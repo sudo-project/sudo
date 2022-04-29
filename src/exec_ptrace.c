@@ -44,6 +44,7 @@
 # include <sys/ptrace.h>
 # include <sys/user.h>
 # include <asm/unistd.h>
+# include <linux/audit.h>
 # include <linux/ptrace.h>
 # include <linux/seccomp.h>
 # include <linux/filter.h>
@@ -61,6 +62,7 @@
  * macros to get/set the struct members.
  */
 #if defined(__amd64__)
+# define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_X86_64
 # define user_pt_regs		user_regs_struct
 # define reg_syscall(x)		(x)->orig_rax
 # define reg_retval(x)		(x)->rax
@@ -70,6 +72,7 @@
 # define reg_arg3(x)		(x)->rdx
 # define reg_arg4(x)		(x)->r10
 #elif defined(__aarch64__)
+# define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_AARCH64
 # define reg_syscall(x)		(x)->regs[8]	/* w8 */
 # define reg_retval(x)		(x)->regs[0]	/* x0 */
 # define reg_sp(x)		(x)->sp		/* sp */
@@ -80,6 +83,7 @@
 #elif defined(__arm__)
 /* Note: assumes arm EABI, not OABI */
 /* Untested */
+# define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_ARM
 # define user_pt_regs		pt_regs
 # define reg_syscall(x)		(x)->ARM_r7
 # define reg_retval(x)		(x)->ARM_r0
@@ -89,7 +93,8 @@
 # define reg_arg3(x)		(x)->ARM_r2
 # define reg_arg4(x)		(x)->ARM_r3
 #elif defined (__hppa__)
-/* Untested */
+/* Untested (should also support hppa64) */
+# define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_PARISC
 # define user_pt_regs		user_regs_struct
 # define reg_syscall(x)		(x)->gr[20]	/* r20 */
 # define reg_retval(x)		(x)->gr[28]	/* r28 */
@@ -99,6 +104,7 @@
 # define reg_arg3(x)		(x)->gr[24]	/* r24 */
 # define reg_arg4(x)		(x)->gr[23]	/* r23 */
 #elif defined(__i386__)
+# define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_I386
 # define user_pt_regs		user_regs_struct
 # define reg_syscall(x)		(x)->orig_eax
 # define reg_retval(x)		(x)->eax
@@ -109,6 +115,11 @@
 # define reg_arg4(x)		(x)->esi
 #elif defined(__powerpc64__)
 /* Untested */
+# if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#  define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_PPC64LE
+# else
+#  define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_PPC64
+# endif
 # define user_pt_regs		pt_regs
 # define reg_syscall(x)		(x)->gpr[0]	/* r0 */
 # define reg_retval(x)		(x)->gpr[3]	/* r3 */
@@ -119,6 +130,7 @@
 # define reg_arg4(x)		(x)->gpr[6]	/* r6 */
 #elif defined(__powerpc__)
 /* Untested */
+# define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_PPC
 # define user_pt_regs		pt_regs
 # define reg_syscall(x)		(x)->gpr[0]	/* r0 */
 # define reg_retval(x)		(x)->gpr[3]	/* r3 */
@@ -129,6 +141,7 @@
 # define reg_arg4(x)		(x)->gpr[6]	/* r6 */
 #elif defined(__riscv) && __riscv_xlen == 64
 /* Untested */
+# define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_RISCV64
 # define user_pt_regs		user_regs_struct
 # define reg_syscall(x)		(x)->a7
 # define reg_retval(x)		(x)->a0
@@ -137,8 +150,18 @@
 # define reg_arg2(x)		(x)->a1
 # define reg_arg3(x)		(x)->a2
 # define reg_arg4(x)		(x)->a3
+#elif defined(__s390x__)
+# define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_S390X
+# define user_pt_regs		s390_regs
+# define reg_syscall(x)		(x)->gprs[1]	/* r1 */
+# define reg_retval(x)		(x)->gprs[2]	/* r2 */
+# define reg_sp(x)		(x)->gprs[15]	/* r15 */
+# define reg_arg1(x)		(x)->gprs[2]	/* r2 */
+# define reg_arg2(x)		(x)->gprs[3]	/* r3 */
+# define reg_arg3(x)		(x)->gprs[4]	/* r4 */
+# define reg_arg4(x)		(x)->gprs[5]	/* r6 */
 #elif defined(__s390__)
-/* Untested */
+# define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_S390
 # define user_pt_regs		s390_regs
 # define reg_syscall(x)		(x)->gprs[1]	/* r1 */
 # define reg_retval(x)		(x)->gprs[2]	/* r2 */
@@ -511,7 +534,11 @@ bool
 set_exec_filter(void)
 {
     struct sock_filter exec_filter[] = {
-	/* Load syscall number into the accumulator */
+	/* Load architecture value (AUDIT_ARCH_*) into the accumulator. */
+	BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, arch)),
+	/* Jump to the end unless the architecture matches. */
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SECCOMP_AUDIT_ARCH, 0, 3),
+	/* Load syscall number into the accumulator. */
 	BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, nr)),
 	/* Jump to trace for execve(2), else allow. */
 	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, __NR_execve, 0, 1),
