@@ -21,6 +21,7 @@
 
 #include <config.h>
 
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <sys/wait.h>
@@ -652,6 +653,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     struct user_pt_regs regs;
     char cwd[PATH_MAX];
     bool ret = false;
+    struct stat sb;
     debug_decl(ptrace_intercept_execve, SUDO_DEBUG_UTIL);
 
     /* Do not check the policy if we are executing the initial command. */
@@ -695,10 +697,18 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	debug_return_bool(false);
     }
 
+    /*
+     * Short-circuit the policy check if the command doesn't exist.
+     * Otherwise, both sudo and the shell will report the error.
+     */
+    if (stat(pathname, &sb) == -1) {
+	ptrace_fail_syscall(pid, &regs, errno);
+	debug_return_bool(true);
+    }
+
     /* Perform a policy check. */
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %d: checking policy for %s",
 	__func__, (int)pid, pathname);
-
     argv[0] = pathname;
     if (!intercept_check_policy(pathname, argc, argv, envc, envp, cwd,
 	    closure)) {
