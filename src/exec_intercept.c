@@ -72,8 +72,19 @@ intercept_setup(int fd, struct sudo_event_base *evbase,
     closure->listen_sock = -1;
 
     if (ISSET(details->flags, CD_USE_PTRACE)) {
-	/* We can perform a policy check immediately using ptrace(2).  */
+	/*
+	 * We can perform a policy check immediately using ptrace(2)
+	 * but should ignore the execve(2) of the initial command
+	 * (and sesh for SELinux RBAC).
+	 *
+	 * If using fexecve(2) and the system doesn't support execveat(2),
+	 * we may end up checking the initial command anyway.
+	 */
 	closure->state = RECV_POLICY_CHECK;
+	if (!ISSET(details->flags, CD_FEXECVE))
+	    closure->initial_command++;
+	if (ISSET(details->flags, CD_RBAC_ENABLED))
+	    closure->initial_command++;
     } else {
 	/*
 	 * Not using ptrace(2), use LD_PRELOAD (or its equivalent).  If

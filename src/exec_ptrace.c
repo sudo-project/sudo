@@ -623,6 +623,12 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     int argc, envc;
     debug_decl(ptrace_intercept_execve, SUDO_DEBUG_UTIL);
 
+    /* Do not check the policy if we are executing the initial command. */
+    if (closure->initial_command != 0) {
+	closure->initial_command--;
+	debug_return_bool(true);
+    }
+
     /* Get the current working directory and execve info. */
     if (!getcwd_by_pid(pid, cwd, sizeof(cwd)))
 	(void)strlcpy(cwd, "unknown", sizeof(cwd));

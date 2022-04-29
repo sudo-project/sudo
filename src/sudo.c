@@ -720,6 +720,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 #ifdef HAVE_FEXECVE
 		    /* Must keep fd open during exec. */
 		    add_preserved_fd(&details->preserved_fds, details->execfd);
+		    SET(details->flags, CD_FEXECVE);
 #else
 		    /* Plugin thinks we support fexecve() but we don't. */
 		    (void)fcntl(details->execfd, F_SETFD, FD_CLOEXEC);

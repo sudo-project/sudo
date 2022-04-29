@@ -141,6 +141,7 @@ struct user_details {
 #define CD_OVERRIDE_UMASK	0x100000
 #define CD_LOG_SUBCMDS		0x200000
 #define CD_USE_PTRACE		0x400000
+#define CD_FEXECVE		0x800000
 
 struct preserved_fd {
     TAILQ_ENTRY(preserved_fd) entries;

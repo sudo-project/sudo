@@ -44,6 +44,7 @@ struct intercept_closure {
     uint32_t off;
     int listen_sock;
     enum intercept_state state;
+    int initial_command;
 };
 
 void intercept_closure_reset(struct intercept_closure *closure);
