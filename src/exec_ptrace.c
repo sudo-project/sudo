@@ -423,9 +423,9 @@ get_execve_info(pid_t pid, struct user_pt_regs *regs, char **pathname_out,
     if (argc == -1 || envc == -1)
 	goto bad;
 
-    /* Reserve argv and envp at the start of argbuf so they are alined. */
+    /* Reserve argv and envp at the start of argbuf so they are aligned. */
     if ((argc + 1 + envc + 1) * sizeof(long) >= bufsize) {
-	sudo_warnx("%s", U_("insufficent space for argv and envp"));
+	sudo_warnx("%s", U_("insufficient space for argv and envp"));
 	goto bad;
     }
     argv = (char **)argbuf;
