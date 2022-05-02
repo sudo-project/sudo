@@ -55,6 +55,11 @@
 # define __NR_execveat	-1
 #endif
 
+/* In case userland doesn't define __X32_SYSCALL_BIT. */
+#if defined(__x86_64__) && !defined(__X32_SYSCALL_BIT)
+# define __X32_SYSCALL_BIT 0x40000000
+#endif
+
 /* Align address to a word boundary. */
 #define WORDALIGN(_a)	(((_a) + (sizeof(long) - 1L)) & ~(sizeof(long) - 1L))
 
@@ -70,8 +75,10 @@
  * The value of SECCOMP_AUDIT_ARCH is used when matching the architecture
  * in the seccomp(2) filter.
  */
-#if defined(__amd64__)
+#if defined(__x86_64__)
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_X86_64
+# define X32_execve		__X32_SYSCALL_BIT + 520
+# define X32_execveat		__X32_SYSCALL_BIT + 545
 # define user_pt_regs		user_regs_struct
 # define reg_syscall(x)		(x)->orig_rax
 # define reg_retval(x)		(x)->rax
@@ -568,10 +575,19 @@ set_exec_filter(void)
 	/* Load architecture value (AUDIT_ARCH_*) into the accumulator. */
 	BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, arch)),
 	/* Jump to the end unless the architecture matches. */
-	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SECCOMP_AUDIT_ARCH, 0, 4),
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SECCOMP_AUDIT_ARCH, 0, 6),
 	/* Load syscall number into the accumulator. */
 	BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, nr)),
 	/* Jump to trace for execve(2)/execveat(2), else allow. */
+#ifdef X32_execve
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, X32_execve, 3, 0),
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, X32_execveat, 2, 0),
+#else
+	/* No x32 support, check native system call numbers. */
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, __NR_execve, 3, 0),
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, __NR_execveat, 2, 3),
+#endif /* X32_execve */
+	/* If no x32 support, these two instructions are never reached. */
 	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, __NR_execve, 1, 0),
 	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, __NR_execveat, 0, 1),
 	/* Trace execve(2)/execveat(2) syscalls */
@@ -671,9 +687,15 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     /* System call number is stored in the lower 32-bits on 64-bit platforms. */
     syscallno = reg_syscall(&regs) & 0xffffffff;
     switch (syscallno) {
+#ifdef X32_execve
+    case X32_execve:
+#endif
     case __NR_execve:
 	/* Handled below. */
 	break;
+#ifdef X32_execveat
+    case X32_execveat:
+#endif
     case __NR_execveat:
 	/* We don't currently check execveat(2). */
 	debug_return_bool(true);
