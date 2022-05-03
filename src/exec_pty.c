@@ -994,8 +994,12 @@ backchannel_cb(int fd, int what, void *v)
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d",
 		ec->details->command, (int)ec->cmnd_pid);
 	    if (ISSET(ec->details->flags, CD_USE_PTRACE)) {
-		/* Seize control of the command using ptrace(2). */
-		if (!exec_ptrace_seize(ec->cmnd_pid)) {
+		/* Try to seize control of the command using ptrace(2). */
+		int rc = exec_ptrace_seize(ec->cmnd_pid);
+		if (rc == 0) {
+		    /* There is another tracer present. */
+		    CLR(ec->details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS|CD_USE_PTRACE);
+		} else if (rc == -1) {
 		    if (ec->cstat->type == CMD_INVALID) {
 			ec->cstat->type = CMD_ERRNO;
 			ec->cstat->val = errno;

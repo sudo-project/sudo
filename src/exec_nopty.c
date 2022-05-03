@@ -476,18 +476,21 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
     fill_exec_closure_nopty(&ec, cstat, details, errpipe[0]);
 
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
-	bool success = true;
+	int rc = 1;
 
 	/* Create event and closure for intercept mode. */
 	ec.intercept = intercept_setup(intercept_sv[0], ec.evbase, details);
 	if (ec.intercept == NULL) {
-	    success = false;
+	    rc = -1;
 	} else if (ISSET(details->flags, CD_USE_PTRACE)) {
-	    /* Seize control of the command using ptrace(2). */
-	    if (!exec_ptrace_seize(ec.cmnd_pid))
-		success = false;
+	    /* Try to seize control of the command using ptrace(2). */
+	    rc = exec_ptrace_seize(ec.cmnd_pid);
+	    if (rc == 0) {
+		/* There is another tracer present. */
+		CLR(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS|CD_USE_PTRACE);
+	    }
 	}
-	if (!success)
+	if (rc == -1)
 	    terminate_command(ec.cmnd_pid, true);
     }
 

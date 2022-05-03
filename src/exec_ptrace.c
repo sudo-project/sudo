@@ -611,27 +611,43 @@ set_exec_filter(void)
 
 /*
  * Seize control of the specified child process which must be in
- * ptrace wait.  Returns true on success and false on failure.
+ * ptrace wait.  Returns true on success, false if child is already
+ * being traced and -1 on error.
  */
-bool
+int
 exec_ptrace_seize(pid_t child)
 {
     const long ptrace_opts = PTRACE_O_TRACESECCOMP|PTRACE_O_TRACECLONE|
 			     PTRACE_O_TRACEFORK|PTRACE_O_TRACEVFORK;
+    int ret = -1;
     int status;
     debug_decl(exec_ptrace_seize, SUDO_DEBUG_UTIL);
 
     /* Seize control of the child process. */
     if (ptrace(PTRACE_SEIZE, child, NULL, ptrace_opts) == -1) {
-	sudo_warn("ptrace(PTRACE_SEIZE, %d, NULL, 0x%lx)", (int)child,
-	    ptrace_opts);
-	debug_return_bool(false);
+	/*
+	 * If the process is already being traced, we will get EPERM.
+	 * We don't treat that as a fatal error since we want it to be
+	 * possible to run sudo inside a sudo shell with intercept enabled.
+	 */
+	if (errno != EPERM) {
+	    sudo_warn("ptrace(PTRACE_SEIZE, %d, NULL, 0x%lx)", (int)child,
+		ptrace_opts);
+	    goto done;
+	}
+	sudo_debug_printf(SUDO_DEBUG_WARN,
+	    "%s: unable to trace process %d, already being traced?",
+		__func__, (int)child);
+	ret = false;
     }
+
     /* The child is suspended waiting for SIGUSR1, wake it up. */
     if (kill(child, SIGUSR1) == -1) {
 	sudo_warn("kill(%d, SIGUSR1)", child);
-	debug_return_bool(false);
+	goto done;
     }
+    if (!ret)
+	goto done;
 
     /* Wait for the child to enter trace stop and continue it. */
     for (;;) {
@@ -640,18 +656,21 @@ exec_ptrace_seize(pid_t child)
 	if (errno == EINTR)
 	    continue;
 	sudo_warn(U_("%s: %s"), __func__, "waitpid");
-	debug_return_bool(false);
+	goto done;
     }
     if (!WIFSTOPPED(status)) {
 	sudo_warnx(U_("process %d exited unexpectedly"), (int)child);
-	debug_return_bool(false);
+	goto done;
     }
     if (ptrace(PTRACE_CONT, child, NULL, (long)SIGUSR1) == -1) {
 	sudo_warn("ptrace(PTRACE_CONT, %d, NULL, SIGUSR1)", (int)child);
-	debug_return_bool(false);
+	goto done;
     }
 
-    debug_return_bool(true);
+    ret = true;
+
+done:
+    debug_return_int(ret);
 }
 
 /*
@@ -921,7 +940,7 @@ exec_ptrace_handled(pid_t pid, int status, void *intercept)
 }
 
 /* STUB */
-bool
+int
 exec_ptrace_seize(pid_t child)
 {
     return true;
