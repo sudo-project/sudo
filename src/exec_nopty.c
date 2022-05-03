@@ -475,16 +475,20 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
      */
     fill_exec_closure_nopty(&ec, cstat, details, errpipe[0]);
 
-    /* Create event and closure for intercept mode. */
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
-	ec.intercept = intercept_setup(intercept_sv[0], ec.evbase, details);
-	if (ec.intercept == NULL)
-	    exit(EXIT_FAILURE);
-    }
+	bool success = true;
 
-    if (ISSET(details->flags, CD_USE_PTRACE)) {
-	/* Seize control of the command using ptrace(2). */
-	exec_ptrace_seize(ec.cmnd_pid);
+	/* Create event and closure for intercept mode. */
+	ec.intercept = intercept_setup(intercept_sv[0], ec.evbase, details);
+	if (ec.intercept == NULL) {
+	    success = false;
+	} else if (ISSET(details->flags, CD_USE_PTRACE)) {
+	    /* Seize control of the command using ptrace(2). */
+	    if (!exec_ptrace_seize(ec.cmnd_pid))
+		success = false;
+	}
+	if (!success)
+	    terminate_command(ec.cmnd_pid, true);
     }
 
     /* Restore signal mask now that signal handlers are setup. */

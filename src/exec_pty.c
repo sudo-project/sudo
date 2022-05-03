@@ -995,7 +995,13 @@ backchannel_cb(int fd, int what, void *v)
 		ec->details->command, (int)ec->cmnd_pid);
 	    if (ISSET(ec->details->flags, CD_USE_PTRACE)) {
 		/* Seize control of the command using ptrace(2). */
-		exec_ptrace_seize(ec->cmnd_pid);
+		if (!exec_ptrace_seize(ec->cmnd_pid)) {
+		    if (ec->cstat->type == CMD_INVALID) {
+			ec->cstat->type = CMD_ERRNO;
+			ec->cstat->val = errno;
+		    }
+		    sudo_ev_loopbreak(ec->evbase);
+		}
 	    }
 	    break;
 	case CMD_WSTATUS:
@@ -1675,7 +1681,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
 	ec.intercept = intercept_setup(intercept_sv[0], ec.evbase, details);
 	if (ec.intercept == NULL)
-	    exit(EXIT_FAILURE);
+	    terminate_command(ec.cmnd_pid, true);
     }
 
     /* Restore signal mask now that signal handlers are setup. */
