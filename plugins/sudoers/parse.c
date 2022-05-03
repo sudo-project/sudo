@@ -131,6 +131,14 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
     debug_return_int(validated);
 }
 
+static void
+init_cmnd_info(struct cmnd_info *info)
+{
+    memset(info, 0, sizeof(*info));
+    if (def_intercept || ISSET(sudo_mode, MODE_POLICY_INTERCEPTED))
+	info->intercepted = true;
+}
+
 static int
 sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
     int *validated, struct cmnd_info *info, struct cmndspec **matching_cs,
@@ -143,9 +151,7 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
     struct member *matching_user;
     debug_decl(sudoers_lookup_check, SUDOERS_DEBUG_PARSER);
 
-    memset(info, 0, sizeof(*info));
-    if (def_intercept || ISSET(sudo_mode, MODE_POLICY_INTERCEPTED))
-	info->intercepted = true;
+    init_cmnd_info(info);
 
     TAILQ_FOREACH_REVERSE(us, &nss->parse_tree->userspecs, userspec_list, entries) {
 	if (userlist_matches(nss->parse_tree, pw, &us->users) != ALLOW)
@@ -193,7 +199,7 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
 			debug_return_int(cmnd_match);
 		    }
 		    free(info->cmnd_path);
-		    memset(info, 0, sizeof(*info));
+		    init_cmnd_info(info);
 		}
 	    }
 	}
