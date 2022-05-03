@@ -542,7 +542,6 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 
     /* There may be multiple children in intercept mode. */
     for (;;) {
-	/* Read command status. */
 	do {
 	    pid = waitpid(-1, &status, wflags);
 	} while (pid == -1 && errno == EINTR);
@@ -566,7 +565,7 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 	    if (sig2str(signo, signame) == -1)
 		(void)snprintf(signame, sizeof(signame), "%d", signo);
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"%s: command (%d) stopped, SIG%s", __func__, (int)pid, signame);
+		"%s: process %d stopped, SIG%s", __func__, (int)pid, signame);
 
 	    if (ISSET(ec->details->flags, CD_USE_PTRACE)) {
 		/* Did exec_ptrace_handled() suppress the signal? */
@@ -574,8 +573,8 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 		    continue;
 	    }
 
-	    /* Only report status for the main command. */
-	    if (ec->cmnd_pid != pid)
+	    /* Special handling for job control in the main command only. */
+	    if (pid != ec->cmnd_pid)
 		continue;
 
 	    /*
@@ -654,11 +653,11 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 			WTERMSIG(status));
 		}
 		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "%s: command (%d) killed, SIG%s", __func__,
+		    "%s: process %d killed, SIG%s", __func__,
 		    (int)pid, signame);
 	    } else if (WIFEXITED(status)) {
 		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "%s: command (%d) exited: %d", __func__,
+		    "%s: process %d exited: %d", __func__,
 		    (int)pid, WEXITSTATUS(status));
 	    } else {
 		sudo_debug_printf(SUDO_DEBUG_WARN,
@@ -666,8 +665,8 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 		    __func__, status, (int)pid);
 	    }
 
-	    /* Only report status for the main command. */
-	    if (ec->cmnd_pid != pid)
+	    /* Only store exit status of the main command. */
+	    if (pid != ec->cmnd_pid)
 		continue;
 
 	    /* Don't overwrite execve() failure with command exit status. */
