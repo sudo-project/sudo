@@ -868,18 +868,15 @@ exec_ptrace_handled(pid_t pid, int status, void *intercept)
 		    "%s: %d: group-stop signal %d",
 		    __func__, (int)pid, stopsig);
 		group_stop = true;
-	    } else {
-		/* Signal-delivery-stop, deliver signal. */
-		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "%s: %d: signal-delivery-stop signal %d",
-		    __func__, (int)pid, stopsig);
-		signo = stopsig;
+		break;
 	    }
-	    break;
+	    FALLTHROUGH;
 	default:
-	    /* Not a stop signal so not a group-stop. */
+	    /* Signal-delivery-stop, deliver signal. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"%s: %d: signal %d", __func__, (int)pid, stopsig);
+		"%s: %d: signal-delivery-stop signal %d",
+		__func__, (int)pid, stopsig);
+	    signo = stopsig;
 	    break;
 	}
     }
@@ -896,7 +893,7 @@ exec_ptrace_handled(pid_t pid, int status, void *intercept)
     } else {
 	/* Restart child. */
 	if (ptrace(PTRACE_CONT, pid, NULL, signo) == -1)
-	    sudo_warn("ptrace(PTRACE_CONT, %d, NULL, %d)", (int)pid, stopsig);
+	    sudo_warn("ptrace(PTRACE_CONT, %d, NULL, %ld)", (int)pid, signo);
     }
 
     debug_return_bool(signo == 0);
