@@ -863,6 +863,12 @@ command_info_to_details(char * const info[], struct command_details *details)
 	}
     }
 
+    if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
+	/* Use ptrace(2) for intercept/log_subcmds if possible. */
+	if (sudo_settings[ARG_INTERCEPT_SETID].value != NULL)
+	    SET(details->flags, CD_USE_PTRACE);
+    }
+
     if (!ISSET(details->flags, CD_SET_EUID))
 	details->cred.euid = details->cred.uid;
     if (!ISSET(details->flags, CD_SET_EGID))

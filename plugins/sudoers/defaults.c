@@ -548,6 +548,8 @@ init_defaults(void)
 #endif
     if ((def_rlimit_core = strdup("0,0")) == NULL)
 	goto oom;
+    if (ISSET(sudo_user.flags, CAN_INTERCEPT_SETID))
+	def_intercept_allow_setid = true;
     def_netgroup_tuple = false;
     def_sudoedit_checkdir = true;
     def_iolog_mode = S_IRUSR|S_IWUSR;

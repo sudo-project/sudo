@@ -297,6 +297,12 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 		goto oom;
 	    continue;
 	}
+	if (MATCHES(*cur, "intercept_setid=")) {
+	    if (parse_bool(*cur, sizeof("intercept_setid") - 1,
+		&sudo_user.flags, CAN_INTERCEPT_SETID) == -1)
+		goto bad;
+	    continue;
+	}
 #ifdef HAVE_SELINUX
 	if (MATCHES(*cur, "selinux_role=")) {
 	    CHECK(*cur, "selinux_role=");

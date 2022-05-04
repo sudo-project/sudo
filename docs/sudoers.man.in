@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "April 28, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "May 4, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3314,8 +3314,11 @@ flag is enabled or the
 \fIINTERCEPT\fR
 tag has been set for the command.
 This flag is
-\fIon\fR
-by default.
+\fIoff\fR
+by default except on Linux systems that support
+seccomp(2)
+filtering, where it defaults to
+\fIon\fR.
 .sp
 This setting is only supported by version 1.9.8 or higher.
 .TP 18n

@@ -378,10 +378,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 	sudo_fatal("%s", U_("unable to create pipe"));
 
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
-	if (have_seccomp_action("trap")) {
-	    /* Kernel supports the seccomp(2) filter "trap" action. */
-	    SET(details->flags, CD_USE_PTRACE);
-	} else {
+	if (!ISSET(details->flags, CD_USE_PTRACE)) {
 	    /*
 	     * Allocate a socketpair for communicating with sudo_intercept.so.
 	     * This must be inherited across exec, hence no FD_CLOEXEC.

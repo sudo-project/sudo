@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996, 1998-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1993-1996, 1998-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -52,61 +52,36 @@ static void usage_excl(void) __attribute__((__noreturn__));
 
 /*
  * Mapping of command line flags to name/value settings.
+ * Do not reorder, indexes must match ARG_ defines in sudo.h.
  */
 static struct sudo_settings sudo_settings[] = {
-#define ARG_BSDAUTH_TYPE 0
     { "bsdauth_type" },
-#define ARG_LOGIN_CLASS 1
     { "login_class" },
-#define ARG_PRESERVE_ENVIRONMENT 2
     { "preserve_environment" },
-#define ARG_RUNAS_GROUP 3
     { "runas_group" },
-#define ARG_SET_HOME 4
     { "set_home" },
-#define ARG_USER_SHELL 5
     { "run_shell" },
-#define ARG_LOGIN_SHELL 6
     { "login_shell" },
-#define ARG_IGNORE_TICKET 7
     { "ignore_ticket" },
-#define ARG_PROMPT 8
     { "prompt" },
-#define ARG_SELINUX_ROLE 9
     { "selinux_role" },
-#define ARG_SELINUX_TYPE 10
     { "selinux_type" },
-#define ARG_RUNAS_USER 11
     { "runas_user" },
-#define ARG_PROGNAME 12
     { "progname" },
-#define ARG_IMPLIED_SHELL 13
     { "implied_shell" },
-#define ARG_PRESERVE_GROUPS 14
     { "preserve_groups" },
-#define ARG_NONINTERACTIVE 15
     { "noninteractive" },
-#define ARG_SUDOEDIT 16
     { "sudoedit" },
-#define ARG_CLOSEFROM 17
     { "closefrom" },
-#define ARG_NET_ADDRS 18
     { "network_addrs" },
-#define ARG_MAX_GROUPS 19
     { "max_groups" },
-#define ARG_PLUGIN_DIR 20
     { "plugin_dir" },
-#define ARG_REMOTE_HOST 21
     { "remote_host" },
-#define ARG_TIMEOUT 22
     { "timeout" },
-#define ARG_CHROOT 23
     { "cmnd_chroot" },
-#define ARG_CWD 24
     { "cmnd_cwd" },
-#define ARG_ASKPASS 25
     { "askpass" },
-#define NUM_SETTINGS 26
+    { "intercept_setid" },
     { NULL }
 };
 
@@ -610,6 +585,8 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 #ifdef ENABLE_SUDO_PLUGIN_API
     sudo_settings[ARG_PLUGIN_DIR].value = sudo_conf_plugin_dir_path();
 #endif
+    if (have_seccomp_action("trap"))
+	sudo_settings[ARG_INTERCEPT_SETID].value = "true";
 
     if (mode == MODE_HELP)
 	help();

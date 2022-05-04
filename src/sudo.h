@@ -75,6 +75,35 @@
 #define MODE_NONINTERACTIVE	0x00800000
 #define MODE_LONG_LIST		0x01000000
 
+/* Indexes into sudo_settings[] args, must match parse_args.c. */
+#define ARG_BSDAUTH_TYPE	 0
+#define ARG_LOGIN_CLASS		 1
+#define ARG_PRESERVE_ENVIRONMENT 2
+#define ARG_RUNAS_GROUP		 3
+#define ARG_SET_HOME		 4
+#define ARG_USER_SHELL		 5
+#define ARG_LOGIN_SHELL		 6
+#define ARG_IGNORE_TICKET	 7
+#define ARG_PROMPT		 8
+#define ARG_SELINUX_ROLE	 9
+#define ARG_SELINUX_TYPE	10
+#define ARG_RUNAS_USER		11
+#define ARG_PROGNAME		12
+#define ARG_IMPLIED_SHELL	13
+#define ARG_PRESERVE_GROUPS	14
+#define ARG_NONINTERACTIVE	15
+#define ARG_SUDOEDIT		16
+#define ARG_CLOSEFROM		17
+#define ARG_NET_ADDRS		18
+#define ARG_MAX_GROUPS		19
+#define ARG_PLUGIN_DIR		20
+#define ARG_REMOTE_HOST		21
+#define ARG_TIMEOUT		22
+#define ARG_CHROOT		23
+#define ARG_CWD			24
+#define ARG_ASKPASS		25
+#define ARG_INTERCEPT_SETID	26
+
 /*
  * Flags for tgetpass()
  */
@@ -307,5 +336,8 @@ void unlimit_nproc(void);
 void unlimit_sudo(void);
 int serialize_rlimits(char **info, size_t info_max);
 bool parse_policy_rlimit(const char *str);
+
+/* exec_ptrace.c */
+bool have_seccomp_action(const char *action);
 
 #endif /* SUDO_SUDO_H */
