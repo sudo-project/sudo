@@ -190,25 +190,6 @@
 # error "Do not know how to find your architecture's registers"
 #endif
 
-/*
- * Use PTRACE_GETREGS and PTRACE_SETREGS where available.
- * Otherwise, use PTRACE_GETREGSET and PTRACE_SETREGSET.
- */
-#if defined(__x86_64__) || defined(__i386__)
-static int
-ptrace_getregs(int pid, struct user_pt_regs *regs)
-{
-    debug_decl(ptrace_getregs, SUDO_DEBUG_EXEC);
-    debug_return_int(ptrace(PTRACE_GETREGS, pid, NULL, regs));
-}
-
-static int
-ptrace_setregs(int pid, struct user_pt_regs *regs)
-{
-    debug_decl(ptrace_setregs, SUDO_DEBUG_EXEC);
-    debug_return_int(ptrace(PTRACE_SETREGS, pid, NULL, regs));
-}
-#else
 static int
 ptrace_getregs(int pid, struct user_pt_regs *regs)
 {
@@ -230,7 +211,6 @@ ptrace_setregs(int pid, struct user_pt_regs *regs)
     iov.iov_len = sizeof(*regs);
     debug_return_int(ptrace(PTRACE_SETREGSET, pid, (long)NT_PRSTATUS, &iov));
 }
-#endif /* __x86_64__ || __i386__ */
 
 /*
  * Read the string at addr and store in buf.
