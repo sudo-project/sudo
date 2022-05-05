@@ -190,9 +190,65 @@
 # error "Do not know how to find your architecture's registers"
 #endif
 
+/*
+ * Compat definitions for running 32-bit binaries on 64-bit platforms.
+ * We must define the register struct too since there is no way to
+ * get it directly from the system headers.
+ */
+#if defined(__x86_64__)
+struct i386_user_regs_struct {
+    unsigned int ebx;
+    unsigned int ecx;
+    unsigned int edx;
+    unsigned int esi;
+    unsigned int edi;
+    unsigned int ebp;
+    unsigned int eax;
+    unsigned int xds;
+    unsigned int xes;
+    unsigned int xfs;
+    unsigned int xgs;
+    unsigned int orig_eax;
+    unsigned int eip;
+    unsigned int xcs;
+    unsigned int eflags;
+    unsigned int esp;
+    unsigned int xss;
+};
+# define SECCOMP_AUDIT_ARCH_COMPAT	AUDIT_ARCH_I386
+# define COMPAT_execve			11
+# define COMPAT_execveat		358
+# define compat_user_pt_regs		i386_user_regs_struct
+# define compat_reg_syscall(x)		(x).orig_eax
+# define compat_reg_retval(x)		(x).eax
+# define compat_reg_sp(x)		(x).esp
+# define compat_reg_arg1(x)		(x).ebx
+# define compat_reg_arg2(x)		(x).ecx
+# define compat_reg_arg3(x)		(x).edx
+# define compat_reg_arg4(x)		(x).esi
+#elif defined(__arm__)
+struct arm_pt_regs {
+  unsigned int uregs[18];
+};
+# define SECCOMP_AUDIT_ARCH_COMPAT	AUDIT_ARCH_ARM
+# define COMPAT_execve			11
+# define COMPAT_execveat		387
+# define compat_user_pt_regs		arm_pt_regs
+# define compat_reg_syscall(x)		(x).uregs[7]	/* r7 */
+# define compat_reg_retval(x)		(x).uregs[0]	/* r0 */
+# define compat_reg_sp(x)		(x).uregs[13]	/* r13 */
+# define compat_reg_arg1(x)		(x).uregs[0]	/* r0 */
+# define compat_reg_arg2(x)		(x).uregs[1]	/* r1 */
+# define compat_reg_arg3(x)		(x).uregs[2]	/* r2 */
+# define compat_reg_arg4(x)		(x).uregs[3]	/* r3 */
+#endif
+
 struct sudo_ptrace_regs {
     union {
 	struct user_pt_regs native;
+#ifdef SECCOMP_AUDIT_ARCH_COMPAT
+	struct compat_user_pt_regs compat;
+#endif
     } u;
     unsigned int wordsize;
     long addrmask;
@@ -200,6 +256,119 @@ struct sudo_ptrace_regs {
 };
 
 /* Register getters and setters. */
+#ifdef SECCOMP_AUDIT_ARCH_COMPAT
+static inline long
+get_stack_pointer(struct sudo_ptrace_regs *regs)
+{
+    if (regs->compat) {
+	return compat_reg_sp(regs->u.compat);
+    } else {
+	return reg_sp(regs->u.native);
+    }
+}
+
+static inline void
+set_sc_retval(struct sudo_ptrace_regs *regs, int retval)
+{
+    if (regs->compat) {
+	compat_reg_retval(regs->u.compat) = retval;
+    } else {
+	reg_retval(regs->u.native) = retval;
+    }
+}
+
+static inline int
+get_syscallno(struct sudo_ptrace_regs *regs)
+{
+    if (regs->compat) {
+	return compat_reg_syscall(regs->u.compat);
+    } else {
+	return reg_syscall(regs->u.native);
+    }
+}
+
+static inline void
+set_syscallno(struct sudo_ptrace_regs *regs, int syscallno)
+{
+    if (regs->compat) {
+	compat_reg_syscall(regs->u.compat) = syscallno;
+    } else {
+	reg_syscall(regs->u.native) = syscallno;
+    }
+}
+
+static inline long
+get_sc_arg1(struct sudo_ptrace_regs *regs)
+{
+    if (regs->compat) {
+	return compat_reg_arg1(regs->u.compat);
+    } else {
+	return reg_arg1(regs->u.native);
+    }
+}
+
+static inline long
+get_sc_arg2(struct sudo_ptrace_regs *regs)
+{
+    if (regs->compat) {
+	return compat_reg_arg2(regs->u.compat);
+    } else {
+	return reg_arg2(regs->u.native);
+    }
+}
+
+static inline void
+set_sc_arg2(struct sudo_ptrace_regs *regs, long addr)
+{
+    if (regs->compat) {
+	compat_reg_arg2(regs->u.compat) = addr;
+    } else {
+	reg_arg2(regs->u.native) = addr;
+    }
+}
+
+static inline long
+get_sc_arg3(struct sudo_ptrace_regs *regs)
+{
+    if (regs->compat) {
+	return compat_reg_arg3(regs->u.compat);
+    } else {
+	return reg_arg3(regs->u.native);
+    }
+}
+
+static inline void
+set_sc_arg3(struct sudo_ptrace_regs *regs, long addr)
+{
+    if (regs->compat) {
+	compat_reg_arg3(regs->u.compat) = addr;
+    } else {
+	reg_arg3(regs->u.native) = addr;
+    }
+}
+
+static inline long
+get_sc_arg4(struct sudo_ptrace_regs *regs)
+{
+    if (regs->compat) {
+	return compat_reg_arg4(regs->u.compat);
+    } else {
+	return reg_arg4(regs->u.native);
+    }
+}
+
+static inline void
+set_sc_arg4(struct sudo_ptrace_regs *regs, long addr)
+{
+    if (regs->compat) {
+	compat_reg_arg4(regs->u.compat) = addr;
+    } else {
+	reg_arg4(regs->u.native) = addr;
+    }
+}
+
+#else /* SECCOMP_AUDIT_ARCH_COMPAT */
+
 static inline long
 get_stack_pointer(struct sudo_ptrace_regs *regs)
 {
@@ -265,23 +434,29 @@ set_sc_arg4(struct sudo_ptrace_regs *regs, long addr)
 {
     reg_arg4(regs->u.native) = addr;
 }
+#endif /* SECCOMP_AUDIT_ARCH_COMPAT */
 
 static bool
-ptrace_getregs(int pid, struct sudo_ptrace_regs *regs)
+ptrace_getregs(int pid, struct sudo_ptrace_regs *regs, bool compat)
 {
     struct iovec iov;
     debug_decl(ptrace_getregs, SUDO_DEBUG_EXEC);
 
     iov.iov_base = &regs->u;
     iov.iov_len = sizeof(regs->u);
-
     if (ptrace(PTRACE_GETREGSET, pid, (long)NT_PRSTATUS, &iov) == -1)
 	debug_return_bool(false);
 
     /* Machine-dependent parameters to support compat binaries. */
-    regs->compat = false;
-    regs->wordsize = sizeof(long);
-    regs->addrmask = (unsigned long)-1;
+    if (compat) {
+	regs->compat = true;
+	regs->wordsize = sizeof(int);
+	regs->addrmask = (unsigned int)-1;
+    } else {
+	regs->compat = false;
+	regs->wordsize = sizeof(long);
+	regs->addrmask = (unsigned long)-1;
+    }
 
     debug_return_bool(true);
 }
@@ -292,10 +467,16 @@ ptrace_setregs(int pid, struct sudo_ptrace_regs *regs)
     struct iovec iov;
     debug_decl(ptrace_setregs, SUDO_DEBUG_EXEC);
 
-    iov.iov_base = &regs->u;
-    iov.iov_len = sizeof(regs->u);
+    if (regs->compat) {
+	iov.iov_base = &regs->u.compat;
+	iov.iov_len = sizeof(regs->u.compat);
+    } else {
+	iov.iov_base = &regs->u.native;
+	iov.iov_len = sizeof(regs->u.native);
+    }
     if (ptrace(PTRACE_SETREGSET, pid, (long)NT_PRSTATUS, &iov) == -1)
 	debug_return_bool(false);
+
     debug_return_bool(true);
 }
 
@@ -647,6 +828,17 @@ set_exec_filter(void)
     struct sock_filter exec_filter[] = {
 	/* Load architecture value (AUDIT_ARCH_*) into the accumulator. */
 	BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, arch)),
+#ifdef SECCOMP_AUDIT_ARCH_COMPAT
+	/* Match on the compat architecture or jump to the native arch check. */
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SECCOMP_AUDIT_ARCH_COMPAT, 0, 4),
+	/* Load syscall number into the accumulator. */
+	BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, nr)),
+	/* Jump to trace for compat execve(2)/execveat(2), else try native. */
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, COMPAT_execve, 1, 0),
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, COMPAT_execveat, 0, 8),
+	/* Trace execve(2)/execveat(2) syscalls (w/ compat flag) */
+	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE | 0x1),
+#endif /* SECCOMP_AUDIT_ARCH_COMPAT */
 	/* Jump to the end unless the architecture matches. */
 	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SECCOMP_AUDIT_ARCH, 0, 6),
 	/* Load syscall number into the accumulator. */
@@ -760,6 +952,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     int argc, envc, syscallno;
     struct sudo_ptrace_regs regs;
     char cwd[PATH_MAX];
+    unsigned long msg;
     bool ret = false;
     struct stat sb;
     debug_decl(ptrace_intercept_execve, SUDO_DEBUG_UTIL);
@@ -770,30 +963,56 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	debug_return_bool(true);
     }
 
+    /* Get compat flag. */
+    if (ptrace(PTRACE_GETEVENTMSG, pid, NULL, &msg) == -1) {
+	sudo_warn(U_("unable to get event message for process %d"), (int)pid);
+	debug_return_bool(false);
+    }
+
     /* Get the registers. */
-    if (!ptrace_getregs(pid, &regs)) {
+    if (!ptrace_getregs(pid, &regs, msg)) {
 	sudo_warn(U_("unable to get registers for process %d"), (int)pid);
 	debug_return_bool(false);
     }
 
-    syscallno = get_syscallno(&regs);
-    switch (syscallno) {
+#ifdef SECCOMP_AUDIT_ARCH_COMPAT
+    if (regs.compat) {
+	syscallno = get_syscallno(&regs);
+	switch (syscallno) {
+	case COMPAT_execve:
+	    /* Handled below. */
+	    break;
+	case COMPAT_execveat:
+	    /* We don't currently check execveat(2). */
+	    debug_return_bool(true);
+	    break;
+	default:
+	    sudo_warnx("%s: unexpected compat system call %d",
+		__func__, syscallno);
+	    debug_return_bool(false);
+	}
+    } else
+#endif /* SECCOMP_AUDIT_ARCH_COMPAT */
+    {
+	syscallno = get_syscallno(&regs);
+	switch (syscallno) {
 #ifdef X32_execve
-    case X32_execve:
+	case X32_execve:
 #endif
-    case __NR_execve:
-	/* Handled below. */
-	break;
+	case __NR_execve:
+	    /* Handled below. */
+	    break;
 #ifdef X32_execveat
-    case X32_execveat:
+	case X32_execveat:
 #endif
-    case __NR_execveat:
-	/* We don't currently check execveat(2). */
-	debug_return_bool(true);
-	break;
-    default:
-	sudo_warnx("%s: unexpected system call %d", __func__, syscallno);
-	debug_return_bool(false);
+	case __NR_execveat:
+	    /* We don't currently check execveat(2). */
+	    debug_return_bool(true);
+	    break;
+	default:
+	    sudo_warnx("%s: unexpected system call %d", __func__, syscallno);
+	    debug_return_bool(false);
+	}
     }
 
     /* Get the current working directory and execve info. */
