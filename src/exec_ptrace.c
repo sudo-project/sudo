@@ -61,7 +61,7 @@
 #endif
 
 /* Align address to a word boundary. */
-#define WORDALIGN(_a)	(((_a) + (sizeof(long) - 1L)) & ~(sizeof(long) - 1L))
+#define WORDALIGN(_a, _l)	(((_a) + ((_l) - 1)) & ~((_l) - 1))
 
 /*
  * See syscall(2) for a list of registers used in system calls.
@@ -80,55 +80,55 @@
 # define X32_execve		__X32_SYSCALL_BIT + 520
 # define X32_execveat		__X32_SYSCALL_BIT + 545
 # define user_pt_regs		user_regs_struct
-# define reg_syscall(x)		(x)->orig_rax
-# define reg_retval(x)		(x)->rax
-# define reg_sp(x)		(x)->rsp
-# define reg_arg1(x)		(x)->rdi
-# define reg_arg2(x)		(x)->rsi
-# define reg_arg3(x)		(x)->rdx
-# define reg_arg4(x)		(x)->r10
+# define reg_syscall(x)		(x).orig_rax
+# define reg_retval(x)		(x).rax
+# define reg_sp(x)		(x).rsp
+# define reg_arg1(x)		(x).rdi
+# define reg_arg2(x)		(x).rsi
+# define reg_arg3(x)		(x).rdx
+# define reg_arg4(x)		(x).r10
 #elif defined(__aarch64__)
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_AARCH64
-# define reg_syscall(x)		(x)->regs[8]	/* w8 */
-# define reg_retval(x)		(x)->regs[0]	/* x0 */
-# define reg_sp(x)		(x)->sp		/* sp */
-# define reg_arg1(x)		(x)->regs[0]	/* x0 */
-# define reg_arg2(x)		(x)->regs[1]	/* x1 */
-# define reg_arg3(x)		(x)->regs[2]	/* x2 */
-# define reg_arg4(x)		(x)->regs[3]	/* x3 */
+# define reg_syscall(x)		(x).regs[8]	/* w8 */
+# define reg_retval(x)		(x).regs[0]	/* x0 */
+# define reg_sp(x)		(x).sp		/* sp */
+# define reg_arg1(x)		(x).regs[0]	/* x0 */
+# define reg_arg2(x)		(x).regs[1]	/* x1 */
+# define reg_arg3(x)		(x).regs[2]	/* x2 */
+# define reg_arg4(x)		(x).regs[3]	/* x3 */
 #elif defined(__arm__)
 /* Note: assumes arm EABI, not OABI */
 /* Untested */
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_ARM
 # define user_pt_regs		pt_regs
-# define reg_syscall(x)		(x)->ARM_r7
-# define reg_retval(x)		(x)->ARM_r0
-# define reg_sp(x)		(x)->ARM_sp
-# define reg_arg1(x)		(x)->ARM_r0
-# define reg_arg2(x)		(x)->ARM_r1
-# define reg_arg3(x)		(x)->ARM_r2
-# define reg_arg4(x)		(x)->ARM_r3
+# define reg_syscall(x)		(x).ARM_r7
+# define reg_retval(x)		(x).ARM_r0
+# define reg_sp(x)		(x).ARM_sp
+# define reg_arg1(x)		(x).ARM_r0
+# define reg_arg2(x)		(x).ARM_r1
+# define reg_arg3(x)		(x).ARM_r2
+# define reg_arg4(x)		(x).ARM_r3
 #elif defined (__hppa__)
 /* Untested (should also support hppa64) */
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_PARISC
 # define user_pt_regs		user_regs_struct
-# define reg_syscall(x)		(x)->gr[20]	/* r20 */
-# define reg_retval(x)		(x)->gr[28]	/* r28 */
-# define reg_sp(x)		(x)->gr[30]	/* r30 */
-# define reg_arg1(x)		(x)->gr[26]	/* r26 */
-# define reg_arg2(x)		(x)->gr[25]	/* r25 */
-# define reg_arg3(x)		(x)->gr[24]	/* r24 */
-# define reg_arg4(x)		(x)->gr[23]	/* r23 */
+# define reg_syscall(x)		(x).gr[20]	/* r20 */
+# define reg_retval(x)		(x).gr[28]	/* r28 */
+# define reg_sp(x)		(x).gr[30]	/* r30 */
+# define reg_arg1(x)		(x).gr[26]	/* r26 */
+# define reg_arg2(x)		(x).gr[25]	/* r25 */
+# define reg_arg3(x)		(x).gr[24]	/* r24 */
+# define reg_arg4(x)		(x).gr[23]	/* r23 */
 #elif defined(__i386__)
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_I386
 # define user_pt_regs		user_regs_struct
-# define reg_syscall(x)		(x)->orig_eax
-# define reg_retval(x)		(x)->eax
-# define reg_sp(x)		(x)->esp
-# define reg_arg1(x)		(x)->ebx
-# define reg_arg2(x)		(x)->ecx
-# define reg_arg3(x)		(x)->edx
-# define reg_arg4(x)		(x)->esi
+# define reg_syscall(x)		(x).orig_eax
+# define reg_retval(x)		(x).eax
+# define reg_sp(x)		(x).esp
+# define reg_arg1(x)		(x).ebx
+# define reg_arg2(x)		(x).ecx
+# define reg_arg3(x)		(x).edx
+# define reg_arg4(x)		(x).esi
 #elif defined(__powerpc64__)
 /* Untested */
 # if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
@@ -137,79 +137,166 @@
 #  define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_PPC64
 # endif
 # define user_pt_regs		pt_regs
-# define reg_syscall(x)		(x)->gpr[0]	/* r0 */
-# define reg_retval(x)		(x)->gpr[3]	/* r3 */
-# define reg_sp(x)		(x)->gpr[1]	/* r1 */
-# define reg_arg1(x)		(x)->gpr[3]	/* r3 */
-# define reg_arg2(x)		(x)->gpr[4]	/* r4 */
-# define reg_arg3(x)		(x)->gpr[5]	/* r5 */
-# define reg_arg4(x)		(x)->gpr[6]	/* r6 */
+# define reg_syscall(x)		(x).gpr[0]	/* r0 */
+# define reg_retval(x)		(x).gpr[3]	/* r3 */
+# define reg_sp(x)		(x).gpr[1]	/* r1 */
+# define reg_arg1(x)		(x).gpr[3]	/* r3 */
+# define reg_arg2(x)		(x).gpr[4]	/* r4 */
+# define reg_arg3(x)		(x).gpr[5]	/* r5 */
+# define reg_arg4(x)		(x).gpr[6]	/* r6 */
 #elif defined(__powerpc__)
 /* Untested */
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_PPC
 # define user_pt_regs		pt_regs
-# define reg_syscall(x)		(x)->gpr[0]	/* r0 */
-# define reg_retval(x)		(x)->gpr[3]	/* r3 */
-# define reg_sp(x)		(x)->gpr[1]	/* r1 */
-# define reg_arg1(x)		(x)->gpr[3]	/* r3 */
-# define reg_arg2(x)		(x)->gpr[4]	/* r4 */
-# define reg_arg3(x)		(x)->gpr[5]	/* r5 */
-# define reg_arg4(x)		(x)->gpr[6]	/* r6 */
+# define reg_syscall(x)		(x).gpr[0]	/* r0 */
+# define reg_retval(x)		(x).gpr[3]	/* r3 */
+# define reg_sp(x)		(x).gpr[1]	/* r1 */
+# define reg_arg1(x)		(x).gpr[3]	/* r3 */
+# define reg_arg2(x)		(x).gpr[4]	/* r4 */
+# define reg_arg3(x)		(x).gpr[5]	/* r5 */
+# define reg_arg4(x)		(x).gpr[6]	/* r6 */
 #elif defined(__riscv) && __riscv_xlen == 64
 /* Untested */
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_RISCV64
 # define user_pt_regs		user_regs_struct
-# define reg_syscall(x)		(x)->a7
-# define reg_retval(x)		(x)->a0
-# define reg_sp(x)		(x)->sp
-# define reg_arg1(x)		(x)->a0
-# define reg_arg2(x)		(x)->a1
-# define reg_arg3(x)		(x)->a2
-# define reg_arg4(x)		(x)->a3
+# define reg_syscall(x)		(x).a7
+# define reg_retval(x)		(x).a0
+# define reg_sp(x)		(x).sp
+# define reg_arg1(x)		(x).a0
+# define reg_arg2(x)		(x).a1
+# define reg_arg3(x)		(x).a2
+# define reg_arg4(x)		(x).a3
 #elif defined(__s390x__)
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_S390X
 # define user_pt_regs		s390_regs
-# define reg_syscall(x)		(x)->gprs[1]	/* r1 */
-# define reg_retval(x)		(x)->gprs[2]	/* r2 */
-# define reg_sp(x)		(x)->gprs[15]	/* r15 */
-# define reg_arg1(x)		(x)->gprs[2]	/* r2 */
-# define reg_arg2(x)		(x)->gprs[3]	/* r3 */
-# define reg_arg3(x)		(x)->gprs[4]	/* r4 */
-# define reg_arg4(x)		(x)->gprs[5]	/* r6 */
+# define reg_syscall(x)		(x).gprs[1]	/* r1 */
+# define reg_retval(x)		(x).gprs[2]	/* r2 */
+# define reg_sp(x)		(x).gprs[15]	/* r15 */
+# define reg_arg1(x)		(x).gprs[2]	/* r2 */
+# define reg_arg2(x)		(x).gprs[3]	/* r3 */
+# define reg_arg3(x)		(x).gprs[4]	/* r4 */
+# define reg_arg4(x)		(x).gprs[5]	/* r6 */
 #elif defined(__s390__)
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_S390
 # define user_pt_regs		s390_regs
-# define reg_syscall(x)		(x)->gprs[1]	/* r1 */
-# define reg_retval(x)		(x)->gprs[2]	/* r2 */
-# define reg_sp(x)		(x)->gprs[15]	/* r15 */
-# define reg_arg1(x)		(x)->gprs[2]	/* r2 */
-# define reg_arg2(x)		(x)->gprs[3]	/* r3 */
-# define reg_arg3(x)		(x)->gprs[4]	/* r4 */
-# define reg_arg4(x)		(x)->gprs[5]	/* r6 */
+# define reg_syscall(x)		(x).gprs[1]	/* r1 */
+# define reg_retval(x)		(x).gprs[2]	/* r2 */
+# define reg_sp(x)		(x).gprs[15]	/* r15 */
+# define reg_arg1(x)		(x).gprs[2]	/* r2 */
+# define reg_arg2(x)		(x).gprs[3]	/* r3 */
+# define reg_arg3(x)		(x).gprs[4]	/* r4 */
+# define reg_arg4(x)		(x).gprs[5]	/* r6 */
 #else
 # error "Do not know how to find your architecture's registers"
 #endif
 
-static int
-ptrace_getregs(int pid, struct user_pt_regs *regs)
+struct sudo_ptrace_regs {
+    union {
+	struct user_pt_regs native;
+    } u;
+    unsigned int wordsize;
+    long addrmask;
+    bool compat;
+};
+
+/* Register getters and setters. */
+static inline long
+get_stack_pointer(struct sudo_ptrace_regs *regs)
+{
+    return reg_sp(regs->u.native);
+}
+
+static inline void
+set_sc_retval(struct sudo_ptrace_regs *regs, int retval)
+{
+    reg_retval(regs->u.native) = retval;
+}
+
+static inline int
+get_syscallno(struct sudo_ptrace_regs *regs)
+{
+    return reg_syscall(regs->u.native);
+}
+
+static inline void
+set_syscallno(struct sudo_ptrace_regs *regs, int syscallno)
+{
+    reg_syscall(regs->u.native) = syscallno;
+}
+
+static inline long
+get_sc_arg1(struct sudo_ptrace_regs *regs)
+{
+    return reg_arg1(regs->u.native);
+}
+
+static inline long
+get_sc_arg2(struct sudo_ptrace_regs *regs)
+{
+    return reg_arg2(regs->u.native);
+}
+
+static inline void
+set_sc_arg2(struct sudo_ptrace_regs *regs, long addr)
+{
+    reg_arg2(regs->u.native) = addr;
+}
+
+static inline long
+get_sc_arg3(struct sudo_ptrace_regs *regs)
+{
+    return reg_arg3(regs->u.native);
+}
+
+static inline void
+set_sc_arg3(struct sudo_ptrace_regs *regs, long addr)
+{
+    reg_arg3(regs->u.native) = addr;
+}
+
+static inline long
+get_sc_arg4(struct sudo_ptrace_regs *regs)
+{
+    return reg_arg4(regs->u.native);
+}
+
+static inline void
+set_sc_arg4(struct sudo_ptrace_regs *regs, long addr)
+{
+    reg_arg4(regs->u.native) = addr;
+}
+
+static bool
+ptrace_getregs(int pid, struct sudo_ptrace_regs *regs)
 {
     struct iovec iov;
     debug_decl(ptrace_getregs, SUDO_DEBUG_EXEC);
 
-    iov.iov_base = regs;
-    iov.iov_len = sizeof(*regs);
-    debug_return_int(ptrace(PTRACE_GETREGSET, pid, (long)NT_PRSTATUS, &iov));
+    iov.iov_base = &regs->u;
+    iov.iov_len = sizeof(regs->u);
+
+    if (ptrace(PTRACE_GETREGSET, pid, (long)NT_PRSTATUS, &iov) == -1)
+	debug_return_bool(false);
+
+    /* Machine-dependent parameters to support compat binaries. */
+    regs->compat = false;
+    regs->wordsize = sizeof(long);
+    regs->addrmask = (unsigned long)-1;
+
+    debug_return_bool(true);
 }
 
-static int
-ptrace_setregs(int pid, struct user_pt_regs *regs)
+static bool
+ptrace_setregs(int pid, struct sudo_ptrace_regs *regs)
 {
     struct iovec iov;
     debug_decl(ptrace_setregs, SUDO_DEBUG_EXEC);
 
-    iov.iov_base = regs;
-    iov.iov_len = sizeof(*regs);
-    debug_return_int(ptrace(PTRACE_SETREGSET, pid, (long)NT_PRSTATUS, &iov));
+    iov.iov_base = &regs->u;
+    iov.iov_len = sizeof(regs->u);
+    if (ptrace(PTRACE_SETREGSET, pid, (long)NT_PRSTATUS, &iov) == -1)
+	debug_return_bool(false);
+    debug_return_bool(true);
 }
 
 /*
@@ -217,7 +304,8 @@ ptrace_setregs(int pid, struct user_pt_regs *regs)
  * Returns the number of bytes stored, including the NUL.
  */
 static size_t
-ptrace_read_string(pid_t pid, long addr, char *buf, size_t bufsize)
+ptrace_read_string(pid_t pid, struct sudo_ptrace_regs *regs, long addr,
+    char *buf, size_t bufsize)
 {
     const char *buf0 = buf;
     const char *cp;
@@ -228,6 +316,7 @@ ptrace_read_string(pid_t pid, long addr, char *buf, size_t bufsize)
     /* Read the string via ptrace(2) one word at a time. */
     for (;;) {
 	word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
+	word &= regs->addrmask;
 	if (word == -1) {
 	    sudo_warn("ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
 		(int)pid, addr);
@@ -236,7 +325,7 @@ ptrace_read_string(pid_t pid, long addr, char *buf, size_t bufsize)
 
 	/* XXX - this could be optimized. */
 	cp = (char *)&word;
-	for (i = 0; i < sizeof(long); i++) {
+	for (i = 0; i < regs->wordsize; i++) {
 	    if (bufsize == 0) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR,
 		    "%s: %d: out of space reading string", __func__, (int)pid);
@@ -247,7 +336,7 @@ ptrace_read_string(pid_t pid, long addr, char *buf, size_t bufsize)
 		debug_return_size_t(buf - buf0);
 	    bufsize--;
 	}
-	addr += sizeof(long);
+	addr += regs->wordsize;
     }
 }
 
@@ -257,7 +346,8 @@ ptrace_read_string(pid_t pid, long addr, char *buf, size_t bufsize)
  * Returns the number of bytes in buf consumed (including NULs).
  */
 static size_t
-ptrace_read_vec(pid_t pid, long addr, char **vec, char *buf, size_t bufsize)
+ptrace_read_vec(pid_t pid, struct sudo_ptrace_regs *regs, long addr,
+    char **vec, char *buf, size_t bufsize)
 {
     char *buf0 = buf;
     int len = 0;
@@ -267,6 +357,7 @@ ptrace_read_vec(pid_t pid, long addr, char **vec, char *buf, size_t bufsize)
     /* Fill in vector. */
     for (;;) {
 	long word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
+	word &= regs->addrmask;
 	switch (word) {
 	case -1:
 	    sudo_warn("ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
@@ -276,13 +367,13 @@ ptrace_read_vec(pid_t pid, long addr, char **vec, char *buf, size_t bufsize)
 	    vec[len] = NULL;
 	    debug_return_size_t(buf - buf0);
 	default:
-	    slen = ptrace_read_string(pid, word, buf, bufsize);
+	    slen = ptrace_read_string(pid, regs, word, buf, bufsize);
 	    if (slen == (size_t)-1)
 		goto bad;
 	    vec[len++] = buf;
 	    buf += slen + 1;
 	    bufsize -= slen + 1;
-	    addr += sizeof(word);
+	    addr += regs->wordsize;
 	    continue;
 	}
     }
@@ -298,13 +389,14 @@ bad:
  * Return the length of the string vector at addr or -1 on error.
  */
 static int
-ptrace_get_vec_len(pid_t pid, long addr)
+ptrace_get_vec_len(pid_t pid, struct sudo_ptrace_regs *regs, long addr)
 {
     int len = 0;
     debug_decl(ptrace_get_vec_len, SUDO_DEBUG_EXEC);
 
     for (;;) {
 	long word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
+	word &= regs->addrmask;
 	switch (word) {
 	case -1:
 	    sudo_warn("ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
@@ -314,7 +406,7 @@ ptrace_get_vec_len(pid_t pid, long addr)
 	    debug_return_int(len);
 	default:
 	    len++;
-	    addr += sizeof(word);
+	    addr += regs->wordsize;
 	    continue;
 	}
     }
@@ -327,7 +419,8 @@ ptrace_get_vec_len(pid_t pid, long addr)
  * Returns the number of bytes written, including trailing NULs.
  */
 static size_t
-ptrace_write_string(pid_t pid, long addr, const char *str)
+ptrace_write_string(pid_t pid, struct sudo_ptrace_regs *regs, long addr,
+    const char *str)
 {
     long start_addr = addr;
     unsigned int i;
@@ -339,7 +432,7 @@ ptrace_write_string(pid_t pid, long addr, const char *str)
 
     /* Write the string via ptrace(2) one word at a time. */
     for (;;) {
-	for (i = 0; i < sizeof(u.buf); i++) {
+	for (i = 0; i < regs->wordsize; i++) {
 	    if (*str == '\0') {
 		u.buf[i] = '\0';
 	    } else {
@@ -348,10 +441,10 @@ ptrace_write_string(pid_t pid, long addr, const char *str)
 	}
 	if (ptrace(PTRACE_POKEDATA, pid, addr, u.word) == -1) {
 	    sudo_warn("ptrace(PTRACE_POKEDATA, %d, 0x%lx, %.*s)",
-		(int)pid, addr, (int)sizeof(u.buf), u.buf);
+		(int)pid, addr, (int)regs->wordsize, u.buf);
 	    debug_return_size_t(-1);
 	}
-	addr += sizeof(long);
+	addr += regs->wordsize;
 	if (*str == '\0')
 	    debug_return_size_t(addr - start_addr);
     }
@@ -385,7 +478,7 @@ getcwd_by_pid(pid_t pid, char *buf, size_t bufsize)
  * Returns a dynamically allocated buffer the parent is responsible for.
  */
 static char *
-get_execve_info(pid_t pid, struct user_pt_regs *regs, char **pathname_out,
+get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     int *argc_out, char ***argv_out, int *envc_out, char ***envp_out)
 {
     char *argbuf, *strtab, *pathname, **argv, **envp;
@@ -400,18 +493,18 @@ get_execve_info(pid_t pid, struct user_pt_regs *regs, char **pathname_out,
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* execve(2) takes three arguments: pathname, argv, envp. */
-    path_addr = reg_arg1(regs);
-    argv_addr = reg_arg2(regs);
-    envp_addr = reg_arg3(regs);
+    path_addr = get_sc_arg1(regs);
+    argv_addr = get_sc_arg2(regs);
+    envp_addr = get_sc_arg3(regs);
 
     /* Count argv and envp */
-    argc = ptrace_get_vec_len(pid, argv_addr);
-    envc = ptrace_get_vec_len(pid, envp_addr);
+    argc = ptrace_get_vec_len(pid, regs, argv_addr);
+    envc = ptrace_get_vec_len(pid, regs, envp_addr);
     if (argc == -1 || envc == -1)
 	goto bad;
 
     /* Reserve argv and envp at the start of argbuf so they are aligned. */
-    if ((argc + 1 + envc + 1) * sizeof(long) >= bufsize) {
+    if ((argc + 1 + envc + 1) * regs->wordsize >= bufsize) {
 	sudo_warnx("%s", U_("insufficient space for argv and envp"));
 	goto bad;
     }
@@ -421,7 +514,7 @@ get_execve_info(pid_t pid, struct user_pt_regs *regs, char **pathname_out,
     bufsize -= strtab - argbuf;
 
     /* Read argv */
-    len = ptrace_read_vec(pid, argv_addr, argv, strtab, bufsize);
+    len = ptrace_read_vec(pid, regs, argv_addr, argv, strtab, bufsize);
     if (len == (size_t)-1) {
 	sudo_warn(U_("unable to read execve argv for process %d"), (int)pid);
 	goto bad;
@@ -430,7 +523,7 @@ get_execve_info(pid_t pid, struct user_pt_regs *regs, char **pathname_out,
     bufsize -= len;
 
     /* Read envp */
-    len = ptrace_read_vec(pid, envp_addr, envp, strtab, bufsize);
+    len = ptrace_read_vec(pid, regs, envp_addr, envp, strtab, bufsize);
     if (len == (size_t)-1) {
 	sudo_warn(U_("unable to read execve envp for process %d"), (int)pid);
 	goto bad;
@@ -439,7 +532,7 @@ get_execve_info(pid_t pid, struct user_pt_regs *regs, char **pathname_out,
     bufsize -= len;
 
     /* Read the pathname. */
-    len = ptrace_read_string(pid, path_addr, strtab, bufsize);
+    len = ptrace_read_string(pid, regs, path_addr, strtab, bufsize);
     if (len == (size_t)-1) {
 	sudo_warn(U_("unable to read execve pathname for process %d"), (int)pid);
 	goto bad;
@@ -466,7 +559,7 @@ bad:
  * Cause the current syscall to fail and set the error value to ecode.
  */
 static bool
-ptrace_fail_syscall(pid_t pid, struct user_pt_regs *regs, int ecode)
+ptrace_fail_syscall(pid_t pid, struct sudo_ptrace_regs *regs, int ecode)
 {
     sigset_t chldmask;
     bool ret = false;
@@ -474,8 +567,8 @@ ptrace_fail_syscall(pid_t pid, struct user_pt_regs *regs, int ecode)
     debug_decl(ptrace_fail_syscall, SUDO_DEBUG_EXEC);
 
     /* Cause the syscall to fail by changing its number to -1. */
-    reg_syscall(regs) |= 0xffffffff;
-    if (ptrace_setregs(pid, regs) == -1) {
+    set_syscallno(regs, -1);
+    if (!ptrace_setregs(pid, regs)) {
 	sudo_warn(U_("unable to set registers for process %d"), (int)pid);
 	debug_return_bool(false);
     }
@@ -499,8 +592,8 @@ ptrace_fail_syscall(pid_t pid, struct user_pt_regs *regs, int ecode)
 	sudo_warnx(U_("process %d exited unexpectedly"), (int)pid);
 	goto done;
     }
-    reg_retval(regs) = -ecode;
-    if (ptrace_setregs(pid, regs) == -1) {
+    set_sc_retval(regs, -ecode);
+    if (!ptrace_setregs(pid, regs)) {
 	sudo_warn(U_("unable to set registers for process %d"), (int)pid);
 	goto done;
     }
@@ -665,7 +758,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 {
     char *pathname, **argv, **envp, *buf;
     int argc, envc, syscallno;
-    struct user_pt_regs regs;
+    struct sudo_ptrace_regs regs;
     char cwd[PATH_MAX];
     bool ret = false;
     struct stat sb;
@@ -678,13 +771,12 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     }
 
     /* Get the registers. */
-    if (ptrace_getregs(pid, &regs) == -1) {
+    if (!ptrace_getregs(pid, &regs)) {
 	sudo_warn(U_("unable to get registers for process %d"), (int)pid);
 	debug_return_bool(false);
     }
 
-    /* System call number is stored in the lower 32-bits on 64-bit platforms. */
-    syscallno = reg_syscall(&regs) & 0xffffffff;
+    syscallno = get_syscallno(&regs);
     switch (syscallno) {
 #ifdef X32_execve
     case X32_execve:
@@ -707,7 +799,8 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     /* Get the current working directory and execve info. */
     if (!getcwd_by_pid(pid, cwd, sizeof(cwd)))
 	(void)strlcpy(cwd, "unknown", sizeof(cwd));
-    buf = get_execve_info(pid, &regs, &pathname, &argc, &argv, &envc, &envp);
+    buf = get_execve_info(pid, &regs, &pathname, &argc, &argv,
+	&envc, &envp);
     if (buf == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: %d: unable to get execve info", __func__, (int)pid);
@@ -758,22 +851,23 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	     * On amd64 there is a 128 byte red zone that must be avoided.
 	     * Note: on pa-risc the stack grows up, not down.
 	     */
-	    long sp = reg_sp(&regs) - 128;
+	    long sp = get_stack_pointer(&regs) - 128;
 	    long new_argv, strtab;
 	    size_t len;
 
 	    /* Calculate the amount of space required for argv + strings. */
-	    size_t argv_size = sizeof(long);
+	    size_t argv_size = regs.wordsize;
 	    for (argc = 0; closure->run_argv[argc] != NULL; argc++) {
 		/* Align length to word boundary to simplify writes. */
-		len = WORDALIGN(strlen(closure->run_argv[argc]) + 1);
-	    	argv_size += sizeof(long) + len;
+		len = WORDALIGN(strlen(closure->run_argv[argc]) + 1,
+		    regs.wordsize);
+	    	argv_size += regs.wordsize + len;
 	    }
 
 	    /* Reserve stack space for argv (w/ NULL) and its strings. */
 	    sp -= argv_size;
 	    new_argv = sp;
-	    strtab = sp + ((argc + 1) * sizeof(long));
+	    strtab = sp + ((argc + 1) * regs.wordsize);
 
 	    /* Copy new argv into tracee one word at a time. */
 	    for (i = 0; i < argc; i++) {
@@ -783,10 +877,11 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 			(int)pid, sp, strtab);
 		    goto done;
 		}
-		sp += sizeof(long);
+		sp += regs.wordsize;
 
 		/* Write new_argv[i] to the string table. */
-		len = ptrace_write_string(pid, strtab, closure->run_argv[i]);
+		len = ptrace_write_string(pid, &regs, strtab,
+		    closure->run_argv[i]);
 		if (len == (size_t)-1)
 		    goto done;
 		strtab += len;
@@ -800,8 +895,8 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	    }
 
 	    /* Update argv address in the tracee to our new value. */
-	    reg_arg2(&regs) = new_argv;
-	    if (ptrace_setregs(pid, &regs) == -1) {
+	    set_sc_arg2(&regs, new_argv);
+	    if (!ptrace_setregs(pid, &regs)) {
 		sudo_warn(U_("unable to set registers for process %d"),
 		    (int)pid);
 		goto done;
