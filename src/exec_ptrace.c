@@ -835,8 +835,10 @@ exec_ptrace_handled(pid_t pid, int status, void *intercept)
     debug_decl(exec_ptrace_handled, SUDO_DEBUG_EXEC);
 
     if (sigtrap == (SIGTRAP | (PTRACE_EVENT_SECCOMP << 8))) {
-	if (!ptrace_intercept_execve(pid, closure))
-	    debug_return_bool(true);
+	if (!ptrace_intercept_execve(pid, closure)) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR,
+		"%s: %d failed to intercept execve", __func__, (int)pid);
+	}
     } else if (sigtrap == (SIGTRAP | (PTRACE_EVENT_CLONE << 8)) ||
 	sigtrap == (SIGTRAP | (PTRACE_EVENT_VFORK << 8)) ||
 	sigtrap == (SIGTRAP | (PTRACE_EVENT_FORK << 8))) {
