@@ -1190,6 +1190,7 @@ src/exec_monitor.c
 src/exec_nopty.c
 src/exec_preload.c
 src/exec_ptrace.c
+src/exec_ptrace.h
 src/exec_pty.c
 src/get_pty.c
 src/hooks.c

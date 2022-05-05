@@ -615,8 +615,8 @@ exec_ptrace.o: $(srcdir)/exec_ptrace.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                $(incdir)/sudo_util.h $(srcdir)/exec_intercept.h \
-               $(srcdir)/sudo.h $(srcdir)/sudo_exec.h $(top_builddir)/config.h \
-               $(top_builddir)/pathnames.h
+               $(srcdir)/exec_ptrace.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
+               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/exec_ptrace.c
 exec_ptrace.i: $(srcdir)/exec_ptrace.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
@@ -624,8 +624,8 @@ exec_ptrace.i: $(srcdir)/exec_ptrace.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                $(incdir)/sudo_util.h $(srcdir)/exec_intercept.h \
-               $(srcdir)/sudo.h $(srcdir)/sudo_exec.h $(top_builddir)/config.h \
-               $(top_builddir)/pathnames.h
+               $(srcdir)/exec_ptrace.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
+               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 exec_ptrace.plog: exec_ptrace.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/exec_ptrace.c --i-file $< --output-file $@

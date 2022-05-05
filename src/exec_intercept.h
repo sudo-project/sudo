@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef SUDO_INTERCEPT_H
-#define SUDO_INTERCEPT_H
+#ifndef SUDO_EXEC_INTERCEPT_H
+#define SUDO_EXEC_INTERCEPT_H
 
 enum intercept_state {
     RECV_HELLO_INITIAL,
@@ -50,4 +50,4 @@ struct intercept_closure {
 void intercept_closure_reset(struct intercept_closure *closure);
 bool intercept_check_policy(const char *command, int argc, char **argv, int envc, char **envp, const char *runcwd, void *closure);
 
-#endif /* SUDO_INTERCEPT_H */
+#endif /* SUDO_EXEC_INTERCEPT_H */
