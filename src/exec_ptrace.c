@@ -94,6 +94,16 @@ get_sc_arg1(struct sudo_ptrace_regs *regs)
     }
 }
 
+static inline void
+set_sc_arg1(struct sudo_ptrace_regs *regs, long addr)
+{
+    if (regs->compat) {
+	compat_reg_arg1(regs->u.compat) = addr;
+    } else {
+	reg_arg1(regs->u.native) = addr;
+    }
+}
+
 static inline long
 get_sc_arg2(struct sudo_ptrace_regs *regs)
 {
@@ -184,6 +194,12 @@ static inline long
 get_sc_arg1(struct sudo_ptrace_regs *regs)
 {
     return reg_arg1(regs->u.native);
+}
+
+static inline void
+set_sc_arg1(struct sudo_ptrace_regs *regs, long addr)
+{
+    reg_arg1(regs->u.native) = addr;
 }
 
 static inline long
@@ -337,6 +353,7 @@ ptrace_read_vec(pid_t pid, struct sudo_ptrace_regs *regs, long addr,
 
     /* Fill in vector. */
     for (;;) {
+	/* XXX - unaligned access for compat binaries */
 	long word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
 	word &= regs->addrmask;
 	switch (word) {
@@ -376,6 +393,7 @@ ptrace_get_vec_len(pid_t pid, struct sudo_ptrace_regs *regs, long addr)
     debug_decl(ptrace_get_vec_len, SUDO_DEBUG_EXEC);
 
     for (;;) {
+	/* XXX - unaligned access for compat binaries */
 	long word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
 	word &= regs->addrmask;
 	switch (word) {
@@ -856,71 +874,99 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 
     if (closure->state == POLICY_ACCEPT) {
 	/*
-	 * Update argv if the policy modified it.
+	 * Update pathname and argv if the policy modified it.
 	 * We don't currently ever modify envp.
 	 */
+	bool path_mismatch = strcmp(pathname, closure->command) != 0;
+	bool argv_mismatch = false;
 	int i;
-	bool match = strcmp(pathname, closure->command) == 0;
-	if (match) {
-	    for (i = 0; closure->run_argv[i] != NULL && argv[i] != NULL; i++) {
-		if (strcmp(closure->run_argv[i], argv[i]) != 0) {
-		    match = false;
-		    break;
-		}
+
+	for (i = 0; closure->run_argv[i] != NULL && argv[i] != NULL; i++) {
+	    if (strcmp(closure->run_argv[i], argv[i]) != 0) {
+		argv_mismatch = true;
+		break;
 	    }
 	}
-	if (!match) {
+	if (path_mismatch || argv_mismatch) {
 	    /*
-	     * Need to replace argv with run_argv.  We can use space below
-	     * the stack pointer to store the new copy of argv.
+	     * Need to rewrite pathname and/or argv.
+	     * We can use space below the stack pointer to store the data.
 	     * On amd64 there is a 128 byte red zone that must be avoided.
 	     * Note: on pa-risc the stack grows up, not down.
 	     */
 	    long sp = get_stack_pointer(&regs) - 128;
-	    long new_argv, strtab;
-	    size_t len;
+	    long strtab;
+	    size_t len, space = 0;
 
 	    /*
 	     * Calculate the amount of space required for pointers + strings.
 	     * We align everything on a word boundary to simplify writes,
 	     * ptrace(2) may not be able to write to unaligned addresses.
 	     */
-	    size_t space = WORDALIGN((argc + 1) * regs.wordsize);
-	    for (argc = 0; closure->run_argv[argc] != NULL; argc++) {
-		space += WORDALIGN(strlen(argv[argc]) + 1);
+	    if (argv_mismatch) {
+		/* argv pointers */
+		len = (argc + 1) * regs.wordsize;
+		space += WORDALIGN(len);
+
+		/* argv strings */
+		for (argc = 0; closure->run_argv[argc] != NULL; argc++) {
+		    len = strlen(closure->run_argv[argc]) + 1;
+		    space += WORDALIGN(len);
+		}
+	    }
+	    if (path_mismatch) {
+		/* pathname string */
+		len = strlen(closure->command) + 1;
+		space += WORDALIGN(len);
 	    }
 
-	    /* Reserve stack space for argv (w/ NULL) and its strings. */
+	    /* Reserve stack space for path, argv (w/ NULL) and its strings. */
 	    sp -= space;
-	    new_argv = sp;
-	    strtab = sp + WORDALIGN((argc + 1) * regs.wordsize);
+	    strtab = sp;
 
-	    /* Copy new argv into tracee one word at a time. */
-	    for (i = 0; i < argc; i++) {
-		/* Store string address as new_argv[i]. */
-		if (ptrace(PTRACE_POKEDATA, pid, sp, strtab) == -1) {
-		    sudo_warn("ptrace(PTRACE_POKEDATA, %d, 0x%lx, 0x%lx)",
-			(int)pid, sp, strtab);
+	    if (argv_mismatch) {
+		/* Update argv address in the tracee to our new value. */
+		set_sc_arg2(&regs, sp);
+
+		/* Skip over argv pointers (plus NULL) for string table. */
+		strtab += WORDALIGN((argc + 1) * regs.wordsize);
+
+		/* Copy new argv (+ NULL) into tracee one word at a time. */
+		for (i = 0; i < argc; i++) {
+		    /* Store string address as new argv[i]. */
+		    /* XXX - unaligned access for compat binaries */
+		    if (ptrace(PTRACE_POKEDATA, pid, sp, strtab) == -1) {
+			sudo_warn("ptrace(PTRACE_POKEDATA, %d, 0x%lx, 0x%lx)",
+			    (int)pid, sp, strtab);
+			goto done;
+		    }
+		    sp += regs.wordsize;
+
+		    /* Write new argv[i] to the string table. */
+		    len = ptrace_write_string(pid, strtab, closure->run_argv[i]);
+		    if (len == (size_t)-1)
+			goto done;
+		    strtab += len;
+		}
+		/* XXX - unaligned access for compat binaries */
+		if (ptrace(PTRACE_POKEDATA, pid, sp, NULL) == -1) {
+		    sudo_warn("ptrace(PTRACE_POKEDATA, %d, 0x%lx, NULL)",
+			(int)pid, sp);
 		    goto done;
 		}
-		sp += regs.wordsize;
+	    }
+	    if (path_mismatch) {
+		/* Update pathname address in the tracee to our new value. */
+		set_sc_arg1(&regs, strtab);
 
-		/* Write new_argv[i] to the string table. */
-		len = ptrace_write_string(pid, strtab, closure->run_argv[i]);
+		/* Write pathname to the string table. */
+		len = ptrace_write_string(pid, strtab, closure->command);
 		if (len == (size_t)-1)
 		    goto done;
 		strtab += len;
 	    }
 
-	    /* Write terminating NULL pointer. */
-	    if (ptrace(PTRACE_POKEDATA, pid, sp, NULL) == -1) {
-		sudo_warn("ptrace(PTRACE_POKEDATA, %d, 0x%lx, NULL)",
-		    (int)pid, sp);
-		goto done;
-	    }
-
-	    /* Update argv address in the tracee to our new value. */
-	    set_sc_arg2(&regs, new_argv);
+	    /* Update args in the tracee to the new values. */
 	    if (!ptrace_setregs(pid, &regs)) {
 		sudo_warn(U_("unable to set registers for process %d"),
 		    (int)pid);
