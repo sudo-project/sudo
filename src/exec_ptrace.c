@@ -835,7 +835,8 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
      */
     if (stat(pathname, &sb) == -1) {
 	ptrace_fail_syscall(pid, &regs, errno);
-	debug_return_bool(true);
+	ret = true;
+	goto done;
     }
 
     /* Perform a policy check. */
@@ -928,6 +929,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     ret = true;
 
 done:
+    free(buf);
     intercept_closure_reset(closure);
 
     debug_return_bool(ret);
