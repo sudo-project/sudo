@@ -283,8 +283,7 @@ ptrace_setregs(int pid, struct sudo_ptrace_regs *regs)
  * Returns the number of bytes stored, including the NUL.
  */
 static size_t
-ptrace_read_string(pid_t pid, struct sudo_ptrace_regs *regs, long addr,
-    char *buf, size_t bufsize)
+ptrace_read_string(pid_t pid, long addr, char *buf, size_t bufsize)
 {
     const char *buf0 = buf;
     const char *cp;
@@ -292,10 +291,13 @@ ptrace_read_string(pid_t pid, struct sudo_ptrace_regs *regs, long addr,
     unsigned int i;
     debug_decl(ptrace_read_string, SUDO_DEBUG_EXEC);
 
-    /* Read the string via ptrace(2) one word at a time. */
+    /*
+     * Read the string via ptrace(2) one (native) word at a time.
+     * We use the native word size even in compat mode because that
+     * is the unit ptrace(2) uses.
+     */
     for (;;) {
 	word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
-	word &= regs->addrmask;
 	if (word == -1) {
 	    sudo_warn("ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
 		(int)pid, addr);
@@ -304,7 +306,7 @@ ptrace_read_string(pid_t pid, struct sudo_ptrace_regs *regs, long addr,
 
 	/* XXX - this could be optimized. */
 	cp = (char *)&word;
-	for (i = 0; i < regs->wordsize; i++) {
+	for (i = 0; i < sizeof(long); i++) {
 	    if (bufsize == 0) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR,
 		    "%s: %d: out of space reading string", __func__, (int)pid);
@@ -315,7 +317,7 @@ ptrace_read_string(pid_t pid, struct sudo_ptrace_regs *regs, long addr,
 		debug_return_size_t(buf - buf0);
 	    bufsize--;
 	}
-	addr += regs->wordsize;
+	addr += sizeof(long);
     }
 }
 
@@ -346,7 +348,7 @@ ptrace_read_vec(pid_t pid, struct sudo_ptrace_regs *regs, long addr,
 	    vec[len] = NULL;
 	    debug_return_size_t(buf - buf0);
 	default:
-	    slen = ptrace_read_string(pid, regs, word, buf, bufsize);
+	    slen = ptrace_read_string(pid, word, buf, bufsize);
 	    if (slen == (size_t)-1)
 		goto bad;
 	    vec[len++] = buf;
@@ -394,12 +396,11 @@ ptrace_get_vec_len(pid_t pid, struct sudo_ptrace_regs *regs, long addr)
 /*
  * Write the NUL-terminated string str to addr in the tracee.
  * The number of bytes written will be rounded up to the nearest
- * word, with extra bytes set to NUL.
+ * native word, with extra bytes set to NUL.
  * Returns the number of bytes written, including trailing NULs.
  */
 static size_t
-ptrace_write_string(pid_t pid, struct sudo_ptrace_regs *regs, long addr,
-    const char *str)
+ptrace_write_string(pid_t pid, long addr, const char *str)
 {
     long start_addr = addr;
     unsigned int i;
@@ -409,10 +410,15 @@ ptrace_write_string(pid_t pid, struct sudo_ptrace_regs *regs, long addr,
     } u;
     debug_decl(ptrace_write_string, SUDO_DEBUG_EXEC);
 
-    /* Write the string via ptrace(2) one word at a time. */
+    /*
+     * Write the string via ptrace(2) one (native) word at a time.
+     * We use the native word size even in compat mode because that
+     * is the unit ptrace(2) uses.
+     */
     for (;;) {
-	for (i = 0; i < regs->wordsize; i++) {
+	for (i = 0; i < sizeof(u.buf); i++) {
 	    if (*str == '\0') {
+		/* NUL-pad buf to sizeof(long). */
 		u.buf[i] = '\0';
 	    } else {
 		u.buf[i] = *str++;
@@ -420,10 +426,10 @@ ptrace_write_string(pid_t pid, struct sudo_ptrace_regs *regs, long addr,
 	}
 	if (ptrace(PTRACE_POKEDATA, pid, addr, u.word) == -1) {
 	    sudo_warn("ptrace(PTRACE_POKEDATA, %d, 0x%lx, %.*s)",
-		(int)pid, addr, (int)regs->wordsize, u.buf);
+		(int)pid, addr, (int)sizeof(u.buf), u.buf);
 	    debug_return_size_t(-1);
 	}
-	addr += regs->wordsize;
+	addr += sizeof(long);
 	if (*str == '\0')
 	    debug_return_size_t(addr - start_addr);
     }
@@ -484,7 +490,7 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
 	goto bad;
 
     /* Reserve argv and envp at the start of argbuf so they are aligned. */
-    if ((argc + 1 + envc + 1) * regs->wordsize >= bufsize) {
+    if ((argc + 1 + envc + 1) * sizeof(long) >= bufsize) {
 	sudo_warnx("%s", U_("insufficient space for argv and envp"));
 	goto bad;
     }
@@ -512,7 +518,7 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     bufsize -= len;
 
     /* Read the pathname. */
-    len = ptrace_read_string(pid, regs, path_addr, strtab, bufsize);
+    len = ptrace_read_string(pid, path_addr, strtab, bufsize);
     if (len == (size_t)-1) {
 	sudo_warn(U_("unable to read execve pathname for process %d"), (int)pid);
 	goto bad;
@@ -874,19 +880,20 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	    long new_argv, strtab;
 	    size_t len;
 
-	    /* Calculate the amount of space required for argv + strings. */
-	    size_t argv_size = regs.wordsize;
+	    /*
+	     * Calculate the amount of space required for pointers + strings.
+	     * We align everything on a word boundary to simplify writes,
+	     * ptrace(2) may not be able to write to unaligned addresses.
+	     */
+	    size_t space = WORDALIGN((argc + 1) * regs.wordsize);
 	    for (argc = 0; closure->run_argv[argc] != NULL; argc++) {
-		/* Align length to word boundary to simplify writes. */
-		len = WORDALIGN(strlen(closure->run_argv[argc]) + 1,
-		    regs.wordsize);
-	    	argv_size += regs.wordsize + len;
+		space += WORDALIGN(strlen(argv[argc]) + 1);
 	    }
 
 	    /* Reserve stack space for argv (w/ NULL) and its strings. */
-	    sp -= argv_size;
+	    sp -= space;
 	    new_argv = sp;
-	    strtab = sp + ((argc + 1) * regs.wordsize);
+	    strtab = sp + WORDALIGN((argc + 1) * regs.wordsize);
 
 	    /* Copy new argv into tracee one word at a time. */
 	    for (i = 0; i < argc; i++) {
@@ -899,8 +906,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 		sp += regs.wordsize;
 
 		/* Write new_argv[i] to the string table. */
-		len = ptrace_write_string(pid, &regs, strtab,
-		    closure->run_argv[i]);
+		len = ptrace_write_string(pid, strtab, closure->run_argv[i]);
 		if (len == (size_t)-1)
 		    goto done;
 		strtab += len;

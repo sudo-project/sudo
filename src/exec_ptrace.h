@@ -37,8 +37,8 @@
 # define __X32_SYSCALL_BIT 0x40000000
 #endif
 
-/* Align address to a word boundary of the given length. */
-#define WORDALIGN(_a, _l)	(((_a) + ((_l) - 1)) & ~((_l) - 1))
+/* Align address to a (native) word boundary. */
+#define WORDALIGN(_a)	(((_a) + (sizeof(long) - 1L)) & ~(sizeof(long) - 1L))
 
 /*
  * See syscall(2) for a list of registers used in system calls.
@@ -231,8 +231,8 @@ struct sudo_ptrace_regs {
 	struct compat_user_pt_regs compat;
 #endif
     } u;
-    unsigned int wordsize;
-    long addrmask;
+    unsigned long wordsize;
+    unsigned long addrmask;
     bool compat;
 };
 
