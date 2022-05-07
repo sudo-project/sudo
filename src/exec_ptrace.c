@@ -320,7 +320,6 @@ ptrace_read_string(pid_t pid, long addr, char *buf, size_t bufsize)
 	    debug_return_ssize_t(-1);
 	}
 
-	/* XXX - this could be optimized. */
 	cp = (char *)&word;
 	for (i = 0; i < sizeof(long); i++) {
 	    if (bufsize == 0) {
@@ -353,7 +352,6 @@ ptrace_read_vec(pid_t pid, struct sudo_ptrace_regs *regs, long addr,
 
     /* Fill in vector. */
     for (;;) {
-	/* XXX - unaligned access for compat binaries */
 	long word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
 	word &= regs->addrmask;
 	switch (word) {
@@ -393,7 +391,6 @@ ptrace_get_vec_len(pid_t pid, struct sudo_ptrace_regs *regs, long addr)
     debug_decl(ptrace_get_vec_len, SUDO_DEBUG_EXEC);
 
     for (;;) {
-	/* XXX - unaligned access for compat binaries */
 	long word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
 	word &= regs->addrmask;
 	switch (word) {
@@ -900,12 +897,15 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 
 	    /*
 	     * Calculate the amount of space required for pointers + strings.
-	     * We align everything on a word boundary to simplify writes,
-	     * ptrace(2) may not be able to write to unaligned addresses.
+	     * We align everything on a word boundary to avoid overlapping
+	     * writes since ptrace(2) does everything in native word units.
+	     *
+	     * In compat mode, if argc is odd, writing the last pointer will
+	     * overlap the first string so leave an extra word in between.
 	     */
 	    if (argv_mismatch) {
 		/* argv pointers */
-		len = (argc + 1) * regs.wordsize;
+		len = (argc + 1 + regs.compat) * regs.wordsize;
 		space += WORDALIGN(len);
 
 		/* argv strings */
@@ -929,12 +929,11 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 		set_sc_arg2(&regs, sp);
 
 		/* Skip over argv pointers (plus NULL) for string table. */
-		strtab += WORDALIGN((argc + 1) * regs.wordsize);
+		strtab += WORDALIGN((argc + 1 + regs.compat) * regs.wordsize);
 
 		/* Copy new argv (+ NULL) into tracee one word at a time. */
 		for (i = 0; i < argc; i++) {
 		    /* Store string address as new argv[i]. */
-		    /* XXX - unaligned access for compat binaries */
 		    if (ptrace(PTRACE_POKEDATA, pid, sp, strtab) == -1) {
 			sudo_warn("ptrace(PTRACE_POKEDATA, %d, 0x%lx, 0x%lx)",
 			    (int)pid, sp, strtab);
@@ -948,7 +947,6 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 			goto done;
 		    strtab += len;
 		}
-		/* XXX - unaligned access for compat binaries */
 		if (ptrace(PTRACE_POKEDATA, pid, sp, NULL) == -1) {
 		    sudo_warn("ptrace(PTRACE_POKEDATA, %d, 0x%lx, NULL)",
 			(int)pid, sp);
