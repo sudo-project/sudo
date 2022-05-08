@@ -410,14 +410,12 @@ ptrace_get_vec_len(pid_t pid, struct sudo_ptrace_regs *regs, long addr)
 
 /*
  * Write the NUL-terminated string str to addr in the tracee.
- * The number of bytes written will be rounded up to the nearest
- * native word, with extra bytes set to NUL.
- * Returns the number of bytes written, including trailing NULs.
+ * Returns the number of bytes written, including trailing NUL.
  */
 static size_t
 ptrace_write_string(pid_t pid, long addr, const char *str)
 {
-    long start_addr = addr;
+    const char *str0 = str;
     unsigned int i;
     union {
 	long word;
@@ -428,25 +426,25 @@ ptrace_write_string(pid_t pid, long addr, const char *str)
     /*
      * Write the string via ptrace(2) one (native) word at a time.
      * We use the native word size even in compat mode because that
-     * is the unit ptrace(2) uses.
+     * is the unit ptrace(2) writes in terms of.
      */
     for (;;) {
 	for (i = 0; i < sizeof(u.buf); i++) {
 	    if (*str == '\0') {
 		/* NUL-pad buf to sizeof(long). */
 		u.buf[i] = '\0';
-	    } else {
-		u.buf[i] = *str++;
+		continue;
 	    }
+	    u.buf[i] = *str++;
 	}
 	if (ptrace(PTRACE_POKEDATA, pid, addr, u.word) == -1) {
 	    sudo_warn("ptrace(PTRACE_POKEDATA, %d, 0x%lx, %.*s)",
 		(int)pid, addr, (int)sizeof(u.buf), u.buf);
 	    debug_return_size_t(-1);
 	}
-	addr += sizeof(long);
 	if (*str == '\0')
-	    debug_return_size_t(addr - start_addr);
+	    debug_return_size_t(str - str0 + 1);
+	addr += sizeof(long);
     }
 }
 
@@ -897,11 +895,16 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 
 	    /*
 	     * Calculate the amount of space required for pointers + strings.
-	     * We align everything on a word boundary to avoid overlapping
-	     * writes since ptrace(2) does everything in native word units.
+	     * Since ptrace(2) always writes in sizeof(long) increments we
+	     * need to be careful to avoid overwriting what we have already
+	     * written for compat binaries (where the word size doesn't match).
 	     *
-	     * In compat mode, if argc is odd, writing the last pointer will
-	     * overlap the first string so leave an extra word in between.
+	     * This is mostly a problem for the string table since we do
+	     * interleaved writes of the argument vector pointers and the
+	     * strings they refer to.  For native binaries, it is sufficient
+	     * to align the string table on a word boundary.  For compat
+	     * binaries, if argc is odd, writing the last pointer will overlap
+	     * the first string so leave an extra word in between them.
 	     */
 	    if (argv_mismatch) {
 		/* argv pointers */
@@ -910,18 +913,16 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 
 		/* argv strings */
 		for (argc = 0; closure->run_argv[argc] != NULL; argc++) {
-		    len = strlen(closure->run_argv[argc]) + 1;
-		    space += WORDALIGN(len);
+		    space += strlen(closure->run_argv[argc]) + 1;
 		}
 	    }
 	    if (path_mismatch) {
 		/* pathname string */
-		len = strlen(closure->command) + 1;
-		space += WORDALIGN(len);
+		space += strlen(closure->command) + 1;
 	    }
 
 	    /* Reserve stack space for path, argv (w/ NULL) and its strings. */
-	    sp -= space;
+	    sp -= WORDALIGN(space);
 	    strtab = sp;
 
 	    if (argv_mismatch) {
