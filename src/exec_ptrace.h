@@ -37,8 +37,9 @@
 # define __X32_SYSCALL_BIT 0x40000000
 #endif
 
-/* Align address to a (native) word boundary. */
-#define WORDALIGN(_a)	(((_a) + (sizeof(long) - 1L)) & ~(sizeof(long) - 1L))
+/* Align address to a (compat) word boundary. */
+#define WORDALIGN(_a, _r)	\
+	(((_a) + ((long)(_r).wordsize - 1L)) & ~((long)(_r).wordsize - 1L))
 
 /*
  * See syscall(2) for a list of registers used in system calls.

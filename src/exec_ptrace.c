@@ -929,8 +929,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	     */
 	    if (argv_mismatch) {
 		/* argv pointers */
-		len = (argc + 1 + regs.compat) * regs.wordsize;
-		space += WORDALIGN(len);
+		space += (argc + 1 + regs.compat) * regs.wordsize;
 
 		/* argv strings */
 		for (argc = 0; closure->run_argv[argc] != NULL; argc++) {
@@ -943,7 +942,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	    }
 
 	    /* Reserve stack space for path, argv (w/ NULL) and its strings. */
-	    sp -= WORDALIGN(space);
+	    sp -= WORDALIGN(space, regs);
 	    strtab = sp;
 
 	    if (argv_mismatch) {
@@ -951,7 +950,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 		set_sc_arg2(&regs, sp);
 
 		/* Skip over argv pointers (plus NULL) for string table. */
-		strtab += WORDALIGN((argc + 1 + regs.compat) * regs.wordsize);
+		strtab += (argc + 1 + regs.compat) * regs.wordsize;
 
 		/* Copy new argv (+ NULL) into tracee one word at a time. */
 		for (i = 0; i < argc; i++) {
