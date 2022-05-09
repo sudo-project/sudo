@@ -261,11 +261,9 @@ ptrace_getregs(int pid, struct sudo_ptrace_regs *regs, bool compat)
     if (compat) {
 	regs->compat = true;
 	regs->wordsize = sizeof(int);
-	regs->addrmask = (unsigned int)-1;
     } else {
 	regs->compat = false;
 	regs->wordsize = sizeof(long);
-	regs->addrmask = (unsigned long)-1;
     }
 
     debug_return_bool(true);
@@ -315,8 +313,8 @@ ptrace_read_string(pid_t pid, long addr, char *buf, size_t bufsize)
     for (;;) {
 	word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
 	if (word == -1) {
-	    sudo_warn("ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
-		(int)pid, addr);
+	    sudo_warn("%s: ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
+		__func__, (int)pid, addr);
 	    debug_return_ssize_t(-1);
 	}
 
@@ -345,6 +343,7 @@ static size_t
 ptrace_read_vec(pid_t pid, struct sudo_ptrace_regs *regs, long addr,
     char **vec, char *buf, size_t bufsize)
 {
+    unsigned long word, next_word = -1;
     char *buf0 = buf;
     int len = 0;
     size_t slen;
@@ -352,12 +351,22 @@ ptrace_read_vec(pid_t pid, struct sudo_ptrace_regs *regs, long addr,
 
     /* Fill in vector. */
     for (;;) {
-	long word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
-	word &= regs->addrmask;
+	if (next_word == (unsigned long)-1) {
+	    word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
+	    if (regs->compat) {
+		/* Stash the next compat word in next_word. */
+		next_word = word >> 32;
+		word &= 0xffffffffU;
+	    }
+	} else {
+	    /* Use the stashed value of the next word. */
+	    word = next_word;
+	    next_word = (unsigned long)-1;
+	}
 	switch (word) {
 	case -1:
-	    sudo_warn("ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
-		(int)pid, addr);
+	    sudo_warn("%s: ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
+		__func__, (int)pid, addr);
 	    goto bad;
 	case 0:
 	    vec[len] = NULL;
@@ -387,16 +396,27 @@ bad:
 static int
 ptrace_get_vec_len(pid_t pid, struct sudo_ptrace_regs *regs, long addr)
 {
+    unsigned long word, next_word = -1;
     int len = 0;
     debug_decl(ptrace_get_vec_len, SUDO_DEBUG_EXEC);
 
     for (;;) {
-	long word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
-	word &= regs->addrmask;
+	if (next_word == (unsigned long)-1) {
+	    word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
+	    if (regs->compat) {
+		/* Stash the next compat word in next_word. */
+		next_word = word >> 32;
+		word &= 0xffffffffU;
+	    }
+	} else {
+	    /* Use the stashed value of the next word. */
+	    word = next_word;
+	    next_word = (unsigned long)-1;
+	}
 	switch (word) {
 	case -1:
-	    sudo_warn("ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
-		(int)pid, addr);
+	    sudo_warn("%s: ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
+		__func__, (int)pid, addr);
 	    debug_return_int(-1);
 	case 0:
 	    debug_return_int(len);
@@ -438,8 +458,8 @@ ptrace_write_string(pid_t pid, long addr, const char *str)
 	    u.buf[i] = *str++;
 	}
 	if (ptrace(PTRACE_POKEDATA, pid, addr, u.word) == -1) {
-	    sudo_warn("ptrace(PTRACE_POKEDATA, %d, 0x%lx, %.*s)",
-		(int)pid, addr, (int)sizeof(u.buf), u.buf);
+	    sudo_warn("%s: ptrace(PTRACE_POKEDATA, %d, 0x%lx, %.*s)",
+		__func__, (int)pid, addr, (int)sizeof(u.buf), u.buf);
 	    debug_return_size_t(-1);
 	}
 	if (*str == '\0')
@@ -714,8 +734,8 @@ exec_ptrace_seize(pid_t child)
 	 * possible to run sudo inside a sudo shell with intercept enabled.
 	 */
 	if (errno != EPERM) {
-	    sudo_warn("ptrace(PTRACE_SEIZE, %d, NULL, 0x%lx)", (int)child,
-		ptrace_opts);
+	    sudo_warn("%s: ptrace(PTRACE_SEIZE, %d, NULL, 0x%lx)",
+		__func__, (int)child, ptrace_opts);
 	    goto done;
 	}
 	sudo_debug_printf(SUDO_DEBUG_WARN,
@@ -726,7 +746,7 @@ exec_ptrace_seize(pid_t child)
 
     /* The child is suspended waiting for SIGUSR1, wake it up. */
     if (kill(child, SIGUSR1) == -1) {
-	sudo_warn("kill(%d, SIGUSR1)", child);
+	sudo_warn("kill(%d, SIGUSR1)", (int)child);
 	goto done;
     }
     if (!ret)
@@ -746,7 +766,8 @@ exec_ptrace_seize(pid_t child)
 	goto done;
     }
     if (ptrace(PTRACE_CONT, child, NULL, (long)SIGUSR1) == -1) {
-	sudo_warn("ptrace(PTRACE_CONT, %d, NULL, SIGUSR1)", (int)child);
+	sudo_warn("%s: ptrace(PTRACE_CONT, %d, NULL, SIGUSR1)",
+	    __func__, (int)child);
 	goto done;
     }
 
@@ -936,8 +957,9 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 		for (i = 0; i < argc; i++) {
 		    /* Store string address as new argv[i]. */
 		    if (ptrace(PTRACE_POKEDATA, pid, sp, strtab) == -1) {
-			sudo_warn("ptrace(PTRACE_POKEDATA, %d, 0x%lx, 0x%lx)",
-			    (int)pid, sp, strtab);
+			sudo_warn(
+			    "%s: ptrace(PTRACE_POKEDATA, %d, 0x%lx, 0x%lx)",
+			    __func__, (int)pid, sp, strtab);
 			goto done;
 		    }
 		    sp += regs.wordsize;
@@ -949,8 +971,8 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 		    strtab += len;
 		}
 		if (ptrace(PTRACE_POKEDATA, pid, sp, NULL) == -1) {
-		    sudo_warn("ptrace(PTRACE_POKEDATA, %d, 0x%lx, NULL)",
-			(int)pid, sp);
+		    sudo_warn("%s: ptrace(PTRACE_POKEDATA, %d, 0x%lx, NULL)",
+			__func__, (int)pid, sp);
 		    goto done;
 		}
 	    }
@@ -1056,11 +1078,13 @@ exec_ptrace_handled(pid_t pid, int status, void *intercept)
 	 * until SIGCONT is received (simulate SIGSTOP, etc).
 	 */
 	if (ptrace(PTRACE_LISTEN, pid, NULL, 0L) == -1)
-	    sudo_warn("ptrace(PTRACE_LISTEN, %d, NULL, %d)", (int)pid, stopsig);
+	    sudo_warn("%s: ptrace(PTRACE_LISTEN, %d, NULL, %d)",
+		__func__, (int)pid, stopsig);
     } else {
 	/* Restart child. */
 	if (ptrace(PTRACE_CONT, pid, NULL, signo) == -1)
-	    sudo_warn("ptrace(PTRACE_CONT, %d, NULL, %ld)", (int)pid, signo);
+	    sudo_warn("%s: ptrace(PTRACE_CONT, %d, NULL, %ld)",
+		__func__, (int)pid, signo);
     }
 
     debug_return_bool(signo == 0);

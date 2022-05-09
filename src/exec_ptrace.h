@@ -231,8 +231,7 @@ struct sudo_ptrace_regs {
 	struct compat_user_pt_regs compat;
 #endif
     } u;
-    unsigned long wordsize;
-    unsigned long addrmask;
+    unsigned int wordsize;
     bool compat;
 };
 
