@@ -279,10 +279,13 @@ ptrace_setregs(int pid, struct sudo_ptrace_regs *regs)
     struct iovec iov;
     debug_decl(ptrace_setregs, SUDO_DEBUG_EXEC);
 
+#ifdef SECCOMP_AUDIT_ARCH_COMPAT
     if (regs->compat) {
 	iov.iov_base = &regs->u.compat;
 	iov.iov_len = sizeof(regs->u.compat);
-    } else {
+    } else
+#endif
+    {
 	iov.iov_base = &regs->u.native;
 	iov.iov_len = sizeof(regs->u.native);
     }
