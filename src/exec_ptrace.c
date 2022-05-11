@@ -44,7 +44,7 @@
 
 /* Register getters and setters. */
 # ifdef SECCOMP_AUDIT_ARCH_COMPAT
-static inline long
+static inline unsigned long
 get_stack_pointer(struct sudo_ptrace_regs *regs)
 {
     if (regs->compat) {
@@ -84,7 +84,7 @@ set_syscallno(struct sudo_ptrace_regs *regs, int syscallno)
     }
 }
 
-static inline long
+static inline unsigned long
 get_sc_arg1(struct sudo_ptrace_regs *regs)
 {
     if (regs->compat) {
@@ -95,7 +95,7 @@ get_sc_arg1(struct sudo_ptrace_regs *regs)
 }
 
 static inline void
-set_sc_arg1(struct sudo_ptrace_regs *regs, long addr)
+set_sc_arg1(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
     if (regs->compat) {
 	compat_reg_arg1(regs->u.compat) = addr;
@@ -104,7 +104,7 @@ set_sc_arg1(struct sudo_ptrace_regs *regs, long addr)
     }
 }
 
-static inline long
+static inline unsigned long
 get_sc_arg2(struct sudo_ptrace_regs *regs)
 {
     if (regs->compat) {
@@ -115,7 +115,7 @@ get_sc_arg2(struct sudo_ptrace_regs *regs)
 }
 
 static inline void
-set_sc_arg2(struct sudo_ptrace_regs *regs, long addr)
+set_sc_arg2(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
     if (regs->compat) {
 	compat_reg_arg2(regs->u.compat) = addr;
@@ -124,7 +124,7 @@ set_sc_arg2(struct sudo_ptrace_regs *regs, long addr)
     }
 }
 
-static inline long
+static inline unsigned long
 get_sc_arg3(struct sudo_ptrace_regs *regs)
 {
     if (regs->compat) {
@@ -135,7 +135,7 @@ get_sc_arg3(struct sudo_ptrace_regs *regs)
 }
 
 static inline void
-set_sc_arg3(struct sudo_ptrace_regs *regs, long addr)
+set_sc_arg3(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
     if (regs->compat) {
 	compat_reg_arg3(regs->u.compat) = addr;
@@ -144,7 +144,7 @@ set_sc_arg3(struct sudo_ptrace_regs *regs, long addr)
     }
 }
 
-static inline long
+static inline unsigned long
 get_sc_arg4(struct sudo_ptrace_regs *regs)
 {
     if (regs->compat) {
@@ -155,7 +155,7 @@ get_sc_arg4(struct sudo_ptrace_regs *regs)
 }
 
 static inline void
-set_sc_arg4(struct sudo_ptrace_regs *regs, long addr)
+set_sc_arg4(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
     if (regs->compat) {
 	compat_reg_arg4(regs->u.compat) = addr;
@@ -166,7 +166,7 @@ set_sc_arg4(struct sudo_ptrace_regs *regs, long addr)
 
 # else /* SECCOMP_AUDIT_ARCH_COMPAT */
 
-static inline long
+static inline unsigned long
 get_stack_pointer(struct sudo_ptrace_regs *regs)
 {
     return reg_sp(regs->u.native);
@@ -190,50 +190,50 @@ set_syscallno(struct sudo_ptrace_regs *regs, int syscallno)
     reg_syscall(regs->u.native) = syscallno;
 }
 
-static inline long
+static inline unsigned long
 get_sc_arg1(struct sudo_ptrace_regs *regs)
 {
     return reg_arg1(regs->u.native);
 }
 
 static inline void
-set_sc_arg1(struct sudo_ptrace_regs *regs, long addr)
+set_sc_arg1(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
     reg_arg1(regs->u.native) = addr;
 }
 
-static inline long
+static inline unsigned long
 get_sc_arg2(struct sudo_ptrace_regs *regs)
 {
     return reg_arg2(regs->u.native);
 }
 
 static inline void
-set_sc_arg2(struct sudo_ptrace_regs *regs, long addr)
+set_sc_arg2(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
     reg_arg2(regs->u.native) = addr;
 }
 
-static inline long
+static inline unsigned long
 get_sc_arg3(struct sudo_ptrace_regs *regs)
 {
     return reg_arg3(regs->u.native);
 }
 
 static inline void
-set_sc_arg3(struct sudo_ptrace_regs *regs, long addr)
+set_sc_arg3(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
     reg_arg3(regs->u.native) = addr;
 }
 
-static inline long
+static inline unsigned long
 get_sc_arg4(struct sudo_ptrace_regs *regs)
 {
     return reg_arg4(regs->u.native);
 }
 
 static inline void
-set_sc_arg4(struct sudo_ptrace_regs *regs, long addr)
+set_sc_arg4(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
     reg_arg4(regs->u.native) = addr;
 }
@@ -254,7 +254,7 @@ ptrace_getregs(int pid, struct sudo_ptrace_regs *regs, bool compat)
 
     iov.iov_base = &regs->u;
     iov.iov_len = sizeof(regs->u);
-    if (ptrace(PTRACE_GETREGSET, pid, (long)NT_PRSTATUS, &iov) == -1)
+    if (ptrace(PTRACE_GETREGSET, pid, (void *)NT_PRSTATUS, &iov) == -1)
 	debug_return_bool(false);
 
     /* Machine-dependent parameters to support compat binaries. */
@@ -263,7 +263,7 @@ ptrace_getregs(int pid, struct sudo_ptrace_regs *regs, bool compat)
 	regs->wordsize = sizeof(int);
     } else {
 	regs->compat = false;
-	regs->wordsize = sizeof(long);
+	regs->wordsize = sizeof(unsigned long);
     }
 
     debug_return_bool(true);
@@ -279,17 +279,14 @@ ptrace_setregs(int pid, struct sudo_ptrace_regs *regs)
     struct iovec iov;
     debug_decl(ptrace_setregs, SUDO_DEBUG_EXEC);
 
-#ifdef SECCOMP_AUDIT_ARCH_COMPAT
     if (regs->compat) {
 	iov.iov_base = &regs->u.compat;
 	iov.iov_len = sizeof(regs->u.compat);
-    } else
-#endif
-    {
+    } else {
 	iov.iov_base = &regs->u.native;
 	iov.iov_len = sizeof(regs->u.native);
     }
-    if (ptrace(PTRACE_SETREGSET, pid, (long)NT_PRSTATUS, &iov) == -1)
+    if (ptrace(PTRACE_SETREGSET, pid, (void *)NT_PRSTATUS, &iov) == -1)
 	debug_return_bool(false);
 
     debug_return_bool(true);
@@ -300,11 +297,11 @@ ptrace_setregs(int pid, struct sudo_ptrace_regs *regs)
  * Returns the number of bytes stored, including the NUL.
  */
 static size_t
-ptrace_read_string(pid_t pid, long addr, char *buf, size_t bufsize)
+ptrace_read_string(pid_t pid, unsigned long addr, char *buf, size_t bufsize)
 {
     const char *buf0 = buf;
     const char *cp;
-    long word;
+    unsigned long word;
     unsigned int i;
     debug_decl(ptrace_read_string, SUDO_DEBUG_EXEC);
 
@@ -315,14 +312,14 @@ ptrace_read_string(pid_t pid, long addr, char *buf, size_t bufsize)
      */
     for (;;) {
 	word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
-	if (word == -1) {
+	if (word == (unsigned long)-1) {
 	    sudo_warn("%s: ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
 		__func__, (int)pid, addr);
 	    debug_return_ssize_t(-1);
 	}
 
 	cp = (char *)&word;
-	for (i = 0; i < sizeof(long); i++) {
+	for (i = 0; i < sizeof(unsigned long); i++) {
 	    if (bufsize == 0) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR,
 		    "%s: %d: out of space reading string", __func__, (int)pid);
@@ -333,7 +330,7 @@ ptrace_read_string(pid_t pid, long addr, char *buf, size_t bufsize)
 		debug_return_size_t(buf - buf0);
 	    bufsize--;
 	}
-	addr += sizeof(long);
+	addr += sizeof(unsigned long);
     }
 }
 
@@ -343,7 +340,7 @@ ptrace_read_string(pid_t pid, long addr, char *buf, size_t bufsize)
  * Returns the number of bytes in buf consumed (including NULs).
  */
 static size_t
-ptrace_read_vec(pid_t pid, struct sudo_ptrace_regs *regs, long addr,
+ptrace_read_vec(pid_t pid, struct sudo_ptrace_regs *regs, unsigned long addr,
     char **vec, char *buf, size_t bufsize)
 {
     unsigned long word, next_word = -1;
@@ -397,7 +394,7 @@ bad:
  * Return the length of the string vector at addr or -1 on error.
  */
 static int
-ptrace_get_vec_len(pid_t pid, struct sudo_ptrace_regs *regs, long addr)
+ptrace_get_vec_len(pid_t pid, struct sudo_ptrace_regs *regs, unsigned long addr)
 {
     unsigned long word, next_word = -1;
     int len = 0;
@@ -436,13 +433,13 @@ ptrace_get_vec_len(pid_t pid, struct sudo_ptrace_regs *regs, long addr)
  * Returns the number of bytes written, including trailing NUL.
  */
 static size_t
-ptrace_write_string(pid_t pid, long addr, const char *str)
+ptrace_write_string(pid_t pid, unsigned long addr, const char *str)
 {
     const char *str0 = str;
     unsigned int i;
     union {
-	long word;
-	char buf[sizeof(long)];
+	unsigned long word;
+	char buf[sizeof(unsigned long)];
     } u;
     debug_decl(ptrace_write_string, SUDO_DEBUG_EXEC);
 
@@ -454,7 +451,7 @@ ptrace_write_string(pid_t pid, long addr, const char *str)
     for (;;) {
 	for (i = 0; i < sizeof(u.buf); i++) {
 	    if (*str == '\0') {
-		/* NUL-pad buf to sizeof(long). */
+		/* NUL-pad buf to sizeof(unsigned long). */
 		u.buf[i] = '\0';
 		continue;
 	    }
@@ -465,11 +462,9 @@ ptrace_write_string(pid_t pid, long addr, const char *str)
 		__func__, (int)pid, addr, (int)sizeof(u.buf), u.buf);
 	    debug_return_size_t(-1);
 	}
-	if ((u.word & 0xff) == 0) {
-	    /* If the last byte we wrote is a NUL we are done. */
+	if (*str == '\0')
 	    debug_return_size_t(str - str0 + 1);
-	}
-	addr += sizeof(long);
+	addr += sizeof(unsigned long);
     }
 }
 
@@ -506,7 +501,7 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     int *argc_out, char ***argv_out, int *envc_out, char ***envp_out)
 {
     char *argbuf, *strtab, *pathname, **argv, **envp;
-    long path_addr, argv_addr, envp_addr;
+    unsigned long path_addr, argv_addr, envp_addr;
     int argc, envc;
     size_t bufsize, len;
     debug_decl(get_execve_info, SUDO_DEBUG_EXEC);
@@ -528,7 +523,7 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
 	goto bad;
 
     /* Reserve argv and envp at the start of argbuf so they are aligned. */
-    if ((argc + 1 + envc + 1) * sizeof(long) >= bufsize) {
+    if ((argc + 1 + envc + 1) * sizeof(unsigned long) >= bufsize) {
 	sudo_warnx("%s", U_("insufficient space for argv and envp"));
 	goto bad;
     }
@@ -770,7 +765,7 @@ exec_ptrace_seize(pid_t child)
 	sudo_warnx(U_("process %d exited unexpectedly"), (int)child);
 	goto done;
     }
-    if (ptrace(PTRACE_CONT, child, NULL, (long)SIGUSR1) == -1) {
+    if (ptrace(PTRACE_CONT, child, NULL, (void *)SIGUSR1) == -1) {
 	sudo_warn("%s: ptrace(PTRACE_CONT, %d, NULL, SIGUSR1)",
 	    __func__, (int)child);
 	goto done;
@@ -915,8 +910,8 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	     * On amd64 there is a 128 byte red zone that must be avoided.
 	     * Note: on pa-risc the stack grows up, not down.
 	     */
-	    long sp = get_stack_pointer(&regs) - 128;
-	    long strtab;
+	    unsigned long sp = get_stack_pointer(&regs) - 128;
+	    unsigned long strtab;
 	    size_t len, space = 0;
 
 	    /*
