@@ -112,6 +112,9 @@ main(int argc, char *argv[])
 
     initprogname(argc > 0 ? argv[0] : "test_ptrace");
 
+    if (!have_seccomp_action("trap"))
+	sudo_fatalx("SECCOMP_MODE_FILTER not available in this kernel");
+
     while ((ch = getopt(argc, argv, "v")) != -1) {
 	switch (ch) {
 	case 'v':
