@@ -58,9 +58,9 @@ static inline void
 set_sc_retval(struct sudo_ptrace_regs *regs, int retval)
 {
     if (regs->compat) {
-	compat_reg_retval(regs->u.compat) = retval;
+	compat_reg_set_retval(regs->u.compat, retval);
     } else {
-	reg_retval(regs->u.native) = retval;
+	reg_set_retval(regs->u.native, retval);
     }
 }
 
@@ -175,7 +175,7 @@ get_stack_pointer(struct sudo_ptrace_regs *regs)
 static inline void
 set_sc_retval(struct sudo_ptrace_regs *regs, int retval)
 {
-    reg_retval(regs->u.native) = retval;
+    reg_set_retval(regs->u.native, retval);
 }
 
 static inline int

@@ -107,32 +107,37 @@
 # define reg_arg2(x)		(x).ecx
 # define reg_arg3(x)		(x).edx
 # define reg_arg4(x)		(x).esi
-#elif defined(__powerpc64__)
-/* Untested */
-# if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-#  define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_PPC64LE
+#elif defined(__powerpc__)
+# if defined(__powerpc64__)
+#  if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#   define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_PPC64LE
+#  else
+#   define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_PPC64
+#  endif
 # else
-#  define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_PPC64
+#  define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_PPC
 # endif
 # define user_pt_regs		pt_regs
 # define reg_syscall(x)		(x).gpr[0]	/* r0 */
 # define reg_retval(x)		(x).gpr[3]	/* r3 */
 # define reg_sp(x)		(x).gpr[1]	/* r1 */
-# define reg_arg1(x)		(x).gpr[3]	/* r3 */
+# define reg_arg1(x)		(x).orig_gpr3	/* r3 */
 # define reg_arg2(x)		(x).gpr[4]	/* r4 */
 # define reg_arg3(x)		(x).gpr[5]	/* r5 */
 # define reg_arg4(x)		(x).gpr[6]	/* r6 */
-#elif defined(__powerpc__)
-/* Untested */
-# define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_PPC
-# define user_pt_regs		pt_regs
-# define reg_syscall(x)		(x).gpr[0]	/* r0 */
-# define reg_retval(x)		(x).gpr[3]	/* r3 */
-# define reg_sp(x)		(x).gpr[1]	/* r1 */
-# define reg_arg1(x)		(x).gpr[3]	/* r3 */
-# define reg_arg2(x)		(x).gpr[4]	/* r4 */
-# define reg_arg3(x)		(x).gpr[5]	/* r5 */
-# define reg_arg4(x)		(x).gpr[6]	/* r6 */
+# define reg_set_retval(_r, _v) do {					\
+    if (((_r).trap & 0xfff0) == 0x3000) {				\
+	/* scv 0 system call, uses negative error code for result. */	\
+	reg_retval(_r) = (_v);						\
+    } else {								\
+	/*								\
+	 * Set CR0 SO bit to indicate a syscall error, which is stored	\
+	 * as a positive error code.					\
+	 */								\
+	reg_retval(_r) = -(_v);						\
+	(_r).ccr |= 0x10000000;						\
+    }									\
+} while (0)
 #elif defined(__riscv) && __riscv_xlen == 64
 /* Untested */
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_RISCV64
@@ -208,7 +213,7 @@ struct i386_user_regs_struct {
 # define compat_reg_arg2(x)		(x).ecx
 # define compat_reg_arg3(x)		(x).edx
 # define compat_reg_arg4(x)		(x).esi
-#elif defined(__arm__)
+#elif defined(__aarch64__)
 struct arm_pt_regs {
   unsigned int uregs[18];
 };
@@ -223,6 +228,51 @@ struct arm_pt_regs {
 # define compat_reg_arg2(x)		(x).uregs[1]	/* r1 */
 # define compat_reg_arg3(x)		(x).uregs[2]	/* r2 */
 # define compat_reg_arg4(x)		(x).uregs[3]	/* r3 */
+#elif defined(__powerpc64__)
+struct ppc_pt_regs {
+    unsigned int gpr[32];
+    unsigned int nip;
+    unsigned int msr;
+    unsigned int orig_gpr3;
+    unsigned int ctr;
+    unsigned int link;
+    unsigned int xer;
+    unsigned int ccr;
+    unsigned int mq;
+    unsigned int trap;
+    unsigned int dar;
+    unsigned int dsisr;
+    unsigned int result;
+};
+#  if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+/* There is no AUDIT_ARCH_PPCLE define. */
+#   define SECCOMP_AUDIT_ARCH_COMPAT	(AUDIT_ARCH_PPC|__AUDIT_ARCH_LE)
+#  else
+#   define SECCOMP_AUDIT_ARCH_COMPAT	AUDIT_ARCH_PPC
+#  endif
+# define COMPAT_execve			__NR_execve
+# define COMPAT_execveat		__NR_execveat
+# define compat_user_pt_regs		ppc_pt_regs
+# define compat_reg_syscall(x)		(x).gpr[0]	/* r0 */
+# define compat_reg_retval(x)		(x).gpr[3]	/* r3 */
+# define compat_reg_sp(x)		(x).gpr[1]	/* r1 */
+# define compat_reg_arg1(x)		(x).orig_gpr3	/* r3 */
+# define compat_reg_arg2(x)		(x).gpr[4]	/* r4 */
+# define compat_reg_arg3(x)		(x).gpr[5]	/* r5 */
+# define compat_reg_arg4(x)		(x).gpr[6]	/* r6 */
+# define compat_reg_set_retval(_r, _v)	reg_set_retval(_r, _v)
+#endif
+
+/* Set the syscall return value the "normal" way by default. */
+#ifndef reg_set_retval
+# define reg_set_retval(_r, _v) do {					\
+    reg_retval(_r) = (_v);						\
+} while (0)
+#endif
+#ifndef compat_reg_set_retval
+# define compat_reg_set_retval(_r, _v) do {				\
+    compat_reg_retval(_r) = (_v);					\
+} while (0)
 #endif
 
 struct sudo_ptrace_regs {
