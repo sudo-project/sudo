@@ -520,34 +520,44 @@ ptrace_write_vec(pid_t pid, struct sudo_ptrace_regs *regs, char **vec,
     /* Copy string vector into tracee one word at a time. */
     for (i = 0; vec[i] != NULL; i++) {
 	unsigned long word = strtab;
+
+	/* First write the actual string to tracee's string table. */
+	len = ptrace_write_string(pid, strtab, vec[i]);
+	if (len == (size_t)-1)
+	    debug_return_int(-1);
+	strtab += len;
+
 # ifdef SECCOMP_AUDIT_ARCH_COMPAT
 	if (regs->compat) {
+	    /*
+	     * For compat binaries we need to pack two 32-bit string addresses
+	     * into a single 64-bit word.  If this is the last string, NULL
+	     * will be written as the second 32-bit address.
+	     */
+	    if ((i & 1) == 1) {
+		/* Wrote this string address last iteration. */
+		continue;
+	    }
 #  if BYTE_ORDER == BIG_ENDIAN
 	    word <<= 32;
 	    if (vec[i + 1] != NULL)
-		word |= (unsigned long)vec[++i];
+		word |= strtab;
 #  else
 	    if (vec[i + 1] != NULL)
-		word |= (unsigned long)vec[++i] << 32;
+		word |= strtab << 32;
 #  endif
 	}
 # endif
-	/* Write string address to tracee at addr. */
+	/* Next write the string address to tracee at addr. */
 	if (ptrace(PTRACE_POKEDATA, pid, addr, word) == -1) {
 	    sudo_warn("%s: ptrace(PTRACE_POKEDATA, %d, 0x%lx, 0x%lx)",
 		__func__, (int)pid, addr, word);
 	    debug_return_int(-1);
 	}
 	addr += sizeof(unsigned long);
-
-	/* Write actual string to tracee's string table. */
-	len = ptrace_write_string(pid, strtab, vec[i]);
-	if (len == (size_t)-1)
-	    debug_return_int(-1);
-	strtab += len;
     }
 
-    /* Write terminating NULL to tracee if needed. */
+    /* Finally, write the terminating NULL to tracee if needed. */
     if (!regs->compat || (i & 1) == 0) {
 	if (ptrace(PTRACE_POKEDATA, pid, addr, NULL) == -1) {
 	    sudo_warn("%s: ptrace(PTRACE_POKEDATA, %d, 0x%lx, NULL)",
