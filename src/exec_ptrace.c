@@ -502,6 +502,61 @@ ptrace_write_string(pid_t pid, unsigned long addr, const char *str)
 }
 
 /*
+ * Write the string vector vec to addr in the tracee which must have
+ * sufficient space.  Strings are written to strtab.
+ * Returns the number of bytes used in strtab (including NULs).
+ */
+static size_t
+ptrace_write_vec(pid_t pid, struct sudo_ptrace_regs *regs, char **vec,
+    unsigned long addr, unsigned long strtab)
+{
+    const unsigned long strtab0 = strtab;
+    size_t i, len;
+    debug_decl(ptrace_write_vec, SUDO_DEBUG_EXEC);
+
+    /* Copy string vector into tracee one word at a time. */
+    for (i = 0; vec[i] != NULL; i++) {
+	unsigned long word = strtab;
+# ifdef SECCOMP_AUDIT_ARCH_COMPAT
+	if (regs->compat) {
+#  if BYTE_ORDER == BIG_ENDIAN
+	    word <<= 32;
+	    if (vec[i + 1] != NULL)
+		word |= (unsigned long)vec[++i];
+#  else
+	    if (vec[i + 1] != NULL)
+		word |= (unsigned long)vec[++i] << 32;
+#  endif
+	}
+# endif
+	/* Write string address to tracee at addr. */
+	if (ptrace(PTRACE_POKEDATA, pid, addr, word) == -1) {
+	    sudo_warn("%s: ptrace(PTRACE_POKEDATA, %d, 0x%lx, 0x%lx)",
+		__func__, (int)pid, addr, word);
+	    debug_return_int(-1);
+	}
+	addr += sizeof(unsigned long);
+
+	/* Write actual string to tracee's string table. */
+	len = ptrace_write_string(pid, strtab, vec[i]);
+	if (len == (size_t)-1)
+	    debug_return_int(-1);
+	strtab += len;
+    }
+
+    /* Write terminating NULL to tracee if needed. */
+    if (!regs->compat || (i & 1) == 0) {
+	if (ptrace(PTRACE_POKEDATA, pid, addr, NULL) == -1) {
+	    sudo_warn("%s: ptrace(PTRACE_POKEDATA, %d, 0x%lx, NULL)",
+		__func__, (int)pid, addr);
+	    debug_return_int(-1);
+	}
+    }
+
+    debug_return_size_t(strtab - strtab0);
+}
+
+/*
  * Use /proc/PID/cwd to determine the current working directory.
  * Returns true on success, else false.
  */
@@ -996,33 +1051,12 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 		/* Skip over argv pointers (plus NULL) for string table. */
 		strtab += (argc + 1 + regs.compat) * regs.wordsize;
 
-		/* Copy new argv (+ NULL) into tracee one word at a time. */
-		for (i = 0; i < argc; i++) {
-		    /* Store string address as new argv[i]. */
-		    unsigned long word = strtab;
-# if defined(SECCOMP_AUDIT_ARCH_COMPAT) && BYTE_ORDER == BIG_ENDIAN
-		    if (regs.compat)
-			word <<= 32;
-# endif
-		    if (ptrace(PTRACE_POKEDATA, pid, sp, word) == -1) {
-			sudo_warn(
-			    "%s: ptrace(PTRACE_POKEDATA, %d, 0x%lx, 0x%lx)",
-			    __func__, (int)pid, sp, word);
-			goto done;
-		    }
-		    sp += regs.wordsize;
-
-		    /* Write new argv[i] to the string table. */
-		    len = ptrace_write_string(pid, strtab, closure->run_argv[i]);
-		    if (len == (size_t)-1)
-			goto done;
-		    strtab += len;
-		}
-		if (ptrace(PTRACE_POKEDATA, pid, sp, NULL) == -1) {
-		    sudo_warn("%s: ptrace(PTRACE_POKEDATA, %d, 0x%lx, NULL)",
-			__func__, (int)pid, sp);
+		len = ptrace_write_vec(pid, &regs, closure->run_argv,
+		    sp, strtab);
+		if (len == (size_t)-1)
 		    goto done;
-		}
+		strtab += len;
+		sp += argc + 1;
 	    }
 	    if (path_mismatch) {
 		/* Update pathname address in the tracee to our new value. */
