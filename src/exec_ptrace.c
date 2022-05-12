@@ -790,10 +790,13 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     char *pathname, **argv, **envp, *buf;
     int argc, envc, syscallno;
     struct sudo_ptrace_regs regs;
+    bool path_mismatch = false;
+    bool argv_mismatch = false;
     char cwd[PATH_MAX];
     unsigned long msg;
     bool ret = false;
     struct stat sb;
+    int i;
     debug_decl(ptrace_intercept_execve, SUDO_DEBUG_UTIL);
 
     /* Do not check the policy if we are executing the initial command. */
@@ -888,21 +891,29 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	sudo_warnx("%s", U_(closure->errstr));
     }
 
-    if (closure->state == POLICY_ACCEPT) {
+    switch (closure->state) {
+    case POLICY_TEST:
+	path_mismatch = true;
+	argv_mismatch = true;
+	if (closure->command == NULL)
+	    closure->command = pathname;
+	if (closure->run_argv == NULL)
+	    closure->run_argv = argv;
+	FALLTHROUGH;
+    case POLICY_ACCEPT:
 	/*
 	 * Update pathname and argv if the policy modified it.
 	 * We don't currently ever modify envp.
 	 */
-	bool path_mismatch = strcmp(pathname, closure->command) != 0;
-	bool argv_mismatch = false;
-	int i;
-
+	if (strcmp(pathname, closure->command) != 0)
+	    path_mismatch = true;
 	for (i = 0; closure->run_argv[i] != NULL && argv[i] != NULL; i++) {
 	    if (strcmp(closure->run_argv[i], argv[i]) != 0) {
 		argv_mismatch = true;
 		break;
 	    }
 	}
+
 	if (path_mismatch || argv_mismatch) {
 	    /*
 	     * Need to rewrite pathname and/or argv.
@@ -993,9 +1004,11 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 		goto done;
 	    }
 	}
-    } else {
-	/* If denied, fake the syscall and set return to EACCES */
+	break;
+    default:
+	/* If rejected, fake the syscall and set return to EACCES */
 	ptrace_fail_syscall(pid, &regs, EACCES);
+	break;
     }
 
     ret = true;

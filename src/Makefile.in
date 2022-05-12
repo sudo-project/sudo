@@ -161,6 +161,8 @@ CHECK_NOEXEC_OBJS = check_noexec.o exec_common.o exec_preload.o
 
 CHECK_TTYNAME_OBJS = check_ttyname.o ttyname.o
 
+TEST_PTRACE_OBJS = test_ptrace.o
+
 LIBOBJDIR = $(top_builddir)/@ac_config_libobj_dir@/
 
 VERSION = @PACKAGE_VERSION@
@@ -234,6 +236,9 @@ check_noexec: $(CHECK_NOEXEC_OBJS) $(top_builddir)/lib/util/libsudo_util.la sudo
 
 check_ttyname: $(CHECK_TTYNAME_OBJS) $(top_builddir)/lib/util/libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_TTYNAME_OBJS) $(TEST_LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LIBS)
+
+test_ptrace: $(TEST_PTRACE_OBJS) $(top_builddir)/lib/util/libsudo_util.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(TEST_PTRACE_OBJS) $(TEST_LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LIBS)
 
 pre-install:
 
@@ -966,6 +971,28 @@ tcsetpgrp_nobg.i: $(srcdir)/tcsetpgrp_nobg.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 tcsetpgrp_nobg.plog: tcsetpgrp_nobg.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/tcsetpgrp_nobg.c --i-file $< --output-file $@
+test_ptrace.o: $(srcdir)/regress/intercept/test_ptrace.c \
+               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+               $(incdir)/sudo_event.h $(incdir)/sudo_fatal.h \
+               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+               $(srcdir)/exec_intercept.h $(srcdir)/exec_ptrace.c \
+               $(srcdir)/exec_ptrace.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
+               $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/intercept/test_ptrace.c
+test_ptrace.i: $(srcdir)/regress/intercept/test_ptrace.c \
+               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+               $(incdir)/sudo_event.h $(incdir)/sudo_fatal.h \
+               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+               $(srcdir)/exec_intercept.h $(srcdir)/exec_ptrace.c \
+               $(srcdir)/exec_ptrace.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
+               $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+test_ptrace.plog: test_ptrace.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/intercept/test_ptrace.c --i-file $< --output-file $@
 tgetpass.o: $(srcdir)/tgetpass.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
             $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \

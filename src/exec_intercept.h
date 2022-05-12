@@ -27,6 +27,7 @@ enum intercept_state {
     RECV_CONNECTION,
     POLICY_ACCEPT,
     POLICY_REJECT,
+    POLICY_TEST,
     POLICY_ERROR
 };
 

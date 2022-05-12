@@ -1204,6 +1204,7 @@ src/openbsd.c
 src/parse_args.c
 src/preload.c
 src/preserve_fds.c
+src/regress/intercept/test_ptrace.c
 src/regress/net_ifs/check_net_ifs.c
 src/regress/noexec/check_noexec.c
 src/regress/ttyname/check_ttyname.c
