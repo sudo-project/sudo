@@ -661,7 +661,7 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     strtab += len;
     bufsize -= len;
 
-    sudo_debug_execve(SUDO_DEBUG_INFO, pathname, argv, envp);
+    sudo_debug_execve(SUDO_DEBUG_DIAG, pathname, argv, envp);
 
     *pathname_out = pathname;
     *argc_out = argc;
@@ -803,7 +803,7 @@ set_exec_filter(void)
 	nitems(exec_filter),
 	exec_filter
     };
-    debug_decl(set_exec_filter, SUDO_DEBUG_UTIL);
+    debug_decl(set_exec_filter, SUDO_DEBUG_EXEC);
 
     /* We must set SECCOMP_MODE_FILTER before dropping privileges. */
     if (prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &exec_fprog) == -1) {
@@ -825,7 +825,7 @@ exec_ptrace_seize(pid_t child)
 			     PTRACE_O_TRACEFORK|PTRACE_O_TRACEVFORK;
     int ret = -1;
     int status;
-    debug_decl(exec_ptrace_seize, SUDO_DEBUG_UTIL);
+    debug_decl(exec_ptrace_seize, SUDO_DEBUG_EXEC);
 
     /* Seize control of the child process. */
     if (ptrace(PTRACE_SEIZE, child, NULL, ptrace_opts) == -1) {
@@ -879,6 +879,75 @@ done:
 }
 
 /*
+ * Verify that the execve(2) argument we wrote match the contents of closure.
+ * Returns true if they match, else false.
+ */
+static bool
+verify_execve_info(pid_t pid, struct sudo_ptrace_regs *regs,
+    struct intercept_closure *closure)
+{
+    char *pathname, **argv, **envp, *buf;
+    int argc, envc, i;
+    bool ret = true;
+    debug_decl(verify_execve_info, SUDO_DEBUG_EXEC);
+
+    buf = get_execve_info(pid, regs, &pathname, &argc, &argv,
+	&envc, &envp);
+    if (buf == NULL)
+	debug_return_bool(false);
+
+    if (pathname == NULL || strcmp(pathname, closure->command) != 0) {
+	sudo_warn(
+	    U_("pathname mismatch, expected \"%s\", got \"%s\""),
+	    closure->command, pathname ? pathname : "(NULL)");
+	ret = false;
+    }
+    for (i = 0; i < argc; i++) {
+	if (closure->run_argv[i] == NULL) {
+	    ret = false;
+	    sudo_warn(
+		U_("%s[%d] mismatch, expected \"%s\", got \"%s\""),
+		"argv", i, "(NULL)", argv[i] ? argv[i] : "(NULL)");
+	    break;
+	} else if (argv[i] == NULL) {
+	    ret = false;
+	    sudo_warn(
+		U_("%s[%d] mismatch, expected \"%s\", got \"%s\""),
+		"argv", i, closure->run_argv[i], "(NULL)");
+	    break;
+	} else if (strcmp(argv[i], closure->run_argv[i]) != 0) {
+	    ret = false;
+	    sudo_warn(
+		U_("%s[%d] mismatch, expected \"%s\", got \"%s\""),
+		"argv", i, closure->run_argv[i], argv[i]);
+	}
+    }
+    for (i = 0; i < envc; i++) {
+	if (closure->run_envp[i] == NULL) {
+	    ret = false;
+	    sudo_warn(
+		U_("%s[%d] mismatch, expected \"%s\", got \"%s\""),
+		"envp", i, "(NULL)", envp[i] ? envp[i] : "(NULL)");
+	    break;
+	} else if (envp[i] == NULL) {
+	    ret = false;
+	    sudo_warn(
+		U_("%s[%d] mismatch, expected \"%s\", got \"%s\""),
+		"envp", i, closure->run_envp[i], "(NULL)");
+	    break;
+	} else if (strcmp(envp[i], closure->run_envp[i]) != 0) {
+	    ret = false;
+	    sudo_warn(
+		U_("%s[%d] mismatch, expected \"%s\", got \"%s\""),
+		"envp", i, closure->run_envp[i], envp[i]);
+	}
+    }
+    free(buf);
+
+    debug_return_bool(ret);
+}
+
+/*
  * Intercept execve(2) and perform a policy check.
  * Reads current registers and execve(2) arguments.
  * If the command is not allowed by policy, fail with EACCES.
@@ -898,7 +967,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     bool ret = false;
     struct stat sb;
     int i;
-    debug_decl(ptrace_intercept_execve, SUDO_DEBUG_UTIL);
+    debug_decl(ptrace_intercept_execve, SUDO_DEBUG_EXEC);
 
     /* Do not check the policy if we are executing the initial command. */
     if (closure->initial_command != 0) {
@@ -1000,6 +1069,8 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	    closure->command = pathname;
 	if (closure->run_argv == NULL)
 	    closure->run_argv = argv;
+	if (closure->run_envp == NULL)
+	    closure->run_envp = envp;
 	FALLTHROUGH;
     case POLICY_ACCEPT:
 	/*
@@ -1025,6 +1096,9 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	    unsigned long sp = get_stack_pointer(&regs) - 128;
 	    unsigned long strtab;
 	    size_t len, space = 0;
+
+	    sudo_debug_execve(SUDO_DEBUG_DIAG, closure->command,
+		closure->run_argv, envp);
 
 	    /*
 	     * Calculate the amount of space required for pointers + strings.
@@ -1087,6 +1161,14 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 		sudo_warn(U_("unable to set registers for process %d"),
 		    (int)pid);
 		goto done;
+	    }
+
+	    if (closure->state == POLICY_TEST) {
+		/* Verify the contents of what we just wrote. */
+		if (!verify_execve_info(pid, &regs, closure)) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR,
+			"%s: new execve args don't match closure", __func__);
+		}
 	    }
 	}
 	break;
