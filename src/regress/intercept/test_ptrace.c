@@ -80,8 +80,7 @@ init_debug_files(struct sudo_conf_debug_file_list *file_list,
     TAILQ_INIT(file_list);
     switch (verbose) {
     case 0:
-	file->debug_flags = NULL;
-	break;
+	debug_return;
     case 1:
 	file->debug_flags = "exec@diag";
 	break;
