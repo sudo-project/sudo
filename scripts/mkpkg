@@ -160,7 +160,7 @@ case "$osversion" in
     centos*|rhel*|f[0-9]*)
 	case "$osversion" in
 	    centos*|rhel*)
-		osmajor=`sed -n -e 's/^.*release \([0-9]*\)[^0-9].*$/\1/p' /etc/redhat-release`
+		osmajor=`sed -n -e 's/^.*release \([0-9][0-9]*\).*$/\1/p' /etc/redhat-release`
 		if [ $osmajor -ge 4 ]; then
 		    # RHEL 4 and up support SELinux
 		    with_selinux=true
