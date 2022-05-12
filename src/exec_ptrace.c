@@ -84,12 +84,12 @@ get_syscallno(struct sudo_ptrace_regs *regs)
 }
 
 static inline void
-set_syscallno(struct sudo_ptrace_regs *regs, int syscallno)
+set_syscallno(pid_t pid, struct sudo_ptrace_regs *regs, int syscallno)
 {
     if (regs->compat) {
-	compat_reg_syscall(regs->u.compat) = syscallno;
+	compat_reg_set_syscall(regs->u.compat, syscallno);
     } else {
-	reg_syscall(regs->u.native) = syscallno;
+	reg_set_syscall(regs->u.native, syscallno);
     }
 }
 
@@ -194,9 +194,9 @@ get_syscallno(struct sudo_ptrace_regs *regs)
 }
 
 static inline void
-set_syscallno(struct sudo_ptrace_regs *regs, int syscallno)
+set_syscallno(pid_t pid, struct sudo_ptrace_regs *regs, int syscallno)
 {
-    reg_syscall(regs->u.native) = syscallno;
+    reg_set_syscall(regs->u.native, syscallno);
 }
 
 static inline unsigned long
@@ -687,7 +687,7 @@ ptrace_fail_syscall(pid_t pid, struct sudo_ptrace_regs *regs, int ecode)
     debug_decl(ptrace_fail_syscall, SUDO_DEBUG_EXEC);
 
     /* Cause the syscall to fail by changing its number to -1. */
-    set_syscallno(regs, -1);
+    set_syscallno(pid, regs, -1);
     if (!ptrace_setregs(pid, regs)) {
 	sudo_warn(U_("unable to set registers for process %d"), (int)pid);
 	debug_return_bool(false);

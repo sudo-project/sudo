@@ -74,6 +74,13 @@
 # define reg_arg2(x)		(x).regs[1]	/* x1 */
 # define reg_arg3(x)		(x).regs[2]	/* x2 */
 # define reg_arg4(x)		(x).regs[3]	/* x3 */
+# define reg_set_syscall(_r, _nr) do {					\
+    struct iovec _iov;							\
+    long syscallno = (_nr);						\
+    _iov.iov_base = &syscallno;						\
+    _iov.iov_len = sizeof(syscallno);					\
+    ptrace(PTRACE_SETREGSET, pid, NT_ARM_SYSTEM_CALL, &_iov);		\
+} while (0)
 #elif defined(__arm__)
 /* Note: assumes arm EABI, not OABI */
 /* Untested */
@@ -86,6 +93,9 @@
 # define reg_arg2(x)		(x).ARM_r1
 # define reg_arg3(x)		(x).ARM_r2
 # define reg_arg4(x)		(x).ARM_r3
+# define reg_set_syscall(_r, _nr) do {					\
+    ptrace(PTRACE_SET_SYSCALL, pid, NULL, _nr);				\
+} while (0)
 #elif defined (__hppa__)
 /* Untested (should also support hppa64) */
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_PARISC
@@ -228,6 +238,9 @@ struct arm_pt_regs {
 # define compat_reg_arg2(x)		(x).uregs[1]	/* r1 */
 # define compat_reg_arg3(x)		(x).uregs[2]	/* r2 */
 # define compat_reg_arg4(x)		(x).uregs[3]	/* r3 */
+# define compat_reg_set_syscall(_r, _nr) do {				\
+    ptrace(PTRACE_SET_SYSCALL, pid, NULL, _nr);				\
+} while (0)
 #elif defined(__powerpc64__)
 struct ppc_pt_regs {
     unsigned int gpr[32];
@@ -261,6 +274,18 @@ struct ppc_pt_regs {
 # define compat_reg_arg3(x)		(x).gpr[5]	/* r5 */
 # define compat_reg_arg4(x)		(x).gpr[6]	/* r6 */
 # define compat_reg_set_retval(_r, _v)	reg_set_retval(_r, _v)
+#endif
+
+/* Set the syscall number the "normal" way by default. */
+#ifndef reg_set_syscall
+# define reg_set_syscall(_r, _nr) do {					\
+    reg_syscall(_r) = (_nr);						\
+} while (0)
+#endif
+#ifndef compat_reg_set_syscall
+# define compat_reg_set_syscall(_r, _nr) do {				\
+    compat_reg_syscall(_r) = (_nr);					\
+} while (0)
 #endif
 
 /* Set the syscall return value the "normal" way by default. */
