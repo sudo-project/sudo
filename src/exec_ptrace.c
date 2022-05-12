@@ -34,6 +34,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if defined(HAVE_ENDIAN_H)
+# include <endian.h>
+#elif defined(HAVE_SYS_ENDIAN_H)
+# include <sys/endian.h>
+#elif defined(HAVE_MACHINE_ENDIAN_H)
+# include <machine/endian.h>
+#else
+# include "compat/endian.h"
+#endif
 
 #include "sudo.h"
 #include "sudo_exec.h"
@@ -343,7 +352,10 @@ static size_t
 ptrace_read_vec(pid_t pid, struct sudo_ptrace_regs *regs, unsigned long addr,
     char **vec, char *buf, size_t bufsize)
 {
-    unsigned long word, next_word = -1;
+# ifdef SECCOMP_AUDIT_ARCH_COMPAT
+    unsigned long next_word = -1;
+# endif
+    unsigned long word;
     char *buf0 = buf;
     int len = 0;
     size_t slen;
@@ -351,18 +363,27 @@ ptrace_read_vec(pid_t pid, struct sudo_ptrace_regs *regs, unsigned long addr,
 
     /* Fill in vector. */
     for (;;) {
+# ifdef SECCOMP_AUDIT_ARCH_COMPAT
 	if (next_word == (unsigned long)-1) {
 	    word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
 	    if (regs->compat) {
 		/* Stash the next compat word in next_word. */
+#  if BYTE_ORDER == BIG_ENDIAN
+		next_word = word & 0xffffffffU;
+		word >>= 32;
+#  else
 		next_word = word >> 32;
 		word &= 0xffffffffU;
+#  endif
 	    }
 	} else {
 	    /* Use the stashed value of the next word. */
 	    word = next_word;
 	    next_word = (unsigned long)-1;
 	}
+# else /* SECCOMP_AUDIT_ARCH_COMPAT */
+	word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
+# endif /* SECCOMP_AUDIT_ARCH_COMPAT */
 	switch (word) {
 	case -1:
 	    sudo_warn("%s: ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
@@ -396,23 +417,35 @@ bad:
 static int
 ptrace_get_vec_len(pid_t pid, struct sudo_ptrace_regs *regs, unsigned long addr)
 {
-    unsigned long word, next_word = -1;
+# ifdef SECCOMP_AUDIT_ARCH_COMPAT
+    unsigned long next_word = -1;
+# endif
+    unsigned long word;
     int len = 0;
     debug_decl(ptrace_get_vec_len, SUDO_DEBUG_EXEC);
 
     for (;;) {
+# ifdef SECCOMP_AUDIT_ARCH_COMPAT
 	if (next_word == (unsigned long)-1) {
 	    word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
 	    if (regs->compat) {
 		/* Stash the next compat word in next_word. */
+#  if BYTE_ORDER == BIG_ENDIAN
+		next_word = word & 0xffffffffU;
+		word >>= 32;
+#  else
 		next_word = word >> 32;
 		word &= 0xffffffffU;
+#  endif
 	    }
 	} else {
 	    /* Use the stashed value of the next word. */
 	    word = next_word;
 	    next_word = (unsigned long)-1;
 	}
+# else /* SECCOMP_AUDIT_ARCH_COMPAT */
+	word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
+# endif /* SECCOMP_AUDIT_ARCH_COMPAT */
 	switch (word) {
 	case -1:
 	    sudo_warn("%s: ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
@@ -966,10 +999,15 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 		/* Copy new argv (+ NULL) into tracee one word at a time. */
 		for (i = 0; i < argc; i++) {
 		    /* Store string address as new argv[i]. */
-		    if (ptrace(PTRACE_POKEDATA, pid, sp, strtab) == -1) {
+		    unsigned long word = strtab;
+# if defined(SECCOMP_AUDIT_ARCH_COMPAT) && BYTE_ORDER == BIG_ENDIAN
+		    if (regs.compat)
+			word <<= 32;
+# endif
+		    if (ptrace(PTRACE_POKEDATA, pid, sp, word) == -1) {
 			sudo_warn(
 			    "%s: ptrace(PTRACE_POKEDATA, %d, 0x%lx, 0x%lx)",
-			    __func__, (int)pid, sp, strtab);
+			    __func__, (int)pid, sp, word);
 			goto done;
 		    }
 		    sp += regs.wordsize;
