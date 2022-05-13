@@ -117,9 +117,48 @@
 # define reg_arg2(x)		(x).ecx
 # define reg_arg3(x)		(x).edx
 # define reg_arg4(x)		(x).esi
+#elif defined(__mips__)
+# if _MIPS_SIM == _MIPS_SIM_ABI32
+#  /* Linux o32 style syscalls, 4000-4999. */
+#  if BYTE_ORDER == LITTLE_ENDIAN
+#   define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_MIPSEL
+#  else
+#   define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_MIPS
+#  endif
+# elif _MIPS_SIM == _MIPS_SIM_ABI64
+#  /* Linux 64-bit syscalls, 5000-5999. */
+#  if BYTE_ORDER == LITTLE_ENDIAN
+#   define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_MIPSEL64
+#  else
+#   define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_MIPS64
+#  endif
+# elif _MIPS_SIM == _MIPS_SIM_NABI32
+# /* Linux N32 syscalls, 6000-6999. */
+#  if BYTE_ORDER == LITTLE_ENDIAN
+#   define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_MIPSEL64N32
+#  else
+#   define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_MIPS64N32
+#  endif
+#  else
+#   error "Unsupported MIPS ABI"
+# endif
+/* Untested/incomplete.
+ * If called via syscall(__NR_###), v0 holds __NR_O32_Linux and the real
+ * syscall the first arg (a0) and other args are shifted by one.
+ * We don't currently support this.
+ * MIPS may not support setting the system call return via ptrace.
+ */
+# define user_pt_regs		pt_regs
+# define reg_syscall(x)		(x).regs[2]	/* v0 */
+# define reg_retval(x)		(x).regs[2]	/* v0 */
+# define reg_sp(x)		(x).regs[29]	/* sp */
+# define reg_arg1(x)		(x).regs[4]	/* a0 */
+# define reg_arg2(x)		(x).regs[5]	/* a1 */
+# define reg_arg3(x)		(x).regs[6]	/* a2 */
+# define reg_arg4(x)		(x).regs[7]	/* a3 */
 #elif defined(__powerpc__)
 # if defined(__powerpc64__)
-#  if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#  if BYTE_ORDER == LITTLE_ENDIAN
 #   define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_PPC64LE
 #  else
 #   define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_PPC64
@@ -149,7 +188,7 @@
     }									\
 } while (0)
 #elif defined(__riscv) && __riscv_xlen == 64
-/* Untested */
+/* Untested/incomplete. */
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_RISCV64
 # define user_pt_regs		user_regs_struct
 # define reg_syscall(x)		(x).a7
@@ -160,6 +199,9 @@
 # define reg_arg3(x)		(x).a2
 # define reg_arg4(x)		(x).a3
 #elif defined(__s390x__)
+/* Untested/incomplete.
+ * s390x may not support setting the system call return via ptrace.
+ */
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_S390X
 # define user_pt_regs		s390_regs
 # define reg_syscall(x)		(x).gprs[1]	/* r1 */
@@ -170,6 +212,9 @@
 # define reg_arg3(x)		(x).gprs[4]	/* r4 */
 # define reg_arg4(x)		(x).gprs[5]	/* r6 */
 #elif defined(__s390__)
+/* Untested/incomplete.
+ * s390 may not support setting the system call return via ptrace.
+ */
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_S390
 # define user_pt_regs		s390_regs
 # define reg_syscall(x)		(x).gprs[1]	/* r1 */
@@ -224,6 +269,7 @@ struct i386_user_regs_struct {
 # define compat_reg_arg3(x)		(x).edx
 # define compat_reg_arg4(x)		(x).esi
 #elif defined(__aarch64__)
+/* Untested. */
 struct arm_pt_regs {
   unsigned int uregs[18];
 };
@@ -257,7 +303,7 @@ struct ppc_pt_regs {
     unsigned int dsisr;
     unsigned int result;
 };
-#  if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#  if BYTE_ORDER == LITTLE_ENDIAN
 /* There is no AUDIT_ARCH_PPCLE define. */
 #   define SECCOMP_AUDIT_ARCH_COMPAT	(AUDIT_ARCH_PPC|__AUDIT_ARCH_LE)
 #  else
