@@ -22,7 +22,7 @@
 /*
  * Test program to exercise seccomp(2) and ptrace(2) intercept code.
  *
- * Usage: test_ptrace [-v] [command]
+ * Usage: test_ptrace [-d 1-3] [command]
  */
 
 /* Ignore architecture restrictions and define this unilaterally. */
@@ -30,7 +30,7 @@
 #include "exec_ptrace.c"
 
 static sig_atomic_t got_sigchld;
-static int verbose;
+static int debug;
 int sudo_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 
 sudo_dso_public int main(int argc, char *argv[]);
@@ -78,7 +78,7 @@ init_debug_files(struct sudo_conf_debug_file_list *file_list,
     debug_decl(init_debug_files, SUDO_DEBUG_EXEC);
 
     TAILQ_INIT(file_list);
-    switch (verbose) {
+    switch (debug) {
     case 0:
 	debug_return;
     case 1:
@@ -104,6 +104,7 @@ main(int argc, char *argv[])
     struct sudo_debug_file debug_file;
     const char *base, *shell = _PATH_SUDO_BSHELL;
     struct intercept_closure closure = { 0 };
+    const char *errstr;
     sigset_t blocked, empty;
     struct sigaction sa;
     pid_t child, pid;
@@ -115,13 +116,15 @@ main(int argc, char *argv[])
     if (!have_seccomp_action("trap"))
 	sudo_fatalx("SECCOMP_MODE_FILTER not available in this kernel");
 
-    while ((ch = getopt(argc, argv, "v")) != -1) {
+    while ((ch = getopt(argc, argv, "d:")) != -1) {
 	switch (ch) {
-	case 'v':
-	    verbose++;
+	case 'd':
+	    debug = sudo_strtonum(optarg, 1, INT_MAX, &errstr);
+	    if (errstr != NULL)
+		sudo_fatalx(U_("%s: %s"), optarg, U_(errstr));
 	    break;
 	default:
-	    fprintf(stderr, "usage: %s [-v] [command]\n", getprogname());
+	    fprintf(stderr, "usage: %s [-d 1-3] [command]\n", getprogname());
 	    return EXIT_FAILURE;
 	}
     }
@@ -133,7 +136,7 @@ main(int argc, char *argv[])
     base = strrchr(shell, '/');
     base = base ? base + 1 : shell;
 
-    /* Set debug level based on the verbose flag. */
+    /* Set debug level based on the debug flag. */
     init_debug_files(&debug_files, &debug_file);
     sudo_debug_instance = sudo_debug_register(getprogname(),
 	NULL, NULL, &debug_files, -1);
@@ -207,7 +210,6 @@ main(int argc, char *argv[])
 		if (pid == child)
 		    return WTERMSIG(status) | 128;
 	    } else if (WIFSTOPPED(status)) {
-		/* XXX - verbose info to stderr, not just debug log */
 		exec_ptrace_handled(pid, status, &closure);
 	    } else {
 		sudo_fatalx("%d: unknown status 0x%x", pid, status);
