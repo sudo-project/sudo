@@ -83,7 +83,6 @@
 } while (0)
 #elif defined(__arm__)
 /* Note: assumes arm EABI, not OABI */
-/* Untested */
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_ARM
 # define user_pt_regs		pt_regs
 # define reg_syscall(x)		(x).ARM_r7
