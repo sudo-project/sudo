@@ -284,9 +284,7 @@ struct arm_pt_regs {
 # define compat_reg_arg2(x)		(x).uregs[1]	/* r1 */
 # define compat_reg_arg3(x)		(x).uregs[2]	/* r2 */
 # define compat_reg_arg4(x)		(x).uregs[3]	/* r3 */
-# define compat_reg_set_syscall(_r, _nr) do {				\
-    ptrace(PTRACE_SET_SYSCALL, pid, NULL, _nr);				\
-} while (0)
+# define compat_reg_set_syscall(_r, _nr) reg_set_syscall(_r, _nr)
 #elif defined(__powerpc64__)
 struct ppc_pt_regs {
     unsigned int gpr[32];
