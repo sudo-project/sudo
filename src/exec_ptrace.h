@@ -268,7 +268,6 @@ struct i386_user_regs_struct {
 # define compat_reg_arg3(x)		(x).edx
 # define compat_reg_arg4(x)		(x).esi
 #elif defined(__aarch64__)
-/* Untested. */
 struct arm_pt_regs {
   unsigned int uregs[18];
 };
