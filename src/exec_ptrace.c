@@ -498,8 +498,10 @@ ptrace_write_string(pid_t pid, unsigned long addr, const char *str)
 		__func__, (int)pid, addr, (int)sizeof(u.buf), u.buf);
 	    debug_return_size_t(-1);
 	}
-	if (*str == '\0')
+	if ((u.word & 0xff) == 0) {
+	    /* If the last byte we wrote is a NUL we are done. */
 	    debug_return_size_t(str - str0 + 1);
+	}
 	addr += sizeof(unsigned long);
     }
 }
