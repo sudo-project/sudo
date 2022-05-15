@@ -327,7 +327,7 @@ case "$osversion" in
 	fi
 	PPVARS="${PPVARS}${PPVARS+$space}linux_audit=$linux_audit"
 	# Use correct libssl dependency
-	libssl_dep=`dpkg-query -S /usr/lib/${MULTIARCH}${MULTIARCH:+/}libssl.so.1.[0-9]* /lib/${MULTIARCH}${MULTIARCH:+/}libssl.so.1.[0-9]* 2>/dev/null | sort -rn | awk -F: '{ print $1; exit }'`
+	libssl_dep=`dpkg-query -S /usr/lib/${MULTIARCH}${MULTIARCH:+/}libssl.so.[1-9]* /lib/${MULTIARCH}${MULTIARCH:+/}libssl.so.[1-9]* 2>/dev/null | sort -rn | awk -F: '{ print $1; exit }'`
 	if [ -z "$libssl_dep" ]; then
 	    echo "unable to determine package for libssl" 1>&2
 	    exit 1
@@ -451,7 +451,7 @@ case "$osversion" in
 			    PYTHON="/usr/bin/python3"; export PYTHON
 			else
 			    # Sometimes the /usr/bin/python3 is missing
-			    for f in /usr/bin/python3.9 /usr/bin/python3.8 /usr/bin/python3.7 /usr/bin/python3.6 /usr/bin/python3.5 /usr/bin/python3.4 /usr/bin/python3.3 /usr/bin/python3.2 /usr/bin/python3.1 /usr/bin/python3.0; do
+			    for f in /usr/bin/python3.11 /usr/bin/python3.10 /usr/bin/python3.9 /usr/bin/python3.8 /usr/bin/python3.7 /usr/bin/python3.6 /usr/bin/python3.5 /usr/bin/python3.4; do
 				if [ -x $f ]; then
 				    PYTHON="$f"; export PYTHON
 				    break
