@@ -187,7 +187,6 @@
     }									\
 } while (0)
 #elif defined(__riscv) && __riscv_xlen == 64
-/* Untested/incomplete. */
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_RISCV64
 # define user_pt_regs		user_regs_struct
 # define reg_syscall(x)		(x).a7
