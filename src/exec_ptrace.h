@@ -196,29 +196,21 @@
 # define reg_arg2(x)		(x).a1
 # define reg_arg3(x)		(x).a2
 # define reg_arg4(x)		(x).a3
-#elif defined(__s390x__)
-/* Untested/incomplete.
- * s390x may not support setting the system call return via ptrace.
- */
-# define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_S390X
-# define sudo_pt_regs		s390_regs
-# define reg_syscall(x)		(x).gprs[1]	/* r1 */
-# define reg_retval(x)		(x).gprs[2]	/* r2 */
-# define reg_sp(x)		(x).gprs[15]	/* r15 */
-# define reg_arg1(x)		(x).gprs[2]	/* r2 */
-# define reg_arg2(x)		(x).gprs[3]	/* r3 */
-# define reg_arg3(x)		(x).gprs[4]	/* r4 */
-# define reg_arg4(x)		(x).gprs[5]	/* r6 */
 #elif defined(__s390__)
-/* Untested/incomplete.
- * s390 may not support setting the system call return via ptrace.
+/*
+ * Both the syscall number and return value are stored in r2 for
+ * the s390 ptrace API.  The first argument is stored in orig_gpr2.
  */
-# define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_S390
+# if defined(__s390x__)
+#  define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_S390X
+# else
+#  define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_S390
+# endif
 # define sudo_pt_regs		s390_regs
-# define reg_syscall(x)		(x).gprs[1]	/* r1 */
+# define reg_syscall(x)		(x).gprs[2]	/* r2 */
 # define reg_retval(x)		(x).gprs[2]	/* r2 */
 # define reg_sp(x)		(x).gprs[15]	/* r15 */
-# define reg_arg1(x)		(x).gprs[2]	/* r2 */
+# define reg_arg1(x)		(x).orig_gpr2	/* r2 */
 # define reg_arg2(x)		(x).gprs[3]	/* r3 */
 # define reg_arg3(x)		(x).gprs[4]	/* r4 */
 # define reg_arg4(x)		(x).gprs[5]	/* r6 */
