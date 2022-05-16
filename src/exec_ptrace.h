@@ -57,7 +57,7 @@
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_X86_64
 # define X32_execve		__X32_SYSCALL_BIT + 520
 # define X32_execveat		__X32_SYSCALL_BIT + 545
-# define user_pt_regs		user_regs_struct
+# define sudo_pt_regs		struct user_regs_struct
 # define reg_syscall(x)		(x).orig_rax
 # define reg_retval(x)		(x).rax
 # define reg_sp(x)		(x).rsp
@@ -84,7 +84,7 @@
 #elif defined(__arm__)
 /* Note: assumes arm EABI, not OABI */
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_ARM
-# define user_pt_regs		pt_regs
+# define sudo_pt_regs		struct pt_regs
 # define reg_syscall(x)		(x).ARM_r7
 # define reg_retval(x)		(x).ARM_r0
 # define reg_sp(x)		(x).ARM_sp
@@ -98,7 +98,7 @@
 #elif defined (__hppa__)
 /* Untested (should also support hppa64) */
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_PARISC
-# define user_pt_regs		user_regs_struct
+# define sudo_pt_regs		struct user_regs_struct
 # define reg_syscall(x)		(x).gr[20]	/* r20 */
 # define reg_retval(x)		(x).gr[28]	/* r28 */
 # define reg_sp(x)		(x).gr[30]	/* r30 */
@@ -108,7 +108,7 @@
 # define reg_arg4(x)		(x).gr[23]	/* r23 */
 #elif defined(__i386__)
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_I386
-# define user_pt_regs		user_regs_struct
+# define sudo_pt_regs		struct user_regs_struct
 # define reg_syscall(x)		(x).orig_eax
 # define reg_retval(x)		(x).eax
 # define reg_sp(x)		(x).esp
@@ -147,7 +147,7 @@
  * We don't currently support this.
  * MIPS may not support setting the system call return via ptrace.
  */
-# define user_pt_regs		pt_regs
+# define sudo_pt_regs		struct pt_regs
 # define reg_syscall(x)		(x).regs[2]	/* v0 */
 # define reg_retval(x)		(x).regs[2]	/* v0 */
 # define reg_sp(x)		(x).regs[29]	/* sp */
@@ -165,7 +165,7 @@
 # else
 #  define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_PPC
 # endif
-# define user_pt_regs		pt_regs
+# define sudo_pt_regs		struct pt_regs
 # define reg_syscall(x)		(x).gpr[0]	/* r0 */
 # define reg_retval(x)		(x).gpr[3]	/* r3 */
 # define reg_sp(x)		(x).gpr[1]	/* r1 */
@@ -188,7 +188,7 @@
 } while (0)
 #elif defined(__riscv) && __riscv_xlen == 64
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_RISCV64
-# define user_pt_regs		user_regs_struct
+# define sudo_pt_regs		struct user_regs_struct
 # define reg_syscall(x)		(x).a7
 # define reg_retval(x)		(x).a0
 # define reg_sp(x)		(x).sp
@@ -201,7 +201,7 @@
  * s390x may not support setting the system call return via ptrace.
  */
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_S390X
-# define user_pt_regs		s390_regs
+# define sudo_pt_regs		s390_regs
 # define reg_syscall(x)		(x).gprs[1]	/* r1 */
 # define reg_retval(x)		(x).gprs[2]	/* r2 */
 # define reg_sp(x)		(x).gprs[15]	/* r15 */
@@ -214,7 +214,7 @@
  * s390 may not support setting the system call return via ptrace.
  */
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_S390
-# define user_pt_regs		s390_regs
+# define sudo_pt_regs		s390_regs
 # define reg_syscall(x)		(x).gprs[1]	/* r1 */
 # define reg_retval(x)		(x).gprs[2]	/* r2 */
 # define reg_sp(x)		(x).gprs[15]	/* r15 */
@@ -258,7 +258,7 @@ struct i386_user_regs_struct {
 # define SECCOMP_AUDIT_ARCH_COMPAT	AUDIT_ARCH_I386
 # define COMPAT_execve			11
 # define COMPAT_execveat		358
-# define compat_user_pt_regs		i386_user_regs_struct
+# define compat_sudo_pt_regs		struct i386_user_regs_struct
 # define compat_reg_syscall(x)		(x).orig_eax
 # define compat_reg_retval(x)		(x).eax
 # define compat_reg_sp(x)		(x).esp
@@ -273,7 +273,7 @@ struct arm_pt_regs {
 # define SECCOMP_AUDIT_ARCH_COMPAT	AUDIT_ARCH_ARM
 # define COMPAT_execve			11
 # define COMPAT_execveat		387
-# define compat_user_pt_regs		arm_pt_regs
+# define compat_sudo_pt_regs		struct arm_pt_regs
 # define compat_reg_syscall(x)		(x).uregs[7]	/* r7 */
 # define compat_reg_retval(x)		(x).uregs[0]	/* r0 */
 # define compat_reg_sp(x)		(x).uregs[13]	/* r13 */
@@ -306,7 +306,7 @@ struct ppc_pt_regs {
 #  endif
 # define COMPAT_execve			__NR_execve
 # define COMPAT_execveat		__NR_execveat
-# define compat_user_pt_regs		ppc_pt_regs
+# define compat_sudo_pt_regs		struct ppc_pt_regs
 # define compat_reg_syscall(x)		(x).gpr[0]	/* r0 */
 # define compat_reg_retval(x)		(x).gpr[3]	/* r3 */
 # define compat_reg_sp(x)		(x).gpr[1]	/* r1 */
@@ -343,9 +343,9 @@ struct ppc_pt_regs {
 
 struct sudo_ptrace_regs {
     union {
-	struct user_pt_regs native;
+	sudo_pt_regs native;
 #ifdef SECCOMP_AUDIT_ARCH_COMPAT
-	struct compat_user_pt_regs compat;
+	compat_sudo_pt_regs compat;
 #endif
     } u;
     unsigned int wordsize;
