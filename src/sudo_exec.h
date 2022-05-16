@@ -96,7 +96,7 @@ union sudo_token_un {
  */
 #if defined(_PATH_SUDO_INTERCEPT) && defined(__linux__)
 # if defined(HAVE_DECL_SECCOMP_SET_MODE_FILTER) && HAVE_DECL_SECCOMP_SET_MODE_FILTER
-#  if defined(__amd64__) || defined(__i386__) || defined(__aarch64__) || defined(__arm__) || defined(__powerpc__) || (defined(__riscv) && __riscv_xlen == 64) || defined(__s390__)
+#  if defined(__x86_64__) || defined(__i386__) || defined(__aarch64__) || defined(__arm__) || defined(__powerpc__) || (defined(__riscv) && __riscv_xlen == 64) || defined(__s390__)
 #   ifndef HAVE_PTRACE_INTERCEPT
 #    define HAVE_PTRACE_INTERCEPT 1
 #   endif /* HAVE_PTRACE_INTERCEPT */

@@ -145,7 +145,7 @@
  * If called via syscall(__NR_###), v0 holds __NR_O32_Linux and the real
  * syscall the first arg (a0) and other args are shifted by one.
  * We don't currently support this.
- * MIPS may not support setting the system call return via ptrace.
+ * MIPS does not support setting the syscall return value via ptrace.
  */
 # define sudo_pt_regs		struct pt_regs
 # define reg_syscall(x)		(x).regs[2]	/* v0 */
