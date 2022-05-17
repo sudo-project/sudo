@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -763,7 +763,8 @@ relay_server_msg_cb(int fd, int what, void *v)
 			closure->errstr = _("error reading from relay");
                     }
 		    sudo_warnx("%s: SSL_read: %s",
-			relay_closure->relay_name.ipaddr, errstr);
+			relay_closure->relay_name.ipaddr,
+			errstr ? errstr : strerror(errno));
                     goto send_error;
                 case SSL_ERROR_SYSCALL:
 		    if (nread == 0) {
@@ -778,7 +779,8 @@ relay_server_msg_cb(int fd, int what, void *v)
                 default:
                     errstr = ERR_reason_error_string(ERR_get_error());
 		    sudo_warnx("%s: SSL_read: %s",
-			relay_closure->relay_name.ipaddr, errstr);
+			relay_closure->relay_name.ipaddr,
+			errstr ? errstr : strerror(errno));
 		    closure->errstr = _("error reading from relay");
                     goto send_error;
             }
@@ -957,7 +959,8 @@ relay_client_msg_cb(int fd, int what, void *v)
                 default:
 		    errstr = ERR_reason_error_string(ERR_get_error());
 		    sudo_warnx("%s: SSL_write: %s",
-			relay_closure->relay_name.ipaddr, errstr);
+			relay_closure->relay_name.ipaddr,
+			errstr ? errstr : strerror(errno));
 		    closure->errstr = _("error writing to relay");
 		    goto send_error;
             }

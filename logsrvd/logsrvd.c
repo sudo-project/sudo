@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -917,7 +917,8 @@ server_msg_cb(int fd, int what, void *v)
 		    goto finished;
                 default:
 		    errstr = ERR_reason_error_string(ERR_get_error());
-		    sudo_warnx("%s: SSL_write: %s", closure->ipaddr, errstr);
+		    sudo_warnx("%s: SSL_write: %s", closure->ipaddr,
+			errstr ? errstr : strerror(errno));
                     goto finished;
             }
         }
@@ -1027,7 +1028,8 @@ client_msg_cb(int fd, int what, void *v)
                     goto close_connection;
                 default:
 		    errstr = ERR_reason_error_string(ERR_get_error());
-		    sudo_warnx("%s: SSL_read: %s", closure->ipaddr, errstr);
+		    sudo_warnx("%s: SSL_read: %s", closure->ipaddr,
+			errstr ? errstr : strerror(errno));
 		    goto close_connection;
             }
         }
@@ -1331,7 +1333,8 @@ tls_handshake_cb(int fd, int what, void *v)
             goto bad;
         default:
 	    errstr = ERR_reason_error_string(ERR_get_error());
-	    sudo_warnx("%s: SSL_accept: %s", closure->ipaddr, errstr);
+	    sudo_warnx("%s: SSL_accept: %s", closure->ipaddr,
+		errstr ? errstr : strerror(errno));
             goto bad;
     }
 
@@ -1397,13 +1400,15 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
         /* Create the SSL object for the closure and attach it to the socket */
         if ((closure->ssl = SSL_new(logsrvd_server_tls_ctx())) == NULL) {
 	    errstr = ERR_reason_error_string(ERR_get_error());
-	    sudo_warnx(U_("%s: %s"), "SSL_new", errstr);
+	    sudo_warnx(U_("%s: %s"), "SSL_new",
+		errstr ? errstr : strerror(errno));
             goto bad;
         }
 
         if (SSL_set_fd(closure->ssl, closure->sock) != 1) {
 	    errstr = ERR_reason_error_string(ERR_get_error());
-	    sudo_warnx(U_("%s: %s"), "SSL_set_fd", errstr);
+	    sudo_warnx(U_("%s: %s"), "SSL_set_fd",
+		errstr ? errstr : strerror(errno));
             goto bad;
         }
 
@@ -1413,7 +1418,7 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
         if (SSL_set_ex_data(closure->ssl, 1, closure) <= 0) {
 	    errstr = ERR_reason_error_string(ERR_get_error());
             sudo_warnx(U_("Unable to attach user data to the ssl object: %s"),
-		errstr);
+		errstr ? errstr : strerror(errno));
             goto bad;
         }
 

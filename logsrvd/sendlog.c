@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1332,20 +1332,20 @@ server_msg_cb(int fd, int what, void *v)
 #if !defined(HAVE_WOLFSSL)
                     if (closure->state == RECV_HELLO &&
                         ERR_GET_REASON(err) == SSL_R_TLSV1_ALERT_INTERNAL_ERROR) {
-                        errstr = "host name does not match certificate";
+                        errstr = U_("host name does not match certificate");
                     } else
 #endif
 		    {
                         errstr = ERR_reason_error_string(err);
                     }
-                    sudo_warnx("%s", errstr);
+                    sudo_warnx("%s", errstr ? errstr : strerror(errno));
                     goto bad;
                 case SSL_ERROR_SYSCALL:
                     sudo_warn("recv");
                     goto bad;
                 default:
                     errstr = ERR_reason_error_string(ERR_get_error());
-                    sudo_warnx("recv: %s", errstr);
+                    sudo_warnx("recv: %s", errstr ? errstr : strerror(errno));
                     goto bad;
             }
         }
@@ -1469,7 +1469,7 @@ client_msg_cb(int fd, int what, void *v)
                     goto bad;
                 default:
 		    errstr = ERR_reason_error_string(ERR_get_error());
-		    sudo_warnx("send: %s", errstr);
+		    sudo_warnx("send: %s", errstr ? errstr : strerror(errno));
                     goto bad;
             }
         }
