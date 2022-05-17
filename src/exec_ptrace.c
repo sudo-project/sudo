@@ -143,6 +143,7 @@ get_sc_arg3(struct sudo_ptrace_regs *regs)
     }
 }
 
+#  ifdef notyet
 static inline void
 set_sc_arg3(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
@@ -172,6 +173,7 @@ set_sc_arg4(struct sudo_ptrace_regs *regs, unsigned long addr)
 	reg_arg4(regs->u.native) = addr;
     }
 }
+#  endif /* notyet */
 
 # else /* SECCOMP_AUDIT_ARCH_COMPAT */
 
@@ -229,6 +231,7 @@ get_sc_arg3(struct sudo_ptrace_regs *regs)
     return reg_arg3(regs->u.native);
 }
 
+#  ifdef notyet
 static inline void
 set_sc_arg3(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
@@ -246,6 +249,7 @@ set_sc_arg4(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
     reg_arg4(regs->u.native) = addr;
 }
+#  endif /* notyet */
 # endif /* SECCOMP_AUDIT_ARCH_COMPAT */
 
 /*
