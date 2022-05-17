@@ -289,6 +289,22 @@ It just says "Sorry, try again." three times and exits.
     Enter new password: <return>
     Re-enter password: <return>
 
+#### After upgrading my system, sudo_logsrvd gives the error:
+
+    X509_verify_cert: CA cert does not include key usage extension
+
+> This can happen if you are using self-signed certificates that do not
+> include the key usage extension.  This error can occur if the certificates
+> were generated using OpenSSL 1.x but sudo_logsrvd now uses OpenSSL 3.x,
+> for example after a system upgrade.  The x509 certificate validation in
+> OpenSSL 3.x now requires that the key usage extension be present.
+> One way to address this is to disable certificate verification in
+> sudo_logsrvd by setting the _tls_verify_ key in the `[server]` section
+> to _false_.  Alternately, you can simply remove your old CA and the
+> associated certificates and create a new one using an updated
+> `/etc/ssl/openssl.cnf` file.  See the sudo_logsrvd manual for more
+> information on creating self-signed certificates.
+
 #### On HP-UX, the umask setting in sudoers has no effect.
 
 > If your /etc/pam.conf file has the libpam_hpsec.so.1 session module

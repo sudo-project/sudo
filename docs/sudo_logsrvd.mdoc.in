@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 16, 2022
+.Dd May 17, 2022
 .Dt SUDO_LOGSRVD @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -184,21 +184,36 @@ your system.
 Now edit the
 .Pa openssl.cnf
 file in the current directory and make sure it contains
-.Dq ca
+.Dq ca ,
+.Dq CA_default ,
+.Dq v3_ca ,
 and
-.Dq CA_default
+.Dq usr_cert
 sections.
-Those sections should include the following settings:
+Those sections should include at least the following settings:
 .Bd -literal -offset 4n
 [ ca ]
-default_ca      = CA_default
+default_ca              = CA_default
 
 [ CA_default ]
-dir             = /etc/ssl/sudo
-certs           = $dir/certs
-database        = $dir/index.txt
-certificate     = $dir/cacert.pem
-serial          = $dir/serial
+dir                     = /etc/ssl/sudo
+certs                   = $dir/certs
+database                = $dir/index.txt
+certificate             = $dir/cacert.pem
+serial                  = $dir/serial
+
+[ v3_ca ]
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always,issuer
+basicConstraints        = critical,CA:true
+keyUsage                = cRLSign, keyCertSign
+
+[ usr_cert ]
+basicConstraints        = CA:FALSE
+keyUsage                = nonRepudiation, digitalSignature, \e
+                          keyEncipherment
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid,issuer
 .Ed
 .Pp
 If your
@@ -207,7 +222,9 @@ file already has a
 .Dq CA_default
 section, you may only need to modify the
 .Dq dir
-setting.
+setting and enable the
+.Dq keyUsage
+settings if they are commented out.
 .Ss Creating the CA key and certificate
 In order to create and sign our own certificates, we need to create
 a private key and a certificate for the root of the CA.
@@ -319,8 +336,8 @@ Certificate Details:
         X509v3 extensions:
             X509v3 Basic Constraints:
                 CA:FALSE
-            Netscape Comment:
-                OpenSSL Generated Certificate
+            X509v3 Key Usage:
+                Digital Signature, Non Repudiation, Key Encipherment
             X509v3 Subject Key Identifier:
                 4C:50:F9:D0:BE:1A:4C:B2:AC:90:76:56:C7:9E:16:AE:E6:9E:E5:B5
             X509v3 Authority Key Identifier:
