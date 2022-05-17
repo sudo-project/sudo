@@ -568,8 +568,8 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 		"%s: process %d stopped, SIG%s", __func__, (int)pid, signame);
 
 	    if (ISSET(ec->details->flags, CD_USE_PTRACE)) {
-		/* Did exec_ptrace_handled() suppress the signal? */
-		if (exec_ptrace_handled(pid, status, ec->intercept))
+		/* If not a group-stop signal, just continue. */
+		if (!exec_ptrace_stopped(pid, status, ec->intercept))
 		    continue;
 	    }
 

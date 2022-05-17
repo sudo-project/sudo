@@ -1100,7 +1100,7 @@ handle_sigchld_pty(struct exec_closure_pty *ec)
 	} else if (WIFSTOPPED(status)) {
 	    if (pid != ec->monitor_pid) {
 		if (ISSET(ec->details->flags, CD_USE_PTRACE))
-		    exec_ptrace_handled(pid, status, ec->intercept);
+		    exec_ptrace_stopped(pid, status, ec->intercept);
 		continue;
 	    }
 

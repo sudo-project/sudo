@@ -1195,17 +1195,19 @@ done:
 
 /*
  * Handle a process stopped due to ptrace.
- * Returns true if the signal was suppressed and false if it was delivered.
+ * Restarts the tracee with PTRACE_LISTEN (for a group-stop)
+ * or PTRACE_CONT (for signal-delivery-stop).
+ * Returns true if stopped by a group-stop, else false.
  */
 bool
-exec_ptrace_handled(pid_t pid, int status, void *intercept)
+exec_ptrace_stopped(pid_t pid, int status, void *intercept)
 {
     struct intercept_closure *closure = intercept;
     const int stopsig = WSTOPSIG(status);
     const int sigtrap = status >> 8;
     long signo = 0;
     bool group_stop = false;
-    debug_decl(exec_ptrace_handled, SUDO_DEBUG_EXEC);
+    debug_decl(exec_ptrace_stopped, SUDO_DEBUG_EXEC);
 
     if (sigtrap == (SIGTRAP | (PTRACE_EVENT_SECCOMP << 8))) {
 	if (!ptrace_intercept_execve(pid, closure)) {
@@ -1255,24 +1257,22 @@ exec_ptrace_handled(pid_t pid, int status, void *intercept)
 	}
     }
 
-    /* Continue child. */
-    /* XXX - handle ptrace returning ESRCH if process dies */
     if (group_stop) {
 	/*
 	 * Restart child but prevent it from executing
 	 * until SIGCONT is received (simulate SIGSTOP, etc).
 	 */
-	if (ptrace(PTRACE_LISTEN, pid, NULL, 0L) == -1)
-	    sudo_warn("%s: ptrace(PTRACE_LISTEN, %d, NULL, %d)",
-		__func__, (int)pid, stopsig);
+	if (ptrace(PTRACE_LISTEN, pid, NULL, 0L) == -1 && errno != ESRCH)
+	    sudo_warn("%s: ptrace(PTRACE_LISTEN, %d, NULL, 0L)",
+		__func__, (int)pid);
     } else {
-	/* Restart child. */
-	if (ptrace(PTRACE_CONT, pid, NULL, signo) == -1)
+	/* Restart child immediately. */
+	if (ptrace(PTRACE_CONT, pid, NULL, signo) == -1 && errno != ESRCH)
 	    sudo_warn("%s: ptrace(PTRACE_CONT, %d, NULL, %ld)",
 		__func__, (int)pid, signo);
     }
 
-    debug_return_bool(signo == 0);
+    debug_return_bool(group_stop);
 }
 #else
 /* STUB */
@@ -1284,9 +1284,9 @@ have_seccomp_action(const char *action)
 
 /* STUB */
 bool
-exec_ptrace_handled(pid_t pid, int status, void *intercept)
+exec_ptrace_stopped(pid_t pid, int status, void *intercept)
 {
-    return false;
+    return true;
 }
 
 /* STUB */

@@ -210,7 +210,13 @@ main(int argc, char *argv[])
 		if (pid == child)
 		    return WTERMSIG(status) | 128;
 	    } else if (WIFSTOPPED(status)) {
-		exec_ptrace_handled(pid, status, &closure);
+		if (exec_ptrace_stopped(pid, status, &closure)) {
+		    if (pid == child) {
+			/* TODO - terminal pgrp switching like exec_nopty.c. */
+			kill(getpid(), WSTOPSIG(status));
+			kill(child, SIGCONT);
+		    }
+		}
 	    } else {
 		sudo_fatalx("%d: unknown status 0x%x", pid, status);
 	    }

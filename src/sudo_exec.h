@@ -147,7 +147,7 @@ bool utmp_logout(const char *line, int status);
 char **sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd);
 
 /* exec_ptrace.c */
-bool exec_ptrace_handled(pid_t pid, int status, void *intercept);
+bool exec_ptrace_stopped(pid_t pid, int status, void *intercept);
 bool set_exec_filter(void);
 int exec_ptrace_seize(pid_t child);
 
