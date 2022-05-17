@@ -233,7 +233,7 @@ set_dhparams(SSL_CTX *ctx, const char *dhparam_file)
     bool ret = false;
     debug_decl(set_dhparams, SUDO_DEBUG_UTIL);
 
-    bio = BIO_new_file(dhparam_file, O_RDONLY);
+    bio = BIO_new_file(dhparam_file, "r");
     if (bio != NULL) {
 	if (set_dhparams_bio(ctx, bio)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
