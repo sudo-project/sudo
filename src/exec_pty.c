@@ -528,12 +528,12 @@ check_foreground(struct exec_closure_pty *ec)
  * foreground or SIGCONT_BG if it is a background process.
  */
 static int
-suspend_sudo(struct exec_closure_pty *ec, int signo)
+suspend_sudo_pty(struct exec_closure_pty *ec, int signo)
 {
     char signame[SIG2STR_MAX];
     struct sigaction sa, osa;
     int ret = 0;
-    debug_decl(suspend_sudo, SUDO_DEBUG_EXEC);
+    debug_decl(suspend_sudo_pty, SUDO_DEBUG_EXEC);
 
     switch (signo) {
     case SIGTTOU:
@@ -1015,7 +1015,7 @@ backchannel_cb(int fd, int what, void *v)
 		/* Suspend parent and tell monitor how to resume on return. */
 		sudo_debug_printf(SUDO_DEBUG_INFO,
 		    "command stopped, suspending parent");
-		signo = suspend_sudo(ec, WSTOPSIG(cstat.val));
+		signo = suspend_sudo_pty(ec, WSTOPSIG(cstat.val));
 		schedule_signal(ec, signo);
 		/* Re-enable I/O events */
 		add_io_events(ec->evbase);
@@ -1111,7 +1111,7 @@ handle_sigchld_pty(struct exec_closure_pty *ec)
 	     */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"monitor stopped, suspending sudo");
-	    n = suspend_sudo(ec, WSTOPSIG(status));
+	    n = suspend_sudo_pty(ec, WSTOPSIG(status));
 	    kill(pid, SIGCONT);
 	    schedule_signal(ec, n);
 	    /* Re-enable I/O events */

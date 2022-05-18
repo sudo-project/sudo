@@ -1222,6 +1222,7 @@ src/sudo_intercept_common.c
 src/sudo_noexec.c
 src/sudo_plugin_int.h
 src/sudo_usage.h.in
+src/suspend_nopty.c
 src/tcsetpgrp_nobg.c
 src/tgetpass.c
 src/ttyname.c

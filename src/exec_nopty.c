@@ -558,9 +558,7 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 	}
 
 	if (WIFSTOPPED(status)) {
-	    struct sigaction sa, osa;
-	    pid_t saved_pgrp = -1;
-	    int fd, signo = WSTOPSIG(status);
+	    const int signo = WSTOPSIG(status);
 
 	    if (sig2str(signo, signame) == -1)
 		(void)snprintf(signame, sizeof(signame), "%d", signo);
@@ -573,79 +571,9 @@ handle_sigchld_nopty(struct exec_closure_nopty *ec)
 		    continue;
 	    }
 
-	    /* Special handling for job control in the main command only. */
-	    if (pid != ec->cmnd_pid)
-		continue;
-
-	    /*
-	     * Save the controlling terminal's process group so we can restore
-	     * it after we resume, if needed.  Most well-behaved shells change
-	     * the pgrp back to its original value before suspending so we must
-	     * not try to restore in that case, lest we race with the command
-	     * upon resume, potentially stopping sudo with SIGTTOU while the
-	     * command continues to run.
-	     */
-	    fd = open(_PATH_TTY, O_RDWR);
-	    if (fd != -1) {
-		saved_pgrp = tcgetpgrp(fd);
-		if (saved_pgrp == -1) {
-		    close(fd);
-		    fd = -1;
-		}
-	    }
-	    if (saved_pgrp != -1) {
-		/*
-		 * Command was stopped trying to access the controlling
-		 * terminal.  If the command has a different pgrp and we
-		 * own the controlling terminal, give it to the command's
-		 * pgrp and let it continue.
-		 */
-		if (signo == SIGTTOU || signo == SIGTTIN) {
-		    if (saved_pgrp == ec->ppgrp) {
-			pid_t cmnd_pgrp = getpgid(ec->cmnd_pid);
-			if (cmnd_pgrp != ec->ppgrp) {
-			    if (tcsetpgrp_nobg(fd, cmnd_pgrp) == 0) {
-				if (killpg(cmnd_pgrp, SIGCONT) != 0) {
-				    sudo_warn("kill(%d, SIGCONT)",
-					(int)cmnd_pgrp);
-				}
-				close(fd);
-				continue;
-			    }
-			}
-		    }
-		}
-	    }
-	    if (signo == SIGTSTP) {
-		memset(&sa, 0, sizeof(sa));
-		sigemptyset(&sa.sa_mask);
-		sa.sa_flags = SA_RESTART;
-		sa.sa_handler = SIG_DFL;
-		if (sudo_sigaction(SIGTSTP, &sa, &osa) != 0) {
-		    sudo_warn(U_("unable to set handler for signal %d"),
-			SIGTSTP);
-		}
-	    }
-	    if (kill(getpid(), signo) != 0)
-		sudo_warn("kill(%d, SIG%s)", (int)getpid(), signame);
-	    if (signo == SIGTSTP) {
-		if (sudo_sigaction(SIGTSTP, &osa, NULL) != 0) {
-		    sudo_warn(U_("unable to restore handler for signal %d"),
-			SIGTSTP);
-		}
-	    }
-	    if (saved_pgrp != -1) {
-		/*
-		 * On resume, restore foreground process group, if different.
-		 * Otherwise, we cannot resume some shells (pdksh).
-		 *
-		 * It is possible that we are no longer the foreground process,
-		 * use tcsetpgrp_nobg() to prevent sudo from receiving SIGTTOU.
-		 */
-		if (saved_pgrp != ec->ppgrp)
-		    tcsetpgrp_nobg(fd, saved_pgrp);
-		close(fd);
-	    }
+	    /* If the main command is suspended, suspend sudo too. */
+	    if (pid == ec->cmnd_pid)
+		suspend_sudo_nopty(signo, ec->ppgrp, ec->cmnd_pid);
 	} else {
 	    if (WIFSIGNALED(status)) {
 		if (sig2str(WTERMSIG(status), signame) == -1) {

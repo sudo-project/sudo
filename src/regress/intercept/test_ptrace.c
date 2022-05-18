@@ -98,6 +98,12 @@ init_debug_files(struct sudo_conf_debug_file_list *file_list,
 }
 
 int
+sudo_sigaction(int signo, struct sigaction *sa, struct sigaction *osa)
+{
+    return sigaction(signo, sa, osa);
+}
+
+int
 main(int argc, char *argv[])
 {
     struct sudo_conf_debug_file_list debug_files;
@@ -107,7 +113,7 @@ main(int argc, char *argv[])
     const char *errstr;
     sigset_t blocked, empty;
     struct sigaction sa;
-    pid_t child, pid;
+    pid_t child, pid, ppgrp;
     int ch, status;
     debug_decl_vars(main, SUDO_DEBUG_MAIN);
 
@@ -159,6 +165,7 @@ main(int argc, char *argv[])
     sigaction(SIGUSR1, &sa, NULL);
 
     /* Fork a shell. */
+    ppgrp = getpgrp();
     child = fork();
     switch (child) {
     case -1:
@@ -212,9 +219,9 @@ main(int argc, char *argv[])
 	    } else if (WIFSTOPPED(status)) {
 		if (exec_ptrace_stopped(pid, status, &closure)) {
 		    if (pid == child) {
-			/* TODO - terminal pgrp switching like exec_nopty.c. */
-			kill(getpid(), WSTOPSIG(status));
-			kill(child, SIGCONT);
+			suspend_sudo_nopty(WSTOPSIG(status), ppgrp, child);
+			if (kill(child, SIGCONT) != 0)
+			    sudo_warn("kill(%d, SIGCONT)", (int)child);
 		    }
 		}
 	    } else {
