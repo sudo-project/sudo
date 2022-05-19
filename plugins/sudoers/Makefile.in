@@ -58,7 +58,7 @@ INSTALL_BACKUP = @INSTALL_BACKUP@
 # Libraries
 LIBFUZZSTUB = $(top_builddir)/lib/fuzzstub/libsudo_fuzzstub.la
 LIBEVENTLOG = $(top_builddir)/lib/eventlog/libsudo_eventlog.la
-LIBIOLOG = $(top_builddir)/lib/iolog/libsudo_iolog.la
+LIBIOLOG = $(top_builddir)/lib/iolog/libsudo_iolog.la $(LIBEVENTLOG)
 LIBLOGSRV = @LIBLOGSRV@
 LIBUTIL = $(top_builddir)/lib/util/libsudo_util.la
 LIBS = $(LIBUTIL)

@@ -289,7 +289,7 @@ LOGSRVD=
 LOGSRVD_SRC=logsrvd
 LOGSRV_SRC=lib/logsrv
 LOGSRVD_CONF='sudo_logsrvd.conf'
-LIBLOGSRV='$(top_builddir)/lib/logsrv/liblogsrv.la'
+LIBLOGSRV='$(top_builddir)/lib/logsrv/liblogsrv.la $(top_builddir)/lib/protobuf-c/libprotobuf-c.la'
 PPFILES='$(srcdir)/etc/sudo.pp'
 
 dnl

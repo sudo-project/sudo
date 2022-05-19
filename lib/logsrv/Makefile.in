@@ -35,7 +35,7 @@ CC = @CC@
 LIBTOOL = @LIBTOOL@
 
 # Libraries
-LT_LIBS = $(top_builddir)/lib/protobuf-c/libprotobuf-c.la
+LT_LIBS =
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) -I$(top_srcdir) @CPPFLAGS@

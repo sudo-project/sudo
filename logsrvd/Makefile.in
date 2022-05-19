@@ -45,7 +45,9 @@ INSTALL_BACKUP = @INSTALL_BACKUP@
 
 # Libraries
 LT_LIBS = $(top_builddir)/lib/iolog/libsudo_iolog.la \
-	  $(top_builddir)/lib/logsrv/liblogsrv.la
+	  $(top_builddir)/lib/eventlog/libsudo_eventlog.la \
+	  $(top_builddir)/lib/logsrv/liblogsrv.la \
+	  $(top_builddir)/lib/protobuf-c/libprotobuf-c.la
 LIBS = $(LT_LIBS) @LIBTLS@
 
 # C preprocessor defines
