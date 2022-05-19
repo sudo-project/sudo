@@ -803,7 +803,7 @@ mail_parse_errors(void)
     }
     sudoers_to_eventlog(&evlog, NewArgv, env_get(), sudo_user.uuid_str);
 
-    len = sizeof(_("problem parsing sudoers"));
+    len = strlen(_("problem parsing sudoers")) + 1;
     STAILQ_FOREACH(pe, &parse_error_list, entries) {
 	len += strlen(_(pe->errstr)) + 1;
     }
