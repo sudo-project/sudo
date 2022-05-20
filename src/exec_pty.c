@@ -48,6 +48,10 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
+#ifndef __WALL
+# define __WALL 0
+#endif
+
 /* Evaluates to true if the event has /dev/tty as its fd. */
 #define USERTTY_EVENT(_ev)	(sudo_ev_get_fd((_ev)) == io_fds[SFD_USERTTY])
 
@@ -1056,20 +1060,14 @@ backchannel_cb(int fd, int what, void *v)
 static void
 handle_sigchld_pty(struct exec_closure_pty *ec)
 {
-    int n, status, wflags;
+    int n, status;
     pid_t pid;
     debug_decl(handle_sigchld_pty, SUDO_DEBUG_EXEC);
-
-#ifdef __WALL
-    wflags = __WALL|WNOHANG;
-#else
-    wflags = WUNTRACED|WNOHANG;
-#endif
 
     /* There may be multiple children in intercept mode. */
     for (;;) {
 	do {
-	    pid = waitpid(-1, &status, wflags);
+	    pid = waitpid(-1, &status, __WALL|WUNTRACED|WNOHANG);
 	} while (pid == -1 && errno == EINTR);
 	switch (pid) {
 	case -1:

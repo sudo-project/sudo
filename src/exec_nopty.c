@@ -44,6 +44,10 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
+#ifndef __WALL
+# define __WALL 0
+#endif
+
 struct exec_closure_nopty {
     struct command_details *details;
     struct sudo_event_base *evbase;
@@ -530,20 +534,14 @@ static void
 handle_sigchld_nopty(struct exec_closure_nopty *ec)
 {
     pid_t pid;
-    int status, wflags;
+    int status;
     char signame[SIG2STR_MAX];
     debug_decl(handle_sigchld_nopty, SUDO_DEBUG_EXEC);
-
-#ifdef __WALL
-    wflags = __WALL|WNOHANG;
-#else
-    wflags = WUNTRACED|WNOHANG;
-#endif
 
     /* There may be multiple children in intercept mode. */
     for (;;) {
 	do {
-	    pid = waitpid(-1, &status, wflags);
+	    pid = waitpid(-1, &status, __WALL|WUNTRACED|WNOHANG);
 	} while (pid == -1 && errno == EINTR);
 	switch (pid) {
 	case -1:
