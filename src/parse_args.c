@@ -82,6 +82,7 @@ static struct sudo_settings sudo_settings[] = {
     { "cmnd_cwd" },
     { "askpass" },
     { "intercept_setid" },
+    { "apparmor_profile" },
     { NULL }
 };
 

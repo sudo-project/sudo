@@ -1178,6 +1178,7 @@ scripts/mkpkg
 scripts/pp
 scripts/unanon
 src/Makefile.in
+src/apparmor.c
 src/conversation.c
 src/copy_file.c
 src/edit_open.c

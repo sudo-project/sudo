@@ -103,6 +103,7 @@
 #define ARG_CWD			24
 #define ARG_ASKPASS		25
 #define ARG_INTERCEPT_SETID	26
+#define ARG_APPARMOR_PROFILE	27
 
 /*
  * Flags for tgetpass()
@@ -198,6 +199,7 @@ struct command_details {
     const char *chroot;
     const char *selinux_role;
     const char *selinux_type;
+    const char *apparmor_profile;
     const char *utmp_user;
     const char *tty;
     char **argv;
@@ -284,6 +286,10 @@ int selinux_restore_tty(void);
 int selinux_setexeccon(void);
 void selinux_execve(int fd, const char *path, char *const argv[],
     char *envp[], int flags);
+
+/* apparmor.c */
+int apparmor_is_enabled(void);
+int apparmor_prepare(const char* new_profile);
 
 /* solaris.c */
 void set_project(struct passwd *);

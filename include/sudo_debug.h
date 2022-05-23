@@ -85,6 +85,7 @@ struct sudo_conf_debug_file_list;
 #define SUDO_DEBUG_SELINUX	(12<<6)    /* selinux */
 #define SUDO_DEBUG_UTIL		(13<<6)    /* utility functions */
 #define SUDO_DEBUG_UTMP		(14<<6)    /* utmp file ops */
+#define SUDO_DEBUG_APPARMOR     (15<<6)    /* AppArmor */
 #define SUDO_DEBUG_ALL		0xffff0000 /* all subsystems */
 
 /* Error return for sudo_debug_register().  */
