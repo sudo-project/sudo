@@ -1290,6 +1290,8 @@ Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
 .\}
+AppArmor_Spec ::= 'APPARMOR_PROFILE=profile'
+
 .if \n(PS \{\
 Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
 
@@ -1503,6 +1505,7 @@ Options may consist of
 .if \n(SL \{\
 SELinux roles and/or types,
 .\}
+AppArmor profiles,
 .if \n(PS \{\
 Solaris privileges sets,
 .\}
@@ -1533,6 +1536,59 @@ A role or type specified on the command line,
 however, will supersede the values in
 \fIsudoers\fR.
 .\}
+.SS "AppArmor_Spec"
+On systems supporting AppArmor,
+\fIsudoers\fR
+file entries may optionally specify an AppArmor profile that should be
+used to confine a command.
+If an AppArmor profile is specified with the command, it will override
+any default values specified in
+\fIsudoers\fR.
+Appropriate profile transition rules must be defined to support the
+profile change specified for a user.
+.PP
+AppArmor profiles can be specified in any way that complies with the
+rules of
+aa_change_profile(2).
+For instance, in the following
+\fIsudoers\fR
+entry
+.nf
+.sp
+.RS 0n
+alice	ALL = (root)	APPARMOR_PROFILE=my-profile	ALL
+.RE
+.fi
+.PP
+the user
+\fBalice\fR
+may run any command as root under confinement by the profile
+\(oqmy-profile\(cq.
+You can also stack profiles, or allow a user to run commands unconfined by
+any profile. E.g.,
+.nf
+.sp
+.RS 0n
+bob	ALL = (root)	APPARMOR_PROFILE=foo//&bar	/usr/bin/vi
+cathy	ALL = (root)	APPARMOR_PROFILE=unconfined	/bin/ls
+.RE
+.fi
+.PP
+These
+\fIsudoers\fR
+entries allow user
+\fBbob\fR
+to run
+\fI/usr/bin/vi\fR
+as root under the stacked profiles
+\(oqfoo\(cq
+and
+\(oqbar\(cq,
+and user
+\fBcathy\fR
+to run
+\fI/bin/ls\fR
+without any confinement at all.
 .if \n(PS \{\
 .SS "Solaris_Priv_Spec"
 On Solaris systems,
@@ -4158,6 +4214,19 @@ The umask setting in PAM is not used for
 which does not create a new PAM session.
 .PP
 \fBStrings\fR:
+.TP 18n
+apparmor_profile
+The default AppArmor profile to transition into when executing the
+command.
+The default
+\fIapparmor_profile\fR
+can be overriden for individual
+\fIsudoers\fR
+entries by specifying the
+\fIAPPARMOR_PROFILE\fR
+option.
+This option is only available when sudo is built with AppArmor
+support.
 .TP 18n
 authfail_message
 Message that is displayed after a user fails to authenticate.
