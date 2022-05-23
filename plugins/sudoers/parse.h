@@ -149,6 +149,9 @@ struct command_options {
 #ifdef HAVE_SELINUX
     char *role, *type;			/* SELinux role and type */
 #endif
+#ifdef HAVE_APPARMOR
+    char *apparmor_profile;			/* AppArmor profile */
+#endif
 #ifdef HAVE_PRIV_SET
     char *privs, *limitprivs;		/* Solaris privilege sets */
 #endif
@@ -232,6 +235,9 @@ struct cmndspec {
     char *runchroot;			/* root directory */
 #ifdef HAVE_SELINUX
     char *role, *type;			/* SELinux role and type */
+#endif
+#ifdef HAVE_APPARMOR
+    char *apparmor_profile;			/* AppArmor profile */
 #endif
 #ifdef HAVE_PRIV_SET
     char *privs, *limitprivs;		/* Solaris privilege sets */

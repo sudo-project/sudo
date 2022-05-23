@@ -658,6 +658,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("List of regular expressions to use when matching a password prompt"),
 	NULL,
     }, {
+	"apparmor_profile", T_STR,
+	N_("AppArmor profile to use in the new security context: %s"),
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

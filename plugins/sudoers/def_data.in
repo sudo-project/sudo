@@ -475,3 +475,6 @@ log_passwords
 passprompt_regex
 	T_LIST|T_SPACE|T_BOOL
 	"List of regular expressions to use when matching a password prompt"
+apparmor_profile
+	T_STR
+	"AppArmor profile to use in the new security context: %s"

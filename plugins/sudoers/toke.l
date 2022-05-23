@@ -679,6 +679,14 @@ ALL {
 			    goto got_alias;
 #endif
 			}
+<INITIAL>APPARMOR_PROFILE {
+#ifdef HAVE_APPARMOR
+			    LEXTRACE("APPARMOR_PROFILE ");
+			    return APPARMOR_PROFILE;
+#else
+			    goto got_alias;
+#endif
+			}
 <INITIAL>PRIVS {
 #ifdef HAVE_PRIV_SET
 			    LEXTRACE("PRIVS ");

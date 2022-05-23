@@ -30,6 +30,7 @@
 "runas_limitprivs"
 "selinux_role"
 "selinux_type"
+"apparmor_profile"
 "bsdauth_type"
 "network_addrs"
 "max_groups"

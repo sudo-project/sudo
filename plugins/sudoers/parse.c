@@ -254,6 +254,24 @@ apply_cmndspec(struct cmndspec *cs)
 	    }
 	}
 #endif /* HAVE_SELINUX */
+#ifdef HAVE_APPARMOR
+	/* Set AppArmor profile, if specified */
+	if (cs->apparmor_profile != NULL) {
+		user_apparmor_profile = strdup(cs->apparmor_profile);
+		if (user_apparmor_profile == NULL) {
+			sudo_warnx(U_("%s: %s"), __func__,
+			U_("unable to allocate memory"));
+			debug_return_bool(false);
+		}
+	} else {
+		user_apparmor_profile = def_apparmor_profile;
+		def_apparmor_profile = NULL;
+	}
+	if (user_apparmor_profile != NULL) {
+		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"user_apparmor_profile -> %s", user_apparmor_profile);
+	}
+#endif
 #ifdef HAVE_PRIV_SET
 	/* Set Solaris privilege sets */
 	if (runas_privs == NULL) {
@@ -525,6 +543,10 @@ new_long_entry(struct cmndspec *cs, struct cmndspec *prev_cs)
     if (cs->type && (!prev_cs->type || strcmp(cs->type, prev_cs->type) != 0))
 	debug_return_bool(true);
 #endif /* HAVE_SELINUX */
+#ifdef HAVE_APPARMOR
+    if (cs->apparmor_profile && (!prev_cs->apparmor_profile || strcmp(cs->apparmor_profile, prev_cs->apparmor_profile) != 0))
+	debug_return_bool(true);
+#endif /* HAVE_APPARMOR */
     if (cs->runchroot && (!prev_cs->runchroot || strcmp(cs->runchroot, prev_cs->runchroot) != 0))
 	debug_return_bool(true);
     if (cs->runcwd && (!prev_cs->runcwd || strcmp(cs->runcwd, prev_cs->runcwd) != 0))

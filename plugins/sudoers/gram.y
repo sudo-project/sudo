@@ -144,6 +144,7 @@ static void alias_error(const char *name, int errnum);
 %token <tok>	 CWD			/* working directory for command */
 %token <tok>	 TYPE			/* SELinux type */
 %token <tok>	 ROLE			/* SELinux role */
+%token <tok>	 APPARMOR_PROFILE		/* AppArmor profile */
 %token <tok>	 PRIVS			/* Solaris privileges */
 %token <tok>	 LIMITPRIVS		/* Solaris limit privileges */
 %token <tok>	 CMND_TIMEOUT		/* command timeout */
@@ -182,6 +183,7 @@ static void alias_error(const char *name, int errnum);
 %type <string>	  chrootspec
 %type <string>	  rolespec
 %type <string>	  typespec
+%type <string>	  apparmor_profilespec
 %type <string>	  privsspec
 %type <string>	  limitprivsspec
 %type <string>	  timeoutspec
@@ -534,6 +536,10 @@ cmndspec	:	runasspec options cmndtag digcmnd {
 			    cs->type = $2.type;
 			    parser_leak_remove(LEAK_PTR, $2.type);
 #endif
+#ifdef HAVE_APPARMOR
+				cs->apparmor_profile = $2.apparmor_profile;
+				parser_leak_remove(LEAK_PTR, $2.apparmor_profile);
+#endif
 #ifdef HAVE_PRIV_SET
 			    cs->privs = $2.privs;
 			    parser_leak_remove(LEAK_PTR, $2.privs);
@@ -688,6 +694,11 @@ typespec	:	TYPE '=' WORD {
 			}
 		;
 
+apparmor_profilespec	:	APPARMOR_PROFILE '=' WORD {
+				$$ = $3;
+			}
+		;
+
 privsspec	:	PRIVS '=' WORD {
 			    $$ = $3;
 			}
@@ -783,6 +794,7 @@ reserved_word	:	ALL		{ $$ = "ALL"; }
 		|	TYPE		{ $$ = "TYPE"; }
 		|	PRIVS		{ $$ = "PRIVS"; }
 		|	LIMITPRIVS	{ $$ = "LIMITPRIVS"; }
+		|	APPARMOR_PROFILE	{ $$ = "APPARMOR_PROFILE"; }
 		;
 
 reserved_alias	:	reserved_word {
@@ -846,6 +858,13 @@ options		:	/* empty */ {
 			    parser_leak_remove(LEAK_PTR, $$.type);
 			    free($$.type);
 			    $$.type = $2;
+#endif
+			}
+		|	options apparmor_profilespec {
+#ifdef HAVE_APPARMOR
+				parser_leak_remove(LEAK_PTR, $$.apparmor_profile);
+				free($$.apparmor_profile);
+				$$.apparmor_profile = $2;
 #endif
 			}
 		|	options privsspec {

@@ -111,6 +111,9 @@ struct sudo_user {
     char *role;
     char *type;
 #endif
+#ifdef HAVE_APPARMOR
+    char *apparmor_profile;
+#endif
 #ifdef HAVE_PRIV_SET
     char *privs;
     char *limitprivs;
@@ -246,6 +249,7 @@ struct sudo_user {
 #define runas_gr		(sudo_user._runas_gr)
 #define user_role		(sudo_user.role)
 #define user_type		(sudo_user.type)
+#define user_apparmor_profile		(sudo_user.apparmor_profile)
 #define user_closefrom		(sudo_user.closefrom)
 #define	runas_privs		(sudo_user.privs)
 #define	runas_limitprivs	(sudo_user.limitprivs)

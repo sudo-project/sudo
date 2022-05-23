@@ -460,6 +460,18 @@ print_cmndspec_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
     }
 #endif /* HAVE_SELINUX */
 
+#ifdef HAVE_APPARMOR
+	/* Print AppArmor profile */
+	if (cs->apparmor_profile != NULL) {
+		if (asprintf(&attr_val, "apparmor_profile=%s", cs->apparmor_profile) == -1) {
+			sudo_fatalx(U_("%s: %s"), __func__,
+			U_("unable to allocate memory"));
+		}
+		print_attribute_ldif(fp, "sudoOption", attr_val);
+		free(attr_val);
+	}
+#endif /* HAVE_APPARMOR */
+
 #ifdef HAVE_PRIV_SET
     /* Print Solaris privs/limitprivs */
     if (cs->privs != NULL || cs->limitprivs != NULL) {

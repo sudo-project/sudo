@@ -581,6 +581,9 @@ cmndspec_continues(struct cmndspec *cs, struct cmndspec *next)
 #ifdef HAVE_SELINUX
 	&& cs->role == next->role && cs->type == next->type
 #endif /* HAVE_SELINUX */
+#ifdef HAVE_APPARMOR
+	&& cs->apparmor_profile == next->apparmor_profile
+#endif /* HAVE_APPARMOR */
 	&& cs->runchroot == next->runchroot && cs->runcwd == next->runcwd;
     return ret;
 }
@@ -754,6 +757,16 @@ print_cmndspec_json(struct json_container *jsonc,
 	sudo_json_close_array(jsonc);
     }
 #endif /* HAVE_SELINUX */
+
+#ifdef HAVE_APPARMOR
+	if (cs->apparmor_profile != NULL) {
+	sudo_json_open_array(jsonc, "AppArmor_Spec");
+	value.type = JSON_STRING;
+	value.u.string = cs->apparmor_profile;
+	sudo_json_add_value(jsonc, "apparmor_profile", &value);
+	sudo_json_close_array(jsonc);
+	}
+#endif /* HAVE_APPARMOR */
 
 #ifdef HAVE_PRIV_SET
     /* Print Solaris privs/limitprivs */
