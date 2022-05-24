@@ -37,6 +37,10 @@
 # define __X32_SYSCALL_BIT 0x40000000
 #endif
 
+#if defined(__mips__) && !defined(__NR_O32_Linux)
+# define __NR_O32_Linux 4000
+#endif
+
 /* Align address to a (compat) word boundary. */
 #define WORDALIGN(_a, _r)	\
 	(((_a) + ((long)(_r).wordsize - 1L)) & ~((long)(_r).wordsize - 1L))
@@ -141,20 +145,60 @@
 #  else
 #   error "Unsupported MIPS ABI"
 # endif
-/* Untested/incomplete.
+/*
  * If called via syscall(__NR_###), v0 holds __NR_O32_Linux and the real
- * syscall the first arg (a0) and other args are shifted by one.
- * We don't currently support this.
+ * syscall is in the first arg (a0).  The actual args are shifted by one.
  * MIPS does not support setting the syscall return value via ptrace.
  */
 # define sudo_pt_regs		struct pt_regs
-# define reg_syscall(x)		(x).regs[2]	/* v0 */
+# define reg_syscall(_r) ({						\
+    __u64 _nr;								\
+    if ((_r).regs[2] == __NR_O32_Linux)					\
+	_nr = (_r).regs[4]; /* a0 */					\
+    else								\
+	_nr = (_r).regs[2]; /* v0 */					\
+    _nr;								\
+})
 # define reg_retval(x)		(x).regs[2]	/* v0 */
 # define reg_sp(x)		(x).regs[29]	/* sp */
-# define reg_arg1(x)		(x).regs[4]	/* a0 */
-# define reg_arg2(x)		(x).regs[5]	/* a1 */
-# define reg_arg3(x)		(x).regs[6]	/* a2 */
-# define reg_arg4(x)		(x).regs[7]	/* a3 */
+# define reg_arg1(x)		\
+    ((x).regs[2] == __NR_O32_Linux ? (x).regs[5] : (x).regs[4])
+# define reg_set_arg1(_r, _v) do {					\
+    if ((_r).regs[2] == __NR_O32_Linux)					\
+	(_r).regs[5] = _v; /* a1 */					\
+    else								\
+	(_r).regs[4] = _v; /* a0 */					\
+} while (0)
+# define reg_arg2(x)							\
+    ((x).regs[2] == __NR_O32_Linux ? (x).regs[6] : (x).regs[5])
+# define reg_set_arg2(_r, _v) do {					\
+    if ((_r).regs[2] == __NR_O32_Linux)					\
+	(_r).regs[6] = _v; /* a2 */					\
+    else								\
+	(_r).regs[5] = _v; /* a1 */					\
+} while (0)
+# define reg_arg3(x)							\
+    ((x).regs[2] == __NR_O32_Linux ? (x).regs[7] : (x).regs[6])
+# define reg_set_arg3(_r, _v) do {					\
+    if ((_r).regs[2] == __NR_O32_Linux)					\
+	(_r).regs[7] = _v; /* a3 */					\
+    else								\
+	(_r).regs[6] = _v; /* a2 */					\
+} while (0)
+# define reg_arg4(x)		\
+    ((x).regs[2] == __NR_O32_Linux ? (x).regs[8] : (x).regs[7])
+# define reg_set_arg4(_r, _v) do {					\
+    if ((_r).regs[2] == __NR_O32_Linux)					\
+	(_r).regs[8] = _v; /* a4 */					\
+    else								\
+	(_r).regs[7] = _v; /* a3 */					\
+} while (0)
+# define reg_set_syscall(_r, _nr) do {					\
+    if ((_r).regs[2] == __NR_O32_Linux)					\
+	(_r).regs[4] = _nr; /* a0 */					\
+    else								\
+	(_r).regs[2] = _nr; /* v0 */					\
+} while (0)
 #elif defined(__powerpc__)
 # if defined(__powerpc64__)
 #  if BYTE_ORDER == LITTLE_ENDIAN
@@ -330,6 +374,48 @@ struct ppc_pt_regs {
 #ifndef compat_reg_set_retval
 # define compat_reg_set_retval(_r, _v) do {				\
     compat_reg_retval(_r) = (_v);					\
+} while (0)
+#endif
+
+/* Set the syscall arguments the "normal" way by default. */
+#ifndef reg_set_arg1
+# define reg_set_arg1(_r, _v) do {					\
+    reg_arg1(_r) = (_v);						\
+} while (0)
+#endif
+#ifndef compat_reg_set_arg1
+# define compat_reg_set_arg1(_r, _v) do {				\
+    compat_reg_arg1(_r) = (_v);						\
+} while (0)
+#endif
+#ifndef reg_set_arg2
+# define reg_set_arg2(_r, _v) do {					\
+    reg_arg2(_r) = (_v);						\
+} while (0)
+#endif
+#ifndef compat_reg_set_arg2
+# define compat_reg_set_arg2(_r, _v) do {				\
+    compat_reg_arg2(_r) = (_v);						\
+} while (0)
+#endif
+#ifndef reg_set_arg3
+# define reg_set_arg3(_r, _v) do {					\
+    reg_arg3(_r) = (_v);						\
+} while (0)
+#endif
+#ifndef compat_reg_set_arg3
+# define compat_reg_set_arg3(_r, _v) do {				\
+    compat_reg_arg3(_r) = (_v);						\
+} while (0)
+#endif
+#ifndef reg_set_arg4
+# define reg_set_arg4(_r, _v) do {					\
+    reg_arg4(_r) = (_v);						\
+} while (0)
+#endif
+#ifndef compat_reg_set_arg4
+# define compat_reg_set_arg4(_r, _v) do {				\
+    compat_reg_arg4(_r) = (_v);						\
 } while (0)
 #endif
 

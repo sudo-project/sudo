@@ -109,9 +109,9 @@ static inline void
 set_sc_arg1(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
     if (regs->compat) {
-	compat_reg_arg1(regs->u.compat) = addr;
+	compat_reg_set_arg1(regs->u.compat, addr);
     } else {
-	reg_arg1(regs->u.native) = addr;
+	reg_set_arg1(regs->u.native, addr);
     }
 }
 
@@ -129,9 +129,9 @@ static inline void
 set_sc_arg2(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
     if (regs->compat) {
-	compat_reg_arg2(regs->u.compat) = addr;
+	compat_reg_set_arg2(regs->u.compat, addr);
     } else {
-	reg_arg2(regs->u.native) = addr;
+	reg_set_arg2(regs->u.native, addr);
     }
 }
 
@@ -150,9 +150,9 @@ static inline void
 set_sc_arg3(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
     if (regs->compat) {
-	compat_reg_arg3(regs->u.compat) = addr;
+	compat_reg_set_arg3(regs->u.compat, addr);
     } else {
-	reg_arg3(regs->u.native) = addr;
+	reg_set_arg3(regs->u.native, addr);
     }
 }
 
@@ -170,9 +170,9 @@ static inline void
 set_sc_arg4(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
     if (regs->compat) {
-	compat_reg_arg4(regs->u.compat) = addr;
+	compat_reg_set_arg4(regs->u.compat, addr);
     } else {
-	reg_arg4(regs->u.native) = addr;
+	reg_set_arg4(regs->u.native, addr);
     }
 }
 #  endif /* notyet */
@@ -212,7 +212,7 @@ get_sc_arg1(struct sudo_ptrace_regs *regs)
 static inline void
 set_sc_arg1(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
-    reg_arg1(regs->u.native) = addr;
+    reg_set_arg1(regs->u.native, addr);
 }
 
 static inline unsigned long
@@ -224,7 +224,7 @@ get_sc_arg2(struct sudo_ptrace_regs *regs)
 static inline void
 set_sc_arg2(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
-    reg_arg2(regs->u.native) = addr;
+    reg_set_arg2(regs->u.native, addr);
 }
 
 static inline unsigned long
@@ -237,7 +237,7 @@ get_sc_arg3(struct sudo_ptrace_regs *regs)
 static inline void
 set_sc_arg3(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
-    reg_arg3(regs->u.native) = addr;
+    reg_set_arg3(regs->u.native, addr);
 }
 
 static inline unsigned long
@@ -249,7 +249,7 @@ get_sc_arg4(struct sudo_ptrace_regs *regs)
 static inline void
 set_sc_arg4(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
-    reg_arg4(regs->u.native) = addr;
+    reg_set_arg4(regs->u.native, addr);
 }
 #  endif /* notyet */
 # endif /* SECCOMP_AUDIT_ARCH_COMPAT */
@@ -1280,10 +1280,15 @@ exec_ptrace_stopped(pid_t pid, int status, void *intercept)
 bool
 exec_ptrace_intercept_supported(void)
 {
+# ifdef __mips__
+    /* MIPS doesn't support changing the syscall return value. */
+    return false;
+# else
     if (seccomp_trap_supported == -1)
-	seccomp_trap_supporetd = have_seccomp_action("trap");
+	seccomp_trap_supported = have_seccomp_action("trap");
 
     return seccomp_trap_supported == true;
+# endif
 }
 
 bool
