@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd May 4, 2022
+.Dd May 24, 2022
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3123,18 +3123,20 @@ To prevent this from happening,
 will not permit a set-user-ID or set-group-ID program to be run in
 intercept mode unless
 .Em intercept_allow_setid
-is set.
+is enable.
 This flag has no effect unless the
 .Em intercept
 flag is enabled or the
 .Em INTERCEPT
 tag has been set for the command.
 This flag is
-.Em off
-by default except on Linux systems that support
-.Xr seccomp 2
-filtering, where it defaults to
-.Em on .
+.Em on
+by default when the
+.Em intercept_type
+option is set to
+.Em trace ,
+otherwise it default to
+.Em off .
 .Pp
 This setting is only supported by version 1.9.8 or higher.
 .It intercept_authenticate
@@ -3982,6 +3984,57 @@ list or the
 option is disabled.
 The default is
 .Pa @editor@ .
+.It intercept_type
+The underlying mechanism used by the
+.Em intercept
+and
+.Em log_subcmds
+options.
+It has the following possible values:
+.Bl -tag -width 6n
+.It dso
+Preload a dynamic shared object (shared library) that intercepts the
+.Fn execl ,
+.Fn execle ,
+.Fn execlp ,
+.Fn execv ,
+.Fn execve ,
+.Fn execvp ,
+and
+.Fn execvpe
+library functions.
+A value of
+.Em dso
+is incompatible with
+.Nm sudo Ns 's
+SELinux RBAC support.
+.It trace
+Use
+.Xr ptrace 2
+to intercept the
+.Xr execve 2
+system call.
+This is only supported on Linux systems where
+.Xr seccomp 2
+filtering is enabled.
+If the
+.Pa /proc/sys/kernel/seccomp/actions_avail
+file is missing or does not contain a
+.Dq trap
+element, setting
+.Em intercept_type
+to
+.Em trace
+will have no effect and
+.Em dso
+will be used instead.
+.El
+.Pp
+The default is to use
+.Em trace
+if it is supported by the system and
+.Em dso
+if it is not.
 .It iolog_dir
 The top-level directory to use when constructing the path name for
 the input/output log directory.
@@ -6266,7 +6319,7 @@ by default and interferes with file descriptor inheritance.
 .Pp
 Linux systems that support
 .Xr seccomp 2
-filtering will use a different method involving
+filtering can use a different method involving
 .Xr ptrace 2
 instead of pre-loading a shared library.
 This method supports both static and dynamic executables as well as

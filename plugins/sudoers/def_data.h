@@ -306,6 +306,8 @@
 #define def_log_passwords       (sudo_defs_table[I_LOG_PASSWORDS].sd_un.flag)
 #define I_PASSPROMPT_REGEX      152
 #define def_passprompt_regex    (sudo_defs_table[I_PASSPROMPT_REGEX].sd_un.list)
+#define I_INTERCEPT_TYPE        153
+#define def_intercept_type      (sudo_defs_table[I_INTERCEPT_TYPE].sd_un.tuple)
 
 enum def_tuple {
     never,
@@ -319,5 +321,7 @@ enum def_tuple {
     tty,
     kernel,
     sudo,
-    json
+    json,
+    dso,
+    trace
 };

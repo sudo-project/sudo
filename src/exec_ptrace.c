@@ -51,6 +51,8 @@
 # include "exec_intercept.h"
 # include "exec_ptrace.h"
 
+static int seccomp_trap_supported = -1;
+
 /* Register getters and setters. */
 # ifdef SECCOMP_AUDIT_ARCH_COMPAT
 static inline unsigned long
@@ -736,7 +738,7 @@ done:
  * Check whether seccomp(2) filtering supports ptrace(2) traps.
  * Only supported by Linux 4.14 and higher.
  */
-bool
+static bool
 have_seccomp_action(const char *action)
 {
     char line[LINE_MAX];
@@ -1274,6 +1276,24 @@ exec_ptrace_stopped(pid_t pid, int status, void *intercept)
 
     debug_return_bool(group_stop);
 }
+
+bool
+exec_ptrace_intercept_supported(void)
+{
+    if (seccomp_trap_supported == -1)
+	seccomp_trap_supporetd = have_seccomp_action("trap");
+
+    return seccomp_trap_supported == true;
+}
+
+bool
+exec_ptrace_subcmds_supported(void)
+{
+    if (seccomp_trap_supported == -1)
+	seccomp_trap_supported = have_seccomp_action("trap");
+
+    return seccomp_trap_supported == true;
+}
 #else
 /* STUB */
 bool
@@ -1295,4 +1315,41 @@ exec_ptrace_seize(pid_t child)
 {
     return true;
 }
+
+/* STUB */
+bool
+exec_ptrace_intercept_supported(void)
+{
+    return false;
+}
+
+/* STUB */
+bool
+exec_ptrace_subcmds_supported(void)
+{
+    return false;
+}
 #endif /* HAVE_PTRACE_INTERCEPT */
+
+/*
+ * Adjust flags based on the availability of ptrace support.
+ */
+void
+exec_ptrace_fix_flags(struct command_details *details)
+{
+    debug_decl(exec_ptrace_fix_flags, SUDO_DEBUG_EXEC);
+
+    if (ISSET(details->flags, CD_USE_PTRACE)) {
+	/* If both CD_INTERCEPT and CD_LOG_SUBCMDS set, CD_INTERCEPT wins. */
+	if (ISSET(details->flags, CD_INTERCEPT)) {
+	    if (!exec_ptrace_intercept_supported())
+		CLR(details->flags, CD_USE_PTRACE);
+	} else if (ISSET(details->flags, CD_LOG_SUBCMDS)) {
+	    if (!exec_ptrace_subcmds_supported())
+		CLR(details->flags, CD_USE_PTRACE);
+	} else {
+	    CLR(details->flags, CD_USE_PTRACE);
+	}
+    }
+    debug_return;
+}

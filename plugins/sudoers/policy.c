@@ -297,10 +297,24 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 		goto oom;
 	    continue;
 	}
+	if (MATCHES(*cur, "intercept_ptrace=")) {
+	    int val = sudo_strtobool(*cur + sizeof("intercept_ptrace=") - 1);
+	    if (val == -1) {
+		INVALID("intercept_ptrace=");	/* Not a fatal error. */
+	    } else if (!append_default("intercept_type",
+		    val ? "trace" : "dso", true, NULL, defaults)) {
+		goto oom;
+	    }
+	    continue;
+	}
 	if (MATCHES(*cur, "intercept_setid=")) {
-	    if (parse_bool(*cur, sizeof("intercept_setid") - 1,
-		&sudo_user.flags, CAN_INTERCEPT_SETID) == -1)
-		goto bad;
+	    int val = sudo_strtobool(*cur + sizeof("intercept_setid=") - 1);
+	    if (val == -1) {
+		INVALID("intercept_setid=");	/* Not a fatal error. */
+	    } else if (!append_default("intercept_allow_setid", NULL, val,
+		    NULL, defaults)) {
+		goto oom;
+	    }
 	    continue;
 	}
 #ifdef HAVE_SELINUX
@@ -605,7 +619,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     }
 
     /* Increase the length of command_info as needed, it is *not* checked. */
-    command_info = calloc(70, sizeof(char *));
+    command_info = calloc(71, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
 
@@ -775,6 +789,10 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     }
     if (def_intercept) {
 	if ((command_info[info_len++] = strdup("intercept=true")) == NULL)
+	    goto oom;
+    }
+    if (def_intercept_type == trace) {
+	if ((command_info[info_len++] = strdup("use_ptrace=true")) == NULL)
 	    goto oom;
     }
     if (def_noexec) {
