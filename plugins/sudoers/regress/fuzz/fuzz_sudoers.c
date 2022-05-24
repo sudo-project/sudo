@@ -172,7 +172,7 @@ static struct user_data {
     { NULL }
 };
 
-int
+void
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     struct user_data *ud;
@@ -187,11 +187,11 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     /* Don't waste time fuzzing tiny inputs. */
     if (size < 5)
-        return 0;
+        return;
 
     fp = open_data(data, size);
     if (fp == NULL)
-        return 0;
+        return;
 
     setprogname("fuzz_sudoers");
     sudoers_debug_register(getprogname(), NULL);
@@ -390,6 +390,4 @@ done:
     sudoers_setlocale(SUDOERS_LOCALE_USER, NULL);
     sudoers_debug_deregister();
     fflush(stdout);
-
-    return 0;
 }

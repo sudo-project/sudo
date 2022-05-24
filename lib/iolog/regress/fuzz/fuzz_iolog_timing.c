@@ -67,7 +67,7 @@ fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],
     return 0;
 }
 
-int
+void
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     struct iolog_file iolog_file = { true };
@@ -81,7 +81,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     /* I/O logs consist of multiple files in a directory. */
     if (mkdtemp(logdir) == NULL)
-	return 0;
+	return;
 
     /* Create a timing file from the supplied data. */
     dfd = open(logdir, O_RDONLY);
@@ -118,8 +118,6 @@ cleanup:
     }
     rmdir(logdir);
     fflush(stdout);
-
-    return 0;
 }
 
 /* STUB */

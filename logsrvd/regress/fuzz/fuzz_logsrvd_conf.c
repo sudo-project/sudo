@@ -89,7 +89,7 @@ fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],
     return 0;
 }
 
-int
+void
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     char tempfile[] = "/tmp/logsrvd_conf.XXXXXX";
@@ -103,11 +103,11 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     /* logsrvd_conf_read() uses a conf file path, not an open file. */
     fd = mkstemp(tempfile);
     if (fd == -1)
-	return 0;
+	return;
     nwritten = write(fd, data, size);
     if (nwritten != size) {
 	close(fd);
-	return 0;
+	return;
     }
     close(fd);
 
@@ -132,6 +132,4 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     unlink(tempfile);
 
     fflush(stdout);
-
-    return 0;
 }

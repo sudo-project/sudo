@@ -241,7 +241,7 @@ enum fuzz_policy_pass {
     PASS_INVALIDATE
 };
 
-int
+void
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     struct dynamic_array plugin_args = { NULL };
@@ -260,7 +260,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     fp = open_data(data, size);
     if (fp == NULL)
-        return 0;
+        return;
 
     setprogname("fuzz_policy");
     sudoers_debug_register(getprogname(), NULL);
@@ -505,8 +505,6 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     sudoers_debug_deregister();
 
     fflush(stdout);
-
-    return 0;
 }
 
 /* STUB */

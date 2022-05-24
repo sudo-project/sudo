@@ -88,7 +88,7 @@ fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],
     return 0;
 }
 
-int
+void
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     struct eventlog *evlog = NULL;
@@ -100,7 +100,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     fp = open_data(data, size);
     if (fp == NULL)
-        return 0;
+        return;
 
     /* Parsed contents of an log.json file are stored in evlog. */
     evlog = calloc(1, sizeof(*evlog));
@@ -116,6 +116,4 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     fclose(fp);
 
     fflush(stdout);
-
-    return 0;
 }

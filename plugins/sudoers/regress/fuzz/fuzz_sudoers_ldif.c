@@ -117,7 +117,7 @@ fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],
     return 0;
 }
 
-int
+void
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     struct sudoers_parse_tree parse_tree;
@@ -125,11 +125,11 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     /* Don't waste time fuzzing tiny inputs. */
     if (size < 5)
-        return 0;
+        return;
 
     fp = open_data(data, size);
     if (fp == NULL)
-        return 0;
+        return;
 
     setprogname("fuzz_sudoers_ldif");
     sudoers_debug_register(getprogname(), NULL);
@@ -146,6 +146,4 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     fclose(fp);
     sudoers_debug_deregister();
     fflush(stdout);
-
-    return 0;
 }
