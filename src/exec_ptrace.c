@@ -51,6 +51,13 @@
 # include "exec_intercept.h"
 # include "exec_ptrace.h"
 
+/* We need to take care when ptracing 32-bit binaries on 64-bit kernels. */
+# ifdef __LP64__
+#  define COMPAT_FLAG 0x01
+# else
+#  define COMPAT_FLAG 0x00
+# endif
+
 static int seccomp_trap_supported = -1;
 
 /* Register getters and setters. */
@@ -264,13 +271,19 @@ set_sc_arg4(struct sudo_ptrace_regs *regs, unsigned long addr)
 static bool
 ptrace_getregs(int pid, struct sudo_ptrace_regs *regs, bool compat)
 {
-    struct iovec iov;
     debug_decl(ptrace_getregs, SUDO_DEBUG_EXEC);
 
+# ifdef __mips__
+    /* PTRACE_GETREGSET has bugs with the MIPS o32 ABI at least. */
+    if (ptrace(PTRACE_GETREGS, pid, NULL, &regs->u) == -1)
+	debug_return_bool(false);
+# else
+    struct iovec iov;
     iov.iov_base = &regs->u;
     iov.iov_len = sizeof(regs->u);
     if (ptrace(PTRACE_GETREGSET, pid, (void *)NT_PRSTATUS, &iov) == -1)
 	debug_return_bool(false);
+# endif /* __mips__ */
 
     /* Machine-dependent parameters to support compat binaries. */
     if (compat) {
@@ -291,21 +304,19 @@ ptrace_getregs(int pid, struct sudo_ptrace_regs *regs, bool compat)
 static bool
 ptrace_setregs(int pid, struct sudo_ptrace_regs *regs)
 {
-    struct iovec iov;
     debug_decl(ptrace_setregs, SUDO_DEBUG_EXEC);
 
-# ifdef SECCOMP_AUDIT_ARCH_COMPAT
-    if (regs->compat) {
-	iov.iov_base = &regs->u.compat;
-	iov.iov_len = sizeof(regs->u.compat);
-    } else
-#endif
-    {
-	iov.iov_base = &regs->u.native;
-	iov.iov_len = sizeof(regs->u.native);
-    }
+# ifdef __mips__
+    /* PTRACE_SETREGSET has bugs with the MIPS o32 ABI at least. */
+    if (ptrace(PTRACE_SETREGS, pid, NULL, &regs->u) == -1)
+	debug_return_bool(false);
+# else
+    struct iovec iov;
+    iov.iov_base = &regs->u;
+    iov.iov_len = sizeof(regs->u);
     if (ptrace(PTRACE_SETREGSET, pid, (void *)NT_PRSTATUS, &iov) == -1)
 	debug_return_bool(false);
+# endif /* __mips__ */
 
     debug_return_bool(true);
 }
@@ -775,16 +786,27 @@ set_exec_filter(void)
     struct sock_filter exec_filter[] = {
 	/* Load architecture value (AUDIT_ARCH_*) into the accumulator. */
 	BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, arch)),
+# ifdef SECCOMP_AUDIT_ARCH_COMPAT2
+	/* Match on the compat2 architecture or jump to the compat check. */
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SECCOMP_AUDIT_ARCH_COMPAT2, 0, 4),
+	/* Load syscall number into the accumulator. */
+	BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, nr)),
+	/* Jump to trace for compat2 execve(2)/execveat(2), else allow. */
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, COMPAT2_execve, 1, 0),
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, COMPAT2_execveat, 0, 13),
+	/* Trace execve(2)/execveat(2) syscalls (w/ compat flag) */
+	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE | COMPAT_FLAG),
+# endif /* SECCOMP_AUDIT_ARCH_COMPAT2 */
 # ifdef SECCOMP_AUDIT_ARCH_COMPAT
 	/* Match on the compat architecture or jump to the native arch check. */
 	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SECCOMP_AUDIT_ARCH_COMPAT, 0, 4),
 	/* Load syscall number into the accumulator. */
 	BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, nr)),
-	/* Jump to trace for compat execve(2)/execveat(2), else try native. */
+	/* Jump to trace for compat execve(2)/execveat(2), else allow. */
 	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, COMPAT_execve, 1, 0),
 	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, COMPAT_execveat, 0, 8),
 	/* Trace execve(2)/execveat(2) syscalls (w/ compat flag) */
-	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE | 0x1),
+	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE | COMPAT_FLAG),
 # endif /* SECCOMP_AUDIT_ARCH_COMPAT */
 	/* Jump to the end unless the architecture matches. */
 	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SECCOMP_AUDIT_ARCH, 0, 6),

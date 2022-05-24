@@ -37,8 +37,13 @@
 # define __X32_SYSCALL_BIT 0x40000000
 #endif
 
-#if defined(__mips__) && !defined(__NR_O32_Linux)
-# define __NR_O32_Linux 4000
+#ifdef __mips__
+# ifndef __NR_O32_Linux
+#  define __NR_O32_Linux 4000
+# endif
+# ifndef __NR_N32_Linux
+#  define __NR_N32_Linux 6000
+# endif
 #endif
 
 /* Align address to a (compat) word boundary. */
@@ -185,6 +190,7 @@
     else								\
 	(_r).regs[6] = _v; /* a2 */					\
 } while (0)
+/* XXX - reg_arg4 probably wrong for syscall() type calls on 032. */
 # define reg_arg4(x)		\
     ((x).regs[2] == __NR_O32_Linux ? (x).regs[8] : (x).regs[7])
 # define reg_set_arg4(_r, _v) do {					\
@@ -318,6 +324,43 @@ struct arm_pt_regs {
 # define compat_reg_arg3(x)		(x).uregs[2]	/* r2 */
 # define compat_reg_arg4(x)		(x).uregs[3]	/* r3 */
 # define compat_reg_set_syscall(_r, _nr) reg_set_syscall(_r, _nr)
+#elif defined(__mips__)
+# if _MIPS_SIM == _MIPS_SIM_ABI64
+/* MIPS o32/n32 binary compatibility on a mips64 system. */
+#  if BYTE_ORDER == LITTLE_ENDIAN
+#   define SECCOMP_AUDIT_ARCH_COMPAT	AUDIT_ARCH_MIPSEL
+#   define SECCOMP_AUDIT_ARCH_COMPAT2	AUDIT_ARCH_MIPSEL64N32
+#  else
+#   define SECCOMP_AUDIT_ARCH_COMPAT	AUDIT_ARCH_MIPS
+#   define SECCOMP_AUDIT_ARCH_COMPAT2	AUDIT_ARCH_MIPS64N32
+#  endif
+#  define COMPAT_execve			__NR_O32_Linux + 11
+#  define COMPAT_execveat		__NR_O32_Linux + 356
+#  define COMPAT2_execve		__NR_N32_Linux + 57
+#  define COMPAT2_execveat		__NR_N32_Linux + 320
+# elif _MIPS_SIM == _MIPS_SIM_NABI32
+#  if BYTE_ORDER == LITTLE_ENDIAN
+#   define SECCOMP_AUDIT_ARCH_COMPAT	AUDIT_ARCH_MIPSEL
+#  else
+#   define SECCOMP_AUDIT_ARCH_COMPAT	AUDIT_ARCH_MIPS
+#  endif
+#  define COMPAT_execve			__NR_O32_Linux + 11
+#  define COMPAT_execveat		__NR_O32_Linux + 356
+# endif /* _MIPS_SIM_ABI64 */
+/* MIPS ABIs use a common ptrace interface. */
+# define compat_sudo_pt_regs		struct pt_regs
+# define compat_reg_syscall(x)		reg_syscall(x)
+# define compat_reg_retval(x)		reg_retval(x)
+# define compat_reg_sp(x)		reg_sp(x)
+# define compat_reg_arg1(x)		reg_arg1(x)
+# define compat_reg_set_arg1(_r, _v)	reg_set_arg1(_r, _v)
+# define compat_reg_arg2(x)		reg_arg2(x)
+# define compat_reg_set_arg2(_r, _v)	reg_set_arg2(_r, _v)
+# define compat_reg_arg3(x)		reg_arg3(x)
+# define compat_reg_set_arg3(_r, _v)	reg_set_arg3(_r, _v)
+# define compat_reg_arg4(x)		reg_arg4(x)
+# define compat_reg_set_arg4(_r, _v)	reg_set_arg4(_r, _v)
+# define compat_reg_set_syscall(_r, _nr) reg_set_syscall(_r, _nr)
 #elif defined(__powerpc64__)
 struct ppc_pt_regs {
     unsigned int gpr[32];
@@ -374,6 +417,48 @@ struct ppc_pt_regs {
 #ifndef compat_reg_set_retval
 # define compat_reg_set_retval(_r, _v) do {				\
     compat_reg_retval(_r) = (_v);					\
+} while (0)
+#endif
+
+/* Set the syscall arguments the "normal" way by default. */
+#ifndef reg_set_arg1
+# define reg_set_arg1(_r, _v) do {					\
+    reg_arg1(_r) = (_v);						\
+} while (0)
+#endif
+#ifndef compat_reg_set_arg1
+# define compat_reg_set_arg1(_r, _v) do {				\
+    compat_reg_arg1(_r) = (_v);						\
+} while (0)
+#endif
+#ifndef reg_set_arg2
+# define reg_set_arg2(_r, _v) do {					\
+    reg_arg2(_r) = (_v);						\
+} while (0)
+#endif
+#ifndef compat_reg_set_arg2
+# define compat_reg_set_arg2(_r, _v) do {				\
+    compat_reg_arg2(_r) = (_v);						\
+} while (0)
+#endif
+#ifndef reg_set_arg3
+# define reg_set_arg3(_r, _v) do {					\
+    reg_arg3(_r) = (_v);						\
+} while (0)
+#endif
+#ifndef compat_reg_set_arg3
+# define compat_reg_set_arg3(_r, _v) do {				\
+    compat_reg_arg3(_r) = (_v);						\
+} while (0)
+#endif
+#ifndef reg_set_arg4
+# define reg_set_arg4(_r, _v) do {					\
+    reg_arg4(_r) = (_v);						\
+} while (0)
+#endif
+#ifndef compat_reg_set_arg4
+# define compat_reg_set_arg4(_r, _v) do {				\
+    compat_reg_arg4(_r) = (_v);						\
 } while (0)
 #endif
 
