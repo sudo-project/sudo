@@ -145,6 +145,9 @@ struct sudo_user {
  */
 #define RUNAS_USER_SPECIFIED	0x01
 #define RUNAS_GROUP_SPECIFIED	0x02
+#define CAN_INTERCEPT_SETID	0x04
+#define HAVE_INTERCEPT_PTRACE	0x08
+#define USER_INTERCEPT_SETID	0x10
 
 /*
  * Return values for sudoers_lookup(), also used as arguments for log_auth()

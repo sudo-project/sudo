@@ -186,8 +186,9 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
     }
 
     /* Parse command line settings. */
-    sudo_mode = 0;
+    sudo_user.flags = 0;
     user_closefrom = -1;
+    sudo_mode = 0;
     for (cur = info->settings; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "closefrom=")) {
 	    errno = 0;
@@ -298,23 +299,15 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	    continue;
 	}
 	if (MATCHES(*cur, "intercept_ptrace=")) {
-	    int val = sudo_strtobool(*cur + sizeof("intercept_ptrace=") - 1);
-	    if (val == -1) {
-		INVALID("intercept_ptrace=");	/* Not a fatal error. */
-	    } else if (!append_default("intercept_type",
-		    val ? "trace" : "dso", true, NULL, defaults)) {
-		goto oom;
-	    }
+	    if (parse_bool(*cur, sizeof("intercept_ptrace") - 1, &sudo_user.flags,
+		    HAVE_INTERCEPT_PTRACE) == -1)
+		goto bad;
 	    continue;
 	}
 	if (MATCHES(*cur, "intercept_setid=")) {
-	    int val = sudo_strtobool(*cur + sizeof("intercept_setid=") - 1);
-	    if (val == -1) {
-		INVALID("intercept_setid=");	/* Not a fatal error. */
-	    } else if (!append_default("intercept_allow_setid", NULL, val,
-		    NULL, defaults)) {
-		goto oom;
-	    }
+	    if (parse_bool(*cur, sizeof("intercept_setid") - 1, &sudo_user.flags,
+		    CAN_INTERCEPT_SETID) == -1)
+		goto bad;
 	    continue;
 	}
 #ifdef HAVE_SELINUX
@@ -569,6 +562,19 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
     if (sudo_uuid_to_string(uuid, sudo_user.uuid_str, sizeof(sudo_user.uuid_str)) == NULL) {
 	sudo_warnx("%s", U_("unable to generate UUID"));
 	goto bad;
+    }
+
+    /*
+     * Set intercept defaults based on flags set above.
+     * We pass -1 as the operator to indicate it is set by the front end.
+     */
+    if (ISSET(sudo_user.flags, HAVE_INTERCEPT_PTRACE)) {
+	if (!append_default("intercept_type", "trace", -1, NULL, defaults))
+	    goto oom;
+    }
+    if (ISSET(sudo_user.flags, CAN_INTERCEPT_SETID)) {
+	if (!append_default("intercept_allow_setid", NULL, -1, NULL, defaults))
+	    goto oom;
     }
 
 #ifdef NO_ROOT_MAILER

@@ -1633,6 +1633,39 @@ cb_mailsub(const char *file, int line, int column,
     debug_return_bool(true);
 }
 
+static bool
+cb_intercept_type(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
+{
+    debug_decl(cb_intercept_type, SUDOERS_DEBUG_PLUGIN);
+
+    if (op != -1) {
+	/* Set explicitly in sudoers. */
+	if (sd_un->tuple == dso) {
+	    /* Reset intercept_allow_setid default value. */
+	    if (!ISSET(sudo_user.flags, USER_INTERCEPT_SETID))
+		def_intercept_allow_setid = false;
+	}
+    }
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_intercept_allow_setid(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
+{
+    debug_decl(cb_intercept_allow_setid, SUDOERS_DEBUG_PLUGIN);
+
+    /* Operator will be -1 if set by front-end. */
+    if (op != -1) {
+	/* Set explicitly in sudoers. */
+	SET(sudo_user.flags, USER_INTERCEPT_SETID);
+    }
+
+    debug_return_bool(true);
+}
+
 /*
  * Set parse Defaults callbacks.
  * We do this here instead in def_data.in so we don't have to
@@ -1692,6 +1725,8 @@ set_callbacks(void)
     sudo_defs_table[I_MAILTO].callback = cb_mailto;
     sudo_defs_table[I_MAILSUB].callback = cb_mailsub;
     sudo_defs_table[I_PASSPROMPT_REGEX].callback = cb_passprompt_regex;
+    sudo_defs_table[I_INTERCEPT_TYPE].callback = cb_intercept_type;
+    sudo_defs_table[I_INTERCEPT_ALLOW_SETID].callback = cb_intercept_allow_setid;
 
     debug_return;
 }
