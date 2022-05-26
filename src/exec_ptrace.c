@@ -644,7 +644,7 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
 
     /* Reserve argv and envp at the start of argbuf so they are aligned. */
     if ((argc + 1 + envc + 1) * sizeof(unsigned long) >= bufsize) {
-	sudo_warnx("%s", U_("insufficient space for argv and envp"));
+	sudo_warnx("%s", U_("insufficient space for execve arguments"));
 	goto bad;
     }
     argv = (char **)argbuf;
@@ -655,7 +655,8 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     /* Read argv */
     len = ptrace_read_vec(pid, regs, argv_addr, argv, strtab, bufsize);
     if (len == (size_t)-1) {
-	sudo_warn(U_("unable to read execve argv for process %d"), (int)pid);
+	sudo_warn(U_("unable to read execve %s for process %d"),
+	    "argv", (int)pid);
 	goto bad;
     }
     strtab += len;
@@ -664,7 +665,8 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     /* Read envp */
     len = ptrace_read_vec(pid, regs, envp_addr, envp, strtab, bufsize);
     if (len == (size_t)-1) {
-	sudo_warn(U_("unable to read execve envp for process %d"), (int)pid);
+	sudo_warn(U_("unable to read execve %s for process %d"),
+	    "envp", (int)pid);
 	goto bad;
     }
     strtab += len;
@@ -673,7 +675,8 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     /* Read the pathname. */
     len = ptrace_read_string(pid, path_addr, strtab, bufsize);
     if (len == (size_t)-1) {
-	sudo_warn(U_("unable to read execve pathname for process %d"), (int)pid);
+	sudo_warn(U_("unable to read execve %s for process %d"),
+	    "pathname", (int)pid);
 	goto bad;
     }
     pathname = strtab;
