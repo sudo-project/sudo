@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN" "5" "February 16, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "May 26, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -291,6 +291,36 @@ implied_shell=bool
 If the user does not specify a program on the command line,
 \fBsudo\fR
 will pass the plugin the path to the user's shell and set
+\fIimplied_shell\fR.
+.TP 6n
+intercept_ptrace=bool
+Indicates whether or not the system supports intercept
+mode using
+ptrace(2).
+This is currently only true for Linux systems that support
+seccomp(2)
+filtering and the
+\(lqtrap\(rq
+action.
+Other systems will use a dynamic shared object to implement
+intercept.
+.TP 6n
+intercept_setid=bool
+Indicates whether or not the system supports running set-user-ID
+and set-group-ID binaries in intercept mode.
+This is currently only true for Linux systems that support
+seccomp(2)
+filtering and the
+\(lqtrap\(rq
+action.
+On systems that use a dynamic shared object to implement
+intercept, the dynamic linker (ld.so or the equivalent)
+will disable preloading of shared objects when executing a
+set-user-ID or set-group-ID binary.
+This will disable intercept mode for that program and any other
+programs that it executes.
+The policy plugin may refuse to execute a set-user-ID or set-group-ID
+binary in intercept mode to avoid this.
 .TP 6n
 login_class=string
 BSD
@@ -1078,6 +1108,21 @@ The specified
 \fInumber\fR
 must refer to an open file descriptor.
 .TP 6n
+intercept=bool
+If specified,
+\fBsudo\fR
+will intercept attempts to execute a subsequent command and perform
+a policy check via the policy plugin's
+\fBcheck_policy\fR()
+function to determine whether or not the command is permitted.
+This can be used to prevent shell escapes on supported platforms
+but it has a number of limitations.
+See
+\fBPreventing shell escapes\fR
+in
+sudoers(@mansectform@)
+for details.
+.TP 6n
 iolog_compress=bool
 Set to true if the I/O logging plugins, if any, should compress the
 log data.
@@ -1141,6 +1186,24 @@ The nice value, if specified, overrides the priority associated with the
 on
 BSD
 systems.
+.TP 6n
+log_subcmds=bool
+If specified,
+\fBsudo\fR
+will call the audit plugin's
+\fBaccept\fR()
+function to log when the command runs a subsequent command, if supported
+by the system.
+If
+\fIintercept\fR
+is also specified,
+\fIlog_subcmds\fR
+will be ignored.
+See
+\fBPreventing shell escapes\fR
+in
+sudoers(@mansectform@)
+for more information.
 .TP 6n
 noexec=bool
 If set, prevent the command from executing other programs.
@@ -1465,6 +1528,16 @@ umask_override=bool
 Force the value specified by the
 \fIumask\fR
 option to override any umask set by PAM or login.conf.
+.TP 6n
+use_ptrace=bool
+If specified,
+\fBsudo\fR
+will use
+ptrace(2)
+to implement intercept mode if supported by the system.
+This setting has no effect unless
+\fIintercept\fR
+is also set.
 .TP 6n
 use_pty=bool
 Allocate a pseudo-terminal to run the command in, regardless of whether
@@ -5280,7 +5353,7 @@ The
 \fIcmnd_chroot\fR
 and
 \fIcmnd_cwd\fR
-enties were added to the
+entries were added to the
 \fRsettings\fR
 list.
 .TP 6n
@@ -5291,6 +5364,27 @@ field was added to the audit_plugin and approval_plugin structs.
 .TP 6n
 Version 1.18 (sudo 1.9.9)
 The policy may now set resource limit values in the
+\fRcommand_info\fR
+list.
+The
+\fIintercept\fR
+and
+\fIlog_subcmds\fR
+entries were added to the
+\fRcommand_info\fR
+list.
+.TP 6n
+Version 1.19 (sudo 1.9.11)
+The
+\fIintercept_ptrace\fR
+and
+\fIintercept_setid\fR
+entries were added to the
+\fRsettings\fR
+list.
+The
+\fIuser_ptrace\fR
+entry was added to the
 \fRcommand_info\fR
 list.
 .SH "SEE ALSO"
