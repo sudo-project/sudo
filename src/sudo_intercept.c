@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -232,7 +232,7 @@ typedef struct interpose_s {
 static int
 my_execve(const char *cmnd, char * const argv[], char * const envp[])
 {
-    return exec_wrapper(cmnd, argv, environ, false);
+    return exec_wrapper(cmnd, argv, envp, false);
 }
 
 static int
@@ -335,7 +335,7 @@ sudo_shl_get_next(const char *symbol, short type)
 sudo_dso_public int
 execve(const char *cmnd, char * const argv[], char * const envp[])
 {
-    return exec_wrapper(cmnd, argv, environ, false);
+    return exec_wrapper(cmnd, argv, envp, false);
 }
 
 sudo_dso_public int
