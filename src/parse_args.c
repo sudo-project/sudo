@@ -83,6 +83,7 @@ static struct sudo_settings sudo_settings[] = {
     { "askpass" },
     { "intercept_setid" },
     { "intercept_ptrace" },
+    { "apparmor_profile" },
     { NULL }
 };
 

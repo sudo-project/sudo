@@ -306,8 +306,10 @@
 #define def_log_passwords       (sudo_defs_table[I_LOG_PASSWORDS].sd_un.flag)
 #define I_PASSPROMPT_REGEX      152
 #define def_passprompt_regex    (sudo_defs_table[I_PASSPROMPT_REGEX].sd_un.list)
-#define I_INTERCEPT_TYPE        153
+#define I_INTERCEPT_TYPE        154
 #define def_intercept_type      (sudo_defs_table[I_INTERCEPT_TYPE].sd_un.tuple)
+#define I_APPARMOR_PROFILE      153
+#define def_apparmor_profile    (sudo_defs_table[I_APPARMOR_PROFILE].sd_un.str)
 
 enum def_tuple {
     never,

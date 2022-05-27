@@ -479,3 +479,6 @@ intercept_type
 	T_TUPLE
 	"The mechanism used by the intercept and log_subcmds options: %s"
 	dso trace
+apparmor_profile
+	T_STR
+	"AppArmor profile to use in the new security context: %s"

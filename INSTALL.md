@@ -375,6 +375,10 @@ Defaults are listed in brackets after the description.
         ldap_sasl_interactive_bind_s() function is present in the
         LDAP libraries.
 
+    --with-apparmor
+        Enable support for the AppArmor Linux Security Module (LSM) on
+        supported systems.
+
     --with-logincap
         This adds support for login classes specified in `/etc/login.conf`.
         It is enabled by default on BSD/OS, Darwin, FreeBSD, OpenBSD, and

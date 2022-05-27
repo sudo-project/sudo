@@ -689,6 +689,9 @@ command_info_to_details(char * const info[], struct command_details *details)
     for (i = 0; info[i] != NULL; i++) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "    %d: %s", i, info[i]);
 	switch (info[i][0]) {
+	    case 'a':
+		SET_STRING("apparmor_profile=", apparmor_profile);
+		break;
 	    case 'c':
 		SET_STRING("chroot=", chroot)
 		SET_STRING("command=", command)
@@ -895,6 +898,15 @@ command_info_to_details(char * const info[], struct command_details *details)
 	    exit(EXIT_FAILURE);
     }
 #endif
+
+#ifdef HAVE_APPARMOR
+    if (details->apparmor_profile != NULL && apparmor_is_enabled()) {
+	i = apparmor_prepare(details->apparmor_profile);
+	if (i != 0)
+	    exit(EXIT_FAILURE);
+    }
+#endif
+
     debug_return;
 }
 

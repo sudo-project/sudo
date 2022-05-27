@@ -269,6 +269,23 @@ case "$osversion" in
 	make_opts="${make_opts}${make_opts+ }"'docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
 	;;
     deb*|ubu*)
+	# AppArmor is enabled by default starting in
+	# Debian: Debian 10 (Buster)
+	# Ubuntu: Ubuntu 12.04 (Precise Pangolin)
+	osmajor=`sed -n -e 's/^VERSION_ID=\"\([0-9]*\).*$/\1/p' /etc/os-release`
+	case "$osversion" in
+	    deb*)
+		if [ -z $osmajor ] || [ $osmajor -ge 10 ]; then
+		    with_apparmor=true
+		fi
+		;;
+	    ubu*)
+		if [ -z $osmajor ] || [ $osmajor -ge 14 ]; then
+		    with_apparmor=true
+		fi
+		;;
+	esac
+
 	# Encrypted remote I/O log support.
 	with_openssl=true
 	# Python plugins
@@ -295,6 +312,9 @@ case "$osversion" in
 		configure_opts="${configure_opts}${configure_opts+$tab}--with-sssd-lib=/usr/lib/$MULTIARCH"
 	    fi
 	fi
+	if [ X"$with_apparmor" = X"true" ]; then
+		configure_opts="${configure_opts}${configure_opts+$tab}--with-apparmor"
+	fi
 	configure_opts="--prefix=/usr
 		--with-all-insults
 		--with-pam
@@ -311,7 +331,6 @@ case "$osversion" in
 		--with-sendmail=/usr/sbin/sendmail
 		--mandir=/usr/share/man
 		--libexecdir=/usr/lib
-		--with-selinux
 		--with-linux-audit
 		$configure_opts"
 	# Use correct libaudit dependency

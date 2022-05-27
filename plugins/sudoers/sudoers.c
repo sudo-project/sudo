@@ -1825,6 +1825,9 @@ sudo_user_free(void)
     free(user_role);
     free(user_type);
 #endif
+#ifdef HAVE_APPARMOR
+    free(user_apparmor_profile);
+#endif
 #ifdef HAVE_PRIV_SET
     free(runas_privs);
     free(runas_limitprivs);

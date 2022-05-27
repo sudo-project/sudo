@@ -328,6 +328,16 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	    continue;
 	}
 #endif /* HAVE_SELINUX */
+#ifdef HAVE_APPARMOR
+	if (MATCHES(*cur, "apparmor_profile=")) {
+		CHECK(*cur, "apparmor_profile=");
+		free(user_apparmor_profile);
+		user_apparmor_profile = strdup(*cur + sizeof("apparmor_profile=") - 1);
+		if (user_apparmor_profile == NULL)
+		goto oom;
+		continue;
+	}
+#endif /* HAVE_APPARMOR */
 #ifdef HAVE_BSD_AUTH_H
 	if (MATCHES(*cur, "bsdauth_type=")) {
 	    CHECK(*cur, "bsdauth_type=");
@@ -957,6 +967,12 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 	    goto oom;
     }
 #endif /* HAVE_SELINUX */
+#ifdef HAVE_APPARMOR
+	if (user_apparmor_profile != NULL) {
+	if ((command_info[info_len++] = sudo_new_key_val("apparmor_profile", user_apparmor_profile)) == NULL)
+		goto oom;
+	}
+#endif /* HAVE_APPARMOR */
 #ifdef HAVE_PRIV_SET
     if (runas_privs != NULL) {
 	if ((command_info[info_len++] = sudo_new_key_val("runas_privs", runas_privs)) == NULL)

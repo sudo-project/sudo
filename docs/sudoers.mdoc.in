@@ -21,6 +21,7 @@
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
 .nr SL @SEMAN@
+.nr AA @AAMAN@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
@@ -1231,12 +1232,22 @@ Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 .el Option_Spec ::= (SELinux_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
 .\}
 .el \{\
+.ie \n(AA \{\
+.ie \n(PS Option_Spec ::= (AppArmor_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
+.el Option_Spec ::= (AppArmor_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
+.\}
+.el \{\
 .ie \n(PS Option_Spec ::= (Solaris_Priv_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
 .el Option_Spec ::= (Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
+.\}
 .\}
 
 .if \n(SL \{\
 SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
+
+.\}
+.if \n(AA \{\
+AppArmor_Spec ::= 'APPARMOR_PROFILE=profile'
 
 .\}
 .if \n(PS \{\
@@ -1427,6 +1438,9 @@ Options may consist of
 .if \n(SL \{\
 SELinux roles and/or types,
 .\}
+.if \n(AA \{\
+AppArmor profiles,
+.\}
 .if \n(PS \{\
 Solaris privileges sets,
 .\}
@@ -1456,6 +1470,55 @@ specified in
 A role or type specified on the command line,
 however, will supersede the values in
 .Em sudoers .
+.\}
+.if \n(AA \{\
+.Ss AppArmor_Spec
+On systems supporting AppArmor,
+.Em sudoers
+file entries may optionally specify an AppArmor profile that should be
+used to confine a command.
+If an AppArmor profile is specified with the command, it will override
+any default values specified in
+.Em sudoers .
+Appropriate profile transition rules must be defined to support the
+profile change specified for a user.
+.Pp
+AppArmor profiles can be specified in any way that complies with the
+rules of
+.Xr aa_change_profile 2 .
+For instance, in the following
+.Em sudoers
+entry
+.Bd -literal
+alice	ALL = (root)	APPARMOR_PROFILE=my-profile	ALL
+.Ed
+.Pp
+the user
+.Sy alice
+may run any command as root under confinement by the profile
+.Ql my-profile .
+You can also stack profiles, or allow a user to run commands unconfined by
+any profile. E.g.,
+.Bd -literal
+bob	ALL = (root)	APPARMOR_PROFILE=foo//&bar	/usr/bin/vi
+cathy	ALL = (root)	APPARMOR_PROFILE=unconfined	/bin/ls
+.Ed
+.Pp
+These
+.Em sudoers
+entries allow user
+.Sy bob
+to run
+.Pa /usr/bin/vi
+as root under the stacked profiles
+.Ql foo
+and
+.Ql bar ,
+and user
+.Sy cathy
+to run
+.Pa /bin/ls
+without any confinement at all.
 .\}
 .if \n(PS \{\
 .Ss Solaris_Priv_Spec
@@ -3931,6 +3994,20 @@ which does not create a new PAM session.
 .Pp
 .Sy Strings :
 .Bl -tag -width 16n
+.if \n(AA \{\
+.It apparmor_profile
+The default AppArmor profile to transition into when executing the
+command.
+The default
+.Em apparmor_profile
+can be overriden for individual
+.Em sudoers
+entries by specifying the
+.Em APPARMOR_PROFILE
+option.
+This option is only available when sudo is built with AppArmor
+support.
+.\}
 .It authfail_message
 Message that is displayed after a user fails to authenticate.
 The message may include the

@@ -67,6 +67,7 @@ AC_SUBST([BAMAN])
 AC_SUBST([LCMAN])
 AC_SUBST([PSMAN])
 AC_SUBST([SEMAN])
+AC_SUBST([AAMAN])
 AC_SUBST([devdir])
 AC_SUBST([mansectsu])
 AC_SUBST([mansectform])
@@ -251,6 +252,7 @@ BAMAN=0
 LCMAN=0
 PSMAN=0
 SEMAN=0
+AAMAN=0
 LIBINTL=
 LIBCRYPTO=
 LIBMD=
@@ -1482,6 +1484,19 @@ AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])
     *)		AC_MSG_ERROR([--with-selinux does not take an argument.])
 		;;
 esac], [with_selinux=no])
+
+AC_ARG_WITH(apparmor, [AS_HELP_STRING([--with-apparmor], [enable AppArmor support])],
+[case $with_apparmor in
+    yes)        AC_DEFINE(HAVE_APPARMOR)
+                AAMAN=1
+                SUDO_OBJS="${SUDO_OBJS} apparmor.o"
+                AC_CHECK_LIB(apparmor, aa_change_profile,
+                    [SUDO_LIBS="${SUDO_LIBS} -lapparmor"])
+                ;;
+    no)         ;;
+    *)          AC_MSG_ERROR([--with-apparmor does not take an argument.])
+
+esac], [with_apparmor=no])
 
 AC_ARG_ENABLE(sasl,
 [AS_HELP_STRING([--enable-sasl], [Enable/disable LDAP SASL support])],
@@ -5416,6 +5431,7 @@ AH_TEMPLATE(HAVE_PROJECT_H, [Define to 1 if you have the <project.h> header file
 AH_TEMPLATE(HAVE_SECURID, [Define to 1 if you use SecurID for authentication.])
 AH_TEMPLATE(HAVE_SELINUX, [Define to 1 to enable SELinux RBAC support.])
 AH_TEMPLATE(HAVE_SETKEYCREATECON, [Define to 1 if you have the `setkeycreatecon' function.])
+AH_TEMPLATE(HAVE_APPARMOR, [Define to 1 to enable AppArmor support.])
 AH_TEMPLATE(HAVE_SHL_LOAD, [Define to 1 if you have the `shl_load' function.])
 AH_TEMPLATE(HAVE_SKEY, [Define to 1 if you use S/Key.])
 AH_TEMPLATE(HAVE_SKEYACCESS, [Define to 1 if your S/Key library has skeyaccess().])
