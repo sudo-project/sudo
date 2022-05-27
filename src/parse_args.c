@@ -82,6 +82,7 @@ static struct sudo_settings sudo_settings[] = {
     { "cmnd_cwd" },
     { "askpass" },
     { "intercept_setid" },
+    { "intercept_ptrace" },
     { "apparmor_profile" },
     { NULL }
 };
@@ -586,8 +587,10 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 #ifdef ENABLE_SUDO_PLUGIN_API
     sudo_settings[ARG_PLUGIN_DIR].value = sudo_conf_plugin_dir_path();
 #endif
-    if (have_seccomp_action("trap"))
+    if (exec_ptrace_intercept_supported())
 	sudo_settings[ARG_INTERCEPT_SETID].value = "true";
+    if (exec_ptrace_subcmds_supported())
+	sudo_settings[ARG_INTERCEPT_PTRACE].value = "true";
 
     if (mode == MODE_HELP)
 	help();

@@ -619,7 +619,7 @@ intercept_read(int fd, struct intercept_closure *closure)
 unpack:
     req = intercept_request__unpack(NULL, closure->len, closure->buf);
     if (req == NULL) {
-	sudo_warnx("unable to unpack %s size %zu", "InterceptRequest",
+	sudo_warnx(U_("unable to unpack %s size %zu"), "InterceptRequest",
 	    (size_t)closure->len);
 	goto done;
     }

@@ -44,6 +44,12 @@ static struct def_values def_data_log_format[] = {
     { NULL, 0 },
 };
 
+static struct def_values def_data_intercept_type[] = {
+    { "dso", dso },
+    { "trace", trace },
+    { NULL, 0 },
+};
+
 struct sudo_defs_types sudo_defs_table[] = {
     {
 	"syslog", T_LOGFAC|T_BOOL,
@@ -657,6 +663,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"passprompt_regex", T_LIST|T_SPACE|T_BOOL,
 	N_("List of regular expressions to use when matching a password prompt"),
 	NULL,
+    }, {
+	"intercept_type", T_TUPLE,
+	N_("The mechanism used by the intercept and log_subcmds options: %s"),
+	def_data_intercept_type,
     }, {
 	"apparmor_profile", T_STR,
 	N_("AppArmor profile to use in the new security context: %s"),

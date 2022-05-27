@@ -743,7 +743,7 @@ handle_client_message(uint8_t *buf, size_t len,
     /* TODO: can we extract type_case without unpacking for relay case? */
     msg = client_message__unpack(NULL, len, buf);
     if (msg == NULL) {
-	sudo_warnx("unable to unpack %s size %zu", "ClientMessage", len);
+	sudo_warnx(U_("unable to unpack %s size %zu"), "ClientMessage", len);
 	debug_return_bool(false);
     }
 

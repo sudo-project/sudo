@@ -186,8 +186,9 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
     }
 
     /* Parse command line settings. */
-    sudo_mode = 0;
+    sudo_user.flags = 0;
     user_closefrom = -1;
+    sudo_mode = 0;
     for (cur = info->settings; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "closefrom=")) {
 	    errno = 0;
@@ -297,9 +298,15 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 		goto oom;
 	    continue;
 	}
+	if (MATCHES(*cur, "intercept_ptrace=")) {
+	    if (parse_bool(*cur, sizeof("intercept_ptrace") - 1, &sudo_user.flags,
+		    HAVE_INTERCEPT_PTRACE) == -1)
+		goto bad;
+	    continue;
+	}
 	if (MATCHES(*cur, "intercept_setid=")) {
-	    if (parse_bool(*cur, sizeof("intercept_setid") - 1,
-		&sudo_user.flags, CAN_INTERCEPT_SETID) == -1)
+	    if (parse_bool(*cur, sizeof("intercept_setid") - 1, &sudo_user.flags,
+		    CAN_INTERCEPT_SETID) == -1)
 		goto bad;
 	    continue;
 	}
@@ -567,6 +574,19 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	goto bad;
     }
 
+    /*
+     * Set intercept defaults based on flags set above.
+     * We pass -1 as the operator to indicate it is set by the front end.
+     */
+    if (ISSET(sudo_user.flags, HAVE_INTERCEPT_PTRACE)) {
+	if (!append_default("intercept_type", "trace", -1, NULL, defaults))
+	    goto oom;
+    }
+    if (ISSET(sudo_user.flags, CAN_INTERCEPT_SETID)) {
+	if (!append_default("intercept_allow_setid", NULL, -1, NULL, defaults))
+	    goto oom;
+    }
+
 #ifdef NO_ROOT_MAILER
     eventlog_set_mailuid(user_uid);
 #endif
@@ -615,7 +635,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     }
 
     /* Increase the length of command_info as needed, it is *not* checked. */
-    command_info = calloc(70, sizeof(char *));
+    command_info = calloc(71, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
 
@@ -785,6 +805,10 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     }
     if (def_intercept) {
 	if ((command_info[info_len++] = strdup("intercept=true")) == NULL)
+	    goto oom;
+    }
+    if (def_intercept_type == trace) {
+	if ((command_info[info_len++] = strdup("use_ptrace=true")) == NULL)
 	    goto oom;
     }
     if (def_noexec) {

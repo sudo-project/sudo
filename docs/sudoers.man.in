@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "May 4, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "May 24, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3363,18 +3363,20 @@ To prevent this from happening,
 will not permit a set-user-ID or set-group-ID program to be run in
 intercept mode unless
 \fIintercept_allow_setid\fR
-is set.
+is enable.
 This flag has no effect unless the
 \fIintercept\fR
 flag is enabled or the
 \fIINTERCEPT\fR
 tag has been set for the command.
 This flag is
-\fIoff\fR
-by default except on Linux systems that support
-seccomp(2)
-filtering, where it defaults to
-\fIon\fR.
+\fIon\fR
+by default when the
+\fIintercept_type\fR
+option is set to
+\fItrace\fR,
+otherwise it default to
+\fIoff\fR.
 .sp
 This setting is only supported by version 1.9.8 or higher.
 .TP 18n
@@ -4283,6 +4285,63 @@ list or the
 option is disabled.
 The default is
 \fI@editor@\fR.
+.TP 18n
+intercept_type
+The underlying mechanism used by the
+\fIintercept\fR
+and
+\fIlog_subcmds\fR
+options.
+It has the following possible values:
+.PP
+.RS 18n
+.PD 0
+.TP 8n
+dso
+Preload a dynamic shared object (shared library) that intercepts the
+\fBexecl\fR(),
+\fBexecle\fR(),
+\fBexeclp\fR(),
+\fBexecv\fR(),
+\fBexecve\fR(),
+\fBexecvp\fR(),
+and
+\fBexecvpe\fR()
+library functions.
+A value of
+\fIdso\fR
+is incompatible with
+\fBsudo\fR's
+SELinux RBAC support.
+.PD
+.TP 8n
+trace
+Use
+ptrace(2)
+to intercept the
+execve(2)
+system call.
+This is only supported on Linux systems where
+seccomp(2)
+filtering is enabled.
+If the
+\fI/proc/sys/kernel/seccomp/actions_avail\fR
+file is missing or does not contain a
+\(lqtrap\(rq
+element, setting
+\fIintercept_type\fR
+to
+\fItrace\fR
+will have no effect and
+\fIdso\fR
+will be used instead.
+.PP
+The default is to use
+\fItrace\fR
+if it is supported by the system and
+\fIdso\fR
+if it is not.
+.RE
 .TP 18n
 iolog_dir
 The top-level directory to use when constructing the path name for
@@ -6846,7 +6905,7 @@ by default and interferes with file descriptor inheritance.
 .sp
 Linux systems that support
 seccomp(2)
-filtering will use a different method involving
+filtering can use a different method involving
 ptrace(2)
 instead of pre-loading a shared library.
 This method supports both static and dynamic executables as well as

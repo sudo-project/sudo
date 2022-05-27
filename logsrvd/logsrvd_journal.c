@@ -280,7 +280,7 @@ journal_seek(struct timespec *target, struct connection_closure *closure)
 	client_message__free_unpacked(msg, NULL);
 	msg = client_message__unpack(NULL, msg_len, buf);
 	if (msg == NULL) {
-	    sudo_warnx("unable to unpack %s size %zu", "ClientMessage",
+	    sudo_warnx(U_("unable to unpack %s size %zu"), "ClientMessage",
 		(size_t)msg_len);
 	    closure->errstr = _("invalid journal file, unable to restart");
 	    break;

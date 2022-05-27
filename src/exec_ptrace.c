@@ -51,6 +51,15 @@
 # include "exec_intercept.h"
 # include "exec_ptrace.h"
 
+/* We need to take care when ptracing 32-bit binaries on 64-bit kernels. */
+# ifdef __LP64__
+#  define COMPAT_FLAG 0x01
+# else
+#  define COMPAT_FLAG 0x00
+# endif
+
+static int seccomp_trap_supported = -1;
+
 /* Register getters and setters. */
 # ifdef SECCOMP_AUDIT_ARCH_COMPAT
 static inline unsigned long
@@ -107,9 +116,9 @@ static inline void
 set_sc_arg1(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
     if (regs->compat) {
-	compat_reg_arg1(regs->u.compat) = addr;
+	compat_reg_set_arg1(regs->u.compat, addr);
     } else {
-	reg_arg1(regs->u.native) = addr;
+	reg_set_arg1(regs->u.native, addr);
     }
 }
 
@@ -127,9 +136,9 @@ static inline void
 set_sc_arg2(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
     if (regs->compat) {
-	compat_reg_arg2(regs->u.compat) = addr;
+	compat_reg_set_arg2(regs->u.compat, addr);
     } else {
-	reg_arg2(regs->u.native) = addr;
+	reg_set_arg2(regs->u.native, addr);
     }
 }
 
@@ -148,9 +157,9 @@ static inline void
 set_sc_arg3(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
     if (regs->compat) {
-	compat_reg_arg3(regs->u.compat) = addr;
+	compat_reg_set_arg3(regs->u.compat, addr);
     } else {
-	reg_arg3(regs->u.native) = addr;
+	reg_set_arg3(regs->u.native, addr);
     }
 }
 
@@ -168,9 +177,9 @@ static inline void
 set_sc_arg4(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
     if (regs->compat) {
-	compat_reg_arg4(regs->u.compat) = addr;
+	compat_reg_set_arg4(regs->u.compat, addr);
     } else {
-	reg_arg4(regs->u.native) = addr;
+	reg_set_arg4(regs->u.native, addr);
     }
 }
 #  endif /* notyet */
@@ -210,7 +219,7 @@ get_sc_arg1(struct sudo_ptrace_regs *regs)
 static inline void
 set_sc_arg1(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
-    reg_arg1(regs->u.native) = addr;
+    reg_set_arg1(regs->u.native, addr);
 }
 
 static inline unsigned long
@@ -222,7 +231,7 @@ get_sc_arg2(struct sudo_ptrace_regs *regs)
 static inline void
 set_sc_arg2(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
-    reg_arg2(regs->u.native) = addr;
+    reg_set_arg2(regs->u.native, addr);
 }
 
 static inline unsigned long
@@ -235,7 +244,7 @@ get_sc_arg3(struct sudo_ptrace_regs *regs)
 static inline void
 set_sc_arg3(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
-    reg_arg3(regs->u.native) = addr;
+    reg_set_arg3(regs->u.native, addr);
 }
 
 static inline unsigned long
@@ -247,7 +256,7 @@ get_sc_arg4(struct sudo_ptrace_regs *regs)
 static inline void
 set_sc_arg4(struct sudo_ptrace_regs *regs, unsigned long addr)
 {
-    reg_arg4(regs->u.native) = addr;
+    reg_set_arg4(regs->u.native, addr);
 }
 #  endif /* notyet */
 # endif /* SECCOMP_AUDIT_ARCH_COMPAT */
@@ -262,13 +271,19 @@ set_sc_arg4(struct sudo_ptrace_regs *regs, unsigned long addr)
 static bool
 ptrace_getregs(int pid, struct sudo_ptrace_regs *regs, bool compat)
 {
-    struct iovec iov;
     debug_decl(ptrace_getregs, SUDO_DEBUG_EXEC);
 
+# ifdef __mips__
+    /* PTRACE_GETREGSET has bugs with the MIPS o32 ABI at least. */
+    if (ptrace(PTRACE_GETREGS, pid, NULL, &regs->u) == -1)
+	debug_return_bool(false);
+# else
+    struct iovec iov;
     iov.iov_base = &regs->u;
     iov.iov_len = sizeof(regs->u);
     if (ptrace(PTRACE_GETREGSET, pid, (void *)NT_PRSTATUS, &iov) == -1)
 	debug_return_bool(false);
+# endif /* __mips__ */
 
     /* Machine-dependent parameters to support compat binaries. */
     if (compat) {
@@ -289,21 +304,19 @@ ptrace_getregs(int pid, struct sudo_ptrace_regs *regs, bool compat)
 static bool
 ptrace_setregs(int pid, struct sudo_ptrace_regs *regs)
 {
-    struct iovec iov;
     debug_decl(ptrace_setregs, SUDO_DEBUG_EXEC);
 
-# ifdef SECCOMP_AUDIT_ARCH_COMPAT
-    if (regs->compat) {
-	iov.iov_base = &regs->u.compat;
-	iov.iov_len = sizeof(regs->u.compat);
-    } else
-#endif
-    {
-	iov.iov_base = &regs->u.native;
-	iov.iov_len = sizeof(regs->u.native);
-    }
+# ifdef __mips__
+    /* PTRACE_SETREGSET has bugs with the MIPS o32 ABI at least. */
+    if (ptrace(PTRACE_SETREGS, pid, NULL, &regs->u) == -1)
+	debug_return_bool(false);
+# else
+    struct iovec iov;
+    iov.iov_base = &regs->u;
+    iov.iov_len = sizeof(regs->u);
     if (ptrace(PTRACE_SETREGSET, pid, (void *)NT_PRSTATUS, &iov) == -1)
 	debug_return_bool(false);
+# endif /* __mips__ */
 
     debug_return_bool(true);
 }
@@ -631,7 +644,7 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
 
     /* Reserve argv and envp at the start of argbuf so they are aligned. */
     if ((argc + 1 + envc + 1) * sizeof(unsigned long) >= bufsize) {
-	sudo_warnx("%s", U_("insufficient space for argv and envp"));
+	sudo_warnx("%s", U_("insufficient space for execve arguments"));
 	goto bad;
     }
     argv = (char **)argbuf;
@@ -642,7 +655,8 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     /* Read argv */
     len = ptrace_read_vec(pid, regs, argv_addr, argv, strtab, bufsize);
     if (len == (size_t)-1) {
-	sudo_warn(U_("unable to read execve argv for process %d"), (int)pid);
+	sudo_warn(U_("unable to read execve %s for process %d"),
+	    "argv", (int)pid);
 	goto bad;
     }
     strtab += len;
@@ -651,7 +665,8 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     /* Read envp */
     len = ptrace_read_vec(pid, regs, envp_addr, envp, strtab, bufsize);
     if (len == (size_t)-1) {
-	sudo_warn(U_("unable to read execve envp for process %d"), (int)pid);
+	sudo_warn(U_("unable to read execve %s for process %d"),
+	    "envp", (int)pid);
 	goto bad;
     }
     strtab += len;
@@ -660,7 +675,8 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     /* Read the pathname. */
     len = ptrace_read_string(pid, path_addr, strtab, bufsize);
     if (len == (size_t)-1) {
-	sudo_warn(U_("unable to read execve pathname for process %d"), (int)pid);
+	sudo_warn(U_("unable to read execve %s for process %d"),
+	    "pathname", (int)pid);
 	goto bad;
     }
     pathname = strtab;
@@ -736,7 +752,7 @@ done:
  * Check whether seccomp(2) filtering supports ptrace(2) traps.
  * Only supported by Linux 4.14 and higher.
  */
-bool
+static bool
 have_seccomp_action(const char *action)
 {
     char line[LINE_MAX];
@@ -773,16 +789,27 @@ set_exec_filter(void)
     struct sock_filter exec_filter[] = {
 	/* Load architecture value (AUDIT_ARCH_*) into the accumulator. */
 	BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, arch)),
+# ifdef SECCOMP_AUDIT_ARCH_COMPAT2
+	/* Match on the compat2 architecture or jump to the compat check. */
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SECCOMP_AUDIT_ARCH_COMPAT2, 0, 4),
+	/* Load syscall number into the accumulator. */
+	BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, nr)),
+	/* Jump to trace for compat2 execve(2)/execveat(2), else allow. */
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, COMPAT2_execve, 1, 0),
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, COMPAT2_execveat, 0, 13),
+	/* Trace execve(2)/execveat(2) syscalls (w/ compat flag) */
+	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE | COMPAT_FLAG),
+# endif /* SECCOMP_AUDIT_ARCH_COMPAT2 */
 # ifdef SECCOMP_AUDIT_ARCH_COMPAT
 	/* Match on the compat architecture or jump to the native arch check. */
 	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SECCOMP_AUDIT_ARCH_COMPAT, 0, 4),
 	/* Load syscall number into the accumulator. */
 	BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, nr)),
-	/* Jump to trace for compat execve(2)/execveat(2), else try native. */
+	/* Jump to trace for compat execve(2)/execveat(2), else allow. */
 	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, COMPAT_execve, 1, 0),
 	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, COMPAT_execveat, 0, 8),
 	/* Trace execve(2)/execveat(2) syscalls (w/ compat flag) */
-	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE | 0x1),
+	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE | COMPAT_FLAG),
 # endif /* SECCOMP_AUDIT_ARCH_COMPAT */
 	/* Jump to the end unless the architecture matches. */
 	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SECCOMP_AUDIT_ARCH, 0, 6),
@@ -1274,6 +1301,29 @@ exec_ptrace_stopped(pid_t pid, int status, void *intercept)
 
     debug_return_bool(group_stop);
 }
+
+bool
+exec_ptrace_intercept_supported(void)
+{
+# ifdef __mips__
+    /* MIPS doesn't support changing the syscall return value. */
+    return false;
+# else
+    if (seccomp_trap_supported == -1)
+	seccomp_trap_supported = have_seccomp_action("trap");
+
+    return seccomp_trap_supported == true;
+# endif
+}
+
+bool
+exec_ptrace_subcmds_supported(void)
+{
+    if (seccomp_trap_supported == -1)
+	seccomp_trap_supported = have_seccomp_action("trap");
+
+    return seccomp_trap_supported == true;
+}
 #else
 /* STUB */
 bool
@@ -1295,4 +1345,41 @@ exec_ptrace_seize(pid_t child)
 {
     return true;
 }
+
+/* STUB */
+bool
+exec_ptrace_intercept_supported(void)
+{
+    return false;
+}
+
+/* STUB */
+bool
+exec_ptrace_subcmds_supported(void)
+{
+    return false;
+}
 #endif /* HAVE_PTRACE_INTERCEPT */
+
+/*
+ * Adjust flags based on the availability of ptrace support.
+ */
+void
+exec_ptrace_fix_flags(struct command_details *details)
+{
+    debug_decl(exec_ptrace_fix_flags, SUDO_DEBUG_EXEC);
+
+    if (ISSET(details->flags, CD_USE_PTRACE)) {
+	/* If both CD_INTERCEPT and CD_LOG_SUBCMDS set, CD_INTERCEPT wins. */
+	if (ISSET(details->flags, CD_INTERCEPT)) {
+	    if (!exec_ptrace_intercept_supported())
+		CLR(details->flags, CD_USE_PTRACE);
+	} else if (ISSET(details->flags, CD_LOG_SUBCMDS)) {
+	    if (!exec_ptrace_subcmds_supported())
+		CLR(details->flags, CD_USE_PTRACE);
+	} else {
+	    CLR(details->flags, CD_USE_PTRACE);
+	}
+    }
+    debug_return;
+}

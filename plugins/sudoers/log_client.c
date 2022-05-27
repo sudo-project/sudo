@@ -1615,7 +1615,7 @@ handle_server_message(uint8_t *buf, size_t len,
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: unpacking ServerMessage", __func__);
     msg = server_message__unpack(NULL, len, buf);
     if (msg == NULL) {
-	sudo_warnx("%s", U_("unable to unpack ServerMessage"));
+	sudo_warnx(U_("unable to unpack %s size %zu"), "ServerMessage", len);
 	debug_return_bool(false);
     }
 

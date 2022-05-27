@@ -103,7 +103,8 @@
 #define ARG_CWD			24
 #define ARG_ASKPASS		25
 #define ARG_INTERCEPT_SETID	26
-#define ARG_APPARMOR_PROFILE	27
+#define ARG_INTERCEPT_PTRACE	27
+#define ARG_APPARMOR_PROFILE	28
 
 /*
  * Flags for tgetpass()
@@ -344,6 +345,8 @@ int serialize_rlimits(char **info, size_t info_max);
 bool parse_policy_rlimit(const char *str);
 
 /* exec_ptrace.c */
-bool have_seccomp_action(const char *action);
+void exec_ptrace_fix_flags(struct command_details *details);
+bool exec_ptrace_intercept_supported(void);
+bool exec_ptrace_subcmds_supported(void);
 
 #endif /* SUDO_SUDO_H */
