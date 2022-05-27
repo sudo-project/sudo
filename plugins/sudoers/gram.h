@@ -96,16 +96,17 @@ extern int sudoersdebug;
     CWD = 297,                     /* CWD  */
     TYPE = 298,                    /* TYPE  */
     ROLE = 299,                    /* ROLE  */
-    PRIVS = 300,                   /* PRIVS  */
-    LIMITPRIVS = 301,              /* LIMITPRIVS  */
-    CMND_TIMEOUT = 302,            /* CMND_TIMEOUT  */
-    NOTBEFORE = 303,               /* NOTBEFORE  */
-    NOTAFTER = 304,                /* NOTAFTER  */
-    MYSELF = 305,                  /* MYSELF  */
-    SHA224_TOK = 306,              /* SHA224_TOK  */
-    SHA256_TOK = 307,              /* SHA256_TOK  */
-    SHA384_TOK = 308,              /* SHA384_TOK  */
-    SHA512_TOK = 309               /* SHA512_TOK  */
+    APPARMOR_PROFILE = 300,        /* APPARMOR_PROFILE  */
+    PRIVS = 301,                   /* PRIVS  */
+    LIMITPRIVS = 302,              /* LIMITPRIVS  */
+    CMND_TIMEOUT = 303,            /* CMND_TIMEOUT  */
+    NOTBEFORE = 304,               /* NOTBEFORE  */
+    NOTAFTER = 305,                /* NOTAFTER  */
+    MYSELF = 306,                  /* MYSELF  */
+    SHA224_TOK = 307,              /* SHA224_TOK  */
+    SHA256_TOK = 308,              /* SHA256_TOK  */
+    SHA384_TOK = 309,              /* SHA384_TOK  */
+    SHA512_TOK = 310               /* SHA512_TOK  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -156,16 +157,17 @@ extern int sudoersdebug;
 #define CWD 297
 #define TYPE 298
 #define ROLE 299
-#define PRIVS 300
-#define LIMITPRIVS 301
-#define CMND_TIMEOUT 302
-#define NOTBEFORE 303
-#define NOTAFTER 304
-#define MYSELF 305
-#define SHA224_TOK 306
-#define SHA256_TOK 307
-#define SHA384_TOK 308
-#define SHA512_TOK 309
+#define APPARMOR_PROFILE 300
+#define PRIVS 301
+#define LIMITPRIVS 302
+#define CMND_TIMEOUT 303
+#define NOTBEFORE 304
+#define NOTAFTER 305
+#define MYSELF 306
+#define SHA224_TOK 307
+#define SHA256_TOK 308
+#define SHA384_TOK 309
+#define SHA512_TOK 310
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -185,7 +187,7 @@ union YYSTYPE
     char *string;
     int tok;
 
-#line 189 "y.tab.h"
+#line 191 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

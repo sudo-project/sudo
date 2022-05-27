@@ -835,6 +835,7 @@ mansectmisc
 mansectform
 mansectsu
 devdir
+AAMAN
 SEMAN
 PSMAN
 LCMAN
@@ -1038,6 +1039,7 @@ enable_shared_libutil
 enable_tmpfiles_d
 enable_devsearch
 with_selinux
+with_apparmor
 enable_sasl
 enable_timestamp_type
 enable_offensive_insults
@@ -1883,6 +1885,7 @@ Optional Packages:
   --with-man              manual pages use man macros
   --with-mdoc             manual pages use mdoc macros
   --with-selinux          enable SELinux support
+  --with-apparmor         enable AppArmor support
   --with-pic[=PKGS]       try to use only PIC/non-PIC objects [default=use
                           both]
   --with-aix-soname=aix|svr4|both
@@ -3572,6 +3575,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -3643,6 +3647,7 @@ BAMAN=0
 LCMAN=0
 PSMAN=0
 SEMAN=0
+AAMAN=0
 LIBINTL=
 LIBCRYPTO=
 LIBMD=
@@ -6851,6 +6856,26 @@ fi
 esac
 else $as_nop
   with_selinux=no
+fi
+
+
+
+# Check whether --with-apparmor was given.
+if test ${with_apparmor+y}
+then :
+  withval=$with_apparmor; case $with_apparmor in
+    yes)        printf "%s\n" "#define HAVE_APPARMOR 1" >>confdefs.h
+
+                AAMAN=1
+		SUDO_LIBS="${SUDO_LIBS} -lapparmor"
+                SUDO_OBJS="${SUDO_OBJS} apparmor.o"
+                ;;
+    no)         ;;
+    *)          as_fn_error $? "--with-apparmor does not take an argument." "$LINENO" 5
+
+esac
+else $as_nop
+  with_apparmor=no
 fi
 
 
@@ -34863,6 +34888,7 @@ printf "%s\n" "$as_me: warning: the $rundir/ts directory must be cleared at boot
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 printf "%s\n" "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
 
 
 

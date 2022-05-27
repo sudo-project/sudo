@@ -1489,9 +1489,8 @@ AC_ARG_WITH(apparmor, [AS_HELP_STRING([--with-apparmor], [enable AppArmor suppor
 [case $with_apparmor in
     yes)        AC_DEFINE(HAVE_APPARMOR)
                 AAMAN=1
+		SUDO_LIBS="${SUDO_LIBS} -lapparmor"
                 SUDO_OBJS="${SUDO_OBJS} apparmor.o"
-                AC_CHECK_LIB(apparmor, aa_change_profile,
-                    [SUDO_LIBS="${SUDO_LIBS} -lapparmor"])
                 ;;
     no)         ;;
     *)          AC_MSG_ERROR([--with-apparmor does not take an argument.])
