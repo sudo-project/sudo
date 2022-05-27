@@ -4000,7 +4000,7 @@ The default AppArmor profile to transition into when executing the
 command.
 The default
 .Em apparmor_profile
-can be overriden for individual
+can be overridden for individual
 .Em sudoers
 entries by specifying the
 .Em APPARMOR_PROFILE

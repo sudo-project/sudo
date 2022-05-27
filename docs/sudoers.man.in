@@ -4222,7 +4222,7 @@ The default AppArmor profile to transition into when executing the
 command.
 The default
 \fIapparmor_profile\fR
-can be overriden for individual
+can be overridden for individual
 \fIsudoers\fR
 entries by specifying the
 \fIAPPARMOR_PROFILE\fR
