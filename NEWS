@@ -42,15 +42,29 @@ What's new in Sudo 1.9.11
    if the command was suspended or received a window size change
    event.
 
- * The "intercept" and "log_subcmds" functionality will now use
+ * Fixed a potential crash in sudo_logsrvd when the "tls_dhparams"
+   configuration setting was used.
+
+ * The "intercept" and "log_subcmds" functionality can now use
    ptrace(2) on Linux systems that support seccomp(2) filtering.
    This has the advantage of working for both static and dynamic
-   binaries and can work with sudo's SELinux RBAC mode.  Currently,
-   this is limited to systems with 32-bit and 64-bit Intel and
-   64-bit ARM CPUs.  Support for other CPU types can be added after
-   sufficient testing.
+   binaries and can work with sudo's SELinux RBAC mode.  The following
+   architectures are currently supported: i386, x86_64, aarch64,
+   arm, mips (log_subcmds only), powerpc, riscv, and s390x.  The
+   default is to use ptrace(2) where possible; the new "intercept_type"
+   sudoers setting can be used to explicitly set the type.
 
  * New Georgian translation from translationproject.org.
+
+ * Fixed creating packages on CentOS Stream.
+
+ * Fixed a bug in the intercept and log_subcmds support where
+   the execve(2) wrapper was using the current environment instead
+   of the passed environment pointer.  Bug #1030.
+
+ * Added AppArmor integration for Linux.  A sudoers rule can now
+   specify an APPARMOR_PROFILE option to run a command confined by
+   the named AppArmor profile.
 
 What's new in Sudo 1.9.10
 
