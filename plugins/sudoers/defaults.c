@@ -935,38 +935,38 @@ store_timespec(const char *str, struct sudo_defs_types *def)
 
     sudo_timespecclear(&ts);
     if (str != NULL) {
-	/* Convert from minutes to timespec. */
+	/* Convert from minutes to seconds. */
 	if (*str == '+' || *str == '-')
 	    sign = *str++;
 	while (*str != '\0' && *str != '.') {
 		if (!isdigit((unsigned char)*str))
 		    debug_return_bool(false);	/* invalid number */
 
-		/* Verify (ts.tv_sec * 10) + digit <= TIME_T_MAX. */
-		i = *str++ - '0';
+		/* Verify (ts.tv_sec * 10) + (digit * 60) <= TIME_T_MAX. */
+		i = (*str++ - '0') * 60L;
 		if (ts.tv_sec > (TIME_T_MAX - i) / 10)
 		    debug_return_bool(false);	/* overflow */
 		ts.tv_sec *= 10;
 		ts.tv_sec += i;
 	}
 	if (*str++ == '.') {
-	    /* Convert optional fractional component to nanosecs. */
+	    long long nsec = 0;
+
+	    /* Convert optional fractional component to seconds and nanosecs. */
 	    for (i = 100000000; i > 0; i /= 10) {
 		if (*str == '\0')
 		    break;
 		if (!isdigit((unsigned char)*str))
 		    debug_return_bool(false);	/* invalid number */
-		ts.tv_nsec += i * (*str++ - '0');
+		nsec += i * (*str++ - '0') * 60LL;
 	    }
-	}
-	/* Convert from minutes to seconds. */
-	if (ts.tv_sec > TIME_T_MAX / 60)
-	    debug_return_bool(false);	/* overflow */
-	ts.tv_sec *= 60;
-	ts.tv_nsec *= 60;
-	while (ts.tv_nsec >= 1000000000) {
-	    ts.tv_sec++;
-	    ts.tv_nsec -= 1000000000;
+	    while (nsec >= 1000000000) {
+		if (ts.tv_sec == TIME_T_MAX)
+		    debug_return_bool(false);	/* overflow */
+		ts.tv_sec++;
+		nsec -= 1000000000;
+	    }
+	    ts.tv_nsec = nsec;
 	}
     }
     if (sign == '-') {
