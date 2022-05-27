@@ -3977,6 +3977,9 @@ init_options(struct command_options *opts)
     opts->privs = NULL;
     opts->limitprivs = NULL;
 #endif
+#ifdef HAVE_APPARMOR
+    opts->apparmor_profile = NULL;
+#endif
 }
 
 bool
