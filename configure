@@ -17322,11 +17322,9 @@ fi
 		    : ${ac_cv_func_strnlen='no'}
 		fi
 
-		# fmemopen(3) may be broken on AIX < 7.1 depending
-		# on the libc version.
-		if test $OSMAJOR -lt 7; then
-		    : ${ac_cv_func_fmemopen='no'}
-		fi
+		# fmemopen(3) has a bug wrt feof() on some AIX versions.
+		# https://www.ibm.com/support/pages/apar/IJ11845
+		: ${ac_cv_func_fmemopen='no'}
 
 		# getdelim() may or may not be present on AIX <= 6.1.
 		# bos610 is missing getdelim but bos61J has it.
