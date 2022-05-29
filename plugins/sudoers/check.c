@@ -293,7 +293,8 @@ display_lecture(struct sudo_conv_callback *callback)
 	"Administrator. It usually boils down to these three things:\n\n"
 	"    #1) Respect the privacy of others.\n"
 	"    #2) Think before you type.\n"
-	"    #3) With great power comes great responsibility.\n\n");
+	"    #3) With great power comes great responsibility.\n\n"
+	"For security reasons, the password you type is invisible.\n\n");
     sudo_conv(1, &msg, &repl, NULL);
 
 done:
