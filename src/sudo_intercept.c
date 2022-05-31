@@ -52,6 +52,10 @@
 #include "sudo_util.h"
 #include "pathnames.h"
 
+#ifndef HAVE_VFORK
+# define vfork fork
+#endif
+
 /* execl flavors */
 #define SUDO_EXECL	0x0
 #define SUDO_EXECLE	0x1

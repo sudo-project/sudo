@@ -3261,6 +3261,7 @@ as_fn_append ac_func_c_list " faccessat HAVE_FACCESSAT"
 as_fn_append ac_func_c_list " wordexp HAVE_WORDEXP"
 as_fn_append ac_func_c_list " getauxval HAVE_GETAUXVAL"
 as_fn_append ac_func_c_list " strtoull HAVE_STRTOULL"
+as_fn_append ac_func_c_list " vfork HAVE_VFORK"
 as_fn_append ac_func_c_list " seteuid HAVE_SETEUID"
 
 # Auxiliary files required by this configure script.
@@ -21250,6 +21251,7 @@ do
     ac_func=$ac_item
   fi
 done
+
 
 
 
