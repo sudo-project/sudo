@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "April 28, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "May 31, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -296,8 +296,9 @@ The fully-qualified path to a shared library containing a wrappers for the
 \fBexecv\fR(),
 \fBexecve\fR(),
 \fBexecvp\fR(),
+\fBexecvpe\fR(),
 and
-\fBexecvpe\fR()
+\fBsystem\fR()
 library functions that intercepts attempts to run further commands and
 performs a policy check before allowing them to be executed.
 This is used to implement the

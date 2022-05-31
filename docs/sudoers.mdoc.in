@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd May 24, 2022
+.Dd May 31, 2022
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2985,8 +2985,9 @@ using the
 .Fn execv ,
 .Fn execve ,
 .Fn execvp ,
+.Fn execvpe ,
 or
-.Fn execvpe
+.Fn system
 library functions.
 For example, if a shell is run by
 .Nm sudo ,
@@ -4077,8 +4078,9 @@ Preload a dynamic shared object (shared library) that intercepts the
 .Fn execv ,
 .Fn execve ,
 .Fn execvp ,
+.Fn execvpe ,
 and
-.Fn execvpe
+.Fn system
 library functions.
 A value of
 .Em dso
@@ -6420,8 +6422,9 @@ functionality only works for programs that use the
 .Fn execv ,
 .Fn execve ,
 .Fn execvp ,
+.Fn execvpe ,
 or
-.Fn execvpe
+.Fn system
 library functions to run the new command.
 This may be expanded in a future release of
 .Nm sudo .

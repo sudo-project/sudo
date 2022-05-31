@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "May 24, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "May 31, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3151,8 +3151,9 @@ using the
 \fBexecv\fR(),
 \fBexecve\fR(),
 \fBexecvp\fR(),
+\fBexecvpe\fR(),
 or
-\fBexecvpe\fR()
+\fBsystem\fR()
 library functions.
 For example, if a shell is run by
 \fBsudo\fR,
@@ -4305,8 +4306,9 @@ Preload a dynamic shared object (shared library) that intercepts the
 \fBexecv\fR(),
 \fBexecve\fR(),
 \fBexecvp\fR(),
+\fBexecvpe\fR(),
 and
-\fBexecvpe\fR()
+\fBsystem\fR()
 library functions.
 A value of
 \fIdso\fR
@@ -6929,8 +6931,9 @@ functionality only works for programs that use the
 \fBexecv\fR(),
 \fBexecve\fR(),
 \fBexecvp\fR(),
+\fBexecvpe\fR(),
 or
-\fBexecvpe\fR()
+\fBsystem\fR()
 library functions to run the new command.
 This may be expanded in a future release of
 \fBsudo\fR.
