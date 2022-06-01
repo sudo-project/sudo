@@ -494,7 +494,7 @@ ldif_to_sudoers(struct sudoers_parse_tree *parse_tree,
     /*
      * Iterate over roles in sorted order, converting to sudoers.
      */
-    for (n = 0; n < numroles; n++) {
+    for (n = 0, role = NULL; n < numroles; n++) {
 	bool reuse_userspec = false;
 	bool reuse_privilege = false;
 	bool reuse_runas = false;
