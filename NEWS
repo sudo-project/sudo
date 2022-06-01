@@ -35,7 +35,8 @@ What's new in Sudo 1.9.11
    to allow the use of 64-bit time values on some 32-bit systems.
 
  * Sudo's "intercept" and "log_subcmds" options no longer force the
-   command to run in its own pseudo-terminal.
+   command to run in its own pseudo-terminal.  It is now also
+   possible to intercept the system(3) function.
 
  * Fixed a bug in sudo_logsrvd when run in store-first relay mode
    where the commit point messages sent by the server were incorrect
