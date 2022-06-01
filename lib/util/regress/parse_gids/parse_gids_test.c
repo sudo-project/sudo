@@ -88,6 +88,7 @@ main(int argc, char *argv[])
 
     for (i = 0; test_data[i].gids != NULL; i++) {
 	free(gidlist);
+	gidlist = NULL;
 	ngids = sudo_parse_gids(test_data[i].gids, test_data[i].baseptr, &gidlist);
 	if (ngids == -1)
 	    sudo_fatal_nodebug("sudo_parse_gids");
@@ -111,6 +112,8 @@ main(int argc, char *argv[])
 	    }
 	}
     }
+    free(gidlist);
+
     if (ntests != 0) {
 	printf("%s: %d tests run, %d errors, %d%% success rate\n",
 	    getprogname(), ntests, errors, (ntests - errors) * 100 / ntests);
