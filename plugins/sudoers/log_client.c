@@ -2011,6 +2011,7 @@ log_server_open(struct log_details *details, struct timespec *now,
     struct sudo_plugin_event * (*event_alloc)(void))
 {
     struct client_closure *closure;
+    static bool warned = false;
     debug_decl(log_server_open, SUDOERS_DEBUG_UTIL);
 
     closure = client_closure_alloc(details, now, log_io, initial_state,
@@ -2021,7 +2022,10 @@ log_server_open(struct log_details *details, struct timespec *now,
     /* Connect to log first available log server. */
     if (!log_server_connect(closure)) {
 	/* TODO: support offline logs if server unreachable */
-	sudo_warnx("%s", U_("unable to connect to log server"));
+	if (!warned) {
+	    sudo_warnx("%s", U_("unable to connect to log server"));
+	    warned = true;
+	}
 	goto bad;
     }
 
