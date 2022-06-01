@@ -498,11 +498,12 @@ ldif_to_sudoers(struct sudoers_parse_tree *parse_tree,
 	bool reuse_userspec = false;
 	bool reuse_privilege = false;
 	bool reuse_runas = false;
+	struct sudo_role *prev_role = role;
 
 	role = role_array[n];
 
 	/* Check whether we can reuse the previous user and host specs */
-	if (n > 0 && role->users == role_array[n - 1]->users) {
+	if (prev_role != NULL && role->users == prev_role->users) {
 	    reuse_userspec = true;
 
 	    /*
@@ -511,12 +512,12 @@ ldif_to_sudoers(struct sudoers_parse_tree *parse_tree,
 	     * we are storing options.
 	     */
 	    if (!store_options) {
-		if (role->hosts == role_array[n - 1]->hosts) {
+		if (role->hosts == prev_role->hosts) {
 		    reuse_privilege = true;
 
 		    /* Reuse runasusers and runasgroups if possible. */
-		    if (role->runasusers == role_array[n - 1]->runasusers &&
-			role->runasgroups == role_array[n - 1]->runasgroups)
+		    if (role->runasusers == prev_role->runasusers &&
+			role->runasgroups == prev_role->runasgroups)
 			reuse_runas = true;
 		}
 	    }
