@@ -348,14 +348,6 @@ free_exec_closure_nopty(struct exec_closure_nopty *ec)
     debug_return;
 }
 
-#ifdef HAVE_PTRACE_INTERCEPT
-static void
-handler(int signo)
-{
-    /* just return */
-}
-#endif /* HAVE_PTRACE_INTERCEPT */
-
 /*
  * Execute a command and wait for it to finish.
  */
@@ -426,27 +418,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 	close(errpipe[0]);
 	if (intercept_sv[0] != -1)
 	    close(intercept_sv[0]);
-#ifdef HAVE_PTRACE_INTERCEPT
-	if (ISSET(details->flags, CD_USE_PTRACE)) {
-	    struct sigaction sa;
-
-	    /* Tracer will send us SIGUSR1 when it is time to proceed. */
-	    memset(&sa, 0, sizeof(sa));
-	    sigemptyset(&sa.sa_mask);
-	    sa.sa_flags = SA_RESTART;
-	    sa.sa_handler = handler;
-	    if (sudo_sigaction(SIGUSR1, &sa, NULL) != 0) {
-		sudo_warn(U_("unable to set handler for signal %d"),
-		    SIGUSR1);
-	    }
-
-	    /* Suspend child until tracer seizes control and sends SIGUSR1. */
-	    sigdelset(&set, SIGUSR1);
-	    sigsuspend(&set);
-	}
-#endif /* HAVE_PTRACE_INTERCEPT */
-	sigprocmask(SIG_SETMASK, &oset, NULL);
-	exec_cmnd(details, intercept_sv[1], errpipe[1]);
+	exec_cmnd(details, &oset, intercept_sv[1], errpipe[1]);
 	while (write(errpipe[1], &errno, sizeof(int)) == -1) {
 	    if (errno != EINTR)
 		break;

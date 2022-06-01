@@ -386,8 +386,8 @@ mon_backchannel_cb(int fd, int what, void *v)
  * Returns only if execve() fails.
  */
 static void
-exec_cmnd_pty(struct command_details *details, bool foreground,
-    int intercept_fd, int errfd)
+exec_cmnd_pty(struct command_details *details, sigset_t *mask,
+    bool foreground, int intercept_fd, int errfd)
 {
     volatile pid_t self = getpid();
     debug_decl(exec_cmnd_pty, SUDO_DEBUG_EXEC);
@@ -430,7 +430,7 @@ exec_cmnd_pty(struct command_details *details, bool foreground,
     /* Execute command; only returns on error. */
     sudo_debug_printf(SUDO_DEBUG_INFO, "executing %s in the %s",
 	details->command, foreground ? "foreground" : "background");
-    exec_cmnd(details, intercept_fd, errfd);
+    exec_cmnd(details, mask, intercept_fd, errfd);
 
     debug_return;
 }
@@ -536,14 +536,6 @@ fill_exec_closure_monitor(struct monitor_closure *mc,
     debug_return;
 }
 
-#ifdef HAVE_PTRACE_INTERCEPT
-static void
-handler(int signo)
-{
-    /* just return */
-}
-#endif /* HAVE_PTRACE_INTERCEPT */
-
 /*
  * Monitor process that creates a new session with the controlling tty,
  * resets signal handlers and forks a child to call exec_cmnd_pty().
@@ -638,28 +630,8 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 	close(errpipe[0]);
 	if (io_fds[SFD_USERTTY] != -1)
 	    close(io_fds[SFD_USERTTY]);
-#ifdef HAVE_PTRACE_INTERCEPT
-	if (ISSET(details->flags, CD_USE_PTRACE)) {
-	    sigset_t set;
-
-	    /* Tracer will send us SIGUSR1 when it is time to proceed. */
-	    sa.sa_handler = handler;
-	    if (sudo_sigaction(SIGUSR1, &sa, NULL) != 0) {
-		sudo_warn(U_("unable to set handler for signal %d"),
-		    SIGUSR1);
-	    }
-
-	    /* Suspend child until tracer seizes control and sends SIGUSR1. */
-	    sigfillset(&set);
-	    sigdelset(&set, SIGUSR1);
-	    sigsuspend(&set);
-	}
-#endif /* HAVE_PTRACE_INTERCEPT */
-	sigprocmask(SIG_SETMASK, oset, NULL);
-	restore_signals();
-
 	/* setup tty and exec command */
-	exec_cmnd_pty(details, foreground, intercept_fd, errpipe[1]);
+	exec_cmnd_pty(details, oset, foreground, intercept_fd, errpipe[1]);
 	if (write(errpipe[1], &errno, sizeof(int)) == -1)
 	    sudo_warn(U_("unable to execute %s"), details->command);
 	_exit(EXIT_FAILURE);

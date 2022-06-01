@@ -113,7 +113,7 @@ struct sudo_event_base;
 struct stat;
 
 /* exec.c */
-void exec_cmnd(struct command_details *details, int intercept_fd, int errfd);
+void exec_cmnd(struct command_details *details, sigset_t *mask, int intercept_fd, int errfd);
 void terminate_command(pid_t pid, bool use_pgrp);
 bool sudo_terminated(struct command_status *cstat);
 

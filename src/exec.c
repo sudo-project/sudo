@@ -48,6 +48,14 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
+#ifdef HAVE_PTRACE_INTERCEPT
+static void
+handler(int signo)
+{
+    /* just return */
+}
+#endif /* HAVE_PTRACE_INTERCEPT */
+
 static void
 close_fds(struct command_details *details, int errfd, int intercept_fd)
 {
@@ -245,10 +253,35 @@ done:
  * If the exec fails, cstat is filled in with the value of errno.
  */
 void
-exec_cmnd(struct command_details *details, int intercept_fd, int errfd)
+exec_cmnd(struct command_details *details, sigset_t *mask,
+    int intercept_fd, int errfd)
 {
     debug_decl(exec_cmnd, SUDO_DEBUG_EXEC);
 
+#ifdef HAVE_PTRACE_INTERCEPT
+    if (ISSET(details->flags, CD_USE_PTRACE)) {
+	struct sigaction sa;
+	sigset_t set;
+
+	/* Tracer will send us SIGUSR1 when it is time to proceed. */
+	memset(&sa, 0, sizeof(sa));
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = SA_RESTART;
+	sa.sa_handler = handler;
+	if (sudo_sigaction(SIGUSR1, &sa, NULL) != 0) {
+	    sudo_warn(U_("unable to set handler for signal %d"),
+		SIGUSR1);
+	}
+
+	/* Suspend child until tracer seizes control and sends SIGUSR1. */
+	sigfillset(&set);
+	sigdelset(&set, SIGUSR1);
+	sigsuspend(&set);
+    }
+#endif /* HAVE_PTRACE_INTERCEPT */
+
+    if (mask != NULL)
+	sigprocmask(SIG_SETMASK, mask, NULL);
     restore_signals();
     if (exec_setup(details, intercept_fd, errfd) == true) {
 	/* headed for execve() */
@@ -440,7 +473,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
      */
     if (direct_exec_allowed(details)) {
 	if (!sudo_terminated(cstat)) {
-	    exec_cmnd(details, -1, -1);
+	    exec_cmnd(details, NULL, -1, -1);
 	    cstat->type = CMD_ERRNO;
 	    cstat->val = errno;
 	}
