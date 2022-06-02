@@ -638,7 +638,7 @@ cb_server_log(struct logsrvd_config *config, const char *str, size_t offset)
 
     /* An empty value means to disable the server log. */
     if (*str != '\0') {
-	if (*str != '/') {
+	if (*str == '/') {
 	    log_type = SERVER_LOG_FILE;
 	    if ((copy = strdup(str)) == NULL) {
 		sudo_warn(NULL);
