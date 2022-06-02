@@ -67,6 +67,10 @@ What's new in Sudo 1.9.11
    specify an APPARMOR_PROFILE option to run a command confined by
    the named AppArmor profile.
 
+ * Fixed parsing of the "server_log" setting in sudo_logsrvd.conf.
+   Non-paths were being treated as paths and an actual path was
+   treated as an error.
+
 What's new in Sudo 1.9.10
 
  * Added new "log_passwords" and "passprompt_regex" sudoers options.
