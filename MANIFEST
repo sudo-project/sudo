@@ -407,6 +407,8 @@ logsrvd/regress/logsrvd_conf/logsrvd_dhparams.pem
 logsrvd/regress/logsrvd_conf/logsrvd_key.pem
 logsrvd/regress/logsrvd_conf/sudo_logsrvd.conf.1.in
 logsrvd/regress/logsrvd_conf/sudo_logsrvd.conf.2.in
+logsrvd/regress/logsrvd_conf/tls/sudo_logsrvd.conf.1.in
+logsrvd/regress/logsrvd_conf/tls/sudo_logsrvd.conf.2.in
 logsrvd/sendlog.c
 logsrvd/sendlog.h
 logsrvd/tls_client.c

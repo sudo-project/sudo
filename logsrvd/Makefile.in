@@ -283,8 +283,13 @@ check: $(TEST_PROGS) check-fuzzer
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    builddir=$(abs_top_builddir)/logsrvd; \
 	    cd $(srcdir) || exit 1; \
-	    $$builddir/logsrvd_conf_test $(TEST_VERBOSE) \
-		regress/logsrvd_conf/*.in; \
+	    if test -n "@LIBTLS@"; then \
+		$$builddir/logsrvd_conf_test $(TEST_VERBOSE) \
+		    regress/logsrvd_conf/tls/*.in; \
+	    else \
+		$$builddir/logsrvd_conf_test $(TEST_VERBOSE) \
+		    regress/logsrvd_conf/*.in; \
+	    fi; \
 	fi
 
 check-verbose: check
