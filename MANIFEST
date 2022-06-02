@@ -400,6 +400,13 @@ logsrvd/regress/corpus/seed/logsrvd_conf/logsrvd.conf.6
 logsrvd/regress/corpus/seed/logsrvd_conf/logsrvd.conf.7
 logsrvd/regress/fuzz/fuzz_logsrvd_conf.c
 logsrvd/regress/fuzz/fuzz_logsrvd_conf.dict
+logsrvd/regress/logsrvd_conf/cacert.pem
+logsrvd/regress/logsrvd_conf/logsrvd_cert.pem
+logsrvd/regress/logsrvd_conf/logsrvd_conf_test.c
+logsrvd/regress/logsrvd_conf/logsrvd_dhparams.pem
+logsrvd/regress/logsrvd_conf/logsrvd_key.pem
+logsrvd/regress/logsrvd_conf/sudo_logsrvd.conf.1.in
+logsrvd/regress/logsrvd_conf/sudo_logsrvd.conf.2.in
 logsrvd/sendlog.c
 logsrvd/sendlog.h
 logsrvd/tls_client.c

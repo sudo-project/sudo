@@ -113,6 +113,11 @@ FUZZ_MAX_LEN = 4096
 FUZZ_RUNS = 8192
 FUZZ_VERBOSE =
 
+TEST_PROGS = logsrvd_conf_test
+TEST_LIBS = $(LIBS)
+TEST_LDFLAGS = $(LDFLAGS)
+TEST_VERBOSE =
+
 # User and group IDs the installed files should be "owned" by
 install_uid = 0
 install_gid = 0
@@ -140,6 +145,8 @@ VERSION = @PACKAGE_VERSION@
 FUZZ_LOGSRVD_CONF_OBJS = fuzz_logsrvd_conf.o logsrvd_conf.o tls_init.o
 
 FUZZ_LOGSRVD_CONF_CORPUS = $(srcdir)/regress/corpus/seed/logsrvd_conf/logsrvd.conf.*
+
+CONF_TEST_OBJS = logsrvd_conf_test.o logsrvd_conf.o tls_init.o
 
 all: $(PROGS)
 
@@ -173,6 +180,9 @@ sudo_sendlog: $(SENDLOG_OBJS) $(LT_LIBS)
 
 fuzz_logsrvd_conf: $(FUZZ_LOGSRVD_CONF_OBJS) $(LIBFUZZSTUB) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(FUZZ_LOGSRVD_CONF_OBJS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS)
+
+logsrvd_conf_test: $(CONF_TEST_OBJS) $(LT_LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CONF_TEST_OBJS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 fuzz_logsrvd_conf_seed_corpus.zip:
 	tdir=fuzz_logsrvd_conf.$$$$; \
@@ -260,7 +270,22 @@ check-fuzzer: $(FUZZ_PROGS)
 	    ./fuzz_logsrvd_conf $(FUZZ_VERBOSE) $(FUZZ_LOGSRVD_CONF_CORPUS); \
 	fi
 
-check: check-fuzzer
+check: $(TEST_PROGS) check-fuzzer
+	@if test X"$(cross_compiling)" != X"yes"; then \
+	    if locale -a 2>&1 | grep '^C.UTF-8$$' >/dev/null 2>&1; then \
+		LC_ALL=C.UTF-8; export LC_ALL; \
+	    else \
+		LC_ALL=C; export LC_ALL; \
+	    fi; \
+	    unset LANG || LANG=; \
+	    unset LANGUAGE || LANGUAGE=; \
+	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
+	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
+	    builddir=$(abs_top_builddir)/logsrvd; \
+	    cd $(srcdir) || exit 1; \
+	    $$builddir/logsrvd_conf_test $(TEST_VERBOSE) \
+		regress/logsrvd_conf/*.in; \
+	fi
 
 check-verbose: check
 
@@ -396,6 +421,24 @@ logsrvd_conf.i: $(srcdir)/logsrvd_conf.c $(incdir)/compat/getaddrinfo.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 logsrvd_conf.plog: logsrvd_conf.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/logsrvd_conf.c --i-file $< --output-file $@
+logsrvd_conf_test.o: $(srcdir)/regress/logsrvd_conf/logsrvd_conf_test.c \
+                     $(incdir)/compat/stdbool.h $(incdir)/log_server.pb-c.h \
+                     $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
+                     $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
+                     $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
+                     $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
+                     $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/logsrvd_conf/logsrvd_conf_test.c
+logsrvd_conf_test.i: $(srcdir)/regress/logsrvd_conf/logsrvd_conf_test.c \
+                     $(incdir)/compat/stdbool.h $(incdir)/log_server.pb-c.h \
+                     $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
+                     $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
+                     $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
+                     $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
+                     $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+logsrvd_conf_test.plog: logsrvd_conf_test.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/logsrvd_conf/logsrvd_conf_test.c --i-file $< --output-file $@
 logsrvd_journal.o: $(srcdir)/logsrvd_journal.c $(incdir)/compat/stdbool.h \
                    $(incdir)/log_server.pb-c.h \
                    $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
