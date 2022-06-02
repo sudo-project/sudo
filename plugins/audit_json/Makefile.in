@@ -23,6 +23,7 @@
 srcdir = @srcdir@
 devdir = @devdir@
 top_builddir = @top_builddir@
+abs_top_builddir = @abs_top_builddir@
 top_srcdir = @top_srcdir@
 scriptdir = $(top_srcdir)/scripts
 incdir = $(top_srcdir)/include
@@ -119,7 +120,7 @@ all: audit_json.la
 
 depend:
 	$(scriptdir)/mkdep.pl --srcdir=$(top_srcdir) \
-	    --builddir=`pwd`/$(top_builddir) plugins/audit_json/Makefile.in
+	    --builddir=$(abs_top_builddir) plugins/audit_json/Makefile.in
 	cd $(top_builddir) && ./config.status --file plugins/audit_json/Makefile
 
 Makefile: $(srcdir)/Makefile.in

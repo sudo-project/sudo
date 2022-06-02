@@ -23,6 +23,7 @@
 srcdir = @srcdir@
 devdir = @devdir@
 top_builddir = @top_builddir@
+abs_top_builddir = @abs_top_builddir@
 top_srcdir = @top_srcdir@
 scriptdir = $(top_srcdir)/scripts
 incdir = $(top_srcdir)/include
@@ -119,7 +120,7 @@ all: sample_approval.la
 
 depend:
 	$(scriptdir)/mkdep.pl --srcdir=$(top_srcdir) \
-	    --builddir=`pwd`/$(top_builddir) plugins/sample_approval/Makefile.in
+	    --builddir=$(abs_top_builddir) plugins/sample_approval/Makefile.in
 	cd $(top_builddir) && ./config.status --file plugins/sample_approval/Makefile
 
 Makefile: $(srcdir)/Makefile.in
