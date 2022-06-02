@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.9.10b1\n"
+"Project-Id-Version: sudo 1.9.11b1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2022-02-12 09:31-0700\n"
-"PO-Revision-Date: 2022-02-14 09:06+0700\n"
+"POT-Creation-Date: 2022-05-27 08:39-0600\n"
+"PO-Revision-Date: 2022-06-02 07:15+0700\n"
 "Last-Translator: Trần Ngọc Quân <vnwildman@gmail.com>\n"
 "Language-Team: Vietnamese <translation-team-vi@lists.sourceforge.net>\n"
 "Language: vi\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Bugs: Report translation errors to the Language-Team address.\n"
-"X-Language-Team-Website: <http://translationproject.org/team/vi.html>\n"
+"X-Generator: Gtranslator 3.38.0\n"
 
 #: lib/util/aix.c:89 lib/util/aix.c:169
 msgid "unable to open userdb"
@@ -35,32 +35,33 @@ msgstr "không thể phục hồi sổ đăng ký"
 #: lib/util/aix.c:272 lib/util/gidlist.c:66 lib/util/gidlist.c:76
 #: lib/util/json.c:54 lib/util/json.c:183 lib/util/sudo_conf.c:218
 #: lib/util/sudo_conf.c:304 lib/util/sudo_conf.c:381 lib/util/sudo_conf.c:665
-#: src/conversation.c:80 src/exec_monitor.c:206 src/exec_monitor.c:456
-#: src/exec_monitor.c:462 src/exec_monitor.c:470 src/exec_monitor.c:478
-#: src/exec_monitor.c:485 src/exec_monitor.c:492 src/exec_monitor.c:499
-#: src/exec_monitor.c:506 src/exec_monitor.c:513 src/exec_monitor.c:520
-#: src/exec_monitor.c:527 src/exec_nopty.c:219 src/exec_nopty.c:228
-#: src/exec_nopty.c:235 src/exec_nopty.c:242 src/exec_nopty.c:249
-#: src/exec_nopty.c:256 src/exec_nopty.c:263 src/exec_nopty.c:270
-#: src/exec_nopty.c:277 src/exec_nopty.c:284 src/exec_nopty.c:291
-#: src/exec_nopty.c:298 src/exec_nopty.c:306 src/exec_nopty.c:503
-#: src/exec_preload.c:143 src/exec_preload.c:204 src/exec_pty.c:840
-#: src/exec_pty.c:849 src/exec_pty.c:906 src/exec_pty.c:1059
-#: src/exec_pty.c:1231 src/exec_pty.c:1240 src/exec_pty.c:1247
-#: src/exec_pty.c:1254 src/exec_pty.c:1261 src/exec_pty.c:1268
-#: src/exec_pty.c:1275 src/exec_pty.c:1282 src/exec_pty.c:1289
-#: src/exec_pty.c:1296 src/exec_pty.c:1303 src/exec_pty.c:1311
-#: src/exec_pty.c:1774 src/load_plugins.c:156 src/load_plugins.c:181
+#: src/conversation.c:80 src/exec_monitor.c:205 src/exec_monitor.c:458
+#: src/exec_monitor.c:464 src/exec_monitor.c:472 src/exec_monitor.c:480
+#: src/exec_monitor.c:487 src/exec_monitor.c:494 src/exec_monitor.c:501
+#: src/exec_monitor.c:508 src/exec_monitor.c:515 src/exec_monitor.c:522
+#: src/exec_monitor.c:529 src/exec_nopty.c:224 src/exec_nopty.c:233
+#: src/exec_nopty.c:240 src/exec_nopty.c:247 src/exec_nopty.c:254
+#: src/exec_nopty.c:261 src/exec_nopty.c:268 src/exec_nopty.c:275
+#: src/exec_nopty.c:282 src/exec_nopty.c:289 src/exec_nopty.c:296
+#: src/exec_nopty.c:303 src/exec_nopty.c:311 src/exec_nopty.c:549
+#: src/exec_preload.c:143 src/exec_preload.c:204 src/exec_ptrace.c:632
+#: src/exec_ptrace.c:730 src/exec_ptrace.c:895 src/exec_pty.c:845
+#: src/exec_pty.c:854 src/exec_pty.c:911 src/exec_pty.c:1075
+#: src/exec_pty.c:1265 src/exec_pty.c:1274 src/exec_pty.c:1281
+#: src/exec_pty.c:1288 src/exec_pty.c:1295 src/exec_pty.c:1302
+#: src/exec_pty.c:1309 src/exec_pty.c:1316 src/exec_pty.c:1323
+#: src/exec_pty.c:1330 src/exec_pty.c:1337 src/exec_pty.c:1345
+#: src/exec_pty.c:1811 src/load_plugins.c:156 src/load_plugins.c:181
 #: src/load_plugins.c:217 src/load_plugins.c:449 src/load_plugins.c:455
-#: src/parse_args.c:192 src/parse_args.c:213 src/parse_args.c:287
-#: src/parse_args.c:632 src/parse_args.c:654 src/parse_args.c:679
+#: src/parse_args.c:169 src/parse_args.c:190 src/parse_args.c:264
+#: src/parse_args.c:613 src/parse_args.c:635 src/parse_args.c:660
 #: src/preserve_fds.c:46 src/preserve_fds.c:131 src/selinux.c:89
-#: src/selinux.c:362 src/selinux.c:474 src/selinux.c:483 src/sesh.c:113
+#: src/selinux.c:362 src/selinux.c:474 src/selinux.c:485 src/sesh.c:113
 #: src/sesh.c:146 src/sesh.c:152 src/sesh.c:159 src/sesh.c:165 src/sesh.c:410
-#: src/sudo.c:639 src/sudo.c:709 src/sudo.c:719 src/sudo.c:744 src/sudo.c:767
-#: src/sudo.c:776 src/sudo.c:785 src/sudo.c:802 src/sudo.c:844 src/sudo.c:854
-#: src/sudo.c:883 src/sudo.c:1083 src/sudo.c:1104 src/sudo.c:1397
-#: src/sudo.c:1566 src/sudo.c:1793 src/sudo.c:2127 src/sudo_edit.c:89
+#: src/sudo.c:639 src/sudo.c:712 src/sudo.c:722 src/sudo.c:748 src/sudo.c:771
+#: src/sudo.c:780 src/sudo.c:789 src/sudo.c:806 src/sudo.c:848 src/sudo.c:858
+#: src/sudo.c:891 src/sudo.c:1100 src/sudo.c:1121 src/sudo.c:1414
+#: src/sudo.c:1583 src/sudo.c:1810 src/sudo.c:2144 src/sudo_edit.c:89
 #: src/sudo_edit.c:149 src/sudo_edit.c:429 src/sudo_edit.c:438
 #: src/sudo_edit.c:539 src/sudo_edit.c:546 src/sudo_edit.c:677
 #: src/sudo_edit.c:697 src/sudo_intercept_common.c:113
@@ -72,36 +73,36 @@ msgstr "%s: %s"
 #: lib/util/aix.c:272 lib/util/gidlist.c:66 lib/util/json.c:55
 #: lib/util/json.c:184 lib/util/regex.c:113 lib/util/regex.c:121
 #: lib/util/sudo_conf.c:219 lib/util/sudo_conf.c:304 lib/util/sudo_conf.c:381
-#: lib/util/sudo_conf.c:665 src/conversation.c:81 src/exec_intercept.c:100
-#: src/exec_intercept.c:330 src/exec_intercept.c:354 src/exec_intercept.c:377
-#: src/exec_intercept.c:385 src/exec_intercept.c:410 src/exec_intercept.c:416
-#: src/exec_intercept.c:425 src/exec_intercept.c:431 src/exec_intercept.c:565
-#: src/exec_intercept.c:706 src/exec_monitor.c:456 src/exec_monitor.c:462
-#: src/exec_monitor.c:470 src/exec_monitor.c:478 src/exec_monitor.c:485
-#: src/exec_monitor.c:492 src/exec_monitor.c:499 src/exec_monitor.c:506
-#: src/exec_monitor.c:513 src/exec_monitor.c:520 src/exec_monitor.c:527
-#: src/exec_nopty.c:219 src/exec_nopty.c:228 src/exec_nopty.c:235
-#: src/exec_nopty.c:242 src/exec_nopty.c:249 src/exec_nopty.c:256
-#: src/exec_nopty.c:263 src/exec_nopty.c:270 src/exec_nopty.c:277
-#: src/exec_nopty.c:284 src/exec_nopty.c:291 src/exec_nopty.c:298
-#: src/exec_nopty.c:306 src/exec_preload.c:143 src/exec_preload.c:204
-#: src/exec_pty.c:840 src/exec_pty.c:849 src/exec_pty.c:906
-#: src/exec_pty.c:1231 src/exec_pty.c:1240 src/exec_pty.c:1247
-#: src/exec_pty.c:1254 src/exec_pty.c:1261 src/exec_pty.c:1268
-#: src/exec_pty.c:1275 src/exec_pty.c:1282 src/exec_pty.c:1289
-#: src/exec_pty.c:1296 src/exec_pty.c:1303 src/exec_pty.c:1311
-#: src/exec_pty.c:1774 src/load_plugins.c:156 src/load_plugins.c:181
-#: src/load_plugins.c:217 src/load_plugins.c:449 src/load_plugins.c:455
-#: src/parse_args.c:192 src/parse_args.c:214 src/parse_args.c:287
-#: src/parse_args.c:632 src/parse_args.c:654 src/parse_args.c:679
-#: src/preserve_fds.c:46 src/preserve_fds.c:131 src/selinux.c:89
-#: src/selinux.c:362 src/selinux.c:474 src/selinux.c:483 src/sesh.c:113
-#: src/sesh.c:411 src/sudo.c:230 src/sudo.c:639 src/sudo.c:883 src/sudo.c:1083
-#: src/sudo.c:1104 src/sudo.c:1397 src/sudo.c:1566 src/sudo.c:1793
-#: src/sudo.c:2127 src/sudo_edit.c:89 src/sudo_edit.c:149 src/sudo_edit.c:429
-#: src/sudo_edit.c:438 src/sudo_edit.c:539 src/sudo_edit.c:546
-#: src/sudo_edit.c:677 src/sudo_edit.c:697 src/sudo_intercept_common.c:113
-#: src/sudo_intercept_common.c:317
+#: lib/util/sudo_conf.c:665 src/conversation.c:81 src/exec_intercept.c:68
+#: src/exec_intercept.c:336 src/exec_intercept.c:359 src/exec_intercept.c:367
+#: src/exec_intercept.c:392 src/exec_intercept.c:398 src/exec_intercept.c:407
+#: src/exec_intercept.c:413 src/exec_intercept.c:478 src/exec_intercept.c:588
+#: src/exec_intercept.c:707 src/exec_monitor.c:458 src/exec_monitor.c:464
+#: src/exec_monitor.c:472 src/exec_monitor.c:480 src/exec_monitor.c:487
+#: src/exec_monitor.c:494 src/exec_monitor.c:501 src/exec_monitor.c:508
+#: src/exec_monitor.c:515 src/exec_monitor.c:522 src/exec_monitor.c:529
+#: src/exec_nopty.c:224 src/exec_nopty.c:233 src/exec_nopty.c:240
+#: src/exec_nopty.c:247 src/exec_nopty.c:254 src/exec_nopty.c:261
+#: src/exec_nopty.c:268 src/exec_nopty.c:275 src/exec_nopty.c:282
+#: src/exec_nopty.c:289 src/exec_nopty.c:296 src/exec_nopty.c:303
+#: src/exec_nopty.c:311 src/exec_preload.c:143 src/exec_preload.c:204
+#: src/exec_ptrace.c:632 src/exec_pty.c:845 src/exec_pty.c:854
+#: src/exec_pty.c:911 src/exec_pty.c:1265 src/exec_pty.c:1274
+#: src/exec_pty.c:1281 src/exec_pty.c:1288 src/exec_pty.c:1295
+#: src/exec_pty.c:1302 src/exec_pty.c:1309 src/exec_pty.c:1316
+#: src/exec_pty.c:1323 src/exec_pty.c:1330 src/exec_pty.c:1337
+#: src/exec_pty.c:1345 src/exec_pty.c:1811 src/load_plugins.c:156
+#: src/load_plugins.c:181 src/load_plugins.c:217 src/load_plugins.c:449
+#: src/load_plugins.c:455 src/parse_args.c:169 src/parse_args.c:191
+#: src/parse_args.c:264 src/parse_args.c:613 src/parse_args.c:635
+#: src/parse_args.c:660 src/preserve_fds.c:46 src/preserve_fds.c:131
+#: src/selinux.c:89 src/selinux.c:362 src/selinux.c:474 src/selinux.c:485
+#: src/sesh.c:113 src/sesh.c:411 src/sudo.c:230 src/sudo.c:639 src/sudo.c:891
+#: src/sudo.c:1100 src/sudo.c:1121 src/sudo.c:1414 src/sudo.c:1583
+#: src/sudo.c:1810 src/sudo.c:2144 src/sudo_edit.c:89 src/sudo_edit.c:149
+#: src/sudo_edit.c:429 src/sudo_edit.c:438 src/sudo_edit.c:539
+#: src/sudo_edit.c:546 src/sudo_edit.c:677 src/sudo_edit.c:697
+#: src/sudo_intercept_common.c:113 src/sudo_intercept_common.c:317
 msgid "unable to allocate memory"
 msgstr "không thể cấp phát bộ nhớ"
 
@@ -198,6 +199,15 @@ msgstr "%s là ai ghi cũng được"
 msgid "%s is group writable"
 msgstr "%s là nhóm có thể ghi"
 
+#: src/apparmor.c:79
+msgid "failed to determine AppArmor confinement"
+msgstr "gặp lỗi khi xác định hạn chế AppArmor"
+
+#: src/apparmor.c:87
+#, c-format
+msgid "unable to change AppArmor profile to %s"
+msgstr "không thể thay đổi hồ sơ AppArmor thành %s"
+
 #: src/copy_file.c:93
 #, c-format
 msgid "%s: truncate %s to zero bytes? (y/n) [n] "
@@ -232,95 +242,115 @@ msgstr "%s: sai chế độ tập tin: 0%o"
 msgid "unable to restore current working directory"
 msgstr "không thể phục hồi thư mục làm việc hiện tại"
 
-#: src/exec.c:130
+#: src/exec.c:103
+msgid "unable to set privileges"
+msgstr "không thể đặt đặc quyền"
+
+#: src/exec.c:109 src/exec.c:114
+msgid "unable to set limit privileges"
+msgstr "không thể đặt giới hạn đặc quyền"
+
+#: src/exec.c:137
 #, c-format
 msgid "unknown login class %s"
 msgstr "không hiểu lớp đăng nhập %s"
 
-#: src/exec.c:142
+#: src/exec.c:149
 msgid "unable to set user context"
 msgstr "không thể đặt ngữ cảnh người dùng"
 
-#: src/exec.c:158
+#: src/exec.c:165
 msgid "unable to set process priority"
 msgstr "không thể đặt ưu tiên cho quá trình"
 
-#: src/exec.c:175
+#: src/exec.c:182
 #, c-format
 msgid "unable to change root to %s"
 msgstr "không thể chuyển đổi thư mục gốc thành %s"
 
-#: src/exec.c:188 src/exec.c:194 src/exec.c:201
+#: src/exec.c:195 src/exec.c:201 src/exec.c:208
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "không thể thay đổi thành chạy như là mã người dùng này (%u, %u)"
 
-#: src/exec.c:219
+#: src/exec.c:226
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "không thể thay đổi thư mục thành %s"
 
-#: src/exec.c:223
+#: src/exec.c:230
 #, c-format
 msgid "starting from %s"
 msgstr "đang bắt đầu từ %s"
 
-#: src/exec.c:305 src/exec_monitor.c:565 src/exec_monitor.c:567
-#: src/exec_nopty.c:561 src/exec_pty.c:581 src/exec_pty.c:1411
-#: src/exec_pty.c:1413 src/signal.c:144 src/signal.c:151 src/signal.c:165
+#: src/exec.c:312 src/exec_monitor.c:575 src/exec_monitor.c:577
+#: src/exec_monitor.c:648 src/exec_nopty.c:439 src/exec_pty.c:586
+#: src/exec_pty.c:1447 src/exec_pty.c:1449 src/signal.c:144 src/signal.c:151
+#: src/signal.c:165 src/suspend_nopty.c:89
 #, c-format
 msgid "unable to set handler for signal %d"
 msgstr "không thể đặt bộ tiếp hợp cho tín hiệu %d"
+
+#: src/exec.c:391
+msgid "intercept mode is not supported with SELinux RBAC on this system"
+msgstr "chế độ chặn không được hỗ trợ với SELinux RBAC trên hệ thống này"
+
+#: src/exec.c:396
+msgid "unable to log sub-commands with SELinux RBAC on this system"
+msgstr "không thể ghi nhật ký lệnh con với SELinux RBAC trên hệ thống này"
 
 #: src/exec_common.c:56
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "không thể xóa bỏ PRIV_PROC_EXEC từ PRIV_LIMIT"
 
-#: src/exec_intercept.c:112 src/exec_intercept.c:116 src/exec_intercept.c:667
-#: src/exec_intercept.c:671 src/exec_intercept.c:857 src/exec_intercept.c:861
-#: src/exec_intercept.c:872 src/exec_intercept.c:876 src/exec_monitor.c:464
-#: src/exec_monitor.c:472 src/exec_monitor.c:480 src/exec_monitor.c:487
-#: src/exec_monitor.c:494 src/exec_monitor.c:501 src/exec_monitor.c:508
-#: src/exec_monitor.c:515 src/exec_monitor.c:522 src/exec_monitor.c:529
-#: src/exec_nopty.c:221 src/exec_nopty.c:230 src/exec_nopty.c:237
-#: src/exec_nopty.c:244 src/exec_nopty.c:251 src/exec_nopty.c:258
-#: src/exec_nopty.c:265 src/exec_nopty.c:272 src/exec_nopty.c:279
-#: src/exec_nopty.c:286 src/exec_nopty.c:293 src/exec_nopty.c:300
-#: src/exec_nopty.c:308 src/exec_pty.c:706 src/exec_pty.c:711
-#: src/exec_pty.c:808 src/exec_pty.c:815 src/exec_pty.c:912
-#: src/exec_pty.c:1233 src/exec_pty.c:1242 src/exec_pty.c:1249
-#: src/exec_pty.c:1256 src/exec_pty.c:1263 src/exec_pty.c:1270
-#: src/exec_pty.c:1277 src/exec_pty.c:1284 src/exec_pty.c:1291
-#: src/exec_pty.c:1298 src/exec_pty.c:1305 src/exec_pty.c:1727
-#: src/exec_pty.c:1737 src/exec_pty.c:1782 src/exec_pty.c:1789
-#: src/exec_pty.c:1816
+#: src/exec_intercept.c:95 src/exec_intercept.c:674 src/exec_intercept.c:864
+#: src/exec_intercept.c:876 src/exec_monitor.c:466 src/exec_monitor.c:474
+#: src/exec_monitor.c:482 src/exec_monitor.c:489 src/exec_monitor.c:496
+#: src/exec_monitor.c:503 src/exec_monitor.c:510 src/exec_monitor.c:517
+#: src/exec_monitor.c:524 src/exec_monitor.c:531 src/exec_nopty.c:226
+#: src/exec_nopty.c:235 src/exec_nopty.c:242 src/exec_nopty.c:249
+#: src/exec_nopty.c:256 src/exec_nopty.c:263 src/exec_nopty.c:270
+#: src/exec_nopty.c:277 src/exec_nopty.c:284 src/exec_nopty.c:291
+#: src/exec_nopty.c:298 src/exec_nopty.c:305 src/exec_nopty.c:313
+#: src/exec_pty.c:711 src/exec_pty.c:716 src/exec_pty.c:813 src/exec_pty.c:820
+#: src/exec_pty.c:917 src/exec_pty.c:1267 src/exec_pty.c:1276
+#: src/exec_pty.c:1283 src/exec_pty.c:1290 src/exec_pty.c:1297
+#: src/exec_pty.c:1304 src/exec_pty.c:1311 src/exec_pty.c:1318
+#: src/exec_pty.c:1325 src/exec_pty.c:1332 src/exec_pty.c:1339
+#: src/exec_pty.c:1764 src/exec_pty.c:1774 src/exec_pty.c:1819
+#: src/exec_pty.c:1826 src/exec_pty.c:1853
 msgid "unable to add event to queue"
 msgstr "không thể thêm sự kiện vào hàng đợi"
 
-#: src/exec_intercept.c:314
-msgid "invalid PolicyCheckRequest"
-msgstr "PolicyCheckRequest không hợp lệ"
-
-#: src/exec_intercept.c:362 src/sudo.c:1209 src/sudo.c:1254 src/sudo.c:1298
+#: src/exec_intercept.c:344 src/sudo.c:1226 src/sudo.c:1271 src/sudo.c:1315
 msgid "command rejected by policy"
 msgstr "lệnh bị từ chối do chính sách"
 
-#: src/exec_intercept.c:455 src/sudo.c:1214 src/sudo.c:1259 src/sudo.c:1303
-#: src/sudo.c:1377
+#: src/exec_intercept.c:437 src/sudo.c:1231 src/sudo.c:1276 src/sudo.c:1320
+#: src/sudo.c:1394
 msgid "policy plugin error"
 msgstr "lỗi trình cắm chính sách"
 
-#: src/exec_intercept.c:561
+#: src/exec_intercept.c:462
+msgid "invalid PolicyCheckRequest"
+msgstr "PolicyCheckRequest không hợp lệ"
+
+#: src/exec_intercept.c:584
 #, c-format
 msgid "client request too large: %zu"
 msgstr "yêu cầu từ máy khách là quá lớn: %zu"
 
-#: src/exec_intercept.c:659
+#: src/exec_intercept.c:622
+#, c-format
+msgid "unable to unpack %s size %zu"
+msgstr "không thể giải nén %s kích cỡ %zu"
+
+#: src/exec_intercept.c:665
 #, c-format
 msgid "unexpected type_case value %d in %s from %s"
 msgstr "gặp giá trị type_case không cần %d trong %s từ %s"
 
-#: src/exec_intercept.c:694
+#: src/exec_intercept.c:695
 #, c-format
 msgid "server message too large: %zu"
 msgstr "thông điệp từ máy chủ là quá lớn: %zu"
@@ -334,73 +364,117 @@ msgstr "gặp lỗi khi đọc từ socketpair"
 msgid "unexpected reply type on backchannel: %d"
 msgstr "kiểu trả về không như mong đợi từ backchannel: %d"
 
-#: src/exec_monitor.c:583
+#: src/exec_monitor.c:593
 msgid "unable to set controlling tty"
 msgstr "không thể đặt điều khiển cho tty"
 
-#: src/exec_monitor.c:591 src/exec_nopty.c:369 src/exec_pty.c:1490
-#: src/exec_pty.c:1511 src/exec_pty.c:1531 src/tgetpass.c:307
+#: src/exec_monitor.c:601 src/exec_nopty.c:382 src/exec_pty.c:1526
+#: src/exec_pty.c:1547 src/exec_pty.c:1567 src/tgetpass.c:305
 msgid "unable to create pipe"
 msgstr "không tạo được đường ống pipe"
 
-#: src/exec_monitor.c:601
+#: src/exec_monitor.c:611
 msgid "unable to receive message from parent"
 msgstr "không thể nhận tin nhắn từ cha mẹ"
 
-#: src/exec_monitor.c:617 src/exec_nopty.c:407 src/exec_pty.c:1569
-#: src/sudo_edit.c:361 src/tgetpass.c:311
+#: src/exec_monitor.c:627 src/exec_nopty.c:422 src/exec_pty.c:1605
+#: src/sudo_edit.c:361 src/tgetpass.c:309
 msgid "unable to fork"
 msgstr "không thể tạo tiến trình con"
 
-#: src/exec_monitor.c:621 src/exec_monitor.c:722 src/exec_nopty.c:471
+#: src/exec_monitor.c:631 src/exec_monitor.c:749 src/exec_nopty.c:518
 msgid "unable to restore tty label"
 msgstr "không thể phục hồi nhãn cho tty"
 
-#: src/exec_monitor.c:637 src/sesh.c:123 src/sudo.c:1160
+#: src/exec_monitor.c:664 src/sesh.c:123 src/sudo.c:1177
 #, c-format
 msgid "unable to execute %s"
 msgstr "không thể thực thi %s"
 
-#: src/exec_nopty.c:363 src/exec_pty.c:1420
+#: src/exec_nopty.c:376 src/exec_pty.c:1456
 msgid "policy plugin failed session initialization"
 msgstr "phần bổ sung chính sách gặp lỗi khi khởi tạo phiên"
 
-#: src/exec_nopty.c:377 src/exec_pty.c:1391 src/exec_pty.c:1399
+#: src/exec_nopty.c:391 src/exec_pty.c:1425 src/exec_pty.c:1434
 msgid "unable to create sockets"
 msgstr "không thể tạo các ổ cắm mạng"
 
-#: src/exec_nopty.c:459 src/exec_pty.c:1666
+#: src/exec_nopty.c:506 src/exec_pty.c:1703
 msgid "error in event loop"
 msgstr "có lỗi trong vòng lặp sự kiện"
 
-#: src/exec_nopty.c:569 src/exec_pty.c:619 src/signal.c:101
+#: src/exec_ptrace.c:647
+msgid "insufficient space for execve arguments"
+msgstr "không gian thiếu cho các tham số execve"
+
+#: src/exec_ptrace.c:658 src/exec_ptrace.c:668 src/exec_ptrace.c:678
+#, c-format
+msgid "unable to read execve %s for process %d"
+msgstr "không thể đọc execve %s cho tiến trình %d"
+
+#: src/exec_ptrace.c:714 src/exec_ptrace.c:739 src/exec_ptrace.c:1194
+#, c-format
+msgid "unable to set registers for process %d"
+msgstr "không thể đặt đăng ký cho tiến trình %d"
+
+#: src/exec_ptrace.c:734 src/exec_ptrace.c:899
+#, c-format
+msgid "process %d exited unexpectedly"
+msgstr "tiến trình %d đã thoát bất thường"
+
+#: src/exec_ptrace.c:843
+msgid "unable to set seccomp filter"
+msgstr "không thể đặt bộ lọc seccomp"
+
+#: src/exec_ptrace.c:934
+#, c-format
+msgid "pathname mismatch, expected \"%s\", got \"%s\""
+msgstr "tên đường dẫn không khớp, cần \"%s\", nhưng lại nhận được \"%s\""
+
+#: src/exec_ptrace.c:942 src/exec_ptrace.c:948 src/exec_ptrace.c:954
+#: src/exec_ptrace.c:962 src/exec_ptrace.c:968 src/exec_ptrace.c:974
+#, c-format
+msgid "%s[%d] mismatch, expected \"%s\", got \"%s\""
+msgstr "%s[%d] không khớp, cần \"%s\", nhưng lại nhận được \"%s\""
+
+#: src/exec_ptrace.c:1013
+#, c-format
+msgid "unable to get event message for process %d"
+msgstr "không thể lấy tin nhắn sự kiện cho tiến trình %d"
+
+#: src/exec_ptrace.c:1019
+#, c-format
+msgid "unable to get registers for process %d"
+msgstr "không thể lấy đăng ký cho tiến trình %d"
+
+#: src/exec_pty.c:163
+msgid "unable to allocate pty"
+msgstr "không thể phân bổ pty"
+
+#: src/exec_pty.c:227 src/exec_pty.c:267 src/exec_pty.c:307 src/exec_pty.c:358
+#: src/exec_pty.c:409
+msgid "I/O plugin error"
+msgstr "Lỗi trình cắm V/R"
+
+#: src/exec_pty.c:231 src/exec_pty.c:271 src/exec_pty.c:311 src/exec_pty.c:362
+#: src/exec_pty.c:413
+msgid "command rejected by I/O plugin"
+msgstr "lệnh bị từ chối bởi trình cắm V/R"
+
+#: src/exec_pty.c:460
+msgid "error logging suspend"
+msgstr "lỗi cấm ghi nhật ký"
+
+#: src/exec_pty.c:494
+msgid "error changing window size"
+msgstr "gặp lỗi khi thay đổi cỡ của cửa sổ"
+
+#: src/exec_pty.c:624 src/signal.c:101 src/suspend_nopty.c:95
 #, c-format
 msgid "unable to restore handler for signal %d"
 msgstr "không thể phục hồi bộ tiếp hợp cho tín hiệu %d"
 
-#: src/exec_pty.c:158
-msgid "unable to allocate pty"
-msgstr "không thể phân bổ pty"
-
-#: src/exec_pty.c:222 src/exec_pty.c:262 src/exec_pty.c:302 src/exec_pty.c:353
-#: src/exec_pty.c:404
-msgid "I/O plugin error"
-msgstr "Lỗi trình cắm V/R"
-
-#: src/exec_pty.c:226 src/exec_pty.c:266 src/exec_pty.c:306 src/exec_pty.c:357
-#: src/exec_pty.c:408
-msgid "command rejected by I/O plugin"
-msgstr "lệnh bị từ chối bởi trình cắm V/R"
-
-#: src/exec_pty.c:455
-msgid "error logging suspend"
-msgstr "lỗi cấm ghi nhật ký"
-
-#: src/exec_pty.c:489
-msgid "error changing window size"
-msgstr "gặp lỗi khi thay đổi cỡ của cửa sổ"
-
-#: src/exec_pty.c:1615
+#: src/exec_pty.c:1651
 msgid "unable to send message to monitor process"
 msgstr "không thể gửi tin đến tiến trình theo dõi"
 
@@ -466,48 +540,48 @@ msgstr "phần bổ sung chính sách %s không bao gồm phương thức kiểm
 msgid "internal error, %s overflow"
 msgstr "lỗi nội bộ, %s bị tràn"
 
-#: src/parse_args.c:234
+#: src/parse_args.c:211
 #, c-format
 msgid "invalid environment variable name: %s"
 msgstr "tên biến môi trường không hợp lệ: %s"
 
-#: src/parse_args.c:337
+#: src/parse_args.c:314
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "đối số cho -C phải là một số lớn hơn hoặc bằng 3"
 
-#: src/parse_args.c:568
+#: src/parse_args.c:545
 msgid "you may not specify both the -i and -s options"
 msgstr "bạn không nên chỉ định đồng thời cả hai tùy chọn “-i” và “-s”"
 
-#: src/parse_args.c:573
+#: src/parse_args.c:550
 msgid "you may not specify both the -i and -E options"
 msgstr "bạn không nên chỉ định cả hai tùy chọn “-i” và “-E”"
 
-#: src/parse_args.c:583
+#: src/parse_args.c:560
 msgid "the -E option is not valid in edit mode"
 msgstr "tùy chọn “-E” không hợp lệ trong chế độ chỉnh sửa"
 
-#: src/parse_args.c:586
+#: src/parse_args.c:563
 msgid "you may not specify environment variables in edit mode"
 msgstr "bạn có lẽ không được chỉ định biến môi trường trong chế độ soạn thảo"
 
-#: src/parse_args.c:596
+#: src/parse_args.c:573
 msgid "the -U option may only be used with the -l option"
 msgstr "tùy chọn “-U” chỉ nên sử dụng cùng với tùy chọn “-l”"
 
-#: src/parse_args.c:600
+#: src/parse_args.c:577
 msgid "the -A and -S options may not be used together"
 msgstr "tùy chọn “-A” và “-S” không nên dùng cùng một lúc với nhau"
 
-#: src/parse_args.c:693
+#: src/parse_args.c:674
 msgid "sudoedit is not supported on this platform"
 msgstr "sudoedit không được hỗ trợ trên nền tảng này"
 
-#: src/parse_args.c:776
+#: src/parse_args.c:757
 msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
 msgstr "Chỉ được phép chỉ định một trong số các tùy chọn -e, -h, -i, -K, -l, -s, -v hay -V"
 
-#: src/parse_args.c:792
+#: src/parse_args.c:773
 #, c-format
 msgid ""
 "%s - edit files as another user\n"
@@ -516,7 +590,7 @@ msgstr ""
 "%s - sửa chữa các tập tin trên danh nghĩa người dùng khác\n"
 "\n"
 
-#: src/parse_args.c:794
+#: src/parse_args.c:775
 #, c-format
 msgid ""
 "%s - execute a command as another user\n"
@@ -525,7 +599,7 @@ msgstr ""
 "%s - thực hiện câu lệnh trên danh nghĩa người dùng khác\n"
 "\n"
 
-#: src/parse_args.c:800
+#: src/parse_args.c:781
 msgid ""
 "\n"
 "Options:\n"
@@ -533,131 +607,131 @@ msgstr ""
 "\n"
 "Tùy chọn:\n"
 
-#: src/parse_args.c:802
+#: src/parse_args.c:783
 msgid "use a helper program for password prompting"
 msgstr "sử dụng chương trình trợ giúp cho hỏi đáp mật khẩu"
 
-#: src/parse_args.c:805
+#: src/parse_args.c:786
 msgid "use specified BSD authentication type"
 msgstr "sử dụng kiểu xác thực BSD được chỉ ra"
 
-#: src/parse_args.c:809
+#: src/parse_args.c:790
 msgid "run command in the background"
 msgstr "chạy lệnh ở chế độ nền"
 
-#: src/parse_args.c:812
+#: src/parse_args.c:793
 msgid "ring bell when prompting"
 msgstr "reo chuông khi nhắc"
 
-#: src/parse_args.c:814
+#: src/parse_args.c:795
 msgid "close all file descriptors >= num"
 msgstr "đóng tất cả các mô tả của tập tin >= số"
 
-#: src/parse_args.c:817
+#: src/parse_args.c:798
 msgid "run command with the specified BSD login class"
 msgstr "chạy lệnh với một lớp đăng nhập BSD được chỉ ra"
 
-#: src/parse_args.c:820
+#: src/parse_args.c:801
 msgid "change the working directory before running command"
 msgstr "thay đổi thư mục làm việc trước khi chạy lệnh"
 
-#: src/parse_args.c:823
+#: src/parse_args.c:804
 msgid "preserve user environment when running command"
 msgstr "bảo tồn môi trường người dùng khi thi hành lệnh"
 
-#: src/parse_args.c:825
+#: src/parse_args.c:806
 msgid "preserve specific environment variables"
 msgstr "bảo tôn các biến môi trường chuyên biệt"
 
-#: src/parse_args.c:827
+#: src/parse_args.c:808
 msgid "edit files instead of running a command"
 msgstr "chỉnh sửa các tập tin thay vì chạy lệnh"
 
-#: src/parse_args.c:830
+#: src/parse_args.c:811
 msgid "run command as the specified group name or ID"
 msgstr "thực hiện câu lệnh với tư cách là tên hay ID của nhóm được chỉ định"
 
-#: src/parse_args.c:833
+#: src/parse_args.c:814
 msgid "set HOME variable to target user's home dir"
 msgstr "đặt biến HOME cho thư mục riêng của người dùng đích"
 
-#: src/parse_args.c:836
+#: src/parse_args.c:817
 msgid "display help message and exit"
 msgstr "hiển thị trợ giúp này rồi thoát"
 
-#: src/parse_args.c:838
+#: src/parse_args.c:819
 msgid "run command on host (if supported by plugin)"
 msgstr "chạy câu lệnh trên máy chủ (nếu được hỗ trợ bởi phần bổ sung)"
 
-#: src/parse_args.c:841
+#: src/parse_args.c:822
 msgid "run login shell as the target user; a command may also be specified"
 msgstr "chạy shell đăng nhập như là người dùng đích; có thể đồng thời chỉ định một câu lệnh"
 
-#: src/parse_args.c:843
+#: src/parse_args.c:824
 msgid "remove timestamp file completely"
 msgstr "gỡ bỏ hoàn toàn dấu vết thời gian của tập tin"
 
-#: src/parse_args.c:846
+#: src/parse_args.c:827
 msgid "invalidate timestamp file"
 msgstr "làm mất hiệu lực dấu vết thời gian (timestamp) của tập tin"
 
-#: src/parse_args.c:849
+#: src/parse_args.c:830
 msgid "list user's privileges or check a specific command; use twice for longer format"
 msgstr "liệt kê đặc quyền của người dùng hay kiểm tra câu lệnh xác định; dùng hai lần cho định dạng dài"
 
-#: src/parse_args.c:852
+#: src/parse_args.c:833
 msgid "non-interactive mode, no prompts are used"
 msgstr "chế độ không-tương-tác, sẽ không hỏi tên người dùng"
 
-#: src/parse_args.c:855
+#: src/parse_args.c:836
 msgid "preserve group vector instead of setting to target's"
 msgstr "bảo tồn véc-tơ nhóm thay vì các cài đặt cho đích"
 
-#: src/parse_args.c:858
+#: src/parse_args.c:839
 msgid "use the specified password prompt"
 msgstr "sử dụng nhắc nhập mật khẩu đã chỉ ra"
 
-#: src/parse_args.c:860
+#: src/parse_args.c:841
 msgid "change the root directory before running command"
 msgstr "thay đổi thư mục gốc trước khi chạy lệnh"
 
-#: src/parse_args.c:863
+#: src/parse_args.c:844
 msgid "create SELinux security context with specified role"
 msgstr "tạo ngữ cảnh an ninh SELinux với vai trò đã chỉ ra"
 
-#: src/parse_args.c:866
+#: src/parse_args.c:847
 msgid "read password from standard input"
 msgstr "đọc mật khẩu từ đầu vào tiêu chuẩn"
 
-#: src/parse_args.c:869
+#: src/parse_args.c:850
 msgid "run shell as the target user; a command may also be specified"
 msgstr "chạy hệ vỏ dưới danh nghĩa người dùng đích; cũng có thể chỉ định thêm câu lệnh"
 
-#: src/parse_args.c:873
+#: src/parse_args.c:854
 msgid "create SELinux security context with specified type"
 msgstr "tạo ngữ cảnh an ninh SELinux với kiểu đã chỉ ra"
 
-#: src/parse_args.c:876
+#: src/parse_args.c:857
 msgid "terminate command after the specified time limit"
 msgstr "chấm dứt lệnh sau một thời hạn giới hạn được chỉ định"
 
-#: src/parse_args.c:879
+#: src/parse_args.c:860
 msgid "in list mode, display privileges for user"
 msgstr "ở chế độ liệt kê, hiển thị đặc quyền cho người dùng"
 
-#: src/parse_args.c:882
+#: src/parse_args.c:863
 msgid "run command (or edit file) as specified user name or ID"
 msgstr "chạy lệnh (hay sửa chữa tập tin) trên tư cách của người dùng hay ID đã chỉ ra"
 
-#: src/parse_args.c:884
+#: src/parse_args.c:865
 msgid "display version information and exit"
 msgstr "hiển thị thông tin phiên bản rồi thoát"
 
-#: src/parse_args.c:887
+#: src/parse_args.c:868
 msgid "update user's timestamp without running a command"
 msgstr "cập nhật dấu vết thời gian (timestamp) của người dùng mà không chạy một lệnh"
 
-#: src/parse_args.c:890
+#: src/parse_args.c:871
 msgid "stop processing command line arguments"
 msgstr "dừng việc xử lý đối số dòng lệnh"
 
@@ -871,115 +945,115 @@ msgstr "bạn không tồn tại trong cơ sở dữ liệu %s"
 msgid "unable to determine tty"
 msgstr "không thể dò tìm tty"
 
-#: src/sudo.c:908
+#: src/sudo.c:925
 msgid "The \"no new privileges\" flag is set, which prevents sudo from running as root."
 msgstr "Chưa đặt cờ \"đặc quyền mới\" nào, việc này sẽ ngăn cản sudo chạy với tư cách root."
 
-#: src/sudo.c:910
+#: src/sudo.c:927
 msgid "If sudo is running in a container, you may need to adjust the container configuration to disable the flag."
 msgstr "Nếu sudo được chạy trong một container, bạn có lẽ cần chỉnh cấu hình container để tắt cờ."
 
-#: src/sudo.c:944
+#: src/sudo.c:961
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s phải được sở hữu bởi uid %d và bít setuid phải được đặt"
 
-#: src/sudo.c:947
+#: src/sudo.c:964
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "uid chịu tác động hiện tại không phải là %d, có phải là %s trên hệ thống tập tin với tùy chọn  “nosuid” được đặt, hay một hệ thống tập tin NFS không có đặc quyền của root không?"
 
-#: src/sudo.c:953
+#: src/sudo.c:970
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "uid chịu tác động hiện tại không phải là %d, chương trình sudo có được cài với setuid root không?"
 
-#: src/sudo.c:969 src/tgetpass.c:333
+#: src/sudo.c:986 src/tgetpass.c:331
 msgid "unable to set supplementary group IDs"
 msgstr "không thể đặt nhóm phụ IDs"
 
-#: src/sudo.c:976
+#: src/sudo.c:993
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "không thể đặt hiệu ứng gid chạy như là gid %u"
 
-#: src/sudo.c:982
+#: src/sudo.c:999
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "không thể thay đổi gid thành runas gid %u"
 
-#: src/sudo.c:1025
+#: src/sudo.c:1042
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "biểu thức điều kiện con kết thúc không như mong đợi: %d"
 
-#: src/sudo.c:1132
+#: src/sudo.c:1149
 msgid "unable to initialize policy plugin"
 msgstr "không thể khởi tạo phần bổ sung chính sách"
 
-#: src/sudo.c:1194
+#: src/sudo.c:1211
 #, c-format
 msgid "policy plugin %s is missing the \"check_policy\" method"
 msgstr "phần bổ sung chính sách %s bị thiếu phương thức kiểm tra chính sách “check_policy”"
 
-#: src/sudo.c:1240
+#: src/sudo.c:1257
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "phần bổ sung chính sách %s không hỗ trợ liệt kê đặc quyền"
 
-#: src/sudo.c:1284
+#: src/sudo.c:1301
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "phần bổ sung chính sách %s không hỗ trợ tùy chọn -v"
 
-#: src/sudo.c:1322
+#: src/sudo.c:1339
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "phần bổ sung chính sách %s không hỗ trợ tùy chọn -k/-K"
 
-#: src/sudo.c:1451
+#: src/sudo.c:1468
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "gặp lỗi khi khởi tạo phần bổ sung I/O %s"
 
-#: src/sudo.c:1454
+#: src/sudo.c:1471
 msgid "error initializing I/O plugin"
 msgstr "gặp lỗi khi khởi tạo phần bổ sung V/R"
 
-#: src/sudo.c:1603
+#: src/sudo.c:1620
 #, c-format
 msgid "error initializing audit plugin %s"
 msgstr "gặp lỗi khi khởi tạo phần bổ sung audit %s"
 
-#: src/sudo.c:1682
+#: src/sudo.c:1699
 #, c-format
 msgid "%s: unable to log error event%s%s"
 msgstr "%s: không thể ghi nhật ký sự kiện lỗi%s%s"
 
-#: src/sudo.c:1718
+#: src/sudo.c:1735
 #, c-format
 msgid "%s: unable to log accept event%s%s"
 msgstr "%s: không thể ghi nhật ký sự kiện chấp thuận%s%s"
 
-#: src/sudo.c:1723 src/sudo.c:1761
+#: src/sudo.c:1740 src/sudo.c:1778
 msgid "audit plugin error"
-msgstr "lõi trình cắm audit"
+msgstr "lỗi trình cắm audit"
 
-#: src/sudo.c:1756
+#: src/sudo.c:1773
 #, c-format
 msgid "%s: unable to log reject event%s%s"
 msgstr "%s: không thể ghi nhật ký sự kiện từ chối%s%s"
 
-#: src/sudo.c:1816
+#: src/sudo.c:1833
 #, c-format
 msgid "error initializing approval plugin %s"
 msgstr "gặp lỗi khi khởi tạo phần bổ sung chấp thuận %s"
 
-#: src/sudo.c:1886
+#: src/sudo.c:1903
 msgid "command rejected by approver"
 msgstr "lệnh bị từ chối do bộ chấp thuận"
 
-#: src/sudo.c:1896
+#: src/sudo.c:1913
 msgid "approval plugin error"
 msgstr "lỗi trình cắm chấp thuận"
 
@@ -1059,17 +1133,17 @@ msgstr "một thiết bị đầu cuối là cần thiết để đọc mật kh
 msgid "no askpass program specified, try setting SUDO_ASKPASS"
 msgstr "không có chương trình hỏi mật khẩu nào được chỉ ra, hãy thử đặt SUDO_ASKPASS"
 
-#: src/tgetpass.c:328
+#: src/tgetpass.c:326
 #, c-format
 msgid "unable to set gid to %u"
 msgstr "không thể đặt mã số nhóm thành %u"
 
-#: src/tgetpass.c:338
+#: src/tgetpass.c:336
 #, c-format
 msgid "unable to set uid to %u"
 msgstr "không thể đặt mã số người dùng thành %u"
 
-#: src/tgetpass.c:343
+#: src/tgetpass.c:341
 #, c-format
 msgid "unable to run %s"
 msgstr "không thể chạy %s"
