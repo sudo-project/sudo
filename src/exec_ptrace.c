@@ -674,8 +674,6 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
 	goto bad;
     }
     pathname = strtab;
-    strtab += len;
-    bufsize -= len;
 
     sudo_debug_execve(SUDO_DEBUG_DIAG, pathname, argv, envp);
 
@@ -1170,7 +1168,6 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 		if (len == (size_t)-1)
 		    goto done;
 		strtab += len;
-		sp += argc + 1;
 	    }
 	    if (path_mismatch) {
 		/* Update pathname address in the tracee to our new value. */
@@ -1180,7 +1177,6 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 		len = ptrace_write_string(pid, strtab, closure->command);
 		if (len == (size_t)-1)
 		    goto done;
-		strtab += len;
 	    }
 
 	    /* Update args in the tracee to the new values. */
