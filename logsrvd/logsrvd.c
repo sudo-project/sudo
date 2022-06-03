@@ -1364,7 +1364,7 @@ bad:
  * Allocate a connection closure and optionally perform TLS handshake.
  */
 static bool
-new_connection(int sock, bool tls, const struct sockaddr *sa,
+new_connection(int sock, bool tls, const union sockaddr_union *sa_un,
     struct sudo_event_base *evbase)
 {
     struct connection_closure *closure;
@@ -1374,14 +1374,12 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
 	goto bad;
 
     /* store the peer's IP address in the closure object */
-    if (sa->sa_family == AF_INET) {
-        struct sockaddr_in *sin = (struct sockaddr_in *)sa;
-        inet_ntop(AF_INET, &sin->sin_addr, closure->ipaddr,
+    if (sa_un->sa.sa_family == AF_INET) {
+        inet_ntop(AF_INET, &sa_un->sin.sin_addr, closure->ipaddr,
             sizeof(closure->ipaddr));
 #if defined(HAVE_STRUCT_IN6_ADDR)
-    } else if (sa->sa_family == AF_INET6) {
-        struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)sa;
-        inet_ntop(AF_INET6, &sin6->sin6_addr, closure->ipaddr,
+    } else if (sa_un->sa.sa_family == AF_INET6) {
+        inet_ntop(AF_INET6, &sa_un->sin6.sin6_addr, closure->ipaddr,
             sizeof(closure->ipaddr));
 #endif /* HAVE_STRUCT_IN6_ADDR */
     } else {
@@ -1500,21 +1498,21 @@ listener_cb(int fd, int what, void *v)
 {
     struct listener *l = v;
     struct sudo_event_base *evbase = sudo_ev_get_base(l->ev);
-    union sockaddr_union s_un;
-    socklen_t salen = sizeof(s_un);
+    union sockaddr_union sa_un;
+    socklen_t salen = sizeof(sa_un);
     int sock;
     debug_decl(listener_cb, SUDO_DEBUG_UTIL);
 
-    sock = accept(fd, &s_un.sa, &salen);
+    sock = accept(fd, &sa_un.sa, &salen);
     if (sock != -1) {
 	if (logsrvd_conf_server_tcp_keepalive()) {
 	    int keepalive = 1;
 	    if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &keepalive,
-		sizeof(keepalive)) == -1) {
+		    sizeof(keepalive)) == -1) {
 		sudo_warn("SO_KEEPALIVE");
 	    }
 	}
-	if (!new_connection(sock, l->tls, &s_un.sa, evbase)) {
+	if (!new_connection(sock, l->tls, &sa_un, evbase)) {
 	    /* TODO: pause accepting on ENOMEM */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to start new connection");
