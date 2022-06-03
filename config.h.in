@@ -1021,9 +1021,6 @@
 /* Define to 1 if you have the `va_copy' function. */
 #undef HAVE_VA_COPY
 
-/* Define to 1 if you have the `vfork' function. */
-#undef HAVE_VFORK
-
 /* Define to 1 if you have the `vsnprintf' function. */
 #undef HAVE_VSNPRINTF
 

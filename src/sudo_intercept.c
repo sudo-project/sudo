@@ -52,10 +52,6 @@
 #include "sudo_util.h"
 #include "pathnames.h"
 
-#ifndef HAVE_VFORK
-# define vfork fork
-#endif
-
 /* execl flavors */
 #define SUDO_EXECL	0x0
 #define SUDO_EXECLE	0x1
@@ -249,7 +245,7 @@ system_wrapper(const char *cmnd)
     if (sigprocmask(SIG_BLOCK, &mask, &omask) == -1)
 	debug_return_int(-1);
 
-    switch (child = vfork()) {
+    switch (child = fork()) {
     case -1:
 	/* error */
 	(void)sigprocmask(SIG_SETMASK, &omask, NULL);
