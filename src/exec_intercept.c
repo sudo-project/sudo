@@ -52,6 +52,11 @@ static struct intercept_closure *accept_closure;
 static void intercept_accept_cb(int fd, int what, void *v);
 static void intercept_cb(int fd, int what, void *v);
 
+/*
+ * Create an intercept closure.
+ * Returns an opaque pointer to the closure, which is also
+ * passed to the event callback when not using ptrace(2).
+ */
 void *
 intercept_setup(int fd, struct sudo_event_base *evbase,
     struct command_details *details)
@@ -917,8 +922,6 @@ intercept_cb(int fd, int what, void *v)
 
 /*
  * Accept a new connection from the client register a new event for it.
- * Returns an opaque pointer to the intercept closure, which is
- * also passed to the event callback.
  */
 static void
 intercept_accept_cb(int fd, int what, void *v)
