@@ -49,8 +49,21 @@
 
 #include <stdlib.h>	/* for malloc, free */
 #include <string.h>	/* for strcmp, strlen, memcpy, memmove, memset */
+#if defined(HAVE_ENDIAN_H)
+# include <endian.h>
+#elif defined(HAVE_SYS_ENDIAN_H)
+# include <sys/endian.h>
+#elif defined(HAVE_MACHINE_ENDIAN_H)
+# include <machine/endian.h>
+#else
+# include "compat/endian.h"
+#endif
 
 #include "protobuf-c/protobuf-c.h"
+
+#if BYTE_ORDER == BIG_ENDIAN
+# define WORDS_BIGENDIAN
+#endif
 
 #define TRUE				1
 #define FALSE				0
