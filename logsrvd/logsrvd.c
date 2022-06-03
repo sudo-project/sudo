@@ -1503,6 +1503,7 @@ listener_cb(int fd, int what, void *v)
     int sock;
     debug_decl(listener_cb, SUDO_DEBUG_UTIL);
 
+    memset(&sa_un, 0, sizeof(sa_un));
     sock = accept(fd, &sa_un.sa, &salen);
     if (sock != -1) {
 	if (logsrvd_conf_server_tcp_keepalive()) {

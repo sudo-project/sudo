@@ -574,6 +574,9 @@ print_cmndspec_csv(FILE *fp, struct sudoers_parse_tree *parse_tree,
 	}
     }
 #endif /* HAVE_PRIV_SET */
+#ifdef __clang_analyzer__
+    (void)&need_comma;
+#endif
     putc('"', fp);
     putc(',', fp);
 
