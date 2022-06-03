@@ -408,14 +408,14 @@ ptrace_read_vec(pid_t pid, struct sudo_ptrace_regs *regs, unsigned long addr,
 	case -1:
 	    sudo_warn("%s: ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
 		__func__, (int)pid, addr);
-	    goto bad;
+	    debug_return_size_t(-1);
 	case 0:
 	    vec[len] = NULL;
 	    debug_return_size_t(buf - buf0);
 	default:
 	    slen = ptrace_read_string(pid, word, buf, bufsize);
 	    if (slen == (size_t)-1)
-		goto bad;
+		debug_return_size_t(-1);
 	    vec[len++] = buf;
 	    buf += slen + 1;
 	    bufsize -= slen + 1;
@@ -423,12 +423,6 @@ ptrace_read_vec(pid_t pid, struct sudo_ptrace_regs *regs, unsigned long addr,
 	    continue;
 	}
     }
-bad:
-    while (len > 0) {
-	free(vec[len]);
-	len--;
-    }
-    debug_return_size_t(-1);
 }
 
 /*
