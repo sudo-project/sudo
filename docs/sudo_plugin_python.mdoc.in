@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 16, 2022
+.Dd June 6, 2022
 .Dt SUDO_PLUGIN_PYTHON @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -155,7 +155,8 @@ The plugin arguments are as follows:
 .It ModulePath
 The path of a python file which contains the class of the sudo Python plugin.
 It must be either an absolute path or a path relative to the sudo Python plugin
-directory: "@plugindir@/python".
+directory,
+.Pa @plugindir@/python .
 .It ClassName
 (Optional.) The name of the class implementing the sudo Python plugin.
 If not supplied, the one and only sudo.Plugin that is present in the module
@@ -449,7 +450,7 @@ To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
 .Bd -literal
 Plugin python_policy python_plugin.so \e
-    ModulePath=@prefix@/share/doc/sudo/examples/example_policy_plugin.py \e
+    ModulePath=@EXAMPLES@/example_policy_plugin.py \e
     ClassName=SudoPolicyPlugin
 .Ed
 .Pp
@@ -683,7 +684,7 @@ To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
 .Bd -literal -offset 4n
 Plugin python_io python_plugin.so \e
-    ModulePath=@prefix@/share/doc/sudo/examples/example_io_plugin.py \e
+    ModulePath=@EXAMPLES@/example_io_plugin.py \e
     ClassName=SudoIOPlugin
 .Ed
 .Ss Audit plugin API
@@ -930,7 +931,7 @@ To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
 .Bd -literal -offset 4n
 Plugin python_audit python_plugin.so \e
-    ModulePath=@prefix@/share/doc/sudo/examples/example_audit_plugin.py \e
+    ModulePath=@EXAMPLES@/example_audit_plugin.py \e
     ClassName=SudoAuditPlugin
 .Ed
 .Pp
@@ -1036,7 +1037,7 @@ To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
 .Bd -literal -offset 4n
 Plugin python_approval python_plugin.so \e
-    ModulePath=@prefix@/share/doc/sudo/examples/example_approval_plugin.py \e
+    ModulePath=@EXAMPLES@/example_approval_plugin.py \e
     ClassName=BusinessHoursApprovalPlugin
 .Ed
 .Pp
@@ -1113,7 +1114,7 @@ To try it, register it in the
 file by adding the following lines:
 .Bd -literal -offset 4n
 Defaults group_plugin="python_plugin.so \e
-    ModulePath=@prefix@/share/doc/sudo/examples/example_group_plugin.py \e
+    ModulePath=@EXAMPLES@/example_group_plugin.py \e
     ClassName=SudoGroupPlugin"
 .Ed
 .Pp
@@ -1249,7 +1250,7 @@ To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
 .Bd -literal -offset 4n
 Plugin python_io python_plugin.so \e
-    ModulePath=@prefix@/share/doc/sudo/examples/example_conversation.py \e
+    ModulePath=@EXAMPLES@/example_conversation.py \e
     ClassName=ReasonLoggerIOPlugin
 .Ed
 .Ss Information / error display API
@@ -1398,7 +1399,7 @@ To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
 .Bd -literal -offset 4n
 Plugin python_io python_plugin.so \e
-    ModulePath=@prefix@/share/doc/sudo/examples/example_debugging.py \e
+    ModulePath=@EXAMPLES@/example_debugging.py \e
     ClassName=DebugDemoPlugin
 
 Debug python_plugin.so \e

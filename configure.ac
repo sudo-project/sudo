@@ -63,6 +63,7 @@ AC_SUBST([SUDOERS_MODE])
 AC_SUBST([SUDOERS_UID])
 AC_SUBST([SUDOERS_GID])
 AC_SUBST([DEVEL])
+AC_SUBST([EXAMPLES])
 AC_SUBST([BAMAN])
 AC_SUBST([LCMAN])
 AC_SUBST([PSMAN])
@@ -5048,7 +5049,7 @@ dnl
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
 
 dnl
-dnl Expand exec_prefix in in variables used by the manual pages
+dnl Expand exec_prefix in variables used by the manual pages
 dnl
 oexec_prefix="$exec_prefix"
 if test "$exec_prefix" = '$(prefix)'; then
@@ -5087,6 +5088,26 @@ while test X"$plugindir" != X"$_plugindir"; do
     eval plugindir="$_plugindir"
 done
 exec_prefix="$oexec_prefix"
+
+# Convert exampledir to something that can be used in the man pages
+# I wish there was a better way to expand this.
+EXAMPLES="$exampledir"
+while :; do
+    EXAMPLES="`echo \"$EXAMPLES\" | sed -e 's/(/{/g' -e 's/)/}/g'`"
+    case "$EXAMPLES" in
+    *\${[[A-Za-z]]*}*)
+	eval EXAMPLES="$EXAMPLES"
+	;;
+    *)
+	break
+	;;
+    esac
+done
+case "$EXAMPLES" in
+    NONE/*)
+	EXAMPLES="${ac_default_prefix}${EXAMPLES#NONE}"
+	;;
+esac
 
 dnl
 dnl Defer setting _PATH_SUDO_NOEXEC, etc until after exec_prefix is set

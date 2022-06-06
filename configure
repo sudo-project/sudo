@@ -840,6 +840,7 @@ SEMAN
 PSMAN
 LCMAN
 BAMAN
+EXAMPLES
 DEVEL
 SUDOERS_GID
 SUDOERS_UID
@@ -3430,6 +3431,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 ac_config_headers="$ac_config_headers config.h pathnames.h"
+
 
 
 
@@ -32429,6 +32431,26 @@ while test X"$plugindir" != X"$_plugindir"; do
     eval plugindir="$_plugindir"
 done
 exec_prefix="$oexec_prefix"
+
+# Convert exampledir to something that can be used in the man pages
+# I wish there was a better way to expand this.
+EXAMPLES="$exampledir"
+while :; do
+    EXAMPLES="`echo \"$EXAMPLES\" | sed -e 's/(/{/g' -e 's/)/}/g'`"
+    case "$EXAMPLES" in
+    *\${[A-Za-z]*}*)
+	eval EXAMPLES="$EXAMPLES"
+	;;
+    *)
+	break
+	;;
+    esac
+done
+case "$EXAMPLES" in
+    NONE/*)
+	EXAMPLES="${ac_default_prefix}${EXAMPLES#NONE}"
+	;;
+esac
 
 if test X"$enable_intercept" != X"no"; then
     SUDO_OBJS="${SUDO_OBJS} intercept.pb-c.o"
