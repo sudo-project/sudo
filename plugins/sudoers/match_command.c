@@ -114,16 +114,11 @@ command_args_match(const char *sudoers_cmnd, const char *sudoers_args)
  * Returns true on success, else false.
  */
 static bool
-do_stat(int fd, const char *path, const char *runchroot, bool intercepted,
-    struct stat *sb)
+do_stat(int fd, const char *path, const char *runchroot, struct stat *sb)
 {
-    struct stat sbuf;
     char pathbuf[PATH_MAX];
     bool ret;
     debug_decl(do_stat, SUDOERS_DEBUG_MATCH);
-
-    if (sb == NULL)
-	sb = &sbuf;
 
     if (fd != -1) {
 	ret = fstat(fd, sb) == 0;
@@ -140,14 +135,26 @@ do_stat(int fd, const char *path, const char *runchroot, bool intercepted,
 	}
 	ret = stat(path, sb) == 0;
     }
-    if (ret && intercepted) {
+    debug_return_bool(ret);
+}
+
+/*
+ * Perform intercept-specific checks.
+ * Returns true if allowed, else false.
+ */
+static bool
+intercept_ok(const char *path, bool intercepted, struct stat *sb)
+{
+    debug_decl(intercept_ok, SUDOERS_DEBUG_MATCH);
+
+    if (intercepted) {
 	if (!def_intercept_allow_setid && ISSET(sb->st_mode, S_ISUID|S_ISGID)) {
 	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
 		"rejecting setid command %s", path);
-	    ret = false;
+	    debug_return_bool(false);
 	}
     }
-    debug_return_int(ret);
+    debug_return_bool(true);
 }
 #endif /* SUDOERS_NAME_MATCH */
 
@@ -309,7 +316,9 @@ command_matches_dir(const char *sudoers_dir, size_t dlen, const char *runchroot,
 	/* Open the file for fdexec or for digest matching. */
 	if (!open_cmnd(buf, NULL, digests, &fd))
 	    continue;
-	if (!do_stat(fd, buf, NULL, intercepted, &sudoers_stat))
+	if (!do_stat(fd, buf, NULL, &sudoers_stat))
+	    continue;
+	if (!intercept_ok(buf, intercepted, &sudoers_stat))
 	    continue;
 
 	if (user_stat == NULL ||
@@ -375,6 +384,9 @@ static bool
 command_matches_all(const char *runchroot,
     bool intercepted, const struct command_digest_list *digests)
 {
+#ifndef SUDOERS_NAME_MATCH
+    struct stat sb;
+#endif
     int fd = -1;
     debug_decl(command_matches_all, SUDOERS_DEBUG_MATCH);
 
@@ -383,8 +395,11 @@ command_matches_all(const char *runchroot,
 	if (!open_cmnd(user_cmnd, runchroot, digests, &fd))
 	    goto bad;
 #ifndef SUDOERS_NAME_MATCH
-	if (!do_stat(fd, user_cmnd, runchroot, intercepted, NULL))
-	    goto bad;
+	/* A non-existent file is not an error for "sudo ALL". */
+	if (do_stat(fd, user_cmnd, runchroot, &sb)) {
+	    if (!intercept_ok(user_cmnd, intercepted, &sb))
+		goto bad;
+	}
 #endif
     }
 
@@ -406,6 +421,9 @@ command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args,
     const char *runchroot, bool intercepted,
     const struct command_digest_list *digests)
 {
+#ifndef SUDOERS_NAME_MATCH
+    struct stat sb;
+#endif
     int fd = -1;
     debug_decl(command_matches_fnmatch, SUDOERS_DEBUG_MATCH);
 
@@ -425,7 +443,9 @@ command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args,
 	if (!open_cmnd(user_cmnd, runchroot, digests, &fd))
 	    goto bad;
 #ifndef SUDOERS_NAME_MATCH
-	if (!do_stat(fd, user_cmnd, runchroot, intercepted, NULL))
+	if (!do_stat(fd, user_cmnd, runchroot, &sb))
+	    goto bad;
+	if (!intercept_ok(user_cmnd, intercepted, &sb))
 	    goto bad;
 #endif
 	/* Check digest of user_cmnd since sudoers_cmnd is a pattern. */
@@ -448,6 +468,9 @@ command_matches_regex(const char *sudoers_cmnd, const char *sudoers_args,
     const char *runchroot, bool intercepted,
     const struct command_digest_list *digests)
 {
+#ifndef SUDOERS_NAME_MATCH
+    struct stat sb;
+#endif
     int fd = -1;
     debug_decl(command_matches_regex, SUDOERS_DEBUG_MATCH);
 
@@ -468,7 +491,9 @@ command_matches_regex(const char *sudoers_cmnd, const char *sudoers_args,
 	if (!open_cmnd(user_cmnd, runchroot, digests, &fd))
 	    goto bad;
 #ifndef SUDOERS_NAME_MATCH
-	if (!do_stat(fd, user_cmnd, runchroot, intercepted, NULL))
+	if (!do_stat(fd, user_cmnd, runchroot, &sb))
+	    goto bad;
+	if (!intercept_ok(user_cmnd, intercepted, &sb))
 	    goto bad;
 #endif
 	/* Check digest of user_cmnd since sudoers_cmnd is a pattern. */
@@ -551,7 +576,9 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
 	    /* Open the file for fdexec or for digest matching. */
 	    if (!open_cmnd(cp, runchroot, digests, &fd))
 		continue;
-	    if (!do_stat(fd, cp, runchroot, intercepted, &sudoers_stat))
+	    if (!do_stat(fd, cp, runchroot, &sudoers_stat))
+		continue;
+	    if (!intercept_ok(cp, intercepted, &sudoers_stat))
 		continue;
 	    if (user_stat == NULL ||
 		(user_stat->st_dev == sudoers_stat.st_dev &&
@@ -603,7 +630,9 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
 	    /* Open the file for fdexec or for digest matching. */
 	    if (!open_cmnd(cp, runchroot, digests, &fd))
 		continue;
-	    if (!do_stat(fd, cp, runchroot, intercepted, &sudoers_stat))
+	    if (!do_stat(fd, cp, runchroot, &sudoers_stat))
+		continue;
+	    if (!intercept_ok(cp, intercepted, &sudoers_stat))
 		continue;
 	    if (user_stat == NULL ||
 		(user_stat->st_dev == sudoers_stat.st_dev &&
@@ -668,7 +697,9 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args,
      *  c) there are args in sudoers and on command line and they match
      *  d) there is a digest and it matches
      */
-    if (user_stat != NULL && do_stat(fd, sudoers_cmnd, runchroot, intercepted, &sudoers_stat)) {
+    if (user_stat != NULL && do_stat(fd, sudoers_cmnd, runchroot, &sudoers_stat)) {
+	if (!intercept_ok(sudoers_cmnd, intercepted, &sudoers_stat))
+	    goto bad;
 	if (user_stat->st_dev != sudoers_stat.st_dev ||
 	    user_stat->st_ino != sudoers_stat.st_ino)
 	    goto bad;

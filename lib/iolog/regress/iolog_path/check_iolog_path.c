@@ -281,6 +281,10 @@ main(int argc, char *argv[])
 	}
 	state = (state + 1) % MAX_STATE;
     }
+    free(dir_in);
+    free(dir_out);
+    free(file_in);
+    free(file_out);
 
     if (ntests != 0) {
 	printf("iolog_path: %d test%s run, %d errors, %d%% success rate\n",

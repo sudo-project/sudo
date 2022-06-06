@@ -64,7 +64,7 @@ static void dump_sudoers(struct sudo_lbuf *lbuf);
 static void usage(void) __attribute__((__noreturn__));
 static void set_runaspw(const char *);
 static void set_runasgr(const char *);
-static bool cb_runas_default(const union sudo_defs_val *, int);
+static bool cb_runas_default(const char *file, int line, int column, const union sudo_defs_val *, int);
 static int testsudoers_error(const char *msg);
 static int testsudoers_output(const char *buf);
 
@@ -292,17 +292,17 @@ main(int argc, char *argv[])
 	}
         break;
     case format_sudoers:
-	if (sudoersparse() != 0 || parse_error)
+	if (sudoersparse() != 0)
 	    parse_error = true;
         break;
     default:
         sudo_fatalx("error: unhandled input %d", input_format);
     }
+    if (!update_defaults(&parsed_policy, NULL, SETDEF_ALL, false))
+	parse_error = true;
+
     if (!parse_error)
 	(void) puts("Parses OK");
-
-    if (!update_defaults(&parsed_policy, NULL, SETDEF_ALL, false))
-	(void) puts("Problem with defaults entries");
 
     if (dflag) {
 	(void) putchar('\n');
@@ -415,7 +415,8 @@ set_runasgr(const char *group)
  * Callback for runas_default sudoers setting.
  */
 static bool
-cb_runas_default(const union sudo_defs_val *sd_un, int op)
+cb_runas_default(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     /* Only reset runaspw if user didn't specify one. */
     if (!runas_user && !runas_group)

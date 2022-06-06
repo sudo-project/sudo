@@ -45,7 +45,9 @@ INSTALL_BACKUP = @INSTALL_BACKUP@
 
 # Libraries
 LT_LIBS = $(top_builddir)/lib/iolog/libsudo_iolog.la \
-	  $(top_builddir)/lib/logsrv/liblogsrv.la
+	  $(top_builddir)/lib/eventlog/libsudo_eventlog.la \
+	  $(top_builddir)/lib/logsrv/liblogsrv.la \
+	  $(top_builddir)/lib/protobuf-c/libprotobuf-c.la
 LIBS = $(LT_LIBS) @LIBTLS@
 
 # C preprocessor defines
@@ -75,8 +77,8 @@ PIE_CFLAGS = @PIE_CFLAGS@
 PIE_LDFLAGS = @PIE_LDFLAGS@
 
 # Stack smashing protection flags
-SSP_CFLAGS = @SSP_CFLAGS@
-SSP_LDFLAGS = @SSP_LDFLAGS@
+HARDENING_CFLAGS = @HARDENING_CFLAGS@
+HARDENING_LDFLAGS = @HARDENING_LDFLAGS@
 
 # cppcheck options, usually set in the top-level Makefile
 CPPCHECK_OPTS = -q --enable=warning,performance,portability --suppress=constStatement --suppress=compareBoolExpressionWithInt --error-exitcode=1 --inline-suppr -Dva_copy=va_copy -U__cplusplus -UQUAD_MAX -UQUAD_MIN -UUQUAD_MAX -U_POSIX_HOST_NAME_MAX -U_POSIX_PATH_MAX -U__NBBY -DNSIG=64
@@ -111,6 +113,11 @@ FUZZ_MAX_LEN = 4096
 FUZZ_RUNS = 8192
 FUZZ_VERBOSE =
 
+TEST_PROGS = logsrvd_conf_test
+TEST_LIBS = $(LIBS)
+TEST_LDFLAGS = $(LDFLAGS)
+TEST_VERBOSE =
+
 # User and group IDs the installed files should be "owned" by
 install_uid = 0
 install_gid = 0
@@ -139,6 +146,8 @@ FUZZ_LOGSRVD_CONF_OBJS = fuzz_logsrvd_conf.o logsrvd_conf.o tls_init.o
 
 FUZZ_LOGSRVD_CONF_CORPUS = $(srcdir)/regress/corpus/seed/logsrvd_conf/logsrvd.conf.*
 
+CONF_TEST_OBJS = logsrvd_conf_test.o logsrvd_conf.o tls_init.o
+
 all: $(PROGS)
 
 depend:
@@ -152,10 +161,10 @@ Makefile: $(srcdir)/Makefile.in
 .SUFFIXES: .c .h .i .lo .o .plog
 
 .c.o:
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $<
 
 .c.lo:
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $<
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $<
 
 .c.i:
 	$(CC) -E -o $@ $(CPPFLAGS) $<
@@ -164,13 +173,16 @@ Makefile: $(srcdir)/Makefile.in
 	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
 
 sudo_logsrvd: $(LOGSRVD_OBJS) $(LT_LIBS)
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LOGSRVD_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LOGSRVD_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(LIBS)
 
 sudo_sendlog: $(SENDLOG_OBJS) $(LT_LIBS)
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(SENDLOG_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(SENDLOG_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(LIBS)
 
 fuzz_logsrvd_conf: $(FUZZ_LOGSRVD_CONF_OBJS) $(LIBFUZZSTUB) $(LT_LIBS)
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(FUZZ_LOGSRVD_CONF_OBJS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(FUZZ_LOGSRVD_CONF_OBJS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS)
+
+logsrvd_conf_test: $(CONF_TEST_OBJS) $(LT_LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CONF_TEST_OBJS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 fuzz_logsrvd_conf_seed_corpus.zip:
 	tdir=fuzz_logsrvd_conf.$$$$; \
@@ -188,6 +200,7 @@ run-fuzz_logsrvd_conf: fuzz_logsrvd_conf
 	    LC_ALL=C; export LC_ALL; \
 	fi; \
 	unset LANG || LANG=; \
+	unset LANGUAGE || LANGUAGE=; \
 	MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	umask 022; \
@@ -250,13 +263,34 @@ check-fuzzer: $(FUZZ_PROGS)
 		LC_ALL=C; export LC_ALL; \
 	    fi; \
 	    unset LANG || LANG=; \
+	    unset LANGUAGE || LANGUAGE=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    echo "fuzz_logsrvd_conf: verifying corpus"; \
 	    ./fuzz_logsrvd_conf $(FUZZ_VERBOSE) $(FUZZ_LOGSRVD_CONF_CORPUS); \
 	fi
 
-check: check-fuzzer
+check: $(TEST_PROGS) check-fuzzer
+	@if test X"$(cross_compiling)" != X"yes"; then \
+	    if locale -a 2>&1 | grep '^C.UTF-8$$' >/dev/null 2>&1; then \
+		LC_ALL=C.UTF-8; export LC_ALL; \
+	    else \
+		LC_ALL=C; export LC_ALL; \
+	    fi; \
+	    unset LANG || LANG=; \
+	    unset LANGUAGE || LANGUAGE=; \
+	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
+	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
+	    builddir=$(abs_top_builddir)/logsrvd; \
+	    cd $(srcdir) || exit 1; \
+	    if test -n "@LIBTLS@"; then \
+		$$builddir/logsrvd_conf_test $(TEST_VERBOSE) \
+		    regress/logsrvd_conf/tls/*.in; \
+	    else \
+		$$builddir/logsrvd_conf_test $(TEST_VERBOSE) \
+		    regress/logsrvd_conf/*.in; \
+	    fi; \
+	fi
 
 check-verbose: check
 
@@ -291,7 +325,7 @@ fuzz_logsrvd_conf.o: $(srcdir)/regress/fuzz/fuzz_logsrvd_conf.c \
                      $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                      $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h \
                      $(srcdir)/tls_common.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/fuzz/fuzz_logsrvd_conf.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/fuzz/fuzz_logsrvd_conf.c
 fuzz_logsrvd_conf.i: $(srcdir)/regress/fuzz/fuzz_logsrvd_conf.c \
                      $(incdir)/compat/stdbool.h $(incdir)/log_server.pb-c.h \
                      $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
@@ -313,7 +347,7 @@ iolog_writer.o: $(srcdir)/iolog_writer.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
                 $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
                 $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_writer.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_writer.c
 iolog_writer.i: $(srcdir)/iolog_writer.c $(incdir)/compat/stdbool.h \
                 $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
@@ -332,7 +366,7 @@ logsrv_util.o: $(srcdir)/logsrv_util.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                $(srcdir)/logsrv_util.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/logsrv_util.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/logsrv_util.c
 logsrv_util.i: $(srcdir)/logsrv_util.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -353,7 +387,7 @@ logsrvd.o: $(srcdir)/logsrvd.c $(incdir)/compat/getopt.h \
            $(incdir)/sudo_queue.h $(incdir)/sudo_rand.h $(incdir)/sudo_util.h \
            $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
            $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/logsrvd.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/logsrvd.c
 logsrvd.i: $(srcdir)/logsrvd.c $(incdir)/compat/getopt.h \
            $(incdir)/compat/stdbool.h $(incdir)/hostcheck.h \
            $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
@@ -378,7 +412,7 @@ logsrvd_conf.o: $(srcdir)/logsrvd_conf.c $(incdir)/compat/getaddrinfo.h \
                 $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h \
                 $(srcdir)/tls_common.h $(top_builddir)/config.h \
                 $(top_builddir)/pathnames.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/logsrvd_conf.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/logsrvd_conf.c
 logsrvd_conf.i: $(srcdir)/logsrvd_conf.c $(incdir)/compat/getaddrinfo.h \
                 $(incdir)/compat/stdbool.h $(incdir)/log_server.pb-c.h \
                 $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
@@ -392,6 +426,24 @@ logsrvd_conf.i: $(srcdir)/logsrvd_conf.c $(incdir)/compat/getaddrinfo.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 logsrvd_conf.plog: logsrvd_conf.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/logsrvd_conf.c --i-file $< --output-file $@
+logsrvd_conf_test.o: $(srcdir)/regress/logsrvd_conf/logsrvd_conf_test.c \
+                     $(incdir)/compat/stdbool.h $(incdir)/log_server.pb-c.h \
+                     $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
+                     $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
+                     $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
+                     $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
+                     $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/logsrvd_conf/logsrvd_conf_test.c
+logsrvd_conf_test.i: $(srcdir)/regress/logsrvd_conf/logsrvd_conf_test.c \
+                     $(incdir)/compat/stdbool.h $(incdir)/log_server.pb-c.h \
+                     $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
+                     $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
+                     $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
+                     $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
+                     $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+logsrvd_conf_test.plog: logsrvd_conf_test.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/logsrvd_conf/logsrvd_conf_test.c --i-file $< --output-file $@
 logsrvd_journal.o: $(srcdir)/logsrvd_journal.c $(incdir)/compat/stdbool.h \
                    $(incdir)/log_server.pb-c.h \
                    $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
@@ -402,7 +454,7 @@ logsrvd_journal.o: $(srcdir)/logsrvd_journal.c $(incdir)/compat/stdbool.h \
                    $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                    $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h \
                    $(srcdir)/tls_common.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/logsrvd_journal.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/logsrvd_journal.c
 logsrvd_journal.i: $(srcdir)/logsrvd_journal.c $(incdir)/compat/stdbool.h \
                    $(incdir)/log_server.pb-c.h \
                    $(incdir)/protobuf-c/protobuf-c.h $(incdir)/sudo_compat.h \
@@ -427,7 +479,7 @@ logsrvd_local.o: $(srcdir)/logsrvd_local.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
                  $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
                  $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/logsrvd_local.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/logsrvd_local.c
 logsrvd_local.i: $(srcdir)/logsrvd_local.c $(incdir)/compat/stdbool.h \
                  $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
@@ -452,7 +504,7 @@ logsrvd_queue.o: $(srcdir)/logsrvd_queue.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
                  $(srcdir)/logsrvd.h $(srcdir)/tls_common.h \
                  $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/logsrvd_queue.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/logsrvd_queue.c
 logsrvd_queue.i: $(srcdir)/logsrvd_queue.c $(incdir)/compat/stdbool.h \
                  $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
@@ -475,7 +527,7 @@ logsrvd_relay.o: $(srcdir)/logsrvd_relay.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                  $(srcdir)/logsrv_util.h $(srcdir)/logsrvd.h \
                  $(srcdir)/tls_common.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/logsrvd_relay.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/logsrvd_relay.c
 logsrvd_relay.i: $(srcdir)/logsrvd_relay.c $(incdir)/compat/stdbool.h \
                  $(incdir)/log_server.pb-c.h $(incdir)/protobuf-c/protobuf-c.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
@@ -498,7 +550,7 @@ sendlog.o: $(srcdir)/sendlog.c $(incdir)/compat/getaddrinfo.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
            $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h $(srcdir)/sendlog.h \
            $(srcdir)/tls_common.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/sendlog.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/sendlog.c
 sendlog.i: $(srcdir)/sendlog.c $(incdir)/compat/getaddrinfo.h \
            $(incdir)/compat/getopt.h $(incdir)/compat/stdbool.h \
            $(incdir)/hostcheck.h $(incdir)/log_server.pb-c.h \
@@ -519,7 +571,7 @@ tls_client.o: $(srcdir)/tls_client.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
               $(incdir)/sudo_util.h $(srcdir)/logsrv_util.h \
               $(srcdir)/tls_common.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/tls_client.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/tls_client.c
 tls_client.i: $(srcdir)/tls_client.c $(incdir)/compat/stdbool.h \
               $(incdir)/hostcheck.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
@@ -536,7 +588,7 @@ tls_init.o: $(srcdir)/tls_init.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
             $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
             $(srcdir)/tls_common.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/tls_init.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/tls_init.c
 tls_init.i: $(srcdir)/tls_init.c $(incdir)/compat/stdbool.h \
             $(incdir)/hostcheck.h $(incdir)/sudo_compat.h \
             $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \

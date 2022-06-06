@@ -17,7 +17,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN_PYTHON" "5" "February 16, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN_PYTHON" "5" "June 6, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -184,7 +184,18 @@ The plugin arguments are as follows:
 ModulePath
 The path of a python file which contains the class of the sudo Python plugin.
 It must be either an absolute path or a path relative to the sudo Python plugin
-directory: "@plugindir@/python".
+directory,
+\fI@plugindir@/python\fR.
+The parent directory of
+\fIModulePath\fR
+will be appended to Python's module search path (there is currently no
+way to force Python to load a module from a fully-qualified path).
+It is good practice to use a prefix for the module file that is unlikely
+to conflict with other installed Python modules, for example,
+\fIsudo_policy.py\fR.
+Otherwise, if the there is an installed Python module with the same
+file name as the sudo Python plugin file (without the directory),
+the wrong file will be loaded.
 .TP 6n
 ClassName
 (Optional.) The name of the class implementing the sudo Python plugin.
@@ -553,7 +564,7 @@ To try it, register it by adding the following lines to
 .sp
 .RS 0n
 Plugin python_policy python_plugin.so \e
-    ModulePath=@prefix@/share/doc/sudo/examples/example_policy_plugin.py \e
+    ModulePath=@EXAMPLES@/example_policy_plugin.py \e
     ClassName=SudoPolicyPlugin
 .RE
 .fi
@@ -845,7 +856,7 @@ To try it, register it by adding the following lines to
 .sp
 .RS 4n
 Plugin python_io python_plugin.so \e
-    ModulePath=@prefix@/share/doc/sudo/examples/example_io_plugin.py \e
+    ModulePath=@EXAMPLES@/example_io_plugin.py \e
     ClassName=SudoIOPlugin
 .RE
 .fi
@@ -1161,7 +1172,7 @@ To try it, register it by adding the following lines to
 .sp
 .RS 4n
 Plugin python_audit python_plugin.so \e
-    ModulePath=@prefix@/share/doc/sudo/examples/example_audit_plugin.py \e
+    ModulePath=@EXAMPLES@/example_audit_plugin.py \e
     ClassName=SudoAuditPlugin
 .RE
 .fi
@@ -1302,7 +1313,7 @@ To try it, register it by adding the following lines to
 .sp
 .RS 4n
 Plugin python_approval python_plugin.so \e
-    ModulePath=@prefix@/share/doc/sudo/examples/example_approval_plugin.py \e
+    ModulePath=@EXAMPLES@/example_approval_plugin.py \e
     ClassName=BusinessHoursApprovalPlugin
 .RE
 .fi
@@ -1399,7 +1410,7 @@ file by adding the following lines:
 .sp
 .RS 4n
 Defaults group_plugin="python_plugin.so \e
-    ModulePath=@prefix@/share/doc/sudo/examples/example_group_plugin.py \e
+    ModulePath=@EXAMPLES@/example_group_plugin.py \e
     ClassName=SudoGroupPlugin"
 .RE
 .fi
@@ -1558,7 +1569,7 @@ To try it, register it by adding the following lines to
 .sp
 .RS 4n
 Plugin python_io python_plugin.so \e
-    ModulePath=@prefix@/share/doc/sudo/examples/example_conversation.py \e
+    ModulePath=@EXAMPLES@/example_conversation.py \e
     ClassName=ReasonLoggerIOPlugin
 .RE
 .fi
@@ -1737,7 +1748,7 @@ To try it, register it by adding the following lines to
 .sp
 .RS 4n
 Plugin python_io python_plugin.so \e
-    ModulePath=@prefix@/share/doc/sudo/examples/example_debugging.py \e
+    ModulePath=@EXAMPLES@/example_debugging.py \e
     ClassName=DebugDemoPlugin
 
 Debug python_plugin.so \e

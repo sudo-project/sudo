@@ -55,6 +55,7 @@
 "NOTAFTER"
 "ROLE"
 "TYPE"
+"APPARMOR_PROFILE"
 "PRIVS"
 "LIMITPRIVS"
 
@@ -127,6 +128,7 @@
 "env_keep"
 "role"
 "type"
+"apparmor_profile"
 "env_file"
 "restricted_env_file"
 "sudoers_locale"

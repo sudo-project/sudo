@@ -1,4 +1,3 @@
-ABOUT-NLS
 ChangeLog
 INSTALL.configure
 INSTALL.md
@@ -401,6 +400,15 @@ logsrvd/regress/corpus/seed/logsrvd_conf/logsrvd.conf.6
 logsrvd/regress/corpus/seed/logsrvd_conf/logsrvd.conf.7
 logsrvd/regress/fuzz/fuzz_logsrvd_conf.c
 logsrvd/regress/fuzz/fuzz_logsrvd_conf.dict
+logsrvd/regress/logsrvd_conf/cacert.pem
+logsrvd/regress/logsrvd_conf/logsrvd_cert.pem
+logsrvd/regress/logsrvd_conf/logsrvd_conf_test.c
+logsrvd/regress/logsrvd_conf/logsrvd_dhparams.pem
+logsrvd/regress/logsrvd_conf/logsrvd_key.pem
+logsrvd/regress/logsrvd_conf/sudo_logsrvd.conf.1.in
+logsrvd/regress/logsrvd_conf/sudo_logsrvd.conf.2.in
+logsrvd/regress/logsrvd_conf/tls/sudo_logsrvd.conf.1.in
+logsrvd/regress/logsrvd_conf/tls/sudo_logsrvd.conf.2.in
 logsrvd/sendlog.c
 logsrvd/sendlog.h
 logsrvd/tls_client.c
@@ -1128,6 +1136,8 @@ po/it.mo
 po/it.po
 po/ja.mo
 po/ja.po
+po/ka.mo
+po/ka.po
 po/ko.mo
 po/ko.po
 po/nb.mo
@@ -1177,6 +1187,7 @@ scripts/mkpkg
 scripts/pp
 scripts/unanon
 src/Makefile.in
+src/apparmor.c
 src/conversation.c
 src/copy_file.c
 src/edit_open.c
@@ -1184,9 +1195,12 @@ src/env_hooks.c
 src/exec.c
 src/exec_common.c
 src/exec_intercept.c
+src/exec_intercept.h
 src/exec_monitor.c
 src/exec_nopty.c
 src/exec_preload.c
+src/exec_ptrace.c
+src/exec_ptrace.h
 src/exec_pty.c
 src/get_pty.c
 src/hooks.c
@@ -1200,6 +1214,7 @@ src/openbsd.c
 src/parse_args.c
 src/preload.c
 src/preserve_fds.c
+src/regress/intercept/test_ptrace.c
 src/regress/net_ifs/check_net_ifs.c
 src/regress/noexec/check_noexec.c
 src/regress/ttyname/check_ttyname.c
@@ -1217,6 +1232,7 @@ src/sudo_intercept_common.c
 src/sudo_noexec.c
 src/sudo_plugin_int.h
 src/sudo_usage.h.in
+src/suspend_nopty.c
 src/tcsetpgrp_nobg.c
 src/tgetpass.c
 src/ttyname.c

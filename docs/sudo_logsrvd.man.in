@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD" "@mansectsu@" "February 16, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO_LOGSRVD" "@mansectsu@" "May 17, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -200,23 +200,38 @@ your system.
 Now edit the
 \fIopenssl.cnf\fR
 file in the current directory and make sure it contains
-\(lqca\(rq
+\(lqca\(rq,
+\(lqCA_default\(rq,
+\(lqv3_ca\(rq,
 and
-\(lqCA_default\(rq
+\(lqusr_cert\(rq
 sections.
-Those sections should include the following settings:
+Those sections should include at least the following settings:
 .nf
 .sp
 .RS 4n
 [ ca ]
-default_ca      = CA_default
+default_ca              = CA_default
 
 [ CA_default ]
-dir             = /etc/ssl/sudo
-certs           = $dir/certs
-database        = $dir/index.txt
-certificate     = $dir/cacert.pem
-serial          = $dir/serial
+dir                     = /etc/ssl/sudo
+certs                   = $dir/certs
+database                = $dir/index.txt
+certificate             = $dir/cacert.pem
+serial                  = $dir/serial
+
+[ v3_ca ]
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always,issuer
+basicConstraints        = critical,CA:true
+keyUsage                = cRLSign, keyCertSign
+
+[ usr_cert ]
+basicConstraints        = CA:FALSE
+keyUsage                = nonRepudiation, digitalSignature, \e
+                          keyEncipherment
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid,issuer
 .RE
 .fi
 .PP
@@ -226,7 +241,9 @@ file already has a
 \(lqCA_default\(rq
 section, you may only need to modify the
 \(lqdir\(rq
-setting.
+setting and enable the
+\(lqkeyUsage\(rq
+settings if they are commented out.
 .SS "Creating the CA key and certificate"
 In order to create and sign our own certificates, we need to create
 a private key and a certificate for the root of the CA.
@@ -355,8 +372,8 @@ Certificate Details:
         X509v3 extensions:
             X509v3 Basic Constraints:
                 CA:FALSE
-            Netscape Comment:
-                OpenSSL Generated Certificate
+            X509v3 Key Usage:
+                Digital Signature, Non Repudiation, Key Encipherment
             X509v3 Subject Key Identifier:
                 4C:50:F9:D0:BE:1A:4C:B2:AC:90:76:56:C7:9E:16:AE:E6:9E:E5:B5
             X509v3 Authority Key Identifier:

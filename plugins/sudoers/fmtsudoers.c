@@ -241,6 +241,10 @@ sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
     if (cs->type != NULL && FIELD_CHANGED(prev_cs, cs, type))
 	sudo_lbuf_append(lbuf, "TYPE=%s ", cs->type);
 #endif /* HAVE_SELINUX */
+#ifdef HAVE_APPARMOR
+    if (cs->apparmor_profile != NULL && FIELD_CHANGED(prev_cs, cs, apparmor_profile))
+	sudo_lbuf_append(lbuf, "APPARMOR_PROFILE=%s ", cs->apparmor_profile);
+#endif /* HAVE_APPARMOR */
     if (cs->runchroot != NULL && FIELD_CHANGED(prev_cs, cs, runchroot))
 	sudo_lbuf_append(lbuf, "CHROOT=%s ", cs->runchroot);
     if (cs->runcwd != NULL && FIELD_CHANGED(prev_cs, cs, runcwd))

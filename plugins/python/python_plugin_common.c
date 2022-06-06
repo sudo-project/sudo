@@ -736,8 +736,9 @@ python_plugin_unlink(void)
     if (Py_IsInitialized()) {
         sudo_debug_printf(SUDO_DEBUG_NOTICE, "Closing: deinit python %zu subinterpreters\n",
                           py_ctx.interpreter_count);
-        for (size_t i = 0; i < py_ctx.interpreter_count; ++i) {
-            PyThreadState *py_interpreter = py_ctx.py_subinterpreters[i];
+	while (py_ctx.interpreter_count != 0) {
+            PyThreadState *py_interpreter =
+		py_ctx.py_subinterpreters[--py_ctx.interpreter_count];
             PyThreadState_Swap(py_interpreter);
             Py_EndInterpreter(py_interpreter);
         }

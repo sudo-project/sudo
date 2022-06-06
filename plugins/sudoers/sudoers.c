@@ -149,10 +149,16 @@ restore_nproc(void)
 #endif /* __linux__ */
 }
 
+/*
+ * Re-initialize Defaults settings.
+ * We do not warn, log or send mail for errors when reinitializing,
+ * this would have already been done the first time through.
+ */
 static bool
 sudoers_reinit_defaults(void)
 {
     struct sudo_nss *nss, *nss_next;
+    sudoers_logger_t logger = sudoers_error_hook;
     debug_decl(sudoers_reinit_defaults, SUDOERS_DEBUG_PLUGIN);
 
     if (!init_defaults()) {
@@ -160,27 +166,30 @@ sudoers_reinit_defaults(void)
 	debug_return_bool(false);
     }
 
+    /* It should not be possible for the initial defaults to fail to apply. */
     if (!update_defaults(NULL, &initial_defaults,
-	SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
-	log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
-	    N_("problem with defaults entries"));
+	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false))
 	debug_return_bool(false);
-    }
+
+    /* Disable error logging while re-processing defaults. */
+    sudoers_error_hook = NULL;
 
     TAILQ_FOREACH_SAFE(nss, snl, entries, nss_next) {
-	if (nss->getdefs(nss) == -1 || !update_defaults(nss->parse_tree, NULL,
-	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
-	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
-		N_("problem with defaults entries"));
-	    /* not a fatal error */
+	/* Missing/invalid defaults is not a fatal error. */
+	if (nss->getdefs(nss) != -1) {
+	    (void)update_defaults(nss->parse_tree, NULL,
+		SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, true);
 	}
     }
 
-    debug_return_int(true);
+    /* Restore error logging. */
+    sudoers_error_hook = logger;
+
+    debug_return_bool(true);
 }
 
 int
-sudoers_init(void *info, char * const envp[])
+sudoers_init(void *info, sudoers_logger_t logger, char * const envp[])
 {
     struct sudo_nss *nss, *nss_next;
     int oldlocale, sources = 0;
@@ -192,6 +201,9 @@ sudoers_init(void *info, char * const envp[])
 	debug_return_int(ret);
 
     bindtextdomain("sudoers", LOCALEDIR);
+
+    /* Hook up logging function for parse errors. */
+    sudoers_error_hook = logger;
 
     /* Register fatal/fatalx callback. */
     sudo_fatal_callback_register(sudoers_cleanup);
@@ -221,32 +233,32 @@ sudoers_init(void *info, char * const envp[])
     if (!set_perms(PERM_ROOT))
 	debug_return_int(-1);
 
-    /* Update defaults set by front-end. */
-    if (!update_defaults(NULL, &initial_defaults,
-	SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
-	log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
-	    N_("problem with defaults entries"));
-	debug_return_int(-1);
-    }
-
-    /*
-     * Open and parse sudoers, set global defaults.
-     * Uses the C locale unless another is specified in sudoers.
-     */
+    /* Use the C locale unless another is specified in sudoers. */
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     sudo_warn_set_locale_func(sudoers_warn_setlocale);
+
+    /* Update defaults set by front-end. */
+    if (!update_defaults(NULL, &initial_defaults,
+	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
+	goto cleanup;
+    }
+
+    /* Open and parse sudoers, set global defaults.  */
     init_parser(sudoers_file, false, false);
     TAILQ_FOREACH_SAFE(nss, snl, entries, nss_next) {
 	if (nss->open(nss) == -1 || (nss->parse_tree = nss->parse(nss)) == NULL) {
 	    TAILQ_REMOVE(snl, nss, entries);
 	    continue;
 	}
-
 	sources++;
-	if (nss->getdefs(nss) == -1 || !update_defaults(nss->parse_tree, NULL,
-	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false)) {
+
+	/* Missing/invalid defaults is not a fatal error. */
+	if (nss->getdefs(nss) == -1) {
 	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
-		N_("problem with defaults entries"));
+		N_("unable to get defaults from %s"), nss->source);
+	} else {
+	    (void)update_defaults(nss->parse_tree, NULL,
+		SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS, false);
 	}
     }
     if (sources == 0) {
@@ -259,6 +271,8 @@ sudoers_init(void *info, char * const envp[])
 	ret = true;
 
 cleanup:
+    mail_parse_errors();
+
     if (!restore_perms())
 	ret = -1;
 
@@ -804,6 +818,8 @@ bad:
     ret = false;
 
 done:
+    mail_parse_errors();
+
     if (def_group_plugin)
 	group_plugin_unload();
     init_parser(NULL, false, false);
@@ -1044,10 +1060,8 @@ set_cmnd(void)
     }
 
     TAILQ_FOREACH(nss, snl, entries) {
-	if (!update_defaults(nss->parse_tree, NULL, SETDEF_CMND, false)) {
-	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
-		N_("problem with defaults entries"));
-	}
+	/* Missing/invalid defaults is not a fatal error. */
+	(void)update_defaults(nss->parse_tree, NULL, SETDEF_CMND, false);
     }
 
     debug_return_int(ret);
@@ -1254,7 +1268,8 @@ resolve_host(const char *host, char **longp, char **shortp)
  * Sets user_host, user_shost, user_runhost and user_srunhost.
  */
 static bool
-cb_fqdn(const union sudo_defs_val *sd_un, int op)
+cb_fqdn(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     bool remote;
     int rc;
@@ -1392,7 +1407,8 @@ set_runasgr(const char *group, bool quiet)
  * Callback for runas_default sudoers setting.
  */
 static bool
-cb_runas_default(const union sudo_defs_val *sd_un, int op)
+cb_runas_default(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_runas_default, SUDOERS_DEBUG_PLUGIN);
 
@@ -1406,7 +1422,8 @@ cb_runas_default(const union sudo_defs_val *sd_un, int op)
  * Callback for tty_tickets sudoers setting.
  */
 static bool
-cb_tty_tickets(const union sudo_defs_val *sd_un, int op)
+cb_tty_tickets(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_tty_tickets, SUDOERS_DEBUG_PLUGIN);
 
@@ -1422,7 +1439,8 @@ cb_tty_tickets(const union sudo_defs_val *sd_un, int op)
  * Callback for umask sudoers setting.
  */
 static bool
-cb_umask(const union sudo_defs_val *sd_un, int op)
+cb_umask(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_umask, SUDOERS_DEBUG_PLUGIN);
 
@@ -1436,7 +1454,8 @@ cb_umask(const union sudo_defs_val *sd_un, int op)
  * Callback for runchroot sudoers setting.
  */
 static bool
-cb_runchroot(const union sudo_defs_val *sd_un, int op)
+cb_runchroot(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_runchroot, SUDOERS_DEBUG_PLUGIN);
 
@@ -1453,7 +1472,8 @@ cb_runchroot(const union sudo_defs_val *sd_un, int op)
 }
 
 static bool
-cb_logfile(const union sudo_defs_val *sd_un, int op)
+cb_logfile(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     int logtype = def_syslog ? EVLOG_SYSLOG : EVLOG_NONE;
     debug_decl(cb_logfile, SUDOERS_DEBUG_PLUGIN);
@@ -1467,7 +1487,8 @@ cb_logfile(const union sudo_defs_val *sd_un, int op)
 }
 
 static bool
-cb_log_format(const union sudo_defs_val *sd_un, int op)
+cb_log_format(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_log_format, SUDOERS_DEBUG_PLUGIN);
 
@@ -1477,7 +1498,8 @@ cb_log_format(const union sudo_defs_val *sd_un, int op)
 }
 
 static bool
-cb_syslog(const union sudo_defs_val *sd_un, int op)
+cb_syslog(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     int logtype = def_logfile ? EVLOG_FILE : EVLOG_NONE;
     debug_decl(cb_syslog, SUDOERS_DEBUG_PLUGIN);
@@ -1490,7 +1512,8 @@ cb_syslog(const union sudo_defs_val *sd_un, int op)
 }
 
 static bool
-cb_syslog_goodpri(const union sudo_defs_val *sd_un, int op)
+cb_syslog_goodpri(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_syslog_goodpri, SUDOERS_DEBUG_PLUGIN);
 
@@ -1500,7 +1523,8 @@ cb_syslog_goodpri(const union sudo_defs_val *sd_un, int op)
 }
 
 static bool
-cb_syslog_badpri(const union sudo_defs_val *sd_un, int op)
+cb_syslog_badpri(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_syslog_badpri, SUDOERS_DEBUG_PLUGIN);
 
@@ -1511,7 +1535,8 @@ cb_syslog_badpri(const union sudo_defs_val *sd_un, int op)
 }
 
 static bool
-cb_syslog_maxlen(const union sudo_defs_val *sd_un, int op)
+cb_syslog_maxlen(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_syslog_maxlen, SUDOERS_DEBUG_PLUGIN);
 
@@ -1521,7 +1546,8 @@ cb_syslog_maxlen(const union sudo_defs_val *sd_un, int op)
 }
 
 static bool
-cb_loglinelen(const union sudo_defs_val *sd_un, int op)
+cb_loglinelen(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_loglinelen, SUDOERS_DEBUG_PLUGIN);
 
@@ -1531,7 +1557,8 @@ cb_loglinelen(const union sudo_defs_val *sd_un, int op)
 }
 
 static bool
-cb_log_year(const union sudo_defs_val *sd_un, int op)
+cb_log_year(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_syslog_maxlen, SUDOERS_DEBUG_PLUGIN);
 
@@ -1541,7 +1568,8 @@ cb_log_year(const union sudo_defs_val *sd_un, int op)
 }
 
 static bool
-cb_log_host(const union sudo_defs_val *sd_un, int op)
+cb_log_host(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_syslog_maxlen, SUDOERS_DEBUG_PLUGIN);
 
@@ -1551,7 +1579,8 @@ cb_log_host(const union sudo_defs_val *sd_un, int op)
 }
 
 static bool
-cb_mailerpath(const union sudo_defs_val *sd_un, int op)
+cb_mailerpath(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_mailerpath, SUDOERS_DEBUG_PLUGIN);
 
@@ -1561,7 +1590,8 @@ cb_mailerpath(const union sudo_defs_val *sd_un, int op)
 }
 
 static bool
-cb_mailerflags(const union sudo_defs_val *sd_un, int op)
+cb_mailerflags(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_mailerflags, SUDOERS_DEBUG_PLUGIN);
 
@@ -1571,7 +1601,8 @@ cb_mailerflags(const union sudo_defs_val *sd_un, int op)
 }
 
 static bool
-cb_mailfrom(const union sudo_defs_val *sd_un, int op)
+cb_mailfrom(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_mailfrom, SUDOERS_DEBUG_PLUGIN);
 
@@ -1581,7 +1612,8 @@ cb_mailfrom(const union sudo_defs_val *sd_un, int op)
 }
 
 static bool
-cb_mailto(const union sudo_defs_val *sd_un, int op)
+cb_mailto(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_mailto, SUDOERS_DEBUG_PLUGIN);
 
@@ -1591,11 +1623,45 @@ cb_mailto(const union sudo_defs_val *sd_un, int op)
 }
 
 static bool
-cb_mailsub(const union sudo_defs_val *sd_un, int op)
+cb_mailsub(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(cb_mailsub, SUDOERS_DEBUG_PLUGIN);
 
     eventlog_set_mailsub(sd_un->str);
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_intercept_type(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
+{
+    debug_decl(cb_intercept_type, SUDOERS_DEBUG_PLUGIN);
+
+    if (op != -1) {
+	/* Set explicitly in sudoers. */
+	if (sd_un->tuple == dso) {
+	    /* Reset intercept_allow_setid default value. */
+	    if (!ISSET(sudo_user.flags, USER_INTERCEPT_SETID))
+		def_intercept_allow_setid = false;
+	}
+    }
+
+    debug_return_bool(true);
+}
+
+static bool
+cb_intercept_allow_setid(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
+{
+    debug_decl(cb_intercept_allow_setid, SUDOERS_DEBUG_PLUGIN);
+
+    /* Operator will be -1 if set by front-end. */
+    if (op != -1) {
+	/* Set explicitly in sudoers. */
+	SET(sudo_user.flags, USER_INTERCEPT_SETID);
+    }
 
     debug_return_bool(true);
 }
@@ -1659,6 +1725,8 @@ set_callbacks(void)
     sudo_defs_table[I_MAILTO].callback = cb_mailto;
     sudo_defs_table[I_MAILSUB].callback = cb_mailsub;
     sudo_defs_table[I_PASSPROMPT_REGEX].callback = cb_passprompt_regex;
+    sudo_defs_table[I_INTERCEPT_TYPE].callback = cb_intercept_type;
+    sudo_defs_table[I_INTERCEPT_ALLOW_SETID].callback = cb_intercept_allow_setid;
 
     debug_return;
 }
@@ -1756,6 +1824,9 @@ sudo_user_free(void)
 #ifdef HAVE_SELINUX
     free(user_role);
     free(user_type);
+#endif
+#ifdef HAVE_APPARMOR
+    free(user_apparmor_profile);
 #endif
 #ifdef HAVE_PRIV_SET
     free(runas_privs);

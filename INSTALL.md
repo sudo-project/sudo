@@ -220,8 +220,9 @@ Defaults are listed in brackets after the description.
     --disable-hardening
         Disable the use of compiler/linker exploit mitigation options
         which are enabled by default.  This includes compiling with
-        _FORTIFY_SOURCE defined to 2, building with -fstack-protector
-        and linking with -zrelro, where supported.
+        _FORTIFY_SOURCE defined to 2, building with -fstack-protector,
+        -fstack-clash-protection, -fcf-protection and linking with
+        -zrelro, -znow, and -znoexecstack where supported.
 
     --disable-ssp
         Disable use of the -fstack-protector compiler option.
@@ -373,6 +374,10 @@ Defaults are listed in brackets after the description.
         will compile in support for SASL authentication if the
         ldap_sasl_interactive_bind_s() function is present in the
         LDAP libraries.
+
+    --with-apparmor
+        Enable support for the AppArmor Linux Security Module (LSM) on
+        supported systems.
 
     --with-logincap
         This adds support for login classes specified in `/etc/login.conf`.

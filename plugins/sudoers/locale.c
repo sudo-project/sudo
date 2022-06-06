@@ -142,7 +142,8 @@ sudoers_warn_setlocale(bool restore, int *cookie)
  * Callback for sudoers_locale sudoers setting.
  */
 bool
-sudoers_locale_callback(const union sudo_defs_val *sd_un, int op)
+sudoers_locale_callback(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     debug_decl(sudoers_locale_callback, SUDOERS_DEBUG_UTIL);
 

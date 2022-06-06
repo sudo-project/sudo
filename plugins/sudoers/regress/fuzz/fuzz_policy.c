@@ -660,6 +660,7 @@ sudo_file_getdefs(struct sudo_nss *nss)
 
 static struct sudo_nss sudo_nss_file = {
     { NULL, NULL },
+    "sudoers",
     sudo_file_open,
     sudo_file_close,
     sudo_file_parse,
@@ -742,6 +743,21 @@ log_exit_status(int exit_status)
 }
 
 /* STUB */
+bool
+mail_parse_errors(void)
+{
+    return true;
+}
+
+/* STUB */
+bool
+log_parse_error(const char *file, int line, int column, const char *fmt,
+    va_list args)
+{
+    return true;
+}
+
+/* STUB */
 int
 audit_failure(char *const argv[], char const *const fmt, ...)
 {
@@ -812,35 +828,40 @@ iolog_nextid(char *iolog_dir, char sessid[7])
 
 /* STUB */
 bool
-cb_maxseq(const union sudo_defs_val *sd_un, int op)
+cb_maxseq(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }
 
 /* STUB */
 bool
-cb_iolog_user(const union sudo_defs_val *sd_un, int op)
+cb_iolog_user(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }
 
 /* STUB */
 bool
-cb_iolog_group(const union sudo_defs_val *sd_un, int op)
+cb_iolog_group(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }
 
 /* STUB */
 bool
-cb_iolog_mode(const union sudo_defs_val *sd_un, int op)
+cb_iolog_mode(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }
 
 /* STUB */
 bool
-cb_group_plugin(const union sudo_defs_val *sd_un, int op)
+cb_group_plugin(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }

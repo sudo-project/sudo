@@ -66,6 +66,7 @@ you believe you should be listed, send a note to sudo@sudo.ws.
     Jackson, John R.
     Jackson, Richard L., Jr.
     Janssen, Mark
+    Jindrák, Jaroslav
     Jepeway, Chris
     Jorge, Joel Peláe
     Jover, Guillem
@@ -143,8 +144,10 @@ you believe you should be listed, send a note to sudo@sudo.ws.
     Schuring, Arno
     Schwarze, Ingo
     Scott, Dougal
+    Shand, Will
     Sieger, Nick
     Simon, Thor Lancelot
+    Skoll, Dianne
     Slemko, Marc
     Smith, Andy
     Sobrado, Igor
@@ -194,6 +197,7 @@ https://translationproject.org for more details.
     Cho, Seong-ho
     Chornoivan, Yuri
     Diéguez, Francisco
+    Doghonadze, Temuri
     Fontenelle, Rafael
     García-Fontes, Walter
     Gezer, Volkan

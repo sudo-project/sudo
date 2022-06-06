@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -197,14 +197,16 @@ tls_init(struct client_closure *closure)
     /* Create the ssl context and enforce TLS 1.2 or higher. */
     if ((closure->ssl_ctx = SSL_CTX_new(TLS_method())) == NULL) {
         errstr = ERR_reason_error_string(ERR_get_error());
-        sudo_warnx(U_("Creation of new SSL_CTX object failed: %s"), errstr);
+        sudo_warnx(U_("Creation of new SSL_CTX object failed: %s"),
+	    errstr ? errstr : strerror(errno));
         goto bad;
     }
 #ifdef HAVE_SSL_CTX_SET_MIN_PROTO_VERSION
     if (!SSL_CTX_set_min_proto_version(closure->ssl_ctx, TLS1_2_VERSION)) {
         errstr = ERR_reason_error_string(ERR_get_error());
         sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-            "unable to restrict min. protocol version: %s", errstr);
+            "unable to restrict min. protocol version: %s",
+	    errstr ? errstr : strerror(errno));
         goto bad;
     }
 #else
@@ -219,7 +221,7 @@ tls_init(struct client_closure *closure)
                 closure->log_details->ca_bundle, NULL) <= 0) {
                 errstr = ERR_reason_error_string(ERR_get_error());
                 sudo_warnx(U_("%s: %s"), closure->log_details->ca_bundle,
-                    errstr);
+		    errstr ? errstr : strerror(errno));
                 sudo_warnx(U_("unable to load certificate authority bundle %s"),
                     closure->log_details->ca_bundle);
                 goto bad;
@@ -227,7 +229,8 @@ tls_init(struct client_closure *closure)
         } else {
             if (!SSL_CTX_set_default_verify_paths(closure->ssl_ctx)) {
                 errstr = ERR_reason_error_string(ERR_get_error());
-                sudo_warnx("SSL_CTX_set_default_verify_paths: %s", errstr);
+                sudo_warnx("SSL_CTX_set_default_verify_paths: %s",
+		    errstr ? errstr : strerror(errno));
                 goto bad;
             }
         }
@@ -239,7 +242,8 @@ tls_init(struct client_closure *closure)
         if (!SSL_CTX_use_certificate_chain_file(closure->ssl_ctx,
                 closure->log_details->cert_file)) {
             errstr = ERR_reason_error_string(ERR_get_error());
-	    sudo_warnx(U_("%s: %s"), closure->log_details->cert_file, errstr);
+	    sudo_warnx(U_("%s: %s"), closure->log_details->cert_file,
+		errstr ? errstr : strerror(errno));
 	    sudo_warnx(U_("unable to load certificate %s"),
 		closure->log_details->cert_file);
             goto bad;
@@ -252,7 +256,8 @@ tls_init(struct client_closure *closure)
                 closure->log_details->key_file, SSL_FILETYPE_PEM) ||
                 !SSL_CTX_check_private_key(closure->ssl_ctx)) {
             errstr = ERR_reason_error_string(ERR_get_error());
-	    sudo_warnx(U_("%s: %s"), closure->log_details->key_file, errstr);
+	    sudo_warnx(U_("%s: %s"), closure->log_details->key_file,
+		errstr ? errstr : strerror(errno));
 	    sudo_warnx(U_("unable to load private key %s"),
 		closure->log_details->key_file);
             goto bad;
@@ -262,13 +267,14 @@ tls_init(struct client_closure *closure)
     /* Create the SSL object and attach the closure. */
     if ((closure->ssl = SSL_new(closure->ssl_ctx)) == NULL) {
         errstr = ERR_reason_error_string(ERR_get_error());
-        sudo_warnx(U_("Unable to allocate ssl object: %s"), errstr);
+        sudo_warnx(U_("Unable to allocate ssl object: %s"),
+	    errstr ? errstr : strerror(errno));
         goto bad;
     }
     if (SSL_set_ex_data(closure->ssl, 1, closure) <= 0) {
         errstr = ERR_reason_error_string(ERR_get_error());
         sudo_warnx(U_("Unable to attach user data to the ssl object: %s"),
-            errstr);
+	    errstr ? errstr : strerror(errno));
         goto bad;
     }
 
@@ -356,7 +362,8 @@ tls_connect_cb(int sock, int what, void *v)
             default:
                 errstr = ERR_reason_error_string(ERR_get_error());
 		sudo_warnx(U_("TLS connection to %s:%s failed: %s"),
-		    closure->host, closure->port, errstr);
+		    closure->host, closure->port,
+		    errstr ? errstr : strerror(errno));
                 goto bad;
         }
     }
@@ -1531,10 +1538,13 @@ handle_commit_point(TimeSpec *commit_point, struct client_closure *closure)
 	debug_return_bool(false);
     }
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: commit point: [%lld, %d]",
-	__func__, (long long)commit_point->tv_sec, commit_point->tv_nsec);
     closure->committed.tv_sec = commit_point->tv_sec;
     closure->committed.tv_nsec = commit_point->tv_nsec;
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: received [%lld, %d], elapsed [%lld, %ld], committed [%lld, %ld]",
+	__func__, (long long)commit_point->tv_sec, commit_point->tv_nsec,
+	(long long)closure->elapsed.tv_sec, closure->elapsed.tv_nsec,
+	(long long)closure->committed.tv_sec, closure->committed.tv_nsec);
 
     if (closure->state == CLOSING) {
 	if (sudo_timespeccmp(&closure->elapsed, &closure->committed, ==)) {
@@ -1605,7 +1615,7 @@ handle_server_message(uint8_t *buf, size_t len,
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: unpacking ServerMessage", __func__);
     msg = server_message__unpack(NULL, len, buf);
     if (msg == NULL) {
-	sudo_warnx("%s", U_("unable to unpack ServerMessage"));
+	sudo_warnx(U_("unable to unpack %s size %zu"), "ServerMessage", len);
 	debug_return_bool(false);
     }
 
@@ -1715,7 +1725,9 @@ server_msg_cb(int fd, int what, void *v)
 
             switch (SSL_get_error(closure->ssl, nread)) {
 		case SSL_ERROR_ZERO_RETURN:
-		    /* ssl connection shutdown cleanly */
+		    /* TLS connection shutdown cleanly */
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+			"TLS connection shut down cleanly");
 		    nread = 0;
 		    break;
                 case SSL_ERROR_WANT_READ:
@@ -1750,13 +1762,13 @@ server_msg_cb(int fd, int what, void *v)
 #if !defined(HAVE_WOLFSSL)
                     if (closure->state == RECV_HELLO &&
                         ERR_GET_REASON(err) == SSL_R_TLSV1_ALERT_INTERNAL_ERROR) {
-                        errstr = "host name does not match certificate";
+                        errstr = U_("host name does not match certificate");
                     } else
 #endif
 		    {
                         errstr = ERR_reason_error_string(err);
                     }
-                    sudo_warnx("%s", errstr);
+                    sudo_warnx("%s", errstr ? errstr : strerror(errno));
                     goto bad;
                 case SSL_ERROR_SYSCALL:
 		    if (nread == 0)
@@ -1766,7 +1778,7 @@ server_msg_cb(int fd, int what, void *v)
                     goto bad;
                 default:
                     errstr = ERR_reason_error_string(ERR_get_error());
-                    sudo_warnx("recv: %s", errstr);
+                    sudo_warnx("recv: %s", errstr ? errstr : strerror(errno));
                     goto bad;
             }
         }
@@ -1876,7 +1888,9 @@ client_msg_cb(int fd, int what, void *v)
 
             switch (SSL_get_error(closure->ssl, nwritten)) {
 		case SSL_ERROR_ZERO_RETURN:
-		    /* ssl connection shutdown */
+		    /* TLS connection shutdown cleanly */
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+			"TLS connection shut down cleanly");
 		    goto bad;
                 case SSL_ERROR_WANT_READ:
 		    /* ssl wants to read, read event always active */
@@ -1892,14 +1906,14 @@ client_msg_cb(int fd, int what, void *v)
                     debug_return;
                 case SSL_ERROR_SSL:
                     errstr = ERR_reason_error_string(ERR_get_error());
-                    sudo_warnx("%s", errstr);
+                    sudo_warnx("%s", errstr ? errstr : strerror(errno));
                     goto bad;
                 case SSL_ERROR_SYSCALL:
                     sudo_warn("send");
                     goto bad;
                 default:
                     errstr = ERR_reason_error_string(ERR_get_error());
-                    sudo_warnx("send: %s", errstr);
+                    sudo_warnx("send: %s", errstr ? errstr : strerror(errno));
                     goto bad;
             }
         }
@@ -1997,6 +2011,7 @@ log_server_open(struct log_details *details, struct timespec *now,
     struct sudo_plugin_event * (*event_alloc)(void))
 {
     struct client_closure *closure;
+    static bool warned = false;
     debug_decl(log_server_open, SUDOERS_DEBUG_UTIL);
 
     closure = client_closure_alloc(details, now, log_io, initial_state,
@@ -2007,7 +2022,10 @@ log_server_open(struct log_details *details, struct timespec *now,
     /* Connect to log first available log server. */
     if (!log_server_connect(closure)) {
 	/* TODO: support offline logs if server unreachable */
-	sudo_warnx("%s", U_("unable to connect to log server"));
+	if (!warned) {
+	    sudo_warnx("%s", U_("unable to connect to log server"));
+	    warned = true;
+	}
 	goto bad;
     }
 

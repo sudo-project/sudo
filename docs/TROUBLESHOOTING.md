@@ -75,9 +75,15 @@ It just says "Sorry, try again." three times and exits.
     Account expired or PAM config lacks an 'account' section for sudo,
     contact your system administrator`
 
-> when the account has not expired, your PAM config probably lacks
-> an 'account' specification.  On Linux this usually means you are
-> missing a line in /etc/pam.d/sudo similar to:
+> double-check the `/etc/shadow` file to verify that the target user
+> (for example, root) does not have the password expiration field set.
+> A common way to disable access to an account is to set the expiration
+> date to 1, such as via `usermod -e 1`.  If the account is marked as
+> expired, sudo will not allow you to access it.
+>
+> If, however, the account has not expired, it is possible that the PAM
+> configuration lacks an 'account' specification.  On Linux this usually
+> means you are missing a line in /etc/pam.d/sudo similar to:
 
     account    required    pam_unix.so
 
@@ -282,6 +288,22 @@ It just says "Sorry, try again." three times and exits.
 
     Enter new password: <return>
     Re-enter password: <return>
+
+#### After upgrading my system, sudo_logsrvd gives the error:
+
+    X509_verify_cert: CA cert does not include key usage extension
+
+> This can happen if you are using self-signed certificates that do not
+> include the key usage extension.  This error can occur if the certificates
+> were generated using OpenSSL 1.x but sudo_logsrvd now uses OpenSSL 3.x,
+> for example after a system upgrade.  The x509 certificate validation in
+> OpenSSL 3.x now requires that the key usage extension be present.
+> One way to address this is to disable certificate verification in
+> sudo_logsrvd by setting the _tls_verify_ key in the `[server]` section
+> to _false_.  Alternately, you can simply remove your old CA and the
+> associated certificates and create a new one using an updated
+> `/etc/ssl/openssl.cnf` file.  See the sudo_logsrvd manual for more
+> information on creating self-signed certificates.
 
 #### On HP-UX, the umask setting in sudoers has no effect.
 

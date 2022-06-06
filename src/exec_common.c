@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -104,8 +104,12 @@ sudo_execve(int fd, const char *path, char *const argv[], char *envp[],
     /* Modify the environment as needed to trap execve(). */
     if (ISSET(flags, CD_NOEXEC))
 	envp = disable_execute(envp, sudo_conf_noexec_path());
-    else if (ISSET(flags, CD_INTERCEPT|CD_LOG_SUBCMDS))
-	envp = enable_intercept(envp, sudo_conf_intercept_path(), intercept_fd);
+    if (ISSET(flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
+	if (!ISSET(flags, CD_USE_PTRACE)) {
+	    envp = enable_intercept(envp, sudo_conf_intercept_path(),
+		intercept_fd);
+	}
+    }
 
 #ifdef HAVE_FEXECVE
     if (fd != -1)

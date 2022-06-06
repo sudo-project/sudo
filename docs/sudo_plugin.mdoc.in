@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 16, 2022
+.Dd May 26, 2022
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -269,6 +269,34 @@ to print a usage message and exit.
 If the user does not specify a program on the command line,
 .Nm sudo
 will pass the plugin the path to the user's shell and set
+.Em implied_shell .
+.It intercept_ptrace=bool
+Indicates whether or not the system supports intercept
+mode using
+.Xr ptrace 2 .
+This is currently only true for Linux systems that support
+.Xr seccomp 2
+filtering and the
+.Dq trap
+action.
+Other systems will use a dynamic shared object to implement
+intercept.
+.It intercept_setid=bool
+Indicates whether or not the system supports running set-user-ID
+and set-group-ID binaries in intercept mode.
+This is currently only true for Linux systems that support
+.Xr seccomp 2
+filtering and the
+.Dq trap
+action.
+On systems that use a dynamic shared object to implement
+intercept, the dynamic linker (ld.so or the equivalent)
+will disable preloading of shared objects when executing a
+set-user-ID or set-group-ID binary.
+This will disable intercept mode for that program and any other
+programs that it executes.
+The policy plugin may refuse to execute a set-user-ID or set-group-ID
+binary in intercept mode to avoid this.
 .It login_class=string
 .Bx
 login class to use when setting resource limits and nice value,
@@ -965,6 +993,20 @@ system call to execute the command instead of
 The specified
 .Em number
 must refer to an open file descriptor.
+.It intercept=bool
+If specified,
+.Nm sudo
+will intercept attempts to execute a subsequent command and perform
+a policy check via the policy plugin's
+.Fn check_policy
+function to determine whether or not the command is permitted.
+This can be used to prevent shell escapes on supported platforms
+but it has a number of limitations.
+See
+.Sy Preventing shell escapes
+in
+.Xr sudoers @mansectform@
+for details.
 .It iolog_compress=bool
 Set to true if the I/O logging plugins, if any, should compress the
 log data.
@@ -1017,6 +1059,23 @@ The nice value, if specified, overrides the priority associated with the
 on
 .Bx
 systems.
+.It log_subcmds=bool
+If specified,
+.Nm sudo
+will call the audit plugin's
+.Fn accept
+function to log when the command runs a subsequent command, if supported
+by the system.
+If
+.Em intercept
+is also specified,
+.Em log_subcmds
+will be ignored.
+See
+.Sy Preventing shell escapes
+in
+.Xr sudoers @mansectform@
+for more information.
 .It noexec=bool
 If set, prevent the command from executing other programs.
 .It preserve_fds=list
@@ -1311,6 +1370,15 @@ option is also set.
 Force the value specified by the
 .Em umask
 option to override any umask set by PAM or login.conf.
+.It use_ptrace=bool
+If specified,
+.Nm sudo
+will use
+.Xr ptrace 2
+to implement intercept mode if supported by the system.
+This setting has no effect unless
+.Em intercept
+is also set.
 .It use_pty=bool
 Allocate a pseudo-terminal to run the command in, regardless of whether
 or not I/O logging is in use.
@@ -4676,7 +4744,7 @@ The
 .Em cmnd_chroot
 and
 .Em cmnd_cwd
-enties were added to the
+entries were added to the
 .Li settings
 list.
 .It Version 1.17 (sudo 1.9.4)
@@ -4685,6 +4753,26 @@ The
 field was added to the audit_plugin and approval_plugin structs.
 .It Version 1.18 (sudo 1.9.9)
 The policy may now set resource limit values in the
+.Li command_info
+list.
+The
+.Em intercept
+and
+.Em log_subcmds
+entries were added to the
+.Li command_info
+list.
+.It Version 1.19 (sudo 1.9.11)
+The
+.Em intercept_ptrace
+and
+.Em intercept_setid
+entries were added to the
+.Li settings
+list.
+The
+.Em user_ptrace
+entry was added to the
 .Li command_info
 list.
 .El

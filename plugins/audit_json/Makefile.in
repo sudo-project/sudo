@@ -23,6 +23,7 @@
 srcdir = @srcdir@
 devdir = @devdir@
 top_builddir = @top_builddir@
+abs_top_builddir = @abs_top_builddir@
 top_srcdir = @top_srcdir@
 scriptdir = $(top_srcdir)/scripts
 incdir = $(top_srcdir)/include
@@ -65,8 +66,8 @@ PIE_CFLAGS = @PIE_CFLAGS@
 PIE_LDFLAGS = @PIE_LDFLAGS@
 
 # Stack smashing protection flags
-SSP_CFLAGS = @SSP_CFLAGS@
-SSP_LDFLAGS = @SSP_LDFLAGS@
+HARDENING_CFLAGS = @HARDENING_CFLAGS@
+HARDENING_LDFLAGS = @HARDENING_LDFLAGS@
 
 # cppcheck options, usually set in the top-level Makefile
 CPPCHECK_OPTS = -q --enable=warning,performance,portability --suppress=constStatement --suppress=compareBoolExpressionWithInt --error-exitcode=1 --inline-suppr -Dva_copy=va_copy -U__cplusplus -UQUAD_MAX -UQUAD_MIN -UUQUAD_MAX -U_POSIX_HOST_NAME_MAX -U_POSIX_PATH_MAX -U__NBBY -DNSIG=64
@@ -119,7 +120,7 @@ all: audit_json.la
 
 depend:
 	$(scriptdir)/mkdep.pl --srcdir=$(top_srcdir) \
-	    --builddir=`pwd`/$(top_builddir) plugins/audit_json/Makefile.in
+	    --builddir=$(abs_top_builddir) plugins/audit_json/Makefile.in
 	cd $(top_builddir) && ./config.status --file plugins/audit_json/Makefile
 
 Makefile: $(srcdir)/Makefile.in
@@ -128,7 +129,7 @@ Makefile: $(srcdir)/Makefile.in
 .SUFFIXES: .c .h .i .lo .plog
 
 .c.lo:
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $<
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $<
 
 .c.i:
 	$(CC) -E -o $@ $(CPPFLAGS) $<
@@ -143,7 +144,7 @@ $(shlib_opt): $(shlib_exp)
 	@$(SED) 's/^/+e /' $(shlib_exp) > $@
 
 audit_json.la: $(OBJS) $(LT_LIBS) @LT_LDDEP@
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) $(LDFLAGS) $(ASAN_LDFLAGS) $(SSP_LDFLAGS) $(LT_LDFLAGS) -o $@ $(OBJS) $(LIBS) -module -avoid-version -rpath $(plugindir) -shrext .so
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) $(LDFLAGS) $(ASAN_LDFLAGS) $(HARDENING_LDFLAGS) $(LT_LDFLAGS) -o $@ $(OBJS) $(LIBS) -module -avoid-version -rpath $(plugindir) -shrext .so
 
 pre-install:
 
@@ -211,7 +212,7 @@ cleandir: realclean
 getgrent.lo: $(srcdir)/getgrent.c $(incdir)/compat/stdbool.h \
              $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
              $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/getgrent.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/getgrent.c
 getgrent.i: $(srcdir)/getgrent.c $(incdir)/compat/stdbool.h \
              $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
              $(top_builddir)/config.h
@@ -221,7 +222,7 @@ getgrent.plog: getgrent.i
 audit_json.lo: $(srcdir)/audit_json.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_plugin.h \
                $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/audit_json.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/audit_json.c
 audit_json.i: $(srcdir)/audit_json.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_plugin.h \
                $(top_builddir)/config.h

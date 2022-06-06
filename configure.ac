@@ -18,7 +18,7 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.70])
-AC_INIT([sudo], [1.9.10], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.9.11], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 AC_CONFIG_AUX_DIR([scripts])
@@ -63,10 +63,12 @@ AC_SUBST([SUDOERS_MODE])
 AC_SUBST([SUDOERS_UID])
 AC_SUBST([SUDOERS_GID])
 AC_SUBST([DEVEL])
+AC_SUBST([EXAMPLES])
 AC_SUBST([BAMAN])
 AC_SUBST([LCMAN])
 AC_SUBST([PSMAN])
 AC_SUBST([SEMAN])
+AC_SUBST([AAMAN])
 AC_SUBST([devdir])
 AC_SUBST([mansectsu])
 AC_SUBST([mansectform])
@@ -107,8 +109,8 @@ AC_SUBST([ASAN_LDFLAGS])
 AC_SUBST([ASAN_CFLAGS])
 AC_SUBST([PIE_LDFLAGS])
 AC_SUBST([PIE_CFLAGS])
-AC_SUBST([SSP_LDFLAGS])
-AC_SUBST([SSP_CFLAGS])
+AC_SUBST([HARDENING_LDFLAGS])
+AC_SUBST([HARDENING_CFLAGS])
 AC_SUBST([INIT_SCRIPT])
 AC_SUBST([INIT_DIR])
 AC_SUBST([RC_LINK])
@@ -251,6 +253,7 @@ BAMAN=0
 LCMAN=0
 PSMAN=0
 SEMAN=0
+AAMAN=0
 LIBINTL=
 LIBCRYPTO=
 LIBMD=
@@ -289,7 +292,7 @@ LOGSRVD=
 LOGSRVD_SRC=logsrvd
 LOGSRV_SRC=lib/logsrv
 LOGSRVD_CONF='sudo_logsrvd.conf'
-LIBLOGSRV='$(top_builddir)/lib/logsrv/liblogsrv.la'
+LIBLOGSRV='$(top_builddir)/lib/logsrv/liblogsrv.la $(top_builddir)/lib/protobuf-c/libprotobuf-c.la'
 PPFILES='$(srcdir)/etc/sudo.pp'
 
 dnl
@@ -1483,6 +1486,18 @@ AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])
 		;;
 esac], [with_selinux=no])
 
+AC_ARG_WITH(apparmor, [AS_HELP_STRING([--with-apparmor], [enable AppArmor support])],
+[case $with_apparmor in
+    yes)        AC_DEFINE(HAVE_APPARMOR)
+                AAMAN=1
+		SUDO_LIBS="${SUDO_LIBS} -lapparmor"
+                SUDO_OBJS="${SUDO_OBJS} apparmor.o"
+                ;;
+    no)         ;;
+    *)          AC_MSG_ERROR([--with-apparmor does not take an argument.])
+
+esac], [with_apparmor=no])
+
 AC_ARG_ENABLE(sasl,
 [AS_HELP_STRING([--enable-sasl], [Enable/disable LDAP SASL support])],
 [ case "$enableval" in
@@ -1837,11 +1852,9 @@ case "$host" in
 		    : ${ac_cv_func_strnlen='no'}
 		fi
 
-		# fmemopen(3) may be broken on AIX < 7.1 depending
-		# on the libc version.
-		if test $OSMAJOR -lt 7; then
-		    : ${ac_cv_func_fmemopen='no'}
-		fi
+		# fmemopen(3) has a bug wrt feof() on some AIX versions.
+		# https://www.ibm.com/support/pages/apar/IJ11845
+		: ${ac_cv_func_fmemopen='no'}
 
 		# getdelim() may or may not be present on AIX <= 6.1.
 		# bos610 is missing getdelim but bos61J has it.
@@ -2447,9 +2460,20 @@ AC_CHECK_HEADERS([procfs.h] [sys/procfs.h], [AC_CHECK_MEMBERS(struct psinfo.pr_t
 ])]
 break)
 #
-# Check for large file support.
+# Check for large file and 64-bit time support.
+# GNU libc only allows setting _TIME_BITS when FILE_OFFSET_BITS is also set.
+# GNU libc defines __TIMESIZE on systems where _TIME_BITS can be set.
 #
 AC_SYS_LARGEFILE
+if test X"$ac_cv_sys_file_offset_bits" = X"yes"; then
+    AC_CHECK_DECL(__TIMESIZE, [
+	AC_DEFINE([_TIME_BITS], [64], [Number of bits in a time_t, on hosts where this is settable.])
+    ], [], [
+AC_INCLUDES_DEFAULT
+#include <time.h>
+    ])
+fi
+
 #
 # HP-UX may need to define _XOPEN_SOURCE_EXTENDED to expose MSG_WAITALL.
 # Also, HP-UX 11.23 has a broken sys/types.h when large files support
@@ -2996,8 +3020,16 @@ openssl_missing=no
 if test "${enable_openssl-no}" != no; then
     # Use pkg-config to find the openssl cflags and libs if possible.
     if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
-	PKG_CONFIG_LIBDIR="${enable_openssl}/lib/pkgconfig:${enable_openssl}/lib64/pkgconfig:${enable_openssl}/share/pkgconfig"
-	export PKG_CONFIG_LIBDIR
+	PKG_CONFIG_LIBDIR=
+	for d in ${enable_openssl}/*/pkgconfig; do
+	    if test -d "$d"; then
+		PKG_CONFIG_LIBDIR="$PKG_CONFIG_LIBDIR:$d"
+	    fi
+	done
+	if test -n "$PKG_CONFIG_LIBDIR"; then
+	    PKG_CONFIG_LIBDIR=${PKG_CONFIG_LIBDIR#:}
+	    export PKG_CONFIG_LIBDIR
+	fi
     elif test "$cross_compiling" = "yes" -a -z "$PKG_CONFIG"; then
 	# Cannot use pkg-config when cross-compiling
 	PKG_CONFIG=false
@@ -3011,17 +3043,14 @@ if test "${enable_openssl-no}" != no; then
 	    enable_openssl=yes
 	fi
 
+	# Check whether --static is needed (don't assume name of ssl lib)
+	# There may be dependent libraries or -pthread.
 	O_LDFLAGS="$LDFLAGS"
 	LDFLAGS="$LDFLAGS `$PKG_CONFIG --libs-only-L $pkg_openssl`"
-	# Check whether --static is needed (don't assume name of ssl lib)
 	libssl="`$PKG_CONFIG --libs-only-l $pkg_openssl | sed 's/^ *-l//'`"
-	libssl_extra=`echo $libssl | sed 's/^[[^ ]]* *//'`
-	libssl=`echo $libssl | sed 's/ .*//'`
+	libssl_extra="`echo $libssl | sed 's/^[[^ ]]* *//'`"
+	libssl="`echo $libssl | sed 's/ .*//'`"
 	AC_CHECK_LIB($libssl, SSL_new, [STATIC=""], [STATIC="--static"], [$libssl_extra])
-
-	# Use OpenSSL's sha2 functions if possible (don't assume name of crypto)
-	libcrypto="`$PKG_CONFIG --libs-only-l $pkg_libcrypto | sed -e 's/^ *-l//' -e 's/ .*//'`"
-	AC_CHECK_LIB($libcrypto, EVP_MD_CTX_new, [DIGEST=digest_openssl.lo])
 	LDFLAGS="$O_LDFLAGS"
 
 	# Use pkg-config to determine OpenSSL libs and cflags
@@ -3037,7 +3066,28 @@ if test "${enable_openssl-no}" != no; then
 	    esac
 	done
 	if $PKG_CONFIG --exists $pkg_libcrypto >/dev/null 2>&1; then
-	    LIBCRYPTO=`$PKG_CONFIG $STATIC --libs $pkg_libcrypto`
+	    # Use OpenSSL's sha2 functions if possible (don't assume name of crypto)
+	    O_LDFLAGS="$LDFLAGS"
+	    libcrypto=
+	    libcrypto_extra=
+	    for f in `$PKG_CONFIG $STATIC --libs $pkg_libcrypto`; do
+		case "$f" in
+		    -l*)
+			if test -z "$libcrypto"; then
+			    libcrypto="${f#-l}"
+			else
+			    libcrypto_extra="$libcrypto_extra $f"
+			fi
+			;;
+		    *)
+			AX_APPEND_FLAG([$f], [LDFLAGS])
+			;;
+		    esac
+	    done
+	    AC_CHECK_LIB($libcrypto, EVP_MD_CTX_new, [DIGEST=digest_openssl.lo], [], [$libcrypto_extra])
+	    LDFLAGS="$O_LDFLAGS"
+
+	    # Use pkg-config to determine libcrypto libs and cflags
 	    for f in `$PKG_CONFIG $STATIC --libs $pkg_libcrypto`; do
 		case "$f" in
 		    -L*)
@@ -3111,7 +3161,7 @@ if test "${enable_openssl-no}" != no; then
 	LDFLAGS="$O_LDFLAGS"
     fi
     if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
-	unset PKG_CONFIG_LIBDIRS
+	unset PKG_CONFIG_LIBDIR
     fi
 fi
 dnl
@@ -4880,18 +4930,18 @@ if test "$enable_hardening" != "no" && test "$enable_ssp" != "no"; then
 	]
     )
     if test X"$sudo_cv_var_stack_protector" != X"no"; then
-	SSP_CFLAGS="$sudo_cv_var_stack_protector"
-	SSP_LDFLAGS="-Wc,$sudo_cv_var_stack_protector"
+	HARDENING_CFLAGS="$sudo_cv_var_stack_protector"
+	HARDENING_LDFLAGS="-Wc,$sudo_cv_var_stack_protector"
     fi
 fi
 if test "$enable_hardening" != "no"; then
     AX_CHECK_LINK_FLAG([-fstack-clash-protection], [
-	AX_APPEND_FLAG([-fstack-clash-protection], [SSP_CFLAGS])
-	AX_APPEND_FLAG([-Wc,-fstack-clash-protection], [SSP_LDFLAGS])
+	AX_APPEND_FLAG([-fstack-clash-protection], [HARDENING_CFLAGS])
+	AX_APPEND_FLAG([-Wc,-fstack-clash-protection], [HARDENING_LDFLAGS])
     ])
     AX_CHECK_LINK_FLAG([-fcf-protection], [
-	AX_APPEND_FLAG([-fcf-protection], [SSP_CFLAGS])
-	AX_APPEND_FLAG([-Wc,-fcf-protection], [SSP_LDFLAGS])
+	AX_APPEND_FLAG([-fcf-protection], [HARDENING_CFLAGS])
+	AX_APPEND_FLAG([-Wc,-fcf-protection], [HARDENING_LDFLAGS])
     ])
     AX_CHECK_LINK_FLAG([-Wl,-z,relro], [AX_APPEND_FLAG([-Wl,-z,relro], [LDFLAGS])])
     AX_CHECK_LINK_FLAG([-Wl,-z,now], [AX_APPEND_FLAG([-Wl,-z,now], [LDFLAGS])])
@@ -4999,7 +5049,7 @@ dnl
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
 
 dnl
-dnl Expand exec_prefix in in variables used by the manual pages
+dnl Expand exec_prefix in variables used by the manual pages
 dnl
 oexec_prefix="$exec_prefix"
 if test "$exec_prefix" = '$(prefix)'; then
@@ -5038,6 +5088,26 @@ while test X"$plugindir" != X"$_plugindir"; do
     eval plugindir="$_plugindir"
 done
 exec_prefix="$oexec_prefix"
+
+# Convert exampledir to something that can be used in the man pages
+# I wish there was a better way to expand this.
+EXAMPLES="$exampledir"
+while :; do
+    EXAMPLES="`echo \"$EXAMPLES\" | sed -e 's/(/{/g' -e 's/)/}/g'`"
+    case "$EXAMPLES" in
+    *\${[[A-Za-z]]*}*)
+	eval EXAMPLES="$EXAMPLES"
+	;;
+    *)
+	break
+	;;
+    esac
+done
+case "$EXAMPLES" in
+    NONE/*)
+	EXAMPLES="${ac_default_prefix}${EXAMPLES#NONE}"
+	;;
+esac
 
 dnl
 dnl Defer setting _PATH_SUDO_NOEXEC, etc until after exec_prefix is set
@@ -5379,6 +5449,7 @@ AH_TEMPLATE(HAVE_PROJECT_H, [Define to 1 if you have the <project.h> header file
 AH_TEMPLATE(HAVE_SECURID, [Define to 1 if you use SecurID for authentication.])
 AH_TEMPLATE(HAVE_SELINUX, [Define to 1 to enable SELinux RBAC support.])
 AH_TEMPLATE(HAVE_SETKEYCREATECON, [Define to 1 if you have the `setkeycreatecon' function.])
+AH_TEMPLATE(HAVE_APPARMOR, [Define to 1 to enable AppArmor support.])
 AH_TEMPLATE(HAVE_SHL_LOAD, [Define to 1 if you have the `shl_load' function.])
 AH_TEMPLATE(HAVE_SKEY, [Define to 1 if you use S/Key.])
 AH_TEMPLATE(HAVE_SKEYACCESS, [Define to 1 if your S/Key library has skeyaccess().])

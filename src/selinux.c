@@ -440,7 +440,7 @@ selinux_setexeccon(void)
 
 void
 selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
-    bool noexec)
+    int flags)
 {
     char **nargv;
     const char *sesh;
@@ -474,10 +474,12 @@ selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return;
     }
-    if (noexec)
+    if (ISSET(flags, CD_NOEXEC)) {
 	nargv[0] = *argv[0] == '-' ? "-sesh-noexec" : "sesh-noexec";
-    else
+	CLR(flags, CD_NOEXEC);
+    } else {
 	nargv[0] = *argv[0] == '-' ? "-sesh" : "sesh";
+    }
     nargc = 1;
     if (fd != -1 && asprintf(&nargv[nargc++], "--execfd=%d", fd) == -1) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -487,7 +489,7 @@ selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
     memcpy(&nargv[nargc], &argv[1], argc * sizeof(char *)); /* copies NULL */
 
     /* sesh will handle noexec for us. */
-    sudo_execve(-1, sesh, nargv, envp, -1, 0);
+    sudo_execve(-1, sesh, nargv, envp, -1, flags);
     serrno = errno;
     free(nargv);
     errno = serrno;

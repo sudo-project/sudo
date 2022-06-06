@@ -650,10 +650,10 @@ bad:
 static void
 command_info_to_details(char * const info[], struct command_details *details)
 {
-    int i;
-    id_t id;
-    char *cp;
     const char *errstr;
+    char *cp;
+    id_t id;
+    int i;
     debug_decl(command_info_to_details, SUDO_DEBUG_PCOMM);
 
     memset(details, 0, sizeof(*details));
@@ -689,6 +689,9 @@ command_info_to_details(char * const info[], struct command_details *details)
     for (i = 0; info[i] != NULL; i++) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "    %d: %s", i, info[i]);
 	switch (info[i][0]) {
+	    case 'a':
+		SET_STRING("apparmor_profile=", apparmor_profile);
+		break;
 	    case 'c':
 		SET_STRING("chroot=", chroot)
 		SET_STRING("command=", command)
@@ -720,6 +723,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 #ifdef HAVE_FEXECVE
 		    /* Must keep fd open during exec. */
 		    add_preserved_fd(&details->preserved_fds, details->execfd);
+		    SET(details->flags, CD_FEXECVE);
 #else
 		    /* Plugin thinks we support fexecve() but we don't. */
 		    (void)fcntl(details->execfd, F_SETFD, FD_CLOEXEC);
@@ -856,11 +860,15 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    break;
 		}
 		SET_FLAG("umask_override=", CD_OVERRIDE_UMASK)
+		SET_FLAG("use_ptrace=", CD_USE_PTRACE)
 		SET_FLAG("use_pty=", CD_USE_PTY)
 		SET_STRING("utmp_user=", utmp_user)
 		break;
 	}
     }
+
+    /* Only use ptrace(2) for intercept/log_subcmds if supported. */
+    exec_ptrace_fix_flags(details);
 
     if (!ISSET(details->flags, CD_SET_EUID))
 	details->cred.euid = details->cred.uid;
@@ -890,6 +898,15 @@ command_info_to_details(char * const info[], struct command_details *details)
 	    exit(EXIT_FAILURE);
     }
 #endif
+
+#ifdef HAVE_APPARMOR
+    if (details->apparmor_profile != NULL && apparmor_is_enabled()) {
+	i = apparmor_prepare(details->apparmor_profile);
+	if (i != 0)
+	    exit(EXIT_FAILURE);
+    }
+#endif
+
     debug_return;
 }
 

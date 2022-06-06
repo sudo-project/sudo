@@ -64,10 +64,19 @@ For more information, see https://www.sudo.ws/security/fuzzing/.
 
 ## Translations
 
-The Free Translation Project provides translations for Sudo.  If
-you would like to contribute to Sudo's translations, see the
-ABOUT-NLS file in the Sudo source tree or visit [the Free Translation
-Project's homepage](https://translationproject.org).
+Sudo uses [GNU gettext](https://www.gnu.org/software/gettext/) for
+its National Language Support (NLS).  Strings in sudo and related
+programs are collected in `.pot` files that can be translated into
+multiple languages.
+
+Translations for sudo are coordinated by the [Translation
+Project](https://translationproject.org).  If you would like to
+contribute to Sudo's translations, please join a translation team
+at the Translation Project instead of contributing a `.po` file
+directly.  This will avoid duplicated work if there is already a
+translation in progress.  If you would like to become a member of
+a translation team, please follow the [instructions for
+translators](https://translationproject.org/html/translators.html).
 
 There are currently two translation domains: [one for the sudo
 front-end](https://translationproject.org/domain/sudo.html) and a

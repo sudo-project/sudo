@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996, 1998-2005, 2007-2021
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2022
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -75,6 +75,37 @@
 #define MODE_NONINTERACTIVE	0x00800000
 #define MODE_LONG_LIST		0x01000000
 
+/* Indexes into sudo_settings[] args, must match parse_args.c. */
+#define ARG_BSDAUTH_TYPE	 0
+#define ARG_LOGIN_CLASS		 1
+#define ARG_PRESERVE_ENVIRONMENT 2
+#define ARG_RUNAS_GROUP		 3
+#define ARG_SET_HOME		 4
+#define ARG_USER_SHELL		 5
+#define ARG_LOGIN_SHELL		 6
+#define ARG_IGNORE_TICKET	 7
+#define ARG_PROMPT		 8
+#define ARG_SELINUX_ROLE	 9
+#define ARG_SELINUX_TYPE	10
+#define ARG_RUNAS_USER		11
+#define ARG_PROGNAME		12
+#define ARG_IMPLIED_SHELL	13
+#define ARG_PRESERVE_GROUPS	14
+#define ARG_NONINTERACTIVE	15
+#define ARG_SUDOEDIT		16
+#define ARG_CLOSEFROM		17
+#define ARG_NET_ADDRS		18
+#define ARG_MAX_GROUPS		19
+#define ARG_PLUGIN_DIR		20
+#define ARG_REMOTE_HOST		21
+#define ARG_TIMEOUT		22
+#define ARG_CHROOT		23
+#define ARG_CWD			24
+#define ARG_ASKPASS		25
+#define ARG_INTERCEPT_SETID	26
+#define ARG_INTERCEPT_PTRACE	27
+#define ARG_APPARMOR_PROFILE	28
+
 /*
  * Flags for tgetpass()
  */
@@ -140,6 +171,8 @@ struct user_details {
 #define CD_LOGIN_SHELL		0x080000
 #define CD_OVERRIDE_UMASK	0x100000
 #define CD_LOG_SUBCMDS		0x200000
+#define CD_USE_PTRACE		0x400000
+#define CD_FEXECVE		0x800000
 
 struct preserved_fd {
     TAILQ_ENTRY(preserved_fd) entries;
@@ -167,6 +200,7 @@ struct command_details {
     const char *chroot;
     const char *selinux_role;
     const char *selinux_type;
+    const char *apparmor_profile;
     const char *utmp_user;
     const char *tty;
     char **argv;
@@ -252,7 +286,11 @@ int selinux_relabel_tty(const char *ttyn, int ttyfd);
 int selinux_restore_tty(void);
 int selinux_setexeccon(void);
 void selinux_execve(int fd, const char *path, char *const argv[],
-    char *envp[], bool noexec);
+    char *envp[], int flags);
+
+/* apparmor.c */
+int apparmor_is_enabled(void);
+int apparmor_prepare(const char* new_profile);
 
 /* solaris.c */
 void set_project(struct passwd *);
@@ -305,5 +343,10 @@ void unlimit_nproc(void);
 void unlimit_sudo(void);
 int serialize_rlimits(char **info, size_t info_max);
 bool parse_policy_rlimit(const char *str);
+
+/* exec_ptrace.c */
+void exec_ptrace_fix_flags(struct command_details *details);
+bool exec_ptrace_intercept_supported(void);
+bool exec_ptrace_subcmds_supported(void);
 
 #endif /* SUDO_SUDO_H */

@@ -72,6 +72,7 @@ lib/util/regress/harness
 logsrvd/sudo_logsrvd
 logsrvd/sudo_sendlog
 logsrvd/fuzz_[a-z]*
+logsrvd/logsrvd_conf_test
 
 plugins/sudoers/cvtsudoers
 plugins/sudoers/sudoers

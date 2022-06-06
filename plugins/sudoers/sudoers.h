@@ -111,6 +111,9 @@ struct sudo_user {
     char *role;
     char *type;
 #endif
+#ifdef HAVE_APPARMOR
+    char *apparmor_profile;
+#endif
 #ifdef HAVE_PRIV_SET
     char *privs;
     char *limitprivs;
@@ -145,6 +148,9 @@ struct sudo_user {
  */
 #define RUNAS_USER_SPECIFIED	0x01
 #define RUNAS_GROUP_SPECIFIED	0x02
+#define CAN_INTERCEPT_SETID	0x04
+#define HAVE_INTERCEPT_PTRACE	0x08
+#define USER_INTERCEPT_SETID	0x10
 
 /*
  * Return values for sudoers_lookup(), also used as arguments for log_auth()
@@ -245,6 +251,7 @@ struct sudo_user {
 #define runas_gr		(sudo_user._runas_gr)
 #define user_role		(sudo_user.role)
 #define user_type		(sudo_user.type)
+#define user_apparmor_profile		(sudo_user.apparmor_profile)
 #define user_closefrom		(sudo_user.closefrom)
 #define	runas_privs		(sudo_user.privs)
 #define	runas_limitprivs	(sudo_user.limitprivs)
@@ -310,8 +317,6 @@ int pam_prep_user(struct passwd *);
 /* gram.y */
 int sudoersparse(void);
 extern char *login_style;
-extern char *errorfile;
-extern int errorlineno;
 extern bool parse_error;
 extern bool sudoers_warnings;
 extern bool sudoers_recovery;
@@ -374,10 +379,10 @@ char *get_timestr(time_t, int);
 bool get_boottime(struct timespec *);
 
 /* iolog.c */
-bool cb_maxseq(const union sudo_defs_val *sd_un, int op);
-bool cb_iolog_user(const union sudo_defs_val *sd_un, int op);
-bool cb_iolog_group(const union sudo_defs_val *sd_un, int op);
-bool cb_iolog_mode(const union sudo_defs_val *sd_un, int op);
+bool cb_maxseq(const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
+bool cb_iolog_user(const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
+bool cb_iolog_group(const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
+bool cb_iolog_mode(const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
 
 /* iolog_path_escapes.c */
 struct iolog_path_escape;
@@ -411,7 +416,7 @@ bool matches_env_pattern(const char *pattern, const char *var, bool *full_match)
 /* sudoers.c */
 FILE *open_sudoers(const char *, bool, bool *);
 int set_cmnd_path(const char *runchroot);
-int sudoers_init(void *info, char * const envp[]);
+int sudoers_init(void *info, sudoers_logger_t logger, char * const envp[]);
 int sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[], bool verbose, void *closure);
 void sudoers_cleanup(void);
 void sudo_user_free(void);
@@ -440,7 +445,7 @@ int group_plugin_load(char *plugin_info);
 void group_plugin_unload(void);
 int group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd);
-bool cb_group_plugin(const union sudo_defs_val *sd_un, int op);
+bool cb_group_plugin(const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
 extern const char *path_plugin_dir;
 
 /* editor.c */

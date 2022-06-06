@@ -38,8 +38,7 @@ SHA1SUM = @SHA1SUM@
 SED = @SED@
 
 # Libraries
-LT_LIBS = $(top_builddir)/lib/eventlog/libsudo_eventlog.la \
-	  $(top_builddir)/lib/util/libsudo_util.la
+LT_LIBS = $(top_builddir)/lib/util/libsudo_util.la
 LIBS = @LIBS@ @ZLIB@ $(LT_LIBS)
 
 # C preprocessor flags
@@ -63,8 +62,8 @@ PIE_CFLAGS = @PIE_CFLAGS@
 PIE_LDFLAGS = @PIE_LDFLAGS@
 
 # Stack smashing protection flags
-SSP_CFLAGS = @SSP_CFLAGS@
-SSP_LDFLAGS = @SSP_LDFLAGS@
+HARDENING_CFLAGS = @HARDENING_CFLAGS@
+HARDENING_LDFLAGS = @HARDENING_LDFLAGS@
 
 # cppcheck options, usually set in the top-level Makefile
 CPPCHECK_OPTS = -q --enable=warning,performance,portability --suppress=constStatement --suppress=compareBoolExpressionWithInt --error-exitcode=1 --inline-suppr -Dva_copy=va_copy -U__cplusplus -UQUAD_MAX -UQUAD_MIN -UUQUAD_MAX -U_POSIX_HOST_NAME_MAX -U_POSIX_PATH_MAX -U__NBBY -DNSIG=64
@@ -78,7 +77,8 @@ PVS_IGNORE = 'V707,V011,V002,V536'
 PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
 
 # Regression tests
-TEST_PROGS = check_iolog_filter check_iolog_json check_iolog_mkpath check_iolog_path check_iolog_timing host_port_test
+TEST_PROGS = check_iolog_filter check_iolog_json check_iolog_mkpath \
+	     check_iolog_path check_iolog_timing host_port_test
 TEST_LIBS = @LIBS@
 TEST_LDFLAGS = @LDFLAGS@
 TEST_VERBOSE =
@@ -88,7 +88,8 @@ LIBFUZZSTUB = $(top_builddir)/lib/fuzzstub/libsudo_fuzzstub.la
 LIB_FUZZING_ENGINE = @FUZZ_ENGINE@
 FUZZ_PROGS = fuzz_iolog_json fuzz_iolog_legacy fuzz_iolog_timing
 FUZZ_SEED_CORPUS = ${FUZZ_PROGS:=_seed_corpus.zip}
-FUZZ_LIBS = $(LIB_FUZZING_ENGINE) @LIBS@
+FUZZ_LIBS = $(LIB_FUZZING_ENGINE) @LIBS@ \
+	    $(top_builddir)/lib/eventlog/libsudo_eventlog.la
 FUZZ_LDFLAGS = @LDFLAGS@
 FUZZ_MAX_LEN = 4096
 FUZZ_RUNS = 8192
@@ -155,7 +156,7 @@ Makefile: $(srcdir)/Makefile.in
 .SUFFIXES: .c .h .i .lo .plog
 
 .c.lo:
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $<
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $<
 
 .c.i:
 	$(CC) -E -o $@ $(CPPFLAGS) $<
@@ -167,31 +168,31 @@ libsudo_iolog.la: $(LIBIOLOG_OBJS) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LIBIOLOG_OBJS) $(LT_LIBS) @ZLIB@ @NET_LIBS@
 
 check_iolog_path: $(CHECK_IOLOG_PATH_OBJS) libsudo_iolog.la
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_PATH_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_PATH_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 check_iolog_mkpath: $(CHECK_IOLOG_MKPATH_OBJS) libsudo_iolog.la
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_MKPATH_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_MKPATH_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 check_iolog_timing: $(CHECK_IOLOG_TIMING_OBJS) libsudo_iolog.la
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_TIMING_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_TIMING_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 check_iolog_filter: $(CHECK_IOLOG_FILTER_OBJS) libsudo_iolog.la
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_FILTER_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_FILTER_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 check_iolog_json: $(CHECK_IOLOG_JSON_OBJS) libsudo_iolog.la
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_JSON_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_JSON_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 host_port_test: $(HOST_PORT_TEST_OBJS) libsudo_iolog.la
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(HOST_PORT_TEST_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(HOST_PORT_TEST_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 fuzz_iolog_json: $(FUZZ_IOLOG_JSON_OBJS) $(LIBFUZZSTUB) libsudo_iolog.la
-	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_IOLOG_JSON_OBJS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS) libsudo_iolog.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_IOLOG_JSON_OBJS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS) libsudo_iolog.la
 
 fuzz_iolog_legacy: $(FUZZ_IOLOG_LEGACY_OBJS) $(LIBFUZZSTUB) libsudo_iolog.la
-	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_IOLOG_LEGACY_OBJS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS) libsudo_iolog.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_IOLOG_LEGACY_OBJS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS) libsudo_iolog.la
 
 fuzz_iolog_timing: $(FUZZ_IOLOG_TIMING_OBJS) $(LIBFUZZSTUB) libsudo_iolog.la
-	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_IOLOG_TIMING_OBJS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(SSP_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS) libsudo_iolog.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_IOLOG_TIMING_OBJS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS) libsudo_iolog.la
 
 fuzz_iolog_json_seed_corpus.zip:
 	tdir=fuzz_iolog_json.$$$$; \
@@ -209,6 +210,7 @@ run-fuzz_iolog_json: fuzz_iolog_json
 	    LC_ALL=C; export LC_ALL; \
 	fi; \
 	unset LANG || LANG=; \
+	unset LANGUAGE || LANGUAGE=; \
 	MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	umask 022; \
@@ -235,6 +237,7 @@ run-fuzz_iolog_legacy: fuzz_iolog_legacy
 	    LC_ALL=C; export LC_ALL; \
 	fi; \
 	unset LANG || LANG=; \
+	unset LANGUAGE || LANGUAGE=; \
 	MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	umask 022; \
@@ -261,6 +264,7 @@ run-fuzz_iolog_timing: fuzz_iolog_timing
 	    LC_ALL=C; export LC_ALL; \
 	fi; \
 	unset LANG || LANG=; \
+	unset LANGUAGE || LANGUAGE=; \
 	MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	umask 022; \
@@ -311,6 +315,7 @@ check-fuzzer: $(FUZZ_PROGS)
 		LC_ALL=C; export LC_ALL; \
 	    fi; \
 	    unset LANG || LANG=; \
+	    unset LANGUAGE || LANGUAGE=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    echo "fuzz_iolog_legacy: verifying corpus"; \
@@ -329,6 +334,7 @@ check: $(TEST_PROGS) check-fuzzer
 		LC_ALL=C; export LC_ALL; \
 	    fi; \
 	    unset LANG || LANG=; \
+	    unset LANGUAGE || LANGUAGE=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    rval=0; \
@@ -373,7 +379,7 @@ check_iolog_filter.lo: $(srcdir)/regress/iolog_filter/check_iolog_filter.c \
                        $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
                        $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
                        $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/iolog_filter/check_iolog_filter.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/iolog_filter/check_iolog_filter.c
 check_iolog_filter.i: $(srcdir)/regress/iolog_filter/check_iolog_filter.c \
                        $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                        $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
@@ -388,7 +394,7 @@ check_iolog_json.lo: $(srcdir)/regress/iolog_json/check_iolog_json.c \
                      $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                      $(incdir)/sudo_util.h $(srcdir)/iolog_json.h \
                      $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/iolog_json/check_iolog_json.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/iolog_json/check_iolog_json.c
 check_iolog_json.i: $(srcdir)/regress/iolog_json/check_iolog_json.c \
                      $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                      $(incdir)/sudo_fatal.h $(incdir)/sudo_json.h \
@@ -403,7 +409,7 @@ check_iolog_mkpath.lo: $(srcdir)/regress/iolog_mkpath/check_iolog_mkpath.c \
                        $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
                        $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
                        $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/iolog_mkpath/check_iolog_mkpath.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/iolog_mkpath/check_iolog_mkpath.c
 check_iolog_mkpath.i: $(srcdir)/regress/iolog_mkpath/check_iolog_mkpath.c \
                        $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                        $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
@@ -417,7 +423,7 @@ check_iolog_path.lo: $(srcdir)/regress/iolog_path/check_iolog_path.c \
                      $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
                      $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
                      $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/iolog_path/check_iolog_path.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/iolog_path/check_iolog_path.c
 check_iolog_path.i: $(srcdir)/regress/iolog_path/check_iolog_path.c \
                      $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                      $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
@@ -431,7 +437,7 @@ check_iolog_timing.lo: $(srcdir)/regress/iolog_timing/check_iolog_timing.c \
                        $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
                        $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
                        $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/iolog_timing/check_iolog_timing.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/iolog_timing/check_iolog_timing.c
 check_iolog_timing.i: $(srcdir)/regress/iolog_timing/check_iolog_timing.c \
                        $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                        $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
@@ -447,7 +453,7 @@ fuzz_iolog_json.lo: $(srcdir)/regress/fuzz/fuzz_iolog_json.c \
                     $(incdir)/sudo_json.h $(incdir)/sudo_plugin.h \
                     $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                     $(srcdir)/iolog_json.h $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/fuzz/fuzz_iolog_json.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/fuzz/fuzz_iolog_json.c
 fuzz_iolog_json.i: $(srcdir)/regress/fuzz/fuzz_iolog_json.c \
                     $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                     $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
@@ -464,7 +470,7 @@ fuzz_iolog_legacy.lo: $(srcdir)/regress/fuzz/fuzz_iolog_legacy.c \
                       $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
                       $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                       $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/fuzz/fuzz_iolog_legacy.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/fuzz/fuzz_iolog_legacy.c
 fuzz_iolog_legacy.i: $(srcdir)/regress/fuzz/fuzz_iolog_legacy.c \
                       $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                       $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
@@ -480,7 +486,7 @@ fuzz_iolog_timing.lo: $(srcdir)/regress/fuzz/fuzz_iolog_timing.c \
                       $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
                       $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                       $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/fuzz/fuzz_iolog_timing.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/fuzz/fuzz_iolog_timing.c
 fuzz_iolog_timing.i: $(srcdir)/regress/fuzz/fuzz_iolog_timing.c \
                       $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                       $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
@@ -494,7 +500,7 @@ host_port.lo: $(srcdir)/host_port.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_queue.h \
               $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/host_port.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/host_port.c
 host_port.i: $(srcdir)/host_port.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_queue.h \
@@ -507,7 +513,7 @@ host_port_test.lo: $(srcdir)/regress/host_port/host_port_test.c \
                    $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
                    $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
                    $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/regress/host_port/host_port_test.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/host_port/host_port_test.c
 host_port_test.i: $(srcdir)/regress/host_port/host_port_test.c \
                    $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                    $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
@@ -520,7 +526,7 @@ hostcheck.lo: $(srcdir)/hostcheck.c $(incdir)/compat/stdbool.h \
               $(incdir)/hostcheck.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_debug.h $(incdir)/sudo_queue.h \
               $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/hostcheck.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/hostcheck.c
 hostcheck.i: $(srcdir)/hostcheck.c $(incdir)/compat/stdbool.h \
               $(incdir)/hostcheck.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_debug.h $(incdir)/sudo_queue.h \
@@ -532,7 +538,7 @@ iolog_clearerr.lo: $(srcdir)/iolog_clearerr.c $(incdir)/compat/stdbool.h \
                    $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                    $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
                    $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_clearerr.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_clearerr.c
 iolog_clearerr.i: $(srcdir)/iolog_clearerr.c $(incdir)/compat/stdbool.h \
                    $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                    $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -544,7 +550,7 @@ iolog_close.lo: $(srcdir)/iolog_close.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                 $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
                 $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_close.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_close.c
 iolog_close.i: $(srcdir)/iolog_close.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                 $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -557,7 +563,7 @@ iolog_conf.lo: $(srcdir)/iolog_conf.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
                $(incdir)/sudo_util.h $(top_builddir)/config.h \
                $(top_builddir)/pathnames.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_conf.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_conf.c
 iolog_conf.i: $(srcdir)/iolog_conf.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -570,7 +576,7 @@ iolog_eof.lo: $(srcdir)/iolog_eof.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
               $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
               $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_eof.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_eof.c
 iolog_eof.i: $(srcdir)/iolog_eof.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
               $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -584,7 +590,7 @@ iolog_filter.lo: $(srcdir)/iolog_filter.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
                  $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                  $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_filter.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_filter.c
 iolog_filter.i: $(srcdir)/iolog_filter.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                  $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -598,7 +604,7 @@ iolog_flush.lo: $(srcdir)/iolog_flush.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                 $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
                 $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_flush.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_flush.c
 iolog_flush.i: $(srcdir)/iolog_flush.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                 $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -610,7 +616,7 @@ iolog_gets.lo: $(srcdir)/iolog_gets.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
                $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_gets.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_gets.c
 iolog_gets.i: $(srcdir)/iolog_gets.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -625,7 +631,7 @@ iolog_json.lo: $(srcdir)/iolog_json.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_json.h $(incdir)/sudo_plugin.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                $(srcdir)/iolog_json.h $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_json.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_json.c
 iolog_json.i: $(srcdir)/iolog_json.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
@@ -642,7 +648,7 @@ iolog_legacy.lo: $(srcdir)/iolog_legacy.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
                  $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                  $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_legacy.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_legacy.c
 iolog_legacy.i: $(srcdir)/iolog_legacy.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                  $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
@@ -659,7 +665,7 @@ iolog_loginfo.lo: $(srcdir)/iolog_loginfo.c $(incdir)/compat/stdbool.h \
                   $(incdir)/sudo_json.h $(incdir)/sudo_plugin.h \
                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                   $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_loginfo.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_loginfo.c
 iolog_loginfo.i: $(srcdir)/iolog_loginfo.c $(incdir)/compat/stdbool.h \
                   $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                   $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
@@ -676,7 +682,7 @@ iolog_mkdirs.lo: $(srcdir)/iolog_mkdirs.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
                  $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                  $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_mkdirs.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_mkdirs.c
 iolog_mkdirs.i: $(srcdir)/iolog_mkdirs.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                  $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -692,7 +698,7 @@ iolog_mkdtemp.lo: $(srcdir)/iolog_mkdtemp.c $(incdir)/compat/stdbool.h \
                   $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                   $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_mkdtemp.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_mkdtemp.c
 iolog_mkdtemp.i: $(srcdir)/iolog_mkdtemp.c $(incdir)/compat/stdbool.h \
                   $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                   $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -706,7 +712,7 @@ iolog_mkpath.lo: $(srcdir)/iolog_mkpath.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                  $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
                  $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_mkpath.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_mkpath.c
 iolog_mkpath.i: $(srcdir)/iolog_mkpath.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                  $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -720,7 +726,7 @@ iolog_nextid.lo: $(srcdir)/iolog_nextid.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
                  $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                  $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_nextid.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_nextid.c
 iolog_nextid.i: $(srcdir)/iolog_nextid.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                  $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -734,7 +740,7 @@ iolog_open.lo: $(srcdir)/iolog_open.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
                $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_open.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_open.c
 iolog_open.i: $(srcdir)/iolog_open.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -748,7 +754,7 @@ iolog_openat.lo: $(srcdir)/iolog_openat.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
                  $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                  $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_openat.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_openat.c
 iolog_openat.i: $(srcdir)/iolog_openat.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                  $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -764,7 +770,7 @@ iolog_path.lo: $(srcdir)/iolog_path.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_path.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_path.c
 iolog_path.i: $(srcdir)/iolog_path.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -778,7 +784,7 @@ iolog_read.lo: $(srcdir)/iolog_read.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
                $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_read.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_read.c
 iolog_read.i: $(srcdir)/iolog_read.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -790,7 +796,7 @@ iolog_seek.lo: $(srcdir)/iolog_seek.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
                $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_seek.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_seek.c
 iolog_seek.i: $(srcdir)/iolog_seek.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -803,7 +809,7 @@ iolog_swapids.lo: $(srcdir)/iolog_swapids.c $(incdir)/compat/stdbool.h \
                   $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                   $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
                   $(incdir)/sudo_queue.h $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_swapids.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_swapids.c
 iolog_swapids.i: $(srcdir)/iolog_swapids.c $(incdir)/compat/stdbool.h \
                   $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                   $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -818,7 +824,7 @@ iolog_timing.lo: $(srcdir)/iolog_timing.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
                  $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                  $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_timing.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_timing.c
 iolog_timing.i: $(srcdir)/iolog_timing.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                  $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
@@ -832,7 +838,7 @@ iolog_util.lo: $(srcdir)/iolog_util.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
                $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_util.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_util.c
 iolog_util.i: $(srcdir)/iolog_util.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -844,7 +850,7 @@ iolog_write.lo: $(srcdir)/iolog_write.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                 $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
                 $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(SSP_CFLAGS) $(srcdir)/iolog_write.c
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_write.c
 iolog_write.i: $(srcdir)/iolog_write.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                 $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \

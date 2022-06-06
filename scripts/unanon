@@ -19,7 +19,7 @@ sub unanon {
 
     # Detect and replace anonymous unions in .h file.
     # Assumes there is only one anonymous union in scope.
-    while ($content =~ s/^(struct\s+_(\w+)[^}]+)(union\s+{([^}]+)}\s*);/$1$3 u;/sm) {
+    while ($content =~ s/^(struct\s+(\w+)[^}]+)(union\s+{([^}]+)}\s*);/$1$3 u;/sm) {
 	my $s = $2;
 	my $u = $4;
 	$u =~ s:/\*((?!\*/).)*\*/::sg;

@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.Dd February 16, 2022
+.Dd May 31, 2022
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -271,8 +271,9 @@ The fully-qualified path to a shared library containing a wrappers for the
 .Fn execv ,
 .Fn execve ,
 .Fn execvp ,
+.Fn execvpe ,
 and
-.Fn execvpe
+.Fn system
 library functions that intercepts attempts to run further commands and
 performs a policy check before allowing them to be executed.
 This is used to implement the
@@ -549,9 +550,9 @@ Debug sudo_intercept.so @log_dir@/intercept_debug all@debug
 .Pp
 would log all debugging statements, regardless of level, for the
 .Pa sudo_intercept.so
-shared object that implements
+shared library that implements
 .Nm sudo Ns 's
-intercept functionality.
+intercept functionality on some systems.
 .Pp
 As of
 .Nm sudo

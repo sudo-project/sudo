@@ -220,7 +220,8 @@ group_plugin_query(const char *user, const char *group,
  * Group plugin sudoers callback.
  */
 bool
-cb_group_plugin(const union sudo_defs_val *sd_un, int op)
+cb_group_plugin(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
 {
     bool rc = true;
     debug_decl(cb_group_plugin, SUDOERS_DEBUG_PLUGIN);

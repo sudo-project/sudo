@@ -1,0 +1,1084 @@
+# Portable object template file for sudo
+# This file is put in the public domain.
+# Todd C. Miller <Todd.Miller@sudo.ws>, 2011-2018
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sudo 1.9.10b1\n"
+"Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
+"POT-Creation-Date: 2022-02-12 09:31-0700\n"
+"PO-Revision-Date: 2022-04-27 15:21+0200\n"
+"Last-Translator: Temuri Doghonadze <temuri.doghonadze@gmail.com>\n"
+"Language-Team: Georgian <(nothing)>\n"
+"Language: ka\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 3.0.1\n"
+
+#: lib/util/aix.c:89 lib/util/aix.c:169
+msgid "unable to open userdb"
+msgstr "userdb-ის გახსნის შეცდომა"
+
+#: lib/util/aix.c:224
+#, c-format
+msgid "unable to switch to registry \"%s\" for %s"
+msgstr "რეესტრზე(\"%s\") გადართვის შეცდომა %s-თვის"
+
+#: lib/util/aix.c:249
+msgid "unable to restore registry"
+msgstr "რეესტრის აღდგენის შედომა"
+
+#: lib/util/aix.c:272 lib/util/gidlist.c:66 lib/util/gidlist.c:76
+#: lib/util/json.c:54 lib/util/json.c:183 lib/util/sudo_conf.c:218
+#: lib/util/sudo_conf.c:304 lib/util/sudo_conf.c:381 lib/util/sudo_conf.c:665
+#: src/conversation.c:80 src/exec_monitor.c:206 src/exec_monitor.c:456
+#: src/exec_monitor.c:462 src/exec_monitor.c:470 src/exec_monitor.c:478
+#: src/exec_monitor.c:485 src/exec_monitor.c:492 src/exec_monitor.c:499
+#: src/exec_monitor.c:506 src/exec_monitor.c:513 src/exec_monitor.c:520
+#: src/exec_monitor.c:527 src/exec_nopty.c:219 src/exec_nopty.c:228
+#: src/exec_nopty.c:235 src/exec_nopty.c:242 src/exec_nopty.c:249
+#: src/exec_nopty.c:256 src/exec_nopty.c:263 src/exec_nopty.c:270
+#: src/exec_nopty.c:277 src/exec_nopty.c:284 src/exec_nopty.c:291
+#: src/exec_nopty.c:298 src/exec_nopty.c:306 src/exec_nopty.c:503
+#: src/exec_preload.c:143 src/exec_preload.c:204 src/exec_pty.c:840
+#: src/exec_pty.c:849 src/exec_pty.c:906 src/exec_pty.c:1059
+#: src/exec_pty.c:1231 src/exec_pty.c:1240 src/exec_pty.c:1247
+#: src/exec_pty.c:1254 src/exec_pty.c:1261 src/exec_pty.c:1268
+#: src/exec_pty.c:1275 src/exec_pty.c:1282 src/exec_pty.c:1289
+#: src/exec_pty.c:1296 src/exec_pty.c:1303 src/exec_pty.c:1311
+#: src/exec_pty.c:1774 src/load_plugins.c:156 src/load_plugins.c:181
+#: src/load_plugins.c:217 src/load_plugins.c:449 src/load_plugins.c:455
+#: src/parse_args.c:192 src/parse_args.c:213 src/parse_args.c:287
+#: src/parse_args.c:632 src/parse_args.c:654 src/parse_args.c:679
+#: src/preserve_fds.c:46 src/preserve_fds.c:131 src/selinux.c:89
+#: src/selinux.c:362 src/selinux.c:474 src/selinux.c:483 src/sesh.c:113
+#: src/sesh.c:146 src/sesh.c:152 src/sesh.c:159 src/sesh.c:165 src/sesh.c:410
+#: src/sudo.c:639 src/sudo.c:709 src/sudo.c:719 src/sudo.c:744 src/sudo.c:767
+#: src/sudo.c:776 src/sudo.c:785 src/sudo.c:802 src/sudo.c:844 src/sudo.c:854
+#: src/sudo.c:883 src/sudo.c:1083 src/sudo.c:1104 src/sudo.c:1397
+#: src/sudo.c:1566 src/sudo.c:1793 src/sudo.c:2127 src/sudo_edit.c:89
+#: src/sudo_edit.c:149 src/sudo_edit.c:429 src/sudo_edit.c:438
+#: src/sudo_edit.c:539 src/sudo_edit.c:546 src/sudo_edit.c:677
+#: src/sudo_edit.c:697 src/sudo_intercept_common.c:113
+#: src/sudo_intercept_common.c:317
+#, c-format
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: lib/util/aix.c:272 lib/util/gidlist.c:66 lib/util/json.c:55
+#: lib/util/json.c:184 lib/util/regex.c:113 lib/util/regex.c:121
+#: lib/util/sudo_conf.c:219 lib/util/sudo_conf.c:304 lib/util/sudo_conf.c:381
+#: lib/util/sudo_conf.c:665 src/conversation.c:81 src/exec_intercept.c:100
+#: src/exec_intercept.c:330 src/exec_intercept.c:354 src/exec_intercept.c:377
+#: src/exec_intercept.c:385 src/exec_intercept.c:410 src/exec_intercept.c:416
+#: src/exec_intercept.c:425 src/exec_intercept.c:431 src/exec_intercept.c:565
+#: src/exec_intercept.c:706 src/exec_monitor.c:456 src/exec_monitor.c:462
+#: src/exec_monitor.c:470 src/exec_monitor.c:478 src/exec_monitor.c:485
+#: src/exec_monitor.c:492 src/exec_monitor.c:499 src/exec_monitor.c:506
+#: src/exec_monitor.c:513 src/exec_monitor.c:520 src/exec_monitor.c:527
+#: src/exec_nopty.c:219 src/exec_nopty.c:228 src/exec_nopty.c:235
+#: src/exec_nopty.c:242 src/exec_nopty.c:249 src/exec_nopty.c:256
+#: src/exec_nopty.c:263 src/exec_nopty.c:270 src/exec_nopty.c:277
+#: src/exec_nopty.c:284 src/exec_nopty.c:291 src/exec_nopty.c:298
+#: src/exec_nopty.c:306 src/exec_preload.c:143 src/exec_preload.c:204
+#: src/exec_pty.c:840 src/exec_pty.c:849 src/exec_pty.c:906
+#: src/exec_pty.c:1231 src/exec_pty.c:1240 src/exec_pty.c:1247
+#: src/exec_pty.c:1254 src/exec_pty.c:1261 src/exec_pty.c:1268
+#: src/exec_pty.c:1275 src/exec_pty.c:1282 src/exec_pty.c:1289
+#: src/exec_pty.c:1296 src/exec_pty.c:1303 src/exec_pty.c:1311
+#: src/exec_pty.c:1774 src/load_plugins.c:156 src/load_plugins.c:181
+#: src/load_plugins.c:217 src/load_plugins.c:449 src/load_plugins.c:455
+#: src/parse_args.c:192 src/parse_args.c:214 src/parse_args.c:287
+#: src/parse_args.c:632 src/parse_args.c:654 src/parse_args.c:679
+#: src/preserve_fds.c:46 src/preserve_fds.c:131 src/selinux.c:89
+#: src/selinux.c:362 src/selinux.c:474 src/selinux.c:483 src/sesh.c:113
+#: src/sesh.c:411 src/sudo.c:230 src/sudo.c:639 src/sudo.c:883 src/sudo.c:1083
+#: src/sudo.c:1104 src/sudo.c:1397 src/sudo.c:1566 src/sudo.c:1793
+#: src/sudo.c:2127 src/sudo_edit.c:89 src/sudo_edit.c:149 src/sudo_edit.c:429
+#: src/sudo_edit.c:438 src/sudo_edit.c:539 src/sudo_edit.c:546
+#: src/sudo_edit.c:677 src/sudo_edit.c:697 src/sudo_intercept_common.c:113
+#: src/sudo_intercept_common.c:317
+msgid "unable to allocate memory"
+msgstr "მეხსიერების გამოყოფის შეცდომა"
+
+#: lib/util/mkdir_parents.c:63
+#, c-format
+msgid "unable to stat %.*s"
+msgstr "%.*s-ის აღმოჩენის შეცდომა"
+
+#: lib/util/mkdir_parents.c:69
+#, c-format
+msgid "%.*s exists but is not a directory (0%o)"
+msgstr "%.*s არსებობს, მაგრამ საქაღალდე არაა (0%o)"
+
+#: lib/util/mkdir_parents.c:102 lib/util/sudo_conf.c:704 src/selinux.c:235
+#: src/selinux.c:265 src/sudo.c:371 src/sudo_edit.c:494 src/sudo_edit.c:559
+#, c-format
+msgid "unable to open %s"
+msgstr "%s-ის გახსნის შეცდომა"
+
+#: lib/util/mkdir_parents.c:119 lib/util/mkdir_parents.c:127
+#: lib/util/mkdir_parents.c:136
+#, c-format
+msgid "unable to open %.*s"
+msgstr "%.*s-ის გახსნის შეცდომა"
+
+#: lib/util/mkdir_parents.c:157
+#, c-format
+msgid "unable to mkdir %.*s"
+msgstr "%.*s-ის mkdir-ის შეცდომა"
+
+#: lib/util/regex.c:103
+msgid "regular expression too large"
+msgstr "რეგულარული გამოსახულება ძალიან გრძელია"
+
+#: lib/util/strsignal.c:50
+msgid "Unknown signal"
+msgstr "უცნობი სიგნალი"
+
+#: lib/util/strtoid.c:87 lib/util/strtomode.c:52 lib/util/strtonum.c:148
+#: lib/util/strtonum.c:187 src/sesh.c:146 src/sesh.c:159
+msgid "invalid value"
+msgstr "არასწორი მნიშვნელობა"
+
+#: lib/util/strtomode.c:58 lib/util/strtonum.c:160
+msgid "value too large"
+msgstr "მნიშვნელობა ძალიან გრძელია"
+
+#: lib/util/strtomode.c:58 lib/util/strtonum.c:154
+msgid "value too small"
+msgstr "მნიშვნელობა ძალიან პატარაა"
+
+#: lib/util/sudo_conf.c:237
+#, c-format
+msgid "invalid Path value \"%s\" in %s, line %u"
+msgstr "ბილიკის არასწორი მისამართი (\"%s\") %s-ში, %u ხაზზე"
+
+#: lib/util/sudo_conf.c:403 lib/util/sudo_conf.c:419 lib/util/sudo_conf.c:472
+#, c-format
+msgid "invalid value for %s \"%s\" in %s, line %u"
+msgstr "%s -ის არასწორი მნიშვნელობა \"%s\", %s-ში, %u-ე ხაზზე"
+
+#: lib/util/sudo_conf.c:440
+#, c-format
+msgid "unsupported group source \"%s\" in %s, line %u"
+msgstr "ჯგუფის მხარდაუჭერელი წყარო \"%s\" %s-ში, %u-ე ხაზზე"
+
+#: lib/util/sudo_conf.c:456
+#, c-format
+msgid "invalid max groups \"%s\" in %s, line %u"
+msgstr "არასწორი მაქს. ჯგუფები \"%s\" %s-ში, %u-ე ხაზზე"
+
+#: lib/util/sudo_conf.c:681 src/copy_file.c:150
+#, c-format
+msgid "unable to stat %s"
+msgstr "%s-ის აღმოჩენის შეცდომა"
+
+#: lib/util/sudo_conf.c:684
+#, c-format
+msgid "%s is not a regular file"
+msgstr "%s: არ წარმოადგენს ჩვეულებრივ ფაილს"
+
+#: lib/util/sudo_conf.c:687 src/copy_file.c:163
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr "%s-ის მფლობლის UID-ია %u. უნდა იყოს %u"
+
+#: lib/util/sudo_conf.c:691
+#, c-format
+msgid "%s is world writable"
+msgstr "%s ყველას მიერ ჩაწერადია"
+
+#: lib/util/sudo_conf.c:694
+#, c-format
+msgid "%s is group writable"
+msgstr "%s ჯგუფის მიერ ჩაწერადია"
+
+#: src/copy_file.c:93
+#, c-format
+msgid "%s: truncate %s to zero bytes? (y/n) [n] "
+msgstr "%s: შევკვეცო %s ნულ ბაიტამდე? (y/n) [n] "
+
+#: src/copy_file.c:97
+#, c-format
+msgid "not overwriting %s"
+msgstr "არ გადავაწერ %s-ს"
+
+#: src/copy_file.c:119
+#, c-format
+msgid "unable to read from %s"
+msgstr "%s-დან წაკითხვა შეუძლებელია"
+
+#: src/copy_file.c:136 src/sudo_edit.c:320
+#, c-format
+msgid "unable to write to %s"
+msgstr "%s-ში ჩაწერა შეუძლებელია"
+
+#: src/copy_file.c:154 src/sesh.c:218 src/sudo_edit.c:197
+#, c-format
+msgid "%s: not a regular file"
+msgstr "%s: არ წარმოადგენს ჩვეულებრივ ფაილს"
+
+#: src/copy_file.c:158
+#, c-format
+msgid "%s: bad file mode: 0%o"
+msgstr "%s: ფაილის არასწორი რეჟიმი: 0%o"
+
+#: src/edit_open.c:331
+msgid "unable to restore current working directory"
+msgstr "მიმდინარე სამუშაო საქაღალდის აღდგენა შეუძლებელია"
+
+#: src/exec.c:130
+#, c-format
+msgid "unknown login class %s"
+msgstr "შესვლის უცნობი კლასი: %s"
+
+#: src/exec.c:142
+msgid "unable to set user context"
+msgstr "მომხმარებლის კონტექსტის დაყენების შეცდომა"
+
+#: src/exec.c:158
+msgid "unable to set process priority"
+msgstr "პროცესის პრიორიტეტის დაყენების შეცდომა"
+
+#: src/exec.c:175
+#, c-format
+msgid "unable to change root to %s"
+msgstr "root საქაღალდის %s-ზე გადართვის"
+
+#: src/exec.c:188 src/exec.c:194 src/exec.c:201
+#, c-format
+msgid "unable to change to runas uid (%u, %u)"
+msgstr "გამშვებ UID-ზე (%u, %u) გადართვის შეცდომა"
+
+#: src/exec.c:219
+#, c-format
+msgid "unable to change directory to %s"
+msgstr "საქაღალდის შეცვლის შეცდომა: %s"
+
+#: src/exec.c:223
+#, c-format
+msgid "starting from %s"
+msgstr "%s-დან დაწყებული"
+
+#: src/exec.c:305 src/exec_monitor.c:565 src/exec_monitor.c:567
+#: src/exec_nopty.c:561 src/exec_pty.c:581 src/exec_pty.c:1411
+#: src/exec_pty.c:1413 src/signal.c:144 src/signal.c:151 src/signal.c:165
+#, c-format
+msgid "unable to set handler for signal %d"
+msgstr "სიგნაგლისთვის (%d) სახელურის დაყენების შეცდომა"
+
+#: src/exec_common.c:56
+msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
+msgstr "pRIV_LIMIT-დან PRIV_PROC_EXEC-ის წაშლის შეცდომა"
+
+#: src/exec_intercept.c:112 src/exec_intercept.c:116 src/exec_intercept.c:667
+#: src/exec_intercept.c:671 src/exec_intercept.c:857 src/exec_intercept.c:861
+#: src/exec_intercept.c:872 src/exec_intercept.c:876 src/exec_monitor.c:464
+#: src/exec_monitor.c:472 src/exec_monitor.c:480 src/exec_monitor.c:487
+#: src/exec_monitor.c:494 src/exec_monitor.c:501 src/exec_monitor.c:508
+#: src/exec_monitor.c:515 src/exec_monitor.c:522 src/exec_monitor.c:529
+#: src/exec_nopty.c:221 src/exec_nopty.c:230 src/exec_nopty.c:237
+#: src/exec_nopty.c:244 src/exec_nopty.c:251 src/exec_nopty.c:258
+#: src/exec_nopty.c:265 src/exec_nopty.c:272 src/exec_nopty.c:279
+#: src/exec_nopty.c:286 src/exec_nopty.c:293 src/exec_nopty.c:300
+#: src/exec_nopty.c:308 src/exec_pty.c:706 src/exec_pty.c:711
+#: src/exec_pty.c:808 src/exec_pty.c:815 src/exec_pty.c:912
+#: src/exec_pty.c:1233 src/exec_pty.c:1242 src/exec_pty.c:1249
+#: src/exec_pty.c:1256 src/exec_pty.c:1263 src/exec_pty.c:1270
+#: src/exec_pty.c:1277 src/exec_pty.c:1284 src/exec_pty.c:1291
+#: src/exec_pty.c:1298 src/exec_pty.c:1305 src/exec_pty.c:1727
+#: src/exec_pty.c:1737 src/exec_pty.c:1782 src/exec_pty.c:1789
+#: src/exec_pty.c:1816
+msgid "unable to add event to queue"
+msgstr "რიგში მოვლენის ჩამატების შეცდომა"
+
+#: src/exec_intercept.c:314
+msgid "invalid PolicyCheckRequest"
+msgstr "არასწორი PolicyCheckRequest"
+
+#: src/exec_intercept.c:362 src/sudo.c:1209 src/sudo.c:1254 src/sudo.c:1298
+msgid "command rejected by policy"
+msgstr "ბრძანება უარყოფილია წესის მიერ"
+
+#: src/exec_intercept.c:455 src/sudo.c:1214 src/sudo.c:1259 src/sudo.c:1303
+#: src/sudo.c:1377
+msgid "policy plugin error"
+msgstr "წესის დამატების შეცდომა"
+
+#: src/exec_intercept.c:561
+#, c-format
+msgid "client request too large: %zu"
+msgstr "კლიენტის მოთხოვნა ძალიან დიდია: %zu"
+
+#: src/exec_intercept.c:659
+#, c-format
+msgid "unexpected type_case value %d in %s from %s"
+msgstr "type_case-ის მოულოდნელი მნიშვნელობა %d %s-ში %s-დან"
+
+#: src/exec_intercept.c:694
+#, c-format
+msgid "server message too large: %zu"
+msgstr "სერვერის შეტყობინება ძალიან დიდია: %zu"
+
+#: src/exec_monitor.c:360
+msgid "error reading from socketpair"
+msgstr "socketpair-დან წაკითხვის შეცდომა"
+
+#: src/exec_monitor.c:377
+#, c-format
+msgid "unexpected reply type on backchannel: %d"
+msgstr "blackchannel-ის პასუხის მოულოდნელი ტიპი: %d"
+
+#: src/exec_monitor.c:583
+msgid "unable to set controlling tty"
+msgstr "საკონტროლო tty-ის დაყენების შეცდომა"
+
+#: src/exec_monitor.c:591 src/exec_nopty.c:369 src/exec_pty.c:1490
+#: src/exec_pty.c:1511 src/exec_pty.c:1531 src/tgetpass.c:307
+msgid "unable to create pipe"
+msgstr "ფაიფის შექმნის შეცდომა"
+
+#: src/exec_monitor.c:601
+msgid "unable to receive message from parent"
+msgstr "მშობლისგან შეტყობინების მიღების შეცდომა"
+
+#: src/exec_monitor.c:617 src/exec_nopty.c:407 src/exec_pty.c:1569
+#: src/sudo_edit.c:361 src/tgetpass.c:311
+msgid "unable to fork"
+msgstr "პროცესის განტოტვის შეცდომა"
+
+#: src/exec_monitor.c:621 src/exec_monitor.c:722 src/exec_nopty.c:471
+msgid "unable to restore tty label"
+msgstr "tty-ის ჭდის აღდგენის შეცდომა"
+
+#: src/exec_monitor.c:637 src/sesh.c:123 src/sudo.c:1160
+#, c-format
+msgid "unable to execute %s"
+msgstr "%s-ის გაშვების შეცდომა"
+
+#: src/exec_nopty.c:363 src/exec_pty.c:1420
+msgid "policy plugin failed session initialization"
+msgstr "წესების დამატების შეცდომა სესიის ინიციალიზაციისას"
+
+#: src/exec_nopty.c:377 src/exec_pty.c:1391 src/exec_pty.c:1399
+msgid "unable to create sockets"
+msgstr "სოკეტების შექმნის შეცდომა"
+
+#: src/exec_nopty.c:459 src/exec_pty.c:1666
+msgid "error in event loop"
+msgstr "მოვლენების მარყუჟის შეცდომა"
+
+#: src/exec_nopty.c:569 src/exec_pty.c:619 src/signal.c:101
+#, c-format
+msgid "unable to restore handler for signal %d"
+msgstr "სიგნალისთვის სახელურის აღდგენის შეცდომა: %d"
+
+#: src/exec_pty.c:158
+msgid "unable to allocate pty"
+msgstr "pty-ის გამოყოფის შეცდომა"
+
+#: src/exec_pty.c:222 src/exec_pty.c:262 src/exec_pty.c:302 src/exec_pty.c:353
+#: src/exec_pty.c:404
+msgid "I/O plugin error"
+msgstr "I/O დამატების შეცდომა"
+
+#: src/exec_pty.c:226 src/exec_pty.c:266 src/exec_pty.c:306 src/exec_pty.c:357
+#: src/exec_pty.c:408
+msgid "command rejected by I/O plugin"
+msgstr "ბრძანება უარყოფილია I/O დამატების მიერ"
+
+#: src/exec_pty.c:455
+msgid "error logging suspend"
+msgstr "ჟურნალში ჩაწერის შეჩერება შეუძლებელია"
+
+#: src/exec_pty.c:489
+msgid "error changing window size"
+msgstr "ფანჯრის ზომის შეცვლა შეუძლებელია"
+
+#: src/exec_pty.c:1615
+msgid "unable to send message to monitor process"
+msgstr "მაყურებელი პროცესისთვის შეტყობინების გაგზავნა შეუძლებელია"
+
+#: src/load_plugins.c:108 src/load_plugins.c:122 src/load_plugins.c:128
+#: src/load_plugins.c:277 src/load_plugins.c:287 src/load_plugins.c:297
+#: src/load_plugins.c:344
+#, c-format
+msgid "error in %s, line %d while loading plugin \"%s\""
+msgstr "%s-ის შეცდომა %d ხაზზე \"%s\"დამატების ჩატვირთვისას"
+
+#: src/load_plugins.c:124
+#, c-format
+msgid "%s must be owned by uid %d"
+msgstr "%s-ის მფლობლის UID %d უნდა იყოს"
+
+#: src/load_plugins.c:130
+#, c-format
+msgid "%s must be only be writable by owner"
+msgstr "%s ჩაწერადი მხოლოდ მფლობლის მიერ უნდა იყოს"
+
+#: src/load_plugins.c:241 src/load_plugins.c:312
+#, c-format
+msgid "ignoring duplicate plugin \"%s\" in %s, line %d"
+msgstr "ორჯერ აღწერილი დამატება \"%s\", \"%s\"-ში, %d-ე ხაზზე"
+
+#: src/load_plugins.c:279
+#, c-format
+msgid "unable to load %s: %s"
+msgstr "%s-ის ჩატვირთვის შეცდომა: %s"
+
+#: src/load_plugins.c:289
+#, c-format
+msgid "unable to find symbol \"%s\" in %s"
+msgstr "სიმბოლო \"%s\"-ის %s-ში პოვნა შეუძლებელია"
+
+#: src/load_plugins.c:299
+#, c-format
+msgid "incompatible plugin major version %d (expected %d) found in %s"
+msgstr "დამატების შეუთავსებელი ძირითადი ვერსია: %d (ველოდებოდით %d-ს), რომელიც ნაპოვნია %s-ში"
+
+#: src/load_plugins.c:317
+#, c-format
+msgid "ignoring policy plugin \"%s\" in %s, line %d"
+msgstr "წესებს დამატების (\"%s\") იგნორი %s-ში, %d-ე ხაზზე"
+
+#: src/load_plugins.c:320
+msgid "only a single policy plugin may be specified"
+msgstr "დაშვებულია წესების მხოლოდ ერთი დამატების მითითება"
+
+#: src/load_plugins.c:346
+#, c-format
+msgid "unknown plugin type %d found in %s"
+msgstr "დამატების ტიპი (%d) უცნობია. ნაპოვნია %s-ში"
+
+#: src/load_plugins.c:529
+#, c-format
+msgid "policy plugin %s does not include a check_policy method"
+msgstr "წესების დამატება %s არ შეიცავს check_policy მეთოდს"
+
+#: src/net_ifs.c:210 src/net_ifs.c:376 src/net_ifs.c:437 src/net_ifs.c:624
+#: src/net_ifs.c:855 src/sudo.c:486 src/sudo_edit.c:398 src/sudo_edit.c:406
+#, c-format
+msgid "internal error, %s overflow"
+msgstr "შიდა შეცდომა: %s-ის გადავსება"
+
+#: src/parse_args.c:234
+#, c-format
+msgid "invalid environment variable name: %s"
+msgstr "გარემოს ცვლადის არასწორი სახელი: %s"
+
+#: src/parse_args.c:337
+msgid "the argument to -C must be a number greater than or equal to 3"
+msgstr "-C -ის არგუმენტი რიცხვი უნდა იყოს, 3 ან მეტი"
+
+#: src/parse_args.c:568
+msgid "you may not specify both the -i and -s options"
+msgstr "-i და -s პარამეტრების ერთად მითითება აკრძალულია"
+
+#: src/parse_args.c:573
+msgid "you may not specify both the -i and -E options"
+msgstr "-i და -E პარამეტრების ერთად მითითება აკრძალულია"
+
+#: src/parse_args.c:583
+msgid "the -E option is not valid in edit mode"
+msgstr "ჩასწორების რეჟიმში -E-ის მითითება აკრძალულია"
+
+#: src/parse_args.c:586
+msgid "you may not specify environment variables in edit mode"
+msgstr "ჩასწორების რეჟიმში გარემოს ცვლადების მითითება არ შეგიძლიათ"
+
+#: src/parse_args.c:596
+msgid "the -U option may only be used with the -l option"
+msgstr "პარამეტრები -U და -I შეუთავსებლებია"
+
+#: src/parse_args.c:600
+msgid "the -A and -S options may not be used together"
+msgstr "პარამეტრები -A და -S შეუთავსებლებია"
+
+#: src/parse_args.c:693
+msgid "sudoedit is not supported on this platform"
+msgstr "ამ პლატფორმაზე sudoedit-ი მხარდაუჭერელია"
+
+#: src/parse_args.c:776
+msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
+msgstr "შესაძლო პარამეტრებია -e, -h, -I, -K, -l, -s, -v, -V"
+
+#: src/parse_args.c:792
+#, c-format
+msgid ""
+"%s - edit files as another user\n"
+"\n"
+msgstr ""
+"%s - ფაილების სხვა მომხმარებლით ჩასწორება\n"
+"\n"
+
+#: src/parse_args.c:794
+#, c-format
+msgid ""
+"%s - execute a command as another user\n"
+"\n"
+msgstr "%s - sსხვ\n"
+
+#: src/parse_args.c:800
+msgid ""
+"\n"
+"Options:\n"
+msgstr ""
+"\n"
+"პარამეტრები:\n"
+
+#: src/parse_args.c:802
+msgid "use a helper program for password prompting"
+msgstr "პაროლის მოსათხოვნად დამხმარე პროგრამის გამოყენება"
+
+#: src/parse_args.c:805
+msgid "use specified BSD authentication type"
+msgstr "bsd ავთენტიკაციის მოთხოვნილი ტიპის გამოყენება"
+
+#: src/parse_args.c:809
+msgid "run command in the background"
+msgstr "ბრძანების ფონურ რეჟიმში გაშვება"
+
+#: src/parse_args.c:812
+msgid "ring bell when prompting"
+msgstr "მოთხოვნისას ზარის დარეკვა"
+
+#: src/parse_args.c:814
+msgid "close all file descriptors >= num"
+msgstr "ყველა იმ ფაილის დესკრიპტორის დახურვა, რომლის ნომერიც >= რიცხვზე"
+
+#: src/parse_args.c:817
+msgid "run command with the specified BSD login class"
+msgstr "ბრძანების BSD-ის მითითებული კლასით გაშვება"
+
+#: src/parse_args.c:820
+msgid "change the working directory before running command"
+msgstr "ბრძანების გაშვებამდე სამუშაო საქაღალდის შეცვლა"
+
+#: src/parse_args.c:823
+msgid "preserve user environment when running command"
+msgstr "ბრძანების გაშვებისას მომხმარებლის გარემოს შენარჩუნება"
+
+#: src/parse_args.c:825
+msgid "preserve specific environment variables"
+msgstr "გარემოს მითითებული ცვლადების შენარჩუნება"
+
+#: src/parse_args.c:827
+msgid "edit files instead of running a command"
+msgstr "ბრძანების გაშვების მაგიერ ფაილების ჩასწორება"
+
+#: src/parse_args.c:830
+msgid "run command as the specified group name or ID"
+msgstr "ბრძანების მითითებული ჯგუფის სახელით ან ID-ით გაშვება"
+
+#: src/parse_args.c:833
+msgid "set HOME variable to target user's home dir"
+msgstr "გარემოს ცვლადის HOME მომხმარებლის საწყის საქაღალდეზე დაყენება"
+
+#: src/parse_args.c:836
+msgid "display help message and exit"
+msgstr "დახმარების გამოტანა და გამოსვლა"
+
+#: src/parse_args.c:838
+msgid "run command on host (if supported by plugin)"
+msgstr "ჰოსტზე ბრძანების გაშვება (თუ მხარდაჭერილია დამატების მიერ)"
+
+#: src/parse_args.c:841
+msgid "run login shell as the target user; a command may also be specified"
+msgstr "შესვლის გარსის სამიზნე მომხმარებლით გაშვება; ასევე შეიძლება მიეთითოს ბრძანებაც"
+
+#: src/parse_args.c:843
+msgid "remove timestamp file completely"
+msgstr "timestamp ფაილის სრულად წაშლა"
+
+#: src/parse_args.c:846
+msgid "invalidate timestamp file"
+msgstr "timestamp ფაილის არასწორად გამოცხადება"
+
+#: src/parse_args.c:849
+msgid "list user's privileges or check a specific command; use twice for longer format"
+msgstr "მომხმარებლის პრივილეგიების სიის ან მითითებული ბრძანების გამოტანა; მეტი ინფორმაციისთვის მიუთითეთ ორჯერ"
+
+#: src/parse_args.c:852
+msgid "non-interactive mode, no prompts are used"
+msgstr "არაინტერაქტიური რეჟიმი. შეყვანა მოთხვნილი არ იქნება"
+
+#: src/parse_args.c:855
+msgid "preserve group vector instead of setting to target's"
+msgstr "სამიზნის დაყენების მაგიერ ჯგუფის ვექტორის შენარჩუნება"
+
+#: src/parse_args.c:858
+msgid "use the specified password prompt"
+msgstr "პაროლის მითითებული ტიპის მოთხოვნის გამოყენება"
+
+#: src/parse_args.c:860
+msgid "change the root directory before running command"
+msgstr "ბრძანების გაშვებამდე root საქაღალდის შეცვლა"
+
+#: src/parse_args.c:863
+msgid "create SELinux security context with specified role"
+msgstr "მითითებული როლით SELinux-ის საუფრთხოების კონტექსტის შექმნა"
+
+#: src/parse_args.c:866
+msgid "read password from standard input"
+msgstr "პაროლის სტანდარტული შეტანის მექანიზმიდან წაკითხვა"
+
+#: src/parse_args.c:869
+msgid "run shell as the target user; a command may also be specified"
+msgstr "გარსის სამიზნე მომხმარებლით გაშვება; ასევე შეიძლება მიეთითოს ბრძანებაც"
+
+#: src/parse_args.c:873
+msgid "create SELinux security context with specified type"
+msgstr "მითითებული ტიპის SELinux-ის უსაფრთხოების კონტექსტის შექმნა"
+
+#: src/parse_args.c:876
+msgid "terminate command after the specified time limit"
+msgstr "ბრძანების შესრულების მითითებული დროის შემდეგ შეწყვეტა"
+
+#: src/parse_args.c:879
+msgid "in list mode, display privileges for user"
+msgstr "სიის რეჟიმის დროს მომხმარებლის პრივილეგიების ჩვენება"
+
+#: src/parse_args.c:882
+msgid "run command (or edit file) as specified user name or ID"
+msgstr "ბრძანების მითითებული სახელით ან ID-ით გაშვება (ან ფაილის ჩასწორება)"
+
+#: src/parse_args.c:884
+msgid "display version information and exit"
+msgstr "ვერსიის ჩვენება და გასვლა"
+
+#: src/parse_args.c:887
+msgid "update user's timestamp without running a command"
+msgstr "მომხმარებლის timestamp-ის ბრძანების გაშვების გარეშე განახლება"
+
+#: src/parse_args.c:890
+msgid "stop processing command line arguments"
+msgstr "ბრძანების სტრიქონიდან ჩაწოდებული არგუმენტების დამუშავების შეწყვეტა"
+
+#: src/selinux.c:83
+msgid "unable to open audit system"
+msgstr "აუდიტის სისტემის გახსნის შეცდომა"
+
+#: src/selinux.c:93
+msgid "unable to send audit message"
+msgstr "აუდიტის შეტყობინების გაგზავნის შეცდომა"
+
+#: src/selinux.c:129
+#, c-format
+msgid "unable to fgetfilecon %s"
+msgstr "fgetfilecon %s-ის შეცდომა"
+
+#: src/selinux.c:134
+#, c-format
+msgid "%s changed labels"
+msgstr "%s-ის ჭდეები შეცვლილია"
+
+#: src/selinux.c:142
+#, c-format
+msgid "unable to restore context for %s"
+msgstr "%s-ის კონტექსტის აღდგენა შეუძლებელია"
+
+#: src/selinux.c:190
+#, c-format
+msgid "unable to open %s, not relabeling tty"
+msgstr "%s-ის გახსნის შეცდომა. tty-ზე ჭდე თავიდან არ დაედება"
+
+#: src/selinux.c:194 src/selinux.c:239 src/selinux.c:269
+#, c-format
+msgid "%s is not a character device, not relabeling tty"
+msgstr "%s არ წარმოადგენს სერიულ მოწყობილობას. tty-ზე ჭდე თავიდან არ დაედება"
+
+#: src/selinux.c:203
+msgid "unable to get current tty context, not relabeling tty"
+msgstr "tty-ის მიმდინარე კონტექსტის მიღება შეუძლებელია. tty-ზე ჭდე თავიდან არ დაედება"
+
+#: src/selinux.c:210
+msgid "unknown security class \"chr_file\", not relabeling tty"
+msgstr "უსაფრთხოების არასწორი კლასი: \"chr_file\". tty-ზე ჭდე თავიდან არ დაედება"
+
+#: src/selinux.c:215
+msgid "unable to get new tty context, not relabeling tty"
+msgstr "tty-ის ახალი კონტექსტის მიღება შეუძლებელია. tty-ზე ჭდე თავიდან არ დაედება"
+
+#: src/selinux.c:224
+msgid "unable to set new tty context"
+msgstr "tty-ის ახალი კონტექსტის დაყენება შეუძლებელია"
+
+#: src/selinux.c:323
+#, c-format
+msgid "you must specify a role for type %s"
+msgstr "გთხოვთ მიუთითოთ %s-ის ტიპის როლი"
+
+#: src/selinux.c:329
+#, c-format
+msgid "unable to get default type for role %s"
+msgstr "%s-ის ტიპის როლის მიღება შეუძლებელია"
+
+#: src/selinux.c:341
+msgid "failed to get new context"
+msgstr "ახალი კონტექსტის მიღების შეცდომა"
+
+#: src/selinux.c:350
+#, c-format
+msgid "failed to set new role %s"
+msgstr "ახალი როლის (%s) დაყენების შეცდომა"
+
+#: src/selinux.c:354
+#, c-format
+msgid "failed to set new type %s"
+msgstr "ახალი ტიპის (%s) დაყენების შეცდომა"
+
+#: src/selinux.c:366
+#, c-format
+msgid "%s is not a valid context"
+msgstr "არასწორი კონტექსტი: %s"
+
+#: src/selinux.c:394
+msgid "failed to get old context"
+msgstr "ძველი კონტექსტის მიღების შეცდომა"
+
+#: src/selinux.c:400
+msgid "unable to determine enforcing mode."
+msgstr "selinux-ის რეჟიმის დადგენის შეცდომა."
+
+#: src/selinux.c:425
+#, c-format
+msgid "unable to set exec context to %s"
+msgstr "%s-ზე გაშვების კონტექსტის დაყენების შეცდომა"
+
+#: src/selinux.c:432
+#, c-format
+msgid "unable to set key creation context to %s"
+msgstr "%s-ზე გასაღების შექმნის კონტექსტის დაყენების შეცდომა"
+
+#: src/sesh.c:72
+msgid "requires at least one argument"
+msgstr "საჭიროა ერთი არგუმენტი მაინც"
+
+#: src/sesh.c:104
+#, c-format
+msgid "invalid file descriptor number: %s"
+msgstr "ფაილის დესკრიპტორის არასწორი ნომერი: %s"
+
+#: src/sesh.c:118
+#, c-format
+msgid "unable to run %s as a login shell"
+msgstr "%s - სწორ შესვლის გარსს არ წარმოადგენს"
+
+#: src/sesh.c:200 src/sesh.c:300 src/sudo_edit.c:204
+#, c-format
+msgid "%s: editing symbolic links is not permitted"
+msgstr "%s: სიმბმულების ჩასწორება შეუძლებელია"
+
+#: src/sesh.c:203 src/sesh.c:303 src/sudo_edit.c:207
+#, c-format
+msgid "%s: editing files in a writable directory is not permitted"
+msgstr "%s: ჩაწერად საქაღალდეში ფაილების ჩასწორება აკრძალულია"
+
+#: src/sesh.c:287 src/sesh.c:308 src/sesh.c:317 src/sesh.c:325
+#: src/sudo_edit.c:331
+#, c-format
+msgid "contents of edit session left in %s"
+msgstr "ნაპოვნია ჩასწორების სესიის ნარჩენი შემცველობა: %s"
+
+#: src/sesh.c:416 src/sudo_edit.c:94
+msgid "unable to get group list"
+msgstr "ჯგუფების სიის მიღების შეცდომა"
+
+#: src/signal.c:79
+#, c-format
+msgid "unable to save handler for signal %d"
+msgstr "სახელურის შენახვის შეცდომა სიგნალისთვის \"%d\""
+
+#: src/solaris.c:72
+msgid "resource control limit has been reached"
+msgstr "მიღწეულია რესურსების კონტროლის ლიმიტი"
+
+#: src/solaris.c:75
+#, c-format
+msgid "user \"%s\" is not a member of project \"%s\""
+msgstr "მომხმარებელი \"%s\" არ წარმოადგენს ჯგუფ \"%s\"-ის წევრს"
+
+#: src/solaris.c:79
+msgid "the invoking task is final"
+msgstr "ჩაწოდების ამოცანა საბოლოოა"
+
+#: src/solaris.c:82
+#, c-format
+msgid "could not join project \"%s\""
+msgstr "პროექტში შეერთების შეცდომა: \"%s\""
+
+#: src/solaris.c:89
+#, c-format
+msgid "no resource pool accepting default bindings exists for project \"%s\""
+msgstr "რესურსების პული, რომელიც ეთანხმება ნაგულისხმებ ბმებს, არ არსებობს პროექტისთვის: \"%s\""
+
+#: src/solaris.c:93
+#, c-format
+msgid "specified resource pool does not exist for project \"%s\""
+msgstr "რესურსების სპეციალური პული არ არსებობს პროექტისთვის: \"%s\""
+
+#: src/solaris.c:97
+#, c-format
+msgid "could not bind to default resource pool for project \"%s\""
+msgstr "ნაგულისხმებ რესურსების პულთან მიბმის შეცდომა პროექტისთვის: %s"
+
+#: src/solaris.c:104
+#, c-format
+msgid "setproject failed for project \"%s\""
+msgstr "setproject-ის შეცდომა პროექტისთვის: \"%s\""
+
+#: src/solaris.c:106
+#, c-format
+msgid "warning, resource control assignment failed for project \"%s\""
+msgstr "ყურადღებით. რესურსების კონტროლის მინიჭების შეცდომა პროექტისთვის \"%s\""
+
+#: src/sudo.c:216
+#, c-format
+msgid "Sudo version %s\n"
+msgstr "SUDO-ის ვერსიაა %s\n"
+
+#: src/sudo.c:218
+#, c-format
+msgid "Configure options: %s\n"
+msgstr "მორგების პარამეტრები: %s\n"
+
+#: src/sudo.c:226
+msgid "fatal error, unable to load plugins"
+msgstr "ფატალური შეცდომა. დამატებების ჩატვირთვა შეუძლებელია"
+
+#: src/sudo.c:272
+msgid "plugin did not return a command to execute"
+msgstr "დამატებას შესასრულებელი ბრძანება არ დაუბრუნებია"
+
+#: src/sudo.c:305
+#, c-format
+msgid "unexpected sudo mode 0x%x"
+msgstr "sudo-ის მოულოდნელი რეჟიმი: 0x%x"
+
+#: src/sudo.c:553
+#, c-format
+msgid "you do not exist in the %s database"
+msgstr "ბაზაში \"%s\" თქვენ არ არსებობთ"
+
+#: src/sudo.c:610
+msgid "unable to determine tty"
+msgstr "tty-ის დადგენა შეუძლებელია"
+
+#: src/sudo.c:908
+msgid "The \"no new privileges\" flag is set, which prevents sudo from running as root."
+msgstr "დაყენებულია ალამი \"ახალი პრივილეგიების გარეშე\", რომელიც sudo-ს საშუალებას არ აძლევს, root-ით გაეშვას."
+
+#: src/sudo.c:910
+msgid "If sudo is running in a container, you may need to adjust the container configuration to disable the flag."
+msgstr "თუ sudo კონტეინერში ეშვება, ალმის გასათიშად შეიძლება კონტეინერის კონფიგურაციი ცვლილება დაგჭირდეთ."
+
+#: src/sudo.c:944
+#, c-format
+msgid "%s must be owned by uid %d and have the setuid bit set"
+msgstr "%s-ის მფლობელი UID %d უნდა იყოს. ასევე დაყენებული უნდა ჰქონდეს setuid ბიტი"
+
+#: src/sudo.c:947
+#, c-format
+msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
+msgstr "მიმდინარე uid არ უდრის %d-ს, არამედ %s-ს, ფაილურ სისტემაზე, რომელსაც პარამეტრად \"nosuid\" აქვს მითითებული.თუ ეს NFS ფაილური სისტემაა root პრივილეგიების გარეშე?"
+
+#: src/sudo.c:953
+#, c-format
+msgid "effective uid is not %d, is sudo installed setuid root?"
+msgstr "მიმდინარე uid %d-ს არ უდრის. შეამოწმეთ, აქვს sudo-ს setuid ბიტი მინიჭებული?"
+
+#: src/sudo.c:969 src/tgetpass.c:333
+msgid "unable to set supplementary group IDs"
+msgstr "ჯგუფის დამატებითი ID-ების დაყენების შეცდომა"
+
+#: src/sudo.c:976
+#, c-format
+msgid "unable to set effective gid to runas gid %u"
+msgstr "მიმდინარე gid-ის შესრულებად gid(%u)-ად დაყენების შეცდომა"
+
+#: src/sudo.c:982
+#, c-format
+msgid "unable to set gid to runas gid %u"
+msgstr "gid-ის შესრულებად gid(%u)-ად დაყენების შეცდომა"
+
+#: src/sudo.c:1025
+#, c-format
+msgid "unexpected child termination condition: %d"
+msgstr "შვილეული პროცესის დასრულების მოულოდნელი პირობა: %d"
+
+#: src/sudo.c:1132
+msgid "unable to initialize policy plugin"
+msgstr "წესების დამატების ინიციაცლიზაციის შეცდომა"
+
+#: src/sudo.c:1194
+#, c-format
+msgid "policy plugin %s is missing the \"check_policy\" method"
+msgstr "წესების დამატება %s არ შეიცავს check_policy მეთოდს"
+
+#: src/sudo.c:1240
+#, c-format
+msgid "policy plugin %s does not support listing privileges"
+msgstr "წესების დამატება %s-ს პრივილეგიების ჩამოთვლის მხარდაჭერა არ გააჩნია"
+
+#: src/sudo.c:1284
+#, c-format
+msgid "policy plugin %s does not support the -v option"
+msgstr "წესების დამატება %s-ს -v პარამეტრის მხარდაჭერა არ გააჩნია"
+
+#: src/sudo.c:1322
+#, c-format
+msgid "policy plugin %s does not support the -k/-K options"
+msgstr "წესების დამატება %s-ს -k/-K პარამეტრების მხარდაჭერა არ გააჩნია"
+
+#: src/sudo.c:1451
+#, c-format
+msgid "error initializing I/O plugin %s"
+msgstr "i/o დამატების (%s) ინიციალიზაციის შეცდომა"
+
+#: src/sudo.c:1454
+msgid "error initializing I/O plugin"
+msgstr "i/o დამატების ინიციალიზაციის შეცდომა"
+
+#: src/sudo.c:1603
+#, c-format
+msgid "error initializing audit plugin %s"
+msgstr "აუდიტის დამატების (%s) ინიციალიზაციის შეცდომა"
+
+#: src/sudo.c:1682
+#, c-format
+msgid "%s: unable to log error event%s%s"
+msgstr "%s: ჟურნალში შეცდომის მოვლენის ჩასწერის შეცდომა (%s%s)"
+
+#: src/sudo.c:1718
+#, c-format
+msgid "%s: unable to log accept event%s%s"
+msgstr "%s: ჟურნალში თანხმობის მოვლენის ჩასწერის შეცდომა (%s%s)"
+
+#: src/sudo.c:1723 src/sudo.c:1761
+msgid "audit plugin error"
+msgstr "აუდიტის დამატების შეცდომა"
+
+#: src/sudo.c:1756
+#, c-format
+msgid "%s: unable to log reject event%s%s"
+msgstr "%s: ჟურნალში უარყოფის მოვლენის ჩასწერის შეცდომა (%s%s)"
+
+#: src/sudo.c:1816
+#, c-format
+msgid "error initializing approval plugin %s"
+msgstr "ნებადამრთველი დამატების (%s)"
+
+#: src/sudo.c:1886
+msgid "command rejected by approver"
+msgstr "ბრძანება უარყოფილია ნებადამრთველის მიერ"
+
+#: src/sudo.c:1896
+msgid "approval plugin error"
+msgstr "ნებადამრთველი დამატების შეცდომა"
+
+#: src/sudo_edit.c:113
+msgid "no writable temporary directory found"
+msgstr "არცერთი დროებითი საქაღალდე ჩაწერადი არაა"
+
+#: src/sudo_edit.c:291
+#, c-format
+msgid "%s left unmodified"
+msgstr "%s არ შეცვლილა"
+
+#: src/sudo_edit.c:304 src/sudo_edit.c:571
+#, c-format
+msgid "%s unchanged"
+msgstr "%s შეუცვლელია"
+
+#: src/sudo_edit.c:481
+msgid "sesh: internal error: odd number of paths"
+msgstr "sesh: შიდა შეცდომა: ბილიკების კენტი რიცხვი"
+
+#: src/sudo_edit.c:483
+msgid "sesh: unable to create temporary files"
+msgstr "sesh: დროებითი ფაილების შექმნის შეცდომა"
+
+#: src/sudo_edit.c:485 src/sudo_edit.c:609
+msgid "sesh: killed by a signal"
+msgstr "sesh: გარდაიცვალა სიგნალით"
+
+#: src/sudo_edit.c:487 src/sudo_edit.c:612
+#, c-format
+msgid "sesh: unknown error %d"
+msgstr "sesh: უცნობი შეცდომა (%d)"
+
+#: src/sudo_edit.c:602
+msgid "unable to copy temporary files back to their original location"
+msgstr "დროებითი ფაილების თავიანთ პირველად მდებარეობაზე კოპირების შეცდომა"
+
+#: src/sudo_edit.c:606
+msgid "unable to copy some of the temporary files back to their original location"
+msgstr "ზოგიერთი დროებითი ფაილის პირველად მდებარეობაზე კოპირების შეცდომა"
+
+#: src/sudo_edit.c:649
+#, c-format
+msgid "unable to change uid to root (%u)"
+msgstr "uid-ის root-ზე(%u) გადართვის შეცდომა"
+
+#: src/sudo_edit.c:670
+msgid "plugin error: missing file list for sudoedit"
+msgstr "დამატების შეცდომა: sudoedit-ს ფაილების სია ესაჭიროება"
+
+#: src/sudo_edit.c:713 src/sudo_edit.c:727
+msgid "unable to read the clock"
+msgstr "საათის წაკითხვის შეცდომა"
+
+#: src/sudo_intercept_common.c:341
+msgid "intercept port not set"
+msgstr "გადაჭერის პორტი დაყენებული არაა"
+
+#: src/tgetpass.c:95
+msgid "timed out reading password"
+msgstr "პაროლის წაკითხვის ვადა გავიდა"
+
+#: src/tgetpass.c:98
+msgid "no password was provided"
+msgstr "პაროლი მითითებული არაა"
+
+#: src/tgetpass.c:101
+msgid "unable to read password"
+msgstr "პაროლის წაკითხვის შეცდომა"
+
+#: src/tgetpass.c:141
+msgid "a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper"
+msgstr "პაროლის წასაკითხად აუცილებელია ტერმინალი; ან გამოიყენეთ -S პარამეტრი, ან askpass-ის ტიპის დამხმარე მოირგეთ"
+
+#: src/tgetpass.c:152
+msgid "no askpass program specified, try setting SUDO_ASKPASS"
+msgstr "askpass-ის ტიპის პროგრამა მითითებული არაა. სცადეთ დააყენოთ SUDO_ASKPASS"
+
+#: src/tgetpass.c:328
+#, c-format
+msgid "unable to set gid to %u"
+msgstr "gid-ის %u-ზე დაყენების შეცდომა"
+
+#: src/tgetpass.c:338
+#, c-format
+msgid "unable to set uid to %u"
+msgstr "uid-ის %u-ზე დაყენების შეცდომა"
+
+#: src/tgetpass.c:343
+#, c-format
+msgid "unable to run %s"
+msgstr "%s-ის გაშვების შეცდომა"
+
+#: src/utmp.c:288
+msgid "unable to save stdin"
+msgstr "stdin-ის შენახვის შეცდომა"
+
+#: src/utmp.c:290
+msgid "unable to dup2 stdin"
+msgstr "stdin-ის dup2-ის შეცდომა"
+
+#: src/utmp.c:293
+msgid "unable to restore stdin"
+msgstr "stdin-ის აღდგენის შეცდომა"

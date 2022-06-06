@@ -553,6 +553,14 @@ print_cmndspec_csv(FILE *fp, struct sudoers_parse_tree *parse_tree,
     }
 #endif /* HAVE_SELINUX */
 
+#ifdef HAVE_APPARMOR
+    if (cs->apparmor_profile != NULL) {
+	fprintf(fp, "%sapparmor_profile=%s,", need_comma ? "," : "",
+	    cs->apparmor_profile);
+	need_comma = true;
+    }
+#endif /* HAVE_APPARMOR */
+
 #ifdef HAVE_PRIV_SET
     /* Print Solaris privs/limitprivs */
     if (cs->privs != NULL || cs->limitprivs != NULL) {
@@ -566,12 +574,15 @@ print_cmndspec_csv(FILE *fp, struct sudoers_parse_tree *parse_tree,
 	}
     }
 #endif /* HAVE_PRIV_SET */
+#ifdef __clang_analyzer__
+    (void)&need_comma;
+#endif
     putc('"', fp);
     putc(',', fp);
 
     /*
      * Merge adjacent commands with matching tags, runas, SELinux
-     * role/type and Solaris priv settings.
+     * role/type, AppArmor profiles and Solaris priv settings.
      */
     for (;;) {
 	/* Does the next entry differ only in the command itself? */
@@ -585,6 +596,9 @@ print_cmndspec_csv(FILE *fp, struct sudoers_parse_tree *parse_tree,
 #ifdef HAVE_SELINUX
 	    || cs->role != next->role || cs->type != next->type
 #endif /* HAVE_SELINUX */
+#ifdef HAVE_APPARMOR
+		|| cs->apparmor_profile != next->apparmor_profile
+#endif /* HAVE_APPARMOR  */
 	    || cs->runchroot != next->runchroot || cs->runcwd != next->runcwd;
 
 	if (!quoted && !last_one) {

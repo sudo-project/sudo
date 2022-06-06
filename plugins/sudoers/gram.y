@@ -2,7 +2,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2021
+ * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2022
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -51,8 +51,9 @@
 bool sudoers_warnings = true;
 bool sudoers_strict = false;
 bool parse_error = false;
-int errorlineno = -1;
-char *errorfile = NULL;
+
+/* Optional logging function for parse errors. */
+sudoers_logger_t sudoers_error_hook;
 
 static int alias_line, alias_column;
 
@@ -143,6 +144,7 @@ static void alias_error(const char *name, int errnum);
 %token <tok>	 CWD			/* working directory for command */
 %token <tok>	 TYPE			/* SELinux type */
 %token <tok>	 ROLE			/* SELinux role */
+%token <tok>	 APPARMOR_PROFILE		/* AppArmor profile */
 %token <tok>	 PRIVS			/* Solaris privileges */
 %token <tok>	 LIMITPRIVS		/* Solaris limit privileges */
 %token <tok>	 CMND_TIMEOUT		/* command timeout */
@@ -181,6 +183,7 @@ static void alias_error(const char *name, int errnum);
 %type <string>	  chrootspec
 %type <string>	  rolespec
 %type <string>	  typespec
+%type <string>	  apparmor_profilespec
 %type <string>	  privsspec
 %type <string>	  limitprivsspec
 %type <string>	  timeoutspec
@@ -533,6 +536,10 @@ cmndspec	:	runasspec options cmndtag digcmnd {
 			    cs->type = $2.type;
 			    parser_leak_remove(LEAK_PTR, $2.type);
 #endif
+#ifdef HAVE_APPARMOR
+				cs->apparmor_profile = $2.apparmor_profile;
+				parser_leak_remove(LEAK_PTR, $2.apparmor_profile);
+#endif
 #ifdef HAVE_PRIV_SET
 			    cs->privs = $2.privs;
 			    parser_leak_remove(LEAK_PTR, $2.privs);
@@ -687,6 +694,11 @@ typespec	:	TYPE '=' WORD {
 			}
 		;
 
+apparmor_profilespec	:	APPARMOR_PROFILE '=' WORD {
+				$$ = $3;
+			}
+		;
+
 privsspec	:	PRIVS '=' WORD {
 			    $$ = $3;
 			}
@@ -782,6 +794,7 @@ reserved_word	:	ALL		{ $$ = "ALL"; }
 		|	TYPE		{ $$ = "TYPE"; }
 		|	PRIVS		{ $$ = "PRIVS"; }
 		|	LIMITPRIVS	{ $$ = "LIMITPRIVS"; }
+		|	APPARMOR_PROFILE	{ $$ = "APPARMOR_PROFILE"; }
 		;
 
 reserved_alias	:	reserved_word {
@@ -845,6 +858,13 @@ options		:	/* empty */ {
 			    parser_leak_remove(LEAK_PTR, $$.type);
 			    free($$.type);
 			    $$.type = $2;
+#endif
+			}
+		|	options apparmor_profilespec {
+#ifdef HAVE_APPARMOR
+				parser_leak_remove(LEAK_PTR, $$.apparmor_profile);
+				free($$.apparmor_profile);
+				$$.apparmor_profile = $2;
 #endif
 			}
 		|	options privsspec {
@@ -1168,13 +1188,14 @@ group		:	ALIAS {
 void
 sudoerserrorf(const char *fmt, ...)
 {
+    const int column = sudolinebuf.toke_start + 1;
+    va_list ap;
     debug_decl(sudoerserrorf, SUDOERS_DEBUG_PARSER);
 
-    /* Save the line the first error occurred on. */
-    if (errorlineno == -1) {
-	errorlineno = this_lineno;
-	sudo_rcstr_delref(errorfile);
-	errorfile = sudo_rcstr_addref(sudoers);
+    if (sudoers_error_hook != NULL) {
+	va_start(ap, fmt);
+	sudoers_error_hook(sudoers, this_lineno, column, fmt, ap);
+	va_end(ap);
     }
     if (sudoers_warnings && fmt != NULL) {
 	LEXTRACE("<*> ");
@@ -1182,7 +1203,6 @@ sudoerserrorf(const char *fmt, ...)
 	if (trace_print == NULL || trace_print == sudoers_trace_print) {
 	    char *s, *tofree = NULL;
 	    int oldlocale;
-	    va_list ap;
 
 	    /* Warnings are displayed in the user's locale. */
 	    sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
@@ -1192,7 +1212,7 @@ sudoerserrorf(const char *fmt, ...)
 		/* Optimize common case, a single string. */
 		s = _(va_arg(ap, char *));
 	    } else {
-		if (vasprintf(&s, fmt, ap) != -1)
+		if (vasprintf(&s, _(fmt), ap) != -1)
 		    tofree = s;
 		else
 		    s = _("syntax error");
@@ -1420,7 +1440,8 @@ add_userspec(struct member *members, struct privilege *privs)
 	    "unable to allocate memory");
 	debug_return_bool(false);
     }
-    u->line = this_lineno;
+    /* We already parsed the newline so sudolineno is off by one. */
+    u->line = sudolineno - 1;
     u->column = sudolinebuf.toke_start + 1;
     u->file = sudo_rcstr_addref(sudoers);
     parser_leak_remove(LEAK_MEMBER, members);
@@ -1753,9 +1774,6 @@ init_parser(const char *path, bool quiet, bool strict)
     }
 
     parse_error = false;
-    errorlineno = -1;
-    sudo_rcstr_delref(errorfile);
-    errorfile = NULL;
     sudoers_warnings = !quiet;
     sudoers_strict = strict;
 
@@ -1780,6 +1798,9 @@ init_options(struct command_options *opts)
 #ifdef HAVE_PRIV_SET
     opts->privs = NULL;
     opts->limitprivs = NULL;
+#endif
+#ifdef HAVE_APPARMOR
+    opts->apparmor_profile = NULL;
 #endif
 }
 

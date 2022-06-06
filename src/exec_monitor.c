@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -43,11 +43,7 @@
 #include "sudo_plugin_int.h"
 
 struct monitor_closure {
-    pid_t cmnd_pid;
-    pid_t cmnd_pgrp;
-    pid_t mon_pgrp;
-    int backchannel;
-    struct command_status *cstat;
+    struct command_details *details;
     struct sudo_event_base *evbase;
     struct sudo_event *errpipe_event;
     struct sudo_event *backchannel_event;
@@ -59,6 +55,11 @@ struct monitor_closure {
     struct sudo_event *sigusr1_event;
     struct sudo_event *sigusr2_event;
     struct sudo_event *sigchld_event;
+    struct command_status *cstat;
+    pid_t cmnd_pid;
+    pid_t cmnd_pgrp;
+    pid_t mon_pgrp;
+    int backchannel;
 };
 
 static bool tty_initialized;
@@ -196,21 +197,23 @@ mon_handle_sigchld(struct monitor_closure *mc)
 
     /* Read command status. */
     do {
-	pid = waitpid(mc->cmnd_pid, &status, WUNTRACED|WCONTINUED|WNOHANG);
+	pid = waitpid(mc->cmnd_pid, &status, WUNTRACED|WNOHANG);
     } while (pid == -1 && errno == EINTR);
     switch (pid) {
-    case 0:
-	errno = ECHILD;
-	FALLTHROUGH;
     case -1:
-	sudo_warn(U_("%s: %s"), __func__, "waitpid");
+	if (errno != ECHILD) {
+	    sudo_warn(U_("%s: %s"), __func__, "waitpid");
+	    debug_return;
+	}
+	FALLTHROUGH;
+    case 0:
+	/* Nothing to wait for. */
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: no process to wait for",
+	    __func__);
 	debug_return;
     }
 
-    if (WIFCONTINUED(status)) {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) resumed",
-	    __func__, (int)mc->cmnd_pid);
-    } else if (WIFSTOPPED(status)) {
+    if (WIFSTOPPED(status)) {
 	if (sig2str(WSTOPSIG(status), signame) == -1)
 	    (void)snprintf(signame, sizeof(signame), "%d", WSTOPSIG(status));
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: command (%d) stopped, SIG%s",
@@ -227,7 +230,7 @@ mon_handle_sigchld(struct monitor_closure *mc)
 	mc->cmnd_pid = -1;
     } else {
 	sudo_debug_printf(SUDO_DEBUG_WARN,
-	    "%s: unexpected wait status %d for command (%d)",
+	    "%s: unexpected wait status 0x%x for command (%d)",
 	    __func__, status, (int)mc->cmnd_pid);
     }
 
@@ -235,18 +238,15 @@ mon_handle_sigchld(struct monitor_closure *mc)
     if (mc->cstat->type == CMD_INVALID) {
 	/*
 	 * Store wait status in cstat and forward to parent if stopped.
-	 * Parent does not expect SIGCONT so don't bother sending it.
 	 */
-	if (!WIFCONTINUED(status)) {
-	    mc->cstat->type = CMD_WSTATUS;
-	    mc->cstat->val = status;
-	    if (WIFSTOPPED(status)) {
-		/* Save the foreground pgid so we can restore it later. */
-		pid = tcgetpgrp(io_fds[SFD_FOLLOWER]);
-		if (pid != mc->mon_pgrp)
-		    mc->cmnd_pgrp = pid;
-		send_status(mc->backchannel, mc->cstat);
-	    }
+	mc->cstat->type = CMD_WSTATUS;
+	mc->cstat->val = status;
+	if (WIFSTOPPED(status)) {
+	    /* Save the foreground pgid so we can restore it later. */
+	    pid = tcgetpgrp(io_fds[SFD_FOLLOWER]);
+	    if (pid != mc->mon_pgrp)
+		mc->cmnd_pgrp = pid;
+	    send_status(mc->backchannel, mc->cstat);
 	}
     } else {
 	sudo_debug_printf(SUDO_DEBUG_WARN,
@@ -386,8 +386,8 @@ mon_backchannel_cb(int fd, int what, void *v)
  * Returns only if execve() fails.
  */
 static void
-exec_cmnd_pty(struct command_details *details, bool foreground,
-    int intercept_fd, int errfd)
+exec_cmnd_pty(struct command_details *details, sigset_t *mask,
+    bool foreground, int intercept_fd, int errfd)
 {
     volatile pid_t self = getpid();
     debug_decl(exec_cmnd_pty, SUDO_DEBUG_EXEC);
@@ -430,7 +430,7 @@ exec_cmnd_pty(struct command_details *details, bool foreground,
     /* Execute command; only returns on error. */
     sudo_debug_printf(SUDO_DEBUG_INFO, "executing %s in the %s",
 	details->command, foreground ? "foreground" : "background");
-    exec_cmnd(details, intercept_fd, errfd);
+    exec_cmnd(details, mask, intercept_fd, errfd);
 
     debug_return;
 }
@@ -441,11 +441,13 @@ exec_cmnd_pty(struct command_details *details, bool foreground,
  */
 static void
 fill_exec_closure_monitor(struct monitor_closure *mc,
-    struct command_status *cstat, int errfd, int backchannel)
+    struct command_details *details, struct command_status *cstat,
+    int errfd, int backchannel)
 {
     debug_decl(fill_exec_closure_monitor, SUDO_DEBUG_EXEC);
     
     /* Fill in the non-event part of the closure. */
+    mc->details = details;
     mc->cstat = cstat;
     mc->backchannel = backchannel;
     mc->mon_pgrp = getpgrp();
@@ -624,15 +626,12 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 	goto bad;
     case 0:
 	/* child */
-	sigprocmask(SIG_SETMASK, oset, NULL);
 	close(backchannel);
 	close(errpipe[0]);
 	if (io_fds[SFD_USERTTY] != -1)
 	    close(io_fds[SFD_USERTTY]);
-	restore_signals();
-
 	/* setup tty and exec command */
-	exec_cmnd_pty(details, foreground, intercept_fd, errpipe[1]);
+	exec_cmnd_pty(details, oset, foreground, intercept_fd, errpipe[1]);
 	if (write(errpipe[1], &errno, sizeof(int)) == -1)
 	    sudo_warn(U_("unable to execute %s"), details->command);
 	_exit(EXIT_FAILURE);
@@ -656,7 +655,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
      * Create new event base and register read events for the
      * signal pipe, error pipe, and backchannel.
      */
-    fill_exec_closure_monitor(&mc, &cstat, errpipe[0], backchannel);
+    fill_exec_closure_monitor(&mc, details, &cstat, errpipe[0], backchannel);
 
     /* Restore signal mask now that signal handlers are setup. */
     sigprocmask(SIG_SETMASK, oset, NULL);

@@ -1,3 +1,76 @@
+What's new in Sudo 1.9.11
+
+ * Fixed a crash in the Python module with Python 3.9.10 on some
+   systems.  Additionally, "make check" now passes for Python 3.9.10.
+
+ * Error messages sent via email now include more details, including
+   the file name and the line number and column of the error.
+   Multiple errors are sent in a single message.  Previously, only
+   the first error was included.
+
+ * Fixed logging of parse errors in JSON format.  Previously,
+   the JSON logger would not write entries unless the command and
+   runuser were set.  These may not be known at the time a parse
+   error is encountered.
+
+ * Fixed a potential crash parsing sudoers lines larger than twice
+   the value of LINE_MAX on systems that lack the getdelim() function.
+
+ * The tests run by "make check" now unset the LANGUAGE environment
+   variable.  Otherwise, localization strings will not match if
+   LANGUAGE is set to a non-English locale.  Bug #1025.
+
+ * The "starttime" test now passed when run under Debian faketime.
+   Bug #1026.
+
+ * The Kerberos authentication module now honors the custom password
+   prompt if one has been specified.
+
+ * The embedded copy of zlib has been updated to version 1.2.12.
+
+ * Updated the version of libtool used by sudo to version 2.4.7.
+
+ * Sudo now defines _TIME_BITS to 64 on systems that define __TIMESIZE
+   in the header files (currently only GNU libc).  This is required
+   to allow the use of 64-bit time values on some 32-bit systems.
+
+ * Sudo's "intercept" and "log_subcmds" options no longer force the
+   command to run in its own pseudo-terminal.  It is now also
+   possible to intercept the system(3) function.
+
+ * Fixed a bug in sudo_logsrvd when run in store-first relay mode
+   where the commit point messages sent by the server were incorrect
+   if the command was suspended or received a window size change
+   event.
+
+ * Fixed a potential crash in sudo_logsrvd when the "tls_dhparams"
+   configuration setting was used.
+
+ * The "intercept" and "log_subcmds" functionality can now use
+   ptrace(2) on Linux systems that support seccomp(2) filtering.
+   This has the advantage of working for both static and dynamic
+   binaries and can work with sudo's SELinux RBAC mode.  The following
+   architectures are currently supported: i386, x86_64, aarch64,
+   arm, mips (log_subcmds only), powerpc, riscv, and s390x.  The
+   default is to use ptrace(2) where possible; the new "intercept_type"
+   sudoers setting can be used to explicitly set the type.
+
+ * New Georgian translation from translationproject.org.
+
+ * Fixed creating packages on CentOS Stream.
+
+ * Fixed a bug in the intercept and log_subcmds support where
+   the execve(2) wrapper was using the current environment instead
+   of the passed environment pointer.  Bug #1030.
+
+ * Added AppArmor integration for Linux.  A sudoers rule can now
+   specify an APPARMOR_PROFILE option to run a command confined by
+   the named AppArmor profile.
+
+ * Fixed parsing of the "server_log" setting in sudo_logsrvd.conf.
+   Non-paths were being treated as paths and an actual path was
+   treated as an error.
+
 What's new in Sudo 1.9.10
 
  * Added new "log_passwords" and "passprompt_regex" sudoers options.

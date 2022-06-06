@@ -80,7 +80,9 @@ main(int argc, char *argv[])
 {
     int ntests = 0, errors = 0;
     struct timespec now, then, delta;
+    time_t timeoff = 0;
     pid_t pids[2];
+    char *faketime;
     int i;
 
     initprogname(argc > 0 ? argv[0] : "check_starttime");
@@ -90,6 +92,11 @@ main(int argc, char *argv[])
 
     pids[0] = getpid();
     pids[1] = getppid();
+
+    /* Debian CI pipeline runs tests using faketime. */
+    faketime = getenv("FAKETIME");
+    if (faketime != NULL)
+	timeoff = sudo_strtonum(faketime, TIME_T_MIN, TIME_T_MAX, NULL);
 
     for (i = 0; i < 2; i++) {
 	ntests++;
@@ -104,6 +111,7 @@ main(int argc, char *argv[])
 	/* Verify our own process start time, allowing for some drift. */
 	ntests++;
 	sudo_timespecsub(&then, &now, &delta);
+	delta.tv_sec += timeoff;
 	if (delta.tv_sec > 30 || delta.tv_sec < -30) {
 	    printf("%s: test %d: unexpected start time for pid %d: %s",
 		getprogname(), ntests, (int)pids[i], ctime(&then.tv_sec));

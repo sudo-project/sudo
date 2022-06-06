@@ -8,6 +8,9 @@ compressBound
 crc32
 crc32_combine
 crc32_combine64
+crc32_combine_gen
+crc32_combine_gen64
+crc32_combine_op
 crc32_z
 deflate
 deflateBound

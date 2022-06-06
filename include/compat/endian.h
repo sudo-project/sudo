@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2013 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013, 2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -37,7 +37,13 @@
  * We just check for the most common uses.
  */
 
-# if defined(__BYTE_ORDER)
+# if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && \
+    (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+#  define BYTE_ORDER	LITTLE_ENDIAN
+# elif defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && \
+    (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+#  define BYTE_ORDER	BIG_ENDIAN
+# elif defined(__BYTE_ORDER)
 #  define BYTE_ORDER	__BYTE_ORDER
 # elif defined(_BYTE_ORDER)
 #  define BYTE_ORDER	_BYTE_ORDER
@@ -49,7 +55,7 @@
        defined(BIT_ZERO_ON_RIGHT) || defined(i386) || defined(__i386) || \
        defined(MIPSEL) || defined(_MIPSEL) || defined(ns32000) || \
        defined(__ns3200) || defined(sun386) || defined(vax) || \
-       defined(__vax) || defined(__x86__) || \
+       defined(__vax) || defined(__x86__) || defined(__riscv) || \
        (defined(sun) && defined(__powerpc)) || \
        (!defined(__hpux) && defined(__ia64))
 #  define BYTE_ORDER	LITTLE_ENDIAN

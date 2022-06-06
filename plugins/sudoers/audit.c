@@ -181,7 +181,7 @@ sudoers_audit_open(unsigned int version, sudo_conv_t conversation,
     info.settings = settings;
     info.user_info = user_info;
     info.plugin_args = plugin_options;
-    ret = sudoers_init(&info, submit_envp);
+    ret = sudoers_init(&info, log_parse_error, submit_envp);
 
     if (ret == true) {
 	/* Unset close function if we don't need it to avoid extra process. */

@@ -1,7 +1,8 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2005, 2007-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004-2005, 2007-2018, 2021-2022
+ *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -37,6 +38,8 @@ struct alias_warned {
 };
 SLIST_HEAD(alias_warned_list, alias_warned);
 
+static bool alias_warnx(const char *file, int line, int column, bool strict, bool quiet, const char *fmt, ...) __printflike(6, 7);
+
 static bool
 alias_warned(struct alias_warned_list *warned, char *name)
 {
@@ -66,6 +69,44 @@ alias_warned_add(struct alias_warned_list *warned, char *name)
     debug_return;
 }
 
+static bool
+alias_warnx(const char *file, int line, int column, bool strict, bool quiet,
+    const char *fmt, ...)
+{
+    bool ret = true;
+    va_list ap;
+    debug_decl(alias_warnx, SUDOERS_DEBUG_ALIAS);
+
+    if (strict && sudoers_error_hook != NULL) {
+	va_start(ap, fmt);
+	ret = sudoers_error_hook(file, line, column, fmt, ap);
+	va_end(ap);
+    }
+
+    if (!quiet) {
+	int oldlocale;
+	char *errstr;
+
+	sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
+	va_start(ap, fmt);
+	if (vasprintf(&errstr, _(fmt), ap) == -1) {
+	    errstr = NULL;
+	    ret = false;
+	} else if (line > 0) {
+	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s:%d:%d: %s\n"), file,
+		line, column, errstr);
+	} else {
+	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s: %s\n"), file, errstr);
+	}
+	va_end(ap);
+	sudoers_setlocale(oldlocale, NULL);
+
+	free(errstr);
+    }
+
+    debug_return_bool(ret);
+}
+
 static int
 check_alias(struct sudoers_parse_tree *parse_tree,
     struct alias_warned_list *warned, char *name, int type,
@@ -86,22 +127,14 @@ check_alias(struct sudoers_parse_tree *parse_tree,
 	}
 	alias_put(a);
     } else {
-	if (!quiet && !alias_warned(warned, name)) {
+	if (!alias_warned(warned, name)) {
 	    if (errno == ELOOP) {
-		sudo_printf(SUDO_CONV_ERROR_MSG, strict ?
-		    U_("Error: %s:%d:%d: cycle in %s \"%s\"") :
-		    U_("Warning: %s:%d:%d: cycle in %s \"%s\""),
-		    file, line, column, alias_type_to_string(type), name);
+		alias_warnx(file, line, column, strict, quiet,
+		    N_("cycle in %s \"%s\""), alias_type_to_string(type), name);
 	    } else {
-		sudo_printf(SUDO_CONV_ERROR_MSG, strict ?
-		    U_("Error: %s:%d:%d: %s \"%s\" referenced but not defined") :
-		    U_("Warning: %s:%d:%d: %s \"%s\" referenced but not defined"),
-		    file, line, column, alias_type_to_string(type), name);
-	    }
-	    sudo_printf(SUDO_CONV_ERROR_MSG, "\n");
-	    if (strict && errorfile == NULL) {
-		errorfile = sudo_rcstr_addref(file);
-		errorlineno = line;
+		alias_warnx(file, line, column, strict, quiet,
+		    N_("%s \"%s\" referenced but not defined"),
+		    alias_type_to_string(type), name);
 	    }
 	    alias_warned_add(warned, name);
 	}
@@ -114,6 +147,7 @@ check_alias(struct sudoers_parse_tree *parse_tree,
 /*
  * Iterate through the sudoers datastructures looking for undefined
  * aliases or unused aliases.
+ * In strict mode, returns the number of errors, else 0.
  */
 int
 check_aliases(struct sudoers_parse_tree *parse_tree, bool strict, bool quiet,

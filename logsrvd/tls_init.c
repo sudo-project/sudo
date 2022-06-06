@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,6 +30,7 @@
 #endif
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -63,37 +64,42 @@ verify_cert_chain(SSL_CTX *ctx, const char *cert_file)
 
     if ((x509 = SSL_CTX_get0_certificate(ctx)) == NULL) {
 	errstr = ERR_reason_error_string(ERR_get_error());
-	sudo_warnx("SSL_CTX_get0_certificate: %s", errstr);
+	sudo_warnx("SSL_CTX_get0_certificate: %s",
+	    errstr ? errstr : strerror(errno));
         goto done;
     }
 
     if ((store_ctx = X509_STORE_CTX_new()) == NULL) {
 	errstr = ERR_reason_error_string(ERR_get_error());
-	sudo_warnx("X509_STORE_CTX_new: %s", errstr);
+	sudo_warnx("X509_STORE_CTX_new: %s",
+	    errstr ? errstr : strerror(errno));
         goto done;
     }
 
     if (!SSL_CTX_get0_chain_certs(ctx, &chain_certs)) {
 	errstr = ERR_reason_error_string(ERR_get_error());
-	sudo_warnx("SSL_CTX_get0_chain_certs: %s", errstr);
+	sudo_warnx("SSL_CTX_get0_chain_certs: %s: %s", cert_file,
+	    errstr ? errstr : strerror(errno));
         goto done;
     }
 
-#if !defined(HAVE_WOLFSSL)
-    if ((ca_store = SSL_CTX_get_cert_store(ctx)) != NULL)
+    ca_store = SSL_CTX_get_cert_store(ctx);
+#ifdef X509_V_FLAG_X509_STRICT
+    if (ca_store != NULL)
         X509_STORE_set_flags(ca_store, X509_V_FLAG_X509_STRICT);
 #endif
 
     if (!X509_STORE_CTX_init(store_ctx, ca_store, x509, chain_certs)) {
 	errstr = ERR_reason_error_string(ERR_get_error());
-	sudo_warnx("X509_STORE_CTX_init: %s", errstr);
+	sudo_warnx("X509_STORE_CTX_init: %s",
+	    errstr ? errstr : strerror(errno));
         goto done;
     }
 
     if (X509_verify_cert(store_ctx) <= 0) {
 	errstr =
 	    X509_verify_cert_error_string(X509_STORE_CTX_get_error(store_ctx));
-	sudo_warnx("X509_verify_cert: %s", errstr);
+	sudo_warnx("X509_verify_cert: %s: %s", cert_file, errstr);
         goto done;
     }
 
@@ -125,7 +131,7 @@ init_tls_ciphersuites(SSL_CTX *ctx, const char *ciphers_v12,
         } else {
 	    errstr = ERR_reason_error_string(ERR_get_error());
 	    sudo_warnx(U_("unable to set TLS 1.2 ciphersuite to %s: %s"),
-		ciphers_v12, errstr);
+		ciphers_v12, errstr ? errstr : strerror(errno));
         }
     }
     if (!success) {
@@ -133,7 +139,7 @@ init_tls_ciphersuites(SSL_CTX *ctx, const char *ciphers_v12,
         if (SSL_CTX_set_cipher_list(ctx, DEFAULT_CIPHER_LST12) <= 0) {
 	    errstr = ERR_reason_error_string(ERR_get_error());
 	    sudo_warnx(U_("unable to set TLS 1.2 ciphersuite to %s: %s"),
-		DEFAULT_CIPHER_LST12, errstr);
+		DEFAULT_CIPHER_LST12, errstr ? errstr : strerror(errno));
             debug_return_bool(false);
         } else {
             sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
@@ -153,7 +159,7 @@ init_tls_ciphersuites(SSL_CTX *ctx, const char *ciphers_v12,
         } else {
 	    errstr = ERR_reason_error_string(ERR_get_error());
 	    sudo_warnx(U_("unable to set TLS 1.3 ciphersuite to %s: %s"),
-		ciphers_v13, errstr);
+		ciphers_v13, errstr ? errstr : strerror(errno));
         }
     }
     if (!success) {
@@ -161,7 +167,7 @@ init_tls_ciphersuites(SSL_CTX *ctx, const char *ciphers_v12,
         if (SSL_CTX_set_ciphersuites(ctx, DEFAULT_CIPHER_LST13) <= 0) {
 	    errstr = ERR_reason_error_string(ERR_get_error());
 	    sudo_warnx(U_("unable to set TLS 1.3 ciphersuite to %s: %s"),
-		DEFAULT_CIPHER_LST13, errstr);
+		DEFAULT_CIPHER_LST13, errstr ? errstr : strerror(errno));
             debug_return_bool(false);
         } else {
             sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
@@ -193,7 +199,7 @@ set_dhparams_bio(SSL_CTX *ctx, BIO *bio)
 	if (!ret) {
 	    const char *errstr = ERR_reason_error_string(ERR_get_error());
 	    sudo_warnx(U_("unable to set diffie-hellman parameters: %s"),
-		errstr);
+		errstr ? errstr : strerror(errno));
 	    EVP_PKEY_free(dhparams);
 	}
     }
@@ -214,7 +220,7 @@ set_dhparams_bio(SSL_CTX *ctx, BIO *bio)
 	if (!ret) {
 	    const char *errstr = ERR_reason_error_string(ERR_get_error());
 	    sudo_warnx(U_("unable to set diffie-hellman parameters: %s"),
-		errstr);
+		errstr ? errstr : strerror(errno));
 	    DH_free(dhparams);
 	}
     }
@@ -233,7 +239,7 @@ set_dhparams(SSL_CTX *ctx, const char *dhparam_file)
     bool ret = false;
     debug_decl(set_dhparams, SUDO_DEBUG_UTIL);
 
-    bio = BIO_new_file(dhparam_file, O_RDONLY);
+    bio = BIO_new_file(dhparam_file, "r");
     if (bio != NULL) {
 	if (set_dhparams_bio(ctx, bio)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
@@ -269,14 +275,15 @@ init_tls_context(const char *ca_bundle_file, const char *cert_file,
     /* Create the ssl context and enforce TLS 1.2 or higher. */
     if ((ctx = SSL_CTX_new(TLS_method())) == NULL) {
 	errstr = ERR_reason_error_string(ERR_get_error());
-	sudo_warnx(U_("unable to create TLS context: %s"), errstr);
+	sudo_warnx(U_("unable to create TLS context: %s"),
+	    errstr ? errstr : strerror(errno));
         goto bad;
     }
 #ifdef HAVE_SSL_CTX_SET_MIN_PROTO_VERSION
     if (!SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION)) {
 	errstr = ERR_reason_error_string(ERR_get_error());
 	sudo_warnx(U_("unable to set minimum protocol version to TLS 1.2: %s"),
-	    errstr);
+	    errstr ? errstr : strerror(errno));
         goto bad;
     }
 #else
@@ -290,20 +297,23 @@ init_tls_context(const char *ca_bundle_file, const char *cert_file,
 
 	if (cacerts == NULL) {
 	    errstr = ERR_reason_error_string(ERR_get_error());
-	    sudo_warnx(U_("%s: %s"), ca_bundle_file, errstr);
+	    sudo_warnx(U_("%s: %s"), ca_bundle_file,
+		errstr ? errstr : strerror(errno));
 	    goto bad;
 	}
 	SSL_CTX_set_client_CA_list(ctx, cacerts);
 
 	if (SSL_CTX_load_verify_locations(ctx, ca_bundle_file, NULL) <= 0) {
 	    errstr = ERR_reason_error_string(ERR_get_error());
-	    sudo_warnx("SSL_CTX_load_verify_locations: %s", errstr);
+	    sudo_warnx("SSL_CTX_load_verify_locations: %s: %s", ca_bundle_file,
+		errstr ? errstr : strerror(errno));
 	    goto bad;
 	}
     } else {
 	if (!SSL_CTX_set_default_verify_paths(ctx)) {
 	    errstr = ERR_reason_error_string(ERR_get_error());
-	    sudo_warnx("SSL_CTX_set_default_verify_paths: %s", errstr);
+	    sudo_warnx("SSL_CTX_set_default_verify_paths: %s",
+		errstr ? errstr : strerror(errno));
 	    goto bad;
 	}
     }
@@ -311,7 +321,8 @@ init_tls_context(const char *ca_bundle_file, const char *cert_file,
     if (cert_file != NULL) {
         if (!SSL_CTX_use_certificate_chain_file(ctx, cert_file)) {
 	    errstr = ERR_reason_error_string(ERR_get_error());
-	    sudo_warnx(U_("%s: %s"), cert_file, errstr);
+	    sudo_warnx(U_("%s: %s"), cert_file,
+		errstr ? errstr : strerror(errno));
             goto bad;
         }
 	if (key_file == NULL) {
@@ -321,7 +332,8 @@ init_tls_context(const char *ca_bundle_file, const char *cert_file,
         if (!SSL_CTX_use_PrivateKey_file(ctx, key_file, SSL_FILETYPE_PEM) ||
 		!SSL_CTX_check_private_key(ctx)) {
 	    errstr = ERR_reason_error_string(ERR_get_error());
-	    sudo_warnx(U_("%s: %s"), key_file, errstr);
+	    sudo_warnx(U_("%s: %s"), key_file,
+		errstr ? errstr : strerror(errno));
             goto bad;
         }
 

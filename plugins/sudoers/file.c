@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2005, 2007-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004-2005, 2007-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -102,18 +102,9 @@ sudo_file_parse(struct sudo_nss *nss)
 
     sudoersin = handle->fp;
     error = sudoersparse();
-    if (error || parse_error) {
-	if (errorlineno != -1) {
-	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
-		N_("parse error in %s near line %d"), errorfile, errorlineno);
-	} else {
-	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
-		N_("parse error in %s"), errorfile);
-	}
-	if (error || !sudoers_recovery) {
-	    /* unrecoverable error */
-	    debug_return_ptr(NULL);
-	}
+    if (error || (parse_error && !sudoers_recovery)) {
+	/* unrecoverable error */
+	debug_return_ptr(NULL);
     }
 
     /* Move parsed sudoers policy to nss handle. */
@@ -145,6 +136,7 @@ sudo_file_getdefs(struct sudo_nss *nss)
 /* sudo_nss implementation */
 struct sudo_nss sudo_nss_file = {
     { NULL, NULL },
+    "sudoers",
     sudo_file_open,
     sudo_file_close,
     sudo_file_parse,

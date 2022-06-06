@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -912,6 +912,10 @@ update_elapsed_time(TimeSpec *delta, struct timespec *elapsed)
 	elapsed->tv_sec++;
 	elapsed->tv_nsec -= 1000000000;
     }
+    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	"%s: delta [%lld, %d], elapsed time now [%lld, %ld]",
+	__func__, (long long)delta->tv_sec, delta->tv_nsec,
+	(long long)elapsed->tv_sec, elapsed->tv_nsec);
 
     debug_return;
 }

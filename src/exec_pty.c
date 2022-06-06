@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -48,6 +48,10 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
+#ifndef __WALL
+# define __WALL 0
+#endif
+
 /* Evaluates to true if the event has /dev/tty as its fd. */
 #define USERTTY_EVENT(_ev)	(sudo_ev_get_fd((_ev)) == io_fds[SFD_USERTTY])
 
@@ -77,6 +81,7 @@ struct exec_closure_pty {
     struct sudo_event *sigchld_event;
     struct sudo_event *sigwinch_event;
     struct command_status *cstat;
+    void *intercept;
     struct monitor_message_list monitor_messages;
     pid_t monitor_pid;
     pid_t cmnd_pid;
@@ -527,12 +532,12 @@ check_foreground(struct exec_closure_pty *ec)
  * foreground or SIGCONT_BG if it is a background process.
  */
 static int
-suspend_sudo(struct exec_closure_pty *ec, int signo)
+suspend_sudo_pty(struct exec_closure_pty *ec, int signo)
 {
     char signame[SIG2STR_MAX];
     struct sigaction sa, osa;
     int ret = 0;
-    debug_decl(suspend_sudo, SUDO_DEBUG_EXEC);
+    debug_decl(suspend_sudo_pty, SUDO_DEBUG_EXEC);
 
     switch (signo) {
     case SIGTTOU:
@@ -992,6 +997,20 @@ backchannel_cb(int fd, int what, void *v)
 	    ec->cmnd_pid = cstat.val;
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d",
 		ec->details->command, (int)ec->cmnd_pid);
+	    if (ISSET(ec->details->flags, CD_USE_PTRACE)) {
+		/* Try to seize control of the command using ptrace(2). */
+		int rc = exec_ptrace_seize(ec->cmnd_pid);
+		if (rc == 0) {
+		    /* There is another tracer present. */
+		    CLR(ec->details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS|CD_USE_PTRACE);
+		} else if (rc == -1) {
+		    if (ec->cstat->type == CMD_INVALID) {
+			ec->cstat->type = CMD_ERRNO;
+			ec->cstat->val = errno;
+		    }
+		    sudo_ev_loopbreak(ec->evbase);
+		}
+	    }
 	    break;
 	case CMD_WSTATUS:
 	    if (WIFSTOPPED(cstat.val)) {
@@ -1000,7 +1019,7 @@ backchannel_cb(int fd, int what, void *v)
 		/* Suspend parent and tell monitor how to resume on return. */
 		sudo_debug_printf(SUDO_DEBUG_INFO,
 		    "command stopped, suspending parent");
-		signo = suspend_sudo(ec, WSTOPSIG(cstat.val));
+		signo = suspend_sudo_pty(ec, WSTOPSIG(cstat.val));
 		schedule_signal(ec, signo);
 		/* Re-enable I/O events */
 		add_io_events(ec->evbase);
@@ -1045,47 +1064,62 @@ handle_sigchld_pty(struct exec_closure_pty *ec)
     pid_t pid;
     debug_decl(handle_sigchld_pty, SUDO_DEBUG_EXEC);
 
-    /*
-     * Monitor process was signaled; wait for it as needed.
-     */
-    do {
-	pid = waitpid(ec->monitor_pid, &status, WUNTRACED|WNOHANG);
-    } while (pid == -1 && errno == EINTR);
-    switch (pid) {
-    case 0:
-	errno = ECHILD;
-	FALLTHROUGH;
-    case -1:
-	sudo_warn(U_("%s: %s"), __func__, "waitpid");
-	debug_return;
-    }
+    /* There may be multiple children in intercept mode. */
+    for (;;) {
+	do {
+	    pid = waitpid(-1, &status, __WALL|WUNTRACED|WNOHANG);
+	} while (pid == -1 && errno == EINTR);
+	switch (pid) {
+	case -1:
+	    if (errno != ECHILD) {
+		sudo_warn(U_("%s: %s"), __func__, "waitpid");
+		debug_return;
+	    }
+	    FALLTHROUGH;
+	case 0:
+	    /* Nothing left to wait for. */
+	    debug_return;
+	}
 
-    /*
-     * If the monitor dies we get notified via backchannel_cb().
-     * If it was stopped, we should stop too (the command keeps
-     * running in its pty) and continue it when we come back.
-     */
-    if (WIFSTOPPED(status)) {
-	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "monitor stopped, suspending sudo");
-	n = suspend_sudo(ec, WSTOPSIG(status));
-	kill(pid, SIGCONT);
-	schedule_signal(ec, n);
-	/* Re-enable I/O events */
-	add_io_events(ec->evbase);
-    } else if (WIFSIGNALED(status)) {
-	char signame[SIG2STR_MAX];
-	if (sig2str(WTERMSIG(status), signame) == -1)
-	    (void)snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
-	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: monitor (%d) killed, SIG%s",
-	    __func__, (int)ec->monitor_pid, signame);
-	ec->monitor_pid = -1;
-    } else {
-	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "%s: monitor exited, status %d", __func__, WEXITSTATUS(status));
-	ec->monitor_pid = -1;
+	if (WIFEXITED(status)) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: process %d exited: %d",
+		__func__, (int)pid, WEXITSTATUS(status));
+	    if (pid == ec->monitor_pid)
+		ec->monitor_pid = -1;
+	} else if (WIFSIGNALED(status)) {
+	    char signame[SIG2STR_MAX];
+
+	    if (sig2str(WTERMSIG(status), signame) == -1)
+		(void)snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: process %d killed, SIG%s",
+		__func__, (int)pid, signame);
+	    if (pid == ec->monitor_pid)
+		ec->monitor_pid = -1;
+	} else if (WIFSTOPPED(status)) {
+	    if (pid != ec->monitor_pid) {
+		if (ISSET(ec->details->flags, CD_USE_PTRACE))
+		    exec_ptrace_stopped(pid, status, ec->intercept);
+		continue;
+	    }
+
+	    /*
+	     * If the monitor dies we get notified via backchannel_cb().
+	     * If it was stopped, we should stop too (the command keeps
+	     * running in its pty) and continue it when we come back.
+	     */
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"monitor stopped, suspending sudo");
+	    n = suspend_sudo_pty(ec, WSTOPSIG(status));
+	    kill(pid, SIGCONT);
+	    schedule_signal(ec, n);
+	    /* Re-enable I/O events */
+	    add_io_events(ec->evbase);
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_WARN,
+		"%s: unexpected wait status 0x%x for process (%d)",
+		__func__, status, (int)pid);
+	}
     }
-    debug_return;
 }
 
 /* Signal callback */
@@ -1390,13 +1424,15 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	    fcntl(sv[1], F_SETFD, FD_CLOEXEC) == -1)
 	sudo_fatal("%s", U_("unable to create sockets"));
 
-    /*
-     * Allocate a socketpair for communicating with sudo_intercept.so.
-     * This must be inherited across exec, hence no FD_CLOEXEC.
-     */
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
-	if (socketpair(PF_UNIX, SOCK_STREAM, 0, intercept_sv) == -1)
-	    sudo_fatal("%s", U_("unable to create sockets"));
+	if (!ISSET(details->flags, CD_USE_PTRACE)) {
+	    /*
+	     * Allocate a socketpair for communicating with sudo_intercept.so.
+	     * This must be inherited across exec, hence no FD_CLOEXEC.
+	     */
+	    if (socketpair(PF_UNIX, SOCK_STREAM, 0, intercept_sv) == -1)
+		sudo_fatal("%s", U_("unable to create sockets"));
+	}
     }
 
     /*
@@ -1641,9 +1677,10 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     fill_exec_closure_pty(&ec, cstat, details, ppgrp, sv[0]);
 
     /* Create event and closure for intercept mode. */
-    if (intercept_sv[0] != -1) {
-	if (!intercept_setup(intercept_sv[0], ec.evbase, details))
-	    exit(EXIT_FAILURE);
+    if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
+	ec.intercept = intercept_setup(intercept_sv[0], ec.evbase, details);
+	if (ec.intercept == NULL)
+	    terminate_command(ec.cmnd_pid, true);
     }
 
     /* Restore signal mask now that signal handlers are setup. */

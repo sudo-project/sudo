@@ -33,6 +33,13 @@
 #endif
 #define ROOT_GID	0
 
+#ifndef TIME_T_MIN
+# if SIZEOF_TIME_T == 8
+#  define TIME_T_MIN	LLONG_MIN
+# else
+#  define TIME_T_MIN	INT_MIN
+# endif
+#endif
 #ifndef TIME_T_MAX
 # if SIZEOF_TIME_T == 8
 #  define TIME_T_MAX	LLONG_MAX

@@ -28,6 +28,36 @@ const char *sudo_conf_normal_mode = TESTDATA_DIR "sudo.conf.normal_mode";
 
 struct TestData data;
 
+/*
+ * Starting with Python 3.11, backtraces may contain a line with
+ * '^' characters to bring attention to the important part of the
+ * line.
+ */
+static void
+remove_underline(char *output)
+{
+    char *cp, *ep;
+
+    // Remove lines that only consist of '^' and white space.
+    cp = output;
+    ep = output + strlen(output);
+    for (;;) {
+	size_t len = strspn(cp, "^ \t");
+	if (len > 0 && cp[len] == '\n') {
+	    /* Prune out lines that are "underlining". */
+	    memmove(cp, cp + len + 1, ep - cp);
+	    if (*cp == '\0')
+		break;
+	} else {
+	    /* No match, move to the next line. */
+	    cp = strchr(cp, '\n');
+	    if (cp == NULL)
+		break;
+	    cp++;
+	}
+    }
+}
+
 static void
 clean_output(char *output)
 {
@@ -38,6 +68,8 @@ clean_output(char *output)
         str_replace_in_place(output, MAX_OUTPUT, data.tmp_dir2, TEMP_PATH_TEMPLATE "2");
 
     str_replace_in_place(output, MAX_OUTPUT, SRC_DIR, "SRC_DIR");
+
+    remove_underline(output);
 }
 
 const char *
@@ -189,7 +221,7 @@ verify_log_lines(const char *reference_path)
 
     char line[1024] = "";
     char stored_str[MAX_OUTPUT] = "";
-    while(fgets(line, sizeof(line), file) != NULL) {
+    while (fgets(line, sizeof(line), file) != NULL) {
         char *line_data = strstr(line, "] "); // this skips the timestamp and pid at the beginning
         VERIFY_NOT_NULL(line_data); // malformed log line
         line_data += 2;
@@ -218,7 +250,15 @@ verify_log_lines(const char *reference_path)
             // LogHandler.emit argument details vary based on python version
             line_data[26] = '\n';
             line_data[27] = '\0';
-        }
+        } else {
+	    // Python 3.11 uses 0 instead of the symbolic REJECT in backtraces
+	    char *cp = strstr(line_data, ": REJECT");
+	    if (cp != NULL) {
+		// Convert ": REJECT" to ": 0" + rest of line
+		memcpy(cp, ": 0", 3);
+		memmove(cp + 3, cp + 8, strlen(cp + 8) + 1);
+	    }
+	}
 
         VERIFY_TRUE(strlcat(stored_str, line_data, sizeof(stored_str)) < sizeof(stored_str));  // we have enough space in buffer
     }

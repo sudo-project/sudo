@@ -802,6 +802,7 @@ bad:
 /* sudo_nss implementation */
 struct sudo_nss sudo_nss_sss = {
     { NULL, NULL },
+    "sss",
     sudo_sss_open,
     sudo_sss_close,
     sudo_sss_parse,

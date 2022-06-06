@@ -310,7 +310,7 @@ $(srcdir)/sudo_plugin_python.man.in: $(srcdir)/sudo_plugin_python.mdoc.in
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo_plugin_python.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO_PLUGIN" \)"8"\(.*\)/\1"'$$mansectsu'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo_plugin_python.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO_PLUGIN_PYTHON" \)"8"\(.*\)/\1"'$$mansectsu'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
 	fi
 
 ./sudo_plugin_python.man: $(top_builddir)/config.status $(srcdir)/sudo_plugin_python.man.in fixman.sed
@@ -351,8 +351,8 @@ install-doc: install-dirs
 	$(INSTALL) $(INSTALL_OWNER) -m 0644 ./cvtsudoers.$(mantype) $(DESTDIR)$(mandirexe)/cvtsudoers.1
 	$(INSTALL) $(INSTALL_OWNER) -m 0644 ./sudo.$(mantype) $(DESTDIR)$(mandirsu)/sudo.$(mansectsu)
 	@LOGSRV@$(INSTALL) $(INSTALL_OWNER) -m 0644 ./sudo_logsrvd.$(mantype) $(DESTDIR)$(mandirsu)/sudo_logsrvd.$(mansectsu)
-	$(INSTALL) $(INSTALL_OWNER) -m 0644 ./sudo_plugin.$(mantype) $(DESTDIR)$(mandirsu)/sudo_plugin.$(mansectsu)
-	@PYTHON_PLUGIN@$(INSTALL) $(INSTALL_OWNER) -m 0644 ./sudo_plugin_python.$(mantype) $(DESTDIR)$(mandirsu)/sudo_plugin_python.$(mansectsu)
+	$(INSTALL) $(INSTALL_OWNER) -m 0644 ./sudo_plugin.$(mantype) $(DESTDIR)$(mandirform)/sudo_plugin.$(mansectform)
+	@PYTHON_PLUGIN@$(INSTALL) $(INSTALL_OWNER) -m 0644 ./sudo_plugin_python.$(mantype) $(DESTDIR)$(mandirform)/sudo_plugin_python.$(mansectform)
 	$(INSTALL) $(INSTALL_OWNER) -m 0644 ./sudo_sendlog.$(mantype) $(DESTDIR)$(mandirsu)/sudo_sendlog.$(mansectsu)
 	$(INSTALL) $(INSTALL_OWNER) -m 0644 ./sudoreplay.$(mantype) $(DESTDIR)$(mandirsu)/sudoreplay.$(mansectsu)
 	$(INSTALL) $(INSTALL_OWNER) -m 0644 ./visudo.$(mantype) $(DESTDIR)$(mandirsu)/visudo.$(mansectsu)
@@ -363,7 +363,7 @@ install-doc: install-dirs
 	$(INSTALL) $(INSTALL_OWNER) -m 0644 ./sudoers_timestamp.$(mantype) $(DESTDIR)$(mandirform)/sudoers_timestamp.$(mansectform)
 	@LDAP@$(INSTALL) $(INSTALL_OWNER) -m 0644 ./sudoers.ldap.$(mantype) $(DESTDIR)$(mandirform)/sudoers.ldap.$(mansectform)
 	@if test -n "$(MANCOMPRESS)"; then \
-	    for f in $(mandirexe)/cvtsudoers.1 $(mandirsu)/sudo.$(mansectsu) $(mandirsu)/sudo_logsrvd.$(mansectsu) $(mandirsu)/sudo_plugin.$(mansectsu) $(mandirsu)/sudo_plugin_python.$(mansectsu) $(mandirsu)/sudo_sendlog.$(mansectsu) $(mandirsu)/sudoreplay.$(mansectsu) $(mandirsu)/visudo.$(mansectsu) $(mandirform)/sudo.conf.$(mansectform) $(mandirform)/sudo_logsrv.proto.$(mansectform) $(mandirform)/sudo_logsrvd.conf.$(mansectform) $(mandirform)/sudoers.$(mansectform) $(mandirform)/sudoers_timestamp.$(mansectform) $(mandirform)/sudoers.ldap.$(mansectform); do \
+	    for f in $(mandirexe)/cvtsudoers.1 $(mandirsu)/sudo.$(mansectsu) $(mandirsu)/sudo_logsrvd.$(mansectsu) $(mandirform)/sudo_plugin.$(mansectform) $(mandirform)/sudo_plugin_python.$(mansectform) $(mandirsu)/sudo_sendlog.$(mansectsu) $(mandirsu)/sudoreplay.$(mansectsu) $(mandirsu)/visudo.$(mansectsu) $(mandirform)/sudo.conf.$(mansectform) $(mandirform)/sudo_logsrv.proto.$(mansectform) $(mandirform)/sudo_logsrvd.conf.$(mansectform) $(mandirform)/sudoers.$(mansectform) $(mandirform)/sudoers_timestamp.$(mansectform) $(mandirform)/sudoers.ldap.$(mansectform); do \
 		if test -f $(DESTDIR)$$f; then \
 		    echo $(MANCOMPRESS) -f $(DESTDIR)$$f; \
 		    $(MANCOMPRESS) -f $(DESTDIR)$$f; \
@@ -388,14 +388,14 @@ uninstall:
 		$(DESTDIR)$(mandirsu)/sudo.$(mansectsu) \
 		$(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu) \
 		$(DESTDIR)$(mandirsu)/sudo_logsrvd.$(mansectsu) \
-		$(DESTDIR)$(mandirsu)/sudo_plugin.$(mansectsu) \
-		$(DESTDIR)$(mandirsu)/sudo_plugin_python.$(mansectsu) \
 		$(DESTDIR)$(mandirsu)/sudo_sendlog.$(mansectsu) \
 		$(DESTDIR)$(mandirsu)/sudoreplay.$(mansectsu) \
 		$(DESTDIR)$(mandirsu)/visudo.$(mansectsu) \
 		$(DESTDIR)$(mandirform)/sudo.conf.$(mansectform) \
 		$(DESTDIR)$(mandirform)/sudo_logsrv.proto.$(mansectform) \
 		$(DESTDIR)$(mandirform)/sudo_logsrvd.conf.$(mansectform) \
+		$(DESTDIR)$(mandirform)/sudo_plugin.$(mansectform) \
+		$(DESTDIR)$(mandirform)/sudo_plugin_python.$(mansectform) \
 		$(DESTDIR)$(mandirform)/sudoers.$(mansectform) \
 		$(DESTDIR)$(mandirform)/sudoers_timestamp.$(mansectform) \
 		$(DESTDIR)$(mandirform)/sudoers.ldap.$(mansectform)

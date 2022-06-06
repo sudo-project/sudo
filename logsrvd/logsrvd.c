@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -743,7 +743,7 @@ handle_client_message(uint8_t *buf, size_t len,
     /* TODO: can we extract type_case without unpacking for relay case? */
     msg = client_message__unpack(NULL, len, buf);
     if (msg == NULL) {
-	sudo_warnx("unable to unpack %s size %zu", "ClientMessage", len);
+	sudo_warnx(U_("unable to unpack %s size %zu"), "ClientMessage", len);
 	debug_return_bool(false);
     }
 
@@ -917,7 +917,8 @@ server_msg_cb(int fd, int what, void *v)
 		    goto finished;
                 default:
 		    errstr = ERR_reason_error_string(ERR_get_error());
-		    sudo_warnx("%s: SSL_write: %s", closure->ipaddr, errstr);
+		    sudo_warnx("%s: SSL_write: %s", closure->ipaddr,
+			errstr ? errstr : strerror(errno));
                     goto finished;
             }
         }
@@ -1027,7 +1028,8 @@ client_msg_cb(int fd, int what, void *v)
                     goto close_connection;
                 default:
 		    errstr = ERR_reason_error_string(ERR_get_error());
-		    sudo_warnx("%s: SSL_read: %s", closure->ipaddr, errstr);
+		    sudo_warnx("%s: SSL_read: %s", closure->ipaddr,
+			errstr ? errstr : strerror(errno));
 		    goto close_connection;
             }
         }
@@ -1331,7 +1333,8 @@ tls_handshake_cb(int fd, int what, void *v)
             goto bad;
         default:
 	    errstr = ERR_reason_error_string(ERR_get_error());
-	    sudo_warnx("%s: SSL_accept: %s", closure->ipaddr, errstr);
+	    sudo_warnx("%s: SSL_accept: %s", closure->ipaddr,
+		errstr ? errstr : strerror(errno));
             goto bad;
     }
 
@@ -1361,7 +1364,7 @@ bad:
  * Allocate a connection closure and optionally perform TLS handshake.
  */
 static bool
-new_connection(int sock, bool tls, const struct sockaddr *sa,
+new_connection(int sock, bool tls, const union sockaddr_union *sa_un,
     struct sudo_event_base *evbase)
 {
     struct connection_closure *closure;
@@ -1371,14 +1374,12 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
 	goto bad;
 
     /* store the peer's IP address in the closure object */
-    if (sa->sa_family == AF_INET) {
-        struct sockaddr_in *sin = (struct sockaddr_in *)sa;
-        inet_ntop(AF_INET, &sin->sin_addr, closure->ipaddr,
+    if (sa_un->sa.sa_family == AF_INET) {
+        inet_ntop(AF_INET, &sa_un->sin.sin_addr, closure->ipaddr,
             sizeof(closure->ipaddr));
 #if defined(HAVE_STRUCT_IN6_ADDR)
-    } else if (sa->sa_family == AF_INET6) {
-        struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)sa;
-        inet_ntop(AF_INET6, &sin6->sin6_addr, closure->ipaddr,
+    } else if (sa_un->sa.sa_family == AF_INET6) {
+        inet_ntop(AF_INET6, &sa_un->sin6.sin6_addr, closure->ipaddr,
             sizeof(closure->ipaddr));
 #endif /* HAVE_STRUCT_IN6_ADDR */
     } else {
@@ -1397,13 +1398,15 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
         /* Create the SSL object for the closure and attach it to the socket */
         if ((closure->ssl = SSL_new(logsrvd_server_tls_ctx())) == NULL) {
 	    errstr = ERR_reason_error_string(ERR_get_error());
-	    sudo_warnx(U_("%s: %s"), "SSL_new", errstr);
+	    sudo_warnx(U_("%s: %s"), "SSL_new",
+		errstr ? errstr : strerror(errno));
             goto bad;
         }
 
         if (SSL_set_fd(closure->ssl, closure->sock) != 1) {
 	    errstr = ERR_reason_error_string(ERR_get_error());
-	    sudo_warnx(U_("%s: %s"), "SSL_set_fd", errstr);
+	    sudo_warnx(U_("%s: %s"), "SSL_set_fd",
+		errstr ? errstr : strerror(errno));
             goto bad;
         }
 
@@ -1413,7 +1416,7 @@ new_connection(int sock, bool tls, const struct sockaddr *sa,
         if (SSL_set_ex_data(closure->ssl, 1, closure) <= 0) {
 	    errstr = ERR_reason_error_string(ERR_get_error());
             sudo_warnx(U_("Unable to attach user data to the ssl object: %s"),
-		errstr);
+		errstr ? errstr : strerror(errno));
             goto bad;
         }
 
@@ -1495,21 +1498,22 @@ listener_cb(int fd, int what, void *v)
 {
     struct listener *l = v;
     struct sudo_event_base *evbase = sudo_ev_get_base(l->ev);
-    union sockaddr_union s_un;
-    socklen_t salen = sizeof(s_un);
+    union sockaddr_union sa_un;
+    socklen_t salen = sizeof(sa_un);
     int sock;
     debug_decl(listener_cb, SUDO_DEBUG_UTIL);
 
-    sock = accept(fd, &s_un.sa, &salen);
+    memset(&sa_un, 0, sizeof(sa_un));
+    sock = accept(fd, &sa_un.sa, &salen);
     if (sock != -1) {
 	if (logsrvd_conf_server_tcp_keepalive()) {
 	    int keepalive = 1;
 	    if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &keepalive,
-		sizeof(keepalive)) == -1) {
+		    sizeof(keepalive)) == -1) {
 		sudo_warn("SO_KEEPALIVE");
 	    }
 	}
-	if (!new_connection(sock, l->tls, &s_un.sa, evbase)) {
+	if (!new_connection(sock, l->tls, &sa_un, evbase)) {
 	    /* TODO: pause accepting on ENOMEM */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to start new connection");

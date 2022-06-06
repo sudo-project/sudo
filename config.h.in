@@ -51,6 +51,9 @@
 /* Define to 1 if you use AIX general authentication. */
 #undef HAVE_AIXAUTH
 
+/* Define to 1 to enable AppArmor support. */
+#undef HAVE_APPARMOR
+
 /* Define to 1 if you have the `arc4random' function. */
 #undef HAVE_ARC4RANDOM
 
@@ -1385,6 +1388,9 @@
 
 /* Define for large files, on AIX-style hosts. */
 #undef _LARGE_FILES
+
+/* Number of bits in a time_t, on hosts where this is settable. */
+#undef _TIME_BITS
 
 /* Define to __FUNCTION__ if your compiler supports __FUNCTION__ but not
    __func__ */

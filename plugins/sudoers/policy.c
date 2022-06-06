@@ -186,8 +186,9 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
     }
 
     /* Parse command line settings. */
-    sudo_mode = 0;
+    sudo_user.flags = 0;
     user_closefrom = -1;
+    sudo_mode = 0;
     for (cur = info->settings; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "closefrom=")) {
 	    errno = 0;
@@ -297,6 +298,18 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 		goto oom;
 	    continue;
 	}
+	if (MATCHES(*cur, "intercept_ptrace=")) {
+	    if (parse_bool(*cur, sizeof("intercept_ptrace") - 1, &sudo_user.flags,
+		    HAVE_INTERCEPT_PTRACE) == -1)
+		goto bad;
+	    continue;
+	}
+	if (MATCHES(*cur, "intercept_setid=")) {
+	    if (parse_bool(*cur, sizeof("intercept_setid") - 1, &sudo_user.flags,
+		    CAN_INTERCEPT_SETID) == -1)
+		goto bad;
+	    continue;
+	}
 #ifdef HAVE_SELINUX
 	if (MATCHES(*cur, "selinux_role=")) {
 	    CHECK(*cur, "selinux_role=");
@@ -315,6 +328,16 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	    continue;
 	}
 #endif /* HAVE_SELINUX */
+#ifdef HAVE_APPARMOR
+	if (MATCHES(*cur, "apparmor_profile=")) {
+		CHECK(*cur, "apparmor_profile=");
+		free(user_apparmor_profile);
+		user_apparmor_profile = strdup(*cur + sizeof("apparmor_profile=") - 1);
+		if (user_apparmor_profile == NULL)
+		goto oom;
+		continue;
+	}
+#endif /* HAVE_APPARMOR */
 #ifdef HAVE_BSD_AUTH_H
 	if (MATCHES(*cur, "bsdauth_type=")) {
 	    CHECK(*cur, "bsdauth_type=");
@@ -551,6 +574,19 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	goto bad;
     }
 
+    /*
+     * Set intercept defaults based on flags set above.
+     * We pass -1 as the operator to indicate it is set by the front end.
+     */
+    if (ISSET(sudo_user.flags, HAVE_INTERCEPT_PTRACE)) {
+	if (!append_default("intercept_type", "trace", -1, NULL, defaults))
+	    goto oom;
+    }
+    if (ISSET(sudo_user.flags, CAN_INTERCEPT_SETID)) {
+	if (!append_default("intercept_allow_setid", NULL, -1, NULL, defaults))
+	    goto oom;
+    }
+
 #ifdef NO_ROOT_MAILER
     eventlog_set_mailuid(user_uid);
 #endif
@@ -599,7 +635,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     }
 
     /* Increase the length of command_info as needed, it is *not* checked. */
-    command_info = calloc(70, sizeof(char *));
+    command_info = calloc(71, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
 
@@ -771,6 +807,10 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 	if ((command_info[info_len++] = strdup("intercept=true")) == NULL)
 	    goto oom;
     }
+    if (def_intercept_type == trace) {
+	if ((command_info[info_len++] = strdup("use_ptrace=true")) == NULL)
+	    goto oom;
+    }
     if (def_noexec) {
 	if ((command_info[info_len++] = strdup("noexec=true")) == NULL)
 	    goto oom;
@@ -927,6 +967,12 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 	    goto oom;
     }
 #endif /* HAVE_SELINUX */
+#ifdef HAVE_APPARMOR
+	if (user_apparmor_profile != NULL) {
+	if ((command_info[info_len++] = sudo_new_key_val("apparmor_profile", user_apparmor_profile)) == NULL)
+		goto oom;
+	}
+#endif /* HAVE_APPARMOR */
 #ifdef HAVE_PRIV_SET
     if (runas_privs != NULL) {
 	if ((command_info[info_len++] = sudo_new_key_val("runas_privs", runas_privs)) == NULL)
@@ -1000,7 +1046,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     info.settings = settings;
     info.user_info = user_info;
     info.plugin_args = args;
-    ret = sudoers_init(&info, envp);
+    ret = sudoers_init(&info, log_parse_error, envp);
 
     /* The audit functions set audit_msg on failure. */
     if (ret != 1 && audit_msg != NULL) {

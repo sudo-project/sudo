@@ -190,6 +190,9 @@ check_user(int validated, int mode)
 #ifdef HAVE_SELINUX
 	if (user_role == NULL && user_type == NULL)
 #endif
+#ifdef HAVE_APPARMOR
+	if (user_apparmor_profile == NULL)
+#endif
 #ifdef HAVE_PRIV_SET
 	if (runas_privs == NULL && runas_limitprivs == NULL)
 #endif

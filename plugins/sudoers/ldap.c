@@ -2143,6 +2143,7 @@ sudo_ldap_result_from_search(LDAP *ldap, LDAPMessage *searchresult)
 /* sudo_nss implementation */
 struct sudo_nss sudo_nss_ldap = {
     { NULL, NULL },
+    "ldap",
     sudo_ldap_open,
     sudo_ldap_close,
     sudo_ldap_parse,

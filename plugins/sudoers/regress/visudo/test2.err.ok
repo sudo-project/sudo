@@ -1,1 +1,1 @@
-Error: stdin:1:12: cycle in User_Alias "FOO"
+stdin:1:12: cycle in User_Alias "FOO"

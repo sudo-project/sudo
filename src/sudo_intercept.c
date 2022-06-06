@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -25,6 +25,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 
 #include <errno.h>
 #include <stdarg.h>
@@ -34,6 +35,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <string.h>
+#include <signal.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
@@ -193,7 +195,8 @@ exec_wrapper(const char *cmnd, char * const argv[], char * const envp[],
 static int
 execl_wrapper(int type, const char *name, const char *arg, va_list ap)
 {
-    char **argv, **envp = environ;
+    char * const *envp = environ;
+    char **argv;
     int argc = 1;
     va_list ap2;
     debug_decl(execl_wrapper, SUDO_DEBUG_EXEC);
@@ -219,6 +222,72 @@ execl_wrapper(int type, const char *name, const char *arg, va_list ap)
     debug_return_int(-1);
 }
 
+static int
+system_wrapper(const char *cmnd)
+{
+    char * const argv[] = { "sh", "-c", (char *)cmnd, NULL };
+    const char shell[] = _PATH_SUDO_BSHELL;
+    struct sigaction saveint, savequit, sa;
+    sigset_t mask, omask;
+    pid_t child;
+    int status;
+    debug_decl(system_wrapper, SUDO_DEBUG_EXEC);
+
+    /* Special case for NULL command, just check whether shell exists. */
+    if (cmnd == NULL)
+	debug_return_int(access(shell, X_OK) == 0);
+
+    /* First, block signals to avoid potential race conditions. */
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGCHLD);
+    sigaddset(&mask, SIGINT);
+    sigaddset(&mask, SIGQUIT);
+    if (sigprocmask(SIG_BLOCK, &mask, &omask) == -1)
+	debug_return_int(-1);
+
+    switch (child = fork()) {
+    case -1:
+	/* error */
+	(void)sigprocmask(SIG_SETMASK, &omask, NULL);
+	debug_return_int(-1);
+    case 0:
+	/* child */
+	if (sigprocmask(SIG_SETMASK, &omask, NULL) != -1)
+	    exec_wrapper(shell, argv, environ, false);
+	_exit(127);
+    default:
+	/* parent */
+	break;
+    }
+
+    /* We must ignore SIGINT and SIGQUIT until the command finishes. */
+    memset(&sa, 0, sizeof(sa));
+    sigemptyset(&sa.sa_mask);
+    sa.sa_handler = SIG_IGN;
+    (void)sigaction(SIGINT, &sa, &saveint);
+    (void)sigaction(SIGQUIT, &sa, &savequit);
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGINT);
+    sigaddset(&mask, SIGQUIT);
+    (void)sigprocmask(SIG_UNBLOCK, &mask, NULL);
+
+    for (;;) {
+	if (waitpid(child, &status, 0) == -1) {
+	    if (errno == EINTR)
+		continue;
+	    status = -1;
+	}
+	break;
+    }
+
+    /* Restore signal mask and handlers. */
+    (void)sigprocmask(SIG_SETMASK, &omask, NULL);
+    (void)sigaction(SIGINT, &saveint, NULL);
+    (void)sigaction(SIGQUIT, &savequit, NULL);
+
+    debug_return_int(status);
+}
+
 #ifdef HAVE___INTERPOSE
 /*
  * Mac OS X 10.4 and above has support for library symbol interposition.
@@ -230,15 +299,21 @@ typedef struct interpose_s {
 } interpose_t;
 
 static int
+my_system(const char *cmnd)
+{
+    return system_wrapper(cmnd);
+}
+
+static int
 my_execve(const char *cmnd, char * const argv[], char * const envp[])
 {
-    return exec_wrapper(cmnd, argv, environ, false);
+    return exec_wrapper(cmnd, argv, envp, false);
 }
 
 static int
 my_execv(const char *cmnd, char * const argv[])
 {
-    return execve(cmnd, argv, environ);
+    return exec_wrapper(cmnd, argv, environ, false);
 }
 
 #ifdef HAVE_EXECVPE
@@ -294,6 +369,7 @@ my_execlp(const char *name, const char *arg, ...)
 /* Magic to tell dyld to do symbol interposition. */
 __attribute__((__used__)) static const interpose_t interposers[]
 __attribute__((__section__("__DATA,__interpose"))) = {
+    { (void *)my_system, (void *)system },
     { (void *)my_execl, (void *)execl },
     { (void *)my_execle, (void *)execle },
     { (void *)my_execlp, (void *)execlp },
@@ -333,9 +409,15 @@ sudo_shl_get_next(const char *symbol, short type)
 # endif /* HAVE_SHL_LOAD */
 
 sudo_dso_public int
+system(const char *cmnd)
+{
+    return system_wrapper(cmnd);
+}
+
+sudo_dso_public int
 execve(const char *cmnd, char * const argv[], char * const envp[])
 {
-    return exec_wrapper(cmnd, argv, environ, false);
+    return exec_wrapper(cmnd, argv, envp, false);
 }
 
 sudo_dso_public int
