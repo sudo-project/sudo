@@ -157,6 +157,16 @@ The path of a python file which contains the class of the sudo Python plugin.
 It must be either an absolute path or a path relative to the sudo Python plugin
 directory,
 .Pa @plugindir@/python .
+The parent directory of
+.Em ModulePath
+will be appended to Python's module search path (there is currently no
+way to force Python to load a module from a fully-qualified path).
+It is good practice to use a prefix for the module file that is unlikely
+to conflict with other installed Python modules, for example,
+.Pa sudo_policy.py .
+Otherwise, if the there is an installed Python module with the same
+file name as the sudo Python plugin file (without the directory),
+the wrong file will be loaded.
 .It ClassName
 (Optional.) The name of the class implementing the sudo Python plugin.
 If not supplied, the one and only sudo.Plugin that is present in the module

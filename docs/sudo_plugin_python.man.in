@@ -186,6 +186,16 @@ The path of a python file which contains the class of the sudo Python plugin.
 It must be either an absolute path or a path relative to the sudo Python plugin
 directory,
 \fI@plugindir@/python\fR.
+The parent directory of
+\fIModulePath\fR
+will be appended to Python's module search path (there is currently no
+way to force Python to load a module from a fully-qualified path).
+It is good practice to use a prefix for the module file that is unlikely
+to conflict with other installed Python modules, for example,
+\fIsudo_policy.py\fR.
+Otherwise, if the there is an installed Python module with the same
+file name as the sudo Python plugin file (without the directory),
+the wrong file will be loaded.
 .TP 6n
 ClassName
 (Optional.) The name of the class implementing the sudo Python plugin.
