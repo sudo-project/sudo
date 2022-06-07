@@ -120,12 +120,12 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
     if (ISSET(ev->events, SUDO_EV_READ)) {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: added fd %d to readfs",
 	    __func__, ev->fd);
-	FD_SET(ev->fd, base->readfds_in);
+	FD_SET(ev->fd, (fd_set *)base->readfds_in);
     }
     if (ISSET(ev->events, SUDO_EV_WRITE)) {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: added fd %d to writefds",
 	    __func__, ev->fd);
-	FD_SET(ev->fd, base->writefds_in);
+	FD_SET(ev->fd, (fd_set *)base->writefds_in);
     }
     if (ev->fd > base->highfd)
 	base->highfd = ev->fd;
@@ -142,17 +142,17 @@ sudo_ev_del_impl(struct sudo_event_base *base, struct sudo_event *ev)
     if (ISSET(ev->events, SUDO_EV_READ)) {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: removed fd %d from readfds",
 	    __func__, ev->fd);
-	FD_CLR(ev->fd, base->readfds_in);
+	FD_CLR(ev->fd, (fd_set *)base->readfds_in);
     }
     if (ISSET(ev->events, SUDO_EV_WRITE)) {
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: removed fd %d from writefds",
 	    __func__, ev->fd);
-	FD_CLR(ev->fd, base->writefds_in);
+	FD_CLR(ev->fd, (fd_set *)base->writefds_in);
     }
     if (base->highfd == ev->fd) {
 	for (;;) {
-	    if (FD_ISSET(base->highfd, base->readfds_in) ||
-		FD_ISSET(base->highfd, base->writefds_in))
+	    if (FD_ISSET(base->highfd, (fd_set *)base->readfds_in) ||
+		FD_ISSET(base->highfd, (fd_set *)base->writefds_in))
 		break;
 	    if (--base->highfd < 0)
 		break;
@@ -230,9 +230,9 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
 	TAILQ_FOREACH(ev, &base->events, entries) {
 	    if (ev->fd >= 0) {
 		int what = 0;
-		if (FD_ISSET(ev->fd, base->readfds_out))
+		if (FD_ISSET(ev->fd, (fd_set *)base->readfds_out))
 		    what |= (ev->events & SUDO_EV_READ);
-		if (FD_ISSET(ev->fd, base->writefds_out))
+		if (FD_ISSET(ev->fd, (fd_set *)base->writefds_out))
 		    what |= (ev->events & SUDO_EV_WRITE);
 		if (what != 0) {
 		    /* Make event active. */
