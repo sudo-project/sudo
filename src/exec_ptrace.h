@@ -76,6 +76,7 @@
 # define reg_arg4(x)		(x).r10
 #elif defined(__aarch64__)
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_AARCH64
+# define sudo_pt_regs		struct user_pt_regs
 # define reg_syscall(x)		(x).regs[8]	/* w8 */
 # define reg_retval(x)		(x).regs[0]	/* x0 */
 # define reg_sp(x)		(x).sp		/* sp */
