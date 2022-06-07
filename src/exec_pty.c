@@ -676,8 +676,12 @@ read_callback(int fd, int what, void *v)
 		/* Schedule SIGTTIN to be forwarded to the command. */
 		schedule_signal(iob->ec, SIGTTIN);
 	    }
-	    if (errno == EAGAIN || errno == EINTR)
+	    if (errno == EAGAIN || errno == EINTR) {
+		/* Re-enable reader. */
+		if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
+		    sudo_fatal("%s", U_("unable to add event to queue"));
 		break;
+	    }
 	    /* treat read error as fatal and close the fd */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR,
 		"error reading fd %d: %s", fd, strerror(errno));
@@ -717,6 +721,8 @@ read_callback(int fd, int what, void *v)
 	    }
 	    break;
     }
+
+    debug_return;
 }
 
 /*
@@ -783,7 +789,9 @@ write_callback(int fd, int what, void *v)
 	    }
 	    FALLTHROUGH;
 	case EAGAIN:
-	    /* not an error */
+	    /* Not an error, re-enable writer. */
+	    if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
+		sudo_fatal("%s", U_("unable to add event to queue"));
 	    break;
 	default:
 	    /* XXX - need a way to distinguish non-exec error. */
@@ -821,6 +829,8 @@ write_callback(int fd, int what, void *v)
 	    }
 	}
     }
+
+    debug_return;
 }
 
 static void
