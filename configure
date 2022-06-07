@@ -17821,8 +17821,8 @@ fi
     *-*-linux*|*-*-k*bsd*-gnu)
 		shadow_funcs="getspnam"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
-		# Check for SECCOMP_SET_MODE_FILTER in linux/seccomp.h
-		ac_fn_check_decl "$LINENO" "SECCOMP_SET_MODE_FILTER" "ac_cv_have_decl_SECCOMP_SET_MODE_FILTER" "
+		# Check for SECCOMP_MODE_FILTER in linux/seccomp.h
+		ac_fn_check_decl "$LINENO" "SECCOMP_MODE_FILTER" "ac_cv_have_decl_SECCOMP_MODE_FILTER" "
 #include <sys/types.h>
 #include <sys/prctl.h>
 #include <asm/unistd.h>
@@ -17830,13 +17830,13 @@ fi
 #include <linux/filter.h>
 
 " "$ac_c_undeclared_builtin_options" "CFLAGS"
-if test "x$ac_cv_have_decl_SECCOMP_SET_MODE_FILTER" = xyes
+if test "x$ac_cv_have_decl_SECCOMP_MODE_FILTER" = xyes
 then :
   ac_have_decl=1
 else $as_nop
   ac_have_decl=0
 fi
-printf "%s\n" "#define HAVE_DECL_SECCOMP_SET_MODE_FILTER $ac_have_decl" >>confdefs.h
+printf "%s\n" "#define HAVE_DECL_SECCOMP_MODE_FILTER $ac_have_decl" >>confdefs.h
 
 		# We call getrandom via syscall(3) in case it is not in libc
 		ac_fn_c_check_header_compile "$LINENO" "linux/random.h" "ac_cv_header_linux_random_h" "$ac_includes_default"
