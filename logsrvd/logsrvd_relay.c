@@ -799,7 +799,7 @@ relay_server_msg_cb(int fd, int what, void *v)
 	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
     switch (nread) {
     case -1:
-	if (errno == EAGAIN)
+	if (errno == EAGAIN || errno == EINTR)
 	    debug_return;
 	sudo_warn("%s: read", relay_closure->relay_name.ipaddr);
 	closure->errstr = _("unable to read from relay");
@@ -970,7 +970,7 @@ relay_client_msg_cb(int fd, int what, void *v)
     {
 	nwritten = write(fd, buf->data + buf->off, buf->len - buf->off);
 	if (nwritten == -1) {
-	    if (errno == EAGAIN)
+	    if (errno == EAGAIN || errno == EINTR)
 		debug_return;
 	    sudo_warn("%s: write", relay_closure->relay_name.ipaddr);
 	    closure->errstr = _("error writing to relay");
