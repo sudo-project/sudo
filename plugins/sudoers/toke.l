@@ -482,84 +482,84 @@ DEFVAR			[a-z_]+
 			    }
 			}
 
-NOPASSWD[[:blank:]]*:	{
+NOPASSWD:	{
 				/* cmnd does not require passwd for this user */
 			    	LEXTRACE("NOPASSWD ");
 			    	return NOPASSWD;
 			}
 
-PASSWD[[:blank:]]*:	{
+PASSWD:	{
 				/* cmnd requires passwd for this user */
 			    	LEXTRACE("PASSWD ");
 			    	return PASSWD;
 			}
 
-NOEXEC[[:blank:]]*:	{
+NOEXEC:	{
 			    	LEXTRACE("NOEXEC ");
 			    	return NOEXEC;
 			}
 
-EXEC[[:blank:]]*:	{
+EXEC:	{
 			    	LEXTRACE("EXEC ");
 			    	return EXEC;
 			}
 
-INTERCEPT[[:blank:]]*:	{
+INTERCEPT:	{
 			    	LEXTRACE("INTERCEPT ");
 			    	return INTERCEPT;
 			}
 
-NOINTERCEPT[[:blank:]]*: {
+NOINTERCEPT: {
 			    	LEXTRACE("NOINTERCEPT ");
 			    	return NOINTERCEPT;
 			}
 
-SETENV[[:blank:]]*:	{
+SETENV:	{
 			    	LEXTRACE("SETENV ");
 			    	return SETENV;
 			}
 
-NOSETENV[[:blank:]]*:	{
+NOSETENV:	{
 			    	LEXTRACE("NOSETENV ");
 			    	return NOSETENV;
 			}
 
-LOG_OUTPUT[[:blank:]]*:	{
+LOG_OUTPUT:	{
 			    	LEXTRACE("LOG_OUTPUT ");
 			    	return LOG_OUTPUT;
 			}
 
-NOLOG_OUTPUT[[:blank:]]*:	{
+NOLOG_OUTPUT:	{
 			    	LEXTRACE("NOLOG_OUTPUT ");
 			    	return NOLOG_OUTPUT;
 			}
 
-LOG_INPUT[[:blank:]]*:	{
+LOG_INPUT:	{
 			    	LEXTRACE("LOG_INPUT ");
 			    	return LOG_INPUT;
 			}
 
-NOLOG_INPUT[[:blank:]]*:	{
+NOLOG_INPUT:	{
 			    	LEXTRACE("NOLOG_INPUT ");
 			    	return NOLOG_INPUT;
 			}
 
-MAIL[[:blank:]]*:	{
+MAIL:	{
 			    	LEXTRACE("MAIL ");
 			    	return MAIL;
 			}
 
-NOMAIL[[:blank:]]*:	{
+NOMAIL:	{
 			    	LEXTRACE("NOMAIL ");
 			    	return NOMAIL;
 			}
 
-FOLLOW[[:blank:]]*:	{
+FOLLOW:	{
 			    	LEXTRACE("FOLLOW ");
 			    	return FOLLOWLNK;
 			}
 
-NOFOLLOW[[:blank:]]*:	{
+NOFOLLOW:	{
 			    	LEXTRACE("NOFOLLOW ");
 			    	return NOFOLLOWLNK;
 			}
