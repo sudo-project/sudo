@@ -929,6 +929,8 @@ server_msg_cb(int fd, int what, void *v)
     }
 
     if (nwritten == -1) {
+	if (errno == EAGAIN)
+	    debug_return;
 	sudo_warn("%s: write", closure->ipaddr);
 	goto finished;
     }

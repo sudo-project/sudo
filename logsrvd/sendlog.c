@@ -1479,6 +1479,8 @@ client_msg_cb(int fd, int what, void *v)
 	nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
     }
     if (nwritten == -1) {
+	if (errno == EAGAIN)
+	    debug_return;
 	sudo_warn("send");
 	goto bad;
     }

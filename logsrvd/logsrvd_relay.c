@@ -970,6 +970,8 @@ relay_client_msg_cb(int fd, int what, void *v)
     {
 	nwritten = write(fd, buf->data + buf->off, buf->len - buf->off);
 	if (nwritten == -1) {
+	    if (errno == EAGAIN)
+		debug_return;
 	    sudo_warn("%s: write", relay_closure->relay_name.ipaddr);
 	    closure->errstr = _("error writing to relay");
 	    goto send_error;
