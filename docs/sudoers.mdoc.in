@@ -1223,7 +1223,7 @@ User_Spec ::= User_List Host_List '=' Cmnd_Spec_List \e
 Cmnd_Spec_List ::= Cmnd_Spec |
                    Cmnd_Spec ',' Cmnd_Spec_List
 
-Cmnd_Spec ::= Runas_Spec? Option_Spec* Tag_Spec* Cmnd
+Cmnd_Spec ::= Runas_Spec? Option_Spec* (Tag_Spec ':')* Cmnd
 
 Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 
@@ -1262,11 +1262,11 @@ Chdir_Spec ::= 'CWD=directory'
 
 Chroot_Spec ::= 'CHROOT=directory'
 
-Tag_Spec ::= ('EXEC:' | 'NOEXEC:' | 'FOLLOW:' | 'NOFOLLOW' |
-              'LOG_INPUT:' | 'NOLOG_INPUT:' | 'LOG_OUTPUT:' |
-              'NOLOG_OUTPUT:' | 'MAIL:' | 'NOMAIL:' | 'INTERCEPT:' |
-              'NOINTERCEPT:' | 'PASSWD:' | 'NOPASSWD:' | 'SETENV:' |
-              'NOSETENV:')
+Tag_Spec ::= ('EXEC' | 'NOEXEC' | 'FOLLOW' | 'NOFOLLOW' |
+              'LOG_INPUT' | 'NOLOG_INPUT' | 'LOG_OUTPUT' |
+              'NOLOG_OUTPUT' | 'MAIL' | 'NOMAIL' | 'INTERCEPT' |
+              'NOINTERCEPT' | 'PASSWD' | 'NOPASSWD' | 'SETENV' |
+              'NOSETENV')
 .Ed
 .Pp
 A

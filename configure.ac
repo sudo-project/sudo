@@ -18,7 +18,7 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.70])
-AC_INIT([sudo], [1.9.11], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.9.11p1], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 AC_CONFIG_AUX_DIR([scripts])
@@ -2065,8 +2065,8 @@ case "$host" in
     *-*-linux*|*-*-k*bsd*-gnu)
 		shadow_funcs="getspnam"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
-		# Check for SECCOMP_SET_MODE_FILTER in linux/seccomp.h
-		AC_CHECK_DECLS([SECCOMP_SET_MODE_FILTER], [], [], [
+		# Check for SECCOMP_MODE_FILTER in linux/seccomp.h
+		AC_CHECK_DECLS([SECCOMP_MODE_FILTER], [], [], [
 #include <sys/types.h>
 #include <sys/prctl.h>
 #include <asm/unistd.h>

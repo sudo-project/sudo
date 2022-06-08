@@ -676,9 +676,11 @@ read_callback(int fd, int what, void *v)
 		/* Schedule SIGTTIN to be forwarded to the command. */
 		schedule_signal(iob->ec, SIGTTIN);
 	    }
-	    if (errno == EAGAIN || errno == EINTR)
+	    if (errno == EAGAIN || errno == EINTR) {
+		/* Not an error, retry later. */
 		break;
-	    /* treat read error as fatal and close the fd */
+	    }
+	    /* Treat read error as fatal and close the fd. */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR,
 		"error reading fd %d: %s", fd, strerror(errno));
 	    FALLTHROUGH;
@@ -705,18 +707,18 @@ read_callback(int fd, int what, void *v)
 		iob->ec->cmnd_pid = -1;
 	    }
 	    iob->len += n;
-	    /* Enable writer now that there is data in the buffer. */
+	    /* Disable reader if buffer is full. */
+	    if (iob->len == sizeof(iob->buf))
+		sudo_ev_del(evbase, iob->revent);
+	    /* Enable writer now that there is new data in the buffer. */
 	    if (iob->wevent != NULL) {
 		if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
 		    sudo_fatal("%s", U_("unable to add event to queue"));
 	    }
-	    /* Re-enable reader if buffer is not full. */
-	    if (iob->len != sizeof(iob->buf)) {
-		if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
-		    sudo_fatal("%s", U_("unable to add event to queue"));
-	    }
 	    break;
     }
+
+    debug_return;
 }
 
 /*
@@ -783,7 +785,7 @@ write_callback(int fd, int what, void *v)
 	    }
 	    FALLTHROUGH;
 	case EAGAIN:
-	    /* not an error */
+	    /* Not an error, retry later. */
 	    break;
 	default:
 	    /* XXX - need a way to distinguish non-exec error. */
@@ -798,19 +800,15 @@ write_callback(int fd, int what, void *v)
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "wrote %zd bytes to fd %d", n, fd);
 	iob->off += n;
-	/* Reset buffer if fully consumed. */
+	/* Disable writer and reset the buffer if fully consumed. */
 	if (iob->off == iob->len) {
 	    iob->off = iob->len = 0;
+	    sudo_ev_del(evbase, iob->wevent);
 	    /* Forward the EOF from reader to writer. */
 	    if (iob->revent == NULL) {
 		safe_close(fd);
 		ev_free_by_fd(evbase, fd);
 	    }
-	}
-	/* Re-enable writer if buffer is not empty. */
-	if (iob->len > iob->off) {
-	    if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
-		sudo_fatal("%s", U_("unable to add event to queue"));
 	}
 	/* Enable reader if buffer is not full. */
 	if (iob->revent != NULL &&
@@ -821,6 +819,8 @@ write_callback(int fd, int what, void *v)
 	    }
 	}
     }
+
+    debug_return;
 }
 
 static void
@@ -844,8 +844,10 @@ io_buf_new(int rfd, int wfd,
     if ((iob = malloc(sizeof(*iob))) == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     iob->ec = ec;
-    iob->revent = sudo_ev_alloc(rfd, SUDO_EV_READ, read_callback, iob);
-    iob->wevent = sudo_ev_alloc(wfd, SUDO_EV_WRITE, write_callback, iob);
+    iob->revent = sudo_ev_alloc(rfd, SUDO_EV_READ|SUDO_EV_PERSIST,
+	read_callback, iob);
+    iob->wevent = sudo_ev_alloc(wfd, SUDO_EV_WRITE|SUDO_EV_PERSIST,
+	write_callback, iob);
     iob->len = 0;
     iob->off = 0;
     iob->action = action;

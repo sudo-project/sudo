@@ -1,3 +1,19 @@
+What's new in Sudo 1.9.11p1
+
+ * Correctly handle EAGAIN in the I/O read/right events.  This fixes
+   a hang seen on some systems when piping a large amount of data
+   through sudo, such as via rsync.  Bug #963.
+
+ * Changes to avoid implementation or unspecified behavior when
+   bit shifting signed values in the protobuf library.
+
+ * Fixed a compilation error on Linux/aarch64.
+
+ * Fixed the configure check for seccomp(2) support on Linux.
+
+ * Corrected the EBNF specification for tags in the sudoers manual
+   page.  GitHub issue #153.
+
 What's new in Sudo 1.9.11
 
  * Fixed a crash in the Python module with Python 3.9.10 on some

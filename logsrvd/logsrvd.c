@@ -929,6 +929,8 @@ server_msg_cb(int fd, int what, void *v)
     }
 
     if (nwritten == -1) {
+	if (errno == EAGAIN || errno == EINTR)
+	    debug_return;
 	sudo_warn("%s: write", closure->ipaddr);
 	goto finished;
     }
@@ -1043,7 +1045,7 @@ client_msg_cb(int fd, int what, void *v)
 	__func__, nread, closure->ipaddr);
     switch (nread) {
     case -1:
-	if (errno == EAGAIN)
+	if (errno == EAGAIN || errno == EINTR)
 	    debug_return;
 	sudo_warn("%s: read", closure->ipaddr);
 	goto close_connection;
@@ -1519,9 +1521,10 @@ listener_cb(int fd, int what, void *v)
 		"unable to start new connection");
 	}
     } else {
-	if (errno != EAGAIN)
-	    sudo_warn("accept");
+	if (errno == EAGAIN || errno == EINTR)
+	    debug_return;
 	/* TODO: pause accepting on ENFILE and EMFILE */
+	sudo_warn("accept");
     }
 
     debug_return;
