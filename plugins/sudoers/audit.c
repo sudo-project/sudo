@@ -158,6 +158,8 @@ sudoers_audit_open(unsigned int version, sudo_conv_t conversation,
 
     sudo_conv = conversation;
     sudo_printf = plugin_printf;
+    if (sudoers_audit.event_alloc != NULL)
+	plugin_event_alloc = sudoers_audit.event_alloc;
 
     bindtextdomain("sudoers", LOCALEDIR);
 
@@ -284,7 +286,7 @@ log_server_accept(struct eventlog *evlog)
 
 	/* Open connection to log server, send hello and accept messages. */
 	client_closure = log_server_open(&audit_details, &now, false,
-	    SEND_ACCEPT, NULL, sudoers_audit.event_alloc);
+	    SEND_ACCEPT, NULL);
 	if (client_closure != NULL)
 	    ret = true;
     }
@@ -391,7 +393,7 @@ sudoers_audit_reject(const char *plugin_name, unsigned int plugin_type,
     if (!eventlog_reject(&evlog, 0, message, NULL, NULL))
 	ret = false;
 
-    if (!log_server_reject(&evlog, message, sudoers_audit.event_alloc))
+    if (!log_server_reject(&evlog, message))
 	ret = false;
 
     debug_return_int(ret);
@@ -424,8 +426,7 @@ sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
     if (!eventlog_alert(&evlog, 0, &now, message, NULL))
 	ret = false;
 
-    if (!log_server_alert(&evlog, &now, message, NULL,
-	    sudoers_audit.event_alloc))
+    if (!log_server_alert(&evlog, &now, message, NULL))
 	ret = false;
 
     debug_return_int(ret);

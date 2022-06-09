@@ -70,8 +70,6 @@ static struct parse_error_list parse_error_list =
 static bool should_mail(int);
 static bool warned = false;
 
-extern struct policy_plugin sudoers_policy;	/* XXX */
-
 #ifdef SUDOERS_LOG_CLIENT
 /*
  * Convert a defaults-style list to a stringlist.
@@ -129,8 +127,7 @@ init_log_details(struct log_details *details, struct eventlog *evlog)
 }
 
 bool
-log_server_reject(struct eventlog *evlog, const char *message,
-    struct sudo_plugin_event * (*event_alloc)(void))
+log_server_reject(struct eventlog *evlog, const char *message)
 {
     bool ret = false;
     debug_decl(log_server_reject, SUDOERS_DEBUG_LOGGING);
@@ -160,7 +157,7 @@ log_server_reject(struct eventlog *evlog, const char *message,
 
 	/* Open connection to log server, send hello and reject messages. */
 	client_closure = log_server_open(&details, &sudo_user.submit_time,
-	    false, SEND_REJECT, message, event_alloc);
+	    false, SEND_REJECT, message);
 	if (client_closure != NULL) {
 	    client_closure_free(client_closure);
 	    client_closure = NULL;
@@ -177,8 +174,7 @@ done:
 
 bool
 log_server_alert(struct eventlog *evlog, struct timespec *now,
-    const char *message, const char *errstr,
-    struct sudo_plugin_event * (*event_alloc)(void))
+    const char *message, const char *errstr)
 {
     struct log_details details;
     char *emessage = NULL;
@@ -217,7 +213,7 @@ log_server_alert(struct eventlog *evlog, struct timespec *now,
 
 	/* Open connection to log server, send hello and alert messages. */
 	client_closure = log_server_open(&details, now, false,
-	    SEND_ALERT, emessage ? emessage : message, event_alloc);
+	    SEND_ALERT, emessage ? emessage : message);
 	if (client_closure != NULL) {
 	    client_closure_free(client_closure);
 	    client_closure = NULL;
@@ -234,16 +230,14 @@ done:
 }
 #else
 bool
-log_server_reject(struct eventlog *evlog, const char *message,
-    struct sudo_plugin_event * (*event_alloc)(void))
+log_server_reject(struct eventlog *evlog, const char *message)
 {
     return true;
 }
 
 bool
 log_server_alert(struct eventlog *evlog, struct timespec *now,
-    const char *message, const char *errstr,
-    struct sudo_plugin_event * (*event_alloc)(void))
+    const char *message, const char *errstr)
 {
     return true;
 }
@@ -258,7 +252,7 @@ log_reject(const char *message, bool logit, bool mailit)
     const char *uuid_str = NULL;
     struct eventlog evlog;
     int evl_flags = 0;
-    bool ret = true;
+    bool ret;
     debug_decl(log_reject, SUDOERS_DEBUG_LOGGING);
 
     if (!ISSET(sudo_mode, MODE_POLICY_INTERCEPTED))
@@ -270,10 +264,8 @@ log_reject(const char *message, bool logit, bool mailit)
 	    SET(evl_flags, EVLOG_MAIL_ONLY);
     }
     sudoers_to_eventlog(&evlog, NewArgv, env_get(), uuid_str);
-    if (!eventlog_reject(&evlog, evl_flags, message, NULL, NULL))
-	ret = false;
-
-    if (!log_server_reject(&evlog, message, sudoers_policy.event_alloc))
+    ret = eventlog_reject(&evlog, evl_flags, message, NULL, NULL);
+    if (!log_server_reject(&evlog, message))
 	ret = false;
 
     debug_return_bool(ret);
@@ -705,9 +697,7 @@ vlog_warning(int flags, int errnum, const char *fmt, va_list ap)
 	}
 	sudoers_to_eventlog(&evlog, NewArgv, env_get(), sudo_user.uuid_str);
 	eventlog_alert(&evlog, evl_flags, &now, message, errstr);
-
-	log_server_alert(&evlog, &now, message, errstr,
-	    sudoers_policy.event_alloc);
+	log_server_alert(&evlog, &now, message, errstr);
     }
 
     /*
@@ -836,10 +826,8 @@ mail_parse_errors(void)
     }
 
     ret = eventlog_alert(&evlog, evl_flags, &now, mailbody, NULL);
-    if (!log_server_alert(&evlog, &now, mailbody, NULL,
-	    sudoers_policy.event_alloc)) {
+    if (!log_server_alert(&evlog, &now, mailbody, NULL))
 	ret = false;
-    }
 
 done:
     free(mailbody);
