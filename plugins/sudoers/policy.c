@@ -983,7 +983,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 	if ((command_info[info_len++] = sudo_new_key_val("runas_limitprivs", runas_limitprivs)) == NULL)
 	    goto oom;
     }
-#endif /* HAVE_SELINUX */
+#endif /* HAVE_PRIV_SET */
 
     /* Fill in exec environment info. */
     *(exec_args->argv) = argv;
