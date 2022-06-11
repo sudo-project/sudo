@@ -64,8 +64,10 @@
  */
 #if defined(__x86_64__)
 # define SECCOMP_AUDIT_ARCH	AUDIT_ARCH_X86_64
-# define X32_execve		__X32_SYSCALL_BIT + 520
-# define X32_execveat		__X32_SYSCALL_BIT + 545
+# ifndef __ILP32__
+#  define X32_execve		__X32_SYSCALL_BIT + 520
+#  define X32_execveat		__X32_SYSCALL_BIT + 545
+# endif
 # define sudo_pt_regs		struct user_regs_struct
 # define reg_syscall(x)		(x).orig_rax
 # define reg_retval(x)		(x).rax
