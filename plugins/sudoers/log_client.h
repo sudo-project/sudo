@@ -106,7 +106,7 @@ struct client_closure {
 };
 
 /* iolog_client.c */
-struct client_closure *log_server_open(struct log_details *details, struct timespec *now, bool log_io, enum client_state initial_state, const char *reason, struct sudo_plugin_event * (*event_alloc)(void));
+struct client_closure *log_server_open(struct log_details *details, struct timespec *now, bool log_io, enum client_state initial_state, const char *reason);
 bool log_server_close(struct client_closure *closure, int exit_status, int error);
 bool fmt_client_message(struct client_closure *closure, ClientMessage *msg);
 bool fmt_accept_message(struct client_closure *closure, struct eventlog *evlog);

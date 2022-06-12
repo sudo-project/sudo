@@ -1964,11 +1964,16 @@ bad:
  */
 static struct client_closure *
 client_closure_alloc(struct log_details *details, struct timespec *now,
-    bool log_io, enum client_state initial_state, const char *reason,
-    struct sudo_plugin_event * (*event_alloc)(void))
+    bool log_io, enum client_state initial_state, const char *reason)
 {
     struct client_closure *closure;
     debug_decl(client_closure_alloc, SUDOERS_DEBUG_UTIL);
+
+    if (plugin_event_alloc == NULL) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "plugin_event_alloc is not set");
+	debug_return_ptr(NULL);
+    }
 
     if ((closure = calloc(1, sizeof(*closure))) == NULL)
         goto oom;
@@ -1990,10 +1995,10 @@ client_closure_alloc(struct log_details *details, struct timespec *now,
     if (closure->read_buf.data == NULL)
 	goto oom;
 
-    if ((closure->read_ev = event_alloc()) == NULL)
+    if ((closure->read_ev = plugin_event_alloc()) == NULL)
 	goto oom;
 
-    if ((closure->write_ev = event_alloc()) == NULL)
+    if ((closure->write_ev = plugin_event_alloc()) == NULL)
 	goto oom;
 
     closure->log_details = details;
@@ -2007,15 +2012,14 @@ oom:
 
 struct client_closure *
 log_server_open(struct log_details *details, struct timespec *now,
-    bool log_io, enum client_state initial_state, const char *reason,
-    struct sudo_plugin_event * (*event_alloc)(void))
+    bool log_io, enum client_state initial_state, const char *reason)
 {
     struct client_closure *closure;
     static bool warned = false;
     debug_decl(log_server_open, SUDOERS_DEBUG_UTIL);
 
     closure = client_closure_alloc(details, now, log_io, initial_state,
-	reason, event_alloc);
+	reason);
     if (closure == NULL)
 	goto bad;
 

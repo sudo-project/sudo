@@ -157,7 +157,7 @@
 #endif
 
 #if defined(HAVE_DECL_SSIZE_MAX) && !HAVE_DECL_SSIZE_MAX
-# define SIZE_MAX	LONG_MAX
+# define SSIZE_MAX	LONG_MAX
 #endif
 
 #if defined(HAVE_DECL_PATH_MAX) && !HAVE_DECL_PATH_MAX

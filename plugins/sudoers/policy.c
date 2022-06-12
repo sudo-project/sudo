@@ -54,6 +54,7 @@ static const char *interfaces_string;
 bool sudoers_recovery = true;
 sudo_conv_t sudo_conv;
 sudo_printf_t sudo_printf;
+struct sudo_plugin_event * (*plugin_event_alloc)(void);
 const char *path_ldap_conf = _PATH_LDAP_CONF;
 const char *path_ldap_secret = _PATH_LDAP_SECRET;
 static bool session_opened;
@@ -982,7 +983,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 	if ((command_info[info_len++] = sudo_new_key_val("runas_limitprivs", runas_limitprivs)) == NULL)
 	    goto oom;
     }
-#endif /* HAVE_SELINUX */
+#endif /* HAVE_PRIV_SET */
 
     /* Fill in exec environment info. */
     *(exec_args->argv) = argv;
@@ -1021,6 +1022,8 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     sudo_version = version;
     sudo_conv = conversation;
     sudo_printf = plugin_printf;
+    if (sudoers_policy.event_alloc != NULL)
+	plugin_event_alloc = sudoers_policy.event_alloc;
 
     /* Plugin args are only specified for API version 1.2 and higher. */
     if (sudo_version < SUDO_API_MKVERSION(1, 2))

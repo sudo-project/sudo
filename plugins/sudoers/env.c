@@ -986,7 +986,7 @@ rebuild_env(void)
 	 * env_check.
 	 */
 	for (ep = env.old_envp; *ep; ep++) {
-	    /* Add variable unless it matches a black list. */
+	    /* Add variable unless it matches a blocklist. */
 	    if (!env_should_delete(*ep)) {
 		if (strncmp(*ep, "SUDO_PS1=", 9) == 0)
 		    ps1 = *ep + 5;

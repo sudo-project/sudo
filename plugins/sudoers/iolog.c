@@ -745,7 +745,7 @@ sudoers_io_open_remote(struct timespec *now)
 
     /* Open connection to log server, send hello and accept messages. */
     client_closure = log_server_open(&iolog_details, now, true, SEND_ACCEPT,
-	NULL, sudoers_io.event_alloc);
+	NULL);
     if (client_closure != NULL)
 	debug_return_int(1);
 
@@ -768,6 +768,8 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 
     sudo_conv = conversation;
     sudo_printf = plugin_printf;
+    if (sudoers_io.event_alloc != NULL)
+	plugin_event_alloc = sudoers_io.event_alloc;
 
     bindtextdomain("sudoers", LOCALEDIR);
 
@@ -1329,7 +1331,7 @@ sudoers_io_setops(void)
     debug_decl(sudoers_io_setops, SUDOERS_DEBUG_PLUGIN);
 
 #ifdef SUDOERS_LOG_CLIENT
-    if (sudoers_io.event_alloc != NULL && iolog_details.log_servers != NULL) {
+    if (plugin_event_alloc != NULL && iolog_details.log_servers != NULL) {
 	io_operations.open = sudoers_io_open_remote;
 	io_operations.close = sudoers_io_close_remote;
 	io_operations.log = sudoers_io_log_remote;

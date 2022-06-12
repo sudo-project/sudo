@@ -1,3 +1,10 @@
+What's new in Sudo 1.9.11p2
+
+ * Fixed a compilation error on Linux/x86_64 with the x32 ABI.
+
+ * Fixed a regression introduced in 1.9.11p1 that caused a warning
+   when logging to sudo_logsrvd if the command returned no output.
+
 What's new in Sudo 1.9.11p1
 
  * Correctly handle EAGAIN in the I/O read/right events.  This fixes
