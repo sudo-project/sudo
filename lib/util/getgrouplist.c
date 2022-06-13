@@ -66,7 +66,11 @@ int
 sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
     GETGROUPS_T **groupsp, int *ngroupsp)
 {
+#ifdef __APPLE__
+    int *groups = (int *)*groupsp;
+#else
     GETGROUPS_T *groups = *groupsp;
+#endif
     int ngroups;
 #ifndef HAVE_GETGROUPLIST_2
     int grpsize, tries;
