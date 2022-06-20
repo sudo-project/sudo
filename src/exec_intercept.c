@@ -560,8 +560,12 @@ intercept_read(int fd, struct intercept_closure *closure)
 	case false:
 	    goto done;
 	default:
-	    if (errno == EINTR || errno == EAGAIN)
+	    if (errno == EINTR || errno == EAGAIN) {
 		debug_return_bool(true);
+		sudo_debug_printf(
+		    SUDO_DEBUG_WARN|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		    "reading intercept token");
+	    }
 	    sudo_warn("recv");
 	    goto done;
 	}
@@ -574,8 +578,12 @@ intercept_read(int fd, struct intercept_closure *closure)
 	nread = recv(fd, &req_len, sizeof(req_len), 0);
 	if (nread != sizeof(req_len)) {
 	    if (nread == -1) {
-		if (errno == EINTR || errno == EAGAIN)
+		if (errno == EINTR || errno == EAGAIN) {
+		    sudo_debug_printf(
+			SUDO_DEBUG_WARN|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+			"reading intercept message size");
 		    debug_return_bool(true);
+		}
 		sudo_warn("recv");
 	    }
 	    goto done;
@@ -605,8 +613,12 @@ intercept_read(int fd, struct intercept_closure *closure)
 	/* EOF, other side must have exited. */
 	goto done;
     case -1:
-	if (errno == EINTR || errno == EAGAIN)
+	if (errno == EINTR || errno == EAGAIN) {
+	    sudo_debug_printf(
+		SUDO_DEBUG_WARN|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		"reading intercept message");
 	    debug_return_bool(true);
+	}
 	sudo_warn("recv");
 	goto done;
     default:
@@ -835,8 +847,12 @@ intercept_write(int fd, struct intercept_closure *closure)
     nwritten = send(fd, closure->buf + closure->off,
 	closure->len - closure->off, 0);
     if (nwritten == -1) {
-	if (errno == EINTR || errno == EAGAIN)
+	if (errno == EINTR || errno == EAGAIN) {
+	    sudo_debug_printf(
+		SUDO_DEBUG_WARN|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		"writing intercept message");
 	    debug_return_bool(true);
+	}
 	sudo_warn("send");
 	goto done;
     }
