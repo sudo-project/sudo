@@ -26,6 +26,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
@@ -136,16 +137,29 @@ recv_intercept_response(int fd)
     debug_decl(recv_intercept_response, SUDO_DEBUG_EXEC);
 
     /* Read message size (uint32_t in host byte order). */
-    nread = recv(fd, &res_len, sizeof(res_len), 0);
-    if ((size_t)nread != sizeof(res_len)) {
-        if (nread == 0) {
+    for (;;) {
+	nread = recv(fd, &res_len, sizeof(res_len), 0);
+	if (nread == ssizeof(res_len))
+	    break;
+	switch (nread) {
+	case 0:
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unexpected EOF reading response size");
-	} else {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    break;
+	case -1:
+	    if (errno == EINTR)
+		continue;
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 		"error reading response size");
+	    break;
+	default:
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"error reading response size: short read");
+	    break;
 	}
-        goto done;
+	goto done;
     }
     if (res_len > MESSAGE_SIZE_MAX) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -169,7 +183,8 @@ recv_intercept_response(int fd)
 	case -1:
 	    if (errno == EINTR)
 		continue;
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 		"error reading response");
 	    goto done;
 	default:
@@ -199,7 +214,7 @@ sudo_interposer_init(void)
 {
     InterceptResponse *res = NULL;
     static bool initialized;
-    int fd = -1;
+    int flags, fd = -1;
     char **p;
     debug_decl(sudo_interposer_init, SUDO_DEBUG_EXEC);
 
@@ -238,6 +253,13 @@ sudo_interposer_init(void)
 	    "SUDO_INTERCEPT_FD not found in environment");
 	goto done;
     }
+
+    /*
+     * We don't want to use non-blocking I/O.
+     */
+    flags = fcntl(fd, F_GETFL, 0);
+    if (flags != -1)
+        (void)fcntl(fd, F_SETFL, flags & ~O_NONBLOCK);
 
     /*
      * Send InterceptHello message to over the fd.
@@ -334,6 +356,7 @@ static int
 intercept_connect(void)
 {
     int sock = -1;
+    int on = 1;
     struct sockaddr_in sin;
     debug_decl(command_allowed, SUDO_DEBUG_EXEC);
 
@@ -352,6 +375,9 @@ intercept_connect(void)
 	sudo_warn("socket");
 	goto done;
     }
+
+    /* Send data immediately, we need low latency IPC. */
+    (void)setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on));
 
     if (connect(sock, (struct sockaddr *)&sin, sizeof(sin)) == -1) {
 	sudo_warn("connect");

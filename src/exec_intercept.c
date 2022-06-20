@@ -25,6 +25,7 @@
 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
@@ -560,8 +561,12 @@ intercept_read(int fd, struct intercept_closure *closure)
 	case false:
 	    goto done;
 	default:
-	    if (errno == EINTR || errno == EAGAIN)
+	    if (errno == EINTR || errno == EAGAIN) {
 		debug_return_bool(true);
+		sudo_debug_printf(
+		    SUDO_DEBUG_WARN|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		    "reading intercept token");
+	    }
 	    sudo_warn("recv");
 	    goto done;
 	}
@@ -574,8 +579,12 @@ intercept_read(int fd, struct intercept_closure *closure)
 	nread = recv(fd, &req_len, sizeof(req_len), 0);
 	if (nread != sizeof(req_len)) {
 	    if (nread == -1) {
-		if (errno == EINTR || errno == EAGAIN)
+		if (errno == EINTR || errno == EAGAIN) {
+		    sudo_debug_printf(
+			SUDO_DEBUG_WARN|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+			"reading intercept message size");
 		    debug_return_bool(true);
+		}
 		sudo_warn("recv");
 	    }
 	    goto done;
@@ -605,8 +614,12 @@ intercept_read(int fd, struct intercept_closure *closure)
 	/* EOF, other side must have exited. */
 	goto done;
     case -1:
-	if (errno == EINTR || errno == EAGAIN)
+	if (errno == EINTR || errno == EAGAIN) {
+	    sudo_debug_printf(
+		SUDO_DEBUG_WARN|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		"reading intercept message");
 	    debug_return_bool(true);
+	}
 	sudo_warn("recv");
 	goto done;
     default:
@@ -835,8 +848,12 @@ intercept_write(int fd, struct intercept_closure *closure)
     nwritten = send(fd, closure->buf + closure->off,
 	closure->len - closure->off, 0);
     if (nwritten == -1) {
-	if (errno == EINTR || errno == EAGAIN)
+	if (errno == EINTR || errno == EAGAIN) {
+	    sudo_debug_printf(
+		SUDO_DEBUG_WARN|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		"writing intercept message");
 	    debug_return_bool(true);
+	}
 	sudo_warn("send");
 	goto done;
     }
@@ -930,7 +947,7 @@ intercept_accept_cb(int fd, int what, void *v)
     struct sudo_event_base *evbase = sudo_ev_get_base(&closure->ev);
     struct sockaddr_in sin;
     socklen_t sin_len = sizeof(sin);
-    int client_sock, flags;
+    int client_sock, flags, on = 1;
     debug_decl(intercept_accept_cb, SUDO_DEBUG_EXEC);
 
     if (closure->state != RECV_CONNECTION) {
@@ -950,6 +967,9 @@ intercept_accept_cb(int fd, int what, void *v)
     flags = fcntl(client_sock, F_GETFL, 0);
     if (flags != -1)
 	(void)fcntl(client_sock, F_SETFL, flags | O_NONBLOCK);
+
+    /* Send data immediately, we need low latency IPC. */
+    (void)setsockopt(client_sock, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on));
 
     /*
      * Create a new intercept closure and register an event for client_sock.

@@ -573,15 +573,15 @@ log_allowed(struct eventlog *evlog)
 }
 
 bool
-log_exit_status(int exit_status)
+log_exit_status(int status)
 {
     struct eventlog evlog;
     int evl_flags = 0;
-    int ecode = 0;
+    int exit_value = 0;
     int oldlocale;
     struct timespec run_time;
     char sigbuf[SIG2STR_MAX];
-    char *signame = NULL;
+    char *signal_name = NULL;
     bool dumped_core = false;
     bool ret = true;
     debug_decl(log_exit_status, SUDOERS_DEBUG_LOGGING);
@@ -594,17 +594,17 @@ log_exit_status(int exit_status)
 	}
 	sudo_timespecsub(&run_time, &sudo_user.submit_time, &run_time);
 
-        if (WIFEXITED(exit_status)) {
-	    ecode = WEXITSTATUS(exit_status);
-        } else if (WIFSIGNALED(exit_status)) {
-            int signo = WTERMSIG(exit_status);
+        if (WIFEXITED(status)) {
+	    exit_value = WEXITSTATUS(status);
+        } else if (WIFSIGNALED(status)) {
+            int signo = WTERMSIG(status);
             if (signo <= 0 || sig2str(signo, sigbuf) == -1)
                 (void)snprintf(sigbuf, sizeof(sigbuf), "%d", signo);
-	    signame = sigbuf;
-	    ecode = signo | 128;
-	    dumped_core = WCOREDUMP(exit_status);
+	    signal_name = sigbuf;
+	    exit_value = signo | 128;
+	    dumped_core = WCOREDUMP(status);
         } else {
-            sudo_warnx("invalid exit status 0x%x", exit_status);
+            sudo_warnx("invalid exit status 0x%x", status);
 	    ret = false;
 	    goto done;
         }
@@ -619,8 +619,8 @@ log_exit_status(int exit_status)
 		SET(evl_flags, EVLOG_MAIL_ONLY);
 	}
 	evlog.run_time = run_time;
-	evlog.exit_value = ecode;
-	evlog.signal_name = signame;
+	evlog.exit_value = exit_value;
+	evlog.signal_name = signal_name;
 	evlog.dumped_core = dumped_core;
 	if (!eventlog_exit(&evlog, evl_flags))
 	    ret = false;
