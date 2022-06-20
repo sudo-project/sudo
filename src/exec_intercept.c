@@ -25,6 +25,7 @@
 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
@@ -946,7 +947,7 @@ intercept_accept_cb(int fd, int what, void *v)
     struct sudo_event_base *evbase = sudo_ev_get_base(&closure->ev);
     struct sockaddr_in sin;
     socklen_t sin_len = sizeof(sin);
-    int client_sock, flags;
+    int client_sock, flags, on = 1;
     debug_decl(intercept_accept_cb, SUDO_DEBUG_EXEC);
 
     if (closure->state != RECV_CONNECTION) {
@@ -966,6 +967,9 @@ intercept_accept_cb(int fd, int what, void *v)
     flags = fcntl(client_sock, F_GETFL, 0);
     if (flags != -1)
 	(void)fcntl(client_sock, F_SETFL, flags | O_NONBLOCK);
+
+    /* Send data immediately, we need low latency IPC. */
+    (void)setsockopt(client_sock, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on));
 
     /*
      * Create a new intercept closure and register an event for client_sock.

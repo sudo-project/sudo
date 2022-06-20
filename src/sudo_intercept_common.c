@@ -26,6 +26,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
@@ -355,6 +356,7 @@ static int
 intercept_connect(void)
 {
     int sock = -1;
+    int on = 1;
     struct sockaddr_in sin;
     debug_decl(command_allowed, SUDO_DEBUG_EXEC);
 
@@ -373,6 +375,9 @@ intercept_connect(void)
 	sudo_warn("socket");
 	goto done;
     }
+
+    /* Send data immediately, we need low latency IPC. */
+    (void)setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on));
 
     if (connect(sock, (struct sockaddr *)&sin, sizeof(sin)) == -1) {
 	sudo_warn("connect");
