@@ -1,3 +1,14 @@
+What's new in Sudo 1.9.11p3
+
+ * Fixed "connection reset" errors on AIX when running shell scripts
+   with the "intercept" or "log_subcmds" sudoers options enabled.
+   Bug #1034.
+
+ * Fixed very slow execution of shell scripts when the "intercept"
+   or "log_subcmds" sudoers options are set on systems that enable
+   Nagle's algorithm on the loopback device, such as AIX.
+   Bug #1034.
+
 What's new in Sudo 1.9.11p2
 
  * Fixed a compilation error on Linux/x86_64 with the x32 ABI.
