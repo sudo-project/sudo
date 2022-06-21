@@ -872,38 +872,33 @@ intercept_write(int fd, struct intercept_closure *closure)
     closure->len = 0;
     closure->off = 0;
 
-    if (ISSET(closure->details->flags, CD_USE_PTRACE)) {
-	/* Ready for the next policy check from the tracer. */
-	closure->state = RECV_POLICY_CHECK;
-    } else {
-	switch (closure->state) {
-	case RECV_HELLO_INITIAL:
-	    /* Re-use event for the listener. */
-	    close(fd);
-	    rc = sudo_ev_set(&closure->ev, closure->listen_sock,
-		SUDO_EV_READ|SUDO_EV_PERSIST, intercept_accept_cb, closure);
-	    if (rc == -1 || sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
-		sudo_warn("%s", U_("unable to add event to queue"));
-		goto done;
-	    }
-	    closure->listen_sock = -1;
-	    closure->state = RECV_CONNECTION;
-	    accept_closure = closure;
-	    break;
-	case POLICY_ACCEPT:
-	    /* Re-use event to read InterceptHello from sudo_intercept.so ctor. */
-	    rc = sudo_ev_set(&closure->ev, fd, SUDO_EV_READ|SUDO_EV_PERSIST,
-		intercept_cb, closure);
-	    if (rc == -1 || sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
-		sudo_warn("%s", U_("unable to add event to queue"));
-		goto done;
-	    }
-	    closure->state = RECV_HELLO;
-	    break;
-	default:
-	    /* Done with this connection. */
-	    intercept_connection_close(closure);
+    switch (closure->state) {
+    case RECV_HELLO_INITIAL:
+	/* Re-use event for the listener. */
+	close(fd);
+	rc = sudo_ev_set(&closure->ev, closure->listen_sock,
+	    SUDO_EV_READ|SUDO_EV_PERSIST, intercept_accept_cb, closure);
+	if (rc == -1 || sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
+	    sudo_warn("%s", U_("unable to add event to queue"));
+	    goto done;
 	}
+	closure->listen_sock = -1;
+	closure->state = RECV_CONNECTION;
+	accept_closure = closure;
+	break;
+    case POLICY_ACCEPT:
+	/* Re-use event to read InterceptHello from sudo_intercept.so ctor. */
+	rc = sudo_ev_set(&closure->ev, fd, SUDO_EV_READ|SUDO_EV_PERSIST,
+	    intercept_cb, closure);
+	if (rc == -1 || sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
+	    sudo_warn("%s", U_("unable to add event to queue"));
+	    goto done;
+	}
+	closure->state = RECV_HELLO;
+	break;
+    default:
+	/* Done with this connection. */
+	intercept_connection_close(closure);
     }
 
     ret = true;
