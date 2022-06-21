@@ -37,13 +37,13 @@
  * Add a DSO file to LD_PRELOAD or the system equivalent.
  */
 char **
-sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
+sudo_preload_dso(char *const envp[], const char *dso_file, int intercept_fd)
 {
     char *preload = NULL;
-    char **nenvp = NULL;
-    int env_len, len;
-    int preload_idx = -1;
-    int intercept_idx = -1;
+    char **nep, **nenvp = NULL;
+    char *const *ep;
+    char **preload_ptr = NULL;
+    char **intercept_ptr = NULL;
     bool fd_present = false;
     bool dso_present = false;
 # ifdef RTLD_PRELOAD_ENABLE_VAR
@@ -54,6 +54,8 @@ sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
 # ifdef _PATH_ASAN_LIB
     char *dso_buf = NULL;
 # endif
+    size_t env_size;
+    int len;
     debug_decl(sudo_preload_dso, SUDO_DEBUG_UTIL);
 
 # ifdef _PATH_ASAN_LIB
@@ -73,84 +75,81 @@ sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
      * XXX - need to support 32-bit and 64-bit variants
      */
 
-    /* Count entries in envp, looking for LD_PRELOAD as we go. */
-    for (env_len = 0; envp[env_len] != NULL; env_len++) {
-	if (strncmp(envp[env_len], RTLD_PRELOAD_VAR "=", sizeof(RTLD_PRELOAD_VAR)) == 0) {
-	    if (preload_idx == -1) {
-		const char *cp = envp[env_len] + sizeof(RTLD_PRELOAD_VAR);
-		const size_t dso_len = strlen(dso_file);
+    /* Determine max size for new envp. */
+    for (env_size = 0; envp[env_size] != NULL; env_size++)
+	continue;
+    if (!dso_enabled)
+	env_size++;
+    if (intercept_fd != -1)
+	env_size++;
+    env_size += 2;	/* dso_file + terminating NULL */
 
-		/*
-		 * Check to see if dso_file is already first in the list.
-		 * We don't bother checking for it later in the list.
-		 */
-		if (strncmp(cp, dso_file, dso_len) == 0) {
-		    if (cp[dso_len] == '\0' || cp[dso_len] == RTLD_PRELOAD_DELIM)
-			dso_present = true;
-		}
-
-		/* Save index of existing LD_PRELOAD variable. */
-		preload_idx = env_len;
-	    } else {
-		/* Remove duplicate LD_PRELOAD. */
-		int i;
-		for (i = env_len; envp[i] != NULL; i++) {
-		    envp[i] = envp[i + 1];
-		}
-	    }
-	    continue;
-	}
-	if (intercept_fd != -1 && strncmp(envp[env_len], "SUDO_INTERCEPT_FD=",
-		sizeof("SUDO_INTERCEPT_FD=") - 1) == 0) {
-	    if (intercept_idx == -1) {
-		const char *cp = envp[env_len] + sizeof("SUDO_INTERCEPT_FD=") - 1;
-		const char *errstr;
-		int fd;
-
-		fd = sudo_strtonum(cp, 0, INT_MAX, &errstr);
-		if (fd == intercept_fd && errstr == NULL)
-		    fd_present = true;
-
-		/* Save index of existing SUDO_INTERCEPT_FD variable. */
-		intercept_idx = env_len;
-	    } else {
-		/* Remove duplicate SUDO_INTERCEPT_FD. */
-		int i;
-		for (i = env_len; envp[i] != NULL; i++) {
-		    envp[i] = envp[i + 1];
-		}
-	    }
-	    continue;
-	}
-# ifdef RTLD_PRELOAD_ENABLE_VAR
-	if (strncmp(envp[env_len], RTLD_PRELOAD_ENABLE_VAR "=", sizeof(RTLD_PRELOAD_ENABLE_VAR)) == 0) {
-	    dso_enabled = true;
-	    continue;
-	}
-# endif
+    /* Allocate new envp. */
+    nenvp = reallocarray(NULL, env_size, sizeof(*nenvp));
+    if (nenvp == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_ptr(NULL);
     }
 
     /*
-     * Make a new copy of envp as needed.
-     * It would be nice to realloc the old envp[] but we don't know
-     * whether it was dynamically allocated. [TODO: plugin API]
+     * Shallow copy envp, with special handling for RTLD_PRELOAD_VAR,
+     * RTLD_PRELOAD_ENABLE_VAR and SUDO_INTERCEPT_FD.
      */
-    if (preload_idx == -1 || !dso_enabled || intercept_idx == -1) {
-	const int env_size = env_len + 1 + (preload_idx == -1) + dso_enabled + (intercept_idx == -1); // -V547
+    for (ep = envp, nep = nenvp; *ep != NULL; ep++) {
+	if (strncmp(*ep, RTLD_PRELOAD_VAR "=", sizeof(RTLD_PRELOAD_VAR)) == 0) {
+	    const char *cp = *ep + sizeof(RTLD_PRELOAD_VAR);
+	    const size_t dso_len = strlen(dso_file);
 
-	nenvp = reallocarray(NULL, env_size, sizeof(*nenvp));
-	if (nenvp == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    debug_return_ptr(NULL);
+	    /* Skip duplicates. */
+	    if (preload_ptr != NULL)
+		continue;
+
+	    /*
+	     * Check to see if dso_file is already first in the list.
+	     * We don't bother checking for it later in the list.
+	     */
+	    if (strncmp(cp, dso_file, dso_len) == 0) {
+		if (cp[dso_len] == '\0' || cp[dso_len] == RTLD_PRELOAD_DELIM)
+		    dso_present = true;
+	    }
+
+	    /* Save pointer to LD_PRELOAD variable. */
+	    preload_ptr = nep;
+
+	    goto copy;
 	}
-	memcpy(nenvp, envp, env_len * sizeof(*envp));
-	nenvp[env_len] = NULL;
-	envp = nenvp;
+	if (intercept_fd != -1 && strncmp(*ep, "SUDO_INTERCEPT_FD=",
+		sizeof("SUDO_INTERCEPT_FD=") - 1) == 0) {
+	    const char *cp = *ep + sizeof("SUDO_INTERCEPT_FD=") - 1;
+	    const char *errstr;
+	    int fd;
+
+	    /* Skip duplicates. */
+	    if (intercept_ptr != NULL)
+		continue;
+
+	    fd = sudo_strtonum(cp, 0, INT_MAX, &errstr);
+	    if (fd == intercept_fd && errstr == NULL)
+		fd_present = true;
+
+	    /* Save pointer to SUDO_INTERCEPT_FD variable. */
+	    intercept_ptr = nep;
+
+	    goto copy;
+	}
+# ifdef RTLD_PRELOAD_ENABLE_VAR
+	if (strncmp(*ep, RTLD_PRELOAD_ENABLE_VAR "=",
+		sizeof(RTLD_PRELOAD_ENABLE_VAR)) == 0) {
+	    dso_enabled = true;
+	}
+# endif
+copy:
+	*nep++ = *ep;	/* shallow copy */
     }
 
     /* Prepend our LD_PRELOAD to existing value or add new entry at the end. */
     if (!dso_present) {
-	if (preload_idx == -1) {
+	if (preload_ptr == NULL) {
 # ifdef RTLD_PRELOAD_DEFAULT
 	    len = asprintf(&preload, "%s=%s%c%s", RTLD_PRELOAD_VAR, dso_file,
 		RTLD_PRELOAD_DELIM, RTLD_PRELOAD_DEFAULT);
@@ -163,22 +162,20 @@ sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
 		goto oom;
 	    }
 # endif
-	    envp[env_len++] = preload;
-	    envp[env_len] = NULL;
+	    *nep++ = preload;
 	} else {
-	    const char *old_val = envp[preload_idx] + sizeof(RTLD_PRELOAD_VAR);
+	    const char *old_val = *preload_ptr + sizeof(RTLD_PRELOAD_VAR);
 	    len = asprintf(&preload, "%s=%s%c%s", RTLD_PRELOAD_VAR,
 		dso_file, RTLD_PRELOAD_DELIM, old_val);
 	    if (len == -1) {
 		goto oom;
 	    }
-	    envp[preload_idx] = preload;
+	    *preload_ptr = preload;
 	}
     }
 # ifdef RTLD_PRELOAD_ENABLE_VAR
     if (!dso_enabled) {
-	envp[env_len++] = RTLD_PRELOAD_ENABLE_VAR "=";
-	envp[env_len] = NULL;
+	*nenvp++ = RTLD_PRELOAD_ENABLE_VAR "=";
     }
 # endif
     if (!fd_present && intercept_fd != -1) {
@@ -188,18 +185,21 @@ sudo_preload_dso(char *envp[], const char *dso_file, int intercept_fd)
 	if (len == -1) {
 	    goto oom;
 	}
-	if (intercept_idx != -1) {
-	    envp[intercept_idx] = fdstr;
+	if (intercept_ptr != NULL) {
+	    *intercept_ptr = fdstr;
 	} else {
-	    envp[env_len++] = fdstr;
-	    envp[env_len] = NULL;
+	    *nep++ = fdstr;
 	}
     }
+
+    /* NULL terminate nenvp at last. */
+    *nep = NULL;
+
 # ifdef _PATH_ASAN_LIB
     free(dso_buf);
 # endif
 
-    debug_return_ptr(envp);
+    debug_return_ptr(nenvp);
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 # ifdef _PATH_ASAN_LIB

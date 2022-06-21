@@ -447,9 +447,7 @@ command_allowed(const char *cmnd, char * const argv[],
 		goto oom;
 	}
 	nargv[len] = NULL;
-	// XXX - bogus cast
-	nenvp = sudo_preload_dso((char **)envp, sudo_conf_intercept_path(),
-	    sock);
+	nenvp = sudo_preload_dso(envp, sudo_conf_intercept_path(), sock);
 	if (nenvp == NULL)
 	    goto oom;
 	*ncmndp = ncmnd;
