@@ -595,11 +595,10 @@ getcwd_by_pid(pid_t pid, char *buf, size_t bufsize)
 
     len = snprintf(path, sizeof(path), "/proc/%d/cwd", (int)pid);
     if (len < sizeof(path)) {
-	len = readlink(path, buf, bufsize);
+	len = readlink(path, buf, bufsize - 1);
 	if (len != (size_t)-1) {
-	    /* Check for truncation. */
-	    if (len >= bufsize)
-		buf[bufsize - 1] = '\0';
+	    /* readlink(2) does not add the NUL for us. */
+	    buf[len] = '\0';
 	    debug_return_bool(true);
 	}
     }
