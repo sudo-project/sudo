@@ -34,9 +34,9 @@
 # endif
 #endif
 
-#include "sudo_plugin.h"
-#include "sudo_compat.h"
+#include "sudo.h"
 #include "sudo_dso.h"
+#include "sudo_plugin.h"
 
 #ifdef STATIC_SUDOERS_PLUGIN
 
