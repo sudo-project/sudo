@@ -18,6 +18,19 @@
 #undef _LARGE_FILES
 #undef const
 
+/*
+ * Configure does not define _LARGEFILE64_SOURCE by default.
+ * We need to manually define it on AIX and native 64-bit platforms.
+ */
+#if defined (_LARGE_FILES) || defined (__LP64__)
+# ifndef _LFS64_LARGEFILE
+#  define _LFS64_LARGEFILE 1
+# endif
+# ifndef _LARGEFILE64_SOURCE
+#  define _LARGEFILE64_SOURCE 1
+# endif
+#endif
+
 /* We build sudo and its libs with -fvisibility=hidden where supported. */
 #ifdef HAVE_DSO_VISIBILITY
 # if defined(__GNUC__)
