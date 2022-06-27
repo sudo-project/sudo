@@ -755,7 +755,7 @@ done:
  * Appends the wire format message to the closure's write queue.
  * Returns true on success, false on failure.
  */
-bool
+static bool
 fmt_client_hello(struct client_closure *closure)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;

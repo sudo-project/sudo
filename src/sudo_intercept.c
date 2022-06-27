@@ -408,39 +408,50 @@ sudo_shl_get_next(const char *symbol, short type)
 }
 # endif /* HAVE_SHL_LOAD */
 
-sudo_dso_public int
+sudo_dso_public int system(const char *cmnd);
+sudo_dso_public int execve(const char *cmnd, char * const argv[], char * const envp[]);
+sudo_dso_public int execv(const char *cmnd, char * const argv[]);
+#ifdef HAVE_EXECVPE
+sudo_dso_public int execvpe(const char *cmnd, char * const argv[], char * const envp[]);
+#endif
+sudo_dso_public int execvp(const char *cmnd, char * const argv[]);
+sudo_dso_public int execl(const char *name, const char *arg, ...);
+sudo_dso_public int execle(const char *name, const char *arg, ...);
+sudo_dso_public int execlp(const char *name, const char *arg, ...);
+
+int
 system(const char *cmnd)
 {
     return system_wrapper(cmnd);
 }
 
-sudo_dso_public int
+int
 execve(const char *cmnd, char * const argv[], char * const envp[])
 {
     return exec_wrapper(cmnd, argv, envp, false);
 }
 
-sudo_dso_public int
+int
 execv(const char *cmnd, char * const argv[])
 {
     return execve(cmnd, argv, environ);
 }
 
 #ifdef HAVE_EXECVPE
-sudo_dso_public int
+int
 execvpe(const char *cmnd, char * const argv[], char * const envp[])
 {
     return exec_wrapper(cmnd, argv, envp, true);
 }
 #endif
 
-sudo_dso_public int
+int
 execvp(const char *cmnd, char * const argv[])
 {
     return exec_wrapper(cmnd, argv, environ, true);
 }
 
-sudo_dso_public int
+int
 execl(const char *name, const char *arg, ...)
 {
     va_list ap;
@@ -452,7 +463,7 @@ execl(const char *name, const char *arg, ...)
     return -1;
 }
 
-sudo_dso_public int
+int
 execle(const char *name, const char *arg, ...)
 {
     va_list ap;
@@ -464,7 +475,7 @@ execle(const char *name, const char *arg, ...)
     return -1;
 }
 
-sudo_dso_public int
+int
 execlp(const char *name, const char *arg, ...)
 {
     va_list ap;

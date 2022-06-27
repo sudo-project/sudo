@@ -232,7 +232,7 @@ connect_server(struct peer_info *server, const char *port)
 /*
  * Get a buffer from the free list if possible, else allocate a new one.
  */
-struct connection_buffer *
+static struct connection_buffer *
 get_free_buf(size_t len, struct client_closure *closure)
 {
     struct connection_buffer *buf;

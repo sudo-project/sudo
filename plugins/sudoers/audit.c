@@ -432,7 +432,7 @@ sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
     debug_return_int(ret);
 }
 
-void
+static void
 sudoers_audit_close(int status_type, int status)
 {
     log_server_exit(status_type, status);

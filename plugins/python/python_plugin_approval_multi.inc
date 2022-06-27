@@ -11,7 +11,7 @@ extern struct approval_plugin APPROVAL_SYMBOL_NAME(python_approval);
 static struct ApprovalPluginContext PLUGIN_CTX = { { NULL }, &APPROVAL_SYMBOL_NAME(python_approval) };
 
 
-int
+static int
 CALLBACK_CFUNC(open)(unsigned int version, sudo_conv_t conversation,
     sudo_printf_t sudo_printf, char * const settings[],
     char * const user_info[], int submit_optind,
@@ -23,13 +23,13 @@ CALLBACK_CFUNC(open)(unsigned int version, sudo_conv_t conversation,
         submit_envp, plugin_options, errstr);
 }
 
-void
+static void
 CALLBACK_CFUNC(close)(void)
 {
     python_plugin_approval_close(&PLUGIN_CTX);
 }
 
-int
+static int
 CALLBACK_CFUNC(check)(char * const command_info[], char * const run_argv[],
     char * const run_envp[], const char **errstr)
 {
@@ -37,7 +37,7 @@ CALLBACK_CFUNC(check)(char * const command_info[], char * const run_argv[],
         run_envp, errstr);
 }
 
-int
+static int
 CALLBACK_CFUNC(show_version)(int verbose)
 {
     return python_plugin_approval_show_version(&PLUGIN_CTX, verbose);

@@ -311,7 +311,7 @@ get_free_buf(size_t len, struct connection_closure *closure)
     debug_return_ptr(buf);
 }
 
-bool
+static bool
 fmt_server_message(struct connection_closure *closure, ServerMessage *msg)
 {
     struct connection_buffer *buf = NULL;

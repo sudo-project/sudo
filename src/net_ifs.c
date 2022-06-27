@@ -67,11 +67,7 @@ struct rtentry;
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
 
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
+#include "sudo.h"
 
 /* Minix apparently lacks IFF_LOOPBACK */
 #ifndef IFF_LOOPBACK

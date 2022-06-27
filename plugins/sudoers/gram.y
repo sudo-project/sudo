@@ -1914,10 +1914,10 @@ found:
 #endif /* NO_LEAKS */
 }
 
-void
+#ifdef NO_LEAKS
+static void
 parser_leak_free(void)
 {
-#ifdef NO_LEAKS
     struct parser_leak_entry *entry;
     void *next;
     debug_decl(parser_leak_run, SUDOERS_DEBUG_PARSER);
@@ -1999,8 +1999,8 @@ parser_leak_free(void)
     }
 
     debug_return;
-#endif /* NO_LEAKS */
 }
+#endif /* NO_LEAKS */
 
 void
 parser_leak_init(void)

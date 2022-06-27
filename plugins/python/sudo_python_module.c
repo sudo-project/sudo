@@ -293,13 +293,13 @@ _call_conversation_callback(PyObject *py_callback, int signo)
     debug_return_int(rc);
 }
 
-int
+static int
 python_sudo_conversation_suspend_cb(int signo, struct py_conv_callback_closure *closure)
 {
     return _call_conversation_callback(closure->py_on_suspend, signo);
 }
 
-int
+static int
 python_sudo_conversation_resume_cb(int signo, struct py_conv_callback_closure *closure)
 {
     return _call_conversation_callback(closure->py_on_resume, signo);
@@ -467,7 +467,7 @@ cleanup:
 }
 
 CPYCHECKER_STEALS_REFERENCE_TO_ARG(3)
-void
+static void
 sudo_module_register_enum(PyObject *py_module, const char *enum_name, PyObject *py_constants_dict)
 {
     // pseudo code:

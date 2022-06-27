@@ -43,6 +43,7 @@
 
 static int fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[], struct sudo_conv_reply replies[], struct sudo_conv_callback *callback);
 static int fuzz_printf(int msg_type, const char *fmt, ...);
+int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
 /* Required to link with parser. */
 struct sudo_user sudo_user;

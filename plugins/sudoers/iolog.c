@@ -288,7 +288,7 @@ bad:
  * Pull out I/O log related data from user_info and command_info arrays.
  * Returns true if I/O logging is enabled, false if not and -1 on error.
  */
-int
+static int
 iolog_deserialize_info(struct log_details *details, char * const user_info[],
     char * const command_info[], char * const argv[], char * const user_env[])
 {

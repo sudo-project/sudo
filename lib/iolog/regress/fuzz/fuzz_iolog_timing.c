@@ -41,6 +41,8 @@
 #include "sudo_plugin.h"
 #include "sudo_util.h"
 
+int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
+
 static int
 fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],
     struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)

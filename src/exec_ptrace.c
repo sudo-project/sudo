@@ -1320,13 +1320,6 @@ exec_ptrace_subcmds_supported(void)
 #else
 /* STUB */
 bool
-have_seccomp_action(const char *action)
-{
-    return false;
-}
-
-/* STUB */
-bool
 exec_ptrace_stopped(pid_t pid, int status, void *intercept)
 {
     return true;

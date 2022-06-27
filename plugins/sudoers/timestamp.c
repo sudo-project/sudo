@@ -591,7 +591,7 @@ done:
 /*
  * Write a TS_LOCKEXCL record at the beginning of the time stamp file.
  */
-bool
+static bool
 timestamp_lock_write(struct ts_cookie *cookie)
 {
     struct timestamp_entry entry;

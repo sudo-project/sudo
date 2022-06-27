@@ -34,7 +34,7 @@
 
 sudo_dso_public int main(int argc, char *argv[]);
 
-bool
+static bool
 json_print_object(struct json_container *json, struct json_object *object)
 {
     struct json_item *item;

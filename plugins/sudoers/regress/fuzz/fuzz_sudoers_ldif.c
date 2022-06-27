@@ -29,6 +29,7 @@
 #include "sudoers.h"
 
 static int fuzz_printf(int msg_type, const char *fmt, ...);
+int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
 /* Required to link with parser. */
 struct sudo_user sudo_user;

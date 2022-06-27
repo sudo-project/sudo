@@ -39,9 +39,6 @@
 #include "sudo_gettext.h"
 #include "sudo_util.h"
 
-/* strtoid.c (not exported) */
-long long sudo_strtonumx(const char *str, long long minval, long long maxval, char **ep, const char **errstrp);
-
 /*
  * Make sure that the ID ends with a valid separator char.
  */

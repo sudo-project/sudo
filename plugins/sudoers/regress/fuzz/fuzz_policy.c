@@ -39,7 +39,9 @@
 #endif
 
 #include "sudoers.h"
+#include "sudo_iolog.h"
 #include "interfaces.h"
+#include "check.h"
 
 extern char **environ;
 extern sudo_dso_public struct policy_plugin sudoers_policy;
@@ -48,6 +50,8 @@ const char *path_plugin_dir = _PATH_SUDO_PLUGIN_DIR;
 char *audit_msg;
 
 static int pass;
+
+int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
 static FILE *
 open_data(const uint8_t *data, size_t size)
@@ -161,7 +165,7 @@ fuzz_printf(int msg_type, const char *fmt, ...)
     return 0;
 }
 
-int
+static int
 fuzz_hook_stub(struct sudo_hook *hook)
 {
     return 0;
@@ -820,7 +824,7 @@ expand_iolog_path(const char *inpath, char *path, size_t pathlen,
 
 /* STUB */
 bool
-iolog_nextid(char *iolog_dir, char sessid[7])
+iolog_nextid(const char *iolog_dir, char sessid[7])
 {
     strlcpy(sessid, "000001", 7);
     return true;

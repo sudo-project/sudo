@@ -295,7 +295,7 @@ bad:
  * Returns 0 on success, -1 on error, setting errno.
  * If there is no next relay, errno is set to ENOENT.
  */
-int
+static int
 connect_relay_next(struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;

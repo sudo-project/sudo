@@ -49,7 +49,7 @@ static struct parse_delay_test {
 /*
  * Test iolog_parse_delay()
  */
-void
+static void
 test_parse_delay(int *ntests, int *nerrors)
 {
     unsigned int i;
@@ -106,7 +106,7 @@ static struct adjust_delay_test {
 /*
  * Test iolog_adjust_delay()
  */
-void
+static void
 test_adjust_delay(int *ntests, int *nerrors)
 {
     unsigned int i;

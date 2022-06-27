@@ -854,6 +854,8 @@ difftm(struct tm *a, struct tm *b)
 	  + (a->tm_sec - b->tm_sec));
 }
 
+time_t get_date(char *p);
+
 time_t
 get_date(char *p)
 {

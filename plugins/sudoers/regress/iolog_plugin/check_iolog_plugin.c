@@ -155,7 +155,7 @@ validate_iolog_info(const char *log_dir, bool legacy)
     return true;
 }
 
-bool
+static bool
 validate_timing(FILE *fp, int recno, int type, unsigned int p1, unsigned int p2)
 {
     struct timing_closure timing;
@@ -206,7 +206,7 @@ validate_timing(FILE *fp, int recno, int type, unsigned int p1, unsigned int p2)
 /*
  * Test sudoers I/O log plugin endpoints.
  */
-void
+static void
 test_endpoints(int *ntests, int *nerrors, const char *iolog_dir, char *envp[])
 {
     int rc, cmnd_argc = 1;

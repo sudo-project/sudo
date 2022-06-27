@@ -335,7 +335,7 @@ void parse_preserved_fds(struct preserved_fd_list *pfds, const char *fdstr);
 int tcsetpgrp_nobg(int fd, pid_t pgrp_id);
 
 /* limits.c */
-void disable_coredump();
+void disable_coredump(void);
 void restore_limits(void);
 void restore_nproc(void);
 void set_policy_rlimits(void);

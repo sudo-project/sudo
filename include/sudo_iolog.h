@@ -146,7 +146,7 @@ bool iolog_swapids(bool restore);
 bool iolog_mkdirs(char *path);
 
 /* iolog_filter.c */
-void *iolog_pwfilt_alloc();
+void *iolog_pwfilt_alloc(void);
 bool iolog_pwfilt_add(void *handle, const char *pattern);
 void iolog_pwfilt_free(void *handle);
 bool iolog_pwfilt_remove(void *handle, const char *pattern);

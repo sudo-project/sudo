@@ -299,6 +299,8 @@ sudo_dso_public int sudo_strtobool_v1(const char *str);
 /* strtonum.c */
 /* Not versioned for historical reasons. */
 sudo_dso_public long long sudo_strtonum(const char *, long long, long long, const char **);
+/* Not currently exported. */
+long long sudo_strtonumx(const char *str, long long minval, long long maxval, char **endp, const char **errstrp);
 
 /* strtoid.c */
 sudo_dso_public id_t sudo_strtoid_v1(const char *str, const char *sep, char **endp, const char **errstr);

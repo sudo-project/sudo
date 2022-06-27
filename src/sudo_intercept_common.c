@@ -127,7 +127,7 @@ done:
 /*
  * Receive InterceptResponse from sudo over fd.
  */
-InterceptResponse *
+static InterceptResponse *
 recv_intercept_response(int fd)
 {
     InterceptResponse *res = NULL;
@@ -358,7 +358,7 @@ intercept_connect(void)
     int sock = -1;
     int on = 1;
     struct sockaddr_in sin;
-    debug_decl(command_allowed, SUDO_DEBUG_EXEC);
+    debug_decl(intercept_connect, SUDO_DEBUG_EXEC);
 
     if (intercept_port == 0) {
 	sudo_warnx(U_("intercept port not set"));
@@ -389,6 +389,9 @@ intercept_connect(void)
 done:
     debug_return_int(sock);
 }
+
+/* Called from sudo_intercept.c */
+bool command_allowed(const char *cmnd, char * const argv[], char * const envp[], char **ncmndp, char ***nargvp, char ***nenvpp);
 
 bool
 command_allowed(const char *cmnd, char * const argv[],

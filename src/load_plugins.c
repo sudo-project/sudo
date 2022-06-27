@@ -205,7 +205,7 @@ plugin_exists(struct plugin_container_list *plugins, const char *symbol_name)
 
 typedef struct generic_plugin * (plugin_clone_func)(void);
 
-struct generic_plugin *
+static struct generic_plugin *
 sudo_plugin_try_to_clone(void *so_handle, const char *symbol_name)
 {
     debug_decl(sudo_plugin_try_to_clone, SUDO_DEBUG_PLUGIN);
@@ -436,7 +436,7 @@ sudo_init_event_alloc(void)
  * Load the specified symbol from the sudoers plugin.
  * Used to provide a default plugin when none are specified in sudo.conf.
  */
-bool
+static bool
 sudo_load_sudoers_plugin(const char *symbol_name, bool optional)
 {
     struct plugin_info *info;

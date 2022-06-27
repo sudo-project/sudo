@@ -38,6 +38,7 @@ struct ApprovalPluginContext
 // This also verifies compile time that the name matches the sudo plugin API.
 #define CALLBACK_PYNAME(func_name) ((void)CALLBACK_PLUGINFUNC(func_name), #func_name)
 
+sudo_dso_public struct approval_plugin *python_approval_clone(void);
 
 static int
 python_plugin_approval_open(struct ApprovalPluginContext *approval_ctx,
@@ -133,7 +134,7 @@ python_plugin_approval_check(struct ApprovalPluginContext *approval_ctx,
     debug_return_int(rc);
 }
 
-int
+static int
 python_plugin_approval_show_version(struct ApprovalPluginContext *approval_ctx, int verbose)
 {
     debug_decl(python_plugin_approval_show_version, PYTHON_DEBUG_CALLBACKS);
@@ -175,7 +176,7 @@ static struct approval_plugin *extra_approval_plugins[] = {
     &python_approval7
 };
 
-sudo_dso_public struct approval_plugin *
+struct approval_plugin *
 python_approval_clone(void)
 {
     static size_t counter = 0;

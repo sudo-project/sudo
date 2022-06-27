@@ -183,7 +183,8 @@ main(int argc, char **argv)
 	return errors;
 }
 
-int test_glob(struct gl_entry *entry)
+static int
+test_glob(struct gl_entry *entry)
 {
 	glob_t gl;
 	char **ap;

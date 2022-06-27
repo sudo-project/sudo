@@ -41,6 +41,8 @@
 #include "sudoers.h"
 #include "interfaces.h"
 
+int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
+
 struct interface_list *
 get_interfaces(void)
 {

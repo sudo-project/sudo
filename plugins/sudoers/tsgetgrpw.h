@@ -40,3 +40,6 @@ void testsudoers_endpwent(void);
 struct passwd *testsudoers_getpwent(void);
 struct passwd *testsudoers_getpwnam(const char *);
 struct passwd *testsudoers_getpwuid(uid_t);
+
+int testsudoers_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
+    GETGROUPS_T **groupsp, int *ngroupsp);

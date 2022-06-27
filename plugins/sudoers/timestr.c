@@ -26,9 +26,7 @@
 
 #include <time.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "parse.h"
+#include "sudoers.h"
 
 /*
  * Return a static buffer with the current date + time.

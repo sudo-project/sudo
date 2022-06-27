@@ -4995,7 +4995,7 @@ if test -n "$GCC"; then
 	dnl
 	dnl Default warnings for development use.
 	dnl
-	CFLAGS="${CFLAGS} -Wall -Wsign-compare -Wpointer-arith -Wno-unknown-pragmas"
+	CFLAGS="${CFLAGS} -Wall -Wsign-compare -Wpointer-arith -Wno-unknown-pragmas -Wmissing-prototypes"
 	AX_CHECK_COMPILE_FLAG([-Wshadow], [CFLAGS="$CFLAGS -Wshadow"])
 	dnl
 	dnl The fallthrough attribute is supported by gcc 7.0 and clang 10.

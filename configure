@@ -32298,7 +32298,7 @@ printf "%s\n" "#define os_init $OS_INIT" >>confdefs.h
 
 if test -n "$GCC"; then
     if test X"$enable_warnings" = X"yes" -o X"$with_devel" = X"yes"; then
-				CFLAGS="${CFLAGS} -Wall -Wsign-compare -Wpointer-arith -Wno-unknown-pragmas"
+				CFLAGS="${CFLAGS} -Wall -Wsign-compare -Wpointer-arith -Wno-unknown-pragmas -Wmissing-prototypes"
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -Wshadow" >&5
 printf %s "checking whether C compiler accepts -Wshadow... " >&6; }
 if test ${ax_cv_check_cflags___Wshadow+y}
