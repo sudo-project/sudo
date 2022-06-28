@@ -193,7 +193,7 @@ group_plugin_query(const char *user, const char *group,
  */
 
 int
-group_plugin_load(char *plugin_info)
+group_plugin_load(const char *plugin_info)
 {
     debug_decl(group_plugin_load, SUDOERS_DEBUG_UTIL);
     debug_return_int(false);
