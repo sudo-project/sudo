@@ -5032,7 +5032,7 @@ if test -n "$GCC"; then
     if test X"$enable_werror" = X"yes"; then
 	CFLAGS="${CFLAGS} -Werror"
     fi
-    case "$host" in
+    case "$host_os" in
 	# Avoid unwanted warnings on macOS
 	darwin*) CFLAGS="${CFLAGS} -Wno-deprecated-declarations";;
     esac
