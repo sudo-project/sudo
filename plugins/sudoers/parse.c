@@ -719,7 +719,7 @@ display_defaults(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
     struct sudo_lbuf *lbuf)
 {
     struct defaults *d;
-    char *prefix;
+    const char *prefix;
     int nfound = 0;
     debug_decl(display_defaults, SUDOERS_DEBUG_PARSER);
 
@@ -762,7 +762,7 @@ display_bound_defaults_by_type(struct sudoers_parse_tree *parse_tree,
     struct defaults *d;
     struct defaults_binding *binding = NULL;
     struct member *m;
-    char *dsep;
+    const char *dsep;
     int atype, nfound = 0;
     debug_decl(display_bound_defaults_by_type, SUDOERS_DEBUG_PARSER);
 

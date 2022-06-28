@@ -35,7 +35,7 @@ sudo_dso_public int main(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
-    char *progbase = "progname_test";
+    const char *progbase = "progname_test";
     int ch;
 
     if (argc > 0)

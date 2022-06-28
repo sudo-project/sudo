@@ -787,7 +787,7 @@ userlist_matches_filter(struct sudoers_parse_tree *parse_tree,
 	     * can do its thing.
 	     */
 	    memset(&pw, 0, sizeof(pw));
-	    pw.pw_name = "_nobody";
+	    pw.pw_name = (char *)"_nobody";
 	    pw.pw_uid = (uid_t)-1;
 	    pw.pw_gid = (gid_t)-1;
 

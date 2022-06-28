@@ -652,7 +652,7 @@ sudo_debug_write2_v1(int fd, const char *func, const char *file, int lineno,
     /* Append error string if errno is specified. */
     if (errnum) {
 	if (len > 0) {
-	    iov[iovcnt].iov_base = ": ";
+	    iov[iovcnt].iov_base = (char *)": ";
 	    iov[iovcnt].iov_len = 2;
 	    iovcnt++;
 	}
@@ -663,7 +663,7 @@ sudo_debug_write2_v1(int fd, const char *func, const char *file, int lineno,
 
     /* If function, file and lineno are specified, append them. */
     if (func != NULL && file != NULL && lineno != 0) {
-	iov[iovcnt].iov_base = " @ ";
+	iov[iovcnt].iov_base = (char *)" @ ";
 	iov[iovcnt].iov_len = 3;
 	iovcnt++;
 
@@ -671,7 +671,7 @@ sudo_debug_write2_v1(int fd, const char *func, const char *file, int lineno,
 	iov[iovcnt].iov_len = strlen(func);
 	iovcnt++;
 
-	iov[iovcnt].iov_base = "() ";
+	iov[iovcnt].iov_base = (char *)"() ";
 	iov[iovcnt].iov_len = 3;
 	iovcnt++;
 
@@ -686,7 +686,7 @@ sudo_debug_write2_v1(int fd, const char *func, const char *file, int lineno,
     }
 
     /* Append newline. */
-    iov[iovcnt].iov_base = "\n";
+    iov[iovcnt].iov_base = (char *)"\n";
     iov[iovcnt].iov_len = 1;
     iovcnt++;
 

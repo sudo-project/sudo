@@ -58,7 +58,7 @@
 **  An entry in the lexical lookup table.
 */
 typedef struct _TABLE {
-    char	*name;
+    const char	*name;
     int		type;
     time_t	value;
 } TABLE;

@@ -1171,7 +1171,7 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 static int
 sudoers_policy_validate(const char **errstr)
 {
-    char *argv[] = { "validate", NULL };
+    char *argv[] = { (char *)"validate", NULL };
     const int argc = 1;
     int ret;
     debug_decl(sudoers_policy_validate, SUDOERS_DEBUG_PLUGIN);
@@ -1213,7 +1213,7 @@ static int
 sudoers_policy_list(int argc, char * const argv[], int verbose,
     const char *list_user, const char **errstr)
 {
-    char *list_argv[] = { "list", NULL };
+    char *list_argv[] = { (char *)"list", NULL };
     int ret;
     debug_decl(sudoers_policy_list, SUDOERS_DEBUG_PLUGIN);
 

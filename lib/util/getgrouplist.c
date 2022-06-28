@@ -238,7 +238,7 @@ str2grp(const char *instr, int inlen, void *ent, char *buf, int buflen)
     /* Check for YP inclusion/exclusion entries. */
     if (*cp == '+' || *cp == '-') {
 	/* Only the name is required for YP inclusion/exclusion entries. */
-	grp->gr_passwd = "";
+	grp->gr_passwd = (char *)"";
 	grp->gr_gid = 0;
 	grp->gr_mem = NULL;
 	yp = 1;

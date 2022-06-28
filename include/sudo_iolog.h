@@ -95,7 +95,7 @@ struct iolog_path_escape {
 };
 
 /* host_port.c */
-bool iolog_parse_host_port(char *str, char **hostp, char **portp, bool *tlsp, char *defport, char *defport_tls);
+bool iolog_parse_host_port(char *str, char **hostp, char **portp, bool *tlsp, const char *defport, const char *defport_tls);
 
 /* iolog_path.c */
 bool expand_iolog_path(const char *inpath, char *path, size_t pathlen, const struct iolog_path_escape *escapes, void *closure);

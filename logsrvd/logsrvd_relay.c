@@ -234,7 +234,7 @@ fmt_client_hello(struct connection_closure *closure)
     debug_decl(fmt_client_hello, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending ClientHello", __func__);
-    hello_msg.client_id = "Sudo Logsrvd " PACKAGE_VERSION;
+    hello_msg.client_id = (char *)"Sudo Logsrvd " PACKAGE_VERSION;
 
     client_msg.u.hello_msg = &hello_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_HELLO_MSG;

@@ -818,13 +818,13 @@ env_update_didvar(const char *ep, unsigned int *didvar)
 }
 
 #define CHECK_PUTENV(a, b, c)	do {					       \
-    if (sudo_putenv((a), (b), (c)) == -1) {				       \
+    if (sudo_putenv((char *)(a), (b), (c)) == -1) {			       \
 	goto bad;							       \
     }									       \
 } while (0)
 
 #define CHECK_SETENV2(a, b, c, d)	do {				       \
-    if (sudo_setenv2((a), (b), (c), (d)) == -1) {			       \
+    if (sudo_setenv2((char *)(a), (b), (c), (d)) == -1) {		       \
 	goto bad;							       \
     }									       \
 } while (0)

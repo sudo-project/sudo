@@ -210,7 +210,7 @@ main(int argc, char *argv[], char *envp[])
     /* Disable execution for post-exec and re-exec ourself. */
     if (strcmp(argv[optind], "rexec") != 0) {
 	const char *noexec = argv[optind];
-	argv[optind] = "rexec";
+	argv[optind] = (char *)"rexec";
 	execve(argv[0], argv, disable_execute(envp, noexec));
 	sudo_fatalx_nodebug("execve");
     }

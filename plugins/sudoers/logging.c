@@ -986,11 +986,11 @@ sudoers_to_eventlog(struct eventlog *evlog, char * const argv[],
 static FILE *
 sudoers_log_open(int type, const char *log_file)
 {
+    const char *omode;
     bool uid_changed;
     FILE *fp = NULL;
     mode_t oldmask;
     int fd, flags;
-    char *omode;
     debug_decl(sudoers_log_open, SUDOERS_DEBUG_LOGGING);
 
     switch (type) {

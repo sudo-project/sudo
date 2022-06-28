@@ -329,11 +329,11 @@ store_exit_info_json(int dfd, struct eventlog *evlog)
     }
 
     /* Append the exit data and close the object. */
-    iov[0].iov_base = ",";
+    iov[0].iov_base = (char *)",";
     iov[0].iov_len = 1;
     iov[1].iov_base = sudo_json_get_buf(&json);
     iov[1].iov_len = sudo_json_get_len(&json);
-    iov[2].iov_base = "\n}\n";
+    iov[2].iov_base = (char *)"\n}\n";
     iov[2].iov_len = 3;
     if (writev(fd, iov, 3) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,

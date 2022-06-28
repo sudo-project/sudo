@@ -214,11 +214,11 @@ test_endpoints(int *ntests, int *nerrors, const char *iolog_dir, char *envp[])
     char buf[1024], iolog_path[PATH_MAX];
     char runas_gid[64], runas_uid[64];
     FILE *fp;
-    char *cmnd_argv[] = {
+    const char *cmnd_argv[] = {
 	"/usr/bin/id",
 	NULL
     };
-    char *user_info[] = {
+    const char *user_info[] = {
 	"cols=80",
 	"lines=24",
 	"cwd=/",
@@ -227,7 +227,7 @@ test_endpoints(int *ntests, int *nerrors, const char *iolog_dir, char *envp[])
 	"user=nobody",
 	NULL
     };
-    char *command_info[] = {
+    const char *command_info[] = {
 	"command=/usr/bin/id",
 	iolog_path,
 	"iolog_stdin=true",
@@ -257,7 +257,8 @@ test_endpoints(int *ntests, int *nerrors, const char *iolog_dir, char *envp[])
 
     /* Test open endpoint. */
     rc = sudoers_io.open(SUDO_API_VERSION, NULL, sudo_printf_int, settings,
-	user_info, command_info, cmnd_argc, cmnd_argv, envp, NULL, &errstr);
+	(char **)user_info, (char **)command_info, cmnd_argc,
+	(char **)cmnd_argv, envp, NULL, &errstr);
     (*ntests)++;
     if (rc != 1) {
 	sudo_warnx("I/O log open endpoint failed");

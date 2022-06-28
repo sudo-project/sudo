@@ -356,7 +356,7 @@ exec_mailer(int pipein)
     char *last, *mflags, *p, *argv[MAX_MAILFLAGS + 1];
     const char *mpath = evl_conf->mailerpath;
     int i;
-    char * const root_envp[] = {
+    const char * const root_envp[] = {
 	"HOME=/",
 	"PATH=/usr/bin:/bin:/usr/sbin:/sbin",
 	"LOGNAME=root",
@@ -409,7 +409,7 @@ exec_mailer(int pipein)
     }
     sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
     if (evl_conf->mailuid == ROOT_UID)
-	execve(mpath, argv, root_envp);
+	execve(mpath, argv, (char **)root_envp);
     else
 	execv(mpath, argv);
     syslog(LOG_ERR, _("unable to execute %s: %m"), mpath); // -V618

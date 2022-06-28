@@ -185,9 +185,10 @@ union YYSTYPE
     struct command_options options;
     struct cmndtag tag;
     char *string;
+    const char *cstring;
     int tok;
 
-#line 191 "y.tab.h"
+#line 192 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

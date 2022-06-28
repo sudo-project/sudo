@@ -68,7 +68,7 @@ struct sudo_conf_path_table {
     const char *pname;
     unsigned int pnamelen;
     bool dynamic;
-    char *pval;
+    const char *pval;
 };
 
 struct sudo_conf_settings {
@@ -221,7 +221,7 @@ parse_path(const char *entry, const char *conf_file, unsigned int lineno)
 		}
 	    }
 	    if (cur->dynamic)
-		free(cur->pval);
+		free((char *)cur->pval);
 	    cur->pval = pval;
 	    cur->dynamic = true;
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %s:%u: Path %s %s",
@@ -769,7 +769,7 @@ sudo_conf_clear_paths_v1(void)
 
     for (cur = sudo_conf_data.path_table; cur->pname != NULL; cur++) {
 	if (cur->dynamic)
-	    free(cur->pval);
+	    free((char *)cur->pval);
 	cur->pval = NULL;
 	cur->dynamic = false;
     }

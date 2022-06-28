@@ -242,7 +242,8 @@ sudo_ldap_parse_uri(const struct ldap_config_str_list *uri_list)
 
     hostbuf[0] = '\0';
     STAILQ_FOREACH(entry, uri_list, entries) {
-	char *cp, *host, *last, *port, *uri;
+	char *cp, *last, *uri;
+	const char *host, *port;
 
 	buf = strdup(entry->val);
 	if (buf == NULL) {

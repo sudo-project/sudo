@@ -259,7 +259,7 @@ static void *
 set_passprompt_regex(const char *cstr)
 {
     void *handle;
-    char *cp, *last, *str;
+    char *cp, *str, *last = NULL;
     debug_decl(set_passprompt_regex, SUDOERS_DEBUG_UTIL);
 
     handle = iolog_pwfilt_alloc();

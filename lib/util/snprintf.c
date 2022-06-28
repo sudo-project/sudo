@@ -848,7 +848,7 @@ fp_common:
 					convbuf = NULL;
 				}
 				if ((wcp = GETARG(wchar_t *)) == NULL) {
-					cp = "(null)";
+					cp = (char *)"(null)";
 				} else {
 					convbuf = __wcsconv(wcp, prec);
 					if (convbuf == NULL)
@@ -858,7 +858,7 @@ fp_common:
 			} else
 #endif /* PRINTF_WIDE_CHAR */
 			if ((cp = GETARG(char *)) == NULL)
-				cp = "(null)";
+				cp = (char *)"(null)";
 			if (prec >= 0) {
 				/*
 				 * can't use strlen; can only look for the
@@ -945,7 +945,7 @@ number:			if ((dprec = prec) >= 0)
 					break;
 
 				default:
-					cp = "bug in vfprintf: bad base";
+					cp = (char *)"bug in xxxprintf: bad base";
 					size = strlen(cp);
 					goto skipsize;
 				}

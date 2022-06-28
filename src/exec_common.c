@@ -119,16 +119,16 @@ sudo_execve(int fd, const char *path, char *const argv[], char *envp[],
 	    execve(path, argv, envp);
     if (fd == -1 && errno == ENOEXEC) {
 	int argc;
-	char **nargv;
+	const char **nargv;
 
 	for (argc = 0; argv[argc] != NULL; argc++)
 	    continue;
 	nargv = reallocarray(NULL, argc + 2, sizeof(char *));
 	if (nargv != NULL) {
 	    nargv[0] = "sh";
-	    nargv[1] = (char *)path;
+	    nargv[1] = path;
 	    memcpy(nargv + 2, argv + 1, argc * sizeof(char *));
-	    execve(_PATH_SUDO_BSHELL, nargv, envp);
+	    execve(_PATH_SUDO_BSHELL, (char **)nargv, envp);
 	    free(nargv);
 	}
     }

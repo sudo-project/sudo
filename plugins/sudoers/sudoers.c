@@ -749,7 +749,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    strcmp(NewArgv[1], "-c") == 0) {
 	    /* We allocated extra space for the --login above. */
 	    memmove(&NewArgv[2], &NewArgv[1], sizeof(char *) * NewArgc);
-	    NewArgv[1] = "--login";
+	    NewArgv[1] = (char *)"--login";
 	    NewArgc++;
 	}
 
@@ -1188,8 +1188,8 @@ set_loginclass(struct passwd *pw)
     } else {
 	login_class = pw->pw_class;
 	if (!login_class || !*login_class)
-	    login_class =
-		(pw->pw_uid == 0) ? LOGIN_DEFROOTCLASS : LOGIN_DEFCLASS;
+	    login_class = (char *)
+		((pw->pw_uid == 0) ? LOGIN_DEFROOTCLASS : LOGIN_DEFCLASS);
     }
 
     /* Make sure specified login class is valid. */

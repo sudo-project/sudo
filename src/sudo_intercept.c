@@ -166,7 +166,7 @@ exec_wrapper(const char *cmnd, char * const argv[], char * const envp[],
 	/* Fall back to exec via shell for execvp and friends. */
 	if (errno == ENOEXEC && is_execvp) {
 	    int argc;
-	    char **shargv;
+	    const char **shargv;
 
 	    for (argc = 0; argv[argc] != NULL; argc++)
 		continue;
@@ -176,7 +176,7 @@ exec_wrapper(const char *cmnd, char * const argv[], char * const envp[],
 	    shargv[0] = "sh";
 	    shargv[1] = ncmnd;
 	    memcpy(shargv + 2, nargv + 1, argc * sizeof(char *));
-	    ((sudo_fn_execve_t)fn)(_PATH_SUDO_BSHELL, shargv, nenvp);
+	    ((sudo_fn_execve_t)fn)(_PATH_SUDO_BSHELL, (char **)shargv, nenvp);
 	    free(shargv);
 	}
     } else {
@@ -225,7 +225,7 @@ execl_wrapper(int type, const char *name, const char *arg, va_list ap)
 static int
 system_wrapper(const char *cmnd)
 {
-    char * const argv[] = { "sh", "-c", (char *)cmnd, NULL };
+    const char * const argv[] = { "sh", "-c", cmnd, NULL };
     const char shell[] = _PATH_SUDO_BSHELL;
     struct sigaction saveint, savequit, sa;
     sigset_t mask, omask;
@@ -253,7 +253,7 @@ system_wrapper(const char *cmnd)
     case 0:
 	/* child */
 	if (sigprocmask(SIG_SETMASK, &omask, NULL) != -1)
-	    exec_wrapper(shell, argv, environ, false);
+	    exec_wrapper(shell, (char **)argv, environ, false);
 	_exit(127);
     default:
 	/* parent */

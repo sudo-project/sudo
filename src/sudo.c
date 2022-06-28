@@ -1246,7 +1246,7 @@ policy_list(int argc, char * const argv[], int verbose, const char *user)
 {
     const char *errstr = NULL;
     /* TODO: add list_user */
-    char * const command_info[] = {
+    const char * const command_info[] = {
 	"command=list",
 	NULL
     };
@@ -1264,17 +1264,17 @@ policy_list(int argc, char * const argv[], int verbose, const char *user)
     switch (ok) {
     case 1:
 	audit_accept(policy_plugin.name, SUDO_POLICY_PLUGIN,
-	    command_info, argv, submit_envp);
+	    (char **)command_info, argv, submit_envp);
 	break;
     case 0:
 	audit_reject(policy_plugin.name, SUDO_POLICY_PLUGIN,
 	    errstr ? errstr : _("command rejected by policy"),
-	    command_info);
+	    (char **)command_info);
 	break;
     default:
 	audit_error(policy_plugin.name, SUDO_POLICY_PLUGIN,
 	    errstr ? errstr : _("policy plugin error"),
-	    command_info);
+	    (char **)command_info);
 	break;
     }
 
@@ -1290,7 +1290,7 @@ static void
 policy_validate(char * const argv[])
 {
     const char *errstr = NULL;
-    char * const command_info[] = {
+    const char * const command_info[] = {
 	"command=validate",
 	NULL
     };
@@ -1307,18 +1307,18 @@ policy_validate(char * const argv[])
 
     switch (ok) {
     case 1:
-	audit_accept(policy_plugin.name, SUDO_POLICY_PLUGIN, command_info,
-	    argv, submit_envp);
+	audit_accept(policy_plugin.name, SUDO_POLICY_PLUGIN,
+	    (char **)command_info, argv, submit_envp);
 	break;
     case 0:
 	audit_reject(policy_plugin.name, SUDO_POLICY_PLUGIN,
 	    errstr ? errstr : _("command rejected by policy"),
-	    command_info);
+	    (char **)command_info);
 	break;
     default:
 	audit_error(policy_plugin.name, SUDO_POLICY_PLUGIN,
 	    errstr ? errstr : _("policy plugin error"),
-	    command_info);
+	    (char **)command_info);
 	break;
     }
 

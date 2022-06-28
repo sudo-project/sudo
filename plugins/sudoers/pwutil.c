@@ -686,7 +686,7 @@ sudo_mkgrent(const char *group, gid_t gid, ...)
 	}
 	gr = &gritem->gr;
 	gr->gr_gid = gid;
-	gr->gr_passwd = "*";
+	gr->gr_passwd = (char *)"*";
 	cp = (char *)(gritem + 1);
 	gr->gr_mem = (char **)cp;
 	cp += sizeof(char *) * nmem;

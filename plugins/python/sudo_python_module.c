@@ -79,8 +79,8 @@ _parse_log_function_args(PyObject *py_args, PyObject *py_kwargs, char **args_joi
     if (py_empty == NULL)
         goto cleanup;
 
-    static char *keywords[] = { "sep", "end", NULL };
-    if (py_kwargs != NULL && !PyArg_ParseTupleAndKeywords(py_empty, py_kwargs, "|zz:sudo.log", keywords, &sep, end))
+    static const char *keywords[] = { "sep", "end", NULL };
+    if (py_kwargs != NULL && !PyArg_ParseTupleAndKeywords(py_empty, py_kwargs, "|zz:sudo.log", (char **)keywords, &sep, end))
         goto cleanup;
 
     if (sep == NULL)
@@ -330,8 +330,8 @@ python_sudo_conversation(PyObject *Py_UNUSED(self), PyObject *py_args, PyObject 
     if (py_empty == NULL)
         goto cleanup;
 
-    static char *keywords[] = { "on_suspend", "on_resume", NULL };
-    if (py_kwargs != NULL && !PyArg_ParseTupleAndKeywords(py_empty, py_kwargs, "|OO:sudo.conv", keywords,
+    static const char *keywords[] = { "on_suspend", "on_resume", NULL };
+    if (py_kwargs != NULL && !PyArg_ParseTupleAndKeywords(py_empty, py_kwargs, "|OO:sudo.conv", (char **)keywords,
                                                   &callback_closure.py_on_suspend,
                                                   &callback_closure.py_on_resume))
         goto cleanup;

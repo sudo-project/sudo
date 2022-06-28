@@ -297,7 +297,7 @@ done:
  * on error.
  */
 static struct berval **
-sudo_ldap_get_values_len(LDAP *ld, LDAPMessage *entry, char *attr, int *rc)
+sudo_ldap_get_values_len(LDAP *ld, LDAPMessage *entry, const char *attr, int *rc)
 {
     struct berval **bval;
 
@@ -1613,7 +1613,7 @@ sudo_ldap_bind_s(LDAP *ld)
     {
 	struct berval bv;
 
-	bv.bv_val = ldap_conf.bindpw ? ldap_conf.bindpw : "";
+	bv.bv_val = ldap_conf.bindpw ? ldap_conf.bindpw : (char *)"";
 	bv.bv_len = strlen(bv.bv_val);
 
 	ret = ldap_sasl_bind_s(ld, ldap_conf.binddn, LDAP_SASL_SIMPLE, &bv,

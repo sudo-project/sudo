@@ -52,8 +52,8 @@
 
 struct aix_limit {
     int resource;
-    char *soft;
-    char *hard;
+    const char *soft;
+    const char *hard;
     int factor;
 };
 
@@ -68,11 +68,11 @@ static struct aix_limit aix_limits[] = {
 };
 
 static int
-aix_getlimit(char *user, char *lim, int *valp)
+aix_getlimit(const char *user, const char *lim, int *valp)
 {
     debug_decl(aix_getlimit, SUDO_DEBUG_UTIL);
 
-    if (getuserattr(user, lim, valp, SEC_INT) != 0)
+    if (getuserattr((char *)user, (char *)lim, valp, SEC_INT) != 0)
 	debug_return_int(-1);
     debug_return_int(0);
 }
@@ -169,7 +169,7 @@ aix_getauthregistry_v1(char *user, char *saved_registry)
 	    sudo_warn("%s", U_("unable to open userdb"));
 	    goto done;
 	}
-	ret = getuserattr(user, S_REGISTRY, &registry, SEC_CHAR);
+	ret = getuserattr(user, (char *)S_REGISTRY, &registry, SEC_CHAR);
 	if (ret == 0) {
 	    /* sizeof(authdb_t) is guaranteed to be 16 */
 	    if (strlcpy(saved_registry, registry, 16) >= 16) {

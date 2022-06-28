@@ -93,7 +93,7 @@ static bool install_sudoers(struct sudoersfile *, bool, bool);
 static bool visudo_track_error(const char *file, int line, int column, const char *fmt, va_list args);
 static int print_unused(struct sudoers_parse_tree *, struct alias *, void *);
 static bool reparse_sudoers(char *, int, char **, bool, bool);
-static int run_command(char *, char **);
+static int run_command(const char *, char *const *);
 static void parse_sudoers_options(void);
 static void setup_signals(void);
 static void help(void) __attribute__((__noreturn__));
@@ -255,7 +255,7 @@ main(int argc, char *argv[])
     }
 
     /* Mock up a fake sudo_user struct. */
-    user_cmnd = user_base = "";
+    user_cmnd = user_base = (char *)"";
     if (geteuid() == 0) {
 	const char *user = getenv("SUDO_USER");
 	if (user != NULL && *user != '\0')
@@ -361,7 +361,7 @@ get_editor(int *editor_argc, char ***editor_argv)
 {
     char *editor_path = NULL, **allowlist = NULL;
     const char *env_editor;
-    static char *files[] = { "+1", "sudoers" };
+    static const char *files[] = { "+1", "sudoers" };
     unsigned int allowlist_len = 0;
     debug_decl(get_editor, SUDOERS_DEBUG_UTIL);
 
@@ -389,8 +389,8 @@ get_editor(int *editor_argc, char ***editor_argv)
 	allowlist[allowlist_len] = NULL;
     }
 
-    editor_path = find_editor(2, files, editor_argc, editor_argv, allowlist,
-	&env_editor);
+    editor_path = find_editor(2, (char **)files, editor_argc, editor_argv,
+	allowlist, &env_editor);
     if (editor_path == NULL) {
 	if (def_env_editor && env_editor != NULL) {
 	    /* We are honoring $EDITOR so this is a fatal error. */
@@ -413,7 +413,7 @@ get_editor(int *editor_argc, char ***editor_argv)
  * If an entry starts with '*' the tail end of the string is matched.
  * No other wild cards are supported.
  */
-static char *lineno_editors[] = {
+static const char *lineno_editors[] = {
     "ex",
     "nex",
     "vi",
@@ -440,7 +440,7 @@ static bool
 editor_supports_plus(const char *editor)
 {
     const char *cp, *editor_base;
-    char **av;
+    const char **av;
     debug_decl(editor_supports_plus, SUDOERS_DEBUG_UTIL);
 
     editor_base = sudo_basename(editor);
@@ -532,7 +532,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 	(void)snprintf(linestr, sizeof(linestr), "+%d", lineno);
 	editor_argv[ac++] = linestr; // -V507
     }
-    editor_argv[ac++] = "--";
+    editor_argv[ac++] = (char *)"--";
     editor_argv[ac++] = sp->tpath;
     editor_argv[ac++] = NULL;
 
@@ -885,7 +885,7 @@ setup_signals(void)
 }
 
 static int
-run_command(char *path, char **argv)
+run_command(const char *path, char *const *argv)
 {
     int status;
     pid_t pid, rv;
@@ -1204,11 +1204,11 @@ quit(int signo)
 #define	emsg	 " exiting due to signal: "
     iov[0].iov_base = (char *)getprogname();
     iov[0].iov_len = strlen(iov[0].iov_base);
-    iov[1].iov_base = emsg;
+    iov[1].iov_base = (char *)emsg;
     iov[1].iov_len = sizeof(emsg) - 1;
     iov[2].iov_base = strsignal(signo);
     iov[2].iov_len = strlen(iov[2].iov_base);
-    iov[3].iov_base = "\n";
+    iov[3].iov_base = (char *)"\n";
     iov[3].iov_len = 1;
     ignore_result(writev(STDERR_FILENO, iov, 4));
     _exit(signo);

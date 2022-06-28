@@ -39,7 +39,7 @@
  */
 bool
 iolog_parse_host_port(char *str, char **hostp, char **portp, bool *tlsp,
-     char *defport, char *defport_tls)
+     const char *defport, const char *defport_tls)
 {
     char *flags, *port, *host = str;
     bool ret = false;
@@ -88,7 +88,7 @@ iolog_parse_host_port(char *str, char **hostp, char **portp, bool *tlsp,
     }
 
     if (port == NULL)
-	port = tls ? defport_tls : defport;
+	port = tls ? (char *)defport_tls : (char *)defport;
     else if (*port == '\0')
 	goto done;
 

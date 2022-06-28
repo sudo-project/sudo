@@ -126,7 +126,7 @@ copy_arg(const char *src, size_t len)
  * as well as the argument vector.
  */
 static char *
-resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
+resolve_editor(const char *ed, size_t edlen, int nfiles, char * const *files,
     int *argc_out, char ***argv_out, char * const *allowlist)
 {
     char **nargv = NULL, *editor = NULL, *editor_path = NULL;
@@ -177,7 +177,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char **files,
 	    goto oom;
     }
     if (nfiles != 0) {
-	nargv[nargc++] = "--";
+	nargv[nargc++] = (char *)"--";
 	while (nfiles--)
 	    nargv[nargc++] = *files++;
     }
@@ -211,10 +211,11 @@ oom:
  * as well as the argument vector.
  */
 char *
-find_editor(int nfiles, char **files, int *argc_out, char ***argv_out,
+find_editor(int nfiles, char * const *files, int *argc_out, char ***argv_out,
      char * const *allowlist, const char **env_editor)
 {
-    char *ev[3], *editor_path = NULL;
+    char *editor_path = NULL;
+    const char *ev[3];
     unsigned int i;
     debug_decl(find_editor, SUDOERS_DEBUG_UTIL);
 

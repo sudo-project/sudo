@@ -219,7 +219,7 @@ format_cmnd(struct sudo_command *c, bool negated)
     int len;
     debug_decl(format_cmnd, SUDOERS_DEBUG_UTIL);
 
-    cmnd = c->cmnd ? c->cmnd : "ALL";
+    cmnd = c->cmnd ? c->cmnd : (char *)"ALL";
     bufsiz = negated + strlen(cmnd) + 1;
     if (c->args != NULL)
 	bufsiz += 1 + strlen(c->args);

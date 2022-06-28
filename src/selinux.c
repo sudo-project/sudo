@@ -445,6 +445,7 @@ selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
     char **nargv;
     const char *sesh;
     int argc, nargc, serrno;
+    bool login_shell = false;
     debug_decl(selinux_execve, SUDO_DEBUG_SELINUX);
 
     sesh = sudo_conf_sesh_path();
@@ -474,11 +475,13 @@ selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return;
     }
+    if (*argv[0] == '-')
+	login_shell = true;
     if (ISSET(flags, CD_NOEXEC)) {
-	nargv[0] = *argv[0] == '-' ? "-sesh-noexec" : "sesh-noexec";
+	nargv[0] = (char *)(login_shell ? "-sesh-noexec" : "sesh-noexec");
 	CLR(flags, CD_NOEXEC);
     } else {
-	nargv[0] = *argv[0] == '-' ? "-sesh" : "sesh";
+	nargv[0] = (char *)(login_shell ? "-sesh" : "sesh");
     }
     nargc = 1;
     if (fd != -1 && asprintf(&nargv[nargc++], "--execfd=%d", fd) == -1) {

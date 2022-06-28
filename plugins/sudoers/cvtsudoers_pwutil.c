@@ -126,11 +126,11 @@ cvtsudoers_make_pwitem(uid_t uid, const char *name)
     /* Fake up a passwd struct. */
     memset(&pw, 0, sizeof(pw));
     pw.pw_name = name ? s->str : uidstr;
-    pw.pw_passwd = "*";
+    pw.pw_passwd = (char *)"*";
     pw.pw_uid = uid;
     pw.pw_gid = (gid_t)-1;
-    pw.pw_shell = _PATH_BSHELL;
-    pw.pw_dir = "/";
+    pw.pw_shell = (char *)_PATH_BSHELL;
+    pw.pw_dir = (char *)"/";
 
     /* Allocate in one big chunk for easy freeing. */
     total = sizeof(*pwitem);

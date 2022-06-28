@@ -638,7 +638,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 
 	av[0] = (char *)user_details.shell; /* plugin may override shell */
 	if (cmnd != NULL) {
-	    av[1] = "-c";
+	    av[1] = (char *)"-c";
 	    av[2] = cmnd;
 	}
 	av[ac] = NULL;
@@ -662,7 +662,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 	    exit(EXIT_FAILURE);
 
 	/* Must have the command in argv[0]. */
-	av[0] = "sudoedit";
+	av[0] = (char *)"sudoedit";
 	for (ac = 0; argv[ac] != NULL; ac++) {
 	    av[ac + 1] = argv[ac];
 	}
@@ -702,7 +702,7 @@ static void
 display_usage(int (*output)(const char *))
 {
     struct sudo_lbuf lbuf;
-    char *uvec[6];
+    const char *uvec[6];
     int i, ulen;
 
     /*

@@ -202,8 +202,8 @@ main(int argc, char *argv[])
     if (argc < 2) {
 	if (!dflag)
 	    usage();
-	user_name = argc ? *argv++ : "root";
-	user_cmnd = user_base = "true";
+	user_name = argc ? *argv++ : (char *)"root";
+	user_cmnd = user_base = (char *)"true";
 	argc = 0;
     } else {
 	user_name = *argv++;

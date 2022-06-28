@@ -89,7 +89,7 @@ dump_defaults(void)
     struct sudo_defs_types *cur;
     struct list_member *item;
     struct def_values *def;
-    char *desc;
+    const char *desc;
     debug_decl(dump_defaults, SUDOERS_DEBUG_DEFAULTS);
 
     for (cur = sudo_defs_table; cur->name; cur++) {

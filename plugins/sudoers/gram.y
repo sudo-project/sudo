@@ -95,6 +95,7 @@ static void alias_error(const char *name, int errnum);
     struct command_options options;
     struct cmndtag tag;
     char *string;
+    const char *cstring;
     int tok;
 }
 
@@ -193,7 +194,7 @@ static void alias_error(const char *name, int errnum);
 %type <string>	  includedir
 %type <digest>	  digestspec
 %type <digest>	  digestlist
-%type <string>	  reserved_word
+%type <cstring>	  reserved_word
 
 %%
 
@@ -794,7 +795,7 @@ reserved_word	:	ALL		{ $$ = "ALL"; }
 		|	TYPE		{ $$ = "TYPE"; }
 		|	PRIVS		{ $$ = "PRIVS"; }
 		|	LIMITPRIVS	{ $$ = "LIMITPRIVS"; }
-		|	APPARMOR_PROFILE	{ $$ = "APPARMOR_PROFILE"; }
+		|	APPARMOR_PROFILE { $$ = "APPARMOR_PROFILE"; }
 		;
 
 reserved_alias	:	reserved_word {
@@ -1201,7 +1202,8 @@ sudoerserrorf(const char *fmt, ...)
 	LEXTRACE("<*> ");
 #ifndef TRACELEXER
 	if (trace_print == NULL || trace_print == sudoers_trace_print) {
-	    char *s, *tofree = NULL;
+	    char *tofree = NULL;
+	    const char *s;
 	    int oldlocale;
 
 	    /* Warnings are displayed in the user's locale. */
@@ -1212,10 +1214,12 @@ sudoerserrorf(const char *fmt, ...)
 		/* Optimize common case, a single string. */
 		s = _(va_arg(ap, char *));
 	    } else {
-		if (vasprintf(&s, _(fmt), ap) != -1)
-		    tofree = s;
-		else
+		if (vasprintf(&tofree, _(fmt), ap) != -1) {
+		    s = tofree;
+		} else {
 		    s = _("syntax error");
+		    tofree = NULL;
+		}
 	    }
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s:%d:%d: %s\n"), sudoers,
 		this_lineno, (int)sudolinebuf.toke_start + 1, s);

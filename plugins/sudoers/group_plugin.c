@@ -46,7 +46,7 @@ const char *path_plugin_dir = _PATH_SUDO_PLUGIN_DIR;
  * the value from the plugin's init function.
  */
 int
-group_plugin_load(char *plugin_info)
+group_plugin_load(const char *plugin_info)
 {
     struct stat sb;
     char *args, path[PATH_MAX];

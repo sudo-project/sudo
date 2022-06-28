@@ -384,8 +384,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     line = NULL;
 
     /* Exercise code paths that use KRB5CCNAME and SUDO_PROMPT. */
-    putenv("KRB5CCNAME=/tmp/krb5cc_123456");
-    putenv("SUDO_PROMPT=[sudo] password for %p: ");
+    putenv((char *)"KRB5CCNAME=/tmp/krb5cc_123456");
+    putenv((char *)"SUDO_PROMPT=[sudo] password for %p: ");
 
     sudoers_policy.register_hooks(SUDO_API_VERSION, fuzz_hook_stub);
 

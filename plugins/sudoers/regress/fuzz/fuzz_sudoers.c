@@ -162,9 +162,9 @@ open_data(const uint8_t *data, size_t size)
 }
 
 static struct user_data {
-    char *user;
-    char *runuser;
-    char *rungroup;
+    const char *user;
+    const char *runuser;
+    const char *rungroup;
 } user_data[] = {
     { "root", NULL, NULL },
     { "millert", "operator", NULL },
@@ -183,7 +183,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     struct interface_list *interfaces;
     struct passwd *pw;
     struct group *gr;
-    char *gids[10];
+    const char *gids[10];
     FILE *fp;
 
     /* Don't waste time fuzzing tiny inputs. */
@@ -237,7 +237,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     gids[1] = "20";
     gids[2] = "5";
     gids[3] = NULL;
-    if (sudo_set_gidlist(pw, gids, ENTRY_TYPE_FRONTEND) == -1)
+    if (sudo_set_gidlist(pw, (char **)gids, ENTRY_TYPE_FRONTEND) == -1)
 	goto done;
     sudo_pw_delref(pw);
 
@@ -246,7 +246,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	goto done;
     gids[0] = "5";
     gids[1] = NULL;
-    if (sudo_set_gidlist(pw, gids, ENTRY_TYPE_FRONTEND) == -1)
+    if (sudo_set_gidlist(pw, (char **)gids, ENTRY_TYPE_FRONTEND) == -1)
 	goto done;
     sudo_pw_delref(pw);
 
@@ -258,17 +258,17 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     gids[2] = "5";
     gids[3] = "100";
     gids[4] = NULL;
-    if (sudo_set_gidlist(pw, gids, ENTRY_TYPE_FRONTEND) == -1)
+    if (sudo_set_gidlist(pw, (char **)gids, ENTRY_TYPE_FRONTEND) == -1)
 	goto done;
     sudo_pw_delref(pw);
 
     /* The minimum needed to perform matching (user_cmnd must be dynamic). */
-    user_host = user_shost = user_runhost = user_srunhost = "localhost";
+    user_host = user_shost = user_runhost = user_srunhost = (char *)"localhost";
     user_cmnd = strdup("/usr/bin/id");
     if (user_cmnd == NULL)
 	goto done;
-    user_args = "-u";
-    user_base = "id";
+    user_args = (char *)"-u";
+    user_base = (char *)"id";
 
     /* Add a fake network interfaces. */
     interfaces = get_interfaces();
@@ -301,7 +301,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	    int cmnd_status;
 
 	    /* Invoking user. */
-	    user_name = ud->user;
+	    user_name = (char *)ud->user;
 	    if (sudo_user.pw != NULL)
 		sudo_pw_delref(sudo_user.pw);
 	    sudo_user.pw = sudo_getpwnam(user_name);
@@ -314,7 +314,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	    if (runas_pw != NULL)
 		sudo_pw_delref(runas_pw);
 	    if (ud->runuser != NULL) {
-		sudo_user.runas_user = ud->runuser;
+		sudo_user.runas_user = (char *)ud->runuser;
 		SET(sudo_user.flags, RUNAS_USER_SPECIFIED);
 		runas_pw = sudo_getpwnam(sudo_user.runas_user);
 	    } else {
@@ -331,7 +331,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	    if (runas_gr != NULL)
 		sudo_gr_delref(runas_gr);
 	    if (ud->rungroup != NULL) {
-		sudo_user.runas_group = ud->rungroup;
+		sudo_user.runas_group = (char *)ud->rungroup;
 		SET(sudo_user.flags, RUNAS_GROUP_SPECIFIED);
 		runas_gr = sudo_getgrnam(sudo_user.runas_group);
 		if (runas_gr == NULL) {

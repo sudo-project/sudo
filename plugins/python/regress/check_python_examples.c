@@ -106,11 +106,11 @@ init(void)
     memset(&data, 0, sizeof(data));
 
     memset(&example_pwd, 0, sizeof(example_pwd));
-    example_pwd.pw_name = "pw_name";
-    example_pwd.pw_passwd = "pw_passwd";
-    example_pwd.pw_gecos = "pw_gecos";
-    example_pwd.pw_shell ="pw_shell";
-    example_pwd.pw_dir = "pw_dir";
+    example_pwd.pw_name = (char *)"pw_name";
+    example_pwd.pw_passwd = (char *)"pw_passwd";
+    example_pwd.pw_gecos = (char *)"pw_gecos";
+    example_pwd.pw_shell = (char *)"pw_shell";
+    example_pwd.pw_dir = (char *)"pw_dir";
     example_pwd.pw_uid = (uid_t)1001;
     example_pwd.pw_gid = (gid_t)101;
 

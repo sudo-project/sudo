@@ -101,7 +101,7 @@ sudoers_hook_getenv(const char *name, char **value, void *closure)
 	    goto done;
 	}
 	if (strcmp(name, "LC_ALL") == 0 || strcmp(name, "LC_MESSAGES") == 0) {
-	    *value = def_sudoers_locale;
+	    *value = (char *)def_sudoers_locale;
 	    goto done;
 	}
     }

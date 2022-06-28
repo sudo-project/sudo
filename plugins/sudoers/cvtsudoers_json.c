@@ -77,7 +77,7 @@ print_command_json(struct json_container *jsonc, const char *name, bool negated)
 	}
     }
     value.type = JSON_STRING;
-    value.u.string = cmnd ? cmnd : "ALL";
+    value.u.string = cmnd ? cmnd : (char *)"ALL";
 
     if (!negated && TAILQ_EMPTY(&c->digests)) {
 	/* Print as { "command": "command and args" } */

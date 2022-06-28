@@ -1129,7 +1129,7 @@ write_output(int fd, int what, void *v)
 	    if ((nl == iov[0].iov_base && iobuf->lastc != '\r') ||
 		(nl != iov[0].iov_base && nl[-1] != '\r')) {
 		iov[0].iov_len = len;
-		iov[1].iov_base = "\r\n";
+		iov[1].iov_base = (char *)"\r\n";
 		iov[1].iov_len = 2;
 		iovcnt = 2;
 		nbytes = iov[0].iov_len + iov[1].iov_len;

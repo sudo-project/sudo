@@ -96,7 +96,7 @@ sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char *
 {
     int len, saved_len = lbuf->len;
     bool ret = false;
-    char *cp, *s;
+    const char *cp, *s;
     va_list ap;
     debug_decl(sudo_lbuf_append_quoted, SUDO_DEBUG_UTIL);
 
@@ -155,7 +155,7 @@ sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...)
     int len, saved_len = lbuf->len;
     bool ret = false;
     va_list ap;
-    char *s;
+    const char *s;
     debug_decl(sudo_lbuf_append, SUDO_DEBUG_UTIL);
 
     if (sudo_lbuf_error(lbuf))

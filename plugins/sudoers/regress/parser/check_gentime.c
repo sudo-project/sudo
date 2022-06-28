@@ -33,7 +33,7 @@
 sudo_dso_public int main(int argc, char *argv[]);
 
 const struct gentime_test {
-    char *gentime;
+    const char *gentime;
     time_t unixtime;
 } tests[] = {
     { "199412161032ZZ", -1 },
@@ -65,7 +65,7 @@ main(int argc, char *argv[])
     initprogname(argc > 0 ? argv[0] : "check_gentime");
 
     /* Do local time tests in Eastern Standard Time. */
-    putenv("TZ=EST5EST5");
+    putenv((char *)"TZ=EST5EST5");
     tzset();
 
     for (i = 0; i < ntests; i++) {

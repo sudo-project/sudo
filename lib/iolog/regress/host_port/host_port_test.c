@@ -45,8 +45,8 @@ struct host_port_test {
     const char *host;		/* parsed host */
     const char *port;		/* parsed port */
     bool tls;			/* parsed TLS flag */
-    char *defport;		/* default port */
-    char *defport_tls;		/* default port */
+    const char *defport;	/* default port */
+    const char *defport_tls;	/* default port */
     bool ret;			/* return value */
 };
 

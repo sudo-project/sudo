@@ -68,7 +68,7 @@ static struct audit_state {
 } state = { -1 };
 
 /* Filter out entries in settings[] that are not really options. */
-char * const settings_filter[] = {
+const char * const settings_filter[] = {
     "debug_flags",
     "max_groups",
     "network_addrs",
@@ -282,9 +282,9 @@ add_array(struct json_container *json, const char *name, char * const * array)
 }
 
 static bool
-filter_key_value(const char *kv, char * const * filter)
+filter_key_value(const char *kv, const char * const * filter)
 {
-    char * const *cur;
+    const char * const *cur;
     const char *cp;
     size_t namelen;
 
@@ -300,7 +300,7 @@ filter_key_value(const char *kv, char * const * filter)
 
 static bool
 add_key_value_object(struct json_container *json, const char *name,
-	char * const * array, char * const * filter)
+	char * const * array, const char * const * filter)
 {
     char * const *cur;
     const char *cp;

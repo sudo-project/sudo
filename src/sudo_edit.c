@@ -414,7 +414,8 @@ static int
 selinux_edit_create_tfiles(struct command_details *command_details,
     struct tempfile *tf, char *files[], int nfiles)
 {
-    char **sesh_args, **sesh_ap, *user_str = NULL;
+    const char **sesh_args, **sesh_ap;
+    char *user_str = NULL;
     int i, error, sesh_nargs, ret = -1;
     struct stat sb;
     debug_decl(selinux_edit_create_tfiles, SUDO_DEBUG_EDIT);
@@ -471,9 +472,9 @@ selinux_edit_create_tfiles(struct command_details *command_details,
     *sesh_ap = NULL;
 
     /* Run sesh -e [-h] 0 <o1> <t1> ... <on> <tn> */
-    error = selinux_run_helper(command_details->cred.uid, command_details->cred.gid,
-	command_details->cred.ngroups, command_details->cred.groups, sesh_args,
-	command_details->envp);
+    error = selinux_run_helper(command_details->cred.uid,
+	command_details->cred.gid, command_details->cred.ngroups,
+	command_details->cred.groups, (char **)sesh_args, command_details->envp);
     switch (error) {
     case SESH_SUCCESS:
 	break;
@@ -520,7 +521,8 @@ static int
 selinux_edit_copy_tfiles(struct command_details *command_details,
     struct tempfile *tf, int nfiles, struct timespec *times)
 {
-    char **sesh_args, **sesh_ap, *user_str = NULL;
+    const char **sesh_args, **sesh_ap;
+    char *user_str = NULL;
     int i, error, sesh_nargs, ret = 1;
     int tfd = -1;
     struct timespec ts;
@@ -590,9 +592,9 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
     if ((!check_dir && sesh_ap - sesh_args > 3)
         || (check_dir && sesh_ap - sesh_args > 5)) {
 	/* Run sesh -e 1 <t1> <o1> ... <tn> <on> */
-	error = selinux_run_helper(command_details->cred.uid, command_details->cred.gid,
-	    command_details->cred.ngroups, command_details->cred.groups, sesh_args,
-	    command_details->envp);
+	error = selinux_run_helper(command_details->cred.uid,
+	    command_details->cred.gid, command_details->cred.ngroups,
+	    command_details->cred.groups, (char **)sesh_args, command_details->envp);
 	switch (error) {
 	case SESH_SUCCESS:
 	    ret = 0;

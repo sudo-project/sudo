@@ -101,7 +101,7 @@ _import_module(const char *path)
     if (strlcpy(path_copy, path, sizeof(path_copy)) >= sizeof(path_copy))
         debug_return_ptr(NULL);
 
-    char *module_dir = path_copy;
+    const char *module_dir = path_copy;
     char *module_name = strrchr(path_copy, '/');
     if (module_name == NULL) {
         module_name = path_copy;

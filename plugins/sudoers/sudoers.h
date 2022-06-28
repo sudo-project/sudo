@@ -417,7 +417,7 @@ bool matches_env_pattern(const char *pattern, const char *var, bool *full_match)
 FILE *open_sudoers(const char *, bool, bool *);
 int set_cmnd_path(const char *runchroot);
 int sudoers_init(void *info, sudoers_logger_t logger, char * const envp[]);
-int sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[], bool verbose, void *closure);
+int sudoers_policy_main(int argc, char *const argv[], int pwflag, char *env_add[], bool verbose, void *closure);
 void sudoers_cleanup(void);
 void sudo_user_free(void);
 extern struct sudo_user sudo_user;
@@ -442,7 +442,7 @@ extern const char *path_ldap_conf;
 extern const char *path_ldap_secret;
 
 /* group_plugin.c */
-int group_plugin_load(char *plugin_info);
+int group_plugin_load(const char *plugin_info);
 void group_plugin_unload(void);
 int group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd);
@@ -450,8 +450,8 @@ bool cb_group_plugin(const char *file, int line, int column, const union sudo_de
 extern const char *path_plugin_dir;
 
 /* editor.c */
-char *find_editor(int nfiles, char **files, int *argc_out, char ***argv_out,
-     char * const *allowlist, const char **env_editor);
+char *find_editor(int nfiles, char * const *files, int *argc_out,
+    char ***argv_out, char * const *allowlist, const char **env_editor);
 
 /* exptilde.c */
 bool expand_tilde(char **path, const char *user);

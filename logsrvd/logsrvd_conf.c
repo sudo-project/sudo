@@ -88,13 +88,13 @@ struct logsrvd_config;
 typedef bool (*logsrvd_conf_cb_t)(struct logsrvd_config *, const char *, size_t);
 
 struct logsrvd_config_entry {
-    char *conf_str;
+    const char *conf_str;
     logsrvd_conf_cb_t setter;
     size_t offset;
 };
 
 struct logsrvd_config_section {
-    char *name;
+    const char *name;
     struct logsrvd_config_entry *entries;
 };
 
