@@ -197,11 +197,6 @@ FUZZ_SUDO_CONF_CORPUS = $(srcdir)/regress/corpus/seed/sudo_conf/sudo.conf.*
 
 all: libsudo_util.la
 
-pvs-log-files: $(POBJS)
-
-pvs-studio: $(POBJS)
-	plog-converter $(PVS_LOG_OPTS) $(POBJS)
-
 depend: siglist.c signame.c
 	$(scriptdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
 	    --builddir=$(abs_top_builddir) lib/util/Makefile.in
@@ -394,6 +389,9 @@ cppcheck:
 	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) $(srcdir)/*.c
 
 pvs-log-files: $(POBJS)
+
+pvs-studio: $(POBJS)
+	plog-converter $(PVS_LOG_OPTS) $(POBJS)
 
 fuzz: run-fuzz_sudo_conf
 

@@ -140,11 +140,6 @@ FUZZ_IOLOG_TIMING_CORPUS = $(srcdir)/regress/corpus/seed/timing/timing.*
 
 all: libsudo_iolog.la
 
-pvs-log-files: $(POBJS)
-
-pvs-studio: $(POBJS)
-	plog-converter $(PVS_LOG_OPTS) $(POBJS)
-
 depend:
 	$(scriptdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
 	    --builddir=$(abs_top_builddir) lib/iolog/Makefile.in
@@ -304,6 +299,9 @@ cppcheck:
 	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) $(srcdir)/*.c
 
 pvs-log-files: $(POBJS)
+
+pvs-studio: $(POBJS)
+	plog-converter $(PVS_LOG_OPTS) $(POBJS)
 
 fuzz: run-fuzz_iolog_json run-fuzz_iolog_legacy run-fuzz_iolog_timing
 

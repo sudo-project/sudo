@@ -86,11 +86,6 @@ GENERATED = log_server.pb-c.h log_server.pb-c.c
 
 all: liblogsrv.la
 
-pvs-log-files: $(POBJS)
-
-pvs-studio: $(POBJS)
-	plog-converter $(PVS_LOG_OPTS) $(POBJS)
-
 depend:
 	$(scriptdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
 	    --builddir=$(abs_top_builddir) lib/logsrv/Makefile.in
@@ -149,7 +144,9 @@ splint:
 cppcheck:
 	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I$(top_srcdir) $(srcdir)/*.c
 
-pvs-log-files: $(POBJS)
+pvs-log-files:
+
+pvs-studio:
 
 fuzz:
 
