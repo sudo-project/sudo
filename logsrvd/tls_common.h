@@ -19,7 +19,7 @@
 #ifndef SUDO_TLS_COMMON_H
 #define SUDO_TLS_COMMON_H
 
-#include "config.h"
+#include <config.h>
 
 #if defined(HAVE_OPENSSL)
 # if defined(HAVE_WOLFSSL)

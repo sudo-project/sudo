@@ -19,7 +19,7 @@
  * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
  */
 
-#include "config.h"
+#include <config.h>
 
 #if defined(HAVE_OPENSSL)
 # if defined(HAVE_WOLFSSL)

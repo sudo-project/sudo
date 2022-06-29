@@ -19,7 +19,7 @@
 #ifndef PYTHON_IO_HELPERS
 #define PYTHON_IO_HELPERS
 
-#include "config.h"
+#include <config.h>
 #include "sudo_compat.h"
 
 #include <stdio.h>
