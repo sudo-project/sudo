@@ -20,9 +20,9 @@
 
 /*
  * Configure does not define _LARGEFILE64_SOURCE by default.
- * We need to manually define it on AIX and native 64-bit platforms.
+ * We need to manually define it on systems that support large files.
  */
-#if defined (_LARGE_FILES) || defined (__LP64__)
+#if defined(__LP64__) || defined(_LARGE_FILES) || (defined(_FILE_OFFSET_BITS) && _FILE_OFFSET_BITS-0 == 64)
 # ifndef _LFS64_LARGEFILE
 #  define _LFS64_LARGEFILE 1
 # endif
