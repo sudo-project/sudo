@@ -459,16 +459,16 @@ copy_file.o: $(srcdir)/copy_file.c $(incdir)/compat/stdbool.h \
              $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
-             $(incdir)/sudo_util.h $(srcdir)/sudo.h $(top_builddir)/config.h \
-             $(top_builddir)/pathnames.h
+             $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_edit.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/copy_file.c
 copy_file.i: $(srcdir)/copy_file.c $(incdir)/compat/stdbool.h \
              $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
              $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
-             $(incdir)/sudo_util.h $(srcdir)/sudo.h $(top_builddir)/config.h \
-             $(top_builddir)/pathnames.h
+             $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_edit.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 copy_file.plog: copy_file.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/copy_file.c --i-file $< --output-file $@
@@ -711,11 +711,8 @@ hooks.plog: hooks.i
 intercept.pb-c.lo: $(srcdir)/intercept.pb-c.c $(incdir)/intercept.pb-c.h \
                    $(incdir)/protobuf-c/protobuf-c.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/intercept.pb-c.c
-intercept.pb-c.i: $(srcdir)/intercept.pb-c.c $(incdir)/intercept.pb-c.h \
-                   $(incdir)/protobuf-c/protobuf-c.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
-intercept.pb-c.plog: intercept.pb-c.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/intercept.pb-c.c --i-file $< --output-file $@
+intercept.pb-c.plog: $(srcdir)/intercept.pb-c.c
+	touch $@
 intercept.pb-c.o: $(srcdir)/intercept.pb-c.c $(incdir)/intercept.pb-c.h \
                   $(incdir)/protobuf-c/protobuf-c.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/intercept.pb-c.c
@@ -757,15 +754,19 @@ load_plugins.plog: load_plugins.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/load_plugins.c --i-file $< --output-file $@
 net_ifs.o: $(srcdir)/net_ifs.c $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
-           $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
-           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
-           $(incdir)/sudo_queue.h $(top_builddir)/config.h
+           $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+           $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+           $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+           $(incdir)/sudo_util.h $(srcdir)/sudo.h $(top_builddir)/config.h \
+           $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/net_ifs.c
 net_ifs.i: $(srcdir)/net_ifs.c $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
-           $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
-           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
-           $(incdir)/sudo_queue.h $(top_builddir)/config.h
+           $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+           $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+           $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+           $(incdir)/sudo_util.h $(srcdir)/sudo.h $(top_builddir)/config.h \
+           $(top_builddir)/pathnames.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 net_ifs.plog: net_ifs.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/net_ifs.c --i-file $< --output-file $@
@@ -807,11 +808,21 @@ parse_args.i: $(srcdir)/parse_args.c $(incdir)/compat/getopt.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 parse_args.plog: parse_args.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/parse_args.c --i-file $< --output-file $@
-preload.o: $(srcdir)/preload.c $(incdir)/sudo_compat.h $(incdir)/sudo_dso.h \
-           $(incdir)/sudo_plugin.h $(top_builddir)/config.h
+preload.o: $(srcdir)/preload.c $(incdir)/compat/stdbool.h \
+           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+           $(incdir)/sudo_debug.h $(incdir)/sudo_dso.h $(incdir)/sudo_event.h \
+           $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+           $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+           $(incdir)/sudo_util.h $(srcdir)/sudo.h $(top_builddir)/config.h \
+           $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/preload.c
-preload.i: $(srcdir)/preload.c $(incdir)/sudo_compat.h $(incdir)/sudo_dso.h \
-           $(incdir)/sudo_plugin.h $(top_builddir)/config.h
+preload.i: $(srcdir)/preload.c $(incdir)/compat/stdbool.h \
+           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+           $(incdir)/sudo_debug.h $(incdir)/sudo_dso.h $(incdir)/sudo_event.h \
+           $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+           $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+           $(incdir)/sudo_util.h $(srcdir)/sudo.h $(top_builddir)/config.h \
+           $(top_builddir)/pathnames.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 preload.plog: preload.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/preload.c --i-file $< --output-file $@

@@ -496,13 +496,15 @@ fuzz_iolog_timing.plog: fuzz_iolog_timing.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/fuzz/fuzz_iolog_timing.c --i-file $< --output-file $@
 host_port.lo: $(srcdir)/host_port.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
-              $(incdir)/sudo_gettext.h $(incdir)/sudo_queue.h \
-              $(incdir)/sudo_util.h $(top_builddir)/config.h
+              $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
+              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+              $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/host_port.c
 host_port.i: $(srcdir)/host_port.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
-              $(incdir)/sudo_gettext.h $(incdir)/sudo_queue.h \
-              $(incdir)/sudo_util.h $(top_builddir)/config.h
+              $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
+              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+              $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 host_port.plog: host_port.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/host_port.c --i-file $< --output-file $@
