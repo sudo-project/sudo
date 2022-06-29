@@ -216,17 +216,24 @@ sub mkdep {
 	    if ($ext ne "o" || !exists($objs{"$base.lo"})) {
 		$imp = $implicit{"i"};
 		if (exists $implicit{"i"} && exists $implicit{"plog"}) {
-		    $imp = $implicit{"i"};
-		    $deps =~ s/\.l?o/.i/;
-		    $new_makefile .= $deps;
-		    $new_makefile .= "\t$imp\n";
+		    if ($src =~ /\.pb-c.c$/) {
+			# Do not check protobuf-c generated files
+			$obj =~ /(.*)\.[a-z]+$/;
+			$new_makefile .= "${1}.plog: ${src}\n";
+			$new_makefile .= "\ttouch \$@\n";
+		    } else {
+			$imp = $implicit{"i"};
+			$deps =~ s/\.l?o/.i/;
+			$new_makefile .= $deps;
+			$new_makefile .= "\t$imp\n";
 
-		    $imp = $implicit{"plog"};
-		    $imp =~ s/ifile=\$<; *//;
-		    $imp =~ s/\$\$\{ifile\%i\}c/$src/;
-		    $obj =~ /(.*)\.[a-z]+$/;
-		    $new_makefile .= "${1}.plog: ${1}.i\n";
-		    $new_makefile .= "\t$imp\n";
+			$imp = $implicit{"plog"};
+			$imp =~ s/ifile=\$<; *//;
+			$imp =~ s/\$\$\{ifile\%i\}c/$src/;
+			$obj =~ /(.*)\.[a-z]+$/;
+			$new_makefile .= "${1}.plog: ${1}.i\n";
+			$new_makefile .= "\t$imp\n";
+		    }
 		}
 	    }
 	}
