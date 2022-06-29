@@ -47,6 +47,6 @@ sudo_strsignal(int signo)
     if (signo > 0 && signo < NSIG && sudo_sys_siglist[signo] != NULL)
 	return (char *)sudo_sys_siglist[signo];
     /* XXX - should be "Unknown signal: %d" */
-    return _("Unknown signal");
+    return (char *)_("Unknown signal");
 }
 #endif /* HAVE_STRSIGNAL */
