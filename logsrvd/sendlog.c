@@ -1798,7 +1798,7 @@ main(int argc, char *argv[])
 	goto bad;
 
     if ((evbase = sudo_ev_base_alloc()) == NULL)
-	sudo_fatal(NULL);
+	sudo_fatal(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     if (testrun)
         printf("connecting clients...\n");

@@ -268,7 +268,7 @@ connection_close(struct connection_closure *closure)
 
 	    /* Connect to the first relay available asynchronously. */
 	    if (!connect_relay(new_closure)) {
-		sudo_warnx(U_("unable to connect to relay"));
+		sudo_warnx("%s", U_("unable to connect to relay"));
 		connection_closure_free(new_closure);
 	    }
 	}
@@ -1548,12 +1548,12 @@ register_listener(struct server_address *addr, struct sudo_event_base *evbase)
 
     /* TODO: make non-fatal */
     if ((l = malloc(sizeof(*l))) == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     l->sock = sock;
     l->tls = addr->tls;
     l->ev = sudo_ev_alloc(sock, SUDO_EV_READ|SUDO_EV_PERSIST, listener_cb, l);
     if (l->ev == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(evbase, l->ev, NULL, false) == -1)
 	sudo_fatal("%s", U_("unable to add event to queue"));
     TAILQ_INSERT_TAIL(&listeners, l, entries);
@@ -1737,7 +1737,7 @@ register_signal(int signo, struct sudo_event_base *base)
 
     ev = sudo_ev_alloc(signo, SUDO_EV_SIGNAL, signal_cb, base);
     if (ev == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(base, ev, NULL, false) == -1)
 	sudo_fatal("%s", U_("unable to add event to queue"));
 
@@ -1953,7 +1953,7 @@ main(int argc, char *argv[])
         exit(EXIT_FAILURE);
 
     if ((evbase = sudo_ev_base_alloc()) == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* Initialize listeners. */
     if (!server_setup(evbase))

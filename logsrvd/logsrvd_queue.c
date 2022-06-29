@@ -132,7 +132,7 @@ outgoing_queue_cb(int unused, int what, void *v)
 
 	success = connect_relay(closure);
 	if (!success) {
-	    sudo_warnx(U_("unable to connect to relay"));
+	    sudo_warnx("%s", U_("unable to connect to relay"));
 	    connection_close(closure);
 	}
 	break;

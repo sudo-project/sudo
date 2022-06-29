@@ -361,7 +361,7 @@ intercept_connect(void)
     debug_decl(intercept_connect, SUDO_DEBUG_EXEC);
 
     if (intercept_port == 0) {
-	sudo_warnx(U_("intercept port not set"));
+	sudo_warnx("%s", U_("intercept port not set"));
 	goto done;
     }
 

@@ -235,7 +235,7 @@ tls_client_setup(int sock, const char *ca_bundle_file, const char *cert_file,
     ssl_ctx = init_tls_context(ca_bundle_file, cert_file, key_file,
 	dhparam_file, ciphers_v12, ciphers_v13, verify_server);
     if (ssl_ctx == NULL) {
-        sudo_warnx(U_("unable to initialize TLS context"));
+        sudo_warnx("%s", U_("unable to initialize TLS context"));
 	debug_return_bool(false);
     }
 

@@ -1029,7 +1029,6 @@ cb_logfile_path(struct logsrvd_config *config, const char *str, size_t offset)
     debug_decl(cb_logfile_path, SUDO_DEBUG_UTIL);
 
     if (*str != '/') {
-	debug_return_bool(false);
 	sudo_warnx(U_("%s: not a fully qualified path"), str);
 	debug_return_bool(false);
     }
@@ -1761,7 +1760,7 @@ logsrvd_conf_apply(struct logsrvd_config *config)
 	    config->server.tls_ciphers_v12, config->server.tls_ciphers_v13,
 	    config->server.tls_verify);
 	if (config->server.ssl_ctx == NULL) {
-	    sudo_warnx(U_("unable to initialize server TLS context"));
+	    sudo_warnx("%s", U_("unable to initialize server TLS context"));
 	    debug_return_bool(false);
 	}
 	break;
@@ -1781,7 +1780,7 @@ logsrvd_conf_apply(struct logsrvd_config *config)
 		TLS_RELAY_STR(config, tls_ciphers_v13),
 		TLS_RELAY_INT(config, tls_verify));
 	    if (config->relay.ssl_ctx == NULL) {
-		sudo_warnx(U_("unable to initialize relay TLS context"));
+		sudo_warnx("%s", U_("unable to initialize relay TLS context"));
 		debug_return_bool(false);
 	    }
 	    break;
