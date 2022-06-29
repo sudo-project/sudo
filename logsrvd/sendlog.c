@@ -288,7 +288,7 @@ read_io_buf(struct client_closure *closure)
 	free(closure->buf);
 	closure->bufsize = sudo_pow2_roundup(timing->u.nbytes);
 	if ((closure->buf = malloc(closure->bufsize)) == NULL) {
-	    sudo_warn(NULL);
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    timing->u.nbytes = 0;
 	    debug_return_bool(false);
 	}
