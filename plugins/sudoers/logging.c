@@ -263,7 +263,7 @@ log_reject(const char *message, bool logit, bool mailit)
 	if (!logit)
 	    SET(evl_flags, EVLOG_MAIL_ONLY);
     }
-    sudoers_to_eventlog(&evlog, NewArgv, env_get(), uuid_str);
+    sudoers_to_eventlog(&evlog, safe_cmnd, NewArgv, env_get(), uuid_str);
     ret = eventlog_reject(&evlog, evl_flags, message, NULL, NULL);
     if (!log_server_reject(&evlog, message))
 	ret = false;
@@ -612,7 +612,8 @@ log_exit_status(int status)
 	/* Log and mail messages should be in the sudoers locale. */
 	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
-	sudoers_to_eventlog(&evlog, NewArgv, env_get(), sudo_user.uuid_str);
+	sudoers_to_eventlog(&evlog, saved_cmnd, saved_argv, env_get(),
+	    sudo_user.uuid_str);
 	if (def_mail_always) {
 	    SET(evl_flags, EVLOG_MAIL);
 	    if (!def_log_exit_status)
@@ -695,7 +696,8 @@ vlog_warning(int flags, int errnum, const char *fmt, va_list ap)
 	    if (ISSET(flags, SLOG_NO_LOG))
 		SET(evl_flags, EVLOG_MAIL_ONLY);
 	}
-	sudoers_to_eventlog(&evlog, NewArgv, env_get(), sudo_user.uuid_str);
+	sudoers_to_eventlog(&evlog, safe_cmnd, NewArgv, env_get(),
+	    sudo_user.uuid_str);
 	eventlog_alert(&evlog, evl_flags, &now, message, errstr);
 	log_server_alert(&evlog, &now, message, errstr);
     }
@@ -791,7 +793,8 @@ mail_parse_errors(void)
 	ret = false;
 	goto done;
     }
-    sudoers_to_eventlog(&evlog, NewArgv, env_get(), sudo_user.uuid_str);
+    sudoers_to_eventlog(&evlog, safe_cmnd, NewArgv, env_get(),
+	sudo_user.uuid_str);
 
     len = strlen(_("problem parsing sudoers")) + 1;
     STAILQ_FOREACH(pe, &parse_error_list, entries) {
@@ -916,8 +919,8 @@ should_mail(int status)
  * The values in the resulting eventlog struct should not be freed.
  */
 void
-sudoers_to_eventlog(struct eventlog *evlog, char * const argv[],
-    char * const envp[], const char *uuid_str)
+sudoers_to_eventlog(struct eventlog *evlog, const char *cmnd,
+    char * const argv[], char * const envp[], const char *uuid_str)
 {
     struct group *grp;
     debug_decl(sudoers_to_eventlog, SUDOERS_DEBUG_LOGGING);
@@ -929,7 +932,7 @@ sudoers_to_eventlog(struct eventlog *evlog, char * const argv[],
     memset(evlog, 0, sizeof(*evlog));
     evlog->iolog_file = sudo_user.iolog_file;
     evlog->iolog_path = sudo_user.iolog_path;
-    evlog->command = safe_cmnd ? safe_cmnd : (argv ? argv[0] : NULL);
+    evlog->command = cmnd ? (char *)cmnd : (argv ? argv[0] : NULL);
     evlog->cwd = user_cwd;
     if (def_runchroot != NULL && strcmp(def_runchroot, "*") != 0) {
 	evlog->runchroot = def_runchroot;

@@ -208,7 +208,7 @@ audit_to_eventlog(struct eventlog *evlog, char * const command_info[],
     debug_decl(audit_to_eventlog, SUDOERS_DEBUG_PLUGIN);
 
     /* Fill in evlog from sudoers Defaults, run_argv and run_envp. */
-    sudoers_to_eventlog(evlog, run_argv, run_envp, uuid_str);
+    sudoers_to_eventlog(evlog, NULL, run_argv, run_envp, uuid_str);
 
     /* Update iolog and execution environment from command_info[]. */
     if (command_info != NULL) {

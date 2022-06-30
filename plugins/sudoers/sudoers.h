@@ -103,6 +103,7 @@ struct sudo_user {
     char *cmnd_args;
     char *cmnd_base;
     char *cmnd_safe;
+    char *cmnd_saved;
     char *class_name;
     char *krb5_ccname;
     struct gid_list *gid_list;
@@ -245,6 +246,7 @@ struct sudo_user {
 #define user_srunhost		(sudo_user.srunhost)
 #define user_ccname		(sudo_user.krb5_ccname)
 #define safe_cmnd		(sudo_user.cmnd_safe)
+#define saved_cmnd		(sudo_user.cmnd_saved)
 #define cmnd_fd			(sudo_user.execfd)
 #define login_class		(sudo_user.class_name)
 #define runas_pw		(sudo_user._runas_pw)

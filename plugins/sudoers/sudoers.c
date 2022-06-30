@@ -102,6 +102,7 @@ static struct rlimit nproclimit;
 /* XXX - must be extern for audit bits of sudo_auth.c */
 int NewArgc;
 char **NewArgv;
+char **saved_argv;
 
 #ifdef SUDOERS_LOG_CLIENT
 # define remote_iologs	(!SLIST_EMPTY(&def_log_servers))
@@ -433,7 +434,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
      * Make a local copy of argc/argv, with special handling for the
      * '-i' option.  We also allocate an extra slot for bash's --login.
      */
-    if (NewArgv != NULL) {
+    if (NewArgv != NULL && NewArgv != saved_argv) {
 	sudoers_gc_remove(GC_PTR, NewArgv);
 	free(NewArgv);
     }
@@ -803,13 +804,25 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    goto bad;
 	}
 	/* find_editor() already g/c'd edit_argv[] */
-	sudoers_gc_remove(GC_PTR, NewArgv);
-	free(NewArgv);
+	if (NewArgv != saved_argv) {
+	    sudoers_gc_remove(GC_PTR, NewArgv);
+	    free(NewArgv);
+	}
 	NewArgv = edit_argv;
 	NewArgc = edit_argc;
 
 	/* We want to run the editor with the unmodified environment. */
 	env_swap_old();
+    }
+
+    /* Save the initial command and argv so we have it for exit logging. */
+    if (saved_cmnd == NULL) {
+	saved_cmnd = strdup(safe_cmnd);
+	if (saved_cmnd == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
+	saved_argv = NewArgv;
     }
 
     goto done;
@@ -1764,6 +1777,7 @@ sudoers_cleanup(void)
 
     /* Clear globals */
     list_pw = NULL;
+    saved_argv = NULL;
     NewArgv = NULL;
     NewArgc = 0;
     prev_user = NULL;
@@ -1820,6 +1834,7 @@ sudo_user_free(void)
     free(user_cmnd);
     free(user_args);
     free(safe_cmnd);
+    free(saved_cmnd);
     free(user_stat);
 #ifdef HAVE_SELINUX
     free(user_role);
