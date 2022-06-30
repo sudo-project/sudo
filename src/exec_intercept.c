@@ -54,6 +54,44 @@ static void intercept_accept_cb(int fd, int what, void *v);
 static void intercept_cb(int fd, int what, void *v);
 
 /*
+ * Enable the closure->ev event with the specified events and callback,
+ * and set the connection state to new_state if it is valid.
+ * Returns true on success, else false.
+ */
+static bool
+intercept_enable_event(int fd, short events, enum intercept_state new_state,
+    sudo_ev_callback_t callback, struct intercept_closure *closure)
+{
+    int rc;
+    debug_decl(intercept_enable_event, SUDO_DEBUG_EXEC);
+
+    rc = sudo_ev_set(&closure->ev, fd, events, callback, closure);
+    if (rc == -1 || sudo_ev_add(NULL, &closure->ev, NULL, false) == -1) {
+	sudo_warn("%s", U_("unable to add event to queue"));
+	debug_return_bool(false);
+    }
+    if (new_state != INVALID_STATE)
+	closure->state = new_state;
+    debug_return_bool(true);
+}
+
+static bool
+enable_read_event(int fd, enum intercept_state new_state,
+    sudo_ev_callback_t callback, struct intercept_closure *closure)
+{
+    return intercept_enable_event(fd, SUDO_EV_READ|SUDO_EV_PERSIST,
+	new_state, callback, closure);
+}
+
+static bool
+enable_write_event(int fd, sudo_ev_callback_t callback,
+    struct intercept_closure *closure)
+{
+    return intercept_enable_event(fd, SUDO_EV_WRITE|SUDO_EV_PERSIST,
+	INVALID_STATE, callback, closure);
+}
+
+/*
  * Create an intercept closure.
  * Returns an opaque pointer to the closure, which is also
  * passed to the event callback when not using ptrace(2).
@@ -63,7 +101,6 @@ intercept_setup(int fd, struct sudo_event_base *evbase,
     struct command_details *details)
 {
     struct intercept_closure *closure;
-    int rc;
     debug_decl(intercept_setup, SUDO_DEBUG_EXEC);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
@@ -76,6 +113,7 @@ intercept_setup(int fd, struct sudo_event_base *evbase,
     }
     closure->details = details;
     closure->listen_sock = -1;
+    sudo_ev_set_base(&closure->ev, evbase);
 
     if (ISSET(details->flags, CD_USE_PTRACE)) {
 	/*
@@ -92,15 +130,10 @@ intercept_setup(int fd, struct sudo_event_base *evbase,
 	 * Not using ptrace(2), use LD_PRELOAD (or its equivalent).  If
 	 * we've already seen an InterceptHello, expect a policy check first.
 	 */
-	closure->state = sudo_token_isset(intercept_token) ?
+	const int new_state = sudo_token_isset(intercept_token) ?
 	    RECV_SECRET : RECV_HELLO_INITIAL;
-
-	rc = sudo_ev_set(&closure->ev, fd, SUDO_EV_READ|SUDO_EV_PERSIST,
-	    intercept_cb, closure);
-	if (rc == -1 || sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
-	    sudo_warn("%s", U_("unable to add event to queue"));
+	if (!enable_read_event(fd, new_state, intercept_cb, closure))
 	    goto bad;
-	}
     }
 
     debug_return_ptr(closure);
@@ -546,11 +579,9 @@ intercept_verify_token(int fd, struct intercept_closure *closure)
 static bool
 intercept_read(int fd, struct intercept_closure *closure)
 {
-    struct sudo_event_base *evbase = sudo_ev_get_base(&closure->ev);
     InterceptRequest *req = NULL;
     bool ret = false;
     ssize_t nread;
-    int rc;
     debug_decl(intercept_read, SUDO_DEBUG_EXEC);
 
     if (closure->state == RECV_SECRET) {
@@ -644,7 +675,7 @@ unpack:
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: finished receiving %u bytes from client", __func__, closure->len);
-    sudo_ev_del(evbase, &closure->ev);
+    sudo_ev_del(NULL, &closure->ev);
     free(closure->buf);
     closure->buf = NULL;
     closure->len = 0;
@@ -663,6 +694,11 @@ unpack:
 	ret = intercept_check_policy_req(req->u.policy_check_req, closure);
 	if (!ret)
 	    goto done;
+	if (!ISSET(closure->details->flags, CD_INTERCEPT)) {
+	    /* Just logging, re-use event to read next InterceptHello. */
+	    ret = enable_read_event(fd, RECV_HELLO, intercept_cb, closure);
+	    goto done;
+	}
 	break;
     case INTERCEPT_REQUEST__TYPE_HELLO:
 	switch (closure->state) {
@@ -686,12 +722,8 @@ unpack:
     }
 
     /* Switch event to write mode for the reply. */
-    rc = sudo_ev_set(&closure->ev, fd, SUDO_EV_WRITE|SUDO_EV_PERSIST,
-	intercept_cb, closure);
-    if (rc == -1 || sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
-	sudo_warn("%s", U_("unable to add event to queue"));
+    if (!enable_write_event(fd, intercept_cb, closure))
 	goto done;
-    }
 
     ret = true;
 
@@ -744,6 +776,7 @@ fmt_hello_response(struct intercept_closure *closure)
     hello_resp.portno = intercept_listen_port;
     hello_resp.token_lo = intercept_token.u64[0];
     hello_resp.token_hi = intercept_token.u64[1];
+    hello_resp.log_only = !ISSET(closure->details->flags, CD_INTERCEPT);
 
     resp.u.hello_resp = &hello_resp;
     resp.type_case = INTERCEPT_RESPONSE__TYPE_HELLO_RESP;
@@ -811,10 +844,8 @@ fmt_error_message(struct intercept_closure *closure)
 static bool
 intercept_write(int fd, struct intercept_closure *closure)
 {
-    struct sudo_event_base *evbase = sudo_ev_get_base(&closure->ev);
     bool ret = false;
     ssize_t nwritten;
-    int rc;
     debug_decl(intercept_write, SUDO_DEBUG_EXEC);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO, "state %d",
@@ -864,9 +895,9 @@ intercept_write(int fd, struct intercept_closure *closure)
 	debug_return_bool(true);
     }
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sent %u bytes to client",
-	__func__, closure->len);
-    sudo_ev_del(evbase, &closure->ev);
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: sent %u bytes to client", __func__, closure->len);
+    sudo_ev_del(NULL, &closure->ev);
     free(closure->buf);
     closure->buf = NULL;
     closure->len = 0;
@@ -874,27 +905,19 @@ intercept_write(int fd, struct intercept_closure *closure)
 
     switch (closure->state) {
     case RECV_HELLO_INITIAL:
-	/* Re-use event for the listener. */
+	/* Re-use the listener event. */
 	close(fd);
-	rc = sudo_ev_set(&closure->ev, closure->listen_sock,
-	    SUDO_EV_READ|SUDO_EV_PERSIST, intercept_accept_cb, closure);
-	if (rc == -1 || sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
-	    sudo_warn("%s", U_("unable to add event to queue"));
+	if (!enable_read_event(closure->listen_sock, RECV_CONNECTION,
+		intercept_accept_cb, closure))
 	    goto done;
-	}
 	closure->listen_sock = -1;
 	closure->state = RECV_CONNECTION;
 	accept_closure = closure;
 	break;
     case POLICY_ACCEPT:
 	/* Re-use event to read InterceptHello from sudo_intercept.so ctor. */
-	rc = sudo_ev_set(&closure->ev, fd, SUDO_EV_READ|SUDO_EV_PERSIST,
-	    intercept_cb, closure);
-	if (rc == -1 || sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
-	    sudo_warn("%s", U_("unable to add event to queue"));
+	if (!enable_read_event(fd, RECV_HELLO, intercept_cb, closure))
 	    goto done;
-	}
-	closure->state = RECV_HELLO;
 	break;
     default:
 	/* Done with this connection. */

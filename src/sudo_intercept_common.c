@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -61,6 +61,7 @@ extern char **environ;
 
 static union sudo_token_un intercept_token;
 static in_port_t intercept_port;
+static bool log_only;
 
 /* Send entire request to sudo (blocking). */
 static bool
@@ -273,6 +274,7 @@ sudo_interposer_init(void)
 	    intercept_token.u64[0] = res->u.hello_resp->token_lo;
 	    intercept_token.u64[1] = res->u.hello_resp->token_hi;
 	    intercept_port = res->u.hello_resp->portno;
+	    log_only = res->u.hello_resp->log_only;
 	} else {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unexpected type_case value %d in %s from %s",
@@ -420,6 +422,18 @@ command_allowed(const char *cmnd, char * const argv[],
     if (!send_policy_check_req(sock, cmnd, argv, envp))
 	goto done;
 
+    if (log_only) {
+	/* Just logging, no policy check. */
+	nenvp = sudo_preload_dso(envp, sudo_conf_intercept_path(), sock);
+	if (nenvp == NULL)
+	    goto oom;
+	*ncmndp = (char *)cmnd;		/* safe */
+	*nargvp = (char **)argv;	/* safe */
+	*nenvpp = nenvp;
+	ret = true;
+	goto done;
+    }
+
     res = recv_intercept_response(sock);
     if (res == NULL)
 	goto done;
@@ -467,7 +481,7 @@ command_allowed(const char *cmnd, char * const argv[],
     default:
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unexpected type_case value %d in %s from %s",
-            res->type_case, "InterceptResponse", "sudo");
+	    res->type_case, "InterceptResponse", "sudo");
 	goto done;
     }
 

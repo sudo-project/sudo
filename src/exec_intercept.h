@@ -20,6 +20,7 @@
 #define SUDO_EXEC_INTERCEPT_H
 
 enum intercept_state {
+    INVALID_STATE,
     RECV_HELLO_INITIAL,
     RECV_HELLO,
     RECV_SECRET,

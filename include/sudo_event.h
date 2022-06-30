@@ -192,6 +192,9 @@ sudo_dso_public bool sudo_ev_got_break_v1(struct sudo_event_base *base);
 /* Return the base an event is associated with or NULL. */
 #define sudo_ev_get_base(_ev) ((_ev) ? (_ev)->base : NULL)
 
+/* Set the base an event is associated with. */
+#define sudo_ev_set_base(_ev, _b) ((_ev)->base = (_b))
+
 /* Magic pointer value to use self pointer as callback arg. */
 #define sudo_ev_self_cbarg() ((void *)-1)
 
