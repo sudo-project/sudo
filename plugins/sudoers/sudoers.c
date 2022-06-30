@@ -699,25 +699,21 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     switch (sudo_mode & MODE_MASK) {
 	case MODE_CHECK:
 	    ret = display_cmnd(snl, list_pw ? list_pw : sudo_user.pw);
-	    break;
+	    goto done;
 	case MODE_LIST:
 	    ret = display_privs(snl, list_pw ? list_pw : sudo_user.pw, verbose);
-	    break;
+	    goto done;
 	case MODE_VALIDATE:
+	    ret = true;
+	    goto done;
 	case MODE_RUN:
 	case MODE_EDIT:
-	    /* ret may be overridden by "goto bad" later */
-	    ret = true;
+	    /* ret will not be set until the very end. */
 	    break;
 	default:
 	    /* Should not happen. */
 	    sudo_warnx("internal error, unexpected sudo mode 0x%x", sudo_mode);
 	    goto done;
-    }
-
-    if (ISSET(sudo_mode, (MODE_VALIDATE|MODE_CHECK|MODE_LIST))) {
-	/* ret already set appropriately */
-	goto done;
     }
 
     /*
@@ -825,6 +821,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	saved_argv = NewArgv;
     }
 
+    ret = true;
     goto done;
 
 bad:
