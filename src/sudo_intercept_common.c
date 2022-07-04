@@ -98,7 +98,7 @@ send_client_hello(int sock)
 
     /* Setup client hello. */
     hello.pid = getpid();
-    msg.type_case = INTERCEPT_REQUEST__TYPE_HELLO;;
+    msg.type_case = INTERCEPT_REQUEST__TYPE_HELLO;
     msg.u.hello = &hello;
 
     len = intercept_request__get_packed_size(&msg);
