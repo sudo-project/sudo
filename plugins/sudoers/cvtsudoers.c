@@ -691,7 +691,7 @@ cvtsudoers_parse_filter(char *expression)
 	/* Parse keyword = value */
 	keyword = cp;
 	if ((cp = strchr(cp, '=')) == NULL) {
-	    sudo_warnx(U_("invalid filter: %s"), keyword);;
+	    sudo_warnx(U_("invalid filter: %s"), keyword);
 	    free(s);
 	    debug_return_bool(false);
 	}
@@ -707,7 +707,7 @@ cvtsudoers_parse_filter(char *expression)
 	} else if (strcmp(keyword, "cmnd") == 0 || strcmp(keyword, "cmd") == 0) {
 	    STAILQ_INSERT_TAIL(&filters->cmnds, s, entries);
 	} else {
-	    sudo_warnx(U_("invalid filter: %s"), keyword);;
+	    sudo_warnx(U_("invalid filter: %s"), keyword);
 	    free(s);
 	    debug_return_bool(false);
 	}
