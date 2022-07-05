@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <unistd.h>
 
 #define SUDO_ERROR_WRAP 0
 

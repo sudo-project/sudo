@@ -22,6 +22,7 @@
  */
 
 #include "testhelpers.h"
+#include <unistd.h>
 
 #include "sudo_dso.h"
 

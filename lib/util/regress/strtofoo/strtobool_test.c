@@ -25,6 +25,7 @@
 #else
 # include "compat/stdbool.h"
 #endif
+#include <unistd.h>
 
 #include "sudo_compat.h"
 #include "sudo_util.h"

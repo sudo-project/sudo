@@ -25,6 +25,7 @@
 # include <inttypes.h>
 #endif
 #include <string.h>
+#include <unistd.h>
 
 #define SUDO_ERROR_WRAP 0
 
