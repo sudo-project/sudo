@@ -28,7 +28,7 @@ root ALL = /bin/*at ^/var/log/[^/]+$
 EOF
 
 # Command: path, args: args start with escaped ^
-$TESTSUDOERS root /usr/bin/grep ^foo$ <<'EOF'
+$TESTSUDOERS root /usr/bin/grep '^foo$' <<'EOF'
 root ALL = /usr/bin/grep \^foo$
 EOF
 
