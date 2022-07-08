@@ -391,9 +391,10 @@ command_matches_all(const char *runchroot,
     debug_decl(command_matches_all, SUDOERS_DEBUG_MATCH);
 
     if (user_cmnd[0] == '/') {
+#ifndef SUDOERS_NAME_MATCH
 	/* Open the file for fdexec or for digest matching. */
 	bool open_error = !open_cmnd(user_cmnd, runchroot, digests, &fd);
-#ifndef SUDOERS_NAME_MATCH
+
 	/* A non-existent file is not an error for "sudo ALL". */
 	if (do_stat(fd, user_cmnd, runchroot, &sb)) {
 	    if (open_error) {
@@ -403,6 +404,9 @@ command_matches_all(const char *runchroot,
 	    if (!intercept_ok(user_cmnd, intercepted, &sb))
 		goto bad;
 	}
+#else
+	/* Open the file for fdexec or for digest matching. */
+	(void)open_cmnd(user_cmnd, runchroot, digests, &fd);
 #endif
     }
 
