@@ -392,11 +392,14 @@ command_matches_all(const char *runchroot,
 
     if (user_cmnd[0] == '/') {
 	/* Open the file for fdexec or for digest matching. */
-	if (!open_cmnd(user_cmnd, runchroot, digests, &fd))
-	    goto bad;
+	bool open_error = !open_cmnd(user_cmnd, runchroot, digests, &fd);
 #ifndef SUDOERS_NAME_MATCH
 	/* A non-existent file is not an error for "sudo ALL". */
 	if (do_stat(fd, user_cmnd, runchroot, &sb)) {
+	    if (open_error) {
+		/* File exists but we couldn't open it above? */
+		goto bad;
+	    }
 	    if (!intercept_ok(user_cmnd, intercepted, &sb))
 		goto bad;
 	}
