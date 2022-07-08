@@ -655,7 +655,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	}
 	fclose(sudoersin);
 	if (!parse_error) {
-	    (void) update_defaults(&parsed_policy, NULL,
+	    parse_error = !update_defaults(&parsed_policy, NULL,
 		SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, true);
 	    check_defaults_and_aliases(strict, quiet);
 	}
@@ -975,7 +975,7 @@ check_syntax(const char *file, bool quiet, bool strict, bool check_owner,
 	parse_error = true;
     }
     if (!parse_error) {
-	(void) update_defaults(&parsed_policy, NULL,
+	parse_error = !update_defaults(&parsed_policy, NULL,
 	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, true);
 	check_defaults_and_aliases(strict, quiet);
     }
