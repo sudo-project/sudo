@@ -118,13 +118,13 @@ push(struct dynamic_array *arr, const char *entry)
     }
 
     if (arr->len + (entry != NULL) >= arr->size) {
-	char **tmp = reallocarray(arr->entries, arr->size + 128, sizeof(char *));
+	char **tmp = reallocarray(arr->entries, arr->size + 1024, sizeof(char *));
 	if (tmp == NULL) {
 	    free(copy);
 	    return false;
 	}
 	arr->entries = tmp;
-	arr->size += 128;
+	arr->size += 1024;
     }
     if (copy != NULL)
 	arr->entries[arr->len++] = copy;
@@ -372,7 +372,9 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
 	/* Additional environment variables to add. */
 	if (strncmp(line, "env=", sizeof("env=") - 1) == 0) {
-	    push(&env_add, line);
+	    const char *cp = line + sizeof("env=") - 1;
+	    if (strchr(cp, '=') != NULL)
+		push(&env_add, line);
 	    continue;
 	}
 
