@@ -314,8 +314,14 @@ int
 sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
 {
     char **ep;
-    size_t len;
+    const char *equal;
     bool found = false;
+
+    equal = strchr(str, '=');
+    if (equal == NULL) {
+	errno = EINVAL;
+	return -1;
+    }
 
     /* Make sure there is room for the new entry plus a NULL. */
     if (env.env_size > 2 && env.env_len > env.env_size - 2) {
@@ -358,7 +364,7 @@ sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
 #endif
 
     if (dupcheck) {
-	len = (strchr(str, '=') - str) + 1;
+	size_t len = (size_t)(equal - str) + 1;
 	for (ep = env.envp; *ep != NULL; ep++) {
 	    if (strncmp(str, *ep, len) == 0) {
 		if (overwrite)
