@@ -44,7 +44,8 @@ apparmor_is_enabled(void)
     FILE *fd;
     debug_decl(apparmor_is_enabled, SUDO_DEBUG_APPARMOR);
 
-    /* Check whether AppArmor is enabled by reading
+    /*
+     * Check whether AppArmor is enabled by reading
      * /sys/module/apparmor/parameters/enabled
      *
      * When this file exists and its contents are equal to "Y", AppArmor
@@ -93,20 +94,21 @@ apparmor_prepare(const char *new_profile)
         goto done;
     }
 
-    if (mode == NULL)
+    if (mode == NULL) {
         sudo_debug_printf(SUDO_DEBUG_INFO,
-                "%s: changing AppArmor profile: %s -> %s", __func__,
-                old_profile, new_profile ? new_profile : "?"
-                );
-    else
+	    "%s: changing AppArmor profile: %s -> %s", __func__,
+	    old_profile, new_profile ? new_profile : "?");
+    } else {
         sudo_debug_printf(SUDO_DEBUG_INFO,
-                "%s: changing AppArmor profile: %s (%s) -> %s", __func__,
-                old_profile, mode, new_profile ? new_profile : "?"
-                );
+	    "%s: changing AppArmor profile: %s (%s) -> %s", __func__,
+	    old_profile, mode, new_profile ? new_profile : "?");
+    }
 
 done:
-    /* The profile string returned by aa_getcon must be free'd, while the
-     * mode string must _not_ be free'd */
+    /*
+     * The profile string returned by aa_getcon must be free'd, while the
+     * mode string must _not_ be free'd.
+     */
     if (old_profile != NULL)
         free(old_profile);
 

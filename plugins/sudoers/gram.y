@@ -145,7 +145,7 @@ static void alias_error(const char *name, int errnum);
 %token <tok>	 CWD			/* working directory for command */
 %token <tok>	 TYPE			/* SELinux type */
 %token <tok>	 ROLE			/* SELinux role */
-%token <tok>	 APPARMOR_PROFILE		/* AppArmor profile */
+%token <tok>	 APPARMOR_PROFILE	/* AppArmor profile */
 %token <tok>	 PRIVS			/* Solaris privileges */
 %token <tok>	 LIMITPRIVS		/* Solaris limit privileges */
 %token <tok>	 CMND_TIMEOUT		/* command timeout */
@@ -538,8 +538,8 @@ cmndspec	:	runasspec options cmndtag digcmnd {
 			    parser_leak_remove(LEAK_PTR, $2.type);
 #endif
 #ifdef HAVE_APPARMOR
-				cs->apparmor_profile = $2.apparmor_profile;
-				parser_leak_remove(LEAK_PTR, $2.apparmor_profile);
+			    cs->apparmor_profile = $2.apparmor_profile;
+			    parser_leak_remove(LEAK_PTR, $2.apparmor_profile);
 #endif
 #ifdef HAVE_PRIV_SET
 			    cs->privs = $2.privs;
@@ -863,9 +863,9 @@ options		:	/* empty */ {
 			}
 		|	options apparmor_profilespec {
 #ifdef HAVE_APPARMOR
-				parser_leak_remove(LEAK_PTR, $$.apparmor_profile);
-				free($$.apparmor_profile);
-				$$.apparmor_profile = $2;
+			    parser_leak_remove(LEAK_PTR, $$.apparmor_profile);
+			    free($$.apparmor_profile);
+			    $$.apparmor_profile = $2;
 #endif
 			}
 		|	options privsspec {

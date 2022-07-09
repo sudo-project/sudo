@@ -597,7 +597,7 @@ print_cmndspec_csv(FILE *fp, struct sudoers_parse_tree *parse_tree,
 	    || cs->role != next->role || cs->type != next->type
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_APPARMOR
-		|| cs->apparmor_profile != next->apparmor_profile
+	    || cs->apparmor_profile != next->apparmor_profile
 #endif /* HAVE_APPARMOR  */
 	    || cs->runchroot != next->runchroot || cs->runcwd != next->runcwd;
 

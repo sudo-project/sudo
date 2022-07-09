@@ -257,18 +257,18 @@ apply_cmndspec(struct cmndspec *cs)
 #ifdef HAVE_APPARMOR
 	/* Set AppArmor profile, if specified */
 	if (cs->apparmor_profile != NULL) {
-		user_apparmor_profile = strdup(cs->apparmor_profile);
-		if (user_apparmor_profile == NULL) {
-			sudo_warnx(U_("%s: %s"), __func__,
-			U_("unable to allocate memory"));
-			debug_return_bool(false);
-		}
+	    user_apparmor_profile = strdup(cs->apparmor_profile);
+	    if (user_apparmor_profile == NULL) {
+		sudo_warnx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+		debug_return_bool(false);
+	    }
 	} else {
-		user_apparmor_profile = def_apparmor_profile;
-		def_apparmor_profile = NULL;
+	    user_apparmor_profile = def_apparmor_profile;
+	    def_apparmor_profile = NULL;
 	}
 	if (user_apparmor_profile != NULL) {
-		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"user_apparmor_profile -> %s", user_apparmor_profile);
 	}
 #endif

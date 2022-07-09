@@ -2139,8 +2139,8 @@ yyreduce:
 			    parser_leak_remove(LEAK_PTR, (yyvsp[-2].options).type);
 #endif
 #ifdef HAVE_APPARMOR
-				cs->apparmor_profile = (yyvsp[-2].options).apparmor_profile;
-				parser_leak_remove(LEAK_PTR, (yyvsp[-2].options).apparmor_profile);
+			    cs->apparmor_profile = (yyvsp[-2].options).apparmor_profile;
+			    parser_leak_remove(LEAK_PTR, (yyvsp[-2].options).apparmor_profile);
 #endif
 #ifdef HAVE_PRIV_SET
 			    cs->privs = (yyvsp[-2].options).privs;
@@ -2662,9 +2662,9 @@ yyreduce:
 #line 864 "gram.y"
                                                      {
 #ifdef HAVE_APPARMOR
-				parser_leak_remove(LEAK_PTR, (yyval.options).apparmor_profile);
-				free((yyval.options).apparmor_profile);
-				(yyval.options).apparmor_profile = (yyvsp[0].string);
+			    parser_leak_remove(LEAK_PTR, (yyval.options).apparmor_profile);
+			    free((yyval.options).apparmor_profile);
+			    (yyval.options).apparmor_profile = (yyvsp[0].string);
 #endif
 			}
 #line 2665 "gram.c"
