@@ -341,7 +341,7 @@ bad:
 /*
  * Perform a policy check for the given command.
  * While argv must be NULL-terminated, envp need not be.
- * The status of the policy check is stored in closure->state.
+ * Sets closure->state to the result of the policy check before returning.
  * Return false on error, else true.
  */
 bool
@@ -353,7 +353,7 @@ intercept_check_policy(const char *command, int argc, char **argv, int envc,
     char **command_info_copy = NULL;
     char **user_env_out = NULL;
     char **run_argv = NULL;
-    bool ret = false;
+    bool ret = true;
     int i, rc;
     debug_decl(intercept_check_policy, SUDO_DEBUG_EXEC);
 
@@ -371,10 +371,8 @@ intercept_check_policy(const char *command, int argc, char **argv, int envc,
 	    /* Rebuild command_info[] with runcwd and extract command. */
 	    command_info_copy = update_command_info(command_info, NULL,
 		runcwd ? runcwd : "unknown", &closure->command);
-	    if (command_info_copy == NULL) {
-		closure->errstr = N_("unable to allocate memory");
-		goto done;
-	    }
+	    if (command_info_copy == NULL)
+		goto oom;
 	    command_info = command_info_copy;
 	    closure->state = POLICY_ACCEPT;
 	    break;
@@ -384,28 +382,24 @@ intercept_check_policy(const char *command, int argc, char **argv, int envc,
 	    audit_reject(policy_plugin.name, SUDO_POLICY_PLUGIN,
 		closure->errstr, command_info);
 	    closure->state = POLICY_REJECT;
-	    ret = true;
 	    goto done;
 	default:
-	    goto done;
+	    /* Plugin error? */
+	    goto bad;
 	}
     } else {
 	/* No actual policy check, just logging child processes. */
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "not checking policy, audit only");
 	closure->command = strdup(command);
-	if (closure->command == NULL) {
-	    closure->errstr = N_("unable to allocate memory");
-	    goto done;
-	}
+	if (closure->command == NULL)
+	    goto oom;
 
 	/* Rebuild command_info[] with new command and runcwd. */
 	command_info = update_command_info(closure->details->info,
 	    command, runcwd ? runcwd : "unknown", NULL);
-	if (command_info == NULL) {
-	    closure->errstr = N_("unable to allocate memory");
-	    goto done;
-	}
+	if (command_info == NULL)
+	    goto oom;
 	closure->state = POLICY_ACCEPT;
 	run_argv = argv;
     }
@@ -427,31 +421,23 @@ intercept_check_policy(const char *command, int argc, char **argv, int envc,
     for (i = 0; run_argv[i] != NULL; i++)
 	continue;
     closure->run_argv = reallocarray(NULL, i + 1, sizeof(char *));
-    if (closure->run_argv == NULL) {
-	closure->errstr = N_("unable to allocate memory");
-	goto done;
-    }
+    if (closure->run_argv == NULL)
+	goto oom;
     for (i = 0; run_argv[i] != NULL; i++) {
 	closure->run_argv[i] = strdup(run_argv[i]);
-	if (closure->run_argv[i] == NULL) {
-	    closure->errstr = N_("unable to allocate memory");
-	    goto done;
-	}
+	if (closure->run_argv[i] == NULL)
+	    goto oom;
     }
     closure->run_argv[i] = NULL;
 
     /* Make a copy of envp, which may not be NULL-terminated. */
     closure->run_envp = reallocarray(NULL, envc + 1, sizeof(char *));
-    if (closure->run_envp == NULL) {
-	closure->errstr = N_("unable to allocate memory");
-	goto done;
-    }
+    if (closure->run_envp == NULL)
+	goto oom;
     for (i = 0; i < envc; i++) {
 	closure->run_envp[i] = strdup(envp[i]);
-	if (closure->run_envp[i] == NULL) {
-	    closure->errstr = N_("unable to allocate memory");
-	    goto done;
-	}
+	if (closure->run_envp[i] == NULL)
+	    goto oom;
     }
     closure->run_envp[i] = NULL;
 
@@ -460,24 +446,32 @@ intercept_check_policy(const char *command, int argc, char **argv, int envc,
 		closure->run_argv, closure->run_envp);
 
 	/* Call approval plugins and audit the result. */
-	if (!approval_check(command_info, closure->run_argv, closure->run_envp))
-	    debug_return_int(0);
+	if (!approval_check(command_info, closure->run_argv, closure->run_envp)) {
+	    if (closure->errstr == NULL)
+		closure->errstr = N_("approval plugin error");
+	    closure->state = POLICY_REJECT;
+	    goto done;
+	}
     }
 
     /* Audit the event again for the sudo front-end. */
     audit_accept("sudo", SUDO_FRONT_END, command_info, closure->run_argv,
 	closure->run_envp);
 
-    ret = true;
+    goto done;
+
+oom:
+    closure->errstr = N_("unable to allocate memory");
+
+bad:
+    if (closure->errstr == NULL)
+	closure->errstr = N_("policy plugin error");
+    audit_error(policy_plugin.name, SUDO_POLICY_PLUGIN, closure->errstr,
+	command_info ? command_info : closure->details->info);
+    closure->state = POLICY_ERROR;
+    ret = false;
 
 done:
-    if (!ret) {
-	if (closure->errstr == NULL)
-	    closure->errstr = N_("policy plugin error");
-	audit_error(policy_plugin.name, SUDO_POLICY_PLUGIN, closure->errstr,
-	    command_info ? command_info : closure->details->info);
-	closure->state = POLICY_ERROR;
-    }
     if (command_info_copy != NULL) {
 	for (i = 0; command_info_copy[i] != NULL; i++) {
 	    free(command_info_copy[i]);
