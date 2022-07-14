@@ -271,7 +271,7 @@ bad:
  */
 static char **
 update_command_info(char * const *old_command_info, const char *cmnd,
-    const char *runcwd, char **cmnd_out)
+    const char *runcwd, char **cmnd_out, struct intercept_closure *closure)
 {
     char **command_info;
     char * const *oci;
@@ -281,7 +281,7 @@ update_command_info(char * const *old_command_info, const char *cmnd,
     /* Rebuild command_info[] with new command and add a runcwd. */
     for (n = 0; old_command_info[n] != NULL; n++)
 	continue;
-    command_info = reallocarray(NULL, n + 2, sizeof(char *));
+    command_info = reallocarray(NULL, n + 3, sizeof(char *));
     if (command_info == NULL) {
 	goto bad;
     }
@@ -290,19 +290,12 @@ update_command_info(char * const *old_command_info, const char *cmnd,
 	switch (*cp) {
 	case 'c':
 	    if (strncmp(cp, "command=", sizeof("command=") - 1) == 0) {
-		if (cmnd != NULL) {
-		    command_info[n] = sudo_new_key_val("command", cmnd);
-		    if (command_info[n] == NULL) {
-			goto bad;
-		    }
-		    n++;
-		    continue;
-		} else if (cmnd_out != NULL) {
-		    *cmnd_out = strdup(cp + sizeof("command=") - 1);
-		    if (*cmnd_out == NULL) {
-			goto bad;
-		    }
+		if (cmnd == NULL) {
+		    /* No new command specified, use old value. */
+		    cmnd = cp + sizeof("command=") - 1;
 		}
+		/* Filled in at the end. */
+		continue;
 	    }
 	    break;
 	case 'r':
@@ -318,16 +311,38 @@ update_command_info(char * const *old_command_info, const char *cmnd,
 	}
 	n++;
     }
-    /* Append actual runcwd. */
-    command_info[n] = sudo_new_key_val("runcwd", runcwd);
-    if (command_info[n] == NULL) {
+
+    /* Append new command. */
+    if (cmnd == NULL) {
+	closure->errstr = N_("command not set by the security policy");
 	goto bad;
+    }
+    command_info[n] = sudo_new_key_val("command", cmnd);
+    if (command_info[n] == NULL) {
+	goto oom;
+    }
+    n++;
+
+    /* Append actual runcwd. */
+    command_info[n] = sudo_new_key_val("runcwd", runcwd ? runcwd : "unknown");
+    if (command_info[n] == NULL) {
+	goto oom;
     }
     n++;
 
     command_info[n] = NULL;
 
+    if (cmnd_out != NULL) {
+	*cmnd_out = strdup(cmnd);
+	if (*cmnd_out == NULL) {
+	    goto oom;
+	}
+    }
     debug_return_ptr(command_info);
+
+oom:
+    closure->errstr = N_("unable to allocate memory");
+
 bad:
     if (command_info != NULL) {
 	for (n = 0; command_info[n] != NULL; n++) {
@@ -370,7 +385,7 @@ intercept_check_policy(const char *command, int argc, char **argv, int envc,
 	case 1:
 	    /* Rebuild command_info[] with runcwd and extract command. */
 	    command_info_copy = update_command_info(command_info, NULL,
-		runcwd ? runcwd : "unknown", &closure->command);
+		runcwd, &closure->command, closure);
 	    if (command_info_copy == NULL)
 		goto oom;
 	    command_info = command_info_copy;
@@ -397,7 +412,7 @@ intercept_check_policy(const char *command, int argc, char **argv, int envc,
 
 	/* Rebuild command_info[] with new command and runcwd. */
 	command_info = update_command_info(closure->details->info,
-	    command, runcwd ? runcwd : "unknown", NULL);
+	    command, runcwd, NULL, closure);
 	if (command_info == NULL)
 	    goto oom;
 	closure->state = POLICY_ACCEPT;

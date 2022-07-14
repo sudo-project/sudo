@@ -1021,6 +1021,19 @@ run_command(struct command_details *details)
     cstat.type = CMD_INVALID;
     cstat.val = 0;
 
+    if (details->command == NULL) {
+	sudo_warnx(U_("command not set by the security policy"));
+	debug_return_int(status);
+    }
+    if (details->argv == NULL) {
+	sudo_warnx(U_("argv not set by the security policy"));
+	debug_return_int(status);
+    }
+    if (details->envp == NULL) {
+	sudo_warnx(U_("envp not set by the security policy"));
+	debug_return_int(status);
+    }
+
     sudo_execute(details, &cstat);
 
     switch (cstat.type) {
