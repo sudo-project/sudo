@@ -297,6 +297,7 @@ send_policy_check_req(int sock, const char *cmnd, char * const argv[],
     InterceptRequest msg = INTERCEPT_REQUEST__INIT;
     PolicyCheckRequest req = POLICY_CHECK_REQUEST__INIT;
     char cwdbuf[PATH_MAX];
+    char *empty[1] = { NULL };
     uint8_t *buf = NULL;
     bool ret = false;
     uint32_t msg_len;
@@ -313,14 +314,14 @@ send_policy_check_req(int sock, const char *cmnd, char * const argv[],
     /* Setup policy check request. */
     req.intercept_fd = sock;
     req.command = (char *)cmnd;
-    req.argv = (char **)argv;
-    for (len = 0; argv[len] != NULL; len++)
-	continue;
-    req.n_argv = len;
-    req.envp = (char **)envp;
-    for (len = 0; envp[len] != NULL; len++)
-	continue;
-    req.n_envp = len;
+    req.argv = argv ? (char **)argv : empty;
+    req.n_argv = 0;
+    while (req.argv[req.n_argv] != NULL)
+	req.n_argv++;
+    req.envp = envp ? (char **)envp : empty;
+    req.n_envp = 0;
+    while (req.envp[req.n_envp] != NULL)
+	req.n_envp++;
     if (getcwd(cwdbuf, sizeof(cwdbuf)) != NULL) {
 	req.cwd = cwdbuf;
     }
@@ -409,9 +410,11 @@ command_allowed(const char *cmnd, char * const argv[],
     if (sudo_debug_needed(SUDO_DEBUG_INFO)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "req_command: %s", cmnd);
-	for (idx = 0; argv[idx] != NULL; idx++) {
-	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		"req_argv[%zu]: %s", idx, argv[idx]);
+	if (argv != NULL) {
+	    for (idx = 0; argv[idx] != NULL; idx++) {
+		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		    "req_argv[%zu]: %s", idx, argv[idx]);
+	    }
 	}
     }
 

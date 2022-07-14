@@ -135,6 +135,11 @@ exec_wrapper(const char *cmnd, char * const argv[], char * const envp[],
     void *fn = NULL;
     debug_decl(exec_wrapper, SUDO_DEBUG_EXEC);
 
+    if (cmnd == NULL) {
+	errno = EINVAL;
+	debug_return_int(-1);
+    }
+
     /* Only check PATH for the command for execlp/execvp/execvpe. */
     if (strchr(cmnd, '/') == NULL) {
 	if (!is_execvp) {
@@ -200,6 +205,11 @@ execl_wrapper(int type, const char *name, const char *arg, va_list ap)
     int argc = 1;
     va_list ap2;
     debug_decl(execl_wrapper, SUDO_DEBUG_EXEC);
+
+    if (name == NULL || arg == NULL) {
+	errno = EINVAL;
+	debug_return_int(-1);
+    }
 
     va_copy(ap2, ap);
     while (va_arg(ap2, char *) != NULL)

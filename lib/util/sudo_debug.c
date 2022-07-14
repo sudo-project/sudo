@@ -831,7 +831,7 @@ sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *con
     size_t plen;
     debug_decl_func(sudo_debug_execve2);
 
-    if (sudo_debug_active_instance == -1)
+    if (sudo_debug_active_instance == -1 || path == NULL)
 	goto out;
 
     /* Extract priority and subsystem from level. */
@@ -867,13 +867,13 @@ sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *con
 	/* Alloc and build up buffer. */
 	plen = strlen(path);
 	buflen = sizeof(EXEC_PREFIX) -1 + plen;
-	if (argv[0] != NULL) {
+	if (argv != NULL && argv[0] != NULL) {
 	    buflen += sizeof(" []") - 1;
 	    for (av = argv; *av; av++)
 		buflen += strlen(*av) + 1;
 	    buflen--;
 	}
-	if (log_envp) {
+	if (envp != NULL && log_envp) {
 	    buflen += sizeof(" []") - 1;
 	    for (av = envp; *av; av++)
 		buflen += strlen(*av) + 1;
@@ -892,7 +892,7 @@ sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *con
 	cp += plen;
 
 	/* Copy argv. */
-	if (argv[0] != NULL) {
+	if (argv != NULL && argv[0] != NULL) {
 	    *cp++ = ' ';
 	    *cp++ = '[';
 	    for (av = argv; *av; av++) {
@@ -904,7 +904,7 @@ sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *con
 	    cp[-1] = ']';
 	}
 
-	if (log_envp) {
+	if (envp != NULL && log_envp) {
 	    *cp++ = ' ';
 	    *cp++ = '[';
 	    for (av = envp; *av; av++) {

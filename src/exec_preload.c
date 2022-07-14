@@ -44,6 +44,7 @@ sudo_preload_dso(char *const envp[], const char *dso_file, int intercept_fd)
     char *const *ep;
     char **preload_ptr = NULL;
     char **intercept_ptr = NULL;
+    char *const empty[1] = { NULL };
     bool fd_present = false;
     bool dso_present = false;
 # ifdef RTLD_PRELOAD_ENABLE_VAR
@@ -74,6 +75,10 @@ sudo_preload_dso(char *const envp[], const char *dso_file, int intercept_fd)
      * http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html
      * XXX - need to support 32-bit and 64-bit variants
      */
+
+    /* Treat a NULL envp as empty, thanks Linux. */
+    if (envp == NULL)
+	envp = empty;
 
     /* Determine max size for new envp. */
     for (env_size = 0; envp[env_size] != NULL; env_size++)

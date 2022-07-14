@@ -491,7 +491,7 @@ intercept_check_policy_req(PolicyCheckRequest *req,
     size_t n;
     debug_decl(intercept_check_policy_req, SUDO_DEBUG_EXEC);
 
-    if (req->command == NULL || req->n_argv == 0 || req->n_envp == 0) {
+    if (req->command == NULL || req->n_argv == 0) {
 	closure->errstr = N_("invalid PolicyCheckRequest");
 	goto done;
     }

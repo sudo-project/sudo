@@ -386,6 +386,12 @@ ptrace_read_vec(pid_t pid, struct sudo_ptrace_regs *regs, unsigned long addr,
     size_t slen;
     debug_decl(ptrace_read_vec, SUDO_DEBUG_EXEC);
 
+    /* Treat a NULL vector as empty, thanks Linux. */
+    if (addr == 0) {
+	vec[0] = NULL;
+	debug_return_size_t(0);
+    }
+
     /* Fill in vector. */
     for (;;) {
 # ifdef SECCOMP_AUDIT_ARCH_COMPAT
@@ -442,6 +448,10 @@ ptrace_get_vec_len(pid_t pid, struct sudo_ptrace_regs *regs, unsigned long addr)
     unsigned long word;
     int len = 0;
     debug_decl(ptrace_get_vec_len, SUDO_DEBUG_EXEC);
+
+    /* Treat a NULL vector as empty, thanks Linux. */
+    if (addr == 0)
+	debug_return_int(0);
 
     for (;;) {
 # ifdef SECCOMP_AUDIT_ARCH_COMPAT
@@ -634,7 +644,7 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     argv_addr = get_sc_arg2(regs);
     envp_addr = get_sc_arg3(regs);
 
-    /* Count argv and envp */
+    /* Count argv and envp. */
     argc = ptrace_get_vec_len(pid, regs, argv_addr);
     envc = ptrace_get_vec_len(pid, regs, envp_addr);
     if (argc == -1 || envc == -1)
@@ -643,6 +653,7 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     /* Reserve argv and envp at the start of argbuf so they are aligned. */
     if ((argc + 1 + envc + 1) * sizeof(unsigned long) >= bufsize) {
 	sudo_warnx("%s", U_("insufficient space for execve arguments"));
+	errno = ENOMEM;
 	goto bad;
     }
     argv = (char **)argbuf;
@@ -671,13 +682,18 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     bufsize -= len;
 
     /* Read the pathname. */
-    len = ptrace_read_string(pid, path_addr, strtab, bufsize);
-    if (len == (size_t)-1) {
-	sudo_warn(U_("unable to read execve %s for process %d"),
-	    "pathname", (int)pid);
-	goto bad;
+    if (path_addr == 0) {
+	/* execve(2) will fail with EINVAL */
+	pathname = NULL;
+    } else {
+	len = ptrace_read_string(pid, path_addr, strtab, bufsize);
+	if (len == (size_t)-1) {
+	    sudo_warn(U_("unable to read execve %s for process %d"),
+		"pathname", (int)pid);
+	    goto bad;
+	}
+	pathname = strtab;
     }
-    pathname = strtab;
 
     sudo_debug_execve(SUDO_DEBUG_DIAG, pathname, argv, envp);
 
@@ -1069,6 +1085,12 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	if (errno != ESRCH)
 	    kill(pid, SIGKILL);
 	debug_return_bool(false);
+    }
+
+    /* Must have a pathname. */
+    if (pathname == NULL) {
+	ptrace_fail_syscall(pid, &regs, EINVAL);
+	goto done;
     }
 
     /*
