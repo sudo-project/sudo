@@ -104,6 +104,8 @@ resolve_path(const char *cmnd, char *out_cmnd, size_t out_size)
 	}
 
 	if (stat(path, &sb) == 0) {
+	    if (!S_ISREG(sb.st_mode))
+		continue;
 	    if (strlcpy(out_cmnd, path, out_size) >= out_size) {
 		errval = ENAMETOOLONG;
 		break;
@@ -150,6 +152,17 @@ exec_wrapper(const char *cmnd, char * const argv[], char * const envp[],
 	    debug_return_int(-1);
 	}
 	cmnd = cmnd_buf;
+    } else {
+	struct stat sb;
+
+	/* Absolute or relative path name. */
+	if (stat(cmnd, &sb) == -1) {
+	    /* Leave errno unchanged. */
+	    debug_return_int(-1);
+	} else if (!S_ISREG(sb.st_mode)) {
+	    errno = EACCES;
+	    debug_return_int(-1);
+	}
     }
 
 # if defined(HAVE___INTERPOSE)
