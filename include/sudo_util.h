@@ -248,6 +248,16 @@ sudo_dso_public const char *sudo_logpri2str_v1(int num);
 sudo_dso_public bool sudo_mkdir_parents_v1(const char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet);
 #define sudo_mkdir_parents(_a, _b, _c, _d, _e) sudo_mkdir_parents_v1((_a), (_b), (_c), (_d), (_e))
 
+/* mmap_alloc.c */
+sudo_dso_public void *sudo_mmap_alloc_v1(size_t size);
+#define sudo_mmap_alloc(_a) sudo_mmap_alloc_v1(_a)
+sudo_dso_public void *sudo_mmap_allocarray_v1(size_t count, size_t size);
+#define sudo_mmap_allocarray(_a, _b) sudo_mmap_allocarray_v1((_a), (_b))
+sudo_dso_public void sudo_mmap_free_v1(void *ptr);
+#define sudo_mmap_free(_a) sudo_mmap_free_v1(_a)
+sudo_dso_public char *sudo_mmap_strdup_v1(const char *str);
+#define sudo_mmap_strdup(_a) sudo_mmap_strdup_v1(_a)
+
 /* parseln.c */
 sudo_dso_public ssize_t sudo_parseln_v1(char **buf, size_t *bufsize, unsigned int *lineno, FILE *fp);
 sudo_dso_public ssize_t sudo_parseln_v2(char **buf, size_t *bufsize, unsigned int *lineno, FILE *fp, int flags);

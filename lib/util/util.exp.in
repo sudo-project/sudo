@@ -110,6 +110,10 @@ sudo_lock_region_v1
 sudo_logfac2str_v1
 sudo_logpri2str_v1
 sudo_mkdir_parents_v1
+sudo_mmap_alloc_v1
+sudo_mmap_allocarray_v1
+sudo_mmap_free_v1
+sudo_mmap_strdup_v1
 sudo_new_key_val_v1
 sudo_parse_gids_v1
 sudo_parseln_v1

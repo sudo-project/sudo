@@ -251,6 +251,7 @@ lib/util/mkdirat.c
 lib/util/mksiglist.c
 lib/util/mksigname.c
 lib/util/mktemp.c
+lib/util/mmap_alloc.c
 lib/util/nanosleep.c
 lib/util/openat.c
 lib/util/parseln.c
