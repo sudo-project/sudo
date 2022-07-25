@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -24,6 +24,7 @@
 #include <config.h>
 
 #include <fcntl.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,13 +32,145 @@
 
 #include "sudo.h"
 #include "sudo_exec.h"
+#include "sudo_util.h"
 
 #ifdef RTLD_PRELOAD_VAR
+typedef void * (*sudo_alloc_fn_t)(size_t, size_t);
+typedef void (*sudo_free_fn_t)(void *);
+
+static void *
+sudo_allocarray(size_t nmemb, size_t size)
+{
+    return reallocarray(NULL, nmemb, size);
+}
+
+/*
+ * Allocate space for the string described by fmt and return it,
+ * or NULL on error.
+ * Currently only supports %%, %c, %d, and %s escapes.
+ */
+static char *
+fmtstr(sudo_alloc_fn_t alloc_fn, sudo_free_fn_t free_fn, const char *ofmt, ...)
+{
+    char *cp, *cur, *newstr = NULL;
+    size_t len, size = 1;
+    const char *fmt;
+    va_list ap;
+    debug_decl(fmtstr, SUDO_DEBUG_UTIL);
+
+    /* Determine size. */
+    va_start(ap, ofmt);
+    for (fmt = ofmt; *fmt != '\0'; ) {
+	if (fmt[0] == '%') {
+	    switch (fmt[1]) {
+	    case '%':
+	    case 'c':
+		size++;
+		fmt += 2;
+		continue;
+	    case 's':
+		cp = va_arg(ap, char *);
+		size += strlen(cp ? cp : "(NULL)");
+		fmt += 2;
+		continue;
+	    case 'd': {
+		char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
+		len = snprintf(numbuf, sizeof(numbuf), "%d", va_arg(ap, int));
+		if (len >= sizeof(numbuf)) {
+		    goto oflow;
+		}
+		size += len;
+		fmt += 2;
+		continue;
+	    }
+	    default:
+		/* Treat as literal. */
+		break;
+	    }
+	}
+	size++;
+	fmt++;
+    }
+    va_end(ap);
+
+    newstr = alloc_fn(1, size);
+    if (newstr == NULL)
+	debug_return_str(NULL);
+
+    /* Format/copy data. */
+    cur = newstr;
+    va_start(ap, ofmt);
+    for (fmt = ofmt; *fmt != '\0'; ) {
+	if (fmt[0] == '%') {
+	    switch (fmt[1]) {
+	    case '%':
+		if (size < 2) {
+		    goto oflow;
+		}
+		*cur++ = '%';
+		size--;
+		fmt += 2;
+		continue;
+	    case 'c':
+		if (size < 2) {
+		    goto oflow;
+		}
+		*cur++ = va_arg(ap, int);
+		size--;
+		fmt += 2;
+		continue;
+	    case 's':
+		cp = va_arg(ap, char *);
+		len = strlcpy(cur, cp ? cp : "(NULL)", size);
+		if (len >= size) {
+		    goto oflow;
+		}
+		cur += len;
+		size -= len;
+		fmt += 2;
+		continue;
+	    case 'd':
+		len = snprintf(cur, size, "%d", va_arg(ap, int));
+		if (len >= size) {
+		    goto oflow;
+		}
+		cur += len;
+		size -= len;
+		fmt += 2;
+		continue;
+	    default:
+		/* Treat as literal. */
+		break;
+	    }
+	}
+	if (size < 2) {
+	    goto oflow;
+	}
+	*cur++ = *fmt++;
+	size++;
+    }
+    va_end(ap);
+
+    if (size < 1) {
+	goto oflow;
+    }
+    *cur = '\0';
+
+    debug_return_str(newstr);
+
+oflow:
+    /* We pre-allocate enough space, so this should never happen. */
+    free_fn(newstr);
+    sudo_warnx(U_("internal error, %s overflow"), __func__);
+    debug_return_str(NULL);
+}
+
 /*
  * Add a DSO file to LD_PRELOAD or the system equivalent.
  */
-char **
-sudo_preload_dso(char *const envp[], const char *dso_file, int intercept_fd)
+static char **
+sudo_preload_dso_alloc(char *const envp[], const char *dso_file,
+    int intercept_fd, sudo_alloc_fn_t alloc_fn, sudo_free_fn_t free_fn)
 {
     char *preload = NULL;
     char **nep, **nenvp = NULL;
@@ -56,17 +189,17 @@ sudo_preload_dso(char *const envp[], const char *dso_file, int intercept_fd)
     char *dso_buf = NULL;
 # endif
     size_t env_size;
-    int len;
     debug_decl(sudo_preload_dso, SUDO_DEBUG_UTIL);
 
 # ifdef _PATH_ASAN_LIB
     /*
      * The address sanitizer DSO needs to be first in the list.
      */
-    len = asprintf(&dso_buf, "%s%c%s", _PATH_ASAN_LIB, RTLD_PRELOAD_DELIM,
-	dso_file);
-    if (len == -1)
-       goto oom;
+    dso_buf = fmtstr(alloc_fn, free_fn, "%s%c%s", _PATH_ASAN_LIB,
+	RTLD_PRELOAD_DELIM, dso_file);
+    if (dso_buf == NULL) {
+	goto oom;
+    }
     dso_file = dso_buf;
 # endif
 
@@ -90,11 +223,9 @@ sudo_preload_dso(char *const envp[], const char *dso_file, int intercept_fd)
     env_size += 2;	/* dso_file + terminating NULL */
 
     /* Allocate new envp. */
-    nenvp = reallocarray(NULL, env_size, sizeof(*nenvp));
-    if (nenvp == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return_ptr(NULL);
-    }
+    nenvp = alloc_fn(env_size, sizeof(*nenvp));
+    if (nenvp == NULL)
+	goto oom;
 
     /*
      * Shallow copy envp, with special handling for RTLD_PRELOAD_VAR,
@@ -156,13 +287,14 @@ copy:
     if (!dso_present) {
 	if (preload_ptr == NULL) {
 # ifdef RTLD_PRELOAD_DEFAULT
-	    len = asprintf(&preload, "%s=%s%c%s", RTLD_PRELOAD_VAR, dso_file,
-		RTLD_PRELOAD_DELIM, RTLD_PRELOAD_DEFAULT);
-	    if (len == -1) {
+	    preload = fmtstr(alloc_fn, free_fn, "%s=%s%c%s", RTLD_PRELOAD_VAR,
+		dso_file, RTLD_PRELOAD_DELIM, RTLD_PRELOAD_DEFAULT);
+	    if (preload == NULL) {
 		goto oom;
 	    }
 # else
-	    preload = sudo_new_key_val(RTLD_PRELOAD_VAR, dso_file);
+	    preload = fmtstr(alloc_fn, free_fn, "%s=%s", RTLD_PRELOAD_VAR,
+		dso_file);
 	    if (preload == NULL) {
 		goto oom;
 	    }
@@ -170,9 +302,9 @@ copy:
 	    *nep++ = preload;
 	} else {
 	    const char *old_val = *preload_ptr + sizeof(RTLD_PRELOAD_VAR);
-	    len = asprintf(&preload, "%s=%s%c%s", RTLD_PRELOAD_VAR,
+	    preload = fmtstr(alloc_fn, free_fn, "%s=%s%c%s", RTLD_PRELOAD_VAR,
 		dso_file, RTLD_PRELOAD_DELIM, old_val);
-	    if (len == -1) {
+	    if (preload == NULL) {
 		goto oom;
 	    }
 	    *preload_ptr = preload;
@@ -184,10 +316,9 @@ copy:
     }
 # endif
     if (!fd_present && intercept_fd != -1) {
-	char *fdstr;
-
-	len = asprintf(&fdstr, "SUDO_INTERCEPT_FD=%d", intercept_fd);
-	if (len == -1) {
+	char *fdstr = fmtstr(alloc_fn, free_fn, "SUDO_INTERCEPT_FD=%d",
+	    intercept_fd);
+	if (fdstr == NULL) {
 	    goto oom;
 	}
 	if (intercept_ptr != NULL) {
@@ -201,17 +332,33 @@ copy:
     *nep = NULL;
 
 # ifdef _PATH_ASAN_LIB
-    free(dso_buf);
+    free_fn(dso_buf);
 # endif
 
     debug_return_ptr(nenvp);
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 # ifdef _PATH_ASAN_LIB
-    free(dso_buf);
+    free_fn(dso_buf);
 # endif
-    free(preload);
-    free(nenvp);
+    free_fn(preload);
+    free_fn(nenvp);
     debug_return_ptr(NULL);
+}
+
+char **
+sudo_preload_dso_mmap(char *const envp[], const char *dso_file,
+    int intercept_fd)
+{
+    return sudo_preload_dso_alloc(envp, dso_file, intercept_fd,
+	sudo_mmap_allocarray_v1, sudo_mmap_free_v1);
+}
+
+char **
+sudo_preload_dso(char *const envp[], const char *dso_file,
+    int intercept_fd)
+{
+    return sudo_preload_dso_alloc(envp, dso_file, intercept_fd,
+	sudo_allocarray, free);
 }
 #endif /* RTLD_PRELOAD_VAR */

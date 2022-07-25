@@ -111,7 +111,7 @@ send_client_hello(int sock)
     msg_len = len;
     len += sizeof(msg_len);
 
-    if ((buf = malloc(len)) == NULL) {
+    if ((buf = sudo_mmap_alloc(len)) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
     }
@@ -121,7 +121,7 @@ send_client_hello(int sock)
     ret = send_req(sock, buf, len);
 
 done:
-    free(buf);
+    sudo_mmap_free(buf);
     debug_return_bool(ret);
 }
 
@@ -169,7 +169,7 @@ recv_intercept_response(int fd)
     }
 
     /* Read response from sudo (blocking). */
-    if ((buf = malloc(res_len)) == NULL) {
+    if ((buf = sudo_mmap_alloc(res_len)) == NULL) {
 	goto done;
     }
     cp = buf;
@@ -202,7 +202,7 @@ recv_intercept_response(int fd)
     }
 
 done:
-    free(buf);
+    sudo_mmap_free(buf);
     debug_return_ptr(res);
 }
 
@@ -338,7 +338,7 @@ send_policy_check_req(int sock, const char *cmnd, char * const argv[],
     msg_len = len;
     len += sizeof(msg_len);
 
-    if ((buf = malloc(len)) == NULL) {
+    if ((buf = sudo_mmap_alloc(len)) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
     }
@@ -348,7 +348,7 @@ send_policy_check_req(int sock, const char *cmnd, char * const argv[],
     ret = send_req(sock, buf, len);
 
 done:
-    free(buf);
+    sudo_mmap_free(buf);
     debug_return_bool(ret);
 }
 
@@ -427,7 +427,7 @@ command_allowed(const char *cmnd, char * const argv[],
 
     if (log_only) {
 	/* Just logging, no policy check. */
-	nenvp = sudo_preload_dso(envp, sudo_conf_intercept_path(), sock);
+	nenvp = sudo_preload_dso_mmap(envp, sudo_conf_intercept_path(), sock);
 	if (nenvp == NULL)
 	    goto oom;
 	*ncmndp = (char *)cmnd;		/* safe */
@@ -451,20 +451,20 @@ command_allowed(const char *cmnd, char * const argv[],
 		    "run_argv[%zu]: %s", idx, res->u.accept_msg->run_argv[idx]);
 	    }
 	}
-	ncmnd = strdup(res->u.accept_msg->run_command);
+	ncmnd = sudo_mmap_strdup(res->u.accept_msg->run_command);
 	if (ncmnd == NULL)
 	    goto oom;
-	nargv = reallocarray(NULL, res->u.accept_msg->n_run_argv + 1,
+	nargv = sudo_mmap_allocarray(res->u.accept_msg->n_run_argv + 1,
 	    sizeof(char *));
 	if (nargv == NULL)
 	    goto oom;
 	for (len = 0; len < res->u.accept_msg->n_run_argv; len++) {
-	    nargv[len] = strdup(res->u.accept_msg->run_argv[len]);
+	    nargv[len] = sudo_mmap_strdup(res->u.accept_msg->run_argv[len]);
 	    if (nargv[len] == NULL)
 		goto oom;
 	}
 	nargv[len] = NULL;
-	nenvp = sudo_preload_dso(envp, sudo_conf_intercept_path(), sock);
+	nenvp = sudo_preload_dso_mmap(envp, sudo_conf_intercept_path(), sock);
 	if (nenvp == NULL)
 	    goto oom;
 	*ncmndp = ncmnd;
@@ -489,10 +489,10 @@ command_allowed(const char *cmnd, char * const argv[],
     }
 
 oom:
-    free(ncmnd);
+    sudo_mmap_free(ncmnd);
     while (len > 0)
-	free(nargv[--len]);
-    free(nargv);
+	sudo_mmap_free(nargv[--len]);
+    sudo_mmap_free(nargv);
 
 done:
     /* Keep socket open for ctor when we execute the command. */

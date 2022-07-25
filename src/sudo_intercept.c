@@ -135,6 +135,7 @@ exec_wrapper(const char *cmnd, char * const argv[], char * const envp[],
     char *ncmnd = NULL, **nargv = NULL, **nenvp = NULL;
     char cmnd_buf[PATH_MAX];
     void *fn = NULL;
+    unsigned int i;
     debug_decl(exec_wrapper, SUDO_DEBUG_EXEC);
 
     if (cmnd == NULL) {
@@ -188,24 +189,28 @@ exec_wrapper(const char *cmnd, char * const argv[], char * const envp[],
 
 	    for (argc = 0; argv[argc] != NULL; argc++)
 		continue;
-	    shargv = reallocarray(NULL, (argc + 2), sizeof(char *));
+	    shargv = sudo_mmap_allocarray(argc + 2, sizeof(char *));
 	    if (shargv == NULL)
 		return -1;
 	    shargv[0] = "sh";
 	    shargv[1] = ncmnd;
 	    memcpy(shargv + 2, nargv + 1, argc * sizeof(char *));
 	    ((sudo_fn_execve_t)fn)(_PATH_SUDO_BSHELL, (char **)shargv, nenvp);
-	    free(shargv);
+	    sudo_mmap_free(shargv);
 	}
     } else {
 	errno = EACCES;
     }
     if (ncmnd != cmnd)
-	free(ncmnd);
-    if (nargv != argv)
-	free(nargv);
+	sudo_mmap_free(ncmnd);
+    if (nargv != argv && nargv != NULL) {
+	for (i = 0; nargv[i] != NULL; i++)
+	    sudo_mmap_free(nargv[i]);
+	sudo_mmap_free(nargv);
+    }
+    /* Leaks allocated preload vars. */
     if (nenvp != envp)
-	free(nenvp);
+	sudo_mmap_free(nenvp);
 
     debug_return_int(-1);
 }
@@ -228,7 +233,7 @@ execl_wrapper(int type, const char *name, const char *arg, va_list ap)
     while (va_arg(ap2, char *) != NULL)
 	argc++;
     va_end(ap2);
-    argv = reallocarray(NULL, (argc + 1), sizeof(char *));
+    argv = sudo_mmap_allocarray(argc + 1, sizeof(char *));
     if (argv == NULL)
 	debug_return_int(-1);
 
@@ -240,7 +245,7 @@ execl_wrapper(int type, const char *name, const char *arg, va_list ap)
 	envp = va_arg(ap, char **);
 
     exec_wrapper(name, argv, envp, type == SUDO_EXECLP);
-    free(argv);
+    sudo_mmap_free(argv);
 
     debug_return_int(-1);
 }
