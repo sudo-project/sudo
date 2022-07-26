@@ -113,6 +113,7 @@ sudo_mkdir_parents_v1
 sudo_mmap_alloc_v1
 sudo_mmap_allocarray_v1
 sudo_mmap_free_v1
+sudo_mmap_protect_v1
 sudo_mmap_strdup_v1
 sudo_new_key_val_v1
 sudo_parse_gids_v1

@@ -62,6 +62,51 @@ extern bool command_allowed(const char *cmnd, char * const argv[], char * const 
 
 typedef int (*sudo_fn_execve_t)(const char *, char *const *, char *const *);
 
+static void
+free_vector(char **vec)
+{
+    char **cur;
+    debug_decl(free_vector, SUDO_DEBUG_EXEC);
+
+    if (vec != NULL) {
+	for (cur = vec; *cur != NULL; cur++) {
+	    sudo_mmap_free(*cur);
+	}
+	sudo_mmap_free(vec);
+    }
+
+    debug_return;
+}
+
+static char **
+copy_vector(char * const *src)
+{
+    char **copy;
+    int i, len;
+    debug_decl(copy_vector, SUDO_DEBUG_EXEC);
+
+    if (src == NULL)
+	debug_return_ptr(NULL);
+
+    for (len = 0; src[len] != NULL; len++) {
+	continue;
+    }
+    copy = sudo_mmap_allocarray(len + 1, sizeof(char *));
+    if (copy == NULL) {
+	debug_return_ptr(NULL);
+    }
+    for (i = 0; i < len; i++) {
+	copy[i] = sudo_mmap_strdup(src[i]);
+	if (copy[i] == NULL) {
+	    sudo_mmap_free(copy);
+	    debug_return_ptr(NULL);
+	}
+    }
+    copy[i] = NULL;
+
+    debug_return_ptr(copy);
+}
+
 /*
  * We do PATH resolution here rather than in the policy because we
  * want to use the PATH in the current environment.
@@ -74,6 +119,7 @@ resolve_path(const char *cmnd, char *out_cmnd, size_t out_size)
     char path[PATH_MAX];
     char **p, *cp, *endp;
     int dirlen, len;
+    debug_decl(resolve_path, SUDO_DEBUG_EXEC);
 
     for (p = environ; (cp = *p) != NULL; p++) {
 	if (strncmp(cp, "PATH=", sizeof("PATH=") - 1) == 0) {
@@ -83,7 +129,7 @@ resolve_path(const char *cmnd, char *out_cmnd, size_t out_size)
     }
     if (cp == NULL) {
 	errno = ENOENT;
-	return false;
+	debug_return_bool(false);
     }
 
     endp = cp + strlen(cp);
@@ -110,7 +156,7 @@ resolve_path(const char *cmnd, char *out_cmnd, size_t out_size)
 		errval = ENAMETOOLONG;
 		break;
 	    }
-	    return true;
+	    debug_return_bool(true);
 	}
 	switch (errno) {
 	case EACCES:
@@ -121,21 +167,21 @@ resolve_path(const char *cmnd, char *out_cmnd, size_t out_size)
 	case ENOENT:
 	    break;
 	default:
-	    return false;
+	    debug_return_bool(false);
 	}
     }
     errno = errval;
-    return false;
+    debug_return_bool(false);
 }
 
 static int
 exec_wrapper(const char *cmnd, char * const argv[], char * const envp[],
     bool is_execvp)
 {
+    char *cmnd_copy = NULL, **argv_copy = NULL, **envp_copy = NULL;
     char *ncmnd = NULL, **nargv = NULL, **nenvp = NULL;
     char cmnd_buf[PATH_MAX];
     void *fn = NULL;
-    unsigned int i;
     debug_decl(exec_wrapper, SUDO_DEBUG_EXEC);
 
     if (cmnd == NULL) {
@@ -147,10 +193,10 @@ exec_wrapper(const char *cmnd, char * const argv[], char * const envp[],
     if (strchr(cmnd, '/') == NULL) {
 	if (!is_execvp) {
 	    errno = ENOENT;
-	    debug_return_int(-1);
+	    goto bad;
 	}
 	if (!resolve_path(cmnd, cmnd_buf, sizeof(cmnd_buf))) {
-	    debug_return_int(-1);
+	    goto bad;
 	}
 	cmnd = cmnd_buf;
     } else {
@@ -159,12 +205,36 @@ exec_wrapper(const char *cmnd, char * const argv[], char * const envp[],
 	/* Absolute or relative path name. */
 	if (stat(cmnd, &sb) == -1) {
 	    /* Leave errno unchanged. */
-	    debug_return_int(-1);
+	    goto bad;
 	} else if (!S_ISREG(sb.st_mode)) {
 	    errno = EACCES;
-	    debug_return_int(-1);
+	    goto bad;
 	}
     }
+
+    /*
+     * Make copies of cmnd, argv, and envp.
+     */
+    cmnd_copy = sudo_mmap_strdup(cmnd);
+    if (cmnd_copy == NULL) {
+	debug_return_int(-1);
+    }
+    sudo_mmap_protect(cmnd_copy);
+    cmnd = cmnd_copy;
+
+    argv_copy = copy_vector(argv);
+    if (argv_copy == NULL) {
+	goto bad;
+    }
+    sudo_mmap_protect(argv_copy);
+    argv = argv_copy;
+
+    envp_copy = copy_vector(envp);
+    if (envp_copy == NULL) {
+	goto bad;
+    }
+    sudo_mmap_protect(envp_copy);
+    envp = envp_copy;
 
 # if defined(HAVE___INTERPOSE)
     fn = execve;
@@ -175,7 +245,7 @@ exec_wrapper(const char *cmnd, char * const argv[], char * const envp[],
 # endif
     if (fn == NULL) {
         errno = EACCES;
-        debug_return_int(-1);
+	goto bad;
     }
 
     if (command_allowed(cmnd, argv, envp, &ncmnd, &nargv, &nenvp)) {
@@ -191,7 +261,7 @@ exec_wrapper(const char *cmnd, char * const argv[], char * const envp[],
 		continue;
 	    shargv = sudo_mmap_allocarray(argc + 2, sizeof(char *));
 	    if (shargv == NULL)
-		return -1;
+		goto bad;
 	    shargv[0] = "sh";
 	    shargv[1] = ncmnd;
 	    memcpy(shargv + 2, nargv + 1, argc * sizeof(char *));
@@ -201,15 +271,17 @@ exec_wrapper(const char *cmnd, char * const argv[], char * const envp[],
     } else {
 	errno = EACCES;
     }
-    if (ncmnd != cmnd)
+
+bad:
+    sudo_mmap_free(cmnd_copy);
+    if (ncmnd != cmnd_copy)
 	sudo_mmap_free(ncmnd);
-    if (nargv != argv && nargv != NULL) {
-	for (i = 0; nargv[i] != NULL; i++)
-	    sudo_mmap_free(nargv[i]);
-	sudo_mmap_free(nargv);
-    }
+    free_vector(argv_copy);
+    if (nargv != argv_copy)
+	free_vector(nargv);
+    free_vector(envp_copy);
     /* Leaks allocated preload vars. */
-    if (nenvp != envp)
+    if (nenvp != envp_copy)
 	sudo_mmap_free(nenvp);
 
     debug_return_int(-1);

@@ -122,6 +122,24 @@ sudo_mmap_strdup_v1(const char *str)
 }
 
 /*
+ * Set the page permissions for the allocation represented by "ptr" to
+ * read-only.  Returns 0 on success, -1 on failure.
+ */
+int
+sudo_mmap_protect_v1(void *ptr)
+{
+    if (ptr != NULL) {
+	unsigned long *ulp = ptr;
+	const unsigned long size = ulp[-1];
+	return mprotect((void *)&ulp[-1], size, PROT_READ);
+    }
+
+    /* Can't protect NULL. */
+    errno = EINVAL;
+    return -1;
+}
+
+/*
  * Free "ptr" allocated by sudo_mmap_alloc().
  * The allocated size is stored (as unsigned long) in ptr[-1].
  */
@@ -131,7 +149,9 @@ sudo_mmap_free_v1(void *ptr)
     if (ptr != NULL) {
 	unsigned long *ulp = ptr;
 	const unsigned long size = ulp[-1];
+	int saved_errno = errno;
 
-	munmap((void *)&ulp[-1], size);
+	(void)munmap((void *)&ulp[-1], size);
+	errno = saved_errno;
     }
 }

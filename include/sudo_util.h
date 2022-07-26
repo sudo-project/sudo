@@ -257,6 +257,8 @@ sudo_dso_public void sudo_mmap_free_v1(void *ptr);
 #define sudo_mmap_free(_a) sudo_mmap_free_v1(_a)
 sudo_dso_public char *sudo_mmap_strdup_v1(const char *str);
 #define sudo_mmap_strdup(_a) sudo_mmap_strdup_v1(_a)
+sudo_dso_public int sudo_mmap_protect_v1(void *ptr);
+#define sudo_mmap_protect(_a) sudo_mmap_protect_v1(_a)
 
 /* parseln.c */
 sudo_dso_public ssize_t sudo_parseln_v1(char **buf, size_t *bufsize, unsigned int *lineno, FILE *fp);
