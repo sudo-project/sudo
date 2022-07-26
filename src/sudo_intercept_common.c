@@ -315,13 +315,11 @@ send_policy_check_req(int sock, const char *cmnd, char * const argv[],
     req.intercept_fd = sock;
     req.command = (char *)cmnd;
     req.argv = argv ? (char **)argv : empty;
-    req.n_argv = 0;
-    while (req.argv[req.n_argv] != NULL)
-	req.n_argv++;
+    for (req.n_argv = 0; req.argv[req.n_argv] != NULL; req.n_argv++)
+	continue;
     req.envp = envp ? (char **)envp : empty;
-    req.n_envp = 0;
-    while (req.envp[req.n_envp] != NULL)
-	req.n_envp++;
+    for (req.n_envp = 0; req.envp[req.n_envp] != NULL; req.n_envp++)
+	continue;
     if (getcwd(cwdbuf, sizeof(cwdbuf)) != NULL) {
 	req.cwd = cwdbuf;
     }

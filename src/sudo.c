@@ -1022,15 +1022,15 @@ run_command(struct command_details *details)
     cstat.val = 0;
 
     if (details->command == NULL) {
-	sudo_warnx(U_("command not set by the security policy"));
+	sudo_warnx("%s", U_("command not set by the security policy"));
 	debug_return_int(status);
     }
     if (details->argv == NULL) {
-	sudo_warnx(U_("argv not set by the security policy"));
+	sudo_warnx("%s", U_("argv not set by the security policy"));
 	debug_return_int(status);
     }
     if (details->envp == NULL) {
-	sudo_warnx(U_("envp not set by the security policy"));
+	sudo_warnx("%s", U_("envp not set by the security policy"));
 	debug_return_int(status);
     }
 
