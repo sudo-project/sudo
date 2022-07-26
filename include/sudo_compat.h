@@ -51,6 +51,15 @@
 # define __attribute__(x)
 #endif
 
+/* For malloc-like functions that return uninitialized or zeroed memory. */
+#ifndef __malloc
+# if __GNUC_PREREQ__(2, 96)
+#  define __malloc	__attribute__((__malloc__))
+# else
+#  define __malloc
+# endif
+#endif
+
 /* For catching format string mismatches */
 #ifndef __printflike
 # if __GNUC_PREREQ__(3, 3)
