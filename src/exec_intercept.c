@@ -369,10 +369,19 @@ intercept_check_policy(const char *command, int argc, char **argv, int envc,
     char **user_env_out = NULL;
     char **run_argv = NULL;
     bool ret = true;
-    int i, rc;
+    int i, rc, saved_dir = -1;
     debug_decl(intercept_check_policy, SUDO_DEBUG_EXEC);
 
     if (ISSET(closure->details->flags, CD_INTERCEPT)) {
+	/* Change to runcwd for the policy check if possible. */
+	if (runcwd != NULL) {
+	    saved_dir = open(".", O_RDONLY);
+	    if (saved_dir != -1 && chdir(runcwd) == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		    "%s: unable to chdir to %s", __func__, runcwd);
+	    }
+	}
+
 	/* We don't currently have a good way to validate the environment. */
 	sudo_debug_set_active_instance(policy_plugin.debug_instance);
 	rc = policy_plugin.u.policy->check_policy(argc, argv, NULL,
@@ -487,6 +496,9 @@ bad:
     ret = false;
 
 done:
+    if (saved_dir != -1)
+	fchdir(saved_dir);
+
     if (command_info_copy != NULL) {
 	for (i = 0; command_info_copy[i] != NULL; i++) {
 	    free(command_info_copy[i]);
