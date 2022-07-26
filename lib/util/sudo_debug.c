@@ -861,7 +861,7 @@ sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *con
 	    continue;
 
 	/* Log envp for debug level "debug". */
-	if (output->settings[subsys] >= SUDO_DEBUG_DEBUG - 1 && envp[0] != NULL)
+	if (output->settings[subsys] >= SUDO_DEBUG_DEBUG - 1 && envp != NULL)
 	    log_envp = true;
 
 	/* Alloc and build up buffer. */
@@ -873,7 +873,7 @@ sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *con
 		buflen += strlen(*av) + 1;
 	    buflen--;
 	}
-	if (envp != NULL && log_envp) {
+	if (log_envp && envp[0] != NULL) {
 	    buflen += sizeof(" []") - 1;
 	    for (av = envp; *av; av++)
 		buflen += strlen(*av) + 1;
@@ -904,7 +904,7 @@ sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *con
 	    cp[-1] = ']';
 	}
 
-	if (envp != NULL && log_envp) {
+	if (log_envp && envp[0] != NULL) {
 	    *cp++ = ' ';
 	    *cp++ = '[';
 	    for (av = envp; *av; av++) {
