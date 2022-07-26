@@ -496,8 +496,13 @@ bad:
     ret = false;
 
 done:
-    if (saved_dir != -1)
-	fchdir(saved_dir);
+    if (saved_dir != -1) {
+	if (fchdir(saved_dir) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		"%s: unable to restore saved cwd", __func__);
+	}
+	close(saved_dir);
+    }
 
     if (command_info_copy != NULL) {
 	for (i = 0; command_info_copy[i] != NULL; i++) {
