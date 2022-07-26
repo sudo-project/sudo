@@ -149,17 +149,18 @@ fmtstr(sudo_alloc_fn_t alloc_fn, sudo_free_fn_t free_fn, const char *ofmt, ...)
 	*cur++ = *fmt++;
 	size++;
     }
-    va_end(ap);
 
     if (size < 1) {
 	goto oflow;
     }
     *cur = '\0';
+    va_end(ap);
 
     debug_return_str(newstr);
 
 oflow:
     /* We pre-allocate enough space, so this should never happen. */
+    va_end(ap);
     free_fn(newstr);
     sudo_warnx(U_("internal error, %s overflow"), __func__);
     debug_return_str(NULL);
