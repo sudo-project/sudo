@@ -147,11 +147,11 @@ void
 sudo_mmap_free_v1(void *ptr)
 {
     if (ptr != NULL) {
-	unsigned long *ulp = ptr;
-	const unsigned long size = ulp[-1];
+	unsigned long *ulp = (unsigned long *)ptr - 1;
+	const unsigned long size = ulp[0];
 	int saved_errno = errno;
 
-	(void)munmap((void *)&ulp[-1], size);
+	(void)munmap((void *)ulp, size);
 	errno = saved_errno;
     }
 }
