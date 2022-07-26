@@ -373,12 +373,28 @@ intercept_check_policy(const char *command, int argc, char **argv, int envc,
     debug_decl(intercept_check_policy, SUDO_DEBUG_EXEC);
 
     if (ISSET(closure->details->flags, CD_INTERCEPT)) {
-	/* Change to runcwd for the policy check if possible. */
-	if (runcwd != NULL) {
-	    saved_dir = open(".", O_RDONLY);
-	    if (saved_dir != -1 && chdir(runcwd) == -1) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-		    "%s: unable to chdir to %s", __func__, runcwd);
+	/* Change to runcwd for the policy check if necessary. */
+	if (*command != '/') {
+	    if (runcwd == NULL || (saved_dir = open(".", O_RDONLY)) == -1 ||
+		    chdir(runcwd) == -1) {
+		if (runcwd == NULL) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"relative command path but no runcwd specified");
+		} else if (saved_dir == -1) {
+		    sudo_debug_printf(
+			SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+			"unable to open current directory for reading");
+		} else {
+		    sudo_debug_printf(
+			SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+			"unable to chdir for %s", runcwd);
+		}
+		if (closure->errstr == NULL)
+		    closure->errstr = N_("command rejected by policy");
+		audit_reject(policy_plugin.name, SUDO_POLICY_PLUGIN,
+		    closure->errstr, closure->details->info);
+		closure->state = POLICY_REJECT;
+		goto done;
 	    }
 	}
 
