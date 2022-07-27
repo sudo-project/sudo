@@ -428,8 +428,8 @@ ptrace_read_vec(pid_t pid, struct sudo_ptrace_regs *regs, unsigned long addr,
 	    if (slen == (size_t)-1)
 		debug_return_size_t(-1);
 	    vec[len++] = buf;
-	    buf += slen + 1;
-	    bufsize -= slen + 1;
+	    buf += slen;
+	    bufsize -= slen;
 	    addr += regs->wordsize;
 	    continue;
 	}
