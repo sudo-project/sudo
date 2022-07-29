@@ -399,7 +399,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
 
     /* Was previous command was intercepted? */
-    if (def_intercept)
+    if (ISSET(sudo_mode, MODE_RUN) && def_intercept)
 	SET(sudo_mode, MODE_POLICY_INTERCEPTED);
 
     /* Only certain mode flags are legal for intercepted commands. */
