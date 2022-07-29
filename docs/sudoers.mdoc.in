@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd May 31, 2022
+.Dd July 29, 2022
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3220,6 +3220,30 @@ This flag is
 by default.
 .Pp
 This setting is only supported by version 1.9.8 or higher.
+.It intercept_verify
+If set,
+.Nm sudo
+will attempt to verify that a command run in intercept mode has
+the expected path name and command line arguments.
+The process is stopped after
+.Xr execve 2
+has completed but before the new command has had a chance to run.
+In the case of a path name or argument mismatch, the command will be sent a
+.Dv SIGKILL
+signal and terminated.
+This flag has no effect unless the
+.Em intercept
+flag is enabled or the
+.Em INTERCEPT
+tag has been set for the command and the
+.Em intercept_type
+option is set to
+.Em trace .
+This flag is
+.Em on
+by default.
+.Pp
+This setting is only supported by version 1.9.12 or higher.
 .It netgroup_tuple
 If set, netgroup lookups will be performed using the full netgroup
 tuple: host name, user name, and domain (if one is set).

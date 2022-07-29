@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "May 31, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "July 29, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3398,6 +3398,31 @@ This flag is
 by default.
 .sp
 This setting is only supported by version 1.9.8 or higher.
+.TP 18n
+intercept_verify
+If set,
+\fBsudo\fR
+will attempt to verify that a command run in intercept mode has
+the expected path name and command line arguments.
+The process is stopped after
+execve(2)
+has completed but before the new command has had a chance to run.
+In the case of a path name or argument mismatch, the command will be sent a
+\fRSIGKILL\fR
+signal and terminated.
+This flag has no effect unless the
+\fIintercept\fR
+flag is enabled or the
+\fIINTERCEPT\fR
+tag has been set for the command and the
+\fIintercept_type\fR
+option is set to
+\fItrace\fR.
+This flag is
+\fIon\fR
+by default.
+.sp
+This setting is only supported by version 1.9.12 or higher.
 .TP 18n
 netgroup_tuple
 If set, netgroup lookups will be performed using the full netgroup

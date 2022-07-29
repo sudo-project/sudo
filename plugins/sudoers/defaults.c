@@ -549,6 +549,7 @@ init_defaults(void)
     if ((def_rlimit_core = strdup("0,0")) == NULL)
 	goto oom;
     def_intercept_type = dso;
+    def_intercept_verify = true;
     def_netgroup_tuple = false;
     def_sudoedit_checkdir = true;
     def_iolog_mode = S_IRUSR|S_IWUSR;

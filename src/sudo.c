@@ -734,6 +734,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		break;
 	    case 'i':
 		SET_FLAG("intercept=", CD_INTERCEPT)
+		SET_FLAG("intercept_verify=", CD_INTERCEPT_VERIFY)
 		break;
 	    case 'l':
 		SET_STRING("login_class=", login_class)

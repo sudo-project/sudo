@@ -636,7 +636,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     }
 
     /* Increase the length of command_info as needed, it is *not* checked. */
-    command_info = calloc(71, sizeof(char *));
+    command_info = calloc(72, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
 
@@ -810,6 +810,10 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     }
     if (def_intercept_type == trace) {
 	if ((command_info[info_len++] = strdup("use_ptrace=true")) == NULL)
+	    goto oom;
+    }
+    if (def_intercept_verify) {
+	if ((command_info[info_len++] = strdup("intercept_verify=true")) == NULL)
 	    goto oom;
     }
     if (def_noexec) {
