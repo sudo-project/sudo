@@ -26,6 +26,7 @@
 #include <sys/uio.h>
 #include <sys/wait.h>
 
+#include <ctype.h>
 #include <errno.h>
 #include <limits.h>
 #include <signal.h>
@@ -598,17 +599,18 @@ ptrace_write_vec(pid_t pid, struct sudo_ptrace_regs *regs, char **vec,
 }
 
 /*
- * Use /proc/PID/cwd to determine the current working directory.
+ * Read a link from /proc/PID and store the result in buf.
+ * Used to read the cwd and exe links in /proc/PID.
  * Returns true on success, else false.
  */
 static bool
-getcwd_by_pid(pid_t pid, char *buf, size_t bufsize)
+read_proc_link(pid_t pid, const char *name, char *buf, size_t bufsize)
 {
     size_t len;
     char path[PATH_MAX];
-    debug_decl(getcwd_by_pid, SUDO_DEBUG_EXEC);
+    debug_decl(read_proc_link, SUDO_DEBUG_EXEC);
 
-    len = snprintf(path, sizeof(path), "/proc/%d/cwd", (int)pid);
+    len = snprintf(path, sizeof(path), "/proc/%d/%s", (int)pid, name);
     if (len < sizeof(path)) {
 	len = readlink(path, buf, bufsize - 1);
 	if (len != (size_t)-1) {
@@ -634,10 +636,13 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     size_t bufsize, len;
     debug_decl(get_execve_info, SUDO_DEBUG_EXEC);
 
+    /* XXX - Linux allows this to be bigger, see execve(2). */
     bufsize = sysconf(_SC_ARG_MAX) + PATH_MAX;
     argbuf = malloc(bufsize);
-    if (argbuf == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    if (argbuf == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto bad;
+    }
 
     /* execve(2) takes three arguments: pathname, argv, envp. */
     path_addr = get_sc_arg1(regs);
@@ -867,7 +872,8 @@ int
 exec_ptrace_seize(pid_t child)
 {
     const long ptrace_opts = PTRACE_O_TRACESECCOMP|PTRACE_O_TRACECLONE|
-			     PTRACE_O_TRACEFORK|PTRACE_O_TRACEVFORK;
+			     PTRACE_O_TRACEFORK|PTRACE_O_TRACEVFORK|
+			     PTRACE_O_TRACEEXEC;
     int ret = -1;
     int status;
     debug_decl(exec_ptrace_seize, SUDO_DEBUG_EXEC);
@@ -924,45 +930,193 @@ done:
 }
 
 /*
- * Verify that the execve(2) argument we wrote match the contents of closure.
+ * Compare two pathnames.  If do_stat is true, fall back to stat(2)ing
+ * the paths for a dev/inode match if the strings don't match.
+ * Returns true on match, else false.
+ */
+static bool
+pathname_matches(const char *path1, const char *path2, bool do_stat)
+{
+    struct stat sb1, sb2;
+    debug_decl(pathname_matches, SUDO_DEBUG_EXEC);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: compare %s to %s", __func__,
+	path1 ? path1 : "(NULL)", path2 ? path2 : "(NULL)");
+
+    if (path1 == NULL || path2 == NULL)
+	debug_return_bool(false);
+
+    if (strcmp(path1, path2) == 0)
+	debug_return_bool(true);
+
+    if (do_stat && stat(path1, &sb1) == 0 && stat(path2, &sb2) == 0) {
+	if (sb1.st_dev == sb2.st_dev && sb1.st_ino == sb2.st_ino)
+	    debug_return_bool(true);
+    }
+
+    debug_return_bool(false);
+}
+
+/*
+ * Open script and check for '#!' magic number followed by an interpreter.
+ * If present, check the interpreter against execpath, and argument string
+ * (if any) against argv[1].
+ * Returns number of argv entries to skip on success, else 0.
+ */
+static int
+script_matches(const char *script, const char *execpath, int argc,
+    char * const *argv)
+{
+    char * const *orig_argv = argv;
+    size_t linesize = 0;
+    char *interp, *interp_args, *line = NULL;
+    char magic[2];
+    int count;
+    FILE *fp = NULL;
+    ssize_t len;
+    debug_decl(get_interpreter, SUDO_DEBUG_EXEC);
+
+    /* Linux allows up to 4 nested interpreters. */
+    for (count = 0; count < 4; count++) {
+	if (fp != NULL)
+	    fclose(fp);
+	fp = fopen(script, "r");
+	if (fp == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_ERRNO,
+		"%s: unable to open %s for reading", __func__, script);
+	    goto done;
+	}
+
+	if (fread(magic, 1, 2, fp) != 2 || memcmp(magic, "#!", 2) != 0) {
+	    sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: %s: not a script",
+		__func__, script);
+	    goto done;
+	}
+
+	/* Check interpreter, skipping the shebang and trim trailing space. */
+	len = getdelim(&line, &linesize, '\n', fp);
+	if (len == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR, "%s: %s: can't get interpreter",
+		__func__, script);
+	    goto done;
+	}
+	while (len > 0 && isspace((unsigned char)line[len - 1])) {
+	    len--;
+	    line[len] = '\0';
+	}
+	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: %s: shebang line \"%s\"",
+	    __func__, script, line);
+
+	/*
+	 * Split line into interpreter and args.
+	 * Whitespace is not supported in the interpreter path.
+	 */
+	for (interp = line; isspace((unsigned char)*interp); interp++)
+	    continue;
+	interp_args = strpbrk(interp, " \t");
+	if (interp_args != NULL) {
+	    *interp_args++ = '\0';
+	    while (isspace((unsigned char)*interp_args))
+		interp_args++;
+	}
+
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: interpreter %s, args \"%s\"",
+	    __func__, interp, interp_args ? interp_args : "");
+
+	/* Match interpreter. */
+	if (!pathname_matches(execpath, interp, true)) {
+	    /* It is possible for the interpreter to be a script too. */
+	    if (argv > 0 && strcmp(interp, argv[1]) == 0) {
+		/* Interpreter args must match for *this* interpreter. */
+		if (interp_args == NULL ||
+			(argc > 1 && strcmp(interp_args, argv[2]) == 0)) {
+		    script = interp;
+		    argv++;
+		    argc--;
+		    if (interp_args != NULL) {
+			argv++;
+			argc--;
+		    }
+		    /* Check whether interp is itself a script. */
+		    continue;
+		}
+	    }
+	}
+	if (argc > 0 && interp_args != NULL) {
+	    if (strcmp(interp_args, argv[1]) != 0) {
+		sudo_warnx(
+		    U_("interpreter argument , expected \"%s\", got \"%s\""),
+		    interp_args, argc > 1 ? argv[1] : "(NULL)");
+		goto done;
+	    }
+	    argv++;
+	}
+	argv++;
+	break;
+    }
+
+done:
+    free(line);
+    if (fp != NULL)
+	fclose(fp);
+    debug_return_int((int)(argv - orig_argv));
+}
+
+/*
+ * Check if the execve(2) arguments match the contents of closure.
  * Returns true if they match, else false.
  */
 static bool
-verify_execve_info(pid_t pid, struct sudo_ptrace_regs *regs,
+execve_args_match(const char *pathname, int argc, char * const *argv,
+    int envc, char * const *envp, bool do_stat,
     struct intercept_closure *closure)
 {
-    char *pathname, **argv, **envp, *buf;
-    int argc, envc, i;
     bool ret = true;
-    debug_decl(verify_execve_info, SUDO_DEBUG_EXEC);
+    int i;
+    debug_decl(execve_args_match, SUDO_DEBUG_EXEC);
 
-    buf = get_execve_info(pid, regs, &pathname, &argc, &argv,
-	&envc, &envp);
-    if (buf == NULL)
-	debug_return_bool(false);
-
-    if (pathname == NULL || strcmp(pathname, closure->command) != 0) {
-	sudo_warn(
+    if (!pathname_matches(pathname, closure->command, do_stat)) {
+	/* For scripts, pathname will refer to the interpreter instead. */
+	if (do_stat) {
+	    int skip = script_matches(closure->command, pathname,
+		argc, argv);
+	    if (skip != 0) {
+		/* Skip interpreter (and args) in argv. */
+		argv += skip;
+		argc -= skip;
+		goto check_argv;
+	    }
+	}
+	sudo_warnx(
 	    U_("pathname mismatch, expected \"%s\", got \"%s\""),
 	    closure->command, pathname ? pathname : "(NULL)");
 	ret = false;
     }
+check_argv:
     for (i = 0; i < argc; i++) {
 	if (closure->run_argv[i] == NULL) {
 	    ret = false;
-	    sudo_warn(
+	    sudo_warnx(
 		U_("%s[%d] mismatch, expected \"%s\", got \"%s\""),
 		"argv", i, "(NULL)", argv[i] ? argv[i] : "(NULL)");
 	    break;
-	} else if (argv[i] == NULL) {
+	}
+	if (argv[i] == NULL) {
 	    ret = false;
-	    sudo_warn(
+	    sudo_warnx(
 		U_("%s[%d] mismatch, expected \"%s\", got \"%s\""),
 		"argv", i, closure->run_argv[i], "(NULL)");
 	    break;
-	} else if (strcmp(argv[i], closure->run_argv[i]) != 0) {
+	}
+	if (strcmp(argv[i], closure->run_argv[i]) != 0) {
+	    if (i == 0) {
+		/* Special case for argv[0] which may contain the basename. */
+		const char *base = sudo_basename(closure->run_argv[0]);
+		if (strcmp(argv[i], base) == 0)
+		    continue;
+	    }
 	    ret = false;
-	    sudo_warn(
+	    sudo_warnx(
 		U_("%s[%d] mismatch, expected \"%s\", got \"%s\""),
 		"argv", i, closure->run_argv[i], argv[i]);
 	}
@@ -970,24 +1124,181 @@ verify_execve_info(pid_t pid, struct sudo_ptrace_regs *regs,
     for (i = 0; i < envc; i++) {
 	if (closure->run_envp[i] == NULL) {
 	    ret = false;
-	    sudo_warn(
+	    sudo_warnx(
 		U_("%s[%d] mismatch, expected \"%s\", got \"%s\""),
 		"envp", i, "(NULL)", envp[i] ? envp[i] : "(NULL)");
 	    break;
 	} else if (envp[i] == NULL) {
 	    ret = false;
-	    sudo_warn(
+	    sudo_warnx(
 		U_("%s[%d] mismatch, expected \"%s\", got \"%s\""),
 		"envp", i, closure->run_envp[i], "(NULL)");
 	    break;
 	} else if (strcmp(envp[i], closure->run_envp[i]) != 0) {
 	    ret = false;
-	    sudo_warn(
+	    sudo_warnx(
 		U_("%s[%d] mismatch, expected \"%s\", got \"%s\""),
 		"envp", i, closure->run_envp[i], envp[i]);
 	}
     }
-    free(buf);
+
+    debug_return_bool(ret);
+}
+
+/*
+ * Verify that the execve(2) argument we wrote match the contents of closure.
+ * Returns true if they match, else false.
+ */
+static bool
+verify_execve_args(pid_t pid, struct sudo_ptrace_regs *regs,
+    struct intercept_closure *closure)
+{
+    char *pathname, **argv, **envp, *buf;
+    int argc, envc;
+    bool ret = false;
+    debug_decl(verify_execve_args, SUDO_DEBUG_EXEC);
+
+    buf = get_execve_info(pid, regs, &pathname, &argc, &argv,
+	&envc, &envp);
+    if (buf != NULL) {
+	ret = execve_args_match(pathname, argc, argv, envc, envp, false, closure);
+	free(buf);
+    }
+
+    debug_return_bool(ret);
+}
+
+/*
+ * Verify that the command executed matches the arguments we checked.
+ * Returns true on success and false on error.
+ */
+static bool
+ptrace_verify_post_exec(pid_t pid, struct sudo_ptrace_regs *regs,
+    struct intercept_closure *closure)
+{
+    unsigned long argv_addr, envp_addr, sp, word;
+    char **argv, **envp, *strtab, *argbuf = NULL;
+    char pathname[PATH_MAX];
+    sigset_t chldmask;
+    bool ret = false;
+    int argc, envc, status;
+    size_t bufsize, len;
+    debug_decl(ptrace_verify_post_exec, SUDO_DEBUG_EXEC);
+
+    /* Block SIGCHLD for the critical section (waitpid). */
+    sigemptyset(&chldmask);
+    sigaddset(&chldmask, SIGCHLD);
+    sigprocmask(SIG_BLOCK, &chldmask, NULL);
+
+    /* Allow execve(2) to continue and wait for PTRACE_EVENT_EXEC. */
+    ptrace(PTRACE_SYSCALL, pid, NULL, NULL);
+    for (;;) {
+	if (waitpid(pid, &status, __WALL) != -1)
+	    break;
+	if (errno == EINTR)
+	    continue;
+	sudo_warn(U_("%s: %s"), __func__, "waitpid");
+	goto done;
+    }
+    if (!WIFSTOPPED(status)) {
+	sudo_warnx(U_("process %d exited unexpectedly"), (int)pid);
+	goto done;
+    }
+    if (status >> 8 != (SIGTRAP | (PTRACE_EVENT_EXEC << 8))) {
+	sudo_warnx(U_("process %d unexpected status 0x%x"), (int)pid, status);
+	goto done;
+    }
+
+    /* Get the executable path. */
+    if (!read_proc_link(pid, "exe", pathname, sizeof(pathname))) {
+	/* Missing /proc file system is not a fatal error. */
+	sudo_debug_printf(SUDO_DEBUG_ERROR, "%s: unable to read /proc/%d/exe",
+	    __func__, (int)pid);
+	ret = true;
+	goto done;
+    }
+
+    /* Update the registers to get the new stack pointer. */
+    if (!ptrace_getregs(pid, regs, regs->compat)) {
+	sudo_warn(U_("unable to get registers for process %d"), (int)pid);
+	goto done;
+    }
+    sp = get_stack_pointer(regs);
+
+    /*
+     * We assume the initial stack layout is as follows:
+     *	argc: sp
+     *	argv: sp + wordsize
+     *	envp: sp + wordsize + (argc * wordsize)
+     */
+
+    /* Read argc, first address on the stack. */
+    word = ptrace(PTRACE_PEEKDATA, pid, sp, NULL);
+    if (word == (unsigned long)-1) {
+	sudo_warn("%s: ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
+	    __func__, (int)pid, sp);
+	goto done;
+    }
+    argc = (int)word;
+
+    /* argv follows arc, followed by envp. */
+    sp += regs->wordsize;
+    argv_addr = sp;
+    sp += regs->wordsize * (argc + 1);
+    envp_addr = sp;
+
+    /* Count the number of entries in envp for easy copying. */
+    envc = ptrace_get_vec_len(pid, regs, envp_addr);
+    if (envc == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	    "%s: %d unable to get length of environment", __func__, (int)pid);
+	goto done;
+    }
+
+    /* Allocate a single buffer for argv, envp and their strings. */
+    /* XXX - Linux allows this to be bigger, see execve(2). */
+    bufsize = sysconf(_SC_ARG_MAX);
+    argbuf = malloc(bufsize);
+    if (argbuf == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto done;
+    }
+
+    /* Reserve argv and envp at the start of argbuf so they are aligned. */
+    argv = (char **)argbuf;
+    envp = argv + argc + 1;
+    strtab = (char *)(envp + envc + 1);
+    bufsize -= strtab - argbuf;
+
+    /* Read argv */
+    len = ptrace_read_vec(pid, regs, argv_addr, argv, strtab, bufsize);
+    if (len == (size_t)-1) {
+	sudo_warn(U_("unable to read execve %s for process %d"),
+	    "argv", (int)pid);
+	goto done;
+    }
+    strtab += len;
+    bufsize -= len;
+
+    /* Read envp */
+    len = ptrace_read_vec(pid, regs, envp_addr, envp, strtab, bufsize);
+    if (len == (size_t)-1) {
+	sudo_warn(U_("unable to read execve %s for process %d"),
+	    "envp", (int)pid);
+	goto done;
+    }
+    strtab += len;
+    bufsize -= len;
+
+    ret = execve_args_match(pathname, argc, argv, envc, envp, true, closure);
+    if (!ret) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	    "%s: %d new execve args don't match closure", __func__, (int)pid);
+    }
+
+done:
+    free(argbuf);
+    sigprocmask(SIG_UNBLOCK, &chldmask, NULL);
 
     debug_return_bool(ret);
 }
@@ -1073,7 +1384,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     }
 
     /* Get the current working directory and execve info. */
-    if (!getcwd_by_pid(pid, cwd, sizeof(cwd)))
+    if (!read_proc_link(pid, "cwd", cwd, sizeof(cwd)))
 	(void)strlcpy(cwd, "unknown", sizeof(cwd));
     buf = get_execve_info(pid, &regs, &pathname, &argc, &argv,
 	&envc, &envp);
@@ -1214,10 +1525,17 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 
 	    if (closure->state == POLICY_TEST) {
 		/* Verify the contents of what we just wrote. */
-		if (!verify_execve_info(pid, &regs, closure)) {
+		if (!verify_execve_args(pid, &regs, closure)) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR,
 			"%s: new execve args don't match closure", __func__);
 		}
+	    }
+	}
+	if (closure->state == POLICY_ACCEPT) {
+	    /* Verify execve(2) args post-exec. */
+	    if (!ptrace_verify_post_exec(pid, &regs, closure)) {
+		if (errno != ESRCH)
+		    kill(pid, SIGKILL);
 	    }
 	}
 	break;
@@ -1257,6 +1575,9 @@ exec_ptrace_stopped(pid_t pid, int status, void *intercept)
 	    sudo_debug_printf(SUDO_DEBUG_ERROR,
 		"%s: %d failed to intercept execve", __func__, (int)pid);
 	}
+    } else if (sigtrap == (SIGTRAP | (PTRACE_EVENT_EXEC << 8))) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR,
+	    "%s: %d PTRACE_EVENT_EXEC", __func__, (int)pid);
     } else if (sigtrap == (SIGTRAP | (PTRACE_EVENT_CLONE << 8)) ||
 	sigtrap == (SIGTRAP | (PTRACE_EVENT_VFORK << 8)) ||
 	sigtrap == (SIGTRAP | (PTRACE_EVENT_FORK << 8))) {
