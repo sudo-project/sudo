@@ -224,6 +224,7 @@ static const char *initial_keepenv_table[] = {
     "PS2",
     "XAUTHORITY",
     "XAUTHORIZATION",
+    "XDG_CURRENT_DESKTOP",
     NULL
 };
 
