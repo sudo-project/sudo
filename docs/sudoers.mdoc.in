@@ -3231,6 +3231,12 @@ has completed but before the new command has had a chance to run.
 In the case of a path name or argument mismatch, the command will be sent a
 .Dv SIGKILL
 signal and terminated.
+This can help prevent a time of check vs. time of use issue with
+intercept mode where the
+.Xr execve 2
+arguments could be altered after the
+.Nm
+policy check.
 This flag has no effect unless the
 .Em intercept
 flag is enabled or the
@@ -6498,6 +6504,27 @@ you can always just try it out and check whether or not external
 commands run via a shell are logged when
 .Em intercept
 is enabled.
+.Pp
+There is an inherent race condition between when a command is checked against
+.Nm
+rules and when it is actually executed.
+If a user is allowed to run arbitrary commands, they may be able
+to change the
+.Xr execve 2
+arguments in the program after the
+.Nm
+policy check has completed but before the new command is executed.
+Starting with version 1.9.12, the
+.Xr ptrace 2
+method will verify that the command and its arguments have not changed after
+.Xr execve 2
+has completed but before execution of the new program has had a chance to run.
+This is not the case with the
+.Em dso
+method.
+See the description of the
+.Em intercept_verify
+setting for more information.
 .It log
 There are two separate but related ways to log additional commands.
 The first is to enable I/O logging using the
