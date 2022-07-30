@@ -10,7 +10,7 @@
     (TAG_SET((nt).setenv) && (nt).setenv != (ot).setenv) || \
     (TAG_SET((nt).send_mail) && (nt).send_mail != (ot).send_mail))
                           sv sw ta te tg th tr uk  ur vi  wa wo zh_CN zh_HK
-    if (!PyArg_ParseTupleAndKeywords(py_args ? py_args : py_empty, py_kwargs, "Ois|i:sudo.ConvMessage", keywords,
+    if (!PyArg_ParseTupleAndKeywords(py_args ? py_args : py_empty, py_kwargs, "Ois|i:sudo.ConvMessage", (char **)keywords,
 			$ans = <STDIN>;
 			if ($ans =~ /^[yY]/) {
 .nr BA @BAMAN@
