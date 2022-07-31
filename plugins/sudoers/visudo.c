@@ -419,6 +419,7 @@ static const char *lineno_editors[] = {
     "vi",
     "nvi",
     "vim",
+    "nvim",
     "elvis",
     "*macs",
     "mg",
