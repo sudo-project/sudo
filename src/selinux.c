@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  * Copyright (c) 2008 Dan Walsh <dwalsh@redhat.com>
  *
  * Borrowed heavily from newrole source code
@@ -440,7 +440,7 @@ selinux_setexeccon(void)
 
 void
 selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
-    int flags)
+    const char *rundir, int flags)
 {
     char **nargv;
     const char *sesh;
@@ -470,7 +470,7 @@ selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
 	errno = EINVAL;
 	debug_return;
     }
-    nargv = reallocarray(NULL, argc + 3, sizeof(char *));
+    nargv = reallocarray(NULL, argc + 4, sizeof(char *));
     if (nargv == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return;
@@ -484,6 +484,18 @@ selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
 	nargv[0] = (char *)(login_shell ? "-sesh" : "sesh");
     }
     nargc = 1;
+    if (ISSET(flags, CD_RBAC_SET_CWD)) {
+	const char *prefix = ISSET(flags, CD_CWD_OPTIONAL) ? "+" : "";
+	if (rundir == NULL) {
+	    sudo_warnx("internal error: sesh rundir not set");
+	    errno = EINVAL;
+	    debug_return;
+	}
+	if (asprintf(&nargv[nargc++], "--chdir=%s%s", prefix, rundir) == -1) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return;
+	}
+    }
     if (fd != -1 && asprintf(&nargv[nargc++], "--execfd=%d", fd) == -1) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return;

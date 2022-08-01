@@ -174,6 +174,8 @@ struct user_details {
 #define CD_USE_PTRACE		0x00400000
 #define CD_FEXECVE		0x00800000
 #define CD_INTERCEPT_VERIFY	0x01000000
+#define CD_RBAC_SET_CWD		0x02000000
+#define CD_CWD_OPTIONAL		0x04000000
 
 struct preserved_fd {
     TAILQ_ENTRY(preserved_fd) entries;
@@ -191,7 +193,6 @@ struct command_details {
     int closefrom;
     int flags;
     int execfd;
-    int cwd_optional;
     struct preserved_fd_list preserved_fds;
     struct passwd *pw;
     const char *command;
@@ -287,7 +288,7 @@ int selinux_relabel_tty(const char *ttyn, int ttyfd);
 int selinux_restore_tty(void);
 int selinux_setexeccon(void);
 void selinux_execve(int fd, const char *path, char *const argv[],
-    char *envp[], int flags);
+    char *envp[], const char *rundir, int flags);
 
 /* apparmor.c */
 int apparmor_is_enabled(void);

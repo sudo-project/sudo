@@ -94,11 +94,30 @@ main(int argc, char *argv[], char *envp[])
 		SET(flags, CD_NOEXEC);
 	}
 
+	/* If argv[1] is --chdir=dir, change to specified dir. */
+	if (strncmp(argv[1], "--chdir=", sizeof("--chdir=") - 1) == 0) {
+	    const char *cp = argv[1] + sizeof("--chdir=") - 1;
+	    bool cwd_optional = false;
+
+	    /* If run dir starts with a '+', ignore chdir(2) failure. */
+	    if (*cp == '+') {
+		cwd_optional = true;
+		cp++;
+	    }
+	    if (chdir(cp) == -1) {
+		sudo_warnx(U_("unable to change directory to %s"), cp);
+		if (!cwd_optional)
+		    exit(EXIT_FAILURE);
+	    }
+	    argv++;
+	    argc--;
+	}
+
 	/* If argv[1] is --execfd=%d, extract the fd to exec with. */
-	if (strncmp(argv[1], "--execfd=", 9) == 0) {
+	if (strncmp(argv[1], "--execfd=", sizeof("--execfd=") - 1) == 0) {
 	    const char *errstr;
 
-	    cp = argv[1] + 9;
+	    cp = argv[1] + sizeof("--execfd=") - 1;
 	    fd = sudo_strtonum(cp, 0, INT_MAX, &errstr);
 	    if (errstr != NULL)
 		sudo_fatalx(U_("invalid file descriptor number: %s"), cp);

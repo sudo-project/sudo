@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -696,15 +696,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		SET_STRING("chroot=", chroot)
 		SET_STRING("command=", command)
 		SET_STRING("cwd=", cwd)
-		if (strncmp("cwd_optional=", info[i], sizeof("cwd_optional=") - 1) == 0) {
-		    cp = info[i] + sizeof("cwd_optional=") - 1;
-		    details->cwd_optional = sudo_strtobool(cp);
-		    if (details->cwd_optional == -1) {
-			errno = EINVAL;
-			sudo_fatal("%s", info[i]);
-		    }
-		    break;
-		}
+		SET_FLAG("cwd_optional=", CD_CWD_OPTIONAL)
 		if (strncmp("closefrom=", info[i], sizeof("closefrom=") - 1) == 0) {
 		    cp = info[i] + sizeof("closefrom=") - 1;
 		    details->closefrom = sudo_strtonum(cp, 0, INT_MAX, &errstr);

@@ -229,13 +229,19 @@ exec_setup(struct command_details *details, int intercept_fd, int errfd)
     if (details->cwd != NULL) {
 	if (details->chroot != NULL || user_details.cwd == NULL ||
 	    strcmp(details->cwd, user_details.cwd) != 0) {
-	    /* Note: cwd is relative to the new root, if any. */
-	    if (chdir(details->cwd) == -1) {
-		sudo_warn(U_("unable to change directory to %s"), details->cwd);
-		if (!details->cwd_optional)
-		    goto done;
-		if (details->chroot != NULL)
-		    sudo_warnx(U_("starting from %s"), "/");
+	    if (ISSET(details->flags, CD_RBAC_ENABLED)) {
+		 /* For SELinux, chdir(2) in sesh after the context change. */
+		SET(details->flags, CD_RBAC_SET_CWD);
+	    } else {
+		/* Note: cwd is relative to the new root, if any. */
+		if (chdir(details->cwd) == -1) {
+		    sudo_warn(U_("unable to change directory to %s"),
+			details->cwd);
+		    if (!ISSET(details->flags, CD_CWD_OPTIONAL))
+			goto done;
+		    if (details->chroot != NULL)
+			sudo_warnx(U_("starting from %s"), "/");
+		}
 	    }
 	}
     }
@@ -288,7 +294,7 @@ exec_cmnd(struct command_details *details, sigset_t *mask,
 #ifdef HAVE_SELINUX
 	if (ISSET(details->flags, CD_RBAC_ENABLED)) {
 	    selinux_execve(details->execfd, details->command, details->argv,
-		details->envp, details->flags);
+		details->envp, details->cwd, details->flags);
 	} else
 #endif
 	{
