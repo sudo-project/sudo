@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd May 26, 2022
+.Dd August 2, 2022
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -4771,7 +4771,20 @@ entries were added to the
 .Li settings
 list.
 The
-.Em user_ptrace
+.Em apparmor_profile
+and
+.Em use_ptrace
+entries were added to the
+.Li command_info
+list.
+.It Version 1.20 (sudo 1.9.12)
+The
+.Em update_ticket
+entry was added to the
+.Li settings
+list.
+The
+.Em intercept_verify
 entry was added to the
 .Li command_info
 list.
