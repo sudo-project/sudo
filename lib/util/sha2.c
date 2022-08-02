@@ -490,7 +490,7 @@ SHA512Pad(SHA2_CTX *ctx)
 	SHA512Update(ctx, (uint8_t *)"\200", 1);
 
 	/* Pad message such that the resulting length modulo 1024 is 896. */
-	while ((ctx->count[0] & 1008) != 896)
+	while ((ctx->count[0] & 1016) != 896)
 		SHA512Update(ctx, (uint8_t *)"\0", 1);
 
 	/* Append length of message in bits and do final SHA512Transform(). */
