@@ -150,7 +150,7 @@ _rs_rekey(unsigned char *dat, size_t datlen)
 static inline void
 _rs_random_buf(void *_buf, size_t n)
 {
-	unsigned char *buf = (unsigned char *)_buf;
+	unsigned char *buf = _buf;
 	unsigned char *keystream;
 	size_t m;
 
