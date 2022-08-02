@@ -1,3 +1,49 @@
+What's new in Sudo 1.9.12
+
+ * Fixed a bug in the ptrace-based intercept mode where the current
+   working directory could include garbage at the end.
+
+ * Fixed a compilation error on systems that lack the stdint.h
+   header.  Bug #1035
+
+ * Fixed a bug when logging the command's exit status in intercept
+   mode.  The wrong command could be logged with the exit status.
+
+ * For ptrace-based intercept mode, sudo will now attempt to
+   verify that the command path name, arguments and environment
+   have not changed from the time when they were authorized by the
+   security policy.  The new "intercept_verify" sudoers setting can
+   be used to control this behavior.
+
+ * Fixed running commands with a relative path (e.g. ./foo) in
+   intercept mode.  Previously, this would fail if sudo's current
+   working directory was different from that of the command.
+
+ * Sudo now supports passing the execve(2) system call the NULL
+   pointer for the `argv` and/or `envp` arguments when in intercept
+   mode.  Linux treats a NULL pointer like an empty array.
+
+ * The sudoers LDAP schema now allows sudoUser, sudoRunasUser and
+   sudoRunasGroup to include UTF-8 characters, not just 7-bit ASCII.
+
+ * Fixed a problem with "sudo -i" on SELinux when the target user's
+   home directory is not searchable by sudo.  GitHub issue #160.
+
+ * Neovim has been added to the list of visudo editors that support
+   passing the line number on the command line.
+
+ * Fixed a bug in the SHA384/512 message digest padding.
+
+ * Added a new "-N" (--no-update) command line option to sudo which
+   can be used to prevent sudo from updating the user's cached
+   credentials.  It is now possible to determine whether or not a
+   user's cached credentials are currently valid by running:
+
+	$ sudo -Nnv
+
+   and checking the exit value.  One use case for this is to indicate
+   in a shell prompt that sudo is "active" for the user.
+
 What's new in Sudo 1.9.11p3
 
  * Fixed "connection reset" errors on AIX when running shell scripts
