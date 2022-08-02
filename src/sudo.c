@@ -1065,6 +1065,12 @@ format_plugin_settings(struct plugin_container *plugin)
     unsigned int i = 0;
     debug_decl(format_plugin_settings, SUDO_DEBUG_PCOMM);
 
+    /* We update the ticket entry by default. */
+    if (sudo_settings[ARG_IGNORE_TICKET].value == NULL &&
+	    sudo_settings[ARG_UPDATE_TICKET].value == NULL) {
+	sudo_settings[ARG_UPDATE_TICKET].value = "true";
+    }
+
     /* Determine sudo_settings array size (including plugin_path and NULL) */
     plugin_settings_size = 2;
     for (setting = sudo_settings; setting->name != NULL; setting++)

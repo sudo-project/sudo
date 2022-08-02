@@ -215,8 +215,8 @@ done:
 	 * Only update time stamp if user validated and was approved.
 	 * Failure to update the time stamp is not a fatal error.
 	 */
-	if (ret == true && closure.tstat != TS_ERROR) {
-	    if (ISSET(validated, VALIDATE_SUCCESS))
+	if (ret == true && ISSET(validated, VALIDATE_SUCCESS)) {
+	    if (ISSET(mode, MODE_UPDATE_TICKET) && closure.tstat != TS_ERROR)
 		(void)timestamp_update(closure.cookie, closure.auth_pw);
 	}
     }

@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDO" "@mansectsu@" "February 16, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "August 2, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -41,7 +41,7 @@
 .HP 5n
 \fBsudo\fR
 \fB\-v\fR
-[\fB\-ABknS\fR]
+[\fB\-ABkNnS\fR]
 .if \n(BA [\fB\-a\fR\ \fItype\fR]
 [\fB\-g\fR\ \fIgroup\fR]
 [\fB\-h\fR\ \fIhost\fR]
@@ -51,7 +51,7 @@
 .HP 5n
 \fBsudo\fR
 \fB\-l\fR
-[\fB\-ABknS\fR]
+[\fB\-ABkNnS\fR]
 .if \n(BA [\fB\-a\fR\ \fItype\fR]
 [\fB\-g\fR\ \fIgroup\fR]
 [\fB\-h\fR\ \fIhost\fR]
@@ -81,7 +81,7 @@
 .br
 .HP 9n
 \fBsudoedit\fR
-[\fB\-ABknS\fR]
+[\fB\-ABkNnS\fR]
 .if \n(BA [\fB\-a\fR\ \fItype\fR]
 [\fB\-C\fR\ \fInum\fR]
 .if \n(LC [\fB\-c\fR\ \fIclass\fR]
@@ -531,6 +531,22 @@ If a
 is specified but not allowed by the policy,
 \fBsudo\fR
 will exit with a status value of 1.
+.TP 12n
+\fB\-N\fR, \fB\--no-update\fR
+Do not update the user's cached credentials, even if the user successfully
+authenticates.
+Unlike the
+\fB\-k\fR
+flag, existing cached credentials are used if they are valid.
+To detect when the user's cached credentials are valid (or when no
+authentication is required), the following command can be used:
+.RS 18n
+sudo -Nnv
+.RE
+.RS 12n
+.sp
+Not all security policies support credential caching.
+.RE
 .TP 12n
 \fB\-n\fR, \fB\--non-interactive\fR
 Avoid prompting the user for input of any kind.

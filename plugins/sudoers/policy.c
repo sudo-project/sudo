@@ -84,11 +84,11 @@ parse_bool(const char *line, int varlen, int *flags, int fval)
     }
 }
 
-#define RUN_VALID_FLAGS	(MODE_ASKPASS|MODE_PRESERVE_ENV|MODE_RESET_HOME|MODE_IMPLIED_SHELL|MODE_LOGIN_SHELL|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_PRESERVE_GROUPS|MODE_SHELL|MODE_RUN|MODE_POLICY_INTERCEPTED)
-#define EDIT_VALID_FLAGS	(MODE_ASKPASS|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_EDIT)
-#define LIST_VALID_FLAGS	(MODE_ASKPASS|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_LIST|MODE_CHECK)
-#define VALIDATE_VALID_FLAGS	(MODE_ASKPASS|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_VALIDATE)
-#define INVALIDATE_VALID_FLAGS	(MODE_ASKPASS|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_INVALIDATE)
+#define RUN_VALID_FLAGS	(MODE_ASKPASS|MODE_PRESERVE_ENV|MODE_RESET_HOME|MODE_IMPLIED_SHELL|MODE_LOGIN_SHELL|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_UPDATE_TICKET|MODE_PRESERVE_GROUPS|MODE_SHELL|MODE_RUN|MODE_POLICY_INTERCEPTED)
+#define EDIT_VALID_FLAGS	(MODE_ASKPASS|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_UPDATE_TICKET|MODE_EDIT)
+#define LIST_VALID_FLAGS	(MODE_ASKPASS|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_UPDATE_TICKET|MODE_LIST|MODE_CHECK)
+#define VALIDATE_VALID_FLAGS	(MODE_ASKPASS|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_UPDATE_TICKET|MODE_VALIDATE)
+#define INVALIDATE_VALID_FLAGS	(MODE_ASKPASS|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_UPDATE_TICKET|MODE_INVALIDATE)
 
 /*
  * Deserialize args, settings and user_info arrays.
@@ -102,7 +102,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
     const char *remhost = NULL;
     unsigned char uuid[16];
     char * const *cur;
-    int flags = 0;
+    int flags = MODE_UPDATE_TICKET;
     debug_decl(sudoers_policy_deserialize_info, SUDOERS_DEBUG_PLUGIN);
 
 #define MATCHES(s, v)	\
@@ -280,6 +280,12 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 		goto bad;
 	    continue;
 	}
+	if (MATCHES(*cur, "update_ticket=")) {
+	    if (parse_bool(*cur, sizeof("update_ticket") -1, &flags,
+		MODE_UPDATE_TICKET) == -1)
+		goto bad;
+	    continue;
+	}
 	if (MATCHES(*cur, "noninteractive=")) {
 	    if (parse_bool(*cur, sizeof("noninteractive") - 1, &flags,
 		MODE_NONINTERACTIVE) == -1)
@@ -395,6 +401,9 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	}
 #endif
     }
+    /* Ignore ticket trumps update. */
+    if (ISSET(flags, MODE_IGNORE_TICKET))
+	CLR(flags, MODE_UPDATE_TICKET);
 
     user_gid = (gid_t)-1;
     user_sid = (pid_t)-1;
