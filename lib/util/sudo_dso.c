@@ -217,6 +217,10 @@ sudo_dso_load_v1(const char *path, int mode)
 	    ret = dlopen(cp, flags|RTLD_MEMBER);
 	    free(cp);
 	}
+	if (ret == NULL) {
+	    /* Retry with the original path so we get the correct error. */
+	    ret = dlopen(path, flags);
+	}
     }
 #endif /* RTLD_MEMBER */
 
