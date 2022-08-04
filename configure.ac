@@ -2080,6 +2080,10 @@ case "$host" in
 		# We use our own getentropy() by default on Linux.
 		: ${ac_cv_func_getentropy='no'}
 
+		# The glibc arc4random() may fail in chroot on older kernels.
+		# We use our own arc4random() by default on Linux.
+		: ${ac_cv_func_arc4random='no'}
+
 		# The glibc closefrom() emulation may fail in chroot.
 		# We use our own closefrom() by default on Linux.
 		: ${ac_cv_func_closefrom='no'}
