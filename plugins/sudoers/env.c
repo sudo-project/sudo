@@ -318,8 +318,15 @@ sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
     const char *equal;
     bool found = false;
 
+    /* Some putenv(3) implementations check for NULL. */
+    if (str == NULL) {
+	errno = EINVAL;
+	return -1;
+    }
+
+    /* The string must contain a '=' char but not start with one. */
     equal = strchr(str, '=');
-    if (equal == NULL) {
+    if (equal == NULL || equal == str) {
 	errno = EINVAL;
 	return -1;
     }

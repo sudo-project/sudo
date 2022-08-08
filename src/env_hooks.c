@@ -76,11 +76,25 @@ static int
 rpl_putenv(PUTENV_CONST char *string)
 {
     char **ep;
+    const char *equal;
     size_t len;
     bool found = false;
 
+    /* Some putenv(3) implementations check for NULL. */
+    if (string == NULL) {
+	errno = EINVAL;
+	return -1;
+    }
+
+    /* The string must contain a '=' char but not start with one. */
+    equal = strchr(string, '=');
+    if (equal == NULL || equal == string) {
+	errno = EINVAL;
+	return -1;
+    }
+
     /* Look for existing entry. */
-    len = (strchr(string, '=') - string) + 1;
+    len = (equal - string) + 1;
     for (ep = environ; *ep != NULL; ep++) {
 	if (strncmp(string, *ep, len) == 0) {
 	    *ep = (char *)string;
