@@ -174,7 +174,7 @@ static struct plugin_container *
 new_container(void *handle, const char *path, struct generic_plugin *plugin,
     struct plugin_info *info)
 {
-    struct plugin_container *container = NULL;
+    struct plugin_container *container;
     debug_decl(new_container, SUDO_DEBUG_PLUGIN);
 
     if ((container = calloc(1, sizeof(*container))) == NULL) {
