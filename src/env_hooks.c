@@ -60,11 +60,9 @@ getenv_unhooked(const char *name)
 sudo_dso_public char *
 getenv(const char *name)
 {
-    char *val = NULL;
-
     switch (process_hooks_getenv(name, &val)) {
 	case SUDO_HOOK_RET_STOP:
-	    return val;
+	    return NULL;
 	case SUDO_HOOK_RET_ERROR:
 	    return NULL;
 	default:
