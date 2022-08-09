@@ -1408,38 +1408,38 @@ repeated_field_pack(const ProtobufCFieldDescriptor *field,
 			break;
 		case PROTOBUF_C_TYPE_ENUM:
 		case PROTOBUF_C_TYPE_INT32: {
-			const int32_t *arr = (const int32_t *) array;
+			const int32_t *arr = array;
 			for (i = 0; i < count; i++)
 				payload_at += int32_pack(arr[i], payload_at);
 			break;
 		}
 		case PROTOBUF_C_TYPE_SINT32: {
-			const int32_t *arr = (const int32_t *) array;
+			const int32_t *arr = array;
 			for (i = 0; i < count; i++)
 				payload_at += sint32_pack(arr[i], payload_at);
 			break;
 		}
 		case PROTOBUF_C_TYPE_SINT64: {
-			const int64_t *arr = (const int64_t *) array;
+			const int64_t *arr = array;
 			for (i = 0; i < count; i++)
 				payload_at += sint64_pack(arr[i], payload_at);
 			break;
 		}
 		case PROTOBUF_C_TYPE_UINT32: {
-			const uint32_t *arr = (const uint32_t *) array;
+			const uint32_t *arr = array;
 			for (i = 0; i < count; i++)
 				payload_at += uint32_pack(arr[i], payload_at);
 			break;
 		}
 		case PROTOBUF_C_TYPE_INT64:
 		case PROTOBUF_C_TYPE_UINT64: {
-			const uint64_t *arr = (const uint64_t *) array;
+			const uint64_t *arr = array;
 			for (i = 0; i < count; i++)
 				payload_at += uint64_pack(arr[i], payload_at);
 			break;
 		}
 		case PROTOBUF_C_TYPE_BOOL: {
-			const protobuf_c_boolean *arr = (const protobuf_c_boolean *) array;
+			const protobuf_c_boolean *arr = array;
 			for (i = 0; i < count; i++)
 				payload_at += boolean_pack(arr[i], payload_at);
 			break;
