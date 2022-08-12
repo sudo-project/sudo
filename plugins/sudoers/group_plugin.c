@@ -41,6 +41,90 @@ static struct sudoers_group_plugin *group_plugin;
 const char *path_plugin_dir = _PATH_SUDO_PLUGIN_DIR;
 
 /*
+ * Check for a fallback path when the original group plugin is not loadable.
+ * Returns true on success, rewriting path and filling in sb, else false.
+ */
+static bool
+group_plugin_fallback(char *path, size_t pathsize, struct stat *sb)
+{
+#if defined(__LP64__)
+    char newpath[PATH_MAX];
+    bool ret = false;
+    int len;
+    debug_decl(group_plugin_fallback, SUDOERS_DEBUG_UTIL);
+
+# if defined(__sun__) || defined(__linux__)
+    /*
+     * Solaris uses /lib/64 and /usr/lib/64 for 64-bit libraries.
+     * Linux may use /lib64 and /usr/lib64 for 64-bit libraries.
+     * If dirname(path) ends in /lib, try /lib/64 (Solaris) or /lib64 (Linux).
+     */
+#  if defined(__sun__)
+    const char *lib64 = "lib/64";
+#  else
+    const char *lib64 = "lib64";
+#  endif
+    const char *base, *slash;
+    int dirlen;
+
+    slash = strrchr(path, '/');
+    if (slash == NULL) {
+	goto done;
+    }
+    base = slash + 1;
+
+    /* Collapse consecutive slashes. */
+    while (slash > path && slash[-1] == '/') {
+	slash--;
+    }
+
+    /* If directory ends in /lib/, try again with /lib/64/ or /lib64/. */
+    dirlen = slash - path;
+    if (dirlen < 4 || strncmp(slash - 4, "/lib", 4) != 0) {
+	goto done;
+    }
+    dirlen -= 4;
+    len = snprintf(newpath, sizeof(newpath), "%.*s/%s/%s", dirlen, path, lib64,
+	base);
+# else /* !__sun__ && !__linux__ */
+    /*
+     * Multilib not supported, check for a path of the form libfoo64.so.
+     */
+    const char *dot;
+    int plen;
+
+    dot = strrchr(path, '.');
+    if (dot == NULL) {
+	goto done;
+    }
+    plen = dot - path;
+
+    /* If basename(path) doesn't match libfoo64.so, try adding the 64. */
+    if (plen >= 2 && strncmp(dot - 2, "64", 2) == 0) {
+	goto done;
+    }
+    len = snprintf(newpath, sizeof(newpath), "%.*s64%s", plen, path, dot);
+# endif /* __sun__ || __linux__ */
+    if (len < 0 || len >= ssizeof(newpath)) {
+	errno = ENAMETOOLONG;
+	goto done;
+    }
+    if (stat(newpath, sb) == -1) {
+	goto done;
+    }
+    if (strlcpy(path, newpath, pathsize) >= pathsize) {
+	errno = ENAMETOOLONG;
+	goto done;
+    }
+    ret = true;
+done:
+    debug_return_bool(ret);
+#else
+    return false;
+#endif /* __LP64__ */
+}
+
+/*
  * Load the specified plugin and run its init function.
  * Returns -1 if unable to open the plugin, else it returns
  * the value from the plugin's init function.
@@ -52,6 +136,7 @@ group_plugin_load(const char *plugin_info)
     char *args, path[PATH_MAX];
     char **argv = NULL;
     int len, rc = -1;
+    bool retry = true;
     debug_decl(group_plugin_load, SUDOERS_DEBUG_UTIL);
 
     /*
@@ -72,31 +157,41 @@ group_plugin_load(const char *plugin_info)
 	    (*plugin_info != '/') ? path_plugin_dir : "", plugin_info);
 	goto done;
     }
-
-    /* Check owner and mode of plugin path. */
     if (stat(path, &sb) != 0) {
 	sudo_warn("%s", path);
 	goto done;
     }
-    if (!sudo_conf_developer_mode()) {
-        if (sb.st_uid != ROOT_UID) {
-            sudo_warnx(U_("%s must be owned by uid %d"), path, ROOT_UID);
-            goto done;
-        }
-        if ((sb.st_mode & (S_IWGRP|S_IWOTH)) != 0) {
-            sudo_warnx(U_("%s must only be writable by owner"), path);
-            goto done;
-        }
+
+    for (;;) {
+	if (!sudo_conf_developer_mode()) {
+	    /* Check owner and mode of plugin path. */
+	    if (sb.st_uid != ROOT_UID) {
+		sudo_warnx(U_("%s must be owned by uid %d"), path, ROOT_UID);
+		goto done;
+	    }
+	    if ((sb.st_mode & (S_IWGRP|S_IWOTH)) != 0) {
+		sudo_warnx(U_("%s must only be writable by owner"), path);
+		goto done;
+	    }
+	}
+
+	group_handle = sudo_dso_load(path, SUDO_DSO_LAZY|SUDO_DSO_GLOBAL);
+	if (group_handle != NULL) {
+	    break;
+	}
+
+	if (!retry || !group_plugin_fallback(path, sizeof(path), &sb)) {
+	    const char *errstr = sudo_dso_strerror();
+	    sudo_warnx(U_("unable to load %s: %s"), path,
+		errstr ? errstr : "unknown error");
+	    goto done;
+	}
+
+	/* Retry once with the fallback path. */
+	retry = false;
     }
 
-    /* Open plugin and map in symbol. */
-    group_handle = sudo_dso_load(path, SUDO_DSO_LAZY|SUDO_DSO_GLOBAL);
-    if (!group_handle) {
-	const char *errstr = sudo_dso_strerror();
-	sudo_warnx(U_("unable to load %s: %s"), path,
-	    errstr ? errstr : "unknown error");
-	goto done;
-    }
+    /* Map in symbol from group plugin. */
     group_plugin = sudo_dso_findsym(group_handle, "group_plugin");
     if (group_plugin == NULL) {
 	sudo_warnx(U_("unable to find symbol \"group_plugin\" in %s"), path);
