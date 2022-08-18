@@ -2103,7 +2103,7 @@ Convert(time_t Month, time_t Day, time_t Year, time_t Hours, time_t Minutes,
     if (Year < EPOCH || (sizeof(time_t) == sizeof(int) && Year > 2038)
      || Month < 1 || Month > 12
      /* Lint fluff:  "conversion from long may lose accuracy" */
-     || Day < 1 || Day > DaysInMonth[(int)--Month])
+     || Day < 1 || Day > DaysInMonth[--Month])
 	return -1;
 
     for (Julian = Day - 1, i = 0; i < Month; i++)
