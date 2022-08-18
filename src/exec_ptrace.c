@@ -1468,6 +1468,8 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 		break;
 	    }
 	}
+	if (closure->run_argv[i] != NULL || argv[i] != NULL)
+	    argv_mismatch = true;
 
 	if (path_mismatch || argv_mismatch) {
 	    /*
