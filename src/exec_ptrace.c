@@ -630,14 +630,19 @@ static char *
 get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     int *argc_out, char ***argv_out, int *envc_out, char ***envp_out)
 {
-    char *argbuf, *strtab, *pathname, **argv, **envp;
+    char *strtab, *pathname, **argv, **envp, *argbuf = NULL;
     unsigned long path_addr, argv_addr, envp_addr;
     int argc, envc;
     size_t bufsize, len;
     debug_decl(get_execve_info, SUDO_DEBUG_EXEC);
 
     /* XXX - Linux allows this to be bigger, see execve(2). */
-    bufsize = sysconf(_SC_ARG_MAX) + PATH_MAX;
+    bufsize = sysconf(_SC_ARG_MAX);
+    if (bufsize == (size_t)-1) {
+	sudo_warnx(U_("%s: %s"), __func__, "sysconf");
+	goto bad;
+    }
+    bufsize += PATH_MAX;
     argbuf = malloc(bufsize);
     if (argbuf == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -1258,6 +1263,10 @@ ptrace_verify_post_exec(pid_t pid, struct sudo_ptrace_regs *regs,
     /* Allocate a single buffer for argv, envp and their strings. */
     /* XXX - Linux allows this to be bigger, see execve(2). */
     bufsize = sysconf(_SC_ARG_MAX);
+    if (bufsize == (size_t)-1) {
+	sudo_warnx(U_("%s: %s"), __func__, "sysconf");
+	goto done;
+    }
     argbuf = malloc(bufsize);
     if (argbuf == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
