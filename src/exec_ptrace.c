@@ -632,7 +632,7 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
 {
     char *strtab, *pathname, **argv, **envp, *argbuf = NULL;
     unsigned long path_addr, argv_addr, envp_addr;
-    int argc, envc;
+    int argc, envc, extra = 0;
     size_t bufsize, len;
     debug_decl(get_execve_info, SUDO_DEBUG_EXEC);
 
@@ -660,14 +660,18 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     if (argc == -1 || envc == -1)
 	goto bad;
 
+    /* If argv is empty, reserve an extra slot for the command. */
+    if (argc == 0)
+	extra++;
+
     /* Reserve argv and envp at the start of argbuf so they are aligned. */
-    if ((argc + 1 + envc + 1) * sizeof(unsigned long) >= bufsize) {
+    if ((argc + extra + 1 + envc + 1) * sizeof(unsigned long) >= bufsize) {
 	sudo_warnx("%s", U_("insufficient space for execve arguments"));
 	errno = ENOMEM;
 	goto bad;
     }
     argv = (char **)argbuf;
-    envp = argv + argc + 1;
+    envp = argv + argc + extra + 1;
     strtab = (char *)(envp + envc + 1);
     bufsize -= strtab - argbuf;
 
@@ -1246,7 +1250,7 @@ ptrace_verify_post_exec(pid_t pid, struct sudo_ptrace_regs *regs,
     }
     argc = (int)word;
 
-    /* argv follows arc, followed by envp. */
+    /* argv follows argc, followed by envp. */
     sp += regs->wordsize;
     argv_addr = sp;
     sp += regs->wordsize * (argc + 1);
@@ -1423,10 +1427,18 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	goto done;
     }
 
+    /* We can only pass the pathname to exececute via argv[0] (plugin API). */
+    argv[0] = pathname;
+    if (argc == 0) {
+	/* Rewrite an empty argv[] with the path to execute. */
+	argv[1] = NULL;
+	argc = 1;
+	argv_mismatch = true;
+    }
+
     /* Perform a policy check. */
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %d: checking policy for %s",
 	__func__, (int)pid, pathname);
-    argv[0] = pathname;
     if (!intercept_check_policy(pathname, argc, argv, envc, envp, cwd,
 	    closure)) {
 	sudo_warnx("%s", U_(closure->errstr));
