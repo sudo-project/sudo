@@ -553,7 +553,14 @@ intercept_check_policy_req(PolicyCheckRequest *req,
 	}
     }
 
-    /* Rebuild argv from PolicyCheckReq so it is NULL-terminated. */
+    /* If argv is empty, reserve an extra slot for the command. */
+    if (req->n_argv == 0)
+	req->n_argv = 1;
+
+    /*
+     * Rebuild argv from PolicyCheckReq so it is NULL-terminated.
+     * The plugin API requires us to pass the pathname to exec in argv[0].
+     */
     argv = reallocarray(NULL, req->n_argv + 1, sizeof(char *));
     if (argv == NULL) {
 	closure->errstr = N_("unable to allocate memory");
