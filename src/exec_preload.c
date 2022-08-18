@@ -190,7 +190,7 @@ sudo_preload_dso_alloc(char *const envp[], const char *dso_file,
     char *dso_buf = NULL;
 # endif
     size_t env_size;
-    debug_decl(sudo_preload_dso, SUDO_DEBUG_UTIL);
+    debug_decl(sudo_preload_dso_alloc, SUDO_DEBUG_UTIL);
 
 # ifdef _PATH_ASAN_LIB
     /*
