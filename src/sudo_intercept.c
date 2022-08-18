@@ -82,14 +82,12 @@ static char **
 copy_vector(char * const *src)
 {
     char **copy;
-    int i, len;
+    int i, len = 0;
     debug_decl(copy_vector, SUDO_DEBUG_EXEC);
 
-    if (src == NULL)
-	debug_return_ptr(NULL);
-
-    for (len = 0; src[len] != NULL; len++) {
-	continue;
+    if (src != NULL) {
+	while (src[len] != NULL)
+	    len++;
     }
     copy = sudo_mmap_allocarray(len + 1, sizeof(char *));
     if (copy == NULL) {
