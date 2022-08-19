@@ -275,7 +275,7 @@ set_sc_arg4(struct sudo_ptrace_regs *regs, unsigned long addr)
  * Returns true on success, else false.
  */
 static bool
-ptrace_getregs(int pid, struct sudo_ptrace_regs *regs, bool compat)
+ptrace_getregs(int pid, struct sudo_ptrace_regs *regs, int compat)
 {
     debug_decl(ptrace_getregs, SUDO_DEBUG_EXEC);
 
@@ -283,12 +283,21 @@ ptrace_getregs(int pid, struct sudo_ptrace_regs *regs, bool compat)
     /* PTRACE_GETREGSET has bugs with the MIPS o32 ABI at least. */
     if (ptrace(PTRACE_GETREGS, pid, NULL, &regs->u) == -1)
 	debug_return_bool(false);
+    if (compat == -1) {
+	/* Assume that 64-bit executables will have a 64-bit stack pointer. */
+	if (reg_sp(&regs->u.native) > 0xffffffff)
+	    compat = false;
+    }
 # else
     struct iovec iov;
     iov.iov_base = &regs->u;
     iov.iov_len = sizeof(regs->u);
     if (ptrace(PTRACE_GETREGSET, pid, (void *)NT_PRSTATUS, &iov) == -1)
 	debug_return_bool(false);
+    if (compat == -1) {
+	/* Guess compat based on size of register struct returned. */
+	compat = iov.iov_len != sizeof(regs->u.native);
+    }
 # endif /* __mips__ */
 
     /* Machine-dependent parameters to support compat binaries. */
@@ -297,7 +306,7 @@ ptrace_getregs(int pid, struct sudo_ptrace_regs *regs, bool compat)
 	regs->wordsize = sizeof(int);
     } else {
 	regs->compat = false;
-	regs->wordsize = sizeof(unsigned long);
+	regs->wordsize = sizeof(long);
     }
 
     debug_return_bool(true);
@@ -1233,13 +1242,23 @@ ptrace_verify_post_exec(pid_t pid, struct sudo_ptrace_regs *regs,
 	ret = true;
 	goto done;
     }
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %d: verify %s", __func__,
+	(int)pid, pathname);
 
-    /* Update the registers to get the new stack pointer. */
-    if (!ptrace_getregs(pid, regs, regs->compat)) {
+    /*
+     * Update the registers to get the new stack pointer.
+     * We don't know whether this is a native or compat executable
+     * so ask ptrace_getregs() to figure it out for us (if it can).
+     */
+    if (!ptrace_getregs(pid, regs, -1)) {
 	sudo_warn(U_("unable to get registers for process %d"), (int)pid);
 	goto done;
     }
     sp = get_stack_pointer(regs);
+    if (sp == 0) {
+	sudo_warnx(U_("invalid stack pointer for process %d"), (int)pid);
+	goto done;
+    }
 
     /*
      * We assume the initial stack layout is as follows:
@@ -1364,6 +1383,8 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	sudo_warn(U_("unable to get registers for process %d"), (int)pid);
 	debug_return_bool(false);
     }
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %d: compat: %s, wordsize: %u",
+	__func__, (int)pid, regs.compat ? "true" : "false", regs.wordsize);
 
 # ifdef SECCOMP_AUDIT_ARCH_COMPAT
     if (regs.compat) {
