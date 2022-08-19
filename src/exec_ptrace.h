@@ -88,9 +88,9 @@
 # define reg_arg4(x)		(x).regs[3]	/* x3 */
 # define reg_set_syscall(_r, _nr) do {					\
     struct iovec _iov;							\
-    long syscallno = (_nr);						\
-    _iov.iov_base = &syscallno;						\
-    _iov.iov_len = sizeof(syscallno);					\
+    long _syscallno = (_nr);						\
+    _iov.iov_base = &_syscallno;					\
+    _iov.iov_len = sizeof(_syscallno);					\
     ptrace(PTRACE_SETREGSET, pid, NT_ARM_SYSTEM_CALL, &_iov);		\
 } while (0)
 #elif defined(__arm__)
