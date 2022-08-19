@@ -348,8 +348,9 @@ ptrace_read_string(pid_t pid, unsigned long addr, char *buf, size_t bufsize)
     for (;;) {
 	word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
 	if (word == (unsigned long)-1) {
-	    sudo_warn("%s: ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
-		__func__, (int)pid, addr);
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)", (int)pid, addr);
 	    debug_return_ssize_t(-1);
 	}
 
@@ -653,6 +654,9 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     path_addr = get_sc_arg1(regs);
     argv_addr = get_sc_arg2(regs);
     envp_addr = get_sc_arg3(regs);
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: %d: path 0x%lx, argv 0x%lx, envp 0x%lx", __func__,
+	(int)pid, path_addr, argv_addr, envp_addr);
 
     /* Count argv and envp. */
     argc = ptrace_get_vec_len(pid, regs, argv_addr);
@@ -678,8 +682,9 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     /* Read argv */
     len = ptrace_read_vec(pid, regs, argv_addr, argv, strtab, bufsize);
     if (len == (size_t)-1) {
-	sudo_warn(U_("unable to read execve %s for process %d"),
-	    "argv", (int)pid);
+	sudo_debug_printf(
+	    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to read execve argv for process %d", (int)pid);
 	goto bad;
     }
     strtab += len;
@@ -688,8 +693,9 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     /* Read envp */
     len = ptrace_read_vec(pid, regs, envp_addr, envp, strtab, bufsize);
     if (len == (size_t)-1) {
-	sudo_warn(U_("unable to read execve %s for process %d"),
-	    "envp", (int)pid);
+	sudo_debug_printf(
+	    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to read execve envp for process %d", (int)pid);
 	goto bad;
     }
     strtab += len;
@@ -702,8 +708,9 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     } else {
 	len = ptrace_read_string(pid, path_addr, strtab, bufsize);
 	if (len == (size_t)-1) {
-	    sudo_warn(U_("unable to read execve %s for process %d"),
-		"pathname", (int)pid);
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"unable to read execve pathname for process %d", (int)pid);
 	    goto bad;
 	}
 	pathname = strtab;
@@ -1286,8 +1293,9 @@ ptrace_verify_post_exec(pid_t pid, struct sudo_ptrace_regs *regs,
     /* Read argv */
     len = ptrace_read_vec(pid, regs, argv_addr, argv, strtab, bufsize);
     if (len == (size_t)-1) {
-	sudo_warn(U_("unable to read execve %s for process %d"),
-	    "argv", (int)pid);
+	sudo_debug_printf(
+	    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to read execve argv for process %d", (int)pid);
 	goto done;
     }
     strtab += len;
@@ -1296,8 +1304,9 @@ ptrace_verify_post_exec(pid_t pid, struct sudo_ptrace_regs *regs,
     /* Read envp */
     len = ptrace_read_vec(pid, regs, envp_addr, envp, strtab, bufsize);
     if (len == (size_t)-1) {
-	sudo_warn(U_("unable to read execve %s for process %d"),
-	    "envp", (int)pid);
+	sudo_debug_printf(
+	    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to read execve envp for process %d", (int)pid);
 	goto done;
     }
     strtab += len;
@@ -1404,11 +1413,11 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     if (buf == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: %d: unable to get execve info", __func__, (int)pid);
-
-	/* Unrecoverable error, kill the process if it still exists. */
-	if (errno != ESRCH)
-	    kill(pid, SIGKILL);
-	debug_return_bool(false);
+	/* EIO from ptrace is like EFAULT from the kernel. */
+	if (errno == EIO)
+	    errno = EFAULT;
+	ptrace_fail_syscall(pid, &regs, errno);
+	goto done;
     }
 
     /* Must have a pathname. */
