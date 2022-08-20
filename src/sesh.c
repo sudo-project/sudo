@@ -96,10 +96,10 @@ main(int argc, char *argv[], char *envp[])
 
 	/* If argv[1] is --chdir=dir, change to specified dir. */
 	if (strncmp(argv[1], "--chdir=", sizeof("--chdir=") - 1) == 0) {
-	    const char *cp = argv[1] + sizeof("--chdir=") - 1;
 	    bool cwd_optional = false;
 
 	    /* If run dir starts with a '+', ignore chdir(2) failure. */
+	    cp = argv[1] + sizeof("--chdir=") - 1;
 	    if (*cp == '+') {
 		cwd_optional = true;
 		cp++;
