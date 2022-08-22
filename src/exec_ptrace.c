@@ -283,22 +283,26 @@ ptrace_getregs(int pid, struct sudo_ptrace_regs *regs, int compat)
     /* PTRACE_GETREGSET has bugs with the MIPS o32 ABI at least. */
     if (ptrace(PTRACE_GETREGS, pid, NULL, &regs->u) == -1)
 	debug_return_bool(false);
-    if (compat == -1) {
-	/* Assume that 64-bit executables will have a 64-bit stack pointer. */
-	if (reg_sp(&regs->u.native) > 0xffffffff)
-	    compat = false;
-    }
 # else
     struct iovec iov;
     iov.iov_base = &regs->u;
     iov.iov_len = sizeof(regs->u);
     if (ptrace(PTRACE_GETREGSET, pid, (void *)NT_PRSTATUS, &iov) == -1)
 	debug_return_bool(false);
-    if (compat == -1) {
-	/* Guess compat based on size of register struct returned. */
-	compat = iov.iov_len != sizeof(regs->u.native);
-    }
 # endif /* __mips__ */
+    if (compat == -1) {
+# ifdef SECCOMP_AUDIT_ARCH_COMPAT
+	if (sizeof(regs->u.native) != sizeof(regs->u.compat)) {
+	    /* Guess compat based on size of register struct returned. */
+	    compat = iov.iov_len != sizeof(regs->u.native);
+	} else {
+	    /* Assume a 64-bit executable will have a 64-bit stack pointer. */
+	    compat = reg_sp(regs->u.native) < 0xffffffff;
+	}
+# else
+	compat = false;
+# endif /* SECCOMP_AUDIT_ARCH_COMPAT */
+    }
 
     /* Machine-dependent parameters to support compat binaries. */
     if (compat) {
