@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd August 11, 2022
+.Dd August 23, 2022
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3224,19 +3224,35 @@ This setting is only supported by version 1.9.8 or higher.
 If set,
 .Nm sudo
 will attempt to verify that a command run in intercept mode has
-the expected path name and command line arguments.
-The process is stopped after
+the expected path name, command line arguments and environment.
+.Pp
+The process will be stopped after
 .Xr execve 2
 has completed but before the new command has had a chance to run.
-In the case of a path name or argument mismatch, the command will be sent a
+To verify the command,
+.Nm sudo
+will read the command's path from
+.Pa /proc/PID/exe ,
+the command line arguments and environment from the process's memory,
+and compare them against the arguments that were passed to
+.Xr execve 2 .
+In the event of a mismatch, the command will be sent a
 .Dv SIGKILL
 signal and terminated.
+.Pp
 This can help prevent a time of check versus time of use issue with
 intercept mode where the
 .Xr execve 2
 arguments could be altered after the
 .Nm
 policy check.
+The checks can only be performed if the
+.Xr proc @mansectform@
+file system is available.
+The additional overhead from
+.Em intercept_verify
+can slow down intercept mode considerably for shell scripts that
+execute a large number of commands.
 This flag has no effect unless the
 .Em intercept
 flag is enabled or the
