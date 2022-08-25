@@ -65,6 +65,9 @@
 # endif
 
 static int seccomp_trap_supported = -1;
+#ifdef HAVE_PROCESS_VM_READV
+static size_t page_size;
+#endif
 
 /* Register getters and setters. */
 # ifdef SECCOMP_AUDIT_ARCH_COMPAT
@@ -341,17 +344,75 @@ ptrace_setregs(int pid, struct sudo_ptrace_regs *regs)
 }
 
 /*
- * Read the string at addr and store in buf.
+ * Read the string at addr and store in buf using process_vm_readv(2).
+ * Returns the number of bytes stored, including the NUL.
+ */
+static size_t
+ptrace_readv_string(pid_t pid, unsigned long addr, char *buf, size_t bufsize)
+{
+    const char *cp, *buf0 = buf;
+    struct iovec local, remote;
+    ssize_t nread;
+    debug_decl(ptrace_read_string, SUDO_DEBUG_EXEC);
+
+    /*
+     * Read the string via process_vm_readv(2) one page at a time.
+     * We could do larger reads but since we don't know the length
+     * of the string, going one page at a time is simplest.
+     */
+    for (;;) {
+	local.iov_base = buf;
+	local.iov_len = bufsize;
+	remote.iov_base = (void *)addr;
+	remote.iov_len = MIN(bufsize, page_size);
+
+	nread = process_vm_readv(pid, &local, 1, &remote, 1, 0);
+	switch (nread) {
+	case -1:
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"process_vm_readv(%d, [0x%lx, %zu], 1, [0x%lx, %zu], 1, 0)",
+		(int)pid, (unsigned long)local.iov_base, local.iov_len,
+		(unsigned long)remote.iov_base, remote.iov_len);
+	    debug_return_ssize_t(-1);
+	case 0:
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"process_vm_readv(%d, [0x%lx, %zu], 1, [0x%lx, %zu], 1, 0): %s",
+		(int)pid, (unsigned long)local.iov_base, local.iov_len,
+		(unsigned long)remote.iov_base, remote.iov_len, "premature EOF");
+	    debug_return_ssize_t(-1);
+	default:
+	    /* Check for NUL terminator in page. */
+	    cp = memchr(buf, '\0', nread);
+	    if (cp != NULL)
+		debug_return_size_t((cp - buf0) + 1);	/* includes NUL */
+	    buf += nread;
+	    bufsize -= nread;
+	    addr += sizeof(unsigned long);
+	    break;
+	}
+    }
+    debug_return_ssize_t(-1);
+}
+
+/*
+ * Read the string at addr and store in buf using ptrace(2).
  * Returns the number of bytes stored, including the NUL.
  */
 static size_t
 ptrace_read_string(pid_t pid, unsigned long addr, char *buf, size_t bufsize)
 {
-    const char *buf0 = buf;
-    const char *cp;
+    const char *cp, *buf0 = buf;
     unsigned long word;
-    unsigned int i;
+    size_t i;
     debug_decl(ptrace_read_string, SUDO_DEBUG_EXEC);
+
+#ifdef HAVE_PROCESS_VM_READV
+    i = ptrace_readv_string(pid, addr, buf, bufsize);
+    if (i != (size_t)-1 || errno != ENOSYS)
+	debug_return_size_t(i);
+#endif /* HAVE_PROCESS_VM_READV */
 
     /*
      * Read the string via ptrace(2) one (native) word at a time.
@@ -372,7 +433,7 @@ ptrace_read_string(pid_t pid, unsigned long addr, char *buf, size_t bufsize)
 	    if (bufsize == 0) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR,
 		    "%s: %d: out of space reading string", __func__, (int)pid);
-		debug_return_size_t(-1);
+		debug_return_ssize_t(-1);
 	    }
 	    *buf = cp[i];
 	    if (*buf++ == '\0')
@@ -390,14 +451,14 @@ ptrace_read_string(pid_t pid, unsigned long addr, char *buf, size_t bufsize)
  */
 static size_t
 ptrace_read_vec(pid_t pid, struct sudo_ptrace_regs *regs, unsigned long addr,
-    char **vec, char *buf, size_t bufsize)
+    int count, char **vec, char *buf, size_t bufsize)
 {
 # ifdef SECCOMP_AUDIT_ARCH_COMPAT
     unsigned long next_word = -1;
 # endif
     unsigned long word;
     char *buf0 = buf;
-    int len = 0;
+    int i, len = 0;
     size_t slen;
     debug_decl(ptrace_read_vec, SUDO_DEBUG_EXEC);
 
@@ -408,7 +469,7 @@ ptrace_read_vec(pid_t pid, struct sudo_ptrace_regs *regs, unsigned long addr,
     }
 
     /* Fill in vector. */
-    for (;;) {
+    for (i = 0; i <= count; i++) {
 # ifdef SECCOMP_AUDIT_ARCH_COMPAT
 	if (next_word == (unsigned long)-1) {
 	    word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
@@ -434,14 +495,14 @@ ptrace_read_vec(pid_t pid, struct sudo_ptrace_regs *regs, unsigned long addr,
 	case -1:
 	    sudo_warn("%s: ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
 		__func__, (int)pid, addr);
-	    debug_return_size_t(-1);
+	    debug_return_ssize_t(-1);
 	case 0:
 	    vec[len] = NULL;
 	    debug_return_size_t(buf - buf0);
 	default:
 	    slen = ptrace_read_string(pid, word, buf, bufsize);
 	    if (slen == (size_t)-1)
-		debug_return_size_t(-1);
+		debug_return_ssize_t(-1);
 	    vec[len++] = buf;
 	    buf += slen;
 	    bufsize -= slen;
@@ -449,6 +510,8 @@ ptrace_read_vec(pid_t pid, struct sudo_ptrace_regs *regs, unsigned long addr,
 	    continue;
 	}
     }
+    errno = ENOSPC;
+    debug_return_ssize_t(-1);
 }
 
 /*
@@ -505,20 +568,82 @@ ptrace_get_vec_len(pid_t pid, struct sudo_ptrace_regs *regs, unsigned long addr)
     }
 }
 
+#ifdef HAVE_PROCESS_VM_READV
 /*
- * Write the NUL-terminated string str to addr in the tracee.
+ * Write the NUL-terminated string str to addr in the tracee using
+ * process_vm_writev(2).
+ * Returns the number of bytes written, including trailing NUL.
+ */
+static size_t
+ptrace_writev_string(pid_t pid, unsigned long addr, const char *str0)
+{
+    const char *str = str0;
+    size_t len = strlen(str) + 1;
+    debug_decl(ptrace_writev_string, SUDO_DEBUG_EXEC);
+
+    /*
+     * Write the string via process_vm_writev(2), handling partial writes.
+     */
+    for (;;) {
+	struct iovec local, remote;
+	ssize_t nwritten;
+
+	local.iov_base = (void *)str;
+	local.iov_len = len;
+	remote.iov_base = (void *)addr;
+	remote.iov_len = len;
+
+	nwritten = process_vm_writev(pid, &local, 1, &remote, 1, 0);
+	switch (nwritten) {
+	case -1:
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"process_vm_writev(%d, [0x%lx, %zu], 1, [0x%lx, %zu], 1, 0)",
+		(int)pid, (unsigned long)local.iov_base, local.iov_len,
+		(unsigned long)remote.iov_base, remote.iov_len);
+	    debug_return_ssize_t(-1);
+	case 0:
+	    /* Should not be possible. */
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"process_vm_writev(%d, [0x%lx, %zu], 1, [0x%lx, %zu], 1, 0): %s",
+		(int)pid, (unsigned long)local.iov_base, local.iov_len,
+		(unsigned long)remote.iov_base, remote.iov_len,
+		"zero bytes written");
+	    debug_return_ssize_t(-1);
+	default:
+	    str += nwritten;
+	    len -= nwritten;
+	    addr += nwritten;
+	    if (len == 0)
+		debug_return_size_t(str - str0);	/* includes NUL */
+	    break;
+	}
+    }
+    debug_return_ssize_t(-1);
+}
+#endif /* HAVE_PROCESS_VM_READV */
+
+/*
+ * Write the NUL-terminated string str to addr in the tracee using ptrace(2).
  * Returns the number of bytes written, including trailing NUL.
  */
 static size_t
 ptrace_write_string(pid_t pid, unsigned long addr, const char *str)
 {
     const char *str0 = str;
-    unsigned int i;
+    size_t i;
     union {
 	unsigned long word;
 	char buf[sizeof(unsigned long)];
     } u;
     debug_decl(ptrace_write_string, SUDO_DEBUG_EXEC);
+
+#ifdef HAVE_PROCESS_VM_READV
+    i = ptrace_writev_string(pid, addr, str);
+    if (i != (size_t)-1 || errno != ENOSYS)
+	debug_return_size_t(i);
+#endif /* HAVE_PROCESS_VM_READV */
 
     /*
      * Write the string via ptrace(2) one (native) word at a time.
@@ -537,7 +662,7 @@ ptrace_write_string(pid_t pid, unsigned long addr, const char *str)
 	if (ptrace(PTRACE_POKEDATA, pid, addr, u.word) == -1) {
 	    sudo_warn("%s: ptrace(PTRACE_POKEDATA, %d, 0x%lx, %.*s)",
 		__func__, (int)pid, addr, (int)sizeof(u.buf), u.buf);
-	    debug_return_size_t(-1);
+	    debug_return_ssize_t(-1);
 	}
 	if ((u.word & 0xff) == 0) {
 	    /* If the last byte we wrote is a NUL we are done. */
@@ -546,6 +671,137 @@ ptrace_write_string(pid_t pid, unsigned long addr, const char *str)
 	addr += sizeof(unsigned long);
     }
 }
+
+#ifdef HAVE_PROCESS_VM_READV
+/*
+ * Write the string vector vec to addr in the tracee which must have
+ * sufficient space.  Strings are written to strtab.
+ * Returns the number of bytes used in strtab (including NULs).
+ * process_vm_writev() version.
+ */
+static size_t
+ptrace_writev_vec(pid_t pid, struct sudo_ptrace_regs *regs, char **vec,
+    unsigned long addr, unsigned long strtab)
+{
+    const unsigned long addr0 = addr;
+    const unsigned long strtab0 = strtab;
+    unsigned long *addrbuf = NULL;
+    struct iovec *local, *remote;
+    struct iovec local_addrs, remote_addrs;
+    size_t i, j, len, off = 0;
+    ssize_t expected = -1, nwritten, total_written = 0;
+    debug_decl(ptrace_writev_vec, SUDO_DEBUG_EXEC);
+
+    /* Build up local and remote iovecs for process_vm_writev(2). */
+    for (len = 0; vec[len] != NULL; len++)
+	continue;
+    local = reallocarray(NULL, len, sizeof(struct iovec));
+    remote = reallocarray(NULL, len, sizeof(struct iovec));
+    j = regs->compat && (len & 1) != 0;	/* pad for final NULL in compat */
+    addrbuf = reallocarray(NULL, len + 1 + j, regs->wordsize);
+    if (local == NULL || remote == NULL || addrbuf == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto done;
+    }
+    for (i = 0, j = 0; i < len; i++) {
+	unsigned long word = strtab;
+
+	/* Store remote string. */
+	const size_t size = strlen(vec[i]) + 1;
+	local[i].iov_base = vec[i];
+	local[i].iov_len = size;
+	remote[i].iov_base = (void *)strtab;
+	remote[i].iov_len = size;
+	strtab += size;
+
+	/* Store address of remote string. */
+# ifdef SECCOMP_AUDIT_ARCH_COMPAT
+	if (regs->compat) {
+	    /*
+	     * For compat binaries we need to pack two 32-bit string addresses
+	     * into a single 64-bit word.  If this is the last string, NULL
+	     * will be written as the second 32-bit address.
+	     */
+	    if ((i & 1) == 1) {
+		/* Wrote this string address last iteration. */
+		continue;
+	    }
+#  if BYTE_ORDER == BIG_ENDIAN
+	    word <<= 32;
+	    if (vec[i + 1] != NULL)
+		word |= strtab;
+#  else
+	    if (vec[i + 1] != NULL)
+		word |= strtab << 32;
+#  endif
+	}
+# endif
+	addrbuf[j++] = word;
+	addr += sizeof(unsigned long);
+    }
+    if (!regs->compat || (len & 1) == 0) {
+	addrbuf[j] = 0;
+    }
+
+    /* Write strings addresses to addr0 on remote. */
+    local_addrs.iov_base = addrbuf;
+    local_addrs.iov_len = (len + 1) * regs->wordsize;
+    remote_addrs.iov_base = (void *)addr0;
+    remote_addrs.iov_len = local_addrs.iov_len;
+    if (process_vm_writev(pid, &local_addrs, 1, &remote_addrs, 1, 0) == -1)
+	goto done;
+
+    /* Copy the strings to the (remote) string table. */
+    expected = strtab - strtab0;
+    for (;;) {
+	nwritten = process_vm_writev(pid, local + off, len - off,
+	    remote + off, len - off, 0);
+	switch (nwritten) {
+	case -1:
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"process_vm_writev(%d, 0x%lx, %zu, 0x%lx, %zu, 0)",
+		(int)pid, (unsigned long)local + off, len - off,
+		(unsigned long)remote + off, len - off);
+	    goto done;
+	case 0:
+	    sudo_debug_printf(
+		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"process_vm_writev(%d, 0x%lx, %zu, 0x%lx, %zu, 0): %s",
+		(int)pid, (unsigned long)local + off, len - off,
+		(unsigned long)remote + off, len - off,
+		"zero bytes written");
+	    goto done;
+	default:
+	    total_written += nwritten;
+	    if (total_written >= expected)
+		goto done;
+
+	    /* Adjust offset for partial write (doesn't cross iov boundary). */
+	    while (off < len) {
+		nwritten -= local[off].iov_len;
+		off++;
+		if (nwritten <= 0)
+		    break;
+	    }
+	    if (off == len) {
+		sudo_debug_printf(
+		    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "overflow while resuming process_vm_writev()");
+		goto done;
+	    }
+	    break;
+	}
+    }
+done:
+    free(local);
+    free(remote);
+    free(addrbuf);
+    if (total_written == expected)
+	debug_return_size_t(total_written);
+    debug_return_ssize_t(-1);
+}
+#endif /* HAVE_PROCESS_VM_READV */
 
 /*
  * Write the string vector vec to addr in the tracee which must have
@@ -559,6 +815,12 @@ ptrace_write_vec(pid_t pid, struct sudo_ptrace_regs *regs, char **vec,
     const unsigned long strtab0 = strtab;
     size_t i, len;
     debug_decl(ptrace_write_vec, SUDO_DEBUG_EXEC);
+
+#ifdef HAVE_PROCESS_VM_READV
+    i = ptrace_writev_vec(pid, regs, vec, addr, strtab);
+    if (i != (size_t)-1 || errno != ENOSYS)
+	debug_return_size_t(i);
+#endif /* HAVE_PROCESS_VM_READV */
 
     /* Copy string vector into tracee one word at a time. */
     for (i = 0; vec[i] != NULL; i++) {
@@ -693,7 +955,7 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     bufsize -= strtab - argbuf;
 
     /* Read argv */
-    len = ptrace_read_vec(pid, regs, argv_addr, argv, strtab, bufsize);
+    len = ptrace_read_vec(pid, regs, argv_addr, argc, argv, strtab, bufsize);
     if (len == (size_t)-1) {
 	sudo_debug_printf(
 	    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
@@ -704,7 +966,7 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     bufsize -= len;
 
     /* Read envp */
-    len = ptrace_read_vec(pid, regs, envp_addr, envp, strtab, bufsize);
+    len = ptrace_read_vec(pid, regs, envp_addr, envc, envp, strtab, bufsize);
     if (len == (size_t)-1) {
 	sudo_debug_printf(
 	    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
@@ -906,6 +1168,12 @@ exec_ptrace_seize(pid_t child)
     int ret = -1;
     int status;
     debug_decl(exec_ptrace_seize, SUDO_DEBUG_EXEC);
+
+#ifdef HAVE_PROCESS_VM_READV
+    page_size = sysconf(_SC_PAGESIZE);
+    if (page_size == (size_t)-1)
+	page_size = 4096;
+#endif
 
     /* Seize control of the child process. */
     if (ptrace(PTRACE_SEIZE, child, NULL, ptrace_opts) == -1) {
@@ -1314,7 +1582,7 @@ ptrace_verify_post_exec(pid_t pid, struct sudo_ptrace_regs *regs,
     bufsize -= strtab - argbuf;
 
     /* Read argv */
-    len = ptrace_read_vec(pid, regs, argv_addr, argv, strtab, bufsize);
+    len = ptrace_read_vec(pid, regs, argv_addr, argc, argv, strtab, bufsize);
     if (len == (size_t)-1) {
 	sudo_debug_printf(
 	    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
@@ -1325,7 +1593,7 @@ ptrace_verify_post_exec(pid_t pid, struct sudo_ptrace_regs *regs,
     bufsize -= len;
 
     /* Read envp */
-    len = ptrace_read_vec(pid, regs, envp_addr, envp, strtab, bufsize);
+    len = ptrace_read_vec(pid, regs, envp_addr, envc, envp, strtab, bufsize);
     if (len == (size_t)-1) {
 	sudo_debug_printf(
 	    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,

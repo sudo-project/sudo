@@ -17858,6 +17858,16 @@ fi
 		# The glibc closefrom() emulation may fail in chroot.
 		# We use our own closefrom() by default on Linux.
 		: ${ac_cv_func_closefrom='no'}
+
+		# Linux 3.2 supports reading/writing a another process
+		# without using ptrace(2).
+		ac_fn_c_check_func "$LINENO" "process_vm_readv" "ac_cv_func_process_vm_readv"
+if test "x$ac_cv_func_process_vm_readv" = xyes
+then :
+  printf "%s\n" "#define HAVE_PROCESS_VM_READV 1" >>confdefs.h
+
+fi
+
 		;;
     *-*-gnu*)
 		# lockf() is broken on the Hurd

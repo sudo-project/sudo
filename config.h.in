@@ -686,6 +686,9 @@
 /* Define to 1 if you have the `priv_set' function. */
 #undef HAVE_PRIV_SET
 
+/* Define to 1 if you have the `process_vm_readv' function. */
+#undef HAVE_PROCESS_VM_READV
+
 /* Define to 1 if you have the <procfs.h> header file. */
 #undef HAVE_PROCFS_H
 

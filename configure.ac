@@ -2087,6 +2087,10 @@ case "$host" in
 		# The glibc closefrom() emulation may fail in chroot.
 		# We use our own closefrom() by default on Linux.
 		: ${ac_cv_func_closefrom='no'}
+
+		# Linux 3.2 supports reading/writing a another process
+		# without using ptrace(2).
+		AC_CHECK_FUNCS([process_vm_readv])
 		;;
     *-*-gnu*)
 		# lockf() is broken on the Hurd
