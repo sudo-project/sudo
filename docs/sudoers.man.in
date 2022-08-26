@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "August 23, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "August 25, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3430,7 +3430,7 @@ proc(@mansectform@)
 file system is available.
 The additional overhead from
 \fIintercept_verify\fR
-can slow down intercept mode considerably for shell scripts that
+may add additional latency when running shell scripts that
 execute a large number of commands.
 This flag has no effect unless the
 \fIintercept\fR
@@ -6953,12 +6953,7 @@ do not is often unworkable.
 .TP 10n
 intercept
 .br
-Many systems that support shared libraries have the ability to
-override default library functions by pointing an environment
-variable (usually
-\fRLD_PRELOAD\fR)
-to an alternate shared library.
-On such systems,
+On most systems,
 \fBsudo\fR's
 \fIintercept\fR
 functionality can be used to transparently intercept an attempt to
@@ -6966,40 +6961,26 @@ run a new command, allow or deny it based on
 \fIsudoers\fR
 rules, and log the result.
 For example, this can be used to restrict the commands run from
-within a privileged shell.
-Note, however, that this applies only to dynamically-linked
-executables.
-It is not possible to intercept commands for statically-linked executables
-or executables that run under binary emulation.
-This implementation of the
-\fIintercept\fR
-functionality is incompatible with
-\fBsudo\fR's
-SELinux RBAC support (but see below).
-SELinux disables
-\fRLD_PRELOAD\fR
-by default and interferes with file descriptor inheritance.
+within a privileged shell or editor.
 .sp
-Linux systems that support
-seccomp(2)
-filtering can use a different method involving
-ptrace(2)
-instead of pre-loading a shared library.
-This method supports both static and dynamic executables as well as
-\fBsudo\fR's
-SELinux RBAC mode.
-Because it operates at the system call level, not the library function level,
-it is possible to intercept all calls to
-execve(2).
-Functions utilizing the
-execveat(2)
-system call, such as
-fexecve(3),
-are not currently intercepted.
-.sp
-The shared library-based
+There are two underlying mechanisms that may be used to implement
 \fIintercept\fR
-functionality only works for programs that use the
+mode:
+\fIdso\fR
+and
+\fItrace\fR.
+The
+\fIintercept_type\fR
+setting can be used to select between them.
+.sp
+The first mechanism,
+\fIdso\fR,
+overrides the standard C library functions that are used to execute a
+command.
+It does this by setting an environment variable (usually
+\fRLD_PRELOAD\fR)
+to the path of a dynamic shared object, or shared library,
+containing custom versions of the
 \fBexecl\fR(),
 \fBexecle\fR(),
 \fBexeclp\fR(),
@@ -7007,21 +6988,53 @@ functionality only works for programs that use the
 \fBexecve\fR(),
 \fBexecvp\fR(),
 \fBexecvpe\fR(),
-or
+and
 \fBsystem\fR()
-library functions to run the new command.
-This may be expanded in a future release of
-\fBsudo\fR.
+library functions that connect back to
+\fBsudo\fR
+for a policy decision.
+Note, however, that this applies only to dynamically-linked
+executables.
+It is not possible to intercept commands for statically-linked executables
+or executables that run under binary emulation this way.
 Because most dynamic loaders ignore
 \fRLD_PRELOAD\fR
 (or the equivalent) when running set-user-ID and set-group-ID programs,
 \fBsudoers\fR
 will not permit such programs to be run in
 \fIintercept\fR
-mode.
-The Linux
-seccomp(2)\-based
-implementation does not share these restrictions.
+mode by default.
+The
+\fIdso\fR
+mechanism is incompatible with
+\fBsudo\fR's
+SELinux RBAC support (but see below).
+SELinux disables
+\fRLD_PRELOAD\fR
+by default and interferes with file descriptor inheritance, which
+\fBsudo\fR
+relies on.
+.sp
+The second mechanism,
+\fItrace\fR,
+is available on Linux systems that support
+seccomp(2)
+filtering.
+It uses
+ptrace(2)
+and
+seccomp(2)
+to intercept the
+execve(2)
+system call instead of pre-loading a dynamic shared object.
+Both static and dynamic executables are supported and it is compatible with
+\fBsudo\fR's
+SELinux RBAC mode.
+Functions utilizing the
+execveat(2)
+system call, such as
+fexecve(3),
+are not currently intercepted.
 .sp
 The
 \fIintercept\fR
@@ -7029,11 +7042,7 @@ feature is known to work on Solaris, *BSD, Linux, macOS, HP-UX 11.x
 and AIX 5.3 and above.
 It should be supported on most operating systems that support the
 \fRLD_PRELOAD\fR
-environment variable.
-Check your operating system's manual pages for the dynamic linker
-(usually ld.so, ld.so.1, dyld, dld.sl, rld, or loader) to see if
-\fRLD_PRELOAD\fR
-is supported.
+environment variable or an equivalent.
 It is not possible to intercept shell built-in commands or restrict
 the ability to read or write sensitive files from within a shell.
 .sp
@@ -7073,8 +7082,9 @@ arguments in the program after the
 \fBsudoers\fR
 policy check has completed but before the new command is executed.
 Starting with version 1.9.12, the
-ptrace(2)
-method will verify that the command and its arguments have not changed after
+\fItrace\fR
+method will verify that the command and its arguments have not
+changed after
 execve(2)
 has completed but before execution of the new program has had a chance to run.
 This is not the case with the
