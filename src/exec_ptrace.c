@@ -343,6 +343,7 @@ ptrace_setregs(int pid, struct sudo_ptrace_regs *regs)
     debug_return_bool(true);
 }
 
+#ifdef HAVE_PROCESS_VM_READV
 /*
  * Read the string at addr and store in buf using process_vm_readv(2).
  * Returns the number of bytes stored, including the NUL.
@@ -395,6 +396,7 @@ ptrace_readv_string(pid_t pid, unsigned long addr, char *buf, size_t bufsize)
     }
     debug_return_ssize_t(-1);
 }
+#endif /* HAVE_PROCESS_VM_READV */
 
 /*
  * Read the string at addr and store in buf using ptrace(2).
