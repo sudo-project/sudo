@@ -364,6 +364,13 @@ ptrace_readv_string(pid_t pid, unsigned long addr, char *buf, size_t bufsize)
      * of the string, going one page at a time is simplest.
      */
     for (;;) {
+	if (bufsize == 0) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR,
+		"%s: %d: out of space reading string", __func__, (int)pid);
+	    errno = ENOSPC;
+	    debug_return_ssize_t(-1);
+	}
+
 	local.iov_base = buf;
 	local.iov_len = bufsize;
 	remote.iov_base = (void *)addr;
@@ -437,6 +444,7 @@ ptrace_read_string(pid_t pid, unsigned long addr, char *buf, size_t bufsize)
 	    if (bufsize == 0) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR,
 		    "%s: %d: out of space reading string", __func__, (int)pid);
+		errno = ENOSPC;
 		debug_return_ssize_t(-1);
 	    }
 	    *buf = cp[i];
@@ -449,31 +457,124 @@ ptrace_read_string(pid_t pid, unsigned long addr, char *buf, size_t bufsize)
 }
 
 /*
- * Read the string vector at addr and store in vec, which must have
- * sufficient space.  Strings are stored in buf.
+ * Expand buf by doubling its size.
+ * Updates bufp and bufsizep and recalculates curp and remp if non-NULL.
+ * Returns true on success, else false.
+ */
+static bool
+growbuf(char **bufp, size_t *bufsizep, char **curp, size_t *remp)
+{
+    const size_t oldsize = *bufsizep;
+    char *newbuf;
+    debug_decl(growbuf, SUDO_DEBUG_EXEC);
+
+    /* Double the size of the buffer. */
+    newbuf = reallocarray(*bufp, 2, oldsize);
+    if (newbuf == NULL) {
+       sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+       debug_return_bool(false);
+    }
+    if (curp != NULL)
+	*curp = newbuf + (*curp - *bufp);
+    if (remp != NULL)
+	*remp += oldsize;
+    *bufp = newbuf;
+    *bufsizep = 2 * oldsize;
+    debug_return_bool(true);
+}
+
+/*
+ * Build a NULL-terminated string vector from a string table.
+ * On success, returns number of bytes used for the vector and sets
+ * vecp to the start of the vector and countp to the number of elements
+ * (not including the NULL).  The buffer is resized as needed.
+ * Both vecp and its elements are stored as offsets into buf, not pointers.
+ * However, NULL is still stored as NULL.
+ * Returns (size_t)-1 on failure.
+ */
+static size_t
+strtab_to_vec(char *strtab, size_t strtab_len, int *countp, char ***vecp,
+    char **bufp, size_t *bufsizep, size_t remainder)
+{
+    char *strend = strtab + strtab_len;
+    char **vec, **vp;
+    int count = 0;
+    debug_decl(strtab_to_vec, SUDO_DEBUG_EXEC);
+
+    /* Store vector in buf after string table and make it aligned. */
+    while (remainder < 2 * sizeof(char *)) {
+	if (!growbuf(bufp, bufsizep, &strtab, &remainder))
+	    debug_return_ssize_t(-1);
+	strend = strtab + strtab_len;
+    }
+    vec = (char **)LONGALIGN(strend);
+    remainder -= (char *)vec - strend;
+
+    /* Fill in vector with the strings we read. */
+    for (vp = vec; strtab < strend; ) {
+	while (remainder < 2 * sizeof(char *)) {
+	    if (!growbuf(bufp, bufsizep, &strtab, &remainder))
+		debug_return_ssize_t(-1);
+	    strend = strtab + strtab_len;
+	    vec = (char **)LONGALIGN(strend);
+	    vp = vec + count;
+	}
+	/* Store offset into buf (not a pointer) in case of realloc(). */
+	*vp++ = (char *)(strtab - *bufp);
+	remainder -= sizeof(char *);
+	strtab = memchr(strtab, '\0', strend - strtab);
+	if (strtab == NULL)
+	    break;
+	strtab++;
+	count++;
+    }
+    *vp++ = NULL;		/* we always leave room for NULL */
+
+    *countp = count;
+    *vecp = (char **)((char *)vec - *bufp);
+
+    debug_return_size_t((char *)vp - strend);
+}
+
+/*
+ * Read the string vector at addr and store it in bufp, which
+ * is reallocated as needed.  The actual vector is returned in vecp.
+ * The count stored in countp does not include the terminating NULL pointer.
+ * The vecp and its contents are _offsets_, not pointers, in case the buffer
+ * gets reallocated later.  The caller is responsible for converting the
+ * offsets into pointers based on the buffer before using.
  * Returns the number of bytes in buf consumed (including NULs).
  */
 static size_t
 ptrace_read_vec(pid_t pid, struct sudo_ptrace_regs *regs, unsigned long addr,
-    int count, char **vec, char *buf, size_t bufsize)
+    int *countp, char ***vecp, char **bufp, size_t *bufsizep, size_t off)
 {
 # ifdef SECCOMP_AUDIT_ARCH_COMPAT
     unsigned long next_word = -1;
 # endif
+    size_t remainder = *bufsizep - off;
+    char *strtab = *bufp + off;
     unsigned long word;
-    char *buf0 = buf;
-    int i, len = 0;
-    size_t slen;
+    size_t len, strtab_len;
     debug_decl(ptrace_read_vec, SUDO_DEBUG_EXEC);
 
     /* Treat a NULL vector as empty, thanks Linux. */
     if (addr == 0) {
-	vec[0] = NULL;
-	debug_return_size_t(0);
+	char **vp;
+
+	while (remainder < 2 * sizeof(char *)) {
+	    if (!growbuf(bufp, bufsizep, &strtab, &remainder))
+		debug_return_ssize_t(-1);
+	}
+	vp = (char **)LONGALIGN(strtab);
+	*vecp = (char **)((char *)vp - *bufp);
+	*countp = 0;
+	*vp++ = NULL;
+	debug_return_size_t((char *)vp - strtab);
     }
 
-    /* Fill in vector. */
-    for (i = 0; i <= count; i++) {
+    /* Fill in string table. */
+    do {
 # ifdef SECCOMP_AUDIT_ARCH_COMPAT
 	if (next_word == (unsigned long)-1) {
 	    word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
@@ -501,75 +602,34 @@ ptrace_read_vec(pid_t pid, struct sudo_ptrace_regs *regs, unsigned long addr,
 		__func__, (int)pid, addr);
 	    debug_return_ssize_t(-1);
 	case 0:
-	    vec[len] = NULL;
-	    debug_return_size_t(buf - buf0);
+	    /* NULL terminator */
+	    break;
 	default:
-	    slen = ptrace_read_string(pid, word, buf, bufsize);
-	    if (slen == (size_t)-1)
-		debug_return_ssize_t(-1);
-	    vec[len++] = buf;
-	    buf += slen;
-	    bufsize -= slen;
-	    addr += regs->wordsize;
-	    continue;
-	}
-    }
-    errno = ENOSPC;
-    debug_return_ssize_t(-1);
-}
-
-/*
- * Return the length of the string vector at addr or -1 on error.
- */
-static int
-ptrace_get_vec_len(pid_t pid, struct sudo_ptrace_regs *regs, unsigned long addr)
-{
-# ifdef SECCOMP_AUDIT_ARCH_COMPAT
-    unsigned long next_word = -1;
-# endif
-    unsigned long word;
-    int len = 0;
-    debug_decl(ptrace_get_vec_len, SUDO_DEBUG_EXEC);
-
-    /* Treat a NULL vector as empty, thanks Linux. */
-    if (addr == 0)
-	debug_return_int(0);
-
-    for (;;) {
-# ifdef SECCOMP_AUDIT_ARCH_COMPAT
-	if (next_word == (unsigned long)-1) {
-	    word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
-	    if (regs->compat) {
-		/* Stash the next compat word in next_word. */
-#  if BYTE_ORDER == BIG_ENDIAN
-		next_word = word & 0xffffffffU;
-		word >>= 32;
-#  else
-		next_word = word >> 32;
-		word &= 0xffffffffU;
-#  endif
+	    for (;;) {
+		len = ptrace_read_string(pid, word, strtab, remainder);
+		if (len != (size_t)-1)
+		    break;
+		if (errno != ENOSPC)
+		    debug_return_ssize_t(-1);
+		if (!growbuf(bufp, bufsizep, &strtab, &remainder))
+		    debug_return_ssize_t(-1);
 	    }
-	} else {
-	    /* Use the stashed value of the next word. */
-	    word = next_word;
-	    next_word = (unsigned long)-1;
-	}
-# else /* SECCOMP_AUDIT_ARCH_COMPAT */
-	word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
-# endif /* SECCOMP_AUDIT_ARCH_COMPAT */
-	switch (word) {
-	case -1:
-	    sudo_warn("%s: ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
-		__func__, (int)pid, addr);
-	    debug_return_int(-1);
-	case 0:
-	    debug_return_int(len);
-	default:
-	    len++;
+	    strtab += len;
+	    remainder -= len;
 	    addr += regs->wordsize;
 	    continue;
 	}
-    }
+    } while (word != 0);
+
+    /* Store strings in a vector after the string table. */
+    strtab_len = strtab - (*bufp + off);
+    strtab = *bufp + off;
+    len = strtab_to_vec(strtab, strtab_len, countp, vecp, bufp, bufsizep,
+	remainder);
+    if (len == (size_t)-1)
+	debug_return_ssize_t(-1);
+
+    debug_return_size_t(strtab_len + len);
 }
 
 #ifdef HAVE_PROCESS_VM_READV
@@ -884,11 +944,11 @@ ptrace_write_vec(pid_t pid, struct sudo_ptrace_regs *regs, char **vec,
  * Returns true on success, else false.
  */
 static bool
-read_proc_link(pid_t pid, const char *name, char *buf, size_t bufsize)
+proc_read_link(pid_t pid, const char *name, char *buf, size_t bufsize)
 {
     size_t len;
     char path[PATH_MAX];
-    debug_decl(read_proc_link, SUDO_DEBUG_EXEC);
+    debug_decl(proc_read_link, SUDO_DEBUG_EXEC);
 
     len = snprintf(path, sizeof(path), "/proc/%d/%s", (int)pid, name);
     if (len < sizeof(path)) {
@@ -910,14 +970,13 @@ static char *
 get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     int *argc_out, char ***argv_out, int *envc_out, char ***envp_out)
 {
-    char *strtab, *pathname, **argv, **envp, *argbuf = NULL;
+    char *pathname, **argv, **envp, *argbuf = NULL;
     unsigned long path_addr, argv_addr, envp_addr;
-    int argc, envc, extra = 0;
-    size_t bufsize, len;
+    size_t bufsize, len, off = 0;
+    int i, argc, envc = 0;
     debug_decl(get_execve_info, SUDO_DEBUG_EXEC);
 
-    /* XXX - Linux allows this to be bigger, see execve(2). */
-    bufsize = arg_max + PATH_MAX;
+    bufsize = PATH_MAX + arg_max;
     argbuf = malloc(bufsize);
     if (argbuf == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -932,62 +991,60 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
 	"%s: %d: path 0x%lx, argv 0x%lx, envp 0x%lx", __func__,
 	(int)pid, path_addr, argv_addr, envp_addr);
 
-    /* Count argv and envp. */
-    argc = ptrace_get_vec_len(pid, regs, argv_addr);
-    envc = ptrace_get_vec_len(pid, regs, envp_addr);
-    if (argc == -1 || envc == -1)
-	goto bad;
-
-    /* If argv is empty, reserve an extra slot for the command. */
-    if (argc == 0)
-	extra++;
-
-    /* Reserve argv and envp at the start of argbuf so they are aligned. */
-    if ((argc + extra + 1 + envc + 1) * sizeof(unsigned long) >= bufsize) {
-	sudo_warnx("%s", U_("insufficient space for execve arguments"));
-	errno = ENOMEM;
-	goto bad;
-    }
-    argv = (char **)argbuf;
-    envp = argv + argc + extra + 1;
-    strtab = (char *)(envp + envc + 1);
-    bufsize -= strtab - argbuf;
-
-    /* Read argv */
-    len = ptrace_read_vec(pid, regs, argv_addr, argc, argv, strtab, bufsize);
-    if (len == (size_t)-1) {
-	sudo_debug_printf(
-	    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to read execve argv for process %d", (int)pid);
-	goto bad;
-    }
-    strtab += len;
-    bufsize -= len;
-
-    /* Read envp */
-    len = ptrace_read_vec(pid, regs, envp_addr, envc, envp, strtab, bufsize);
-    if (len == (size_t)-1) {
-	sudo_debug_printf(
-	    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to read execve envp for process %d", (int)pid);
-	goto bad;
-    }
-    strtab += len;
-    bufsize -= len;
-
     /* Read the pathname. */
     if (path_addr == 0) {
 	/* execve(2) will fail with EINVAL */
 	pathname = NULL;
     } else {
-	len = ptrace_read_string(pid, path_addr, strtab, bufsize);
+	len = ptrace_read_string(pid, path_addr, argbuf, bufsize);
 	if (len == (size_t)-1) {
 	    sudo_debug_printf(
 		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 		"unable to read execve pathname for process %d", (int)pid);
 	    goto bad;
 	}
-	pathname = strtab;
+	pathname = argbuf;
+	off = len;
+    }
+
+    /* Read argv */
+    len = ptrace_read_vec(pid, regs, argv_addr, &argc, &argv, &argbuf,
+	&bufsize, off);
+    if (len == (size_t)-1) {
+	sudo_debug_printf(
+	    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to read execve argv for process %d", (int)pid);
+	goto bad;
+    }
+    off += len;
+
+    if (argc == 0) {
+	/* Reserve an extra slot so we can store argv[0]. */
+	while (bufsize - off < sizeof(char *)) {
+	    if (!growbuf(&argbuf, &bufsize, NULL, NULL))
+		goto bad;
+	}
+	off += sizeof(char *);
+    }
+
+    /* Read envp */
+    len = ptrace_read_vec(pid, regs, envp_addr, &envc, &envp, &argbuf,
+	&bufsize, off);
+    if (len == (size_t)-1) {
+	sudo_debug_printf(
+	    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to read execve envp for process %d", (int)pid);
+	goto bad;
+    }
+
+    /* Convert offsets in argv and envp to pointers. */
+    argv = (char **)(argbuf + (unsigned long)argv);
+    for (i = 0; i < argc; i++) {
+	argv[i] = argbuf + (unsigned long)argv[i];
+    }
+    envp = (char **)(argbuf + (unsigned long)envp);
+    for (i = 0; i < envc; i++) {
+	envp[i] = argbuf + (unsigned long)envp[i];
     }
 
     sudo_debug_execve(SUDO_DEBUG_DIAG, pathname, argv, envp);
@@ -1362,18 +1419,18 @@ done:
 }
 
 static size_t
-read_proc_vec(pid_t pid, const char *name, int *countp, char ***vecp,
+proc_read_vec(pid_t pid, const char *name, int *countp, char ***vecp,
     char **bufp, size_t *bufsizep, size_t off)
 {
     size_t remainder = *bufsizep - off;
+    size_t len, strtab_len;
     char path[PATH_MAX], *strtab = *bufp + off;
-    char *strend, **vec, **vp;
-    int count = 0, fd, len;
+    int fd;
     ssize_t nread;
-    debug_decl(read_proc_vec, SUDO_DEBUG_EXEC);
+    debug_decl(proc_read_vec, SUDO_DEBUG_EXEC);
 
     len = snprintf(path, sizeof(path), "/proc/%d/%s", (int)pid, name);
-    if (len < 0 || len >= ssizeof(path))
+    if (len >= sizeof(path))
 	debug_return_ssize_t(-1);
 
     fd = open(path, O_RDONLY);
@@ -1392,8 +1449,10 @@ read_proc_vec(pid_t pid, const char *name, int *countp, char ***vecp,
 	strtab += nread;
 	remainder -= nread;
 	if (remainder < sizeof(char *)) {
-	    close(fd);
-	    debug_return_ssize_t(-1);
+	    while (!growbuf(bufp, bufsizep, &strtab, &remainder)) {
+		close(fd);
+		debug_return_ssize_t(-1);
+	    }
 	}
     } while (nread != 0);
     close(fd);
@@ -1403,31 +1462,16 @@ read_proc_vec(pid_t pid, const char *name, int *countp, char ***vecp,
 	strtab--;
 	remainder++;
     }
-    strend = strtab;
 
-    /* Store vector in buf after string table and make it aligned. */
-    vec = (char **)LONGALIGN(strtab);
+    /* Store strings in a vector after the string table. */
+    strtab_len = strtab - (*bufp + off);
+    strtab = *bufp + off;
+    len = strtab_to_vec(strtab, strtab_len, countp, vecp, bufp, bufsizep,
+	remainder);
+    if (len == (size_t)-1)
+	debug_return_ssize_t(-1);
 
-    /* Fill in vector with the strings we read. */
-    for (strtab = *bufp + off, vp = vec; strtab < strend; ) {
-	if (remainder < 2 * sizeof(char *)) {
-	    close(fd);
-	    debug_return_ssize_t(-1);
-	}
-	*vp++ = strtab;
-	remainder -= sizeof(char *);
-	strtab = memchr(strtab, '\0', strend - strtab);
-	if (strtab == NULL)
-	    break;
-	strtab++;
-	count++;
-    }
-    *vp++ = NULL;		/* we always leave room for NULL */
-
-    *countp = count;
-    *vecp = vec;
-
-    debug_return_size_t((char *)vp - *bufp - off);
+    debug_return_size_t(strtab_len + len);
 }
 
 /*
@@ -1548,7 +1592,7 @@ ptrace_verify_post_exec(pid_t pid, struct sudo_ptrace_regs *regs,
     char pathname[PATH_MAX];
     sigset_t chldmask;
     bool ret = false;
-    int argc, envc, status;
+    int argc, envc, i, status;
     size_t bufsize, len;
     debug_decl(ptrace_verify_post_exec, SUDO_DEBUG_EXEC);
 
@@ -1577,7 +1621,7 @@ ptrace_verify_post_exec(pid_t pid, struct sudo_ptrace_regs *regs,
     }
 
     /* Get the executable path. */
-    if (!read_proc_link(pid, "exe", pathname, sizeof(pathname))) {
+    if (!proc_read_link(pid, "exe", pathname, sizeof(pathname))) {
 	/* Missing /proc file system is not a fatal error. */
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "%s: unable to read /proc/%d/exe",
 	    __func__, (int)pid);
@@ -1588,7 +1632,6 @@ ptrace_verify_post_exec(pid_t pid, struct sudo_ptrace_regs *regs,
 	(int)pid, pathname);
 
     /* Allocate a single buffer for argv, envp and their strings. */
-    /* XXX - Linux allows this to be bigger, see execve(2). */
     bufsize = arg_max;
     argbuf = malloc(bufsize);
     if (argbuf == NULL) {
@@ -1596,7 +1639,7 @@ ptrace_verify_post_exec(pid_t pid, struct sudo_ptrace_regs *regs,
 	goto done;
     }
 
-    len = read_proc_vec(pid, "cmdline", &argc, &argv, &argbuf, &bufsize, 0);
+    len = proc_read_vec(pid, "cmdline", &argc, &argv, &argbuf, &bufsize, 0);
     if (len == (size_t)-1) {
 	sudo_debug_printf(
 	    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
@@ -1604,12 +1647,22 @@ ptrace_verify_post_exec(pid_t pid, struct sudo_ptrace_regs *regs,
 	goto done;
     }
 
-    len = read_proc_vec(pid, "environ", &envc, &envp, &argbuf, &bufsize, len);
+    len = proc_read_vec(pid, "environ", &envc, &envp, &argbuf, &bufsize, len);
     if (len == (size_t)-1) {
 	sudo_debug_printf(
 	    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to read execve envp for process %d", (int)pid);
 	goto done;
+    }
+
+    /* Convert offsets in argv and envp to pointers. */
+    argv = (char **)(argbuf + (unsigned long)argv);
+    for (i = 0; i < argc; i++) {
+	argv[i] = argbuf + (unsigned long)argv[i];
+    }
+    envp = (char **)(argbuf + (unsigned long)envp);
+    for (i = 0; i < envc; i++) {
+	envp[i] = argbuf + (unsigned long)envp[i];
     }
 
     ret = execve_args_match(pathname, argc, argv, envc, envp, true, closure);
@@ -1708,7 +1761,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     }
 
     /* Get the current working directory and execve info. */
-    if (!read_proc_link(pid, "cwd", cwd, sizeof(cwd)))
+    if (!proc_read_link(pid, "cwd", cwd, sizeof(cwd)))
 	(void)strlcpy(cwd, "unknown", sizeof(cwd));
     buf = get_execve_info(pid, &regs, &pathname, &argc, &argv,
 	&envc, &envp);
