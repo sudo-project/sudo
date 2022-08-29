@@ -28,6 +28,7 @@
 
 #include <ctype.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <limits.h>
 #include <signal.h>
 #if defined(HAVE_STDINT_H)
@@ -68,6 +69,7 @@ static int seccomp_trap_supported = -1;
 #ifdef HAVE_PROCESS_VM_READV
 static size_t page_size;
 #endif
+static size_t arg_max;
 
 /* Register getters and setters. */
 # ifdef SECCOMP_AUDIT_ARCH_COMPAT
@@ -915,12 +917,7 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     debug_decl(get_execve_info, SUDO_DEBUG_EXEC);
 
     /* XXX - Linux allows this to be bigger, see execve(2). */
-    bufsize = sysconf(_SC_ARG_MAX);
-    if (bufsize == (size_t)-1) {
-	sudo_warnx(U_("%s: %s"), __func__, "sysconf");
-	goto bad;
-    }
-    bufsize += PATH_MAX;
+    bufsize = arg_max + PATH_MAX;
     argbuf = malloc(bufsize);
     if (argbuf == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -1176,6 +1173,9 @@ exec_ptrace_seize(pid_t child)
     if (page_size == (size_t)-1)
 	page_size = 4096;
 #endif
+    arg_max = sysconf(_SC_ARG_MAX);
+    if (arg_max == (size_t)-1)
+	arg_max = 128 * 1024;
 
     /* Seize control of the child process. */
     if (ptrace(PTRACE_SEIZE, child, NULL, ptrace_opts) == -1) {
@@ -1361,6 +1361,75 @@ done:
     debug_return_int((int)(argv - orig_argv));
 }
 
+static size_t
+read_proc_vec(pid_t pid, const char *name, int *countp, char ***vecp,
+    char **bufp, size_t *bufsizep, size_t off)
+{
+    size_t remainder = *bufsizep - off;
+    char path[PATH_MAX], *strtab = *bufp + off;
+    char *strend, **vec, **vp;
+    int count = 0, fd, len;
+    ssize_t nread;
+    debug_decl(read_proc_vec, SUDO_DEBUG_EXEC);
+
+    len = snprintf(path, sizeof(path), "/proc/%d/%s", (int)pid, name);
+    if (len < 0 || len >= ssizeof(path))
+	debug_return_ssize_t(-1);
+
+    fd = open(path, O_RDONLY);
+    if (fd == -1)
+	debug_return_ssize_t(-1);
+
+    /* Read in strings until EOF. */
+    do {
+	nread = read(fd, strtab, remainder);
+	if (nread == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		"%s: unable to read %s", __func__, path);
+	    close(fd);
+	    debug_return_ssize_t(-1);
+	}
+	strtab += nread;
+	remainder -= nread;
+	if (remainder < sizeof(char *)) {
+	    close(fd);
+	    debug_return_ssize_t(-1);
+	}
+    } while (nread != 0);
+    close(fd);
+
+    /* Trim off the extra NUL byte at the end of the string table. */
+    if (strtab - *bufp >= 2 && strtab[-1] == '\0' && strtab[-2] == '\0') {
+	strtab--;
+	remainder++;
+    }
+    strend = strtab;
+
+    /* Store vector in buf after string table and make it aligned. */
+    vec = (char **)LONGALIGN(strtab);
+
+    /* Fill in vector with the strings we read. */
+    for (strtab = *bufp + off, vp = vec; strtab < strend; ) {
+	if (remainder < 2 * sizeof(char *)) {
+	    close(fd);
+	    debug_return_ssize_t(-1);
+	}
+	*vp++ = strtab;
+	remainder -= sizeof(char *);
+	strtab = memchr(strtab, '\0', strend - strtab);
+	if (strtab == NULL)
+	    break;
+	strtab++;
+	count++;
+    }
+    *vp++ = NULL;		/* we always leave room for NULL */
+
+    *countp = count;
+    *vecp = vec;
+
+    debug_return_size_t((char *)vp - *bufp - off);
+}
+
 /*
  * Check if the execve(2) arguments match the contents of closure.
  * Returns true if they match, else false.
@@ -1475,8 +1544,7 @@ static bool
 ptrace_verify_post_exec(pid_t pid, struct sudo_ptrace_regs *regs,
     struct intercept_closure *closure)
 {
-    unsigned long argv_addr, envp_addr, sp, word;
-    char **argv, **envp, *strtab, *argbuf = NULL;
+    char **argv, **envp, *argbuf = NULL;
     char pathname[PATH_MAX];
     sigset_t chldmask;
     bool ret = false;
@@ -1519,91 +1587,30 @@ ptrace_verify_post_exec(pid_t pid, struct sudo_ptrace_regs *regs,
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %d: verify %s", __func__,
 	(int)pid, pathname);
 
-    /*
-     * Update the registers to get the new stack pointer.
-     * We don't know whether this is a native or compat executable
-     * so ask ptrace_getregs() to figure it out for us (if it can).
-     */
-    if (!ptrace_getregs(pid, regs, -1)) {
-	sudo_warn(U_("unable to get registers for process %d"), (int)pid);
-	goto done;
-    }
-    sp = get_stack_pointer(regs);
-    if (sp == 0) {
-	sudo_warnx(U_("invalid stack pointer for process %d"), (int)pid);
-	goto done;
-    }
-
-    /*
-     * We assume the initial stack layout is as follows:
-     *	argc: sp
-     *	argv: sp + wordsize
-     *	envp: sp + wordsize + (argc * wordsize)
-     */
-
-    /* Read argc, first address on the stack. */
-    word = ptrace(PTRACE_PEEKDATA, pid, sp, NULL);
-    if (word == (unsigned long)-1) {
-	sudo_warn("%s: ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)",
-	    __func__, (int)pid, sp);
-	goto done;
-    }
-    argc = (int)word;
-
-    /* argv follows argc, followed by envp. */
-    sp += regs->wordsize;
-    argv_addr = sp;
-    sp += regs->wordsize * (argc + 1);
-    envp_addr = sp;
-
-    /* Count the number of entries in envp for easy copying. */
-    envc = ptrace_get_vec_len(pid, regs, envp_addr);
-    if (envc == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR,
-	    "%s: %d unable to get length of environment", __func__, (int)pid);
-	goto done;
-    }
-
     /* Allocate a single buffer for argv, envp and their strings. */
     /* XXX - Linux allows this to be bigger, see execve(2). */
-    bufsize = sysconf(_SC_ARG_MAX);
-    if (bufsize == (size_t)-1) {
-	sudo_warnx(U_("%s: %s"), __func__, "sysconf");
-	goto done;
-    }
+    bufsize = arg_max;
     argbuf = malloc(bufsize);
     if (argbuf == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
     }
 
-    /* Reserve argv and envp at the start of argbuf so they are aligned. */
-    argv = (char **)argbuf;
-    envp = argv + argc + 1;
-    strtab = (char *)(envp + envc + 1);
-    bufsize -= strtab - argbuf;
-
-    /* Read argv */
-    len = ptrace_read_vec(pid, regs, argv_addr, argc, argv, strtab, bufsize);
+    len = read_proc_vec(pid, "cmdline", &argc, &argv, &argbuf, &bufsize, 0);
     if (len == (size_t)-1) {
 	sudo_debug_printf(
 	    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to read execve argv for process %d", (int)pid);
 	goto done;
     }
-    strtab += len;
-    bufsize -= len;
 
-    /* Read envp */
-    len = ptrace_read_vec(pid, regs, envp_addr, envc, envp, strtab, bufsize);
+    len = read_proc_vec(pid, "environ", &envc, &envp, &argbuf, &bufsize, len);
     if (len == (size_t)-1) {
 	sudo_debug_printf(
 	    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to read execve envp for process %d", (int)pid);
 	goto done;
     }
-    strtab += len;
-    bufsize -= len;
 
     ret = execve_args_match(pathname, argc, argv, envc, envp, true, closure);
     if (!ret) {
