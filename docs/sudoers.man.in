@@ -2023,6 +2023,11 @@ and logged just like they would be if run through
 directly.
 This is useful in conjunction with commands that allow shell escapes
 such as editors, shells, and paginators.
+There is additional overhead due to the policy check that may add
+latency when running commands such as shell scripts that execute a
+large number of sub-commands.
+For interactive commands, such as a shell or editor,
+the overhead is not usually noticable.
 .sp
 In the following example, user
 \fBchuck\fR
@@ -3428,10 +3433,6 @@ policy check.
 The checks can only be performed if the
 proc(@mansectform@)
 file system is available.
-The additional overhead from
-\fIintercept_verify\fR
-may add additional latency when running shell scripts that
-execute a large number of commands.
 This flag has no effect unless the
 \fIintercept\fR
 flag is enabled or the
