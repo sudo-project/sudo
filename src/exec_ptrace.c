@@ -1713,6 +1713,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     }
 
     /* Get the registers. */
+    memset(&regs, 0, sizeof(regs));
     if (!ptrace_getregs(pid, &regs, msg)) {
 	sudo_warn(U_("unable to get registers for process %d"), (int)pid);
 	debug_return_bool(false);
