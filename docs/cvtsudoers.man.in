@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "CVTSUDOERS" "1" "February 16, 2022" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
+.TH "CVTSUDOERS" "1" "August 31, 2022" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -522,6 +522,445 @@ command line option.
 .PP
 Options on the command line will override values from the
 configuration file.
+.SS "JSON output format"
+The
+\fIsudoers\fR
+JSON format may contain any of the following top-level objects:
+.TP 6n
+Defaults
+An array of objects, each containing an
+\fIOptions\fR
+array and an optional
+\fIBinding\fR
+array.
+Each object contains a
+\(lqname:value\(rq
+pair and an optional
+\fInegated\fR
+entry, which will negate any comparison performed with the object.
+If a
+\fIBinding\fR
+is present, the setting will only take effect if one of the specified
+\fIcommand\fR,
+\fIhostname\fR,
+\fIusergid\fR,
+\fIusergroup\fR,
+\fIuserid\fR,
+\fIusername\fR,
+or alias entries match.
+.sp
+For example:
+.nf
+.sp
+.RS 6n
+"Defaults": [
+    {
+        "Binding": [
+            { "hostname": "somehost" }
+        ],
+        "Options": [
+            { "set_home": true }
+        ]
+    }
+]
+.RE
+.fi
+.RS 6n
+.sp
+will enable the
+\fIset_home\fR
+option when the local host name matches
+\fIsomehost\fR.
+.RE
+.TP 6n
+User_Aliases
+A JSON object containing one or more
+\fIsudoers\fR
+User_Alias entries where each named alias has as its value an array
+containing one or more objects.
+Each object contains a
+\(lqname:value\(rq
+pair and an optional
+\fInegated\fR
+entry, which will negate any comparison performed with the object.
+The name may be one of
+\fInetgroup\fR,
+\fInonunixgid\fR,
+\fInonunixgroup\fR,
+\fIuseralias\fR,
+\fIusergid\fR,
+\fIusergroup\fR,
+\fIuserid\fR,
+or
+\fIusername\fR.
+.sp
+For example:
+.nf
+.sp
+.RS 6n
+"User_Aliases": {
+    "SYSADMIN": [
+        { "username": "will" },
+        { "usergroup": "wheel" },
+        { "netgroup": "admin" }
+    ]
+}
+.RE
+.fi
+.RS 6n
+.sp
+will define a
+\fIUser_Alias\fR
+named SYSADMIN that contains the user
+\(lqwill\(rq,
+the Unix group
+\(lqwheel\(rq,
+and the netgroup
+\(lqadmin\(rq.
+.RE
+.TP 6n
+Runas_Aliases
+A JSON object containing one or more
+\fIsudoers\fR
+Runas_Alias entries, where each named alias has as its value an array
+containing one or more objects.
+Each object contains a
+\(lqname:value\(rq
+pair and an optional
+\fInegated\fR
+entry, which will negate any comparison performed with the object.
+The name may be one of
+\fInetgroup\fR,
+\fInonunixgid\fR,
+\fInonunixgroup\fR,
+\fIrunasalias\fR,
+\fIusergid\fR,
+\fIusergroup\fR,
+\fIuserid\fR,
+or
+\fIusername\fR.
+.sp
+For example:
+.nf
+.sp
+.RS 6n
+"Runas_Aliases": {
+    "DB": [
+        { "username": "oracle" },
+        { "username": "sybase" }
+    ],
+    "OP": [
+        { "username": "root" },
+        { "username": "operator" }
+    ]
+}
+.RE
+.fi
+.RS 6n
+.sp
+will define two
+\fIRunas_Alias\fR
+entries:
+\(lqDB\(rq
+and
+\(lqOP\(rq.
+.RE
+.TP 6n
+Host_Aliases
+A JSON object containing one or more
+\fIsudoers\fR
+Host_Alias entries where each named alias has as its value an array
+containing one or more objects.
+Each object contains a
+\(lqname:value\(rq
+pair and an optional
+\fInegated\fR
+entry, which will negate any comparison performed with the object.
+The name may be one of
+\fIhostalias\fR,
+\fIhostname\fR,
+\fInetgroup\fR,
+or
+\fInetworkaddr\fR.
+.sp
+For example:
+.nf
+.sp
+.RS 6n
+"Host_Aliases": {
+    "DORMNET": [
+        { "networkaddr": "128.138.243.0" },
+        { "networkaddr": "128.138.204.0/24" }
+    ],
+    "SERVERS": [
+        { "hostname": "boulder" },
+        { "hostname": "refuge" }
+    ]
+}
+.RE
+.fi
+.TP 6n
+Cmnd_Aliases
+A JSON object containing one or more
+\fIsudoers\fR
+Cmnd_Alias entries where each named alias has as its value an array
+containing one or more objects.
+Each object contains a
+\(lqname:value\(rq
+pair and an optional
+\fInegated\fR
+entry, which will negate any comparison performed with the object.
+The name may be either another
+\fIcmndalias\fR
+or a
+\fIcommand\fR.
+For example:
+.nf
+.sp
+.RS 6n
+"Cmnd_Aliases": {
+    "SHELLS": [
+        { "command": "/bin/bash" },
+        { "command": "/bin/csh" },
+        { "command": "/bin/sh" },
+        { "command": "/bin/zsh" }
+    ],
+    "VIPW": [
+        { "command": "/usr/bin/chpass" },
+        { "command": "/usr/bin/chfn" },
+        { "command": "/usr/bin/chsh" },
+        { "command": "/usr/bin/passwd" },
+        { "command": "/usr/sbin/vigr" },
+        { "command": "/usr/sbin/vipw" }
+    ]
+}
+.RE
+.fi
+.TP 6n
+User_Specs
+A JSON array containing one or more objects, each representing a
+\fIsudoers\fR
+User_Spec.
+Each object in the
+\fIUser_Specs\fR
+array should contain a
+\fIUser_List\fR
+array, a
+\fIHost_List\fR
+array and a
+\fICmnd_Specs\fR
+array.
+.sp
+A
+\fIUser_List\fR
+consists of one or more objects.
+Each object contains a
+\(lqname:value\(rq
+pair and an optional
+\fInegated\fR
+entry, which will negate any comparison performed with the object.
+The name may be one of
+\fInetgroup\fR,
+\fInonunixgid\fR,
+\fInonunixgroup\fR,
+\fIuseralias\fR,
+\fIusergid\fR,
+\fIusergroup\fR,
+\fIuserid\fR,
+or
+\fIusername\fR.
+If
+\fIusername\fR
+is set to the special value
+\fBALL\fR,
+it will match any user.
+.sp
+A
+\fIHost_List\fR
+consists of one or more objects.
+Each object contains a
+\(lqname:value\(rq
+pair and an optional
+\fInegated\fR
+entry, which will negate any comparison performed with the object.
+The name may be one of
+\fIhostalias\fR,
+\fIhostname\fR,
+\fInetgroup\fR,
+or
+\fInetworkaddr\fR.
+If
+\fIhostname\fR
+is set to the special value
+\fBALL\fR,
+it will match any host.
+.sp
+The
+\fICmnd_Specs\fR
+array consists of one or more JSON objects describing a command that
+may be run.
+Each
+\fICmnd_Specs\fR
+is made up of a
+\fICommands\fR
+array, an optional
+\fIrunasusers\fR
+array, an optional
+\fIrunasgroups\fR
+array, and an optional
+\fIOptions array.\fR
+.sp
+The
+\fICommands\fR
+array consists of one or more objects containing
+\(lqname:value\(rq
+pair elements.
+The following names and values are supported:
+.PP
+.RS 6n
+.PD 0
+.TP 10n
+command
+A string containing the command to run.
+The special value
+\fBALL\fR
+it will match any command.
+.PD
+.TP 10n
+negated
+A boolean value that, if true, will negate any comparison performed
+with the object.
+.TP 10n
+sha224
+A string containing the SHA224 digest of the
+\fIcommand\fR.
+.TP 10n
+sha256
+A string containing the SHA256 digest of the
+\fIcommand\fR.
+.TP 10n
+sha384
+A string containing the SHA384 digest of the
+\fIcommand\fR.
+.TP 10n
+sha512
+A string containing the SHA512 digest of the
+\fIcommand\fR.
+.PP
+The
+\fIrunasusers\fR
+array consists of objects describing users the command may be run as.
+Each object contains a
+\(lqname:value\(rq
+pair and an optional
+\fInegated\fR
+entry, which will negate any comparison performed with the object.
+The name may be one of
+\fInetgroup\fR,
+\fInonunixgid\fR,
+\fInonunixgroup\fR,
+\fIrunasalias\fR,
+\fIusergid\fR,
+\fIusergroup\fR,
+\fIuserid\fR,
+or
+\fIusername\fR.
+If
+\fIusername\fR
+is set to the special value
+\fBALL\fR,
+it will match any user.
+If
+\fIusername\fR
+is set to the empty string
+\(lq\(rq,
+it will match the invoking user.
+.sp
+The
+\fIrunasgroups\fR
+array consists of objects describing groups the command may be run as.
+Each object contains a
+\(lqname:value\(rq
+pair and an optional
+\fInegated\fR
+entry, which will negate any comparison performed with the object.
+The name may be one of
+\fIrunasalias\fR,
+\fIusergid\fR,
+or
+\fIusergroup\fR.
+If
+\fIusergroup\fR
+is set to the special value
+\fBALL\fR,
+it will match any group.
+.sp
+The
+\fIOptions\fR
+array is of the same format as the one in the
+\fIDefaults\fR
+object.
+Any
+\fITag_Spec\fR
+entries in
+\fIsudoers\fR
+are converted to
+\fIOptions\fR.
+A user with
+\(lqsudo ALL\(rq
+privileges will automatically have the
+\fIsetenv\fR
+option enabled to match the implicit behavior provided by
+\fIsudoers\fR.
+.sp
+For example, the following
+\fIsudoers\fR
+entry:
+.nf
+.sp
+.RS 6n
+millert ALL = (ALL : ALL) NOPASSWD: ALL, !/usr/bin/id
+.RE
+.fi
+.sp
+converts to:
+.nf
+.sp
+.RS 6n
+"User_Specs": [
+    {
+        "User_List": [
+            { "username": "millert" }
+        ],
+        "Host_List": [
+            { "hostname": "ALL" }
+        ],
+        "Cmnd_Specs": [
+            {
+                "runasusers": [
+                    { "username": "ALL" }
+                ],
+                "runasgroups": [
+                    { "usergroup": "ALL" }
+                ],
+                "Options": [
+                    { "authenticate": false },
+                    { "setenv": true }
+                ],
+                "Commands": [
+                    { "command": "ALL" },
+                    {
+                        "command": "/usr/bin/id",
+                        "negated": true
+                    }
+                ]
+            }
+        ]
+    }
+]
+.RE
+.fi
+.RE
 .SH "FILES"
 .TP 26n
 \fI@sysconfdir@/cvtsudoers.conf\fR

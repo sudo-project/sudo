@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 16, 2022
+.Dd August 31, 2022
 .Dt CVTSUDOERS 1
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -454,6 +454,405 @@ command line option.
 .Pp
 Options on the command line will override values from the
 configuration file.
+.Ss JSON output format
+The
+.Em sudoers
+JSON format may contain any of the following top-level objects:
+.Bl -tag -width 4n
+.It Defaults
+An array of objects, each containing an
+.Em Options
+array and an optional
+.Em Binding
+array.
+Each object contains a
+.Dq name:value
+pair and an optional
+.Em negated
+entry, which will negate any comparison performed with the object.
+If a
+.Em Binding
+is present, the setting will only take effect if one of the specified
+.Em command ,
+.Em hostname ,
+.Em usergid ,
+.Em usergroup ,
+.Em userid ,
+.Em username ,
+or alias entries match.
+.Pp
+For example:
+.Bd -literal
+"Defaults": [
+    {
+        "Binding": [
+            { "hostname": "somehost" }
+        ],
+        "Options": [
+            { "set_home": true }
+        ]
+    }
+]
+.Ed
+.Pp
+will enable the
+.Em set_home
+option when the local host name matches
+.Em somehost .
+.It User_Aliases
+A JSON object containing one or more
+.Em sudoers
+User_Alias entries where each named alias has as its value an array
+containing one or more objects.
+Each object contains a
+.Dq name:value
+pair and an optional
+.Em negated
+entry, which will negate any comparison performed with the object.
+The name may be one of
+.Em netgroup ,
+.Em nonunixgid ,
+.Em nonunixgroup ,
+.Em useralias ,
+.Em usergid ,
+.Em usergroup ,
+.Em userid ,
+or
+.Em username .
+.Pp
+For example:
+.Bd -literal
+"User_Aliases": {
+    "SYSADMIN": [
+        { "username": "will" },
+        { "usergroup": "wheel" },
+        { "netgroup": "admin" }
+    ]
+}
+.Ed
+.Pp
+will define a
+.Em User_Alias
+named SYSADMIN that contains the user
+.Dq will ,
+the Unix group
+.Dq wheel ,
+and the netgroup
+.Dq admin .
+.It Runas_Aliases
+A JSON object containing one or more
+.Em sudoers
+Runas_Alias entries, where each named alias has as its value an array
+containing one or more objects.
+Each object contains a
+.Dq name:value
+pair and an optional
+.Em negated
+entry, which will negate any comparison performed with the object.
+The name may be one of
+.Em netgroup ,
+.Em nonunixgid ,
+.Em nonunixgroup ,
+.Em runasalias ,
+.Em usergid ,
+.Em usergroup ,
+.Em userid ,
+or
+.Em username .
+.Pp
+For example:
+.Bd -literal
+"Runas_Aliases": {
+    "DB": [
+        { "username": "oracle" },
+        { "username": "sybase" }
+    ],
+    "OP": [
+        { "username": "root" },
+        { "username": "operator" }
+    ]
+}
+.Ed
+.Pp
+will define two
+.Em Runas_Alias
+entries:
+.Dq DB
+and
+.Dq OP .
+.It Host_Aliases
+A JSON object containing one or more
+.Em sudoers
+Host_Alias entries where each named alias has as its value an array
+containing one or more objects.
+Each object contains a
+.Dq name:value
+pair and an optional
+.Em negated
+entry, which will negate any comparison performed with the object.
+The name may be one of
+.Em hostalias ,
+.Em hostname ,
+.Em netgroup ,
+or
+.Em networkaddr .
+.Pp
+For example:
+.Bd -literal
+"Host_Aliases": {
+    "DORMNET": [
+        { "networkaddr": "128.138.243.0" },
+        { "networkaddr": "128.138.204.0/24" }
+    ],
+    "SERVERS": [
+        { "hostname": "boulder" },
+        { "hostname": "refuge" }
+    ]
+}
+.Ed
+.It Cmnd_Aliases
+A JSON object containing one or more
+.Em sudoers
+Cmnd_Alias entries where each named alias has as its value an array
+containing one or more objects.
+Each object contains a
+.Dq name:value
+pair and an optional
+.Em negated
+entry, which will negate any comparison performed with the object.
+The name may be either another
+.Em cmndalias
+or a
+.Em command .
+For example:
+.Bd -literal
+"Cmnd_Aliases": {
+    "SHELLS": [
+        { "command": "/bin/bash" },
+        { "command": "/bin/csh" },
+        { "command": "/bin/sh" },
+        { "command": "/bin/zsh" }
+    ],
+    "VIPW": [
+        { "command": "/usr/bin/chpass" },
+        { "command": "/usr/bin/chfn" },
+        { "command": "/usr/bin/chsh" },
+        { "command": "/usr/bin/passwd" },
+        { "command": "/usr/sbin/vigr" },
+        { "command": "/usr/sbin/vipw" }
+    ] 
+}
+.Ed
+.It User_Specs
+A JSON array containing one or more objects, each representing a
+.Em sudoers
+User_Spec.
+Each object in the
+.Em User_Specs
+array should contain a
+.Em User_List
+array, a
+.Em Host_List
+array and a
+.Em Cmnd_Specs
+array.
+.Pp
+A
+.Em User_List
+consists of one or more objects.
+Each object contains a
+.Dq name:value
+pair and an optional
+.Em negated
+entry, which will negate any comparison performed with the object.
+The name may be one of
+.Em netgroup ,
+.Em nonunixgid ,
+.Em nonunixgroup ,
+.Em useralias ,
+.Em usergid ,
+.Em usergroup ,
+.Em userid ,
+or
+.Em username .
+If
+.Em username
+is set to the special value
+.Sy ALL ,
+it will match any user.
+.Pp
+A
+.Em Host_List
+consists of one or more objects.
+Each object contains a
+.Dq name:value
+pair and an optional
+.Em negated
+entry, which will negate any comparison performed with the object.
+The name may be one of
+.Em hostalias ,
+.Em hostname ,
+.Em netgroup ,
+or
+.Em networkaddr .
+If
+.Em hostname
+is set to the special value
+.Sy ALL ,
+it will match any host.
+.Pp
+The
+.Em Cmnd_Specs
+array consists of one or more JSON objects describing a command that
+may be run.
+Each
+.Em Cmnd_Specs
+is made up of a
+.Em Commands
+array, an optional
+.Em runasusers
+array, an optional
+.Em runasgroups
+array, and an optional
+.Em Options array.
+.Pp
+The
+.Em Commands
+array consists of one or more objects containing
+.Dq name:value
+pair elements.
+The following names and values are supported:
+.Bl -tag -width 8n
+.It command
+A string containing the command to run.
+The special value
+.Sy ALL
+it will match any command.
+.It negated
+A boolean value that, if true, will negate any comparison performed
+with the object.
+.It sha224
+A string containing the SHA224 digest of the
+.Em command .
+.It sha256
+A string containing the SHA256 digest of the
+.Em command .
+.It sha384
+A string containing the SHA384 digest of the
+.Em command .
+.It sha512
+A string containing the SHA512 digest of the
+.Em command .
+.El
+.Pp
+The
+.Em runasusers
+array consists of objects describing users the command may be run as.
+Each object contains a
+.Dq name:value
+pair and an optional
+.Em negated
+entry, which will negate any comparison performed with the object.
+The name may be one of
+.Em netgroup ,
+.Em nonunixgid ,
+.Em nonunixgroup ,
+.Em runasalias ,
+.Em usergid ,
+.Em usergroup ,
+.Em userid ,
+or
+.Em username .
+If
+.Em username
+is set to the special value
+.Sy ALL ,
+it will match any user.
+If
+.Em username
+is set to the empty string
+.Dq "" ,
+it will match the invoking user.
+.Pp
+The
+.Em runasgroups
+array consists of objects describing groups the command may be run as.
+Each object contains a
+.Dq name:value
+pair and an optional
+.Em negated
+entry, which will negate any comparison performed with the object.
+The name may be one of
+.Em runasalias ,
+.Em usergid ,
+or
+.Em usergroup .
+If
+.Em usergroup
+is set to the special value
+.Sy ALL ,
+it will match any group.
+.Pp
+The
+.Em Options
+array is of the same format as the one in the
+.Em Defaults
+object.
+Any
+.Em Tag_Spec
+entries in
+.Em sudoers
+are converted to
+.Em Options .
+A user with
+.Dq sudo ALL
+privileges will automatically have the
+.Em setenv
+option enabled to match the implicit behavior provided by
+.Em sudoers .
+.Pp
+For example, the following
+.Em sudoers
+entry:
+.Bd -literal
+millert ALL = (ALL : ALL) NOPASSWD: ALL, !/usr/bin/id
+.Ed
+.Pp
+converts to:
+.Bd -literal
+"User_Specs": [
+    {
+        "User_List": [
+            { "username": "millert" }
+        ],
+        "Host_List": [
+            { "hostname": "ALL" }
+        ],
+        "Cmnd_Specs": [
+            {
+                "runasusers": [
+                    { "username": "ALL" }
+                ],
+                "runasgroups": [
+                    { "usergroup": "ALL" }
+                ],
+                "Options": [
+                    { "authenticate": false },
+                    { "setenv": true }
+                ],
+                "Commands": [
+                    { "command": "ALL" },
+                    {
+                        "command": "/usr/bin/id",
+                        "negated": true
+                    }
+                ]
+            }
+        ]
+    }
+]
+.Ed
+.El
 .Sh FILES
 .Bl -tag -width 24n
 .It Pa @sysconfdir@/cvtsudoers.conf
