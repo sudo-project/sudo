@@ -32,7 +32,7 @@ What's new in Sudo 1.9.12
  * Neovim has been added to the list of visudo editors that support
    passing the line number on the command line.
 
- * Fixed a bug in the SHA384/512 message digest padding.
+ * Fixed a bug in sudo's SHA384 and SHA512 message digest padding.
 
  * Added a new "-N" (--no-update) command line option to sudo which
    can be used to prevent sudo from updating the user's cached
@@ -43,6 +43,29 @@ What's new in Sudo 1.9.12
 
    and checking the exit value.  One use case for this is to indicate
    in a shell prompt that sudo is "active" for the user.
+
+ * PAM approval modules are no longer invoked when running sub-commands
+   in intercept mode unless the "intercept_authenticate" option is set.
+   There is a substantial performance penalty for calling into PAM
+   for each command run.  PAM approval modules are still called for
+   the initial command.
+
+ * Intercept mode on Linux now uses process_vm_readv(2) and
+   process_vm_writev(2) if available.
+
+ * The XDG_CURRENT_DESKTOP environment variable is now preserved
+   by default.  This makes it possible for graphical applications
+   to choose the correct theme when run via sudo.
+
+ * On 64-bit systems, if sudo fails to load a sudoers group plugin,
+   it will use system-specific heuristics to try to locate a 64-bit
+   version of the plugin.
+
+ * The cvtsudoers manual now documents the JSON and CSV output
+   formats.  GitHub issue #172.
+
+ * Fixed a bug where sub-commands were not being logged to a remote
+   log server when log_subcmds was enabled.  GitHub issue #174.
 
 What's new in Sudo 1.9.11p3
 
