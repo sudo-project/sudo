@@ -648,7 +648,7 @@ For example:
         { "command": "/usr/bin/passwd" },
         { "command": "/usr/sbin/vigr" },
         { "command": "/usr/sbin/vipw" }
-    ] 
+    ]
 }
 .Ed
 .It User_Specs
@@ -1053,7 +1053,7 @@ millert ALL = (ALL : ALL) NOPASSWD: ALL, !/usr/bin/id
 converts to:
 .Bd -literal
 rule,millert,ALL,ALL,ALL,"!authenticate","ALL,!/usr/bin/id"
-.Ed -literal
+.Ed
 .El
 .Sh FILES
 .Bl -tag -width 24n
