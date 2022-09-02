@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd August 31, 2022
+.Dd September 2, 2022
 .Dt CVTSUDOERS 1
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -125,12 +125,9 @@ The following formats are supported:
 .It CSV
 CSV (comma-separated value) files are often used by spreadsheets
 and report generators.
-For CSV output,
-.Nm
-double quotes strings that contain commas.
-For each literal double quote character present inside the string,
-two double quotes are output.
-This method of quoting commas is compatible with most spreadsheet programs.
+See
+.Sx CSV output format
+for more details.
 .It JSON
 JSON (JavaScript Object Notation) files are usually easier for
 third-party applications to consume than the traditional
@@ -140,6 +137,9 @@ The various values have explicit types which removes much of the
 ambiguity of the
 .Em sudoers
 format.
+See
+.Sx JSON output format
+for more details.
 .It LDIF
 LDIF (LDAP Data Interchange Format) files can be imported into an LDAP
 server for use with
@@ -217,7 +217,12 @@ For example,
 .Sy user No = Ar operator
 or
 .Sy host No = Ar www .
-An upper-case Cmnd_Alias, Host_alias, or Host_Alias may be specified as the
+An upper-case
+.Li Cmnd_Alias ,
+.Li Host_alias ,
+or
+.Li User_Alias
+may be specified as the
 .Dq cmnd ,
 .Dq host ,
 or
@@ -542,7 +547,8 @@ and the netgroup
 .It Runas_Aliases
 A JSON object containing one or more
 .Em sudoers
-Runas_Alias entries, where each named alias has as its value an array
+.It Runas_Alias
+entries, where each named alias has as its value an array
 containing one or more objects.
 Each object contains a
 .Dq name:value
@@ -583,7 +589,8 @@ and
 .It Host_Aliases
 A JSON object containing one or more
 .Em sudoers
-Host_Alias entries where each named alias has as its value an array
+.Li Host_Alias
+entries where each named alias has as its value an array
 containing one or more objects.
 Each object contains a
 .Dq name:value
@@ -613,7 +620,8 @@ For example:
 .It Cmnd_Aliases
 A JSON object containing one or more
 .Em sudoers
-Cmnd_Alias entries where each named alias has as its value an array
+.Li Cmnd_Alias
+entries where each named alias has as its value an array
 containing one or more objects.
 Each object contains a
 .Dq name:value
@@ -852,6 +860,200 @@ converts to:
     }
 ]
 .Ed
+.El
+.Ss CSV output format
+CSV (comma-separated value) files are often used by spreadsheets
+and report generators.
+For CSV output,
+.Nm
+double quotes strings that contain commas.
+For each literal double quote character present inside the string,
+two double quotes are output.
+This method of quoting commas is compatible with most spreadsheet programs.
+.Pp
+There are three possible sections in
+.Nm cvtsudoers Ns 's
+CSV output, each separated by a blank line:
+.Bl -tag -width 4n
+.It defaults
+This section includes any
+.Em Defaults
+settings in
+.Em sudoers .
+The
+.Em defaults
+section begins with the following heading:
+.Bd -literal -offset indent
+defaults_type,binding,name,operator,value
+.Ed
+.Pp
+The fields are as follows:
+.Bl -tag -width 8n
+.It defaults_type
+The type of
+.Em Defaults
+setting; one of
+.Li defaults ,
+.Li defaults_command ,
+.Li defaults_host ,
+.Li defaults_runas ,
+or
+.Li defaults_user .
+.It binding
+For
+.Li defaults_command ,
+.Li defaults_host ,
+.Li defaults_runas ,
+and
+.Li defaults_user
+this is the value that must match for the setting to be applied.
+.It name
+The name of the
+.Em Defaults
+setting.
+.It operator
+The operator determines how the value is applied to the setting.
+It may be either
+.Dq =
+(assignment),
+.Dq +=
+(append),
+or
+.Dq -=
+(remove).
+.It value
+The setting's value, usually a string or, for
+settings used in a boolean context,
+.Em true
+or
+.Em false .
+.El
+.It aliases
+This section includes any
+.Li Cmnd_Alias
+.Li Host_Alias ,
+.Li Runas_Alias ,
+or
+.Li User_Alias ,
+entries from
+.Em sudoers .
+The
+.Em aliases
+section begins with the following heading:
+.Bd -literal -offset indent
+alias_type,alias_name,members
+.Ed
+.Pp
+The fields are as follows:
+.Bl -tag -width 8n
+.It alias_type
+The type of alias; one of
+.Li Cmnd_Alias ,
+.Li Host_Alias ,
+.Li Runas_Alias ,
+or
+.Li User_Alias .
+.It alias_name
+The name of the alias; a string starting with an upper-case letter that
+consists of upper-case letters, digits, or underscores.
+.It members
+A comma-separated list of members belonging to the alias.
+Due to the use of commas,
+.Em members
+is surrounded by double quotes if it contains more than one member.
+.El
+.It rules
+This section includes the
+.Em sudoers
+rules that grant privileges.
+The
+.Em rules
+section begins with the following heading:
+.Bd -literal -offset indent
+rule,user,host,runusers,rungroups,options,command
+.Ed
+.Pp
+The fields are as follows:
+.Bl -tag -width 8n
+.It rule
+This field indicates a
+.Em sudoers
+.Em rule
+entry.
+.It user
+The user the rule applies to.
+This may also be a Unix group (preceded by a
+.Ql %
+character), a non-Unix group (preceded by
+.Ql %: )
+or a netgroup (preceded by a
+.Ql +
+character)
+or a
+.Li User_Alias .
+If set to the special value
+.Sy ALL ,
+it will match any user.
+.It host
+The host the rule applies to.
+This may also be a netgroup (preceded by a
+.Ql +
+character)
+or a
+.Li Host_Alias .
+If set to the special value
+.Sy ALL ,
+it will match any host.
+.It runusers
+An optional comma-separated list of users (or
+.Li Runas_Alias Ns No es )
+the command may be run as.
+If it contains more than one member, the value is surrounded by
+double quotes.
+If set to the special value
+.Sy ALL ,
+it will match any user.
+If empty, the root user is assumed.
+.It rungroups
+An optional comma-separated list of groups (or
+.Li Runas_Alias Ns No es )
+the command may be run as.
+If it contains more than one member, the value is surrounded by
+double quotes.
+If set to the special value
+.Sy ALL ,
+it will match any group.
+If empty, the
+.Em runuser Ns 's
+group is used.
+.It options
+An optional list of
+.Em Defaults
+settings to apply to the command.
+Any
+.Em Tag_Spec
+entries in
+.Em sudoers
+are converted to
+.Em options .
+.It commands
+A list of commands, with optional arguments, that the user is allowed to run.
+If set to the special value
+.Sy ALL ,
+it will match any command.
+.El
+.Pp
+For example, the following
+.Em sudoers
+entry:
+.Bd -literal
+millert ALL = (ALL : ALL) NOPASSWD: ALL, !/usr/bin/id
+.Ed
+.Pp
+converts to:
+.Bd -literal
+rule,millert,ALL,ALL,ALL,"!authenticate","ALL,!/usr/bin/id"
+.Ed -literal
 .El
 .Sh FILES
 .Bl -tag -width 24n
