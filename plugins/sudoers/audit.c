@@ -341,6 +341,7 @@ sudoers_audit_accept(const char *plugin_name, unsigned int plugin_type,
 {
     const char *uuid_str = NULL;
     struct eventlog evlog;
+    static bool first = true;
     int ret = true;
     debug_decl(sudoers_audit_accept, SUDOERS_DEBUG_PLUGIN);
 
@@ -364,6 +365,13 @@ sudoers_audit_accept(const char *plugin_name, unsigned int plugin_type,
     if (!log_server_accept(&evlog)) {
 	if (!def_ignore_logfile_errors)
 	    ret = false;
+    }
+
+    if (first) {
+	/* log_subcmds doesn't go through sudo_policy_main again to set this. */
+	if (def_log_subcmds)
+	    SET(sudo_mode, MODE_POLICY_INTERCEPTED);
+	first = false;
     }
 
     debug_return_int(ret);
