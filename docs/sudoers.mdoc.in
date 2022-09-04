@@ -1470,6 +1470,12 @@ specified in
 A role or type specified on the command line,
 however, will supersede the values in
 .Em sudoers .
+To prevent this behavior, prefix the SELinux role and/or type with an
+asterisk in this fashion:
+.Bd -literal
+auditor ALL = (root) TYPE=*auditor.process ROLE=*unconfined_r NOPASSWD: /usr/bin/bash
+.Ed
+
 .\}
 .if \n(AA \{\
 .Ss AppArmor_Spec

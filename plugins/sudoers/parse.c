@@ -221,7 +221,10 @@ apply_cmndspec(struct cmndspec *cs)
 	/* Set role and type if not specified on command line. */
 	if (user_role == NULL) {
 	    if (cs->role != NULL) {
-		user_role = strdup(cs->role);
+		if (cs->role[0] == '*')
+		    user_role = strdup(cs->role+1);
+		else
+		    user_role = strdup(cs->role);
 		if (user_role == NULL) {
 		    sudo_warnx(U_("%s: %s"), __func__,
 			U_("unable to allocate memory"));
@@ -235,10 +238,17 @@ apply_cmndspec(struct cmndspec *cs)
 		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		    "user_role -> %s", user_role);
 	    }
+	} else if (cs->role != NULL && cs->role[0] == '*') {
+	    sudo_warnx(U_("%s: %s"), __func__,
+			U_("cannot change the selinux role"));
+	    debug_return_bool(false);
 	}
 	if (user_type == NULL) {
 	    if (cs->type != NULL) {
-		user_type = strdup(cs->type);
+		if (cs->type[0] == '*')
+		    user_type = strdup(cs->type+1);
+		else
+		    user_type = strdup(cs->type);
 		if (user_type == NULL) {
 		    sudo_warnx(U_("%s: %s"), __func__,
 			U_("unable to allocate memory"));
@@ -252,6 +262,10 @@ apply_cmndspec(struct cmndspec *cs)
 		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		    "user_type -> %s", user_type);
 	    }
+	} else if (cs->type != NULL && cs->type[0] == '*') {
+	    sudo_warnx(U_("%s: %s"), __func__,
+			U_("cannot change the selinux type"));
+	    debug_return_bool(false);
 	}
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_APPARMOR
