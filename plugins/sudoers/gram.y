@@ -1195,7 +1195,8 @@ sudoerserrorf(const char *fmt, ...)
 
     if (sudoers_error_hook != NULL) {
 	va_start(ap, fmt);
-	sudoers_error_hook(sudoers, this_lineno, column, fmt, ap);
+	sudoers_error_hook(sudoers, this_lineno, column,
+	    fmt ? fmt : "parse error", ap);
 	va_end(ap);
     }
     if (sudoers_warnings && fmt != NULL) {

@@ -89,7 +89,7 @@ bool sudoers_locale_callback(const char *file, int line, int column, const union
 void sudoers_to_eventlog(struct eventlog *evlog, const char *cmnd, char * const argv[], char *const envp[], const char *uuid_str);
 void init_eventlog_config(void);
 bool init_log_details(struct log_details *details, struct eventlog *evlog);
-bool log_parse_error(const char *file, int line, int column, const char *fmt, va_list ap) __printflike(4, 0);
+bool log_parse_error(const char *file, int line, int column, const char *fmt, va_list ap) __printf0like(4, 0);
 bool mail_parse_errors(void);
 
 #endif /* SUDOERS_LOGGING_H */

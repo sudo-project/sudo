@@ -857,7 +857,9 @@ log_parse_error(const char *file, int line, int column, const char *fmt,
     bool ret;
     debug_decl(log_parse_error, SUDOERS_DEBUG_LOGGING);
 
-    if (strcmp(fmt, "%s") == 0) {
+    if (fmt == NULL) {
+	errstr = _("syntax error");
+    } else if (strcmp(fmt, "%s") == 0) {
 	/* Optimize common case, a single string. */
 	errstr = _(va_arg(args, char *));
     } else {
