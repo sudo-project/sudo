@@ -175,12 +175,12 @@ extern time_t get_date(char *);
 static int list_sessions(int, char **, const char *, const char *, const char *);
 static int parse_expr(struct search_node_list *, char **, bool);
 static void read_keyboard(int fd, int what, void *v);
-static void help(void) __attribute__((__noreturn__));
+static sudo_noreturn void help(void);
+static sudo_noreturn void usage(void);
 static int replay_session(int iolog_dir_fd, const char *iolog_dir,
     struct timespec *offset, struct timespec *max_wait, const char *decimal,
     bool interactive, bool suspend_wait);
 static void sudoreplay_cleanup(void);
-static void usage(int);
 static void write_output(int fd, int what, void *v);
 static void restore_terminal_size(void);
 static void setup_terminal(struct eventlog *evlog, bool interactive, bool resize);
@@ -302,7 +302,7 @@ main(int argc, char *argv[])
 	    exitcode = EXIT_SUCCESS;
 	    goto done;
 	default:
-	    usage(1);
+	    usage();
 	    /* NOTREACHED */
 	}
 
@@ -316,7 +316,7 @@ main(int argc, char *argv[])
     }
 
     if (argc != 1)
-	usage(1);
+	usage();
 
     /* By default we replay stdout, stderr and ttyout. */
     if (def_filter) {
@@ -1645,23 +1645,26 @@ read_keyboard(int fd, int what, void *v)
 }
 
 static void
-usage(int fatal)
+print_usage(FILE *fp)
 {
-    fprintf(fatal ? stderr : stdout,
-	_("usage: %s [-hnRS] [-d dir] [-m num] [-s num] ID\n"),
+    fprintf(fp, _("usage: %s [-hnRS] [-d dir] [-m num] [-s num] ID\n"),
 	getprogname());
-    fprintf(fatal ? stderr : stdout,
-	_("usage: %s [-h] [-d dir] -l [search expression]\n"),
+    fprintf(fp, _("usage: %s [-h] [-d dir] -l [search expression]\n"),
 	getprogname());
-    if (fatal)
-	exit(EXIT_FAILURE);
+}
+
+static void
+usage(void)
+{
+    print_usage(stderr);
+    exit(EXIT_FAILURE);
 }
 
 static void
 help(void)
 {
     (void) printf(_("%s - replay sudo session logs\n\n"), getprogname());
-    usage(0);
+    print_usage(stdout);
     (void) puts(_("\nOptions:\n"
 	"  -d, --directory=dir    specify directory for session logs\n"
 	"  -f, --filter=filter    specify which I/O type(s) to display\n"

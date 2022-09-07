@@ -90,14 +90,14 @@ static char *get_editor(int *editor_argc, char ***editor_argv);
 static bool check_syntax(const char *, bool, bool, bool, bool);
 static bool edit_sudoers(struct sudoersfile *, char *, int, char **, int);
 static bool install_sudoers(struct sudoersfile *, bool, bool);
-static bool visudo_track_error(const char *file, int line, int column, const char *fmt, va_list args) __printf0like(4, 0);
+static bool visudo_track_error(const char *file, int line, int column, const char *fmt, va_list args) sudo_printf0like(4, 0);
 static int print_unused(struct sudoers_parse_tree *, struct alias *, void *);
 static bool reparse_sudoers(char *, int, char **, bool, bool);
 static int run_command(const char *, char *const *);
 static void parse_sudoers_options(void);
 static void setup_signals(void);
-static void help(void) __attribute__((__noreturn__));
-static void usage(int);
+static sudo_noreturn void help(void);
+static sudo_noreturn void usage(void);
 static void visudo_cleanup(void);
 
 extern void get_hostname(void);
@@ -151,7 +151,7 @@ main(int argc, char *argv[])
     textdomain("sudoers");
 
     if (argc < 1)
-	usage(1);
+	usage();
 
     /* Register fatal/fatalx callback. */
     sudo_fatal_callback_register(visudo_cleanup);
@@ -208,7 +208,7 @@ main(int argc, char *argv[])
 		export_path = optarg;
 		break;
 	    default:
-		usage(1);
+		usage();
 	}
     }
     argc -= optind;
@@ -226,7 +226,7 @@ main(int argc, char *argv[])
 	}
 	break;
     default:
-	usage(1);
+	usage();
     }
 
     if (fflag) {
@@ -1215,20 +1215,20 @@ quit(int signo)
     _exit(signo);
 }
 
+#define VISUDO_USAGE	"usage: %s [-chqsV] [[-f] sudoers ]\n"
+
 static void
-usage(int fatal)
+usage(void)
 {
-    (void) fprintf(fatal ? stderr : stdout,
-	"usage: %s [-chqsV] [[-f] sudoers ]\n", getprogname());
-    if (fatal)
-	exit(EXIT_FAILURE);
+    (void) fprintf(stderr, VISUDO_USAGE, getprogname());
+    exit(EXIT_FAILURE);
 }
 
 static void
 help(void)
 {
     (void) printf(_("%s - safely edit the sudoers file\n\n"), getprogname());
-    usage(0);
+    (void) printf(VISUDO_USAGE, getprogname());
     (void) puts(_("\nOptions:\n"
 	"  -c, --check              check-only mode\n"
 	"  -f, --file=sudoers       specify sudoers file location\n"

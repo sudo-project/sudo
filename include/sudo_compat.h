@@ -37,54 +37,6 @@
  * Macros and functions that may be missing on some operating systems.
  */
 
-#ifndef __GNUC_PREREQ__
-# ifdef __GNUC__
-#  define __GNUC_PREREQ__(ma, mi) \
-	((__GNUC__ > (ma)) || (__GNUC__ == (ma) && __GNUC_MINOR__ >= (mi)))
-# else
-#  define __GNUC_PREREQ__(ma, mi)	0
-# endif
-#endif
-
-/* Define away __attribute__ for non-gcc or old gcc */
-#if !defined(__attribute__) && !__GNUC_PREREQ__(2, 5)
-# define __attribute__(x)
-#endif
-
-/* For malloc-like functions that return uninitialized or zeroed memory. */
-#ifndef __malloc
-# if __GNUC_PREREQ__(2, 96)
-#  define __malloc	__attribute__((__malloc__))
-# else
-#  define __malloc
-# endif
-#endif
-
-/* For catching format string mismatches */
-#ifndef __printflike
-# if __GNUC_PREREQ__(3, 3)
-#  define __printflike(f, v) 	__attribute__((__format__ (__printf__, f, v))) __attribute__((__nonnull__ (f)))
-# elif __GNUC_PREREQ__(2, 7)
-#  define __printflike(f, v) 	__attribute__((__format__ (__printf__, f, v)))
-# else
-#  define __printflike(f, v)
-# endif
-#endif
-#ifndef __printf0like
-# if __GNUC_PREREQ__(2, 7)
-#  define __printf0like(f, v) 	__attribute__((__format__ (__printf__, f, v)))
-# else
-#  define __printf0like(f, v)
-# endif
-#endif
-#ifndef __format_arg
-# if __GNUC_PREREQ__(2, 7)
-#  define __format_arg(f) 	__attribute__((__format_arg__ (f)))
-# else
-#  define __format_arg(f)
-# endif
-#endif
-
 #ifdef HAVE_FALLTHROUGH_ATTRIBUTE
 # define FALLTHROUGH 	__attribute__((__fallthrough__))
 #else
@@ -493,22 +445,22 @@ sudo_dso_public int sudo_futimens(int fd, const struct timespec *times);
 # define futimens(_a, _b) sudo_futimens((_a), (_b))
 #endif /* HAVE_FUTIMENS */
 #if !defined(HAVE_SNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-sudo_dso_public int sudo_snprintf(char *str, size_t n, char const *fmt, ...) __printflike(3, 4);
+sudo_dso_public int sudo_snprintf(char *str, size_t n, char const *fmt, ...) sudo_printflike(3, 4);
 # undef snprintf
 # define snprintf sudo_snprintf
 #endif /* HAVE_SNPRINTF */
 #if !defined(HAVE_VSNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-sudo_dso_public int sudo_vsnprintf(char *str, size_t n, const char *fmt, va_list ap) __printflike(3, 0);
+sudo_dso_public int sudo_vsnprintf(char *str, size_t n, const char *fmt, va_list ap) sudo_printflike(3, 0);
 # undef vsnprintf
 # define vsnprintf sudo_vsnprintf
 #endif /* HAVE_VSNPRINTF */
 #if !defined(HAVE_ASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-sudo_dso_public int sudo_asprintf(char **str, char const *fmt, ...) __printflike(2, 3);
+sudo_dso_public int sudo_asprintf(char **str, char const *fmt, ...) sudo_printflike(2, 3);
 # undef asprintf
 # define asprintf sudo_asprintf
 #endif /* HAVE_ASPRINTF */
 #if !defined(HAVE_VASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-sudo_dso_public int sudo_vasprintf(char **str, const char *fmt, va_list ap) __printflike(2, 0);
+sudo_dso_public int sudo_vasprintf(char **str, const char *fmt, va_list ap) sudo_printflike(2, 0);
 # undef vasprintf
 # define vasprintf sudo_vasprintf
 #endif /* HAVE_VASPRINTF */

@@ -73,7 +73,7 @@ static bool store_timespec(const char *str, struct sudo_defs_types *def);
 static bool store_rlimit(const char *str, struct sudo_defs_types *def);
 static bool list_op(const char *str, size_t, struct list_members *list, enum list_ops op);
 static bool valid_path(struct sudo_defs_types *def, const char *val, const char *file, int line, int column, bool quiet);
-static bool defaults_warnx(const char *file, int line, int column, bool quiet, const char *fmt, ...) __printflike(5, 6);
+static bool defaults_warnx(const char *file, int line, int column, bool quiet, const char *fmt, ...) sudo_printflike(5, 6);
 
 /*
  * Table describing compile-time and run-time options.

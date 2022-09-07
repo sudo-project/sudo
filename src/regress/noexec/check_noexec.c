@@ -44,7 +44,6 @@
 static bool verbose;
 
 sudo_dso_public int main(int argc, char *argv[], char *envp[]);
-static void usage(void) __attribute__((__noreturn__));
 
 static bool
 report_status(int status, const char *what)
@@ -179,7 +178,7 @@ try_wordexp(void)
 }
 #endif
 
-static void
+static sudo_noreturn void
 usage(void)
 {
     fprintf(stderr, "usage: %s [-v] rexec | /path/to/sudo_noexec.so\n",

@@ -5533,7 +5533,53 @@ dnl
 AH_TOP([#ifndef SUDO_CONFIG_H
 #define SUDO_CONFIG_H])
 
-AH_BOTTOM([/* Symbol visibility controls */
+AH_BOTTOM([#ifndef __GNUC_PREREQ__
+# ifdef __GNUC__
+#  define __GNUC_PREREQ__(ma, mi) \
+	((__GNUC__ > (ma)) || (__GNUC__ == (ma) && __GNUC_MINOR__ >= (mi)))
+# else
+#  define __GNUC_PREREQ__(ma, mi)	0
+# endif
+#endif
+
+/* Define away __attribute__ for non-gcc or old gcc. */
+#if !defined(__attribute__) && !__GNUC_PREREQ__(2, 5)
+# define __attribute__(x)
+#endif
+
+/* For functions that call exit() directly. */
+#if __GNUC_PREREQ__(2, 5)
+# define sudo_noreturn		__attribute__((__noreturn__))
+#else
+# define sudo_noreturn
+#endif
+
+/* For malloc-like functions that return uninitialized or zeroed memory. */
+#if __GNUC_PREREQ__(2, 96)
+# define sudo_malloclike	__attribute__((__malloc__))
+#else
+# define sudo_malloclike
+#endif
+
+/* Compile-time checking for function arguments that must not be NULL. */
+#if __GNUC_PREREQ__(3, 3)
+# define sudo_attr_nonnull(_a)	__attribute__((__nonnull__ (_a)))
+#else
+# define sudo_attr_nonnull(_a)
+#endif
+
+/* For catching format string mismatches. */
+#if __GNUC_PREREQ__(2, 7)
+# define sudo_printflike(_f, _v)	__attribute__((__format__ (__printf__, _f, _v))) sudo_attr_nonnull(_f)
+# define sudo_printf0like(_f, _v)	__attribute__((__format__ (__printf__, _f, _v)))
+# define sudo_attr_fmt_arg(_f)		__attribute__((__format_arg__ (_f)))
+#else
+# define sudo_printflike(_f, _v)
+# define sudo_printf0like(_f, _v)
+# define sudo_attr_fmt_arg(_f)
+#endif
+
+/* Symbol visibility controls. */
 #ifdef HAVE_DSO_VISIBILITY
 # if defined(__GNUC__)
 #  define sudo_dso_public __attribute__((__visibility__("default")))

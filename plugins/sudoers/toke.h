@@ -36,7 +36,7 @@ bool fill_cmnd(const char *, size_t);
 bool fill(const char *, size_t);
 bool ipv6_valid(const char *s);
 int sudoers_trace_print(const char *);
-void sudoerserrorf(const char *, ...) __printf0like(1, 2);
+void sudoerserrorf(const char *, ...) sudo_printf0like(1, 2);
 void sudoerserror(const char *);
 bool push_include(const char *, bool);
 

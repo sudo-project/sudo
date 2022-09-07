@@ -265,13 +265,13 @@ sudo_dso_public int sudo_debug_get_active_instance_v1(void);
 sudo_dso_public int sudo_debug_get_fds_v1(unsigned char **fds);
 sudo_dso_public int sudo_debug_get_instance_v1(const char *program);
 sudo_dso_public int sudo_debug_parse_flags_v1(struct sudo_conf_debug_file_list *debug_files, const char *entry);
-sudo_dso_public void sudo_debug_printf2_v1(const char *func, const char *file, int line, int level, const char *fmt, ...) __printf0like(5, 6);
-sudo_dso_public void sudo_debug_printf_nvm_v1(int pri, const char *fmt, ...) __printf0like(2, 3);
+sudo_dso_public void sudo_debug_printf2_v1(const char *func, const char *file, int line, int level, const char *fmt, ...) sudo_printf0like(5, 6);
+sudo_dso_public void sudo_debug_printf_nvm_v1(int pri, const char *fmt, ...) sudo_printf0like(2, 3);
 sudo_dso_public int sudo_debug_register_v1(const char *program, const char *const subsystems[], unsigned int ids[], struct sudo_conf_debug_file_list *debug_files);
 sudo_dso_public int sudo_debug_register_v2(const char *program, const char *const subsystems[], unsigned int ids[], struct sudo_conf_debug_file_list *debug_files, int minfd);
 sudo_dso_public int sudo_debug_set_active_instance_v1(int inst);
 sudo_dso_public void sudo_debug_update_fd_v1(int ofd, int nfd);
-sudo_dso_public void sudo_debug_vprintf2_v1(const char *func, const char *file, int line, int level, const char *fmt, va_list ap) __printf0like(5, 0);
+sudo_dso_public void sudo_debug_vprintf2_v1(const char *func, const char *file, int line, int level, const char *fmt, va_list ap) sudo_printf0like(5, 0);
 sudo_dso_public void sudo_debug_write2_v1(int fd, const char *func, const char *file, int line, const char *str, int len, int errnum);
 sudo_dso_public bool sudo_debug_needed_v1(int level);
 
