@@ -852,7 +852,8 @@ log_parse_error(const char *file, int line, int column, const char *fmt,
     va_list args)
 {
     const int flags = SLOG_RAW_MSG|SLOG_NO_STDERR;
-    char *errstr, *tofree = NULL;
+    char *tofree = NULL;
+    const char *errstr;
     struct parse_error *pe;
     bool ret;
     debug_decl(log_parse_error, SUDOERS_DEBUG_LOGGING);
@@ -863,9 +864,9 @@ log_parse_error(const char *file, int line, int column, const char *fmt,
 	/* Optimize common case, a single string. */
 	errstr = _(va_arg(args, char *));
     } else {
-	if (vasprintf(&errstr, _(fmt), args) == -1)
+	if (vasprintf(&tofree, _(fmt), args) == -1)
 	    debug_return_bool(false);
-	tofree = errstr;
+	errstr = tofree;
     }
 
     if (line > 0) {
