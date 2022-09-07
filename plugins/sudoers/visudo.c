@@ -90,7 +90,7 @@ static char *get_editor(int *editor_argc, char ***editor_argv);
 static bool check_syntax(const char *, bool, bool, bool, bool);
 static bool edit_sudoers(struct sudoersfile *, char *, int, char **, int);
 static bool install_sudoers(struct sudoersfile *, bool, bool);
-static bool visudo_track_error(const char *file, int line, int column, const char *fmt, va_list args);
+static bool visudo_track_error(const char *file, int line, int column, const char *fmt, va_list args) __printf0like(4, 0);
 static int print_unused(struct sudoers_parse_tree *, struct alias *, void *);
 static bool reparse_sudoers(char *, int, char **, bool, bool);
 static int run_command(const char *, char *const *);
