@@ -35,6 +35,7 @@ cross_compiling = @CROSS_COMPILING@
 # Compiler & tools to use
 CC = @CC@
 LIBTOOL = @LIBTOOL@
+GREP = @GREP@
 SED = @SED@
 AWK = @AWK@
 
@@ -330,7 +331,7 @@ check-fuzzer:
 
 check: $(TEST_PROGS) check-fuzzer
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    if locale -a 2>&1 | grep '^C.UTF-8$$' >/dev/null 2>&1; then \
+	    if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
 		LC_ALL=C.UTF-8; export LC_ALL; \
 	    else \
 		LC_ALL=C; export LC_ALL; \

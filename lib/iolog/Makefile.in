@@ -35,6 +35,7 @@ cross_compiling = @CROSS_COMPILING@
 CC = @CC@
 LIBTOOL = @LIBTOOL@
 SHA1SUM = @SHA1SUM@
+GREP = @GREP@
 SED = @SED@
 
 # Libraries
@@ -199,7 +200,7 @@ fuzz_iolog_json_seed_corpus.zip:
 	rm -rf $$tdir
 
 run-fuzz_iolog_json: fuzz_iolog_json
-	if locale -a 2>&1 | grep '^C.UTF-8$$' >/dev/null 2>&1; then \
+	if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
 	    LC_ALL=C.UTF-8; export LC_ALL; \
 	else \
 	    LC_ALL=C; export LC_ALL; \
@@ -226,7 +227,7 @@ fuzz_iolog_legacy_seed_corpus.zip:
 	rm -rf $$tdir
 
 run-fuzz_iolog_legacy: fuzz_iolog_legacy
-	if locale -a 2>&1 | grep '^C.UTF-8$$' >/dev/null 2>&1; then \
+	if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
 	    LC_ALL=C.UTF-8; export LC_ALL; \
 	else \
 	    LC_ALL=C; export LC_ALL; \
@@ -253,7 +254,7 @@ fuzz_iolog_timing_seed_corpus.zip:
 	rm -rf $$tdir
 
 run-fuzz_iolog_timing: fuzz_iolog_timing
-	if locale -a 2>&1 | grep '^C.UTF-8$$' >/dev/null 2>&1; then \
+	if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
 	    LC_ALL=C.UTF-8; export LC_ALL; \
 	else \
 	    LC_ALL=C; export LC_ALL; \
@@ -307,7 +308,7 @@ fuzz: run-fuzz_iolog_json run-fuzz_iolog_legacy run-fuzz_iolog_timing
 
 check-fuzzer: $(FUZZ_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    if locale -a 2>&1 | grep '^C.UTF-8$$' >/dev/null 2>&1; then \
+	    if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
 		LC_ALL=C.UTF-8; export LC_ALL; \
 	    else \
 		LC_ALL=C; export LC_ALL; \
@@ -326,7 +327,7 @@ check-fuzzer: $(FUZZ_PROGS)
 
 check: $(TEST_PROGS) check-fuzzer
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    if locale -a 2>&1 | grep '^C.UTF-8$$' >/dev/null 2>&1; then \
+	    if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
 		LC_ALL=C.UTF-8; export LC_ALL; \
 	    else \
 		LC_ALL=C; export LC_ALL; \

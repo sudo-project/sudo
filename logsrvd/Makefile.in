@@ -36,6 +36,7 @@ cross_compiling = @CROSS_COMPILING@
 CC = @CC@
 LIBTOOL = @LIBTOOL@
 SHA1SUM = @SHA1SUM@
+GREP = @GREP@
 SED = @SED@
 
 # Our install program supports extra flags...
@@ -194,7 +195,7 @@ fuzz_logsrvd_conf_seed_corpus.zip:
 	rm -rf $$tdir
 
 run-fuzz_logsrvd_conf: fuzz_logsrvd_conf
-	if locale -a 2>&1 | grep '^C.UTF-8$$' >/dev/null 2>&1; then \
+	if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
 	    LC_ALL=C.UTF-8; export LC_ALL; \
 	else \
 	    LC_ALL=C; export LC_ALL; \
@@ -257,7 +258,7 @@ fuzz: run-fuzz_logsrvd_conf
 
 check-fuzzer: $(FUZZ_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    if locale -a 2>&1 | grep '^C.UTF-8$$' >/dev/null 2>&1; then \
+	    if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
 		LC_ALL=C.UTF-8; export LC_ALL; \
 	    else \
 		LC_ALL=C; export LC_ALL; \
@@ -272,7 +273,7 @@ check-fuzzer: $(FUZZ_PROGS)
 
 check: $(TEST_PROGS) check-fuzzer
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    if locale -a 2>&1 | grep '^C.UTF-8$$' >/dev/null 2>&1; then \
+	    if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
 		LC_ALL=C.UTF-8; export LC_ALL; \
 	    else \
 		LC_ALL=C; export LC_ALL; \
