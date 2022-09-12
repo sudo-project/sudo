@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN" "5" "September 10, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "September 11, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -305,6 +305,7 @@ filtering and the
 action.
 Other systems will use a dynamic shared object to implement
 intercept.
+Only available starting with API version 1.19.
 .TP 6n
 intercept_setid=bool
 Indicates whether or not the system supports running set-user-ID
@@ -322,6 +323,7 @@ This will disable intercept mode for that program and any other
 programs that it executes.
 The policy plugin may refuse to execute a set-user-ID or set-group-ID
 binary in intercept mode to avoid this.
+Only available starting with API version 1.19.
 .TP 6n
 login_class=string
 BSD
@@ -474,6 +476,13 @@ option.
 Not all plugins support command timeouts and the ability of the
 user to set a timeout may be restricted by policy.
 The format of the timeout string is plugin-specific.
+.TP 6n
+update_ticket=bool
+Set to false if the user specified the
+\fB\-N\fR
+option, indicating that the user wishes to avoid updating any cached
+authentication credentials.
+Only available starting with API version 1.20.
 .PP
 Additional settings may be added in the future so the plugin should
 silently ignore settings that it does not recognize.
@@ -1001,9 +1010,13 @@ The following values are recognized by
 .RS 6n
 .PD 0
 .TP 6n
+apparmor_profile=string
+AppArmor profile to transition to when executing the command.
+Only available starting with API version 1.19.
+.PD
+.TP 6n
 chroot=string
 The root directory to use when running the command.
-.PD
 .TP 6n
 closefrom=number
 If specified,
@@ -1026,7 +1039,7 @@ not be run unless
 is also set (see below).
 .TP 6n
 cwd_optional=bool
-If enabled,
+If set,
 \fBsudo\fR
 will treat an inability to change to the new working directory as a
 non-fatal error.
@@ -1107,7 +1120,7 @@ The specified
 must refer to an open file descriptor.
 .TP 6n
 intercept=bool
-If specified,
+If set,
 \fBsudo\fR
 will intercept attempts to execute a subsequent command and perform
 a policy check via the policy plugin's
@@ -1120,6 +1133,17 @@ See
 in
 sudoers(@mansectform@)
 for details.
+Only available starting with API version 1.18.
+.TP 6n
+intercept_verify=bool
+If set,
+\fBsudo\fR
+will attempt to verify that a command run in intercept mode has the
+expected path name, command line arguments and environment.
+This setting has no effect unless
+\fIuse_ptrace\fR
+is also enabled.
+Only available starting with API version 1.20.
 .TP 6n
 iolog_compress=bool
 Set to true if the I/O logging plugins, if any, should compress the
@@ -1186,7 +1210,7 @@ BSD
 systems.
 .TP 6n
 log_subcmds=bool
-If specified,
+If set,
 \fBsudo\fR
 will call the audit plugin's
 \fBaccept\fR()
@@ -1202,6 +1226,7 @@ See
 in
 sudoers(@mansectform@)
 for more information.
+Only available starting with API version 1.18.
 .TP 6n
 noexec=bool
 If set, prevent the command from executing other programs.
@@ -1235,7 +1260,7 @@ A value of
 \(lqdefault\(rq
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .TP 6n
 rlimit_core=soft,hard
 The largest size core dump file that may be created (in bytes).
@@ -1251,7 +1276,7 @@ A value of
 \(lqdefault\(rq
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .TP 6n
 rlimit_cpu=soft,hard
 The maximum amount of CPU time that the process may use (in seconds).
@@ -1267,7 +1292,7 @@ A value of
 \(lqdefault\(rq
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .TP 6n
 rlimit_data=soft,hard
 The maximum size of the data segment for the process (in bytes).
@@ -1283,7 +1308,7 @@ A value of
 \(lqdefault\(rq
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .TP 6n
 rlimit_fsize=soft,hard
 The largest size file that the process may create (in bytes).
@@ -1299,7 +1324,7 @@ A value of
 \(lqdefault\(rq
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .TP 6n
 rlimit_locks=soft,hard
 The maximum number of locks that the process may establish,
@@ -1316,7 +1341,7 @@ A value of
 \(lqdefault\(rq
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .TP 6n
 rlimit_memlock=soft,hard
 The maximum size that the process may lock in memory (in bytes),
@@ -1333,7 +1358,7 @@ A value of
 \(lqdefault\(rq
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .TP 6n
 rlimit_nofile=soft,hard
 The maximum number of files that the process may have open.
@@ -1349,7 +1374,7 @@ A value of
 \(lqdefault\(rq
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .TP 6n
 rlimit_nproc=soft,hard
 The maximum number of processes that the user may run simultaneously.
@@ -1365,7 +1390,7 @@ A value of
 \(lqdefault\(rq
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .TP 6n
 rlimit_rss=soft,hard
 The maximum size to which the process's resident set size may grow (in bytes).
@@ -1381,7 +1406,7 @@ A value of
 \(lqdefault\(rq
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .TP 6n
 rlimit_stack=soft,hard
 The maximum size to which the process's stack may grow (in bytes).
@@ -1397,7 +1422,7 @@ A value of
 \(lqdefault\(rq
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .TP 6n
 runas_egid=gid
 Effective group-ID to run the command as.
@@ -1493,7 +1518,7 @@ These restrictions are not enforced when
 \fBsudoedit\fR
 is run by root.
 The
-\fIsudoedit_follow\fR
+\fIsudoedit_checkdir\fR
 option can be set to false to disable this check.
 Only available starting with API version 1.8.
 .TP 6n
@@ -1528,7 +1553,7 @@ Force the value specified by the
 option to override any umask set by PAM or login.conf.
 .TP 6n
 use_ptrace=bool
-If specified,
+If set,
 \fBsudo\fR
 will use
 ptrace(2)
@@ -1536,6 +1561,7 @@ to implement intercept mode if supported by the system.
 This setting has no effect unless
 \fIintercept\fR
 is also set.
+Only available starting with API version 1.19.
 .TP 6n
 use_pty=bool
 Allocate a pseudo-terminal to run the command in, regardless of whether

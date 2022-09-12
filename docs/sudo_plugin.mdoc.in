@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 10, 2022
+.Dd September 11, 2022
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -282,6 +282,7 @@ filtering and the
 action.
 Other systems will use a dynamic shared object to implement
 intercept.
+Only available starting with API version 1.19.
 .It intercept_setid=bool
 Indicates whether or not the system supports running set-user-ID
 and set-group-ID binaries in intercept mode.
@@ -298,6 +299,7 @@ This will disable intercept mode for that program and any other
 programs that it executes.
 The policy plugin may refuse to execute a set-user-ID or set-group-ID
 binary in intercept mode to avoid this.
+Only available starting with API version 1.19.
 .It login_class=string
 .Bx
 login class to use when setting resource limits and nice value,
@@ -430,6 +432,12 @@ option.
 Not all plugins support command timeouts and the ability of the
 user to set a timeout may be restricted by policy.
 The format of the timeout string is plugin-specific.
+.It update_ticket=bool
+Set to false if the user specified the
+.Fl N
+option, indicating that the user wishes to avoid updating any cached
+authentication credentials.
+Only available starting with API version 1.20.
 .El
 .Pp
 Additional settings may be added in the future so the plugin should
@@ -894,6 +902,9 @@ pointer.
 The following values are recognized by
 .Nm sudo :
 .Bl -tag -width 4n
+.It apparmor_profile=string
+AppArmor profile to transition to when executing the command.
+Only available starting with API version 1.19.
 .It chroot=string
 The root directory to use when running the command.
 .It closefrom=number
@@ -914,7 +925,7 @@ not be run unless
 .Em cwd_optional
 is also set (see below).
 .It cwd_optional=bool
-If enabled,
+If set,
 .Nm sudo
 will treat an inability to change to the new working directory as a
 non-fatal error.
@@ -992,7 +1003,7 @@ The specified
 .Em number
 must refer to an open file descriptor.
 .It intercept=bool
-If specified,
+If set,
 .Nm sudo
 will intercept attempts to execute a subsequent command and perform
 a policy check via the policy plugin's
@@ -1005,6 +1016,16 @@ See
 in
 .Xr sudoers @mansectform@
 for details.
+Only available starting with API version 1.18.
+.It intercept_verify=bool
+If set,
+.Nm sudo
+will attempt to verify that a command run in intercept mode has the
+expected path name, command line arguments and environment.
+This setting has no effect unless
+.Em use_ptrace
+is also enabled.
+Only available starting with API version 1.20.
 .It iolog_compress=bool
 Set to true if the I/O logging plugins, if any, should compress the
 log data.
@@ -1058,7 +1079,7 @@ on
 .Bx
 systems.
 .It log_subcmds=bool
-If specified,
+If set,
 .Nm sudo
 will call the audit plugin's
 .Fn accept
@@ -1074,6 +1095,7 @@ See
 in
 .Xr sudoers @mansectform@
 for more information.
+Only available starting with API version 1.18.
 .It noexec=bool
 If set, prevent the command from executing other programs.
 .It preserve_fds=list
@@ -1103,7 +1125,7 @@ A value of
 .Dq default
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .It rlimit_core=soft,hard
 The largest size core dump file that may be created (in bytes).
 The soft and hard limits are separated by a comma.
@@ -1118,7 +1140,7 @@ A value of
 .Dq default
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .It rlimit_cpu=soft,hard
 The maximum amount of CPU time that the process may use (in seconds).
 The soft and hard limits are separated by a comma.
@@ -1133,7 +1155,7 @@ A value of
 .Dq default
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .It rlimit_data=soft,hard
 The maximum size of the data segment for the process (in bytes).
 The soft and hard limits are separated by a comma.
@@ -1148,7 +1170,7 @@ A value of
 .Dq default
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .It rlimit_fsize=soft,hard
 The largest size file that the process may create (in bytes).
 The soft and hard limits are separated by a comma.
@@ -1163,7 +1185,7 @@ A value of
 .Dq default
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .It rlimit_locks=soft,hard
 The maximum number of locks that the process may establish,
 if supported by the operating system.
@@ -1179,7 +1201,7 @@ A value of
 .Dq default
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .It rlimit_memlock=soft,hard
 The maximum size that the process may lock in memory (in bytes),
 if supported by the operating system.
@@ -1195,7 +1217,7 @@ A value of
 .Dq default
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .It rlimit_nofile=soft,hard
 The maximum number of files that the process may have open.
 The soft and hard limits are separated by a comma.
@@ -1210,7 +1232,7 @@ A value of
 .Dq default
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .It rlimit_nproc=soft,hard
 The maximum number of processes that the user may run simultaneously.
 The soft and hard limits are separated by a comma.
@@ -1225,7 +1247,7 @@ A value of
 .Dq default
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .It rlimit_rss=soft,hard
 The maximum size to which the process's resident set size may grow (in bytes).
 The soft and hard limits are separated by a comma.
@@ -1240,7 +1262,7 @@ A value of
 .Dq default
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .It rlimit_stack=soft,hard
 The maximum size to which the process's stack may grow (in bytes).
 The soft and hard limits are separated by a comma.
@@ -1255,7 +1277,7 @@ A value of
 .Dq default
 will cause the target user's default resource limit to be used
 on systems that allow per-user resource limits to be configured.
-Only available starting with API version 1.17.
+Only available starting with API version 1.18.
 .It runas_egid=gid
 Effective group-ID to run the command as.
 If not specified, the value of
@@ -1339,7 +1361,7 @@ These restrictions are not enforced when
 .Nm sudoedit
 is run by root.
 The
-.Em sudoedit_follow
+.Em sudoedit_checkdir
 option can be set to false to disable this check.
 Only available starting with API version 1.8.
 .It sudoedit_follow=bool
@@ -1369,7 +1391,7 @@ Force the value specified by the
 .Em umask
 option to override any umask set by PAM or login.conf.
 .It use_ptrace=bool
-If specified,
+If set,
 .Nm sudo
 will use
 .Xr ptrace 2
@@ -1377,6 +1399,7 @@ to implement intercept mode if supported by the system.
 This setting has no effect unless
 .Em intercept
 is also set.
+Only available starting with API version 1.19.
 .It use_pty=bool
 Allocate a pseudo-terminal to run the command in, regardless of whether
 or not I/O logging is in use.
