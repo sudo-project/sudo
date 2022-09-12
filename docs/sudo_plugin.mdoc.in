@@ -1630,21 +1630,27 @@ function can be
 used to tear down the session that was opened by
 .Li init_session .
 .Pp
-The
-.Em pwd
-argument points to a passwd struct for the user the
-command will be run as if the user-ID the command will run as was found
-in the password database, otherwise it will be
-.Dv NULL .
+Returns 1 on success, 0 on failure, and \-1 on error.
+On error, the plugin may optionally call the
+.Fn conversation
+or
+.Fn plugin_printf
+function with
+.Dv SUDO_CONF_ERROR_MSG
+to present additional
+error information to the user.
 .Pp
+The function arguments are as follows:
+.Bl -tag -width 4n
+.It pwd
+If the user-ID the command will run as was found in the password database,
+.Fa pwd
+will describe that user, otherwise it will be
+.Dv NULL .
+.It user_env_out
 The
-.Em user_env_out
-argument points to the environment the command will
-run in, in the form of a
 .Dv NULL Ns -terminated
-vector of
-.Dq name=value
-strings.
+environment vector to use when executing the command.
 This is the same string passed back to the front-end via
 the Policy Plugin's
 .Em user_env_out
@@ -1669,16 +1675,33 @@ version specified by the
 front-end before using
 .Em user_env_out .
 Failure to do so may result in a crash.
+.It errstr
+If the
+.Fn init_session
+function returns a value other than 1, the plugin may
+store a message describing the failure or error in
+.Fa errstr .
+The
+.Nm sudo
+front-end will then pass this value to any registered audit plugins.
+The string stored in
+.Fa errstr
+must remain valid until the plugin's
+.Fn close
+function is called.
 .Pp
-Returns 1 on success, 0 on failure, and \-1 on error.
-On error, the plugin may optionally call the
-.Fn conversation
-or
-.Fn plugin_printf
-function with
-.Dv SUDO_CONF_ERROR_MSG
-to present additional
-error information to the user.
+The
+.Fa errstr
+parameter is only available starting with
+API version 1.15.
+A plugin
+.Sy must
+check the API version specified by the
+.Nm sudo
+front-end before using
+.Fa errstr .
+Failure to do so may result in a crash.
+.El
 .It register_hooks
 .Bd -literal -compact
 void (*register_hooks)(int version,
@@ -1807,32 +1830,6 @@ front-end doesn't support API
 version 1.15 or higher,
 .Fn event_alloc
 will not be set.
-.It errstr
-If the
-.Fn init_session
-function returns a value other than 1, the plugin may
-store a message describing the failure or error in
-.Fa errstr .
-The
-.Nm sudo
-front-end will then pass this value to any registered audit plugins.
-The string stored in
-.Fa errstr
-must remain valid until the plugin's
-.Fn close
-function is called.
-.Pp
-The
-.Fa errstr
-parameter is only available starting with
-API version 1.15.
-A plugin
-.Sy must
-check the API version specified by the
-.Nm sudo
-front-end before using
-.Fa errstr .
-Failure to do so may result in a crash.
 .El
 .Pp
 .Em Policy Plugin Version Macros

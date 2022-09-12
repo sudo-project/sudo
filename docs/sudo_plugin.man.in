@@ -1824,21 +1824,28 @@ function can be
 used to tear down the session that was opened by
 \fRinit_session\fR.
 .sp
-The
-\fIpwd\fR
-argument points to a passwd struct for the user the
-command will be run as if the user-ID the command will run as was found
-in the password database, otherwise it will be
-\fRNULL\fR.
+Returns 1 on success, 0 on failure, and \-1 on error.
+On error, the plugin may optionally call the
+\fBconversation\fR()
+or
+\fBplugin_printf\fR()
+function with
+\fRSUDO_CONF_ERROR_MSG\fR
+to present additional
+error information to the user.
 .sp
+The function arguments are as follows:
+.TP 6n
+pwd
+If the user-ID the command will run as was found in the password database,
+\fIpwd\fR
+will describe that user, otherwise it will be
+\fRNULL\fR.
+.TP 6n
+user_env_out
 The
-\fIuser_env_out\fR
-argument points to the environment the command will
-run in, in the form of a
 \fRNULL\fR-terminated
-vector of
-\(lqname=value\(rq
-strings.
+environment vector to use when executing the command.
 This is the same string passed back to the front-end via
 the Policy Plugin's
 \fIuser_env_out\fR
@@ -1863,17 +1870,37 @@ version specified by the
 front-end before using
 \fIuser_env_out\fR.
 Failure to do so may result in a crash.
+.TP 6n
+errstr
+If the
+\fBinit_session\fR()
+function returns a value other than 1, the plugin may
+store a message describing the failure or error in
+\fIerrstr\fR.
+The
+\fBsudo\fR
+front-end will then pass this value to any registered audit plugins.
+The string stored in
+\fIerrstr\fR
+must remain valid until the plugin's
+\fBclose\fR()
+function is called.
 .sp
-Returns 1 on success, 0 on failure, and \-1 on error.
-On error, the plugin may optionally call the
-\fBconversation\fR()
-or
-\fBplugin_printf\fR()
-function with
-\fRSUDO_CONF_ERROR_MSG\fR
-to present additional
-error information to the user.
+The
+\fIerrstr\fR
+parameter is only available starting with
+API version 1.15.
+A plugin
+\fBmust\fR
+check the API version specified by the
+\fBsudo\fR
+front-end before using
+\fIerrstr\fR.
+Failure to do so may result in a crash.
+.PD 0
+.PP
 .RE
+.PD
 .TP 6n
 register_hooks
 .nf
@@ -2017,33 +2044,6 @@ version 1.15 or higher,
 \fBevent_alloc\fR()
 will not be set.
 .RE
-.TP 6n
-errstr
-If the
-\fBinit_session\fR()
-function returns a value other than 1, the plugin may
-store a message describing the failure or error in
-\fIerrstr\fR.
-The
-\fBsudo\fR
-front-end will then pass this value to any registered audit plugins.
-The string stored in
-\fIerrstr\fR
-must remain valid until the plugin's
-\fBclose\fR()
-function is called.
-.sp
-The
-\fIerrstr\fR
-parameter is only available starting with
-API version 1.15.
-A plugin
-\fBmust\fR
-check the API version specified by the
-\fBsudo\fR
-front-end before using
-\fIerrstr\fR.
-Failure to do so may result in a crash.
 .PP
 \fIPolicy Plugin Version Macros\fR
 .nf
