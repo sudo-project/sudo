@@ -440,4 +440,4 @@ sandwich:
 	fi
 
 .PHONY: clean mostlyclean distclean cleandir clobber realclean ChangeLog \
-        me a sandwhich check-format reformat
+        me a sandwich check-format reformat
