@@ -4071,7 +4071,7 @@ unless insults are enabled.
 .It editor
 A colon
 .Pq Ql :\&
-separated list of editors path names used by
+separated list of editor path names used by
 .Nm sudoedit
 and
 .Nm visudo .

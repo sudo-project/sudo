@@ -2027,7 +2027,7 @@ There is additional overhead due to the policy check that may add
 latency when running commands such as shell scripts that execute a
 large number of sub-commands.
 For interactive commands, such as a shell or editor,
-the overhead is not usually noticable.
+the overhead is not usually noticeable.
 .sp
 In the following example, user
 \fBchuck\fR
@@ -4296,7 +4296,7 @@ unless insults are enabled.
 editor
 A colon
 (\(oq:\&\(cq)
-separated list of editors path names used by
+separated list of editor path names used by
 \fBsudoedit\fR
 and
 \fBvisudo\fR.
