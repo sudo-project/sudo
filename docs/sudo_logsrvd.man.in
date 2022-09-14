@@ -117,7 +117,7 @@ section.
 .SS "Debugging sudo_logsrvd"
 \fBsudo_logsrvd\fR
 supports a flexible debugging framework that is configured via
-\fRDebug\fR
+\fIDebug\fR
 lines in the
 sudo.conf(@mansectform@)
 file.

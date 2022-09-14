@@ -154,7 +154,7 @@ version and exit.
 .SS "Debugging sendlog"
 \fBsudo_sendlog\fR
 supports a flexible debugging framework that is configured via
-\fRDebug\fR
+\fIDebug\fR
 lines in the
 sudo.conf(@mansectform@)
 file.

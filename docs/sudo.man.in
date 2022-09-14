@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDO" "@mansectsu@" "August 2, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "September 13, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -135,9 +135,7 @@ time limit.
 This limit is policy-specific; the default password prompt timeout
 for the
 \fIsudoers\fR
-security policy is
-\fR@password_timeout@\fR
-minutes.
+security policy is @password_timeout@ minutes.
 .PP
 Security policies may support credential caching to allow the user
 to run
@@ -145,9 +143,7 @@ to run
 again for a period of time without requiring authentication.
 By default, the
 \fIsudoers\fR
-policy caches credentials on a per-terminal basis for
-\fR@timeout@\fR
-minutes.
+policy caches credentials on a per-terminal basis for @timeout@ minutes.
 See the
 \fItimestamp_type\fR
 and
@@ -399,7 +395,7 @@ may be either a group name or a numeric group-ID
 prefixed with the
 \(oq#\(cq
 character (e.g.,
-\fR#0\fR
+\(oq#0\(cq
 for GID 0).
 When running a command as a GID, many shells require that the
 \(oq#\(cq
@@ -574,7 +570,7 @@ policy:
 .RS 12n
 .PD 0
 .TP 4n
-\fR%H\fR
+%H
 expanded to the host name including the domain name (only if the
 machine's host name is fully qualified or the
 \fIfqdn\fR
@@ -582,10 +578,10 @@ option is set in
 sudoers(@mansectform@))
 .PD
 .TP 4n
-\fR%h\fR
+%h
 expanded to the local host name without the domain name
 .TP 4n
-\fR%p\fR
+%p
 expanded to the name of the user whose password is being requested
 (respects the
 \fIrootpw\fR,
@@ -595,16 +591,16 @@ and
 flags in
 sudoers(@mansectform@))
 .TP 4n
-\fR\&%U\fR
+\&%U
 expanded to the login name of the user the command will be run as
 (defaults to root unless the
 \fB\-u\fR
 option is also specified)
 .TP 4n
-\fR%u\fR
+%u
 expanded to the invoking user's login name
 .TP 4n
-\fR%%\fR
+%%
 two consecutive
 \(oq%\(cq
 characters are collapsed into a single
@@ -707,7 +703,7 @@ may be either a user name or a numeric user-ID
 prefixed with the
 \(oq#\(cq
 character (e.g.,
-\fR#0\fR
+\(oq#0\(cq
 for UID 0).
 When running commands as a UID, many shells require that the
 \(oq#\(cq
@@ -740,9 +736,7 @@ For the
 \fIsudoers\fR
 plugin, this extends the
 \fBsudo\fR
-timeout for another
-\fR@timeout@\fR
-minutes by default, but does not run a command.
+timeout for another @timeout@ minutes by default, but does not run a command.
 Not all security policies support cached credentials.
 .TP 12n
 \fB\--\fR
@@ -778,7 +772,7 @@ option is set in
 the command to be run has the
 \fRSETENV\fR
 tag set or the command matched is
-\fRALL\fR,
+\fBALL\fR,
 the user may set variables that would otherwise be forbidden.
 See
 sudoers(@mansectform@)
@@ -986,7 +980,7 @@ run in a new pty,
 may execute the command directly instead of running it as a child process.
 .SS "Plugins"
 Plugins may be specified via
-\fRPlugin\fR
+\fIPlugin\fR
 directives in the
 sudo.conf(@mansectform@)
 file.
@@ -997,7 +991,7 @@ binary.
 If no
 sudo.conf(@mansectform@)
 file is present, or if it doesn't contain any
-\fRPlugin\fR
+\fIPlugin\fR
 lines,
 \fBsudo\fR
 will use
@@ -1086,9 +1080,9 @@ By default,
 \fBsudo\fR
 will only log the command it explicitly runs.
 If a user runs a command such as
-\fRsudo su\fR
+\(oqsudo su\(cq
 or
-\fRsudo sh\fR,
+\(oqsudo sh\(cq,
 subsequent commands run from that shell are not subject to
 \fBsudo\fR's
 security policy.
@@ -1176,7 +1170,7 @@ or when
 is enabled in
 \fIsudoers\fR
 and
-\fIHOME\fR
+\fRHOME\fR
 is not present in the
 \fIenv_keep\fR
 list.
@@ -1226,8 +1220,7 @@ Default editor to use in
 Set to the group-ID of the user who invoked sudo.
 .TP 17n
 \fRSUDO_PROMPT\fR
-Used as the default password prompt unless
-the
+Used as the default password prompt unless the
 \fB\-p\fR
 option was specified.
 .TP 17n
@@ -1315,7 +1308,7 @@ $ sudo shutdown -r +15 "quick reboot"
 .PP
 To make a usage listing of the directories in the /home partition.
 The commands are run in a sub-shell to allow the
-\fRcd\fR
+\(oqcd\(cq
 command and file redirection to work.
 .nf
 .sp
@@ -1500,7 +1493,7 @@ plugin's
 functionality.
 .PP
 It is not meaningful to run the
-\fRcd\fR
+\(oqcd\(cq
 command directly via sudo, e.g.,
 .nf
 .sp

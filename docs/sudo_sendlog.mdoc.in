@@ -139,7 +139,7 @@ version and exit.
 .Ss Debugging sendlog
 .Nm
 supports a flexible debugging framework that is configured via
-.Li Debug
+.Em Debug
 lines in the
 .Xr sudo.conf @mansectform@
 file.

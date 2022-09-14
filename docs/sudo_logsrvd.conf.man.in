@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "February 16, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "September 13, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -168,14 +168,16 @@ will enable the TCP keepalive socket option on the client connection.
 This enables the periodic transmission of keepalive messages to the client.
 If the client does not respond to a message in time, the connection will
 be closed.
-Defaults to true.
+Defaults to
+\fItrue\fR.
 .TP 10n
 timeout = number
 The amount of time, in seconds,
 \fBsudo_logsrvd\fR
 will wait for the client to respond.
 A value of 0 will disable the timeout.
-The default value is 30.
+The default value is
+\fI30\fR.
 .TP 10n
 tls_cacert = path
 The path to a certificate authority bundle file, in PEM format,
@@ -202,7 +204,7 @@ authority, the
 setting must be set to a CA bundle that contains the CA certificate
 used to generate the client certificate.
 The default value is
-\fRfalse\fR.
+\fIfalse\fR.
 .TP 10n
 tls_ciphers_v12 = string
 A list of ciphers to use for connections secured by TLS version 1.2 only,
@@ -214,7 +216,7 @@ section in
 openssl-ciphers(1)
 for full details.
 The default value is
-\fRHIGH:!aNULL\fR
+\(lqHIGH:!aNULL\(rq
 which consists of encryption cipher suites with key lengths larger than
 128 bits, and some cipher suites with 128-bit keys.
 Cipher suites that offer no authentication are excluded.
@@ -241,7 +243,8 @@ TLS_AES_128_CCM_8_SHA256
 .RE
 .RS 10n
 .sp
-The default cipher suite is TLS_AES_256_GCM_SHA384.
+The default cipher suite is
+\(lqTLS_AES_256_GCM_SHA384\(rq.
 .RE
 .PD
 .TP 10n
@@ -274,7 +277,8 @@ configuration is changed.
 If false, no verification is performed of the server certificate.
 When using self-signed certificates without a certificate authority,
 this setting should be set to false.
-The default value is true.
+The default value is
+\fItrue\fR.
 .SS "relay"
 The
 \fIrelay\fR
@@ -301,7 +305,8 @@ setting controls the amount of time
 \fBsudo_logsrvd\fR
 will wait for the relay to respond.
 A value of 0 will disable the timeout.
-The default value is 30.
+The default value is
+\fI30\fR.
 .TP 10n
 relay_dir = path
 The directory in which log messages are temporarily stored before they
@@ -339,7 +344,8 @@ lines are specified, the first available relay host will be used.
 retry_interval = number
 The number of seconds to wait after a connection error before making
 a new attempt to forward a message to a relay host.
-The default value is 30 seconds.
+The default value is
+\fI30\fR.
 .TP 10n
 store_first = boolean
 If true,
@@ -365,7 +371,8 @@ The amount of time, in seconds,
 \fBsudo_logsrvd\fR
 will wait for the relay server to respond after a connection has succeeded.
 A value of 0 will disable the timeout.
-The default value is 30.
+The default value is
+\fI30\fR.
 .TP 10n
 tls_cacert = path
 The path to a certificate authority bundle file, in PEM format,
@@ -455,7 +462,7 @@ If set, I/O logs will be compressed using
 Enabling compression can make it harder to view the logs in real-time as
 the program is executing due to buffering.
 The default value is
-\fRfalse\fR.
+\fIfalse\fR.
 .TP 10n
 iolog_dir = path
 The top-level directory to use when constructing the path
@@ -471,30 +478,30 @@ escape sequences are supported:
 .RS 10n
 .PD 0
 .TP 6n
-\fR%{seq}\fR
+%{seq}
 expanded to a monotonically increasing base-36 sequence number, such as 0100A5,
 where every two digits are used to form a new directory, e.g.,
 \fI01/00/A5\fR
 .PD
 .TP 6n
-\fR%{user}\fR
+%{user}
 expanded to the invoking user's login name
 .TP 6n
-\fR%{group}\fR
+%{group}
 expanded to the name of the invoking user's real group-ID
 .TP 6n
-\fR%{runas_user}\fR
+%{runas_user}
 expanded to the login name of the user the command will
 be run as (e.g., root)
 .TP 6n
-\fR%{runas_group}\fR
+%{runas_group}
 expanded to the group name of the user the command will
 be run as (e.g., wheel)
 .TP 6n
-\fR%{hostname}\fR
+%{hostname}
 expanded to the local host name without the domain name
 .TP 6n
-\fR%{command}\fR
+%{command}
 expanded to the base name of the command being run
 .PP
 In addition, any escape sequences supported by the system's
@@ -516,7 +523,7 @@ It is possible for
 \fIiolog_file\fR
 to contain directory components.
 The default value is
-\fR%{seq}\fR.
+\(lq%{seq}\(rq.
 .sp
 See the
 \fIiolog_dir\fR
@@ -526,9 +533,9 @@ escape sequences.
 .sp
 In addition to the escape sequences, path names that end in six or
 more
-\fRX\fRs
+\fIX\fRs
 will have the
-\fRX\fRs
+\fIX\fRs
 replaced with a unique combination of digits and letters, similar to the
 mktemp(3)
 function.
@@ -542,7 +549,7 @@ overwritten unless
 \fIiolog_file\fR
 ends in six or
 more
-\fRX\fRs.
+\fIX\fRs.
 .TP 10n
 iolog_flush = boolean
 If set, I/O log data is flushed to disk after each write instead of
@@ -553,7 +560,7 @@ of I/O log compression.
 I/O logs are always flushed before sending a commit point to the client
 regardless of this setting.
 The default value is
-\fRtrue\fR.
+\fItrue\fR.
 .TP 10n
 iolog_group = name
 The group name to look up when setting the group-ID on new I/O log
@@ -579,7 +586,7 @@ When creating I/O log directories, search (execute) bits are added
 to match the read and write bits specified by
 \fIiolog_mode\fR.
 The default value is
-\fR0600\fR.
+\fI0600\fR.
 .TP 10n
 iolog_user = name
 The user name to look up when setting the owner of new
@@ -599,7 +606,7 @@ the password will still be present in the I/O log.
 If
 \fIlog_passwords\fR
 is set to
-\fRfalse\fR,
+\fIfalse\fR,
 \fBsudo_logsrvd\fR
 will attempt to prevent passwords from being logged.
 It does this by using the regular expressions in
@@ -617,16 +624,16 @@ when the
 option is set), only the
 first character of the password will be replaced in the I/O log.
 The default value is
-\fRtrue\fR.
+\fItrue\fR.
 .TP 10n
 maxseq = number
 The maximum sequence number that will be substituted for the
-\(lq\fR%{seq}\fR\(rq
+\(lq%{seq}\(rq
 escape in the I/O log file (see the
 \fIiolog_dir\fR
 description above for more information).
 While the value substituted for
-\(lq\fR%{seq}\fR\(rq
+\(lq%{seq}\(rq
 is in base 36,
 \fImaxseq\fR
 itself should be expressed in decimal.
@@ -634,7 +641,8 @@ Values larger than 2176782336 (which corresponds to the
 base 36 sequence number
 \(lqZZZZZZ\(rq)
 will be silently truncated to 2176782336.
-The default value is 2176782336.
+The default value is
+\fI2176782336\fR.
 .TP 10n
 passprompt_regex = string
 One or more POSIX extended regular expressions used to
@@ -669,7 +677,8 @@ log_exit = boolean
 If true,
 \fBsudo_logsrvd\fR
 will log an event when a command exits or is terminated by a signal.
-Defaults to false.
+Defaults to
+\fIfalse\fR.
 .TP 6n
 log_format = string
 The event log format.
@@ -691,7 +700,7 @@ syslog(3).
 facility = string
 Syslog facility if syslog is being used for logging.
 Defaults to
-\fR@logfac@\fR.
+\fI@logfac@\fR.
 .sp
 The following syslog facilities are supported:
 \fBauthpriv\fR
@@ -714,7 +723,7 @@ accept_priority = string
 Syslog priority to use when the user is allowed to run a command and
 authentication is successful.
 Defaults to
-\fR@goodpri@\fR.
+\fI@goodpri@\fR.
 .sp
 The following syslog priorities are supported:
 \fBalert\fR,
@@ -735,7 +744,7 @@ reject_priority = string
 Syslog priority to use when the user is not allowed to run a command or
 when authentication is unsuccessful.
 Defaults to
-\fR@badpri@\fR.
+\fI@badpri@\fR.
 .sp
 See
 \fIaccept_priority\fR
@@ -744,7 +753,7 @@ for the list of supported syslog priorities.
 alert_priority = string
 Syslog priority to use for event log alert messages received from the client.
 Defaults to
-\fR@badpri@\fR.
+\fI@badpri@\fR.
 .sp
 See
 \fIaccept_priority\fR
@@ -779,7 +788,7 @@ server_facility = string
 Syslog facility if syslog is being used for server warning messages.
 See above for a list of supported facilities.
 Defaults to
-\fRdaemon\fR
+\fIdaemon\fR
 .SS "logfile"
 The
 \fIlogfile\fR
@@ -800,10 +809,12 @@ Formatting is performed via the system's
 strftime(3)
 function so any escape sequences supported by that function will be expanded.
 The default value is
-\(lq\fR%h %e %T\fR\(rq
+\(lq%h %e %T\(rq
 which produces dates like
 \(lqOct 3 07:15:24\(rq
-in the C locale.
+in the
+\(oqC\(cq
+locale.
 .SH "FILES"
 .TP 26n
 \fI@sysconfdir@/sudo_logsrvd.conf\fR

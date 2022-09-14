@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd July 25, 2022
+.Dd September 13, 2022
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -67,16 +67,16 @@ is no need for a specialized tool to check syntax.
 The
 .Em sudoers
 configuration is contained in the
-.Li ou=SUDOers
+.Ql ou=SUDOers
 LDAP container.
 .Pp
 Sudo first looks for the
-.Li cn=defaults
+.Ql cn=defaults
 entry in the SUDOers container.
 If found, the multi-valued
-.Li sudoOption
+.Em sudoOption
 attribute is parsed in the same manner as a global
-.Li Defaults
+.Em Defaults
 line in
 .Pa @sysconfdir@/sudoers .
 In the following example, the
@@ -92,7 +92,7 @@ sudoOption: env_keep+=SSH_AUTH_SOCK
 .Ed
 .Pp
 The equivalent of a sudoer in LDAP is a
-.Li sudoRole .
+.Em sudoRole .
 It consists of the following attributes:
 .Bl -tag -width 4n
 .It Sy sudoUser
@@ -115,35 +115,35 @@ Non-Unix group support is only available when an appropriate
 .Em group_plugin
 is defined in the global
 .Em defaults
-.Li sudoRole
+.Em sudoRole
 object.
 If a
-.Li sudoUser
+.Em sudoUser
 entry is preceded by an exclamation point,
 .Ql \&! ,
 and the entry matches, the
-.Li sudoRole
+.Em sudoRole
 in which it resides will be ignored.
 Negated
-.Li sudoUser
+.Em sudoUser
 entries are only supported by version 1.9.9 or higher.
 .It Sy sudoHost
 A host name, IP address, IP network, or host netgroup (prefixed with a
 .Ql + ) .
 The special value
-.Li ALL
+.Sy ALL
 will match any host.
 Host netgroups are matched using the host (both qualified and unqualified)
 and domain members only; the user member is not used when matching.
 If a
-.Li sudoHost
+.Em sudoHost
 entry is preceded by an exclamation point,
 .Ql \&! ,
 and the entry matches, the
-.Li sudoRole
+.Em sudoRole
 in which it resides will be ignored.
 Negated
-.Li sudoHost
+.Em sudoHost
 entries are only supported by version 1.8.18 or higher.
 .It Sy sudoCommand
 A fully-qualified Unix command name with optional command line arguments,
@@ -153,7 +153,7 @@ If a command name is preceded by an exclamation point,
 the user will be prohibited from running that command.
 .Pp
 The built-in command
-.Dq Li sudoedit
+.Dq sudoedit
 is used to permit a user to run
 .Nm sudo
 with the
@@ -162,13 +162,13 @@ option (or as
 .Nm sudoedit ) .
 It may take command line arguments just as a normal command does.
 Unlike other commands,
-.Dq Li sudoedit
+.Dq sudoedit
 is a built into
 .Nm sudo
 itself and must be specified in without a leading path.
 .Pp
 The special value
-.Li ALL
+.Sy ALL
 will match any command.
 .Pp
 If a command name is prefixed with a SHA-2 digest, it will
@@ -192,7 +192,7 @@ Command digests are only supported by version 1.8.7 or higher.
 .It Sy sudoOption
 Identical in function to the global options described above, but
 specific to the
-.Li sudoRole
+.Em sudoRole
 in which it resides.
 .It Sy sudoRunAsUser
 A user name or user-ID (prefixed with
@@ -203,30 +203,29 @@ or user netgroup (prefixed with a
 .Ql + )
 that contains a list of users that commands may be run as.
 The special value
-.Li ALL
+.Sy ALL
 will match any user.
 If a
-.Li sudoRunAsUser
+.Em sudoRunAsUser
 entry is preceded by an exclamation point,
 .Ql \&! ,
 and the entry matches, the
-.Li sudoRole
+.Em sudoRole
 in which it resides will be ignored.
 If
-.Li sudoRunAsUser
+.Em sudoRunAsUser
 is specified but empty, it will match the invoking user.
 If neither
-.Li sudoRunAsUser
+.Em sudoRunAsUser
 nor
-.Li sudoRunAsGroup
+.Em sudoRunAsGroup
 are present, the value of the
 .Em runas_default
-.Li sudoOption
-is used (defaults to
-.Li @runas_default@ ) .
+.Em sudoOption
+is used (defaults to @runas_default@).
 .Pp
 The
-.Li sudoRunAsUser
+.Em sudoRunAsUser
 attribute is only available in
 .Nm sudo
 versions
@@ -234,43 +233,43 @@ versions
 Older versions of
 .Nm sudo
 use the
-.Li sudoRunAs
+.Em sudoRunAs
 attribute instead.
 Negated
-.Li sudoRunAsUser
+.Em sudoRunAsUser
 entries are only supported by version 1.8.26 or higher.
 .It Sy sudoRunAsGroup
 A Unix group or group-ID (prefixed with
 .Ql # )
 that commands may be run as.
 The special value
-.Li ALL
+.Sy ALL
 will match any group.
 If a
-.Li sudoRunAsGroup
+.Em sudoRunAsGroup
 entry is preceded by an exclamation point,
 .Ql \&! ,
 and the entry matches, the
-.Li sudoRole
+.Em sudoRole
 in which it resides will be ignored.
 .Pp
 The
-.Li sudoRunAsGroup
+.Em sudoRunAsGroup
 attribute is only available in
 .Nm sudo
 versions
 1.7.0 and higher.
 Negated
-.Li sudoRunAsGroup
+.Em sudoRunAsGroup
 entries are only supported by version 1.8.26 or higher.
 .It Sy sudoNotBefore
 A timestamp in the form
-.Li yyyymmddHHMMSSZ
+.Ql yyyymmddHHMMSSZ
 that can be used to provide a start date/time for when the
-.Li sudoRole
+.Em sudoRole
 will be valid.
 If multiple
-.Li sudoNotBefore
+.Em sudoNotBefore
 entries are present, the earliest is used.
 Timestamps must be in Coordinated Universal Time (UTC),
 not the local timezone.
@@ -278,7 +277,7 @@ The minute and seconds portions are optional, but some LDAP servers
 require that they be present (contrary to the RFC).
 .Pp
 The
-.Li sudoNotBefore
+.Em sudoNotBefore
 attribute is only available in
 .Nm sudo
 versions 1.7.5 and higher and must be explicitly enabled via the
@@ -287,12 +286,12 @@ option in
 .Pa @ldap_conf@ .
 .It Sy sudoNotAfter
 A timestamp in the form
-.Li yyyymmddHHMMSSZ
+.Ql yyyymmddHHMMSSZ
 that indicates an expiration date/time, after which the
-.Li sudoRole
+.Em sudoRole
 will no longer be valid.
 If multiple
-.Li sudoNotAfter
+.Em sudoNotAfter
 entries are present, the last one is used.
 Timestamps must be in Coordinated Universal Time (UTC),
 not the local timezone.
@@ -300,7 +299,7 @@ The minute and seconds portions are optional, but some LDAP servers
 require that they be present (contrary to the RFC).
 .Pp
 The
-.Li sudoNotAfter
+.Em sudoNotAfter
 attribute is only available in
 .Nm sudo
 versions
@@ -310,26 +309,26 @@ option in
 .Pa @ldap_conf@ .
 .It Sy sudoOrder
 The
-.Li sudoRole
+.Em sudoRole
 entries retrieved from the LDAP directory have no inherent order.
 The
-.Li sudoOrder
+.Em sudoOrder
 attribute is an integer (or floating point value for LDAP servers
 that support it) that is used to sort the matching entries.
 This allows LDAP-based sudoers entries to more closely mimic the behavior
 of the sudoers file, where the order of the entries influences the result.
 If multiple entries match, the entry with the highest
-.Li sudoOrder
+.Em sudoOrder
 attribute is chosen.
 This corresponds to the
 .Dq last match
 behavior of the sudoers file.
 If the
-.Li sudoOrder
+.Em sudoOrder
 attribute is not present, a value of 0 is assumed.
 .Pp
 The
-.Li sudoOrder
+.Em sudoOrder
 attribute is only available in
 .Nm sudo
 versions 1.7.5 and higher.
@@ -338,12 +337,12 @@ versions 1.7.5 and higher.
 Each attribute listed above should contain a single value, but there
 may be multiple instances of each attribute type.
 A
-.Li sudoRole
+.Em sudoRole
 must contain at least one
-.Li sudoUser ,
-.Li sudoHost ,
+.Em sudoUser ,
+.Em sudoHost ,
 and
-.Li sudoCommand .
+.Em sudoCommand .
 .Pp
 The following example allows users in group wheel to run any command
 on any host via
@@ -364,7 +363,7 @@ The first query is to parse the global options.
 The second is to match against the user's name and the groups that
 the user belongs to.
 (The special
-.Li ALL
+.Sy ALL
 tag is matched in this query too.)
 If no match is returned for the user's name and groups, a third
 query returns all entries containing user netgroups and other
@@ -391,12 +390,12 @@ are as follows:
 .Bl -enum
 .It
 Match all
-.Li nisNetgroup
+.Em nisNetgroup
 records with a
-.Li nisNetgroupTriple
+.Em nisNetgroupTriple
 containing the user, host, and NIS domain.
 The query will match
-.Li nisNetgroupTriple
+.Em nisNetgroupTriple
 entries with either the short or long form of the host name or
 no host name specified in the tuple.
 If the NIS domain is set, the query will match only match entries
@@ -405,12 +404,12 @@ If the NIS domain is
 .Em not
 set, a wildcard is used to match any domain name but be aware that the
 NIS schema used by some LDAP servers may not support wild cards for
-.Li nisNetgroupTriple .
+.Em nisNetgroupTriple .
 .It
 Repeated queries are performed to find any nested
-.Li nisNetgroup
+.Em nisNetgroup
 records with a
-.Li memberNisNetgroup
+.Em memberNisNetgroup
 entry that refers to an already-matched record.
 .El
 .Pp
@@ -445,7 +444,7 @@ returned in any specific order.
 .Pp
 The order in which different entries are applied can be controlled
 using the
-.Li sudoOrder
+.Em sudoOrder
 attribute, but there is no way to guarantee the order of attributes
 within a specific entry.
 If there are conflicting command rules in an entry, the negative
@@ -496,18 +495,18 @@ These cannot be converted automatically.
 For example, a Cmnd_Alias in a
 .Em sudoers
 file may be converted to a
-.Li sudoRole
+.Em sudoRole
 that contains multiple commands.
 Multiple users and/or groups may be assigned to the
-.Li sudoRole .
+.Em sudoRole .
 .Pp
 Also, host, user, runas, and command-based
-.Li Defaults
+.Em Defaults
 entries are not supported.
 However, a
-.Li sudoRole
+.Em sudoRole
 may contain one or more
-.Li sudoOption
+.Em sudoOption
 attributes which can often serve the same purpose.
 .Pp
 Consider the following
@@ -561,7 +560,7 @@ Using a Unix group or netgroup in PAGERS rather than listing each
 user would make this easier to maintain.
 .Pp
 Per-user
-.Li Defaults
+.Em Defaults
 entries can be emulated by using one or more sudoOption attributes
 in a sudoRole.
 Consider the following
@@ -602,7 +601,7 @@ LDAP support, the
 schema must be
 installed on your LDAP server.
 In addition, be sure to index the
-.Li sudoUser
+.Em sudoUser
 attribute.
 .Pp
 The
@@ -748,31 +747,30 @@ The default value is protocol version 3.
 .It Sy NETGROUP_BASE Ar base
 The base DN to use when performing LDAP netgroup queries.
 Typically this is of the form
-.Li ou=netgroup,dc=my-domain,dc=com
-for the domain
-.Li my-domain.com .
+.Ql ou=netgroup,dc=my-domain,dc=com
+for the domain my-domain.com.
 Multiple
 .Sy NETGROUP_BASE
 lines may be specified, in which case they are queried in the order specified.
 .Pp
 This option can be used to query a user's netgroups directly via LDAP
 which is usually faster than fetching every
-.Li sudoRole
+.Em sudoRole
 object containing a
-.Li sudoUser
+.Em sudoUser
 that begins with a
 .Ql +
 prefix.
 The NIS schema used by some LDAP servers need a modification to
 support querying the
-.Li nisNetgroup
+.Em nisNetgroup
 object by its
-.Li nisNetgroupTriple
+.Em nisNetgroupTriple
 member.
 OpenLDAP's
 .Sy slapd
 requires the following change to the
-.Li nisNetgroupTriple
+.Em nisNetgroupTriple
 attribute:
 .Bd -literal -offset 4n
 attributetype ( 1.3.6.1.1.1.1.14 NAME 'nisNetgroupTriple'
@@ -784,13 +782,12 @@ attributetype ( 1.3.6.1.1.1.1.14 NAME 'nisNetgroupTriple'
 .It Sy NETGROUP_SEARCH_FILTER Ar ldap_filter
 An LDAP filter which is used to restrict the set of records returned
 when performing an LDAP netgroup query.
-Typically, this is of the
-form
-.Li attribute=value
+Typically, this is of the form
+.Ql attribute=value
 or
-.Li (&(attribute=value)(attribute2=value2)) .
+.Ql (&(attribute=value)(attribute2=value2)) .
 The default search filter is:
-.Li objectClass=nisNetgroup .
+.Ql objectClass=nisNetgroup .
 If
 .Ar ldap_filter
 is omitted, no search filter will be used.
@@ -867,17 +864,17 @@ This option is only relevant when using SASL authentication.
 If the
 .Sy SSL
 parameter is set to
-.Li on ,
-.Li true ,
+.Em on ,
+.Em true ,
 or
-.Li yes
+.Em yes
 TLS (SSL) encryption is always used when communicating with the LDAP server.
 Typically, this involves connecting to the server on port 636 (ldaps).
 .It Sy SSL Ar start_tls
 If the
 .Sy SSL
 parameter is set to
-.Li start_tls ,
+.Em start_tls ,
 the LDAP server connection is initiated normally and TLS encryption is
 begun before the bind credentials are sent.
 This has the advantage of not requiring a dedicated port for encrypted
@@ -890,9 +887,8 @@ The base DN to use when performing
 .Nm sudo
 LDAP queries.
 Typically this is of the form
-.Li ou=SUDOers,dc=my-domain,dc=com
-for the domain
-.Li my-domain.com .
+.Ql ou=SUDOers,dc=my-domain,dc=com
+for the domain my-domain.com.
 Multiple
 .Sy SUDOERS_BASE
 lines may be specified, in which case they are queried in the order specified.
@@ -932,19 +928,19 @@ when performing a
 LDAP query.
 Typically, this is of the
 form
-.Li attribute=value
+.Ql attribute=value
 or
-.Li (&(attribute=value)(attribute2=value2)) .
+.Ql (&(attribute=value)(attribute2=value2)) .
 The default search filter is:
-.Li objectClass=sudoRole .
+.Ql objectClass=sudoRole .
 If
 .Ar ldap_filter
 is omitted, no search filter will be used.
 .It Sy SUDOERS_TIMED Ar on/true/yes/off/false/no
 Whether or not to evaluate the
-.Li sudoNotBefore
+.Em sudoNotBefore
 and
-.Li sudoNotAfter
+.Em sudoNotAfter
 attributes that implement time-dependent sudoers entries.
 .It Sy TIMELIMIT Ar seconds
 The
@@ -987,9 +983,9 @@ be used to authenticate the client to the LDAP server.
 The certificate type depends on the LDAP libraries used.
 .Bl -tag -width 4n
 .It OpenLDAP:
-.Li tls_cert /etc/ssl/client_cert.pem
+.Ql tls_cert /etc/ssl/client_cert.pem
 .It Netscape-derived:
-.Li tls_cert /var/ldap/cert7.db
+.Ql tls_cert /var/ldap/cert7.db
 .It IBM LDAP:
 Unused, the key database specified by
 .Sy TLS_KEY
@@ -1023,11 +1019,11 @@ The private key must not be password-protected.
 The key type depends on the LDAP libraries used.
 .Bl -tag -width 4n
 .It OpenLDAP:
-.Li tls_key /etc/ssl/client_key.pem
+.Ql tls_key /etc/ssl/client_key.pem
 .It Netscape-derived:
-.Li tls_key /var/ldap/key3.db
+.Ql tls_key /var/ldap/key3.db
 .It IBM LDAP:
-.Li tls_key /usr/ldap/ldapkey.kdb
+.Ql tls_key /usr/ldap/ldapkey.kdb
 .El
 .Pp
 When using IBM LDAP libraries, this file may also contain
@@ -1079,15 +1075,15 @@ The
 must have the same path as the file specified by
 .Sy TLS_KEY ,
 but use a
-.Li .sth
+.Ql .sth
 file extension instead of
-.Li .kdb ,
-e.g.,
-.Li ldapkey.sth .
+.Ql .kdb ,
+for example
+.Ql ldapkey.sth .
 The default
-.Li ldapkey.kdb
+.Ql ldapkey.kdb
 that ships with the IBM Tivoli Directory Server is encrypted with the password
-.Li ssl_password .
+.Ql ssl_password .
 The
 .Em gsk8capicmd
 utility can be used to manage the key database and create a
@@ -1149,9 +1145,9 @@ the latter being for servers that support TLS (SSL) encryption.
 If no
 .Em port
 is specified, the default is port 389 for
-.Li ldap://
+.Ql ldap://
 or port 636 for
-.Li ldaps:// .
+.Ql ldaps:// .
 If no
 .Em hostname
 is specified,
@@ -1164,9 +1160,9 @@ lines are treated identically to a
 .Sy URI
 line containing multiple entries.
 Only systems using the OpenSSL libraries support the mixing of
-.Li ldap://
+.Ql ldap://
 and
-.Li ldaps://
+.Ql ldaps://
 URIs.
 Both the Netscape-derived and IBM LDAP libraries used on most commercial
 versions of Unix are only capable of supporting one or the other.
@@ -1194,13 +1190,13 @@ to specify the
 .Em sudoers
 search order.
 Sudo looks for a line beginning with
-.Li sudoers :
+.Em sudoers :
 and uses this to determine the search order.
 By default,
 .Nm sudo
 does not stop searching after the first match and later matches take
 precedence over earlier ones (unless
-.Li [SUCCESS=return]
+.Ql [SUCCESS=return]
 is used, see below).
 The following sources are recognized:
 .Pp
@@ -1215,14 +1211,14 @@ read sudoers from LDAP
 In addition, a subset of
 .Pa nsswitch.conf Ns -style
 action statements is supported, specifically
-.Li [SUCCESS=return]
+.Ql [SUCCESS=return]
 and
-.Li [NOTFOUND=return] .
+.Ql [NOTFOUND=return] .
 These will unconditionally terminate the search if the user was either
 found
-.Pq Li [SUCCESS=return]
+.Ql [SUCCESS=return]
 or not found
-.Pq Li [NOTFOUND=return]
+.Ql [NOTFOUND=return]
 in the immediately preceding source.
 Other action statements tokens are not supported, nor is test
 negation with
@@ -1292,11 +1288,11 @@ sudoers = ldap = auth, files
 .Ed
 .Pp
 In the above example, the
-.Li auth
+.Em auth
 qualifier only affects user lookups; both LDAP and
 .Em sudoers
 will be queried for
-.Li Defaults
+.Em Defaults
 entries.
 .Pp
 If the
@@ -1318,9 +1314,9 @@ rules.
 To use SSSD as the
 .Em sudoers
 source, you should use
-.Li sss
+.Em sss
 instead of
-.Li ldap
+.Em ldap
 for the sudoers entry in
 .Pa @nsswitch_conf@ .
 The
@@ -1461,7 +1457,7 @@ Simply copy
 it to the schema directory (e.g.,
 .Pa /etc/openldap/schema ) ,
 add the proper
-.Li include
+.Em include
 line in
 .Pa slapd.conf
 and restart

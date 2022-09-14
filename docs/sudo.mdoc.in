@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd August 2, 2022
+.Dd September 13, 2022
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -139,9 +139,7 @@ time limit.
 This limit is policy-specific; the default password prompt timeout
 for the
 .Em sudoers
-security policy is
-.Li @password_timeout@
-minutes.
+security policy is @password_timeout@ minutes.
 .Pp
 Security policies may support credential caching to allow the user
 to run
@@ -149,9 +147,7 @@ to run
 again for a period of time without requiring authentication.
 By default, the
 .Em sudoers
-policy caches credentials on a per-terminal basis for
-.Li @timeout@
-minutes.
+policy caches credentials on a per-terminal basis for @timeout@ minutes.
 See the
 .Em timestamp_type
 and
@@ -380,7 +376,7 @@ may be either a group name or a numeric group-ID
 prefixed with the
 .Ql #
 character (e.g.,
-.Li #0
+.Ql #0
 for GID 0).
 When running a command as a GID, many shells require that the
 .Ql #
@@ -537,15 +533,15 @@ escape sequences are supported by the
 .Em sudoers
 policy:
 .Bl -tag -width 2n
-.It Li %H
+.It %H
 expanded to the host name including the domain name (only if the
 machine's host name is fully qualified or the
 .Em fqdn
 option is set in
 .Xr sudoers @mansectform@ )
-.It Li %h
+.It %h
 expanded to the local host name without the domain name
-.It Li %p
+.It %p
 expanded to the name of the user whose password is being requested
 (respects the
 .Em rootpw ,
@@ -554,14 +550,14 @@ and
 .Em runaspw
 flags in
 .Xr sudoers @mansectform@ )
-.It Li \&%U
+.It \&%U
 expanded to the login name of the user the command will be run as
 (defaults to root unless the
 .Fl u
 option is also specified)
-.It Li %u
+.It %u
 expanded to the invoking user's login name
-.It Li %%
+.It %%
 two consecutive
 .Ql %
 characters are collapsed into a single
@@ -656,7 +652,7 @@ may be either a user name or a numeric user-ID
 prefixed with the
 .Ql #
 character (e.g.,
-.Li #0
+.Ql #0
 for UID 0).
 When running commands as a UID, many shells require that the
 .Ql #
@@ -687,9 +683,7 @@ For the
 .Em sudoers
 plugin, this extends the
 .Nm
-timeout for another
-.Li @timeout@
-minutes by default, but does not run a command.
+timeout for another @timeout@ minutes by default, but does not run a command.
 Not all security policies support cached credentials.
 .It Fl -
 The
@@ -723,9 +717,9 @@ If the
 option is set in
 .Em sudoers ,
 the command to be run has the
-.Li SETENV
+.Dv SETENV
 tag set or the command matched is
-.Li ALL ,
+.Sy ALL ,
 the user may set variables that would otherwise be forbidden.
 See
 .Xr sudoers @mansectform@
@@ -922,7 +916,7 @@ run in a new pty,
 may execute the command directly instead of running it as a child process.
 .Ss Plugins
 Plugins may be specified via
-.Li Plugin
+.Em Plugin
 directives in the
 .Xr sudo.conf @mansectform@
 file.
@@ -933,7 +927,7 @@ binary.
 If no
 .Xr sudo.conf @mansectform@
 file is present, or if it doesn't contain any
-.Li Plugin
+.Em Plugin
 lines,
 .Nm
 will use
@@ -1022,9 +1016,9 @@ By default,
 .Nm
 will only log the command it explicitly runs.
 If a user runs a command such as
-.Li sudo su
+.Ql sudo su
 or
-.Li sudo sh ,
+.Ql sudo sh ,
 subsequent commands run from that shell are not subject to
 .Nm sudo Ns 's
 security policy.
@@ -1107,7 +1101,7 @@ or when
 is enabled in
 .Em sudoers
 and
-.Em HOME
+.Ev HOME
 is not present in the
 .Em env_keep
 list.
@@ -1149,8 +1143,7 @@ Default editor to use in
 .It Ev SUDO_GID
 Set to the group-ID of the user who invoked sudo.
 .It Ev SUDO_PROMPT
-Used as the default password prompt unless
-the
+Used as the default password prompt unless the
 .Fl p
 option was specified.
 .It Ev SUDO_PS1
@@ -1217,7 +1210,7 @@ $ sudo shutdown -r +15 "quick reboot"
 .Pp
 To make a usage listing of the directories in the /home partition.
 The commands are run in a sub-shell to allow the
-.Li cd
+.Ql cd
 command and file redirection to work.
 .Bd -literal -offset 4n
 $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
@@ -1385,7 +1378,7 @@ plugin's
 functionality.
 .Pp
 It is not meaningful to run the
-.Li cd
+.Ql cd
 command directly via sudo, e.g.,
 .Bd -literal -offset 4n
 $ sudo cd /usr/local/protected

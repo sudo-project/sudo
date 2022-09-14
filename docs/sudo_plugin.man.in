@@ -236,7 +236,7 @@ Only available starting with API version 1.16.
 debug_flags=string
 A debug file path name followed by a space and a comma-separated
 list of debug flags that correspond to the plugin's
-\fRDebug\fR
+\fIDebug\fR
 entry in
 sudo.conf(@mansectform@),
 if there is one.
@@ -265,7 +265,7 @@ will only pass
 if
 sudo.conf(@mansectform@)
 contains a plugin-specific
-\fRDebug\fR
+\fIDebug\fR
 entry.
 .TP 6n
 ignore_ticket=bool
@@ -677,7 +677,7 @@ tty=string
 The path to the user's terminal device.
 If the user has no terminal device associated with the session,
 the value will be empty, as in
-\(lq\fRtty=\fR\(rq.
+\(oqtty=\(cq.
 .TP 6n
 uid=uid_t
 The real user-ID of the user invoking
@@ -921,10 +921,10 @@ into
 \fIargv_out\fR,
 separated from the
 editor and its arguments by a
-\(lq\fR--\fR\(rq
+\(oq--\(cq
 element.
 The
-\(lq\fR--\fR\(rq
+\(oq--\(cq
 will be removed by
 \fBsudo\fR
 before the editor is executed.

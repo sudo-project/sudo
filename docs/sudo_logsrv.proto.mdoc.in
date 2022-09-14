@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 16, 2022
+.Dd September 13, 2022
 .Dt SUDO_LOGSRV.PROTO @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -87,7 +87,7 @@ message TimeSpec {
 A
 .Em TimeSpec
 is the equivalent of a POSIX
-.Li struct timespec ,
+.Vt struct timespec ,
 containing seconds and nanoseconds members.
 The
 .Em tv_sec
@@ -237,10 +237,10 @@ If the command was terminated by a signal, this is set to the
 name of the signal without the leading
 .Dq SIG .
 For example,
-.Li INT ,
-.Li TERM ,
-.Li KILL ,
-.Li SEGV .
+.Dv INT ,
+.Dv TERM ,
+.Dv KILL ,
+.Dv SEGV .
 .It error
 A message from the client indicating that the command was terminated
 unexpectedly due to an error.
@@ -397,9 +397,9 @@ should be calculated using a monotonic clock where possible.
 The signal name without the leading
 .Dq SIG .
 For example,
-.Li STOP ,
-.Li TSTP ,
-.Li CONT .
+.Dv STOP ,
+.Dv TSTP ,
+.Dv CONT .
 .El
 .Sh Server Messages
 A

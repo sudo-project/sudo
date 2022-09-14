@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOERS.LDAP" "@mansectform@" "July 25, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "@mansectform@" "September 13, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -69,16 +69,16 @@ is no need for a specialized tool to check syntax.
 The
 \fIsudoers\fR
 configuration is contained in the
-\fRou=SUDOers\fR
+\(oqou=SUDOers\(cq
 LDAP container.
 .PP
 Sudo first looks for the
-\fRcn=defaults\fR
+\(oqcn=defaults\(cq
 entry in the SUDOers container.
 If found, the multi-valued
-\fRsudoOption\fR
+\fIsudoOption\fR
 attribute is parsed in the same manner as a global
-\fRDefaults\fR
+\fIDefaults\fR
 line in
 \fI@sysconfdir@/sudoers\fR.
 In the following example, the
@@ -97,7 +97,7 @@ sudoOption: env_keep+=SSH_AUTH_SOCK
 .fi
 .PP
 The equivalent of a sudoer in LDAP is a
-\fRsudoRole\fR.
+\fIsudoRole\fR.
 It consists of the following attributes:
 .TP 6n
 \fBsudoUser\fR
@@ -120,36 +120,36 @@ Non-Unix group support is only available when an appropriate
 \fIgroup_plugin\fR
 is defined in the global
 \fIdefaults\fR
-\fRsudoRole\fR
+\fIsudoRole\fR
 object.
 If a
-\fRsudoUser\fR
+\fIsudoUser\fR
 entry is preceded by an exclamation point,
 \(oq\&!\(cq,
 and the entry matches, the
-\fRsudoRole\fR
+\fIsudoRole\fR
 in which it resides will be ignored.
 Negated
-\fRsudoUser\fR
+\fIsudoUser\fR
 entries are only supported by version 1.9.9 or higher.
 .TP 6n
 \fBsudoHost\fR
 A host name, IP address, IP network, or host netgroup (prefixed with a
 \(oq+\(cq).
 The special value
-\fRALL\fR
+\fBALL\fR
 will match any host.
 Host netgroups are matched using the host (both qualified and unqualified)
 and domain members only; the user member is not used when matching.
 If a
-\fRsudoHost\fR
+\fIsudoHost\fR
 entry is preceded by an exclamation point,
 \(oq\&!\(cq,
 and the entry matches, the
-\fRsudoRole\fR
+\fIsudoRole\fR
 in which it resides will be ignored.
 Negated
-\fRsudoHost\fR
+\fIsudoHost\fR
 entries are only supported by version 1.8.18 or higher.
 .TP 6n
 \fBsudoCommand\fR
@@ -160,7 +160,7 @@ If a command name is preceded by an exclamation point,
 the user will be prohibited from running that command.
 .sp
 The built-in command
-\(lq\fRsudoedit\fR\(rq
+\(lqsudoedit\(rq
 is used to permit a user to run
 \fBsudo\fR
 with the
@@ -169,13 +169,13 @@ option (or as
 \fBsudoedit\fR).
 It may take command line arguments just as a normal command does.
 Unlike other commands,
-\(lq\fRsudoedit\fR\(rq
+\(lqsudoedit\(rq
 is a built into
 \fBsudo\fR
 itself and must be specified in without a leading path.
 .sp
 The special value
-\fRALL\fR
+\fBALL\fR
 will match any command.
 .sp
 If a command name is prefixed with a SHA-2 digest, it will
@@ -205,7 +205,7 @@ Command digests are only supported by version 1.8.7 or higher.
 \fBsudoOption\fR
 Identical in function to the global options described above, but
 specific to the
-\fRsudoRole\fR
+\fIsudoRole\fR
 in which it resides.
 .TP 6n
 \fBsudoRunAsUser\fR
@@ -217,30 +217,29 @@ or user netgroup (prefixed with a
 \(oq+\(cq)
 that contains a list of users that commands may be run as.
 The special value
-\fRALL\fR
+\fBALL\fR
 will match any user.
 If a
-\fRsudoRunAsUser\fR
+\fIsudoRunAsUser\fR
 entry is preceded by an exclamation point,
 \(oq\&!\(cq,
 and the entry matches, the
-\fRsudoRole\fR
+\fIsudoRole\fR
 in which it resides will be ignored.
 If
-\fRsudoRunAsUser\fR
+\fIsudoRunAsUser\fR
 is specified but empty, it will match the invoking user.
 If neither
-\fRsudoRunAsUser\fR
+\fIsudoRunAsUser\fR
 nor
-\fRsudoRunAsGroup\fR
+\fIsudoRunAsGroup\fR
 are present, the value of the
 \fIrunas_default\fR
-\fRsudoOption\fR
-is used (defaults to
-\fR@runas_default@\fR).
+\fIsudoOption\fR
+is used (defaults to @runas_default@).
 .sp
 The
-\fRsudoRunAsUser\fR
+\fIsudoRunAsUser\fR
 attribute is only available in
 \fBsudo\fR
 versions
@@ -248,10 +247,10 @@ versions
 Older versions of
 \fBsudo\fR
 use the
-\fRsudoRunAs\fR
+\fIsudoRunAs\fR
 attribute instead.
 Negated
-\fRsudoRunAsUser\fR
+\fIsudoRunAsUser\fR
 entries are only supported by version 1.8.26 or higher.
 .TP 6n
 \fBsudoRunAsGroup\fR
@@ -259,34 +258,34 @@ A Unix group or group-ID (prefixed with
 \(oq#\(cq)
 that commands may be run as.
 The special value
-\fRALL\fR
+\fBALL\fR
 will match any group.
 If a
-\fRsudoRunAsGroup\fR
+\fIsudoRunAsGroup\fR
 entry is preceded by an exclamation point,
 \(oq\&!\(cq,
 and the entry matches, the
-\fRsudoRole\fR
+\fIsudoRole\fR
 in which it resides will be ignored.
 .sp
 The
-\fRsudoRunAsGroup\fR
+\fIsudoRunAsGroup\fR
 attribute is only available in
 \fBsudo\fR
 versions
 1.7.0 and higher.
 Negated
-\fRsudoRunAsGroup\fR
+\fIsudoRunAsGroup\fR
 entries are only supported by version 1.8.26 or higher.
 .TP 6n
 \fBsudoNotBefore\fR
 A timestamp in the form
-\fRyyyymmddHHMMSSZ\fR
+\(oqyyyymmddHHMMSSZ\(cq
 that can be used to provide a start date/time for when the
-\fRsudoRole\fR
+\fIsudoRole\fR
 will be valid.
 If multiple
-\fRsudoNotBefore\fR
+\fIsudoNotBefore\fR
 entries are present, the earliest is used.
 Timestamps must be in Coordinated Universal Time (UTC),
 not the local timezone.
@@ -294,7 +293,7 @@ The minute and seconds portions are optional, but some LDAP servers
 require that they be present (contrary to the RFC).
 .sp
 The
-\fRsudoNotBefore\fR
+\fIsudoNotBefore\fR
 attribute is only available in
 \fBsudo\fR
 versions 1.7.5 and higher and must be explicitly enabled via the
@@ -304,12 +303,12 @@ option in
 .TP 6n
 \fBsudoNotAfter\fR
 A timestamp in the form
-\fRyyyymmddHHMMSSZ\fR
+\(oqyyyymmddHHMMSSZ\(cq
 that indicates an expiration date/time, after which the
-\fRsudoRole\fR
+\fIsudoRole\fR
 will no longer be valid.
 If multiple
-\fRsudoNotAfter\fR
+\fIsudoNotAfter\fR
 entries are present, the last one is used.
 Timestamps must be in Coordinated Universal Time (UTC),
 not the local timezone.
@@ -317,7 +316,7 @@ The minute and seconds portions are optional, but some LDAP servers
 require that they be present (contrary to the RFC).
 .sp
 The
-\fRsudoNotAfter\fR
+\fIsudoNotAfter\fR
 attribute is only available in
 \fBsudo\fR
 versions
@@ -328,26 +327,26 @@ option in
 .TP 6n
 \fBsudoOrder\fR
 The
-\fRsudoRole\fR
+\fIsudoRole\fR
 entries retrieved from the LDAP directory have no inherent order.
 The
-\fRsudoOrder\fR
+\fIsudoOrder\fR
 attribute is an integer (or floating point value for LDAP servers
 that support it) that is used to sort the matching entries.
 This allows LDAP-based sudoers entries to more closely mimic the behavior
 of the sudoers file, where the order of the entries influences the result.
 If multiple entries match, the entry with the highest
-\fRsudoOrder\fR
+\fIsudoOrder\fR
 attribute is chosen.
 This corresponds to the
 \(lqlast match\(rq
 behavior of the sudoers file.
 If the
-\fRsudoOrder\fR
+\fIsudoOrder\fR
 attribute is not present, a value of 0 is assumed.
 .sp
 The
-\fRsudoOrder\fR
+\fIsudoOrder\fR
 attribute is only available in
 \fBsudo\fR
 versions 1.7.5 and higher.
@@ -355,12 +354,12 @@ versions 1.7.5 and higher.
 Each attribute listed above should contain a single value, but there
 may be multiple instances of each attribute type.
 A
-\fRsudoRole\fR
+\fIsudoRole\fR
 must contain at least one
-\fRsudoUser\fR,
-\fRsudoHost\fR,
+\fIsudoUser\fR,
+\fIsudoHost\fR,
 and
-\fRsudoCommand\fR.
+\fIsudoCommand\fR.
 .PP
 The following example allows users in group wheel to run any command
 on any host via
@@ -384,7 +383,7 @@ The first query is to parse the global options.
 The second is to match against the user's name and the groups that
 the user belongs to.
 (The special
-\fRALL\fR
+\fBALL\fR
 tag is matched in this query too.)
 If no match is returned for the user's name and groups, a third
 query returns all entries containing user netgroups and other
@@ -411,12 +410,12 @@ are as follows:
 .TP 5n
 1.\&
 Match all
-\fRnisNetgroup\fR
+\fInisNetgroup\fR
 records with a
-\fRnisNetgroupTriple\fR
+\fInisNetgroupTriple\fR
 containing the user, host, and NIS domain.
 The query will match
-\fRnisNetgroupTriple\fR
+\fInisNetgroupTriple\fR
 entries with either the short or long form of the host name or
 no host name specified in the tuple.
 If the NIS domain is set, the query will match only match entries
@@ -425,13 +424,13 @@ If the NIS domain is
 \fInot\fR
 set, a wildcard is used to match any domain name but be aware that the
 NIS schema used by some LDAP servers may not support wild cards for
-\fRnisNetgroupTriple\fR.
+\fInisNetgroupTriple\fR.
 .TP 5n
 2.\&
 Repeated queries are performed to find any nested
-\fRnisNetgroup\fR
+\fInisNetgroup\fR
 records with a
-\fRmemberNisNetgroup\fR
+\fImemberNisNetgroup\fR
 entry that refers to an already-matched record.
 .PP
 For sites with a large number of netgroups, using
@@ -465,7 +464,7 @@ returned in any specific order.
 .PP
 The order in which different entries are applied can be controlled
 using the
-\fRsudoOrder\fR
+\fIsudoOrder\fR
 attribute, but there is no way to guarantee the order of attributes
 within a specific entry.
 If there are conflicting command rules in an entry, the negative
@@ -519,18 +518,18 @@ These cannot be converted automatically.
 For example, a Cmnd_Alias in a
 \fIsudoers\fR
 file may be converted to a
-\fRsudoRole\fR
+\fIsudoRole\fR
 that contains multiple commands.
 Multiple users and/or groups may be assigned to the
-\fRsudoRole\fR.
+\fIsudoRole\fR.
 .PP
 Also, host, user, runas, and command-based
-\fRDefaults\fR
+\fIDefaults\fR
 entries are not supported.
 However, a
-\fRsudoRole\fR
+\fIsudoRole\fR
 may contain one or more
-\fRsudoOption\fR
+\fIsudoOption\fR
 attributes which can often serve the same purpose.
 .PP
 Consider the following
@@ -590,7 +589,7 @@ Using a Unix group or netgroup in PAGERS rather than listing each
 user would make this easier to maintain.
 .PP
 Per-user
-\fRDefaults\fR
+\fIDefaults\fR
 entries can be emulated by using one or more sudoOption attributes
 in a sudoRole.
 Consider the following
@@ -637,7 +636,7 @@ LDAP support, the
 schema must be
 installed on your LDAP server.
 In addition, be sure to index the
-\fRsudoUser\fR
+\fIsudoUser\fR
 attribute.
 .PP
 The
@@ -797,31 +796,30 @@ The default value is protocol version 3.
 \fBNETGROUP_BASE\fR \fIbase\fR
 The base DN to use when performing LDAP netgroup queries.
 Typically this is of the form
-\fRou=netgroup,dc=my-domain,dc=com\fR
-for the domain
-\fRmy-domain.com\fR.
+\(oqou=netgroup,dc=my-domain,dc=com\(cq
+for the domain my-domain.com.
 Multiple
 \fBNETGROUP_BASE\fR
 lines may be specified, in which case they are queried in the order specified.
 .sp
 This option can be used to query a user's netgroups directly via LDAP
 which is usually faster than fetching every
-\fRsudoRole\fR
+\fIsudoRole\fR
 object containing a
-\fRsudoUser\fR
+\fIsudoUser\fR
 that begins with a
 \(oq+\(cq
 prefix.
 The NIS schema used by some LDAP servers need a modification to
 support querying the
-\fRnisNetgroup\fR
+\fInisNetgroup\fR
 object by its
-\fRnisNetgroupTriple\fR
+\fInisNetgroupTriple\fR
 member.
 OpenLDAP's
 \fBslapd\fR
 requires the following change to the
-\fRnisNetgroupTriple\fR
+\fInisNetgroupTriple\fR
 attribute:
 .nf
 .sp
@@ -837,13 +835,12 @@ attributetype ( 1.3.6.1.1.1.1.14 NAME 'nisNetgroupTriple'
 \fBNETGROUP_SEARCH_FILTER\fR \fIldap_filter\fR
 An LDAP filter which is used to restrict the set of records returned
 when performing an LDAP netgroup query.
-Typically, this is of the
-form
-\fRattribute=value\fR
+Typically, this is of the form
+\(oqattribute=value\(cq
 or
-\fR(&(attribute=value)(attribute2=value2))\fR.
+\(oq(&(attribute=value)(attribute2=value2))\(cq.
 The default search filter is:
-\fRobjectClass=nisNetgroup\fR.
+\(oqobjectClass=nisNetgroup\(cq.
 If
 \fIldap_filter\fR
 is omitted, no search filter will be used.
@@ -928,10 +925,10 @@ This option is only relevant when using SASL authentication.
 If the
 \fBSSL\fR
 parameter is set to
-\fRon\fR,
-\fRtrue\fR,
+\fIon\fR,
+\fItrue\fR,
 or
-\fRyes\fR
+\fIyes\fR
 TLS (SSL) encryption is always used when communicating with the LDAP server.
 Typically, this involves connecting to the server on port 636 (ldaps).
 .TP 6n
@@ -939,7 +936,7 @@ Typically, this involves connecting to the server on port 636 (ldaps).
 If the
 \fBSSL\fR
 parameter is set to
-\fRstart_tls\fR,
+\fIstart_tls\fR,
 the LDAP server connection is initiated normally and TLS encryption is
 begun before the bind credentials are sent.
 This has the advantage of not requiring a dedicated port for encrypted
@@ -953,9 +950,8 @@ The base DN to use when performing
 \fBsudo\fR
 LDAP queries.
 Typically this is of the form
-\fRou=SUDOers,dc=my-domain,dc=com\fR
-for the domain
-\fRmy-domain.com\fR.
+\(oqou=SUDOers,dc=my-domain,dc=com\(cq
+for the domain my-domain.com.
 Multiple
 \fBSUDOERS_BASE\fR
 lines may be specified, in which case they are queried in the order specified.
@@ -997,20 +993,20 @@ when performing a
 LDAP query.
 Typically, this is of the
 form
-\fRattribute=value\fR
+\(oqattribute=value\(cq
 or
-\fR(&(attribute=value)(attribute2=value2))\fR.
+\(oq(&(attribute=value)(attribute2=value2))\(cq.
 The default search filter is:
-\fRobjectClass=sudoRole\fR.
+\(oqobjectClass=sudoRole\(cq.
 If
 \fIldap_filter\fR
 is omitted, no search filter will be used.
 .TP 6n
 \fBSUDOERS_TIMED\fR \fIon/true/yes/off/false/no\fR
 Whether or not to evaluate the
-\fRsudoNotBefore\fR
+\fIsudoNotBefore\fR
 and
-\fRsudoNotAfter\fR
+\fIsudoNotAfter\fR
 attributes that implement time-dependent sudoers entries.
 .TP 6n
 \fBTIMELIMIT\fR \fIseconds\fR
@@ -1062,11 +1058,11 @@ The certificate type depends on the LDAP libraries used.
 .PD 0
 .TP 6n
 OpenLDAP:
-\fRtls_cert /etc/ssl/client_cert.pem\fR
+\(oqtls_cert /etc/ssl/client_cert.pem\(cq
 .PD
 .TP 6n
 Netscape-derived:
-\fRtls_cert /var/ldap/cert7.db\fR
+\(oqtls_cert /var/ldap/cert7.db\(cq
 .TP 6n
 IBM LDAP:
 Unused, the key database specified by
@@ -1106,14 +1102,14 @@ The key type depends on the LDAP libraries used.
 .PD 0
 .TP 6n
 OpenLDAP:
-\fRtls_key /etc/ssl/client_key.pem\fR
+\(oqtls_key /etc/ssl/client_key.pem\(cq
 .PD
 .TP 6n
 Netscape-derived:
-\fRtls_key /var/ldap/key3.db\fR
+\(oqtls_key /var/ldap/key3.db\(cq
 .TP 6n
 IBM LDAP:
-\fRtls_key /usr/ldap/ldapkey.kdb\fR
+\(oqtls_key /usr/ldap/ldapkey.kdb\(cq
 .PP
 When using IBM LDAP libraries, this file may also contain
 Certificate Authority and client certificates and may be encrypted.
@@ -1171,15 +1167,15 @@ The
 must have the same path as the file specified by
 \fBTLS_KEY\fR,
 but use a
-\fR.sth\fR
+\(oq.sth\(cq
 file extension instead of
-\fR.kdb\fR,
-e.g.,
-\fRldapkey.sth\fR.
+\(oq.kdb\(cq,
+for example
+\(oqldapkey.sth\(cq.
 The default
-\fRldapkey.kdb\fR
+\(oqldapkey.kdb\(cq
 that ships with the IBM Tivoli Directory Server is encrypted with the password
-\fRssl_password\fR.
+\(oqssl_password\(cq.
 The
 \fIgsk8capicmd\fR
 utility can be used to manage the key database and create a
@@ -1251,9 +1247,9 @@ the latter being for servers that support TLS (SSL) encryption.
 If no
 \fIport\fR
 is specified, the default is port 389 for
-\fRldap://\fR
+\(oqldap://\(cq
 or port 636 for
-\fRldaps://\fR.
+\(oqldaps://\(cq.
 If no
 \fIhostname\fR
 is specified,
@@ -1266,9 +1262,9 @@ lines are treated identically to a
 \fBURI\fR
 line containing multiple entries.
 Only systems using the OpenSSL libraries support the mixing of
-\fRldap://\fR
+\(oqldap://\(cq
 and
-\fRldaps://\fR
+\(oqldaps://\(cq
 URIs.
 Both the Netscape-derived and IBM LDAP libraries used on most commercial
 versions of Unix are only capable of supporting one or the other.
@@ -1297,13 +1293,13 @@ to specify the
 \fIsudoers\fR
 search order.
 Sudo looks for a line beginning with
-\fRsudoers\fR:
+\fIsudoers\fR:
 and uses this to determine the search order.
 By default,
 \fBsudo\fR
 does not stop searching after the first match and later matches take
 precedence over earlier ones (unless
-\fR[SUCCESS=return]\fR
+\(oq[SUCCESS=return]\(cq
 is used, see below).
 The following sources are recognized:
 .PP
@@ -1322,14 +1318,14 @@ read sudoers from LDAP
 In addition, a subset of
 \fInsswitch.conf\fR-style
 action statements is supported, specifically
-\fR[SUCCESS=return]\fR
+\(oq[SUCCESS=return]\(cq
 and
-\fR[NOTFOUND=return]\fR.
+\(oq[NOTFOUND=return]\(cq.
 These will unconditionally terminate the search if the user was either
 found
-(\fR[SUCCESS=return]\fR)
+\(oq[SUCCESS=return]\(cq
 or not found
-(\fR[NOTFOUND=return]\fR)
+\(oq[NOTFOUND=return]\(cq
 in the immediately preceding source.
 Other action statements tokens are not supported, nor is test
 negation with
@@ -1420,11 +1416,11 @@ sudoers = ldap = auth, files
 .fi
 .PP
 In the above example, the
-\fRauth\fR
+\fIauth\fR
 qualifier only affects user lookups; both LDAP and
 \fIsudoers\fR
 will be queried for
-\fRDefaults\fR
+\fIDefaults\fR
 entries.
 .PP
 If the
@@ -1449,9 +1445,9 @@ rules.
 To use SSSD as the
 \fIsudoers\fR
 source, you should use
-\fRsss\fR
+\fIsss\fR
 instead of
-\fRldap\fR
+\fIldap\fR
 for the sudoers entry in
 \fI@nsswitch_conf@\fR.
 The
@@ -1595,7 +1591,7 @@ Simply copy
 it to the schema directory (e.g.,
 \fI/etc/openldap/schema\fR),
 add the proper
-\fRinclude\fR
+\fIinclude\fR
 line in
 \fIslapd.conf\fR
 and restart

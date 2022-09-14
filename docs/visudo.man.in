@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "@mansectsu@" "April 23, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "@mansectsu@" "September 13, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -289,7 +289,7 @@ include file for syntax errors.
 \fBvisudo\fR
 versions 1.8.4 and higher support a flexible debugging framework
 that is configured via
-\fRDebug\fR
+\fIDebug\fR
 lines in the
 sudo.conf(@mansectform@)
 file.
@@ -450,7 +450,7 @@ file.
 The
 \fIsudoers\fR
 file contains a
-\fRDefaults\fR
+\fIDefaults\fR
 setting not recognized by
 \fBvisudo\fR.
 .SH "SEE ALSO"

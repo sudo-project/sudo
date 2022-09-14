@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 16, 2022
+.Dd September 13, 2022
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -152,13 +152,15 @@ will enable the TCP keepalive socket option on the client connection.
 This enables the periodic transmission of keepalive messages to the client.
 If the client does not respond to a message in time, the connection will
 be closed.
-Defaults to true.
+Defaults to
+.Em true .
 .It timeout = number
 The amount of time, in seconds,
 .Nm sudo_logsrvd
 will wait for the client to respond.
 A value of 0 will disable the timeout.
-The default value is 30.
+The default value is
+.Em 30 .
 .It tls_cacert = path
 The path to a certificate authority bundle file, in PEM format,
 to use instead of the system's default certificate authority database
@@ -182,7 +184,7 @@ authority, the
 setting must be set to a CA bundle that contains the CA certificate
 used to generate the client certificate.
 The default value is
-.Li false .
+.Em false .
 .It tls_ciphers_v12 = string
 A list of ciphers to use for connections secured by TLS version 1.2 only,
 separated by a colon
@@ -193,7 +195,7 @@ section in
 .Xr openssl-ciphers 1
 for full details.
 The default value is
-.Li HIGH:!aNULL
+.Dq HIGH:!aNULL
 which consists of encryption cipher suites with key lengths larger than
 128 bits, and some cipher suites with 128-bit keys.
 Cipher suites that offer no authentication are excluded.
@@ -212,7 +214,8 @@ but should include the following:
 .It TLS_AES_128_CCM_8_SHA256
 .El
 .Pp
-The default cipher suite is TLS_AES_256_GCM_SHA384.
+The default cipher suite is
+.Dq TLS_AES_256_GCM_SHA384 .
 .It tls_dhparams = path
 The path to a file containing custom Diffie-Hellman parameters in PEM format.
 This file can be created with the following command:
@@ -235,7 +238,8 @@ configuration is changed.
 If false, no verification is performed of the server certificate.
 When using self-signed certificates without a certificate authority,
 this setting should be set to false.
-The default value is true.
+The default value is
+.Em true .
 .El
 .Ss relay
 The
@@ -263,7 +267,8 @@ setting controls the amount of time
 .Nm sudo_logsrvd
 will wait for the relay to respond.
 A value of 0 will disable the timeout.
-The default value is 30.
+The default value is
+.Em 30 .
 .It relay_dir = path
 The directory in which log messages are temporarily stored before they
 are sent to the relay host.
@@ -298,7 +303,8 @@ lines are specified, the first available relay host will be used.
 .It retry_interval = number
 The number of seconds to wait after a connection error before making
 a new attempt to forward a message to a relay host.
-The default value is 30 seconds.
+The default value is
+.Em 30 .
 .It store_first = boolean
 If true,
 .Nm sudo_logsrvd
@@ -321,7 +327,8 @@ The amount of time, in seconds,
 .Nm sudo_logsrvd
 will wait for the relay server to respond after a connection has succeeded.
 A value of 0 will disable the timeout.
-The default value is 30.
+The default value is
+.Em 30 .
 .It tls_cacert = path
 The path to a certificate authority bundle file, in PEM format,
 to use instead of the system's default certificate authority database
@@ -404,7 +411,7 @@ If set, I/O logs will be compressed using
 Enabling compression can make it harder to view the logs in real-time as
 the program is executing due to buffering.
 The default value is
-.Li false .
+.Em false .
 .It iolog_dir = path
 The top-level directory to use when constructing the path
 name for the I/O log directory.
@@ -416,23 +423,23 @@ The following percent
 .Pq Ql %
 escape sequences are supported:
 .Bl -tag -width 4n
-.It Li %{seq}
+.It %{seq}
 expanded to a monotonically increasing base-36 sequence number, such as 0100A5,
 where every two digits are used to form a new directory, e.g.,
 .Pa 01/00/A5
-.It Li %{user}
+.It %{user}
 expanded to the invoking user's login name
-.It Li %{group}
+.It %{group}
 expanded to the name of the invoking user's real group-ID
-.It Li %{runas_user}
+.It %{runas_user}
 expanded to the login name of the user the command will
 be run as (e.g., root)
-.It Li %{runas_group}
+.It %{runas_group}
 expanded to the group name of the user the command will
 be run as (e.g., wheel)
-.It Li %{hostname}
+.It %{hostname}
 expanded to the local host name without the domain name
-.It Li %{command}
+.It %{command}
 expanded to the base name of the command being run
 .El
 .Pp
@@ -453,7 +460,7 @@ It is possible for
 .Em iolog_file
 to contain directory components.
 The default value is
-.Li %{seq} .
+.Dq %{seq} .
 .Pp
 See the
 .Em iolog_dir
@@ -463,9 +470,9 @@ escape sequences.
 .Pp
 In addition to the escape sequences, path names that end in six or
 more
-.Li X Ns s
+.Em X Ns s
 will have the
-.Li X Ns s
+.Em X Ns s
 replaced with a unique combination of digits and letters, similar to the
 .Xr mktemp 3
 function.
@@ -479,7 +486,7 @@ overwritten unless
 .Em iolog_file
 ends in six or
 more
-.Li X Ns s .
+.Em X Ns s .
 .It iolog_flush = boolean
 If set, I/O log data is flushed to disk after each write instead of
 buffering it.
@@ -489,7 +496,7 @@ of I/O log compression.
 I/O logs are always flushed before sending a commit point to the client
 regardless of this setting.
 The default value is
-.Li true .
+.Em true .
 .It iolog_group = name
 The group name to look up when setting the group-ID on new I/O log
 files and directories.
@@ -513,7 +520,7 @@ When creating I/O log directories, search (execute) bits are added
 to match the read and write bits specified by
 .Em iolog_mode .
 The default value is
-.Li 0600 .
+.Em 0600 .
 .It iolog_user = name
 The user name to look up when setting the owner of new
 I/O log files and directories.
@@ -531,7 +538,7 @@ the password will still be present in the I/O log.
 If
 .Em log_passwords
 is set to
-.Li false ,
+.Em false ,
 .Nm sudo_logsrvd
 will attempt to prevent passwords from being logged.
 It does this by using the regular expressions in
@@ -549,15 +556,15 @@ when the
 option is set), only the
 first character of the password will be replaced in the I/O log.
 The default value is
-.Li true .
+.Em true .
 .It maxseq = number
 The maximum sequence number that will be substituted for the
-.Dq Li %{seq}
+.Dq %{seq}
 escape in the I/O log file (see the
 .Em iolog_dir
 description above for more information).
 While the value substituted for
-.Dq Li %{seq}
+.Dq %{seq}
 is in base 36,
 .Em maxseq
 itself should be expressed in decimal.
@@ -565,7 +572,8 @@ Values larger than 2176782336 (which corresponds to the
 base 36 sequence number
 .Dq ZZZZZZ )
 will be silently truncated to 2176782336.
-The default value is 2176782336.
+The default value is
+.Em 2176782336 .
 .It passprompt_regex = string
 One or more POSIX extended regular expressions used to
 match password prompts in the terminal output when
@@ -599,7 +607,8 @@ The default value is
 If true,
 .Nm sudo_logsrvd
 will log an event when a command exits or is terminated by a signal.
-Defaults to false.
+Defaults to
+.Em false .
 .It log_format = string
 The event log format.
 Supported log formats are
@@ -621,7 +630,7 @@ section configures how events are logged via
 .It facility = string
 Syslog facility if syslog is being used for logging.
 Defaults to
-.Li @logfac@ .
+.Em @logfac@ .
 .Pp
 The following syslog facilities are supported:
 .Sy authpriv
@@ -643,7 +652,7 @@ and
 Syslog priority to use when the user is allowed to run a command and
 authentication is successful.
 Defaults to
-.Li @goodpri@ .
+.Em @goodpri@ .
 .Pp
 The following syslog priorities are supported:
 .Sy alert ,
@@ -663,7 +672,7 @@ will disable logging of successful commands.
 Syslog priority to use when the user is not allowed to run a command or
 when authentication is unsuccessful.
 Defaults to
-.Li @badpri@ .
+.Em @badpri@ .
 .Pp
 See
 .Em accept_priority
@@ -671,7 +680,7 @@ for the list of supported syslog priorities.
 .It alert_priority = string
 Syslog priority to use for event log alert messages received from the client.
 Defaults to
-.Li @badpri@ .
+.Em @badpri@ .
 .Pp
 See
 .Em accept_priority
@@ -704,7 +713,7 @@ JSON-format log entries are never split and are not affected by
 Syslog facility if syslog is being used for server warning messages.
 See above for a list of supported facilities.
 Defaults to
-.Li daemon
+.Em daemon
 .El
 .Ss logfile
 The
@@ -725,10 +734,12 @@ Formatting is performed via the system's
 .Xr strftime 3
 function so any escape sequences supported by that function will be expanded.
 The default value is
-.Dq Li "%h %e %T"
+.Dq "%h %e %T"
 which produces dates like
 .Dq Oct  3 07:15:24
-in the C locale.
+in the
+.Ql C
+locale.
 .El
 .Sh FILES
 .Bl -tag -width 24n

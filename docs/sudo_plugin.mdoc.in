@@ -216,7 +216,7 @@ Only available starting with API version 1.16.
 .It debug_flags=string
 A debug file path name followed by a space and a comma-separated
 list of debug flags that correspond to the plugin's
-.Li Debug
+.Em Debug
 entry in
 .Xr sudo.conf @mansectform@ ,
 if there is one.
@@ -245,7 +245,7 @@ will only pass
 if
 .Xr sudo.conf @mansectform@
 contains a plugin-specific
-.Li Debug
+.Em Debug
 entry.
 .It ignore_ticket=bool
 Set to true if the user specified the
@@ -603,7 +603,7 @@ Only available starting with API version 1.2.
 The path to the user's terminal device.
 If the user has no terminal device associated with the session,
 the value will be empty, as in
-.Dq Li tty= .
+.Ql tty= .
 .It uid=uid_t
 The real user-ID of the user invoking
 .Nm sudo .
@@ -819,10 +819,10 @@ into
 .Fa argv_out ,
 separated from the
 editor and its arguments by a
-.Dq Li --
+.Ql --
 element.
 The
-.Dq Li --
+.Ql --
 will be removed by
 .Nm sudo
 before the editor is executed.

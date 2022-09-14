@@ -20,7 +20,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd April 23, 2022
+.Dd September 13, 2022
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -281,7 +281,7 @@ include file for syntax errors.
 .Nm
 versions 1.8.4 and higher support a flexible debugging framework
 that is configured via
-.Li Debug
+.Em Debug
 lines in the
 .Xr sudo.conf @mansectform@
 file.
@@ -430,7 +430,7 @@ file.
 The
 .Em sudoers
 file contains a
-.Li Defaults
+.Em Defaults
 setting not recognized by
 .Nm .
 .El

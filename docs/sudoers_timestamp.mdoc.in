@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 16, 2022
+.Dd September 13, 2022
 .Dt SUDOERS_TIMESTAMP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -29,7 +29,7 @@ Once a user has been authenticated, they may use
 .Nm sudo
 without a password for a short period of time
 .Po
-.Li @timeout@
+.Em @timeout@
 minutes unless overridden by the
 .Em timestamp_timeout
 option
@@ -94,19 +94,19 @@ same file but are not inter-operable.
 The size of the record in bytes.
 .It type
 The record type, currently
-.Li TS_GLOBAL ,
-.Li TS_TTY ,
+.Dv TS_GLOBAL ,
+.Dv TS_TTY ,
 or
-.Li TS_PPID .
+.Dv TS_PPID .
 .It flags
 Zero or more record flags which can be bit-wise ORed together.
 Supported flags are
-.Li TS_DISABLED ,
+.Dv TS_DISABLED ,
 for records disabled via
 .Nm sudo
 .Fl k
 and
-.Li TS_ANYUID ,
+.Dv TS_ANYUID ,
 which is used only when matching records.
 .It auth_uid
 The user-ID that was used for authentication.
@@ -120,12 +120,12 @@ the default runas user or the target user.
 .It sid
 The ID of the user's terminal session, if present.
 The session ID is only used when matching records of type
-.Li TS_TTY .
+.Dv TS_TTY .
 .It start_time
 The start time of the session leader for records of type
-.Li TS_TTY
+.Dv TS_TTY
 or of the parent process for records of type
-.Li TS_PPID .
+.Dv TS_PPID .
 The
 .Em start_time
 is used to help prevent re-use of a time stamp record after a
@@ -157,10 +157,10 @@ option, no password is required.
 .It u.ttydev
 The device number of the terminal associated with the session for
 records of type
-.Li TS_TTY .
+.Dv TS_TTY .
 .It u.ppid
 The ID of the parent process for records of type
-.Li TS_PPID .
+.Dv TS_PPID .
 .El
 .Sh LOCKING
 In
@@ -174,7 +174,7 @@ of the entire file and the lock is held for a longer period of time.
 This scheme is described below.
 .Pp
 The first record in the time stamp file is of type
-.Li TS_LOCKEXCL
+.Dv TS_LOCKEXCL
 and is used as a
 .Em lock
 record to prevent more than one
@@ -182,7 +182,7 @@ record to prevent more than one
 process from adding a new record at the same time.
 Once the desired time stamp record has been located or created (and
 locked), the
-.Li TS_LOCKEXCL
+.Dv TS_LOCKEXCL
 record is unlocked.
 The lock on the individual time stamp record, however, is held until
 authentication is complete.
@@ -192,7 +192,7 @@ to avoid prompting for a password multiple times when it
 is used more than once in a pipeline.
 .Pp
 Records of type
-.Li TS_GLOBAL
+.Dv TS_GLOBAL
 cannot be locked for a long period of time since doing so would
 interfere with other
 .Nm sudo
