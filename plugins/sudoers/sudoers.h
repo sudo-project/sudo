@@ -134,6 +134,7 @@ struct sudo_user {
     uid_t uid;
     uid_t gid;
     pid_t sid;
+    pid_t tcpgid;
     char uuid_str[37];
 };
 
@@ -226,6 +227,7 @@ struct sudo_user {
 #define user_uid		(sudo_user.uid)
 #define user_gid		(sudo_user.gid)
 #define user_sid		(sudo_user.sid)
+#define user_tcpgid		(sudo_user.tcpgid)
 #define user_umask		(sudo_user.umask)
 #define user_passwd		(sudo_user.pw->pw_passwd)
 #define user_dir		(sudo_user.pw->pw_dir)

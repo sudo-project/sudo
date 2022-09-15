@@ -406,7 +406,6 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	CLR(flags, MODE_UPDATE_TICKET);
 
     user_gid = (gid_t)-1;
-    user_sid = (pid_t)-1;
     user_uid = (gid_t)-1;
     user_umask = (mode_t)-1;
     for (cur = info->user_info; *cur != NULL; cur++) {
@@ -496,6 +495,15 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	if (MATCHES(*cur, "sid=")) {
 	    p = *cur + sizeof("sid=") - 1;
 	    user_sid = (pid_t) sudo_strtoid(p, &errstr);
+	    if (errstr != NULL) {
+		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
+		goto bad;
+	    }
+	    continue;
+	}
+	if (MATCHES(*cur, "tcpgid=")) {
+	    p = *cur + sizeof("tcpgid=") - 1;
+	    user_tcpgid = (pid_t) sudo_strtoid(p, &errstr);
 	    if (errstr != NULL) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;

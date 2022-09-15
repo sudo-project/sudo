@@ -1791,7 +1791,8 @@ tty_present(void)
 {
     debug_decl(tty_present, SUDOERS_DEBUG_PLUGIN);
     
-    if (user_ttypath == NULL) {
+    if (user_tcpgid == 0 && user_ttypath == NULL) {
+	/* No job control or terminal, check /dev/tty. */
 	int fd = open(_PATH_TTY, O_RDWR);
 	if (fd == -1)
 	    debug_return_bool(false);
