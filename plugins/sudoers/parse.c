@@ -358,11 +358,13 @@ apply_cmndspec(struct cmndspec *cs)
 	}
 	if (cs->tags.log_input != UNSPEC) {
 	    def_log_input = cs->tags.log_input;
+	    cb_log_input(NULL, 0, 0, NULL, cs->tags.log_input);
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"def_log_input -> %s", def_log_input ? "true" : "false");
 	}
 	if (cs->tags.log_output != UNSPEC) {
 	    def_log_output = cs->tags.log_output;
+	    cb_log_output(NULL, 0, 0, NULL, cs->tags.log_output);
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"def_log_output -> %s", def_log_output ? "true" : "false");
 	}

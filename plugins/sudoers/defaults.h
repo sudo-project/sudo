@@ -132,6 +132,11 @@ struct early_default {
 #define SETDEF_ALL	(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS|SETDEF_CMND)
 
 /*
+ * Convenience macros
+ */
+#define iolog_enabled   (def_log_stdin || def_log_ttyin || def_log_stdout || def_log_stderr || def_log_ttyout)
+
+/*
  * Prototypes
  */
 struct defaults_list;

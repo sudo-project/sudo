@@ -689,13 +689,18 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
 
     if (ISSET(sudo_mode, (MODE_RUN | MODE_EDIT)) && !remote_iologs) {
-	if ((def_log_input || def_log_output) && def_iolog_file && def_iolog_dir) {
+	if (iolog_enabled && def_iolog_file && def_iolog_dir) {
 	    if ((iolog_path = format_iolog_path()) == NULL) {
 		if (!def_ignore_iolog_errors)
 		    goto done;
 		/* Unable to expand I/O log path, disable I/O logging. */
 		def_log_input = false;
 		def_log_output = false;
+		def_log_stdin = false;
+		def_log_stdout = false;
+		def_log_stderr = false;
+		def_log_ttyin = false;
+		def_log_ttyout = false;
 	    }
 	}
     }
@@ -1680,6 +1685,31 @@ cb_intercept_allow_setid(const char *file, int line, int column,
     debug_return_bool(true);
 }
 
+bool
+cb_log_input(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
+{
+    debug_decl(cb_log_input, SUDOERS_DEBUG_PLUGIN);
+
+    def_log_stdin = op;
+    def_log_ttyin = op;
+
+    debug_return_bool(true);
+}
+
+bool
+cb_log_output(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
+{
+    debug_decl(cb_log_output, SUDOERS_DEBUG_PLUGIN);
+
+    def_log_stdout = op;
+    def_log_stderr = op;
+    def_log_ttyout = op;
+
+    debug_return_bool(true);
+}
+
 /*
  * Set parse Defaults callbacks.
  * We do this here instead in def_data.in so we don't have to
@@ -1741,6 +1771,8 @@ set_callbacks(void)
     sudo_defs_table[I_PASSPROMPT_REGEX].callback = cb_passprompt_regex;
     sudo_defs_table[I_INTERCEPT_TYPE].callback = cb_intercept_type;
     sudo_defs_table[I_INTERCEPT_ALLOW_SETID].callback = cb_intercept_allow_setid;
+    sudo_defs_table[I_LOG_INPUT].callback = cb_log_input;
+    sudo_defs_table[I_LOG_OUTPUT].callback = cb_log_output;
 
     debug_return;
 }

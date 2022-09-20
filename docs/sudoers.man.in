@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "September 13, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "September 20, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -292,27 +292,17 @@ and
 \fIlogfile\fR
 settings.
 See
-\fILOG FORMAT\fR
+\fIEVENT LOGGING\fR
 for a description of the log file format.
 .PP
 \fBsudoers\fR
-is also capable of running a command in a pseudo-terminal and logging all
+is also capable of running a command in a pseudo-terminal and logging
 input and/or output.
 The standard input, standard output, and standard error can be logged
 even when not associated with a terminal.
-I/O logging is not on by default but can be enabled using
-the
-\fIlog_input\fR
-and
-\fIlog_output\fR
-options as well as the
-\fRLOG_INPUT\fR
-and
-\fRLOG_OUTPUT\fR
-command tags.
-See
-\fII/O LOG FILES\fR
-for details on how I/O log files are stored.
+For more information about I/O logging, see the
+\fII/O LOGGING\fR
+section.
 .PP
 Starting with version 1.9, the
 \fIlog_servers\fR
@@ -1860,22 +1850,16 @@ command and are ignored for all other commands.
 These tags override the value of the
 \fIlog_input\fR
 flag on a per-command basis.
-For more information, see the description of
-\fIlog_input\fR
-in the
-\fISUDOERS OPTIONS\fR
-section below.
+For more information, see
+\fII/O LOGGING\fR.
 .TP 2n
 \fRLOG_OUTPUT\fR and \fRNOLOG_OUTPUT\fR
 .sp
 These tags override the value of the
 \fIlog_output\fR
 flag on a per-command basis.
-For more information, see the description of
-\fIlog_output\fR
-in the
-\fISUDOERS OPTIONS\fR
-section below.
+For more information, see
+\fII/O LOGGING\fR.
 .TP 2n
 \fRMAIL\fR and \fRNOMAIL\fR
 .sp
@@ -2846,7 +2830,7 @@ Most programs that require a user's password will disable echo before
 reading the password to avoid displaying the plaintext password on
 the screen.
 However, if terminal input is being logged (see
-\fIlog_input\fR),
+\fII/O LOGGING\fR),
 the password will still be present in the I/O log.
 If the
 \fIlog_passwords\fR
@@ -2869,8 +2853,8 @@ is set), only the
 first character of the password will be replaced in the I/O log.
 This option has no effect unless
 \fIlog_input\fR
-and
-\fIlog_input\fR
+or
+\fIlog_ttyin\fR
 are also set.
 This flag is
 \fIon\fR
@@ -3088,19 +3072,14 @@ by default.
 log_input
 If set,
 \fBsudo\fR
-will run the command in a pseudo-terminal and log all user input.
-If the standard input is not connected to the user's tty, due to
-I/O redirection or because the command is part of a pipeline, that
-input is also captured and stored in a separate log file.
-Anything sent to the standard input will be consumed, regardless of
-whether or not the command run via
+will run the command in a pseudo-terminal (if
 \fBsudo\fR
-is actually reading the standard input.
-This may have unexpected results when using
-\fBsudo\fR
-in a shell script that expects to process the standard input.
+was run from a terminal) and log all user input.
+If the standard input is not connected to the user's terminal, due
+to I/O redirection or because the command is part of a pipeline,
+that input is also logged.
 For more information about I/O logging, see the
-\fII/O LOG FILES\fR
+\fII/O LOGGING\fR
 section.
 This flag is
 \fIoff\fR
@@ -3109,12 +3088,15 @@ by default.
 log_output
 If set,
 \fBsudo\fR
-will run the command in a pseudo-terminal and log all output that is sent
-to the screen, similar to the
-script(1)
-command.
+will run the command in a pseudo-terminal (if
+\fBsudo\fR
+was run from a terminal) and log all output that is sent to the
+user's terminal, the standard output or the standard error.
+If the standard output or standard error is not connected to the
+user's terminal, due to I/O redirection or because the command is
+part of a pipeline, that output is also logged.
 For more information about I/O logging, see the
-\fII/O LOG FILES\fR
+\fII/O LOGGING\fR
 section.
 This flag is
 \fIoff\fR
@@ -3150,6 +3132,48 @@ by default.
 .sp
 This setting is only supported by version 1.9.0 or higher.
 .TP 18n
+log_stderr
+If set,
+\fBsudo\fR
+will run the command in a pseudo-terminal and log the standard error
+if it is not connected to the user's terminal.
+This can be used to log output to a pipe or redirected to a file.
+This flag is
+\fIoff\fR
+by default but is enabled when either the
+\fIlog_output\fR
+flag or the
+\fRLOG_OUTPUT\fR
+command tag is set.
+.TP 18n
+log_stdin
+If set,
+\fBsudo\fR
+will run the command in a pseudo-terminal and log the standard input
+if it is not connected to the user's terminal.
+This can be used to log input from a pipe or redirected from a file.
+This flag is
+\fIoff\fR
+by default but is enabled when either the
+\fIlog_input\fR
+flag or the
+\fRLOG_INPUT\fR
+command tag is set.
+.TP 18n
+log_stdout
+If set,
+\fBsudo\fR
+will run the command in a pseudo-terminal and log the standard output
+if it is not connected to the user's terminal.
+This can be used to log output to a pipe or redirected to a file.
+This flag is
+\fIoff\fR
+by default but is enabled when either the
+\fIlog_output\fR
+flag or the
+\fRLOG_OUTPUT\fR
+command tag is set.
+.TP 18n
 log_subcmds
 If set,
 \fBsudoers\fR
@@ -3184,6 +3208,38 @@ This setting is only supported by version 1.9.8 or higher
 and is incompatible with SELinux RBAC support unless the system supports
 seccomp(2)
 filter mode.
+.TP 18n
+log_ttyin
+If set,
+\fBsudo\fR
+will run the command in a pseudo-terminal and log user keystrokes
+sent to the user's terminal, if one is present.
+This flag is
+\fIoff\fR
+by default but is enabled when either the
+\fIlog_input\fR
+flag or the
+\fRLOG_INPUT\fR
+command tag is set.
+If no terminal is present, for example when running a remote command using
+ssh(1),
+this flag will have no effect.
+.TP 18n
+log_ttyout
+If set,
+\fBsudo\fR
+will run the command in a pseudo-terminal and log all output displayed
+on the user's terminal, if one is present.
+This flag is
+\fIoff\fR
+by default but is enabled when either the
+\fIlog_output\fR
+flag or the
+\fRLOG_OUTPUT\fR
+command tag is set.
+If no terminal is present, for example when running a remote command using
+ssh(1),
+this flag will have no effect.
 .TP 18n
 log_year
 If set, the four-digit year will be logged in the (non-syslog)
@@ -3834,6 +3890,11 @@ A pseudo-terminal is allocated by
 when it is running in a terminal and one or more of the
 \fIlog_input\fR,
 \fIlog_output\fR,
+\fIlog_stdin\fR,
+\fIlog_stdout\fR,
+\fIlog_stderr\fR,
+\fIlog_ttyin\fR,
+\fIlog_ttyout\fR,
 or
 \fIuse_pty\fR
 flags is enabled.
@@ -4606,7 +4667,7 @@ For
 \fBsudo_logsrvd\fR,
 client certificate validation is controlled by the
 \fItls_checkpeer\fR
-option, which defaults to
+flag, which defaults to
 \fIfalse\fR.
 .sp
 This setting is only supported by version 1.9.0 or higher.
@@ -5110,7 +5171,7 @@ may be truncated.
 .TP 10n
 sudo
 Traditional sudo-style logs, see
-\fILOG FORMAT\fR
+\fIEVENT LOGGING\fR
 for a description of the log file format.
 .PP
 This setting affects logs sent via
@@ -5693,7 +5754,7 @@ Defaults group_plugin=system_group.so
 .PP
 The group provider plugin API is described in detail in
 sudo_plugin(@mansectform@).
-.SH "LOG FORMAT"
+.SH "EVENT LOGGING"
 \fBsudoers\fR
 can log events in either JSON or
 \fIsudo\fR
@@ -6049,11 +6110,60 @@ If the
 option is set to 0 (or negated with a
 \(oq\&!\(cq),
 word wrap will be disabled.
-.SH "I/O LOG FILES"
+.SH "I/O LOGGING"
 When I/O logging is enabled,
 \fBsudo\fR
-will run the command in a pseudo-terminal and log all user input and/or output,
-depending on which options are enabled.
+will runs the command in a pseudo-terminal, logging user input
+and/or output, depending on which
+\fBsudoers\fR
+flags are enabled.
+There are five distinct types of I/O that can be logged, each with
+a corresponding
+\fBsudoers\fR
+flag.
+.TS
+l l l.
+.PP
+\fBType\fR	\fBFlag\fR	\fBDescription\fR
+.PP
+terminal input	log_ttyin	keystrokes entered by the user
+.PP
+terminal output	log_ttyout	command output displayed to the screen
+.PP
+standard input	log_stdin	input from a pipe or a file
+.PP
+standard output	log_stdout	output to a pipe or a file
+.PP
+standard error	log_stderr	output to a pipe or a file
+.TE
+.PP
+In addition to flags described the above, the
+\fIlog_input\fR
+flag and
+\fRLOG_INPUT\fR
+command tag set both
+\fIlog_ttyin\fR
+and
+\fIlog_stdin\fR.
+The
+\fIlog_output\fR
+flag and
+\fRLOG_OUTPUT\fR
+command tag set
+\fIlog_ttyout\fR,
+\fIlog_stdout\fR,
+and
+\fIlog_stderr\fR.
+.PP
+To capture terminal input and output,
+\fBsudo\fR
+run the command in a pseudo-terminal, logging the input and
+output before passing it on to the user.
+To capture the standard input, standard output or standard error,
+\fBsudo\fR
+uses a pipe to interpose itself between the input or output stream,
+logging the I/O before passing it to the other end of the pipe.
+.PP
 I/O can be logged either to the local machine or to a remote log server.
 For local logs, I/O is logged to the directory specified by the
 \fIiolog_dir\fR
@@ -6073,7 +6183,121 @@ setting is used to specify one or more log servers running
 \fBsudo_logsrvd\fR
 or another server that implements the protocol described by
 sudo_logsrv.proto(@mansectform@).
+.SS "I/O logging pitfals"
+When logging standard input, anything sent to the standard input
+will be consumed, regardless of whether or not the command run via
+\fBsudo\fR
+is actively reading the standard input.
+This may have unexpected results when using
+\fBsudo\fR
+in a shell script that expects to process the standard input.
+For example, given the following shell script:
+.nf
+.sp
+.RS 4n
+#!/bin/sh
+sudo echo testing
+echo done
+.RE
+.fi
 .PP
+It will behave as expected when the script is passed to the shell as a
+an argument:
+.nf
+.sp
+.RS 4n
+$ sh test.sh
+testing
+done
+.RE
+.fi
+.PP
+However, if the script is passed to the shell on the standard input, the
+\(oqsudo echo testing\(cq
+command will consume the rest of the script.
+This means that the
+\(oqecho done\(cq
+statement is never executed.
+.nf
+.sp
+.RS 4n
+$ sh -s < test.sh
+testing
+.RE
+.fi
+.PP
+There are several ways to work around this problem:
+.TP 5n
+1.\&
+Redirect the standard input from
+\fI/dev/null\fR
+when running a command via
+\fBsudo\fR
+that does not need to read the standard input.
+.nf
+.sp
+.RS 9n
+sudo echo testing < /dev/null
+.RE
+.fi
+.TP 5n
+2.\&
+Pass the script to the shell by path name instead of via the standard input.
+.nf
+.sp
+.RS 9n
+sh test.sh
+.RE
+.fi
+.TP 5n
+3.\&
+Disable logging the standard input for commands that do not need
+to read the standard input.
+.nf
+.sp
+.RS 9n
+Defaults!/bin/echo !log_stdin
+.RE
+.fi
+.PP
+Depending on the command, it may not be desirable to log the
+standard input or standard output.
+For example, I/O logging of commands that send or receive large
+amount of data via the standard output or standard input such as
+rsync(1)
+and
+tar(1)
+could fill up the log file system with superfluous data.
+It is possible to disable logging of the standard input and standard
+output for such commands as follows:
+.nf
+.sp
+.RS 4n
+Cmnd_Alias COPY_CMDS = /usr/bin/tar, /usr/bin/cpio, /usr/bin/rsync
+
+# Log input and output but omit stdin and stdout when copying files.
+Defaults log_input, log_output
+Defaults!COPY_CMDS !log_stdin, !log_stdout
+.RE
+.fi
+.PP
+However, be aware that using the
+\fIlog_input\fR
+flag or the
+\fRLOG_INPUT\fR
+command tag will also enable
+\fIlog_stdin\fR.
+Likewise, the
+\fIlog_ouput\fR
+flag or the
+\fRLOG_OUTPUT\fR
+command tag will enable
+\fIlog_stdout\fR
+and
+\fIlog_stderr.\fR
+Careful ordering of rules may be necessary to achieve the results
+that you expect.
+.SS "I/O log format"
 For both local and remote I/O logs, each log is stored in a separate
 directory that contains the following files:
 .TP 10n
@@ -6219,6 +6443,13 @@ command suspend or resume, signal received
 .TP 10n
 \fIttyin\fR
 Raw input from the user's terminal, exactly as it was received.
+This file is only present if the
+\fIlog_input\fR
+or
+\fIlog_ttyin\fR
+flags are set and
+\fBsudo\fR
+was run from a terminal.
 No post-processing is performed.
 For manual viewing, you may wish to convert carriage return characters
 in the log to line feeds.
@@ -6228,19 +6459,42 @@ For example:
 \fIstdin\fR
 The standard input when no terminal is present, or input redirected from
 a pipe or file.
+This file is only present if the
+\fIlog_input\fR
+or
+\fIlog_stdin\fR
+flags are set and the standard input is not connected to a terminal.
 .TP 10n
 \fIttyout\fR
 Output from the pseudo-terminal (what the command writes to the screen).
 Terminal-specific post-processing is performed before the data is logged.
 This means that, for example, line feeds are usually converted to
 line feed/carriage return pairs and tabs may be expanded to spaces.
+This file is only present if the
+\fIlog_output\fR
+or
+\fIlog_ttyout\fR
+flags are set and
+\fBsudo\fR
+was run from a terminal.
 .TP 10n
 \fIstdout\fR
 The standard output when no terminal is present, or output redirected to
 a pipe or file.
+This file is only present if the
+\fIlog_output\fR
+or
+\fIlog_stdout\fR
+flags are set and the standard output is not connected to a terminal.
 .TP 10n
 \fIstderr\fR
-The standard error redirected to a pipe or file.
+The standard error when no terminal is present, or output redirected to
+a pipe or file.
+This file is only present if the
+\fIlog_output\fR
+or
+\fIlog_stderr\fR
+flags are set and the standard error is not connected to a terminal.
 .PP
 All files other than
 \fIlog\fR
@@ -6268,6 +6522,9 @@ In most cases, logging the command output via
 or
 \fRLOG_OUTPUT\fR
 is all that is required.
+When logging input, consider disabling the
+\fIlog_passwords\fR
+flag.
 .PP
 Since each session's I/O logs are stored in a separate directory,
 traditional log rotation utilities cannot be used to limit the

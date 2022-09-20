@@ -352,8 +352,28 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Log user's input for the command being run"),
 	NULL,
     }, {
+	"log_stdin", T_FLAG,
+	N_("Log the command's standard input if not connected to a terminal"),
+	NULL,
+    }, {
+	"log_ttyin", T_FLAG,
+	N_("Log the user's terminal input for the command being run"),
+	NULL,
+    }, {
 	"log_output", T_FLAG,
 	N_("Log the output of the command being run"),
+	NULL,
+    }, {
+	"log_stdout", T_FLAG,
+	N_("Log the command's standard output if not connected to a terminal"),
+	NULL,
+    }, {
+	"log_stderr", T_FLAG,
+	N_("Log the command's standard error if not connected to a terminal"),
+	NULL,
+    }, {
+	"log_ttyout", T_FLAG,
+	N_("Log the terminal output of the command being run"),
 	NULL,
     }, {
 	"compress_io", T_FLAG,

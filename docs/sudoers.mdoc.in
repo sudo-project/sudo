@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd September 13, 2022
+.Dd September 20, 2022
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -281,27 +281,17 @@ and
 .Em logfile
 settings.
 See
-.Sx "LOG FORMAT"
+.Sx "EVENT LOGGING"
 for a description of the log file format.
 .Pp
 .Nm
-is also capable of running a command in a pseudo-terminal and logging all
+is also capable of running a command in a pseudo-terminal and logging
 input and/or output.
 The standard input, standard output, and standard error can be logged
 even when not associated with a terminal.
-I/O logging is not on by default but can be enabled using
-the
-.Em log_input
-and
-.Em log_output
-options as well as the
-.Dv LOG_INPUT
-and
-.Dv LOG_OUTPUT
-command tags.
-See
-.Sx "I/O LOG FILES"
-for details on how I/O log files are stored.
+For more information about I/O logging, see the
+.Sx "I/O LOGGING"
+section.
 .Pp
 Starting with version 1.9, the
 .Em log_servers
@@ -1772,21 +1762,15 @@ command and are ignored for all other commands.
 These tags override the value of the
 .Em log_input
 flag on a per-command basis.
-For more information, see the description of
-.Em log_input
-in the
-.Sx SUDOERS OPTIONS
-section below.
+For more information, see
+.Sx "I/O LOGGING" .
 .It Dv LOG_OUTPUT No and Dv NOLOG_OUTPUT
 .sp
 These tags override the value of the
 .Em log_output
 flag on a per-command basis.
-For more information, see the description of
-.Em log_output
-in the
-.Sx SUDOERS OPTIONS
-section below.
+For more information, see
+.Sx "I/O LOGGING" .
 .It Dv MAIL No and Dv NOMAIL
 .sp
 These tags provide fine-grained control over whether
@@ -2696,7 +2680,7 @@ Most programs that require a user's password will disable echo before
 reading the password to avoid displaying the plaintext password on
 the screen.
 However, if terminal input is being logged (see
-.Em log_input ) ,
+.Sx "I/O LOGGING" ) ,
 the password will still be present in the I/O log.
 If the
 .Em log_passwords
@@ -2719,8 +2703,8 @@ is set), only the
 first character of the password will be replaced in the I/O log.
 This option has no effect unless
 .Em log_input
-and
-.Em log_input
+or
+.Em log_ttyin
 are also set.
 This flag is
 .Em on
@@ -2921,19 +2905,14 @@ by default.
 .It log_input
 If set,
 .Nm sudo
-will run the command in a pseudo-terminal and log all user input.
-If the standard input is not connected to the user's tty, due to
-I/O redirection or because the command is part of a pipeline, that
-input is also captured and stored in a separate log file.
-Anything sent to the standard input will be consumed, regardless of
-whether or not the command run via
+will run the command in a pseudo-terminal (if
 .Nm sudo
-is actually reading the standard input.
-This may have unexpected results when using
-.Nm sudo
-in a shell script that expects to process the standard input.
+was run from a terminal) and log all user input.
+If the standard input is not connected to the user's terminal, due
+to I/O redirection or because the command is part of a pipeline,
+that input is also logged.
 For more information about I/O logging, see the
-.Sx "I/O LOG FILES"
+.Sx "I/O LOGGING"
 section.
 This flag is
 .Em off
@@ -2941,12 +2920,15 @@ by default.
 .It log_output
 If set,
 .Nm sudo
-will run the command in a pseudo-terminal and log all output that is sent
-to the screen, similar to the
-.Xr script 1
-command.
+will run the command in a pseudo-terminal (if
+.Nm sudo
+was run from a terminal) and log all output that is sent to the
+user's terminal, the standard output or the standard error.
+If the standard output or standard error is not connected to the
+user's terminal, due to I/O redirection or because the command is
+part of a pipeline, that output is also logged.
 For more information about I/O logging, see the
-.Sx "I/O LOG FILES"
+.Sx "I/O LOGGING"
 section.
 This flag is
 .Em off
@@ -2978,6 +2960,45 @@ This flag is
 by default.
 .Pp
 This setting is only supported by version 1.9.0 or higher.
+.It log_stderr
+If set,
+.Nm sudo
+will run the command in a pseudo-terminal and log the standard error
+if it is not connected to the user's terminal.
+This can be used to log output to a pipe or redirected to a file.
+This flag is
+.Em off
+by default but is enabled when either the
+.Em log_output
+flag or the
+.Dv LOG_OUTPUT
+command tag is set.
+.It log_stdin
+If set,
+.Nm sudo
+will run the command in a pseudo-terminal and log the standard input
+if it is not connected to the user's terminal.
+This can be used to log input from a pipe or redirected from a file.
+This flag is
+.Em off
+by default but is enabled when either the
+.Em log_input
+flag or the
+.Dv LOG_INPUT
+command tag is set.
+.It log_stdout
+If set,
+.Nm sudo
+will run the command in a pseudo-terminal and log the standard output
+if it is not connected to the user's terminal.
+This can be used to log output to a pipe or redirected to a file.
+This flag is
+.Em off
+by default but is enabled when either the
+.Em log_output
+flag or the
+.Dv LOG_OUTPUT
+command tag is set.
 .It log_subcmds
 If set,
 .Nm
@@ -3012,6 +3033,36 @@ This setting is only supported by version 1.9.8 or higher
 and is incompatible with SELinux RBAC support unless the system supports
 .Xr seccomp 2
 filter mode.
+.It log_ttyin
+If set,
+.Nm sudo
+will run the command in a pseudo-terminal and log user keystrokes
+sent to the user's terminal, if one is present.
+This flag is
+.Em off
+by default but is enabled when either the
+.Em log_input
+flag or the
+.Dv LOG_INPUT
+command tag is set.
+If no terminal is present, for example when running a remote command using
+.Xr ssh 1 ,
+this flag will have no effect.
+.It log_ttyout
+If set,
+.Nm sudo
+will run the command in a pseudo-terminal and log all output displayed
+on the user's terminal, if one is present.
+This flag is
+.Em off
+by default but is enabled when either the
+.Em log_output
+flag or the
+.Dv LOG_OUTPUT
+command tag is set.
+If no terminal is present, for example when running a remote command using
+.Xr ssh 1 ,
+this flag will have no effect.
 .It log_year
 If set, the four-digit year will be logged in the (non-syslog)
 .Nm sudo
@@ -3626,6 +3677,11 @@ A pseudo-terminal is allocated by
 when it is running in a terminal and one or more of the
 .Em log_input ,
 .Em log_output ,
+.Em log_stdin ,
+.Em log_stdout ,
+.Em log_stderr ,
+.Em log_ttyin ,
+.Em log_ttyout ,
 or
 .Em use_pty
 flags is enabled.
@@ -4348,7 +4404,7 @@ For
 .Nm sudo_logsrvd ,
 client certificate validation is controlled by the
 .Em tls_checkpeer
-option, which defaults to
+flag, which defaults to
 .Em false .
 .Pp
 This setting is only supported by version 1.9.0 or higher.
@@ -4791,7 +4847,7 @@ Due to limitations of the protocol, JSON events sent via
 may be truncated.
 .It sudo
 Traditional sudo-style logs, see
-.Sx "LOG FORMAT"
+.Sx "EVENT LOGGING"
 for a description of the log file format.
 .El
 .Pp
@@ -5325,7 +5381,7 @@ Defaults group_plugin=system_group.so
 .Pp
 The group provider plugin API is described in detail in
 .Xr sudo_plugin @mansectform@ .
-.Sh LOG FORMAT
+.Sh EVENT LOGGING
 .Nm
 can log events in either JSON or
 .Em sudo
@@ -5653,11 +5709,53 @@ option is set to 0 (or negated with a
 .Ql \&! ) ,
 word wrap will be disabled.
 .El
-.Sh I/O LOG FILES
+.Sh I/O LOGGING
 When I/O logging is enabled,
 .Nm sudo
-will run the command in a pseudo-terminal and log all user input and/or output,
-depending on which options are enabled.
+will runs the command in a pseudo-terminal, logging user input
+and/or output, depending on which
+.Nm
+flags are enabled.
+There are five distinct types of I/O that can be logged, each with
+a corresponding
+.Nm
+flag.
+.Bl -column "standard output" "log_output" "command output displayed to the screen"
+.It Sy Type Ta Sy Flag Ta Sy Description
+.It terminal input Ta log_ttyin Ta keystrokes entered by the user
+.It terminal output Ta log_ttyout Ta command output displayed to the screen
+.It standard input Ta log_stdin Ta input from a pipe or a file
+.It standard output Ta log_stdout Ta output to a pipe or a file
+.It standard error Ta log_stderr Ta output to a pipe or a file
+.El
+.Pp
+In addition to flags described the above, the
+.Em log_input
+flag and
+.Dv LOG_INPUT
+command tag set both
+.Em log_ttyin
+and
+.Em log_stdin .
+The
+.Em log_output
+flag and
+.Dv LOG_OUTPUT
+command tag set
+.Em log_ttyout ,
+.Em log_stdout ,
+and
+.Em log_stderr .
+.Pp
+To capture terminal input and output,
+.Nm sudo
+run the command in a pseudo-terminal, logging the input and
+output before passing it on to the user.
+To capture the standard input, standard output or standard error,
+.Nm sudo
+uses a pipe to interpose itself between the input or output stream,
+logging the I/O before passing it to the other end of the pipe.
+.Pp
 I/O can be logged either to the local machine or to a remote log server.
 For local logs, I/O is logged to the directory specified by the
 .Em iolog_dir
@@ -5679,7 +5777,99 @@ setting is used to specify one or more log servers running
 .Nm sudo_logsrvd
 or another server that implements the protocol described by
 .Xr sudo_logsrv.proto @mansectform@ .
+.Ss I/O logging pitfals
+When logging standard input, anything sent to the standard input
+will be consumed, regardless of whether or not the command run via
+.Nm sudo
+is actively reading the standard input.
+This may have unexpected results when using
+.Nm sudo
+in a shell script that expects to process the standard input.
+For example, given the following shell script:
+.Bd -literal -offset 4n
+#!/bin/sh
+sudo echo testing
+echo done
+.Ed
 .Pp
+It will behave as expected when the script is passed to the shell as a
+an argument:
+.Bd -literal -offset 4n
+$ sh test.sh
+testing
+done
+.Ed
+.Pp
+However, if the script is passed to the shell on the standard input, the
+.Ql sudo echo testing
+command will consume the rest of the script.
+This means that the
+.Ql echo done
+statement is never executed.
+.Bd -literal -offset 4n
+$ sh -s < test.sh
+testing
+.Ed
+.Pp
+There are several ways to work around this problem:
+.Bl -enum
+.It
+Redirect the standard input from
+.Pa /dev/null
+when running a command via
+.Nm sudo
+that does not need to read the standard input.
+.Bd -literal -offset 4n
+sudo echo testing < /dev/null
+.Ed
+.It
+Pass the script to the shell by path name instead of via the standard input.
+.Bd -literal -offset 4n
+sh test.sh
+.Ed
+.It
+Disable logging the standard input for commands that do not need
+to read the standard input.
+.Bd -literal -offset 4n
+Defaults!/bin/echo !log_stdin
+.Ed
+.El
+.Pp
+Depending on the command, it may not be desirable to log the
+standard input or standard output.
+For example, I/O logging of commands that send or receive large
+amount of data via the standard output or standard input such as
+.Xr rsync 1
+and
+.Xr tar 1
+could fill up the log file system with superfluous data.
+It is possible to disable logging of the standard input and standard
+output for such commands as follows:
+.Bd -literal -offset 4n
+Cmnd_Alias COPY_CMDS = /usr/bin/tar, /usr/bin/cpio, /usr/bin/rsync
+
+# Log input and output but omit stdin and stdout when copying files.
+Defaults log_input, log_output
+Defaults!COPY_CMDS !log_stdin, !log_stdout
+.Ed
+.Pp
+However, be aware that using the
+.Em log_input
+flag or the
+.Dv LOG_INPUT
+command tag will also enable
+.Em log_stdin .
+Likewise, the
+.Em log_ouput
+flag or the
+.Dv LOG_OUTPUT
+command tag will enable
+.Em log_stdout
+and
+.Em log_stderr.
+Careful ordering of rules may be necessary to achieve the results
+that you expect.
+.Ss I/O log format
 For both local and remote I/O logs, each log is stored in a separate
 directory that contains the following files:
 .Bl -tag -width 8n
@@ -5789,6 +5979,13 @@ command suspend or resume, signal received
 .El
 .It Pa ttyin
 Raw input from the user's terminal, exactly as it was received.
+This file is only present if the
+.Em log_input
+or
+.Em log_ttyin
+flags are set and
+.Nm sudo
+was run from a terminal.
 No post-processing is performed.
 For manual viewing, you may wish to convert carriage return characters
 in the log to line feeds.
@@ -5797,16 +5994,39 @@ For example:
 .It Pa stdin
 The standard input when no terminal is present, or input redirected from
 a pipe or file.
+This file is only present if the
+.Em log_input
+or
+.Em log_stdin
+flags are set and the standard input is not connected to a terminal.
 .It Pa ttyout
 Output from the pseudo-terminal (what the command writes to the screen).
 Terminal-specific post-processing is performed before the data is logged.
 This means that, for example, line feeds are usually converted to
 line feed/carriage return pairs and tabs may be expanded to spaces.
+This file is only present if the
+.Em log_output
+or
+.Em log_ttyout
+flags are set and
+.Nm sudo
+was run from a terminal.
 .It Pa stdout
 The standard output when no terminal is present, or output redirected to
 a pipe or file.
+This file is only present if the
+.Em log_output
+or
+.Em log_stdout
+flags are set and the standard output is not connected to a terminal.
 .It Pa stderr
-The standard error redirected to a pipe or file.
+The standard error when no terminal is present, or output redirected to
+a pipe or file.
+This file is only present if the
+.Em log_output
+or
+.Em log_stderr
+flags are set and the standard error is not connected to a terminal.
 .El
 .Pp
 All files other than
@@ -5835,6 +6055,9 @@ In most cases, logging the command output via
 or
 .Dv LOG_OUTPUT
 is all that is required.
+When logging input, consider disabling the
+.Em log_passwords
+flag.
 .Pp
 Since each session's I/O logs are stored in a separate directory,
 traditional log rotation utilities cannot be used to limit the

@@ -261,7 +261,7 @@ log_server_accept(struct eventlog *evlog)
 	    debug_return_bool(true);
     } else {
 	/* Only send accept event to log server if I/O log plugin did not. */
-	if (def_log_input || def_log_output)
+	if (iolog_enabled)
 	    debug_return_bool(true);
     }
 

@@ -666,20 +666,26 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 	if ((command_info[info_len++] = strdup("log_subcmds=true")) == NULL)
 	    goto oom;
     }
-    if (def_log_input || def_log_output) {
+    if (iolog_enabled) {
 	if (iolog_path)
 	    command_info[info_len++] = iolog_path;	/* now owned */
-	if (def_log_input) {
+	if (def_log_stdin) {
 	    if ((command_info[info_len++] = strdup("iolog_stdin=true")) == NULL)
 		goto oom;
+	}
+	if (def_log_stdout) {
+	    if ((command_info[info_len++] = strdup("iolog_stdout=true")) == NULL)
+		goto oom;
+	}
+	if (def_log_stderr) {
+	    if ((command_info[info_len++] = strdup("iolog_stderr=true")) == NULL)
+		goto oom;
+	}
+	if (def_log_ttyin) {
 	    if ((command_info[info_len++] = strdup("iolog_ttyin=true")) == NULL)
 		goto oom;
 	}
-	if (def_log_output) {
-	    if ((command_info[info_len++] = strdup("iolog_stdout=true")) == NULL)
-		goto oom;
-	    if ((command_info[info_len++] = strdup("iolog_stderr=true")) == NULL)
-		goto oom;
+	if (def_log_ttyout) {
 	    if ((command_info[info_len++] = strdup("iolog_ttyout=true")) == NULL)
 		goto oom;
 	}
@@ -1175,8 +1181,8 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 #ifndef NO_LEAKS
     if (ret == true && sudo_version >= SUDO_API_MKVERSION(1, 3)) {
 	/* Unset close function if we don't need it to avoid extra process. */
-	if (!def_log_input && !def_log_output && !def_log_exit_status &&
-	    !def_use_pty && !sudo_auth_needs_end_session())
+	if (!iolog_enabled && !def_log_exit_status && !def_use_pty &&
+		!sudo_auth_needs_end_session())
 	    sudoers_policy.close = NULL;
     }
 #endif

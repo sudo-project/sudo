@@ -135,6 +135,20 @@ cb_unused(struct sudoers_parse_tree *parse_tree, struct alias *a, void *v)
     return 0;
 }
 
+bool
+cb_log_input(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
+{
+    return 0;
+}
+
+bool
+cb_log_output(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
+{
+    return 0;
+}
+
 static FILE *
 open_data(const uint8_t *data, size_t size)
 {

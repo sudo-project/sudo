@@ -420,6 +420,8 @@ bool matches_env_pattern(const char *pattern, const char *var, bool *full_match)
 
 /* sudoers.c */
 FILE *open_sudoers(const char *, bool, bool *);
+bool cb_log_input(const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
+bool cb_log_output(const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
 int set_cmnd_path(const char *runchroot);
 int sudoers_init(void *info, sudoers_logger_t logger, char * const envp[]);
 int sudoers_policy_main(int argc, char *const argv[], int pwflag, char *env_add[], bool verbose, void *closure);
