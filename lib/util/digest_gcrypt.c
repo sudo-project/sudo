@@ -23,6 +23,11 @@
 
 #include <config.h>
 
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -32,6 +37,8 @@
 #include "sudo_compat.h"
 #include "sudo_debug.h"
 #include "sudo_digest.h"
+
+#define SUDO_LIBGCRYPT_VERSION_MIN "1.3.0"
 
 struct sudo_digest {
     int gcry_digest_type;
@@ -61,8 +68,20 @@ struct sudo_digest *
 sudo_digest_alloc_v1(int digest_type)
 {
     debug_decl(sudo_digest_alloc, SUDO_DEBUG_UTIL);
+    static bool initialized = false;
     struct sudo_digest *dig;
     int gcry_digest_type;
+
+    if (!initialized) {
+	if (!gcry_check_version(SUDO_LIBGCRYPT_VERSION_MIN)) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"libgcrypt too old (need %s, have %s)",
+		SUDO_LIBGCRYPT_VERSION_MIN, gcry_check_version(NULL));
+	    debug_return_ptr(NULL);
+	}
+	gcry_control(GCRYCTL_INITIALIZATION_FINISHED, 0);
+	initialized = true;
+    }
 
     gcry_digest_type = sudo_digest_type_to_gcry(digest_type);
     if (gcry_digest_type == -1) {
