@@ -319,7 +319,7 @@ The embedded copy of zlib bears the following license:
 
 The embedded copy of protobuf-c bears the following license:
 
-    Copyright (c) 2008-2018, Dave Benson and the protobuf-c authors.
+    Copyright (c) 2008-2022, Dave Benson and the protobuf-c authors.
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
