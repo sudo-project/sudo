@@ -1285,10 +1285,12 @@ signame.i: signame.c
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 signame.plog: signame.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file signame.c --i-file $< --output-file $@
-snprintf.lo: $(srcdir)/snprintf.c $(incdir)/sudo_compat.h \
+snprintf.lo: $(srcdir)/snprintf.c $(incdir)/compat/stdbool.h \
+             $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
              $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/snprintf.c
-snprintf.i: $(srcdir)/snprintf.c $(incdir)/sudo_compat.h \
+snprintf.i: $(srcdir)/snprintf.c $(incdir)/compat/stdbool.h \
+             $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
              $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 snprintf.plog: snprintf.i
