@@ -23311,8 +23311,9 @@ fi
 fi
 
 done
+sudo_mktemp=no
 
-  for ac_func in mkstemps mkdtemp
+  for ac_func in mkdtempat mkostempsat mkstemps mkdtemp
 do :
   as_ac_var=`printf "%s\n" "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -23323,11 +23324,12 @@ then :
 _ACEOF
 
 else $as_nop
-  break
+  sudo_mktemp=yes; break
 fi
 
 done
-if test X"$ac_cv_func_mkstemps$ac_cv_func_mkdtemp" != X"yesyes"; then
+# If any of the mktemp family are missing we use our own.
+if test X"$sudo_mktemp" = X"yes"; then
 
   for ac_func in arc4random random lrand48
 do :
@@ -23357,9 +23359,8 @@ fi
  ;;
 esac
 
-    # If either mkdtemp() or mkstemps() is missing, replace both.
 
-    for _sym in sudo_mkdtemp sudo_mkstemps; do
+    for _sym in sudo_mkdtemp sudo_mkdtempat sudo_mkostempsat sudo_mkstemp sudo_mkstemps; do
 	COMPAT_EXP="${COMPAT_EXP}${_sym}
 "
     done

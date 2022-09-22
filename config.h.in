@@ -602,6 +602,12 @@
 /* Define to 1 if you have the `mkdtemp' function. */
 #undef HAVE_MKDTEMP
 
+/* Define to 1 if you have the `mkdtempat' function. */
+#undef HAVE_MKDTEMPAT
+
+/* Define to 1 if you have the `mkostempsat' function. */
+#undef HAVE_MKOSTEMPSAT
+
 /* Define to 1 if you have the `mkstemps' function. */
 #undef HAVE_MKSTEMPS
 

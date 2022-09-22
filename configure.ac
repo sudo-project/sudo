@@ -2957,15 +2957,16 @@ AC_CHECK_FUNCS([closefrom], [], [AC_LIBOBJ(closefrom)
 #	include <fcntl.h> ])
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }closefrom_test"
 ])
-AC_CHECK_FUNCS([mkstemps mkdtemp], [], [break])
-if test X"$ac_cv_func_mkstemps$ac_cv_func_mkdtemp" != X"yesyes"; then
+sudo_mktemp=no
+AC_CHECK_FUNCS([mkdtempat mkostempsat mkstemps mkdtemp], [], [sudo_mktemp=yes; break])
+# If any of the mktemp family are missing we use our own.
+if test X"$sudo_mktemp" = X"yes"; then
     AC_CHECK_FUNCS([arc4random random lrand48], [break])
     if test X"$ac_cv_func_arc4random" != X"yes"; then
 	AC_CHECK_FUNCS([getentropy])
     fi
     AC_LIBOBJ(mktemp)
-    # If either mkdtemp() or mkstemps() is missing, replace both.
-    SUDO_APPEND_COMPAT_EXP(sudo_mkdtemp sudo_mkstemps)
+    SUDO_APPEND_COMPAT_EXP(sudo_mkdtemp sudo_mkdtempat sudo_mkostempsat sudo_mkstemp sudo_mkstemps)
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }mktemp_test"
 fi
 AX_FUNC_SNPRINTF
