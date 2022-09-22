@@ -2962,7 +2962,15 @@ AC_CHECK_FUNCS([closefrom], [], [AC_LIBOBJ(closefrom)
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }closefrom_test"
 ])
 sudo_mktemp=no
-AC_CHECK_FUNCS([mkdtempat mkostempsat mkstemps mkdtemp], [], [sudo_mktemp=yes; break])
+case "$host_os" in
+    darwin*)
+	# macOS has these but uses a _np (non-portable) suffix
+	AC_CHECK_FUNCS([mkdtempat_np mkostempsat_np], [], [sudo_mktemp=yes; break])
+	;;
+    *)
+	AC_CHECK_FUNCS([mkdtempat mkostempsat], [], [sudo_mktemp=yes; break])
+	;;
+esac
 # If any of the mktemp family are missing we use our own.
 if test X"$sudo_mktemp" = X"yes"; then
     AC_CHECK_FUNCS([arc4random random lrand48], [break])

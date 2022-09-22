@@ -24,7 +24,8 @@
 
 #include <config.h>
 
-#if !defined(HAVE_MKDTEMP) || !defined(HAVE_MKDTEMPAT) || !defined(HAVE_MKOSTEMPSAT) || !defined(HAVE_MKSTEMPS)
+#if (!defined(HAVE_MKDTEMPAT) && !defined(HAVE_MKDTEMPAT_NP)) || \
+    (!defined(HAVE_MKOSTEMPSAT) && !defined(HAVE_MKOSTEMPSAT_NP))
 
 #include <sys/stat.h>
 
@@ -168,4 +169,4 @@ sudo_mkstemps(char *path, int slen)
 {
 	return mktemp_internal(AT_FDCWD, path, slen, MKTEMP_FILE, 0);
 }
-#endif /* !HAVE_MKDTEMP || !HAVE_MKDTEMPAT || !HAVE_MKOSTEMPSAT || !HAVE_MKSTEMPS */
+#endif /* !HAVE_MKDTEMPAT || !HAVE_MKOSTEMPSAT */

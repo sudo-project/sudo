@@ -602,17 +602,17 @@
 /* Define to 1 if you have the `mkdirat' function. */
 #undef HAVE_MKDIRAT
 
-/* Define to 1 if you have the `mkdtemp' function. */
-#undef HAVE_MKDTEMP
-
 /* Define to 1 if you have the `mkdtempat' function. */
 #undef HAVE_MKDTEMPAT
+
+/* Define to 1 if you have the `mkdtempat_np' function. */
+#undef HAVE_MKDTEMPAT_NP
 
 /* Define to 1 if you have the `mkostempsat' function. */
 #undef HAVE_MKOSTEMPSAT
 
-/* Define to 1 if you have the `mkstemps' function. */
-#undef HAVE_MKSTEMPS
+/* Define to 1 if you have the `mkostempsat_np' function. */
+#undef HAVE_MKOSTEMPSAT_NP
 
 /* Define to 1 if you have the <mps/ldap_ssl.h> header file. */
 #undef HAVE_MPS_LDAP_SSL_H

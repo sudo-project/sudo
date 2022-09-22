@@ -499,23 +499,30 @@ sudo_dso_public int sudo_mkdirat(int dfd, const char *path, mode_t mode);
 # undef mkdirat
 # define mkdirat(_a, _b, _c) sudo_mkdirat((_a), (_b), (_c))
 #endif /* HAVE_MKDIRAT */
-#if !defined(HAVE_MKDTEMP) || !defined(HAVE_MKDTEMPAT) || !defined(HAVE_MKOSTEMPSAT) || !defined(HAVE_MKSTEMPS)
+#if !defined(HAVE_MKDTEMPAT) || !defined(HAVE_MKOSTEMPSAT)
+# if defined(HAVE_MKDTEMPAT_NP) && defined(HAVE_MKOSTEMPSAT_NP)
+#  undef mkdtempat
+#  define mkdtempat mkdtempat_np
+#  undef mkostempsat
+#  define mkostempsat mkostempsat_np
+# else
 sudo_dso_public char *sudo_mkdtemp(char *path);
-# undef mkdtemp
-# define mkdtemp(_a) sudo_mkdtemp((_a))
+#  undef mkdtemp
+#  define mkdtemp(_a) sudo_mkdtemp((_a))
 sudo_dso_public char *sudo_mkdtempat(int dfd, char *path);
-# undef mkdtempat
-# define mkdtempat(_a, _b) sudo_mkdtempat((_a), (_b))
+#  undef mkdtempat
+#  define mkdtempat(_a, _b) sudo_mkdtempat((_a), (_b))
 sudo_dso_public int sudo_mkostempsat(int dfd, char *path, int slen, int flags);
-# undef mkostempsat
-# define mkostempsat(_a, _b, _c, _d) sudo_mkostempsat((_a), (_b), (_c), (_d))
+#  undef mkostempsat
+#  define mkostempsat(_a, _b, _c, _d) sudo_mkostempsat((_a), (_b), (_c), (_d))
 sudo_dso_public int sudo_mkstemp(char *path);
-# undef mkstemp
-# define mkstemp(_a) sudo_mkstemp((_a))
+#  undef mkstemp
+#  define mkstemp(_a) sudo_mkstemp((_a))
 sudo_dso_public int sudo_mkstemps(char *path, int slen);
-# undef mkstemps
-# define mkstemps(_a, _b) sudo_mkstemps((_a), (_b))
-#endif /* !HAVE_MKDTEMP || !HAVE_MKDTEMPAT || !HAVE_MKOSTEMPSAT || !HAVE_MKSTEMPS */
+#  undef mkstemps
+#  define mkstemps(_a, _b) sudo_mkstemps((_a), (_b))
+# endif /* HAVE_MKDTEMPAT_NP || HAVE_MKOSTEMPSAT_NP */
+#endif /* !HAVE_MKDTEMPAT || !HAVE_MKOSTEMPSAT */
 #ifndef HAVE_NANOSLEEP
 sudo_dso_public int sudo_nanosleep(const struct timespec *timeout, struct timespec *remainder);
 #undef nanosleep
