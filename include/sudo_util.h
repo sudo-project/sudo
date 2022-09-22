@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2013-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -247,6 +247,8 @@ sudo_dso_public const char *sudo_logpri2str_v1(int num);
 /* mkdir_parents.c */
 sudo_dso_public bool sudo_mkdir_parents_v1(const char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet);
 #define sudo_mkdir_parents(_a, _b, _c, _d, _e) sudo_mkdir_parents_v1((_a), (_b), (_c), (_d), (_e))
+sudo_dso_public int sudo_open_parent_dir_v1(const char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet);
+#define sudo_open_parent_dir(_a, _b, _c, _d, _e) sudo_open_parent_dir_v1((_a), (_b), (_c), (_d), (_e))
 
 /* mmap_alloc.c */
 sudo_dso_public void *sudo_mmap_alloc_v1(size_t size) sudo_malloclike;
@@ -295,6 +297,10 @@ sudo_dso_public int sudo_secure_dir_v1(const char *path, uid_t uid, gid_t gid, s
 #define sudo_secure_dir(_a, _b, _c, _d) sudo_secure_dir_v1((_a), (_b), (_c), (_d))
 sudo_dso_public int sudo_secure_file_v1(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
 #define sudo_secure_file(_a, _b, _c, _d) sudo_secure_file_v1((_a), (_b), (_c), (_d))
+sudo_dso_public int sudo_secure_open_file_v1(const char *path, uid_t uid, gid_t gid, int *error);
+#define sudo_secure_open_file(_a, _b, _c, _d) sudo_secure_open_file_v1((_a), (_b), (_c), (_d))
+sudo_dso_public int sudo_secure_open_dir_v1(const char *path, uid_t uid, gid_t gid, int *error);
+#define sudo_secure_open_dir(_a, _b, _c, _d) sudo_secure_open_dir_v1((_a), (_b), (_c), (_d))
 
 /* setgroups.c */
 sudo_dso_public int sudo_setgroups_v1(int ngids, const GETGROUPS_T *gids);

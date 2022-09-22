@@ -116,6 +116,7 @@ sudo_mmap_free_v1
 sudo_mmap_protect_v1
 sudo_mmap_strdup_v1
 sudo_new_key_val_v1
+sudo_open_parent_dir_v1
 sudo_parse_gids_v1
 sudo_parseln_v1
 sudo_parseln_v2
@@ -127,6 +128,8 @@ sudo_rcstr_dup
 sudo_regex_compile_v1
 sudo_secure_dir_v1
 sudo_secure_file_v1
+sudo_secure_open_dir_v1
+sudo_secure_open_file_v1
 sudo_setgroups_v1
 sudo_str2logfac_v1
 sudo_str2logpri_v1
