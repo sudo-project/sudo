@@ -1759,8 +1759,7 @@ static void
 write_pidfile(void)
 {
     FILE *fp;
-    int fd;
-    bool success;
+    int dfd, fd;
     mode_t oldmask;
     const char *pid_file = logsrvd_conf_pid_file();
     debug_decl(write_pidfile, SUDO_DEBUG_UTIL);
@@ -1771,10 +1770,11 @@ write_pidfile(void)
     /* Default logsrvd umask is more restrictive (077). */
     oldmask = umask(S_IWGRP|S_IWOTH);
 
-    success = sudo_mkdir_parents(pid_file, ROOT_UID, ROOT_GID,
+    dfd = sudo_open_parent_dir(pid_file, ROOT_UID, ROOT_GID,
 	S_IRWXU|S_IXGRP|S_IXOTH, false);
-    if (success) {
-	fd = open(pid_file, O_WRONLY|O_CREAT|O_NOFOLLOW, 0644);
+    if (dfd != -1) {
+	const char *base = sudo_basename(pid_file);
+	fd = openat(dfd, base, O_WRONLY|O_CREAT|O_NOFOLLOW, 0644);
 	if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
 	    sudo_warn("%s", pid_file);
 	    if (fd != -1)
@@ -1786,6 +1786,7 @@ write_pidfile(void)
 		sudo_warn("%s", pid_file);
 	    fclose(fp);
 	}
+	close(dfd);
     }
     umask(oldmask);
 

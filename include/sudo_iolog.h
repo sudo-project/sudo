@@ -143,7 +143,7 @@ void iolog_set_maxseq(unsigned int maxval);
 void iolog_set_mode(mode_t mode);
 void iolog_set_owner(uid_t uid, uid_t gid);
 bool iolog_swapids(bool restore);
-bool iolog_mkdirs(char *path);
+bool iolog_mkdirs(const char *path);
 
 /* iolog_filter.c */
 void *iolog_pwfilt_alloc(void);

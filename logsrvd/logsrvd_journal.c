@@ -89,8 +89,9 @@ journal_fdopen(int fd, const char *journal_path,
 static int
 journal_mkstemp(const char *parent_dir, char *pathbuf, int pathlen)
 {
-    int len, fd = -1;
+    int len, dfd = -1, fd = -1;
     mode_t dirmode, oldmask;
+    char *template;
     debug_decl(journal_mkstemp, SUDO_DEBUG_UTIL);
 
     /* umask must not be more restrictive than the file modes. */
@@ -109,19 +110,23 @@ journal_mkstemp(const char *parent_dir, char *pathbuf, int pathlen)
 	    RELAY_TEMPLATE);
 	goto done;
     }
-    if (!sudo_mkdir_parents(pathbuf, logsrvd_conf_iolog_uid(),
-	    logsrvd_conf_iolog_gid(), S_IRWXU|S_IXGRP|S_IXOTH, false)) {
+    dfd = sudo_open_parent_dir(pathbuf, logsrvd_conf_iolog_uid(),
+	logsrvd_conf_iolog_gid(), S_IRWXU|S_IXGRP|S_IXOTH, false);
+    if (dfd == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to create parent dir for %s", pathbuf);
 	goto done;
     }
-    if ((fd = mkstemp(pathbuf)) == -1) {
+    template = pathbuf + (len - strlen(RELAY_TEMPLATE));
+    if ((fd = mkostempsat(dfd, template, 0, 0)) == -1) {
 	sudo_warn(U_("%s: %s"), "mkstemp", pathbuf);
 	goto done;
     }
 
 done:
     umask(oldmask);
+    if (dfd != -1)
+	close(dfd);
 
     debug_return_int(fd);
 }

@@ -182,6 +182,7 @@ bad:
 
 /*
  * Create any parent directories needed by path (but not path itself).
+ * Not currently used.
  */
 bool
 sudo_mkdir_parents_v1(const char *path, uid_t uid, gid_t gid, mode_t mode,
