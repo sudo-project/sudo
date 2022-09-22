@@ -1093,36 +1093,25 @@ set_cmnd(void)
 FILE *
 open_sudoers(const char *file, bool doedit, bool *keepopen)
 {
-    struct stat sb;
     FILE *fp = NULL;
-    bool perm_root = false;
+    struct stat sb;
+    int error, fd;
     debug_decl(open_sudoers, SUDOERS_DEBUG_PLUGIN);
 
     if (!set_perms(PERM_SUDOERS))
 	debug_return_ptr(NULL);
 
 again:
-    switch (sudo_secure_file(file, sudoers_uid, sudoers_gid, &sb)) {
+    fd = sudo_secure_open_file(file, sudoers_uid, sudoers_gid, &sb, &error);
+    switch (error) {
 	case SUDO_PATH_SECURE:
 	    /*
-	     * If we are expecting sudoers to be group readable by
-	     * SUDOERS_GID but it is not, we must open the file as root,
-	     * not uid 1.
+	     * Make sure we can read the file so we can present the
+	     * user with a reasonable error message (unlike the lexer).
 	     */
-	    if (sudoers_uid == ROOT_UID && ISSET(sudoers_mode, S_IRGRP)) {
-		if (!ISSET(sb.st_mode, S_IRGRP) || sb.st_gid != SUDOERS_GID) {
-		    if (!perm_root) {
-			if (!restore_perms() || !set_perms(PERM_ROOT))
-			    debug_return_ptr(NULL);
-		    }
-		}
-	    }
-	    /*
-	     * Open file and make sure we can read it so we can present
-	     * the user with a reasonable error message (unlike the lexer).
-	     */
-	    if ((fp = fopen(file, "r")) == NULL) {
+	    if ((fp = fdopen(fd, "r")) == NULL) {
 		log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), file);
+		close(fd);
 	    } else {
 		if (sb.st_size != 0 && fgetc(fp) == EOF) {
 		    log_warning(SLOG_SEND_MAIL,
@@ -1138,7 +1127,7 @@ again:
 	    break;
 	case SUDO_PATH_MISSING:
 	    /*
-	     * If we tried to stat() sudoers as non-root but got EACCES,
+	     * If we tried to open sudoers as non-root but got EACCES,
 	     * try again as root.
 	     */
 	    if (errno == EACCES && geteuid() != ROOT_UID) {
@@ -1146,12 +1135,11 @@ again:
 		if (restore_perms()) {
 		    if (!set_perms(PERM_ROOT))
 			debug_return_ptr(NULL);
-		    perm_root = true;
 		    goto again;
 		}
 		errno = serrno;
 	    }
-	    log_warning(SLOG_SEND_MAIL, N_("unable to stat %s"), file);
+	    log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), file);
 	    break;
 	case SUDO_PATH_BAD_TYPE:
 	    log_warningx(SLOG_SEND_MAIL,

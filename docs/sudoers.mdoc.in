@@ -5557,7 +5557,7 @@ file) to the end of the
 line in the
 .Xr sudo.conf @mansectform@
 file.
-.It unable to stat @sysconfdir@/sudoers
+.It unable to open @sysconfdir@/sudoers
 The
 .Pa @sysconfdir@/sudoers
 file is missing.

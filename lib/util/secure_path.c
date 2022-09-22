@@ -77,6 +77,7 @@ sudo_secure_path(const char *path, unsigned int type, uid_t uid, gid_t gid,
 
 /*
  * Verify that path is a regular file and not writable by other users.
+ * Not currently used.
  */
 int
 sudo_secure_file_v1(const char *path, uid_t uid, gid_t gid, struct stat *sb)
@@ -99,21 +100,25 @@ sudo_secure_dir_v1(const char *path, uid_t uid, gid_t gid, struct stat *sb)
  * Sets error to SUDO_PATH_SECURE on success, and a value < 0 on failure.
  */
 static int
-sudo_secure_open(const char *path, int type, uid_t uid, gid_t gid, int *error)
+sudo_secure_open(const char *path, int type, uid_t uid, gid_t gid,
+    struct stat *sb, int *error)
 {
-    struct stat sb;
+    struct stat stat_buf;
     int fd;
     debug_decl(sudo_secure_open, SUDO_DEBUG_UTIL);
 
+    if (sb == NULL)
+	sb = &stat_buf;
+
     fd = open(path, O_RDONLY|O_NONBLOCK);
-    if (fd == -1 || fstat(fd, &sb) != 0) {
+    if (fd == -1 || fstat(fd, sb) != 0) {
 	if (fd != -1)
 	    close(fd);
 	*error = SUDO_PATH_MISSING;
 	debug_return_int(-1);
     }
 
-    *error = sudo_check_secure(&sb, type, uid, gid);
+    *error = sudo_check_secure(sb, type, uid, gid);
     if (*error == SUDO_PATH_SECURE) {
 	(void)fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
     } else {
@@ -126,13 +131,15 @@ sudo_secure_open(const char *path, int type, uid_t uid, gid_t gid, int *error)
 }
 
 int
-sudo_secure_open_file_v1(const char *path, uid_t uid, gid_t gid, int *error)
+sudo_secure_open_file_v1(const char *path, uid_t uid, gid_t gid,
+    struct stat *sb, int *error)
 {
-    return sudo_secure_open(path, S_IFREG, uid, gid, error);
+    return sudo_secure_open(path, S_IFREG, uid, gid, sb, error);
 }
 
 int
-sudo_secure_open_dir_v1(const char *path, uid_t uid, gid_t gid, int *error)
+sudo_secure_open_dir_v1(const char *path, uid_t uid, gid_t gid,
+    struct stat *sb, int *error)
 {
-    return sudo_secure_open(path, S_IFDIR, uid, gid, error);
+    return sudo_secure_open(path, S_IFDIR, uid, gid, sb, error);
 }

@@ -293,14 +293,14 @@ sudo_dso_public unsigned int sudo_pow2_roundup_v1(unsigned int len);
 #define SUDO_PATH_WORLD_WRITABLE	-4
 #define SUDO_PATH_GROUP_WRITABLE	-5
 struct stat;
-sudo_dso_public int sudo_secure_dir_v1(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
+sudo_dso_public int sudo_secure_dir_v1(const char *path, uid_t uid, gid_t gid, struct stat *sb);
 #define sudo_secure_dir(_a, _b, _c, _d) sudo_secure_dir_v1((_a), (_b), (_c), (_d))
-sudo_dso_public int sudo_secure_file_v1(const char *path, uid_t uid, gid_t gid, struct stat *sbp);
+sudo_dso_public int sudo_secure_file_v1(const char *path, uid_t uid, gid_t gid, struct stat *sb);
 #define sudo_secure_file(_a, _b, _c, _d) sudo_secure_file_v1((_a), (_b), (_c), (_d))
-sudo_dso_public int sudo_secure_open_file_v1(const char *path, uid_t uid, gid_t gid, int *error);
-#define sudo_secure_open_file(_a, _b, _c, _d) sudo_secure_open_file_v1((_a), (_b), (_c), (_d))
-sudo_dso_public int sudo_secure_open_dir_v1(const char *path, uid_t uid, gid_t gid, int *error);
-#define sudo_secure_open_dir(_a, _b, _c, _d) sudo_secure_open_dir_v1((_a), (_b), (_c), (_d))
+sudo_dso_public int sudo_secure_open_file_v1(const char *path, uid_t uid, gid_t gid, struct stat *sb, int *error);
+#define sudo_secure_open_file(_a, _b, _c, _d, _e) sudo_secure_open_file_v1((_a), (_b), (_c), (_d), (_e))
+sudo_dso_public int sudo_secure_open_dir_v1(const char *path, uid_t uid, gid_t gid, struct stat *sb, int *error);
+#define sudo_secure_open_dir(_a, _b, _c, _d, _e) sudo_secure_open_dir_v1((_a), (_b), (_c), (_d), (_e))
 
 /* setgroups.c */
 sudo_dso_public int sudo_setgroups_v1(int ngids, const GETGROUPS_T *gids);

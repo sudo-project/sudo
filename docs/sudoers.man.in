@@ -5950,7 +5950,7 @@ line in the
 sudo.conf(@mansectform@)
 file.
 .TP 3n
-unable to stat @sysconfdir@/sudoers
+unable to open @sysconfdir@/sudoers
 The
 \fI@sysconfdir@/sudoers\fR
 file is missing.

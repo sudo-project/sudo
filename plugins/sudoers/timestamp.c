@@ -236,47 +236,55 @@ static int
 ts_secure_opendir(const char *path, bool make_it, bool quiet)
 {
     int error, fd = -1;
+    struct stat sb;
     debug_decl(ts_secure_opendir, SUDOERS_DEBUG_AUTH);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO, "checking %s", path);
-    fd = sudo_secure_open_dir(path, timestamp_uid, timestamp_gid, &error);
-    if (fd == -1) {
-	switch (error) {
-	case SUDO_PATH_MISSING:
-	    if (make_it) {
-		fd = ts_mkdirs(path, timestamp_uid, timestamp_gid, S_IRWXU,
-		    S_IRWXU|S_IXGRP|S_IXOTH, quiet);
-		if (fd != -1)
-		    break;
-	    }
-	    if (!quiet)
-		sudo_warn("%s", path);
-	    break;
-	case SUDO_PATH_BAD_TYPE:
-	    errno = ENOTDIR;
-	    if (!quiet)
-		sudo_warn("%s", path);
-	    break;
-	case SUDO_PATH_WRONG_OWNER:
-	    if (!quiet) {
-		sudo_warnx(U_("%s: wrong owner, should be uid %u\n"),
-		    path, (unsigned int)timestamp_uid);
-	    }
-	    errno = EACCES;
-	    break;
-	case SUDO_PATH_GROUP_WRITABLE:
-	    if (!quiet)
-		sudo_warnx(U_("%s is group writable"), path);
-	    errno = EACCES;
-	    break;
-	default:
-	    if (!quiet) {
-		sudo_warnx("%s: internal error, unexpected error %d",
-		    __func__, error);
-		errno = EINVAL;
-	    }
-	    break;
+    fd = sudo_secure_open_dir(path, timestamp_uid, timestamp_gid, &sb, &error);
+    switch (error) {
+    case SUDO_PATH_SECURE:
+	break;
+    case SUDO_PATH_MISSING:
+	if (make_it) {
+	    fd = ts_mkdirs(path, timestamp_uid, timestamp_gid, S_IRWXU,
+		S_IRWXU|S_IXGRP|S_IXOTH, quiet);
+	    if (fd != -1)
+		break;
 	}
+	if (!quiet)
+	    sudo_warn("%s", path);
+	break;
+    case SUDO_PATH_BAD_TYPE:
+	errno = ENOTDIR;
+	if (!quiet)
+	    sudo_warn("%s", path);
+	break;
+    case SUDO_PATH_WRONG_OWNER:
+	if (!quiet) {
+	    sudo_warnx(U_("%s is owned by uid %u, should be %u"),
+		path, (unsigned int)sb.st_uid, (unsigned int)timestamp_uid);
+	}
+	errno = EACCES;
+	break;
+    case SUDO_PATH_WORLD_WRITABLE:
+	if (!quiet)
+	    sudo_warnx(U_("%s is world writable"), path);
+	errno = EACCES;
+	break;
+    case SUDO_PATH_GROUP_WRITABLE:
+	if (!quiet) {
+	    sudo_warnx(U_("%s is owned by gid %u, should be %u"),
+		path, (unsigned int)sb.st_gid, (unsigned int)timestamp_gid);
+	}
+	errno = EACCES;
+	break;
+    default:
+	if (!quiet) {
+	    sudo_warnx("%s: internal error, unexpected error %d",
+		__func__, error);
+	    errno = EINVAL;
+	}
+	break;
     }
 
     debug_return_int(fd);
