@@ -2873,6 +2873,10 @@ AC_CHECK_FUNCS(nanosleep, [], [
 	SUDO_APPEND_COMPAT_EXP(sudo_nanosleep)
     ])
 ])
+AC_CHECK_FUNCS([fchownat], [], [
+    AC_LIBOBJ(fchownat)
+    SUDO_APPEND_COMPAT_EXP(sudo_fchownat)
+])
 AC_CHECK_FUNCS([mkdirat], [], [
     AC_LIBOBJ(mkdirat)
     SUDO_APPEND_COMPAT_EXP(sudo_mkdirat)

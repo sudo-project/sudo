@@ -22751,6 +22751,32 @@ fi
 
 done
 
+  for ac_func in fchownat
+do :
+  ac_fn_c_check_func "$LINENO" "fchownat" "ac_cv_func_fchownat"
+if test "x$ac_cv_func_fchownat" = xyes
+then :
+  printf "%s\n" "#define HAVE_FCHOWNAT 1" >>confdefs.h
+
+else $as_nop
+
+    case " $LIBOBJS " in
+  *" fchownat.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS fchownat.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_fchownat; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+
+fi
+
+done
+
   for ac_func in mkdirat
 do :
   ac_fn_c_check_func "$LINENO" "mkdirat" "ac_cv_func_mkdirat"

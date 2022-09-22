@@ -484,6 +484,11 @@ sudo_dso_public size_t sudo_strnlen(const char *str, size_t maxlen);
 # undef strnlen
 # define strnlen(_a, _b) sudo_strnlen((_a), (_b))
 #endif /* HAVE_STRNLEN */
+#ifndef HAVE_FCHOWNAT
+sudo_dso_public int sudo_fchownat(int dfd, const char *path, uid_t uid, gid_t gid, int flag);
+# undef fchownat
+# define fchownat(_a, _b, _c, _d, _e) sudo_fchownat((_a), (_b), (_c), (_d), (_e))
+#endif /* HAVE_FCHOWNAT */
 #ifndef HAVE_MEMRCHR
 sudo_dso_public void *sudo_memrchr(const void *s, int c, size_t n);
 # undef memrchr

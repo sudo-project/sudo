@@ -703,6 +703,14 @@ fchmodat.i: $(srcdir)/fchmodat.c $(incdir)/sudo_compat.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 fchmodat.plog: fchmodat.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/fchmodat.c --i-file $< --output-file $@
+fchownat.lo: $(srcdir)/fchownat.c $(incdir)/sudo_compat.h \
+             $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/fchownat.c
+fchownat.i: $(srcdir)/fchownat.c $(incdir)/sudo_compat.h \
+             $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+fchownat.plog: fchownat.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/fchownat.c --i-file $< --output-file $@
 fnm_test.lo: $(srcdir)/regress/fnmatch/fnm_test.c $(incdir)/compat/fnmatch.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
              $(incdir)/sudo_util.h $(top_builddir)/config.h
