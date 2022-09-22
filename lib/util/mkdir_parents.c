@@ -107,18 +107,20 @@ sudo_mkdir_parents_v1(const char *path, uid_t uid, gid_t gid, mode_t mode, bool 
     pathend = cp + strlen(cp);
     for (cp = sudo_strsplit(cp, pathend, "/", &ep); cp != NULL && ep != NULL;
 	cp = sudo_strsplit(NULL, pathend, "/", &ep)) {
-	int dfd, len;
+	size_t len = (size_t)(ep - cp);
+	int dfd;
 
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	    "mkdir %.*s, mode 0%o, uid %d, gid %d", (int)(ep - path),
-	    path, (unsigned int)mode, (int)uid, (int)gid);
-	len = snprintf(name, sizeof(name), "%.*s", (int)(ep - cp), cp);
-	if (len >= ssizeof(name)) {
+	    "mkdir %.*s, mode 0%o, uid %d, gid %d", (int)len, path,
+	    (unsigned int)mode, (int)uid, (int)gid);
+	if (len >= sizeof(name)) {
 	    errno = ENAMETOOLONG;
 	    if (!quiet)
-		sudo_warn(U_("unable to open %.*s"), (int)(ep - path), path);
-	    goto done;
+		sudo_warn(U_("unable to open %.*s"), (int)len, path);
+	    goto bad;
 	}
+	memcpy(name, cp, len);
+	name[len] = '\0';
 reopen:
 	dfd = openat(parentfd, name, O_RDONLY|O_NONBLOCK, 0);
 	if (dfd == -1) {
