@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010-2015 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010-2015, 2020-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -103,10 +103,8 @@ copy_arg(const char *src, size_t len)
     if ((copy = malloc(len + 1)) != NULL) {
 	sudoers_gc_add(GC_PTR, copy);
 	for (dst = copy; src < src_end; ) {
-	    if (src[0] == '\\' && src[1] != '\0') {
+	    if (src[0] == '\\' && src[1] != '\0')
 		src++;
-		continue;
-	    }
 	    *dst++ = *src++;
 	}
 	*dst = '\0';

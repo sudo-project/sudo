@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -62,6 +62,15 @@ struct test_data {
 	"/usr/bin/vi\\",
 	3,
 	{ "/usr/bin/vi\\", "--", "/etc/hosts", "/bogus/file", NULL }
+    },
+    {
+	/* GitHub issue #179 */
+	"EDITOR=sed -rie s/^\\\\(foo\\\\)/waldo\\\\1/",
+	1,
+	{ "/etc/sudoers", NULL },
+	"/usr/bin/sed",
+	5,
+	{ "sed", "-rie", "s/^\\(foo\\)/waldo\\1/", "--", "/etc/sudoers", NULL }
     },
     { NULL }
 };
