@@ -78,17 +78,18 @@ cleanup:
 }
 
 static PyObject *
-_sudo_ImportBlocker__find_module(PyObject *py_self, PyObject *py_args)
+_sudo_ImportBlocker__find_spec(PyObject *py_self, PyObject *py_args)
 {
-    debug_decl(_sudo_ImportBlocker__find_module, PYTHON_DEBUG_C_CALLS);
+    debug_decl(_sudo_ImportBlocker__find_spec, PYTHON_DEBUG_C_CALLS);
 
-    PyObject *py_fullname = NULL, *py_path = NULL, *py_meta_path = NULL,
-             *py_meta_path_iterator = NULL, *py_finder = NULL,
-             *py_importer = NULL, *py_import_path = NULL;
+    PyObject *py_fullname = NULL, *py_path = NULL, *py_target = NULL,
+             *py_meta_path = NULL, *py_meta_path_iterator = NULL,
+             *py_finder = NULL, *py_spec = NULL, *py_loader = NULL,
+             *py_import_path = NULL;
 
-    py_debug_python_call("ImportBlocker", "find_module", py_args, NULL, PYTHON_DEBUG_C_CALLS);
+    py_debug_python_call("ImportBlocker", "find_spec", py_args, NULL, PYTHON_DEBUG_C_CALLS);
 
-    if (!PyArg_UnpackTuple(py_args, "sudo.ImportBlocker.find_module", 2, 3, &py_self, &py_fullname, &py_path))
+    if (!PyArg_UnpackTuple(py_args, "sudo.ImportBlocker.find_spec", 2, 4, &py_self, &py_fullname, &py_path, &py_target))
         goto cleanup;
 
     py_meta_path = PyObject_GetAttrString(py_self, "meta_path");
@@ -100,16 +101,18 @@ _sudo_ImportBlocker__find_module(PyObject *py_self, PyObject *py_args)
         goto cleanup;
 
     while ((py_finder = PyIter_Next(py_meta_path_iterator)) != NULL) {
-        py_importer = PyObject_CallMethod(py_finder, "find_module", "(OO)",
-                                          py_fullname, py_path);
-        if (py_importer == NULL) {
+        py_spec = PyObject_CallMethod(py_finder, "find_spec", "(OO)",
+                                      py_fullname, py_path, py_target);
+        if (py_spec == NULL) {
             goto cleanup;
         }
 
-        if (py_importer != Py_None) { // the import could be resolved
-            if (PyObject_HasAttrString(py_importer, "get_filename")) {
+        if (py_spec != Py_None && PyObject_HasAttrString(py_spec, "loader")) {
+            // the finder could be resolved and contains a loader
+            py_loader = PyObject_GetAttrString(py_spec, "loader");
+            if (py_loader != NULL && PyObject_HasAttrString(py_loader, "get_filename")) {
                 // there is a file associated with the import (.py, .so, etc)
-                py_import_path = PyObject_CallMethod(py_importer, "get_filename", "");
+                py_import_path = PyObject_CallMethod(py_loader, "get_filename", "");
                 const char *import_path = PyUnicode_AsUTF8(py_import_path);
 
                 sudo_debug_printf(SUDO_DEBUG_DIAG, "ImportBlocker: verifying permissions "
@@ -127,32 +130,33 @@ _sudo_ImportBlocker__find_module(PyObject *py_self, PyObject *py_args)
             goto cleanup;
         }
 
-        Py_CLEAR(py_importer);
+        Py_CLEAR(py_spec);
         Py_CLEAR(py_finder);
     }
 
-    Py_CLEAR(py_importer);
-    py_importer = Py_None;
-    Py_INCREF(py_importer);
+    Py_CLEAR(py_spec);
+    py_spec = Py_None;
+    Py_INCREF(py_spec);
 
 cleanup:
     Py_CLEAR(py_meta_path_iterator);
     Py_CLEAR(py_meta_path);
     Py_CLEAR(py_finder);
     Py_CLEAR(py_import_path);
+    Py_CLEAR(py_loader);
 
     if (PyErr_Occurred()) {
-        Py_CLEAR(py_importer);
+        Py_CLEAR(py_spec);
         debug_return_ptr(NULL);
     }
 
-    debug_return_ptr(py_importer);
+    debug_return_ptr(py_spec);
 }
 
 static PyMethodDef _sudo_ImportBlocker_class_methods[] =
 {
     {"__init__", _sudo_ImportBlocker__Init, METH_VARARGS, ""},
-    {"find_module", _sudo_ImportBlocker__find_module, METH_VARARGS, ""},
+    {"find_spec", _sudo_ImportBlocker__find_spec, METH_VARARGS, ""},
     {NULL, NULL, 0, NULL}
 };
 
