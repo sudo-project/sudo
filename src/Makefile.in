@@ -411,14 +411,14 @@ check_net_ifs.plog: check_net_ifs.i
 check_noexec.o: $(srcdir)/regress/noexec/check_noexec.c \
                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                 $(incdir)/sudo_fatal.h $(incdir)/sudo_plugin.h \
-                $(incdir)/sudo_util.h $(srcdir)/sudo_exec.h \
-                $(top_builddir)/config.h
+                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                $(srcdir)/sudo_exec.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/noexec/check_noexec.c
 check_noexec.i: $(srcdir)/regress/noexec/check_noexec.c \
                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                 $(incdir)/sudo_fatal.h $(incdir)/sudo_plugin.h \
-                $(incdir)/sudo_util.h $(srcdir)/sudo_exec.h \
-                $(top_builddir)/config.h
+                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                $(srcdir)/sudo_exec.h $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 check_noexec.plog: check_noexec.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/noexec/check_noexec.c --i-file $< --output-file $@

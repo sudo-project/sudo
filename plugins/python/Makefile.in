@@ -277,11 +277,13 @@ check_python_examples.i: $(srcdir)/regress/check_python_examples.c \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 check_python_examples.plog: check_python_examples.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/check_python_examples.c --i-file $< --output-file $@
-iohelpers.o: $(srcdir)/regress/iohelpers.c $(incdir)/sudo_compat.h \
-             $(srcdir)/regress/iohelpers.h $(top_builddir)/config.h
+iohelpers.o: $(srcdir)/regress/iohelpers.c $(incdir)/compat/stdbool.h \
+             $(incdir)/sudo_compat.h $(srcdir)/regress/iohelpers.h \
+             $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/iohelpers.c
-iohelpers.i: $(srcdir)/regress/iohelpers.c $(incdir)/sudo_compat.h \
-             $(srcdir)/regress/iohelpers.h $(top_builddir)/config.h
+iohelpers.i: $(srcdir)/regress/iohelpers.c $(incdir)/compat/stdbool.h \
+             $(incdir)/sudo_compat.h $(srcdir)/regress/iohelpers.h \
+             $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 iohelpers.plog: iohelpers.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/iohelpers.c --i-file $< --output-file $@
