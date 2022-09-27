@@ -219,7 +219,7 @@ main(int argc, char *argv[])
 	    } else if (WIFSTOPPED(status)) {
 		if (exec_ptrace_stopped(pid, status, &closure)) {
 		    if (pid == child) {
-			suspend_sudo_nopty(WSTOPSIG(status), ppgrp, child);
+			suspend_sudo_nopty(NULL, WSTOPSIG(status), ppgrp, child);
 			if (kill(child, SIGCONT) != 0)
 			    sudo_warn("kill(%d, SIGCONT)", (int)child);
 		    }

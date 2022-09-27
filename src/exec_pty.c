@@ -980,14 +980,10 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     debug_decl(exec_pty, SUDO_DEBUG_EXEC);
 
     /*
-     * Allocate a pty.
+     * Allocate a pty if sudo is running in a terminal.
      */
-    if (!pty_setup(details, user_details.tty)) {
-	if (TAILQ_EMPTY(&io_plugins)) {
-	    /* Not logging I/O and didn't allocate a pty. */
-	    debug_return_bool(false);
-	}
-    }
+    if (!pty_setup(details, user_details.tty))
+	debug_return_bool(false);
 
     /*
      * We communicate with the monitor over a bi-directional pair of sockets.

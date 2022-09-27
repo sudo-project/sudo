@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd September 20, 2022
+.Dd September 27, 2022
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2963,8 +2963,7 @@ This setting is only supported by version 1.9.0 or higher.
 .It log_stderr
 If set,
 .Nm sudo
-will run the command in a pseudo-terminal and log the standard error
-if it is not connected to the user's terminal.
+will log the standard error if it is not connected to the user's terminal.
 This can be used to log output to a pipe or redirected to a file.
 This flag is
 .Em off
@@ -2976,8 +2975,7 @@ command tag is set.
 .It log_stdin
 If set,
 .Nm sudo
-will run the command in a pseudo-terminal and log the standard input
-if it is not connected to the user's terminal.
+will log the standard input if it is not connected to the user's terminal.
 This can be used to log input from a pipe or redirected from a file.
 This flag is
 .Em off
@@ -2989,8 +2987,7 @@ command tag is set.
 .It log_stdout
 If set,
 .Nm sudo
-will run the command in a pseudo-terminal and log the standard output
-if it is not connected to the user's terminal.
+will log the standard output if it is not connected to the user's terminal.
 This can be used to log output to a pipe or redirected to a file.
 This flag is
 .Em off

@@ -232,6 +232,6 @@ bool set_exec_filter(void);
 int exec_ptrace_seize(pid_t child);
 
 /* suspend_nopty.c */
-void suspend_sudo_nopty(int signo, pid_t ppgrp, pid_t cmnd_pid);
+void suspend_sudo_nopty(struct exec_closure *ec, int signo, pid_t ppgrp, pid_t cmnd_pid);
 
 #endif /* SUDO_EXEC_H */

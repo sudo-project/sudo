@@ -360,9 +360,6 @@ sudo_terminated(struct command_status *cstat)
     debug_return_bool(false);
 }
 
-#if SUDO_API_VERSION != SUDO_API_MKVERSION(1, 20)
-# error "Update sudo_needs_pty() after changing the plugin API"
-#endif
 static bool
 sudo_needs_pty(struct command_details *details)
 {
@@ -373,12 +370,7 @@ sudo_needs_pty(struct command_details *details)
 
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_ttyin != NULL ||
-	    plugin->u.io->log_ttyout != NULL ||
-	    plugin->u.io->log_stdin != NULL ||
-	    plugin->u.io->log_stdout != NULL ||
-	    plugin->u.io->log_stderr != NULL ||
-	    plugin->u.io->change_winsize != NULL ||
-	    plugin->u.io->log_suspend != NULL)
+	    plugin->u.io->log_ttyout != NULL)
 	    return true;
     }
     return false;

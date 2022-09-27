@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "September 20, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "September 27, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3135,8 +3135,7 @@ This setting is only supported by version 1.9.0 or higher.
 log_stderr
 If set,
 \fBsudo\fR
-will run the command in a pseudo-terminal and log the standard error
-if it is not connected to the user's terminal.
+will log the standard error if it is not connected to the user's terminal.
 This can be used to log output to a pipe or redirected to a file.
 This flag is
 \fIoff\fR
@@ -3149,8 +3148,7 @@ command tag is set.
 log_stdin
 If set,
 \fBsudo\fR
-will run the command in a pseudo-terminal and log the standard input
-if it is not connected to the user's terminal.
+will log the standard input if it is not connected to the user's terminal.
 This can be used to log input from a pipe or redirected from a file.
 This flag is
 \fIoff\fR
@@ -3163,8 +3161,7 @@ command tag is set.
 log_stdout
 If set,
 \fBsudo\fR
-will run the command in a pseudo-terminal and log the standard output
-if it is not connected to the user's terminal.
+will log the standard output if it is not connected to the user's terminal.
 This can be used to log output to a pipe or redirected to a file.
 This flag is
 \fIoff\fR
