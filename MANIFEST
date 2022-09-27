@@ -1198,6 +1198,7 @@ src/exec.c
 src/exec_common.c
 src/exec_intercept.c
 src/exec_intercept.h
+src/exec_iolog.c
 src/exec_monitor.c
 src/exec_nopty.c
 src/exec_preload.c

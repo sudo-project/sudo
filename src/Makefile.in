@@ -141,11 +141,12 @@ SHELL = @SHELL@
 
 PROGS = @PROGS@
 
-OBJS = conversation.o copy_file.o edit_open.o env_hooks.o exec.o exec_common.o \
-       exec_intercept.o exec_monitor.o exec_nopty.o exec_preload.o \
-       exec_ptrace.o exec_pty.o get_pty.o hooks.o limits.o load_plugins.o \
-       net_ifs.o parse_args.o preserve_fds.o signal.o sudo.o sudo_edit.o \
-       suspend_nopty.o tcsetpgrp_nobg.o tgetpass.o ttyname.o utmp.o @SUDO_OBJS@
+OBJS = conversation.o copy_file.o edit_open.o env_hooks.o exec.o \
+       exec_common.o exec_intercept.o exec_iolog.o exec_monitor.o \
+       exec_nopty.o exec_preload.o exec_ptrace.o exec_pty.o get_pty.o \
+       hooks.o limits.o load_plugins.o net_ifs.o parse_args.o preserve_fds.o \
+       signal.o sudo.o sudo_edit.o suspend_nopty.o tcsetpgrp_nobg.o \
+       tgetpass.o ttyname.o utmp.o @SUDO_OBJS@
 
 IOBJS = $(OBJS:.o=.i) sesh.i sudo_intercept.i sudo_intercept_common.i
 
@@ -567,6 +568,26 @@ exec_intercept.i: $(srcdir)/exec_intercept.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 exec_intercept.plog: exec_intercept.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/exec_intercept.c --i-file $< --output-file $@
+exec_iolog.o: $(srcdir)/exec_iolog.c $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+              $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
+              $(srcdir)/sudo_plugin_int.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/exec_iolog.c
+exec_iolog.i: $(srcdir)/exec_iolog.c $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
+              $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
+              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
+              $(srcdir)/sudo_plugin_int.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+exec_iolog.plog: exec_iolog.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/exec_iolog.c --i-file $< --output-file $@
 exec_monitor.o: $(srcdir)/exec_monitor.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
                 $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \

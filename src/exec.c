@@ -531,3 +531,34 @@ terminate_command(pid_t pid, bool use_pgrp)
 
     debug_return;
 }
+
+/*
+ * Free the dynamically-allocated contents of the exec closure.
+ */
+void
+free_exec_closure(struct exec_closure *ec)
+{
+    debug_decl(free_exec_closure, SUDO_DEBUG_EXEC);
+
+    /* Free any remaining intercept resources. */
+    intercept_cleanup();
+
+    sudo_ev_base_free(ec->evbase);
+    sudo_ev_free(ec->backchannel_event);
+    sudo_ev_free(ec->fwdchannel_event);
+    sudo_ev_free(ec->sigint_event);
+    sudo_ev_free(ec->sigquit_event);
+    sudo_ev_free(ec->sigtstp_event);
+    sudo_ev_free(ec->sigterm_event);
+    sudo_ev_free(ec->sighup_event);
+    sudo_ev_free(ec->sigalrm_event);
+    sudo_ev_free(ec->sigpipe_event);
+    sudo_ev_free(ec->sigusr1_event);
+    sudo_ev_free(ec->sigusr2_event);
+    sudo_ev_free(ec->sigchld_event);
+    sudo_ev_free(ec->sigcont_event);
+    sudo_ev_free(ec->siginfo_event);
+    sudo_ev_free(ec->sigwinch_event);
+
+    debug_return;
+}

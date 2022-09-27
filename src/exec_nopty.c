@@ -44,39 +44,13 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
-#ifndef __WALL
-# define __WALL 0
-#endif
-
-struct exec_closure_nopty {
-    struct command_details *details;
-    struct sudo_event_base *evbase;
-    struct sudo_event *errpipe_event;
-    struct sudo_event *sigint_event;
-    struct sudo_event *sigquit_event;
-    struct sudo_event *sigtstp_event;
-    struct sudo_event *sigterm_event;
-    struct sudo_event *sighup_event;
-    struct sudo_event *sigalrm_event;
-    struct sudo_event *sigpipe_event;
-    struct sudo_event *sigusr1_event;
-    struct sudo_event *sigusr2_event;
-    struct sudo_event *sigchld_event;
-    struct sudo_event *sigcont_event;
-    struct sudo_event *siginfo_event;
-    struct command_status *cstat;
-    void *intercept;
-    pid_t cmnd_pid;
-    pid_t ppgrp;
-};
-
-static void handle_sigchld_nopty(struct exec_closure_nopty *ec);
+static void handle_sigchld_nopty(struct exec_closure *ec);
 
 /* Note: this is basically the same as mon_errpipe_cb() in exec_monitor.c */
 static void
 errpipe_cb(int fd, int what, void *v)
 {
-    struct exec_closure_nopty *ec = v;
+    struct exec_closure *ec = v;
     ssize_t nread;
     int errval;
     debug_decl(errpipe_cb, SUDO_DEBUG_EXEC);
@@ -110,7 +84,7 @@ errpipe_cb(int fd, int what, void *v)
 	    ec->cstat->type = CMD_ERRNO;
 	    ec->cstat->val = errval;
 	}
-	sudo_ev_del(ec->evbase, ec->errpipe_event);
+	sudo_ev_del(ec->evbase, ec->backchannel_event);
 	close(fd);
 	break;
     }
@@ -122,7 +96,7 @@ static void
 signal_cb_nopty(int signo, int what, void *v)
 {
     struct sudo_ev_siginfo_container *sc = v;
-    struct exec_closure_nopty *ec = sc->closure;
+    struct exec_closure *ec = sc->closure;
     char signame[SIG2STR_MAX];
     debug_decl(signal_cb_nopty, SUDO_DEBUG_EXEC);
 
@@ -203,10 +177,10 @@ signal_cb_nopty(int signo, int what, void *v)
  * Allocates events for the signal pipe and error pipe.
  */
 static void
-fill_exec_closure_nopty(struct exec_closure_nopty *ec,
+fill_exec_closure(struct exec_closure *ec,
     struct command_status *cstat, struct command_details *details, int errfd)
 {
-    debug_decl(fill_exec_closure_nopty, SUDO_DEBUG_EXEC);
+    debug_decl(fill_exec_closure, SUDO_DEBUG_EXEC);
 
     /* Fill in the non-event part of the closure. */
     ec->ppgrp = getpgrp();
@@ -218,11 +192,11 @@ fill_exec_closure_nopty(struct exec_closure_nopty *ec,
     details->evbase = NULL;
 
     /* Event for command status via errfd. */
-    ec->errpipe_event = sudo_ev_alloc(errfd,
+    ec->backchannel_event = sudo_ev_alloc(errfd,
 	SUDO_EV_READ|SUDO_EV_PERSIST, errpipe_cb, ec);
-    if (ec->errpipe_event == NULL)
+    if (ec->backchannel_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    if (sudo_ev_add(ec->evbase, ec->errpipe_event, NULL, false) == -1)
+    if (sudo_ev_add(ec->evbase, ec->backchannel_event, NULL, false) == -1)
 	sudo_fatal("%s", U_("unable to add event to queue"));
     sudo_debug_printf(SUDO_DEBUG_INFO, "error pipe fd %d\n", errfd);
 
@@ -320,41 +294,12 @@ fill_exec_closure_nopty(struct exec_closure_nopty *ec,
 }
 
 /*
- * Free the dynamically-allocated contents of the exec closure.
- */
-static void
-free_exec_closure_nopty(struct exec_closure_nopty *ec)
-{
-    debug_decl(free_exec_closure_nopty, SUDO_DEBUG_EXEC);
-
-    /* Free any remaining intercept resources. */
-    intercept_cleanup();
-
-    sudo_ev_base_free(ec->evbase);
-    sudo_ev_free(ec->errpipe_event);
-    sudo_ev_free(ec->sigint_event);
-    sudo_ev_free(ec->sigquit_event);
-    sudo_ev_free(ec->sigtstp_event);
-    sudo_ev_free(ec->sigterm_event);
-    sudo_ev_free(ec->sighup_event);
-    sudo_ev_free(ec->sigalrm_event);
-    sudo_ev_free(ec->sigpipe_event);
-    sudo_ev_free(ec->sigusr1_event);
-    sudo_ev_free(ec->sigusr2_event);
-    sudo_ev_free(ec->sigchld_event);
-    sudo_ev_free(ec->sigcont_event);
-    sudo_ev_free(ec->siginfo_event);
-
-    debug_return;
-}
-
-/*
  * Execute a command and wait for it to finish.
  */
 void
 exec_nopty(struct command_details *details, struct command_status *cstat)
 {
-    struct exec_closure_nopty ec = { 0 };
+    struct exec_closure ec = { 0 };
     int intercept_sv[2] = { -1, -1 };
     sigset_t set, oset;
     int errpipe[2];
@@ -446,7 +391,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
      * Fill in exec closure, allocate event base, signal events and
      * the error pipe event.
      */
-    fill_exec_closure_nopty(&ec, cstat, details, errpipe[0]);
+    fill_exec_closure(&ec, cstat, details, errpipe[0]);
 
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
 	int rc = 1;
@@ -492,7 +437,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 #endif
 
     /* Free things up. */
-    free_exec_closure_nopty(&ec);
+    free_exec_closure(&ec);
     debug_return;
 }
 
@@ -503,7 +448,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
  * the tty pgrp when sudo resumes.
  */
 static void
-handle_sigchld_nopty(struct exec_closure_nopty *ec)
+handle_sigchld_nopty(struct exec_closure *ec)
 {
     pid_t pid;
     int status;

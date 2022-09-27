@@ -48,82 +48,22 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
-#ifndef __WALL
-# define __WALL 0
-#endif
-
-/* Evaluates to true if the event has /dev/tty as its fd. */
-#define USERTTY_EVENT(_ev)	(sudo_ev_get_fd((_ev)) == io_fds[SFD_USERTTY])
-
-#define TERM_COOKED	0
-#define TERM_RAW	1
-
 /* Tail queue of messages to send to the monitor. */
 struct monitor_message {
     TAILQ_ENTRY(monitor_message) entries;
     struct command_status cstat;
 };
 TAILQ_HEAD(monitor_message_list, monitor_message);
-
-struct exec_closure_pty {
-    struct command_details *details;
-    struct sudo_event_base *evbase;
-    struct sudo_event *backchannel_event;
-    struct sudo_event *fwdchannel_event;
-    struct sudo_event *sigint_event;
-    struct sudo_event *sigquit_event;
-    struct sudo_event *sigtstp_event;
-    struct sudo_event *sigterm_event;
-    struct sudo_event *sighup_event;
-    struct sudo_event *sigalrm_event;
-    struct sudo_event *sigusr1_event;
-    struct sudo_event *sigusr2_event;
-    struct sudo_event *sigchld_event;
-    struct sudo_event *sigwinch_event;
-    struct command_status *cstat;
-    void *intercept;
-    struct monitor_message_list monitor_messages;
-    pid_t monitor_pid;
-    pid_t cmnd_pid;
-    pid_t ppgrp;
-    short rows;
-    short cols;
-};
-
-/*
- * I/O buffer with associated read/write events and a logging action.
- * Used to, e.g. pass data from the pty to the user's terminal
- * and any I/O logging plugins.
- */
-struct io_buffer;
-typedef bool (*sudo_io_action_t)(const char *, unsigned int, struct io_buffer *);
-struct io_buffer {
-    SLIST_ENTRY(io_buffer) entries;
-    struct exec_closure_pty *ec;
-    struct sudo_event *revent;
-    struct sudo_event *wevent;
-    sudo_io_action_t action;
-    int len; /* buffer length (how much produced) */
-    int off; /* write position (how much already consumed) */
-    char buf[64 * 1024];
-};
-SLIST_HEAD(io_buffer_list, io_buffer);
+static struct monitor_message_list monitor_messages =
+    TAILQ_HEAD_INITIALIZER(monitor_messages);
 
 static char ptyname[PATH_MAX];
-int io_fds[6] = { -1, -1, -1, -1, -1, -1};
 static bool foreground, pipeline;
-static int ttymode = TERM_COOKED;
-static sigset_t ttyblock;
-static struct io_buffer_list iobufs;
 static const char *utmp_user;
 
-static void del_io_events(bool nonblocking);
-static void sync_ttysize(struct exec_closure_pty *ec);
-static int safe_close(int fd);
-static void ev_free_by_fd(struct sudo_event_base *evbase, int fd);
-static pid_t check_foreground(struct exec_closure_pty *ec);
-static void add_io_events(struct sudo_event_base *evbase);
-static void schedule_signal(struct exec_closure_pty *ec, int signo);
+static void sync_ttysize(struct exec_closure *ec);
+static pid_t check_foreground(struct exec_closure *ec);
+static void schedule_signal(struct exec_closure *ec, int signo);
 
 /*
  * Cleanup hook for sudo_fatal()/sudo_fatalx()
@@ -202,307 +142,6 @@ pty_make_controlling(void)
     return 0;
 }
 
-/* Call I/O plugin tty input log method. */
-static bool
-log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob)
-{
-    struct plugin_container *plugin;
-    const char *errstr = NULL;
-    sigset_t omask;
-    bool ret = true;
-    debug_decl(log_ttyin, SUDO_DEBUG_EXEC);
-
-    sigprocmask(SIG_BLOCK, &ttyblock, &omask);
-    TAILQ_FOREACH(plugin, &io_plugins, entries) {
-	if (plugin->u.io->log_ttyin) {
-	    int rc;
-
-	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    rc = plugin->u.io->log_ttyin(buf, n, &errstr);
-	    if (rc <= 0) {
-		if (rc < 0) {
-		    /* Error: disable plugin's I/O function. */
-		    plugin->u.io->log_ttyin = NULL;
-		    audit_error(plugin->name, SUDO_IO_PLUGIN,
-			errstr ? errstr : _("I/O plugin error"),
-			iob->ec->details->info);
-		} else {
-		    audit_reject(plugin->name, SUDO_IO_PLUGIN,
-			errstr ? errstr : _("command rejected by I/O plugin"),
-			iob->ec->details->info);
-		}
-		ret = false;
-		break;
-	    }
-	}
-    }
-    sudo_debug_set_active_instance(sudo_debug_instance);
-    sigprocmask(SIG_SETMASK, &omask, NULL);
-
-    debug_return_bool(ret);
-}
-
-/* Call I/O plugin stdin log method. */
-static bool
-log_stdin(const char *buf, unsigned int n, struct io_buffer *iob)
-{
-    struct plugin_container *plugin;
-    const char *errstr = NULL;
-    sigset_t omask;
-    bool ret = true;
-    debug_decl(log_stdin, SUDO_DEBUG_EXEC);
-
-    sigprocmask(SIG_BLOCK, &ttyblock, &omask);
-    TAILQ_FOREACH(plugin, &io_plugins, entries) {
-	if (plugin->u.io->log_stdin) {
-	    int rc;
-
-	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    rc = plugin->u.io->log_stdin(buf, n, &errstr);
-	    if (rc <= 0) {
-		if (rc < 0) {
-		    /* Error: disable plugin's I/O function. */
-		    plugin->u.io->log_stdin = NULL;
-		    audit_error(plugin->name, SUDO_IO_PLUGIN,
-			errstr ? errstr : _("I/O plugin error"),
-			iob->ec->details->info);
-		} else {
-		    audit_reject(plugin->name, SUDO_IO_PLUGIN,
-			errstr ? errstr : _("command rejected by I/O plugin"),
-			iob->ec->details->info);
-		}
-		ret = false;
-		break;
-	    }
-	}
-    }
-    sudo_debug_set_active_instance(sudo_debug_instance);
-    sigprocmask(SIG_SETMASK, &omask, NULL);
-
-    debug_return_bool(ret);
-}
-
-/* Call I/O plugin tty output log method. */
-static bool
-log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob)
-{
-    struct plugin_container *plugin;
-    const char *errstr = NULL;
-    sigset_t omask;
-    bool ret = true;
-    debug_decl(log_ttyout, SUDO_DEBUG_EXEC);
-
-    sigprocmask(SIG_BLOCK, &ttyblock, &omask);
-    TAILQ_FOREACH(plugin, &io_plugins, entries) {
-	if (plugin->u.io->log_ttyout) {
-	    int rc;
-
-	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    rc = plugin->u.io->log_ttyout(buf, n, &errstr);
-	    if (rc <= 0) {
-		if (rc < 0) {
-		    /* Error: disable plugin's I/O function. */
-		    plugin->u.io->log_ttyout = NULL;
-		    audit_error(plugin->name, SUDO_IO_PLUGIN,
-			errstr ? errstr : _("I/O plugin error"),
-			iob->ec->details->info);
-		} else {
-		    audit_reject(plugin->name, SUDO_IO_PLUGIN,
-			errstr ? errstr : _("command rejected by I/O plugin"),
-			iob->ec->details->info);
-		}
-		ret = false;
-		break;
-	    }
-	}
-    }
-    sudo_debug_set_active_instance(sudo_debug_instance);
-    if (!ret) {
-	/*
-	 * I/O plugin rejected the output, delete the write event
-	 * (user's tty) so we do not display the rejected output.
-	 */
-	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "%s: deleting and freeing devtty wevent %p", __func__, iob->wevent);
-	sudo_ev_free(iob->wevent);
-	iob->wevent = NULL;
-	iob->off = iob->len = 0;
-    }
-    sigprocmask(SIG_SETMASK, &omask, NULL);
-
-    debug_return_bool(ret);
-}
-
-/* Call I/O plugin stdout log method. */
-static bool
-log_stdout(const char *buf, unsigned int n, struct io_buffer *iob)
-{
-    struct plugin_container *plugin;
-    const char *errstr = NULL;
-    sigset_t omask;
-    bool ret = true;
-    debug_decl(log_stdout, SUDO_DEBUG_EXEC);
-
-    sigprocmask(SIG_BLOCK, &ttyblock, &omask);
-    TAILQ_FOREACH(plugin, &io_plugins, entries) {
-	if (plugin->u.io->log_stdout) {
-	    int rc;
-
-	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    rc = plugin->u.io->log_stdout(buf, n, &errstr);
-	    if (rc <= 0) {
-		if (rc < 0) {
-		    /* Error: disable plugin's I/O function. */
-		    plugin->u.io->log_stdout = NULL;
-		    audit_error(plugin->name, SUDO_IO_PLUGIN,
-			errstr ? errstr : _("I/O plugin error"),
-			iob->ec->details->info);
-		} else {
-		    audit_reject(plugin->name, SUDO_IO_PLUGIN,
-			errstr ? errstr : _("command rejected by I/O plugin"),
-			iob->ec->details->info);
-		}
-		ret = false;
-		break;
-	    }
-	}
-    }
-    sudo_debug_set_active_instance(sudo_debug_instance);
-    if (!ret) {
-	/*
-	 * I/O plugin rejected the output, delete the write event
-	 * (user's stdout) so we do not display the rejected output.
-	 */
-	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "%s: deleting and freeing stdout wevent %p", __func__, iob->wevent);
-	sudo_ev_free(iob->wevent);
-	iob->wevent = NULL;
-	iob->off = iob->len = 0;
-    }
-    sigprocmask(SIG_SETMASK, &omask, NULL);
-
-    debug_return_bool(ret);
-}
-
-/* Call I/O plugin stderr log method. */
-static bool
-log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
-{
-    struct plugin_container *plugin;
-    const char *errstr = NULL;
-    sigset_t omask;
-    bool ret = true;
-    debug_decl(log_stderr, SUDO_DEBUG_EXEC);
-
-    sigprocmask(SIG_BLOCK, &ttyblock, &omask);
-    TAILQ_FOREACH(plugin, &io_plugins, entries) {
-	if (plugin->u.io->log_stderr) {
-	    int rc;
-
-	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    rc = plugin->u.io->log_stderr(buf, n, &errstr);
-	    if (rc <= 0) {
-		if (rc < 0) {
-		    /* Error: disable plugin's I/O function. */
-		    plugin->u.io->log_stderr = NULL;
-		    audit_error(plugin->name, SUDO_IO_PLUGIN,
-			errstr ? errstr : _("I/O plugin error"),
-			iob->ec->details->info);
-		} else {
-		    audit_reject(plugin->name, SUDO_IO_PLUGIN,
-			errstr ? errstr : _("command rejected by I/O plugin"),
-			iob->ec->details->info);
-		}
-		ret = false;
-		break;
-	    }
-	}
-    }
-    sudo_debug_set_active_instance(sudo_debug_instance);
-    if (!ret) {
-	/*
-	 * I/O plugin rejected the output, delete the write event
-	 * (user's stderr) so we do not display the rejected output.
-	 */
-	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "%s: deleting and freeing stderr wevent %p", __func__, iob->wevent);
-	sudo_ev_free(iob->wevent);
-	iob->wevent = NULL;
-	iob->off = iob->len = 0;
-    }
-    sigprocmask(SIG_SETMASK, &omask, NULL);
-
-    debug_return_bool(ret);
-}
-
-/* Call I/O plugin suspend log method. */
-static void
-log_suspend(struct exec_closure_pty *ec, int signo)
-{
-    struct plugin_container *plugin;
-    const char *errstr = NULL;
-    sigset_t omask;
-    debug_decl(log_suspend, SUDO_DEBUG_EXEC);
-
-    sigprocmask(SIG_BLOCK, &ttyblock, &omask);
-    TAILQ_FOREACH(plugin, &io_plugins, entries) {
-	if (plugin->u.io->version < SUDO_API_MKVERSION(1, 13))
-	    continue;
-	if (plugin->u.io->log_suspend) {
-	    int rc;
-
-	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    rc = plugin->u.io->log_suspend(signo, &errstr);
-	    if (rc <= 0) {
-		/* Error: disable plugin's I/O function. */
-		plugin->u.io->log_suspend = NULL;
-		audit_error(plugin->name, SUDO_IO_PLUGIN,
-		    errstr ? errstr : _("error logging suspend"),
-		    ec->details->info);
-		break;
-	    }
-	}
-    }
-    sudo_debug_set_active_instance(sudo_debug_instance);
-    sigprocmask(SIG_SETMASK, &omask, NULL);
-
-    debug_return;
-}
-
-/* Call I/O plugin window change log method. */
-static void
-log_winchange(struct exec_closure_pty *ec, unsigned int rows, unsigned int cols)
-{
-    struct plugin_container *plugin;
-    const char *errstr = NULL;
-    sigset_t omask;
-    debug_decl(log_winchange, SUDO_DEBUG_EXEC);
-
-    sigprocmask(SIG_BLOCK, &ttyblock, &omask);
-    TAILQ_FOREACH(plugin, &io_plugins, entries) {
-	if (plugin->u.io->version < SUDO_API_MKVERSION(1, 12))
-	    continue;
-	if (plugin->u.io->change_winsize) {
-	    int rc;
-
-	    sudo_debug_set_active_instance(plugin->debug_instance);
-	    rc = plugin->u.io->change_winsize(rows, cols, &errstr);
-	    if (rc <= 0) {
-		/* Error: disable plugin's I/O function. */
-		plugin->u.io->change_winsize = NULL;
-		audit_error(plugin->name, SUDO_IO_PLUGIN,
-		    errstr ? errstr : _("error changing window size"),
-		    ec->details->info);
-		break;
-	    }
-	}
-    }
-    sudo_debug_set_active_instance(sudo_debug_instance);
-    sigprocmask(SIG_SETMASK, &omask, NULL);
-
-    debug_return;
-}
-
 /*
  * Check whether we are running in the foregroup.
  * Updates the foreground global and updates the window size.
@@ -510,7 +149,7 @@ log_winchange(struct exec_closure_pty *ec, unsigned int rows, unsigned int cols)
  * on success, or -1 on failure (tty revoked).
  */
 static pid_t
-check_foreground(struct exec_closure_pty *ec)
+check_foreground(struct exec_closure *ec)
 {
     int ret = 0;
     debug_decl(check_foreground, SUDO_DEBUG_EXEC);
@@ -532,7 +171,7 @@ check_foreground(struct exec_closure_pty *ec)
  * foreground or SIGCONT_BG if it is a background process.
  */
 static int
-suspend_sudo_pty(struct exec_closure_pty *ec, int signo)
+suspend_sudo_pty(struct exec_closure *ec, int signo)
 {
     char signame[SIG2STR_MAX];
     struct sigaction sa, osa;
@@ -823,71 +462,25 @@ write_callback(int fd, int what, void *v)
     debug_return;
 }
 
-static void
-io_buf_new(int rfd, int wfd,
-    bool (*action)(const char *, unsigned int, struct io_buffer *),
-    struct exec_closure_pty *ec, struct io_buffer_list *head)
-{
-    int n;
-    struct io_buffer *iob;
-    debug_decl(io_buf_new, SUDO_DEBUG_EXEC);
-
-    /* Set non-blocking mode. */
-    n = fcntl(rfd, F_GETFL, 0);
-    if (n != -1 && !ISSET(n, O_NONBLOCK))
-	(void) fcntl(rfd, F_SETFL, n | O_NONBLOCK);
-    n = fcntl(wfd, F_GETFL, 0);
-    if (n != -1 && !ISSET(n, O_NONBLOCK))
-	(void) fcntl(wfd, F_SETFL, n | O_NONBLOCK);
-
-    /* Allocate and add to head of list. */
-    if ((iob = malloc(sizeof(*iob))) == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    iob->ec = ec;
-    iob->revent = sudo_ev_alloc(rfd, SUDO_EV_READ|SUDO_EV_PERSIST,
-	read_callback, iob);
-    iob->wevent = sudo_ev_alloc(wfd, SUDO_EV_WRITE|SUDO_EV_PERSIST,
-	write_callback, iob);
-    iob->len = 0;
-    iob->off = 0;
-    iob->action = action;
-    iob->buf[0] = '\0';
-    if (iob->revent == NULL || iob->wevent == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    SLIST_INSERT_HEAD(head, iob, entries);
-
-    debug_return;
-}
-
 /*
  * We already closed the follower so reads from the leader will not block.
  */
 static void
 pty_finish(struct command_status *cstat)
 {
-    struct io_buffer *iob;
-    int n;
+    int flags;
     debug_decl(pty_finish, SUDO_DEBUG_EXEC);
 
-    /* Flush any remaining output (the plugin already got it). */
+    /* Flush any remaining output (the plugin already got it) and free bufs. */
     if (io_fds[SFD_USERTTY] != -1) {
-	n = fcntl(io_fds[SFD_USERTTY], F_GETFL, 0);
-	if (n != -1 && ISSET(n, O_NONBLOCK)) {
-	    CLR(n, O_NONBLOCK);
-	    (void) fcntl(io_fds[SFD_USERTTY], F_SETFL, n);
+	flags = fcntl(io_fds[SFD_USERTTY], F_GETFL, 0);
+	if (flags != -1 && ISSET(flags, O_NONBLOCK)) {
+	    CLR(flags, O_NONBLOCK);
+	    (void) fcntl(io_fds[SFD_USERTTY], F_SETFL, flags);
 	}
     }
     del_io_events(false);
-
-    /* Free I/O buffers. */
-    while ((iob = SLIST_FIRST(&iobufs)) != NULL) {
-	SLIST_REMOVE_HEAD(&iobufs, entries);
-	if (iob->revent != NULL)
-	    sudo_ev_free(iob->revent);
-	if (iob->wevent != NULL)
-	    sudo_ev_free(iob->wevent);
-	free(iob);
-    }
+    free_io_bufs();
 
     /* Restore terminal settings. */
     if (io_fds[SFD_USERTTY] != -1)
@@ -904,7 +497,7 @@ pty_finish(struct command_status *cstat)
  * Send command status to the monitor (signal or window size change).
  */
 static void
-send_command_status(struct exec_closure_pty *ec, int type, int val)
+send_command_status(struct exec_closure *ec, int type, int val)
 {
     struct monitor_message *msg;
     debug_decl(send_command, SUDO_DEBUG_EXEC);
@@ -913,7 +506,7 @@ send_command_status(struct exec_closure_pty *ec, int type, int val)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     msg->cstat.type = type;
     msg->cstat.val = val;
-    TAILQ_INSERT_TAIL(&ec->monitor_messages, msg, entries);
+    TAILQ_INSERT_TAIL(&monitor_messages, msg, entries);
 
     if (sudo_ev_add(ec->evbase, ec->fwdchannel_event, NULL, true) == -1)
 	sudo_fatal("%s", U_("unable to add event to queue"));
@@ -928,7 +521,7 @@ send_command_status(struct exec_closure_pty *ec, int type, int val)
  * Schedule a signal to be forwarded.
  */
 static void
-schedule_signal(struct exec_closure_pty *ec, int signo)
+schedule_signal(struct exec_closure *ec, int signo)
 {
     char signame[SIG2STR_MAX];
     debug_decl(schedule_signal, SUDO_DEBUG_EXEC);
@@ -949,10 +542,27 @@ schedule_signal(struct exec_closure_pty *ec, int signo)
     debug_return;
 }
 
+/*
+ * Free any remaining monitor messages in the queue.
+ */
+static void
+flush_monitor_messages(void)
+{
+    struct monitor_message *msg;
+    debug_decl(flush_monitor_messages, SUDO_DEBUG_EXEC);
+
+    while ((msg = TAILQ_FIRST(&monitor_messages)) != NULL) {
+	TAILQ_REMOVE(&monitor_messages, msg, entries);
+	free(msg);
+    }
+
+    debug_return;
+}
+
 static void
 backchannel_cb(int fd, int what, void *v)
 {
-    struct exec_closure_pty *ec = v;
+    struct exec_closure *ec = v;
     struct command_status cstat;
     ssize_t nread;
     debug_decl(backchannel_cb, SUDO_DEBUG_EXEC);
@@ -1060,7 +670,7 @@ backchannel_cb(int fd, int what, void *v)
  * Handle changes to the monitors's status (SIGCHLD).
  */
 static void
-handle_sigchld_pty(struct exec_closure_pty *ec)
+handle_sigchld_pty(struct exec_closure *ec)
 {
     int n, status;
     pid_t pid;
@@ -1129,7 +739,7 @@ static void
 signal_cb_pty(int signo, int what, void *v)
 {
     struct sudo_ev_siginfo_container *sc = v;
-    struct exec_closure_pty *ec = sc->closure;
+    struct exec_closure *ec = sc->closure;
     char signame[SIG2STR_MAX];
     debug_decl(signal_cb_pty, SUDO_DEBUG_EXEC);
 
@@ -1180,13 +790,13 @@ signal_cb_pty(int signo, int what, void *v)
 static void
 fwdchannel_cb(int sock, int what, void *v)
 {
-    struct exec_closure_pty *ec = v;
+    struct exec_closure *ec = v;
     char signame[SIG2STR_MAX];
     struct monitor_message *msg;
     ssize_t nsent;
     debug_decl(fwdchannel_cb, SUDO_DEBUG_EXEC);
 
-    while ((msg = TAILQ_FIRST(&ec->monitor_messages)) != NULL) {
+    while ((msg = TAILQ_FIRST(&monitor_messages)) != NULL) {
 	switch (msg->cstat.type) {
 	case CMD_SIGNO:
 	    if (msg->cstat.val == SIGCONT_FG)
@@ -1209,7 +819,7 @@ fwdchannel_cb(int sock, int what, void *v)
 		msg->cstat.type, msg->cstat.val);
 	    break;
 	}
-	TAILQ_REMOVE(&ec->monitor_messages, msg, entries);
+	TAILQ_REMOVE(&monitor_messages, msg, entries);
 	nsent = send(sock, &msg->cstat, sizeof(msg->cstat), 0);
 	if (nsent != sizeof(msg->cstat)) {
 	    if (errno == EPIPE) {
@@ -1217,10 +827,7 @@ fwdchannel_cb(int sock, int what, void *v)
 		    "broken pipe writing to monitor over backchannel");
 		/* Other end of socket gone, empty out monitor_messages. */
 		free(msg);
-		while ((msg = TAILQ_FIRST(&ec->monitor_messages)) != NULL) {
-		    TAILQ_REMOVE(&ec->monitor_messages, msg, entries);
-		    free(msg);
-		}
+		flush_monitor_messages();
 		/* XXX - need new CMD_ type for monitor errors. */
 		ec->cstat->type = CMD_ERRNO;
 		ec->cstat->val = errno;
@@ -1238,10 +845,10 @@ fwdchannel_cb(int sock, int what, void *v)
  * Forwarded signals on the backchannel are enabled on demand.
  */
 static void
-fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
+fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
     struct command_details *details, pid_t ppgrp, int backchannel)
 {
-    debug_decl(fill_exec_closure_pty, SUDO_DEBUG_EXEC);
+    debug_decl(fill_exec_closure, SUDO_DEBUG_EXEC);
 
     /* Fill in the non-event part of the closure. */
     ec->cmnd_pid = -1;
@@ -1250,7 +857,6 @@ fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
     ec->details = details;
     ec->rows = user_details.ts_rows;
     ec->cols = user_details.ts_cols;
-    TAILQ_INIT(&ec->monitor_messages);
 
     /* Reset cstat for running the command. */
     cstat->type = CMD_INVALID;
@@ -1353,40 +959,6 @@ fill_exec_closure_pty(struct exec_closure_pty *ec, struct command_status *cstat,
 }
 
 /*
- * Free the dynamically-allocated contents of the exec closure.
- */
-static void
-free_exec_closure_pty(struct exec_closure_pty *ec)
-{
-    struct monitor_message *msg;
-    debug_decl(free_exec_closure_pty, SUDO_DEBUG_EXEC);
-
-    /* Free any remaining intercept resources. */
-    intercept_cleanup();
-
-    sudo_ev_base_free(ec->evbase);
-    sudo_ev_free(ec->backchannel_event);
-    sudo_ev_free(ec->fwdchannel_event);
-    sudo_ev_free(ec->sigint_event);
-    sudo_ev_free(ec->sigquit_event);
-    sudo_ev_free(ec->sigtstp_event);
-    sudo_ev_free(ec->sigterm_event);
-    sudo_ev_free(ec->sighup_event);
-    sudo_ev_free(ec->sigalrm_event);
-    sudo_ev_free(ec->sigusr1_event);
-    sudo_ev_free(ec->sigusr2_event);
-    sudo_ev_free(ec->sigchld_event);
-    sudo_ev_free(ec->sigwinch_event);
-
-    while ((msg = TAILQ_FIRST(&ec->monitor_messages)) != NULL) {
-	TAILQ_REMOVE(&ec->monitor_messages, msg, entries);
-	free(msg);
-    }
-
-    debug_return;
-}
-
-/*
  * Execute a command in a pty, potentially with I/O logging, and
  * wait for it to finish.
  * This is a little bit tricky due to how POSIX job control works and
@@ -1398,7 +970,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     int io_pipe[3][2] = { { -1, -1 }, { -1, -1 }, { -1, -1 } };
     bool interpose[3] = { false, false, false };
     int sv[2], intercept_sv[2] = { -1, -1 };
-    struct exec_closure_pty ec = { 0 };
+    struct exec_closure ec = { 0 };
     struct plugin_container *plugin;
     int evloop_retries = -1;
     sigset_t set, oset;
@@ -1461,15 +1033,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
      * Child will run the command in the pty, parent will pass data
      * to and from pty.
      */
-
-    /* So we can block tty-generated signals */
-    sigemptyset(&ttyblock);
-    sigaddset(&ttyblock, SIGINT);
-    sigaddset(&ttyblock, SIGQUIT);
-    sigaddset(&ttyblock, SIGTSTP);
-    sigaddset(&ttyblock, SIGTTIN);
-    sigaddset(&ttyblock, SIGTTOU);
-
+    init_ttyblock();
     ppgrp = getpgrp();	/* parent's pgrp, so child can signal us */
 
     /* Determine whether any of std{in,out,err} should be logged. */
@@ -1495,12 +1059,12 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	/* Read from /dev/tty, write to pty leader */
 	if (!ISSET(details->flags, CD_BACKGROUND)) {
 	    io_buf_new(io_fds[SFD_USERTTY], io_fds[SFD_LEADER],
-		log_ttyin, &ec, &iobufs);
+		log_ttyin, read_callback, write_callback, &ec, &iobufs);
 	}
 
 	/* Read from pty leader, write to /dev/tty */
 	io_buf_new(io_fds[SFD_LEADER], io_fds[SFD_USERTTY],
-	    log_ttyout, &ec, &iobufs);
+	    log_ttyout, read_callback, write_callback, &ec, &iobufs);
 
 	/* Are we the foreground process? */
 	foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ppgrp;
@@ -1527,7 +1091,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	    if (pipe2(io_pipe[STDIN_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
-		log_stdin, &ec, &iobufs);
+		log_stdin, read_callback, write_callback, &ec, &iobufs);
 	    io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
 	}
     }
@@ -1548,7 +1112,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	    if (pipe2(io_pipe[STDOUT_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
-		log_stdout, &ec, &iobufs);
+		log_stdout, read_callback, write_callback, &ec, &iobufs);
 	    io_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
 	}
     }
@@ -1568,7 +1132,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	    if (pipe2(io_pipe[STDERR_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
-		log_stderr, &ec, &iobufs);
+		log_stderr, read_callback, write_callback, &ec, &iobufs);
 	    io_fds[SFD_STDERR] = io_pipe[STDERR_FILENO][1];
 	}
     }
@@ -1676,7 +1240,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
      * Fill in exec closure, allocate event base, signal events and
      * the backchannel event.
      */
-    fill_exec_closure_pty(&ec, cstat, details, ppgrp, sv[0]);
+    fill_exec_closure(&ec, cstat, details, ppgrp, sv[0]);
 
     /* Create event and closure for intercept mode. */
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
@@ -1734,148 +1298,9 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     pty_finish(cstat);
 
     /* Free things up. */
-    free_exec_closure_pty(&ec);
+    free_exec_closure(&ec);
 
     debug_return_bool(true);
-}
-
-/*
- * Schedule I/O events before starting the main event loop or
- * resuming from suspend.
- */
-static void
-add_io_events(struct sudo_event_base *evbase)
-{
-    struct io_buffer *iob;
-    debug_decl(add_io_events, SUDO_DEBUG_EXEC);
-
-    /*
-     * Schedule all readers as long as the buffer is not full.
-     * Schedule writers that contain buffered data.
-     * Normally, write buffers are added on demand when data is read.
-     */
-    SLIST_FOREACH(iob, &iobufs, entries) {
-	/* Don't read from /dev/tty if we are not in the foreground. */
-	if (iob->revent != NULL &&
-	    (ttymode == TERM_RAW || !USERTTY_EVENT(iob->revent))) {
-	    if (iob->len != sizeof(iob->buf)) {
-		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "added I/O revent %p, fd %d, events %d",
-		    iob->revent, iob->revent->fd, iob->revent->events);
-		if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
-		    sudo_fatal("%s", U_("unable to add event to queue"));
-	    }
-	}
-	if (iob->wevent != NULL) {
-	    /* Enable writer if buffer is not empty. */
-	    if (iob->len > iob->off) {
-		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "added I/O wevent %p, fd %d, events %d",
-		    iob->wevent, iob->wevent->fd, iob->wevent->events);
-		if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
-		    sudo_fatal("%s", U_("unable to add event to queue"));
-	    }
-	}
-    }
-    debug_return;
-}
-
-/*
- * Flush any output buffered in iobufs or readable from fds other
- * than /dev/tty.  Removes I/O events from the event base when done.
- */
-static void
-del_io_events(bool nonblocking)
-{
-    struct io_buffer *iob;
-    struct sudo_event_base *evbase;
-    debug_decl(del_io_events, SUDO_DEBUG_EXEC);
-
-    /* Remove iobufs from existing event base. */
-    SLIST_FOREACH(iob, &iobufs, entries) {
-	if (iob->revent != NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"deleted I/O revent %p, fd %d, events %d",
-		iob->revent, iob->revent->fd, iob->revent->events);
-	    sudo_ev_del(NULL, iob->revent);
-	}
-	if (iob->wevent != NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"deleted I/O wevent %p, fd %d, events %d",
-		iob->wevent, iob->wevent->fd, iob->wevent->events);
-	    sudo_ev_del(NULL, iob->wevent);
-	}
-    }
-
-    /* Create temporary event base for flushing. */
-    evbase = sudo_ev_base_alloc();
-    if (evbase == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-
-    /* Avoid reading from /dev/tty, just flush existing data. */
-    SLIST_FOREACH(iob, &iobufs, entries) {
-	/* Don't read from /dev/tty while flushing. */
-	if (iob->revent != NULL && !USERTTY_EVENT(iob->revent)) {
-	    if (iob->len != sizeof(iob->buf)) {
-		if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
-		    sudo_fatal("%s", U_("unable to add event to queue"));
-	    }
-	}
-	/* Flush any write buffers with data in them. */
-	if (iob->wevent != NULL) {
-	    if (iob->len > iob->off) {
-		if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
-		    sudo_fatal("%s", U_("unable to add event to queue"));
-	    }
-	}
-    }
-    sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: flushing remaining I/O buffers (nonblocking)", __func__);
-    (void) sudo_ev_loop(evbase, SUDO_EVLOOP_NONBLOCK);
-
-    /*
-     * If not in non-blocking mode, make sure we flush write buffers.
-     * We don't want to read from the pty or stdin since that might block
-     * and the command is no longer running anyway.
-     */
-    if (!nonblocking) {
-	/* Clear out iobufs from event base. */
-	SLIST_FOREACH(iob, &iobufs, entries) {
-	    if (iob->revent != NULL && !USERTTY_EVENT(iob->revent))
-		sudo_ev_del(evbase, iob->revent);
-	    if (iob->wevent != NULL)
-		sudo_ev_del(evbase, iob->wevent);
-	}
-
-	SLIST_FOREACH(iob, &iobufs, entries) {
-	    /* Flush any write buffers with data in them. */
-	    if (iob->wevent != NULL) {
-		if (iob->len > iob->off) {
-		    if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
-			sudo_fatal("%s", U_("unable to add event to queue"));
-		}
-	    }
-	}
-	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "%s: flushing remaining write buffers (blocking)", __func__);
-	(void) sudo_ev_dispatch(evbase);
-     
-	/* We should now have flushed all write buffers. */
-	SLIST_FOREACH(iob, &iobufs, entries) {
-	    if (iob->wevent != NULL) {
-		if (iob->len > iob->off) {
-		    sudo_debug_printf(SUDO_DEBUG_ERROR,
-			"unflushed data: wevent %p, fd %d, events %d",
-			iob->wevent, iob->wevent->fd, iob->wevent->events);
-		}
-	    }
-	}
-    }
-
-    /* Free temporary event base, removing its events. */
-    sudo_ev_base_free(evbase);
-
-    debug_return;
 }
 
 /*
@@ -1883,7 +1308,7 @@ del_io_events(bool nonblocking)
  * Passes the new window size to the I/O plugin and to the monitor.
  */
 static void
-sync_ttysize(struct exec_closure_pty *ec)
+sync_ttysize(struct exec_closure *ec)
 {
     struct winsize wsize;
     debug_decl(sync_ttysize, SUDO_DEBUG_EXEC);
@@ -1906,58 +1331,4 @@ sync_ttysize(struct exec_closure_pty *ec)
     }
 
     debug_return;
-}
-
-/*
- * Remove and free any events associated with the specified
- * file descriptor present in the I/O buffers list.
- */
-static void
-ev_free_by_fd(struct sudo_event_base *evbase, int fd)
-{
-    struct io_buffer *iob;
-    debug_decl(ev_free_by_fd, SUDO_DEBUG_EXEC);
-
-    /* Deschedule any users of the fd and free up the events. */
-    SLIST_FOREACH(iob, &iobufs, entries) {
-	if (iob->revent != NULL) {
-	    if (sudo_ev_get_fd(iob->revent) == fd) {
-		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "%s: deleting and freeing revent %p with fd %d",
-		    __func__, iob->revent, fd);
-		sudo_ev_free(iob->revent);
-		iob->revent = NULL;
-	    }
-	}
-	if (iob->wevent != NULL) {
-	    if (sudo_ev_get_fd(iob->wevent) == fd) {
-		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "%s: deleting and freeing wevent %p with fd %d",
-		    __func__, iob->wevent, fd);
-		sudo_ev_free(iob->wevent);
-		iob->wevent = NULL;
-	    }
-	}
-    }
-    debug_return;
-}
-
-/*
- * Only close the fd if it is not /dev/tty or std{in,out,err}.
- * Return value is the same as close(2).
- */
-static int
-safe_close(int fd)
-{
-    debug_decl(safe_close, SUDO_DEBUG_EXEC);
-
-    /* Avoid closing /dev/tty or std{in,out,err}. */
-    if (fd < 3 || fd == io_fds[SFD_USERTTY]) {
-	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "%s: not closing fd %d (%s)", __func__, fd, _PATH_TTY);
-	errno = EINVAL;
-	debug_return_int(-1);
-    }
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: closing fd %d", __func__, fd);
-    debug_return_int(close(fd));
 }
