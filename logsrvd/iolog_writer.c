@@ -238,7 +238,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	    }
 	    if (strcmp(key, "rungid") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_NUMVAL)) {
-		    if (info->u.numval < 0 || info->u.numval > INT_MAX) {
+		    if (info->u.numval < 0 || info->u.numval > UINT_MAX) {
 			errno = ERANGE;
 			sudo_warn(U_("%s: %s"), source, "rungid");
 		    } else {
@@ -259,7 +259,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	    }
 	    if (strcmp(key, "runuid") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_NUMVAL)) {
-		    if (info->u.numval < 0 || info->u.numval > INT_MAX) {
+		    if (info->u.numval < 0 || info->u.numval > UINT_MAX) {
 			errno = ERANGE;
 			sudo_warn(U_("%s: %s"), source, "runuid");
 		    } else {
