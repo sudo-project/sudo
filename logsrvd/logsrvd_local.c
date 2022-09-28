@@ -141,6 +141,27 @@ logsrvd_json_log_cb(struct json_container *json, void *v)
 		goto bad;
 	    break;
 	}
+	case INFO_MESSAGE__VALUE_NUMLISTVAL: {
+	    InfoMessage__NumberList *numlist = info->u.numlistval;
+	    size_t n;
+
+	    if (numlist == NULL) {
+		sudo_warnx(U_("%s: protocol error: NULL value found in %s"),
+		    "local", info->key);
+		break;
+	    }
+	    if (!sudo_json_open_array(json, info->key))
+		goto bad;
+	    for (n = 0; n < numlist->n_numbers; n++) {
+		json_value.type = JSON_NUMBER;
+		json_value.u.number = numlist->numbers[n];
+		if (!sudo_json_add_value(json, NULL, &json_value))
+		    goto bad;
+	    }
+	    if (!sudo_json_close_array(json))
+		goto bad;
+	    break;
+	}
 	default:
 	    sudo_warnx(U_("unexpected value_case %d in %s from %s"),
 		info->value_case, "InfoMessage", "local");
