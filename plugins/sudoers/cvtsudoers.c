@@ -1384,7 +1384,7 @@ alias_prune_helper(struct sudoers_parse_tree *parse_tree, struct alias *a,
 {
     struct cvtsudoers_config *conf = v;
 
-    /* XXX - misue of these functions */
+    /* XXX - misuse of these functions */
     switch (a->type) {
     case USERALIAS:
 	userlist_matches_filter(parse_tree, &a->members, conf);

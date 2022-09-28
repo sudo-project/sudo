@@ -455,7 +455,7 @@ write_callback(int fd, int what, void *v)
 
 /*
  * If std{in,out,err} are not connected to a terminal, interpose
- * outselves using a pipe.  Fills in io_pipe[][].
+ * ourselves using a pipe.  Fills in io_pipe[][].
  */
 static void
 interpose_pipes(struct exec_closure *ec, int io_pipe[3][2])

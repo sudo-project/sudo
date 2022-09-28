@@ -320,7 +320,7 @@ Defaults are listed in brackets after the description.
         Adds the specified library (or libraries) to SUDO_LIBS and
         and VISUDO_LIBS so sudo will link against them.  If the
         library doesn't start with "-l" or end in ".a" or ".o" a
-        "-l" will be pre-pended to it.  Multiple libraries may be
+        "-l" will be prepended to it.  Multiple libraries may be
         specified as long as they are space separated.
 
     --with-libtool=PATH

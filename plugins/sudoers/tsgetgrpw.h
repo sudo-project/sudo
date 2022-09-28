@@ -17,8 +17,8 @@
  */
 
 /*
- * Trivial replacements for the libc get{gr,pw}{uid,nam}() routines
- * for use by testsudoers in the sudo test harness.
+ * Trivial replacements for the libc getgrent() and getpwent() family
+ * of functions for use by testsudoers in the sudo test harness.
  * We need our own since many platforms don't provide set{pw,gr}file().
  */
 

@@ -1004,7 +1004,7 @@ bad:
 }
 
 /*
- * Log a message to syslog, pre-pending the username and splitting the
+ * Log a message to syslog, prepending the username and splitting the
  * message into parts if it is longer than syslog_maxlen.
  */
 static bool
