@@ -517,6 +517,12 @@ handle_exit(ExitMessage *msg, uint8_t *buf, size_t len,
 	debug_return_bool(false);
     }
 
+    /* Check that message is valid. */
+    if (msg->run_time == NULL) {
+	sudo_warnx(U_("%s: %s"), source, U_("invalid ExitMessage"));
+	closure->errstr = _("invalid ExitMessage");
+	debug_return_bool(false);
+    }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ExitMessage from %s",
 	source, __func__);
 
@@ -562,6 +568,13 @@ handle_restart(RestartMessage *msg, uint8_t *buf, size_t len,
     if (closure->state != INITIAL) {
 	sudo_warnx(U_("unexpected state %d for %s"), closure->state, source);
 	closure->errstr = _("state machine error");
+	debug_return_bool(false);
+    }
+
+    /* Check that message is valid. */
+    if (msg->log_id == NULL || msg->resume_point == NULL) {
+	sudo_warnx(U_("%s: %s"), source, U_("invalid RestartMessage"));
+	closure->errstr = _("invalid RestartMessage");
 	debug_return_bool(false);
     }
     sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -642,6 +655,12 @@ handle_iobuf(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len,
 	debug_return_bool(false);
     }
 
+    /* Check that message is valid. */
+    if (iobuf->delay == NULL) {
+	sudo_warnx(U_("%s: %s"), source, U_("invalid IoBuffer"));
+	closure->errstr = _("invalid IoBuffer");
+	debug_return_bool(false);
+    }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received IoBuffer from %s",
 	source, __func__);
 
@@ -672,6 +691,12 @@ handle_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len,
 	debug_return_bool(false);
     }
 
+    /* Check that message is valid. */
+    if (msg->delay == NULL) {
+	sudo_warnx(U_("%s: %s"), source, U_("invalid ChangeWindowSize"));
+	closure->errstr = _("invalid ChangeWindowSize");
+	debug_return_bool(false);
+    }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ChangeWindowSize from %s",
 	source, __func__);
 
@@ -702,6 +727,12 @@ handle_suspend(CommandSuspend *msg, uint8_t *buf, size_t len,
 	debug_return_bool(false);
     }
 
+    /* Check that message is valid. */
+    if (msg->delay == NULL || msg->signal == NULL) {
+	sudo_warnx(U_("%s: %s"), source, U_("invalid CommandSuspend"));
+	closure->errstr = _("invalid CommandSuspend");
+	debug_return_bool(false);
+    }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received CommandSuspend from %s",
 	source, __func__);
 
@@ -730,7 +761,7 @@ handle_client_hello(ClientHello *msg, uint8_t *buf, size_t len,
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ClientHello",
 	__func__);
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: client ID %s",
-	__func__, msg->client_id);
+	__func__, msg->client_id ? msg->client_id : "unknown");
 
     debug_return_bool(true);
 }

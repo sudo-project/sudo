@@ -105,6 +105,11 @@ logsrvd_json_log_cb(struct json_container *json, void *v)
 		goto bad;
 	    break;
 	case INFO_MESSAGE__VALUE_STRVAL:
+	    if (info->u.strval == NULL) {
+		sudo_warnx(U_("%s: protocol error: NULL value found in %s"),
+		    "local", info->key);
+		break;
+	    }
 	    json_value.type = JSON_STRING;
 	    json_value.u.string = info->u.strval;
 	    if (!sudo_json_add_value(json, info->key, &json_value))
@@ -114,9 +119,19 @@ logsrvd_json_log_cb(struct json_container *json, void *v)
 	    InfoMessage__StringList *strlist = info->u.strlistval;
 	    size_t n;
 
+	    if (strlist == NULL) {
+		sudo_warnx(U_("%s: protocol error: NULL value found in %s"),
+		    "local", info->key);
+		break;
+	    }
 	    if (!sudo_json_open_array(json, info->key))
 		goto bad;
 	    for (n = 0; n < strlist->n_strings; n++) {
+		if (strlist->strings[n] == NULL) {
+		    sudo_warnx(U_("%s: protocol error: NULL value found in %s"),
+			"local", info->key);
+		    break;
+		}
 		json_value.type = JSON_STRING;
 		json_value.u.string = strlist->strings[n];
 		if (!sudo_json_add_value(json, NULL, &json_value))
@@ -127,9 +142,9 @@ logsrvd_json_log_cb(struct json_container *json, void *v)
 	    break;
 	}
 	default:
-	    sudo_warnx(U_("unexpected type_case value %d in %s from %s"),
+	    sudo_warnx(U_("unexpected value_case %d in %s from %s"),
 		info->value_case, "InfoMessage", "local");
-	    goto bad;
+	    break;
 	}
     }
     debug_return_bool(true);

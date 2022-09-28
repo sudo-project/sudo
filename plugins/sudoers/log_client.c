@@ -909,9 +909,9 @@ fmt_info_messages(struct client_closure *closure, struct eventlog *evlog,
     fill_str("submithost", evlog->submithost);
     /* TODO - submituid */
     fill_str("submituser", evlog->submituser);
-    if (evlog->ttyname != NULL) {
+//    if (evlog->ttyname != NULL) {
 	fill_str("ttyname", evlog->ttyname);
-    }
+ //   }
 
     /* Free unused structs. */
     while (info_msgs_size > n)
