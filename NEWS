@@ -67,6 +67,23 @@ What's new in Sudo 1.9.12
  * Fixed a bug where sub-commands were not being logged to a remote
    log server when log_subcmds was enabled.  GitHub issue #174.
 
+ * The new log_stdin, log_stdout, log_stderr, log_ttyin, and log_ttyout
+   sudoers settings can be used to support more fine-grained I/O logging.
+   The sudo front-end no longer allocates a pseudo-terminal when running
+   a command if the I/O logging plugin requests logging of stdin, stdout,
+   or stderr but not terminal input/output.
+
+ * Quieted a libgcrypt run-time initialization warning.
+   This fixes Debian bug #1019428 and Ubuntu bug #1397663.
+
+ * Fixed a bug in visudo that caused literal backslashes to be removed
+   from the EDITOR environment variable.  GitHub issue #179.
+
+ * The sudo Python plugin now implements the "find_spec" method instead
+   of the the deprecated "find_module".  This fixes a test failure when
+   a newer version of setuptools that doesn't include "find_module" is
+   found on the system.
+
 What's new in Sudo 1.9.11p3
 
  * Fixed "connection reset" errors on AIX when running shell scripts
