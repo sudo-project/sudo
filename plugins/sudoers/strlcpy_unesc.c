@@ -29,6 +29,9 @@
 
 #include "sudoers.h"
 
+/*
+ * Like strlcpy() but collapses non-space chars escaped with a backslash.
+ */
 size_t
 strlcpy_unescape(char *dst, const char *src, size_t size)
 {

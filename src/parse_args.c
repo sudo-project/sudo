@@ -606,6 +606,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 
     /*
      * For shell mode we need to rewrite argv
+     * TODO: move this to the policy plugin and make escaping configurable
      */
     if (ISSET(flags, MODE_SHELL|MODE_LOGIN_SHELL) && ISSET(mode, MODE_RUN)) {
 	char **av, *cmnd = NULL;

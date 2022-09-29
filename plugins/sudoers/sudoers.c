@@ -1047,6 +1047,7 @@ set_cmnd(void)
 		 * When running a command via a shell, the sudo front-end
 		 * escapes potential meta chars.  We unescape non-spaces
 		 * for sudoers matching and logging purposes.
+		 * TODO: move escaping to the policy plugin instead
 		 */
 		user_args = strvec_join(NewArgv + 1, ' ', strlcpy_unescape);
 	    } else {
