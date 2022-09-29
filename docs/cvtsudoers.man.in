@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "CVTSUDOERS" "1" "September 13, 2022" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
+.TH "CVTSUDOERS" "1" "September 29, 2022" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -537,7 +537,33 @@ An array of objects, each containing an
 array and an optional
 \fIBinding\fR
 array.
-Each object contains a
+.sp
+The
+\fIOptions\fR
+array consists of one or more objects, each containing a
+\(lqname:value\(rq
+pair that corresponds to a
+\fIsudoers\fR
+\fIDefaults\fR
+setting.
+\fIOptions\fR
+that operate on a list will also include an
+\fIoperation\fR
+entry in the object, with a value of
+\(lqlist_assign\(rq
+for
+\(oq=\(cq,
+\(lqlist_add\(rq
+for
+\(oq+=\(cq,
+or
+\(lqlist_remove\(rq
+for
+\(oq-=\(cq.
+.sp
+The optional
+\fIBinding\fR
+array consists of one or more objects, each containing a
 \(lqname:value\(rq
 pair and an optional
 \fInegated\fR
@@ -547,13 +573,28 @@ If a
 is present, the setting will only take effect if one of the specified
 \fIcommand\fR,
 \fIhostname\fR,
+\fInetgroup\fR,
+\fInetworkaddr\fR,
+\fInonunixgid\fR,
+\fInonunixgroup\fR,
 \fIusergid\fR,
 \fIusergroup\fR,
 \fIuserid\fR,
 \fIusername\fR,
 or alias entries match.
 .sp
-For example:
+For example, the following
+\fIsudoers\fR
+entry:
+.nf
+.sp
+.RS 6n
+Defaults@somehost set_home, env_keep += DISPLAY
+.RE
+.fi
+.RS 6n
+.sp
+converts to:
 .nf
 .sp
 .RS 6n
@@ -563,24 +604,25 @@ For example:
             { "hostname": "somehost" }
         ],
         "Options": [
-            { "set_home": true }
+            { "set_home": true },
+            {
+                "operation": "list_add",
+                "env_keep": [
+                    "DISPLAY"
+                ]
+            }
         ]
     }
 ]
 .RE
 .fi
-.RS 6n
-.sp
-will enable the
-\fIset_home\fR
-option when the local host name matches
-\fIsomehost\fR.
 .RE
 .TP 6n
 User_Aliases
 A JSON object containing one or more
 \fIsudoers\fR
-User_Alias entries where each named alias has as its value an array
+\fIUser_Alias\fR
+entries where each named alias has as its value an array
 containing one or more objects.
 Each object contains a
 \(lqname:value\(rq
@@ -598,7 +640,18 @@ The name may be one of
 or
 \fIusername\fR.
 .sp
-For example:
+For example, the following
+\fIsudoers\fR
+entry:
+.nf
+.sp
+.RS 6n
+User_Alias SYSADMIN = will, %wheel, +admin
+.RE
+.fi
+.RS 6n
+.sp
+converts to:
 .nf
 .sp
 .RS 6n
@@ -611,23 +664,12 @@ For example:
 }
 .RE
 .fi
-.RS 6n
-.sp
-will define a
-\fIUser_Alias\fR
-named SYSADMIN that contains the user
-\(lqwill\(rq,
-the Unix group
-\(lqwheel\(rq,
-and the netgroup
-\(lqadmin\(rq.
 .RE
 .TP 6n
 Runas_Aliases
 A JSON object containing one or more
 \fIsudoers\fR
-.TP 6n
-Runas_Alias
+\fIRunas_Alias\fR
 entries, where each named alias has as its value an array
 containing one or more objects.
 Each object contains a
@@ -646,7 +688,18 @@ The name may be one of
 or
 \fIusername\fR.
 .sp
-For example:
+For example, the following
+\fIsudoers\fR
+entry:
+.nf
+.sp
+.RS 6n
+Runas_Alias DB = oracle, sybase : OP = root, operator
+.RE
+.fi
+.RS 6n
+.sp
+converts to:
 .nf
 .sp
 .RS 6n
@@ -662,14 +715,6 @@ For example:
 }
 .RE
 .fi
-.RS 6n
-.sp
-will define two
-\fIRunas_Alias\fR
-entries:
-\(lqDB\(rq
-and
-\(lqOP\(rq.
 .RE
 .TP 6n
 Host_Aliases
@@ -690,7 +735,19 @@ The name may be one of
 or
 \fInetworkaddr\fR.
 .sp
-For example:
+For example, the following
+\fIsudoers\fR
+entries:
+.nf
+.sp
+.RS 6n
+Host_Alias DORMNET = 128.138.243.0, 128.138.204.0/24
+Host_Alias SERVERS = boulder, refuge
+.RE
+.fi
+.RS 6n
+.sp
+convert to:
 .nf
 .sp
 .RS 6n
@@ -706,6 +763,7 @@ For example:
 }
 .RE
 .fi
+.RE
 .TP 6n
 Cmnd_Aliases
 A JSON object containing one or more
@@ -722,7 +780,20 @@ The name may be either another
 \fIcmndalias\fR
 or a
 \fIcommand\fR.
-For example:
+For example, the following
+\fIsudoers\fR
+entries:
+.nf
+.sp
+.RS 6n
+Cmnd_Alias SHELLS = /bin/bash, /bin/csh, /bin/sh, /bin/zsh
+Cmnd_Alias VIPW = /usr/bin/chpass, /usr/bin/chfn, /usr/bin/chsh, \e
+                  /usr/bin/passwd, /usr/sbin/vigr, /usr/sbin/vipw
+.RE
+.fi
+.RS 6n
+.sp
+convert to:
 .nf
 .sp
 .RS 6n
@@ -744,6 +815,7 @@ For example:
 }
 .RE
 .fi
+.RE
 .TP 6n
 User_Specs
 A JSON array containing one or more objects, each representing a
@@ -1029,12 +1101,12 @@ setting.
 operator
 The operator determines how the value is applied to the setting.
 It may be either
-\(lq=\(rq
+\(oq=\(cq
 (assignment),
-\(lq+=\(rq
+\(oq+=\(cq
 (append),
 or
-\(lq-=\(rq
+\(oq-=\(cq
 (remove).
 .TP 10n
 value

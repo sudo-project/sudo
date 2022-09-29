@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 13, 2022
+.Dd September 29, 2022
 .Dt CVTSUDOERS 1
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -469,7 +469,33 @@ An array of objects, each containing an
 array and an optional
 .Em Binding
 array.
-Each object contains a
+.Pp
+The
+.Em Options
+array consists of one or more objects, each containing a
+.Dq name:value
+pair that corresponds to a
+.Em sudoers
+.Em Defaults
+setting.
+.Em Options
+that operate on a list will also include an
+.Em operation
+entry in the object, with a value of
+.Dq list_assign
+for
+.Ql = ,
+.Dq list_add
+for
+.Ql += ,
+or
+.Dq list_remove
+for
+.Ql -= .
+.Pp
+The optional
+.Em Binding
+array consists of one or more objects, each containing a
 .Dq name:value
 pair and an optional
 .Em negated
@@ -479,13 +505,24 @@ If a
 is present, the setting will only take effect if one of the specified
 .Em command ,
 .Em hostname ,
+.Em netgroup ,
+.Em networkaddr ,
+.Em nonunixgid ,
+.Em nonunixgroup ,
 .Em usergid ,
 .Em usergroup ,
 .Em userid ,
 .Em username ,
 or alias entries match.
 .Pp
-For example:
+For example, the following
+.Em sudoers
+entry:
+.Bd -literal
+Defaults@somehost set_home, env_keep += DISPLAY
+.Ed
+.Pp
+converts to:
 .Bd -literal
 "Defaults": [
     {
@@ -493,20 +530,22 @@ For example:
             { "hostname": "somehost" }
         ],
         "Options": [
-            { "set_home": true }
+            { "set_home": true },
+            {
+                "operation": "list_add",
+                "env_keep": [
+                    "DISPLAY"
+                ]
+            }
         ]
     }
 ]
 .Ed
-.Pp
-will enable the
-.Em set_home
-option when the local host name matches
-.Em somehost .
 .It User_Aliases
 A JSON object containing one or more
 .Em sudoers
-User_Alias entries where each named alias has as its value an array
+.Em User_Alias
+entries where each named alias has as its value an array
 containing one or more objects.
 Each object contains a
 .Dq name:value
@@ -524,7 +563,14 @@ The name may be one of
 or
 .Em username .
 .Pp
-For example:
+For example, the following
+.Em sudoers
+entry:
+.Bd -literal
+User_Alias SYSADMIN = will, %wheel, +admin
+.Ed
+.Pp
+converts to:
 .Bd -literal
 "User_Aliases": {
     "SYSADMIN": [
@@ -534,19 +580,10 @@ For example:
     ]
 }
 .Ed
-.Pp
-will define a
-.Em User_Alias
-named SYSADMIN that contains the user
-.Dq will ,
-the Unix group
-.Dq wheel ,
-and the netgroup
-.Dq admin .
 .It Runas_Aliases
 A JSON object containing one or more
 .Em sudoers
-.It Runas_Alias
+.Em Runas_Alias
 entries, where each named alias has as its value an array
 containing one or more objects.
 Each object contains a
@@ -565,7 +602,14 @@ The name may be one of
 or
 .Em username .
 .Pp
-For example:
+For example, the following
+.Em sudoers
+entry:
+.Bd -literal
+Runas_Alias DB = oracle, sybase : OP = root, operator
+.Ed
+.Pp
+converts to:
 .Bd -literal
 "Runas_Aliases": {
     "DB": [
@@ -578,13 +622,6 @@ For example:
     ]
 }
 .Ed
-.Pp
-will define two
-.Em Runas_Alias
-entries:
-.Dq DB
-and
-.Dq OP .
 .It Host_Aliases
 A JSON object containing one or more
 .Em sudoers
@@ -603,7 +640,15 @@ The name may be one of
 or
 .Em networkaddr .
 .Pp
-For example:
+For example, the following
+.Em sudoers
+entries:
+.Bd -literal
+Host_Alias DORMNET = 128.138.243.0, 128.138.204.0/24
+Host_Alias SERVERS = boulder, refuge
+.Ed
+.Pp
+convert to:
 .Bd -literal
 "Host_Aliases": {
     "DORMNET": [
@@ -631,7 +676,16 @@ The name may be either another
 .Em cmndalias
 or a
 .Em command .
-For example:
+For example, the following
+.Em sudoers
+entries:
+.Bd -literal
+Cmnd_Alias SHELLS = /bin/bash, /bin/csh, /bin/sh, /bin/zsh
+Cmnd_Alias VIPW = /usr/bin/chpass, /usr/bin/chfn, /usr/bin/chsh, \e
+                  /usr/bin/passwd, /usr/sbin/vigr, /usr/sbin/vipw
+.Ed
+.Pp
+convert to:
 .Bd -literal
 "Cmnd_Aliases": {
     "SHELLS": [
@@ -913,12 +967,12 @@ setting.
 .It operator
 The operator determines how the value is applied to the setting.
 It may be either
-.Dq =
+.Ql =
 (assignment),
-.Dq +=
+.Ql +=
 (append),
 or
-.Dq -=
+.Ql -=
 (remove).
 .It value
 The setting's value, usually a string or, for
