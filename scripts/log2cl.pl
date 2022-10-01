@@ -17,7 +17,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 # Simple script to massage "git log" output into a GNU style ChangeLog.
-# The goal is to emulate "hg log --style=changelog" via perl format.
+# The goal is to emulate "hg log --template=changelog" via perl format.
 
 use Getopt::Std;
 use Text::Wrap;
@@ -46,7 +46,7 @@ my $key_date = "";
 my $log_size = 0;
 my @lines;
 
-# Wrap like "hg log --style=changelog"
+# Wrap like "hg log --template=changelog"
 $Text::Wrap::columns = 77;
 
 while (<LOG>) {
