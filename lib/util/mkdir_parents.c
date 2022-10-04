@@ -106,18 +106,18 @@ sudo_open_parent_dir_v1(const char *path, uid_t uid, gid_t gid, mode_t mode,
 
     /* Iterate over path components, skipping the last one. */
     pathend = cp + strlen(cp);
-    for (cp = sudo_strsplit(cp, pathend, "/", &ep); cp != NULL && ep != NULL;
+    for (cp = sudo_strsplit(cp, pathend, "/", &ep); cp != NULL && *ep != '\0';
 	cp = sudo_strsplit(NULL, pathend, "/", &ep)) {
 	size_t len = (size_t)(ep - cp);
 	int dfd;
 
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	    "mkdir %.*s, mode 0%o, uid %d, gid %d", (int)len, path,
+	    "mkdir %.*s, mode 0%o, uid %d, gid %d", (int)(ep - path), path,
 	    (unsigned int)mode, (int)uid, (int)gid);
 	if (len >= sizeof(name)) {
 	    errno = ENAMETOOLONG;
 	    if (!quiet)
-		sudo_warn(U_("unable to open %.*s"), (int)len, path);
+		sudo_warn(U_("unable to mkdir %.*s"), (int)(ep - path), path);
 	    goto bad;
 	}
 	memcpy(name, cp, len);
