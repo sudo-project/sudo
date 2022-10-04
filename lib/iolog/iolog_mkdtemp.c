@@ -79,12 +79,13 @@ iolog_mkdtemp(char *path)
 	    ok = false;
 	} else {
 	    if (chmod(path, iolog_dirmode) != 0) {
+		/* Not a fatal error, pre-existing mode is 0700. */
 		sudo_warn(U_("unable to change mode of %s to 0%o"),
 		    path, (unsigned int)iolog_dirmode);
 	    }
+	    ok = true;
 	}
 	close(dfd);
-	ok = true;
     }
 
     umask(omask);
