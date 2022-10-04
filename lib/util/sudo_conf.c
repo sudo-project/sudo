@@ -681,30 +681,31 @@ sudo_conf_read_v1(const char *conf_file, int conf_types)
 	int error;
 	conf_file = _PATH_SUDO_CONF;
 	fd = sudo_secure_open_file(conf_file, ROOT_UID, -1, &sb, &error);
-	switch (error) {
-	case SUDO_PATH_SECURE:
-	    break;
-	case SUDO_PATH_MISSING:
-	    /* Root should always be able to read sudo.conf. */
-	    if (errno != ENOENT && geteuid() == ROOT_UID)
-		sudo_warn(U_("unable to open %s"), conf_file);
-	    goto done;
-	case SUDO_PATH_BAD_TYPE:
-	    sudo_warnx(U_("%s is not a regular file"), conf_file);
-	    goto done;
-	case SUDO_PATH_WRONG_OWNER:
-	    sudo_warnx(U_("%s is owned by uid %u, should be %u"),
-		conf_file, (unsigned int) sb.st_uid, ROOT_UID);
-	    goto done;
-	case SUDO_PATH_WORLD_WRITABLE:
-	    sudo_warnx(U_("%s is world writable"), conf_file);
-	    goto done;
-	case SUDO_PATH_GROUP_WRITABLE:
-	    sudo_warnx(U_("%s is group writable"), conf_file);
-	    goto done;
-	default:
-	    sudo_warnx("%s: internal error, unexpected error %d",
-		__func__, error);
+	if (fd == -1) {
+	    switch (error) {
+	    case SUDO_PATH_MISSING:
+		/* Root should always be able to read sudo.conf. */
+		if (errno != ENOENT && geteuid() == ROOT_UID)
+		    sudo_warn(U_("unable to open %s"), conf_file);
+		break;
+	    case SUDO_PATH_BAD_TYPE:
+		sudo_warnx(U_("%s is not a regular file"), conf_file);
+		break;
+	    case SUDO_PATH_WRONG_OWNER:
+		sudo_warnx(U_("%s is owned by uid %u, should be %u"),
+		    conf_file, (unsigned int) sb.st_uid, ROOT_UID);
+		break;
+	    case SUDO_PATH_WORLD_WRITABLE:
+		sudo_warnx(U_("%s is world writable"), conf_file);
+		break;
+	    case SUDO_PATH_GROUP_WRITABLE:
+		sudo_warnx(U_("%s is group writable"), conf_file);
+		break;
+	    default:
+		sudo_warnx("%s: internal error, unexpected error %d",
+		    __func__, error);
+		break;
+	    }
 	    goto done;
 	}
     }

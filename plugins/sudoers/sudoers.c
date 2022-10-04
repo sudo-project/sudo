@@ -1104,28 +1104,28 @@ open_sudoers(const char *file, bool doedit, bool *keepopen)
 
 again:
     fd = sudo_secure_open_file(file, sudoers_uid, sudoers_gid, &sb, &error);
-    switch (error) {
-	case SUDO_PATH_SECURE:
-	    /*
-	     * Make sure we can read the file so we can present the
-	     * user with a reasonable error message (unlike the lexer).
-	     */
-	    if ((fp = fdopen(fd, "r")) == NULL) {
-		log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), file);
-		close(fd);
+    if (fd != -1) {
+	/*
+	 * Make sure we can read the file so we can present the
+	 * user with a reasonable error message (unlike the lexer).
+	 */
+	if ((fp = fdopen(fd, "r")) == NULL) {
+	    log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), file);
+	    close(fd);
+	} else {
+	    if (sb.st_size != 0 && fgetc(fp) == EOF) {
+		log_warning(SLOG_SEND_MAIL,
+		    N_("unable to read %s"), file);
+		fclose(fp);
+		fp = NULL;
 	    } else {
-		if (sb.st_size != 0 && fgetc(fp) == EOF) {
-		    log_warning(SLOG_SEND_MAIL,
-			N_("unable to read %s"), file);
-		    fclose(fp);
-		    fp = NULL;
-		} else {
-		    /* Rewind fp and set close on exec flag. */
-		    rewind(fp);
-		    (void) fcntl(fileno(fp), F_SETFD, 1);
-		}
+		/* Rewind fp and set close on exec flag. */
+		rewind(fp);
+		(void) fcntl(fileno(fp), F_SETFD, 1);
 	    }
-	    break;
+	}
+    } else {
+	switch (error) {
 	case SUDO_PATH_MISSING:
 	    /*
 	     * If we tried to open sudoers as non-root but got EACCES,
@@ -1160,8 +1160,10 @@ again:
 		(unsigned int) sb.st_gid, (unsigned int) sudoers_gid);
 	    break;
 	default:
-	    /* NOTREACHED */
+	    sudo_warnx("%s: internal error, unexpected error %d",
+		__func__, error);
 	    break;
+	}
     }
 
     if (!restore_perms()) {

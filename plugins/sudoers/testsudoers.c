@@ -448,31 +448,35 @@ open_sudoers(const char *file, bool doedit, bool *keepopen)
     /* Report errors using the basename for consistent test output. */
     base = sudo_basename(file);
     fd = sudo_secure_open_file(file, sudoers_uid, sudoers_gid, &sb, &error);
-    switch (error) {
-    case SUDO_PATH_SECURE:
-	if ((fp = fdopen(fd, "r")) == NULL)
+    if (fd != -1) {
+	if ((fp = fdopen(fd, "r")) == NULL) {
+	    sudo_warn("unable to open %s", base);
 	    close(fd);
-	break;
-    case SUDO_PATH_MISSING:
-	sudo_warn("unable to open %s", base);
-	break;
-    case SUDO_PATH_BAD_TYPE:
-	sudo_warnx("%s is not a regular file", base);
-	break;
-    case SUDO_PATH_WRONG_OWNER:
-	sudo_warnx("%s should be owned by uid %u",
-	    base, (unsigned int) sudoers_uid);
-	break;
-    case SUDO_PATH_WORLD_WRITABLE:
-	sudo_warnx("%s is world writable", base);
-	break;
-    case SUDO_PATH_GROUP_WRITABLE:
-	sudo_warnx("%s should be owned by gid %u",
-	    base, (unsigned int) sudoers_gid);
-	break;
-    default:
-	/* NOTREACHED */
-	break;
+	}
+    } else {
+	switch (error) {
+	case SUDO_PATH_MISSING:
+	    sudo_warn("unable to open %s", base);
+	    break;
+	case SUDO_PATH_BAD_TYPE:
+	    sudo_warnx("%s is not a regular file", base);
+	    break;
+	case SUDO_PATH_WRONG_OWNER:
+	    sudo_warnx("%s should be owned by uid %u",
+		base, (unsigned int) sudoers_uid);
+	    break;
+	case SUDO_PATH_WORLD_WRITABLE:
+	    sudo_warnx("%s is world writable", base);
+	    break;
+	case SUDO_PATH_GROUP_WRITABLE:
+	    sudo_warnx("%s should be owned by gid %u",
+		base, (unsigned int) sudoers_gid);
+	    break;
+	default:
+	    sudo_warnx("%s: internal error, unexpected error %d",
+		__func__, error);
+	    break;
+	}
     }
 
     debug_return_ptr(fp);
