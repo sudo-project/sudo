@@ -89,8 +89,10 @@ command_args_match(const char *sudoers_cmnd, const char *sudoers_args)
      * If no args specified in sudoers, any user args are allowed.
      * If the empty string is specified in sudoers, no user args are allowed.
      */
-    if (!sudoers_args || (!user_args && !strcmp("\"\"", sudoers_args)))
+    if (sudoers_args == NULL)
 	debug_return_bool(true);
+    if (strcmp("\"\"", sudoers_args) == 0)
+	debug_return_bool(user_args ? false : true);
 
     /*
      * If args are specified in sudoers, they must match the user args.
