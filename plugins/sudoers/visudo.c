@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2018
+ * Copyright (c) 1996, 1998-2005, 2007-2022
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -109,13 +109,15 @@ struct sudo_user sudo_user;
 struct passwd *list_pw;
 static struct sudoersfile_list sudoerslist = TAILQ_HEAD_INITIALIZER(sudoerslist);
 static bool checkonly;
+static bool edit_includes = true;
 static unsigned int errors;
-static const char short_opts[] =  "cf:hOPqsVx:";
+static const char short_opts[] =  "cf:hIOPqsVx:";
 static struct option long_opts[] = {
     { "check",		no_argument,		NULL,	'c' },
     { "export",		required_argument,	NULL,	'x' },
     { "file",		required_argument,	NULL,	'f' },
     { "help",		no_argument,		NULL,	'h' },
+    { "no-includes",	no_argument,		NULL,	'I' },
     { "owner",		no_argument,		NULL,	'O' },
     { "perms",		no_argument,		NULL,	'P' },
     { "quiet",		no_argument,		NULL,	'q' },
@@ -191,6 +193,9 @@ main(int argc, char *argv[])
 		break;
 	    case 'h':
 		help();
+		break;
+	    case 'I':
+		edit_includes = false;
 		break;
 	    case 'O':
 		use_owner = true;	/* check/set owner */
@@ -1087,6 +1092,11 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
 	    break;
     }
     if (entry == NULL) {
+	if (doedit && !edit_includes) {
+	    /* Only edit the main sudoers file. */
+	    if (strcmp(path, sudoers_file) != 0)
+		doedit = false;
+	}
 	if ((entry = new_sudoers(path, doedit)) == NULL)
 	    debug_return_ptr(NULL);
 	if ((fp = fdopen(entry->fd, "r")) == NULL)
@@ -1233,6 +1243,7 @@ help(void)
 	"  -c, --check              check-only mode\n"
 	"  -f, --file=sudoers       specify sudoers file location\n"
 	"  -h, --help               display help message and exit\n"
+	"  -I, --no-includes        do not edit include files\n"
 	"  -q, --quiet              less verbose (quiet) syntax error messages\n"
 	"  -s, --strict             strict syntax checking\n"
 	"  -V, --version            display version information and exit\n"));
