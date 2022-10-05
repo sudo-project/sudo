@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010, 2012-2014 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010, 2012-2014, 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,6 +22,10 @@
  */
 
 #include <config.h>
+
+#ifdef __linux__
+# include <sys/utsname.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -169,6 +173,58 @@ sudo_dso_strerror_v1(void)
 #  endif
 # endif
 
+# if defined(__linux__)
+/* 
+ * On Linux systems that use muti-arch, the actual DSO may be
+ * in a machine-specific subdirectory.  If the specified path
+ * contains /lib/ or /libexec/, insert a multi-arch directory
+ * after it.
+ */
+static void *
+dlopen_multi_arch(const char *path, int flags)
+{
+#  if defined(__ILP32__)
+    const char *libdirs[] = { "/libx32/", "/lib/", "/libexec/", NULL };
+#  elif defined(__LP64__)
+    const char *libdirs[] = { "/lib64/", "/lib/", "/libexec/", NULL };
+#  else
+    const char *libdirs[] = { "/lib32/", "/lib/", "/libexec/", NULL };
+#  endif
+    const char **lp, *lib, *slash;
+    struct utsname unamebuf;
+    void *ret = NULL;
+    struct stat sb;
+    char *newpath;
+    int len;
+
+    /* Only try multi-arch if the original path does not exist.  */
+    if (stat(path, &sb) == -1 && errno == ENOENT && uname(&unamebuf) == 0) {
+	for (lp = libdirs; *lp != NULL; lp++) {
+	    /* Replace lib64, lib32, libx32 with lib in new path. */
+	    const char *newlib = lp == libdirs ? "/lib/" : *lp;
+
+	    /* Search for lib dir in path, find the trailing slash. */
+	    lib = strstr(path, *lp);
+	    if (lib == NULL)
+		continue;
+	    slash = lib + strlen(*lp) - 1;
+
+	    /* Add machine-linux-gnu dir after /lib/ or /libexec/. */
+	    len = asprintf(&newpath, "%.*s%s%s-linux-gnu%s",
+		(int)(lib - path), path, newlib, unamebuf.machine, slash);
+	    if (len == -1)
+		break;
+	    if (stat(newpath, &sb) == 0)
+		ret = dlopen(newpath, flags);
+	    free(newpath);
+	    if (ret != NULL)
+		break;
+	}
+    }
+    return ret;
+}
+#endif /* __linux__ */
+
 void *
 sudo_dso_load_v1(const char *path, int mode)
 {
@@ -207,7 +263,7 @@ sudo_dso_load_v1(const char *path, int mode)
     }
 #endif /* RTLD_MEMBER */
     ret = dlopen(path, flags);
-#ifdef RTLD_MEMBER
+#if defined(RTLD_MEMBER)
     /*
      * If we try to dlopen() an AIX .a file without an explicit member
      * it will fail with ENOEXEC.  Try again using the default member.
@@ -222,6 +278,10 @@ sudo_dso_load_v1(const char *path, int mode)
 	    ret = dlopen(path, flags);
 	}
     }
+#elif defined(__linux__)
+    /* On failure, try again with a muti-arch path where possible. */
+    if (ret == NULL)
+	ret = dlopen_multi_arch(path, flags);
 #endif /* RTLD_MEMBER */
 
     return ret;
