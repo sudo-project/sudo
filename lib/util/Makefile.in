@@ -112,9 +112,9 @@ PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
 
 # Regression tests
 TEST_PROGS = conf_test hltq_test parseln_test progname_test \
+	     parse_gids_test getgids getgrouplist_test open_parent_dir_test \
 	     strsplit_test strtobool_test strtoid_test strtomode_test \
-	     strtonum_test parse_gids_test getgids getgrouplist_test \
-	     uuid_test @COMPAT_TEST_PROGS@
+	     strtonum_test uuid_test @COMPAT_TEST_PROGS@
 TEST_LIBS = @LIBS@
 TEST_LDFLAGS = @LDFLAGS@
 TEST_VERBOSE =
@@ -171,6 +171,8 @@ FNM_TEST_OBJS = fnm_test.lo fnmatch.lo
 GLOBTEST_OBJS = globtest.lo glob.lo
 
 GETDELIM_TEST_OBJS = getdelim_test.lo getdelim.lo
+
+OPEN_PARENT_DIR_TEST_OBJS = open_parent_dir_test.lo mkdir_parents.lo
 
 STRTOBOOL_TEST_OBJS = strtobool_test.lo strtobool.lo
 
@@ -282,6 +284,9 @@ hltq_test: $(HLTQ_TEST_OBJS) libsudo_util.la
 
 mktemp_test: $(MKTEMP_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(MKTEMP_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+
+open_parent_dir_test: $(OPEN_PARENT_DIR_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(OPEN_PARENT_DIR_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 parseln_test: $(PARSELN_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(PARSELN_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
@@ -455,6 +460,7 @@ check: $(TEST_PROGS) check-fuzzer
 		./strsig_test || rval=`expr $$rval + $$?`; \
 	    fi; \
 	    ./getgrouplist_test || rval=`expr $$rval + $$?`; \
+	    ./open_parent_dir_test || rval=`expr $$rval + $$?`; \
 	    ./strtobool_test || rval=`expr $$rval + $$?`; \
 	    ./strtoid_test || rval=`expr $$rval + $$?`; \
 	    ./strtomode_test || rval=`expr $$rval + $$?`; \
@@ -1115,6 +1121,20 @@ nanosleep.i: $(srcdir)/nanosleep.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 nanosleep.plog: nanosleep.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/nanosleep.c --i-file $< --output-file $@
+open_parent_dir_test.lo: \
+                         $(srcdir)/regress/open_parent_dir/open_parent_dir_test.c \
+                         $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                         $(incdir)/sudo_fatal.h $(incdir)/sudo_plugin.h \
+                         $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/open_parent_dir/open_parent_dir_test.c
+open_parent_dir_test.i: \
+                         $(srcdir)/regress/open_parent_dir/open_parent_dir_test.c \
+                         $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                         $(incdir)/sudo_fatal.h $(incdir)/sudo_plugin.h \
+                         $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+open_parent_dir_test.plog: open_parent_dir_test.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/open_parent_dir/open_parent_dir_test.c --i-file $< --output-file $@
 openat.lo: $(srcdir)/openat.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/openat.c
 openat.i: $(srcdir)/openat.c $(incdir)/sudo_compat.h $(top_builddir)/config.h

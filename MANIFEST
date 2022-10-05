@@ -280,6 +280,7 @@ lib/util/regress/glob/globtest.c
 lib/util/regress/glob/globtest.in
 lib/util/regress/harness.in
 lib/util/regress/mktemp/mktemp_test.c
+lib/util/regress/open_parent_dir/open_parent_dir_test.c
 lib/util/regress/parse_gids/parse_gids_test.c
 lib/util/regress/progname/progname_test.c
 lib/util/regress/strsig/strsig_test.c
