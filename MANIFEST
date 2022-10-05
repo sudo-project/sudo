@@ -1020,6 +1020,8 @@ plugins/sudoers/regress/testsudoers/test17.out.ok
 plugins/sudoers/regress/testsudoers/test17.sh
 plugins/sudoers/regress/testsudoers/test18.out.ok
 plugins/sudoers/regress/testsudoers/test18.sh
+plugins/sudoers/regress/testsudoers/test19.out.ok
+plugins/sudoers/regress/testsudoers/test19.sh
 plugins/sudoers/regress/testsudoers/test2.inc
 plugins/sudoers/regress/testsudoers/test2.out.ok
 plugins/sudoers/regress/testsudoers/test2.sh

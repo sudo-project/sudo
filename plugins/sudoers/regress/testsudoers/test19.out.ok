@@ -1,0 +1,20 @@
+Parses OK
+
+Entries for user root:
+
+ALL = /bin/ls ""
+	host  matched
+	runas matched
+	cmnd  allowed
+
+Command allowed
+Parses OK
+
+Entries for user root:
+
+ALL = /bin/ls ""
+	host  matched
+	runas matched
+	cmnd  unmatched
+
+Command unmatched
