@@ -470,7 +470,7 @@ display_priv_short(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
     debug_decl(display_priv_short, SUDOERS_DEBUG_PARSER);
 
     TAILQ_FOREACH(priv, &us->privileges, entries) {
-	struct cmndspec *cs, *prev_cs = NULL;
+	struct cmndspec *cs;
 	struct cmndtag tags;
 
 	if (hostlist_matches(parse_tree, pw, &priv->hostlist) != ALLOW)
@@ -478,11 +478,13 @@ display_priv_short(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 
 	sudoers_defaults_list_to_tags(&priv->defaults, &tags);
 	TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
-	    /* Start a new line if RunAs changes. */
+	    struct cmndspec *prev_cs = TAILQ_PREV(cs, cmndspec_list, entries);
+
 	    if (prev_cs == NULL || RUNAS_CHANGED(cs, prev_cs)) {
 		struct member *m;
 
-		if (cs != TAILQ_FIRST(&priv->cmndlist))
+		/* Start new line, first entry or RunAs changed. */
+		if (prev_cs != NULL)
 		    sudo_lbuf_append(lbuf, "\n");
 		sudo_lbuf_append(lbuf, "    (");
 		if (cs->runasuserlist != NULL) {
@@ -507,11 +509,13 @@ display_priv_short(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 		    }
 		}
 		sudo_lbuf_append(lbuf, ") ");
-	    } else if (cs != TAILQ_FIRST(&priv->cmndlist)) {
+		sudoers_format_cmndspec(lbuf, parse_tree, cs, NULL, tags, true);
+	    } else {
+		/* Continue existing line. */
 		sudo_lbuf_append(lbuf, ", ");
+		sudoers_format_cmndspec(lbuf, parse_tree, cs, prev_cs, tags,
+		    true);
 	    }
-	    sudoers_format_cmndspec(lbuf, parse_tree, cs, prev_cs, tags, true);
-	    prev_cs = cs;
 	    nfound++;
 	}
 	sudo_lbuf_append(lbuf, "\n");
