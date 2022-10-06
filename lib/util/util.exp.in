@@ -131,6 +131,7 @@ sudo_secure_file_v1
 sudo_secure_open_dir_v1
 sudo_secure_open_file_v1
 sudo_setgroups_v1
+sudo_stat_multiarch_v1
 sudo_str2logfac_v1
 sudo_str2logpri_v1
 sudo_strsplit_v1

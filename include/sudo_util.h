@@ -262,6 +262,10 @@ sudo_dso_public void sudo_mmap_free_v1(void *ptr);
 sudo_dso_public int sudo_mmap_protect_v1(void *ptr);
 #define sudo_mmap_protect(_a) sudo_mmap_protect_v1(_a)
 
+/* multiarch.c */
+sudo_dso_public char *sudo_stat_multiarch_v1(const char *path, struct stat *sb);
+#define sudo_stat_multiarch(_a, _b) sudo_stat_multiarch_v1((_a), (_b))
+
 /* parseln.c */
 sudo_dso_public ssize_t sudo_parseln_v1(char **buf, size_t *bufsize, unsigned int *lineno, FILE *fp);
 sudo_dso_public ssize_t sudo_parseln_v2(char **buf, size_t *bufsize, unsigned int *lineno, FILE *fp, int flags);

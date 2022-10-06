@@ -39,6 +39,7 @@
 
 #include "sudo_compat.h"
 #include "sudo_dso.h"
+#include "sudo_util.h"
 
 /*
  * Pointer for statically compiled symbols.
@@ -183,47 +184,27 @@ sudo_dso_strerror_v1(void)
 static void *
 dlopen_multi_arch(const char *path, int flags)
 {
-#  if defined(__ILP32__)
-    const char *libdirs[] = { "/libx32/", "/lib/", "/libexec/", NULL };
-#  elif defined(__LP64__)
-    const char *libdirs[] = { "/lib64/", "/lib/", "/libexec/", NULL };
-#  else
-    const char *libdirs[] = { "/lib32/", "/lib/", "/libexec/", NULL };
-#  endif
-    const char **lp, *lib, *slash;
-    struct utsname unamebuf;
     void *ret = NULL;
     struct stat sb;
     char *newpath;
-    int len;
 
     /* Only try multi-arch if the original path does not exist.  */
-    if (stat(path, &sb) == -1 && errno == ENOENT && uname(&unamebuf) == 0) {
-	for (lp = libdirs; *lp != NULL; lp++) {
-	    /* Replace lib64, lib32, libx32 with lib in new path. */
-	    const char *newlib = lp == libdirs ? "/lib/" : *lp;
-
-	    /* Search for lib dir in path, find the trailing slash. */
-	    lib = strstr(path, *lp);
-	    if (lib == NULL)
-		continue;
-	    slash = lib + strlen(*lp) - 1;
-
-	    /* Add machine-linux-gnu dir after /lib/ or /libexec/. */
-	    len = asprintf(&newpath, "%.*s%s%s-linux-gnu%s",
-		(int)(lib - path), path, newlib, unamebuf.machine, slash);
-	    if (len == -1)
-		break;
-	    if (stat(newpath, &sb) == 0)
-		ret = dlopen(newpath, flags);
+    if (stat(path, &sb) == -1 && errno == ENOENT) {
+	newpath = sudo_stat_multiarch(path, &sb);
+	if (newpath != NULL) {
+	    ret = dlopen(newpath, flags);
 	    free(newpath);
-	    if (ret != NULL)
-		break;
 	}
     }
     return ret;
 }
-#endif /* __linux__ */
+# else
+static void *
+dlopen_multi_arch(const char *path, int flags)
+{
+    return NULL;
+}
+# endif /* __linux__ */
 
 void *
 sudo_dso_load_v1(const char *path, int mode)
@@ -231,9 +212,9 @@ sudo_dso_load_v1(const char *path, int mode)
     struct sudo_preload_table *pt;
     int flags = 0;
     void *ret;
-#ifdef RTLD_MEMBER
+# ifdef RTLD_MEMBER
     char *cp;
-#endif
+# endif
 
     /* Check prelinked symbols first. */
     if (preload_table != NULL) {
@@ -253,7 +234,7 @@ sudo_dso_load_v1(const char *path, int mode)
     if (ISSET(mode, SUDO_DSO_LOCAL))
 	SET(flags, RTLD_LOCAL);
 
-#ifdef RTLD_MEMBER
+# ifdef RTLD_MEMBER
     /* Check for AIX path(module) syntax and add RTLD_MEMBER for a module. */
     cp = strrchr(path, '(');
     if (cp != NULL) {
@@ -261,9 +242,9 @@ sudo_dso_load_v1(const char *path, int mode)
 	if (len > 2 && cp[len - 1] == '\0')
 	    SET(flags, RTLD_MEMBER);
     }
-#endif /* RTLD_MEMBER */
+# endif /* RTLD_MEMBER */
     ret = dlopen(path, flags);
-#if defined(RTLD_MEMBER)
+# if defined(RTLD_MEMBER)
     /*
      * If we try to dlopen() an AIX .a file without an explicit member
      * it will fail with ENOEXEC.  Try again using the default member.
@@ -278,11 +259,10 @@ sudo_dso_load_v1(const char *path, int mode)
 	    ret = dlopen(path, flags);
 	}
     }
-#elif defined(__linux__)
+# endif /* RTLD_MEMBER */
     /* On failure, try again with a muti-arch path where possible. */
     if (ret == NULL)
 	ret = dlopen_multi_arch(path, flags);
-#endif /* RTLD_MEMBER */
 
     return ret;
 }

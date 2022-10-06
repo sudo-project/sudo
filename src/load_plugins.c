@@ -43,6 +43,7 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
     size_t pathsize, struct stat *sb)
 {
     int status = -1;
+    size_t len;
     debug_decl(sudo_stat_plugin, SUDO_DEBUG_PLUGIN);
 
     if (info->path[0] == '/') {
@@ -52,8 +53,6 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 	}
 	status = stat(fullpath, sb);
     } else {
-	int len;
-
 #ifdef STATIC_SUDOERS_PLUGIN
 	/* Check static symbols. */
 	if (strcmp(info->path, SUDOERS_PLUGIN) == 0) {
@@ -77,20 +76,22 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 
 	len = snprintf(fullpath, pathsize, "%s%s", sudo_conf_plugin_dir_path(),
 	    info->path);
-	if (len < 0 || (size_t)len >= pathsize) {
+	if (len >= pathsize) {
 	    errno = ENAMETOOLONG;
 	    goto done;
 	}
-	/* Try parent dir for compatibility with old plugindir default. */
-	if ((status = stat(fullpath, sb)) != 0) {
-	    char *cp = strrchr(fullpath, '/');
-	    if (cp > fullpath + 4 && cp[-5] == '/' && cp[-4] == 's' &&
-		cp[-3] == 'u' && cp[-2] == 'd' && cp[-1] == 'o') {
-		int serrno = errno;
-		strlcpy(cp - 4, info->path, pathsize - (cp - 4 - fullpath));
-		if ((status = stat(fullpath, sb)) != 0)
-		    errno = serrno;
+	status = stat(fullpath, sb);
+    }
+    if (status == -1) {
+	char *newpath = sudo_stat_multiarch(fullpath, sb);
+	if (newpath != NULL) {
+	    len = strlcpy(fullpath, newpath, pathsize);
+	    free(newpath);
+	    if (len >= pathsize) {
+		errno = ENAMETOOLONG;
+		goto done;
 	    }
+	    status = 0;
 	}
     }
 done:
