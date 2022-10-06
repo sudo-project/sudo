@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pwd.h>
 #include <time.h>
 
 #include "sudoers.h"
@@ -51,7 +52,7 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
     switch (type) {
 	case MYSELF:
 	    sudo_lbuf_append(lbuf, "%s%s", negated ? "!" : "",
-		user_name ? user_name : "");
+		list_pw ? list_pw->pw_name : (user_name ? user_name : ""));
 	    break;
 	case ALL:
 	    if (name == NULL) {
