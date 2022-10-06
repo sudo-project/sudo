@@ -84,6 +84,21 @@ What's new in Sudo 1.9.12
    a newer version of setuptools that doesn't include "find_module" is
    found on the system.
 
+ * Fixed a bug introduced in sudo 1.9.9 where sudo_logsrvd created
+   the process ID file, usually /var/run/sudo/sudo_logsrvd.pid, as
+   a directory instead of a plain file.  The same bug could result
+   in I/O log directories that end in six or more X's being created
+   literally in addition to the name being used as a template for
+   the mkdtemp(3) function.
+
+ * Fixed a long-standing bug where a sudoers rule with a command
+   line argument of "", which indicates the command may be run with
+   no arguments, would also match a literal "" on the command line.
+   GitHub issue #182.
+
+ * Added the -I option to visudo which only edits the main sudoers
+   file.  Include files are not edited unless a syntax error is found.
+
 What's new in Sudo 1.9.11p3
 
  * Fixed "connection reset" errors on AIX when running shell scripts
