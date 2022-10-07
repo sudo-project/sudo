@@ -210,7 +210,7 @@ static struct generic_plugin *
 sudo_plugin_try_to_clone(void *so_handle, const char *symbol_name)
 {
     debug_decl(sudo_plugin_try_to_clone, SUDO_DEBUG_PLUGIN);
-    struct generic_plugin * plugin = NULL;
+    struct generic_plugin *plugin = NULL;
     plugin_clone_func *clone_func;
     char *clone_func_name = NULL;
 
@@ -219,7 +219,8 @@ sudo_plugin_try_to_clone(void *so_handle, const char *symbol_name)
         goto cleanup;
     }
 
-    clone_func = sudo_dso_findsym(so_handle, clone_func_name);
+    clone_func = (plugin_clone_func *)sudo_dso_findsym(so_handle,
+	clone_func_name);
     if (clone_func) {
         plugin = (*clone_func)();
     }
