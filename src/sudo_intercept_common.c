@@ -358,7 +358,7 @@ intercept_connect(void)
 {
     int sock = -1;
     int on = 1;
-    struct sockaddr_in sin;
+    struct sockaddr_in sin4;
     debug_decl(intercept_connect, SUDO_DEBUG_EXEC);
 
     if (intercept_port == 0) {
@@ -366,10 +366,10 @@ intercept_connect(void)
 	goto done;
     }
 
-    memset(&sin, 0, sizeof(sin));
-    sin.sin_family = AF_INET;
-    sin.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    sin.sin_port = htons(intercept_port);
+    memset(&sin4, 0, sizeof(sin4));
+    sin4.sin_family = AF_INET;
+    sin4.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    sin4.sin_port = htons(intercept_port);
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == -1) {
@@ -380,7 +380,7 @@ intercept_connect(void)
     /* Send data immediately, we need low latency IPC. */
     (void)setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on));
 
-    if (connect(sock, (struct sockaddr *)&sin, sizeof(sin)) == -1) {
+    if (connect(sock, (struct sockaddr *)&sin4, sizeof(sin4)) == -1) {
 	sudo_warn("connect");
 	close(sock);
 	sock = -1;

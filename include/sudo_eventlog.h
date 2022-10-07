@@ -132,7 +132,7 @@ bool eventlog_accept(const struct eventlog *evlog, int flags, eventlog_json_call
 bool eventlog_exit(const struct eventlog *evlog, int flags);
 bool eventlog_alert(const struct eventlog *evlog, int flags, struct timespec *alert_time, const char *reason, const char *errstr);
 bool eventlog_reject(const struct eventlog *evlog, int flags, const char *reason, eventlog_json_callback_t info_cb, void *info);
-bool eventlog_store_json(struct json_container *json, const struct eventlog *evlog);
+bool eventlog_store_json(struct json_container *jsonc, const struct eventlog *evlog);
 size_t eventlog_writeln(FILE *fp, char *line, size_t len, size_t maxlen);
 void eventlog_free(struct eventlog *evlog);
 void eventlog_set_type(int type);

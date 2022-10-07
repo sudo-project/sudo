@@ -87,7 +87,7 @@ set_random_drop(const char *dropstr)
 }
 
 static bool
-logsrvd_json_log_cb(struct json_container *json, void *v)
+logsrvd_json_log_cb(struct json_container *jsonc, void *v)
 {
     struct logsrvd_info_closure *closure = v;
     struct json_value json_value;
@@ -101,7 +101,7 @@ logsrvd_json_log_cb(struct json_container *json, void *v)
 	case INFO_MESSAGE__VALUE_NUMVAL:
 	    json_value.type = JSON_NUMBER;
 	    json_value.u.number = info->u.numval;
-	    if (!sudo_json_add_value(json, info->key, &json_value))
+	    if (!sudo_json_add_value(jsonc, info->key, &json_value))
 		goto bad;
 	    break;
 	case INFO_MESSAGE__VALUE_STRVAL:
@@ -112,7 +112,7 @@ logsrvd_json_log_cb(struct json_container *json, void *v)
 	    }
 	    json_value.type = JSON_STRING;
 	    json_value.u.string = info->u.strval;
-	    if (!sudo_json_add_value(json, info->key, &json_value))
+	    if (!sudo_json_add_value(jsonc, info->key, &json_value))
 		goto bad;
 	    break;
 	case INFO_MESSAGE__VALUE_STRLISTVAL: {
@@ -124,7 +124,7 @@ logsrvd_json_log_cb(struct json_container *json, void *v)
 		    "local", info->key);
 		break;
 	    }
-	    if (!sudo_json_open_array(json, info->key))
+	    if (!sudo_json_open_array(jsonc, info->key))
 		goto bad;
 	    for (n = 0; n < strlist->n_strings; n++) {
 		if (strlist->strings[n] == NULL) {
@@ -134,10 +134,10 @@ logsrvd_json_log_cb(struct json_container *json, void *v)
 		}
 		json_value.type = JSON_STRING;
 		json_value.u.string = strlist->strings[n];
-		if (!sudo_json_add_value(json, NULL, &json_value))
+		if (!sudo_json_add_value(jsonc, NULL, &json_value))
 		    goto bad;
 	    }
-	    if (!sudo_json_close_array(json))
+	    if (!sudo_json_close_array(jsonc))
 		goto bad;
 	    break;
 	}
@@ -150,15 +150,15 @@ logsrvd_json_log_cb(struct json_container *json, void *v)
 		    "local", info->key);
 		break;
 	    }
-	    if (!sudo_json_open_array(json, info->key))
+	    if (!sudo_json_open_array(jsonc, info->key))
 		goto bad;
 	    for (n = 0; n < numlist->n_numbers; n++) {
 		json_value.type = JSON_NUMBER;
 		json_value.u.number = numlist->numbers[n];
-		if (!sudo_json_add_value(json, NULL, &json_value))
+		if (!sudo_json_add_value(jsonc, NULL, &json_value))
 		    goto bad;
 	    }
-	    if (!sudo_json_close_array(json))
+	    if (!sudo_json_close_array(jsonc))
 		goto bad;
 	    break;
 	}
@@ -304,7 +304,7 @@ done:
 static bool
 store_exit_info_json(int dfd, struct eventlog *evlog)
 {
-    struct json_container json = { 0 };
+    struct json_container jsonc = { 0 };
     struct json_value json_value;
     struct iovec iov[3];
     bool ret = false;
@@ -312,7 +312,7 @@ store_exit_info_json(int dfd, struct eventlog *evlog)
     off_t pos;
     debug_decl(store_exit_info_json, SUDO_DEBUG_UTIL);
 
-    if (!sudo_json_init(&json, 4, false, false))
+    if (!sudo_json_init(&jsonc, 4, false, false))
         goto done;
 
     fd = iolog_openat(dfd, "log.json", O_RDWR);
@@ -327,38 +327,38 @@ store_exit_info_json(int dfd, struct eventlog *evlog)
     }
 
     if (sudo_timespecisset(&evlog->run_time)) {
-	if (!sudo_json_open_object(&json, "run_time"))
+	if (!sudo_json_open_object(&jsonc, "run_time"))
 	    goto done;
 
 	json_value.type = JSON_NUMBER;
 	json_value.u.number = evlog->run_time.tv_sec;
-	if (!sudo_json_add_value(&json, "seconds", &json_value))
+	if (!sudo_json_add_value(&jsonc, "seconds", &json_value))
 	    goto done;
 
 	json_value.type = JSON_NUMBER;
 	json_value.u.number = evlog->run_time.tv_nsec;
-	if (!sudo_json_add_value(&json, "nanoseconds", &json_value))
+	if (!sudo_json_add_value(&jsonc, "nanoseconds", &json_value))
 	    goto done;
 
-	if (!sudo_json_close_object(&json))
+	if (!sudo_json_close_object(&jsonc))
 	    goto done;
     }
 
     if (evlog->signal_name != NULL) {
 	json_value.type = JSON_STRING;
 	json_value.u.string = evlog->signal_name;
-	if (!sudo_json_add_value(&json, "signal", &json_value))
+	if (!sudo_json_add_value(&jsonc, "signal", &json_value))
 	    goto done;
 
 	json_value.type = JSON_BOOL;
 	json_value.u.boolean = evlog->dumped_core;
-	if (!sudo_json_add_value(&json, "dumped_core", &json_value))
+	if (!sudo_json_add_value(&jsonc, "dumped_core", &json_value))
 	    goto done;
     }
 
     json_value.type = JSON_NUMBER;
     json_value.u.number = evlog->exit_value;
-    if (!sudo_json_add_value(&json, "exit_value", &json_value))
+    if (!sudo_json_add_value(&jsonc, "exit_value", &json_value))
 	goto done;
 
     /* Back up to overwrite the final "\n}\n" */
@@ -372,8 +372,8 @@ store_exit_info_json(int dfd, struct eventlog *evlog)
     /* Append the exit data and close the object. */
     iov[0].iov_base = (char *)",";
     iov[0].iov_len = 1;
-    iov[1].iov_base = sudo_json_get_buf(&json);
-    iov[1].iov_len = sudo_json_get_len(&json);
+    iov[1].iov_base = sudo_json_get_buf(&jsonc);
+    iov[1].iov_len = sudo_json_get_len(&jsonc);
     iov[2].iov_base = (char *)"\n}\n";
     iov[2].iov_len = 3;
     if (writev(fd, iov, 3) == -1) {
@@ -391,7 +391,7 @@ store_exit_info_json(int dfd, struct eventlog *evlog)
 done:
     if (fd != -1)
 	close(fd);
-    sudo_json_free(&json);
+    sudo_json_free(&jsonc);
     debug_return_bool(ret);
 }
 

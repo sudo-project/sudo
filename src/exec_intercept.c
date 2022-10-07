@@ -218,8 +218,8 @@ intercept_cleanup(void)
 static bool
 prepare_listener(struct intercept_closure *closure)
 {
-    struct sockaddr_in sin;
-    socklen_t sin_len = sizeof(sin);
+    struct sockaddr_in sin4;
+    socklen_t sin4_len = sizeof(sin4);
     int sock;
     debug_decl(prepare_listener, SUDO_DEBUG_EXEC);
 
@@ -234,15 +234,15 @@ prepare_listener(struct intercept_closure *closure)
 	sudo_warn("socket");
 	goto bad;
     }
-    memset(&sin, 0, sizeof(sin));
-    sin.sin_family = AF_INET;
-    sin.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    sin.sin_port = 0;
-    if (bind(sock, (struct sockaddr *)&sin, sizeof(sin)) == -1) {
+    memset(&sin4, 0, sizeof(sin4));
+    sin4.sin_family = AF_INET;
+    sin4.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    sin4.sin_port = 0;
+    if (bind(sock, (struct sockaddr *)&sin4, sizeof(sin4)) == -1) {
 	sudo_warn("bind");
 	goto bad;
     }
-    if (getsockname(sock, (struct sockaddr *)&sin, &sin_len) == -1) {
+    if (getsockname(sock, (struct sockaddr *)&sin4, &sin4_len) == -1) {
 	sudo_warn("getsockname");
 	goto bad;
     }
@@ -252,7 +252,7 @@ prepare_listener(struct intercept_closure *closure)
     }
 
     closure->listen_sock = sock;
-    intercept_listen_port = ntohs(sin.sin_port);
+    intercept_listen_port = ntohs(sin4.sin_port);
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"%s: listening on port %hu", __func__, intercept_listen_port);
 
@@ -1012,8 +1012,8 @@ intercept_accept_cb(int fd, int what, void *v)
 {
     struct intercept_closure *closure = v;
     struct sudo_event_base *evbase = sudo_ev_get_base(&closure->ev);
-    struct sockaddr_in sin;
-    socklen_t sin_len = sizeof(sin);
+    struct sockaddr_in sin4;
+    socklen_t sin4_len = sizeof(sin4);
     int client_sock, flags, on = 1;
     debug_decl(intercept_accept_cb, SUDO_DEBUG_EXEC);
 
@@ -1026,7 +1026,7 @@ intercept_accept_cb(int fd, int what, void *v)
 	debug_return;
     }
 
-    client_sock = accept(fd, (struct sockaddr *)&sin, &sin_len);
+    client_sock = accept(fd, (struct sockaddr *)&sin4, &sin4_len);
     if (client_sock == -1) {
 	sudo_warn("accept");
 	goto bad;

@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 11, 2022
+.Dd October 7, 2022
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -67,7 +67,7 @@ struct policy_plugin {
     unsigned int type; /* always SUDO_POLICY_PLUGIN */
     unsigned int version; /* always SUDO_API_VERSION */
     int (*open)(unsigned int version, sudo_conv_t conversation,
-        sudo_printf_t plugin_printf, char * const settings[],
+        sudo_printf_t sudo_plugin_printf, char * const settings[],
         char * const user_info[], char * const user_env[],
         char * const plugin_options[], const char **errstr);
     void (*close)(int exit_status, int error);
@@ -76,9 +76,9 @@ struct policy_plugin {
         char *env_add[], char **command_info[],
         char **argv_out[], char **user_env_out[], const char **errstr);
     int (*list)(int argc, char * const argv[], int verbose,
-        const char *list_user, const char **errstr);
+        const char *user, const char **errstr);
     int (*validate)(const char **errstr);
-    void (*invalidate)(int remove);
+    void (*invalidate)(int rmcred);
     int (*init_session)(struct passwd *pwd, char **user_env[],
         const char **errstr);
     void (*register_hooks)(int version,
@@ -110,7 +110,7 @@ built against.
 .It Fa open
 .Bd -literal -compact
 int (*open)(unsigned int version, sudo_conv_t conversation,
-    sudo_printf_t plugin_printf, char * const settings[],
+    sudo_printf_t sudo_plugin_printf, char * const settings[],
     char * const user_info[], char * const user_env[],
     char * const plugin_options[], const char **errstr);
 .Ed
@@ -123,7 +123,7 @@ will print a usage message before it exits.
 If an error occurs, the plugin may optionally call the
 .Fn conversation
 or
-.Fn plugin_printf
+.Fn sudo_plugin_printf
 function with
 .Dv SUDO_CONF_ERROR_MSG
 to present additional error information to the user.
@@ -143,7 +143,7 @@ function that can be used by the plugin to interact with the user (see
 .Sx Conversation API
 for details).
 Returns 0 on success and \-1 on failure.
-.It Fa plugin_printf
+.It Fa sudo_plugin_printf
 A pointer to a
 .Fn printf Ns -style
 function that may be used to display informational or error messages (see
@@ -729,7 +729,7 @@ system call.
 The plugin is responsible for displaying error information via the
 .Fn conversation
 or
-.Fn plugin_printf
+.Fn sudo_plugin_printf
 function.
 If the command was successfully executed, the value of
 .Fa error
@@ -764,7 +764,7 @@ option.
 The plugin may display its version information to the user via the
 .Fn conversation
 or
-.Fn plugin_printf
+.Fn sudo_plugin_printf
 function using
 .Dv SUDO_CONV_INFO_MSG .
 If the user requests detailed version information, the
@@ -846,7 +846,7 @@ exits.
 If an error occurs, the plugin may optionally call the
 .Fn conversation
 or
-.Fn plugin_printf
+.Fn sudo_plugin_printf
 function with
 .Dv SUDO_CONF_ERROR_MSG
 to present additional error information to the user.
@@ -1462,7 +1462,7 @@ Failure to do so may result in a crash.
 .It Fa list
 .Bd -literal -compact
 int (*list)(int argc, char * const argv[], int verbose,
-    const char *list_user, const char **errstr);
+    const char *user, const char **errstr);
 .Ed
 .Pp
 List available privileges for the invoking user.
@@ -1470,7 +1470,7 @@ Returns 1 on success, 0 on failure, and \-1 on error.
 On error, the plugin may optionally call the
 .Fn conversation
 or
-.Fn plugin_printf
+.Fn sudo_plugin_printf
 function with
 .Dv SUDO_CONF_ERROR_MSG
 to present additional error information to
@@ -1479,7 +1479,7 @@ the user.
 Privileges should be output via the
 .Fn conversation
 or
-.Fn plugin_printf
+.Fn sudo_plugin_printf
 function using
 .Dv SUDO_CONV_INFO_MSG .
 .Pp
@@ -1503,7 +1503,7 @@ If the command is permitted by the policy, the fully-qualified path
 to the command should be displayed along with any command line arguments.
 .It Fa verbose
 Flag indicating whether to list in verbose mode or not.
-.It Fa list_user
+.It Fa user
 The name of a different user to list privileges for if the policy
 allows it.
 If
@@ -1564,7 +1564,7 @@ Returns 1 on success, 0 on failure, and \-1 on error.
 On error, the plugin may optionally call the
 .Fn conversation
 or
-.Fn plugin_printf
+.Fn sudo_plugin_printf
 function with
 .Dv SUDO_CONF_ERROR_MSG
 to present additional
@@ -1601,7 +1601,7 @@ Failure to do so may result in a crash.
 .El
 .It Fa invalidate
 .Bd -literal -compact
-void (*invalidate)(int remove);
+void (*invalidate)(int rmcred);
 .Ed
 .Pp
 The
@@ -1619,7 +1619,7 @@ that
 cache authentication credentials, this function will invalidate the
 credentials.
 If the
-.Fa remove
+.Fa rmcred
 flag is non-zero, the plugin may remove
 the credentials instead of simply invalidating them.
 .Pp
@@ -1656,7 +1656,7 @@ Returns 1 on success, 0 on failure, and \-1 on error.
 On error, the plugin may optionally call the
 .Fn conversation
 or
-.Fn plugin_printf
+.Fn sudo_plugin_printf
 function with
 .Dv SUDO_CONF_ERROR_MSG
 to present additional
@@ -1877,7 +1877,7 @@ struct io_plugin {
     unsigned int type; /* always SUDO_IO_PLUGIN */
     unsigned int version; /* always SUDO_API_VERSION */
     int (*open)(unsigned int version, sudo_conv_t conversation,
-        sudo_printf_t plugin_printf, char * const settings[],
+        sudo_printf_t sudo_plugin_printf, char * const settings[],
         char * const user_info[], char * const command_info[],
         int argc, char * const argv[], char * const user_env[],
         char * const plugin_options[], const char **errstr);
@@ -1973,7 +1973,7 @@ built against.
 .It Fa open
 .Bd -literal -compact
 int (*open)(unsigned int version, sudo_conv_t conversation,
-    sudo_printf_t plugin_printf, char * const settings[],
+    sudo_printf_t sudo_plugin_printf, char * const settings[],
     char * const user_info[], char * const command_info[],
     int argc, char * const argv[], char * const user_env[],
     char * const plugin_options[]);
@@ -2004,7 +2004,7 @@ will print a usage message before it exits.
 If an error occurs, the plugin may optionally call the
 .Fn conversation
 or
-.Fn plugin_printf
+.Fn sudo_plugin_printf
 function with
 .Dv SUDO_CONF_ERROR_MSG
 to present additional error information to the user.
@@ -2031,7 +2031,7 @@ function may also be used to display additional error message to the user.
 The
 .Fn conversation
 function returns 0 on success and \-1 on failure.
-.It Fa plugin_printf
+.It Fa sudo_plugin_printf
 A pointer to a
 .Fn printf Ns -style
 function that may be used by the
@@ -2039,10 +2039,10 @@ function that may be used by the
 function to display version information (see
 show_version below).
 The
-.Fn plugin_printf
+.Fn sudo_plugin_printf
 function may also be used to display additional error message to the user.
 The
-.Fn plugin_printf
+.Fn sudo_plugin_printf
 function returns number of characters printed on success and \-1 on failure.
 .It Fa settings
 A vector of user-supplied
@@ -2258,7 +2258,7 @@ option.
 The plugin may display its version information to the user via the
 .Fn conversation
 or
-.Fn plugin_printf
+.Fn sudo_plugin_printf
 function using
 .Dv SUDO_CONV_INFO_MSG .
 If the user requests detailed version information, the
@@ -2686,7 +2686,7 @@ struct audit_plugin {
     unsigned int type; /* always SUDO_AUDIT_PLUGIN */
     unsigned int version; /* always SUDO_API_VERSION */
     int (*open)(unsigned int version, sudo_conv_t conversation,
-        sudo_printf_t sudo_printf, char * const settings[],
+        sudo_printf_t sudo_plugin_printf, char * const settings[],
         char * const user_info[], int submit_optind,
         char * const submit_argv[], char * const submit_envp[],
         char * const plugin_options[], const char **errstr);
@@ -2739,7 +2739,7 @@ built against.
 .It Fa open
 .Bd -literal -compact
 int (*open)(unsigned int version, sudo_conv_t conversation,
-    sudo_printf_t sudo_printf, char * const settings[],
+    sudo_printf_t sudo_plugin_printf, char * const settings[],
     char * const user_info[], int submit_optind,
     char * const submit_argv[], char * const submit_envp[],
     char * const plugin_options[], const char **errstr);
@@ -3291,7 +3291,7 @@ struct approval_plugin {
     unsigned int type; /* always SUDO_APPROVAL_PLUGIN */
     unsigned int version; /* always SUDO_API_VERSION */
     int (*open)(unsigned int version, sudo_conv_t conversation,
-        sudo_printf_t sudo_printf, char * const settings[],
+        sudo_printf_t sudo_plugin_printf, char * const settings[],
         char * const user_info[], int submit_optind,
         char * const submit_argv[], char * const submit_envp[],
         char * const plugin_options[], const char **errstr);
@@ -3337,7 +3337,7 @@ built against.
 .It Fa open
 .Bd -literal -compact
 int (*open)(unsigned int version, sudo_conv_t conversation,
-    sudo_printf_t sudo_printf, char * const settings[],
+    sudo_printf_t sudo_plugin_printf, char * const settings[],
     char * const user_info[], int submit_optind,
     char * const submit_argv[], char * const submit_envp[],
     char * const plugin_options[], const char **errstr);
@@ -4446,7 +4446,7 @@ initialization, cleanup, and group lookup.
 .Bd -literal
 struct sudoers_group_plugin {
     unsigned int version;
-    int (*init)(int version, sudo_printf_t sudo_printf,
+    int (*init)(int version, sudo_printf_t sudo_plugin_printf,
         char *const argv[]);
     void (*cleanup)(void);
     int (*query)(const char *user, const char *group,
@@ -4469,7 +4469,7 @@ to determine the API version the group plugin
 was built against.
 .It Fa init
 .Bd -literal -compact
-int (*init)(int version, sudo_printf_t plugin_printf,
+int (*init)(int version, sudo_printf_t sudo_plugin_printf,
     char *const argv[]);
 .Ed
 .Pp

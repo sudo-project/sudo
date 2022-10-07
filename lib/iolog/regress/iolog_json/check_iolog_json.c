@@ -35,7 +35,7 @@
 sudo_dso_public int main(int argc, char *argv[]);
 
 static bool
-json_print_object(struct json_container *json, struct json_object *object)
+json_print_object(struct json_container *jsonc, struct json_object *object)
 {
     struct json_item *item;
     struct json_value json_value;
@@ -46,40 +46,40 @@ json_print_object(struct json_container *json, struct json_object *object)
 	case JSON_STRING:
 	    json_value.type = JSON_STRING;
 	    json_value.u.string = item->u.string;
-	    if (!sudo_json_add_value(json, item->name, &json_value))
+	    if (!sudo_json_add_value(jsonc, item->name, &json_value))
 		goto oom;
 	    break;
 	case JSON_NUMBER:
 	    json_value.type = JSON_NUMBER;
 	    json_value.u.number = item->u.number;
-	    if (!sudo_json_add_value(json, item->name, &json_value))
+	    if (!sudo_json_add_value(jsonc, item->name, &json_value))
 		goto oom;
 	    break;
 	case JSON_OBJECT:
-	    if (!sudo_json_open_object(json, item->name))
+	    if (!sudo_json_open_object(jsonc, item->name))
 		goto oom;
-	    if (!json_print_object(json, &item->u.child))
+	    if (!json_print_object(jsonc, &item->u.child))
 		goto done;
-	    if (!sudo_json_close_object(json))
+	    if (!sudo_json_close_object(jsonc))
 		goto oom;
 	    break;
 	case JSON_ARRAY:
-	    if (!sudo_json_open_array(json, item->name))
+	    if (!sudo_json_open_array(jsonc, item->name))
 		goto oom;
-	    if (!json_print_object(json, &item->u.child))
+	    if (!json_print_object(jsonc, &item->u.child))
 		goto done;
-	    if (!sudo_json_close_array(json))
+	    if (!sudo_json_close_array(jsonc))
 		goto oom;
 	    break;
 	case JSON_BOOL:
 	    json_value.type = JSON_BOOL;
 	    json_value.u.boolean = item->u.boolean;
-	    if (!sudo_json_add_value(json, item->name, &json_value))
+	    if (!sudo_json_add_value(jsonc, item->name, &json_value))
 		goto oom;
 	    break;
 	case JSON_NULL:
 	    json_value.type = JSON_NULL;
-	    if (!sudo_json_add_value(json, item->name, &json_value))
+	    if (!sudo_json_add_value(jsonc, item->name, &json_value))
 		goto oom;
 	    break;
 	default:
@@ -98,7 +98,7 @@ done:
 }
 
 static bool
-json_format(struct json_container *json, struct json_object *object)
+json_format(struct json_container *jsonc, struct json_object *object)
 {
     struct json_item *item;
     bool ret = false;
@@ -111,7 +111,7 @@ json_format(struct json_container *json, struct json_object *object)
     }
     object = &item->u.child;
 
-    if (!json_print_object(json, object))
+    if (!json_print_object(jsonc, object))
 	goto done;
 
     ret = true;
@@ -129,7 +129,7 @@ usage(void)
 }
 
 static bool
-compare(FILE *fp, const char *infile, struct json_container *json)
+compare(FILE *fp, const char *infile, struct json_container *jsonc)
 {
     const char *cp;
     unsigned int lineno = 0;
@@ -137,7 +137,7 @@ compare(FILE *fp, const char *infile, struct json_container *json)
     char *line = NULL;
     ssize_t len;
 
-    cp = sudo_json_get_buf(json);
+    cp = sudo_json_get_buf(jsonc);
 
     while ((len = getdelim(&line, &linesize, '\n', fp)) != -1) {
 	lineno++;
@@ -192,7 +192,7 @@ main(int argc, char *argv[])
 	usage();
 
     for (i = 0; i < argc; i++) {
-	struct json_container json;
+	struct json_container jsonc;
 	const char *infile = argv[i];
 	const char *outfile = argv[i];
 	const char *cp;
@@ -202,7 +202,7 @@ main(int argc, char *argv[])
 
 	ntests++;
 
-	if (!sudo_json_init(&json, 4, false, true)) {
+	if (!sudo_json_init(&jsonc, 4, false, true)) {
 	    errors++;
 	    continue;
 	}
@@ -219,7 +219,7 @@ main(int argc, char *argv[])
 	}
 
 	/* Format as pretty-printed JSON */
-	if (!json_format(&json, &root)) {
+	if (!json_format(&jsonc, &root)) {
 	    errors++;
 	    goto next;
 	}
@@ -237,18 +237,18 @@ main(int argc, char *argv[])
 
 	/* Compare output to expected output. */
 	rewind(outfp);
-	if (!compare(outfp, outfile, &json))
+	if (!compare(outfp, outfile, &jsonc))
 	    errors++;
 
 	/* Write the formatted output to stdout for -c (cat) */
 	if (cat) {
-	    fprintf(stdout, "{%s\n}\n", sudo_json_get_buf(&json));
+	    fprintf(stdout, "{%s\n}\n", sudo_json_get_buf(&jsonc));
 	    fflush(stdout);
 	}
 
 next:
 	free_json_items(&root.items);
-	sudo_json_free(&json);
+	sudo_json_free(&jsonc);
 	if (infp != NULL)
 	    fclose(infp);
 	if (outfp != NULL && outfp != infp)

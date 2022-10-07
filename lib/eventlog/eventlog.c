@@ -627,24 +627,24 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
 }
 
 static bool
-json_add_timestamp(struct json_container *json, const char *name,
+json_add_timestamp(struct json_container *jsonc, const char *name,
     const struct timespec *ts, bool format_timestamp)
 {
     struct json_value json_value;
     int len;
     debug_decl(json_add_timestamp, SUDO_DEBUG_PLUGIN);
 
-    if (!sudo_json_open_object(json, name))
+    if (!sudo_json_open_object(jsonc, name))
 	goto oom;
 
     json_value.type = JSON_NUMBER;
     json_value.u.number = ts->tv_sec;
-    if (!sudo_json_add_value(json, "seconds", &json_value))
+    if (!sudo_json_add_value(jsonc, "seconds", &json_value))
 	goto oom;
 
     json_value.type = JSON_NUMBER;
     json_value.u.number = ts->tv_nsec;
-    if (!sudo_json_add_value(json, "nanoseconds", &json_value))
+    if (!sudo_json_add_value(jsonc, "nanoseconds", &json_value))
 	goto oom;
 
     if (format_timestamp) {
@@ -660,7 +660,7 @@ json_add_timestamp(struct json_container *json, const char *name,
 	    if (len != 0 && timebuf[sizeof(timebuf) - 1] == '\0') {
 		json_value.type = JSON_STRING;
 		json_value.u.string = timebuf; // -V507
-		if (!sudo_json_add_value(json, "iso8601", &json_value))
+		if (!sudo_json_add_value(jsonc, "iso8601", &json_value))
 		    goto oom;
 	    }
 	}
@@ -671,13 +671,13 @@ json_add_timestamp(struct json_container *json, const char *name,
 	    if (len != 0 && timebuf[sizeof(timebuf) - 1] == '\0') {
 		json_value.type = JSON_STRING;
 		json_value.u.string = timebuf; // -V507
-		if (!sudo_json_add_value(json, "localtime", &json_value))
+		if (!sudo_json_add_value(jsonc, "localtime", &json_value))
 		    goto oom;
 	    }
 	}
     }
 
-    if (!sudo_json_close_object(json))
+    if (!sudo_json_close_object(jsonc))
 	goto oom;
 
     debug_return_bool(true);
@@ -693,7 +693,7 @@ oom:
  * be stored and formatted by the caller.
  */
 bool
-eventlog_store_json(struct json_container *json, const struct eventlog *evlog)
+eventlog_store_json(struct json_container *jsonc, const struct eventlog *evlog)
 {
     struct json_value json_value;
     size_t i;
@@ -712,112 +712,112 @@ eventlog_store_json(struct json_container *json, const struct eventlog *evlog)
 
     json_value.type = JSON_STRING;
     json_value.u.string = evlog->submituser;
-    if (!sudo_json_add_value(json, "submituser", &json_value))
+    if (!sudo_json_add_value(jsonc, "submituser", &json_value))
 	goto oom;
 
     if (evlog->command != NULL) {
 	json_value.type = JSON_STRING;
 	json_value.u.string = evlog->command;
-	if (!sudo_json_add_value(json, "command", &json_value))
+	if (!sudo_json_add_value(jsonc, "command", &json_value))
 	    goto oom;
     }
 
     if (evlog->runuser != NULL) {
 	json_value.type = JSON_STRING;
 	json_value.u.string = evlog->runuser;
-	if (!sudo_json_add_value(json, "runuser", &json_value))
+	if (!sudo_json_add_value(jsonc, "runuser", &json_value))
 	    goto oom;
     }
 
     if (evlog->rungroup != NULL) {
 	json_value.type = JSON_STRING;
 	json_value.u.string = evlog->rungroup;
-	if (!sudo_json_add_value(json, "rungroup", &json_value))
+	if (!sudo_json_add_value(jsonc, "rungroup", &json_value))
 	    goto oom;
     }
 
     if (evlog->runchroot != NULL) {
 	json_value.type = JSON_STRING;
 	json_value.u.string = evlog->runchroot;
-	if (!sudo_json_add_value(json, "runchroot", &json_value))
+	if (!sudo_json_add_value(jsonc, "runchroot", &json_value))
 	    goto oom;
     }
 
     if (evlog->runcwd != NULL) {
 	json_value.type = JSON_STRING;
 	json_value.u.string = evlog->runcwd;
-	if (!sudo_json_add_value(json, "runcwd", &json_value))
+	if (!sudo_json_add_value(jsonc, "runcwd", &json_value))
 	    goto oom;
     }
 
     if (evlog->ttyname != NULL) {
 	json_value.type = JSON_STRING;
 	json_value.u.string = evlog->ttyname;
-	if (!sudo_json_add_value(json, "ttyname", &json_value))
+	if (!sudo_json_add_value(jsonc, "ttyname", &json_value))
 	    goto oom;
     }
 
     if (evlog->submithost != NULL) {
 	json_value.type = JSON_STRING;
 	json_value.u.string = evlog->submithost;
-	if (!sudo_json_add_value(json, "submithost", &json_value))
+	if (!sudo_json_add_value(jsonc, "submithost", &json_value))
 	    goto oom;
     }
 
     if (evlog->cwd != NULL) {
 	json_value.type = JSON_STRING;
 	json_value.u.string = evlog->cwd;
-	if (!sudo_json_add_value(json, "submitcwd", &json_value))
+	if (!sudo_json_add_value(jsonc, "submitcwd", &json_value))
 	    goto oom;
     }
 
     if (evlog->rungroup!= NULL && evlog->rungid != (gid_t)-1) {
 	json_value.type = JSON_ID;
 	json_value.u.id = evlog->rungid;
-	if (!sudo_json_add_value(json, "rungid", &json_value))
+	if (!sudo_json_add_value(jsonc, "rungid", &json_value))
 	    goto oom;
     }
 
     if (evlog->runuid != (uid_t)-1) {
 	json_value.type = JSON_ID;
 	json_value.u.id = evlog->runuid;
-	if (!sudo_json_add_value(json, "runuid", &json_value))
+	if (!sudo_json_add_value(jsonc, "runuid", &json_value))
 	    goto oom;
     }
 
     json_value.type = JSON_NUMBER;
     json_value.u.number = evlog->columns;
-    if (!sudo_json_add_value(json, "columns", &json_value))
+    if (!sudo_json_add_value(jsonc, "columns", &json_value))
         goto oom;
 
     json_value.type = JSON_NUMBER;
     json_value.u.number = evlog->lines;
-    if (!sudo_json_add_value(json, "lines", &json_value))
+    if (!sudo_json_add_value(jsonc, "lines", &json_value))
         goto oom;
 
     if (evlog->argv != NULL) {
-	if (!sudo_json_open_array(json, "runargv"))
+	if (!sudo_json_open_array(jsonc, "runargv"))
 	    goto oom;
 	for (i = 0; (cp = evlog->argv[i]) != NULL; i++) {
 	    json_value.type = JSON_STRING;
 	    json_value.u.string = cp;
-	    if (!sudo_json_add_value(json, NULL, &json_value))
+	    if (!sudo_json_add_value(jsonc, NULL, &json_value))
 		goto oom;
 	}
-	if (!sudo_json_close_array(json))
+	if (!sudo_json_close_array(jsonc))
 	    goto oom;
     }
 
     if (evlog->envp != NULL) {
-	if (!sudo_json_open_array(json, "runenv"))
+	if (!sudo_json_open_array(jsonc, "runenv"))
 	    goto oom;
 	for (i = 0; (cp = evlog->envp[i]) != NULL; i++) {
 	    json_value.type = JSON_STRING;
 	    json_value.u.string = cp;
-	    if (!sudo_json_add_value(json, NULL, &json_value))
+	    if (!sudo_json_add_value(jsonc, NULL, &json_value))
 		goto oom;
 	}
-	if (!sudo_json_close_array(json))
+	if (!sudo_json_close_array(jsonc))
 	    goto oom;
     }
 
@@ -829,9 +829,9 @@ oom:
 }
 
 static bool
-default_json_cb(struct json_container *json, void *v)
+default_json_cb(struct json_container *jsonc, void *v)
 {
-    return eventlog_store_json(json, v);
+    return eventlog_store_json(jsonc, v);
 }
 
 static char *
@@ -840,7 +840,7 @@ format_json(int event_type, struct eventlog_args *args,
 {
     eventlog_json_callback_t info_cb = args->json_info_cb;
     void *info = args->json_info;
-    struct json_container json = { 0 };
+    struct json_container jsonc = { 0 };
     struct json_value json_value;
     const char *time_str, *type_str;
     struct timespec now;
@@ -880,15 +880,15 @@ format_json(int event_type, struct eventlog_args *args,
 	debug_return_str(NULL);
     }
 
-    if (!sudo_json_init(&json, 4, compact, false))
+    if (!sudo_json_init(&jsonc, 4, compact, false))
 	goto bad;
-    if (!sudo_json_open_object(&json, type_str))
+    if (!sudo_json_open_object(&jsonc, type_str))
 	goto bad;
 
     if (evlog != NULL && evlog->uuid_str[0] != '\0') {
 	json_value.type = JSON_STRING;
 	json_value.u.string = evlog->uuid_str;
-	if (!sudo_json_add_value(&json, "uuid", &json_value))
+	if (!sudo_json_add_value(&jsonc, "uuid", &json_value))
 	    goto bad;
     }
 
@@ -907,7 +907,7 @@ format_json(int event_type, struct eventlog_args *args,
 	}
 	json_value.type = JSON_STRING;
 	json_value.u.string = ereason ? ereason : args->reason;
-	if (!sudo_json_add_value(&json, "reason", &json_value)) {
+	if (!sudo_json_add_value(&jsonc, "reason", &json_value)) {
 	    free(ereason);
 	    goto bad;
 	}
@@ -915,7 +915,7 @@ format_json(int event_type, struct eventlog_args *args,
     }
 
     /* Log event time on server (set earlier) */
-    if (!json_add_timestamp(&json, "server_time", &now, true)) {
+    if (!json_add_timestamp(&jsonc, "server_time", &now, true)) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unable format timestamp");
 	goto bad;
@@ -923,7 +923,7 @@ format_json(int event_type, struct eventlog_args *args,
 
     /* Log event time from client */
     if (args->event_time != NULL) {
-	if (!json_add_timestamp(&json, time_str, args->event_time, true)) {
+	if (!json_add_timestamp(&jsonc, time_str, args->event_time, true)) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable format timestamp");
 	    goto bad;
@@ -938,7 +938,7 @@ format_json(int event_type, struct eventlog_args *args,
 	}
 
 	if (sudo_timespecisset(&evlog->run_time)) {
-	    if (!json_add_timestamp(&json, "run_time", &evlog->run_time, false)) {
+	    if (!json_add_timestamp(&jsonc, "run_time", &evlog->run_time, false)) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "unable format timestamp");
 		goto bad;
@@ -947,17 +947,17 @@ format_json(int event_type, struct eventlog_args *args,
 	if (evlog->signal_name != NULL) {
 	    json_value.type = JSON_STRING;
 	    json_value.u.string = evlog->signal_name;
-	    if (!sudo_json_add_value(&json, "signal", &json_value))
+	    if (!sudo_json_add_value(&jsonc, "signal", &json_value))
 		goto bad;
 
 	    json_value.type = JSON_BOOL;
 	    json_value.u.boolean = evlog->dumped_core;
-	    if (!sudo_json_add_value(&json, "dumped_core", &json_value))
+	    if (!sudo_json_add_value(&jsonc, "dumped_core", &json_value))
 		goto bad;
 	}
 	json_value.type = JSON_NUMBER;
 	json_value.u.number = evlog->exit_value;
-	if (!sudo_json_add_value(&json, "exit_value", &json_value))
+	if (!sudo_json_add_value(&jsonc, "exit_value", &json_value))
 	    goto bad;
     }
 
@@ -966,18 +966,18 @@ format_json(int event_type, struct eventlog_args *args,
 	if (evlog->peeraddr != NULL) {
 	    json_value.type = JSON_STRING;
 	    json_value.u.string = evlog->peeraddr;
-	    if (!sudo_json_add_value(&json, "peeraddr", &json_value))
+	    if (!sudo_json_add_value(&jsonc, "peeraddr", &json_value))
 		goto bad;
 	}
 
 	if (evlog->iolog_path != NULL) {
 	    json_value.type = JSON_STRING;
 	    json_value.u.string = evlog->iolog_path;
-	    if (!sudo_json_add_value(&json, "iolog_path", &json_value))
+	    if (!sudo_json_add_value(&jsonc, "iolog_path", &json_value))
 		goto bad;
 
 	    if (sudo_timespecisset(&evlog->iolog_offset)) {
-		if (!json_add_timestamp(&json, "iolog_offset", &evlog->iolog_offset, false)) {
+		if (!json_add_timestamp(&jsonc, "iolog_offset", &evlog->iolog_offset, false)) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"unable format timestamp");
 		    goto bad;
@@ -988,18 +988,18 @@ format_json(int event_type, struct eventlog_args *args,
 
     /* Write log info. */
     if (info != NULL) {
-	if (!info_cb(&json, info))
+	if (!info_cb(&jsonc, info))
 	    goto bad;
     }
 
-    if (!sudo_json_close_object(&json))
+    if (!sudo_json_close_object(&jsonc))
 	goto bad;
 
     /* Caller is responsible for freeing the buffer. */
-    debug_return_str(sudo_json_get_buf(&json));
+    debug_return_str(sudo_json_get_buf(&jsonc));
 
 bad:
-    sudo_json_free(&json);
+    sudo_json_free(&jsonc);
     debug_return_str(NULL);
 }
 
