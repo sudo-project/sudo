@@ -28,6 +28,7 @@
 #include <sys/mman.h>
 
 #include <errno.h>
+#include <limits.h>
 #include <string.h>
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
