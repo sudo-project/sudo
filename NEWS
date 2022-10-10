@@ -99,6 +99,18 @@ What's new in Sudo 1.9.12
  * Added the -I option to visudo which only edits the main sudoers
    file.  Include files are not edited unless a syntax error is found.
 
+ * Fixed "sudo -l -U otheruser" output when the runas list is empty.
+   Previously, sudo would list the invoking user instead of the
+   list user.  GitHub issue #183.
+
+ * Fixed the display of command tags and options in "sudo -l" output
+   when the RunAs user or group changes.  A new line is started for
+   RunAs changes which means we need to display the command tags
+   and options again.  GitHub issue #184.
+
+ * The sesh helper program now uses getopt_long(3) to parse the
+   command line options.
+
 What's new in Sudo 1.9.11p3
 
  * Fixed "connection reset" errors on AIX when running shell scripts
