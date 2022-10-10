@@ -689,7 +689,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	def_data_intercept_type,
     }, {
 	"intercept_verify", T_FLAG,
-	N_("Whether to verify the command and arguments after execution"),
+	N_("Attempt to verify the command and arguments after execution"),
 	NULL,
     }, {
 	"apparmor_profile", T_STR,

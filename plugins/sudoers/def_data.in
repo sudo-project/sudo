@@ -496,7 +496,7 @@ intercept_type
 	dso trace
 intercept_verify
 	T_FLAG
-	"Whether to verify the command and arguments after execution"
+	"Attempt to verify the command and arguments after execution"
 apparmor_profile
 	T_STR
 	"AppArmor profile to use in the new security context: %s"
