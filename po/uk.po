@@ -4,10 +4,10 @@
 # Yuri Chornoivan <yurchor@ukr.net>, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.9.11b1\n"
+"Project-Id-Version: sudo 1.9.12b2\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2022-05-27 08:39-0600\n"
-"PO-Revision-Date: 2022-05-29 12:09+0300\n"
+"POT-Creation-Date: 2022-10-09 09:48-0600\n"
+"PO-Revision-Date: 2022-10-11 12:15+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -32,76 +32,75 @@ msgid "unable to restore registry"
 msgstr "не вдалося відновити регістр"
 
 #: lib/util/aix.c:272 lib/util/gidlist.c:66 lib/util/gidlist.c:76
-#: lib/util/json.c:54 lib/util/json.c:183 lib/util/sudo_conf.c:218
-#: lib/util/sudo_conf.c:304 lib/util/sudo_conf.c:381 lib/util/sudo_conf.c:665
-#: src/conversation.c:80 src/exec_monitor.c:205 src/exec_monitor.c:458
+#: lib/util/json.c:54 lib/util/json.c:183 lib/util/sudo_conf.c:219
+#: lib/util/sudo_conf.c:305 lib/util/sudo_conf.c:382 lib/util/sudo_conf.c:666
+#: src/conversation.c:80 src/exec_iolog.c:124 src/exec_iolog.c:135
+#: src/exec_iolog.c:212 src/exec_monitor.c:205 src/exec_monitor.c:458
 #: src/exec_monitor.c:464 src/exec_monitor.c:472 src/exec_monitor.c:480
 #: src/exec_monitor.c:487 src/exec_monitor.c:494 src/exec_monitor.c:501
 #: src/exec_monitor.c:508 src/exec_monitor.c:515 src/exec_monitor.c:522
-#: src/exec_monitor.c:529 src/exec_nopty.c:224 src/exec_nopty.c:233
-#: src/exec_nopty.c:240 src/exec_nopty.c:247 src/exec_nopty.c:254
-#: src/exec_nopty.c:261 src/exec_nopty.c:268 src/exec_nopty.c:275
-#: src/exec_nopty.c:282 src/exec_nopty.c:289 src/exec_nopty.c:296
-#: src/exec_nopty.c:303 src/exec_nopty.c:311 src/exec_nopty.c:549
-#: src/exec_preload.c:143 src/exec_preload.c:204 src/exec_ptrace.c:632
-#: src/exec_ptrace.c:730 src/exec_ptrace.c:895 src/exec_pty.c:845
-#: src/exec_pty.c:854 src/exec_pty.c:911 src/exec_pty.c:1075
-#: src/exec_pty.c:1265 src/exec_pty.c:1274 src/exec_pty.c:1281
-#: src/exec_pty.c:1288 src/exec_pty.c:1295 src/exec_pty.c:1302
-#: src/exec_pty.c:1309 src/exec_pty.c:1316 src/exec_pty.c:1323
-#: src/exec_pty.c:1330 src/exec_pty.c:1337 src/exec_pty.c:1345
-#: src/exec_pty.c:1811 src/load_plugins.c:156 src/load_plugins.c:181
-#: src/load_plugins.c:217 src/load_plugins.c:449 src/load_plugins.c:455
-#: src/parse_args.c:169 src/parse_args.c:190 src/parse_args.c:264
-#: src/parse_args.c:613 src/parse_args.c:635 src/parse_args.c:660
-#: src/preserve_fds.c:46 src/preserve_fds.c:131 src/selinux.c:89
-#: src/selinux.c:362 src/selinux.c:474 src/selinux.c:485 src/sesh.c:113
-#: src/sesh.c:146 src/sesh.c:152 src/sesh.c:159 src/sesh.c:165 src/sesh.c:410
-#: src/sudo.c:639 src/sudo.c:712 src/sudo.c:722 src/sudo.c:748 src/sudo.c:771
-#: src/sudo.c:780 src/sudo.c:789 src/sudo.c:806 src/sudo.c:848 src/sudo.c:858
-#: src/sudo.c:891 src/sudo.c:1100 src/sudo.c:1121 src/sudo.c:1414
-#: src/sudo.c:1583 src/sudo.c:1810 src/sudo.c:2144 src/sudo_edit.c:89
-#: src/sudo_edit.c:149 src/sudo_edit.c:429 src/sudo_edit.c:438
-#: src/sudo_edit.c:539 src/sudo_edit.c:546 src/sudo_edit.c:677
-#: src/sudo_edit.c:697 src/sudo_intercept_common.c:113
-#: src/sudo_intercept_common.c:317
+#: src/exec_monitor.c:529 src/exec_nopty.c:227 src/exec_nopty.c:236
+#: src/exec_nopty.c:243 src/exec_nopty.c:250 src/exec_nopty.c:257
+#: src/exec_nopty.c:264 src/exec_nopty.c:271 src/exec_nopty.c:278
+#: src/exec_nopty.c:285 src/exec_nopty.c:292 src/exec_nopty.c:299
+#: src/exec_nopty.c:306 src/exec_nopty.c:314 src/exec_nopty.c:322
+#: src/exec_nopty.c:732 src/exec_preload.c:341 src/exec_ptrace.c:474
+#: src/exec_ptrace.c:767 src/exec_ptrace.c:982 src/exec_ptrace.c:1094
+#: src/exec_ptrace.c:1269 src/exec_ptrace.c:1611 src/exec_ptrace.c:1638
+#: src/exec_pty.c:506 src/exec_pty.c:687 src/exec_pty.c:873 src/exec_pty.c:882
+#: src/exec_pty.c:889 src/exec_pty.c:896 src/exec_pty.c:903 src/exec_pty.c:910
+#: src/exec_pty.c:917 src/exec_pty.c:924 src/exec_pty.c:931 src/exec_pty.c:938
+#: src/exec_pty.c:945 src/exec_pty.c:953 src/load_plugins.c:157
+#: src/load_plugins.c:182 src/load_plugins.c:218 src/load_plugins.c:451
+#: src/load_plugins.c:457 src/parse_args.c:172 src/parse_args.c:193
+#: src/parse_args.c:267 src/parse_args.c:623 src/parse_args.c:645
+#: src/parse_args.c:670 src/preserve_fds.c:46 src/preserve_fds.c:131
+#: src/selinux.c:89 src/selinux.c:362 src/selinux.c:472 src/selinux.c:489
+#: src/selinux.c:496 src/sesh.c:206 src/sesh.c:240 src/sesh.c:246
+#: src/sesh.c:253 src/sesh.c:259 src/sesh.c:470 src/sudo.c:639 src/sudo.c:704
+#: src/sudo.c:714 src/sudo.c:741 src/sudo.c:764 src/sudo.c:773 src/sudo.c:782
+#: src/sudo.c:799 src/sudo.c:841 src/sudo.c:851 src/sudo.c:884 src/sudo.c:1112
+#: src/sudo.c:1133 src/sudo.c:1426 src/sudo.c:1595 src/sudo.c:1822
+#: src/sudo.c:2156 src/sudo_edit.c:89 src/sudo_edit.c:149 src/sudo_edit.c:429
+#: src/sudo_edit.c:438 src/sudo_edit.c:538 src/sudo_edit.c:545
+#: src/sudo_edit.c:673 src/sudo_edit.c:693 src/sudo_intercept_common.c:115
+#: src/sudo_intercept_common.c:340
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
 #: lib/util/aix.c:272 lib/util/gidlist.c:66 lib/util/json.c:55
 #: lib/util/json.c:184 lib/util/regex.c:113 lib/util/regex.c:121
-#: lib/util/sudo_conf.c:219 lib/util/sudo_conf.c:304 lib/util/sudo_conf.c:381
-#: lib/util/sudo_conf.c:665 src/conversation.c:81 src/exec_intercept.c:68
-#: src/exec_intercept.c:336 src/exec_intercept.c:359 src/exec_intercept.c:367
-#: src/exec_intercept.c:392 src/exec_intercept.c:398 src/exec_intercept.c:407
-#: src/exec_intercept.c:413 src/exec_intercept.c:478 src/exec_intercept.c:588
-#: src/exec_intercept.c:707 src/exec_monitor.c:458 src/exec_monitor.c:464
-#: src/exec_monitor.c:472 src/exec_monitor.c:480 src/exec_monitor.c:487
-#: src/exec_monitor.c:494 src/exec_monitor.c:501 src/exec_monitor.c:508
-#: src/exec_monitor.c:515 src/exec_monitor.c:522 src/exec_monitor.c:529
-#: src/exec_nopty.c:224 src/exec_nopty.c:233 src/exec_nopty.c:240
-#: src/exec_nopty.c:247 src/exec_nopty.c:254 src/exec_nopty.c:261
-#: src/exec_nopty.c:268 src/exec_nopty.c:275 src/exec_nopty.c:282
-#: src/exec_nopty.c:289 src/exec_nopty.c:296 src/exec_nopty.c:303
-#: src/exec_nopty.c:311 src/exec_preload.c:143 src/exec_preload.c:204
-#: src/exec_ptrace.c:632 src/exec_pty.c:845 src/exec_pty.c:854
-#: src/exec_pty.c:911 src/exec_pty.c:1265 src/exec_pty.c:1274
-#: src/exec_pty.c:1281 src/exec_pty.c:1288 src/exec_pty.c:1295
-#: src/exec_pty.c:1302 src/exec_pty.c:1309 src/exec_pty.c:1316
-#: src/exec_pty.c:1323 src/exec_pty.c:1330 src/exec_pty.c:1337
-#: src/exec_pty.c:1345 src/exec_pty.c:1811 src/load_plugins.c:156
-#: src/load_plugins.c:181 src/load_plugins.c:217 src/load_plugins.c:449
-#: src/load_plugins.c:455 src/parse_args.c:169 src/parse_args.c:191
-#: src/parse_args.c:264 src/parse_args.c:613 src/parse_args.c:635
-#: src/parse_args.c:660 src/preserve_fds.c:46 src/preserve_fds.c:131
-#: src/selinux.c:89 src/selinux.c:362 src/selinux.c:474 src/selinux.c:485
-#: src/sesh.c:113 src/sesh.c:411 src/sudo.c:230 src/sudo.c:639 src/sudo.c:891
-#: src/sudo.c:1100 src/sudo.c:1121 src/sudo.c:1414 src/sudo.c:1583
-#: src/sudo.c:1810 src/sudo.c:2144 src/sudo_edit.c:89 src/sudo_edit.c:149
-#: src/sudo_edit.c:429 src/sudo_edit.c:438 src/sudo_edit.c:539
-#: src/sudo_edit.c:546 src/sudo_edit.c:677 src/sudo_edit.c:697
-#: src/sudo_intercept_common.c:113 src/sudo_intercept_common.c:317
+#: lib/util/sudo_conf.c:220 lib/util/sudo_conf.c:305 lib/util/sudo_conf.c:382
+#: lib/util/sudo_conf.c:666 src/conversation.c:81 src/exec_intercept.c:111
+#: src/exec_intercept.c:344 src/exec_intercept.c:504 src/exec_intercept.c:566
+#: src/exec_intercept.c:682 src/exec_intercept.c:806 src/exec_iolog.c:124
+#: src/exec_iolog.c:135 src/exec_iolog.c:212 src/exec_monitor.c:458
+#: src/exec_monitor.c:464 src/exec_monitor.c:472 src/exec_monitor.c:480
+#: src/exec_monitor.c:487 src/exec_monitor.c:494 src/exec_monitor.c:501
+#: src/exec_monitor.c:508 src/exec_monitor.c:515 src/exec_monitor.c:522
+#: src/exec_monitor.c:529 src/exec_nopty.c:227 src/exec_nopty.c:236
+#: src/exec_nopty.c:243 src/exec_nopty.c:250 src/exec_nopty.c:257
+#: src/exec_nopty.c:264 src/exec_nopty.c:271 src/exec_nopty.c:278
+#: src/exec_nopty.c:285 src/exec_nopty.c:292 src/exec_nopty.c:299
+#: src/exec_nopty.c:306 src/exec_nopty.c:314 src/exec_nopty.c:322
+#: src/exec_preload.c:341 src/exec_ptrace.c:474 src/exec_ptrace.c:767
+#: src/exec_ptrace.c:982 src/exec_ptrace.c:1638 src/exec_pty.c:506
+#: src/exec_pty.c:873 src/exec_pty.c:882 src/exec_pty.c:889 src/exec_pty.c:896
+#: src/exec_pty.c:903 src/exec_pty.c:910 src/exec_pty.c:917 src/exec_pty.c:924
+#: src/exec_pty.c:931 src/exec_pty.c:938 src/exec_pty.c:945 src/exec_pty.c:953
+#: src/load_plugins.c:157 src/load_plugins.c:182 src/load_plugins.c:218
+#: src/load_plugins.c:451 src/load_plugins.c:457 src/parse_args.c:172
+#: src/parse_args.c:194 src/parse_args.c:267 src/parse_args.c:623
+#: src/parse_args.c:645 src/parse_args.c:670 src/preserve_fds.c:46
+#: src/preserve_fds.c:131 src/selinux.c:89 src/selinux.c:362 src/selinux.c:472
+#: src/selinux.c:489 src/selinux.c:496 src/sesh.c:206 src/sesh.c:471
+#: src/sudo.c:230 src/sudo.c:639 src/sudo.c:884 src/sudo.c:1112
+#: src/sudo.c:1133 src/sudo.c:1426 src/sudo.c:1595 src/sudo.c:1822
+#: src/sudo.c:2156 src/sudo_edit.c:89 src/sudo_edit.c:149 src/sudo_edit.c:429
+#: src/sudo_edit.c:438 src/sudo_edit.c:538 src/sudo_edit.c:545
+#: src/sudo_edit.c:673 src/sudo_edit.c:693 src/sudo_intercept_common.c:115
+#: src/sudo_intercept_common.c:340
 msgid "unable to allocate memory"
 msgstr "не вдалося отримати потрібний об’єм пам’яті"
 
@@ -115,22 +114,22 @@ msgstr "не вдалося виконати stat для %.*s"
 msgid "%.*s exists but is not a directory (0%o)"
 msgstr "%.*s існує, але не є каталогом (0%o)"
 
-#: lib/util/mkdir_parents.c:102 lib/util/sudo_conf.c:704 src/selinux.c:235
-#: src/selinux.c:265 src/sudo.c:371 src/sudo_edit.c:494 src/sudo_edit.c:559
+#: lib/util/mkdir_parents.c:103 lib/util/sudo_conf.c:677
+#: lib/util/sudo_conf.c:689 lib/util/sudo_conf.c:715 src/selinux.c:235
+#: src/selinux.c:265 src/sudo.c:371 src/sudo_edit.c:494 src/sudo_edit.c:557
 #, c-format
 msgid "unable to open %s"
 msgstr "не вдалося відкрити %s"
 
-#: lib/util/mkdir_parents.c:119 lib/util/mkdir_parents.c:127
-#: lib/util/mkdir_parents.c:136
-#, c-format
-msgid "unable to open %.*s"
-msgstr "не вдалося відкрити %.*s"
-
-#: lib/util/mkdir_parents.c:157
+#: lib/util/mkdir_parents.c:120 lib/util/mkdir_parents.c:160
 #, c-format
 msgid "unable to mkdir %.*s"
 msgstr "не вдалося створити каталог %.*s"
+
+#: lib/util/mkdir_parents.c:130 lib/util/mkdir_parents.c:139
+#, c-format
+msgid "unable to open %.*s"
+msgstr "не вдалося відкрити %.*s"
 
 #: lib/util/regex.c:103
 msgid "regular expression too large"
@@ -140,8 +139,8 @@ msgstr "задовгий формальний вираз"
 msgid "Unknown signal"
 msgstr "Невідомий сигнал"
 
-#: lib/util/strtoid.c:87 lib/util/strtomode.c:52 lib/util/strtonum.c:148
-#: lib/util/strtonum.c:187 src/sesh.c:146 src/sesh.c:159
+#: lib/util/strtoid.c:84 lib/util/strtomode.c:52 lib/util/strtonum.c:148
+#: lib/util/strtonum.c:187 src/sesh.c:240 src/sesh.c:253
 msgid "invalid value"
 msgstr "некоректне значення"
 
@@ -153,86 +152,86 @@ msgstr "надто велике значення"
 msgid "value too small"
 msgstr "надто мале значення"
 
-#: lib/util/sudo_conf.c:237
+#: lib/util/sudo_conf.c:238
 #, c-format
 msgid "invalid Path value \"%s\" in %s, line %u"
 msgstr "некоректне значення Path, «%s», у %s, рядок %u"
 
-#: lib/util/sudo_conf.c:403 lib/util/sudo_conf.c:419 lib/util/sudo_conf.c:472
+#: lib/util/sudo_conf.c:404 lib/util/sudo_conf.c:420 lib/util/sudo_conf.c:473
 #, c-format
 msgid "invalid value for %s \"%s\" in %s, line %u"
 msgstr "некоректне значення %s, «%s», у %s, рядок %u"
 
-#: lib/util/sudo_conf.c:440
+#: lib/util/sudo_conf.c:441
 #, c-format
 msgid "unsupported group source \"%s\" in %s, line %u"
 msgstr "непідтримуване джерело групи, «%s», у %s, рядок %u"
 
-#: lib/util/sudo_conf.c:456
+#: lib/util/sudo_conf.c:457
 #, c-format
 msgid "invalid max groups \"%s\" in %s, line %u"
 msgstr "некоректна максимальна кількість груп, «%s», у %s, рядок %u"
 
-#: lib/util/sudo_conf.c:681 src/copy_file.c:150
-#, c-format
-msgid "unable to stat %s"
-msgstr "не вдалося виконати stat для %s"
-
-#: lib/util/sudo_conf.c:684
+#: lib/util/sudo_conf.c:692
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s не є звичайним файлом"
 
-#: lib/util/sudo_conf.c:687 src/copy_file.c:163
+#: lib/util/sudo_conf.c:695 src/copy_file.c:164
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s належить uid %u, має належати %u"
 
-#: lib/util/sudo_conf.c:691
+#: lib/util/sudo_conf.c:699
 #, c-format
 msgid "%s is world writable"
 msgstr "Запис до «%s» можливий для довільного користувача"
 
-#: lib/util/sudo_conf.c:694
+#: lib/util/sudo_conf.c:702
 #, c-format
 msgid "%s is group writable"
 msgstr "Запис до «%s» може здійснювати будь-який користувач з групи"
 
-#: src/apparmor.c:79
+#: src/apparmor.c:85
 msgid "failed to determine AppArmor confinement"
 msgstr "не вдалося визначити контейнер AppArmor"
 
-#: src/apparmor.c:87
+#: src/apparmor.c:93
 #, c-format
 msgid "unable to change AppArmor profile to %s"
 msgstr "не вдалося змінити профіль AppArmor на %s"
 
-#: src/copy_file.c:93
+#: src/copy_file.c:94
 #, c-format
 msgid "%s: truncate %s to zero bytes? (y/n) [n] "
 msgstr "%s: обрізати %s до нуля байтів? (y/n) [n] "
 
-#: src/copy_file.c:97
+#: src/copy_file.c:98
 #, c-format
 msgid "not overwriting %s"
 msgstr "не перезаписуємо %s"
 
-#: src/copy_file.c:119
+#: src/copy_file.c:120
 #, c-format
 msgid "unable to read from %s"
 msgstr "не вдалося виконати читання з %s"
 
-#: src/copy_file.c:136 src/sudo_edit.c:320
+#: src/copy_file.c:137 src/sudo_edit.c:320
 #, c-format
 msgid "unable to write to %s"
 msgstr "не вдалося виконати запис до %s"
 
-#: src/copy_file.c:154 src/sesh.c:218 src/sudo_edit.c:197
+#: src/copy_file.c:151
+#, c-format
+msgid "unable to stat %s"
+msgstr "не вдалося виконати stat для %s"
+
+#: src/copy_file.c:155 src/sesh.c:312 src/sudo_edit.c:197
 #, c-format
 msgid "%s: not a regular file"
 msgstr "%s: не є звичайним файлом"
 
-#: src/copy_file.c:158
+#: src/copy_file.c:159
 #, c-format
 msgid "%s: bad file mode: 0%o"
 msgstr "%s: помилковий режим доступу до файла: 0%o"
@@ -241,60 +240,59 @@ msgstr "%s: помилковий режим доступу до файла: 0%o"
 msgid "unable to restore current working directory"
 msgstr "не вдалося відновити поточний робочий каталог"
 
-#: src/exec.c:103
+#: src/exec.c:111
 msgid "unable to set privileges"
 msgstr "не вдалося встановити привілеї"
 
-#: src/exec.c:109 src/exec.c:114
+#: src/exec.c:117 src/exec.c:122
 msgid "unable to set limit privileges"
 msgstr "не вдалося встановити привілеї щодо обмеження"
 
-#: src/exec.c:137
+#: src/exec.c:145
 #, c-format
 msgid "unknown login class %s"
 msgstr "невідомий клас входу %s"
 
-#: src/exec.c:149
+#: src/exec.c:157
 msgid "unable to set user context"
 msgstr "не вдалося встановити контекст користувача"
 
-#: src/exec.c:165
+#: src/exec.c:173
 msgid "unable to set process priority"
 msgstr "не вдалося встановити пріоритет процесу"
 
-#: src/exec.c:182
+#: src/exec.c:190
 #, c-format
 msgid "unable to change root to %s"
 msgstr "не вдалося змінити root на %s"
 
-#: src/exec.c:195 src/exec.c:201 src/exec.c:208
+#: src/exec.c:203 src/exec.c:209 src/exec.c:216
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "не вдалося змінити uid користувача, від імені якого відбувається виконання (%u, %u)"
 
-#: src/exec.c:226
+#: src/exec.c:238 src/sesh.c:199
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "не вдалося змінити каталог на %s"
 
-#: src/exec.c:230
+#: src/exec.c:243
 #, c-format
 msgid "starting from %s"
 msgstr "починаючи з %s"
 
-#: src/exec.c:312 src/exec_monitor.c:575 src/exec_monitor.c:577
-#: src/exec_monitor.c:648 src/exec_nopty.c:439 src/exec_pty.c:586
-#: src/exec_pty.c:1447 src/exec_pty.c:1449 src/signal.c:144 src/signal.c:151
-#: src/signal.c:165 src/suspend_nopty.c:89
+#: src/exec.c:278 src/exec.c:351 src/exec_monitor.c:567 src/exec_monitor.c:569
+#: src/exec_pty.c:225 src/exec_pty.c:1017 src/exec_pty.c:1019 src/signal.c:144
+#: src/signal.c:151 src/signal.c:165 src/suspend_nopty.c:93
 #, c-format
 msgid "unable to set handler for signal %d"
 msgstr "не вдалося встановити обробник для сигналу %d"
 
-#: src/exec.c:391
+#: src/exec.c:422
 msgid "intercept mode is not supported with SELinux RBAC on this system"
 msgstr "у цій системі з RBAC SELinux не передбачено підтримки режиму перехоплення"
 
-#: src/exec.c:396
+#: src/exec.c:427
 msgid "unable to log sub-commands with SELinux RBAC on this system"
 msgstr "у цій системі неможливо записувати до журналу підкоманди з RBAC SELinux"
 
@@ -302,57 +300,83 @@ msgstr "у цій системі неможливо записувати до ж
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "не вдалося вилучити PRIV_PROC_EXEC з PRIV_LIMIT"
 
-#: src/exec_intercept.c:95 src/exec_intercept.c:674 src/exec_intercept.c:864
-#: src/exec_intercept.c:876 src/exec_monitor.c:466 src/exec_monitor.c:474
-#: src/exec_monitor.c:482 src/exec_monitor.c:489 src/exec_monitor.c:496
-#: src/exec_monitor.c:503 src/exec_monitor.c:510 src/exec_monitor.c:517
-#: src/exec_monitor.c:524 src/exec_monitor.c:531 src/exec_nopty.c:226
-#: src/exec_nopty.c:235 src/exec_nopty.c:242 src/exec_nopty.c:249
-#: src/exec_nopty.c:256 src/exec_nopty.c:263 src/exec_nopty.c:270
-#: src/exec_nopty.c:277 src/exec_nopty.c:284 src/exec_nopty.c:291
-#: src/exec_nopty.c:298 src/exec_nopty.c:305 src/exec_nopty.c:313
-#: src/exec_pty.c:711 src/exec_pty.c:716 src/exec_pty.c:813 src/exec_pty.c:820
-#: src/exec_pty.c:917 src/exec_pty.c:1267 src/exec_pty.c:1276
-#: src/exec_pty.c:1283 src/exec_pty.c:1290 src/exec_pty.c:1297
-#: src/exec_pty.c:1304 src/exec_pty.c:1311 src/exec_pty.c:1318
-#: src/exec_pty.c:1325 src/exec_pty.c:1332 src/exec_pty.c:1339
-#: src/exec_pty.c:1764 src/exec_pty.c:1774 src/exec_pty.c:1819
-#: src/exec_pty.c:1826 src/exec_pty.c:1853
+#: src/exec_intercept.c:70 src/exec_iolog.c:165 src/exec_iolog.c:175
+#: src/exec_iolog.c:220 src/exec_iolog.c:227 src/exec_iolog.c:254
+#: src/exec_monitor.c:466 src/exec_monitor.c:474 src/exec_monitor.c:482
+#: src/exec_monitor.c:489 src/exec_monitor.c:496 src/exec_monitor.c:503
+#: src/exec_monitor.c:510 src/exec_monitor.c:517 src/exec_monitor.c:524
+#: src/exec_monitor.c:531 src/exec_nopty.c:229 src/exec_nopty.c:238
+#: src/exec_nopty.c:245 src/exec_nopty.c:252 src/exec_nopty.c:259
+#: src/exec_nopty.c:266 src/exec_nopty.c:273 src/exec_nopty.c:280
+#: src/exec_nopty.c:287 src/exec_nopty.c:294 src/exec_nopty.c:301
+#: src/exec_nopty.c:308 src/exec_nopty.c:316 src/exec_nopty.c:324
+#: src/exec_nopty.c:383 src/exec_nopty.c:449 src/exec_pty.c:355
+#: src/exec_pty.c:457 src/exec_pty.c:512 src/exec_pty.c:875 src/exec_pty.c:884
+#: src/exec_pty.c:891 src/exec_pty.c:898 src/exec_pty.c:905 src/exec_pty.c:912
+#: src/exec_pty.c:919 src/exec_pty.c:926 src/exec_pty.c:933 src/exec_pty.c:940
+#: src/exec_pty.c:947
 msgid "unable to add event to queue"
 msgstr "не вдалося додати подію до черги обробки"
 
-#: src/exec_intercept.c:344 src/sudo.c:1226 src/sudo.c:1271 src/sudo.c:1315
+#: src/exec_intercept.c:317 src/sudo.c:1018
+msgid "command not set by the security policy"
+msgstr "команду не встановлено правилами захисту"
+
+#: src/exec_intercept.c:393 src/exec_intercept.c:421 src/sudo.c:1238
+#: src/sudo.c:1283 src/sudo.c:1327
 msgid "command rejected by policy"
 msgstr "у виконанні команди відмовлено згідно правил"
 
-#: src/exec_intercept.c:437 src/sudo.c:1231 src/sudo.c:1276 src/sudo.c:1320
-#: src/sudo.c:1394
+#: src/exec_intercept.c:491 src/sudo.c:1925
+msgid "approval plugin error"
+msgstr "помилка у додатку підтвердження"
+
+#: src/exec_intercept.c:508 src/sudo.c:1243 src/sudo.c:1288 src/sudo.c:1332
+#: src/sudo.c:1406
 msgid "policy plugin error"
 msgstr "помилка у додатку правил"
 
-#: src/exec_intercept.c:462
+#: src/exec_intercept.c:543
 msgid "invalid PolicyCheckRequest"
 msgstr "некоректне значення PolicyCheckRequest"
 
-#: src/exec_intercept.c:584
+#: src/exec_intercept.c:678
 #, c-format
 msgid "client request too large: %zu"
 msgstr "надто великий запит клієнта: %zu"
 
-#: src/exec_intercept.c:622
+#: src/exec_intercept.c:720
 #, c-format
 msgid "unable to unpack %s size %zu"
 msgstr "не вдалося розпакувати %s, розмір %zu"
 
-#: src/exec_intercept.c:665
+#: src/exec_intercept.c:768
 #, c-format
 msgid "unexpected type_case value %d in %s from %s"
 msgstr "неочікуване значення type_case %d у %s від %s"
 
-#: src/exec_intercept.c:695
+#: src/exec_intercept.c:794
 #, c-format
 msgid "server message too large: %zu"
 msgstr "надто велике повідомлення сервера: %zu"
+
+#: src/exec_iolog.c:323 src/exec_iolog.c:363 src/exec_iolog.c:403
+#: src/exec_iolog.c:454 src/exec_iolog.c:505
+msgid "I/O plugin error"
+msgstr "Помилка у додатку введення-виведення"
+
+#: src/exec_iolog.c:327 src/exec_iolog.c:367 src/exec_iolog.c:407
+#: src/exec_iolog.c:458 src/exec_iolog.c:509
+msgid "command rejected by I/O plugin"
+msgstr "відмова у виконання команди від додатка введення-виведення"
+
+#: src/exec_iolog.c:556
+msgid "error logging suspend"
+msgstr "помилка під час призупинення ведення журналу"
+
+#: src/exec_iolog.c:591
+msgid "error changing window size"
+msgstr "помилка під час зміни розмірів вікна"
 
 #: src/exec_monitor.c:360
 msgid "error reading from socketpair"
@@ -363,224 +387,213 @@ msgstr "помилка під час спроби читання з пари с�
 msgid "unexpected reply type on backchannel: %d"
 msgstr "неочікуваний тип відповіді на зворотному каналі: %d"
 
-#: src/exec_monitor.c:593
+#: src/exec_monitor.c:585
 msgid "unable to set controlling tty"
 msgstr "не вдалося встановити tty для керування"
 
-#: src/exec_monitor.c:601 src/exec_nopty.c:382 src/exec_pty.c:1526
-#: src/exec_pty.c:1547 src/exec_pty.c:1567 src/tgetpass.c:305
+#: src/exec_monitor.c:593 src/exec_nopty.c:494 src/exec_nopty.c:504
+#: src/exec_nopty.c:514 src/exec_nopty.c:548 src/exec_pty.c:1088
+#: src/exec_pty.c:1109 src/exec_pty.c:1129 src/tgetpass.c:305
 msgid "unable to create pipe"
 msgstr "не вдалося створити канал"
 
-#: src/exec_monitor.c:611
+#: src/exec_monitor.c:603
 msgid "unable to receive message from parent"
 msgstr "не вдалося отримати повідомлення від батьківського процесу"
 
-#: src/exec_monitor.c:627 src/exec_nopty.c:422 src/exec_pty.c:1605
+#: src/exec_monitor.c:619 src/exec_nopty.c:591 src/exec_pty.c:1167
 #: src/sudo_edit.c:361 src/tgetpass.c:309
 msgid "unable to fork"
 msgstr "не вдалося створити відгалуження"
 
-#: src/exec_monitor.c:631 src/exec_monitor.c:749 src/exec_nopty.c:518
+#: src/exec_monitor.c:623 src/exec_monitor.c:721 src/exec_nopty.c:696
 msgid "unable to restore tty label"
 msgstr "не вдалося відновити позначку tty"
 
-#: src/exec_monitor.c:664 src/sesh.c:123 src/sudo.c:1177
+#: src/exec_monitor.c:636 src/sesh.c:217 src/sudo.c:1189
 #, c-format
 msgid "unable to execute %s"
 msgstr "не вдалося виконати %s"
 
-#: src/exec_nopty.c:376 src/exec_pty.c:1456
+#: src/exec_nopty.c:542 src/exec_pty.c:1026
 msgid "policy plugin failed session initialization"
 msgstr "не вдалося виконати ініціалізацію сеансу через додаток правил"
 
-#: src/exec_nopty.c:391 src/exec_pty.c:1425 src/exec_pty.c:1434
+#: src/exec_nopty.c:557 src/exec_pty.c:995 src/exec_pty.c:1004
 msgid "unable to create sockets"
 msgstr "не вдалося створити сокети"
 
-#: src/exec_nopty.c:506 src/exec_pty.c:1703
+#: src/exec_nopty.c:684 src/exec_pty.c:1265
 msgid "error in event loop"
 msgstr "помилка у циклі обробки подій"
 
-#: src/exec_ptrace.c:647
-msgid "insufficient space for execve arguments"
-msgstr "недостатньо місця для аргументів execve"
-
-#: src/exec_ptrace.c:658 src/exec_ptrace.c:668 src/exec_ptrace.c:678
-#, c-format
-msgid "unable to read execve %s for process %d"
-msgstr "не вдалося прочитати %s execve для процесу %d"
-
-#: src/exec_ptrace.c:714 src/exec_ptrace.c:739 src/exec_ptrace.c:1194
-#, c-format
-msgid "unable to set registers for process %d"
-msgstr "не вдалося встановити регістри для процесу %d"
-
-#: src/exec_ptrace.c:734 src/exec_ptrace.c:899
-#, c-format
-msgid "process %d exited unexpectedly"
-msgstr "процес %d неочікувано завершив роботу"
-
-#: src/exec_ptrace.c:843
-msgid "unable to set seccomp filter"
-msgstr "не вдалося встановити фільтр seccomp"
-
-#: src/exec_ptrace.c:934
-#, c-format
-msgid "pathname mismatch, expected \"%s\", got \"%s\""
-msgstr "невідповідність шляхів: мало бути «%s», маємо «%s»"
-
-#: src/exec_ptrace.c:942 src/exec_ptrace.c:948 src/exec_ptrace.c:954
-#: src/exec_ptrace.c:962 src/exec_ptrace.c:968 src/exec_ptrace.c:974
-#, c-format
-msgid "%s[%d] mismatch, expected \"%s\", got \"%s\""
-msgstr "невідповідність %s[%d]: мало бути «%s», маємо «%s»"
-
-#: src/exec_ptrace.c:1013
-#, c-format
-msgid "unable to get event message for process %d"
-msgstr "не вдалося отримати повідомлення події для процесу %d"
-
-#: src/exec_ptrace.c:1019
-#, c-format
-msgid "unable to get registers for process %d"
-msgstr "не вдалося отримати регістри для процесу %d"
-
-#: src/exec_pty.c:163
-msgid "unable to allocate pty"
-msgstr "не вдалося розмістити pty"
-
-#: src/exec_pty.c:227 src/exec_pty.c:267 src/exec_pty.c:307 src/exec_pty.c:358
-#: src/exec_pty.c:409
-msgid "I/O plugin error"
-msgstr "Помилка у додатку введення-виведення"
-
-#: src/exec_pty.c:231 src/exec_pty.c:271 src/exec_pty.c:311 src/exec_pty.c:362
-#: src/exec_pty.c:413
-msgid "command rejected by I/O plugin"
-msgstr "відмова у виконання команди від додатка введення-виведення"
-
-#: src/exec_pty.c:460
-msgid "error logging suspend"
-msgstr "помилка під час призупинення ведення журналу"
-
-#: src/exec_pty.c:494
-msgid "error changing window size"
-msgstr "помилка під час зміни розмірів вікна"
-
-#: src/exec_pty.c:624 src/signal.c:101 src/suspend_nopty.c:95
-#, c-format
-msgid "unable to restore handler for signal %d"
-msgstr "не вдалося відновити обробник для сигналу %d"
-
-#: src/exec_pty.c:1651
-msgid "unable to send message to monitor process"
-msgstr "не вдалося надіслати повідомлення до процесу аудиту"
-
-#: src/load_plugins.c:108 src/load_plugins.c:122 src/load_plugins.c:128
-#: src/load_plugins.c:277 src/load_plugins.c:287 src/load_plugins.c:297
-#: src/load_plugins.c:344
-#, c-format
-msgid "error in %s, line %d while loading plugin \"%s\""
-msgstr "помилка у %s, рядок %d під час спроби завантаження додатка «%s»"
-
-#: src/load_plugins.c:124
-#, c-format
-msgid "%s must be owned by uid %d"
-msgstr "%s має належати користувачеві з uid %d"
-
-#: src/load_plugins.c:130
-#, c-format
-msgid "%s must be only be writable by owner"
-msgstr "%s має бути доступним до запису лише для власника"
-
-#: src/load_plugins.c:241 src/load_plugins.c:312
-#, c-format
-msgid "ignoring duplicate plugin \"%s\" in %s, line %d"
-msgstr "ігноруємо повторний запис додатка, «%s», у %s, рядок %d"
-
-#: src/load_plugins.c:279
-#, c-format
-msgid "unable to load %s: %s"
-msgstr "не вдалося завантажити %s: %s"
-
-#: src/load_plugins.c:289
-#, c-format
-msgid "unable to find symbol \"%s\" in %s"
-msgstr "не вдалося знайти символ «%s» у %s"
-
-#: src/load_plugins.c:299
-#, c-format
-msgid "incompatible plugin major version %d (expected %d) found in %s"
-msgstr "несумісна основна версія додатка, %d, (мало бути %d) у %s"
-
-#: src/load_plugins.c:317
-#, c-format
-msgid "ignoring policy plugin \"%s\" in %s, line %d"
-msgstr "ігноруємо додаток правил, «%s», у %s, рядок %d"
-
-#: src/load_plugins.c:320
-msgid "only a single policy plugin may be specified"
-msgstr "можна визначати лише один додаток обробки правил"
-
-#: src/load_plugins.c:346
-#, c-format
-msgid "unknown plugin type %d found in %s"
-msgstr "у %2$s виявлено невідомий тип додатка, %1$d"
-
-#: src/load_plugins.c:529
-#, c-format
-msgid "policy plugin %s does not include a check_policy method"
-msgstr "до додатка правил %s не включено метод check_policy"
-
-#: src/net_ifs.c:210 src/net_ifs.c:376 src/net_ifs.c:437 src/net_ifs.c:624
-#: src/net_ifs.c:855 src/sudo.c:486 src/sudo_edit.c:398 src/sudo_edit.c:406
+#: src/exec_preload.c:165 src/net_ifs.c:206 src/net_ifs.c:372
+#: src/net_ifs.c:433 src/net_ifs.c:620 src/net_ifs.c:851 src/sudo.c:486
+#: src/sudo_edit.c:398 src/sudo_edit.c:406
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "внутрішня помилка, переповнення %s"
 
-#: src/parse_args.c:211
+#: src/exec_ptrace.c:1078 src/exec_ptrace.c:1103 src/exec_ptrace.c:1909
+#, c-format
+msgid "unable to set registers for process %d"
+msgstr "не вдалося встановити регістри для процесу %d"
+
+#: src/exec_ptrace.c:1098 src/exec_ptrace.c:1273 src/exec_ptrace.c:1615
+#, c-format
+msgid "process %d exited unexpectedly"
+msgstr "процес %d неочікувано завершив роботу"
+
+#: src/exec_ptrace.c:1207
+msgid "unable to set seccomp filter"
+msgstr "не вдалося встановити фільтр seccomp"
+
+#: src/exec_ptrace.c:1404
+#, c-format
+msgid "interpreter argument , expected \"%s\", got \"%s\""
+msgstr "аргумент інтерпретатора , мало бути «%s», маємо «%s»"
+
+#: src/exec_ptrace.c:1503
+#, c-format
+msgid "pathname mismatch, expected \"%s\", got \"%s\""
+msgstr "невідповідність шляхів: мало бути «%s», маємо «%s»"
+
+#: src/exec_ptrace.c:1512 src/exec_ptrace.c:1519 src/exec_ptrace.c:1532
+#: src/exec_ptrace.c:1540 src/exec_ptrace.c:1546 src/exec_ptrace.c:1552
+#, c-format
+msgid "%s[%d] mismatch, expected \"%s\", got \"%s\""
+msgstr "невідповідність %s[%d]: мало бути «%s», маємо «%s»"
+
+#: src/exec_ptrace.c:1619
+#, c-format
+msgid "process %d unexpected status 0x%x"
+msgstr "неочікуваний стан процесу %d: 0x%x"
+
+#: src/exec_ptrace.c:1711
+#, c-format
+msgid "unable to get event message for process %d"
+msgstr "не вдалося отримати повідомлення події для процесу %d"
+
+#: src/exec_ptrace.c:1718
+#, c-format
+msgid "unable to get registers for process %d"
+msgstr "не вдалося отримати регістри для процесу %d"
+
+#: src/exec_pty.c:103
+msgid "unable to allocate pty"
+msgstr "не вдалося розмістити pty"
+
+#: src/exec_pty.c:263 src/signal.c:101 src/suspend_nopty.c:99
+#, c-format
+msgid "unable to restore handler for signal %d"
+msgstr "не вдалося відновити обробник для сигналу %d"
+
+#: src/exec_pty.c:1213
+msgid "unable to send message to monitor process"
+msgstr "не вдалося надіслати повідомлення до процесу аудиту"
+
+#: src/load_plugins.c:109 src/load_plugins.c:123 src/load_plugins.c:129
+#: src/load_plugins.c:279 src/load_plugins.c:289 src/load_plugins.c:299
+#: src/load_plugins.c:346
+#, c-format
+msgid "error in %s, line %d while loading plugin \"%s\""
+msgstr "помилка у %s, рядок %d під час спроби завантаження додатка «%s»"
+
+#: src/load_plugins.c:125
+#, c-format
+msgid "%s must be owned by uid %d"
+msgstr "%s має належати користувачеві з uid %d"
+
+#: src/load_plugins.c:131
+#, c-format
+msgid "%s must be only be writable by owner"
+msgstr "%s має бути доступним до запису лише для власника"
+
+#: src/load_plugins.c:243 src/load_plugins.c:314
+#, c-format
+msgid "ignoring duplicate plugin \"%s\" in %s, line %d"
+msgstr "ігноруємо повторний запис додатка, «%s», у %s, рядок %d"
+
+#: src/load_plugins.c:281
+#, c-format
+msgid "unable to load %s: %s"
+msgstr "не вдалося завантажити %s: %s"
+
+#: src/load_plugins.c:291
+#, c-format
+msgid "unable to find symbol \"%s\" in %s"
+msgstr "не вдалося знайти символ «%s» у %s"
+
+#: src/load_plugins.c:301
+#, c-format
+msgid "incompatible plugin major version %d (expected %d) found in %s"
+msgstr "несумісна основна версія додатка, %d, (мало бути %d) у %s"
+
+#: src/load_plugins.c:319
+#, c-format
+msgid "ignoring policy plugin \"%s\" in %s, line %d"
+msgstr "ігноруємо додаток правил, «%s», у %s, рядок %d"
+
+#: src/load_plugins.c:322
+msgid "only a single policy plugin may be specified"
+msgstr "можна визначати лише один додаток обробки правил"
+
+#: src/load_plugins.c:348
+#, c-format
+msgid "unknown plugin type %d found in %s"
+msgstr "у %2$s виявлено невідомий тип додатка, %1$d"
+
+#: src/load_plugins.c:531
+#, c-format
+msgid "policy plugin %s does not include a check_policy method"
+msgstr "до додатка правил %s не включено метод check_policy"
+
+#: src/parse_args.c:214
 #, c-format
 msgid "invalid environment variable name: %s"
 msgstr "некоректна назва змінної середовища: %s"
 
-#: src/parse_args.c:314
+#: src/parse_args.c:317
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "аргументом параметра -C mмає бути число не менше за 3"
 
-#: src/parse_args.c:545
+#: src/parse_args.c:554
 msgid "you may not specify both the -i and -s options"
 msgstr "не можна одночасно вказувати параметри -i і -s"
 
-#: src/parse_args.c:550
+#: src/parse_args.c:559
 msgid "you may not specify both the -i and -E options"
 msgstr "не можна одночасно вказувати параметри -i і -E"
 
-#: src/parse_args.c:560
+#: src/parse_args.c:569
 msgid "the -E option is not valid in edit mode"
 msgstr "не можна використовувати -E у режимі редагування"
 
-#: src/parse_args.c:563
+#: src/parse_args.c:572
 msgid "you may not specify environment variables in edit mode"
 msgstr "не можна вказувати змінні середовища у режимі редагування"
 
-#: src/parse_args.c:573
+#: src/parse_args.c:582
 msgid "the -U option may only be used with the -l option"
 msgstr "параметр -U можна використовувати лише разом з параметром -l"
 
-#: src/parse_args.c:577
+#: src/parse_args.c:586
 msgid "the -A and -S options may not be used together"
 msgstr "параметри -A і -S не можна використовувати одночасно"
 
-#: src/parse_args.c:674
+#: src/parse_args.c:684
 msgid "sudoedit is not supported on this platform"
 msgstr "підтримки sudoedit для цієї платформи не передбачено"
 
-#: src/parse_args.c:757
+#: src/parse_args.c:767
 msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
 msgstr "Можна використовувати лише такі параметри: -e, -h, -i, -K, -l, -s, -v та -V"
 
-#: src/parse_args.c:773
+#: src/parse_args.c:780
+msgid "Only one of the -K, -k or -N options may be specified"
+msgstr "Може бути вказано лише один параметр з набору -K, -k і -N"
+
+#: src/parse_args.c:796
 #, c-format
 msgid ""
 "%s - edit files as another user\n"
@@ -589,7 +602,7 @@ msgstr ""
 "%s — редагувати файли від імені іншого користувача\n"
 "\n"
 
-#: src/parse_args.c:775
+#: src/parse_args.c:798
 #, c-format
 msgid ""
 "%s - execute a command as another user\n"
@@ -598,7 +611,7 @@ msgstr ""
 "%s — виконати команду від імені іншого користувача\n"
 "\n"
 
-#: src/parse_args.c:781
+#: src/parse_args.c:804
 msgid ""
 "\n"
 "Options:\n"
@@ -606,131 +619,131 @@ msgstr ""
 "\n"
 "Параметри:\n"
 
-#: src/parse_args.c:783
+#: src/parse_args.c:806
 msgid "use a helper program for password prompting"
 msgstr "використовувати допоміжну програму для запитів щодо пароля"
 
-#: src/parse_args.c:786
+#: src/parse_args.c:809
 msgid "use specified BSD authentication type"
 msgstr "використовувати вказаний тип розпізнавання BSD"
 
-#: src/parse_args.c:790
+#: src/parse_args.c:813
 msgid "run command in the background"
 msgstr "виконати команду у фоновому режимі"
 
-#: src/parse_args.c:793
+#: src/parse_args.c:816
 msgid "ring bell when prompting"
 msgstr "звук дзвінка під час запиту"
 
-#: src/parse_args.c:795
+#: src/parse_args.c:818
 msgid "close all file descriptors >= num"
 msgstr "закрити всі дескриптори файлів >= num"
 
-#: src/parse_args.c:798
+#: src/parse_args.c:821
 msgid "run command with the specified BSD login class"
 msgstr "виконати команду з вказаним класом доступу BSD"
 
-#: src/parse_args.c:801
+#: src/parse_args.c:824
 msgid "change the working directory before running command"
 msgstr "змінити робочий каталог перед виконанням команди"
 
-#: src/parse_args.c:804
+#: src/parse_args.c:827
 msgid "preserve user environment when running command"
 msgstr "зберегти середовище користувача на час виконання команди"
 
-#: src/parse_args.c:806
+#: src/parse_args.c:829
 msgid "preserve specific environment variables"
 msgstr "зберегти вказані змінні середовища"
 
-#: src/parse_args.c:808
+#: src/parse_args.c:831
 msgid "edit files instead of running a command"
 msgstr "редагувати файли замість виконання команди"
 
-#: src/parse_args.c:811
+#: src/parse_args.c:834
 msgid "run command as the specified group name or ID"
 msgstr "виконати команду від імені групи користувачів, вказаної за назвою або ідентифікатором"
 
-#: src/parse_args.c:814
+#: src/parse_args.c:837
 msgid "set HOME variable to target user's home dir"
 msgstr "встановити для змінної HOME значення домашнього каталогу вказаного користувача."
 
-#: src/parse_args.c:817
+#: src/parse_args.c:840
 msgid "display help message and exit"
 msgstr "показати довідкове повідомлення і завершити роботу"
 
-#: src/parse_args.c:819
+#: src/parse_args.c:842
 msgid "run command on host (if supported by plugin)"
 msgstr "виконати команду на комп’ютері (якщо підтримується додатком)"
 
-#: src/parse_args.c:822
+#: src/parse_args.c:845
 msgid "run login shell as the target user; a command may also be specified"
 msgstr "запустити оболонку для входу до системи від імені вказаного користувача; слід вказати команду запуску"
 
-#: src/parse_args.c:824
+#: src/parse_args.c:847
 msgid "remove timestamp file completely"
 msgstr "повністю вилучити файл часової позначки"
 
-#: src/parse_args.c:827
+#: src/parse_args.c:850
 msgid "invalidate timestamp file"
 msgstr "позбавити чинності файл часової позначки"
 
-#: src/parse_args.c:830
+#: src/parse_args.c:853
 msgid "list user's privileges or check a specific command; use twice for longer format"
 msgstr "показати список прав доступу користувача або перевірити певну команду; подвоєння параметра призводить до виведення додаткових даних"
 
-#: src/parse_args.c:833
+#: src/parse_args.c:856
 msgid "non-interactive mode, no prompts are used"
 msgstr "неінтерактивний режим, не просити користувача відповідати на питання"
 
-#: src/parse_args.c:836
+#: src/parse_args.c:859
 msgid "preserve group vector instead of setting to target's"
 msgstr "зберегти вектор групи, не встановлювати вектор вказаного користувача"
 
-#: src/parse_args.c:839
+#: src/parse_args.c:862
 msgid "use the specified password prompt"
 msgstr "використовувати вказаний інструмент отримання паролів"
 
-#: src/parse_args.c:841
+#: src/parse_args.c:864
 msgid "change the root directory before running command"
 msgstr "змінити кореневий каталог перед виконанням команди"
 
-#: src/parse_args.c:844
+#: src/parse_args.c:867
 msgid "create SELinux security context with specified role"
 msgstr "створити контекст захисту SELinux з вказаною роллю"
 
-#: src/parse_args.c:847
+#: src/parse_args.c:870
 msgid "read password from standard input"
 msgstr "прочитати пароль зі стандартного джерела вхідних даних"
 
-#: src/parse_args.c:850
+#: src/parse_args.c:873
 msgid "run shell as the target user; a command may also be specified"
 msgstr "виконати командну оболонку від імені вказаного користувача; слід також вказати команду"
 
-#: src/parse_args.c:854
+#: src/parse_args.c:877
 msgid "create SELinux security context with specified type"
 msgstr "створити контекст захисту SELinux вказаного типу"
 
-#: src/parse_args.c:857
+#: src/parse_args.c:880
 msgid "terminate command after the specified time limit"
 msgstr "перервати виконання команди щойно буде перевищено вказане обмеження за часом"
 
-#: src/parse_args.c:860
+#: src/parse_args.c:883
 msgid "in list mode, display privileges for user"
 msgstr "у режимі списку, показати права доступу користувача"
 
-#: src/parse_args.c:863
+#: src/parse_args.c:886
 msgid "run command (or edit file) as specified user name or ID"
 msgstr "виконати команду (або редагувати файл) від імені користувача, вказаного за іменем або ідентифікатором"
 
-#: src/parse_args.c:865
+#: src/parse_args.c:888
 msgid "display version information and exit"
 msgstr "показати дані щодо версії і завершити роботу"
 
-#: src/parse_args.c:868
+#: src/parse_args.c:891
 msgid "update user's timestamp without running a command"
 msgstr "оновити штамп часу користувача без виконання команди"
 
-#: src/parse_args.c:871
+#: src/parse_args.c:894
 msgid "stop processing command line arguments"
 msgstr "зупинити обробку аргументів командного рядка"
 
@@ -830,37 +843,42 @@ msgstr "не вдалося встановити контекст виконан
 msgid "unable to set key creation context to %s"
 msgstr "не вдалося встановити контекст ключа створення у значення %s"
 
-#: src/sesh.c:72
-msgid "requires at least one argument"
-msgstr "потребує принаймні одного аргументу"
+#: src/sesh.c:114 src/sesh.c:134
+msgid "Only one of the -c or -i options may be specified"
+msgstr "Може бути вказано лише один параметр, -c або -i"
 
-#: src/sesh.c:104
+#: src/sesh.c:129
 #, c-format
 msgid "invalid file descriptor number: %s"
 msgstr "некоректний номер дескриптора файла: %s"
 
-#: src/sesh.c:118
+#: src/sesh.c:167 src/sesh.c:171 src/sesh.c:175
 #, c-format
-msgid "unable to run %s as a login shell"
-msgstr "%s не можна працювати як оболонка для входу"
+msgid "The -%c option may not be used in edit mode."
+msgstr "Параметром -%c не можна користуватися у режимі редагування."
 
-#: src/sesh.c:200 src/sesh.c:300 src/sudo_edit.c:204
+#: src/sesh.c:184 src/sesh.c:189
+#, c-format
+msgid "The -%c option may only be used in edit mode."
+msgstr "Параметром -%c можна скористатися лише у режимі редагування."
+
+#: src/sesh.c:294 src/sesh.c:394 src/sudo_edit.c:204
 #, c-format
 msgid "%s: editing symbolic links is not permitted"
 msgstr "%s: не можна редагувати символічні посилання"
 
-#: src/sesh.c:203 src/sesh.c:303 src/sudo_edit.c:207
+#: src/sesh.c:297 src/sesh.c:397 src/sudo_edit.c:207
 #, c-format
 msgid "%s: editing files in a writable directory is not permitted"
 msgstr "%s: не можна редагувати файли у непридатному до запису каталозі"
 
-#: src/sesh.c:287 src/sesh.c:308 src/sesh.c:317 src/sesh.c:325
+#: src/sesh.c:381 src/sesh.c:402 src/sesh.c:411 src/sesh.c:419
 #: src/sudo_edit.c:331
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr "дані сеансу редагування залишилися у %s"
 
-#: src/sesh.c:416 src/sudo_edit.c:94
+#: src/sesh.c:476 src/sudo_edit.c:94
 msgid "unable to get group list"
 msgstr "не вдалося отримати список груп"
 
@@ -944,117 +962,121 @@ msgstr "вас немає у базі даних %s"
 msgid "unable to determine tty"
 msgstr "не вдалося визначити tty"
 
-#: src/sudo.c:925
+#: src/sudo.c:918
 msgid "The \"no new privileges\" flag is set, which prevents sudo from running as root."
 msgstr "Встановлено прапорець «без нових привілеїв», який забороняє запуск sudo від імені користувача root."
 
-#: src/sudo.c:927
+#: src/sudo.c:920
 msgid "If sudo is running in a container, you may need to adjust the container configuration to disable the flag."
 msgstr "Якщо sudo запущено у контейнері, вам, можливо, слід скоригувати налаштування контейнера, щоб вимкнути цей прапорець."
 
-#: src/sudo.c:961
+#: src/sudo.c:954
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s має належати користувачеві з uid %d, крім того, має бути встановлено біт setuid"
 
-#: src/sudo.c:964
+#: src/sudo.c:957
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "поточним uid не є %d. Можливо %s зберігається у файловій системі зі встановленим параметром «nosuid» або у файловій системі NFS без прав доступу root?"
 
-#: src/sudo.c:970
+#: src/sudo.c:963
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "поточним uid не є %d, sudo встановлено з ідентифікатором користувача root?"
 
-#: src/sudo.c:986 src/tgetpass.c:331
+#: src/sudo.c:979 src/tgetpass.c:331
 msgid "unable to set supplementary group IDs"
 msgstr "не вдалося встановити ідентифікатори додаткових груп"
 
-#: src/sudo.c:993
+#: src/sudo.c:986
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "не вдалося встановити ефективний ідентифікатор групи для ідентифікатора групи запуску %u"
 
-#: src/sudo.c:999
+#: src/sudo.c:992
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "не вдалося встановити ідентифікатор групи для ідентифікатора групи запуску %u"
 
-#: src/sudo.c:1042
+#: src/sudo.c:1022
+msgid "argv not set by the security policy"
+msgstr "argv не встановлено правилами захисту"
+
+#: src/sudo.c:1026
+msgid "envp not set by the security policy"
+msgstr "envp не встановлено правилами захисту"
+
+#: src/sudo.c:1048
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "неочікувана умова переривання дочірнього процесу: %d"
 
-#: src/sudo.c:1149
+#: src/sudo.c:1161
 msgid "unable to initialize policy plugin"
 msgstr "не вдалося ініціалізувати додаток правил"
 
-#: src/sudo.c:1211
+#: src/sudo.c:1223
 #, c-format
 msgid "policy plugin %s is missing the \"check_policy\" method"
 msgstr "до додатка правил %s не включено метод check_policy"
 
-#: src/sudo.c:1257
+#: src/sudo.c:1269
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "у додатку правил %s не передбачено підтримки побудови списку прав доступу"
 
-#: src/sudo.c:1301
+#: src/sudo.c:1313
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "у додатку правил %s не передбачено підтримки параметра -v"
 
-#: src/sudo.c:1339
+#: src/sudo.c:1351
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "у додатку правил %s не передбачено підтримки параметрів -k/-K"
 
-#: src/sudo.c:1468
+#: src/sudo.c:1480
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "помилка під час спроби ініціалізації додатка введення/виведення даних %s"
 
-#: src/sudo.c:1471
+#: src/sudo.c:1483
 msgid "error initializing I/O plugin"
 msgstr "помилка під час спроби ініціалізації додатка введення/виведення даних"
 
-#: src/sudo.c:1620
+#: src/sudo.c:1632
 #, c-format
 msgid "error initializing audit plugin %s"
 msgstr "помилка під час спроби ініціалізації додатка аудиту %s"
 
-#: src/sudo.c:1699
+#: src/sudo.c:1711
 #, c-format
 msgid "%s: unable to log error event%s%s"
 msgstr "%s: не вдалося записати до журналу подію помилки%s%s"
 
-#: src/sudo.c:1735
+#: src/sudo.c:1747
 #, c-format
 msgid "%s: unable to log accept event%s%s"
 msgstr "%s: не вдалося записати до журналу подію прийняття%s%s"
 
-#: src/sudo.c:1740 src/sudo.c:1778
+#: src/sudo.c:1752 src/sudo.c:1790
 msgid "audit plugin error"
 msgstr "помилка у додатку аудиту"
 
-#: src/sudo.c:1773
+#: src/sudo.c:1785
 #, c-format
 msgid "%s: unable to log reject event%s%s"
 msgstr "%s: не вдалося записати до журналу подію відмови%s%s"
 
-#: src/sudo.c:1833
+#: src/sudo.c:1845
 #, c-format
 msgid "error initializing approval plugin %s"
 msgstr "помилка під час спроби ініціалізації додатка підтвердження %s"
 
-#: src/sudo.c:1903
+#: src/sudo.c:1915
 msgid "command rejected by approver"
 msgstr "у виконанні команди відмовлено засобом підтвердження"
-
-#: src/sudo.c:1913
-msgid "approval plugin error"
-msgstr "помилка у додатку підтвердження"
 
 #: src/sudo_edit.c:113
 msgid "no writable temporary directory found"
@@ -1065,7 +1087,7 @@ msgstr "не знайдено придатного до запису тимча�
 msgid "%s left unmodified"
 msgstr "%s залишено без змін"
 
-#: src/sudo_edit.c:304 src/sudo_edit.c:571
+#: src/sudo_edit.c:304 src/sudo_edit.c:569
 #, c-format
 msgid "%s unchanged"
 msgstr "%s не змінено"
@@ -1078,37 +1100,37 @@ msgstr "sesh: внутрішня помилка: непарна кількіст
 msgid "sesh: unable to create temporary files"
 msgstr "sesh: не вдалося створити тимчасові файли"
 
-#: src/sudo_edit.c:485 src/sudo_edit.c:609
+#: src/sudo_edit.c:485 src/sudo_edit.c:604
 msgid "sesh: killed by a signal"
 msgstr "sesh: завершено надсиланням сигналу"
 
-#: src/sudo_edit.c:487 src/sudo_edit.c:612
+#: src/sudo_edit.c:487 src/sudo_edit.c:607
 #, c-format
 msgid "sesh: unknown error %d"
 msgstr "sesh: невідома помилка %d"
 
-#: src/sudo_edit.c:602
+#: src/sudo_edit.c:597
 msgid "unable to copy temporary files back to their original location"
 msgstr "не вдалося скопіювати тимчасові файли назад до початкового місця зберігання"
 
-#: src/sudo_edit.c:606
+#: src/sudo_edit.c:601
 msgid "unable to copy some of the temporary files back to their original location"
 msgstr "не вдалося скопіювати деякі з тимчасових файлів назад до початкового місця зберігання"
 
-#: src/sudo_edit.c:649
+#: src/sudo_edit.c:645
 #, c-format
 msgid "unable to change uid to root (%u)"
 msgstr "не вдалося змінити значення uid на значення root (%u)"
 
-#: src/sudo_edit.c:670
+#: src/sudo_edit.c:666
 msgid "plugin error: missing file list for sudoedit"
 msgstr "помилка додатка: не вистачає списку файлів для sudoedit"
 
-#: src/sudo_edit.c:713 src/sudo_edit.c:727
+#: src/sudo_edit.c:709 src/sudo_edit.c:723
 msgid "unable to read the clock"
 msgstr "не вдалося прочитати час на годиннику"
 
-#: src/sudo_intercept_common.c:341
+#: src/sudo_intercept_common.c:365
 msgid "intercept port not set"
 msgstr "порт перехоплення не встановлено"
 
@@ -1158,6 +1180,18 @@ msgstr "не вдалося виконати dup2 для stdin"
 #: src/utmp.c:293
 msgid "unable to restore stdin"
 msgstr "не вдалося відновити stdin"
+
+#~ msgid "insufficient space for execve arguments"
+#~ msgstr "недостатньо місця для аргументів execve"
+
+#~ msgid "unable to read execve %s for process %d"
+#~ msgstr "не вдалося прочитати %s execve для процесу %d"
+
+#~ msgid "requires at least one argument"
+#~ msgstr "потребує принаймні одного аргументу"
+
+#~ msgid "unable to run %s as a login shell"
+#~ msgstr "%s не можна працювати як оболонка для входу"
 
 #~ msgid "unable to dup intercept fd"
 #~ msgstr "не вдалося здублювати перехоплений дескриптор файла"
