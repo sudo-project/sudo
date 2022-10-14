@@ -111,6 +111,8 @@ What's new in Sudo 1.9.12
  * The sesh helper program now uses getopt_long(3) to parse the
    command line options.
 
+ * The embedded copy of zlib has been updated to version 1.2.13.
+
 What's new in Sudo 1.9.11p3
 
  * Fixed "connection reset" errors on AIX when running shell scripts
