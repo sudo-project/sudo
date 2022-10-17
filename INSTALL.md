@@ -30,13 +30,13 @@ for a list of packages required to build sudo.
 
 ## Simple sudo installation
 
-0. If you are upgrading from a previous version of sudo, read
+1. If you are upgrading from a previous version of sudo, read
    [docs/UPGRADE.md](docs/UPGRADE.md) before proceeding.
 
-1. Read the "OS dependent notes" section for any particular
+2. Read the "OS dependent notes" section for any particular
    "gotchas" relating to your operating system.
 
-2. `cd` to the source or build directory and type `./configure`
+3. `cd` to the source or build directory and type `./configure`
    to generate a Makefile and config.h file suitable for building
    sudo.  Before you actually run configure you should read the
    "Available configure options" section to see if there are
