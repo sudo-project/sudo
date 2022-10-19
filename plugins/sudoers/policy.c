@@ -1181,8 +1181,8 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 #ifndef NO_LEAKS
     if (ret == true && sudo_version >= SUDO_API_MKVERSION(1, 3)) {
 	/* Unset close function if we don't need it to avoid extra process. */
-	if (!iolog_enabled && !def_log_exit_status && !def_use_pty &&
-		!sudo_auth_needs_end_session())
+	if (!iolog_enabled && !def_use_pty && !def_log_exit_status &&
+		SLIST_EMPTY(&def_log_servers) && !sudo_auth_needs_end_session())
 	    sudoers_policy.close = NULL;
     }
 #endif
