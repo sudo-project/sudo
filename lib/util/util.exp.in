@@ -145,6 +145,7 @@ sudo_term_cbreak_v1
 sudo_term_copy_v1
 sudo_term_eof
 sudo_term_erase
+sudo_term_is_raw_v1
 sudo_term_kill
 sudo_term_noecho_v1
 sudo_term_raw_v1

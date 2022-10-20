@@ -349,6 +349,8 @@ sudo_dso_public bool sudo_term_raw_v1(int fd, int isig);
 #define sudo_term_raw(_a, _b) sudo_term_raw_v1((_a), (_b))
 sudo_dso_public bool sudo_term_restore_v1(int fd, bool flush);
 #define sudo_term_restore(_a, _b) sudo_term_restore_v1((_a), (_b))
+sudo_dso_public bool sudo_term_is_raw_v1(int fd);
+#define sudo_term_is_raw(_a) sudo_term_is_raw_v1((_a))
 
 /* ttyname_dev.c */
 sudo_dso_public char *sudo_ttyname_dev_v1(dev_t tdev, char *name, size_t namelen);
