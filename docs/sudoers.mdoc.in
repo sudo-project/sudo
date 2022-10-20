@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd September 27, 2022
+.Dd October 20, 2022
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -168,16 +168,19 @@ security policy requires that most users authenticate
 themselves before they can use
 .Nm sudo .
 A password is not required
-if the invoking user is root, if the target user is the same as the
-invoking user, or if the policy has disabled authentication for the
-user or command.
+if the invoking user is
+.Sy root ,
+if the target user is the same as the invoking user, or if the
+policy has disabled authentication for the user or command.
 Unlike
 .Xr su 1 ,
 when
 .Nm
 requires
 authentication, it validates the invoking user's credentials, not
-the target user's (or root's) credentials.
+the target user's (or
+.Sy @runas_default@ Ns No 's)
+credentials.
 This can be changed via
 the
 .Em rootpw ,
@@ -219,7 +222,9 @@ are logged, regardless of whether or not mail is sent.
 .Pp
 If
 .Nm sudo
-is run by root and the
+is run by
+.Sy root
+and the
 .Ev SUDO_USER
 environment variable
 is set, the
@@ -227,7 +232,9 @@ is set, the
 policy will use this value to determine who
 the actual user is.
 This can be used by a user to log commands
-through sudo even when a root shell has been invoked.
+through sudo even when a
+.Sy root
+shell has been invoked.
 It also
 allows the
 .Fl e
@@ -235,7 +242,9 @@ option to remain useful even when invoked via a
 sudo-run script or program.
 Note, however, that the
 .Em sudoers
-file lookup is still done for root, not the user specified by
+file lookup is still done for
+.Sy root ,
+not the user specified by
 .Ev SUDO_USER .
 .Pp
 .Nm
@@ -442,7 +451,9 @@ as modified by global Defaults parameters in
 .Em sudoers ,
 is displayed when
 .Nm sudo
-is run by root with the
+is run by
+.Sy root
+with the
 .Fl V
 option.
 The list of environment variables to remove
@@ -888,8 +899,11 @@ it can contain
 User names and groups are matched as strings.
 In other words, two users (groups) with the same user (group) ID
 are considered to be distinct.
-If you wish to match all user names with the same user-ID (e.g., root and
-toor), you can use a user-ID instead of a name (#0 in the example given).
+If you wish to match all user names with the same user-ID (e.g.,
+.Sy root
+and
+.Sy toor ) ,
+you can use a user-ID instead of a name (#0 in the example given).
 The user-ID or group-ID specified in a
 .Em Runas_Member
 need not be listed in the password or group database.
@@ -1261,10 +1275,12 @@ A
 .Sy user specification
 determines which commands a user may run
 (and as what user) on specified hosts.
-By default, commands are
-run as
-.Sy root ,
-but this can be changed on a per-command basis.
+By default, commands are run as
+.Sy @runas_default@
+(unless
+.Em runas_default
+has been set to a different value)
+but this can also be changed on a per-command basis.
 .Pp
 The basic structure of a user specification is
 .Dq who where = (as_whom) what .
@@ -1308,11 +1324,14 @@ are empty, the command may only be run as the invoking user and the
 group, if specified, must be one that the invoking user is a member of.
 If no
 .Em Runas_Spec
-is specified, the command may only be run as
-.Sy root
-and the group, if specified, must be one that
-.Sy root
-is a member of.
+is specified, the command may only be run as the
+.Em runas_default
+user
+.Sy ( @runas_default@
+by default) and the group,
+if specified, must be one that the
+.Em runas_default
+user is a member of.
 .Pp
 A
 .Em Runas_Spec
@@ -1416,7 +1435,10 @@ alan	ALL = (root, bin : operator, system) ALL
 .Pp
 user
 .Sy alan
-may run any command as either user root or bin,
+may run any command as either user
+.Sy root
+or
+.Sy bin ,
 optionally setting the group to operator or system.
 .Ss Option_Spec
 A
@@ -1483,7 +1505,9 @@ alice	ALL = (root)	APPARMOR_PROFILE=my-profile	ALL
 .Pp
 the user
 .Sy alice
-may run any command as root under confinement by the profile
+may run any command as
+.Sy root
+under confinement by the profile
 .Ql my-profile .
 You can also stack profiles, or allow a user to run commands unconfined by
 any profile.
@@ -1499,7 +1523,9 @@ entries allow user
 .Sy bob
 to run
 .Pa /usr/bin/vi
-as root under the stacked profiles
+as
+.Sy root
+under the stacked profiles
 .Ql foo
 and
 .Ql bar ,
@@ -1832,7 +1858,7 @@ to run
 and
 .Pa /usr/bin/lprm
 as
-.Sy root
+.Sy @runas_default@
 on the machine
 .Dq rushmore
 without authenticating himself.
@@ -2090,7 +2116,11 @@ In the following example, user
 .Sy john
 can run the
 .Xr passwd 1
-command as root on any host but is not allowed to change root's password.
+command as
+.Sy @runas_default@
+on any host but is not allowed to change
+.Sy root Ns No 's
+password.
 This kind of rule is impossible to express safely using wildcards.
 .Bd -literal -offset 4n
 john	ALL = /usr/bin/passwd ^[a-zA-Z0-9_]+$,\e
@@ -2121,7 +2151,8 @@ to run the
 .Pa /usr/sbin/usermod ,
 and
 .Pa /usr/sbin/userdel
-commands as root.
+commands as
+.Sy @runas_default@ .
 .Bd -literal -offset 4n
 sid    ALL = ^/usr/sbin/(group|user)(add|mod|del)$
 .Ed
@@ -2350,7 +2381,9 @@ This allows one to exclude certain values.
 For the
 .Ql \&!
 operator to be effective, there must be something for it to exclude.
-For example, to match all users except for root one would use:
+For example, to match all users except for
+.Sy root
+one would use:
 .Bd -literal -offset 4n
 ALL, !root
 .Ed
@@ -2362,7 +2395,9 @@ is omitted, as in:
 !root
 .Ed
 .Pp
-it would explicitly deny root but not match any other users.
+it would explicitly deny
+.Sy root
+but not match any other users.
 This is different from a true
 .Dq negation
 operator.
@@ -2430,7 +2465,9 @@ If enabled,
 will set the
 .Ev HOME
 environment variable to the home directory of the target user
-(which is the root user unless the
+(which is the
+.Em runas_default
+user unless the
 .Fl u
 option is used).
 This flag is largely obsolete and has no effect unless the
@@ -2562,9 +2599,13 @@ or
 .Ev EDITOR
 environment variables before falling back on the default editor list.
 .Nm visudo
-is typically run as root so this flag may allow a user with
+is typically run as
+.Sy root
+so this flag may allow a user with
 .Nm visudo
-privileges to run arbitrary commands as root without logging.
+privileges to run arbitrary commands as
+.Sy root
+without logging.
 An alternative is to place a colon-separated list of
 .Dq safe
 editors int the
@@ -2629,7 +2670,9 @@ lists, as modified by global Defaults parameters in
 .Em sudoers ,
 are displayed when
 .Nm sudo
-is run by root with the
+is run by
+.Sy root
+with the
 .Fl V
 option.
 If the
@@ -3532,17 +3575,23 @@ This flag is
 .Em off
 by default.
 .It root_sudo
-If set, root is allowed to run
+If set,
+.Sy root
+is allowed to run
 .Nm sudo
 too.
 Disabling this prevents users from
 .Dq chaining
 .Nm sudo
-commands to get a root shell by doing something like
+commands to get a
+.Sy root
+shell by doing something like
 .Ql sudo sudo /bin/sh .
 Note, however, that turning off
 .Em root_sudo
-will also prevent root from running
+will also prevent
+.Sy root
+from running
 .Nm sudoedit .
 Disabling
 .Em root_sudo
@@ -3553,7 +3602,9 @@ by default.
 .It rootpw
 If set,
 .Nm sudo
-will prompt for the root password instead of the password of the invoking user
+will prompt for the
+.Sy root
+password instead of the password of the invoking user
 when running a command or editing a file.
 This flag is
 .Em off
@@ -3599,7 +3650,8 @@ If set,
 .Nm sudo
 will prompt for the password of the user defined by the
 .Em runas_default
-option (defaults to @runas_default@)
+option (defaults to
+.Sy @runas_default@ )
 instead of the password of the invoking user
 when running a command or editing a file.
 This flag is
@@ -3622,7 +3674,9 @@ is invoked with the
 option, the
 .Ev HOME
 environment variable will be set to the home directory of the target
-user (which is the root user unless the
+user (which is the
+.Em runas_default
+user unless the
 .Fl u
 option is used).
 This flag is largely obsolete and has no effect unless the
@@ -3642,7 +3696,9 @@ will set the
 .Ev LOGNAME
 and
 .Ev USER
-environment variables to the name of the target user (usually root unless the
+environment variables to the name of the target user (the user specified by
+.Em runas_default
+unless the
 .Fl u
 option is given).
 However, since some programs (including the RCS revision control system) use
@@ -3709,7 +3765,9 @@ If set and
 is invoked with no arguments it acts as if the
 .Fl s
 option had been given.
-That is, it runs a shell as root (the shell is determined by the
+That is, it runs a shell as
+.Sy root
+(the shell is determined by the
 .Ev SHELL
 environment variable if it is set, falling back on the shell listed
 in the invoking user's /etc/passwd entry if not).
@@ -3720,7 +3778,9 @@ by default.
 Normally, when
 .Nm sudo
 executes a command the real and effective user-IDs are set to the target
-user (root by default).
+user
+.Sy ( @runas_default@
+by default).
 This option changes that behavior such that the real user-ID is left
 as the invoking user's user-ID.
 In other words, this makes
@@ -3746,7 +3806,8 @@ Symbolic links will not be followed in writable directories and
 will refuse to edit a file located in a writable directory.
 These restrictions are not enforced when
 .Nm sudoedit
-is run by root.
+is run by
+.Sy root .
 On some systems, if all directory components of the path to be edited
 are not readable by the target user,
 .Nm sudoedit
@@ -3793,7 +3854,8 @@ If set,
 will prompt for the password of the user specified
 by the
 .Fl u
-option (defaults to root)
+option (defaults to the value of
+.Em runas_default )
 instead of the password of the invoking user
 when running a command or editing a file.
 This flag precludes the use of a user-ID not listed in the passwd
@@ -4225,10 +4287,12 @@ expanded to the invoking user's login name
 expanded to the name of the invoking user's real group-ID
 .It %{runas_user}
 expanded to the login name of the user the command will
-be run as (e.g., root)
+be run as (e.g.,
+.Sy root )
 .It %{runas_group}
 expanded to the group name of the user the command will
-be run as (e.g., wheel)
+be run as (e.g.,
+.Sy wheel )
 .It %{hostname}
 expanded to the local host name without the domain name
 .It %{command}
@@ -4489,7 +4553,8 @@ flags in
 .Em sudoers )
 .It \&%U
 expanded to the login name of the user the command will
-be run as (defaults to root)
+be run as (defaults to
+.Sy @runas_default@ )
 .It %u
 expanded to the invoking user's login name
 .It %%
@@ -4548,7 +4613,8 @@ is built with SELinux support.
 The default user to run commands as if the
 .Fl u
 option is not specified on the command line.
-This defaults to @runas_default@.
+This defaults to
+.Sy @runas_default@ .
 .It sudoers_locale
 Locale to use when parsing the sudoers file, logging commands, and
 sending email.
@@ -4615,7 +4681,8 @@ The default is
 .It timestampowner
 The owner of the lecture status directory, time stamp directory and all
 files stored therein.
-The default is root.
+The default is
+.Sy root .
 .if \n(SL \{\
 .It type
 The default SELinux type to use when constructing a new security
@@ -5194,8 +5261,9 @@ option is enabled or disabled, variables specified by
 will be preserved in the environment if they pass the aforementioned check.
 The global list of environment variables to check is displayed when
 .Nm sudo
-is run by root with
-the
+is run by
+.Sy root
+with the
 .Fl V
 option.
 .It env_delete
@@ -5213,7 +5281,9 @@ and
 operators respectively.
 The global list of environment variables to remove is displayed when
 .Nm sudo
-is run by root with the
+is run by
+.Sy root
+with the
 .Fl V
 option.
 Many operating systems will remove potentially dangerous variables
@@ -5238,7 +5308,9 @@ operators respectively.
 The global list of variables to keep
 is displayed when
 .Nm sudo
-is run by root with the
+is run by
+.Sy root
+with the
 .Fl V
 option.
 .Pp
@@ -5619,7 +5691,9 @@ file.
 was unable to read or create the user's time stamp file.
 This can happen when
 .Em timestampowner
-is set to a user other than root and the mode on
+is set to a user other than
+.Sy root
+and the mode on
 .Pa @rundir@
 is not searchable by group or other.
 The default mode for
@@ -6165,7 +6239,8 @@ need not provide a password and we don't want to reset the
 .Ev LOGNAME
 or
 .Ev USER
-environment variables when running commands as root.
+environment variables when running commands as
+.Sy root .
 Additionally, on the machines in the
 .Dv SERVERS
 .Em Host_Alias ,
@@ -6307,7 +6382,8 @@ groups).
 The user
 .Sy pete
 is allowed to change anyone's password except for
-root on the
+.Sy root
+on the
 .Dv HPPA
 machines.
 Because command line arguments are matched as a single,
@@ -6394,8 +6470,9 @@ On the
 .Dv ALPHA
 machines, user
 .Sy john
-may su to anyone except root but he is not allowed to specify any options
-to the
+may su to anyone except
+.Sy root
+but he is not allowed to specify any options to the
 .Xr su 1
 command.
 .Bd -literal
@@ -6499,7 +6576,9 @@ advisory at best (and reinforced by policy).
 In general, if a user has sudo
 .Sy ALL
 there is nothing to prevent them from creating their own program that gives
-them a root shell (or making their own copy of a shell) regardless of any
+them a
+.Sy root
+shell (or making their own copy of a shell) regardless of any
 .Ql !\&
 elements in the user specification.
 .Ss Security implications of Em fast_glob
@@ -6855,9 +6934,11 @@ is enabled.
 .El
 .Pp
 Restricting shell escapes is not a panacea.
-Programs running as root are still capable of many potentially hazardous
-operations (such as changing or overwriting files) that could lead
-to unintended privilege escalation.
+Programs running as
+.Sy root
+are still capable of many potentially hazardous operations (such
+as changing or overwriting files) that could lead to unintended
+privilege escalation.
 In the specific case of an editor, a safer approach is to give the
 user permission to run
 .Nm sudoedit
@@ -6904,7 +6985,9 @@ as follows:
 $ sudoedit /etc/motd
 .Ed
 .Pp
-The editor will run as the operator user, not root, on a temporary copy of
+The editor will run as the operator user, not
+.Sy @runas_default@ ,
+on a temporary copy of
 .Pa /etc/motd .
 After the file has been edited,
 .Pa /etc/motd
@@ -6925,7 +7008,8 @@ not be followed in writable directories and
 will refuse to edit a file located in a writable directory
 unless the
 .Em sudoedit_checkdir
-option has been disabled or the invoking user is root.
+option has been disabled or the invoking user is
+.Sy root .
 Additionally, in version 1.8.15 and higher,
 .Nm sudoedit
 will refuse to open a symbolic link unless either the
@@ -6944,8 +7028,10 @@ will check the ownership of its time stamp directory
 .Pa @rundir@/ts
 by default
 .Pc
-and ignore the directory's contents if it is not owned by root or
-if it is writable by a user other than root.
+and ignore the directory's contents if it is not owned by
+.Sy root
+or if it is writable by a user other than
+.Sy root .
 Older versions of
 .Nm sudo
 stored time stamp files in

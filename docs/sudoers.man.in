@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "September 27, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "October 20, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -179,16 +179,19 @@ security policy requires that most users authenticate
 themselves before they can use
 \fBsudo\fR.
 A password is not required
-if the invoking user is root, if the target user is the same as the
-invoking user, or if the policy has disabled authentication for the
-user or command.
+if the invoking user is
+\fBroot\fR,
+if the target user is the same as the invoking user, or if the
+policy has disabled authentication for the user or command.
 Unlike
 su(1),
 when
 \fBsudoers\fR
 requires
 authentication, it validates the invoking user's credentials, not
-the target user's (or root's) credentials.
+the target user's (or
+\fB@runas_default@\fR's)
+credentials.
 This can be changed via
 the
 \fIrootpw\fR,
@@ -230,7 +233,9 @@ are logged, regardless of whether or not mail is sent.
 .PP
 If
 \fBsudo\fR
-is run by root and the
+is run by
+\fBroot\fR
+and the
 \fRSUDO_USER\fR
 environment variable
 is set, the
@@ -238,7 +243,9 @@ is set, the
 policy will use this value to determine who
 the actual user is.
 This can be used by a user to log commands
-through sudo even when a root shell has been invoked.
+through sudo even when a
+\fBroot\fR
+shell has been invoked.
 It also
 allows the
 \fB\-e\fR
@@ -246,7 +253,9 @@ option to remain useful even when invoked via a
 sudo-run script or program.
 Note, however, that the
 \fIsudoers\fR
-file lookup is still done for root, not the user specified by
+file lookup is still done for
+\fBroot\fR,
+not the user specified by
 \fRSUDO_USER\fR.
 .PP
 \fBsudoers\fR
@@ -456,7 +465,9 @@ as modified by global Defaults parameters in
 \fIsudoers\fR,
 is displayed when
 \fBsudo\fR
-is run by root with the
+is run by
+\fBroot\fR
+with the
 \fB\-V\fR
 option.
 The list of environment variables to remove
@@ -926,8 +937,11 @@ it can contain
 User names and groups are matched as strings.
 In other words, two users (groups) with the same user (group) ID
 are considered to be distinct.
-If you wish to match all user names with the same user-ID (e.g., root and
-toor), you can use a user-ID instead of a name (#0 in the example given).
+If you wish to match all user names with the same user-ID (e.g.,
+\fBroot\fR
+and
+\fBtoor\fR),
+you can use a user-ID instead of a name (#0 in the example given).
 The user-ID or group-ID specified in a
 \fIRunas_Member\fR
 need not be listed in the password or group database.
@@ -1308,10 +1322,12 @@ A
 \fBuser specification\fR
 determines which commands a user may run
 (and as what user) on specified hosts.
-By default, commands are
-run as
-\fBroot\fR,
-but this can be changed on a per-command basis.
+By default, commands are run as
+\fB@runas_default@\fR
+(unless
+\fIrunas_default\fR
+has been set to a different value)
+but this can also be changed on a per-command basis.
 .PP
 The basic structure of a user specification is
 \(lqwho where = (as_whom) what\(rq.
@@ -1355,11 +1371,14 @@ are empty, the command may only be run as the invoking user and the
 group, if specified, must be one that the invoking user is a member of.
 If no
 \fIRunas_Spec\fR
-is specified, the command may only be run as
-\fBroot\fR
-and the group, if specified, must be one that
-\fBroot\fR
-is a member of.
+is specified, the command may only be run as the
+\fIrunas_default\fR
+user
+(\fB@runas_default@\fR
+by default) and the group,
+if specified, must be one that the
+\fIrunas_default\fR
+user is a member of.
 .PP
 A
 \fIRunas_Spec\fR
@@ -1487,7 +1506,10 @@ alan	ALL = (root, bin : operator, system) ALL
 .PP
 user
 \fBalan\fR
-may run any command as either user root or bin,
+may run any command as either user
+\fBroot\fR
+or
+\fBbin\fR,
 optionally setting the group to operator or system.
 .SS "Option_Spec"
 A
@@ -1554,7 +1576,9 @@ alice	ALL = (root)	APPARMOR_PROFILE=my-profile	ALL
 .PP
 the user
 \fBalice\fR
-may run any command as root under confinement by the profile
+may run any command as
+\fBroot\fR
+under confinement by the profile
 \(oqmy-profile\(cq.
 You can also stack profiles, or allow a user to run commands unconfined by
 any profile.
@@ -1573,7 +1597,9 @@ entries allow user
 \fBbob\fR
 to run
 \fI/usr/bin/vi\fR
-as root under the stacked profiles
+as
+\fBroot\fR
+under the stacked profiles
 \(oqfoo\(cq
 and
 \(oqbar\(cq,
@@ -1927,7 +1953,7 @@ to run
 and
 \fI/usr/bin/lprm\fR
 as
-\fBroot\fR
+\fB@runas_default@\fR
 on the machine
 \(lqrushmore\(rq
 without authenticating himself.
@@ -2200,7 +2226,11 @@ In the following example, user
 \fBjohn\fR
 can run the
 passwd(1)
-command as root on any host but is not allowed to change root's password.
+command as
+\fB@runas_default@\fR
+on any host but is not allowed to change
+\fBroot\fR's
+password.
 This kind of rule is impossible to express safely using wildcards.
 .nf
 .sp
@@ -2237,7 +2267,8 @@ to run the
 \fI/usr/sbin/usermod\fR,
 and
 \fI/usr/sbin/userdel\fR
-commands as root.
+commands as
+\fB@runas_default@\fR.
 .nf
 .sp
 .RS 4n
@@ -2485,7 +2516,9 @@ This allows one to exclude certain values.
 For the
 \(oq\&!\(cq
 operator to be effective, there must be something for it to exclude.
-For example, to match all users except for root one would use:
+For example, to match all users except for
+\fBroot\fR
+one would use:
 .nf
 .sp
 .RS 4n
@@ -2503,7 +2536,9 @@ is omitted, as in:
 .RE
 .fi
 .PP
-it would explicitly deny root but not match any other users.
+it would explicitly deny
+\fBroot\fR
+but not match any other users.
 This is different from a true
 \(lqnegation\(rq
 operator.
@@ -2570,7 +2605,9 @@ If enabled,
 will set the
 \fRHOME\fR
 environment variable to the home directory of the target user
-(which is the root user unless the
+(which is the
+\fIrunas_default\fR
+user unless the
 \fB\-u\fR
 option is used).
 This flag is largely obsolete and has no effect unless the
@@ -2709,9 +2746,13 @@ or
 \fREDITOR\fR
 environment variables before falling back on the default editor list.
 \fBvisudo\fR
-is typically run as root so this flag may allow a user with
+is typically run as
+\fBroot\fR
+so this flag may allow a user with
 \fBvisudo\fR
-privileges to run arbitrary commands as root without logging.
+privileges to run arbitrary commands as
+\fBroot\fR
+without logging.
 An alternative is to place a colon-separated list of
 \(lqsafe\(rq
 editors int the
@@ -2777,7 +2818,9 @@ lists, as modified by global Defaults parameters in
 \fIsudoers\fR,
 are displayed when
 \fBsudo\fR
-is run by root with the
+is run by
+\fBroot\fR
+with the
 \fB\-V\fR
 option.
 If the
@@ -3736,17 +3779,23 @@ This flag is
 by default.
 .TP 18n
 root_sudo
-If set, root is allowed to run
+If set,
+\fBroot\fR
+is allowed to run
 \fBsudo\fR
 too.
 Disabling this prevents users from
 \(lqchaining\(rq
 \fBsudo\fR
-commands to get a root shell by doing something like
+commands to get a
+\fBroot\fR
+shell by doing something like
 \(oqsudo sudo /bin/sh\(cq.
 Note, however, that turning off
 \fIroot_sudo\fR
-will also prevent root from running
+will also prevent
+\fBroot\fR
+from running
 \fBsudoedit\fR.
 Disabling
 \fIroot_sudo\fR
@@ -3758,7 +3807,9 @@ by default.
 rootpw
 If set,
 \fBsudo\fR
-will prompt for the root password instead of the password of the invoking user
+will prompt for the
+\fBroot\fR
+password instead of the password of the invoking user
 when running a command or editing a file.
 This flag is
 \fIoff\fR
@@ -3808,7 +3859,8 @@ If set,
 \fBsudo\fR
 will prompt for the password of the user defined by the
 \fIrunas_default\fR
-option (defaults to @runas_default@)
+option (defaults to
+\fB@runas_default@\fR)
 instead of the password of the invoking user
 when running a command or editing a file.
 This flag is
@@ -3833,7 +3885,9 @@ is invoked with the
 option, the
 \fRHOME\fR
 environment variable will be set to the home directory of the target
-user (which is the root user unless the
+user (which is the
+\fIrunas_default\fR
+user unless the
 \fB\-u\fR
 option is used).
 This flag is largely obsolete and has no effect unless the
@@ -3854,7 +3908,9 @@ will set the
 \fRLOGNAME\fR
 and
 \fRUSER\fR
-environment variables to the name of the target user (usually root unless the
+environment variables to the name of the target user (the user specified by
+\fIrunas_default\fR
+unless the
 \fB\-u\fR
 option is given).
 However, since some programs (including the RCS revision control system) use
@@ -3924,7 +3980,9 @@ If set and
 is invoked with no arguments it acts as if the
 \fB\-s\fR
 option had been given.
-That is, it runs a shell as root (the shell is determined by the
+That is, it runs a shell as
+\fBroot\fR
+(the shell is determined by the
 \fRSHELL\fR
 environment variable if it is set, falling back on the shell listed
 in the invoking user's /etc/passwd entry if not).
@@ -3936,7 +3994,9 @@ stay_setuid
 Normally, when
 \fBsudo\fR
 executes a command the real and effective user-IDs are set to the target
-user (root by default).
+user
+(\fB@runas_default@\fR
+by default).
 This option changes that behavior such that the real user-ID is left
 as the invoking user's user-ID.
 In other words, this makes
@@ -3964,7 +4024,8 @@ Symbolic links will not be followed in writable directories and
 will refuse to edit a file located in a writable directory.
 These restrictions are not enforced when
 \fBsudoedit\fR
-is run by root.
+is run by
+\fBroot\fR.
 On some systems, if all directory components of the path to be edited
 are not readable by the target user,
 \fBsudoedit\fR
@@ -4014,7 +4075,8 @@ If set,
 will prompt for the password of the user specified
 by the
 \fB\-u\fR
-option (defaults to root)
+option (defaults to the value of
+\fIrunas_default\fR)
 instead of the password of the invoking user
 when running a command or editing a file.
 This flag precludes the use of a user-ID not listed in the passwd
@@ -4475,11 +4537,13 @@ expanded to the name of the invoking user's real group-ID
 .TP 6n
 %{runas_user}
 expanded to the login name of the user the command will
-be run as (e.g., root)
+be run as (e.g.,
+\fBroot\fR)
 .TP 6n
 %{runas_group}
 expanded to the group name of the user the command will
-be run as (e.g., wheel)
+be run as (e.g.,
+\fBwheel\fR)
 .TP 6n
 %{hostname}
 expanded to the local host name without the domain name
@@ -4766,7 +4830,8 @@ flags in
 .TP 6n
 \&%U
 expanded to the login name of the user the command will
-be run as (defaults to root)
+be run as (defaults to
+\fB@runas_default@\fR)
 .TP 6n
 %u
 expanded to the invoking user's login name
@@ -4830,7 +4895,8 @@ runas_default
 The default user to run commands as if the
 \fB\-u\fR
 option is not specified on the command line.
-This defaults to @runas_default@.
+This defaults to
+\fB@runas_default@\fR.
 .TP 18n
 sudoers_locale
 Locale to use when parsing the sudoers file, logging commands, and
@@ -4908,7 +4974,8 @@ The default is
 timestampowner
 The owner of the lecture status directory, time stamp directory and all
 files stored therein.
-The default is root.
+The default is
+\fBroot\fR.
 .if \n(SL \{\
 .TP 18n
 type
@@ -5557,8 +5624,9 @@ option is enabled or disabled, variables specified by
 will be preserved in the environment if they pass the aforementioned check.
 The global list of environment variables to check is displayed when
 \fBsudo\fR
-is run by root with
-the
+is run by
+\fBroot\fR
+with the
 \fB\-V\fR
 option.
 .RE
@@ -5578,7 +5646,9 @@ and
 operators respectively.
 The global list of environment variables to remove is displayed when
 \fBsudo\fR
-is run by root with the
+is run by
+\fBroot\fR
+with the
 \fB\-V\fR
 option.
 Many operating systems will remove potentially dangerous variables
@@ -5604,7 +5674,9 @@ operators respectively.
 The global list of variables to keep
 is displayed when
 \fBsudo\fR
-is run by root with the
+is run by
+\fBroot\fR
+with the
 \fB\-V\fR
 option.
 .sp
@@ -6017,7 +6089,9 @@ unable to open @rundir@/ts/username
 was unable to read or create the user's time stamp file.
 This can happen when
 \fItimestampowner\fR
-is set to a user other than root and the mode on
+is set to a user other than
+\fBroot\fR
+and the mode on
 \fI@rundir@\fR
 is not searchable by group or other.
 The default mode for
@@ -6641,7 +6715,8 @@ need not provide a password and we don't want to reset the
 \fRLOGNAME\fR
 or
 \fRUSER\fR
-environment variables when running commands as root.
+environment variables when running commands as
+\fBroot\fR.
 Additionally, on the machines in the
 \fRSERVERS\fR
 \fIHost_Alias\fR,
@@ -6807,7 +6882,8 @@ groups).
 The user
 \fBpete\fR
 is allowed to change anyone's password except for
-root on the
+\fBroot\fR
+on the
 \fRHPPA\fR
 machines.
 Because command line arguments are matched as a single,
@@ -6908,8 +6984,9 @@ On the
 \fRALPHA\fR
 machines, user
 \fBjohn\fR
-may su to anyone except root but he is not allowed to specify any options
-to the
+may su to anyone except
+\fBroot\fR
+but he is not allowed to specify any options to the
 su(1)
 command.
 .nf
@@ -7034,7 +7111,9 @@ advisory at best (and reinforced by policy).
 In general, if a user has sudo
 \fBALL\fR
 there is nothing to prevent them from creating their own program that gives
-them a root shell (or making their own copy of a shell) regardless of any
+them a
+\fBroot\fR
+shell (or making their own copy of a shell) regardless of any
 \(oq!\&\(cq
 elements in the user specification.
 .SS "Security implications of \fIfast_glob\fR"
@@ -7418,9 +7497,11 @@ is enabled.
 .RE
 .PP
 Restricting shell escapes is not a panacea.
-Programs running as root are still capable of many potentially hazardous
-operations (such as changing or overwriting files) that could lead
-to unintended privilege escalation.
+Programs running as
+\fBroot\fR
+are still capable of many potentially hazardous operations (such
+as changing or overwriting files) that could lead to unintended
+privilege escalation.
 In the specific case of an editor, a safer approach is to give the
 user permission to run
 \fBsudoedit\fR
@@ -7473,7 +7554,9 @@ $ sudoedit /etc/motd
 .RE
 .fi
 .PP
-The editor will run as the operator user, not root, on a temporary copy of
+The editor will run as the operator user, not
+\fB@runas_default@\fR,
+on a temporary copy of
 \fI/etc/motd\fR.
 After the file has been edited,
 \fI/etc/motd\fR
@@ -7494,7 +7577,8 @@ not be followed in writable directories and
 will refuse to edit a file located in a writable directory
 unless the
 \fIsudoedit_checkdir\fR
-option has been disabled or the invoking user is root.
+option has been disabled or the invoking user is
+\fBroot\fR.
 Additionally, in version 1.8.15 and higher,
 \fBsudoedit\fR
 will refuse to open a symbolic link unless either the
@@ -7511,8 +7595,10 @@ file.
 will check the ownership of its time stamp directory
 (\fI@rundir@/ts\fR
 by default)
-and ignore the directory's contents if it is not owned by root or
-if it is writable by a user other than root.
+and ignore the directory's contents if it is not owned by
+\fBroot\fR
+or if it is writable by a user other than
+\fBroot\fR.
 Older versions of
 \fBsudo\fR
 stored time stamp files in
