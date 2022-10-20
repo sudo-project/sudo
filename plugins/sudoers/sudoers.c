@@ -188,7 +188,7 @@ sudoers_reinit_defaults(void)
 
     /* No need to check the admin flag file multiple times. */
     if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED))
-	def_admin_flag = false;
+	def_admin_flag = NULL;
 
     debug_return_bool(true);
 }
