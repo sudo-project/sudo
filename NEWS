@@ -118,6 +118,10 @@ What's new in Sudo 1.9.12
    systems without PAM or configurations where the pam_session and
    pam_setcred options were disabled in the sudoers file.
 
+ * Fixed a bug where "sudo -l" output included a carriage return
+   after the newline.  This is only needed when displaying to a
+   terminal in raw mode.  Bug #1042.
+
 What's new in Sudo 1.9.11p3
 
  * Fixed "connection reset" errors on AIX when running shell scripts
