@@ -113,6 +113,11 @@ What's new in Sudo 1.9.12
 
  * The embedded copy of zlib has been updated to version 1.2.13.
 
+ * Fixed a bug that prevented event log data from being sent to the
+   log server when I/O logging was not enabled.  This only affected
+   systems without PAM or configurations where the pam_session and
+   pam_setcred options were disabled in the sudoers file.
+
 What's new in Sudo 1.9.11p3
 
  * Fixed "connection reset" errors on AIX when running shell scripts
