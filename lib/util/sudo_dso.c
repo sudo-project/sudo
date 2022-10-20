@@ -176,7 +176,7 @@ sudo_dso_strerror_v1(void)
 
 # if defined(__linux__)
 /* 
- * On Linux systems that use muti-arch, the actual DSO may be
+ * On Linux systems that use multi-arch, the actual DSO may be
  * in a machine-specific subdirectory.  If the specified path
  * contains /lib/ or /libexec/, insert a multi-arch directory
  * after it.
@@ -260,7 +260,7 @@ sudo_dso_load_v1(const char *path, int mode)
 	}
     }
 # endif /* RTLD_MEMBER */
-    /* On failure, try again with a muti-arch path where possible. */
+    /* On failure, try again with a multi-arch path where possible. */
     if (ret == NULL)
 	ret = dlopen_multi_arch(path, flags);
 

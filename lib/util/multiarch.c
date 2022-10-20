@@ -36,7 +36,7 @@
 
 # if defined(__linux__)
 /* 
- * On Linux systems that use muti-arch, the actual DSO may be in a
+ * On Linux systems that use multi-arch, the actual DSO may be in a
  * machine-specific subdirectory.  If the specified path contains
  * /lib/ or /libexec/, insert a multi-arch directory after it.
  * If sb is non-NULL, stat(2) will be called on the new path, filling in sb.
