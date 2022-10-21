@@ -884,16 +884,16 @@ selinux.i: $(srcdir)/selinux.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 selinux.plog: selinux.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/selinux.c --i-file $< --output-file $@
-sesh.o: $(srcdir)/sesh.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
-        $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
-        $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+sesh.o: $(srcdir)/sesh.c $(incdir)/compat/getopt.h $(incdir)/compat/stdbool.h \
+        $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+        $(incdir)/sudo_event.h $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
         $(srcdir)/sudo.h $(srcdir)/sudo_edit.h $(srcdir)/sudo_exec.h \
         $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/sesh.c
-sesh.i: $(srcdir)/sesh.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
-        $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h $(incdir)/sudo_event.h \
-        $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
+sesh.i: $(srcdir)/sesh.c $(incdir)/compat/getopt.h $(incdir)/compat/stdbool.h \
+        $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+        $(incdir)/sudo_event.h $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
         $(srcdir)/sudo.h $(srcdir)/sudo_edit.h $(srcdir)/sudo_exec.h \
         $(top_builddir)/config.h $(top_builddir)/pathnames.h
