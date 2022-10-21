@@ -96,7 +96,7 @@ int	optreset;		/* reset getopt */
 #define	BADARG		((*options == ':') ? (int)':' : (int)'?')
 #define	INORDER 	(int)1
 
-#define	EMSG		""
+#define	EMSG		(char *)""
 
 #ifdef GNU_COMPATIBLE
 #define NO_PREFIX	(-1)
@@ -202,7 +202,7 @@ parse_long_options(char * const *nargv, const char *options,
 {
 	char *current_argv, *has_equal;
 #ifdef GNU_COMPATIBLE
-	char *current_dash;
+	const char *current_dash;
 #endif
 	size_t current_argv_len;
 	int i, match, exact_match, second_partial_match;

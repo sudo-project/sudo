@@ -36,6 +36,8 @@
 
 #include "iolog_json.h"
 
+int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
+
 static FILE *
 open_data(const uint8_t *data, size_t size)
 {

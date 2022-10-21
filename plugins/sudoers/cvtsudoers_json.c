@@ -77,7 +77,7 @@ print_command_json(struct json_container *jsonc, const char *name, bool negated)
 	}
     }
     value.type = JSON_STRING;
-    value.u.string = cmnd ? cmnd : "ALL";
+    value.u.string = cmnd ? cmnd : (char *)"ALL";
 
     if (!negated && TAILQ_EMPTY(&c->digests)) {
 	/* Print as { "command": "command and args" } */
@@ -759,13 +759,13 @@ print_cmndspec_json(struct json_container *jsonc,
 #endif /* HAVE_SELINUX */
 
 #ifdef HAVE_APPARMOR
-	if (cs->apparmor_profile != NULL) {
+    if (cs->apparmor_profile != NULL) {
 	sudo_json_open_array(jsonc, "AppArmor_Spec");
 	value.type = JSON_STRING;
 	value.u.string = cs->apparmor_profile;
 	sudo_json_add_value(jsonc, "apparmor_profile", &value);
 	sudo_json_close_array(jsonc);
-	}
+    }
 #endif /* HAVE_APPARMOR */
 
 #ifdef HAVE_PRIV_SET

@@ -22,7 +22,7 @@
  */
 
 /*
- * Trivial replacements for the libc getgr{uid,nam}() routines.
+ * Trivial replacements for the libc getgrent() family of functions.
  */
 
 #include <config.h>

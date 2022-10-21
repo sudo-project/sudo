@@ -82,16 +82,16 @@ init_debug_files(struct sudo_conf_debug_file_list *file_list,
     case 0:
 	debug_return;
     case 1:
-	file->debug_flags = "exec@diag";
+	file->debug_flags = (char *)"exec@diag";
 	break;
     case 2:
-	file->debug_flags = "exec@info";
+	file->debug_flags = (char *)"exec@info";
 	break;
     default:
-	file->debug_flags = "exec@debug";
+	file->debug_flags = (char *)"exec@debug";
 	break;
     }
-    file->debug_file = "/dev/stderr";
+    file->debug_file = (char *)"/dev/stderr";
     TAILQ_INSERT_HEAD(file_list, file, entries);
 
     debug_return;
@@ -219,7 +219,7 @@ main(int argc, char *argv[])
 	    } else if (WIFSTOPPED(status)) {
 		if (exec_ptrace_stopped(pid, status, &closure)) {
 		    if (pid == child) {
-			suspend_sudo_nopty(WSTOPSIG(status), ppgrp, child);
+			suspend_sudo_nopty(NULL, WSTOPSIG(status), ppgrp, child);
 			if (kill(child, SIGCONT) != 0)
 			    sudo_warn("kill(%d, SIGCONT)", (int)child);
 		    }

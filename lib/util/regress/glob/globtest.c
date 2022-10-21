@@ -15,6 +15,7 @@
 # include "compat/glob.h"
 #endif
 #include <errno.h>
+#include <unistd.h>
 
 #include "sudo_compat.h"
 #include "sudo_util.h"
@@ -183,7 +184,8 @@ main(int argc, char **argv)
 	return errors;
 }
 
-int test_glob(struct gl_entry *entry)
+static int
+test_glob(struct gl_entry *entry)
 {
 	glob_t gl;
 	char **ap;

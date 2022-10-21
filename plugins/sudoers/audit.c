@@ -208,7 +208,7 @@ audit_to_eventlog(struct eventlog *evlog, char * const command_info[],
     debug_decl(audit_to_eventlog, SUDOERS_DEBUG_PLUGIN);
 
     /* Fill in evlog from sudoers Defaults, run_argv and run_envp. */
-    sudoers_to_eventlog(evlog, run_argv, run_envp, uuid_str);
+    sudoers_to_eventlog(evlog, NULL, run_argv, run_envp, uuid_str);
 
     /* Update iolog and execution environment from command_info[]. */
     if (command_info != NULL) {
@@ -261,7 +261,7 @@ log_server_accept(struct eventlog *evlog)
 	    debug_return_bool(true);
     } else {
 	/* Only send accept event to log server if I/O log plugin did not. */
-	if (def_log_input || def_log_output)
+	if (iolog_enabled)
 	    debug_return_bool(true);
     }
 
@@ -341,6 +341,7 @@ sudoers_audit_accept(const char *plugin_name, unsigned int plugin_type,
 {
     const char *uuid_str = NULL;
     struct eventlog evlog;
+    static bool first = true;
     int ret = true;
     debug_decl(sudoers_audit_accept, SUDOERS_DEBUG_PLUGIN);
 
@@ -364,6 +365,13 @@ sudoers_audit_accept(const char *plugin_name, unsigned int plugin_type,
     if (!log_server_accept(&evlog)) {
 	if (!def_ignore_logfile_errors)
 	    ret = false;
+    }
+
+    if (first) {
+	/* log_subcmds doesn't go through sudo_policy_main again to set this. */
+	if (def_log_subcmds)
+	    SET(sudo_mode, MODE_POLICY_INTERCEPTED);
+	first = false;
     }
 
     debug_return_int(ret);
@@ -432,7 +440,7 @@ sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
     debug_return_int(ret);
 }
 
-void
+static void
 sudoers_audit_close(int status_type, int status)
 {
     log_server_exit(status_type, status);

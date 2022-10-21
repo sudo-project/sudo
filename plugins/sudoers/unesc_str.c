@@ -21,7 +21,11 @@
  * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
  */
 
+#include <config.h>
+
 #include <string.h>
+
+#include "sudoers.h"
 
 /*
  * Remove backslash escape chars.

@@ -13,7 +13,7 @@
 /* SUPPRESS 288 on yyerrlab *//* Label unused */
 
 // PVS Studio suppression
-// -V::1037, 1042
+// -V::560, 592, 1037, 1042
 
 #include <config.h>
 
@@ -41,7 +41,7 @@
 **  An entry in the lexical lookup table.
 */
 typedef struct _TABLE {
-    char	*name;
+    const char	*name;
     int		type;
     time_t	value;
 } TABLE;
@@ -569,7 +569,7 @@ Convert(time_t Month, time_t Day, time_t Year, time_t Hours, time_t Minutes,
     if (Year < EPOCH || (sizeof(time_t) == sizeof(int) && Year > 2038)
      || Month < 1 || Month > 12
      /* Lint fluff:  "conversion from long may lose accuracy" */
-     || Day < 1 || Day > DaysInMonth[(int)--Month])
+     || Day < 1 || Day > DaysInMonth[--Month])
 	return -1;
 
     for (Julian = Day - 1, i = 0; i < Month; i++)
@@ -825,6 +825,8 @@ difftm(struct tm *a, struct tm *b)
 	      + (a->tm_min - b->tm_min))
 	  + (a->tm_sec - b->tm_sec));
 }
+
+time_t get_date(char *p);
 
 time_t
 get_date(char *p)

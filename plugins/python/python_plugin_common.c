@@ -42,7 +42,7 @@ static size_t python_inittab_copy_len = 0;
 # define Py_FinalizeEx()	(Py_Finalize(), 0)
 #endif
 
-const char *
+static const char *
 _lookup_value(char * const keyvalues[], const char *key)
 {
     debug_decl(_lookup_value, PYTHON_DEBUG_INTERNAL);
@@ -101,7 +101,7 @@ _import_module(const char *path)
     if (strlcpy(path_copy, path, sizeof(path_copy)) >= sizeof(path_copy))
         debug_return_ptr(NULL);
 
-    char *module_dir = path_copy;
+    const char *module_dir = path_copy;
     char *module_name = strrchr(path_copy, '/');
     if (module_name == NULL) {
         module_name = path_copy;
@@ -190,7 +190,7 @@ _restore_inittab(void)
     debug_return;
 }
 
-void
+static void
 python_plugin_handle_plugin_error_exception(PyObject **py_result, struct PluginContext *plugin_ctx)
 {
     debug_decl(python_plugin_handle_plugin_error_exception, PYTHON_DEBUG_INTERNAL);
@@ -396,7 +396,7 @@ _python_plugin_register_plugin_in_py_ctx(void)
     debug_return_int(SUDO_RC_OK);
 }
 
-int
+static int
 _python_plugin_set_path(struct PluginContext *plugin_ctx, const char *path)
 {
     if (path == NULL) {

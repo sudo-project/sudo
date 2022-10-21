@@ -16,7 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "config.h"
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
+#include <config.h>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -232,7 +237,7 @@ connect_server(struct peer_info *server, const char *port)
 /*
  * Get a buffer from the free list if possible, else allocate a new one.
  */
-struct connection_buffer *
+static struct connection_buffer *
 get_free_buf(size_t len, struct client_closure *closure)
 {
     struct connection_buffer *buf;
@@ -283,7 +288,7 @@ read_io_buf(struct client_closure *closure)
 	free(closure->buf);
 	closure->bufsize = sudo_pow2_roundup(timing->u.nbytes);
 	if ((closure->buf = malloc(closure->bufsize)) == NULL) {
-	    sudo_warn(NULL);
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    timing->u.nbytes = 0;
 	    debug_return_bool(false);
 	}
@@ -355,7 +360,7 @@ fmt_client_hello(struct client_closure *closure)
     debug_decl(fmt_client_hello, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending ClientHello", __func__);
-    hello_msg.client_id = "Sudo Sendlog " PACKAGE_VERSION;
+    hello_msg.client_id = (char *)"Sudo Sendlog " PACKAGE_VERSION;
 
     /* Schedule ClientMessage */
     client_msg.u.hello_msg = &hello_msg;
@@ -549,82 +554,52 @@ fmt_info_messages(const struct eventlog *evlog, char *hostname,
 	info_message__init(info_msgs[n]);
     }
 
+#define fill_str(_n, _v) do { \
+    info_msgs[n]->key = (char *)(_n); \
+    info_msgs[n]->u.strval = (_v); \
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL; \
+    n++; \
+} while (0)
+
+#define fill_strlist(_n, _v) do { \
+    info_msgs[n]->key = (char *)(_n); \
+    info_msgs[n]->u.strlistval = (_v); \
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL; \
+    n++; \
+} while (0)
+
+#define fill_num(_n, _v) do { \
+    info_msgs[n]->key = (char *)(_n); \
+    info_msgs[n]->u.numval = (_v); \
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL; \
+    n++; \
+} while (0)
+
     /* Fill in info_msgs */
     n = 0;
-    info_msgs[n]->key = "command";
-    info_msgs[n]->u.strval = evlog->command;
-    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
-
-    info_msgs[n]->key = "columns";
-    info_msgs[n]->u.numval = evlog->columns;
-    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
-    n++;
-
-    info_msgs[n]->key = "lines";
-    info_msgs[n]->u.numval = evlog->lines;
-    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
-    n++;
-
-    info_msgs[n]->key = "runargv";
-    info_msgs[n]->u.strlistval = runargv;
-    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
+    fill_num("columns", evlog->columns);
+    fill_str("command", evlog->command);
+    fill_num("lines", evlog->lines);
+    fill_strlist("runargv", runargv);
     runargv = NULL;
-    n++;
-
     if (runenv != NULL) {
-	info_msgs[n]->key = "runenv";
-	info_msgs[n]->u.strlistval = runenv;
-	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
+	fill_strlist("runenv", runenv);
 	runenv = NULL;
-	n++;
     }
-
     if (evlog->rungid != (gid_t)-1) {
-	info_msgs[n]->key = "rungid";
-	info_msgs[n]->u.numval = evlog->rungid;
-	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
-	n++;
+	fill_num("rungid", evlog->rungid);
     }
-
     if (evlog->rungroup != NULL) {
-	info_msgs[n]->key = "rungroup";
-	info_msgs[n]->u.strval = evlog->rungroup;
-	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-	n++;
+	fill_str("rungroup", evlog->rungroup);
     }
-
     if (evlog->runuid != (uid_t)-1) {
-	info_msgs[n]->key = "runuid";
-	info_msgs[n]->u.numval = evlog->runuid;
-	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
-	n++;
+	fill_num("runuid", evlog->runuid);
     }
-
-    info_msgs[n]->key = "runuser";
-    info_msgs[n]->u.strval = evlog->runuser;
-    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
-
-    info_msgs[n]->key = "submitcwd";
-    info_msgs[n]->u.strval = evlog->cwd;
-    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
-
-    info_msgs[n]->key = "submithost";
-    info_msgs[n]->u.strval = hostname;
-    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
-
-    info_msgs[n]->key = "submituser";
-    info_msgs[n]->u.strval = evlog->submituser;
-    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
-
-    info_msgs[n]->key = "ttyname";
-    info_msgs[n]->u.strval = evlog->ttyname;
-    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
+    fill_str("runuser", evlog->runuser);
+    fill_str("submitcwd", evlog->cwd);
+    fill_str("submithost", hostname);
+    fill_str("submituser", evlog->submituser);
+    fill_str("ttyname", evlog->ttyname);
 
     /* Update n_info_msgs. */
     *n_info_msgs = n;
@@ -1823,7 +1798,7 @@ main(int argc, char *argv[])
 	goto bad;
 
     if ((evbase = sudo_ev_base_alloc()) == NULL)
-	sudo_fatal(NULL);
+	sudo_fatal(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     if (testrun)
         printf("connecting clients...\n");

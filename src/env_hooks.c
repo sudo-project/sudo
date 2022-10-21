@@ -57,7 +57,9 @@ getenv_unhooked(const char *name)
     return val;
 }
 
-sudo_dso_public char *
+sudo_dso_public char *getenv(const char *name);
+
+char *
 getenv(const char *name)
 {
     char *val = NULL;
@@ -76,11 +78,25 @@ static int
 rpl_putenv(PUTENV_CONST char *string)
 {
     char **ep;
+    const char *equal;
     size_t len;
     bool found = false;
 
+    /* Some putenv(3) implementations check for NULL. */
+    if (string == NULL) {
+	errno = EINVAL;
+	return -1;
+    }
+
+    /* The string must contain a '=' char but not start with one. */
+    equal = strchr(string, '=');
+    if (equal == NULL || equal == string) {
+	errno = EINVAL;
+	return -1;
+    }
+
     /* Look for existing entry. */
-    len = (strchr(string, '=') - string) + 1;
+    len = (equal - string) + 1;
     for (ep = environ; *ep != NULL; ep++) {
 	if (strncmp(string, *ep, len) == 0) {
 	    *ep = (char *)string;
@@ -129,7 +145,9 @@ putenv_unhooked(PUTENV_CONST char *string)
     return rpl_putenv(string);
 }
 
-sudo_dso_public int
+sudo_dso_public int putenv(PUTENV_CONST char *string);
+
+int
 putenv(PUTENV_CONST char *string)
 {
     switch (process_hooks_putenv((char *)string)) {
@@ -201,7 +219,9 @@ setenv_unhooked(const char *var, const char *val, int overwrite)
     return rpl_setenv(var, val, overwrite);
 }
 
-sudo_dso_public int
+sudo_dso_public int setenv(const char *var, const char *val, int overwrite);
+
+int
 setenv(const char *var, const char *val, int overwrite)
 {
     switch (process_hooks_setenv(var, val, overwrite)) {
@@ -266,10 +286,14 @@ unsetenv_unhooked(const char *var)
 }
 
 #ifdef UNSETENV_VOID
-sudo_dso_public void
+# define UNSETENV_RTYPE	void
 #else
-sudo_dso_public int
+# define UNSETENV_RTYPE	int
 #endif
+
+sudo_dso_public UNSETENV_RTYPE unsetenv(const char *var);
+
+UNSETENV_RTYPE
 unsetenv(const char *var)
 {
     int ret;

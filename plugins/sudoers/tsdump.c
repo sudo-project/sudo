@@ -50,7 +50,7 @@ union timestamp_entry_storage {
 
 sudo_dso_public int main(int argc, char *argv[]);
 
-static void usage(void) __attribute__((__noreturn__));
+static sudo_noreturn void usage(void);
 static void dump_entry(struct timestamp_entry *entry, off_t pos);
 static bool valid_entry(union timestamp_entry_storage *u, off_t pos);
 static bool convert_entry(union timestamp_entry_storage *record, struct timespec *off);

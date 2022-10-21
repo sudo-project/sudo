@@ -28,7 +28,7 @@
  * Use one or more set of insults as determined by configure
  */
 
-char *insults[] = {
+const char *insults[] = {
 
 # ifdef HAL_INSULTS
 #  include "ins_2001.h"

@@ -456,7 +456,7 @@ const ProtobufCMessageDescriptor intercept_hello__descriptor =
   (ProtobufCMessageInit) intercept_hello__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor hello_response__field_descriptors[3] =
+static const ProtobufCFieldDescriptor hello_response__field_descriptors[4] =
 {
   {
     "token_lo",
@@ -494,8 +494,21 @@ static const ProtobufCFieldDescriptor hello_response__field_descriptors[3] =
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "log_only",
+    4,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(HelloResponse, log_only),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned hello_response__field_indices_by_name[] = {
+  3,   /* field[3] = log_only */
   2,   /* field[2] = portno */
   1,   /* field[1] = token_hi */
   0,   /* field[0] = token_lo */
@@ -503,7 +516,7 @@ static const unsigned hello_response__field_indices_by_name[] = {
 static const ProtobufCIntRange hello_response__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 3 }
+  { 0, 4 }
 };
 const ProtobufCMessageDescriptor hello_response__descriptor =
 {
@@ -513,7 +526,7 @@ const ProtobufCMessageDescriptor hello_response__descriptor =
   "HelloResponse",
   "",
   sizeof(HelloResponse),
-  3,
+  4,
   hello_response__field_descriptors,
   hello_response__field_indices_by_name,
   1,  hello_response__number_ranges,

@@ -238,9 +238,24 @@ umask_override
 log_input
 	T_FLAG
 	"Log user's input for the command being run"
+log_stdin
+	T_FLAG
+	"Log the command's standard input if not connected to a terminal"
+log_ttyin
+	T_FLAG
+	"Log the user's terminal input for the command being run"
 log_output
 	T_FLAG
 	"Log the output of the command being run"
+log_stdout
+	T_FLAG
+	"Log the command's standard output if not connected to a terminal"
+log_stderr
+	T_FLAG
+	"Log the command's standard error if not connected to a terminal"
+log_ttyout
+	T_FLAG
+	"Log the terminal output of the command being run"
 compress_io
 	T_FLAG
 	"Compress I/O logs using zlib"
@@ -479,6 +494,9 @@ intercept_type
 	T_TUPLE
 	"The mechanism used by the intercept and log_subcmds options: %s"
 	dso trace
+intercept_verify
+	T_FLAG
+	"Attempt to verify the command and arguments after execution"
 apparmor_profile
 	T_STR
 	"AppArmor profile to use in the new security context: %s"

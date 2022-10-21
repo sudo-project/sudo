@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2016 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  * Copyright (c) 2008 Dan Walsh <dwalsh@redhat.com>
  *
  * Borrowed heavily from newrole source code
@@ -440,11 +440,11 @@ selinux_setexeccon(void)
 
 void
 selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
-    int flags)
+    const char *rundir, int flags)
 {
     char **nargv;
     const char *sesh;
-    int argc, nargc, serrno;
+    int argc, len, nargc, serrno;
     debug_decl(selinux_execve, SUDO_DEBUG_SELINUX);
 
     sesh = sudo_conf_sesh_path();
@@ -460,8 +460,6 @@ selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
 
     /*
      * Build new argv with sesh as argv[0].
-     * If argv[0] ends in -noexec, sesh will disable execute
-     * for the command it runs.
      */
     for (argc = 0; argv[argc] != NULL; argc++)
 	continue;
@@ -469,26 +467,44 @@ selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
 	errno = EINVAL;
 	debug_return;
     }
-    nargv = reallocarray(NULL, argc + 3, sizeof(char *));
+    nargv = reallocarray(NULL, 5 + argc + 1, sizeof(char *));
     if (nargv == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return;
     }
-    if (ISSET(flags, CD_NOEXEC)) {
-	nargv[0] = *argv[0] == '-' ? "-sesh-noexec" : "sesh-noexec";
-	CLR(flags, CD_NOEXEC);
-    } else {
-	nargv[0] = *argv[0] == '-' ? "-sesh" : "sesh";
-    }
+    if (*argv[0] == '-')
+	nargv[0] = (char *)"-sesh";
+    else
+	nargv[0] = (char *)"sesh";
     nargc = 1;
-    if (fd != -1 && asprintf(&nargv[nargc++], "--execfd=%d", fd) == -1) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return;
+    if (ISSET(flags, CD_RBAC_SET_CWD)) {
+	const char *prefix = ISSET(flags, CD_CWD_OPTIONAL) ? "+" : "";
+	if (rundir == NULL) {
+	    sudo_warnx("internal error: sesh rundir not set");
+	    errno = EINVAL;
+	    debug_return;
+	}
+	len = asprintf(&nargv[nargc++], "--directory=%s%s", prefix, rundir);
+	if (len == -1) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return;
+	}
     }
+    if (fd != -1) {
+	len = asprintf(&nargv[nargc++], "--execfd=%d", fd);
+	if (len == -1) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    debug_return;
+	}
+    }
+    if (ISSET(flags, CD_NOEXEC)) {
+	CLR(flags, CD_NOEXEC);
+	nargv[nargc++] = (char *)"--noexec";
+    }
+    nargv[nargc++] = (char *)"--";
     nargv[nargc++] = (char *)path;
     memcpy(&nargv[nargc], &argv[1], argc * sizeof(char *)); /* copies NULL */
 
-    /* sesh will handle noexec for us. */
     sudo_execve(-1, sesh, nargv, envp, -1, flags);
     serrno = errno;
     free(nargv);

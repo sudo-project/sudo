@@ -18,7 +18,7 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.70])
-AC_INIT([sudo], [1.9.11p3], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.9.12], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 AC_CONFIG_AUX_DIR([scripts])
@@ -2080,9 +2080,17 @@ case "$host" in
 		# We use our own getentropy() by default on Linux.
 		: ${ac_cv_func_getentropy='no'}
 
+		# The glibc arc4random() may fail in chroot on older kernels.
+		# We use our own arc4random() by default on Linux.
+		: ${ac_cv_func_arc4random='no'}
+
 		# The glibc closefrom() emulation may fail in chroot.
 		# We use our own closefrom() by default on Linux.
 		: ${ac_cv_func_closefrom='no'}
+
+		# Linux 3.2 supports reading/writing a another process
+		# without using ptrace(2).
+		AC_CHECK_FUNCS([process_vm_readv])
 		;;
     *-*-gnu*)
 		# lockf() is broken on the Hurd
@@ -2865,6 +2873,10 @@ AC_CHECK_FUNCS(nanosleep, [], [
 	SUDO_APPEND_COMPAT_EXP(sudo_nanosleep)
     ])
 ])
+AC_CHECK_FUNCS([fchownat], [], [
+    AC_LIBOBJ(fchownat)
+    SUDO_APPEND_COMPAT_EXP(sudo_fchownat)
+])
 AC_CHECK_FUNCS([mkdirat], [], [
     AC_LIBOBJ(mkdirat)
     SUDO_APPEND_COMPAT_EXP(sudo_mkdirat)
@@ -2949,15 +2961,24 @@ AC_CHECK_FUNCS([closefrom], [], [AC_LIBOBJ(closefrom)
 #	include <fcntl.h> ])
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }closefrom_test"
 ])
-AC_CHECK_FUNCS([mkstemps mkdtemp], [], [break])
-if test X"$ac_cv_func_mkstemps$ac_cv_func_mkdtemp" != X"yesyes"; then
+sudo_mktemp=no
+case "$host_os" in
+    darwin*)
+	# macOS has these but uses a _np (non-portable) suffix
+	AC_CHECK_FUNCS([mkdtempat_np mkostempsat_np], [], [sudo_mktemp=yes; break])
+	;;
+    *)
+	AC_CHECK_FUNCS([mkdtempat mkostempsat], [], [sudo_mktemp=yes; break])
+	;;
+esac
+# If any of the mktemp family are missing we use our own.
+if test X"$sudo_mktemp" = X"yes"; then
     AC_CHECK_FUNCS([arc4random random lrand48], [break])
     if test X"$ac_cv_func_arc4random" != X"yes"; then
 	AC_CHECK_FUNCS([getentropy])
     fi
     AC_LIBOBJ(mktemp)
-    # If either mkdtemp() or mkstemps() is missing, replace both.
-    SUDO_APPEND_COMPAT_EXP(sudo_mkdtemp sudo_mkstemps)
+    SUDO_APPEND_COMPAT_EXP(sudo_mkdtemp sudo_mkdtempat sudo_mkostempsat sudo_mkstemp sudo_mkstemps)
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }mktemp_test"
 fi
 AX_FUNC_SNPRINTF
@@ -4995,7 +5016,7 @@ if test -n "$GCC"; then
 	dnl
 	dnl Default warnings for development use.
 	dnl
-	CFLAGS="${CFLAGS} -Wall -Wsign-compare -Wpointer-arith -Wno-unknown-pragmas"
+	CFLAGS="${CFLAGS} -Wall -Wsign-compare -Wpointer-arith -Wno-unknown-pragmas -Wmissing-prototypes -Wwrite-strings"
 	AX_CHECK_COMPILE_FLAG([-Wshadow], [CFLAGS="$CFLAGS -Wshadow"])
 	dnl
 	dnl The fallthrough attribute is supported by gcc 7.0 and clang 10.
@@ -5032,7 +5053,7 @@ if test -n "$GCC"; then
     if test X"$enable_werror" = X"yes"; then
 	CFLAGS="${CFLAGS} -Werror"
     fi
-    case "$host" in
+    case "$host_os" in
 	# Avoid unwanted warnings on macOS
 	darwin*) CFLAGS="${CFLAGS} -Wno-deprecated-declarations";;
     esac
@@ -5525,7 +5546,53 @@ dnl
 AH_TOP([#ifndef SUDO_CONFIG_H
 #define SUDO_CONFIG_H])
 
-AH_BOTTOM([/* Symbol visibility controls */
+AH_BOTTOM([#ifndef __GNUC_PREREQ__
+# ifdef __GNUC__
+#  define __GNUC_PREREQ__(ma, mi) \
+	((__GNUC__ > (ma)) || (__GNUC__ == (ma) && __GNUC_MINOR__ >= (mi)))
+# else
+#  define __GNUC_PREREQ__(ma, mi)	0
+# endif
+#endif
+
+/* Define away __attribute__ for non-gcc or old gcc. */
+#if !defined(__attribute__) && !__GNUC_PREREQ__(2, 5)
+# define __attribute__(x)
+#endif
+
+/* For functions that call exit() directly. */
+#if __GNUC_PREREQ__(2, 5)
+# define sudo_noreturn		__attribute__((__noreturn__))
+#else
+# define sudo_noreturn
+#endif
+
+/* For malloc-like functions that return uninitialized or zeroed memory. */
+#if __GNUC_PREREQ__(2, 96)
+# define sudo_malloclike	__attribute__((__malloc__))
+#else
+# define sudo_malloclike
+#endif
+
+/* Compile-time checking for function arguments that must not be NULL. */
+#if __GNUC_PREREQ__(3, 3)
+# define sudo_attr_nonnull(_a)	__attribute__((__nonnull__ (_a)))
+#else
+# define sudo_attr_nonnull(_a)
+#endif
+
+/* For catching format string mismatches. */
+#if __GNUC_PREREQ__(2, 7)
+# define sudo_printflike(_f, _v)	__attribute__((__format__ (__printf__, _f, _v))) sudo_attr_nonnull(_f)
+# define sudo_printf0like(_f, _v)	__attribute__((__format__ (__printf__, _f, _v)))
+# define sudo_attr_fmt_arg(_f)		__attribute__((__format_arg__ (_f)))
+#else
+# define sudo_printflike(_f, _v)
+# define sudo_printf0like(_f, _v)
+# define sudo_attr_fmt_arg(_f)
+#endif
+
+/* Symbol visibility controls. */
 #ifdef HAVE_DSO_VISIBILITY
 # if defined(__GNUC__)
 #  define sudo_dso_public __attribute__((__visibility__("default")))

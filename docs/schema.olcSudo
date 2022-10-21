@@ -9,9 +9,9 @@ cn: sudoschema
 olcattributetypes: ( 1.3.6.1.4.1.15953.9.1.1
     NAME 'sudoUser'
     DESC 'User(s) who may  run sudo'
-    EQUALITY caseExactIA5Match
-    SUBSTR caseExactIA5SubstringsMatch
-    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+    EQUALITY caseExactMatch
+    SUBSTR caseExactSubstringsMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
 #
 olcattributetypes: ( 1.3.6.1.4.1.15953.9.1.2
     NAME 'sudoHost'
@@ -41,14 +41,14 @@ olcattributetypes: ( 1.3.6.1.4.1.15953.9.1.5
 olcattributetypes: ( 1.3.6.1.4.1.15953.9.1.6
     NAME 'sudoRunAsUser'
     DESC 'User(s) impersonated by sudo'
-    EQUALITY caseExactIA5Match
-    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+    EQUALITY caseExactMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
 #
 olcattributetypes: ( 1.3.6.1.4.1.15953.9.1.7
     NAME 'sudoRunAsGroup'
     DESC 'Group(s) impersonated by sudo'
-    EQUALITY caseExactIA5Match
-    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+    EQUALITY caseExactMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
 #
 olcattributetypes: ( 1.3.6.1.4.1.15953.9.1.8
     NAME 'sudoNotBefore'

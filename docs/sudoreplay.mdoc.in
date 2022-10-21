@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 16, 2022
+.Dd September 13, 2022
 .Dt SUDOREPLAY @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -48,7 +48,7 @@ The
 .Em ID
 should either be a six character sequence of digits and
 upper case letters, e.g.,
-.Li 0100A5
+.Dq 0100A5
 or a path name.
 The
 .Em ID
@@ -74,8 +74,10 @@ with
 enabled in the
 .Em sudoers
 file, a
-.Li TSID=ID
-string is logged via syslog or to the
+.Dq TSID=ID
+string is logged via
+.Xr syslog 3
+or to the
 .Nm sudo
 log file.
 The
@@ -363,7 +365,7 @@ This will be addressed in a future version of
 .Nm
 versions 1.8.4 and higher support a flexible debugging framework
 that is configured via
-.Li Debug
+.Em Debug
 lines in the
 .Xr sudo.conf @mansectform@
 file.

@@ -61,7 +61,7 @@ enum sudoers_formats {
  * Function Prototypes
  */
 static void dump_sudoers(struct sudo_lbuf *lbuf);
-static void usage(void) __attribute__((__noreturn__));
+static sudo_noreturn void usage(void);
 static void set_runaspw(const char *);
 static void set_runasgr(const char *);
 static bool cb_runas_default(const char *file, int line, int column, const union sudo_defs_val *, int);
@@ -202,8 +202,8 @@ main(int argc, char *argv[])
     if (argc < 2) {
 	if (!dflag)
 	    usage();
-	user_name = argc ? *argv++ : "root";
-	user_cmnd = user_base = "true";
+	user_name = argc ? *argv++ : (char *)"root";
+	user_cmnd = user_base = (char *)"true";
 	argc = 0;
     } else {
 	user_name = *argv++;
@@ -442,16 +442,21 @@ open_sudoers(const char *file, bool doedit, bool *keepopen)
     struct stat sb;
     FILE *fp = NULL;
     const char *base;
+    int error, fd;
     debug_decl(open_sudoers, SUDOERS_DEBUG_UTIL);
 
     /* Report errors using the basename for consistent test output. */
     base = sudo_basename(file);
-    switch (sudo_secure_file(file, sudoers_uid, sudoers_gid, &sb)) {
-	case SUDO_PATH_SECURE:
-	    fp = fopen(file, "r");
-	    break;
+    fd = sudo_secure_open_file(file, sudoers_uid, sudoers_gid, &sb, &error);
+    if (fd != -1) {
+	if ((fp = fdopen(fd, "r")) == NULL) {
+	    sudo_warn("unable to open %s", base);
+	    close(fd);
+	}
+    } else {
+	switch (error) {
 	case SUDO_PATH_MISSING:
-	    sudo_warn("unable to stat %s", base);
+	    sudo_warn("unable to open %s", base);
 	    break;
 	case SUDO_PATH_BAD_TYPE:
 	    sudo_warnx("%s is not a regular file", base);
@@ -468,8 +473,10 @@ open_sudoers(const char *file, bool doedit, bool *keepopen)
 		base, (unsigned int) sudoers_gid);
 	    break;
 	default:
-	    /* NOTREACHED */
+	    sudo_warnx("%s: internal error, unexpected error %d",
+		__func__, error);
 	    break;
+	}
     }
 
     debug_return_ptr(fp);

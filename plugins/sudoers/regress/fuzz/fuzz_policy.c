@@ -39,7 +39,9 @@
 #endif
 
 #include "sudoers.h"
+#include "sudo_iolog.h"
 #include "interfaces.h"
+#include "check.h"
 
 extern char **environ;
 extern sudo_dso_public struct policy_plugin sudoers_policy;
@@ -48,6 +50,8 @@ const char *path_plugin_dir = _PATH_SUDO_PLUGIN_DIR;
 char *audit_msg;
 
 static int pass;
+
+int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
 static FILE *
 open_data(const uint8_t *data, size_t size)
@@ -114,13 +118,13 @@ push(struct dynamic_array *arr, const char *entry)
     }
 
     if (arr->len + (entry != NULL) >= arr->size) {
-	char **tmp = reallocarray(arr->entries, arr->size + 128, sizeof(char *));
+	char **tmp = reallocarray(arr->entries, arr->size + 1024, sizeof(char *));
 	if (tmp == NULL) {
 	    free(copy);
 	    return false;
 	}
 	arr->entries = tmp;
-	arr->size += 128;
+	arr->size += 1024;
     }
     if (copy != NULL)
 	arr->entries[arr->len++] = copy;
@@ -161,7 +165,7 @@ fuzz_printf(int msg_type, const char *fmt, ...)
     return 0;
 }
 
-int
+static int
 fuzz_hook_stub(struct sudo_hook *hook)
 {
     return 0;
@@ -368,7 +372,9 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
 	/* Additional environment variables to add. */
 	if (strncmp(line, "env=", sizeof("env=") - 1) == 0) {
-	    push(&env_add, line);
+	    const char *cp = line + sizeof("env=") - 1;
+	    if (strchr(cp, '=') != NULL)
+		push(&env_add, line);
 	    continue;
 	}
 
@@ -380,8 +386,8 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     line = NULL;
 
     /* Exercise code paths that use KRB5CCNAME and SUDO_PROMPT. */
-    putenv("KRB5CCNAME=/tmp/krb5cc_123456");
-    putenv("SUDO_PROMPT=[sudo] password for %p: ");
+    putenv((char *)"KRB5CCNAME=/tmp/krb5cc_123456");
+    putenv((char *)"SUDO_PROMPT=[sudo] password for %p: ");
 
     sudoers_policy.register_hooks(SUDO_API_VERSION, fuzz_hook_stub);
 
@@ -820,7 +826,7 @@ expand_iolog_path(const char *inpath, char *path, size_t pathlen,
 
 /* STUB */
 bool
-iolog_nextid(char *iolog_dir, char sessid[7])
+iolog_nextid(const char *iolog_dir, char sessid[7])
 {
     strlcpy(sessid, "000001", 7);
     return true;

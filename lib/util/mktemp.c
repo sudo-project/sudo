@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2001, 2003, 2004, 2008-2011, 2013, 2015, 2017, 2018
+ * Copyright (c) 2001, 2003, 2004, 2008-2011, 2013, 2015, 2017, 2018, 2022
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -24,7 +24,8 @@
 
 #include <config.h>
 
-#if !defined(HAVE_MKSTEMPS) || !defined(HAVE_MKDTEMP)
+#if (!defined(HAVE_MKDTEMPAT) && !defined(HAVE_MKDTEMPAT_NP)) || \
+    (!defined(HAVE_MKOSTEMPSAT) && !defined(HAVE_MKOSTEMPSAT_NP))
 
 #include <sys/stat.h>
 
@@ -32,9 +33,7 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <stdio.h>
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
-#endif /* HAVE_STDLIB_H */
+#include <stdlib.h>
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
 #elif defined(HAVE_INTTYPES_H)
@@ -55,12 +54,14 @@
 #define NUM_CHARS	(sizeof(TEMPCHARS) - 1)
 #define MIN_X		6
 
+#define MKOTEMP_FLAGS	(O_APPEND | O_CLOEXEC | O_SYNC)
+
 static int
-mktemp_internal(char *path, int slen, int mode)
+mktemp_internal(int dfd, char *path, int slen, int mode, int flags)
 {
 	char *start, *cp, *ep;
 	const char tempchars[] = TEMPCHARS;
-	unsigned int r, tries;
+	unsigned int tries;
 	size_t len;
 	int fd;
 
@@ -71,31 +72,43 @@ mktemp_internal(char *path, int slen, int mode)
 	}
 	ep = path + len - slen;
 
-	tries = 1;
-	for (start = ep; start > path && start[-1] == 'X'; start--) {
-		if (tries < INT_MAX / NUM_CHARS)
-			tries *= NUM_CHARS;
-	}
-	tries *= 2;
+	for (start = ep; start > path && start[-1] == 'X'; start--)
+		;
 	if (ep - start < MIN_X) {
 		errno = EINVAL;
 		return -1;
 	}
 
+	if (flags & ~MKOTEMP_FLAGS) {
+		errno = EINVAL;
+		return -1;
+	}
+	flags |= O_CREAT | O_EXCL | O_RDWR;
+
+	tries = INT_MAX;
 	do {
-		for (cp = start; cp != ep; cp++) {
-			r = arc4random_uniform(NUM_CHARS);
-			*cp = tempchars[r];
-		}
+		cp = start;
+		do {
+			unsigned short rbuf[16];
+			unsigned int i;
+
+			/*
+			 * Avoid lots of arc4random() calls by using
+			 * a buffer sized for up to 16 Xs at a time.
+			 */
+			arc4random_buf(rbuf, sizeof(rbuf));
+			for (i = 0; i < nitems(rbuf) && cp != ep; i++)
+				*cp++ = tempchars[rbuf[i] % NUM_CHARS];
+		} while (cp != ep);
 
 		switch (mode) {
 		case MKTEMP_FILE:
-			fd = open(path, O_CREAT|O_EXCL|O_RDWR, S_IRUSR|S_IWUSR);
+			fd = openat(dfd, path, flags, S_IRUSR|S_IWUSR);
 			if (fd != -1 || errno != EEXIST)
 				return fd;
 			break;
 		case MKTEMP_DIR:
-			if (mkdir(path, S_IRWXU) == 0)
+			if (mkdirat(dfd, path, S_IRWXU) == 0)
 				return 0;
 			if (errno != EEXIST)
 				return -1;
@@ -107,17 +120,53 @@ mktemp_internal(char *path, int slen, int mode)
 	return -1;
 }
 
-int
-sudo_mkstemps(char *path, int slen)
-{
-	return mktemp_internal(path, slen, MKTEMP_FILE);
-}
-
 char *
 sudo_mkdtemp(char *path)
 {
-	if (mktemp_internal(path, 0, MKTEMP_DIR) == -1)
+	if (mktemp_internal(AT_FDCWD, path, 0, MKTEMP_DIR, 0) == -1)
 		return NULL;
 	return path;
 }
-#endif /* !HAVE_MKSTEMPS || !HAVE_MKDTEMP */
+
+char *
+sudo_mkdtempat(int dfd, char *path)
+{
+	if (mktemp_internal(dfd, path, 0, MKTEMP_DIR, 0) == -1)
+		return NULL;
+	return path;
+}
+
+int
+sudo_mkostempsat(int dfd, char *path, int slen, int flags)
+{
+	return mktemp_internal(dfd, path, slen, MKTEMP_FILE, flags);
+}
+
+#ifdef notyet
+int
+sudo_mkostemps(char *path, int slen, int flags)
+{
+	return mktemp_internal(AT_FDCWD, path, slen, MKTEMP_FILE, flags);
+}
+#endif
+
+int
+sudo_mkstemp(char *path)
+{
+	return mktemp_internal(AT_FDCWD, path, 0, MKTEMP_FILE, 0);
+}
+
+#ifdef notyet
+int
+sudo_mkostemp(char *path, int flags)
+{
+	return mktemp_internal(AT_FDCWD, path, 0, MKTEMP_FILE, flags);
+}
+#endif
+
+int
+sudo_mkstemps(char *path, int slen)
+{
+	return mktemp_internal(AT_FDCWD, path, slen, MKTEMP_FILE, 0);
+}
+#endif /* !HAVE_MKDTEMPAT || !HAVE_MKOSTEMPSAT */

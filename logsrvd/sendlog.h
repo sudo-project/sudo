@@ -24,7 +24,7 @@
 # error protobuf-c version 1.30 or higher required
 #endif
 
-#include "config.h"
+#include <config.h>
 
 #if defined(HAVE_OPENSSL)
 # if defined(HAVE_WOLFSSL)

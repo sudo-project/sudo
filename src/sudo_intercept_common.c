@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -51,8 +51,8 @@
 #include "sudo_compat.h"
 #include "sudo_conf.h"
 #include "sudo_debug.h"
-#include "sudo_fatal.h"
 #include "sudo_exec.h"
+#include "sudo_fatal.h"
 #include "sudo_gettext.h"
 #include "sudo_util.h"
 #include "intercept.pb-c.h"
@@ -61,6 +61,7 @@ extern char **environ;
 
 static union sudo_token_un intercept_token;
 static in_port_t intercept_port;
+static bool log_only;
 
 /* Send entire request to sudo (blocking). */
 static bool
@@ -97,7 +98,7 @@ send_client_hello(int sock)
 
     /* Setup client hello. */
     hello.pid = getpid();
-    msg.type_case = INTERCEPT_REQUEST__TYPE_HELLO;;
+    msg.type_case = INTERCEPT_REQUEST__TYPE_HELLO;
     msg.u.hello = &hello;
 
     len = intercept_request__get_packed_size(&msg);
@@ -110,7 +111,7 @@ send_client_hello(int sock)
     msg_len = len;
     len += sizeof(msg_len);
 
-    if ((buf = malloc(len)) == NULL) {
+    if ((buf = sudo_mmap_alloc(len)) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
     }
@@ -120,14 +121,14 @@ send_client_hello(int sock)
     ret = send_req(sock, buf, len);
 
 done:
-    free(buf);
+    sudo_mmap_free(buf);
     debug_return_bool(ret);
 }
 
 /*
  * Receive InterceptResponse from sudo over fd.
  */
-InterceptResponse *
+static InterceptResponse *
 recv_intercept_response(int fd)
 {
     InterceptResponse *res = NULL;
@@ -168,7 +169,7 @@ recv_intercept_response(int fd)
     }
 
     /* Read response from sudo (blocking). */
-    if ((buf = malloc(res_len)) == NULL) {
+    if ((buf = sudo_mmap_alloc(res_len)) == NULL) {
 	goto done;
     }
     cp = buf;
@@ -201,7 +202,7 @@ recv_intercept_response(int fd)
     }
 
 done:
-    free(buf);
+    sudo_mmap_free(buf);
     debug_return_ptr(res);
 }
 
@@ -273,6 +274,7 @@ sudo_interposer_init(void)
 	    intercept_token.u64[0] = res->u.hello_resp->token_lo;
 	    intercept_token.u64[1] = res->u.hello_resp->token_hi;
 	    intercept_port = res->u.hello_resp->portno;
+	    log_only = res->u.hello_resp->log_only;
 	} else {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unexpected type_case value %d in %s from %s",
@@ -295,6 +297,7 @@ send_policy_check_req(int sock, const char *cmnd, char * const argv[],
     InterceptRequest msg = INTERCEPT_REQUEST__INIT;
     PolicyCheckRequest req = POLICY_CHECK_REQUEST__INIT;
     char cwdbuf[PATH_MAX];
+    char *empty[1] = { NULL };
     uint8_t *buf = NULL;
     bool ret = false;
     uint32_t msg_len;
@@ -311,14 +314,12 @@ send_policy_check_req(int sock, const char *cmnd, char * const argv[],
     /* Setup policy check request. */
     req.intercept_fd = sock;
     req.command = (char *)cmnd;
-    req.argv = (char **)argv;
-    for (len = 0; argv[len] != NULL; len++)
+    req.argv = argv ? (char **)argv : empty;
+    for (req.n_argv = 0; req.argv[req.n_argv] != NULL; req.n_argv++)
 	continue;
-    req.n_argv = len;
-    req.envp = (char **)envp;
-    for (len = 0; envp[len] != NULL; len++)
+    req.envp = envp ? (char **)envp : empty;
+    for (req.n_envp = 0; req.envp[req.n_envp] != NULL; req.n_envp++)
 	continue;
-    req.n_envp = len;
     if (getcwd(cwdbuf, sizeof(cwdbuf)) != NULL) {
 	req.cwd = cwdbuf;
     }
@@ -335,7 +336,7 @@ send_policy_check_req(int sock, const char *cmnd, char * const argv[],
     msg_len = len;
     len += sizeof(msg_len);
 
-    if ((buf = malloc(len)) == NULL) {
+    if ((buf = sudo_mmap_alloc(len)) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
     }
@@ -345,7 +346,7 @@ send_policy_check_req(int sock, const char *cmnd, char * const argv[],
     ret = send_req(sock, buf, len);
 
 done:
-    free(buf);
+    sudo_mmap_free(buf);
     debug_return_bool(ret);
 }
 
@@ -357,18 +358,18 @@ intercept_connect(void)
 {
     int sock = -1;
     int on = 1;
-    struct sockaddr_in sin;
-    debug_decl(command_allowed, SUDO_DEBUG_EXEC);
+    struct sockaddr_in sin4;
+    debug_decl(intercept_connect, SUDO_DEBUG_EXEC);
 
     if (intercept_port == 0) {
-	sudo_warnx(U_("intercept port not set"));
+	sudo_warnx("%s", U_("intercept port not set"));
 	goto done;
     }
 
-    memset(&sin, 0, sizeof(sin));
-    sin.sin_family = AF_INET;
-    sin.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    sin.sin_port = htons(intercept_port);
+    memset(&sin4, 0, sizeof(sin4));
+    sin4.sin_family = AF_INET;
+    sin4.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    sin4.sin_port = htons(intercept_port);
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == -1) {
@@ -379,7 +380,7 @@ intercept_connect(void)
     /* Send data immediately, we need low latency IPC. */
     (void)setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on));
 
-    if (connect(sock, (struct sockaddr *)&sin, sizeof(sin)) == -1) {
+    if (connect(sock, (struct sockaddr *)&sin4, sizeof(sin4)) == -1) {
 	sudo_warn("connect");
 	close(sock);
 	sock = -1;
@@ -389,6 +390,9 @@ intercept_connect(void)
 done:
     debug_return_int(sock);
 }
+
+/* Called from sudo_intercept.c */
+bool command_allowed(const char *cmnd, char * const argv[], char * const envp[], char **ncmndp, char ***nargvp, char ***nenvpp);
 
 bool
 command_allowed(const char *cmnd, char * const argv[],
@@ -404,9 +408,11 @@ command_allowed(const char *cmnd, char * const argv[],
     if (sudo_debug_needed(SUDO_DEBUG_INFO)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "req_command: %s", cmnd);
-	for (idx = 0; argv[idx] != NULL; idx++) {
-	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		"req_argv[%zu]: %s", idx, argv[idx]);
+	if (argv != NULL) {
+	    for (idx = 0; argv[idx] != NULL; idx++) {
+		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		    "req_argv[%zu]: %s", idx, argv[idx]);
+	    }
 	}
     }
 
@@ -416,6 +422,18 @@ command_allowed(const char *cmnd, char * const argv[],
 
     if (!send_policy_check_req(sock, cmnd, argv, envp))
 	goto done;
+
+    if (log_only) {
+	/* Just logging, no policy check. */
+	nenvp = sudo_preload_dso_mmap(envp, sudo_conf_intercept_path(), sock);
+	if (nenvp == NULL)
+	    goto oom;
+	*ncmndp = (char *)cmnd;		/* safe */
+	*nargvp = (char **)argv;	/* safe */
+	*nenvpp = nenvp;
+	ret = true;
+	goto done;
+    }
 
     res = recv_intercept_response(sock);
     if (res == NULL)
@@ -431,22 +449,20 @@ command_allowed(const char *cmnd, char * const argv[],
 		    "run_argv[%zu]: %s", idx, res->u.accept_msg->run_argv[idx]);
 	    }
 	}
-	ncmnd = strdup(res->u.accept_msg->run_command);
+	ncmnd = sudo_mmap_strdup(res->u.accept_msg->run_command);
 	if (ncmnd == NULL)
 	    goto oom;
-	nargv = reallocarray(NULL, res->u.accept_msg->n_run_argv + 1,
+	nargv = sudo_mmap_allocarray(res->u.accept_msg->n_run_argv + 1,
 	    sizeof(char *));
 	if (nargv == NULL)
 	    goto oom;
 	for (len = 0; len < res->u.accept_msg->n_run_argv; len++) {
-	    nargv[len] = strdup(res->u.accept_msg->run_argv[len]);
+	    nargv[len] = sudo_mmap_strdup(res->u.accept_msg->run_argv[len]);
 	    if (nargv[len] == NULL)
 		goto oom;
 	}
 	nargv[len] = NULL;
-	// XXX - bogus cast
-	nenvp = sudo_preload_dso((char **)envp, sudo_conf_intercept_path(),
-	    sock);
+	nenvp = sudo_preload_dso_mmap(envp, sudo_conf_intercept_path(), sock);
 	if (nenvp == NULL)
 	    goto oom;
 	*ncmndp = ncmnd;
@@ -466,15 +482,15 @@ command_allowed(const char *cmnd, char * const argv[],
     default:
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unexpected type_case value %d in %s from %s",
-            res->type_case, "InterceptResponse", "sudo");
+	    res->type_case, "InterceptResponse", "sudo");
 	goto done;
     }
 
 oom:
-    free(ncmnd);
+    sudo_mmap_free(ncmnd);
     while (len > 0)
-	free(nargv[--len]);
-    free(nargv);
+	sudo_mmap_free(nargv[--len]);
+    sudo_mmap_free(nargv);
 
 done:
     /* Keep socket open for ctor when we execute the command. */

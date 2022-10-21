@@ -102,6 +102,7 @@ static struct rlimit nproclimit;
 /* XXX - must be extern for audit bits of sudo_auth.c */
 int NewArgc;
 char **NewArgv;
+char **saved_argv;
 
 #ifdef SUDOERS_LOG_CLIENT
 # define remote_iologs	(!SLIST_EMPTY(&def_log_servers))
@@ -184,6 +185,10 @@ sudoers_reinit_defaults(void)
 
     /* Restore error logging. */
     sudoers_error_hook = logger;
+
+    /* No need to check the admin flag file multiple times. */
+    if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED))
+	def_admin_flag = NULL;
 
     debug_return_bool(true);
 }
@@ -397,16 +402,16 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	debug_return_int(-1);
     }
 
-    /* Was previous command was intercepted? */
-    if (def_intercept)
-	SET(sudo_mode, MODE_POLICY_INTERCEPTED);
-
-    /* Only certain mode flags are legal for intercepted commands. */
-    if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED))
-	sudo_mode &= MODE_INTERCEPT_MASK;
-
-    /* Re-initialize defaults if we are called multiple times. */
     if (need_reinit) {
+	/* Was previous command intercepted? */
+	if (ISSET(sudo_mode, MODE_RUN) && def_intercept)
+	    SET(sudo_mode, MODE_POLICY_INTERCEPTED);
+
+	/* Only certain mode flags are legal for intercepted commands. */
+	if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED))
+	    sudo_mode &= MODE_INTERCEPT_MASK;
+
+	/* Re-initialize defaults if we are called multiple times. */
 	if (!sudoers_reinit_defaults())
 	    debug_return_int(-1);
     }
@@ -433,7 +438,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
      * Make a local copy of argc/argv, with special handling for the
      * '-i' option.  We also allocate an extra slot for bash's --login.
      */
-    if (NewArgv != NULL) {
+    if (NewArgv != NULL && NewArgv != saved_argv) {
 	sudoers_gc_remove(GC_PTR, NewArgv);
 	free(NewArgv);
     }
@@ -684,13 +689,18 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
 
     if (ISSET(sudo_mode, (MODE_RUN | MODE_EDIT)) && !remote_iologs) {
-	if ((def_log_input || def_log_output) && def_iolog_file && def_iolog_dir) {
+	if (iolog_enabled && def_iolog_file && def_iolog_dir) {
 	    if ((iolog_path = format_iolog_path()) == NULL) {
 		if (!def_ignore_iolog_errors)
 		    goto done;
 		/* Unable to expand I/O log path, disable I/O logging. */
 		def_log_input = false;
 		def_log_output = false;
+		def_log_stdin = false;
+		def_log_stdout = false;
+		def_log_stderr = false;
+		def_log_ttyin = false;
+		def_log_ttyout = false;
 	    }
 	}
     }
@@ -698,25 +708,21 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     switch (sudo_mode & MODE_MASK) {
 	case MODE_CHECK:
 	    ret = display_cmnd(snl, list_pw ? list_pw : sudo_user.pw);
-	    break;
+	    goto done;
 	case MODE_LIST:
 	    ret = display_privs(snl, list_pw ? list_pw : sudo_user.pw, verbose);
-	    break;
+	    goto done;
 	case MODE_VALIDATE:
+	    ret = true;
+	    goto done;
 	case MODE_RUN:
 	case MODE_EDIT:
-	    /* ret may be overridden by "goto bad" later */
-	    ret = true;
+	    /* ret will not be set until the very end. */
 	    break;
 	default:
 	    /* Should not happen. */
 	    sudo_warnx("internal error, unexpected sudo mode 0x%x", sudo_mode);
 	    goto done;
-    }
-
-    if (ISSET(sudo_mode, (MODE_VALIDATE|MODE_CHECK|MODE_LIST))) {
-	/* ret already set appropriately */
-	goto done;
     }
 
     /*
@@ -749,7 +755,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    strcmp(NewArgv[1], "-c") == 0) {
 	    /* We allocated extra space for the --login above. */
 	    memmove(&NewArgv[2], &NewArgv[1], sizeof(char *) * NewArgc);
-	    NewArgv[1] = "--login";
+	    NewArgv[1] = (char *)"--login";
 	    NewArgc++;
 	}
 
@@ -803,8 +809,10 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    goto bad;
 	}
 	/* find_editor() already g/c'd edit_argv[] */
-	sudoers_gc_remove(GC_PTR, NewArgv);
-	free(NewArgv);
+	if (NewArgv != saved_argv) {
+	    sudoers_gc_remove(GC_PTR, NewArgv);
+	    free(NewArgv);
+	}
 	NewArgv = edit_argv;
 	NewArgc = edit_argc;
 
@@ -812,6 +820,17 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	env_swap_old();
     }
 
+    /* Save the initial command and argv so we have it for exit logging. */
+    if (saved_cmnd == NULL) {
+	saved_cmnd = strdup(safe_cmnd);
+	if (saved_cmnd == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
+	saved_argv = NewArgv;
+    }
+
+    ret = true;
     goto done;
 
 bad:
@@ -1028,6 +1047,7 @@ set_cmnd(void)
 		 * When running a command via a shell, the sudo front-end
 		 * escapes potential meta chars.  We unescape non-spaces
 		 * for sudoers matching and logging purposes.
+		 * TODO: move escaping to the policy plugin instead
 		 */
 		user_args = strvec_join(NewArgv + 1, ' ', strlcpy_unescape);
 	    } else {
@@ -1074,52 +1094,41 @@ set_cmnd(void)
 FILE *
 open_sudoers(const char *file, bool doedit, bool *keepopen)
 {
-    struct stat sb;
     FILE *fp = NULL;
-    bool perm_root = false;
+    struct stat sb;
+    int error, fd;
     debug_decl(open_sudoers, SUDOERS_DEBUG_PLUGIN);
 
     if (!set_perms(PERM_SUDOERS))
 	debug_return_ptr(NULL);
 
 again:
-    switch (sudo_secure_file(file, sudoers_uid, sudoers_gid, &sb)) {
-	case SUDO_PATH_SECURE:
-	    /*
-	     * If we are expecting sudoers to be group readable by
-	     * SUDOERS_GID but it is not, we must open the file as root,
-	     * not uid 1.
-	     */
-	    if (sudoers_uid == ROOT_UID && ISSET(sudoers_mode, S_IRGRP)) {
-		if (!ISSET(sb.st_mode, S_IRGRP) || sb.st_gid != SUDOERS_GID) {
-		    if (!perm_root) {
-			if (!restore_perms() || !set_perms(PERM_ROOT))
-			    debug_return_ptr(NULL);
-		    }
-		}
-	    }
-	    /*
-	     * Open file and make sure we can read it so we can present
-	     * the user with a reasonable error message (unlike the lexer).
-	     */
-	    if ((fp = fopen(file, "r")) == NULL) {
-		log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), file);
+    fd = sudo_secure_open_file(file, sudoers_uid, sudoers_gid, &sb, &error);
+    if (fd != -1) {
+	/*
+	 * Make sure we can read the file so we can present the
+	 * user with a reasonable error message (unlike the lexer).
+	 */
+	if ((fp = fdopen(fd, "r")) == NULL) {
+	    log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), file);
+	    close(fd);
+	} else {
+	    if (sb.st_size != 0 && fgetc(fp) == EOF) {
+		log_warning(SLOG_SEND_MAIL,
+		    N_("unable to read %s"), file);
+		fclose(fp);
+		fp = NULL;
 	    } else {
-		if (sb.st_size != 0 && fgetc(fp) == EOF) {
-		    log_warning(SLOG_SEND_MAIL,
-			N_("unable to read %s"), file);
-		    fclose(fp);
-		    fp = NULL;
-		} else {
-		    /* Rewind fp and set close on exec flag. */
-		    rewind(fp);
-		    (void) fcntl(fileno(fp), F_SETFD, 1);
-		}
+		/* Rewind fp and set close on exec flag. */
+		rewind(fp);
+		(void) fcntl(fileno(fp), F_SETFD, 1);
 	    }
-	    break;
+	}
+    } else {
+	switch (error) {
 	case SUDO_PATH_MISSING:
 	    /*
-	     * If we tried to stat() sudoers as non-root but got EACCES,
+	     * If we tried to open sudoers as non-root but got EACCES,
 	     * try again as root.
 	     */
 	    if (errno == EACCES && geteuid() != ROOT_UID) {
@@ -1127,12 +1136,11 @@ again:
 		if (restore_perms()) {
 		    if (!set_perms(PERM_ROOT))
 			debug_return_ptr(NULL);
-		    perm_root = true;
 		    goto again;
 		}
 		errno = serrno;
 	    }
-	    log_warning(SLOG_SEND_MAIL, N_("unable to stat %s"), file);
+	    log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), file);
 	    break;
 	case SUDO_PATH_BAD_TYPE:
 	    log_warningx(SLOG_SEND_MAIL,
@@ -1152,8 +1160,10 @@ again:
 		(unsigned int) sb.st_gid, (unsigned int) sudoers_gid);
 	    break;
 	default:
-	    /* NOTREACHED */
+	    sudo_warnx("%s: internal error, unexpected error %d",
+		__func__, error);
 	    break;
+	}
     }
 
     if (!restore_perms()) {
@@ -1188,8 +1198,8 @@ set_loginclass(struct passwd *pw)
     } else {
 	login_class = pw->pw_class;
 	if (!login_class || !*login_class)
-	    login_class =
-		(pw->pw_uid == 0) ? LOGIN_DEFROOTCLASS : LOGIN_DEFCLASS;
+	    login_class = (char *)
+		((pw->pw_uid == 0) ? LOGIN_DEFROOTCLASS : LOGIN_DEFCLASS);
     }
 
     /* Make sure specified login class is valid. */
@@ -1666,6 +1676,31 @@ cb_intercept_allow_setid(const char *file, int line, int column,
     debug_return_bool(true);
 }
 
+bool
+cb_log_input(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
+{
+    debug_decl(cb_log_input, SUDOERS_DEBUG_PLUGIN);
+
+    def_log_stdin = op;
+    def_log_ttyin = op;
+
+    debug_return_bool(true);
+}
+
+bool
+cb_log_output(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
+{
+    debug_decl(cb_log_output, SUDOERS_DEBUG_PLUGIN);
+
+    def_log_stdout = op;
+    def_log_stderr = op;
+    def_log_ttyout = op;
+
+    debug_return_bool(true);
+}
+
 /*
  * Set parse Defaults callbacks.
  * We do this here instead in def_data.in so we don't have to
@@ -1727,6 +1762,8 @@ set_callbacks(void)
     sudo_defs_table[I_PASSPROMPT_REGEX].callback = cb_passprompt_regex;
     sudo_defs_table[I_INTERCEPT_TYPE].callback = cb_intercept_type;
     sudo_defs_table[I_INTERCEPT_ALLOW_SETID].callback = cb_intercept_allow_setid;
+    sudo_defs_table[I_LOG_INPUT].callback = cb_log_input;
+    sudo_defs_table[I_LOG_OUTPUT].callback = cb_log_output;
 
     debug_return;
 }
@@ -1764,6 +1801,7 @@ sudoers_cleanup(void)
 
     /* Clear globals */
     list_pw = NULL;
+    saved_argv = NULL;
     NewArgv = NULL;
     NewArgc = 0;
     prev_user = NULL;
@@ -1776,7 +1814,8 @@ tty_present(void)
 {
     debug_decl(tty_present, SUDOERS_DEBUG_PLUGIN);
     
-    if (user_ttypath == NULL) {
+    if (user_tcpgid == 0 && user_ttypath == NULL) {
+	/* No job control or terminal, check /dev/tty. */
 	int fd = open(_PATH_TTY, O_RDWR);
 	if (fd == -1)
 	    debug_return_bool(false);
@@ -1820,6 +1859,7 @@ sudo_user_free(void)
     free(user_cmnd);
     free(user_args);
     free(safe_cmnd);
+    free(saved_cmnd);
     free(user_stat);
 #ifdef HAVE_SELINUX
     free(user_role);

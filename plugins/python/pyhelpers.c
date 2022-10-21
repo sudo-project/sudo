@@ -67,13 +67,6 @@ struct PythonContext py_ctx = {
 };
 
 
-int
-py_is_sudo_log_available(void)
-{
-    debug_decl(py_is_sudo_log_available, PYTHON_DEBUG_INTERNAL);
-    debug_return_int(py_ctx.sudo_log != &_sudo_printf_default);
-}
-
 char *
 py_join_str_list(PyObject *py_str_list, const char *separator)
 {
@@ -104,7 +97,7 @@ cleanup:
     debug_return_str(result);
 }
 
-char *
+static char *
 py_create_traceback_string(PyObject *py_traceback)
 {
     debug_decl(py_create_traceback_string, PYTHON_DEBUG_INTERNAL);

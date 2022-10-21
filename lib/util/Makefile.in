@@ -55,6 +55,7 @@ CPP = @CPP@
 HOSTCPP = @CPP_FOR_BUILD@
 LIBTOOL = @LIBTOOL@
 SHA1SUM = @SHA1SUM@
+GREP = @GREP@
 SED = @SED@
 AWK = @AWK@
 
@@ -110,10 +111,10 @@ PVS_IGNORE = 'V707,V011,V002,V536'
 PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
 
 # Regression tests
-TEST_PROGS = conf_test hltq_test parseln_test progname_test \
+TEST_PROGS = conf_test hltq_test parseln_test progname_test parse_gids_test \
+	     getgids getgrouplist_test multiarch_test open_parent_dir_test \
 	     strsplit_test strtobool_test strtoid_test strtomode_test \
-	     strtonum_test parse_gids_test getgids getgrouplist_test \
-	     uuid_test @COMPAT_TEST_PROGS@
+	     strtonum_test uuid_test @COMPAT_TEST_PROGS@
 TEST_LIBS = @LIBS@
 TEST_LDFLAGS = @LDFLAGS@
 TEST_VERBOSE =
@@ -143,11 +144,11 @@ SHELL = @SHELL@
 
 LTOBJS = basename.lo @DIGEST@ event.lo fatal.lo key_val.lo gethostname.lo \
 	 gettime.lo getgrouplist.lo gidlist.lo json.lo lbuf.lo locking.lo \
-	 logfac.lo logpri.lo mkdir_parents.lo parseln.lo progname.lo rcstr.lo \
-	 regex.lo roundup.lo secure_path.lo setgroups.lo strsplit.lo \
-	 strtobool.lo strtoid.lo strtomode.lo strtonum.lo sudo_conf.lo \
-	 sudo_debug.lo sudo_dso.lo term.lo ttyname_dev.lo \
-	 ttysize.lo uuid.lo @COMMON_OBJS@ @LTLIBOBJS@
+	 logfac.lo logpri.lo mkdir_parents.lo mmap_alloc.lo multiarch.lo \
+	 parseln.lo progname.lo rcstr.lo regex.lo roundup.lo secure_path.lo \
+	 setgroups.lo strsplit.lo strtobool.lo strtoid.lo strtomode.lo \
+	 strtonum.lo sudo_conf.lo sudo_debug.lo sudo_dso.lo term.lo \
+	 ttyname_dev.lo ttysize.lo uuid.lo @COMMON_OBJS@ @LTLIBOBJS@
 
 IOBJS = $(LTOBJS:.lo=.i)
 
@@ -170,6 +171,10 @@ FNM_TEST_OBJS = fnm_test.lo fnmatch.lo
 GLOBTEST_OBJS = globtest.lo glob.lo
 
 GETDELIM_TEST_OBJS = getdelim_test.lo getdelim.lo
+
+MULTIARCH_TEST_OBJS = multiarch_test.lo multiarch.lo
+
+OPEN_PARENT_DIR_TEST_OBJS = open_parent_dir_test.lo mkdir_parents.lo
 
 STRTOBOOL_TEST_OBJS = strtobool_test.lo strtobool.lo
 
@@ -196,11 +201,6 @@ FUZZ_SUDO_CONF_OBJS = fuzz_sudo_conf.lo
 FUZZ_SUDO_CONF_CORPUS = $(srcdir)/regress/corpus/seed/sudo_conf/sudo.conf.*
 
 all: libsudo_util.la
-
-pvs-log-files: $(POBJS)
-
-pvs-studio: $(POBJS)
-	plog-converter $(PVS_LOG_OPTS) $(POBJS)
 
 depend: siglist.c signame.c
 	$(scriptdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
@@ -287,6 +287,12 @@ hltq_test: $(HLTQ_TEST_OBJS) libsudo_util.la
 mktemp_test: $(MKTEMP_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(MKTEMP_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
+multiarch_test: $(MULTIARCH_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(MULTIARCH_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+
+open_parent_dir_test: $(OPEN_PARENT_DIR_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(OPEN_PARENT_DIR_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+
 parseln_test: $(PARSELN_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(PARSELN_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
@@ -336,7 +342,7 @@ fuzz_sudo_conf_seed_corpus.zip:
 	rm -rf $$tdir
 
 run-fuzz_sudo_conf: fuzz_sudo_conf
-	if locale -a 2>&1 | grep '^C.UTF-8$$' >/dev/null 2>&1; then \
+	if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
 	    LC_ALL=C.UTF-8; export LC_ALL; \
 	else \
 	    LC_ALL=C; export LC_ALL; \
@@ -395,11 +401,14 @@ cppcheck:
 
 pvs-log-files: $(POBJS)
 
+pvs-studio: $(POBJS)
+	plog-converter $(PVS_LOG_OPTS) $(POBJS)
+
 fuzz: run-fuzz_sudo_conf
 
 check-fuzzer: $(FUZZ_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    if locale -a 2>&1 | grep '^C.UTF-8$$' >/dev/null 2>&1; then \
+	    if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
 		LC_ALL=C.UTF-8; export LC_ALL; \
 	    else \
 		LC_ALL=C; export LC_ALL; \
@@ -415,7 +424,7 @@ check-fuzzer: $(FUZZ_PROGS)
 # Note: some regress checks are run from srcdir for consistent error messages
 check: $(TEST_PROGS) check-fuzzer
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    if locale -a 2>&1 | grep '^C.UTF-8$$' >/dev/null 2>&1; then \
+	    if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
 		LC_ALL=C.UTF-8; export LC_ALL; \
 	    else \
 		LC_ALL=C; export LC_ALL; \
@@ -440,9 +449,9 @@ check: $(TEST_PROGS) check-fuzzer
 	    if test -f globtest; then \
 		mkdir -p `$(SED) 's@/[^/]*$$@@' $(srcdir)/regress/glob/files | sort -u`; \
 		touch `cat $(srcdir)/regress/glob/files`; \
-		chmod 0755 `grep '/r[^/]*$$' $(srcdir)/regress/glob/files`; \
-		chmod 0444 `grep '/s[^/]*$$' $(srcdir)/regress/glob/files`; \
-		chmod 0711 `grep '/t[^/]*$$' $(srcdir)/regress/glob/files`; \
+		chmod 0755 `$(GREP) '/r[^/]*$$' $(srcdir)/regress/glob/files`; \
+		chmod 0444 `$(GREP) '/s[^/]*$$' $(srcdir)/regress/glob/files`; \
+		chmod 0711 `$(GREP) '/t[^/]*$$' $(srcdir)/regress/glob/files`; \
 		./globtest $(srcdir)/regress/glob/globtest.in || rval=`expr $$rval + $$?`; \
 		rm -rf fake; \
 	    fi; \
@@ -456,6 +465,8 @@ check: $(TEST_PROGS) check-fuzzer
 		./strsig_test || rval=`expr $$rval + $$?`; \
 	    fi; \
 	    ./getgrouplist_test || rval=`expr $$rval + $$?`; \
+	    ./multiarch_test || rval=`expr $$rval + $$?`; \
+	    ./open_parent_dir_test || rval=`expr $$rval + $$?`; \
 	    ./strtobool_test || rval=`expr $$rval + $$?`; \
 	    ./strtoid_test || rval=`expr $$rval + $$?`; \
 	    ./strtomode_test || rval=`expr $$rval + $$?`; \
@@ -704,6 +715,14 @@ fchmodat.i: $(srcdir)/fchmodat.c $(incdir)/sudo_compat.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 fchmodat.plog: fchmodat.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/fchmodat.c --i-file $< --output-file $@
+fchownat.lo: $(srcdir)/fchownat.c $(incdir)/sudo_compat.h \
+             $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/fchownat.c
+fchownat.i: $(srcdir)/fchownat.c $(incdir)/sudo_compat.h \
+             $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+fchownat.plog: fchownat.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/fchownat.c --i-file $< --output-file $@
 fnm_test.lo: $(srcdir)/regress/fnmatch/fnm_test.c $(incdir)/compat/fnmatch.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
              $(incdir)/sudo_util.h $(top_builddir)/config.h
@@ -1088,6 +1107,38 @@ mktemp_test.i: $(srcdir)/regress/mktemp/mktemp_test.c \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 mktemp_test.plog: mktemp_test.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/mktemp/mktemp_test.c --i-file $< --output-file $@
+mmap_alloc.lo: $(srcdir)/mmap_alloc.c $(incdir)/compat/stdbool.h \
+               $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
+               $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/mmap_alloc.c
+mmap_alloc.i: $(srcdir)/mmap_alloc.c $(incdir)/compat/stdbool.h \
+               $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
+               $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+mmap_alloc.plog: mmap_alloc.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/mmap_alloc.c --i-file $< --output-file $@
+multiarch.lo: $(srcdir)/multiarch.c $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
+              $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/multiarch.c
+multiarch.i: $(srcdir)/multiarch.c $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
+              $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+multiarch.plog: multiarch.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/multiarch.c --i-file $< --output-file $@
+multiarch_test.lo: $(srcdir)/regress/multiarch/multiarch_test.c \
+                   $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                   $(incdir)/sudo_fatal.h $(incdir)/sudo_plugin.h \
+                   $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/multiarch/multiarch_test.c
+multiarch_test.i: $(srcdir)/regress/multiarch/multiarch_test.c \
+                   $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                   $(incdir)/sudo_fatal.h $(incdir)/sudo_plugin.h \
+                   $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+multiarch_test.plog: multiarch_test.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/multiarch/multiarch_test.c --i-file $< --output-file $@
 nanosleep.lo: $(srcdir)/nanosleep.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
               $(top_builddir)/config.h
@@ -1098,6 +1149,20 @@ nanosleep.i: $(srcdir)/nanosleep.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 nanosleep.plog: nanosleep.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/nanosleep.c --i-file $< --output-file $@
+open_parent_dir_test.lo: \
+                         $(srcdir)/regress/open_parent_dir/open_parent_dir_test.c \
+                         $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                         $(incdir)/sudo_fatal.h $(incdir)/sudo_plugin.h \
+                         $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/open_parent_dir/open_parent_dir_test.c
+open_parent_dir_test.i: \
+                         $(srcdir)/regress/open_parent_dir/open_parent_dir_test.c \
+                         $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                         $(incdir)/sudo_fatal.h $(incdir)/sudo_plugin.h \
+                         $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+open_parent_dir_test.plog: open_parent_dir_test.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/open_parent_dir/open_parent_dir_test.c --i-file $< --output-file $@
 openat.lo: $(srcdir)/openat.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/openat.c
 openat.i: $(srcdir)/openat.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
@@ -1276,10 +1341,12 @@ signame.i: signame.c
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 signame.plog: signame.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file signame.c --i-file $< --output-file $@
-snprintf.lo: $(srcdir)/snprintf.c $(incdir)/sudo_compat.h \
+snprintf.lo: $(srcdir)/snprintf.c $(incdir)/compat/stdbool.h \
+             $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
              $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/snprintf.c
-snprintf.i: $(srcdir)/snprintf.c $(incdir)/sudo_compat.h \
+snprintf.i: $(srcdir)/snprintf.c $(incdir)/compat/stdbool.h \
+             $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
              $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 snprintf.plog: snprintf.i
@@ -1488,11 +1555,13 @@ sudo_debug.i: $(srcdir)/sudo_debug.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 sudo_debug.plog: sudo_debug.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sudo_debug.c --i-file $< --output-file $@
-sudo_dso.lo: $(srcdir)/sudo_dso.c $(incdir)/sudo_compat.h $(incdir)/sudo_dso.h \
-             $(top_builddir)/config.h
+sudo_dso.lo: $(srcdir)/sudo_dso.c $(incdir)/compat/stdbool.h \
+             $(incdir)/sudo_compat.h $(incdir)/sudo_dso.h \
+             $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/sudo_dso.c
-sudo_dso.i: $(srcdir)/sudo_dso.c $(incdir)/sudo_compat.h $(incdir)/sudo_dso.h \
-             $(top_builddir)/config.h
+sudo_dso.i: $(srcdir)/sudo_dso.c $(incdir)/compat/stdbool.h \
+             $(incdir)/sudo_compat.h $(incdir)/sudo_dso.h \
+             $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 sudo_dso.plog: sudo_dso.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sudo_dso.c --i-file $< --output-file $@

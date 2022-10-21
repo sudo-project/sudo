@@ -1,3 +1,127 @@
+What's new in Sudo 1.9.12
+
+ * Fixed a bug in the ptrace-based intercept mode where the current
+   working directory could include garbage at the end.
+
+ * Fixed a compilation error on systems that lack the stdint.h
+   header.  Bug #1035
+
+ * Fixed a bug when logging the command's exit status in intercept
+   mode.  The wrong command could be logged with the exit status.
+
+ * For ptrace-based intercept mode, sudo will now attempt to
+   verify that the command path name, arguments and environment
+   have not changed from the time when they were authorized by the
+   security policy.  The new "intercept_verify" sudoers setting can
+   be used to control this behavior.
+
+ * Fixed running commands with a relative path (e.g. ./foo) in
+   intercept mode.  Previously, this would fail if sudo's current
+   working directory was different from that of the command.
+
+ * Sudo now supports passing the execve(2) system call the NULL
+   pointer for the `argv` and/or `envp` arguments when in intercept
+   mode.  Linux treats a NULL pointer like an empty array.
+
+ * The sudoers LDAP schema now allows sudoUser, sudoRunasUser and
+   sudoRunasGroup to include UTF-8 characters, not just 7-bit ASCII.
+
+ * Fixed a problem with "sudo -i" on SELinux when the target user's
+   home directory is not searchable by sudo.  GitHub issue #160.
+
+ * Neovim has been added to the list of visudo editors that support
+   passing the line number on the command line.
+
+ * Fixed a bug in sudo's SHA384 and SHA512 message digest padding.
+
+ * Added a new "-N" (--no-update) command line option to sudo which
+   can be used to prevent sudo from updating the user's cached
+   credentials.  It is now possible to determine whether or not a
+   user's cached credentials are currently valid by running:
+
+	$ sudo -Nnv
+
+   and checking the exit value.  One use case for this is to indicate
+   in a shell prompt that sudo is "active" for the user.
+
+ * PAM approval modules are no longer invoked when running sub-commands
+   in intercept mode unless the "intercept_authenticate" option is set.
+   There is a substantial performance penalty for calling into PAM
+   for each command run.  PAM approval modules are still called for
+   the initial command.
+
+ * Intercept mode on Linux now uses process_vm_readv(2) and
+   process_vm_writev(2) if available.
+
+ * The XDG_CURRENT_DESKTOP environment variable is now preserved
+   by default.  This makes it possible for graphical applications
+   to choose the correct theme when run via sudo.
+
+ * On 64-bit systems, if sudo fails to load a sudoers group plugin,
+   it will use system-specific heuristics to try to locate a 64-bit
+   version of the plugin.
+
+ * The cvtsudoers manual now documents the JSON and CSV output
+   formats.  GitHub issue #172.
+
+ * Fixed a bug where sub-commands were not being logged to a remote
+   log server when log_subcmds was enabled.  GitHub issue #174.
+
+ * The new log_stdin, log_stdout, log_stderr, log_ttyin, and log_ttyout
+   sudoers settings can be used to support more fine-grained I/O logging.
+   The sudo front-end no longer allocates a pseudo-terminal when running
+   a command if the I/O logging plugin requests logging of stdin, stdout,
+   or stderr but not terminal input/output.
+
+ * Quieted a libgcrypt run-time initialization warning.
+   This fixes Debian bug #1019428 and Ubuntu bug #1397663.
+
+ * Fixed a bug in visudo that caused literal backslashes to be removed
+   from the EDITOR environment variable.  GitHub issue #179.
+
+ * The sudo Python plugin now implements the "find_spec" method instead
+   of the the deprecated "find_module".  This fixes a test failure when
+   a newer version of setuptools that doesn't include "find_module" is
+   found on the system.
+
+ * Fixed a bug introduced in sudo 1.9.9 where sudo_logsrvd created
+   the process ID file, usually /var/run/sudo/sudo_logsrvd.pid, as
+   a directory instead of a plain file.  The same bug could result
+   in I/O log directories that end in six or more X's being created
+   literally in addition to the name being used as a template for
+   the mkdtemp(3) function.
+
+ * Fixed a long-standing bug where a sudoers rule with a command
+   line argument of "", which indicates the command may be run with
+   no arguments, would also match a literal "" on the command line.
+   GitHub issue #182.
+
+ * Added the -I option to visudo which only edits the main sudoers
+   file.  Include files are not edited unless a syntax error is found.
+
+ * Fixed "sudo -l -U otheruser" output when the runas list is empty.
+   Previously, sudo would list the invoking user instead of the
+   list user.  GitHub issue #183.
+
+ * Fixed the display of command tags and options in "sudo -l" output
+   when the RunAs user or group changes.  A new line is started for
+   RunAs changes which means we need to display the command tags
+   and options again.  GitHub issue #184.
+
+ * The sesh helper program now uses getopt_long(3) to parse the
+   command line options.
+
+ * The embedded copy of zlib has been updated to version 1.2.13.
+
+ * Fixed a bug that prevented event log data from being sent to the
+   log server when I/O logging was not enabled.  This only affected
+   systems without PAM or configurations where the pam_session and
+   pam_setcred options were disabled in the sudoers file.
+
+ * Fixed a bug where "sudo -l" output included a carriage return
+   after the newline.  This is only needed when displaying to a
+   terminal in raw mode.  Bug #1042.
+
 What's new in Sudo 1.9.11p3
 
  * Fixed "connection reset" errors on AIX when running shell scripts

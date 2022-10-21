@@ -35,7 +35,7 @@
 size_t
 eventlog_writeln(FILE *fp, char *line, size_t linelen, size_t maxlen)
 {
-    char *indent = "";
+    const char *indent = "";
     char *beg = line;
     char *end;
     int len;

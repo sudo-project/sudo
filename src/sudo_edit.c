@@ -414,7 +414,8 @@ static int
 selinux_edit_create_tfiles(struct command_details *command_details,
     struct tempfile *tf, char *files[], int nfiles)
 {
-    char **sesh_args, **sesh_ap, *user_str = NULL;
+    const char **sesh_args, **sesh_ap;
+    char *user_str = NULL;
     int i, error, sesh_nargs, ret = -1;
     struct stat sb;
     debug_decl(selinux_edit_create_tfiles, SUDO_DEBUG_EDIT);
@@ -422,7 +423,6 @@ selinux_edit_create_tfiles(struct command_details *command_details,
     if (nfiles < 1)
 	debug_return_int(0);
 
-    /* Construct common args for sesh */
     sesh_nargs = 6 + (nfiles * 2) + 1;
     sesh_args = sesh_ap = reallocarray(NULL, sesh_nargs, sizeof(char *));
     if (sesh_args == NULL) {
@@ -430,18 +430,18 @@ selinux_edit_create_tfiles(struct command_details *command_details,
 	goto done;
     }
     *sesh_ap++ = "sesh";
-    *sesh_ap++ = "-e";
+    *sesh_ap++ = "--edit-create";
     if (!ISSET(command_details->flags, CD_SUDOEDIT_FOLLOW))
-	*sesh_ap++ = "-h";
+	*sesh_ap++ = "--no-dereference";
     if (ISSET(command_details->flags, CD_SUDOEDIT_CHECKDIR)) {
 	if ((user_str = selinux_fmt_sudo_user()) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
-	*sesh_ap++ = "-w";
+	*sesh_ap++ = "--edit-checkdir";
 	*sesh_ap++ = user_str;
     }
-    *sesh_ap++ = "0";
+    *sesh_ap++ = "--";
 
     for (i = 0; i < nfiles; i++) {
 	char *tfile, *ofile = files[i];
@@ -470,10 +470,10 @@ selinux_edit_create_tfiles(struct command_details *command_details,
     }
     *sesh_ap = NULL;
 
-    /* Run sesh -e [-h] 0 <o1> <t1> ... <on> <tn> */
-    error = selinux_run_helper(command_details->cred.uid, command_details->cred.gid,
-	command_details->cred.ngroups, command_details->cred.groups, sesh_args,
-	command_details->envp);
+    /* Run sesh -c [-h] [-w userstr] <o1> <t1> ... <on> <tn> */
+    error = selinux_run_helper(command_details->cred.uid,
+	command_details->cred.gid, command_details->cred.ngroups,
+	command_details->cred.groups, (char **)sesh_args, command_details->envp);
     switch (error) {
     case SESH_SUCCESS:
 	break;
@@ -520,7 +520,9 @@ static int
 selinux_edit_copy_tfiles(struct command_details *command_details,
     struct tempfile *tf, int nfiles, struct timespec *times)
 {
-    char **sesh_args, **sesh_ap, *user_str = NULL;
+    const char **sesh_args, **sesh_ap;
+    char *user_str = NULL;
+    bool run_helper = false;
     int i, error, sesh_nargs, ret = 1;
     int tfd = -1;
     struct timespec ts;
@@ -530,9 +532,6 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
     if (nfiles < 1)
 	debug_return_int(0);
 
-    const int check_dir = ISSET(command_details->flags, CD_SUDOEDIT_CHECKDIR);
-
-    /* Construct common args for sesh */
     sesh_nargs = 5 + (nfiles * 2) + 1;
     sesh_args = sesh_ap = reallocarray(NULL, sesh_nargs, sizeof(char *));
     if (sesh_args == NULL) {
@@ -540,18 +539,17 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
 	goto done;
     }
     *sesh_ap++ = "sesh";
-    *sesh_ap++ = "-e";
-    if (check_dir) {
+    *sesh_ap++ = "--edit-install";
+    if (ISSET(command_details->flags, CD_SUDOEDIT_CHECKDIR)) {
 	if ((user_str = selinux_fmt_sudo_user()) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
-	*sesh_ap++ = "-w";
+	*sesh_ap++ = "--edit-checkdir";
 	*sesh_ap++ = user_str;
     }
-    *sesh_ap++ = "1";
+    *sesh_ap++ = "--";
 
-    /* Construct args for sesh -e 1 */
     for (i = 0; i < nfiles; i++) {
 	if (tfd != -1)
 	    close(tfd);
@@ -573,6 +571,7 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
 		continue;
 	    }
 	}
+	run_helper = true;
 	*sesh_ap++ = tf[i].tfile;
 	*sesh_ap++ = tf[i].ofile;
 	if (fchown(tfd, command_details->cred.uid, command_details->cred.gid) != 0) {
@@ -581,40 +580,37 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
 	}
     }
     *sesh_ap = NULL;
-    if (tfd != -1)
-	close(tfd);
 
-    /*
-     * check dir adds two more args to the array
-     */
-    if ((!check_dir && sesh_ap - sesh_args > 3)
-        || (check_dir && sesh_ap - sesh_args > 5)) {
-	/* Run sesh -e 1 <t1> <o1> ... <tn> <on> */
-	error = selinux_run_helper(command_details->cred.uid, command_details->cred.gid,
-	    command_details->cred.ngroups, command_details->cred.groups, sesh_args,
-	    command_details->envp);
-	switch (error) {
-	case SESH_SUCCESS:
-	    ret = 0;
-	    break;
-	case SESH_ERR_NO_FILES:
-	    sudo_warnx("%s",
-		U_("unable to copy temporary files back to their original location"));
-	    break;
-	case SESH_ERR_SOME_FILES:
-	    sudo_warnx("%s",
-		U_("unable to copy some of the temporary files back to their original location"));
-	    break;
-	case SESH_ERR_KILLED:
-	    sudo_warnx("%s", U_("sesh: killed by a signal"));
-	    break;
-	default:
-	    sudo_warnx(U_("sesh: unknown error %d"), error);
-	    break;
-	}
+    if (!run_helper)
+	goto done;
+
+    /* Run sesh -i <t1> <o1> ... <tn> <on> */
+    error = selinux_run_helper(command_details->cred.uid,
+	command_details->cred.gid, command_details->cred.ngroups,
+	command_details->cred.groups, (char **)sesh_args, command_details->envp);
+    switch (error) {
+    case SESH_SUCCESS:
+	ret = 0;
+	break;
+    case SESH_ERR_NO_FILES:
+	sudo_warnx("%s",
+	    U_("unable to copy temporary files back to their original location"));
+	break;
+    case SESH_ERR_SOME_FILES:
+	sudo_warnx("%s",
+	    U_("unable to copy some of the temporary files back to their original location"));
+	break;
+    case SESH_ERR_KILLED:
+	sudo_warnx("%s", U_("sesh: killed by a signal"));
+	break;
+    default:
+	sudo_warnx(U_("sesh: unknown error %d"), error);
+	break;
     }
 
 done:
+    if (tfd != -1)
+	close(tfd);
     /* Contents of tf will be freed by caller. */
     free(sesh_args);
     free(user_str);

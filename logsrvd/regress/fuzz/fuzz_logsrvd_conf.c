@@ -44,6 +44,8 @@
 
 #include "logsrvd.h"
 
+int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
+
 /*
  * Stub version that always succeeds for small inputs and fails for large.
  * We want to fuzz our parser, not libc's regular expression code.

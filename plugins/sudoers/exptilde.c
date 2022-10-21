@@ -74,7 +74,7 @@ expand_tilde(char **path, const char *user)
 	    *slash = '\0';
 	    opath = slash + 1;
 	} else {
-	    opath = "";
+	    opath = (char *)"";
 	}
     }
     pw = sudo_getpwnam(user);

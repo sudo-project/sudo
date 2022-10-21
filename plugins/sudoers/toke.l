@@ -51,7 +51,7 @@
 #endif
 
 // PVS Studio suppression
-// -V::519, 1004, 1037
+// -V::519, 547, 1004, 1037, 1048
 
 int sudolineno;			/* current sudoers line number. */
 char *sudoers;			/* sudoers file being parsed. */

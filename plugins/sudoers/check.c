@@ -165,6 +165,16 @@ check_user(int validated, int mode)
     debug_decl(check_user, SUDOERS_DEBUG_AUTH);
 
     /*
+     * In intercept mode, only check the user if configured to do so.
+     * We already have a session so no need to init the auth subsystem.
+     */
+    if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED)) {
+	if (!def_intercept_authenticate) {
+	    debug_return_int(true);
+	}
+    }
+
+    /*
      * Init authentication system regardless of whether we need a password.
      * Required for proper PAM session support.
      */
@@ -215,8 +225,8 @@ done:
 	 * Only update time stamp if user validated and was approved.
 	 * Failure to update the time stamp is not a fatal error.
 	 */
-	if (ret == true && closure.tstat != TS_ERROR) {
-	    if (ISSET(validated, VALIDATE_SUCCESS))
+	if (ret == true && ISSET(validated, VALIDATE_SUCCESS)) {
+	    if (ISSET(mode, MODE_UPDATE_TICKET) && closure.tstat != TS_ERROR)
 		(void)timestamp_update(closure.cookie, closure.auth_pw);
 	}
     }
@@ -310,10 +320,6 @@ user_is_exempt(void)
     bool ret = false;
     debug_decl(user_is_exempt, SUDOERS_DEBUG_AUTH);
 
-    if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED)) {
-	if (!def_intercept_authenticate)
-	    ret = true;
-    }
     if (def_exempt_group) {
 	if (user_in_group(sudo_user.pw, def_exempt_group))
 	    ret = true;

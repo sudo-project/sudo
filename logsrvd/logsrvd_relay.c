@@ -16,7 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "config.h"
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
+#include <config.h>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -234,7 +239,7 @@ fmt_client_hello(struct connection_closure *closure)
     debug_decl(fmt_client_hello, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending ClientHello", __func__);
-    hello_msg.client_id = "Sudo Logsrvd " PACKAGE_VERSION;
+    hello_msg.client_id = (char *)"Sudo Logsrvd " PACKAGE_VERSION;
 
     client_msg.u.hello_msg = &hello_msg;
     client_msg.type_case = CLIENT_MESSAGE__TYPE_HELLO_MSG;
@@ -295,7 +300,7 @@ bad:
  * Returns 0 on success, -1 on error, setting errno.
  * If there is no next relay, errno is set to ENOENT.
  */
-int
+static int
 connect_relay_next(struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;

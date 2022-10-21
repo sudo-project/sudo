@@ -22,6 +22,7 @@
  */
 
 #include "testhelpers.h"
+#include <unistd.h>
 
 #include "sudo_dso.h"
 
@@ -49,7 +50,7 @@ static bool verbose;
 static int _init_symbols(void);
 static int _unlink_symbols(void);
 
-void
+static void
 create_plugin_options(const char *module_name, const char *class_name, const char *extra_option)
 {
     char opt_module_path[PATH_MAX + 256];
@@ -65,7 +66,7 @@ create_plugin_options(const char *module_name, const char *class_name, const cha
                                            opt_classname, extra_option, NULL);
 }
 
-void
+static void
 create_io_plugin_options(const char *log_path)
 {
     char opt_logpath[PATH_MAX + 16];
@@ -73,19 +74,19 @@ create_io_plugin_options(const char *log_path)
     create_plugin_options("example_io_plugin", "SudoIOPlugin", opt_logpath);
 }
 
-void
+static void
 create_debugging_plugin_options(void)
 {
     create_plugin_options("example_debugging", "DebugDemoPlugin", NULL);
 }
 
-void
+static void
 create_audit_plugin_options(const char *extra_argument)
 {
     create_plugin_options("example_audit_plugin", "SudoAuditPlugin", extra_argument);
 }
 
-void
+static void
 create_conversation_plugin_options(void)
 {
     char opt_logpath[PATH_MAX + 16];
@@ -93,24 +94,24 @@ create_conversation_plugin_options(void)
     create_plugin_options("example_conversation", "ReasonLoggerIOPlugin", opt_logpath);
 }
 
-void
+static void
 create_policy_plugin_options(void)
 {
     create_plugin_options("example_policy_plugin", "SudoPolicyPlugin", NULL);
 }
 
-int
+static int
 init(void)
 {
     // always start each test from clean state
     memset(&data, 0, sizeof(data));
 
     memset(&example_pwd, 0, sizeof(example_pwd));
-    example_pwd.pw_name = "pw_name";
-    example_pwd.pw_passwd = "pw_passwd";
-    example_pwd.pw_gecos = "pw_gecos";
-    example_pwd.pw_shell ="pw_shell";
-    example_pwd.pw_dir = "pw_dir";
+    example_pwd.pw_name = (char *)"pw_name";
+    example_pwd.pw_passwd = (char *)"pw_passwd";
+    example_pwd.pw_gecos = (char *)"pw_gecos";
+    example_pwd.pw_shell = (char *)"pw_shell";
+    example_pwd.pw_dir = (char *)"pw_dir";
     example_pwd.pw_uid = (uid_t)1001;
     example_pwd.pw_gid = (gid_t)101;
 
@@ -134,7 +135,7 @@ init(void)
     return true;
 }
 
-int
+static int
 cleanup(int success)
 {
     if (!success) {
@@ -160,7 +161,7 @@ cleanup(int success)
     return true;
 }
 
-int
+static int
 check_example_io_plugin_version_display(int is_verbose)
 {
     const char *errstr = NULL;
@@ -188,7 +189,7 @@ check_example_io_plugin_version_display(int is_verbose)
     return true;
 }
 
-int
+static int
 check_example_io_plugin_command_log(void)
 {
     const char *errstr = NULL;
@@ -233,7 +234,7 @@ check_example_io_plugin_command_log(void)
 
 typedef struct io_plugin * (io_clone_func)(void);
 
-int
+static int
 check_example_io_plugin_command_log_multiple(void)
 {
     const char *errstr = NULL;
@@ -330,7 +331,7 @@ check_example_io_plugin_command_log_multiple(void)
     return true;
 }
 
-int
+static int
 check_example_io_plugin_failed_to_start_command(void)
 {
     const char *errstr = NULL;
@@ -358,7 +359,7 @@ check_example_io_plugin_failed_to_start_command(void)
     return true;
 }
 
-int
+static int
 check_example_io_plugin_fails_with_python_backtrace(void)
 {
     const char *errstr = NULL;
@@ -377,7 +378,7 @@ check_example_io_plugin_fails_with_python_backtrace(void)
     return true;
 }
 
-int
+static int
 check_io_plugin_reports_error(void)
 {
     const char *errstr = NULL;
@@ -445,7 +446,7 @@ check_io_plugin_reports_error(void)
     return true;
 }
 
-int
+static int
 check_example_group_plugin(void)
 {
     create_plugin_options("example_group_plugin", "SudoGroupPlugin", NULL);
@@ -463,7 +464,7 @@ check_example_group_plugin(void)
     return true;
 }
 
-const char *
+static const char *
 create_debug_config(const char *debug_spec)
 {
     char *result = NULL;
@@ -493,7 +494,7 @@ cleanup:
     return result;
 }
 
-int
+static int
 check_example_group_plugin_is_able_to_debug(void)
 {
     const char *config_path = create_debug_config("py_calls@diag");
@@ -516,7 +517,7 @@ check_example_group_plugin_is_able_to_debug(void)
     return true;
 }
 
-int
+static int
 check_plugin_unload(void)
 {
     // You can call this test to avoid having a lot of subinterpreters
@@ -528,7 +529,7 @@ check_plugin_unload(void)
     return true;
 }
 
-int
+static int
 check_example_debugging(const char *debug_spec)
 {
     const char *errstr = NULL;
@@ -559,7 +560,7 @@ check_example_debugging(const char *debug_spec)
     return true;
 }
 
-int
+static int
 check_loading_fails(const char *name)
 {
     const char *errstr = NULL;
@@ -576,7 +577,7 @@ check_loading_fails(const char *name)
     return true;
 }
 
-int
+static int
 check_loading_fails_with_missing_path(void)
 {
     str_array_free(&data.plugin_options);
@@ -584,7 +585,7 @@ check_loading_fails_with_missing_path(void)
     return check_loading_fails("missing_path");
 }
 
-int
+static int
 check_loading_succeeds_with_missing_classname(void)
 {
     str_array_free(&data.plugin_options);
@@ -605,7 +606,7 @@ check_loading_succeeds_with_missing_classname(void)
     return true;
 }
 
-int
+static int
 check_loading_fails_with_missing_classname(void)
 {
     str_array_free(&data.plugin_options);
@@ -613,14 +614,14 @@ check_loading_fails_with_missing_classname(void)
     return check_loading_fails("missing_classname");
 }
 
-int
+static int
 check_loading_fails_with_wrong_classname(void)
 {
     create_plugin_options("example_debugging", "MispelledPluginName", NULL);
     return check_loading_fails("wrong_classname");
 }
 
-int
+static int
 check_loading_fails_with_wrong_path(void)
 {
     str_array_free(&data.plugin_options);
@@ -628,7 +629,7 @@ check_loading_fails_with_wrong_path(void)
     return check_loading_fails("wrong_path");
 }
 
-int
+static int
 check_loading_fails_plugin_is_not_owned_by_root(void)
 {
     sudo_conf_clear_paths();
@@ -638,7 +639,7 @@ check_loading_fails_plugin_is_not_owned_by_root(void)
     return check_loading_fails("not_owned_by_root");
 }
 
-int
+static int
 check_example_conversation_plugin_reason_log(int simulate_suspend, const char *description)
 {
     const char *errstr = NULL;
@@ -667,7 +668,7 @@ check_example_conversation_plugin_reason_log(int simulate_suspend, const char *d
     return true;
 }
 
-int
+static int
 check_example_conversation_plugin_user_interrupts(void)
 {
     const char *errstr = NULL;
@@ -692,7 +693,7 @@ check_example_conversation_plugin_user_interrupts(void)
     return true;
 }
 
-int
+static int
 check_example_policy_plugin_version_display(int is_verbose)
 {
     const char *errstr = NULL;
@@ -721,7 +722,7 @@ check_example_policy_plugin_version_display(int is_verbose)
     return true;
 }
 
-int
+static int
 check_example_policy_plugin_accepted_execution(void)
 {
     const char *errstr = NULL;
@@ -773,7 +774,7 @@ check_example_policy_plugin_accepted_execution(void)
     return true;
 }
 
-int
+static int
 check_example_policy_plugin_failed_execution(void)
 {
     const char *errstr = NULL;
@@ -811,7 +812,7 @@ check_example_policy_plugin_failed_execution(void)
     return true;
 }
 
-int
+static int
 check_example_policy_plugin_denied_execution(void)
 {
     const char *errstr = NULL;
@@ -846,7 +847,7 @@ check_example_policy_plugin_denied_execution(void)
     return true;
 }
 
-int
+static int
 check_example_policy_plugin_list(void)
 {
     const char *errstr = NULL;
@@ -904,7 +905,7 @@ check_example_policy_plugin_list(void)
     return true;
 }
 
-int
+static int
 check_example_policy_plugin_validate_invalidate(void)
 {
     const char *errstr = NULL;
@@ -935,7 +936,7 @@ check_example_policy_plugin_validate_invalidate(void)
     return true;
 }
 
-int
+static int
 check_policy_plugin_callbacks_are_optional(void)
 {
     const char *errstr = NULL;
@@ -961,7 +962,7 @@ check_policy_plugin_callbacks_are_optional(void)
     return true;
 }
 
-int
+static int
 check_policy_plugin_reports_error(void)
 {
     const char *errstr = NULL;
@@ -1024,7 +1025,7 @@ check_policy_plugin_reports_error(void)
     return true;
 }
 
-int
+static int
 check_io_plugin_callbacks_are_optional(void)
 {
     const char *errstr = NULL;
@@ -1051,7 +1052,7 @@ check_io_plugin_callbacks_are_optional(void)
     return true;
 }
 
-int
+static int
 check_python_plugins_do_not_affect_each_other(void)
 {
     const char *errstr = NULL;
@@ -1078,7 +1079,7 @@ check_python_plugins_do_not_affect_each_other(void)
     return true;
 }
 
-int
+static int
 check_example_audit_plugin_receives_accept(void)
 {
     create_audit_plugin_options("");
@@ -1117,7 +1118,7 @@ check_example_audit_plugin_receives_accept(void)
     return true;
 }
 
-int
+static int
 check_example_audit_plugin_receives_reject(void)
 {
     create_audit_plugin_options(NULL);
@@ -1147,7 +1148,7 @@ check_example_audit_plugin_receives_reject(void)
     return true;
 }
 
-int
+static int
 check_example_audit_plugin_receives_error(void)
 {
     create_audit_plugin_options("");
@@ -1179,7 +1180,7 @@ check_example_audit_plugin_receives_error(void)
 
 typedef struct audit_plugin * (audit_clone_func)(void);
 
-int
+static int
 check_example_audit_plugin_workflow_multiple(void)
 {
     // verify multiple python audit plugins are available
@@ -1247,7 +1248,7 @@ check_example_audit_plugin_workflow_multiple(void)
     return true;
 }
 
-int
+static int
 check_example_audit_plugin_version_display(void)
 {
     create_audit_plugin_options(NULL);
@@ -1275,7 +1276,7 @@ check_example_audit_plugin_version_display(void)
     return true;
 }
 
-int
+static int
 check_audit_plugin_callbacks_are_optional(void)
 {
     const char *errstr = NULL;
@@ -1300,7 +1301,7 @@ check_audit_plugin_callbacks_are_optional(void)
     return true;
 }
 
-int
+static int
 check_audit_plugin_reports_error(void)
 {
     const char *errstr = NULL;

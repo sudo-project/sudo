@@ -67,11 +67,7 @@ struct rtentry;
 
 #define DEFAULT_TEXT_DOMAIN	"sudo"
 
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
+#include "sudo.h"
 
 /* Minix apparently lacks IFF_LOOPBACK */
 #ifndef IFF_LOOPBACK
@@ -109,7 +105,7 @@ int
 get_net_ifs(char **addrinfo_out)
 {
     struct ifaddrs *ifa, *ifaddrs;
-    struct sockaddr_in *sin;
+    struct sockaddr_in *sin4;
 # ifdef HAVE_STRUCT_IN6_ADDR
     struct sockaddr_in6 *sin6;
 # endif
@@ -160,19 +156,19 @@ get_net_ifs(char **addrinfo_out)
 
 	switch (ifa->ifa_addr->sa_family) {
 	case AF_INET:
-	    sin = (struct sockaddr_in *)ifa->ifa_addr;
-	    if (sin->sin_addr.s_addr == INADDR_ANY || sin->sin_addr.s_addr == INADDR_NONE) {
+	    sin4 = (struct sockaddr_in *)ifa->ifa_addr;
+	    if (sin4->sin_addr.s_addr == INADDR_ANY || sin4->sin_addr.s_addr == INADDR_NONE) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "ignoring unspecified AF_INET addr for %s", ifa->ifa_name);
 		continue;
 	    }
-	    if (inet_ntop(AF_INET, &sin->sin_addr, addrstr, sizeof(addrstr)) == NULL) {
+	    if (inet_ntop(AF_INET, &sin4->sin_addr, addrstr, sizeof(addrstr)) == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "ignoring bad AF_INET addr for %s", ifa->ifa_name);
 		continue;
 	    }
-	    sin = (struct sockaddr_in *)ifa->ifa_netmask;
-	    if (inet_ntop(AF_INET, &sin->sin_addr, maskstr, sizeof(maskstr)) == NULL) {
+	    sin4 = (struct sockaddr_in *)ifa->ifa_netmask;
+	    if (inet_ntop(AF_INET, &sin4->sin_addr, maskstr, sizeof(maskstr)) == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "ignoring bad AF_INET mask for %s", ifa->ifa_name);
 		continue;
@@ -319,7 +315,7 @@ get_net_ifs(char **addrinfo_out)
      */
     for (i = 0; i < ifconf.ifc_len; ) {
 	struct ifreq *ifr = (struct ifreq *)&ifconf.ifc_buf[i];
-	struct sockaddr_in *sin;
+	struct sockaddr_in *sin4;
 
 	/* Set i to the subscript of the next interface (no sa_len). */
 	i += sizeof(struct ifreq);
@@ -333,13 +329,13 @@ get_net_ifs(char **addrinfo_out)
 	}
 
 	/* Store the address. */
-	sin = (struct sockaddr_in *)&ifr->ifr_addr;
-	if (sin->sin_addr.s_addr == INADDR_ANY || sin->sin_addr.s_addr == INADDR_NONE) {
+	sin4 = (struct sockaddr_in *)&ifr->ifr_addr;
+	if (sin4->sin_addr.s_addr == INADDR_ANY || sin4->sin_addr.s_addr == INADDR_NONE) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"ignoring unspecified AF_INET addr for %s", ifr->ifr_name);
 	    continue;
 	}
-	if (inet_ntop(AF_INET, &sin->sin_addr, addrstr, sizeof(addrstr)) == NULL) {
+	if (inet_ntop(AF_INET, &sin4->sin_addr, addrstr, sizeof(addrstr)) == NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"ignoring bad AF_INET addr for %s", ifr->ifr_name);
 	    continue;
@@ -363,8 +359,8 @@ get_net_ifs(char **addrinfo_out)
 	}
 
 	/* Convert the mask to string form. */
-	sin = (struct sockaddr_in *)&ifr->ifr_addr;
-	if (inet_ntop(AF_INET, &sin->sin_addr, maskstr, sizeof(maskstr)) == NULL) {
+	sin4 = (struct sockaddr_in *)&ifr->ifr_addr;
+	if (inet_ntop(AF_INET, &sin4->sin_addr, maskstr, sizeof(maskstr)) == NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"ignoring bad AF_INET mask for %s", ifr->ifr_name);
 	    continue;
@@ -471,7 +467,7 @@ get_net_ifs(char **addrinfo_out)
 {
     struct lifconf lifconf;
     struct lifnum lifn;
-    struct sockaddr_in *sin;
+    struct sockaddr_in *sin4;
     struct sockaddr_in6 *sin6;
     char addrstr[INET6_ADDRSTRLEN], maskstr[INET6_ADDRSTRLEN];
     char *addrinfo = NULL;
@@ -544,13 +540,13 @@ get_net_ifs(char **addrinfo_out)
 	/* Store the address. */
 	switch (family) {
 	case AF_INET:
-	    sin = (struct sockaddr_in *)&lifr->lifr_addr;
-	    if (sin->sin_addr.s_addr == INADDR_ANY || sin->sin_addr.s_addr == INADDR_NONE) {
+	    sin4 = (struct sockaddr_in *)&lifr->lifr_addr;
+	    if (sin4->sin_addr.s_addr == INADDR_ANY || sin4->sin_addr.s_addr == INADDR_NONE) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "ignoring unspecified AF_INET addr for %s", lifr->lifr_name);
 		continue;
 	    }
-	    if (inet_ntop(AF_INET, &sin->sin_addr, addrstr, sizeof(addrstr)) == NULL) {
+	    if (inet_ntop(AF_INET, &sin4->sin_addr, addrstr, sizeof(addrstr)) == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "ignoring bad AF_INET addr for %s", lifr->lifr_name);
 		continue;
@@ -596,8 +592,8 @@ get_net_ifs(char **addrinfo_out)
 	}
 	switch (family) {
 	case AF_INET:
-	    sin = (struct sockaddr_in *)&lifr->lifr_addr;
-	    if (inet_ntop(AF_INET, &sin->sin_addr, maskstr, sizeof(maskstr)) == NULL) {
+	    sin4 = (struct sockaddr_in *)&lifr->lifr_addr;
+	    if (inet_ntop(AF_INET, &sin4->sin_addr, maskstr, sizeof(maskstr)) == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "ignoring bad AF_INET mask for %s", lifr->lifr_name);
 		continue;
@@ -658,7 +654,7 @@ get_net_ifs(char **addrinfo_out)
 {
     struct ifconf ifconf;
     struct ifreq *ifr;
-    struct sockaddr_in *sin;
+    struct sockaddr_in *sin4;
 # ifdef HAVE_STRUCT_IN6_ADDR
     struct sockaddr_in6 *sin6;
 # endif
@@ -772,13 +768,13 @@ get_net_ifs(char **addrinfo_out)
 	/* Store the address. */
 	switch (family) {
 	case AF_INET:
-	    sin = (struct sockaddr_in *)&ifr->ifr_addr;
-	    if (sin->sin_addr.s_addr == INADDR_ANY || sin->sin_addr.s_addr == INADDR_NONE) {
+	    sin4 = (struct sockaddr_in *)&ifr->ifr_addr;
+	    if (sin4->sin_addr.s_addr == INADDR_ANY || sin4->sin_addr.s_addr == INADDR_NONE) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "ignoring unspecified AF_INET addr for %s", ifr->ifr_name);
 		continue;
 	    }
-	    if (inet_ntop(AF_INET, &sin->sin_addr, addrstr, sizeof(addrstr)) == NULL) {
+	    if (inet_ntop(AF_INET, &sin4->sin_addr, addrstr, sizeof(addrstr)) == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "ignoring bad AF_INET addr for %s", ifr->ifr_name);
 		continue;
@@ -828,8 +824,8 @@ get_net_ifs(char **addrinfo_out)
 	/* Convert the mask to string form. */
 	switch (family) {
 	case AF_INET:
-	    sin = (struct sockaddr_in *)&ifr->ifr_addr;
-	    if (inet_ntop(AF_INET, &sin->sin_addr, maskstr, sizeof(maskstr)) == NULL) {
+	    sin4 = (struct sockaddr_in *)&ifr->ifr_addr;
+	    if (inet_ntop(AF_INET, &sin4->sin_addr, maskstr, sizeof(maskstr)) == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "ignoring bad AF_INET mask for %s", ifr->ifr_name);
 		continue;

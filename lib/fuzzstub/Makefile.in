@@ -88,11 +88,6 @@ POBJS = $(IOBJS:.i=.plog)
 
 all: libsudo_fuzzstub.la
 
-pvs-log-files: $(POBJS)
-
-pvs-studio: $(POBJS)
-	plog-converter $(PVS_LOG_OPTS) $(POBJS)
-
 depend:
 	$(scriptdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
 	    --builddir=$(abs_top_builddir) lib/fuzzstub/Makefile.in
@@ -138,6 +133,9 @@ cppcheck:
 	cppcheck $(CPPCHECK_OPTS) -I$(incdir) -I$(top_builddir) -I$(top_srcdir) $(srcdir)/*.c
 
 pvs-log-files: $(POBJS)
+
+pvs-studio: $(POBJS)
+	plog-converter $(PVS_LOG_OPTS) $(POBJS)
 
 fuzz:
 

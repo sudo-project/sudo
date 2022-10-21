@@ -181,87 +181,113 @@ ts_find_record(int fd, struct timestamp_entry *key, struct timestamp_entry *entr
 /*
  * Create a directory and any missing parent directories with the
  * specified mode.
- * Returns true on success.
- * Returns false on failure and displays a warning to stderr.
+ * Returns an fd usable with the *at() functions on success.
+ * Returns -1 on failure, setting errno.
  */
-static bool
+static int
 ts_mkdirs(const char *path, uid_t owner, gid_t group, mode_t mode,
     mode_t parent_mode, bool quiet)
 {
-    bool ret;
+    int parentfd, fd = -1;
+    const char *base;
     mode_t omask;
     debug_decl(ts_mkdirs, SUDOERS_DEBUG_AUTH);
 
+    /* Child directory we will create. */
+    base = sudo_basename(path);
+
     /* umask must not be more restrictive than the file modes. */
     omask = umask(ACCESSPERMS & ~(mode|parent_mode));
-    ret = sudo_mkdir_parents(path, owner, group, parent_mode, quiet);
-    if (ret) {
+    parentfd = sudo_open_parent_dir(path, owner, group, parent_mode, quiet);
+    if (parentfd != -1) {
 	/* Create final path component. */
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "mkdir %s, mode 0%o, uid %d, gid %d", path, (unsigned int)mode,
 	    (int)owner, (int)group);
-	if (mkdir(path, mode) != 0 && errno != EEXIST) {
+	if (mkdirat(parentfd, base, mode) != 0 && errno != EEXIST) {
 	    if (!quiet)
 		sudo_warn(U_("unable to mkdir %s"), path);
-	    ret = false;
 	} else {
-	    if (chown(path, owner, group) != 0) {
+	    fd = openat(parentfd, base, O_RDONLY|O_NONBLOCK, 0);
+	    if (fd == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		    "%s: unable to open %s", __func__, path);
+	    } else if (fchown(fd, owner, group) != 0) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 		    "%s: unable to chown %d:%d %s", __func__,
 		    (int)owner, (int)group, path);
 	    }
 	}
+	close(parentfd);
     }
     umask(omask);
-    debug_return_bool(ret);
+    debug_return_int(fd);
 }
 
 /*
  * Check that path is owned by timestamp_uid and not writable by
  * group or other.  If path is missing and make_it is true, create
  * the directory and its parent dirs.
- * Returns true on success or false on failure, setting errno.
+ *
+ * Returns an fd usable with the *at() functions on success.
+ * Returns -1 on failure, setting errno.
  */
-static bool
-ts_secure_dir(char *path, bool make_it, bool quiet)
+static int
+ts_secure_opendir(const char *path, bool make_it, bool quiet)
 {
+    int error, fd;
     struct stat sb;
-    bool ret = false;
-    debug_decl(ts_secure_dir, SUDOERS_DEBUG_AUTH);
+    debug_decl(ts_secure_opendir, SUDOERS_DEBUG_AUTH);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO, "checking %s", path);
-    switch (sudo_secure_dir(path, timestamp_uid, -1, &sb)) {
-    case SUDO_PATH_SECURE:
-	ret = true;
-	break;
-    case SUDO_PATH_MISSING:
-	if (make_it && ts_mkdirs(path, timestamp_uid, timestamp_gid, S_IRWXU,
-	    S_IRWXU|S_IXGRP|S_IXOTH, quiet)) {
-	    ret = true;
+    fd = sudo_secure_open_dir(path, timestamp_uid, timestamp_gid, &sb, &error);
+    if (fd == -1) {
+	switch (error) {
+	case SUDO_PATH_MISSING:
+	    if (make_it) {
+		fd = ts_mkdirs(path, timestamp_uid, timestamp_gid, S_IRWXU,
+		    S_IRWXU|S_IXGRP|S_IXOTH, quiet);
+		if (fd != -1)
+		    break;
+	    }
+	    if (!quiet)
+		sudo_warn("%s", path);
+	    break;
+	case SUDO_PATH_BAD_TYPE:
+	    errno = ENOTDIR;
+	    if (!quiet)
+		sudo_warn("%s", path);
+	    break;
+	case SUDO_PATH_WRONG_OWNER:
+	    if (!quiet) {
+		sudo_warnx(U_("%s is owned by uid %u, should be %u"),
+		    path, (unsigned int)sb.st_uid, (unsigned int)timestamp_uid);
+	    }
+	    errno = EACCES;
+	    break;
+	case SUDO_PATH_WORLD_WRITABLE:
+	    if (!quiet)
+		sudo_warnx(U_("%s is world writable"), path);
+	    errno = EACCES;
+	    break;
+	case SUDO_PATH_GROUP_WRITABLE:
+	    if (!quiet) {
+		sudo_warnx(U_("%s is owned by gid %u, should be %u"),
+		    path, (unsigned int)sb.st_gid, (unsigned int)timestamp_gid);
+	    }
+	    errno = EACCES;
+	    break;
+	default:
+	    if (!quiet) {
+		sudo_warnx("%s: internal error, unexpected error %d",
+		    __func__, error);
+		errno = EINVAL;
+	    }
 	    break;
 	}
-	errno = ENOENT;
-	break;
-    case SUDO_PATH_BAD_TYPE:
-	errno = ENOTDIR;
-	if (!quiet)
-	    sudo_warn("%s", path);
-	break;
-    case SUDO_PATH_WRONG_OWNER:
-	if (!quiet) {
-	    sudo_warnx(U_("%s is owned by uid %u, should be %u"),
-		path, (unsigned int) sb.st_uid,
-		(unsigned int) timestamp_uid);
-	}
-	errno = EACCES;
-	break;
-    case SUDO_PATH_GROUP_WRITABLE:
-	if (!quiet)
-	    sudo_warnx(U_("%s is group writable"), path);
-	errno = EACCES;
-	break;
     }
-    debug_return_bool(ret);
+
+    debug_return_int(fd);
 }
 
 /*
@@ -271,15 +297,15 @@ ts_secure_dir(char *path, bool make_it, bool quiet)
  * Returns TIMESTAMP_OPEN_ERROR or TIMESTAMP_PERM_ERROR on error.
  */
 static int
-ts_open(const char *path, int flags)
+ts_openat(int dfd, const char *path, int flags)
 {
     bool uid_changed = false;
     int fd;
-    debug_decl(ts_open, SUDOERS_DEBUG_AUTH);
+    debug_decl(ts_openat, SUDOERS_DEBUG_AUTH);
 
     if (timestamp_uid != 0)
 	uid_changed = set_perms(PERM_TIMESTAMP);
-    fd = open(path, flags, S_IRUSR|S_IWUSR);
+    fd = openat(dfd, path, flags, S_IRUSR|S_IWUSR);
     if (uid_changed && !restore_perms()) {
 	/* Unable to restore permissions, should not happen. */
 	if (fd != -1) {
@@ -406,7 +432,7 @@ timestamp_open(const char *user, pid_t sid)
 {
     struct ts_cookie *cookie;
     char *fname = NULL;
-    int tries, fd = -1;
+    int tries, dfd = -1, fd = -1;
     debug_decl(timestamp_open, SUDOERS_DEBUG_AUTH);
 
     /* Zero timeout means don't use the time stamp file. */
@@ -416,7 +442,8 @@ timestamp_open(const char *user, pid_t sid)
     }
 
     /* Check the validity of timestamp dir and create if missing. */
-    if (!ts_secure_dir(def_timestampdir, true, false))
+    dfd = ts_secure_opendir(def_timestampdir, true, false);
+    if (dfd == -1)
 	goto bad;
 
     /* Open time stamp file. */
@@ -427,7 +454,7 @@ timestamp_open(const char *user, pid_t sid)
     for (tries = 1; ; tries++) {
 	struct stat sb;
 
-	fd = ts_open(fname, O_RDWR|O_CREAT);
+	fd = ts_openat(dfd, user, O_RDWR|O_CREAT);
 	switch (fd) {
 	case TIMESTAMP_OPEN_ERROR:
 	    log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), fname);
@@ -453,7 +480,7 @@ timestamp_open(const char *user, pid_t sid)
 			sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
 			    "removing time stamp file that predates boot time");
 			close(fd);
-			unlink(fname);
+			unlinkat(dfd, user, 0);
 			continue;
 		    }
 		}
@@ -473,9 +500,12 @@ timestamp_open(const char *user, pid_t sid)
     cookie->sid = sid;
     cookie->pos = -1;
 
+    close(dfd);
     debug_return_ptr(cookie);
 bad:
-    if (fd != -1)
+    if (dfd != -1)
+	close(dfd);
+    if (fd >= 0)
 	close(fd);
     free(fname);
     debug_return_ptr(NULL);
@@ -591,7 +621,7 @@ done:
 /*
  * Write a TS_LOCKEXCL record at the beginning of the time stamp file.
  */
-bool
+static bool
 timestamp_lock_write(struct ts_cookie *cookie)
 {
     struct timestamp_entry entry;
@@ -962,7 +992,7 @@ int
 timestamp_remove(bool unlink_it)
 {
     struct timestamp_entry key, entry;
-    int fd = -1, ret = true;
+    int dfd = -1, fd = -1, ret = true;
     char *fname = NULL;
     debug_decl(timestamp_remove, SUDOERS_DEBUG_AUTH);
 
@@ -976,6 +1006,13 @@ timestamp_remove(bool unlink_it)
     }
 #endif
 
+    dfd = open(def_timestampdir, O_RDONLY|O_NONBLOCK);
+    if (dfd == -1) {
+	if (errno != ENOENT)
+	    ret = -1;
+	goto done;
+    }
+
     if (asprintf(&fname, "%s/%s", def_timestampdir, user_name) == -1) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	ret = -1;
@@ -984,12 +1021,12 @@ timestamp_remove(bool unlink_it)
 
     /* For "sudo -K" simply unlink the time stamp file. */
     if (unlink_it) {
-	ret = unlink(fname) ? -1 : true;
+	ret = unlinkat(dfd, user_name, 0) ? -1 : true;
 	goto done;
     }
 
     /* Open time stamp file and lock it for exclusive access. */
-    fd = ts_open(fname, O_RDWR);
+    fd = ts_openat(dfd, user_name, O_RDWR);
     switch (fd) {
     case TIMESTAMP_OPEN_ERROR:
 	if (errno != ENOENT)
@@ -1023,7 +1060,9 @@ timestamp_remove(bool unlink_it)
     }
 
 done:
-    if (fd != -1)
+    if (dfd != -1)
+	close(dfd);
+    if (fd >= 0)
 	close(fd);
     free(fname);
     debug_return_int(ret);
@@ -1035,21 +1074,17 @@ done:
 bool
 already_lectured(void)
 {
-    char status_file[PATH_MAX];
+    bool ret = false;
     struct stat sb;
-    int len;
+    int dfd;
     debug_decl(already_lectured, SUDOERS_DEBUG_AUTH);
 
-    if (ts_secure_dir(def_lecture_status_dir, false, true)) {
-	len = snprintf(status_file, sizeof(status_file), "%s/%s",
-	    def_lecture_status_dir, user_name);
-	if (len > 0 && len < ssizeof(status_file)) {
-	    debug_return_bool(stat(status_file, &sb) == 0);
-	}
-	log_warningx(SLOG_SEND_MAIL, N_("lecture status path too long: %s/%s"),
-	    def_lecture_status_dir, user_name);
+    dfd = ts_secure_opendir(def_lecture_status_dir, false, true);
+    if (dfd != -1) {
+	ret = fstatat(dfd, user_name, &sb, AT_SYMLINK_NOFOLLOW) == 0;
+	close(dfd);
     }
-    debug_return_bool(false);
+    debug_return_bool(ret);
 }
 
 /*
@@ -1059,24 +1094,16 @@ already_lectured(void)
 int
 set_lectured(void)
 {
-    char lecture_status[PATH_MAX];
-    int len, fd, ret = false;
+    int dfd, fd, ret = false;
     debug_decl(set_lectured, SUDOERS_DEBUG_AUTH);
 
-    len = snprintf(lecture_status, sizeof(lecture_status), "%s/%s",
-	def_lecture_status_dir, user_name);
-    if (len < 0 || len >= ssizeof(lecture_status)) {
-	log_warningx(SLOG_SEND_MAIL, N_("lecture status path too long: %s/%s"),
-	    def_lecture_status_dir, user_name);
-	goto done;
-    }
-
-    /* Check the validity of lecture dir and create if missing. */
-    if (!ts_secure_dir(def_lecture_status_dir, true, false))
+    /* Check the validity of timestamp dir and create if missing. */
+    dfd = ts_secure_opendir(def_lecture_status_dir, true, false);
+    if (dfd == -1)
 	goto done;
 
     /* Create lecture file. */
-    fd = ts_open(lecture_status, O_WRONLY|O_CREAT|O_EXCL);
+    fd = ts_openat(dfd, user_name, O_WRONLY|O_CREAT|O_EXCL);
     switch (fd) {
     case TIMESTAMP_OPEN_ERROR:
 	/* Failed to open, not a fatal error. */
@@ -1091,6 +1118,7 @@ set_lectured(void)
 	ret = true;
 	break;
     }
+    close(dfd);
 
 done:
     debug_return_int(ret);

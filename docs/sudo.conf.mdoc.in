@@ -67,17 +67,17 @@ Leading white space is removed from the beginning of lines
 even when a continuation character is used.
 .Pp
 Non-comment lines that don't begin with
-.Li Plugin ,
-.Li Path ,
-.Li Debug ,
+.Em Plugin ,
+.Em Path ,
+.Em Debug ,
 or
-.Li Set
+.Em Set
 are silently ignored.
 .Pp
 The
 .Nm
 file is always parsed in the
-.Dq Li C
+.Ql C
 locale.
 .Ss Plugin configuration
 .Nm sudo
@@ -91,9 +91,9 @@ Plugins are dynamically loaded based on the contents of
 .Nm .
 .Pp
 A
-.Li Plugin
+.Em Plugin
 line consists of the
-.Li Plugin
+.Em Plugin
 keyword, followed by the
 .Em symbol_name
 and the
@@ -102,14 +102,14 @@ to the dynamic shared object that contains the plugin.
 The
 .Em symbol_name
 is the name of the
-.Li approval_plugin ,
-.Li audit_plugin ,
-.Li io_plugin ,
+.Vt struct approval_plugin ,
+.Vt struct audit_plugin ,
+.Vt struct io_plugin ,
 or
-.Li policy_plugin
-struct contained in the plugin.
+.Vt struct policy_plugin
+defined by the plugin.
 If a plugin implements multiple plugin types, there must be a
-.Li Plugin
+.Em Plugin
 line for each unique symbol name.
 The
 .Em path
@@ -117,7 +117,7 @@ may be fully qualified or relative.
 If not fully qualified, it is relative to the directory
 specified by the
 .Em plugin_dir
-.Li Path
+.Em Path
 setting, which defaults to
 .Pa @plugindir@ .
 In other words:
@@ -167,7 +167,7 @@ This limitation does not apply to I/O plugins.
 If no
 .Nm
 file is present, or if it contains no
-.Li Plugin
+.Em Plugin
 lines, the
 .Nm sudoers
 plugin will be used as the default security policy, for I/O logging
@@ -203,9 +203,9 @@ plugin architecture, see the
 manual.
 .Ss Path settings
 A
-.Li Path
+.Em Path
 line consists of the
-.Li Path
+.Em Path
 keyword, followed by the name of the path to set and its value.
 For example:
 .Bd -literal -offset 4n
@@ -217,7 +217,7 @@ Path askpass /usr/X11R6/bin/ssh-askpass
 If no path name is specified, features relying on the specified
 setting will be disabled.
 Disabling
-.Li Path
+.Em Path
 settings is only supported in
 .Nm sudo
 version 1.8.16 and higher.
@@ -254,7 +254,7 @@ If terminal devices may be located in a sub-directory of
 that path must be explicitly listed in
 .Em devsearch .
 The default value is
-.Li /dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev
+.Pa /dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev
 .Pp
 This option is ignored on systems that support either the
 .Fn devname
@@ -265,15 +265,15 @@ functions, for example
 macOS and Solaris.
 .It intercept
 The fully-qualified path to a shared library containing a wrappers for the
-.Fn execl ,
-.Fn execle ,
-.Fn execlp ,
-.Fn execv ,
-.Fn execve ,
-.Fn execvp ,
-.Fn execvpe ,
+.Xr execve 2 ,
+.Xr execl 3 ,
+.Xr execle 3 ,
+.Xr execlp 3 ,
+.Xr execv 3 ,
+.Xr execvp 3 ,
+.Xr execvpe 3 ,
 and
-.Fn system
+.Xr system 3
 library functions that intercepts attempts to run further commands and
 performs a policy check before allowing them to be executed.
 This is used to implement the
@@ -286,23 +286,23 @@ The default value is
 .It noexec
 The fully-qualified path to a shared library containing wrappers
 for the
-.Fn execl ,
-.Fn execle ,
-.Fn execlp ,
-.Fn exect ,
-.Fn execv ,
-.Fn execve ,
-.Fn execveat ,
-.Fn execvP ,
-.Fn execvp ,
-.Fn execvpe ,
-.Fn fexecve ,
-.Fn popen ,
-.Fn posix_spawn ,
-.Fn posix_spawnp ,
-.Fn system ,
+.Xr execve 2 ,
+.Xr execl 3 ,
+.Xr execle 3 ,
+.Xr execlp 3 ,
+.Xr exect 3 ,
+.Xr execv 3 ,
+.Xr execveat 3 ,
+.Xr execvP 3 ,
+.Xr execvp 3 ,
+.Xr execvpe 3 ,
+.Xr fexecve 3 ,
+.Xr popen 3 ,
+.Xr posix_spawn 3 ,
+.Xr posix_spawnp 3 ,
+.Xr system 3 ,
 and
-.Fn wordexp
+.Xr wordexp 3
 library functions that prevent the execution of further commands.
 This is used to implement the
 .Em noexec
@@ -519,9 +519,9 @@ that can log what
 is doing internally if there is a problem.
 .Pp
 A
-.Li Debug
+.Em Debug
 line consists of the
-.Li Debug
+.Em Debug
 keyword, followed by the name of the program, plugin, or shared object
 to debug, the debug file name, and a comma-separated list of debug flags.
 The debug flag syntax used by
@@ -557,25 +557,25 @@ intercept functionality on some systems.
 As of
 .Nm sudo
 1.8.12, multiple
-.Li Debug
+.Em Debug
 entries may be specified per program.
 Older versions of
 .Nm sudo
 only support a single
-.Li Debug
+.Em Debug
 entry per program.
 Plugin-specific
-.Li Debug
+.Em Debug
 entries are also supported starting with
 .Nm sudo
 1.8.12 and are matched by either the base name of the plugin that was loaded
 (for example
-.Li sudoers.so )
+.Pa sudoers.so )
 or by the plugin's fully-qualified path name.
 Previously, the
 .Nm sudoers
 plugin shared the same
-.Li Debug
+.Em Debug
 entry as the
 .Nm sudo
 front-end and could not be configured separately.

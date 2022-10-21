@@ -44,6 +44,7 @@ struct AuditPluginContext
             (void **)&CALLBACK_PLUGINFUNC(function_name)); \
     } while(0)
 
+sudo_dso_public struct audit_plugin *python_audit_clone(void);
 
 static int
 _call_plugin_open(struct AuditPluginContext *audit_ctx, int submit_optind, char * const submit_argv[])
@@ -126,7 +127,7 @@ python_plugin_audit_close(struct AuditPluginContext *audit_ctx, int status_type,
     debug_return;
 }
 
-int
+static int
 python_plugin_audit_accept(struct AuditPluginContext *audit_ctx,
     const char *plugin_name, unsigned int plugin_type,
     char * const command_info[], char * const run_argv[],
@@ -164,7 +165,7 @@ cleanup:
     debug_return_int(rc);
 }
 
-int
+static int
 python_plugin_audit_reject(struct AuditPluginContext *audit_ctx,
     const char *plugin_name, unsigned int plugin_type,
     const char *audit_msg, char * const command_info[], const char **errstr)
@@ -194,7 +195,7 @@ cleanup:
     debug_return_int(rc);
 }
 
-int
+static int
 python_plugin_audit_error(struct AuditPluginContext *audit_ctx,
     const char *plugin_name, unsigned int plugin_type,
     const char *audit_msg, char * const command_info[], const char **errstr)
@@ -221,7 +222,7 @@ cleanup:
     debug_return_int(rc);
 }
 
-int
+static int
 python_plugin_audit_show_version(struct AuditPluginContext *audit_ctx, int verbose)
 {
     debug_decl(python_plugin_audit_show_version, PYTHON_DEBUG_CALLBACKS);
@@ -263,7 +264,7 @@ static struct audit_plugin *extra_audit_plugins[] = {
     &python_audit7
 };
 
-sudo_dso_public struct audit_plugin *
+struct audit_plugin *
 python_audit_clone(void)
 {
     static size_t counter = 0;

@@ -22,11 +22,13 @@ message InterceptHello {
 /*
  * Sudo response to an InterceptHello from sudo_intercept.so.
  * The client uses the port number and token to connect back to sudo.
+ * If log_only is set there is no InterceptResponse to a PolicyCheckRequest.
  */
 message HelloResponse {
   fixed64 token_lo = 1;
   fixed64 token_hi = 2;
   int32 portno = 3;
+  bool log_only = 4;
 }
 
 /*

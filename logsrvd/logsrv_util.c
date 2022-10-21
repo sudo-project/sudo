@@ -16,7 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "config.h"
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
+#include <config.h>
 
 #include <sys/types.h>
 
@@ -64,14 +69,14 @@ expand_buf(struct connection_buffer *buf, unsigned int needed)
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    debug_return_bool(false);
 	}
-	if (buf->len - buf->off > 0)
+	if (buf->len != buf->off)
 	    memcpy(newdata, buf->data + buf->off, buf->len - buf->off);
 	free(buf->data);
 	buf->data = newdata;
 	buf->size = needed;
     } else {
 	/* Just reset existing buffer. */
-	if (buf->len - buf->off > 0) {
+	if (buf->len != buf->off) {
 	    memmove(buf->data, buf->data + buf->off,
 		buf->len - buf->off);
 	}

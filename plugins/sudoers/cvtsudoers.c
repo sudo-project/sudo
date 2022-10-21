@@ -87,8 +87,8 @@ static struct option long_opts[] = {
 };
 
 sudo_dso_public int main(int argc, char *argv[]);
-static void help(void) __attribute__((__noreturn__));
-static void usage(int);
+static sudo_noreturn void help(void);
+static sudo_noreturn void usage(void);
 static bool convert_sudoers_sudoers(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
 static bool parse_sudoers(const char *input_file, struct cvtsudoers_config *conf);
 static bool parse_ldif(struct sudoers_parse_tree *parse_tree, const char *input_file, struct cvtsudoers_config *conf);
@@ -207,7 +207,7 @@ main(int argc, char *argv[])
 	    conf->order_increment = sudo_strtonum(optarg, 1, UINT_MAX, &errstr);
 	    if (errstr != NULL) {
 		sudo_warnx(U_("order increment: %s: %s"), optarg, U_(errstr));
-		usage(1);
+		usage();
 	    }
 	    break;
 	case 'l':
@@ -226,7 +226,7 @@ main(int argc, char *argv[])
 	    conf->sudo_order = sudo_strtonum(optarg, 0, UINT_MAX, &errstr);
 	    if (errstr != NULL) {
 		sudo_warnx(U_("starting order: %s: %s"), optarg, U_(errstr));
-		usage(1);
+		usage();
 	    }
 	    break;
 	case 'p':
@@ -236,7 +236,7 @@ main(int argc, char *argv[])
 	    conf->order_padding = sudo_strtonum(optarg, 1, UINT_MAX, &errstr);
 	    if (errstr != NULL ) {
 		sudo_warnx(U_("order padding: %s: %s"), optarg, U_(errstr));
-		usage(1);
+		usage();
 	    }
 	    break;
 	case 's':
@@ -256,7 +256,7 @@ main(int argc, char *argv[])
 	    pwfile = optarg;
 	    break;
 	default:
-	    usage(1);
+	    usage();
 	}
     }
     argc -= optind;
@@ -275,7 +275,7 @@ main(int argc, char *argv[])
 	    input_format = format_sudoers;
 	} else {
 	    sudo_warnx(U_("unsupported input format %s"), conf->input_format);
-	    usage(1);
+	    usage();
 	}
     }
     if (conf->output_format != NULL) {
@@ -293,23 +293,23 @@ main(int argc, char *argv[])
 	    conf->store_options = false;
 	} else {
 	    sudo_warnx(U_("unsupported output format %s"), conf->output_format);
-	    usage(1);
+	    usage();
 	}
     }
     if (conf->filter != NULL) {
 	/* We always expand aliases when filtering (may change in future). */
 	if (!cvtsudoers_parse_filter(conf->filter))
-	    usage(1);
+	    usage();
     }
     if (conf->defstr != NULL) {
 	conf->defaults = cvtsudoers_parse_defaults(conf->defstr);
 	if (conf->defaults == -1)
-	    usage(1);
+	    usage();
     }
     if (conf->supstr != NULL) {
 	conf->suppress = cvtsudoers_parse_suppression(conf->supstr);
 	if (conf->suppress == -1)
-	    usage(1);
+	    usage();
     }
 
     /* Apply padding to sudo_order if present. */
@@ -691,7 +691,7 @@ cvtsudoers_parse_filter(char *expression)
 	/* Parse keyword = value */
 	keyword = cp;
 	if ((cp = strchr(cp, '=')) == NULL) {
-	    sudo_warnx(U_("invalid filter: %s"), keyword);;
+	    sudo_warnx(U_("invalid filter: %s"), keyword);
 	    free(s);
 	    debug_return_bool(false);
 	}
@@ -707,7 +707,7 @@ cvtsudoers_parse_filter(char *expression)
 	} else if (strcmp(keyword, "cmnd") == 0 || strcmp(keyword, "cmd") == 0) {
 	    STAILQ_INSERT_TAIL(&filters->cmnds, s, entries);
 	} else {
-	    sudo_warnx(U_("invalid filter: %s"), keyword);;
+	    sudo_warnx(U_("invalid filter: %s"), keyword);
 	    free(s);
 	    debug_return_bool(false);
 	}
@@ -787,7 +787,7 @@ userlist_matches_filter(struct sudoers_parse_tree *parse_tree,
 	     * can do its thing.
 	     */
 	    memset(&pw, 0, sizeof(pw));
-	    pw.pw_name = "_nobody";
+	    pw.pw_name = (char *)"_nobody";
 	    pw.pw_uid = (uid_t)-1;
 	    pw.pw_gid = (gid_t)-1;
 
@@ -1384,7 +1384,7 @@ alias_prune_helper(struct sudoers_parse_tree *parse_tree, struct alias *a,
 {
     struct cvtsudoers_config *conf = v;
 
-    /* XXX - misue of these functions */
+    /* XXX - misuse of these functions */
     switch (a->type) {
     case USERALIAS:
 	userlist_matches_filter(parse_tree, &a->members, conf);
@@ -1485,21 +1485,26 @@ done:
 }
 
 static void
-usage(int fatal)
+print_usage(FILE *fp)
 {
-    (void) fprintf(fatal ? stderr : stdout, "usage: %s [-ehMpV] [-b dn] "
+    (void) fprintf(fp, "usage: %s [-ehMpV] [-b dn] "
 	"[-c conf_file ] [-d deftypes] [-f output_format] [-i input_format] "
 	"[-I increment] [-m filter] [-o output_file] [-O start_point] "
 	"[-P padding] [-s sections] [input_file]\n", getprogname());
-    if (fatal)
-	exit(EXIT_FAILURE);
+}
+
+static void
+usage(void)
+{
+    print_usage(stderr);
+    exit(EXIT_FAILURE);
 }
 
 static void
 help(void)
 {
     (void) printf(_("%s - convert between sudoers file formats\n\n"), getprogname());
-    usage(0);
+    print_usage(stdout);
     (void) puts(_("\nOptions:\n"
 	"  -b, --base=dn              the base DN for sudo LDAP queries\n"
 	"  -c, --config=conf_file     the path to the configuration file\n"

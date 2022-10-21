@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -76,16 +76,17 @@ is_dir(int dfd, const char *name, int namelen, bool quiet)
 }
 
 /*
- * Create any parent directories needed by path (but not path itself).
+ * Create any parent directories needed by path (but not path itself)
+ * and return an open fd for the parent directory or -1 on error.
  */
-bool
-sudo_mkdir_parents_v1(const char *path, uid_t uid, gid_t gid, mode_t mode, bool quiet)
+int
+sudo_open_parent_dir_v1(const char *path, uid_t uid, gid_t gid, mode_t mode,
+    bool quiet)
 {
     const char *cp, *ep, *pathend;
     char name[PATH_MAX];
-    bool ret = false;
     int parentfd;
-    debug_decl(sudo_mkdir_parents, SUDO_DEBUG_UTIL);
+    debug_decl(sudo_open_parent_dir, SUDO_DEBUG_UTIL);
 
     /* Starting parent dir is either root or cwd. */
     cp = path;
@@ -100,25 +101,27 @@ sudo_mkdir_parents_v1(const char *path, uid_t uid, gid_t gid, mode_t mode, bool 
     if (parentfd == -1) {
 	if (!quiet)
 	    sudo_warn(U_("unable to open %s"), *path == '/' ? "/" : ".");
-	debug_return_bool(false);
+	debug_return_int(-1);
     }
 
     /* Iterate over path components, skipping the last one. */
     pathend = cp + strlen(cp);
-    for (cp = sudo_strsplit(cp, pathend, "/", &ep); cp != NULL && ep != NULL;
+    for (cp = sudo_strsplit(cp, pathend, "/", &ep); cp != NULL && *ep != '\0';
 	cp = sudo_strsplit(NULL, pathend, "/", &ep)) {
-	int dfd, len;
+	size_t len = (size_t)(ep - cp);
+	int dfd;
 
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	    "mkdir %.*s, mode 0%o, uid %d, gid %d", (int)(ep - path),
-	    path, (unsigned int)mode, (int)uid, (int)gid);
-	len = snprintf(name, sizeof(name), "%.*s", (int)(ep - cp), cp);
-	if (len >= ssizeof(name)) {
+	    "mkdir %.*s, mode 0%o, uid %d, gid %d", (int)(ep - path), path,
+	    (unsigned int)mode, (int)uid, (int)gid);
+	if (len >= sizeof(name)) {
 	    errno = ENAMETOOLONG;
 	    if (!quiet)
-		sudo_warn(U_("unable to open %.*s"), (int)(ep - path), path);
-	    goto done;
+		sudo_warn(U_("unable to mkdir %.*s"), (int)(ep - path), path);
+	    goto bad;
 	}
+	memcpy(name, cp, len);
+	name[len] = '\0';
 reopen:
 	dfd = openat(parentfd, name, O_RDONLY|O_NONBLOCK, 0);
 	if (dfd == -1) {
@@ -127,7 +130,7 @@ reopen:
 		    sudo_warn(U_("unable to open %.*s"),
 			(int)(ep - path), path);
 		}
-		goto done;
+		goto bad;
 	    }
 	    if (mkdirat(parentfd, name, mode) == 0) {
 		dfd = openat(parentfd, name, O_RDONLY|O_NONBLOCK|O_NOFOLLOW, 0);
@@ -136,12 +139,12 @@ reopen:
 			sudo_warn(U_("unable to open %.*s"),
 			    (int)(ep - path), path);
 		    }
-		    goto done;
+		    goto bad;
 		}
 		/* Make sure the path we created is still a directory. */
 		if (!is_dir(dfd, path, ep - path, quiet)) {
 		    close(dfd);
-		    goto done;
+		    goto bad;
 		}
 		if (uid != (uid_t)-1 && gid != (gid_t)-1) {
 		    if (fchown(dfd, uid, gid) != 0) {
@@ -157,22 +160,40 @@ reopen:
 		    sudo_warn(U_("unable to mkdir %.*s"),
 			(int)(ep - path), path);
 		}
-		goto done;
+		goto bad;
 	    }
 	} else {
 	    /* Already exists, make sure it is a directory. */
 	    if (!is_dir(dfd, path, ep - path, quiet)) {
 		close(dfd);
-		goto done;
+		goto bad;
 	    }
 	}
 	close(parentfd);
 	parentfd = dfd;
     }
-    ret = true;
 
-done:
+    debug_return_int(parentfd);
+bad:
     if (parentfd != -1)
 	close(parentfd);
-    debug_return_bool(ret);
+    debug_return_int(-1);
+}
+
+/*
+ * Create any parent directories needed by path (but not path itself).
+ * Not currently used.
+ */
+bool
+sudo_mkdir_parents_v1(const char *path, uid_t uid, gid_t gid, mode_t mode,
+    bool quiet)
+{
+    int fd;
+    debug_decl(sudo_mkdir_parents, SUDO_DEBUG_UTIL);
+
+    fd = sudo_open_parent_dir(path, uid, gid, mode, quiet);
+    if (fd == -1)
+	debug_return_bool(false);
+    close(fd);
+    debug_return_bool(true);
 }

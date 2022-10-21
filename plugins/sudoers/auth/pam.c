@@ -90,7 +90,7 @@ static int converse(int, PAM_CONST struct pam_message **,
 		    struct pam_response **, void *);
 static struct sudo_conv_callback *conv_callback;
 static struct pam_conv pam_conv = { converse, &conv_callback };
-static char *def_prompt = PASSPROMPT;
+static const char *def_prompt = PASSPROMPT;
 static bool getpass_error;
 static bool noninteractive;
 static pam_handle_t *pamh;

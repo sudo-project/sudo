@@ -43,7 +43,7 @@
 #define this_lineno	(sudoerschar == '\n' ? sudolineno - 1 : sudolineno)
 
 // PVS Studio suppression
-// -V::1037, 1042
+// -V::560, 592, 1037, 1042
 
 /*
  * Globals
@@ -95,6 +95,7 @@ static void alias_error(const char *name, int errnum);
     struct command_options options;
     struct cmndtag tag;
     char *string;
+    const char *cstring;
     int tok;
 }
 
@@ -144,7 +145,7 @@ static void alias_error(const char *name, int errnum);
 %token <tok>	 CWD			/* working directory for command */
 %token <tok>	 TYPE			/* SELinux type */
 %token <tok>	 ROLE			/* SELinux role */
-%token <tok>	 APPARMOR_PROFILE		/* AppArmor profile */
+%token <tok>	 APPARMOR_PROFILE	/* AppArmor profile */
 %token <tok>	 PRIVS			/* Solaris privileges */
 %token <tok>	 LIMITPRIVS		/* Solaris limit privileges */
 %token <tok>	 CMND_TIMEOUT		/* command timeout */
@@ -193,7 +194,7 @@ static void alias_error(const char *name, int errnum);
 %type <string>	  includedir
 %type <digest>	  digestspec
 %type <digest>	  digestlist
-%type <string>	  reserved_word
+%type <cstring>	  reserved_word
 
 %%
 
@@ -537,8 +538,8 @@ cmndspec	:	runasspec options cmndtag digcmnd {
 			    parser_leak_remove(LEAK_PTR, $2.type);
 #endif
 #ifdef HAVE_APPARMOR
-				cs->apparmor_profile = $2.apparmor_profile;
-				parser_leak_remove(LEAK_PTR, $2.apparmor_profile);
+			    cs->apparmor_profile = $2.apparmor_profile;
+			    parser_leak_remove(LEAK_PTR, $2.apparmor_profile);
 #endif
 #ifdef HAVE_PRIV_SET
 			    cs->privs = $2.privs;
@@ -794,7 +795,7 @@ reserved_word	:	ALL		{ $$ = "ALL"; }
 		|	TYPE		{ $$ = "TYPE"; }
 		|	PRIVS		{ $$ = "PRIVS"; }
 		|	LIMITPRIVS	{ $$ = "LIMITPRIVS"; }
-		|	APPARMOR_PROFILE	{ $$ = "APPARMOR_PROFILE"; }
+		|	APPARMOR_PROFILE { $$ = "APPARMOR_PROFILE"; }
 		;
 
 reserved_alias	:	reserved_word {
@@ -862,9 +863,9 @@ options		:	/* empty */ {
 			}
 		|	options apparmor_profilespec {
 #ifdef HAVE_APPARMOR
-				parser_leak_remove(LEAK_PTR, $$.apparmor_profile);
-				free($$.apparmor_profile);
-				$$.apparmor_profile = $2;
+			    parser_leak_remove(LEAK_PTR, $$.apparmor_profile);
+			    free($$.apparmor_profile);
+			    $$.apparmor_profile = $2;
 #endif
 			}
 		|	options privsspec {
@@ -1201,7 +1202,8 @@ sudoerserrorf(const char *fmt, ...)
 	LEXTRACE("<*> ");
 #ifndef TRACELEXER
 	if (trace_print == NULL || trace_print == sudoers_trace_print) {
-	    char *s, *tofree = NULL;
+	    char *tofree = NULL;
+	    const char *s;
 	    int oldlocale;
 
 	    /* Warnings are displayed in the user's locale. */
@@ -1212,10 +1214,12 @@ sudoerserrorf(const char *fmt, ...)
 		/* Optimize common case, a single string. */
 		s = _(va_arg(ap, char *));
 	    } else {
-		if (vasprintf(&s, _(fmt), ap) != -1)
-		    tofree = s;
-		else
+		if (vasprintf(&tofree, _(fmt), ap) != -1) {
+		    s = tofree;
+		} else {
 		    s = _("syntax error");
+		    tofree = NULL;
+		}
 	    }
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s:%d:%d: %s\n"), sudoers,
 		this_lineno, (int)sudolinebuf.toke_start + 1, s);
@@ -1256,11 +1260,15 @@ sudoerserror(const char *s)
 	sudoers_errstr = NULL;
     }
 
-    // -V:sudoerserror:575, 618
+#pragma pvs(push)
+#pragma pvs(disable: 575, 618)
+
     if (s == NULL)
 	sudoerserrorf(NULL);
     else
 	sudoerserrorf("%s", s);
+
+#pragma pvs(pop)
 }
 
 static void
@@ -1914,10 +1922,10 @@ found:
 #endif /* NO_LEAKS */
 }
 
-void
+#ifdef NO_LEAKS
+static void
 parser_leak_free(void)
 {
-#ifdef NO_LEAKS
     struct parser_leak_entry *entry;
     void *next;
     debug_decl(parser_leak_run, SUDOERS_DEBUG_PARSER);
@@ -1999,8 +2007,8 @@ parser_leak_free(void)
     }
 
     debug_return;
-#endif /* NO_LEAKS */
 }
+#endif /* NO_LEAKS */
 
 void
 parser_leak_init(void)

@@ -220,6 +220,7 @@ lib/util/event_select.c
 lib/util/explicit_bzero.c
 lib/util/fatal.c
 lib/util/fchmodat.c
+lib/util/fchownat.c
 lib/util/fnmatch.c
 lib/util/freezero.c
 lib/util/fstatat.c
@@ -251,6 +252,8 @@ lib/util/mkdirat.c
 lib/util/mksiglist.c
 lib/util/mksigname.c
 lib/util/mktemp.c
+lib/util/mmap_alloc.c
+lib/util/multiarch.c
 lib/util/nanosleep.c
 lib/util/openat.c
 lib/util/parseln.c
@@ -278,6 +281,8 @@ lib/util/regress/glob/globtest.c
 lib/util/regress/glob/globtest.in
 lib/util/regress/harness.in
 lib/util/regress/mktemp/mktemp_test.c
+lib/util/regress/multiarch/multiarch_test.c
+lib/util/regress/open_parent_dir/open_parent_dir_test.c
 lib/util/regress/parse_gids/parse_gids_test.c
 lib/util/regress/progname/progname_test.c
 lib/util/regress/strsig/strsig_test.c
@@ -1018,6 +1023,8 @@ plugins/sudoers/regress/testsudoers/test17.out.ok
 plugins/sudoers/regress/testsudoers/test17.sh
 plugins/sudoers/regress/testsudoers/test18.out.ok
 plugins/sudoers/regress/testsudoers/test18.sh
+plugins/sudoers/regress/testsudoers/test19.out.ok
+plugins/sudoers/regress/testsudoers/test19.sh
 plugins/sudoers/regress/testsudoers/test2.inc
 plugins/sudoers/regress/testsudoers/test2.out.ok
 plugins/sudoers/regress/testsudoers/test2.sh
@@ -1196,6 +1203,7 @@ src/exec.c
 src/exec_common.c
 src/exec_intercept.c
 src/exec_intercept.h
+src/exec_iolog.c
 src/exec_monitor.c
 src/exec_nopty.c
 src/exec_preload.c

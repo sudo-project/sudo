@@ -52,36 +52,40 @@ iolog_mkdtemp(char *path)
     const mode_t iolog_dirmode = iolog_get_dir_mode();
     const uid_t iolog_uid = iolog_get_uid();
     const gid_t iolog_gid = iolog_get_gid();
-    bool ok, uid_changed = false;
+    bool ok = false, uid_changed = false;
     mode_t omask;
+    int dfd;
     debug_decl(iolog_mkdtemp, SUDO_DEBUG_UTIL);
 
     /* umask must not be more restrictive than the file modes. */
     omask = umask(ACCESSPERMS & ~(iolog_filemode|iolog_dirmode));
 
-    ok = sudo_mkdir_parents(path, iolog_uid, iolog_gid, iolog_dirmode, true);
-    if (!ok && errno == EACCES) {
+    dfd = sudo_open_parent_dir(path, iolog_uid, iolog_gid, iolog_dirmode, true);
+    if (dfd == -1 && errno == EACCES) {
 	/* Try again as the I/O log owner (for NFS). */
 	uid_changed = iolog_swapids(false);
 	if (uid_changed)
-	    ok = sudo_mkdir_parents(path, -1, -1, iolog_dirmode, false);
+	    dfd = sudo_open_parent_dir(path, -1, -1, iolog_dirmode, false);
     }
-    if (ok) {
+    if (dfd != -1) {
 	/* Create final path component. */
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "mkdtemp %s", path);
 	/* We cannot retry mkdtemp() so always open as iolog user */
 	if (!uid_changed)
 	    uid_changed = iolog_swapids(false);
-	if (mkdtemp(path) == NULL) {
+	if (mkdtempat(dfd, path) == NULL) {
 	    sudo_warn(U_("unable to mkdir %s"), path);
 	    ok = false;
 	} else {
 	    if (chmod(path, iolog_dirmode) != 0) {
+		/* Not a fatal error, pre-existing mode is 0700. */
 		sudo_warn(U_("unable to change mode of %s to 0%o"),
 		    path, (unsigned int)iolog_dirmode);
 	    }
+	    ok = true;
 	}
+	close(dfd);
     }
 
     umask(omask);

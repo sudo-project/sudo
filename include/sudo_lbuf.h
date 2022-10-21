@@ -38,8 +38,8 @@ typedef int (*sudo_lbuf_output_t)(const char *);
 
 sudo_dso_public void sudo_lbuf_init_v1(struct sudo_lbuf *lbuf, sudo_lbuf_output_t output, int indent, const char *continuation, int cols);
 sudo_dso_public void sudo_lbuf_destroy_v1(struct sudo_lbuf *lbuf);
-sudo_dso_public bool sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...) __printflike(2, 3);
-sudo_dso_public bool sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char *fmt, ...) __printflike(3, 4);
+sudo_dso_public bool sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...) sudo_printflike(2, 3);
+sudo_dso_public bool sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char *fmt, ...) sudo_printflike(3, 4);
 sudo_dso_public void sudo_lbuf_print_v1(struct sudo_lbuf *lbuf);
 sudo_dso_public bool sudo_lbuf_error_v1(struct sudo_lbuf *lbuf);
 sudo_dso_public void sudo_lbuf_clearerr_v1(struct sudo_lbuf *lbuf);

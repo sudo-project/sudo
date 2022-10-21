@@ -28,6 +28,7 @@
 #endif
 #include <pwd.h>
 #include <grp.h>
+#include <unistd.h>
 
 #include "sudo_compat.h"
 #include "sudo_fatal.h"

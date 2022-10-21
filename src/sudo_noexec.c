@@ -88,32 +88,32 @@ typedef struct interpose_s {
 }
 
 #define EXEC_REPL1(fn, t1)			\
-sudo_dso_public int				\
-FN_NAME(fn)(t1 a1)				\
+sudo_dso_public int FN_NAME(fn)(t1 a1);		\
+int FN_NAME(fn)(t1 a1)				\
 EXEC_REPL_BODY					\
 INTERPOSE(fn)
 
 #define EXEC_REPL2(fn, t1, t2)			\
-sudo_dso_public int				\
-FN_NAME(fn)(t1 a1, t2 a2)			\
+sudo_dso_public int FN_NAME(fn)(t1 a1, t2 a2);	\
+int FN_NAME(fn)(t1 a1, t2 a2)			\
 EXEC_REPL_BODY					\
 INTERPOSE(fn)
 
 #define EXEC_REPL3(fn, t1, t2, t3)		\
-sudo_dso_public int				\
-FN_NAME(fn)(t1 a1, t2 a2, t3 a3)		\
+sudo_dso_public int FN_NAME(fn)(t1 a1, t2 a2, t3 a3); \
+int FN_NAME(fn)(t1 a1, t2 a2, t3 a3)		\
 EXEC_REPL_BODY					\
 INTERPOSE(fn)
 
 #define EXEC_REPL6(fn, t1, t2, t3, t4, t5, t6)	\
-sudo_dso_public int				\
-FN_NAME(fn)(t1 a1, t2 a2, t3 a3, t4 a4, t5 a5, t6 a6)	\
+sudo_dso_public int FN_NAME(fn)(t1 a1, t2 a2, t3 a3, t4 a4, t5 a5, t6 a6); \
+int FN_NAME(fn)(t1 a1, t2 a2, t3 a3, t4 a4, t5 a5, t6 a6) \
 EXEC_REPL_BODY					\
 INTERPOSE(fn)
 
 #define EXEC_REPL_VA(fn, t1, t2)		\
-sudo_dso_public int				\
-FN_NAME(fn)(t1 a1, t2 a2, ...)			\
+sudo_dso_public int FN_NAME(fn)(t1 a1, t2 a2, ...); \
+int FN_NAME(fn)(t1 a1, t2 a2, ...)		\
 EXEC_REPL_BODY					\
 INTERPOSE(fn)
 
@@ -159,8 +159,8 @@ EXEC_REPL6(posix_spawnp, pid_t *, const char *, const posix_spawn_file_actions_t
  */
 EXEC_REPL1(system, const char *)
 
-sudo_dso_public FILE *
-FN_NAME(popen)(const char *c, const char *t)
+sudo_dso_public FILE *FN_NAME(popen)(const char *c, const char *t);
+FILE *FN_NAME(popen)(const char *c, const char *t)
 {
     errno = EACCES;
     return NULL;
@@ -174,8 +174,8 @@ INTERPOSE(popen)
  */
 typedef int (*sudo_fn_wordexp_t)(const char *, wordexp_t *, int);
 
-sudo_dso_public int
-FN_NAME(wordexp)(const char *words, wordexp_t *we, int flags)
+sudo_dso_public int FN_NAME(wordexp)(const char *words, wordexp_t *we, int flags);
+int FN_NAME(wordexp)(const char *words, wordexp_t *we, int flags)
 {
 #if defined(HAVE___INTERPOSE)
     return wordexp(words, we, flags | WRDE_NOCMD);

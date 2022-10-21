@@ -27,8 +27,8 @@
 #include "sudoers.h"
 
 struct test_data {
-    char *input;
-    char *result;
+    const char *input;
+    const char *result;
     size_t result_len;
     size_t bufsize;
 };
@@ -139,7 +139,7 @@ test_strvec_join(char sep, int *ntests_out, int *errors_out)
     /* Simulate: sudoedit -s '\' `perl -e 'print "A" x 65536'` */
     memset(buf, 'A', sizeof(buf));
     buf[sizeof(buf) - 1] = '\0';
-    argv[0] = "\\";
+    argv[0] = (char *)"\\";
     argv[1] = buf;
     argv[2] = NULL;
 

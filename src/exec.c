@@ -229,13 +229,19 @@ exec_setup(struct command_details *details, int intercept_fd, int errfd)
     if (details->cwd != NULL) {
 	if (details->chroot != NULL || user_details.cwd == NULL ||
 	    strcmp(details->cwd, user_details.cwd) != 0) {
-	    /* Note: cwd is relative to the new root, if any. */
-	    if (chdir(details->cwd) == -1) {
-		sudo_warn(U_("unable to change directory to %s"), details->cwd);
-		if (!details->cwd_optional)
-		    goto done;
-		if (details->chroot != NULL)
-		    sudo_warnx(U_("starting from %s"), "/");
+	    if (ISSET(details->flags, CD_RBAC_ENABLED)) {
+		 /* For SELinux, chdir(2) in sesh after the context change. */
+		SET(details->flags, CD_RBAC_SET_CWD);
+	    } else {
+		/* Note: cwd is relative to the new root, if any. */
+		if (chdir(details->cwd) == -1) {
+		    sudo_warn(U_("unable to change directory to %s"),
+			details->cwd);
+		    if (!ISSET(details->flags, CD_CWD_OPTIONAL))
+			goto done;
+		    if (details->chroot != NULL)
+			sudo_warnx(U_("starting from %s"), "/");
+		}
 	    }
 	}
     }
@@ -288,7 +294,7 @@ exec_cmnd(struct command_details *details, sigset_t *mask,
 #ifdef HAVE_SELINUX
 	if (ISSET(details->flags, CD_RBAC_ENABLED)) {
 	    selinux_execve(details->execfd, details->command, details->argv,
-		details->envp, details->flags);
+		details->envp, details->cwd, details->flags);
 	} else
 #endif
 	{
@@ -354,9 +360,6 @@ sudo_terminated(struct command_status *cstat)
     debug_return_bool(false);
 }
 
-#if SUDO_API_VERSION != SUDO_API_MKVERSION(1, 19)
-# error "Update sudo_needs_pty() after changing the plugin API"
-#endif
 static bool
 sudo_needs_pty(struct command_details *details)
 {
@@ -367,12 +370,7 @@ sudo_needs_pty(struct command_details *details)
 
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
 	if (plugin->u.io->log_ttyin != NULL ||
-	    plugin->u.io->log_ttyout != NULL ||
-	    plugin->u.io->log_stdin != NULL ||
-	    plugin->u.io->log_stdout != NULL ||
-	    plugin->u.io->log_stderr != NULL ||
-	    plugin->u.io->change_winsize != NULL ||
-	    plugin->u.io->log_suspend != NULL)
+	    plugin->u.io->log_ttyout != NULL)
 	    return true;
     }
     return false;
@@ -522,6 +520,37 @@ terminate_command(pid_t pid, bool use_pgrp)
 	sudo_debug_printf(SUDO_DEBUG_INFO, "kill %d SIGKILL", (int)pid);
 	kill(pid, SIGKILL);
     }
+
+    debug_return;
+}
+
+/*
+ * Free the dynamically-allocated contents of the exec closure.
+ */
+void
+free_exec_closure(struct exec_closure *ec)
+{
+    debug_decl(free_exec_closure, SUDO_DEBUG_EXEC);
+
+    /* Free any remaining intercept resources. */
+    intercept_cleanup();
+
+    sudo_ev_base_free(ec->evbase);
+    sudo_ev_free(ec->backchannel_event);
+    sudo_ev_free(ec->fwdchannel_event);
+    sudo_ev_free(ec->sigint_event);
+    sudo_ev_free(ec->sigquit_event);
+    sudo_ev_free(ec->sigtstp_event);
+    sudo_ev_free(ec->sigterm_event);
+    sudo_ev_free(ec->sighup_event);
+    sudo_ev_free(ec->sigalrm_event);
+    sudo_ev_free(ec->sigpipe_event);
+    sudo_ev_free(ec->sigusr1_event);
+    sudo_ev_free(ec->sigusr2_event);
+    sudo_ev_free(ec->sigchld_event);
+    sudo_ev_free(ec->sigcont_event);
+    sudo_ev_free(ec->siginfo_event);
+    sudo_ev_free(ec->sigwinch_event);
 
     debug_return;
 }

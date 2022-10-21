@@ -47,8 +47,6 @@
     !defined(HAVE_VASPRINTF) || !defined(HAVE_ASPRINTF) || \
     defined(PREFER_PORTABLE_SNPRINTF)
 
-#include <sys/mman.h>
-
 #include <errno.h>
 #ifdef HAVE_NL_LANGINFO
 # include <langinfo.h>
@@ -71,6 +69,7 @@
 #include <fcntl.h>
 
 #include "sudo_compat.h"
+#include "sudo_util.h"
 
 /* Avoid printf format attacks by ignoring the %n escape. */
 #define NO_PRINTF_PERCENT_N
@@ -107,50 +106,9 @@ union arg {
 #endif
 };
 
-static int __find_arguments(const char *fmt0, va_list ap, union arg **argtable,
-    size_t *argtablesiz);
+static int __find_arguments(const char *fmt0, va_list ap, union arg **argtable);
 static int __grow_type_table(unsigned char **typetable, int *tablesize);
 static int xxxprintf(char **, size_t, int, const char *, va_list);
-
-#if !defined(MAP_ANON) && defined(MAP_ANONYMOUS)
-# define MAP_ANON MAP_ANONYMOUS
-#endif
-
-#ifndef MAP_FAILED
-# define MAP_FAILED ((void *) -1)
-#endif
-
-/*
- * Allocate "size" bytes via mmap.
- */
-static void *
-mmap_alloc(size_t size)
-{
-	void *p;
-#ifndef MAP_ANON
-	int fd;
-
-	if ((fd = open("/dev/zero", O_RDWR)) == -1)
-		return NULL;
-	p = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
-	close(fd);
-#else
-	p = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE|MAP_ANON, -1, 0);
-#endif
-	if (p == MAP_FAILED)
-		return NULL;
-	return p;
-}
-
-/*
- * Unmap "size" bytes of the ptr.
- */
-static void
-mmap_free(void *ptr, size_t size)
-{
-	if (ptr != NULL)
-		munmap(ptr, size);
-}
 
 #ifdef PRINTF_WIDE_CHAR
 /*
@@ -330,7 +288,6 @@ xxxprintf(char **strp, size_t strsize, int alloc, const char *fmt0, va_list ap)
 	char *estr;		/* pointer to last char in str */
 	union arg *argtable;	/* args, built due to positional arg */
 	union arg statargtable[STATIC_ARG_TBL_SIZE];
-	size_t argtablesiz;
 	int nextarg;		/* 1-based argument index */
 	va_list orgap;		/* original argument pointer */
 #ifdef PRINTF_WIDE_CHAR
@@ -442,7 +399,7 @@ xxxprintf(char **strp, size_t strsize, int alloc, const char *fmt0, va_list ap)
 		int hold = nextarg; \
 		if (argtable == NULL) { \
 			argtable = statargtable; \
-			__find_arguments(fmt0, orgap, &argtable, &argtablesiz); \
+			__find_arguments(fmt0, orgap, &argtable); \
 		} \
 		nextarg = n2; \
 		val = GETARG(int); \
@@ -562,7 +519,7 @@ reswitch:	switch (ch) {
 				if (argtable == NULL) {
 					argtable = statargtable;
 					__find_arguments(fmt0, orgap,
-					    &argtable, &argtablesiz);
+					    &argtable);
 				}
 				goto rflag;
 			}
@@ -588,7 +545,7 @@ reswitch:	switch (ch) {
 				if (argtable == NULL) {
 					argtable = statargtable;
 					__find_arguments(fmt0, orgap,
-					    &argtable, &argtablesiz);
+					    &argtable);
 				}
 				goto rflag;
 			}
@@ -848,7 +805,7 @@ fp_common:
 					convbuf = NULL;
 				}
 				if ((wcp = GETARG(wchar_t *)) == NULL) {
-					cp = "(null)";
+					cp = (char *)"(null)";
 				} else {
 					convbuf = __wcsconv(wcp, prec);
 					if (convbuf == NULL)
@@ -858,7 +815,7 @@ fp_common:
 			} else
 #endif /* PRINTF_WIDE_CHAR */
 			if ((cp = GETARG(char *)) == NULL)
-				cp = "(null)";
+				cp = (char *)"(null)";
 			if (prec >= 0) {
 				/*
 				 * can't use strlen; can only look for the
@@ -945,7 +902,7 @@ number:			if ((dprec = prec) >= 0)
 					break;
 
 				default:
-					cp = "bug in vfprintf: bad base";
+					cp = (char *)"bug in xxxprintf: bad base";
 					size = strlen(cp);
 					goto skipsize;
 				}
@@ -1076,7 +1033,7 @@ finish:
 		__freedtoa(dtoaresult);
 #endif
 	if (argtable != NULL && argtable != statargtable) {
-		mmap_free(argtable, argtablesiz);
+		sudo_mmap_free(argtable);
 		argtable = NULL;
 	}
 	return ret;
@@ -1124,8 +1081,7 @@ finish:
  * problematic since we have nested functions..)
  */
 static int
-__find_arguments(const char *fmt0, va_list ap, union arg **argtable,
-    size_t *argtablesiz)
+__find_arguments(const char *fmt0, va_list ap, union arg **argtable)
 {
 	char *fmt;		/* format string */
 	int ch;			/* character from fmt */
@@ -1354,8 +1310,8 @@ done:
 	 * Build the argument table.
 	 */
 	if (tablemax >= STATIC_ARG_TBL_SIZE) {
-		*argtablesiz = sizeof(union arg) * (tablemax + 1);
-		*argtable = mmap_alloc(*argtablesiz);
+		*argtable = sudo_mmap_allocarray(tablemax + 1,
+		    sizeof(union arg));
 		if (*argtable == NULL)
 			return -1;
 	}
@@ -1453,7 +1409,7 @@ overflow:
 
 finish:
 	if (typetable != NULL && typetable != stattypetable) {
-		mmap_free(typetable, *argtablesiz);
+		sudo_mmap_free(typetable);
 		typetable = NULL;
 	}
 	return ret;
@@ -1472,16 +1428,16 @@ __grow_type_table(unsigned char **typetable, int *tablesize)
 		newsize = sysconf(_SC_PAGESIZE);
 
 	if (*tablesize == STATIC_ARG_TBL_SIZE) {
-		*typetable = mmap_alloc(newsize);
+		*typetable = sudo_mmap_alloc(newsize);
 		if (*typetable == NULL)
 			return -1;
 		memcpy(*typetable, oldtable, *tablesize);
 	} else {
-		unsigned char *new = mmap_alloc(newsize);
+		unsigned char *new = sudo_mmap_alloc(newsize);
 		if (new == NULL)
 			return -1;
 		memmove(new, *typetable, *tablesize);
-		mmap_free(*typetable, *tablesize);
+		sudo_mmap_free(*typetable);
 		*typetable = new;
 	}
 	memset(*typetable + *tablesize, T_UNUSED, (newsize - *tablesize));

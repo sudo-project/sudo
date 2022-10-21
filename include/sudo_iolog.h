@@ -95,7 +95,7 @@ struct iolog_path_escape {
 };
 
 /* host_port.c */
-bool iolog_parse_host_port(char *str, char **hostp, char **portp, bool *tlsp, char *defport, char *defport_tls);
+bool iolog_parse_host_port(char *str, char **hostp, char **portp, bool *tlsp, const char *defport, const char *defport_tls);
 
 /* iolog_path.c */
 bool expand_iolog_path(const char *inpath, char *path, size_t pathlen, const struct iolog_path_escape *escapes, void *closure);
@@ -143,10 +143,10 @@ void iolog_set_maxseq(unsigned int maxval);
 void iolog_set_mode(mode_t mode);
 void iolog_set_owner(uid_t uid, uid_t gid);
 bool iolog_swapids(bool restore);
-bool iolog_mkdirs(char *path);
+bool iolog_mkdirs(const char *path);
 
 /* iolog_filter.c */
-void *iolog_pwfilt_alloc();
+void *iolog_pwfilt_alloc(void);
 bool iolog_pwfilt_add(void *handle, const char *pattern);
 void iolog_pwfilt_free(void *handle);
 bool iolog_pwfilt_remove(void *handle, const char *pattern);

@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include "sudo_compat.h"
 #include "sudo_util.h"

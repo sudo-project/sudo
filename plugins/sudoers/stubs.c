@@ -35,6 +35,7 @@
 #include <arpa/inet.h>
 
 #include "sudoers.h"
+#include "cvtsudoers.h"
 #include "interfaces.h"
 
 /* STUB */

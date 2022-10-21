@@ -167,7 +167,7 @@ format_cmnd(struct sudo_command *c, bool negated)
     int len;
     debug_decl(format_cmnd, SUDOERS_DEBUG_UTIL);
 
-    cmnd = c->cmnd ? c->cmnd : "ALL";
+    cmnd = c->cmnd ? c->cmnd : (char *)"ALL";
     bufsiz = negated + strlen(cmnd) + 1;
     if (c->args != NULL)
 	bufsiz += 1 + strlen(c->args);
@@ -597,7 +597,7 @@ print_cmndspec_csv(FILE *fp, struct sudoers_parse_tree *parse_tree,
 	    || cs->role != next->role || cs->type != next->type
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_APPARMOR
-		|| cs->apparmor_profile != next->apparmor_profile
+	    || cs->apparmor_profile != next->apparmor_profile
 #endif /* HAVE_APPARMOR  */
 	    || cs->runchroot != next->runchroot || cs->runcwd != next->runcwd;
 

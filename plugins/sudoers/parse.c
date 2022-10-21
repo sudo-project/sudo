@@ -257,18 +257,18 @@ apply_cmndspec(struct cmndspec *cs)
 #ifdef HAVE_APPARMOR
 	/* Set AppArmor profile, if specified */
 	if (cs->apparmor_profile != NULL) {
-		user_apparmor_profile = strdup(cs->apparmor_profile);
-		if (user_apparmor_profile == NULL) {
-			sudo_warnx(U_("%s: %s"), __func__,
-			U_("unable to allocate memory"));
-			debug_return_bool(false);
-		}
+	    user_apparmor_profile = strdup(cs->apparmor_profile);
+	    if (user_apparmor_profile == NULL) {
+		sudo_warnx(U_("%s: %s"), __func__,
+		    U_("unable to allocate memory"));
+		debug_return_bool(false);
+	    }
 	} else {
-		user_apparmor_profile = def_apparmor_profile;
-		def_apparmor_profile = NULL;
+	    user_apparmor_profile = def_apparmor_profile;
+	    def_apparmor_profile = NULL;
 	}
 	if (user_apparmor_profile != NULL) {
-		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"user_apparmor_profile -> %s", user_apparmor_profile);
 	}
 #endif
@@ -358,11 +358,13 @@ apply_cmndspec(struct cmndspec *cs)
 	}
 	if (cs->tags.log_input != UNSPEC) {
 	    def_log_input = cs->tags.log_input;
+	    cb_log_input(NULL, 0, 0, NULL, cs->tags.log_input);
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"def_log_input -> %s", def_log_input ? "true" : "false");
 	}
 	if (cs->tags.log_output != UNSPEC) {
 	    def_log_output = cs->tags.log_output;
+	    cb_log_output(NULL, 0, 0, NULL, cs->tags.log_output);
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"def_log_output -> %s", def_log_output ? "true" : "false");
 	}
@@ -468,7 +470,7 @@ display_priv_short(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
     debug_decl(display_priv_short, SUDOERS_DEBUG_PARSER);
 
     TAILQ_FOREACH(priv, &us->privileges, entries) {
-	struct cmndspec *cs, *prev_cs = NULL;
+	struct cmndspec *cs;
 	struct cmndtag tags;
 
 	if (hostlist_matches(parse_tree, pw, &priv->hostlist) != ALLOW)
@@ -476,11 +478,13 @@ display_priv_short(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 
 	sudoers_defaults_list_to_tags(&priv->defaults, &tags);
 	TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
-	    /* Start a new line if RunAs changes. */
+	    struct cmndspec *prev_cs = TAILQ_PREV(cs, cmndspec_list, entries);
+
 	    if (prev_cs == NULL || RUNAS_CHANGED(cs, prev_cs)) {
 		struct member *m;
 
-		if (cs != TAILQ_FIRST(&priv->cmndlist))
+		/* Start new line, first entry or RunAs changed. */
+		if (prev_cs != NULL)
 		    sudo_lbuf_append(lbuf, "\n");
 		sudo_lbuf_append(lbuf, "    (");
 		if (cs->runasuserlist != NULL) {
@@ -505,11 +509,13 @@ display_priv_short(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 		    }
 		}
 		sudo_lbuf_append(lbuf, ") ");
-	    } else if (cs != TAILQ_FIRST(&priv->cmndlist)) {
+		sudoers_format_cmndspec(lbuf, parse_tree, cs, NULL, tags, true);
+	    } else {
+		/* Continue existing line. */
 		sudo_lbuf_append(lbuf, ", ");
+		sudoers_format_cmndspec(lbuf, parse_tree, cs, prev_cs, tags,
+		    true);
 	    }
-	    sudoers_format_cmndspec(lbuf, parse_tree, cs, prev_cs, tags, true);
-	    prev_cs = cs;
 	    nfound++;
 	}
 	sudo_lbuf_append(lbuf, "\n");
@@ -719,7 +725,7 @@ display_defaults(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
     struct sudo_lbuf *lbuf)
 {
     struct defaults *d;
-    char *prefix;
+    const char *prefix;
     int nfound = 0;
     debug_decl(display_defaults, SUDOERS_DEBUG_PARSER);
 
@@ -762,7 +768,7 @@ display_bound_defaults_by_type(struct sudoers_parse_tree *parse_tree,
     struct defaults *d;
     struct defaults_binding *binding = NULL;
     struct member *m;
-    char *dsep;
+    const char *dsep;
     int atype, nfound = 0;
     debug_decl(display_bound_defaults_by_type, SUDOERS_DEBUG_PARSER);
 

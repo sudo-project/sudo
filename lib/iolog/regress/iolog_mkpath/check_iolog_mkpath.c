@@ -66,7 +66,7 @@ int
 main(int argc, char *argv[])
 {
     char testdir[] = "mkpath.XXXXXX";
-    char *rmargs[] = { "rm", "-rf", NULL, NULL };
+    const char *rmargs[] = { "rm", "-rf", NULL, NULL };
     int ch, status, ntests = 0, errors = 0;
 
     initprogname(argc > 0 ? argv[0] : "check_iolog_mkpath");
@@ -97,7 +97,7 @@ main(int argc, char *argv[])
     }
 
     /* Clean up (avoid running via shell) */
-    execvp("rm", rmargs);
+    execvp("rm", (char **)rmargs);
     wait(&status);
 
     return errors;

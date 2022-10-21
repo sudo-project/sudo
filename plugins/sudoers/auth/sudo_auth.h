@@ -29,7 +29,7 @@
 typedef struct sudo_auth {
     int flags;			/* various flags, see below */
     int status;			/* status from verify routine */
-    char *name;			/* name of the method as a string */
+    const char *name;		/* name of the method as a string */
     void *data;			/* method-specific data pointer */
     int (*init)(struct passwd *pw, struct sudo_auth *auth);
     int (*setup)(struct passwd *pw, char **prompt, struct sudo_auth *auth);

@@ -16,7 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "config.h"
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
+#include <config.h>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -263,7 +268,7 @@ connection_close(struct connection_closure *closure)
 
 	    /* Connect to the first relay available asynchronously. */
 	    if (!connect_relay(new_closure)) {
-		sudo_warnx(U_("unable to connect to relay"));
+		sudo_warnx("%s", U_("unable to connect to relay"));
 		connection_closure_free(new_closure);
 	    }
 	}
@@ -311,7 +316,7 @@ get_free_buf(size_t len, struct connection_closure *closure)
     debug_return_ptr(buf);
 }
 
-bool
+static bool
 fmt_server_message(struct connection_closure *closure, ServerMessage *msg)
 {
     struct connection_buffer *buf = NULL;
@@ -512,6 +517,12 @@ handle_exit(ExitMessage *msg, uint8_t *buf, size_t len,
 	debug_return_bool(false);
     }
 
+    /* Check that message is valid. */
+    if (msg->run_time == NULL) {
+	sudo_warnx(U_("%s: %s"), source, U_("invalid ExitMessage"));
+	closure->errstr = _("invalid ExitMessage");
+	debug_return_bool(false);
+    }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ExitMessage from %s",
 	source, __func__);
 
@@ -557,6 +568,13 @@ handle_restart(RestartMessage *msg, uint8_t *buf, size_t len,
     if (closure->state != INITIAL) {
 	sudo_warnx(U_("unexpected state %d for %s"), closure->state, source);
 	closure->errstr = _("state machine error");
+	debug_return_bool(false);
+    }
+
+    /* Check that message is valid. */
+    if (msg->log_id == NULL || msg->resume_point == NULL) {
+	sudo_warnx(U_("%s: %s"), source, U_("invalid RestartMessage"));
+	closure->errstr = _("invalid RestartMessage");
 	debug_return_bool(false);
     }
     sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -637,6 +655,12 @@ handle_iobuf(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len,
 	debug_return_bool(false);
     }
 
+    /* Check that message is valid. */
+    if (iobuf->delay == NULL) {
+	sudo_warnx(U_("%s: %s"), source, U_("invalid IoBuffer"));
+	closure->errstr = _("invalid IoBuffer");
+	debug_return_bool(false);
+    }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received IoBuffer from %s",
 	source, __func__);
 
@@ -667,6 +691,12 @@ handle_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len,
 	debug_return_bool(false);
     }
 
+    /* Check that message is valid. */
+    if (msg->delay == NULL) {
+	sudo_warnx(U_("%s: %s"), source, U_("invalid ChangeWindowSize"));
+	closure->errstr = _("invalid ChangeWindowSize");
+	debug_return_bool(false);
+    }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ChangeWindowSize from %s",
 	source, __func__);
 
@@ -697,6 +727,12 @@ handle_suspend(CommandSuspend *msg, uint8_t *buf, size_t len,
 	debug_return_bool(false);
     }
 
+    /* Check that message is valid. */
+    if (msg->delay == NULL || msg->signal == NULL) {
+	sudo_warnx(U_("%s: %s"), source, U_("invalid CommandSuspend"));
+	closure->errstr = _("invalid CommandSuspend");
+	debug_return_bool(false);
+    }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received CommandSuspend from %s",
 	source, __func__);
 
@@ -725,7 +761,7 @@ handle_client_hello(ClientHello *msg, uint8_t *buf, size_t len,
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ClientHello",
 	__func__);
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: client ID %s",
-	__func__, msg->client_id);
+	__func__, msg->client_id ? msg->client_id : "unknown");
 
     debug_return_bool(true);
 }
@@ -1543,12 +1579,12 @@ register_listener(struct server_address *addr, struct sudo_event_base *evbase)
 
     /* TODO: make non-fatal */
     if ((l = malloc(sizeof(*l))) == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     l->sock = sock;
     l->tls = addr->tls;
     l->ev = sudo_ev_alloc(sock, SUDO_EV_READ|SUDO_EV_PERSIST, listener_cb, l);
     if (l->ev == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(evbase, l->ev, NULL, false) == -1)
 	sudo_fatal("%s", U_("unable to add event to queue"));
     TAILQ_INSERT_TAIL(&listeners, l, entries);
@@ -1732,7 +1768,7 @@ register_signal(int signo, struct sudo_event_base *base)
 
     ev = sudo_ev_alloc(signo, SUDO_EV_SIGNAL, signal_cb, base);
     if (ev == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(base, ev, NULL, false) == -1)
 	sudo_fatal("%s", U_("unable to add event to queue"));
 
@@ -1754,8 +1790,7 @@ static void
 write_pidfile(void)
 {
     FILE *fp;
-    int fd;
-    bool success;
+    int dfd, fd;
     mode_t oldmask;
     const char *pid_file = logsrvd_conf_pid_file();
     debug_decl(write_pidfile, SUDO_DEBUG_UTIL);
@@ -1766,10 +1801,11 @@ write_pidfile(void)
     /* Default logsrvd umask is more restrictive (077). */
     oldmask = umask(S_IWGRP|S_IWOTH);
 
-    success = sudo_mkdir_parents(pid_file, ROOT_UID, ROOT_GID,
+    dfd = sudo_open_parent_dir(pid_file, ROOT_UID, ROOT_GID,
 	S_IRWXU|S_IXGRP|S_IXOTH, false);
-    if (success) {
-	fd = open(pid_file, O_WRONLY|O_CREAT|O_NOFOLLOW, 0644);
+    if (dfd != -1) {
+	const char *base = sudo_basename(pid_file);
+	fd = openat(dfd, base, O_WRONLY|O_CREAT|O_NOFOLLOW, 0644);
 	if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
 	    sudo_warn("%s", pid_file);
 	    if (fd != -1)
@@ -1781,6 +1817,7 @@ write_pidfile(void)
 		sudo_warn("%s", pid_file);
 	    fclose(fp);
 	}
+	close(dfd);
     }
     umask(oldmask);
 
@@ -1948,7 +1985,7 @@ main(int argc, char *argv[])
         exit(EXIT_FAILURE);
 
     if ((evbase = sudo_ev_base_alloc()) == NULL)
-	sudo_fatal(NULL);
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* Initialize listeners. */
     if (!server_setup(evbase))

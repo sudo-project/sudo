@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd May 31, 2022
+.Dd October 20, 2022
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -60,7 +60,7 @@ file to determine which plugins to load.
 If no
 .Xr sudo.conf @mansectform@
 file is present, or if it contains no
-.Li Plugin
+.Em Plugin
 lines,
 .Nm
 will be used for auditing, policy decisions and I/O logging.
@@ -168,16 +168,19 @@ security policy requires that most users authenticate
 themselves before they can use
 .Nm sudo .
 A password is not required
-if the invoking user is root, if the target user is the same as the
-invoking user, or if the policy has disabled authentication for the
-user or command.
+if the invoking user is
+.Sy root ,
+if the target user is the same as the invoking user, or if the
+policy has disabled authentication for the user or command.
 Unlike
 .Xr su 1 ,
 when
 .Nm
 requires
 authentication, it validates the invoking user's credentials, not
-the target user's (or root's) credentials.
+the target user's (or
+.Sy @runas_default@ Ns No 's)
+credentials.
 This can be changed via
 the
 .Em rootpw ,
@@ -195,7 +198,7 @@ used for such mail is configurable via the
 .Em mailto
 Defaults entry
 (described later) and defaults to
-.Li @mailto@ .
+.Em @mailto@ .
 .Pp
 No mail will be sent if an unauthorized user tries to run
 .Nm sudo
@@ -219,7 +222,9 @@ are logged, regardless of whether or not mail is sent.
 .Pp
 If
 .Nm sudo
-is run by root and the
+is run by
+.Sy root
+and the
 .Ev SUDO_USER
 environment variable
 is set, the
@@ -227,7 +232,9 @@ is set, the
 policy will use this value to determine who
 the actual user is.
 This can be used by a user to log commands
-through sudo even when a root shell has been invoked.
+through sudo even when a
+.Sy root
+shell has been invoked.
 It also
 allows the
 .Fl e
@@ -235,7 +242,9 @@ option to remain useful even when invoked via a
 sudo-run script or program.
 Note, however, that the
 .Em sudoers
-file lookup is still done for root, not the user specified by
+file lookup is still done for
+.Sy root ,
+not the user specified by
 .Ev SUDO_USER .
 .Pp
 .Nm
@@ -247,13 +256,10 @@ terminal session ID, the start time of the session leader
 (using a monotonic clock if one is available).
 The user may then use
 .Nm sudo
-without a password for a short period of time
-.Po
-.Li @timeout@
-minutes unless overridden by the
+without a password for a short period of time (@timeout@ minutes
+unless overridden by the
 .Em timestamp_timeout
-option
-.Pc .
+option).
 By default,
 .Nm
 uses a separate record for each terminal, which means that
@@ -284,27 +290,17 @@ and
 .Em logfile
 settings.
 See
-.Sx "LOG FORMAT"
+.Sx "EVENT LOGGING"
 for a description of the log file format.
 .Pp
 .Nm
-is also capable of running a command in a pseudo-terminal and logging all
+is also capable of running a command in a pseudo-terminal and logging
 input and/or output.
 The standard input, standard output, and standard error can be logged
 even when not associated with a terminal.
-I/O logging is not on by default but can be enabled using
-the
-.Em log_input
-and
-.Em log_output
-options as well as the
-.Li LOG_INPUT
-and
-.Li LOG_OUTPUT
-command tags.
-See
-.Sx "I/O LOG FILES"
-for details on how I/O log files are stored.
+For more information about I/O logging, see the
+.Sx "I/O LOGGING"
+section.
 .Pp
 Starting with version 1.9, the
 .Em log_servers
@@ -390,7 +386,7 @@ This avoids an inconsistent environment where one of the variables
 describing the user name is set to the invoking user and one is
 set to the target user.
 Environment variables with a value beginning with
-.Li ()
+.Ql ()
 are removed unless both the name and value parts are matched by
 .Em env_keep
 or
@@ -410,7 +406,7 @@ and
 options are allowed and their values are
 inherited from the invoking process.
 Prior to version 1.8.21, environment variables with a value beginning with
-.Li ()
+.Ql ()
 were always removed.
 Beginning with version 1.8.21, a pattern in
 .Em env_delete
@@ -445,7 +441,7 @@ env_keep += "BASH_FUNC_my_func%%=()*"
 .Ed
 .Pp
 Without the
-.Dq Li =()*
+.Ql =()*
 suffix, this would not match, as
 .Sy bash
 shell functions are not preserved by default.
@@ -455,7 +451,9 @@ as modified by global Defaults parameters in
 .Em sudoers ,
 is displayed when
 .Nm sudo
-is run by root with the
+is run by
+.Sy root
+with the
 .Fl V
 option.
 The list of environment variables to remove
@@ -600,7 +598,7 @@ By default,
 uses the operating system's native method of setting resource limits
 for the target user.
 On Linux systems, resource limits are usually set by the
-.Li pam_limits.so
+.Pa pam_limits.so
 PAM module.
 On some BSD systems, the
 .Pa /etc/login.conf
@@ -674,9 +672,10 @@ are only supported by version 1.8.7 or higher.
 EBNF is a concise and exact way of describing the grammar of a language.
 Each EBNF definition is made up of
 .Em production rules .
-E.g.,
-.Pp
-.Li  symbol ::= definition | alternate1 | alternate2 ...
+For example:
+.Bd -literal -offset 4n
+symbol ::= definition | alternate1 | alternate2 ...
+.Ed
 .Pp
 Each
 .Em production rule
@@ -689,13 +688,13 @@ Do not, however, confuse them with
 .Dq wildcard
 characters, which have different meanings.
 .Bl -tag -width 4n
-.It Li \&?
+.It \&?
 Means that the preceding symbol (or group of symbols) is optional.
 That is, it may appear once or not at all.
-.It Li *
+.It *
 Means that the preceding symbol (or group of symbols) may appear
 zero or more times.
-.It Li +
+.It +
 Means that the preceding symbol (or group of symbols) may appear
 one or more times.
 .El
@@ -707,17 +706,17 @@ we will use single quotes
 to designate what is a verbatim character string (as opposed to a symbol name).
 .Ss Aliases
 There are four kinds of aliases:
-.Li User_Alias ,
-.Li Runas_Alias ,
-.Li Host_Alias
+.Em User_Alias ,
+.Em Runas_Alias ,
+.Em Host_Alias
 and
-.Li Cmnd_Alias .
+.Em Cmnd_Alias .
 Beginning with
 .Nm sudo
 1.9.0,
-.Li Cmd_Alias
+.Em Cmd_Alias
 may be used in place of
-.Li Cmnd_Alias
+.Em Cmnd_Alias
 if desired.
 .Bd -literal
 Alias ::= 'User_Alias'  User_Alias_Spec (':' User_Alias_Spec)* |
@@ -755,25 +754,25 @@ Alias_Type NAME = item1, item2, ...
 where
 .Em Alias_Type
 is one of
-.Li User_Alias ,
-.Li Runas_Alias ,
-.Li Host_Alias ,
+.Em User_Alias ,
+.Em Runas_Alias ,
+.Em Host_Alias ,
 or
-.Li Cmnd_Alias .
+.Em Cmnd_Alias .
 A
-.Li NAME
+.Dv NAME
 is a string of uppercase letters, numbers,
 and underscore characters
 .Pq Ql _ .
 A
-.Li NAME
+.Dv NAME
 .Sy must
 start with an
 uppercase letter.
 It is possible to put several alias definitions
 of the same type on a single line, joined by a colon
 .Pq Ql :\& .
-E.g.,
+For example:
 .Bd -literal
 Alias_Type NAME = item1, item2, item3 : NAME = item4, item5
 .Ed
@@ -802,7 +801,7 @@ User ::= '!'* user name |
 .Ed
 .Pp
 A
-.Li User_List
+.Em User_List
 is made up of one or more user names, user-IDs
 (prefixed with
 .Ql # ) ,
@@ -817,7 +816,7 @@ non-Unix group names and IDs (prefixed with
 and
 .Ql %:#
 respectively), and
-.Li User_Alias Ns es.
+.Em User_Alias Ns es.
 Each list item may be prefixed with zero or more
 .Ql \&!
 operators.
@@ -829,14 +828,14 @@ User netgroups are matched using the user and domain members only;
 the host member is not used when matching.
 .Pp
 A
-.Li user name ,
-.Li user-ID ,
-.Li group ,
-.Li group-ID ,
-.Li netgroup ,
-.Li nonunix_group
+.Em user name ,
+.Em user-ID ,
+.Em group ,
+.Em group-ID ,
+.Em netgroup ,
+.Em nonunix_group
 or
-.Li nonunix_gid
+.Em nonunix_gid
 may be enclosed in double quotes to avoid the
 need for escaping special characters.
 Alternately, special characters
@@ -846,9 +845,9 @@ using double quotes, any prefix characters must be included inside
 the quotes.
 .Pp
 The actual
-.Li nonunix_group
+.Em nonunix_group
 and
-.Li nonunix_gid
+.Em nonunix_gid
 syntax depends on
 the underlying group provider plugin.
 For instance, the QAS AD plugin supports the following formats:
@@ -889,21 +888,24 @@ Runas_Member ::= '!'* user name |
 .Ed
 .Pp
 A
-.Li Runas_List
+.Em Runas_List
 is similar to a
-.Li User_List
+.Em User_List
 except that instead
 of
-.Li User_Alias Ns es
+.Em User_Alias Ns es
 it can contain
-.Li Runas_Alias Ns es .
+.Em Runas_Alias Ns es .
 User names and groups are matched as strings.
 In other words, two users (groups) with the same user (group) ID
 are considered to be distinct.
-If you wish to match all user names with the same user-ID (e.g., root and
-toor), you can use a user-ID instead of a name (#0 in the example given).
+If you wish to match all user names with the same user-ID (e.g.,
+.Sy root
+and
+.Sy toor ) ,
+you can use a user-ID instead of a name (#0 in the example given).
 The user-ID or group-ID specified in a
-.Li Runas_Member
+.Em Runas_Member
 need not be listed in the password or group database.
 .Bd -literal
 Host_List ::= Host |
@@ -918,7 +920,7 @@ Host ::= '!'* host name |
 .Ed
 .Pp
 A
-.Li Host_List
+.Em Host_List
 is made up of one or more host names, IP addresses,
 network numbers, netgroups (prefixed with
 .Ql + ) ,
@@ -940,7 +942,7 @@ A host name may include shell-style wildcards (see the
 .Sx Wildcards
 section below),
 but unless the
-.Li host name
+.Em hostname
 command on your machine returns the fully
 qualified host name, you'll need to use the
 .Em fqdn
@@ -987,7 +989,7 @@ Cmnd ::= Digest_List? '!'* command |
 .Ed
 .Pp
 A
-.Li Cmnd_List
+.Em Cmnd_List
 is a list of one or more commands, directories, or aliases.
 A command is a fully qualified file name, which may include
 shell-style wildcards (see the
@@ -1004,7 +1006,7 @@ A directory is a
 fully qualified path name ending in a
 .Ql / .
 When you specify a directory in a
-.Li Cmnd_List ,
+.Em Cmnd_List ,
 the user will be able to run any file within that directory
 (but not in any sub-directories therein).
 If no command line arguments are specified, the user may run the
@@ -1015,19 +1017,19 @@ expression that starts with
 and ends with
 .Ql $ .
 If the command line arguments consist of
-.Li \&"" ,
+.Ql \&"" ,
 the command may only be run with
 .Em no
 arguments.
 .Pp
 If a
-.Li Cmnd
+.Em Cmnd
 has associated command line arguments, the arguments
 in the
-.Li Cmnd
+.Em Cmnd
 must match those given by the user on the command line.
 If the arguments in a
-.Li Cmnd
+.Em Cmnd
 begin with the
 .Ql ^
 character, they will be interpreted as a regular expression
@@ -1042,7 +1044,7 @@ if they are used in command arguments:
 .Ql =\& ,
 .Ql \e .
 To prevent arguments in a
-.Li Cmnd
+.Em Cmnd
 that begin with a
 .Ql ^
 character from being interpreted as a regular expression, the
@@ -1051,7 +1053,7 @@ must be escaped with a
 .Ql \e .
 .Pp
 The built-in command
-.Dq Li sudoedit
+.Dq sudoedit
 is used to permit a user to run
 .Nm sudo
 with the
@@ -1060,7 +1062,7 @@ option (or as
 .Nm sudoedit ) .
 It may take command line arguments just as a normal command does.
 Unlike other commands,
-.Dq Li sudoedit
+.Dq sudoedit
 is built into
 .Nm sudo
 itself and must be specified in the
@@ -1071,27 +1073,27 @@ a leading path.
 If a leading path is present, for example
 .Pa /usr/bin/sudoedit ,
 the path name will be silently converted to
-.Dq Li sudoedit .
+.Dq sudoedit .
 A fully-qualified path for
 .Nm sudoedit
 is treated as an error by
 .Nm visudo .
 .Pp
 A
-.Li command
+.Em command
 may be preceded by a
-.Li Digest_List ,
+.Em Digest_List ,
 a comma-separated list of one or more
-.Li Digest_Spec
+.Em Digest_Spec
 entries.
 If a
-.Li Digest_List
+.Em Digest_List
 is present, the command will only match successfully if it can be verified
 using one of the SHA-2 digests in the list.
 Starting with version 1.9.0, the
 .Sy ALL
 reserved word can be used in conjunction with a
-.Li Digest_List .
+.Em Digest_List .
 The following digest formats are supported: sha224, sha256, sha384, and sha512.
 The string may be specified in either hex or base64 format
 (base64 is more compact).
@@ -1115,7 +1117,7 @@ Warning, if the user has write access to the command itself (directly or via a
 command), it may be possible for the user to replace the command after the
 digest check has been performed but before the command is executed.
 A similar race condition exists on systems that lack the
-.Fn fexecve
+.Xr fexecve 2
 system call when the directory in which the command is located
 is writable by the user.
 See the description of the
@@ -1128,13 +1130,13 @@ Command digests are only supported by version 1.8.7 or higher.
 .Ss Defaults
 Certain configuration options may be changed from their default
 values at run-time via one or more
-.Li Default_Entry
+.Em Default_Entry
 lines.
 These may affect all users on any host, all users on a specific host, a
 specific user, a specific command, or commands being run as a specific user.
 Per-command entries may not include command line arguments.
 If you need to specify arguments, define a
-.Li Cmnd_Alias
+.Em Cmnd_Alias
 and reference
 that instead.
 .Bd -literal
@@ -1192,16 +1194,16 @@ or
 function.
 .Pp
 Lists have two additional assignment operators,
-.Li +=
+.Ql +=
 and
-.Li -= .
+.Ql -= .
 These operators are used to add to and delete from a list respectively.
 It is not an error to use the
-.Li -=
+.Ql -=
 operator to remove an element
 that does not exist in a list.
 .Pp
-Defaults entries are parsed in the following order: generic, host,
+Defaults entries are parsed in the following order: global, host,
 user, and runas Defaults first, then command defaults.
 If there are multiple Defaults settings of the same type, the last
 matching setting is used.
@@ -1273,28 +1275,30 @@ A
 .Sy user specification
 determines which commands a user may run
 (and as what user) on specified hosts.
-By default, commands are
-run as
-.Sy root ,
-but this can be changed on a per-command basis.
+By default, commands are run as
+.Sy @runas_default@
+(unless
+.Em runas_default
+has been set to a different value)
+but this can also be changed on a per-command basis.
 .Pp
 The basic structure of a user specification is
 .Dq who where = (as_whom) what .
 Let's break that down into its constituent parts:
 .Ss Runas_Spec
 A
-.Li Runas_Spec
+.Em Runas_Spec
 determines the user and/or the group that a command
 may be run as.
 A fully-specified
-.Li Runas_Spec
+.Em Runas_Spec
 consists of two
-.Li Runas_List Ns s
+.Em Runas_List Ns s
 (as defined above) separated by a colon
 .Pq Ql :\&
 and enclosed in a set of parentheses.
 The first
-.Li Runas_List
+.Em Runas_List
 indicates which users the command may be run as via the
 .Fl u
 option.
@@ -1302,32 +1306,35 @@ The second defines a list of groups that may be specified via the
 .Fl g
 option (in addition to any of the target user's groups).
 If both
-.Li Runas_List Ns s
+.Em Runas_List Ns s
 are specified, the command may be run with any combination of users
 and groups listed in their respective
-.Li Runas_List Ns s.
+.Em Runas_List Ns s.
 If only the first is specified, the command may be run as any user
 in the list and, optionally, with any group the target user belongs to.
 If the first
-.Li Runas_List
+.Em Runas_List
 is empty but the
 second is specified, the command may be run as the invoking user
 with the group set to any listed in the
-.Li Runas_List .
+.Em Runas_List .
 If both
-.Li Runas_List Ns s
+.Em Runas_List Ns s
 are empty, the command may only be run as the invoking user and the
 group, if specified, must be one that the invoking user is a member of.
 If no
-.Li Runas_Spec
-is specified, the command may only be run as
-.Sy root
-and the group, if specified, must be one that
-.Sy root
-is a member of.
+.Em Runas_Spec
+is specified, the command may only be run as the
+.Em runas_default
+user
+.Sy ( @runas_default@
+by default) and the group,
+if specified, must be one that the
+.Em runas_default
+user is a member of.
 .Pp
 A
-.Li Runas_Spec
+.Em Runas_Spec
 sets the default for the commands that follow it.
 What this means is that for the entry:
 .Bd -literal
@@ -1345,13 +1352,13 @@ on the host
 .No boulder Ns \(em Ns but
 only as
 .Sy operator .
-E.g.,
+For example:
 .Bd -literal
 $ sudo -u operator /bin/ls
 .Ed
 .Pp
 It is also possible to override a
-.Li Runas_Spec
+.Em Runas_Spec
 later on in an entry.
 If we modify the entry like so:
 .Bd -literal
@@ -1374,7 +1381,7 @@ as
 We can extend this to allow
 .Sy dgb
 to run
-.Li /bin/ls
+.Pa /bin/ls
 with either
 the user or group set to
 .Sy operator :
@@ -1384,7 +1391,7 @@ dgb	boulder = (operator : operator) /bin/ls, (root) /bin/kill,\e
 .Ed
 .Pp
 While the group portion of the
-.Li Runas_Spec
+.Em Runas_Spec
 permits the
 user to run as command with that group, it does not force the user
 to do so.
@@ -1409,13 +1416,13 @@ tcm	boulder = (:dialer) /usr/bin/tip, /usr/bin/cu,\e
 .Pp
 In this example only the group will be set, the command still runs as user
 .Sy tcm .
-E.g.\&
+For example:
 .Bd -literal
 $ sudo -g dialer /usr/bin/cu
 .Ed
 .Pp
 Multiple users and groups may be present in a
-.Li Runas_Spec ,
+.Em Runas_Spec ,
 in which case the user may select any combination of users and groups via the
 .Fl u
 and
@@ -1428,11 +1435,14 @@ alan	ALL = (root, bin : operator, system) ALL
 .Pp
 user
 .Sy alan
-may run any command as either user root or bin,
+may run any command as either user
+.Sy root
+or
+.Sy bin ,
 optionally setting the group to operator or system.
 .Ss Option_Spec
 A
-.Li Cmnd
+.Em Cmnd
 may have zero or more options associated with it.
 Options may consist of
 .if \n(SL \{\
@@ -1446,11 +1456,11 @@ Solaris privileges sets,
 .\}
 start and/or end dates and command timeouts.
 Once an option is set for a
-.Li Cmnd ,
+.Em Cmnd ,
 subsequent
-.Li Cmnd Ns s
+.Em Cmnd Ns s
 in the
-.Li Cmnd_Spec_List ,
+.Em Cmnd_Spec_List ,
 inherit that option unless it is overridden by another option.
 Option names are reserved words in
 .Em sudoers .
@@ -1495,10 +1505,13 @@ alice	ALL = (root)	APPARMOR_PROFILE=my-profile	ALL
 .Pp
 the user
 .Sy alice
-may run any command as root under confinement by the profile
+may run any command as
+.Sy root
+under confinement by the profile
 .Ql my-profile .
 You can also stack profiles, or allow a user to run commands unconfined by
-any profile. E.g.,
+any profile.
+For example:
 .Bd -literal
 bob	ALL = (root)	APPARMOR_PROFILE=foo//&bar	/usr/bin/vi
 cathy	ALL = (root)	APPARMOR_PROFILE=unconfined	/bin/ls
@@ -1510,7 +1523,9 @@ entries allow user
 .Sy bob
 to run
 .Pa /usr/bin/vi
-as root under the stacked profiles
+as
+.Sy root
+under the stacked profiles
 .Ql foo
 and
 .Ql bar ,
@@ -1563,15 +1578,15 @@ character.
 .Ss Date_Spec
 .Nm
 rules can be specified with a start and end date via the
-.Li NOTBEFORE
+.Dv NOTBEFORE
 and
-.Li NOTAFTER
+.Dv NOTAFTER
 settings.
 The time stamp must be specified in
-.Em Generalized Time
+.Dq Generalized Time
 as defined by RFC 4517.
 The format is effectively
-.Li yyyymmddHHMMSSZ
+.Ql yyyymmddHHMMSSZ
 where the minutes and seconds are optional.
 The
 .Ql Z
@@ -1602,7 +1617,7 @@ minutes, and seconds with a single-letter case-insensitive suffix
 that indicates the unit of time.
 For example, a timeout of 7 days, 8 hours, 30 minutes, and
 10 seconds would be written as
-.Li 7d8h30m10s .
+.Ql 7d8h30m10s .
 If a number is specified without a unit, seconds are assumed.
 Any of the days, minutes, hours, or seconds may be omitted.
 The order must be from largest to smallest unit and a unit
@@ -1611,23 +1626,23 @@ may not be specified more than once.
 The following are all
 .Em valid
 timeout values:
-.Li 7d8h30m10s ,
-.Li 14d ,
-.Li 8h30m ,
-.Li 600s ,
-.Li 3600 .
+.Ql 7d8h30m10s ,
+.Ql 14d ,
+.Ql 8h30m ,
+.Ql 600s ,
+.Ql 3600 .
 The following are
 .Em invalid
 timeout values:
-.Li 12m2w1d ,
-.Li 30s10m4h ,
-.Li 1d2d3h .
+.Ql 12m2w1d ,
+.Ql 30s10m4h ,
+.Ql 1d2d3h .
 .Pp
 This setting is only supported by version 1.8.20 or higher.
 .Ss Chdir_Spec
 The working directory that the command will be run in can be specified
 using the
-.Li CWD
+.Dv CWD
 setting.
 The
 .Fa directory
@@ -1649,7 +1664,7 @@ directory, unless the
 .Fl i
 option is given.
 Path names of the form
-.Li ~user/path/name
+.Pa ~user/path/name
 are interpreted as being relative to the named user's home directory.
 If the user name is omitted, the path will be relative to the runas
 user's home directory.
@@ -1658,7 +1673,7 @@ This setting is only supported by version 1.9.3 or higher.
 .Ss Chroot_Spec
 The root directory that the command will be run in can be specified
 using the
-.Li CHROOT
+.Dv CHROOT
 setting.
 The
 .Fa directory
@@ -1682,7 +1697,7 @@ similar to the
 .Xr chroot @mansectsu@
 utility.
 Path names of the form
-.Li ~user/path/name
+.Pa ~user/path/name
 are interpreted as being relative to the named user's home directory.
 If the user name is omitted, the path will be relative to the runas
 user's home directory.
@@ -1691,46 +1706,46 @@ This setting is only supported by version 1.9.3 or higher.
 .Ss Tag_Spec
 A command may have zero or more tags associated with it.
 The following tag values are supported:
-.Li EXEC ,
-.Li NOEXEC ,
-.Li FOLLOW ,
-.Li NOFOLLOW ,
-.Li LOG_INPUT ,
-.Li NOLOG_INPUT ,
-.Li LOG_OUTPUT ,
-.Li NOLOG_OUTPUT ,
-.Li MAIL ,
-.Li NOMAIL ,
-.Li INTERCEPT ,
-.Li NOINTERCEPT ,
-.Li PASSWD ,
-.Li NOPASSWD ,
-.Li SETENV ,
+.Dv EXEC ,
+.Dv NOEXEC ,
+.Dv FOLLOW ,
+.Dv NOFOLLOW ,
+.Dv LOG_INPUT ,
+.Dv NOLOG_INPUT ,
+.Dv LOG_OUTPUT ,
+.Dv NOLOG_OUTPUT ,
+.Dv MAIL ,
+.Dv NOMAIL ,
+.Dv INTERCEPT ,
+.Dv NOINTERCEPT ,
+.Dv PASSWD ,
+.Dv NOPASSWD ,
+.Dv SETENV ,
 and
-.Li NOSETENV .
+.Dv NOSETENV .
 Once a tag is set on a
-.Li Cmnd ,
+.Em Cmnd ,
 subsequent
-.Li Cmnd Ns s
+.Em Cmnd Ns s
 in the
-.Li Cmnd_Spec_List ,
+.Em Cmnd_Spec_List ,
 inherit the tag unless it is overridden by the opposite tag (in other words,
-.Li PASSWD
+.Dv PASSWD
 overrides
-.Li NOPASSWD
+.Dv NOPASSWD
 and
-.Li NOEXEC
+.Dv NOEXEC
 overrides
-.Li EXEC ) .
+.Dv EXEC ) .
 .Bl -hang -width 0n
-.It Em EXEC No and Em NOEXEC
+.It Dv EXEC No and Dv NOEXEC
 .sp
 If
 .Nm sudo
 has been compiled with
 .Em noexec
 support and the underlying operating system supports it, the
-.Li NOEXEC
+.Dv NOEXEC
 tag can be used to prevent a dynamically-linked executable from
 running further commands itself.
 .Pp
@@ -1748,18 +1763,19 @@ aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
 See the
 .Sx Preventing shell escapes
 section below for more details on how
-.Li NOEXEC
+.Dv NOEXEC
 works and whether or not it will work on your system.
-.It Em FOLLOW No and Em NOFOLLOW
+.It Dv FOLLOW No and Dv NOFOLLOW
+.sp
 Starting with version 1.8.15,
 .Nm sudoedit
 will not open a file that is a symbolic link unless the
 .Em sudoedit_follow
 flag is enabled.
 The
-.Em FOLLOW
+.Dv FOLLOW
 and
-.Em NOFOLLOW
+.Dv NOFOLLOW
 tags override the value of
 .Em sudoedit_follow
 and can be used to permit (or deny) the editing of symbolic links
@@ -1767,27 +1783,21 @@ on a per-command basis.
 These tags are only effective for the
 .Em sudoedit
 command and are ignored for all other commands.
-.It Em LOG_INPUT No and Em NOLOG_INPUT
+.It Dv LOG_INPUT No and Dv NOLOG_INPUT
 .sp
 These tags override the value of the
 .Em log_input
 flag on a per-command basis.
-For more information, see the description of
-.Em log_input
-in the
-.Sx SUDOERS OPTIONS
-section below.
-.It Em LOG_OUTPUT No and Em NOLOG_OUTPUT
+For more information, see
+.Sx "I/O LOGGING" .
+.It Dv LOG_OUTPUT No and Dv NOLOG_OUTPUT
 .sp
 These tags override the value of the
 .Em log_output
 flag on a per-command basis.
-For more information, see the description of
-.Em log_output
-in the
-.Sx SUDOERS OPTIONS
-section below.
-.It Em MAIL No and Em NOMAIL
+For more information, see
+.Sx "I/O LOGGING" .
+.It Dv MAIL No and Dv NOMAIL
 .sp
 These tags provide fine-grained control over whether
 mail will be sent when a user runs a command by
@@ -1802,7 +1812,7 @@ or
 .Fl v
 options.
 A
-.Em NOMAIL
+.Dv NOMAIL
 tag will also override the
 .Em mail_always
 and
@@ -1816,24 +1826,24 @@ and
 in the
 .Sx SUDOERS OPTIONS
 section below.
-.It Em PASSWD No and Em NOPASSWD
+.It Dv PASSWD No and Dv NOPASSWD
 .sp
 By default,
 .Nm sudo
 requires that a user authenticate
 before running a command.
 This behavior can be modified via the
-.Li NOPASSWD
+.Dv NOPASSWD
 tag.
 Like a
-.Li Runas_Spec ,
+.Em Runas_Spec ,
 the
-.Li NOPASSWD
+.Dv NOPASSWD
 tag sets
 a default for the commands that follow it in the
-.Li Cmnd_Spec_List .
+.Em Cmnd_Spec_List .
 Conversely, the
-.Li PASSWD
+.Dv PASSWD
 tag can be used to reverse things.
 For example:
 .Bd -literal
@@ -1848,7 +1858,7 @@ to run
 and
 .Pa /usr/bin/lprm
 as
-.Sy root
+.Sy @runas_default@
 on the machine
 .Dq rushmore
 without authenticating himself.
@@ -1863,35 +1873,35 @@ ray	rushmore = NOPASSWD: /bin/kill, PASSWD: /bin/ls, /usr/bin/lprm
 .Ed
 .Pp
 Note, however, that the
-.Li PASSWD
+.Dv PASSWD
 tag has no effect on users who are in the group specified by the
 .Em exempt_group
 setting.
 .Pp
 By default, if the
-.Li NOPASSWD
+.Dv NOPASSWD
 tag is applied to any of a user's entries for the current host,
 the user will be able to run
-.Dq Li sudo -l
+.Ql sudo -l
 without a password.
 Additionally, a user may only run
-.Dq Li sudo -v
+.Ql sudo -v
 without a password if all of the user's entries for the current
 host have the
-.Li NOPASSWD
+.Dv NOPASSWD
 tag.
 This behavior may be overridden via the
 .Em verifypw
 and
 .Em listpw
 options.
-.It Em SETENV No and Em NOSETENV
+.It Dv SETENV No and Dv NOSETENV
 .sp
 These tags override the value of the
 .Em setenv
 flag on a per-command basis.
 If
-.Li SETENV
+.Dv SETENV
 has been set for a command, the user may disable the
 .Em env_reset
 flag from the command line via the
@@ -1907,18 +1917,18 @@ As such, only trusted users should be allowed to set variables in this manner.
 If the command matched is
 .Sy ALL ,
 the
-.Li SETENV
+.Dv SETENV
 tag is implied for that command; this default may be overridden by use of the
-.Li NOSETENV
+.Dv NOSETENV
 tag.
-.It Em INTERCEPT No and Em NOINTERCEPT
+.It Dv INTERCEPT No and Dv NOINTERCEPT
 .sp
 If
 .Nm sudo
 has been compiled with
 .Em intercept
 support and the underlying operating system supports it, the
-.Li INTERCEPT
+.Dv INTERCEPT
 tag can be used to cause programs spawned by a command to be validated against
 .Em sudoers
 and logged just like they would be if run through
@@ -1926,6 +1936,11 @@ and logged just like they would be if run through
 directly.
 This is useful in conjunction with commands that allow shell escapes
 such as editors, shells, and paginators.
+There is additional overhead due to the policy check that may add
+latency when running commands such as shell scripts that execute a
+large number of sub-commands.
+For interactive commands, such as a shell or editor,
+the overhead is not usually noticeable.
 .Pp
 In the following example, user
 .Sy chuck
@@ -1939,7 +1954,7 @@ chuck	research = INTERCEPT: ALL
 See the
 .Sx Preventing shell escapes
 section below for more details on how
-.Li INTERCEPT
+.Dv INTERCEPT
 works and whether or not it will work on your system.
 .El
 .Ss Wildcards
@@ -1957,17 +1972,17 @@ and
 functions as specified by
 .St -p1003.1 .
 .Bl -tag -width 8n
-.It Li *
+.It *
 Matches any set of zero or more characters (including white space).
-.It Li \&?
+.It \&?
 Matches any single character (including white space).
-.It Li [...]
+.It [...]
 Matches any character in the specified range.
-.It Li [!...]
+.It [!...]
 Matches any character
 .Em not
 in the specified range.
-.It Li \ex
+.It \ex
 For any character
 .Sq x ,
 evaluates to
@@ -2038,9 +2053,9 @@ below.
 .Ss Exceptions to wildcard rules
 The following exceptions apply to the above rules:
 .Bl -tag -width 8n
-.It Li \&""
+.It \&""
 If the empty string
-.Li \&""
+.Ql \&""
 is the only command line argument in the
 .Em sudoers
 file entry it means that command is not allowed to be run with
@@ -2101,7 +2116,11 @@ In the following example, user
 .Sy john
 can run the
 .Xr passwd 1
-command as root on any host but is not allowed to change root's password.
+command as
+.Sy @runas_default@
+on any host but is not allowed to change
+.Sy root Ns No 's
+password.
 This kind of rule is impossible to express safely using wildcards.
 .Bd -literal -offset 4n
 john	ALL = /usr/bin/passwd ^[a-zA-Z0-9_]+$,\e
@@ -2132,7 +2151,8 @@ to run the
 .Pa /usr/sbin/usermod ,
 and
 .Pa /usr/sbin/userdel
-commands as root.
+commands as
+.Sy @runas_default@ .
 .Bd -literal -offset 4n
 sid    ALL = ^/usr/sbin/(group|user)(add|mod|del)$
 .Ed
@@ -2159,14 +2179,14 @@ It is possible to include other
 files from within the
 .Em sudoers
 file currently being parsed using the
-.Li @include
+.Em @include
 and
-.Li @includedir
+.Em @includedir
 directives.
 For compatibility with sudo versions prior to 1.9.1,
-.Li #include
+.Em #include
 and
-.Li #includedir
+.Em #includedir
 are also accepted.
 .Pp
 An include file can be used, for example, to keep a site-wide
@@ -2222,14 +2242,14 @@ For example, if
 .Pa /etc/sudoers
 contains the line:
 .Bd -literal -offset 4n
-.Li @include sudoers.local
+@include sudoers.local
 .Ed
 .Pp
 the file that will be included is
 .Pa /etc/sudoers.local .
 .Pp
 The file name may also include the
-.Li %h
+.Ql %h
 escape, signifying the short form of the host name.
 In other words, if the machine's host name is
 .Dq xerxes ,
@@ -2244,7 +2264,7 @@ to include the file
 .Pa /etc/sudoers.xerxes .
 .Pp
 The
-.Li @includedir
+.Em @includedir
 directive can be used to create a
 .Pa sudoers.d
 directory that the system package manager can drop
@@ -2264,6 +2284,7 @@ or contain a
 .Ql .\&
 character to avoid causing problems with package manager or editor
 temporary/backup files.
+.Pp
 Files are parsed in sorted lexical order.
 That is,
 .Pa /etc/sudoers.d/01_first
@@ -2278,14 +2299,14 @@ Using a consistent number of leading zeroes in the file names can be used
 to avoid such problems.
 After parsing the files in the directory, control returns to the
 file that contained the
-.Li @includedir
+.Em @includedir
 directive.
 .Pp
 Unlike files included via
-.Li @include ,
+.Em @include ,
 .Nm visudo
 will not edit the files in a
-.Li @includedir
+.Em @includedir
 directory unless one of them contains a syntax error.
 It is still possible to run
 .Nm visudo
@@ -2311,11 +2332,11 @@ is a built-in
 .Em alias
 that always causes a match to succeed.
 It can be used wherever one might otherwise use a
-.Li Cmnd_Alias ,
-.Li User_Alias ,
-.Li Runas_Alias ,
+.Em Cmnd_Alias ,
+.Em User_Alias ,
+.Em Runas_Alias ,
 or
-.Li Host_Alias .
+.Em Host_Alias .
 Attempting to define an
 .Em alias
 named
@@ -2328,22 +2349,22 @@ can be dangerous since in a command context, it allows the user to run
 command on the system.
 .Pp
 The following option names permitted in an
-.Li Option_Spec
+.Em Option_Spec
 are also considered reserved words:
-.Li CHROOT ,
+.Dv CHROOT ,
 .if \n(PS \{\
-.Li PRIVS ,
-.Li LIMITPRIVS ,
+.Dv PRIVS ,
+.Dv LIMITPRIVS ,
 .\}
 .if \n(SL \{\
-.Li ROLE ,
-.Li TYPE ,
+.Dv ROLE ,
+.Dv TYPE ,
 .\}
-.Li TIMEOUT ,
-.Li CWD ,
-.Li NOTBEFORE
+.Dv TIMEOUT ,
+.Dv CWD ,
+.Dv NOTBEFORE
 and
-.Li NOTAFTER .
+.Dv NOTAFTER .
 Attempting to define an
 .Em alias
 with the same name as one of the options will result in a syntax error.
@@ -2355,14 +2376,16 @@ can be used as a logical
 operator in a list or
 .Em alias
 as well as in front of a
-.Li Cmnd .
+.Em Cmnd .
 This allows one to exclude certain values.
 For the
 .Ql \&!
 operator to be effective, there must be something for it to exclude.
-For example, to match all users except for root one would use:
+For example, to match all users except for
+.Sy root
+one would use:
 .Bd -literal -offset 4n
-ALL,!root
+ALL, !root
 .Ed
 .Pp
 If the
@@ -2372,7 +2395,9 @@ is omitted, as in:
 !root
 .Ed
 .Pp
-it would explicitly deny root but not match any other users.
+it would explicitly deny
+.Sy root
+but not match any other users.
 This is different from a true
 .Dq negation
 operator.
@@ -2415,7 +2440,7 @@ when used as part of a word (e.g., a user name or host name):
 .Sh SUDOERS OPTIONS
 .Nm sudo Ns 's
 behavior can be modified by
-.Li Default_Entry
+.Em Default_Entry
 lines, as explained earlier.
 A list of all supported Defaults parameters, grouped by type, are listed below.
 .Pp
@@ -2424,9 +2449,12 @@ A list of all supported Defaults parameters, grouped by type, are listed below.
 .It always_query_group_plugin
 If a
 .Em group_plugin
-is configured, use it to resolve groups of the form %group as long
-as there is not also a system group of the same name.
-Normally, only groups of the form %:group are passed to the
+is configured, use it to resolve groups of the form
+.Ql %group
+as long as there is not also a system group of the same name.
+Normally, only groups of the form
+.Ql %:group
+are passed to the
 .Em group_plugin .
 This flag is
 .Em off
@@ -2437,7 +2465,9 @@ If enabled,
 will set the
 .Ev HOME
 environment variable to the home directory of the target user
-(which is the root user unless the
+(which is the
+.Em runas_default
+user unless the
 .Fl u
 option is used).
 This flag is largely obsolete and has no effect unless the
@@ -2454,9 +2484,9 @@ by default.
 If set, users must authenticate themselves via a password (or other
 means of authentication) before they may run commands.
 This default may be overridden via the
-.Li PASSWD
+.Dv PASSWD
 and
-.Li NOPASSWD
+.Dv NOPASSWD
 tags.
 This flag is
 .Em on
@@ -2536,10 +2566,10 @@ automatic restarting of system calls.
 Unfortunately, not all operating systems do this by default,
 and even those that do may have bugs.
 For example, macOS fails to restart the
-.Fn tcgetattr
+.Xr tcgetattr 3
 and
-.Fn tcsetattr
-system calls (this is a bug in macOS).
+.Xr tcsetattr 3
+functions (this is a bug in macOS).
 Furthermore, because this behavior depends on the command stopping with the
 .Dv SIGTTIN
 or
@@ -2569,9 +2599,13 @@ or
 .Ev EDITOR
 environment variables before falling back on the default editor list.
 .Nm visudo
-is typically run as root so this flag may allow a user with
+is typically run as
+.Sy root
+so this flag may allow a user with
 .Nm visudo
-privileges to run arbitrary commands as root without logging.
+privileges to run arbitrary commands as
+.Sy root
+without logging.
 An alternative is to place a colon-separated list of
 .Dq safe
 editors int the
@@ -2621,22 +2655,24 @@ Any variables in the caller's environment or in the file specified
 by the
 .Em restricted_env_file
 setting that match the
-.Li env_keep
+.Em env_keep
 and
-.Li env_check
+.Em env_check
 lists are then added, followed by any variables present in the file
 specified by the
 .Em env_file
 setting (if any).
 The contents of the
-.Li env_keep
+.Em env_keep
 and
-.Li env_check
+.Em env_check
 lists, as modified by global Defaults parameters in
 .Em sudoers ,
 are displayed when
 .Nm sudo
-is run by root with the
+is run by
+.Sy root
+with the
 .Fl V
 option.
 If the
@@ -2687,7 +2723,7 @@ Most programs that require a user's password will disable echo before
 reading the password to avoid displaying the plaintext password on
 the screen.
 However, if terminal input is being logged (see
-.Em log_input ) ,
+.Sx "I/O LOGGING" ) ,
 the password will still be present in the I/O log.
 If the
 .Em log_passwords
@@ -2710,8 +2746,8 @@ is set), only the
 first character of the password will be replaced in the I/O log.
 This option has no effect unless
 .Em log_input
-and
-.Em log_input
+or
+.Em log_ttyin
 are also set.
 This flag is
 .Em on
@@ -2722,16 +2758,16 @@ This setting is only supported by version 1.9.10 or higher.
 Set this flag if you want to put fully qualified host names in the
 .Em sudoers
 file when the local host name (as returned by the
-.Li hostname
+.Ql hostname
 command) does not contain the domain name.
 In other words, instead of myhost you would use myhost.mydomain.edu.
 You may still use the short form if you wish (and even mix the two).
 This flag is only effective when the
 .Dq canonical
 host name, as returned by the
-.Fn getaddrinfo
+.Xr getaddrinfo 3
 or
-.Fn gethostbyname
+.Xr gethostbyname 3
 function, is a fully-qualified domain name.
 This is usually the case when the system is configured to use DNS
 for host name resolution.
@@ -2778,13 +2814,8 @@ from the network).
 Just like with the hosts file, you must use the
 .Dq canonical
 name as DNS knows it.
-That is, you may not use a host alias
-.Po
-.Li CNAME
-entry
-.Pc
-due to performance issues and the fact that there is no way to get all
-aliases from DNS.
+That is, you may not use a host alias (CNAME entry) due to performance
+issues and the fact that there is no way to get all aliases from DNS.
 .Pp
 This flag is
 .Em @fqdn@
@@ -2807,7 +2838,7 @@ by default.
 .It ignore_dot
 If set,
 .Nm sudo
-will ignore "." or "" (both denoting current directory) in the
+will ignore "." or "" (both denoting the current directory) in the
 .Ev PATH
 environment variable; the
 .Ev PATH
@@ -2843,7 +2874,7 @@ by default.
 If set via LDAP, parsing of
 .Pa @sysconfdir@/sudoers
 will be skipped.
-This is intended for Enterprises that wish to prevent the usage of local
+This is intended for sites that wish to prevent the usage of local
 sudoers files so that only LDAP is used.
 This thwarts the efforts of rogue operators who would attempt to add roles to
 .Pa @sysconfdir@/sudoers .
@@ -2854,7 +2885,7 @@ Since this flag tells
 .Nm sudo
 how to behave when no specific LDAP entries have been matched, this
 sudoOption is only meaningful for the
-.Li cn=defaults
+.Ql cn=defaults
 section.
 This flag is
 .Em off
@@ -2917,19 +2948,14 @@ by default.
 .It log_input
 If set,
 .Nm sudo
-will run the command in a pseudo-terminal and log all user input.
-If the standard input is not connected to the user's tty, due to
-I/O redirection or because the command is part of a pipeline, that
-input is also captured and stored in a separate log file.
-Anything sent to the standard input will be consumed, regardless of
-whether or not the command run via
+will run the command in a pseudo-terminal (if
 .Nm sudo
-is actually reading the standard input.
-This may have unexpected results when using
-.Nm sudo
-in a shell script that expects to process the standard input.
+was run from a terminal) and log all user input.
+If the standard input is not connected to the user's terminal, due
+to I/O redirection or because the command is part of a pipeline,
+that input is also logged.
 For more information about I/O logging, see the
-.Sx "I/O LOG FILES"
+.Sx "I/O LOGGING"
 section.
 This flag is
 .Em off
@@ -2937,12 +2963,15 @@ by default.
 .It log_output
 If set,
 .Nm sudo
-will run the command in a pseudo-terminal and log all output that is sent
-to the screen, similar to the
-.Xr script 1
-command.
+will run the command in a pseudo-terminal (if
+.Nm sudo
+was run from a terminal) and log all output that is sent to the
+user's terminal, the standard output or the standard error.
+If the standard output or standard error is not connected to the
+user's terminal, due to I/O redirection or because the command is
+part of a pipeline, that output is also logged.
 For more information about I/O logging, see the
-.Sx "I/O LOG FILES"
+.Sx "I/O LOGGING"
 section.
 This flag is
 .Em off
@@ -2974,20 +3003,56 @@ This flag is
 by default.
 .Pp
 This setting is only supported by version 1.9.0 or higher.
+.It log_stderr
+If set,
+.Nm sudo
+will log the standard error if it is not connected to the user's terminal.
+This can be used to log output to a pipe or redirected to a file.
+This flag is
+.Em off
+by default but is enabled when either the
+.Em log_output
+flag or the
+.Dv LOG_OUTPUT
+command tag is set.
+.It log_stdin
+If set,
+.Nm sudo
+will log the standard input if it is not connected to the user's terminal.
+This can be used to log input from a pipe or redirected from a file.
+This flag is
+.Em off
+by default but is enabled when either the
+.Em log_input
+flag or the
+.Dv LOG_INPUT
+command tag is set.
+.It log_stdout
+If set,
+.Nm sudo
+will log the standard output if it is not connected to the user's terminal.
+This can be used to log output to a pipe or redirected to a file.
+This flag is
+.Em off
+by default but is enabled when either the
+.Em log_output
+flag or the
+.Dv LOG_OUTPUT
+command tag is set.
 .It log_subcmds
 If set,
 .Nm
 will log when a command spawns a child process and executes a program
 using the
-.Fn execl ,
-.Fn execle ,
-.Fn execlp ,
-.Fn execv ,
-.Fn execve ,
-.Fn execvp ,
-.Fn execvpe ,
+.Xr execve 2 ,
+.Xr execl 3 ,
+.Xr execle 3 ,
+.Xr execlp 3 ,
+.Xr execv 3 ,
+.Xr execvp 3 ,
+.Xr execvpe 3 ,
 or
-.Fn system
+.Xr system 3
 library functions.
 For example, if a shell is run by
 .Nm sudo ,
@@ -3008,6 +3073,36 @@ This setting is only supported by version 1.9.8 or higher
 and is incompatible with SELinux RBAC support unless the system supports
 .Xr seccomp 2
 filter mode.
+.It log_ttyin
+If set,
+.Nm sudo
+will run the command in a pseudo-terminal and log user keystrokes
+sent to the user's terminal, if one is present.
+This flag is
+.Em off
+by default but is enabled when either the
+.Em log_input
+flag or the
+.Dv LOG_INPUT
+command tag is set.
+If no terminal is present, for example when running a remote command using
+.Xr ssh 1 ,
+this flag will have no effect.
+.It log_ttyout
+If set,
+.Nm sudo
+will run the command in a pseudo-terminal and log all output displayed
+on the user's terminal, if one is present.
+This flag is
+.Em off
+by default but is enabled when either the
+.Em log_output
+flag or the
+.Dv LOG_OUTPUT
+command tag is set.
+If no terminal is present, for example when running a remote command using
+.Xr ssh 1 ,
+this flag will have no effect.
 .It log_year
 If set, the four-digit year will be logged in the (non-syslog)
 .Nm sudo
@@ -3114,7 +3209,7 @@ This works well on systems where the number of groups listed in the
 .Em sudoers
 file is larger than the number of groups a typical user belongs to.
 On systems where group lookups are slow, where users may belong
-to a large number of groups, and where the number of groups listed
+to a large number of groups, or where the number of groups listed
 in the
 .Em sudoers
 file is relatively small, it may be prohibitively expensive and
@@ -3160,12 +3255,12 @@ This setting is only supported by version 1.8.18 or higher.
 If set, all commands run via
 .Nm sudo
 will behave as if the
-.Li INTERCEPT
+.Dv INTERCEPT
 tag has been set, unless overridden by an
-.Li NOINTERCEPT
+.Dv NOINTERCEPT
 tag.
 See the description of
-.Em INTERCEPT and NOINTERCEPT
+.Dv INTERCEPT and NOINTERCEPT
 above as well as the
 .Sx Preventing shell escapes
 section at the end of this manual.
@@ -3191,7 +3286,7 @@ is enable.
 This flag has no effect unless the
 .Em intercept
 flag is enabled or the
-.Em INTERCEPT
+.Dv INTERCEPT
 tag has been set for the command.
 This flag is
 .Em on
@@ -3213,22 +3308,64 @@ subsequent commands will need to be authenticated.
 This flag has no effect unless the
 .Em intercept
 flag is enabled or the
-.Em INTERCEPT
+.Dv INTERCEPT
 tag has been set for the command.
 This flag is
 .Em off
 by default.
 .Pp
 This setting is only supported by version 1.9.8 or higher.
+.It intercept_verify
+If set,
+.Nm sudo
+will attempt to verify that a command run in intercept mode has
+the expected path name, command line arguments and environment.
+.Pp
+The process will be stopped after
+.Xr execve 2
+has completed but before the new command has had a chance to run.
+To verify the command,
+.Nm sudo
+will read the command's path from
+.Pa /proc/PID/exe ,
+the command line arguments and environment from the process's memory,
+and compare them against the arguments that were passed to
+.Xr execve 2 .
+In the event of a mismatch, the command will be sent a
+.Dv SIGKILL
+signal and terminated.
+.Pp
+This can help prevent a time of check versus time of use issue with
+intercept mode where the
+.Xr execve 2
+arguments could be altered after the
+.Nm
+policy check.
+The checks can only be performed if the
+.Xr proc @mansectform@
+file system is available.
+This flag has no effect unless the
+.Em intercept
+flag is enabled or the
+.Dv INTERCEPT
+tag has been set for the command and the
+.Em intercept_type
+option is set to
+.Em trace .
+This flag is
+.Em on
+by default.
+.Pp
+This setting is only supported by version 1.9.12 or higher.
 .It netgroup_tuple
 If set, netgroup lookups will be performed using the full netgroup
 tuple: host name, user name, and domain (if one is set).
 Historically,
 .Nm sudo
 only matched the user name and domain for netgroups used in a
-.Li User_List
+.Em User_List
 and only matched the host name and domain for netgroups used in a
-.Li Host_List .
+.Em Host_List .
 This flag is
 .Em off
 by default.
@@ -3236,12 +3373,12 @@ by default.
 If set, all commands run via
 .Nm sudo
 will behave as if the
-.Li NOEXEC
+.Dv NOEXEC
 tag has been set, unless overridden by an
-.Li EXEC
+.Dv EXEC
 tag.
 See the description of
-.Em EXEC and NOEXEC
+.Dv EXEC and NOEXEC
 above as well as the
 .Sx Preventing shell escapes
 section at the end of this manual.
@@ -3438,17 +3575,23 @@ This flag is
 .Em off
 by default.
 .It root_sudo
-If set, root is allowed to run
+If set,
+.Sy root
+is allowed to run
 .Nm sudo
 too.
 Disabling this prevents users from
 .Dq chaining
 .Nm sudo
-commands to get a root shell by doing something like
-.Dq Li sudo sudo /bin/sh .
+commands to get a
+.Sy root
+shell by doing something like
+.Ql sudo sudo /bin/sh .
 Note, however, that turning off
 .Em root_sudo
-will also prevent root from running
+will also prevent
+.Sy root
+from running
 .Nm sudoedit .
 Disabling
 .Em root_sudo
@@ -3459,7 +3602,9 @@ by default.
 .It rootpw
 If set,
 .Nm sudo
-will prompt for the root password instead of the password of the invoking user
+will prompt for the
+.Sy root
+password instead of the password of the invoking user
 when running a command or editing a file.
 This flag is
 .Em off
@@ -3468,7 +3613,7 @@ by default.
 If enabled, allow matching of runas user and group IDs that are
 not present in the password or group databases.
 In addition to explicitly matching unknown user or group IDs in a
-.Li Runas_List ,
+.Em Runas_List ,
 this option also allows the
 .Sy ALL
 alias to match unknown IDs.
@@ -3486,7 +3631,7 @@ If enabled,
 will only run commands as a user whose shell appears in the
 .Pa /etc/shells
 file, even if the invoking user's
-.Li Runas_List
+.Em Runas_List
 would otherwise permit it.
 If no
 .Pa /etc/shells
@@ -3506,7 +3651,7 @@ If set,
 will prompt for the password of the user defined by the
 .Em runas_default
 option (defaults to
-.Li @runas_default@ )
+.Sy @runas_default@ )
 instead of the password of the invoking user
 when running a command or editing a file.
 This flag is
@@ -3529,7 +3674,9 @@ is invoked with the
 option, the
 .Ev HOME
 environment variable will be set to the home directory of the target
-user (which is the root user unless the
+user (which is the
+.Em runas_default
+user unless the
 .Fl u
 option is used).
 This flag is largely obsolete and has no effect unless the
@@ -3549,7 +3696,9 @@ will set the
 .Ev LOGNAME
 and
 .Ev USER
-environment variables to the name of the target user (usually root unless the
+environment variables to the name of the target user (the user specified by
+.Em runas_default
+unless the
 .Fl u
 option is given).
 However, since some programs (including the RCS revision control system) use
@@ -3581,6 +3730,11 @@ A pseudo-terminal is allocated by
 when it is running in a terminal and one or more of the
 .Em log_input ,
 .Em log_output ,
+.Em log_stdin ,
+.Em log_stdout ,
+.Em log_stderr ,
+.Em log_ttyin ,
+.Em log_ttyout ,
 or
 .Em use_pty
 flags is enabled.
@@ -3611,7 +3765,9 @@ If set and
 is invoked with no arguments it acts as if the
 .Fl s
 option had been given.
-That is, it runs a shell as root (the shell is determined by the
+That is, it runs a shell as
+.Sy root
+(the shell is determined by the
 .Ev SHELL
 environment variable if it is set, falling back on the shell listed
 in the invoking user's /etc/passwd entry if not).
@@ -3622,7 +3778,9 @@ by default.
 Normally, when
 .Nm sudo
 executes a command the real and effective user-IDs are set to the target
-user (root by default).
+user
+.Sy ( @runas_default@
+by default).
 This option changes that behavior such that the real user-ID is left
 as the invoking user's user-ID.
 In other words, this makes
@@ -3648,7 +3806,8 @@ Symbolic links will not be followed in writable directories and
 will refuse to edit a file located in a writable directory.
 These restrictions are not enforced when
 .Nm sudoedit
-is run by root.
+is run by
+.Sy root .
 On some systems, if all directory components of the path to be edited
 are not readable by the target user,
 .Nm sudoedit
@@ -3671,9 +3830,9 @@ option can be enabled to allow
 .Nm sudoedit
 to open symbolic links.
 It may be overridden on a per-command basis by the
-.Em FOLLOW
+.Dv FOLLOW
 and
-.Em NOFOLLOW
+.Dv NOFOLLOW
 tags.
 This flag is
 .Em off
@@ -3695,8 +3854,8 @@ If set,
 will prompt for the password of the user specified
 by the
 .Fl u
-option (defaults to
-.Li root )
+option (defaults to the value of
+.Em runas_default )
 instead of the password of the invoking user
 when running a command or editing a file.
 This flag precludes the use of a user-ID not listed in the passwd
@@ -3795,7 +3954,7 @@ If a timeout is specified both in the
 .Pa sudoers
 file and on the command line, the smaller of the two timeouts will be used.
 See the
-.Li Timeout_Spec
+.Em Timeout_Spec
 section for a description of the timeout syntax.
 This flag is
 .Em off
@@ -3823,7 +3982,7 @@ flag is set,
 .Nm sudo
 will prompt for a password even when it would be visible on the screen.
 This makes it possible to run things like
-.Dq Li ssh somehost sudo ls
+.Ql ssh somehost sudo ls
 since by default,
 .Xr ssh 1
 does
@@ -3844,13 +4003,12 @@ The
 .Em closefrom
 option can be used to specify a different file descriptor at which
 to start closing.
-The default is
-.Li 3 .
+The default is 3.
 .It command_timeout
 The maximum amount of time a command is allowed to run before
 it is terminated.
 See the
-.Li Timeout_Spec
+.Em Timeout_Spec
 section for a description of the timeout syntax.
 .Pp
 This setting is only supported by version 1.8.20 or higher.
@@ -3858,19 +4016,19 @@ This setting is only supported by version 1.8.20 or higher.
 The maximum amount of time to wait when connecting to a log server
 or waiting for a server response.
 See the
-.Li Timeout_Spec
+.Em Timeout_Spec
 section for a description of the timeout syntax.
 The default value is 30 seconds.
 .Pp
 This setting is only supported by version 1.9.0 or higher.
 .It maxseq
 The maximum sequence number that will be substituted for the
-.Dq Li %{seq}
+.Ql %{seq}
 escape in the I/O log file (see the
 .Em iolog_dir
 description below for more information).
 While the value substituted for
-.Dq Li %{seq}
+.Ql %{seq}
 is in base 36,
 .Em maxseq
 itself should be expressed in decimal.
@@ -3893,8 +4051,7 @@ This setting is only supported by version 1.8.7 or higher.
 The number of tries a user gets to enter his/her password before
 .Nm sudo
 logs the failure and exits.
-The default is
-.Li @passwd_tries@ .
+The default is @passwd_tries@.
 .It syslog_maxlen
 On many systems,
 .Xr syslog 3
@@ -3926,40 +4083,28 @@ This setting is only supported by version 1.8.19 or higher.
 Number of characters per line for the file log.
 This value is used to decide when to wrap lines for nicer log files.
 This has no effect on the syslog log file, only the file log.
-The default is
-.Li @loglen@
-(use 0 or negate the option to disable word wrap).
+The default is @loglen@ (use 0 or negate the option to disable word wrap).
 .It passwd_timeout
 Number of minutes before the
 .Nm sudo
-password prompt times out, or
-.Li 0
-for no timeout.
+password prompt times out, or 0 for no timeout.
 The timeout may include a fractional component
-if minute granularity is insufficient, for example
-.Li 2.5 .
-The
-default is
-.Li @password_timeout@ .
+if minute granularity is insufficient, for example 2.5.
+The default is @password_timeout@.
 .It timestamp_timeout
 Number of minutes that can elapse before
 .Nm sudo
 will ask for a password again.
 The timeout may include a fractional component if
-minute granularity is insufficient, for example
-.Li 2.5 .
-The default is
-.Li @timeout@ .
-Set this to
-.Li 0
-to always prompt for a password.
-If set to a value less than
-.Li 0
-the user's time stamp will not expire until the system is rebooted.
+minute granularity is insufficient, for example 2.5.
+The default is @timeout@.
+Set this to 0 to always prompt for a password.
+If set to a value less than 0 the user's time stamp will not expire
+until the system is rebooted.
 This can be used to allow users to create or delete their own time stamps via
-.Dq Li sudo -v
+.Ql sudo -v
 and
-.Dq Li sudo -k
+.Ql sudo -k
 respectively.
 .It umask
 File mode creation mask to use when running the command.
@@ -3971,10 +4116,8 @@ Unless the
 flag is set, the actual umask will be the union of the
 user's umask and the value of the
 .Em umask
-setting, which defaults to
-.Li @sudo_umask@ .
-This guarantees
-that
+setting, which defaults to @sudo_umask@.
+This guarantees that
 .Nm sudo
 never lowers the umask when running a command.
 .Pp
@@ -4004,7 +4147,7 @@ The default
 can be overridden for individual
 .Em sudoers
 entries by specifying the
-.Em APPARMOR_PROFILE
+.Dv APPARMOR_PROFILE
 option.
 This option is only available when sudo is built with AppArmor
 support.
@@ -4015,16 +4158,16 @@ The message may include the
 .Ql %d
 escape which will expand to the number of failed password attempts.
 If set, it overrides the default message,
-.Li %d incorrect password attempt(s) .
+.Dq %d incorrect password attempt(s) .
 .It badpass_message
 Message that is displayed if a user enters an incorrect password.
 The default is
-.Li @badpass_message@
+.Dq @badpass_message@
 unless insults are enabled.
 .It editor
 A colon
 .Pq Ql :\&
-separated list of editors path names used by
+separated list of editor path names used by
 .Nm sudoedit
 and
 .Nm visudo .
@@ -4072,15 +4215,15 @@ It has the following possible values:
 .Bl -tag -width 6n
 .It dso
 Preload a dynamic shared object (shared library) that intercepts the
-.Fn execl ,
-.Fn execle ,
-.Fn execlp ,
-.Fn execv ,
-.Fn execve ,
-.Fn execvp ,
-.Fn execvpe ,
+.Xr execve 2 ,
+.Xr execl 3 ,
+.Xr execle 3 ,
+.Xr execlp 3 ,
+.Xr execv 3 ,
+.Xr execvp 3 ,
+.Xr execvpe 3 ,
 and
-.Fn system
+.Xr system 3
 library functions.
 A value of
 .Em dso
@@ -4122,9 +4265,9 @@ Only used if the
 or
 .Em log_output
 options are enabled or when the
-.Li LOG_INPUT
+.Dv LOG_INPUT
 or
-.Li LOG_OUTPUT
+.Dv LOG_OUTPUT
 tags are present for a command.
 The session sequence number, if any, is stored in the directory.
 The default is
@@ -4134,23 +4277,25 @@ The following percent
 .Pq Ql %
 escape sequences are supported:
 .Bl -tag -width 4n
-.It Li %{seq}
+.It %{seq}
 expanded to a monotonically increasing base-36 sequence number, such as 0100A5,
 where every two digits are used to form a new directory, e.g.,
 .Pa 01/00/A5
-.It Li %{user}
+.It %{user}
 expanded to the invoking user's login name
-.It Li %{group}
+.It %{group}
 expanded to the name of the invoking user's real group-ID
-.It Li %{runas_user}
+.It %{runas_user}
 expanded to the login name of the user the command will
-be run as (e.g., root)
-.It Li %{runas_group}
+be run as (e.g.,
+.Sy root )
+.It %{runas_group}
 expanded to the group name of the user the command will
-be run as (e.g., wheel)
-.It Li %{hostname}
+be run as (e.g.,
+.Sy wheel )
+.It %{hostname}
 expanded to the local host name without the domain name
-.It Li %{command}
+.It %{command}
 expanded to the base name of the command being run
 .El
 .Pp
@@ -4171,14 +4316,14 @@ in which to store input/output logs when the
 or
 .Em log_output
 options are enabled or when the
-.Li LOG_INPUT
+.Dv LOG_INPUT
 or
-.Li LOG_OUTPUT
+.Dv LOG_OUTPUT
 tags are present for a command.
 .Em iolog_file
 may contain directory components.
 The default is
-.Dq Li %{seq} .
+.Ql %{seq} .
 .Pp
 See the
 .Em iolog_dir
@@ -4188,9 +4333,9 @@ escape sequences.
 .Pp
 In addition to the escape sequences, path names that end in six or
 more
-.Li X Ns s
+.Em X Ns s
 will have the
-.Li X Ns s
+.Em X Ns s
 replaced with a unique combination of digits and letters, similar to the
 .Xr mktemp 3
 function.
@@ -4204,7 +4349,7 @@ overwritten unless
 .Em iolog_file
 ends in six or
 more
-.Li X Ns s .
+.Em X Ns s .
 .It iolog_flush
 If set,
 .Nm sudo
@@ -4320,7 +4465,7 @@ For
 .Nm sudo_logsrvd ,
 client certificate validation is controlled by the
 .Em tls_checkpeer
-option, which defaults to
+flag, which defaults to
 .Em false .
 .Pp
 This setting is only supported by version 1.9.0 or higher.
@@ -4329,10 +4474,10 @@ Subject of the mail sent to the
 .Em mailto
 user.
 The escape
-.Li %h
+.Ql %h
 will expand to the host name of the machine.
 Default is
-.Dq Li @mailsub@ .
+.Dq @mailsub@ .
 .It noexec_file
 As of
 .Nm sudo
@@ -4346,9 +4491,9 @@ name used when the
 .Fl A
 option is specified.
 The default value is either
-.Dq Li @pam_service@
+.Ql @pam_service@
 or
-.Dq Li @pam_login_service@ ,
+.Ql @pam_login_service@ ,
 depending on whether or not the
 .Fl i
 option is also specified.
@@ -4363,7 +4508,7 @@ name used when the
 .Fl i
 option is specified.
 The default value is
-.Dq Li @pam_login_service@ .
+.Ql @pam_login_service@ .
 See the description of
 .Em pam_service
 for more information.
@@ -4378,7 +4523,7 @@ file or a file in the
 .Pa /etc/pam.d
 directory.
 The default value is
-.Dq Li sudo .
+.Ql sudo .
 .Pp
 This setting is only supported by version 1.8.8 or higher.
 .It passprompt
@@ -4391,14 +4536,14 @@ The following percent
 .Pq Ql %
 escape sequences are supported:
 .Bl -tag -width 4n
-.It Li %H
+.It %H
 expanded to the local host name including the domain name
 (only if the machine's host name is fully qualified or the
 .Em fqdn
 option is set)
-.It Li %h
+.It %h
 expanded to the local host name without the domain name
-.It Li %p
+.It %p
 expanded to the user whose password is being asked for (respects the
 .Em rootpw ,
 .Em targetpw
@@ -4406,16 +4551,17 @@ and
 .Em runaspw
 flags in
 .Em sudoers )
-.It Li \&%U
+.It \&%U
 expanded to the login name of the user the command will
-be run as (defaults to root)
-.It Li %u
+be run as (defaults to
+.Sy @runas_default@ )
+.It %u
 expanded to the invoking user's login name
-.It Li %%
+.It %%
 two consecutive
-.Li %
+.Ql %
 characters are collapsed into a single
-.Li %
+.Ql %
 character
 .El
 .Pp
@@ -4433,7 +4579,7 @@ The
 flag can be used to change this behavior.
 .Pp
 The default value is
-.Dq Li "@passprompt@" .
+.Ql "@passprompt@" .
 .if \n(PS \{\
 .It privs
 The default Solaris privileges to use when constructing a new
@@ -4468,13 +4614,13 @@ The default user to run commands as if the
 .Fl u
 option is not specified on the command line.
 This defaults to
-.Li @runas_default@ .
+.Sy @runas_default@ .
 .It sudoers_locale
 Locale to use when parsing the sudoers file, logging commands, and
 sending email.
 Changing the locale may affect how sudoers is interpreted.
 Defaults to
-.Dq Li C .
+.Ql C .
 .It timestamp_type
 .Nm
 uses per-user time stamp files for credential caching.
@@ -4495,11 +4641,7 @@ process ID (usually the shell).
 Commands run from the same shell (or other common parent process)
 will not require a password for
 .Em timestamp_timeout
-minutes
-.Po
-.Li @timeout@
-by default
-.Pc .
+minutes (@timeout@ by default).
 Commands run via
 .Nm sudo
 with a different parent process ID, for example from a shell script,
@@ -4511,11 +4653,7 @@ If no terminal is present, the behavior is the same as
 .Em ppid .
 Commands run from the same terminal will not require a password for
 .Em timestamp_timeout
-minutes
-.Po
-.Li @timeout@
-by default
-.Pc .
+minutes (@timeout@ by default).
 .It kernel
 The time stamp is stored in the kernel as an attribute of the terminal
 device.
@@ -4544,7 +4682,7 @@ The default is
 The owner of the lecture status directory, time stamp directory and all
 files stored therein.
 The default is
-.Li root .
+.Sy root .
 .if \n(SL \{\
 .It type
 The default SELinux type to use when constructing a new security
@@ -4576,16 +4714,16 @@ is configured with the
 .Li --enable-admin-flag
 option.
 The default value is
-.Li ~/.sudo_as_admin_successful .
+.Pa ~/.sudo_as_admin_successful .
 .It env_file
 The
 .Em env_file
 option specifies the fully qualified path to a file containing variables
 to be set in the environment of the program being run.
 Entries in this file should either be of the form
-.Dq Li VARIABLE=value
+.Ql VARIABLE=value
 or
-.Dq Li export VARIABLE=value .
+.Ql export VARIABLE=value .
 The value may optionally be enclosed in single or double quotes.
 Variables in this file are only added if the variable does not already
 exist in the environment.
@@ -4599,7 +4737,7 @@ and
 .It exempt_group
 Users in this group are exempt from password and PATH requirements.
 The group name specified should not include a
-.Li %
+.Ql %
 prefix.
 This is not set by default.
 .It fdexec
@@ -4646,7 +4784,7 @@ alias.
 .Pp
 This setting is only supported by version 1.8.20 or higher.
 If the operating system does not support the
-.Fn fexecve
+.Xr fexecve 2
 system call, this setting has no effect.
 .It group_plugin
 A string containing a
@@ -4659,6 +4797,34 @@ directory, followed by any configuration arguments the plugin requires.
 These arguments (if any) will be passed to the plugin's initialization function.
 If arguments are present, the string must be enclosed in double quotes
 .Pq \&"" .
+.Pp
+On 64-bit systems, if the plugin is present but cannot be loaded,
+.Nm
+will look for a 64-bit version and, if it exists, load that as a fallback.
+The exact rules for this vary by system.
+On Solaris, if the plugin is stored in a directory ending in
+.Dq lib ,
+.Nm
+will create a fallback path by appending
+.Dq /64
+to the directory name;
+.Pa /usr/lib/sudo_plugin.so
+becomes
+.Pa /usr/lib/64/sudo_plugin.so .
+On Linux, a directory ending in
+.Dq lib
+will be transformed to
+.Dq lib64
+as the fallback path;
+.Pa /usr/lib/sudo_plugin.so
+becomes
+.Pa /usr/lib64/sudo_plugin.so .
+On all other systems, the fallback path is generated by adding a
+.Dq 64
+before the file extension;
+.Pa sudo_plugin.so
+becomes
+.Pa sudo_plugin64.so .
 .Pp
 For more information see
 .Sx "GROUP PROVIDER PLUGINS" .
@@ -4705,7 +4871,7 @@ All the user's
 .Em sudoers
 file entries for the current host must have
 the
-.Li NOPASSWD
+.Dv NOPASSWD
 flag set to avoid entering a password.
 .It always
 The user must always enter a password to use the
@@ -4716,7 +4882,7 @@ At least one of the user's
 .Em sudoers
 file entries for the current host
 must have the
-.Li NOPASSWD
+.Dv NOPASSWD
 flag set to avoid entering a password.
 .It never
 The user need never enter a password to use the
@@ -4745,7 +4911,7 @@ Due to limitations of the protocol, JSON events sent via
 may be truncated.
 .It sudo
 Traditional sudo-style logs, see
-.Sx "LOG FORMAT"
+.Sx "EVENT LOGGING"
 for a description of the log file format.
 .El
 .Pp
@@ -4783,7 +4949,7 @@ The address should be enclosed in double quotes
 to protect against
 .Nm sudo
 interpreting the
-.Li @
+.Ql @
 sign.
 Defaults to the name of the user running
 .Nm sudo .
@@ -4796,10 +4962,9 @@ The address should be enclosed in double quotes
 to protect against
 .Nm sudo
 interpreting the
-.Li @
+.Ql @
 sign.
-Defaults to
-.Li @mailto@ .
+Defaults to @mailto@.
 .It rlimit_as
 The maximum size to which the process's address space may grow (in bytes),
 if supported by the operating system.
@@ -4865,9 +5030,9 @@ The
 option specifies the fully qualified path to a file containing variables
 to be set in the environment of the program being run.
 Entries in this file should either be of the form
-.Dq Li VARIABLE=value
+.Ql VARIABLE=value
 or
-.Dq Li export VARIABLE=value .
+.Ql export VARIABLE=value .
 The value may optionally be enclosed in single or double quotes.
 Variables in this file are only added if the variable does not already
 exist in the environment.
@@ -4911,7 +5076,7 @@ It is only possible to use
 .Em runchroot
 as a command-specific Defaults setting if the command exists with
 the same path both inside and outside the chroot jail.
-This restriction does not apply to generic, host, or user-based
+This restriction does not apply to global, host, or user-based
 Defaults settings or to a
 .Em Cmnd_Spec
 that includes a
@@ -4953,8 +5118,7 @@ This option is @secure_path@ by default.
 .It syslog
 Syslog facility if syslog is being used for logging (negate to
 disable syslog logging).
-Defaults to
-.Li @logfac@ .
+Defaults to @logfac@.
 .Pp
 The following syslog facilities are supported:
 .Sy authpriv
@@ -4975,8 +5139,7 @@ and
 .It syslog_badpri
 Syslog priority to use when the user is not allowed to run a command or
 when authentication is unsuccessful.
-Defaults to
-.Li @badpri@ .
+Defaults to @badpri@.
 .Pp
 The following syslog priorities are supported:
 .Sy alert ,
@@ -4995,8 +5158,7 @@ will disable logging of unsuccessful commands.
 .It syslog_goodpri
 Syslog priority to use when the user is allowed to run a command and
 authentication is successful.
-Defaults to
-.Li @goodpri@ .
+Defaults to @goodpri@.
 .Pp
 See
 .Em syslog_badpri
@@ -5016,7 +5178,7 @@ It has the following possible values:
 All the user's
 .Em sudoers
 file entries for the current host must have the
-.Li NOPASSWD
+.Dv NOPASSWD
 flag set to avoid entering a password.
 .It always
 The user must always enter a password to use the
@@ -5026,7 +5188,7 @@ option.
 At least one of the user's
 .Em sudoers
 file entries for the current host must have the
-.Li NOPASSWD
+.Dv NOPASSWD
 flag set to avoid entering a password.
 .It never
 The user need never enter a password to use the
@@ -5051,7 +5213,7 @@ Environment variables to be removed from the user's environment
 unless they are considered
 .Dq safe .
 For all variables except
-.Li TZ ,
+.Ev TZ ,
 .Dq safe
 means that the variable's value does not contain any
 .Ql %
@@ -5061,7 +5223,7 @@ characters.
 This can be used to guard against printf-style format vulnerabilities
 in poorly-written programs.
 The
-.Li TZ
+.Ev TZ
 variable is considered unsafe if any of the following are true:
 .Bl -bullet -width 1n
 .It
@@ -5079,28 +5241,29 @@ path element.
 It contains white space or non-printable characters.
 .It
 It is longer than the value of
-.Li PATH_MAX .
+.Dv PATH_MAX .
 .El
 .Pp
 The argument may be a double-quoted, space-separated list or a
 single value without double-quotes.
 The list can be replaced, added to, deleted from, or disabled by using
 the
-.Li = ,
-.Li += ,
-.Li -= ,
+.Ql = ,
+.Ql += ,
+.Ql -= ,
 and
-.Li \&!
+.Ql \&!
 operators respectively.
 Regardless of whether the
-.Li env_reset
+.Em env_reset
 option is enabled or disabled, variables specified by
-.Li env_check
+.Em env_check
 will be preserved in the environment if they pass the aforementioned check.
 The global list of environment variables to check is displayed when
 .Nm sudo
-is run by root with
-the
+is run by
+.Sy root
+with the
 .Fl V
 option.
 .It env_delete
@@ -5110,15 +5273,17 @@ option is not in effect.
 The argument may be a double-quoted, space-separated list or a
 single value without double-quotes.
 The list can be replaced, added to, deleted from, or disabled by using the
-.Li = ,
-.Li += ,
-.Li -= ,
+.Ql = ,
+.Ql += ,
+.Ql -= ,
 and
-.Li \&!
+.Ql \&!
 operators respectively.
 The global list of environment variables to remove is displayed when
 .Nm sudo
-is run by root with the
+is run by
+.Sy root
+with the
 .Fl V
 option.
 Many operating systems will remove potentially dangerous variables
@@ -5134,16 +5299,18 @@ processes will receive.
 The argument may be a double-quoted, space-separated list or a
 single value without double-quotes.
 The list can be replaced, added to, deleted from, or disabled by using the
-.Li = ,
-.Li += ,
-.Li -= ,
+.Ql = ,
+.Ql += ,
+.Ql -= ,
 and
-.Li \&!
+.Ql \&!
 operators respectively.
 The global list of variables to keep
 is displayed when
 .Nm sudo
-is run by root with the
+is run by
+.Sy root
+with the
 .Fl V
 option.
 .Pp
@@ -5235,7 +5402,7 @@ plugin supports its own plugin interface to allow non-Unix
 group lookups which can query a group source other
 than the standard Unix group database.
 This can be used to implement support for the
-.Li nonunix_group
+.Em nonunix_group
 syntax described earlier.
 .Pp
 Group provider plugins are specified via the
@@ -5270,9 +5437,9 @@ Defaults group_plugin="group_file.so /etc/sudo-group"
 The
 .Em system_group
 plugin supports group lookups via the standard C library functions
-.Fn getgrnam
+.Xr getgrnam 3
 and
-.Fn getgrid .
+.Xr getgrid 3 .
 This plugin can be used in instances where the user belongs to
 groups not present in the user's supplemental group vector.
 This plugin takes no options:
@@ -5283,7 +5450,7 @@ Defaults group_plugin=system_group.so
 .Pp
 The group provider plugin API is described in detail in
 .Xr sudo_plugin @mansectform@ .
-.Sh LOG FORMAT
+.Sh EVENT LOGGING
 .Nm
 can log events in either JSON or
 .Em sudo
@@ -5372,7 +5539,7 @@ The actual command that was executed.
 Messages are logged using the locale specified by
 .Em sudoers_locale ,
 which defaults to the
-.Dq Li C
+.Ql C
 locale.
 .Ss Denied command log entries
 If the user is not allowed to run the command, the reason for the denial
@@ -5455,11 +5622,11 @@ is the user-ID that owns the
 .Em sudoers
 file) to the end of the
 .Nm
-.Li Plugin
+.Em Plugin
 line in the
 .Xr sudo.conf @mansectform@
 file.
-.It unable to stat @sysconfdir@/sudoers
+.It unable to open @sysconfdir@/sudoers
 The
 .Pa @sysconfdir@/sudoers
 file is missing.
@@ -5481,7 +5648,7 @@ is the user-ID that owns the
 .Em sudoers
 file) to the
 .Nm
-.Li Plugin
+.Em Plugin
 line in the
 .Xr sudo.conf @mansectform@
 file.
@@ -5497,7 +5664,7 @@ The default mode may be changed via the
 .Dq sudoers_mode
 option to the
 .Nm
-.Li Plugin
+.Em Plugin
 line in the
 .Xr sudo.conf @mansectform@
 file.
@@ -5515,7 +5682,7 @@ is the group-ID that owns the
 .Em sudoers
 file) to the
 .Nm
-.Li Plugin
+.Em Plugin
 line in the
 .Xr sudo.conf @mansectform@
 file.
@@ -5524,7 +5691,9 @@ file.
 was unable to read or create the user's time stamp file.
 This can happen when
 .Em timestampowner
-is set to a user other than root and the mode on
+is set to a user other than
+.Sy root
+and the mode on
 .Pa @rundir@
 is not searchable by group or other.
 The default mode for
@@ -5559,7 +5728,7 @@ The
 and
 .Em progname
 fields are added by the system's
-.Fn syslog
+.Xr syslog 3
 function, not
 .Nm
 itself.
@@ -5611,11 +5780,53 @@ option is set to 0 (or negated with a
 .Ql \&! ) ,
 word wrap will be disabled.
 .El
-.Sh I/O LOG FILES
+.Sh I/O LOGGING
 When I/O logging is enabled,
 .Nm sudo
-will run the command in a pseudo-terminal and log all user input and/or output,
-depending on which options are enabled.
+will runs the command in a pseudo-terminal, logging user input
+and/or output, depending on which
+.Nm
+flags are enabled.
+There are five distinct types of I/O that can be logged, each with
+a corresponding
+.Nm
+flag.
+.Bl -column "standard output" "log_output" "command output displayed to the screen"
+.It Sy Type Ta Sy Flag Ta Sy Description
+.It terminal input Ta log_ttyin Ta keystrokes entered by the user
+.It terminal output Ta log_ttyout Ta command output displayed to the screen
+.It standard input Ta log_stdin Ta input from a pipe or a file
+.It standard output Ta log_stdout Ta output to a pipe or a file
+.It standard error Ta log_stderr Ta output to a pipe or a file
+.El
+.Pp
+In addition to flags described the above, the
+.Em log_input
+flag and
+.Dv LOG_INPUT
+command tag set both
+.Em log_ttyin
+and
+.Em log_stdin .
+The
+.Em log_output
+flag and
+.Dv LOG_OUTPUT
+command tag set
+.Em log_ttyout ,
+.Em log_stdout ,
+and
+.Em log_stderr .
+.Pp
+To capture terminal input and output,
+.Nm sudo
+run the command in a pseudo-terminal, logging the input and
+output before passing it on to the user.
+To capture the standard input, standard output or standard error,
+.Nm sudo
+uses a pipe to interpose itself between the input or output stream,
+logging the I/O before passing it to the other end of the pipe.
+.Pp
 I/O can be logged either to the local machine or to a remote log server.
 For local logs, I/O is logged to the directory specified by the
 .Em iolog_dir
@@ -5627,7 +5838,7 @@ by default
 using a unique session ID that is included in the
 .Nm sudo
 log line, prefixed with
-.Dq Li TSID= .
+.Ql TSID= .
 The
 .Em iolog_file
 option may be used to control the format of the session ID.
@@ -5637,7 +5848,99 @@ setting is used to specify one or more log servers running
 .Nm sudo_logsrvd
 or another server that implements the protocol described by
 .Xr sudo_logsrv.proto @mansectform@ .
+.Ss I/O logging pitfals
+When logging standard input, anything sent to the standard input
+will be consumed, regardless of whether or not the command run via
+.Nm sudo
+is actively reading the standard input.
+This may have unexpected results when using
+.Nm sudo
+in a shell script that expects to process the standard input.
+For example, given the following shell script:
+.Bd -literal -offset 4n
+#!/bin/sh
+sudo echo testing
+echo done
+.Ed
 .Pp
+It will behave as expected when the script is passed to the shell as a
+an argument:
+.Bd -literal -offset 4n
+$ sh test.sh
+testing
+done
+.Ed
+.Pp
+However, if the script is passed to the shell on the standard input, the
+.Ql sudo echo testing
+command will consume the rest of the script.
+This means that the
+.Ql echo done
+statement is never executed.
+.Bd -literal -offset 4n
+$ sh -s < test.sh
+testing
+.Ed
+.Pp
+There are several ways to work around this problem:
+.Bl -enum
+.It
+Redirect the standard input from
+.Pa /dev/null
+when running a command via
+.Nm sudo
+that does not need to read the standard input.
+.Bd -literal -offset 4n
+sudo echo testing < /dev/null
+.Ed
+.It
+Pass the script to the shell by path name instead of via the standard input.
+.Bd -literal -offset 4n
+sh test.sh
+.Ed
+.It
+Disable logging the standard input for commands that do not need
+to read the standard input.
+.Bd -literal -offset 4n
+Defaults!/bin/echo !log_stdin
+.Ed
+.El
+.Pp
+Depending on the command, it may not be desirable to log the
+standard input or standard output.
+For example, I/O logging of commands that send or receive large
+amount of data via the standard output or standard input such as
+.Xr rsync 1
+and
+.Xr tar 1
+could fill up the log file system with superfluous data.
+It is possible to disable logging of the standard input and standard
+output for such commands as follows:
+.Bd -literal -offset 4n
+Cmnd_Alias COPY_CMDS = /usr/bin/tar, /usr/bin/cpio, /usr/bin/rsync
+
+# Log input and output but omit stdin and stdout when copying files.
+Defaults log_input, log_output
+Defaults!COPY_CMDS !log_stdin, !log_stdout
+.Ed
+.Pp
+However, be aware that using the
+.Em log_input
+flag or the
+.Dv LOG_INPUT
+command tag will also enable
+.Em log_stdin .
+Likewise, the
+.Em log_ouput
+flag or the
+.Dv LOG_OUTPUT
+command tag will enable
+.Em log_stdout
+and
+.Em log_stderr.
+Careful ordering of rules may be necessary to achieve the results
+that you expect.
+.Ss I/O log format
 For both local and remote I/O logs, each log is stored in a separate
 directory that contains the following files:
 .Bl -tag -width 8n
@@ -5684,11 +5987,11 @@ The number of lines of the terminal the command ran on, or zero
 if no terminal was present.
 .It runargv
 A JSON array representing the command's argument vector as passed to the
-.Fn execve
+.Xr execve 2
 system call.
 .It runenv
 A JSON array representing the command's environment as passed to the
-.Fn execve
+.Xr execve 2
 system call.
 .It rungid
 The group ID the command ran as.
@@ -5747,6 +6050,13 @@ command suspend or resume, signal received
 .El
 .It Pa ttyin
 Raw input from the user's terminal, exactly as it was received.
+This file is only present if the
+.Em log_input
+or
+.Em log_ttyin
+flags are set and
+.Nm sudo
+was run from a terminal.
 No post-processing is performed.
 For manual viewing, you may wish to convert carriage return characters
 in the log to line feeds.
@@ -5755,16 +6065,39 @@ For example:
 .It Pa stdin
 The standard input when no terminal is present, or input redirected from
 a pipe or file.
+This file is only present if the
+.Em log_input
+or
+.Em log_stdin
+flags are set and the standard input is not connected to a terminal.
 .It Pa ttyout
 Output from the pseudo-terminal (what the command writes to the screen).
 Terminal-specific post-processing is performed before the data is logged.
 This means that, for example, line feeds are usually converted to
 line feed/carriage return pairs and tabs may be expanded to spaces.
+This file is only present if the
+.Em log_output
+or
+.Em log_ttyout
+flags are set and
+.Nm sudo
+was run from a terminal.
 .It Pa stdout
 The standard output when no terminal is present, or output redirected to
 a pipe or file.
+This file is only present if the
+.Em log_output
+or
+.Em log_stdout
+flags are set and the standard output is not connected to a terminal.
 .It Pa stderr
-The standard error redirected to a pipe or file.
+The standard error when no terminal is present, or output redirected to
+a pipe or file.
+This file is only present if the
+.Em log_output
+or
+.Em log_stderr
+flags are set and the standard error is not connected to a terminal.
 .El
 .Pp
 All files other than
@@ -5791,8 +6124,11 @@ log file unencrypted.
 In most cases, logging the command output via
 .Em log_output
 or
-.Li LOG_OUTPUT
+.Dv LOG_OUTPUT
 is all that is required.
+When logging input, consider disabling the
+.Em log_passwords
+flag.
 .Pp
 Since each session's I/O logs are stored in a separate directory,
 traditional log rotation utilities cannot be used to limit the
@@ -5903,14 +6239,15 @@ need not provide a password and we don't want to reset the
 .Ev LOGNAME
 or
 .Ev USER
-environment variables when running commands as root.
+environment variables when running commands as
+.Sy root .
 Additionally, on the machines in the
-.Em SERVERS
-.Li Host_Alias ,
+.Dv SERVERS
+.Em Host_Alias ,
 we keep an additional local log file and make sure we log the year
 in each log line since the log entries will be kept around for several years.
 Lastly, we disable shell escapes for the commands in the PAGERS
-.Li Cmnd_Alias
+.Em Cmnd_Alias
 .Po
 .Pa /usr/bin/more ,
 .Pa /usr/bin/pg
@@ -5967,7 +6304,7 @@ and
 .Sy crawl )
 may run any command on any host but they must authenticate themselves
 first (since the entry lacks the
-.Li NOPASSWD
+.Dv NOPASSWD
 tag).
 .Bd -literal
 jack		CSNETS = ALL
@@ -5976,17 +6313,12 @@ jack		CSNETS = ALL
 The user
 .Sy jack
 may run any command on the machines in the
-.Em CSNETS
-alias (the networks
-.Li 128.138.243.0 ,
-.Li 128.138.204.0 ,
-and
-.Li 128.138.242.0 ) .
-Of those networks, only
-.Li 128.138.204.0
-has an explicit netmask (in CIDR notation) indicating it is a class C network.
+.Dv CSNETS
+alias (the networks 128.138.243.0, 128.138.204.0, and 128.138.242.0).
+Of those networks, only 128.138.204.0 has an explicit netmask (in
+CIDR notation) indicating it is a class C network.
 For the other networks in
-.Em CSNETS ,
+.Dv CSNETS ,
 the local machine's netmask will be used during matching.
 .Bd -literal
 lisa		CUNETS = ALL
@@ -5995,9 +6327,8 @@ lisa		CUNETS = ALL
 The user
 .Sy lisa
 may run any command on any host in the
-.Em CUNETS
-alias (the class B network
-.Li 128.138.0.0 ) .
+.Dv CUNETS
+alias (the class B network 128.138.0.0).
 .Bd -literal
 operator	ALL = DUMPS, KILL, SHUTDOWN, HALT, REBOOT, PRINTING,\e
 		sudoedit /etc/printcap, /usr/oper/bin/
@@ -6011,7 +6342,7 @@ printing system, shutting down the system, and any commands in the
 directory
 .Pa /usr/oper/bin/ .
 One command in the
-.Li DUMPS
+.Dv DUMPS
 Cmnd_Alias includes a sha224 digest,
 .Pa /home/operator/bin/start_backups .
 This is because the directory containing the script is writable by the
@@ -6040,8 +6371,8 @@ group may run commands in
 .Pa /usr/sbin/
 as themselves
 with any group in the
-.Em ADMINGRP
-.Li Runas_Alias
+.Dv ADMINGRP
+.Em Runas_Alias
 (the
 .Sy adm
 and
@@ -6051,8 +6382,9 @@ groups).
 The user
 .Sy pete
 is allowed to change anyone's password except for
-root on the
-.Em HPPA
+.Sy root
+on the
+.Dv HPPA
 machines.
 Because command line arguments are matched as a single,
 concatenated string, the
@@ -6081,12 +6413,12 @@ bob		SPARC = (OP) ALL : SGI = (OP) ALL
 The user
 .Sy bob
 may run anything on the
-.Em SPARC
+.Dv SPARC
 and
-.Em SGI
+.Dv SGI
 machines as any user listed in the
-.Em OP
-.Li Runas_Alias
+.Dv OP
+.Em Runas_Alias
 .Po
 .Sy root
 and
@@ -6122,8 +6454,8 @@ fred		ALL = (DB) NOPASSWD: ALL
 The user
 .Sy fred
 can run commands as any user in the
-.Em DB
-.Li Runas_Alias
+.Dv DB
+.Em Runas_Alias
 .Po
 .Sy oracle
 or
@@ -6135,11 +6467,12 @@ john		ALPHA = /usr/bin/su [!-]*, !/usr/bin/su *root*
 .Ed
 .Pp
 On the
-.Em ALPHA
+.Dv ALPHA
 machines, user
 .Sy john
-may su to anyone except root but he is not allowed to specify any options
-to the
+may su to anyone except
+.Sy root
+but he is not allowed to specify any options to the
 .Xr su 1
 command.
 .Bd -literal
@@ -6149,29 +6482,29 @@ jen		ALL, !SERVERS = ALL
 The user
 .Sy jen
 may run any command on any machine except for those in the
-.Em SERVERS
-.Li Host_Alias
+.Dv SERVERS
+.Em Host_Alias
 (primary, mail, www, and ns).
 .Bd -literal
 jill		SERVERS = /usr/bin/, !SU, !SHELLS
 .Ed
 .Pp
 For any machine in the
-.Em SERVERS
-.Li Host_Alias ,
+.Dv SERVERS
+.Em Host_Alias ,
 .Sy jill
 may run
 any commands in the directory
 .Pa /usr/bin/
 except for those commands
 belonging to the
-.Em SU
+.Dv SU
 and
-.Em SHELLS
-.Li Cmnd_Aliases .
+.Dv SHELLS
+.Em Cmnd_Aliases .
 While not specifically mentioned in the rule, the commands in the
-.Em PAGERS
-.Li Cmnd_Alias
+.Dv PAGERS
+.Em Cmnd_Alias
 all reside in
 .Pa /usr/bin
 and have the
@@ -6197,8 +6530,8 @@ WEBADMIN	www = (www) ALL, (root) /usr/bin/su www
 .Ed
 .Pp
 On the host www, any user in the
-.Em WEBADMIN
-.Li User_Alias
+.Dv WEBADMIN
+.Em User_Alias
 (will, wendy, and wim), may run any command as user www (which owns the
 web pages) or simply
 .Xr su 1
@@ -6209,7 +6542,7 @@ ALL		CDROM = NOPASSWD: /sbin/umount /CDROM,\e
 .Ed
 .Pp
 Any user may mount or unmount a CD-ROM on the machines in the CDROM
-.Li Host_Alias
+.Em Host_Alias
 (orion, perseus, hercules) without entering a password.
 This is a bit tedious for users to type, so it is a prime candidate
 for encapsulating in a shell script.
@@ -6232,9 +6565,9 @@ bill	ALL = ALL, !SU, !SHELLS
 Doesn't really prevent
 .Sy bill
 from running the commands listed in
-.Em SU
+.Dv SU
 or
-.Em SHELLS
+.Dv SHELLS
 since he can simply copy those commands to a different name, or use
 a shell escape from an editor or other program.
 Therefore, these kind of restrictions should be considered
@@ -6243,7 +6576,9 @@ advisory at best (and reinforced by policy).
 In general, if a user has sudo
 .Sy ALL
 there is nothing to prevent them from creating their own program that gives
-them a root shell (or making their own copy of a shell) regardless of any
+them a
+.Sy root
+shell (or making their own copy of a shell) regardless of any
 .Ql !\&
 elements in the user specification.
 .Ss Security implications of Em fast_glob
@@ -6268,13 +6603,13 @@ john	ALL = /usr/bin/passwd [a-zA-Z0-9]*, /usr/bin/chsh [a-zA-Z0-9]*,\e
 User
 .Sy john
 can still run
-.Li /usr/bin/passwd root
+.Ql /usr/bin/passwd root
 if
 .Em fast_glob
 is enabled by changing to
 .Pa /usr/bin
 and running
-.Li ./passwd root
+.Ql ./passwd root
 instead.
 .Pp
 Another potential issue is that when
@@ -6369,12 +6704,7 @@ Due to the large number of programs that
 offer shell escapes, restricting users to the set of programs that
 do not is often unworkable.
 .It intercept
-Many systems that support shared libraries have the ability to
-override default library functions by pointing an environment
-variable (usually
-.Ev LD_PRELOAD )
-to an alternate shared library.
-On such systems,
+On most systems,
 .Nm sudo Ns 's
 .Em intercept
 functionality can be used to transparently intercept an attempt to
@@ -6382,62 +6712,80 @@ run a new command, allow or deny it based on
 .Em sudoers
 rules, and log the result.
 For example, this can be used to restrict the commands run from
-within a privileged shell.
+within a privileged shell or editor.
+.Pp
+There are two underlying mechanisms that may be used to implement
+.Em intercept
+mode:
+.Em dso
+and
+.Em trace .
+The
+.Em intercept_type
+setting can be used to select between them.
+.Pp
+The first mechanism,
+.Em dso ,
+overrides the standard C library functions that are used to execute a
+command.
+It does this by setting an environment variable (usually
+.Ev LD_PRELOAD )
+to the path of a dynamic shared object, or shared library,
+containing custom versions of the
+.Xr execve 2 ,
+.Xr execl 3 ,
+.Xr execle 3 ,
+.Xr execlp 3 ,
+.Xr execv 3 ,
+.Xr execvp 3 ,
+.Xr execvpe 3 ,
+and
+.Xr system 3
+library functions that connect back to
+.Nm sudo
+for a policy decision.
 Note, however, that this applies only to dynamically-linked
 executables.
 It is not possible to intercept commands for statically-linked executables
-or executables that run under binary emulation.
-This implementation of the
-.Em intercept
-functionality is incompatible with
-.Nm sudo Ns 's
-SELinux RBAC support (but see below).
-SELinux disables
-.Ev LD_PRELOAD
-by default and interferes with file descriptor inheritance.
-.Pp
-Linux systems that support
-.Xr seccomp 2
-filtering can use a different method involving
-.Xr ptrace 2
-instead of pre-loading a shared library.
-This method supports both static and dynamic executables as well as
-.Nm sudo Ns 's
-SELinux RBAC mode.
-Because it operates at the system call level, not the library function level,
-it is possible to intercept all calls to
-.Xr execve 2 .
-Functions utilizing the
-.Xr execveat 2
-system call, such as
-.Xr fexecve 3 ,
-are not currently intercepted.
-.Pp
-The shared library-based
-.Em intercept
-functionality only works for programs that use the
-.Fn execl ,
-.Fn execle ,
-.Fn execlp ,
-.Fn execv ,
-.Fn execve ,
-.Fn execvp ,
-.Fn execvpe ,
-or
-.Fn system
-library functions to run the new command.
-This may be expanded in a future release of
-.Nm sudo .
+or executables that run under binary emulation this way.
 Because most dynamic loaders ignore
 .Ev LD_PRELOAD
 (or the equivalent) when running set-user-ID and set-group-ID programs,
 .Nm
 will not permit such programs to be run in
 .Em intercept
-mode.
-The Linux
-.Xr seccomp 2 Ns \- Ns based
-implementation does not share these restrictions.
+mode by default.
+The
+.Em dso
+mechanism is incompatible with
+.Nm sudo Ns 's
+SELinux RBAC support (but see below).
+SELinux disables
+.Ev LD_PRELOAD
+by default and interferes with file descriptor inheritance, which
+.Nm sudo
+relies on.
+.Pp
+The second mechanism,
+.Em trace ,
+is available on Linux systems that support
+.Xr seccomp 2
+filtering.
+It uses
+.Xr ptrace 2
+and
+.Xr seccomp 2
+to intercept the
+.Xr execve 2
+system call instead of pre-loading a dynamic shared object.
+Both static and dynamic executables are supported and it is compatible with
+.Nm sudo Ns 's
+SELinux RBAC mode.
+Functions utilizing the
+.Xr execveat 2
+system call, such as
+.Xr fexecve 3 ,
+are not currently intercepted.
 .Pp
 The
 .Em intercept
@@ -6445,16 +6793,12 @@ feature is known to work on Solaris, *BSD, Linux, macOS, HP-UX 11.x
 and AIX 5.3 and above.
 It should be supported on most operating systems that support the
 .Ev LD_PRELOAD
-environment variable.
-Check your operating system's manual pages for the dynamic linker
-(usually ld.so, ld.so.1, dyld, dld.sl, rld, or loader) to see if
-.Ev LD_PRELOAD
-is supported.
+environment variable or an equivalent.
 It is not possible to intercept shell built-in commands or restrict
 the ability to read or write sensitive files from within a shell.
 .Pp
 To enable intercept mode on a per-command basis, use the
-.Li INTERCEPT
+.Dv INTERCEPT
 tag as documented in the User Specification section above.
 Here is that example again:
 .Bd -literal
@@ -6474,6 +6818,28 @@ you can always just try it out and check whether or not external
 commands run via a shell are logged when
 .Em intercept
 is enabled.
+.Pp
+There is an inherent race condition between when a command is checked against
+.Nm
+rules and when it is actually executed.
+If a user is allowed to run arbitrary commands, they may be able
+to change the
+.Xr execve 2
+arguments in the program after the
+.Nm
+policy check has completed but before the new command is executed.
+Starting with version 1.9.12, the
+.Em trace
+method will verify that the command and its arguments have not
+changed after
+.Xr execve 2
+has completed but before execution of the new program has had a chance to run.
+This is not the case with the
+.Em dso
+method.
+See the description of the
+.Em intercept_verify
+setting for more information.
 .It log
 There are two separate but related ways to log additional commands.
 The first is to enable I/O logging using the
@@ -6511,26 +6877,26 @@ The
 .Em noexec
 functionality
 is capable of blocking execution of commands run via the
-.Fn execl ,
-.Fn execle ,
-.Fn execlp ,
-.Fn exect ,
-.Fn execv ,
-.Fn execve ,
-.Fn execveat ,
-.Fn execvP ,
-.Fn execvp ,
-.Fn execvpe ,
-.Fn fexecve ,
-.Fn popen ,
-.Fn posix_spawn ,
-.Fn posix_spawnp ,
-.Fn system ,
+.Xr execve 2 ,
+.Xr execl 3 ,
+.Xr execle 3 ,
+.Xr execlp 3 ,
+.Xr exect 3 ,
+.Xr execv 3 ,
+.Xr execveat 3 ,
+.Xr execvP 3 ,
+.Xr execvp 3 ,
+.Xr execvpe 3 ,
+.Xr fexecve 3 ,
+.Xr popen 3 ,
+.Xr posix_spawn 3 ,
+.Xr posix_spawnp 3 ,
+.Xr system 3 ,
 and
-.Fn wordexp
+.Xr wordexp 3
 functions.
 On Linux, a
-.Fn seccomp
+.Xr seccomp 2
 filter is used to implement
 .Em noexec .
 On Solaris 10 and higher,
@@ -6542,7 +6908,7 @@ environment variable.
 To enable
 .Em noexec
 for a command, use the
-.Li NOEXEC
+.Dv NOEXEC
 tag as documented in the User Specification section above.
 Here is that example again:
 .Bd -literal
@@ -6568,9 +6934,11 @@ is enabled.
 .El
 .Pp
 Restricting shell escapes is not a panacea.
-Programs running as root are still capable of many potentially hazardous
-operations (such as changing or overwriting files) that could lead
-to unintended privilege escalation.
+Programs running as
+.Sy root
+are still capable of many potentially hazardous operations (such
+as changing or overwriting files) that could lead to unintended
+privilege escalation.
 In the specific case of an editor, a safer approach is to give the
 user permission to run
 .Nm sudoedit
@@ -6617,7 +6985,9 @@ as follows:
 $ sudoedit /etc/motd
 .Ed
 .Pp
-The editor will run as the operator user, not root, on a temporary copy of
+The editor will run as the operator user, not
+.Sy @runas_default@ ,
+on a temporary copy of
 .Pa /etc/motd .
 After the file has been edited,
 .Pa /etc/motd
@@ -6638,7 +7008,8 @@ not be followed in writable directories and
 will refuse to edit a file located in a writable directory
 unless the
 .Em sudoedit_checkdir
-option has been disabled or the invoking user is root.
+option has been disabled or the invoking user is
+.Sy root .
 Additionally, in version 1.8.15 and higher,
 .Nm sudoedit
 will refuse to open a symbolic link unless either the
@@ -6646,7 +7017,7 @@ will refuse to open a symbolic link unless either the
 option is enabled or the
 .Em sudoedit
 command is prefixed with the
-.Li FOLLOW
+.Dv FOLLOW
 tag in the
 .Em sudoers
 file.
@@ -6657,8 +7028,10 @@ will check the ownership of its time stamp directory
 .Pa @rundir@/ts
 by default
 .Pc
-and ignore the directory's contents if it is not owned by root or
-if it is writable by a user other than root.
+and ignore the directory's contents if it is not owned by
+.Sy root
+or if it is writable by a user other than
+.Sy root .
 Older versions of
 .Nm sudo
 stored time stamp files in
@@ -6697,7 +7070,7 @@ if the system supports it.
 .Nm
 will not honor time stamps set far in the future.
 Time stamps with a date greater than current_time + 2 *
-.Li TIMEOUT
+.Dv TIMEOUT
 will be ignored and
 .Nm
 will log and complain.
@@ -6765,11 +7138,11 @@ The following subsystems are used by the
 plugin:
 .Bl -tag -width 8n
 .It Em alias
-.Li User_Alias ,
-.Li Runas_Alias ,
-.Li Host_Alias
+.Em User_Alias ,
+.Em Runas_Alias ,
+.Em Host_Alias
 and
-.Li Cmnd_Alias
+.Em Cmnd_Alias
 processing
 .It Em all
 matches every subsystem
@@ -6879,7 +7252,7 @@ When using netgroups of machines (as opposed to users), if you
 store fully qualified host name in the netgroup (as is usually the
 case), you either need to have the machine's host name be fully qualified
 as returned by the
-.Li hostname
+.Em hostname
 command or use the
 .Em fqdn
 option in

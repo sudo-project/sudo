@@ -38,7 +38,7 @@ struct policy_plugin_1_0 {
     unsigned int type;
     unsigned int version;
     int (*open)(unsigned int version, sudo_conv_1_7_t conversation,
-	sudo_printf_t sudo_printf, char * const settings[],
+	sudo_printf_t sudo_plugin_printf, char * const settings[],
 	char * const user_info[], char * const user_env[]);
     void (*close)(int exit_status, int error); /* wait status or error */
     int (*show_version)(int verbose);
@@ -46,16 +46,16 @@ struct policy_plugin_1_0 {
 	char *env_add[], char **command_info[],
 	char **argv_out[], char **user_env_out[]);
     int (*list)(int argc, char * const argv[], int verbose,
-	const char *list_user);
+	const char *user);
     int (*validate)(void);
-    void (*invalidate)(int remove);
+    void (*invalidate)(int rmcred);
     int (*init_session)(struct passwd *pwd);
 };
 struct io_plugin_1_0 {
     unsigned int type;
     unsigned int version;
     int (*open)(unsigned int version, sudo_conv_1_7_t conversation,
-        sudo_printf_t sudo_printf, char * const settings[],
+        sudo_printf_t sudo_plugin_printf, char * const settings[],
         char * const user_info[], int argc, char * const argv[],
         char * const user_env[]);
     void (*close)(int exit_status, int error);
@@ -70,7 +70,7 @@ struct io_plugin_1_1 {
     unsigned int type;
     unsigned int version;
     int (*open)(unsigned int version, sudo_conv_1_7_t conversation,
-	sudo_printf_t sudo_printf, char * const settings[],
+	sudo_printf_t sudo_plugin_printf, char * const settings[],
 	char * const user_info[], char * const command_info[],
 	int argc, char * const argv[], char * const user_env[]);
     void (*close)(int exit_status, int error); /* wait status or error */

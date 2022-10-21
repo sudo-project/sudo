@@ -36,7 +36,7 @@ extern struct sudoers_group_plugin group_plugin;
 #define CALLBACK_PYNAME(func_name) ((void)CALLBACK_PLUGINFUNC(func_name), #func_name)
 
 
-int
+static int
 python_plugin_group_init(int version, sudo_printf_t sudo_printf, char *const plugin_options[])
 {
     debug_decl(python_plugin_group_init, PYTHON_DEBUG_CALLBACKS);
@@ -79,7 +79,7 @@ python_plugin_group_init(int version, sudo_printf_t sudo_printf, char *const plu
     debug_return_int(rc);
 }
 
-void
+static void
 python_plugin_group_cleanup(void)
 {
     debug_decl(python_plugin_group_cleanup, PYTHON_DEBUG_CALLBACKS);
@@ -87,7 +87,7 @@ python_plugin_group_cleanup(void)
     python_plugin_deinit(&plugin_ctx);
 }
 
-int
+static int
 python_plugin_group_query(const char *user, const char *group, const struct passwd *pwd)
 {
     debug_decl(python_plugin_group_query, PYTHON_DEBUG_CALLBACKS);

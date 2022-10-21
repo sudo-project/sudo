@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -46,7 +46,7 @@
  * Create directory and any parent directories as needed.
  */
 bool
-iolog_mkdirs(char *path)
+iolog_mkdirs(const char *path)
 {
     const mode_t iolog_filemode = iolog_get_file_mode();
     const mode_t iolog_dirmode = iolog_get_dir_mode();
@@ -96,29 +96,33 @@ iolog_mkdirs(char *path)
     /* umask must not be more restrictive than the file modes. */
     omask = umask(ACCESSPERMS & ~(iolog_filemode|iolog_dirmode));
 
-    ok = sudo_mkdir_parents(path, iolog_uid, iolog_gid, iolog_dirmode, true);
-    if (!ok && errno == EACCES) {
+    ok = false;
+    if (dfd != -1)
+	close(dfd);
+    dfd = sudo_open_parent_dir(path, iolog_uid, iolog_gid, iolog_dirmode, true);
+    if (dfd == -1 && errno == EACCES) {
 	/* Try again as the I/O log owner (for NFS). */
 	uid_changed = iolog_swapids(false);
 	if (uid_changed)
-	    ok = sudo_mkdir_parents(path, -1, -1, iolog_dirmode, false);
+	    dfd = sudo_open_parent_dir(path, -1, -1, iolog_dirmode, false);
     }
-    if (ok) {
+    if (dfd != -1) {
 	/* Create final path component. */
+	const char *base = sudo_basename(path);
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "mkdir %s, mode 0%o", path, (unsigned int) iolog_dirmode);
-	ok = mkdir(path, iolog_dirmode) == 0 || errno == EEXIST;
+	ok = mkdirat(dfd, base, iolog_dirmode) == 0 || errno == EEXIST;
 	if (!ok) {
 	    if (errno == EACCES && !uid_changed) {
 		/* Try again as the I/O log owner (for NFS). */
 		uid_changed = iolog_swapids(false);
 		if (uid_changed)
-		    ok = mkdir(path, iolog_dirmode) == 0 || errno == EEXIST;
+		    ok = mkdirat(dfd, base, iolog_dirmode) == 0 || errno == EEXIST;
 	    }
 	    if (!ok)
 		sudo_warn(U_("unable to mkdir %s"), path);
 	} else {
-	    if (chown(path, iolog_uid, iolog_gid) != 0) {
+	    if (fchownat(dfd, base, iolog_uid, iolog_gid, AT_SYMLINK_NOFOLLOW) != 0) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 		    "%s: unable to chown %d:%d %s", __func__,
 		    (int)iolog_uid, (int)iolog_gid, path);

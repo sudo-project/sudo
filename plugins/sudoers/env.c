@@ -224,6 +224,7 @@ static const char *initial_keepenv_table[] = {
     "PS2",
     "XAUTHORITY",
     "XAUTHORIZATION",
+    "XDG_CURRENT_DESKTOP",
     NULL
 };
 
@@ -314,8 +315,21 @@ int
 sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
 {
     char **ep;
-    size_t len;
+    const char *equal;
     bool found = false;
+
+    /* Some putenv(3) implementations check for NULL. */
+    if (str == NULL) {
+	errno = EINVAL;
+	return -1;
+    }
+
+    /* The string must contain a '=' char but not start with one. */
+    equal = strchr(str, '=');
+    if (equal == NULL || equal == str) {
+	errno = EINVAL;
+	return -1;
+    }
 
     /* Make sure there is room for the new entry plus a NULL. */
     if (env.env_size > 2 && env.env_len > env.env_size - 2) {
@@ -358,7 +372,7 @@ sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
 #endif
 
     if (dupcheck) {
-	len = (strchr(str, '=') - str) + 1;
+	size_t len = (size_t)(equal - str) + 1;
 	for (ep = env.envp; *ep != NULL; ep++) {
 	    if (strncmp(str, *ep, len) == 0) {
 		if (overwrite)
@@ -818,13 +832,13 @@ env_update_didvar(const char *ep, unsigned int *didvar)
 }
 
 #define CHECK_PUTENV(a, b, c)	do {					       \
-    if (sudo_putenv((a), (b), (c)) == -1) {				       \
+    if (sudo_putenv((char *)(a), (b), (c)) == -1) {			       \
 	goto bad;							       \
     }									       \
 } while (0)
 
 #define CHECK_SETENV2(a, b, c, d)	do {				       \
-    if (sudo_setenv2((a), (b), (c), (d)) == -1) {			       \
+    if (sudo_setenv2((char *)(a), (b), (c), (d)) == -1) {		       \
 	goto bad;							       \
     }									       \
 } while (0)

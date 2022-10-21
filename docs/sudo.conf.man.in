@@ -70,17 +70,17 @@ Leading white space is removed from the beginning of lines
 even when a continuation character is used.
 .PP
 Non-comment lines that don't begin with
-\fRPlugin\fR,
-\fRPath\fR,
-\fRDebug\fR,
+\fIPlugin\fR,
+\fIPath\fR,
+\fIDebug\fR,
 or
-\fRSet\fR
+\fISet\fR
 are silently ignored.
 .PP
 The
 \fBsudo.conf\fR
 file is always parsed in the
-\(lq\fRC\fR\(rq
+\(oqC\(cq
 locale.
 .SS "Plugin configuration"
 \fBsudo\fR
@@ -94,9 +94,9 @@ Plugins are dynamically loaded based on the contents of
 \fBsudo.conf\fR.
 .PP
 A
-\fRPlugin\fR
+\fIPlugin\fR
 line consists of the
-\fRPlugin\fR
+\fIPlugin\fR
 keyword, followed by the
 \fIsymbol_name\fR
 and the
@@ -105,14 +105,14 @@ to the dynamic shared object that contains the plugin.
 The
 \fIsymbol_name\fR
 is the name of the
-\fRapproval_plugin\fR,
-\fRaudit_plugin\fR,
-\fRio_plugin\fR,
+\fIstruct approval_plugin\fR,
+\fIstruct audit_plugin\fR,
+\fIstruct io_plugin\fR,
 or
-\fRpolicy_plugin\fR
-struct contained in the plugin.
+\fIstruct policy_plugin\fR
+defined by the plugin.
 If a plugin implements multiple plugin types, there must be a
-\fRPlugin\fR
+\fIPlugin\fR
 line for each unique symbol name.
 The
 \fIpath\fR
@@ -120,7 +120,7 @@ may be fully qualified or relative.
 If not fully qualified, it is relative to the directory
 specified by the
 \fIplugin_dir\fR
-\fRPath\fR
+\fIPath\fR
 setting, which defaults to
 \fI@plugindir@\fR.
 In other words:
@@ -182,7 +182,7 @@ This limitation does not apply to I/O plugins.
 If no
 \fBsudo.conf\fR
 file is present, or if it contains no
-\fRPlugin\fR
+\fIPlugin\fR
 lines, the
 \fBsudoers\fR
 plugin will be used as the default security policy, for I/O logging
@@ -221,9 +221,9 @@ sudo_plugin(@mansectform@)
 manual.
 .SS "Path settings"
 A
-\fRPath\fR
+\fIPath\fR
 line consists of the
-\fRPath\fR
+\fIPath\fR
 keyword, followed by the name of the path to set and its value.
 For example:
 .nf
@@ -238,7 +238,7 @@ Path askpass /usr/X11R6/bin/ssh-askpass
 If no path name is specified, features relying on the specified
 setting will be disabled.
 Disabling
-\fRPath\fR
+\fIPath\fR
 settings is only supported in
 \fBsudo\fR
 version 1.8.16 and higher.
@@ -277,7 +277,7 @@ If terminal devices may be located in a sub-directory of
 that path must be explicitly listed in
 \fIdevsearch\fR.
 The default value is
-\fR/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev\fR
+\fI/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev\fR
 .sp
 This option is ignored on systems that support either the
 \fBdevname\fR()
@@ -290,15 +290,15 @@ macOS and Solaris.
 intercept
 .br
 The fully-qualified path to a shared library containing a wrappers for the
-\fBexecl\fR(),
-\fBexecle\fR(),
-\fBexeclp\fR(),
-\fBexecv\fR(),
-\fBexecve\fR(),
-\fBexecvp\fR(),
-\fBexecvpe\fR(),
+execve(2),
+execl(3),
+execle(3),
+execlp(3),
+execv(3),
+execvp(3),
+execvpe(3),
 and
-\fBsystem\fR()
+system(3)
 library functions that intercepts attempts to run further commands and
 performs a policy check before allowing them to be executed.
 This is used to implement the
@@ -312,23 +312,23 @@ The default value is
 noexec
 The fully-qualified path to a shared library containing wrappers
 for the
-\fBexecl\fR(),
-\fBexecle\fR(),
-\fBexeclp\fR(),
-\fBexect\fR(),
-\fBexecv\fR(),
-\fBexecve\fR(),
-\fBexecveat\fR(),
-\fBexecvP\fR(),
-\fBexecvp\fR(),
-\fBexecvpe\fR(),
-\fBfexecve\fR(),
-\fBpopen\fR(),
-\fBposix_spawn\fR(),
-\fBposix_spawnp\fR(),
-\fBsystem\fR(),
+execve(2),
+execl(3),
+execle(3),
+execlp(3),
+exect(3),
+execv(3),
+execveat(3),
+execvP(3),
+execvp(3),
+execvpe(3),
+fexecve(3),
+popen(3),
+posix_spawn(3),
+posix_spawnp(3),
+system(3),
 and
-\fBwordexp\fR()
+wordexp(3)
 library functions that prevent the execution of further commands.
 This is used to implement the
 \fInoexec\fR
@@ -569,9 +569,9 @@ that can log what
 is doing internally if there is a problem.
 .PP
 A
-\fRDebug\fR
+\fIDebug\fR
 line consists of the
-\fRDebug\fR
+\fIDebug\fR
 keyword, followed by the name of the program, plugin, or shared object
 to debug, the debug file name, and a comma-separated list of debug flags.
 The debug flag syntax used by
@@ -613,25 +613,25 @@ intercept functionality on some systems.
 As of
 \fBsudo\fR
 1.8.12, multiple
-\fRDebug\fR
+\fIDebug\fR
 entries may be specified per program.
 Older versions of
 \fBsudo\fR
 only support a single
-\fRDebug\fR
+\fIDebug\fR
 entry per program.
 Plugin-specific
-\fRDebug\fR
+\fIDebug\fR
 entries are also supported starting with
 \fBsudo\fR
 1.8.12 and are matched by either the base name of the plugin that was loaded
 (for example
-\fRsudoers.so\fR)
+\fIsudoers.so\fR)
 or by the plugin's fully-qualified path name.
 Previously, the
 \fBsudoers\fR
 plugin shared the same
-\fRDebug\fR
+\fIDebug\fR
 entry as the
 \fBsudo\fR
 front-end and could not be configured separately.

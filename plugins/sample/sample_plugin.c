@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010-2016 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010-2016, 2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -39,6 +39,7 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <unistd.h>
+#include <ctype.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <grp.h>
@@ -72,8 +73,9 @@ static int use_sudoedit = false;
  */
 static int
 policy_open(unsigned int version, sudo_conv_t conversation,
-    sudo_printf_t sudo_printf, char * const settings[],
-    char * const user_info[], char * const user_env[], char * const args[])
+    sudo_printf_t sudo_plugin_printf, char * const settings[],
+    char * const user_info[], char * const user_env[], char * const args[],
+    const char **errstr)
 {
     char * const *ui;
     struct passwd *pw;
@@ -142,20 +144,20 @@ static char *
 find_in_path(char *command, char **envp)
 {
     struct stat sb;
-    char *path, *path0, **ep, *cp;
+    char *path = NULL;
+    char *path0, **ep, *cp;
     char pathbuf[PATH_MAX], *qualified = NULL;
 
     if (strchr(command, '/') != NULL)
 	return command;
 
-    path = _PATH_DEFPATH;
     for (ep = plugin_state.envp; *ep != NULL; ep++) {
 	if (strncmp(*ep, "PATH=", 5) == 0) {
 	    path = *ep + 5;
 	    break;
 	}
     }
-    path = path0 = strdup(path);
+    path = path0 = strdup(path ? path : _PATH_DEFPATH);
     do {
 	if ((cp = strchr(path, ':')))
 	    *cp = '\0';
@@ -231,18 +233,18 @@ build_command_info(const char *command)
 static char *
 find_editor(int nfiles, char * const files[], char **argv_out[])
 {
-    char *cp, *last, **ep, **nargv, *editor, *editor_path;
+    char *cp, *last, **ep, **nargv, *editor_path;
+    char *editor = NULL;
     int ac, i, nargc, wasblank;
 
     /* Lookup EDITOR in user's environment. */
-    editor = _PATH_VI;
     for (ep = plugin_state.envp; *ep != NULL; ep++) {
 	if (strncmp(*ep, "EDITOR=", 7) == 0) {
 	    editor = *ep + 7;
 	    break;
 	}
     }
-    editor = strdup(editor);
+    editor = strdup(editor ? editor : _PATH_VI);
     if (editor == NULL) {
 	sudo_log(SUDO_CONV_ERROR_MSG, "unable to allocate memory\n");
 	return NULL;
@@ -281,7 +283,7 @@ find_editor(int nfiles, char * const files[], char **argv_out[])
 	nargv[ac] = cp;
 	cp = strtok_r(NULL, " \t", &last);
     }
-    nargv[ac++] = "--";
+    nargv[ac++] = (char *)"--";
     for (i = 0; i < nfiles; )
 	nargv[ac++] = files[i++];
     nargv[ac] = NULL;
@@ -297,7 +299,7 @@ find_editor(int nfiles, char * const files[], char **argv_out[])
 static int 
 policy_check(int argc, char * const argv[],
     char *env_add[], char **command_info_out[],
-    char **argv_out[], char **user_env_out[])
+    char **argv_out[], char **user_env_out[], const char **errstr)
 {
     char *command;
 
@@ -348,7 +350,8 @@ policy_check(int argc, char * const argv[],
 }
 
 static int
-policy_list(int argc, char * const argv[], int verbose, const char *list_user)
+policy_list(int argc, char * const argv[], int verbose, const char *list_user,
+    const char **errstr)
 {
     /*
      * List user's capabilities.
@@ -360,7 +363,8 @@ policy_list(int argc, char * const argv[], int verbose, const char *list_user)
 static int
 policy_version(int verbose)
 {
-    sudo_log(SUDO_CONV_INFO_MSG, "Sample policy plugin version %s\n", PACKAGE_VERSION);
+    sudo_log(SUDO_CONV_INFO_MSG, "Sample policy plugin version %s\n",
+	PACKAGE_VERSION);
     return true;
 }
 
@@ -386,9 +390,10 @@ policy_close(int exit_status, int error)
 
 static int
 io_open(unsigned int version, sudo_conv_t conversation,
-    sudo_printf_t sudo_printf, char * const settings[],
+    sudo_printf_t sudo_plugin_printf, char * const settings[],
     char * const user_info[], char * const command_info[],
-    int argc, char * const argv[], char * const user_env[], char * const args[])
+    int argc, char * const argv[], char * const user_env[], char * const args[],
+    const char **errstr)
 {
     int fd;
     char path[PATH_MAX];
@@ -432,14 +437,14 @@ io_version(int verbose)
 }
 
 static int
-io_log_input(const char *buf, unsigned int len)
+io_log_input(const char *buf, unsigned int len, const char **errstr)
 {
     ignore_result(fwrite(buf, len, 1, input));
     return true;
 }
 
 static int
-io_log_output(const char *buf, unsigned int len)
+io_log_output(const char *buf, unsigned int len, const char **errstr)
 {
     const char *cp, *ep;
     bool ret = true;
@@ -471,7 +476,8 @@ sudo_dso_public struct policy_plugin sample_policy = {
     NULL, /* invalidate */
     NULL, /* init_session */
     NULL, /* register_hooks */
-    NULL /* deregister_hooks */
+    NULL, /* deregister_hooks */
+    NULL /* event_alloc() filled in by sudo */
 };
 
 /*
@@ -488,5 +494,10 @@ sudo_dso_public struct io_plugin sample_io = {
     io_log_output,	/* tty output */
     io_log_input,	/* command stdin if not tty */
     io_log_output,	/* command stdout if not tty */
-    io_log_output	/* command stderr if not tty */
+    io_log_output,	/* command stderr if not tty */
+    NULL, /* register_hooks */
+    NULL, /* deregister_hooks */
+    NULL, /* change_winsize */
+    NULL, /* log_suspend */
+    NULL /* event_alloc() filled in by sudo */
 };

@@ -33,6 +33,7 @@ incdir = $(top_srcdir)/include
 # Compiler & tools to use
 CC = @CC@
 LIBTOOL = @LIBTOOL@
+GREP = @GREP@
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) -I$(top_srcdir) @CPPFLAGS@
@@ -93,11 +94,6 @@ CHECK_WRAP_OBJS = check_wrap.lo logwrap.lo
 
 all: libsudo_eventlog.la
 
-pvs-log-files: $(POBJS)
-
-pvs-studio: $(POBJS)
-	plog-converter $(PVS_LOG_OPTS) $(POBJS)
-
 depend:
 	$(scriptdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
 	    --builddir=$(abs_top_builddir) lib/eventlog/Makefile.in
@@ -147,13 +143,16 @@ cppcheck:
 
 pvs-log-files: $(POBJS)
 
+pvs-studio: $(POBJS)
+	plog-converter $(PVS_LOG_OPTS) $(POBJS)
+
 fuzz:
 
 check-fuzzer:
 
 check: $(TEST_PROGS) check-fuzzer
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    if locale -a 2>&1 | grep '^C.UTF-8$$' >/dev/null 2>&1; then \
+	    if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
 		LC_ALL=C.UTF-8; export LC_ALL; \
 	    else \
 		LC_ALL=C; export LC_ALL; \

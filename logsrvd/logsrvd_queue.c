@@ -16,7 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "config.h"
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
+#include <config.h>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -127,7 +132,7 @@ outgoing_queue_cb(int unused, int what, void *v)
 
 	success = connect_relay(closure);
 	if (!success) {
-	    sudo_warnx(U_("unable to connect to relay"));
+	    sudo_warnx("%s", U_("unable to connect to relay"));
 	    connection_close(closure);
 	}
 	break;

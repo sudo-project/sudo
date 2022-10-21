@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "sudo_compat.h"
 #include "sudo_util.h"

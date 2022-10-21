@@ -84,27 +84,28 @@
 #define ARG_USER_SHELL		 5
 #define ARG_LOGIN_SHELL		 6
 #define ARG_IGNORE_TICKET	 7
-#define ARG_PROMPT		 8
-#define ARG_SELINUX_ROLE	 9
-#define ARG_SELINUX_TYPE	10
-#define ARG_RUNAS_USER		11
-#define ARG_PROGNAME		12
-#define ARG_IMPLIED_SHELL	13
-#define ARG_PRESERVE_GROUPS	14
-#define ARG_NONINTERACTIVE	15
-#define ARG_SUDOEDIT		16
-#define ARG_CLOSEFROM		17
-#define ARG_NET_ADDRS		18
-#define ARG_MAX_GROUPS		19
-#define ARG_PLUGIN_DIR		20
-#define ARG_REMOTE_HOST		21
-#define ARG_TIMEOUT		22
-#define ARG_CHROOT		23
-#define ARG_CWD			24
-#define ARG_ASKPASS		25
-#define ARG_INTERCEPT_SETID	26
-#define ARG_INTERCEPT_PTRACE	27
-#define ARG_APPARMOR_PROFILE	28
+#define ARG_UPDATE_TICKET	 8
+#define ARG_PROMPT		 9
+#define ARG_SELINUX_ROLE	10
+#define ARG_SELINUX_TYPE	11
+#define ARG_RUNAS_USER		12
+#define ARG_PROGNAME		13
+#define ARG_IMPLIED_SHELL	14
+#define ARG_PRESERVE_GROUPS	15
+#define ARG_NONINTERACTIVE	16
+#define ARG_SUDOEDIT		17
+#define ARG_CLOSEFROM		18
+#define ARG_NET_ADDRS		19
+#define ARG_MAX_GROUPS		20
+#define ARG_PLUGIN_DIR		21
+#define ARG_REMOTE_HOST		22
+#define ARG_TIMEOUT		23
+#define ARG_CHROOT		24
+#define ARG_CWD			25
+#define ARG_ASKPASS		26
+#define ARG_INTERCEPT_SETID	27
+#define ARG_INTERCEPT_PTRACE	28
+#define ARG_APPARMOR_PROFILE	29
 
 /*
  * Flags for tgetpass()
@@ -149,30 +150,33 @@ struct user_details {
     int ts_cols;
 };
 
-#define CD_SET_UID		0x000001
-#define CD_SET_EUID		0x000002
-#define CD_SET_GID		0x000004
-#define CD_SET_EGID		0x000008
-#define CD_PRESERVE_GROUPS	0x000010
-#define CD_INTERCEPT		0x000020
-#define CD_NOEXEC		0x000040
-#define CD_SET_PRIORITY		0x000080
-#define CD_SET_UMASK		0x000100
-#define CD_SET_TIMEOUT		0x000200
-#define CD_SUDOEDIT		0x000400
-#define CD_BACKGROUND		0x000800
-#define CD_RBAC_ENABLED		0x001000
-#define CD_USE_PTY		0x002000
-#define CD_SET_UTMP		0x004000
-#define CD_EXEC_BG		0x008000
-#define CD_SUDOEDIT_FOLLOW	0x010000
-#define CD_SUDOEDIT_CHECKDIR	0x020000
-#define CD_SET_GROUPS		0x040000
-#define CD_LOGIN_SHELL		0x080000
-#define CD_OVERRIDE_UMASK	0x100000
-#define CD_LOG_SUBCMDS		0x200000
-#define CD_USE_PTRACE		0x400000
-#define CD_FEXECVE		0x800000
+#define CD_SET_UID		0x00000001
+#define CD_SET_EUID		0x00000002
+#define CD_SET_GID		0x00000004
+#define CD_SET_EGID		0x00000008
+#define CD_PRESERVE_GROUPS	0x00000010
+#define CD_INTERCEPT		0x00000020
+#define CD_NOEXEC		0x00000040
+#define CD_SET_PRIORITY		0x00000080
+#define CD_SET_UMASK		0x00000100
+#define CD_SET_TIMEOUT		0x00000200
+#define CD_SUDOEDIT		0x00000400
+#define CD_BACKGROUND		0x00000800
+#define CD_RBAC_ENABLED		0x00001000
+#define CD_USE_PTY		0x00002000
+#define CD_SET_UTMP		0x00004000
+#define CD_EXEC_BG		0x00008000
+#define CD_SUDOEDIT_FOLLOW	0x00010000
+#define CD_SUDOEDIT_CHECKDIR	0x00020000
+#define CD_SET_GROUPS		0x00040000
+#define CD_LOGIN_SHELL		0x00080000
+#define CD_OVERRIDE_UMASK	0x00100000
+#define CD_LOG_SUBCMDS		0x00200000
+#define CD_USE_PTRACE		0x00400000
+#define CD_FEXECVE		0x00800000
+#define CD_INTERCEPT_VERIFY	0x01000000
+#define CD_RBAC_SET_CWD		0x02000000
+#define CD_CWD_OPTIONAL		0x04000000
 
 struct preserved_fd {
     TAILQ_ENTRY(preserved_fd) entries;
@@ -190,7 +194,6 @@ struct command_details {
     int closefrom;
     int flags;
     int execfd;
-    int cwd_optional;
     struct preserved_fd_list preserved_fds;
     struct passwd *pw;
     const char *command;
@@ -274,7 +277,7 @@ extern int sudo_debug_instance;
 int sudo_edit(struct command_details *details);
 
 /* parse_args.c */
-void usage(void) __attribute__((__noreturn__));
+sudo_noreturn void usage(void);
 
 /* openbsd.c */
 int os_init_openbsd(int argc, char *argv[], char *envp[]);
@@ -286,7 +289,7 @@ int selinux_relabel_tty(const char *ttyn, int ttyfd);
 int selinux_restore_tty(void);
 int selinux_setexeccon(void);
 void selinux_execve(int fd, const char *path, char *const argv[],
-    char *envp[], int flags);
+    char *envp[], const char *rundir, int flags);
 
 /* apparmor.c */
 int apparmor_is_enabled(void);
@@ -335,7 +338,7 @@ void parse_preserved_fds(struct preserved_fd_list *pfds, const char *fdstr);
 int tcsetpgrp_nobg(int fd, pid_t pgrp_id);
 
 /* limits.c */
-void disable_coredump();
+void disable_coredump(void);
 void restore_limits(void);
 void restore_nproc(void);
 void set_policy_rlimits(void);

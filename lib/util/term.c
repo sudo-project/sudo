@@ -288,3 +288,27 @@ sudo_term_copy_v1(int src, int dst)
 
     debug_return_bool(true);
 }
+
+/*
+ * Returns true if fd refers to a tty in raw mode, else false.
+ */
+bool
+sudo_term_is_raw_v1(int fd)
+{
+    struct termios term;
+    debug_decl(sudo_term_is_raw, SUDO_DEBUG_UTIL);
+
+    if (tcgetattr(fd, &term) != 0)
+	debug_return_bool(false);
+
+    if (term.c_cc[VMIN] != 1 || term.c_cc[VTIME] != 0)
+	debug_return_bool(false);
+
+    if (ISSET(term.c_oflag, OPOST))
+	debug_return_bool(false);
+
+    if (ISSET(term.c_oflag, ECHO|ECHONL|ICANON))
+	debug_return_bool(false);
+
+    debug_return_bool(true);
+}

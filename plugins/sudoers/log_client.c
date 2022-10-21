@@ -16,7 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "config.h"
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
+#include <config.h>
 
 #ifdef SUDOERS_LOG_CLIENT
 
@@ -755,7 +760,7 @@ done:
  * Appends the wire format message to the closure's write queue.
  * Returns true on success, false on failure.
  */
-bool
+static bool
 fmt_client_hello(struct client_closure *closure)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
@@ -766,7 +771,7 @@ fmt_client_hello(struct client_closure *closure)
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending ClientHello", __func__);
 
     /* Client name + version */
-    hello_msg.client_id = "sudoers " PACKAGE_VERSION;
+    hello_msg.client_id = (char *)"sudoers " PACKAGE_VERSION;
 
     /* Schedule ClientMessage */
     client_msg.u.hello_msg = &hello_msg;
@@ -840,6 +845,27 @@ fmt_info_messages(struct client_closure *closure, struct eventlog *evlog,
 	info_message__init(info_msgs[n]);
     }
 
+#define fill_str(_n, _v) do { \
+    info_msgs[n]->key = (char *)(_n); \
+    info_msgs[n]->u.strval = (_v); \
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL; \
+    n++; \
+} while (0)
+
+#define fill_strlist(_n, _v) do { \
+    info_msgs[n]->key = (char *)(_n); \
+    info_msgs[n]->u.strlistval = (_v); \
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL; \
+    n++; \
+} while (0)
+
+#define fill_num(_n, _v) do { \
+    info_msgs[n]->key = (char *)(_n); \
+    info_msgs[n]->u.numval = (_v); \
+    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL; \
+    n++; \
+} while (0)
+
     /* Fill in info_msgs */
     n = 0;
 
@@ -847,106 +873,45 @@ fmt_info_messages(struct client_closure *closure, struct eventlog *evlog,
     /* TODO: clientpid */
     /* TODO: clientppid */
     /* TODO: clientsid */
-
-    info_msgs[n]->key = "columns";
-    info_msgs[n]->u.numval = evlog->columns;
-    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
-    n++;
-
-    info_msgs[n]->key = "command";
-    info_msgs[n]->u.strval = evlog->command;
-    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
-
-    info_msgs[n]->key = "lines";
-    info_msgs[n]->u.numval = evlog->lines;
-    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
-    n++;
-
+    fill_num("columns", evlog->columns);
+    fill_str("command", evlog->command);
+    fill_num("lines", evlog->lines);
     if (runargv != NULL) {
-	info_msgs[n]->key = "runargv";
-	info_msgs[n]->u.strlistval = runargv;
-	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
-	n++;
+	fill_strlist("runargv", runargv);
+	runargv = NULL;
     }
-
+    if (evlog->runchroot != NULL) {
+	fill_str("runchroot", evlog->runchroot);
+    }
+    if (evlog->runcwd != NULL) {
+	fill_str("runcwd", evlog->runcwd);
+    }
     if (runenv != NULL) {
-	info_msgs[n]->key = "runenv";
-	info_msgs[n]->u.strlistval = runenv;
-	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRLISTVAL;
-	n++;
+        fill_strlist("runenv", runenv);
+        runenv = NULL;
     }
-
     if (evlog->rungroup != NULL) {
-	info_msgs[n]->key = "rungid";
-	info_msgs[n]->u.numval = evlog->rungid;
-	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
-	n++;
-
-	info_msgs[n]->key = "rungroup";
-	info_msgs[n]->u.strval = evlog->rungroup;
-	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-	n++;
+        fill_num("rungid", evlog->rungid);
+        fill_str("rungroup", evlog->rungroup);
     }
-
     /* TODO - rungids */
     /* TODO - rungroups */
-
-    info_msgs[n]->key = "runuid";
-    info_msgs[n]->u.numval = evlog->runuid;
-    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_NUMVAL;
-    n++;
-
-    info_msgs[n]->key = "runuser";
-    info_msgs[n]->u.strval = evlog->runuser;
-    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
-
+    fill_num("runuid", evlog->runuid);
+    fill_str("runuser", evlog->runuser);
     if (evlog->cwd != NULL) {
-	info_msgs[n]->key = "submitcwd";
-	info_msgs[n]->u.strval = evlog->cwd;
-	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-	n++;
+	fill_str("submitcwd", evlog->cwd);
     }
-
-    if (evlog->runcwd != NULL) {
-	info_msgs[n]->key = "runcwd";
-	info_msgs[n]->u.strval = evlog->runcwd;
-	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-	n++;
-    }
-
-    if (evlog->runchroot != NULL) {
-	info_msgs[n]->key = "runchroot";
-	info_msgs[n]->u.strval = evlog->runchroot;
-	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-	n++;
-    }
-
     /* TODO - submitenv */
     /* TODO - submitgid */
     /* TODO - submitgids */
     /* TODO - submitgroup */
     /* TODO - submitgroups */
-
-    info_msgs[n]->key = "submithost";
-    info_msgs[n]->u.strval = evlog->submithost;
-    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
-
+    fill_str("submithost", evlog->submithost);
     /* TODO - submituid */
-
-    info_msgs[n]->key = "submituser";
-    info_msgs[n]->u.strval = evlog->submituser;
-    info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-    n++;
-
-    if (evlog->ttyname != NULL) {
-	info_msgs[n]->key = "ttyname";
-	info_msgs[n]->u.strval = evlog->ttyname;
-	info_msgs[n]->value_case = INFO_MESSAGE__VALUE_STRVAL;
-	n++;
-    }
+    fill_str("submituser", evlog->submituser);
+//    if (evlog->ttyname != NULL) {
+	fill_str("ttyname", evlog->ttyname);
+ //   }
 
     /* Free unused structs. */
     while (info_msgs_size > n)
@@ -1569,7 +1534,7 @@ handle_log_id(char *id, struct client_closure *closure)
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: remote log ID: %s", __func__, id);
     if (closure->iolog_id != NULL) {
 	if ((closure->iolog_id = strdup(id)) == NULL)
-	    sudo_fatal(NULL);
+	    sudo_fatal(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
     debug_return_bool(true);
 }

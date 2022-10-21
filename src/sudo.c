@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -696,15 +696,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		SET_STRING("chroot=", chroot)
 		SET_STRING("command=", command)
 		SET_STRING("cwd=", cwd)
-		if (strncmp("cwd_optional=", info[i], sizeof("cwd_optional=") - 1) == 0) {
-		    cp = info[i] + sizeof("cwd_optional=") - 1;
-		    details->cwd_optional = sudo_strtobool(cp);
-		    if (details->cwd_optional == -1) {
-			errno = EINVAL;
-			sudo_fatal("%s", info[i]);
-		    }
-		    break;
-		}
+		SET_FLAG("cwd_optional=", CD_CWD_OPTIONAL)
 		if (strncmp("closefrom=", info[i], sizeof("closefrom=") - 1) == 0) {
 		    cp = info[i] + sizeof("closefrom=") - 1;
 		    details->closefrom = sudo_strtonum(cp, 0, INT_MAX, &errstr);
@@ -734,6 +726,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		break;
 	    case 'i':
 		SET_FLAG("intercept=", CD_INTERCEPT)
+		SET_FLAG("intercept_verify=", CD_INTERCEPT_VERIFY)
 		break;
 	    case 'l':
 		SET_STRING("login_class=", login_class)
@@ -1021,6 +1014,19 @@ run_command(struct command_details *details)
     cstat.type = CMD_INVALID;
     cstat.val = 0;
 
+    if (details->command == NULL) {
+	sudo_warnx("%s", U_("command not set by the security policy"));
+	debug_return_int(status);
+    }
+    if (details->argv == NULL) {
+	sudo_warnx("%s", U_("argv not set by the security policy"));
+	debug_return_int(status);
+    }
+    if (details->envp == NULL) {
+	sudo_warnx("%s", U_("envp not set by the security policy"));
+	debug_return_int(status);
+    }
+
     sudo_execute(details, &cstat);
 
     switch (cstat.type) {
@@ -1058,6 +1064,12 @@ format_plugin_settings(struct plugin_container *plugin)
     char **plugin_settings;
     unsigned int i = 0;
     debug_decl(format_plugin_settings, SUDO_DEBUG_PCOMM);
+
+    /* We update the ticket entry by default. */
+    if (sudo_settings[ARG_IGNORE_TICKET].value == NULL &&
+	    sudo_settings[ARG_UPDATE_TICKET].value == NULL) {
+	sudo_settings[ARG_UPDATE_TICKET].value = "true";
+    }
 
     /* Determine sudo_settings array size (including plugin_path and NULL) */
     plugin_settings_size = 2;
@@ -1246,7 +1258,7 @@ policy_list(int argc, char * const argv[], int verbose, const char *user)
 {
     const char *errstr = NULL;
     /* TODO: add list_user */
-    char * const command_info[] = {
+    const char * const command_info[] = {
 	"command=list",
 	NULL
     };
@@ -1264,17 +1276,17 @@ policy_list(int argc, char * const argv[], int verbose, const char *user)
     switch (ok) {
     case 1:
 	audit_accept(policy_plugin.name, SUDO_POLICY_PLUGIN,
-	    command_info, argv, submit_envp);
+	    (char **)command_info, argv, submit_envp);
 	break;
     case 0:
 	audit_reject(policy_plugin.name, SUDO_POLICY_PLUGIN,
 	    errstr ? errstr : _("command rejected by policy"),
-	    command_info);
+	    (char **)command_info);
 	break;
     default:
 	audit_error(policy_plugin.name, SUDO_POLICY_PLUGIN,
 	    errstr ? errstr : _("policy plugin error"),
-	    command_info);
+	    (char **)command_info);
 	break;
     }
 
@@ -1290,7 +1302,7 @@ static void
 policy_validate(char * const argv[])
 {
     const char *errstr = NULL;
-    char * const command_info[] = {
+    const char * const command_info[] = {
 	"command=validate",
 	NULL
     };
@@ -1307,18 +1319,18 @@ policy_validate(char * const argv[])
 
     switch (ok) {
     case 1:
-	audit_accept(policy_plugin.name, SUDO_POLICY_PLUGIN, command_info,
-	    argv, submit_envp);
+	audit_accept(policy_plugin.name, SUDO_POLICY_PLUGIN,
+	    (char **)command_info, argv, submit_envp);
 	break;
     case 0:
 	audit_reject(policy_plugin.name, SUDO_POLICY_PLUGIN,
 	    errstr ? errstr : _("command rejected by policy"),
-	    command_info);
+	    (char **)command_info);
 	break;
     default:
 	audit_error(policy_plugin.name, SUDO_POLICY_PLUGIN,
 	    errstr ? errstr : _("policy plugin error"),
-	    command_info);
+	    (char **)command_info);
 	break;
     }
 

@@ -73,7 +73,7 @@ static bool store_timespec(const char *str, struct sudo_defs_types *def);
 static bool store_rlimit(const char *str, struct sudo_defs_types *def);
 static bool list_op(const char *str, size_t, struct list_members *list, enum list_ops op);
 static bool valid_path(struct sudo_defs_types *def, const char *val, const char *file, int line, int column, bool quiet);
-static bool defaults_warnx(const char *file, int line, int column, bool quiet, const char *fmt, ...) __printflike(5, 6);
+static bool defaults_warnx(const char *file, int line, int column, bool quiet, const char *fmt, ...) sudo_printflike(5, 6);
 
 /*
  * Table describing compile-time and run-time options.
@@ -89,7 +89,7 @@ dump_defaults(void)
     struct sudo_defs_types *cur;
     struct list_member *item;
     struct def_values *def;
-    char *desc;
+    const char *desc;
     debug_decl(dump_defaults, SUDOERS_DEBUG_DEFAULTS);
 
     for (cur = sudo_defs_table; cur->name; cur++) {
@@ -549,6 +549,7 @@ init_defaults(void)
     if ((def_rlimit_core = strdup("0,0")) == NULL)
 	goto oom;
     def_intercept_type = dso;
+    def_intercept_verify = true;
     def_netgroup_tuple = false;
     def_sudoedit_checkdir = true;
     def_iolog_mode = S_IRUSR|S_IWUSR;

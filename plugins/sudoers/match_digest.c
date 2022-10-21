@@ -105,9 +105,9 @@ digest_matches(int fd, const char *path, const char *runchroot,
 	} else {
 	    /* Convert base64 to binary. */
 	    size_t len = base64_decode(digest->digest_str, sudoers_digest, digest_len);
+	    if (len == (size_t)-1)
+		goto bad_format;
 	    if (len != digest_len) {
-		if (len == (size_t)-1)
-		    goto bad_format;
 		sudo_warnx(
 		    U_("digest for %s (%s) bad length %zu, expected %zu"),
 		    path, digest->digest_str, len, digest_len);

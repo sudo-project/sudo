@@ -89,8 +89,10 @@ command_args_match(const char *sudoers_cmnd, const char *sudoers_args)
      * If no args specified in sudoers, any user args are allowed.
      * If the empty string is specified in sudoers, no user args are allowed.
      */
-    if (!sudoers_args || (!user_args && !strcmp("\"\"", sudoers_args)))
+    if (sudoers_args == NULL)
 	debug_return_bool(true);
+    if (strcmp("\"\"", sudoers_args) == 0)
+	debug_return_bool(user_args ? false : true);
 
     /*
      * If args are specified in sudoers, they must match the user args.
@@ -391,15 +393,22 @@ command_matches_all(const char *runchroot,
     debug_decl(command_matches_all, SUDOERS_DEBUG_MATCH);
 
     if (user_cmnd[0] == '/') {
-	/* Open the file for fdexec or for digest matching. */
-	if (!open_cmnd(user_cmnd, runchroot, digests, &fd))
-	    goto bad;
 #ifndef SUDOERS_NAME_MATCH
+	/* Open the file for fdexec or for digest matching. */
+	bool open_error = !open_cmnd(user_cmnd, runchroot, digests, &fd);
+
 	/* A non-existent file is not an error for "sudo ALL". */
 	if (do_stat(fd, user_cmnd, runchroot, &sb)) {
+	    if (open_error) {
+		/* File exists but we couldn't open it above? */
+		goto bad;
+	    }
 	    if (!intercept_ok(user_cmnd, intercepted, &sb))
 		goto bad;
 	}
+#else
+	/* Open the file for fdexec or for digest matching. */
+	(void)open_cmnd(user_cmnd, runchroot, digests, &fd);
 #endif
     }
 

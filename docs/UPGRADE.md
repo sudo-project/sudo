@@ -25,6 +25,11 @@ Notes on upgrading from an older release
    such as those seen with the Linux logrotate utility, which could
    interpret a core dump as a valid configuration file.
 
+   To restore the historic core dump file size behavior, add the
+   following line to the sudoers file:
+
+       Defaults rlimit_core=default
+
  * Upgrading from a version prior to 1.9.7:
 
    Sudo now links with OpenSSL 1.0.1 or higher by default if it

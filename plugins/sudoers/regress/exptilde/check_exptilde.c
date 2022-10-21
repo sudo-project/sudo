@@ -34,9 +34,9 @@
 struct sudo_user sudo_user;
 
 struct test_data {
-    char *input;
-    char *output;
-    char *user;
+    const char *input;
+    const char *output;
+    const char *user;
     bool result;
 } test_data[] = {
     { "foo/bar", NULL, NULL, false },

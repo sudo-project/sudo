@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -29,12 +29,12 @@
 
 /* Note hard-coded array lengths. */
 struct test_data {
-    char *editor_var;
+    const char *editor_var;
     int nfiles;
-    char *files[4];
-    char *editor_path;
+    const char *files[4];
+    const char *editor_path;
     int edit_argc;
-    char *edit_argv[10];
+    const char *edit_argv[10];
 } test_data[] = {
     {
 	/* Bug #942 */
@@ -62,6 +62,15 @@ struct test_data {
 	"/usr/bin/vi\\",
 	3,
 	{ "/usr/bin/vi\\", "--", "/etc/hosts", "/bogus/file", NULL }
+    },
+    {
+	/* GitHub issue #179 */
+	"EDITOR=sed -rie s/^\\\\(foo\\\\)/waldo\\\\1/",
+	1,
+	{ "/etc/sudoers", NULL },
+	"/usr/bin/sed",
+	5,
+	{ "sed", "-rie", "s/^\\(foo\\)/waldo\\1/", "--", "/etc/sudoers", NULL }
     },
     { NULL }
 };
@@ -99,13 +108,13 @@ main(int argc, char *argv[])
 	int i, edit_argc = 0;
 
 	/* clear existing editor environment vars */
-	putenv("VISUAL=");
-	putenv("EDITOR=");
-	putenv("SUDO_EDITOR=");
+	putenv((char *)"VISUAL=");
+	putenv((char *)"EDITOR=");
+	putenv((char *)"SUDO_EDITOR=");
 
-	putenv(data->editor_var);
-	editor_path = find_editor(data->nfiles, data->files, &edit_argc,
-	    &edit_argv, NULL, &env_editor);
+	putenv((char *)data->editor_var);
+	editor_path = find_editor(data->nfiles, (char **)data->files,
+	    &edit_argc, &edit_argv, NULL, &env_editor);
 	ntests++;
 	if (strcmp(editor_path, data->editor_path) != 0) {
 	    sudo_warnx("test %d: editor_path: expected \"%s\", got \"%s\"",

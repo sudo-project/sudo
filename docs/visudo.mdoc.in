@@ -20,7 +20,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd April 23, 2022
+.Dd October 4, 2022
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -28,7 +28,7 @@
 .Nd edit the sudoers file
 .Sh SYNOPSIS
 .Nm visudo
-.Op Fl chOPqsV
+.Op Fl chIOPqsV
 .Op Bo Fl f Bc Ar sudoers
 .Sh DESCRIPTION
 .Nm
@@ -203,6 +203,23 @@ path can be specified without using the
 option.
 .It Fl h , -help
 Display a short help message to the standard output and exit.
+.It Fl I , -no-includes
+Disable the editing of include files unless there is a pre-existing
+syntax error.
+By default,
+.Nm
+will edit the main
+.Ar sudoers
+file and any files included via
+.Em @include
+or
+.Em #include
+directives.
+Files included via
+.Em @includedir
+or
+.Em #includedir
+are never edited unless they contain a syntax error.
 .It Fl O , -owner
 Enforce the default ownership (user and group) of the
 .Em sudoers
@@ -281,7 +298,7 @@ include file for syntax errors.
 .Nm
 versions 1.8.4 and higher support a flexible debugging framework
 that is configured via
-.Li Debug
+.Em Debug
 lines in the
 .Xr sudo.conf @mansectform@
 file.
@@ -430,7 +447,7 @@ file.
 The
 .Em sudoers
 file contains a
-.Li Defaults
+.Em Defaults
 setting not recognized by
 .Nm .
 .El

@@ -21,7 +21,7 @@
 
 /* API version major/minor */
 #define SUDO_API_VERSION_MAJOR 1
-#define SUDO_API_VERSION_MINOR 19
+#define SUDO_API_VERSION_MINOR 20
 #define SUDO_API_MKVERSION(x, y) (((x) << 16) | (y))
 #define SUDO_API_VERSION SUDO_API_MKVERSION(SUDO_API_VERSION_MAJOR, SUDO_API_VERSION_MINOR)
 
@@ -165,7 +165,7 @@ struct policy_plugin {
     unsigned int type; /* always SUDO_POLICY_PLUGIN */
     unsigned int version; /* always SUDO_API_VERSION */
     int (*open)(unsigned int version, sudo_conv_t conversation,
-	sudo_printf_t sudo_printf, char * const settings[],
+	sudo_printf_t sudo_plugin_printf, char * const settings[],
 	char * const user_info[], char * const user_env[],
 	char * const plugin_options[], const char **errstr);
     void (*close)(int exit_status, int error); /* wait status or error */
@@ -174,9 +174,9 @@ struct policy_plugin {
 	char *env_add[], char **command_info[],
 	char **argv_out[], char **user_env_out[], const char **errstr);
     int (*list)(int argc, char * const argv[], int verbose,
-	const char *list_user, const char **errstr);
+	const char *user, const char **errstr);
     int (*validate)(const char **errstr);
-    void (*invalidate)(int remove);
+    void (*invalidate)(int rmcred);
     int (*init_session)(struct passwd *pwd, char **user_env_out[],
 	const char **errstr);
     void (*register_hooks)(int version, int (*register_hook)(struct sudo_hook *hook));
@@ -190,7 +190,7 @@ struct io_plugin {
     unsigned int type; /* always SUDO_IO_PLUGIN */
     unsigned int version; /* always SUDO_API_VERSION */
     int (*open)(unsigned int version, sudo_conv_t conversation,
-	sudo_printf_t sudo_printf, char * const settings[],
+	sudo_printf_t sudo_plugin_printf, char * const settings[],
 	char * const user_info[], char * const command_info[],
 	int argc, char * const argv[], char * const user_env[],
 	char * const plugin_options[], const char **errstr);
@@ -223,7 +223,7 @@ struct audit_plugin {
     unsigned int type; /* always SUDO_AUDIT_PLUGIN */
     unsigned int version; /* always SUDO_API_VERSION */
     int (*open)(unsigned int version, sudo_conv_t conversation,
-	sudo_printf_t sudo_printf, char * const settings[],
+	sudo_printf_t sudo_plugin_printf, char * const settings[],
 	char * const user_info[], int submit_optind,
 	char * const submit_argv[], char * const submit_envp[],
 	char * const plugin_options[], const char **errstr);
@@ -249,7 +249,7 @@ struct approval_plugin {
     unsigned int type; /* always SUDO_APPROVAL_PLUGIN */
     unsigned int version; /* always SUDO_API_VERSION */
     int (*open)(unsigned int version, sudo_conv_t conversation,
-	sudo_printf_t sudo_printf, char * const settings[],
+	sudo_printf_t sudo_plugin_printf, char * const settings[],
 	char * const user_info[], int submit_optind,
 	char * const submit_argv[], char * const submit_envp[],
 	char * const plugin_options[], const char **errstr);
@@ -279,7 +279,8 @@ struct approval_plugin {
  */
 struct sudoers_group_plugin {
     unsigned int version;
-    int (*init)(int version, sudo_printf_t sudo_printf, char *const argv[]);
+    int (*init)(int version, sudo_printf_t sudo_plugin_printf,
+	char *const argv[]);
     void (*cleanup)(void);
     int (*query)(const char *user, const char *group, const struct passwd *pwd);
 };

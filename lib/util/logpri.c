@@ -39,7 +39,7 @@
  * For converting between syslog numbers and strings.
  */
 struct strmap {
-    char *name;
+    const char *name;
     int num;
 };
 

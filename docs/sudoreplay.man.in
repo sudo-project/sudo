@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOREPLAY" "@mansectsu@" "February 16, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDOREPLAY" "@mansectsu@" "September 13, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -50,7 +50,7 @@ The
 \fIID\fR
 should either be a six character sequence of digits and
 upper case letters, e.g.,
-\fR0100A5\fR
+\(lq0100A5\(rq
 or a path name.
 The
 \fIID\fR
@@ -76,8 +76,10 @@ with
 enabled in the
 \fIsudoers\fR
 file, a
-\fRTSID=ID\fR
-string is logged via syslog or to the
+\(lqTSID=ID\(rq
+string is logged via
+syslog(3)
+or to the
 \fBsudo\fR
 log file.
 The
@@ -400,7 +402,7 @@ This will be addressed in a future version of
 \fBsudoreplay\fR
 versions 1.8.4 and higher support a flexible debugging framework
 that is configured via
-\fRDebug\fR
+\fIDebug\fR
 lines in the
 sudo.conf(@mansectform@)
 file.

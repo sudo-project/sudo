@@ -38,9 +38,9 @@ test_serialize_list(int *ntests_out, int *errors_out)
     struct list_member lm1, lm2, lm3;
     char *result;
 
-    lm1.value = "a value with spaces";
-    lm2.value = "this,and,that";
-    lm3.value = ",";
+    lm1.value = (char *)"a value with spaces";
+    lm2.value = (char *)"this,and,that";
+    lm3.value = (char *)",";
     SLIST_INSERT_HEAD(&members, &lm3, entries);
     SLIST_INSERT_HEAD(&members, &lm2, entries);
     SLIST_INSERT_HEAD(&members, &lm1, entries);

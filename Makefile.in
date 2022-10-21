@@ -58,10 +58,10 @@ python_version = @PYTHON_VERSION@
 
 SUBDIRS = lib/util @ZLIB_SRC@ lib/eventlog lib/fuzzstub lib/iolog \
 	  lib/protobuf-c @LOGSRV_SRC@ @LOGSRVD_SRC@ plugins/audit_json \
-	  plugins/group_file plugins/sample_approval plugins/sudoers \
-	  plugins/system_group @PYTHON_PLUGIN_SRC@ src include docs examples
+	  plugins/group_file plugins/sudoers plugins/system_group \
+	  @PYTHON_PLUGIN_SRC@ src include docs examples
 
-SAMPLES = plugins/sample
+SAMPLES = plugins/sample plugins/sample_approval
 
 VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
@@ -70,6 +70,8 @@ LIBTOOL_DEPS = @LIBTOOL_DEPS@
 
 SHELL = @SHELL@
 
+EGREP = @EGREP@
+GREP = @GREP@
 SED = @SED@
 
 INSTALL = $(SHELL) $(scriptdir)/install-sh -c
@@ -105,19 +107,19 @@ PVS_IGNORE = 'V707,V011,V002,V536,V568'
 PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
 
 all: config.status
-	for d in $(SUBDIRS); do \
+	for d in $(SUBDIRS) $(SAMPLES); do \
 	    (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
 	done
 
 check check-verbose check-fuzzer fuzz pre-install: config.status
-	for d in $(SUBDIRS); do \
+	for d in $(SUBDIRS) $(SAMPLES); do \
 	    (cd $$d && exec $(MAKE) $@) && continue; \
 	    exit $$?; \
 	done
 
 uncrustify.files: Makefile
-	grep '\.[ch]$$' $(top_srcdir)/MANIFEST | egrep -v '(/zlib/|/(arc4random|arc4random_uniform|chacha_private|charclass|fnmatch|getaddrinfo|getcwd|getdate|getentropy|getopt|getopt_long|glob|gram|inet_ntop|inet_pton|log_server.pb-c|mktemp|pw_dup|reallocarray|mktemp_test|protobuf-c|snprintf|stdbool|strlcat|strlcpy|sudo_queue|toke)\.[ch]$$)'  > uncrustify.files
+	$(GREP) '\.[ch]$$' $(top_srcdir)/MANIFEST | $(EGREP) -v '(/zlib/|/(arc4random|arc4random_uniform|chacha_private|charclass|fnmatch|getaddrinfo|getcwd|getdate|getentropy|getopt|getopt_long|glob|gram|inet_ntop|inet_pton|log_server.pb-c|mktemp|pw_dup|reallocarray|mktemp_test|protobuf-c|snprintf|stdbool|strlcat|strlcpy|sudo_queue|toke)\.[ch]$$)'  > uncrustify.files
 
 reformat: uncrustify.files
 	( cd $(top_srcdir) && uncrustify -c etc/uncrustify.cfg --replace --no-backup -F $(top_builddir)/uncrustify.files )
@@ -126,11 +128,11 @@ check-format: uncrustify.files
 	( cd $(top_srcdir) && uncrustify -c etc/uncrustify.cfg --check -F $(top_builddir)/uncrustify.files )
 
 spell:
-	( cd $(top_srcdir) && codespell -I etc/codespell.ignore -x etc/codespell.exclude `egrep -v -f etc/codespell.skip MANIFEST` )
+	( cd $(top_srcdir) && codespell -I etc/codespell.ignore -x etc/codespell.exclude `$(EGREP) -v -f etc/codespell.skip MANIFEST` )
 
 cppcheck: config.status
 	rval=0; \
-	for d in $(SUBDIRS); do \
+	for d in $(SUBDIRS) $(SAMPLES); do \
 	    echo checking $$d; \
 	    (cd $$d && exec $(MAKE) CPPCHECK_OPTS="$(CPPCHECK_OPTS)" $@) || rval=`expr $$rval + $$?`; \
 	done; \
@@ -138,7 +140,7 @@ cppcheck: config.status
 
 splint: config.status
 	rval=0; \
-	for d in $(SUBDIRS); do \
+	for d in $(SUBDIRS) $(SAMPLES); do \
 	    echo splinting $$d; \
 	    (cd $$d && exec $(MAKE) SPLINT_OPTS="$(SPLINT_OPTS)" $@) || rval=`expr $$rval + $$?`; \
 	done; \
@@ -161,7 +163,7 @@ cov-analyze: cov-upload
 pvs-studio: config.status
 	files=; \
 	rval=0; \
-	for d in $(SUBDIRS); do \
+	for d in $(SUBDIRS) $(SAMPLES); do \
 	    (cd $$d && exec $(MAKE) PVS_IGNORE="$(PVS_IGNORE)" pvs-log-files) || rval=`expr $$rval + $$?`; \
 	    for f in $$d/*.plog; do \
 		if test "$$f" != "$$d/*.plog"; then \
@@ -234,7 +236,7 @@ depend: siglist.c signame.c
 
 ChangeLog:
 	if test -d $(srcdir)/.hg; then \
-	    if hg log -R $(srcdir) --style=changelog -r "sort(branch(.) or follow(), -date)" > $@.tmp; then \
+	    if hg log -R $(srcdir) --template=changelog -r "sort(branch(.) or follow(), -date)" > $@.tmp; then \
 		mv -f $@.tmp $(srcdir)/$@; \
 	    else \
 		rm -f $@.tmp; \
@@ -440,4 +442,4 @@ sandwich:
 	fi
 
 .PHONY: clean mostlyclean distclean cleandir clobber realclean ChangeLog \
-        me a sandwhich check-format reformat
+        me a sandwich check-format reformat

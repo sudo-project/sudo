@@ -239,7 +239,7 @@ warning(const char *errstr, const char *fmt, va_list ap)
             fputs(": ", stderr);
             fputs(errstr, stderr);
         }
-        if (isatty(fileno(stderr)))
+        if (sudo_term_is_raw(fileno(stderr)))
             putc('\r', stderr);
         putc('\n', stderr);
     }

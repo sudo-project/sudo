@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010, 2012-2014 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010, 2012-2014, 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -23,6 +23,10 @@
 
 #include <config.h>
 
+#ifdef __linux__
+# include <sys/utsname.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,6 +39,7 @@
 
 #include "sudo_compat.h"
 #include "sudo_dso.h"
+#include "sudo_util.h"
 
 /*
  * Pointer for statically compiled symbols.
@@ -169,15 +174,47 @@ sudo_dso_strerror_v1(void)
 #  endif
 # endif
 
+# if defined(__linux__)
+/* 
+ * On Linux systems that use multi-arch, the actual DSO may be
+ * in a machine-specific subdirectory.  If the specified path
+ * contains /lib/ or /libexec/, insert a multi-arch directory
+ * after it.
+ */
+static void *
+dlopen_multi_arch(const char *path, int flags)
+{
+    void *ret = NULL;
+    struct stat sb;
+    char *newpath;
+
+    /* Only try multi-arch if the original path does not exist.  */
+    if (stat(path, &sb) == -1 && errno == ENOENT) {
+	newpath = sudo_stat_multiarch(path, &sb);
+	if (newpath != NULL) {
+	    ret = dlopen(newpath, flags);
+	    free(newpath);
+	}
+    }
+    return ret;
+}
+# else
+static void *
+dlopen_multi_arch(const char *path, int flags)
+{
+    return NULL;
+}
+# endif /* __linux__ */
+
 void *
 sudo_dso_load_v1(const char *path, int mode)
 {
     struct sudo_preload_table *pt;
     int flags = 0;
     void *ret;
-#ifdef RTLD_MEMBER
+# ifdef RTLD_MEMBER
     char *cp;
-#endif
+# endif
 
     /* Check prelinked symbols first. */
     if (preload_table != NULL) {
@@ -197,7 +234,7 @@ sudo_dso_load_v1(const char *path, int mode)
     if (ISSET(mode, SUDO_DSO_LOCAL))
 	SET(flags, RTLD_LOCAL);
 
-#ifdef RTLD_MEMBER
+# ifdef RTLD_MEMBER
     /* Check for AIX path(module) syntax and add RTLD_MEMBER for a module. */
     cp = strrchr(path, '(');
     if (cp != NULL) {
@@ -205,9 +242,9 @@ sudo_dso_load_v1(const char *path, int mode)
 	if (len > 2 && cp[len - 1] == '\0')
 	    SET(flags, RTLD_MEMBER);
     }
-#endif /* RTLD_MEMBER */
+# endif /* RTLD_MEMBER */
     ret = dlopen(path, flags);
-#ifdef RTLD_MEMBER
+# if defined(RTLD_MEMBER)
     /*
      * If we try to dlopen() an AIX .a file without an explicit member
      * it will fail with ENOEXEC.  Try again using the default member.
@@ -217,8 +254,15 @@ sudo_dso_load_v1(const char *path, int mode)
 	    ret = dlopen(cp, flags|RTLD_MEMBER);
 	    free(cp);
 	}
+	if (ret == NULL) {
+	    /* Retry with the original path so we get the correct error. */
+	    ret = dlopen(path, flags);
+	}
     }
-#endif /* RTLD_MEMBER */
+# endif /* RTLD_MEMBER */
+    /* On failure, try again with a multi-arch path where possible. */
+    if (ret == NULL)
+	ret = dlopen_multi_arch(path, flags);
 
     return ret;
 }

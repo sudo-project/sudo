@@ -43,6 +43,7 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
     size_t pathsize, struct stat *sb)
 {
     int status = -1;
+    size_t len;
     debug_decl(sudo_stat_plugin, SUDO_DEBUG_PLUGIN);
 
     if (info->path[0] == '/') {
@@ -52,8 +53,6 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 	}
 	status = stat(fullpath, sb);
     } else {
-	int len;
-
 #ifdef STATIC_SUDOERS_PLUGIN
 	/* Check static symbols. */
 	if (strcmp(info->path, SUDOERS_PLUGIN) == 0) {
@@ -77,20 +76,22 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 
 	len = snprintf(fullpath, pathsize, "%s%s", sudo_conf_plugin_dir_path(),
 	    info->path);
-	if (len < 0 || (size_t)len >= pathsize) {
+	if (len >= pathsize) {
 	    errno = ENAMETOOLONG;
 	    goto done;
 	}
-	/* Try parent dir for compatibility with old plugindir default. */
-	if ((status = stat(fullpath, sb)) != 0) {
-	    char *cp = strrchr(fullpath, '/');
-	    if (cp > fullpath + 4 && cp[-5] == '/' && cp[-4] == 's' &&
-		cp[-3] == 'u' && cp[-2] == 'd' && cp[-1] == 'o') {
-		int serrno = errno;
-		strlcpy(cp - 4, info->path, pathsize - (cp - 4 - fullpath));
-		if ((status = stat(fullpath, sb)) != 0)
-		    errno = serrno;
+	status = stat(fullpath, sb);
+    }
+    if (status == -1) {
+	char *newpath = sudo_stat_multiarch(fullpath, sb);
+	if (newpath != NULL) {
+	    len = strlcpy(fullpath, newpath, pathsize);
+	    free(newpath);
+	    if (len >= pathsize) {
+		errno = ENAMETOOLONG;
+		goto done;
 	    }
+	    status = 0;
 	}
     }
 done:
@@ -174,7 +175,7 @@ static struct plugin_container *
 new_container(void *handle, const char *path, struct generic_plugin *plugin,
     struct plugin_info *info)
 {
-    struct plugin_container *container = NULL;
+    struct plugin_container *container;
     debug_decl(new_container, SUDO_DEBUG_PLUGIN);
 
     if ((container = calloc(1, sizeof(*container))) == NULL) {
@@ -205,11 +206,11 @@ plugin_exists(struct plugin_container_list *plugins, const char *symbol_name)
 
 typedef struct generic_plugin * (plugin_clone_func)(void);
 
-struct generic_plugin *
+static struct generic_plugin *
 sudo_plugin_try_to_clone(void *so_handle, const char *symbol_name)
 {
     debug_decl(sudo_plugin_try_to_clone, SUDO_DEBUG_PLUGIN);
-    struct generic_plugin * plugin = NULL;
+    struct generic_plugin *plugin = NULL;
     plugin_clone_func *clone_func;
     char *clone_func_name = NULL;
 
@@ -218,7 +219,8 @@ sudo_plugin_try_to_clone(void *so_handle, const char *symbol_name)
         goto cleanup;
     }
 
-    clone_func = sudo_dso_findsym(so_handle, clone_func_name);
+    clone_func = (plugin_clone_func *)sudo_dso_findsym(so_handle,
+	clone_func_name);
     if (clone_func) {
         plugin = (*clone_func)();
     }
@@ -436,7 +438,7 @@ sudo_init_event_alloc(void)
  * Load the specified symbol from the sudoers plugin.
  * Used to provide a default plugin when none are specified in sudo.conf.
  */
-bool
+static bool
 sudo_load_sudoers_plugin(const char *symbol_name, bool optional)
 {
     struct plugin_info *info;

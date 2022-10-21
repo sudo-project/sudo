@@ -19,17 +19,21 @@
 #ifndef PYTHON_IO_HELPERS
 #define PYTHON_IO_HELPERS
 
-#include "config.h"
-#include "sudo_compat.h"
+#include <config.h>
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
 #include <string.h>
 #include <stdarg.h>
 #include <signal.h>
 #include <pwd.h>
 
-#include <stdbool.h>
+#include "sudo_compat.h"
 
 #define MAX_OUTPUT (2 << 16)
 

@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd June 6, 2022
+.Dd September 11, 2022
 .Dt SUDO_PLUGIN_PYTHON @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -85,9 +85,9 @@ When the plugin loads,
 will create an instance of this class and call the methods.
 The actual methods required depent on the type of the plugin,
 but most return an
-.Dq int
+.Vt int
 result code, as documented in
-.Xr sudo_plugin @mansectsu@ ,
+.Xr sudo_plugin @mansectform@ ,
 that indicates whether or not the method was successful.
 The Python sudo module defines the following constants to improve readability:
 .Bl -column "sudo.RC.USAGE_ERROR" "XXX" -offset 4n
@@ -100,12 +100,12 @@ The Python sudo module defines the following constants to improve readability:
 .El
 .Pp
 If a function returns
-.Em None
+.Dv None
 (for example, if it does not call return),
 it will be considered to have returned
 .Dv sudo.RC.OK .
-If an exception is raised (other than sudo.PluginException), the backtrace will be
-shown to the user and the plugin function will return
+If an exception is raised (other than sudo.PluginException), the
+backtrace will be shown to the user and the plugin function will return
 .Dv sudo.RC.ERROR .
 If that is not acceptable, you must catch the exception and handle it yourself.
 .Pp
@@ -128,7 +128,7 @@ Running the Python interpreter and bridging between C and Python is
 handled by the
 .Nm sudo
 plugin
-.Li python_plugin.so .
+.Pa python_plugin.so .
 This shared object can be loaded like any other dynamic
 .Nm sudo
 plugin and should receive the path and the class name of the Python
@@ -187,8 +187,8 @@ Currently, only a single policy plugin may be specified in
 .Pp
 A policy plugin may have the following member functions:
 .Bl -tag -width 4n
-.It Sy constructor
-.Bd -literal
+.It Fa constructor
+.Bd -literal -compact
 __init__(self, user_env: Tuple[str, ...], settings: Tuple[str, ...],
     version: str, user_info: Tuple[str, ...],
     plugin_options: Tuple[str, ...])
@@ -200,7 +200,9 @@ as member variables in the object.
 .Pp
 The constructor matches the
 .Fn open
-function in the C sudo plugin API.
+function in the C
+.Nm sudo
+plugin API.
 .Pp
 The function arguments are as follows:
 .Bl -tag -width 4n
@@ -239,7 +241,7 @@ see the policy plugin
 .Fn open
 documentation in
 .Xr sudo_plugin @mansectform@ .
-.It Sy check_policy
+.It Fa check_policy
 .Bd -literal -compact
 check_policy(self, argv: Tuple[str, ...], env_add: Tuple[str, ...])
 .Ed
@@ -314,7 +316,7 @@ tuple of strings in
 .Dq key=value
 format.
 .El
-.It Sy init_session
+.It Fa init_session
 .Bd -literal -compact
 init_session(self, user_pwd: Tuple, user_env: Tuple[str, ...])
 .Ed
@@ -331,8 +333,9 @@ The function arguments are as follows:
 .Bl -tag -width 4n
 .It Fa user_pwd
 A tuple describing the user's passwd entry.
-Convertible to pwd.struct_passwd or
-.Em None
+Convertible to
+.Vt pwd.struct_passwd or
+.Dv None
 if the user is not present in the password database.
 .Pp
 Example conversion:
@@ -371,7 +374,7 @@ environment in
 If this is omitted, no changes will be made to
 .Fa user_env .
 .El
-.It Sy list
+.It Fa list
 .Bd -literal -compact
 list(self, argv: Tuple[str, ...], is_verbose: int, user: str)
 .Ed
@@ -382,7 +385,7 @@ The function arguments are as follows:
 .Bl -tag -width 4n
 .It Fa argv
 If not set to
-.Em None ,
+.Dv None ,
 an argument vector describing a command the user wishes to check
 against the policy.
 .It Fa is_verbose
@@ -390,16 +393,16 @@ Flag indicating whether to list in verbose mode or not.
 .It Fa user
 The name of a different user to list privileges for if the policy allows it.
 If
-.Em None ,
+.Dv None ,
 the plugin should list the privileges of the invoking user.
 .El
-.It Sy validate
+.It Fa validate
 .Bd -literal -compact
 validate(self)
 .Ed
 .Pp
 For policy plugins that cache authentication credentials, this function is used to validate and cache the credentials (optional).
-.It Sy invalidate
+.It Fa invalidate
 .Bd -literal -compact
 invalidate(self, remove: int)
 .Ed
@@ -412,7 +415,7 @@ The function arguments are as follows:
 If this flag is set, the plugin may remove the credentials instead of simply
 invalidating them.
 .El
-.It Sy show_version
+.It Fa show_version
 .Bd -literal -compact
 show_version(self, is_verbose: int)
 .Ed
@@ -430,7 +433,7 @@ Currently this is 1 if
 .Ql sudo -V
 is run as the root user.
 .El
-.It Sy close
+.It Fa close
 .Bd -literal -compact
 close(self, exit_status: int, error: int)
 .Ed
@@ -439,7 +442,9 @@ Called when a command finishes executing.
 .Pp
 Works the same as the
 .Fn close
-function in the C sudo plugin API, except that it only gets called if
+function in the C
+.Nm sudo
+plugin API, except that it only gets called if
 .Nm sudo
 attempts to execute the command.
 .Pp
@@ -464,8 +469,10 @@ Plugin python_policy python_plugin.so \e
     ClassName=SudoPolicyPlugin
 .Ed
 .Pp
-Be aware, however, that you cannot enable the Python policy plugin
-in addition to another policy plugin, such as
+Only one policy plugin can be enabled at a time so you must disable
+any other policy plugin listed in
+.Pa @sysconfdir@/sudo.conf ,
+such as
 .Xr sudoers @mansectform@ .
 .Ss I/O plugin API
 I/O plugins must be registered in
@@ -480,7 +487,7 @@ Currently only 8 python I/O plugins can be loaded at once.
 .Pp
 An I/O plugin may have the following member functions:
 .Bl -tag -width 4n
-.It Sy constructor
+.It Fa constructor
 .Bd -literal -compact
 __init__(self, user_env: Tuple[str, ...], settings: Tuple[str, ...],
     version: str, user_info: Tuple[str, ...],
@@ -493,7 +500,9 @@ as member variables in the object.
 .Pp
 The constructor matches the
 .Fn open
-function in the C sudo plugin API.
+function in the C
+.Nm sudo
+plugin API.
 .Pp
 The function arguments are as follows:
 .Bl -tag -width 4n
@@ -532,7 +541,7 @@ see the I/O plugin
 .Fn open
 documentation in
 .Xr sudo_plugin @mansectform@ .
-.It Sy open
+.It Fa open
 .Bd -literal -compact
 open(self, argv: Tuple[str, ...],
     command_info: Tuple[str, ...]) -> int
@@ -542,11 +551,13 @@ Receives the command the user wishes to run.
 .Pp
 Works the same as the
 .Fn open
-function in the C sudo plugin API except that:
+function in the C
+.Nm sudo
+plugin API except that:
 .Pp
 .Bl -bullet -compact -offset 4n -width 1n
 .It
-It only gets called before the user would execute some command
+It only gets called when there is a command to be executed
 (and not for a version query for example).
 .It
 Other arguments of the C API
@@ -583,7 +594,7 @@ constants.
 If the function returns
 .Dv sudo.RC.REJECT ,
 no I/O will be sent to the plugin.
-.It Sy log_ttyin , log_ttyout , log_stdin , log_stdout , log_stderr
+.It Fa log_ttyin , log_ttyout , log_stdin , log_stdout , log_stderr
 .Bd -literal -compact
 log_ttyin(self, buf: str) -> int
 log_ttyout(self, buf: str) -> int
@@ -609,8 +620,8 @@ constants.
 .Pp
 If
 .Dv sudo.RC.ERROR
-is returned, the running command will be terminated and all of the plugin's logging
-functions will be disabled.
+is returned, the running command will be terminated and all of the
+plugin's logging functions will be disabled.
 Other I/O logging plugins will still receive any remaining
 input or output that has not yet been processed.
 .Pp
@@ -622,7 +633,7 @@ If an output logging function rejects the data by returning
 .Dv sudo.RC.REJECT ,
 the command will be terminated and the data will not be written to the
 terminal, though it will still be sent to any other I/O logging plugins.
-.It Sy change_winsize
+.It Fa change_winsize
 .Bd -literal -compact
 change_winsize(self, line: int, cols: int) -> int
 .Ed
@@ -635,7 +646,7 @@ The number of lines of the terminal.
 .It Fa cols
 The number of columns of the terminal.
 .El
-.It Sy log_suspend
+.It Fa log_suspend
 .Bd -literal -compact
 log_suspend(self, signo: int) -> int
 .Ed
@@ -648,7 +659,7 @@ The number of the signal that caused the command to be suspended or
 .Dv SIGCONT
 if the command was resumed.
 .El
-.It Sy show_version
+.It Fa show_version
 .Bd -literal -compact
 show_version(self, is_verbose: int)
 .Ed
@@ -665,15 +676,17 @@ Currently this is 1 if
 .Ql sudo -V
 is run as the root user.
 .El
-.It Sy close
+.It Fa close
 .Bd -literal -compact
 close(self, exit_status: int, error: int) -> None
 .Ed
-Called when a command execution finished.
+Called when a command finishes execution.
 .Pp
 Works the same as the
 .Fn close
-function in the C sudo plugin API, except that it only gets called if
+function in the C
+.Nm sudo
+plugin API, except that it only gets called if
 .Nm sudo
 attempts to execute the command.
 .Pp
@@ -689,7 +702,7 @@ system call, otherwise 0.
 .El
 .El
 .Ss I/O plugin example
-Sudo ships a Python I/O plugin example.
+Sudo ships with a Python I/O plugin example.
 To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
 .Bd -literal -offset 4n
@@ -708,9 +721,9 @@ Plugin python_audit python_plugin.so ModulePath=<path> ClassName=<class>
 Sudo supports loading multiple audit plugins.
 Currently only 8 python audit plugins can be loaded at once.
 .Pp
-An audit plugin may have the following member functions (all of them are optional):
+An audit plugin may have the following member functions (all of which are optional):
 .Bl -tag -width 4n
-.It Sy constructor
+.It Fa constructor
 .Bd -literal -compact
 __init__(self, user_env: Tuple[str, ...], settings: Tuple[str, ...],
     version: str, user_info: Tuple[str, ...], plugin_options: Tuple[str, ...])
@@ -721,7 +734,9 @@ as member variables in the object.
 .Pp
 The constructor matches the
 .Fn open
-function in the C sudo plugin API.
+function in the C
+.Nm sudo
+plugin API.
 .Pp
 The function arguments are as follows:
 .Bl -tag -width 4n
@@ -749,7 +764,7 @@ This is a tuple of strings, usually (but not necessarily) in
 .Dq key=value
 format.
 .El
-.It Sy open
+.It Fa open
 .Bd -literal -compact
 open(self, submit_optind: int,
     submit_argv: Tuple[str, ...]) -> int
@@ -764,7 +779,7 @@ that corresponds to the first entry that is not a command line option.
 .It Fa submit_argv
 The argument vector sudo was invoked with, including all command line options.
 .El
-.It Sy close
+.It Fa close
 .Bd -literal -compact
 close(self, status_type: int, status: int) -> None
 .Ed
@@ -775,7 +790,9 @@ The function arguments are as follows:
 .Bl -tag -width 4n
 .It Fa status_type
 The type of status being passed.
-One of the sudo.EXIT_REASON.* constants.
+One of the
+.Dv sudo.EXIT_REASON.*
+constants.
 .It Fa status
 Depending on the value of
 .Fa status_type ,
@@ -783,16 +800,16 @@ this value is either
 ignored, the command's exit status as returned by the
 .Xr wait 2
 system call, the value of
-.Li errno
+.Va errno
 set by the
 .Xr execve 2
 system call, or the value of
-.Li errno
+.Va errno
 resulting from an error in the
 .Nm sudo
 front-end.
 .El
-.It Sy show_version
+.It Fa show_version
 .Bd -literal -compact
 show_version(self, is_verbose: int) -> int
 .Ed
@@ -810,7 +827,7 @@ Currently this is 1 if
 .Ql sudo -V
 is run as the root user.
 .El
-.It Sy accept
+.It Fa accept
 .Bd -literal -compact
 accept(self, plugin_name: str, plugin_type: int, command_info: Tuple[str, ...],
        run_argv: Tuple[str, ...], run_envp: Tuple[str, ...]) -> int
@@ -863,7 +880,7 @@ Argument vector describing a command that will be run.
 .It run_envp
 The environment the command will be run with.
 .El
-.It Sy reject
+.It Fa reject
 .Bd -literal -compact
 reject(self, plugin_name: str, plugin_type: int, audit_msg: str,
        command_info: Tuple[str, ...]) -> int
@@ -892,15 +909,14 @@ front-end.
 .It audit_msg
 An optional string describing the reason the command was rejected by the plugin.
 If the plugin did not provide a reason, audit_msg will be
-.Em None
-.
+.Dv None .
 .It command_info
 A vector of information describing the rejected command.
 See the
 .Xr sudo_plugin @mansectform@
 manual for possible values.
 .El
-.It Sy error
+.It Fa error
 .Bd -literal -compact
 error(self, plugin_name: str, plugin_type: int, audit_msg: str,
       command_info: Tuple[str, ...]) -> int
@@ -926,8 +942,7 @@ front-end.
 .It audit_msg
 An optional string describing the plugin error.
 If the plugin did not provide a description, it will be
-.Em None
-.
+.Dv None .
 .It command_info
 A vector of information describing the command.
 See the
@@ -936,7 +951,7 @@ manual for possible values.
 .El
 .El
 .Ss Audit plugin example
-Sudo ships a Python Audit plugin example.
+Sudo ships with a Python Audit plugin example.
 To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
 .Bd -literal -offset 4n
@@ -959,7 +974,7 @@ Currently only 8 python approval plugins can be loaded at once.
 .Pp
 An approval plugin may have the following member functions:
 .Bl -tag -width 4n
-.It Sy constructor
+.It Fa constructor
 .Bd -literal -compact
 __init__(self, user_env: Tuple[str, ...], settings: Tuple[str, ...],
     version: str, user_info: Tuple[str, ...], plugin_options: Tuple[str, ...],
@@ -972,7 +987,9 @@ as member variables in the object.
 .Pp
 The constructor matches the
 .Fn open
-function in the C sudo plugin API.
+function in the C
+.Nm sudo
+plugin API.
 .Pp
 The function arguments are as follows:
 .Bl -tag -width 4n
@@ -1006,13 +1023,14 @@ that corresponds to the first entry that is not a command line option.
 .It Fa submit_argv
 The argument vector sudo was invoked with, including all command line options.
 .El
-.It Sy show_version
+.It Fa show_version
 .Bd -literal -compact
 show_version(self, is_verbose: int) -> int
 .Ed
 .Pp
-Display the version. (Same as for all the other plugins.)
-.It Sy check
+Display the version.
+(Same as for all the other plugins.)
+.It Fa check
 .Bd -literal -compact
 check(self, command_info: Tuple[str, ...], run_argv: Tuple[str, ...],
       run_env: Tuple[str, ...]) -> int
@@ -1042,7 +1060,7 @@ The environment the command will be run with.
 .El
 .El
 .Ss Approval plugin example
-Sudo ships a Python Approval plugin example.
+Sudo ships with a Python Approval plugin example.
 To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
 .Bd -literal -offset 4n
@@ -1067,7 +1085,7 @@ Currently, only a single group plugin can be registered in
 .Pp
 A group provider plugin may have the following member functions:
 .Bl -tag -width 4n
-.It Sy constructor
+.It Fa constructor
 .Bd -literal -compact
 __init__(self, args: Tuple[str, ...], version: str)
 .Ed
@@ -1088,7 +1106,7 @@ format).
 .It Fa version
 The version of the Python Group Plugin API.
 .El
-.It Sy query
+.It Fa query
 .Bd -literal -compact
 query(self, user: str, group: str, user_pwd: Tuple)
 .Ed
@@ -1118,7 +1136,7 @@ will be
 .Dv NULL .
 .El
 .Ss Group plugin example
-Sudo ships a Python group plugin example.
+Sudo ships with a Python group plugin example.
 To try it, register it in the
 .Em sudoers
 file by adding the following lines:
@@ -1132,7 +1150,7 @@ The example plugin will tell
 .Nm sudo
 that the user
 .Em test
-is part of the non-unix group
+is part of the non-Unix group
 .Em mygroup .
 If you add a rule that uses this group, it will affect the
 .Em test
@@ -1154,22 +1172,24 @@ written in Python.
 A Python plugin can interact with the user using the
 .Fn sudo.conv
 function which displays one or more messages described by the
-.Sy sudo.ConvMessage
+.Dv sudo.ConvMessage
 class.
 This is the Python equivalent of the
 .Fn conversation
-function in the C sudo plugin API.
+function in the C
+.Nm sudo
+plugin API.
 A plugin should not attempt to read directly from the standard input or
 the user's tty (neither of which are guaranteed to exist).
 .Pp
 The
-.Sy sudo.ConvMessage
+.Dv sudo.ConvMessage
 class specifies how the user interaction should occur:
 .Bd -literal -offset 4n
 sudo.ConvMessage(msg_type: int, msg: str, timeout: int)
 .Ed
 .Pp
-.Sy sudo.ConvMessage
+.Dv sudo.ConvMessage
 member variables:
 .Bl -tag -width 4n
 .It Fa msg_type
@@ -1180,7 +1200,7 @@ constants below.
 .It Fa msg
 The message to display to the user.
 The caller must include a trailing newline in
-.Li msg
+.Fa msg
 if one is to be displayed.
 .It Fa timeout
 Optional.
@@ -1197,19 +1217,19 @@ To specify the message type, the following constants are available:
 .Pp
 .Bl -bullet -compact -offset 4n -width 1n
 .It
-sudo.CONV.PROMPT_ECHO_OFF
+.Dv sudo.CONV.PROMPT_ECHO_OFF
 .It
-sudo.CONV.PROMPT_ECHO_ON
+.Dv sudo.CONV.PROMPT_ECHO_ON
 .It
-sudo.CONV.ERROR_MSG
+.Dv sudo.CONV.ERROR_MSG
 .It
-sudo.CONV.INFO_MSG
+.Dv sudo.CONV.INFO_MSG
 .It
-sudo.CONV.PROMPT_MASK
+.Dv sudo.CONV.PROMPT_MASK
 .It
-sudo.CONV.PROMPT_ECHO_OK
+.Dv sudo.CONV.PROMPT_ECHO_OK
 .It
-sudo.CONV.PREFER_TTY
+.Dv sudo.CONV.PREFER_TTY
 .El
 .Pp
 See the
@@ -1228,7 +1248,7 @@ The function arguments are as follows:
 .Bl -tag -width 4n
 .It Fa message(s)
 One of more messages (of type
-.Sy sudo.ConvMessage ) ,
+.Dv sudo.ConvMessage ) ,
 each describing a conversation.
 At least one message is required.
 .It Fa on_suspend
@@ -1247,10 +1267,10 @@ The
 .Fn sudo.conv
 function can raise the following exceptions:
 .Bl -tag -width 4n
-.It Sy sudo.SudoException
+.It Dv sudo.SudoException
 If the conversation fails, for example when the conversation function is not
 available.
-.It Sy sudo.ConversationInterrupted
+.It Dv sudo.ConversationInterrupted
 If the conversation function returns an error, e.g., the timeout passed
 or the user interrupted the conversation by pressing control-C.
 .El
@@ -1305,7 +1325,7 @@ debug system.
 .Em Enabling debugging in sudo.conf
 .Pp
 To enable debug messages, add a
-.Li Debug
+.Em Debug
 line to
 .Xr sudo.conf @mansectform@
 with the program set to
@@ -1380,14 +1400,14 @@ one or more messages to log
 .Em Available log levels:
 .Bl -column "name in sudo.conf" "Python constant" "only critical messages"
 .It Sy sudo.conf name Ta Sy Python constant Ta Sy description
-.It crit Ta sudo.DEBUG.CRIT Ta only critical messages
-.It err Ta sudo.DEBUG.ERROR Ta
-.It warn Ta sudo.DEBUG.WARN Ta
-.It notice Ta sudo.DEBUG.NOTICE Ta
-.It diag Ta sudo.DEBUG.DIAG Ta
-.It info Ta sudo.DEBUG.INFO Ta
-.It trace Ta sudo.DEBUG.TRACE Ta
-.It debug Ta sudo.DEBUG.DEBUG Ta very extreme verbose debugging
+.It crit Ta Dv sudo.DEBUG.CRIT Ta only critical messages
+.It err Ta Dv sudo.DEBUG.ERROR Ta
+.It warn Ta Dv sudo.DEBUG.WARN Ta
+.It notice Ta Dv sudo.DEBUG.NOTICE Ta
+.It diag Ta Dv sudo.DEBUG.DIAG Ta
+.It info Ta Dv sudo.DEBUG.INFO Ta
+.It trace Ta Dv sudo.DEBUG.TRACE Ta
+.It debug Ta Dv sudo.DEBUG.DEBUG Ta very extreme verbose debugging
 .El
 .Pp
 .Em Using the logging module
@@ -1400,11 +1420,11 @@ The log handler of sudo will map each Python log level of a message to
 the appropriate sudo debug level.
 The sudo debug system will only receive messages that are not filtered
 out by the Python loggers.
-For example, the log level of the python logger will be an additional filter
-for the log messages, and is usually very different from what level is set in sudo.conf
-for the sudo debug system.
+For example, the log level of the python logger will be an additional
+filter for the log messages, and is usually very different from
+what level is set in sudo.conf for the sudo debug system.
 .Ss Debug example
-Sudo ships an example debug plugin by default.
+Sudo ships with an example debug plugin.
 To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
 .Bd -literal -offset 4n
@@ -1470,12 +1490,13 @@ This is how the plugin API accepts options and settings.
 .Sh PLUGIN API CHANGELOG (Python)
 None yet
 .Sh LIMITATIONS
-Only a maximum number of 8 python I/O plugins can be loaded at once.
+A maximum of 8 python I/O plugins can be loaded at once.
 If
 .Pa @sysconfdir@/sudo.conf
 contains more, those will be rejected with a warning message.
 .Pp
-The Event API and the hook function API is currently not accessible for Python plugins.
+The Event API and the hook function API is currently not accessible
+for Python plugins.
 .Sh SEE ALSO
 .Xr sudo.conf @mansectform@ ,
 .Xr sudo_plugin @mansectform@ ,
@@ -1502,7 +1523,7 @@ If you believe you have found a bug in
 you can submit a bug report at https://bugzilla.sudo.ws/
 .Sh SECURITY CONSIDERATIONS
 All Python plugin handling is implemented inside the
-.Li python_plugin.so
+.Pa python_plugin.so
 dynamic plugin.
 Therefore, if no Python plugin is registered in
 .Xr sudo.conf @mansectform@
@@ -1528,7 +1549,7 @@ accidentally importing such file would make it possible for any user
 However, during development of a plugin this might not be very convenient.
 The
 .Xr sudo.conf @mansectform@
-.Li developer_mode
+.Em developer_mode
 option can be used to disable it.
 For example:
 .Dl Set developer_mode true

@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "@mansectsu@" "April 23, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "@mansectsu@" "October 4, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -30,7 +30,7 @@
 .SH "SYNOPSIS"
 .HP 7n
 \fBvisudo\fR
-[\fB\-chOPqsV\fR]
+[\fB\-chIOPqsV\fR]
 [[\fB\-f\fR]\ \fIsudoers\fR]
 .SH "DESCRIPTION"
 \fBvisudo\fR
@@ -208,6 +208,24 @@ option.
 \fB\-h\fR, \fB\--help\fR
 Display a short help message to the standard output and exit.
 .TP 12n
+\fB\-I\fR, \fB\--no-includes\fR
+Disable the editing of include files unless there is a pre-existing
+syntax error.
+By default,
+\fBvisudo\fR
+will edit the main
+\fIsudoers\fR
+file and any files included via
+\fI@include\fR
+or
+\fI#include\fR
+directives.
+Files included via
+\fI@includedir\fR
+or
+\fI#includedir\fR
+are never edited unless they contain a syntax error.
+.TP 12n
 \fB\-O\fR, \fB\--owner\fR
 Enforce the default ownership (user and group) of the
 \fIsudoers\fR
@@ -289,7 +307,7 @@ include file for syntax errors.
 \fBvisudo\fR
 versions 1.8.4 and higher support a flexible debugging framework
 that is configured via
-\fRDebug\fR
+\fIDebug\fR
 lines in the
 sudo.conf(@mansectform@)
 file.
@@ -450,7 +468,7 @@ file.
 The
 \fIsudoers\fR
 file contains a
-\fRDefaults\fR
+\fIDefaults\fR
 setting not recognized by
 \fBvisudo\fR.
 .SH "SEE ALSO"

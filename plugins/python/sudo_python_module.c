@@ -79,8 +79,8 @@ _parse_log_function_args(PyObject *py_args, PyObject *py_kwargs, char **args_joi
     if (py_empty == NULL)
         goto cleanup;
 
-    static char *keywords[] = { "sep", "end", NULL };
-    if (py_kwargs != NULL && !PyArg_ParseTupleAndKeywords(py_empty, py_kwargs, "|zz:sudo.log", keywords, &sep, end))
+    static const char *keywords[] = { "sep", "end", NULL };
+    if (py_kwargs != NULL && !PyArg_ParseTupleAndKeywords(py_empty, py_kwargs, "|zz:sudo.log", (char **)keywords, &sep, end))
         goto cleanup;
 
     if (sep == NULL)
@@ -293,13 +293,13 @@ _call_conversation_callback(PyObject *py_callback, int signo)
     debug_return_int(rc);
 }
 
-int
+static int
 python_sudo_conversation_suspend_cb(int signo, struct py_conv_callback_closure *closure)
 {
     return _call_conversation_callback(closure->py_on_suspend, signo);
 }
 
-int
+static int
 python_sudo_conversation_resume_cb(int signo, struct py_conv_callback_closure *closure)
 {
     return _call_conversation_callback(closure->py_on_resume, signo);
@@ -330,8 +330,8 @@ python_sudo_conversation(PyObject *Py_UNUSED(self), PyObject *py_args, PyObject 
     if (py_empty == NULL)
         goto cleanup;
 
-    static char *keywords[] = { "on_suspend", "on_resume", NULL };
-    if (py_kwargs != NULL && !PyArg_ParseTupleAndKeywords(py_empty, py_kwargs, "|OO:sudo.conv", keywords,
+    static const char *keywords[] = { "on_suspend", "on_resume", NULL };
+    if (py_kwargs != NULL && !PyArg_ParseTupleAndKeywords(py_empty, py_kwargs, "|OO:sudo.conv", (char **)keywords,
                                                   &callback_closure.py_on_suspend,
                                                   &callback_closure.py_on_resume))
         goto cleanup;
@@ -467,7 +467,7 @@ cleanup:
 }
 
 CPYCHECKER_STEALS_REFERENCE_TO_ARG(3)
-void
+static void
 sudo_module_register_enum(PyObject *py_module, const char *enum_name, PyObject *py_constants_dict)
 {
     // pseudo code:

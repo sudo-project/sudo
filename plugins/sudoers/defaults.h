@@ -43,7 +43,7 @@ enum list_ops {
 
 /* Mapping of tuple string value to enum def_tuple. */
 struct def_values {
-    char *sval;		/* string value */
+    const char *sval;	/* string value */
     enum def_tuple nval;/* numeric value */
 };
 
@@ -62,9 +62,9 @@ union sudo_defs_val {
  * Structure describing compile-time and run-time options.
  */
 struct sudo_defs_types {
-    char *name;
+    const char *name;
     int type;
-    char *desc;
+    const char *desc;
     struct def_values *values;
     bool (*callback)(const char *file, int line, int column, const union sudo_defs_val *, int op);
     union sudo_defs_val sd_un;
@@ -130,6 +130,11 @@ struct early_default {
 #define	SETDEF_RUNAS	0x08
 #define	SETDEF_CMND	0x10
 #define SETDEF_ALL	(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS|SETDEF_CMND)
+
+/*
+ * Convenience macros
+ */
+#define iolog_enabled   (def_log_stdin || def_log_ttyin || def_log_stdout || def_log_stderr || def_log_ttyout)
 
 /*
  * Prototypes

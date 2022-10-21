@@ -493,6 +493,7 @@ sudo_edit_parent_valid(char *path, int sflags, struct sudo_cred *user_cred,
     struct stat sb;
     bool ret = false;
     char *slash;
+    char pathbuf[2];
     int dfd;
     debug_decl(sudo_edit_parent_valid, SUDO_DEBUG_EDIT);
 
@@ -500,9 +501,13 @@ sudo_edit_parent_valid(char *path, int sflags, struct sudo_cred *user_cred,
     slash = strrchr(path, '/');
     if (slash == NULL) {
 	/* cwd */
-	path = ".";
+	pathbuf[0] = '.';
+	pathbuf[1] = '\0';
+	path = pathbuf;
     } else if (slash == path) {
-	path = "/";
+	pathbuf[0] = '/';
+	pathbuf[1] = '\0';
+	path = pathbuf;
 	slash = NULL;
     } else {
 	*slash = '\0';

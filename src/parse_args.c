@@ -47,8 +47,9 @@ int tgetpass_flags;
 /*
  * Local functions.
  */
-static void help(void) __attribute__((__noreturn__));
-static void usage_excl(void) __attribute__((__noreturn__));
+static sudo_noreturn void help(void);
+static sudo_noreturn void usage_excl(void);
+static sudo_noreturn void usage_excl_ticket(void);
 
 /*
  * Mapping of command line flags to name/value settings.
@@ -63,6 +64,7 @@ static struct sudo_settings sudo_settings[] = {
     { "run_shell" },
     { "login_shell" },
     { "ignore_ticket" },
+    { "update_ticket" },
     { "prompt" },
     { "selinux_role" },
     { "selinux_type" },
@@ -111,8 +113,8 @@ struct environment {
  * There is a more limited set of options for sudoedit (the sudo-specific
  * long options are listed first).
  */
-static const char sudo_short_opts[] = "+Aa:BbC:c:D:Eeg:Hh::iKklnPp:R:r:SsT:t:U:u:Vv";
-static const char edit_short_opts[] = "+Aa:BC:c:D:g:h::knp:R:r:ST:t:u:V";
+static const char sudo_short_opts[] = "+Aa:BbC:c:D:Eeg:Hh::iKklNnPp:R:r:SsT:t:U:u:Vv";
+static const char edit_short_opts[] = "+Aa:BC:c:D:g:h::KkNnp:R:r:ST:t:u:V";
 static struct option sudo_long_opts[] = {
     /* sudo-specific long options */
     { "background",	no_argument,		NULL,	'b' },
@@ -137,6 +139,7 @@ static struct option sudo_long_opts[] = {
     { "help",		no_argument,		NULL,	'h' },
     { "host",		required_argument,	NULL,	OPT_HOSTNAME },
     { "reset-timestamp", no_argument,		NULL,	'k' },
+    { "no-update",	no_argument,		NULL,	'N' },
     { "non-interactive", no_argument,		NULL,	'n' },
     { "prompt",		required_argument,	NULL,	'p' },
     { "chroot",		required_argument,	NULL,	'R' },
@@ -403,15 +406,16 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		    sudo_settings[ARG_LOGIN_SHELL].value = "true";
 		    SET(flags, MODE_LOGIN_SHELL);
 		    break;
-		case 'k':
-		    sudo_settings[ARG_IGNORE_TICKET].value = "true";
-		    break;
 		case 'K':
-		    sudo_settings[ARG_IGNORE_TICKET].value = "true";
 		    if (mode && mode != MODE_KILL)
 			usage_excl();
 		    mode = MODE_KILL;
 		    valid_flags = 0;
+		    FALLTHROUGH;
+		case 'k':
+		    if (sudo_settings[ARG_UPDATE_TICKET].value != NULL)
+			usage_excl_ticket();
+		    sudo_settings[ARG_IGNORE_TICKET].value = "true";
 		    break;
 		case 'l':
 		    if (mode) {
@@ -422,6 +426,11 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 		    }
 		    mode = MODE_LIST;
 		    valid_flags = LIST_VALID_FLAGS;
+		    break;
+		case 'N':
+		    if (sudo_settings[ARG_IGNORE_TICKET].value != NULL)
+			usage_excl_ticket();
+		    sudo_settings[ARG_UPDATE_TICKET].value = "false";
 		    break;
 		case 'n':
 		    SET(flags, MODE_NONINTERACTIVE);
@@ -597,6 +606,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 
     /*
      * For shell mode we need to rewrite argv
+     * TODO: move this to the policy plugin and make escaping configurable
      */
     if (ISSET(flags, MODE_SHELL|MODE_LOGIN_SHELL) && ISSET(mode, MODE_RUN)) {
 	char **av, *cmnd = NULL;
@@ -638,7 +648,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 
 	av[0] = (char *)user_details.shell; /* plugin may override shell */
 	if (cmnd != NULL) {
-	    av[1] = "-c";
+	    av[1] = (char *)"-c";
 	    av[2] = cmnd;
 	}
 	av[ac] = NULL;
@@ -662,7 +672,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 	    exit(EXIT_FAILURE);
 
 	/* Must have the command in argv[0]. */
-	av[0] = "sudoedit";
+	av[0] = (char *)"sudoedit";
 	for (ac = 0; argv[ac] != NULL; ac++) {
 	    av[ac + 1] = argv[ac];
 	}
@@ -702,7 +712,7 @@ static void
 display_usage(int (*output)(const char *))
 {
     struct sudo_lbuf lbuf;
-    char *uvec[6];
+    const char *uvec[6];
     int i, ulen;
 
     /*
@@ -755,6 +765,19 @@ usage_excl(void)
 
     sudo_warnx("%s",
 	U_("Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"));
+    usage();
+}
+
+/*
+ * Tell which options are mutually exclusive and exit.
+ */
+static void
+usage_excl_ticket(void)
+{
+    debug_decl(usage_excl_ticket, SUDO_DEBUG_ARGS);
+
+    sudo_warnx("%s",
+	U_("Only one of the -K, -k or -N options may be specified"));
     usage();
 }
 

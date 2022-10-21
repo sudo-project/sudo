@@ -38,7 +38,7 @@ struct alias_warned {
 };
 SLIST_HEAD(alias_warned_list, alias_warned);
 
-static bool alias_warnx(const char *file, int line, int column, bool strict, bool quiet, const char *fmt, ...) __printflike(6, 7);
+static bool alias_warnx(const char *file, int line, int column, bool strict, bool quiet, const char *fmt, ...) sudo_printflike(6, 7);
 
 static bool
 alias_warned(struct alias_warned_list *warned, char *name)

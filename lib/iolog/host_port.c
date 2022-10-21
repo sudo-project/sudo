@@ -16,7 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "config.h"
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
+
+#include <config.h>
 
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
@@ -30,6 +35,7 @@
 #include "sudo_debug.h"
 #include "sudo_gettext.h"
 #include "sudo_util.h"
+#include "sudo_iolog.h"
 
 /*
  * Parse a string in the form host[:port] where host can also be
@@ -38,7 +44,7 @@
  */
 bool
 iolog_parse_host_port(char *str, char **hostp, char **portp, bool *tlsp,
-     char *defport, char *defport_tls)
+     const char *defport, const char *defport_tls)
 {
     char *flags, *port, *host = str;
     bool ret = false;
@@ -87,7 +93,7 @@ iolog_parse_host_port(char *str, char **hostp, char **portp, bool *tlsp,
     }
 
     if (port == NULL)
-	port = tls ? defport_tls : defport;
+	port = tls ? (char *)defport_tls : (char *)defport;
     else if (*port == '\0')
 	goto done;
 

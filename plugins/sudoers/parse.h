@@ -150,7 +150,7 @@ struct command_options {
     char *role, *type;			/* SELinux role and type */
 #endif
 #ifdef HAVE_APPARMOR
-    char *apparmor_profile;			/* AppArmor profile */
+    char *apparmor_profile;		/* AppArmor profile */
 #endif
 #ifdef HAVE_PRIV_SET
     char *privs, *limitprivs;		/* Solaris privilege sets */
@@ -237,7 +237,7 @@ struct cmndspec {
     char *role, *type;			/* SELinux role and type */
 #endif
 #ifdef HAVE_APPARMOR
-    char *apparmor_profile;			/* AppArmor profile */
+    char *apparmor_profile;		/* AppArmor profile */
 #endif
 #ifdef HAVE_PRIV_SET
     char *privs, *limitprivs;		/* Solaris privilege sets */

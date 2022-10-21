@@ -110,7 +110,13 @@ sudo_lock_region_v1
 sudo_logfac2str_v1
 sudo_logpri2str_v1
 sudo_mkdir_parents_v1
+sudo_mmap_alloc_v1
+sudo_mmap_allocarray_v1
+sudo_mmap_free_v1
+sudo_mmap_protect_v1
+sudo_mmap_strdup_v1
 sudo_new_key_val_v1
+sudo_open_parent_dir_v1
 sudo_parse_gids_v1
 sudo_parseln_v1
 sudo_parseln_v2
@@ -122,7 +128,10 @@ sudo_rcstr_dup
 sudo_regex_compile_v1
 sudo_secure_dir_v1
 sudo_secure_file_v1
+sudo_secure_open_dir_v1
+sudo_secure_open_file_v1
 sudo_setgroups_v1
+sudo_stat_multiarch_v1
 sudo_str2logfac_v1
 sudo_str2logpri_v1
 sudo_strsplit_v1
@@ -136,6 +145,7 @@ sudo_term_cbreak_v1
 sudo_term_copy_v1
 sudo_term_eof
 sudo_term_erase
+sudo_term_is_raw_v1
 sudo_term_kill
 sudo_term_noecho_v1
 sudo_term_raw_v1

@@ -54,6 +54,44 @@ static void intercept_accept_cb(int fd, int what, void *v);
 static void intercept_cb(int fd, int what, void *v);
 
 /*
+ * Enable the closure->ev event with the specified events and callback,
+ * and set the connection state to new_state if it is valid.
+ * Returns true on success, else false.
+ */
+static bool
+intercept_enable_event(int fd, short events, enum intercept_state new_state,
+    sudo_ev_callback_t callback, struct intercept_closure *closure)
+{
+    int rc;
+    debug_decl(intercept_enable_event, SUDO_DEBUG_EXEC);
+
+    rc = sudo_ev_set(&closure->ev, fd, events, callback, closure);
+    if (rc == -1 || sudo_ev_add(NULL, &closure->ev, NULL, false) == -1) {
+	sudo_warn("%s", U_("unable to add event to queue"));
+	debug_return_bool(false);
+    }
+    if (new_state != INVALID_STATE)
+	closure->state = new_state;
+    debug_return_bool(true);
+}
+
+static bool
+enable_read_event(int fd, enum intercept_state new_state,
+    sudo_ev_callback_t callback, struct intercept_closure *closure)
+{
+    return intercept_enable_event(fd, SUDO_EV_READ|SUDO_EV_PERSIST,
+	new_state, callback, closure);
+}
+
+static bool
+enable_write_event(int fd, sudo_ev_callback_t callback,
+    struct intercept_closure *closure)
+{
+    return intercept_enable_event(fd, SUDO_EV_WRITE|SUDO_EV_PERSIST,
+	INVALID_STATE, callback, closure);
+}
+
+/*
  * Create an intercept closure.
  * Returns an opaque pointer to the closure, which is also
  * passed to the event callback when not using ptrace(2).
@@ -63,7 +101,6 @@ intercept_setup(int fd, struct sudo_event_base *evbase,
     struct command_details *details)
 {
     struct intercept_closure *closure;
-    int rc;
     debug_decl(intercept_setup, SUDO_DEBUG_EXEC);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
@@ -76,6 +113,7 @@ intercept_setup(int fd, struct sudo_event_base *evbase,
     }
     closure->details = details;
     closure->listen_sock = -1;
+    sudo_ev_set_base(&closure->ev, evbase);
 
     if (ISSET(details->flags, CD_USE_PTRACE)) {
 	/*
@@ -92,15 +130,10 @@ intercept_setup(int fd, struct sudo_event_base *evbase,
 	 * Not using ptrace(2), use LD_PRELOAD (or its equivalent).  If
 	 * we've already seen an InterceptHello, expect a policy check first.
 	 */
-	closure->state = sudo_token_isset(intercept_token) ?
+	const int new_state = sudo_token_isset(intercept_token) ?
 	    RECV_SECRET : RECV_HELLO_INITIAL;
-
-	rc = sudo_ev_set(&closure->ev, fd, SUDO_EV_READ|SUDO_EV_PERSIST,
-	    intercept_cb, closure);
-	if (rc == -1 || sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
-	    sudo_warn("%s", U_("unable to add event to queue"));
+	if (!enable_read_event(fd, new_state, intercept_cb, closure))
 	    goto bad;
-	}
     }
 
     debug_return_ptr(closure);
@@ -185,8 +218,8 @@ intercept_cleanup(void)
 static bool
 prepare_listener(struct intercept_closure *closure)
 {
-    struct sockaddr_in sin;
-    socklen_t sin_len = sizeof(sin);
+    struct sockaddr_in sin4;
+    socklen_t sin4_len = sizeof(sin4);
     int sock;
     debug_decl(prepare_listener, SUDO_DEBUG_EXEC);
 
@@ -201,15 +234,15 @@ prepare_listener(struct intercept_closure *closure)
 	sudo_warn("socket");
 	goto bad;
     }
-    memset(&sin, 0, sizeof(sin));
-    sin.sin_family = AF_INET;
-    sin.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    sin.sin_port = 0;
-    if (bind(sock, (struct sockaddr *)&sin, sizeof(sin)) == -1) {
+    memset(&sin4, 0, sizeof(sin4));
+    sin4.sin_family = AF_INET;
+    sin4.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    sin4.sin_port = 0;
+    if (bind(sock, (struct sockaddr *)&sin4, sizeof(sin4)) == -1) {
 	sudo_warn("bind");
 	goto bad;
     }
-    if (getsockname(sock, (struct sockaddr *)&sin, &sin_len) == -1) {
+    if (getsockname(sock, (struct sockaddr *)&sin4, &sin4_len) == -1) {
 	sudo_warn("getsockname");
 	goto bad;
     }
@@ -219,7 +252,7 @@ prepare_listener(struct intercept_closure *closure)
     }
 
     closure->listen_sock = sock;
-    intercept_listen_port = ntohs(sin.sin_port);
+    intercept_listen_port = ntohs(sin4.sin_port);
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"%s: listening on port %hu", __func__, intercept_listen_port);
 
@@ -238,7 +271,7 @@ bad:
  */
 static char **
 update_command_info(char * const *old_command_info, const char *cmnd,
-    const char *runcwd, char **cmnd_out)
+    const char *runcwd, char **cmnd_out, struct intercept_closure *closure)
 {
     char **command_info;
     char * const *oci;
@@ -248,7 +281,7 @@ update_command_info(char * const *old_command_info, const char *cmnd,
     /* Rebuild command_info[] with new command and add a runcwd. */
     for (n = 0; old_command_info[n] != NULL; n++)
 	continue;
-    command_info = reallocarray(NULL, n + 2, sizeof(char *));
+    command_info = reallocarray(NULL, n + 3, sizeof(char *));
     if (command_info == NULL) {
 	goto bad;
     }
@@ -257,19 +290,12 @@ update_command_info(char * const *old_command_info, const char *cmnd,
 	switch (*cp) {
 	case 'c':
 	    if (strncmp(cp, "command=", sizeof("command=") - 1) == 0) {
-		if (cmnd != NULL) {
-		    command_info[n] = sudo_new_key_val("command", cmnd);
-		    if (command_info[n] == NULL) {
-			goto bad;
-		    }
-		    n++;
-		    continue;
-		} else if (cmnd_out != NULL) {
-		    *cmnd_out = strdup(cp + sizeof("command=") - 1);
-		    if (*cmnd_out == NULL) {
-			goto bad;
-		    }
+		if (cmnd == NULL) {
+		    /* No new command specified, use old value. */
+		    cmnd = cp + sizeof("command=") - 1;
 		}
+		/* Filled in at the end. */
+		continue;
 	    }
 	    break;
 	case 'r':
@@ -285,16 +311,38 @@ update_command_info(char * const *old_command_info, const char *cmnd,
 	}
 	n++;
     }
-    /* Append actual runcwd. */
-    command_info[n] = sudo_new_key_val("runcwd", runcwd);
-    if (command_info[n] == NULL) {
+
+    /* Append new command. */
+    if (cmnd == NULL) {
+	closure->errstr = N_("command not set by the security policy");
 	goto bad;
+    }
+    command_info[n] = sudo_new_key_val("command", cmnd);
+    if (command_info[n] == NULL) {
+	goto oom;
+    }
+    n++;
+
+    /* Append actual runcwd. */
+    command_info[n] = sudo_new_key_val("runcwd", runcwd ? runcwd : "unknown");
+    if (command_info[n] == NULL) {
+	goto oom;
     }
     n++;
 
     command_info[n] = NULL;
 
+    if (cmnd_out != NULL) {
+	*cmnd_out = strdup(cmnd);
+	if (*cmnd_out == NULL) {
+	    goto oom;
+	}
+    }
     debug_return_ptr(command_info);
+
+oom:
+    closure->errstr = N_("unable to allocate memory");
+
 bad:
     if (command_info != NULL) {
 	for (n = 0; command_info[n] != NULL; n++) {
@@ -308,7 +356,7 @@ bad:
 /*
  * Perform a policy check for the given command.
  * While argv must be NULL-terminated, envp need not be.
- * The status of the policy check is stored in closure->state.
+ * Sets closure->state to the result of the policy check before returning.
  * Return false on error, else true.
  */
 bool
@@ -320,11 +368,36 @@ intercept_check_policy(const char *command, int argc, char **argv, int envc,
     char **command_info_copy = NULL;
     char **user_env_out = NULL;
     char **run_argv = NULL;
-    bool ret = false;
-    int i, rc;
+    bool ret = true;
+    int i, rc, saved_dir = -1;
     debug_decl(intercept_check_policy, SUDO_DEBUG_EXEC);
 
     if (ISSET(closure->details->flags, CD_INTERCEPT)) {
+	/* Change to runcwd for the policy check if necessary. */
+	if (*command != '/') {
+	    if (runcwd == NULL || (saved_dir = open(".", O_RDONLY)) == -1 ||
+		    chdir(runcwd) == -1) {
+		if (runcwd == NULL) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"relative command path but no runcwd specified");
+		} else if (saved_dir == -1) {
+		    sudo_debug_printf(
+			SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+			"unable to open current directory for reading");
+		} else {
+		    sudo_debug_printf(
+			SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+			"unable to chdir for %s", runcwd);
+		}
+		if (closure->errstr == NULL)
+		    closure->errstr = N_("command rejected by policy");
+		audit_reject(policy_plugin.name, SUDO_POLICY_PLUGIN,
+		    closure->errstr, closure->details->info);
+		closure->state = POLICY_REJECT;
+		goto done;
+	    }
+	}
+
 	/* We don't currently have a good way to validate the environment. */
 	sudo_debug_set_active_instance(policy_plugin.debug_instance);
 	rc = policy_plugin.u.policy->check_policy(argc, argv, NULL,
@@ -337,11 +410,9 @@ intercept_check_policy(const char *command, int argc, char **argv, int envc,
 	case 1:
 	    /* Rebuild command_info[] with runcwd and extract command. */
 	    command_info_copy = update_command_info(command_info, NULL,
-		runcwd ? runcwd : "unknown", &closure->command);
-	    if (command_info_copy == NULL) {
-		closure->errstr = N_("unable to allocate memory");
-		goto done;
-	    }
+		runcwd, &closure->command, closure);
+	    if (command_info_copy == NULL)
+		goto oom;
 	    command_info = command_info_copy;
 	    closure->state = POLICY_ACCEPT;
 	    break;
@@ -351,28 +422,24 @@ intercept_check_policy(const char *command, int argc, char **argv, int envc,
 	    audit_reject(policy_plugin.name, SUDO_POLICY_PLUGIN,
 		closure->errstr, command_info);
 	    closure->state = POLICY_REJECT;
-	    ret = true;
 	    goto done;
 	default:
-	    goto done;
+	    /* Plugin error? */
+	    goto bad;
 	}
     } else {
 	/* No actual policy check, just logging child processes. */
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "not checking policy, audit only");
 	closure->command = strdup(command);
-	if (closure->command == NULL) {
-	    closure->errstr = N_("unable to allocate memory");
-	    goto done;
-	}
+	if (closure->command == NULL)
+	    goto oom;
 
 	/* Rebuild command_info[] with new command and runcwd. */
 	command_info = update_command_info(closure->details->info,
-	    command, runcwd ? runcwd : "unknown", NULL);
-	if (command_info == NULL) {
-	    closure->errstr = N_("unable to allocate memory");
-	    goto done;
-	}
+	    command, runcwd, NULL, closure);
+	if (command_info == NULL)
+	    goto oom;
 	closure->state = POLICY_ACCEPT;
 	run_argv = argv;
     }
@@ -394,31 +461,23 @@ intercept_check_policy(const char *command, int argc, char **argv, int envc,
     for (i = 0; run_argv[i] != NULL; i++)
 	continue;
     closure->run_argv = reallocarray(NULL, i + 1, sizeof(char *));
-    if (closure->run_argv == NULL) {
-	closure->errstr = N_("unable to allocate memory");
-	goto done;
-    }
+    if (closure->run_argv == NULL)
+	goto oom;
     for (i = 0; run_argv[i] != NULL; i++) {
 	closure->run_argv[i] = strdup(run_argv[i]);
-	if (closure->run_argv[i] == NULL) {
-	    closure->errstr = N_("unable to allocate memory");
-	    goto done;
-	}
+	if (closure->run_argv[i] == NULL)
+	    goto oom;
     }
     closure->run_argv[i] = NULL;
 
     /* Make a copy of envp, which may not be NULL-terminated. */
     closure->run_envp = reallocarray(NULL, envc + 1, sizeof(char *));
-    if (closure->run_envp == NULL) {
-	closure->errstr = N_("unable to allocate memory");
-	goto done;
-    }
+    if (closure->run_envp == NULL)
+	goto oom;
     for (i = 0; i < envc; i++) {
 	closure->run_envp[i] = strdup(envp[i]);
-	if (closure->run_envp[i] == NULL) {
-	    closure->errstr = N_("unable to allocate memory");
-	    goto done;
-	}
+	if (closure->run_envp[i] == NULL)
+	    goto oom;
     }
     closure->run_envp[i] = NULL;
 
@@ -427,24 +486,40 @@ intercept_check_policy(const char *command, int argc, char **argv, int envc,
 		closure->run_argv, closure->run_envp);
 
 	/* Call approval plugins and audit the result. */
-	if (!approval_check(command_info, closure->run_argv, closure->run_envp))
-	    debug_return_int(0);
+	if (!approval_check(command_info, closure->run_argv, closure->run_envp)) {
+	    if (closure->errstr == NULL)
+		closure->errstr = N_("approval plugin error");
+	    closure->state = POLICY_REJECT;
+	    goto done;
+	}
     }
 
     /* Audit the event again for the sudo front-end. */
     audit_accept("sudo", SUDO_FRONT_END, command_info, closure->run_argv,
 	closure->run_envp);
 
-    ret = true;
+    goto done;
+
+oom:
+    closure->errstr = N_("unable to allocate memory");
+
+bad:
+    if (closure->errstr == NULL)
+	closure->errstr = N_("policy plugin error");
+    audit_error(policy_plugin.name, SUDO_POLICY_PLUGIN, closure->errstr,
+	command_info ? command_info : closure->details->info);
+    closure->state = POLICY_ERROR;
+    ret = false;
 
 done:
-    if (!ret) {
-	if (closure->errstr == NULL)
-	    closure->errstr = N_("policy plugin error");
-	audit_error(policy_plugin.name, SUDO_POLICY_PLUGIN, closure->errstr,
-	    command_info ? command_info : closure->details->info);
-	closure->state = POLICY_ERROR;
+    if (saved_dir != -1) {
+	if (fchdir(saved_dir) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		"%s: unable to restore saved cwd", __func__);
+	}
+	close(saved_dir);
     }
+
     if (command_info_copy != NULL) {
 	for (i = 0; command_info_copy[i] != NULL; i++) {
 	    free(command_info_copy[i]);
@@ -464,7 +539,7 @@ intercept_check_policy_req(PolicyCheckRequest *req,
     size_t n;
     debug_decl(intercept_check_policy_req, SUDO_DEBUG_EXEC);
 
-    if (req->command == NULL || req->n_argv == 0 || req->n_envp == 0) {
+    if (req->command == NULL) {
 	closure->errstr = N_("invalid PolicyCheckRequest");
 	goto done;
     }
@@ -478,7 +553,14 @@ intercept_check_policy_req(PolicyCheckRequest *req,
 	}
     }
 
-    /* Rebuild argv from PolicyCheckReq so it is NULL-terminated. */
+    /* If argv is empty, reserve an extra slot for the command. */
+    if (req->n_argv == 0)
+	req->n_argv = 1;
+
+    /*
+     * Rebuild argv from PolicyCheckReq so it is NULL-terminated.
+     * The plugin API requires us to pass the pathname to exec in argv[0].
+     */
     argv = reallocarray(NULL, req->n_argv + 1, sizeof(char *));
     if (argv == NULL) {
 	closure->errstr = N_("unable to allocate memory");
@@ -546,11 +628,9 @@ intercept_verify_token(int fd, struct intercept_closure *closure)
 static bool
 intercept_read(int fd, struct intercept_closure *closure)
 {
-    struct sudo_event_base *evbase = sudo_ev_get_base(&closure->ev);
     InterceptRequest *req = NULL;
     bool ret = false;
     ssize_t nread;
-    int rc;
     debug_decl(intercept_read, SUDO_DEBUG_EXEC);
 
     if (closure->state == RECV_SECRET) {
@@ -644,7 +724,7 @@ unpack:
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: finished receiving %u bytes from client", __func__, closure->len);
-    sudo_ev_del(evbase, &closure->ev);
+    sudo_ev_del(NULL, &closure->ev);
     free(closure->buf);
     closure->buf = NULL;
     closure->len = 0;
@@ -663,6 +743,11 @@ unpack:
 	ret = intercept_check_policy_req(req->u.policy_check_req, closure);
 	if (!ret)
 	    goto done;
+	if (!ISSET(closure->details->flags, CD_INTERCEPT)) {
+	    /* Just logging, re-use event to read next InterceptHello. */
+	    ret = enable_read_event(fd, RECV_HELLO, intercept_cb, closure);
+	    goto done;
+	}
 	break;
     case INTERCEPT_REQUEST__TYPE_HELLO:
 	switch (closure->state) {
@@ -686,12 +771,8 @@ unpack:
     }
 
     /* Switch event to write mode for the reply. */
-    rc = sudo_ev_set(&closure->ev, fd, SUDO_EV_WRITE|SUDO_EV_PERSIST,
-	intercept_cb, closure);
-    if (rc == -1 || sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
-	sudo_warn("%s", U_("unable to add event to queue"));
+    if (!enable_write_event(fd, intercept_cb, closure))
 	goto done;
-    }
 
     ret = true;
 
@@ -744,6 +825,7 @@ fmt_hello_response(struct intercept_closure *closure)
     hello_resp.portno = intercept_listen_port;
     hello_resp.token_lo = intercept_token.u64[0];
     hello_resp.token_hi = intercept_token.u64[1];
+    hello_resp.log_only = !ISSET(closure->details->flags, CD_INTERCEPT);
 
     resp.u.hello_resp = &hello_resp;
     resp.type_case = INTERCEPT_RESPONSE__TYPE_HELLO_RESP;
@@ -811,10 +893,8 @@ fmt_error_message(struct intercept_closure *closure)
 static bool
 intercept_write(int fd, struct intercept_closure *closure)
 {
-    struct sudo_event_base *evbase = sudo_ev_get_base(&closure->ev);
     bool ret = false;
     ssize_t nwritten;
-    int rc;
     debug_decl(intercept_write, SUDO_DEBUG_EXEC);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO, "state %d",
@@ -864,46 +944,33 @@ intercept_write(int fd, struct intercept_closure *closure)
 	debug_return_bool(true);
     }
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sent %u bytes to client",
-	__func__, closure->len);
-    sudo_ev_del(evbase, &closure->ev);
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: sent %u bytes to client", __func__, closure->len);
+    sudo_ev_del(NULL, &closure->ev);
     free(closure->buf);
     closure->buf = NULL;
     closure->len = 0;
     closure->off = 0;
 
-    if (ISSET(closure->details->flags, CD_USE_PTRACE)) {
-	/* Ready for the next policy check from the tracer. */
-	closure->state = RECV_POLICY_CHECK;
-    } else {
-	switch (closure->state) {
-	case RECV_HELLO_INITIAL:
-	    /* Re-use event for the listener. */
-	    close(fd);
-	    rc = sudo_ev_set(&closure->ev, closure->listen_sock,
-		SUDO_EV_READ|SUDO_EV_PERSIST, intercept_accept_cb, closure);
-	    if (rc == -1 || sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
-		sudo_warn("%s", U_("unable to add event to queue"));
-		goto done;
-	    }
-	    closure->listen_sock = -1;
-	    closure->state = RECV_CONNECTION;
-	    accept_closure = closure;
-	    break;
-	case POLICY_ACCEPT:
-	    /* Re-use event to read InterceptHello from sudo_intercept.so ctor. */
-	    rc = sudo_ev_set(&closure->ev, fd, SUDO_EV_READ|SUDO_EV_PERSIST,
-		intercept_cb, closure);
-	    if (rc == -1 || sudo_ev_add(evbase, &closure->ev, NULL, false) == -1) {
-		sudo_warn("%s", U_("unable to add event to queue"));
-		goto done;
-	    }
-	    closure->state = RECV_HELLO;
-	    break;
-	default:
-	    /* Done with this connection. */
-	    intercept_connection_close(closure);
-	}
+    switch (closure->state) {
+    case RECV_HELLO_INITIAL:
+	/* Re-use the listener event. */
+	close(fd);
+	if (!enable_read_event(closure->listen_sock, RECV_CONNECTION,
+		intercept_accept_cb, closure))
+	    goto done;
+	closure->listen_sock = -1;
+	closure->state = RECV_CONNECTION;
+	accept_closure = closure;
+	break;
+    case POLICY_ACCEPT:
+	/* Re-use event to read InterceptHello from sudo_intercept.so ctor. */
+	if (!enable_read_event(fd, RECV_HELLO, intercept_cb, closure))
+	    goto done;
+	break;
+    default:
+	/* Done with this connection. */
+	intercept_connection_close(closure);
     }
 
     ret = true;
@@ -945,8 +1012,8 @@ intercept_accept_cb(int fd, int what, void *v)
 {
     struct intercept_closure *closure = v;
     struct sudo_event_base *evbase = sudo_ev_get_base(&closure->ev);
-    struct sockaddr_in sin;
-    socklen_t sin_len = sizeof(sin);
+    struct sockaddr_in sin4;
+    socklen_t sin4_len = sizeof(sin4);
     int client_sock, flags, on = 1;
     debug_decl(intercept_accept_cb, SUDO_DEBUG_EXEC);
 
@@ -959,7 +1026,7 @@ intercept_accept_cb(int fd, int what, void *v)
 	debug_return;
     }
 
-    client_sock = accept(fd, (struct sockaddr *)&sin, &sin_len);
+    client_sock = accept(fd, (struct sockaddr *)&sin4, &sin4_len);
     if (client_sock == -1) {
 	sudo_warn("accept");
 	goto bad;

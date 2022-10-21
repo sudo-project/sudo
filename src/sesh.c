@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2008, 2010-2018, 2020-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2008, 2010-2018, 2020-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -38,14 +38,48 @@
 #else
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
+#ifdef HAVE_GETOPT_LONG
+# include <getopt.h>
+# else
+# include "compat/getopt.h"
+#endif /* HAVE_GETOPT_LONG */
 
 #include "sudo.h"
 #include "sudo_exec.h"
 #include "sudo_edit.h"
 
+enum sesh_mode {
+    SESH_RUN_COMMAND,
+    SESH_EDIT_CREATE,
+    SESH_EDIT_INSTALL
+};
+
+static const char short_opts[] = "+cd:e:ihnw:";
+static struct option long_opts[] = {
+    { "edit-create",		no_argument,		NULL,	'c' },
+    { "directory",		required_argument,	NULL,	'd' },
+    { "execfd",			required_argument,	NULL,	'e' },
+    { "edit-install",		no_argument,		NULL,	'i' },
+    { "no-dereference",		no_argument,		NULL,	'h' },
+    { "noexec",			no_argument,		NULL,	'n' },
+    { "edit-checkdir",		required_argument,	NULL,	'w' },
+    { NULL,			no_argument,		NULL,	'\0' },
+};
+
 sudo_dso_public int main(int argc, char *argv[], char *envp[]);
 
-static int sesh_sudoedit(int argc, char *argv[]);
+static int sesh_sudoedit(enum sesh_mode mode, int flags, char *user, int argc,
+    char *argv[]);
+
+sudo_noreturn void
+usage(void)
+{
+    (void)fprintf(stderr,
+	"usage: %s [-n] [-d directory] [-e fd] command [...]\n"
+	"       %s [-cih] [-w uid:gids] file [...]\n",
+	getprogname(), getprogname());
+    exit(EXIT_FAILURE);
+}
 
 /*
  * Exit codes defined in sudo_exec.h:
@@ -59,7 +93,11 @@ static int sesh_sudoedit(int argc, char *argv[]);
 int
 main(int argc, char *argv[], char *envp[])
 {
-    int ret;
+    enum sesh_mode mode = SESH_RUN_COMMAND;
+    const char *errstr, *rundir = NULL;
+    int flags = CD_SUDOEDIT_FOLLOW;
+    char *edit_user = NULL;
+    int ch, ret, fd = -1;
     debug_decl(main, SUDO_DEBUG_MAIN);
 
     initprogname(argc > 0 ? argv[0] : "sesh");
@@ -68,8 +106,55 @@ main(int argc, char *argv[], char *envp[])
     bindtextdomain(PACKAGE_NAME, LOCALEDIR);
     textdomain(PACKAGE_NAME);
 
-    if (argc < 2)
-	sudo_fatalx("%s", U_("requires at least one argument"));
+    while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
+	switch (ch) {
+	case 'c':
+	    if (mode != SESH_RUN_COMMAND) {
+		sudo_warnx("%s",
+		    U_("Only one of the -c or -i options may be specified"));
+		usage();
+	    }
+	    mode = SESH_EDIT_CREATE;
+	    break;
+	case 'd':
+	    rundir = optarg;
+	    if (*rundir == '+') {
+		SET(flags, CD_CWD_OPTIONAL);
+		rundir++;
+	    }
+	    break;
+	case 'e':
+	    fd = sudo_strtonum(optarg, 0, INT_MAX, &errstr);
+	    if (errstr != NULL)
+		sudo_fatalx(U_("invalid file descriptor number: %s"), optarg);
+	    break;
+	case 'i':
+	    if (mode != SESH_RUN_COMMAND) {
+		sudo_warnx("%s",
+		    U_("Only one of the -c or -i options may be specified"));
+		usage();
+	    }
+	    mode = SESH_EDIT_INSTALL;
+	    break;
+	case 'h':
+	    CLR(flags, CD_SUDOEDIT_FOLLOW);
+	    break;
+	case 'n':
+	    SET(flags, CD_NOEXEC);
+	    break;
+	case 'w':
+	    SET(flags, CD_SUDOEDIT_CHECKDIR);
+	    edit_user = optarg;
+	    break;
+	default:
+	    usage();
+	    break;
+	}
+    }
+    argc -= optind;
+    argv += optind;
+    if (argc == 0)
+	usage();
 
     /* Read sudo.conf and initialize the debug subsystem. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
@@ -77,47 +162,56 @@ main(int argc, char *argv[], char *envp[])
     sudo_debug_register(getprogname(), NULL, NULL,
 	sudo_conf_debug_files(getprogname()), -1);
 
-    if (strcmp(argv[1], "-e") == 0) {
-	ret = sesh_sudoedit(argc, argv);
+    if (mode != SESH_RUN_COMMAND) {
+	if (rundir != NULL) {
+	    sudo_warnx(U_("The -%c option may not be used in edit mode."), 'd');
+	    usage();
+	}
+	if (fd != -1) {
+	    sudo_warnx(U_("The -%c option may not be used in edit mode."), 'e');
+	    usage();
+	}
+	if (ISSET(flags, CD_NOEXEC)) {
+	    sudo_warnx(U_("The -%c option may not be used in edit mode."), 'n');
+	    usage();
+	}
+	ret = sesh_sudoedit(mode, flags, edit_user, argc, argv);
     } else {
 	bool login_shell;
-	char *cp, *cmnd;
-	int flags = 0;
-	int fd = -1;
+	char *cmnd;
+
+	if (!ISSET(flags, CD_SUDOEDIT_FOLLOW)) {
+	    sudo_warnx(U_("The -%c option may only be used in edit mode."),
+		'h');
+	    usage();
+	}
+	if (edit_user != NULL) {
+	    sudo_warnx(U_("The -%c option may only be used in edit mode."),
+		'w');
+	    usage();
+	}
 
 	/* If the first char of argv[0] is '-', we are running a login shell. */
 	login_shell = argv[0][0] == '-';
 
-	/* If argv[0] ends in -noexec, pass the flag to sudo_execve() */
-	if ((cp = strrchr(argv[0], '-')) != NULL && cp != argv[0]) {
-	    if (strcmp(cp, "-noexec") == 0)
-		SET(flags, CD_NOEXEC);
+	/* We must change the directory in sesh after the context changes. */
+	if (rundir != NULL && chdir(rundir) == -1) {
+	    sudo_warnx(U_("unable to change directory to %s"), rundir);
+	    if (!ISSET(flags, CD_CWD_OPTIONAL))
+		exit(EXIT_FAILURE);
 	}
 
-	/* If argv[1] is --execfd=%d, extract the fd to exec with. */
-	if (strncmp(argv[1], "--execfd=", 9) == 0) {
-	    const char *errstr;
-
-	    cp = argv[1] + 9;
-	    fd = sudo_strtonum(cp, 0, INT_MAX, &errstr);
-	    if (errstr != NULL)
-		sudo_fatalx(U_("invalid file descriptor number: %s"), cp);
-	    argv++;
-	    argc--;
-	}
-
-	/* Shift argv and make a copy of the command to execute. */
-	argv++;
-	argc--;
+	/* Make a copy of the command to execute. */
 	if ((cmnd = strdup(argv[0])) == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
 	/* If invoked as a login shell, modify argv[0] accordingly. */
 	if (login_shell) {
-	    if ((cp = strrchr(argv[0], '/')) == NULL)
-		sudo_fatal(U_("unable to run %s as a login shell"), argv[0]);
-	    *cp = '-';
-	    argv[0] = cp;
+	    char *cp = strrchr(argv[0], '/');
+	    if (cp != NULL) {
+		*cp = '-';
+		argv[0] = cp;
+	    }
 	}
 	sudo_execve(fd, cmnd, argv, envp, -1, flags);
 	sudo_warn(U_("unable to execute %s"), cmnd);
@@ -337,59 +431,25 @@ sesh_edit_copy_tfiles(int edit_flags, struct sudo_cred *user_cred,
 }
 
 static int
-sesh_sudoedit(int argc, char *argv[])
+sesh_sudoedit(enum sesh_mode mode, int flags, char *user,
+    int argc, char *argv[])
 {
-    int edit_flags, post, ret;
     struct sudo_cred user_cred, run_cred;
+    int ret;
     debug_decl(sesh_sudoedit, SUDO_DEBUG_EDIT);
 
     memset(&user_cred, 0, sizeof(user_cred));
     memset(&run_cred, 0, sizeof(run_cred));
-    edit_flags = CD_SUDOEDIT_FOLLOW;
 
-    /* Check for -h flag (don't follow links). */
-    if (argc > 2 && strcmp(argv[2], "-h") == 0) {
-	argv++;
-	argc--;
-	CLR(edit_flags, CD_SUDOEDIT_FOLLOW); // -V753
-    }
-
-    /* Check for -w flag (disallow directories writable by the user). */
-    if (argc > 2 && strcmp(argv[2], "-w") == 0) {
-	SET(edit_flags, CD_SUDOEDIT_CHECKDIR);
-
-	/* Parse uid:gid:gid1,gid2,... */
-	if (argv[3] == NULL || !parse_user(argv[3], &user_cred))
-	    debug_return_int(SESH_ERR_FAILURE);
-	argv += 2;
-	argc -= 2;
-    }
-
-    if (argc < 3)
+    /* Parse user for -w option, "uid:gid:gid1,gid2,..." */
+    if (user != NULL && !parse_user(user, &user_cred))
 	debug_return_int(SESH_ERR_FAILURE);
 
-    /*
-     * We need to know whether we are performing the copy operation
-     * before or after the editing. Without this we would not know
-     * which files are temporary and which are the originals.
-     *  post = 0 ... before
-     *  post = 1 ... after
-     */
-    if (strcmp(argv[2], "0") == 0)
-	post = 0;
-    else if (strcmp(argv[2], "1") == 0)
-	post = 1;
-    else /* invalid value */
-	debug_return_int(SESH_ERR_INVALID);
-
-    /* Align argv & argc to the beginning of the file list. */
-    argv += 3;
-    argc -= 3;
-
-    /* no files specified, nothing to do */
+    /* No files specified, nothing to do. */
     if (argc == 0)
 	debug_return_int(SESH_SUCCESS);
-    /* odd number of paths specified */
+
+    /* Odd number of paths specified. */
     if (argc & 1)
 	debug_return_int(SESH_ERR_BAD_PATHS);
 
@@ -422,8 +482,8 @@ sesh_sudoedit(int argc, char *argv[])
 	run_cred.groups = NULL;
     }
 
-    ret = post ?
-	sesh_edit_copy_tfiles(edit_flags, &user_cred, &run_cred, argc, argv) :
-	sesh_edit_create_tfiles(edit_flags, &user_cred, &run_cred, argc, argv);
+    ret = mode == SESH_EDIT_CREATE ?
+	sesh_edit_create_tfiles(flags, &user_cred, &run_cred, argc, argv) :
+	sesh_edit_copy_tfiles(flags, &user_cred, &run_cred, argc, argv);
     debug_return_int(ret);
 }

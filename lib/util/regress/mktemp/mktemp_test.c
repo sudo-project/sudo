@@ -50,7 +50,7 @@ sudo_dso_public int main(int argc, char *argv[]);
  * reasonable expansion of the template and matches the fd.  Returns true
  * if all the X's were replaced with non-X's
  */
-int
+static int
 check(int fd, char const *kind, char const *path, char const *prefix,
     size_t plen, char const *suffix, size_t slen, int tlen)
 {
@@ -86,7 +86,7 @@ check(int fd, char const *kind, char const *path, char const *prefix,
 	return 1;
 }
 
-void
+static void
 try_mkdtemp(char *p, char const *prefix, int len)
 {
 	size_t plen = strlen(prefix);
@@ -105,7 +105,7 @@ try_mkdtemp(char *p, char const *prefix, int len)
 	sudo_fatalx("mkdtemp: exceeded MAX_TRIES");
 }
 
-void
+static void
 try_mkstemps(char *p, char const *prefix, int len, char const *suffix)
 {
 	size_t plen = strlen(prefix);

@@ -652,7 +652,7 @@ sudo_debug_write2_v1(int fd, const char *func, const char *file, int lineno,
     /* Append error string if errno is specified. */
     if (errnum) {
 	if (len > 0) {
-	    iov[iovcnt].iov_base = ": ";
+	    iov[iovcnt].iov_base = (char *)": ";
 	    iov[iovcnt].iov_len = 2;
 	    iovcnt++;
 	}
@@ -663,7 +663,7 @@ sudo_debug_write2_v1(int fd, const char *func, const char *file, int lineno,
 
     /* If function, file and lineno are specified, append them. */
     if (func != NULL && file != NULL && lineno != 0) {
-	iov[iovcnt].iov_base = " @ ";
+	iov[iovcnt].iov_base = (char *)" @ ";
 	iov[iovcnt].iov_len = 3;
 	iovcnt++;
 
@@ -671,7 +671,7 @@ sudo_debug_write2_v1(int fd, const char *func, const char *file, int lineno,
 	iov[iovcnt].iov_len = strlen(func);
 	iovcnt++;
 
-	iov[iovcnt].iov_base = "() ";
+	iov[iovcnt].iov_base = (char *)"() ";
 	iov[iovcnt].iov_len = 3;
 	iovcnt++;
 
@@ -686,7 +686,7 @@ sudo_debug_write2_v1(int fd, const char *func, const char *file, int lineno,
     }
 
     /* Append newline. */
-    iov[iovcnt].iov_base = "\n";
+    iov[iovcnt].iov_base = (char *)"\n";
     iov[iovcnt].iov_len = 1;
     iovcnt++;
 
@@ -831,7 +831,7 @@ sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *con
     size_t plen;
     debug_decl_func(sudo_debug_execve2);
 
-    if (sudo_debug_active_instance == -1)
+    if (sudo_debug_active_instance == -1 || path == NULL)
 	goto out;
 
     /* Extract priority and subsystem from level. */
@@ -861,19 +861,19 @@ sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *con
 	    continue;
 
 	/* Log envp for debug level "debug". */
-	if (output->settings[subsys] >= SUDO_DEBUG_DEBUG - 1 && envp[0] != NULL)
+	if (output->settings[subsys] >= SUDO_DEBUG_DEBUG - 1 && envp != NULL)
 	    log_envp = true;
 
 	/* Alloc and build up buffer. */
 	plen = strlen(path);
 	buflen = sizeof(EXEC_PREFIX) -1 + plen;
-	if (argv[0] != NULL) {
+	if (argv != NULL && argv[0] != NULL) {
 	    buflen += sizeof(" []") - 1;
 	    for (av = argv; *av; av++)
 		buflen += strlen(*av) + 1;
 	    buflen--;
 	}
-	if (log_envp) {
+	if (log_envp && envp[0] != NULL) {
 	    buflen += sizeof(" []") - 1;
 	    for (av = envp; *av; av++)
 		buflen += strlen(*av) + 1;
@@ -892,7 +892,7 @@ sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *con
 	cp += plen;
 
 	/* Copy argv. */
-	if (argv[0] != NULL) {
+	if (argv != NULL && argv[0] != NULL) {
 	    *cp++ = ' ';
 	    *cp++ = '[';
 	    for (av = argv; *av; av++) {
@@ -904,7 +904,7 @@ sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *con
 	    cp[-1] = ']';
 	}
 
-	if (log_envp) {
+	if (log_envp && envp[0] != NULL) {
 	    *cp++ = ' ';
 	    *cp++ = '[';
 	    for (av = envp; *av; av++) {

@@ -29,7 +29,7 @@ CALLBACK_CFUNC(close)(int status_type, int status)
     python_plugin_audit_close(&PLUGIN_CTX, status_type, status);
 }
 
-int
+static int
 CALLBACK_CFUNC(accept)(const char *plugin_name, unsigned int plugin_type,
     char * const command_info[], char * const run_argv[],
     char * const run_envp[], const char **errstr)
@@ -38,7 +38,7 @@ CALLBACK_CFUNC(accept)(const char *plugin_name, unsigned int plugin_type,
         command_info, run_argv, run_envp, errstr);
 }
 
-int
+static int
 CALLBACK_CFUNC(reject)(const char *plugin_name, unsigned int plugin_type,
     const char *audit_msg, char * const command_info[], const char **errstr)
 {
@@ -46,7 +46,7 @@ CALLBACK_CFUNC(reject)(const char *plugin_name, unsigned int plugin_type,
         audit_msg, command_info, errstr);
 }
 
-int
+static int
 CALLBACK_CFUNC(error)(const char *plugin_name, unsigned int plugin_type,
     const char *audit_msg, char * const command_info[], const char **errstr)
 {
@@ -54,7 +54,7 @@ CALLBACK_CFUNC(error)(const char *plugin_name, unsigned int plugin_type,
         audit_msg, command_info, errstr);
 }
 
-int
+static int
 CALLBACK_CFUNC(show_version)(int verbose)
 {
     return python_plugin_audit_show_version(&PLUGIN_CTX, verbose);

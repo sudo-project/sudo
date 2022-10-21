@@ -30,6 +30,7 @@
 #include <errno.h>
 
 #include "sudo.h"
+#include "sudo_edit.h"
 
 /*
  * Extend the given fd to the specified size in bytes.

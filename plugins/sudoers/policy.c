@@ -84,11 +84,11 @@ parse_bool(const char *line, int varlen, int *flags, int fval)
     }
 }
 
-#define RUN_VALID_FLAGS	(MODE_ASKPASS|MODE_PRESERVE_ENV|MODE_RESET_HOME|MODE_IMPLIED_SHELL|MODE_LOGIN_SHELL|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_PRESERVE_GROUPS|MODE_SHELL|MODE_RUN|MODE_POLICY_INTERCEPTED)
-#define EDIT_VALID_FLAGS	(MODE_ASKPASS|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_EDIT)
-#define LIST_VALID_FLAGS	(MODE_ASKPASS|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_LIST|MODE_CHECK)
-#define VALIDATE_VALID_FLAGS	(MODE_ASKPASS|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_VALIDATE)
-#define INVALIDATE_VALID_FLAGS	(MODE_ASKPASS|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_INVALIDATE)
+#define RUN_VALID_FLAGS	(MODE_ASKPASS|MODE_PRESERVE_ENV|MODE_RESET_HOME|MODE_IMPLIED_SHELL|MODE_LOGIN_SHELL|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_UPDATE_TICKET|MODE_PRESERVE_GROUPS|MODE_SHELL|MODE_RUN|MODE_POLICY_INTERCEPTED)
+#define EDIT_VALID_FLAGS	(MODE_ASKPASS|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_UPDATE_TICKET|MODE_EDIT)
+#define LIST_VALID_FLAGS	(MODE_ASKPASS|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_UPDATE_TICKET|MODE_LIST|MODE_CHECK)
+#define VALIDATE_VALID_FLAGS	(MODE_ASKPASS|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_UPDATE_TICKET|MODE_VALIDATE)
+#define INVALIDATE_VALID_FLAGS	(MODE_ASKPASS|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_UPDATE_TICKET|MODE_INVALIDATE)
 
 /*
  * Deserialize args, settings and user_info arrays.
@@ -102,7 +102,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
     const char *remhost = NULL;
     unsigned char uuid[16];
     char * const *cur;
-    int flags = 0;
+    int flags = MODE_UPDATE_TICKET;
     debug_decl(sudoers_policy_deserialize_info, SUDOERS_DEBUG_PLUGIN);
 
 #define MATCHES(s, v)	\
@@ -280,6 +280,12 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 		goto bad;
 	    continue;
 	}
+	if (MATCHES(*cur, "update_ticket=")) {
+	    if (parse_bool(*cur, sizeof("update_ticket") -1, &flags,
+		MODE_UPDATE_TICKET) == -1)
+		goto bad;
+	    continue;
+	}
 	if (MATCHES(*cur, "noninteractive=")) {
 	    if (parse_bool(*cur, sizeof("noninteractive") - 1, &flags,
 		MODE_NONINTERACTIVE) == -1)
@@ -331,12 +337,12 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_APPARMOR
 	if (MATCHES(*cur, "apparmor_profile=")) {
-		CHECK(*cur, "apparmor_profile=");
-		free(user_apparmor_profile);
-		user_apparmor_profile = strdup(*cur + sizeof("apparmor_profile=") - 1);
-		if (user_apparmor_profile == NULL)
+	    CHECK(*cur, "apparmor_profile=");
+	    free(user_apparmor_profile);
+	    user_apparmor_profile = strdup(*cur + sizeof("apparmor_profile=") - 1);
+	    if (user_apparmor_profile == NULL)
 		goto oom;
-		continue;
+	    continue;
 	}
 #endif /* HAVE_APPARMOR */
 #ifdef HAVE_BSD_AUTH_H
@@ -395,9 +401,11 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	}
 #endif
     }
+    /* Ignore ticket trumps update. */
+    if (ISSET(flags, MODE_IGNORE_TICKET))
+	CLR(flags, MODE_UPDATE_TICKET);
 
     user_gid = (gid_t)-1;
-    user_sid = (pid_t)-1;
     user_uid = (gid_t)-1;
     user_umask = (mode_t)-1;
     for (cur = info->user_info; *cur != NULL; cur++) {
@@ -487,6 +495,15 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	if (MATCHES(*cur, "sid=")) {
 	    p = *cur + sizeof("sid=") - 1;
 	    user_sid = (pid_t) sudo_strtoid(p, &errstr);
+	    if (errstr != NULL) {
+		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
+		goto bad;
+	    }
+	    continue;
+	}
+	if (MATCHES(*cur, "tcpgid=")) {
+	    p = *cur + sizeof("tcpgid=") - 1;
+	    user_tcpgid = (pid_t) sudo_strtoid(p, &errstr);
 	    if (errstr != NULL) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
@@ -636,7 +653,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     }
 
     /* Increase the length of command_info as needed, it is *not* checked. */
-    command_info = calloc(71, sizeof(char *));
+    command_info = calloc(72, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
 
@@ -649,20 +666,26 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 	if ((command_info[info_len++] = strdup("log_subcmds=true")) == NULL)
 	    goto oom;
     }
-    if (def_log_input || def_log_output) {
+    if (iolog_enabled) {
 	if (iolog_path)
 	    command_info[info_len++] = iolog_path;	/* now owned */
-	if (def_log_input) {
+	if (def_log_stdin) {
 	    if ((command_info[info_len++] = strdup("iolog_stdin=true")) == NULL)
 		goto oom;
+	}
+	if (def_log_stdout) {
+	    if ((command_info[info_len++] = strdup("iolog_stdout=true")) == NULL)
+		goto oom;
+	}
+	if (def_log_stderr) {
+	    if ((command_info[info_len++] = strdup("iolog_stderr=true")) == NULL)
+		goto oom;
+	}
+	if (def_log_ttyin) {
 	    if ((command_info[info_len++] = strdup("iolog_ttyin=true")) == NULL)
 		goto oom;
 	}
-	if (def_log_output) {
-	    if ((command_info[info_len++] = strdup("iolog_stdout=true")) == NULL)
-		goto oom;
-	    if ((command_info[info_len++] = strdup("iolog_stderr=true")) == NULL)
-		goto oom;
+	if (def_log_ttyout) {
 	    if ((command_info[info_len++] = strdup("iolog_ttyout=true")) == NULL)
 		goto oom;
 	}
@@ -810,6 +833,10 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     }
     if (def_intercept_type == trace) {
 	if ((command_info[info_len++] = strdup("use_ptrace=true")) == NULL)
+	    goto oom;
+    }
+    if (def_intercept_verify) {
+	if ((command_info[info_len++] = strdup("intercept_verify=true")) == NULL)
 	    goto oom;
     }
     if (def_noexec) {
@@ -970,7 +997,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_APPARMOR
 	if (user_apparmor_profile != NULL) {
-	if ((command_info[info_len++] = sudo_new_key_val("apparmor_profile", user_apparmor_profile)) == NULL)
+	    if ((command_info[info_len++] = sudo_new_key_val("apparmor_profile", user_apparmor_profile)) == NULL)
 		goto oom;
 	}
 #endif /* HAVE_APPARMOR */
@@ -1154,8 +1181,8 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 #ifndef NO_LEAKS
     if (ret == true && sudo_version >= SUDO_API_MKVERSION(1, 3)) {
 	/* Unset close function if we don't need it to avoid extra process. */
-	if (!def_log_input && !def_log_output && !def_log_exit_status &&
-	    !def_use_pty && !sudo_auth_needs_end_session())
+	if (!iolog_enabled && !def_use_pty && !def_log_exit_status &&
+		SLIST_EMPTY(&def_log_servers) && !sudo_auth_needs_end_session())
 	    sudoers_policy.close = NULL;
     }
 #endif
@@ -1171,7 +1198,7 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 static int
 sudoers_policy_validate(const char **errstr)
 {
-    char *argv[] = { "validate", NULL };
+    char *argv[] = { (char *)"validate", NULL };
     const int argc = 1;
     int ret;
     debug_decl(sudoers_policy_validate, SUDOERS_DEBUG_PLUGIN);
@@ -1213,7 +1240,7 @@ static int
 sudoers_policy_list(int argc, char * const argv[], int verbose,
     const char *list_user, const char **errstr)
 {
-    char *list_argv[] = { "list", NULL };
+    char *list_argv[] = { (char *)"list", NULL };
     int ret;
     debug_decl(sudoers_policy_list, SUDOERS_DEBUG_PLUGIN);
 

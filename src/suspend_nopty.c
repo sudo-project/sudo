@@ -34,7 +34,8 @@
 #include "sudo_exec.h"
 
 void
-suspend_sudo_nopty(int signo, pid_t ppgrp, pid_t cmnd_pid)
+suspend_sudo_nopty(struct exec_closure *ec, int signo, pid_t ppgrp,
+    pid_t cmnd_pid)
 {
     struct sigaction sa, osa;
     pid_t saved_pgrp = -1;
@@ -80,6 +81,9 @@ suspend_sudo_nopty(int signo, pid_t ppgrp, pid_t cmnd_pid)
 	}
     }
 
+    /* Log the suspend event. */
+    log_suspend(ec, signo);
+
     if (signo == SIGTSTP) {
 	memset(&sa, 0, sizeof(sa));
 	sigemptyset(&sa.sa_mask);
@@ -94,6 +98,10 @@ suspend_sudo_nopty(int signo, pid_t ppgrp, pid_t cmnd_pid)
 	if (sudo_sigaction(SIGTSTP, &osa, NULL) != 0)
 	    sudo_warn(U_("unable to restore handler for signal %d"), SIGTSTP);
     }
+
+    /* Log the resume event. */
+    log_suspend(ec, SIGCONT);
+
     if (saved_pgrp != -1) {
 	/*
 	 * On resume, restore foreground process group, if different.

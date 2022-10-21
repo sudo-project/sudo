@@ -72,6 +72,7 @@ struct  InterceptHello
 /*
  * Sudo response to an InterceptHello from sudo_intercept.so.
  * The client uses the port number and token to connect back to sudo.
+ * If log_only is set there is no InterceptResponse to a PolicyCheckRequest.
  */
 struct  HelloResponse
 {
@@ -79,10 +80,11 @@ struct  HelloResponse
   uint64_t token_lo;
   uint64_t token_hi;
   int32_t portno;
+  protobuf_c_boolean log_only;
 };
 #define HELLO_RESPONSE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&hello_response__descriptor) \
-    , 0, 0, 0 }
+    , 0, 0, 0, 0 }
 
 
 /*

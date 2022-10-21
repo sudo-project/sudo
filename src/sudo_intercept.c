@@ -62,6 +62,49 @@ extern bool command_allowed(const char *cmnd, char * const argv[], char * const 
 
 typedef int (*sudo_fn_execve_t)(const char *, char *const *, char *const *);
 
+static void
+free_vector(char **vec)
+{
+    char **cur;
+    debug_decl(free_vector, SUDO_DEBUG_EXEC);
+
+    if (vec != NULL) {
+	for (cur = vec; *cur != NULL; cur++) {
+	    sudo_mmap_free(*cur);
+	}
+	sudo_mmap_free(vec);
+    }
+
+    debug_return;
+}
+
+static char **
+copy_vector(char * const *src)
+{
+    char **copy;
+    int i, len = 0;
+    debug_decl(copy_vector, SUDO_DEBUG_EXEC);
+
+    if (src != NULL) {
+	while (src[len] != NULL)
+	    len++;
+    }
+    copy = sudo_mmap_allocarray(len + 1, sizeof(char *));
+    if (copy == NULL) {
+	debug_return_ptr(NULL);
+    }
+    for (i = 0; i < len; i++) {
+	copy[i] = sudo_mmap_strdup(src[i]);
+	if (copy[i] == NULL) {
+	    sudo_mmap_free(copy);
+	    debug_return_ptr(NULL);
+	}
+    }
+    copy[i] = NULL;
+
+    debug_return_ptr(copy);
+}
+
 /*
  * We do PATH resolution here rather than in the policy because we
  * want to use the PATH in the current environment.
@@ -74,6 +117,7 @@ resolve_path(const char *cmnd, char *out_cmnd, size_t out_size)
     char path[PATH_MAX];
     char **p, *cp, *endp;
     int dirlen, len;
+    debug_decl(resolve_path, SUDO_DEBUG_EXEC);
 
     for (p = environ; (cp = *p) != NULL; p++) {
 	if (strncmp(cp, "PATH=", sizeof("PATH=") - 1) == 0) {
@@ -83,7 +127,7 @@ resolve_path(const char *cmnd, char *out_cmnd, size_t out_size)
     }
     if (cp == NULL) {
 	errno = ENOENT;
-	return false;
+	debug_return_bool(false);
     }
 
     endp = cp + strlen(cp);
@@ -104,11 +148,13 @@ resolve_path(const char *cmnd, char *out_cmnd, size_t out_size)
 	}
 
 	if (stat(path, &sb) == 0) {
+	    if (!S_ISREG(sb.st_mode))
+		continue;
 	    if (strlcpy(out_cmnd, path, out_size) >= out_size) {
 		errval = ENAMETOOLONG;
 		break;
 	    }
-	    return true;
+	    debug_return_bool(true);
 	}
 	switch (errno) {
 	case EACCES:
@@ -119,33 +165,74 @@ resolve_path(const char *cmnd, char *out_cmnd, size_t out_size)
 	case ENOENT:
 	    break;
 	default:
-	    return false;
+	    debug_return_bool(false);
 	}
     }
     errno = errval;
-    return false;
+    debug_return_bool(false);
 }
 
 static int
 exec_wrapper(const char *cmnd, char * const argv[], char * const envp[],
     bool is_execvp)
 {
+    char *cmnd_copy = NULL, **argv_copy = NULL, **envp_copy = NULL;
     char *ncmnd = NULL, **nargv = NULL, **nenvp = NULL;
     char cmnd_buf[PATH_MAX];
     void *fn = NULL;
     debug_decl(exec_wrapper, SUDO_DEBUG_EXEC);
 
+    if (cmnd == NULL) {
+	errno = EINVAL;
+	debug_return_int(-1);
+    }
+
     /* Only check PATH for the command for execlp/execvp/execvpe. */
     if (strchr(cmnd, '/') == NULL) {
 	if (!is_execvp) {
 	    errno = ENOENT;
-	    debug_return_int(-1);
+	    goto bad;
 	}
 	if (!resolve_path(cmnd, cmnd_buf, sizeof(cmnd_buf))) {
-	    debug_return_int(-1);
+	    goto bad;
 	}
 	cmnd = cmnd_buf;
+    } else {
+	struct stat sb;
+
+	/* Absolute or relative path name. */
+	if (stat(cmnd, &sb) == -1) {
+	    /* Leave errno unchanged. */
+	    goto bad;
+	} else if (!S_ISREG(sb.st_mode)) {
+	    errno = EACCES;
+	    goto bad;
+	}
     }
+
+    /*
+     * Make copies of cmnd, argv, and envp.
+     */
+    cmnd_copy = sudo_mmap_strdup(cmnd);
+    if (cmnd_copy == NULL) {
+	debug_return_int(-1);
+    }
+    sudo_mmap_protect(cmnd_copy);
+    cmnd = cmnd_copy;
+
+    argv_copy = copy_vector(argv);
+    if (argv_copy == NULL) {
+	goto bad;
+    }
+    sudo_mmap_protect(argv_copy);
+    argv = argv_copy;
+
+    envp_copy = copy_vector(envp);
+    if (envp_copy == NULL) {
+	goto bad;
+    }
+    sudo_mmap_protect(envp_copy);
+    envp = envp_copy;
 
 # if defined(HAVE___INTERPOSE)
     fn = execve;
@@ -156,7 +243,7 @@ exec_wrapper(const char *cmnd, char * const argv[], char * const envp[],
 # endif
     if (fn == NULL) {
         errno = EACCES;
-        debug_return_int(-1);
+	goto bad;
     }
 
     if (command_allowed(cmnd, argv, envp, &ncmnd, &nargv, &nenvp)) {
@@ -166,28 +253,34 @@ exec_wrapper(const char *cmnd, char * const argv[], char * const envp[],
 	/* Fall back to exec via shell for execvp and friends. */
 	if (errno == ENOEXEC && is_execvp) {
 	    int argc;
-	    char **shargv;
+	    const char **shargv;
 
 	    for (argc = 0; argv[argc] != NULL; argc++)
 		continue;
-	    shargv = reallocarray(NULL, (argc + 2), sizeof(char *));
+	    shargv = sudo_mmap_allocarray(argc + 2, sizeof(char *));
 	    if (shargv == NULL)
-		return -1;
+		goto bad;
 	    shargv[0] = "sh";
 	    shargv[1] = ncmnd;
 	    memcpy(shargv + 2, nargv + 1, argc * sizeof(char *));
-	    ((sudo_fn_execve_t)fn)(_PATH_SUDO_BSHELL, shargv, nenvp);
-	    free(shargv);
+	    ((sudo_fn_execve_t)fn)(_PATH_SUDO_BSHELL, (char **)shargv, nenvp);
+	    sudo_mmap_free(shargv);
 	}
     } else {
 	errno = EACCES;
     }
-    if (ncmnd != cmnd)
-	free(ncmnd);
-    if (nargv != argv)
-	free(nargv);
-    if (nenvp != envp)
-	free(nenvp);
+
+bad:
+    sudo_mmap_free(cmnd_copy);
+    if (ncmnd != cmnd_copy)
+	sudo_mmap_free(ncmnd);
+    free_vector(argv_copy);
+    if (nargv != argv_copy)
+	free_vector(nargv);
+    free_vector(envp_copy);
+    /* Leaks allocated preload vars. */
+    if (nenvp != envp_copy)
+	sudo_mmap_free(nenvp);
 
     debug_return_int(-1);
 }
@@ -201,11 +294,16 @@ execl_wrapper(int type, const char *name, const char *arg, va_list ap)
     va_list ap2;
     debug_decl(execl_wrapper, SUDO_DEBUG_EXEC);
 
+    if (name == NULL || arg == NULL) {
+	errno = EINVAL;
+	debug_return_int(-1);
+    }
+
     va_copy(ap2, ap);
     while (va_arg(ap2, char *) != NULL)
 	argc++;
     va_end(ap2);
-    argv = reallocarray(NULL, (argc + 1), sizeof(char *));
+    argv = sudo_mmap_allocarray(argc + 1, sizeof(char *));
     if (argv == NULL)
 	debug_return_int(-1);
 
@@ -217,7 +315,7 @@ execl_wrapper(int type, const char *name, const char *arg, va_list ap)
 	envp = va_arg(ap, char **);
 
     exec_wrapper(name, argv, envp, type == SUDO_EXECLP);
-    free(argv);
+    sudo_mmap_free(argv);
 
     debug_return_int(-1);
 }
@@ -225,7 +323,7 @@ execl_wrapper(int type, const char *name, const char *arg, va_list ap)
 static int
 system_wrapper(const char *cmnd)
 {
-    char * const argv[] = { "sh", "-c", (char *)cmnd, NULL };
+    const char * const argv[] = { "sh", "-c", cmnd, NULL };
     const char shell[] = _PATH_SUDO_BSHELL;
     struct sigaction saveint, savequit, sa;
     sigset_t mask, omask;
@@ -253,7 +351,7 @@ system_wrapper(const char *cmnd)
     case 0:
 	/* child */
 	if (sigprocmask(SIG_SETMASK, &omask, NULL) != -1)
-	    exec_wrapper(shell, argv, environ, false);
+	    exec_wrapper(shell, (char **)argv, environ, false);
 	_exit(127);
     default:
 	/* parent */
@@ -408,39 +506,50 @@ sudo_shl_get_next(const char *symbol, short type)
 }
 # endif /* HAVE_SHL_LOAD */
 
-sudo_dso_public int
+sudo_dso_public int system(const char *cmnd);
+sudo_dso_public int execve(const char *cmnd, char * const argv[], char * const envp[]);
+sudo_dso_public int execv(const char *cmnd, char * const argv[]);
+#ifdef HAVE_EXECVPE
+sudo_dso_public int execvpe(const char *cmnd, char * const argv[], char * const envp[]);
+#endif
+sudo_dso_public int execvp(const char *cmnd, char * const argv[]);
+sudo_dso_public int execl(const char *name, const char *arg, ...);
+sudo_dso_public int execle(const char *name, const char *arg, ...);
+sudo_dso_public int execlp(const char *name, const char *arg, ...);
+
+int
 system(const char *cmnd)
 {
     return system_wrapper(cmnd);
 }
 
-sudo_dso_public int
+int
 execve(const char *cmnd, char * const argv[], char * const envp[])
 {
     return exec_wrapper(cmnd, argv, envp, false);
 }
 
-sudo_dso_public int
+int
 execv(const char *cmnd, char * const argv[])
 {
     return execve(cmnd, argv, environ);
 }
 
 #ifdef HAVE_EXECVPE
-sudo_dso_public int
+int
 execvpe(const char *cmnd, char * const argv[], char * const envp[])
 {
     return exec_wrapper(cmnd, argv, envp, true);
 }
 #endif
 
-sudo_dso_public int
+int
 execvp(const char *cmnd, char * const argv[])
 {
     return exec_wrapper(cmnd, argv, environ, true);
 }
 
-sudo_dso_public int
+int
 execl(const char *name, const char *arg, ...)
 {
     va_list ap;
@@ -452,7 +561,7 @@ execl(const char *name, const char *arg, ...)
     return -1;
 }
 
-sudo_dso_public int
+int
 execle(const char *name, const char *arg, ...)
 {
     va_list ap;
@@ -464,7 +573,7 @@ execle(const char *name, const char *arg, ...)
     return -1;
 }
 
-sudo_dso_public int
+int
 execlp(const char *name, const char *arg, ...)
 {
     va_list ap;
