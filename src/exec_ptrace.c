@@ -282,16 +282,17 @@ set_sc_arg4(struct sudo_ptrace_regs *regs, unsigned long addr)
 static bool
 ptrace_getregs(int pid, struct sudo_ptrace_regs *regs, int compat)
 {
+    struct iovec iov;
     debug_decl(ptrace_getregs, SUDO_DEBUG_EXEC);
+
+    iov.iov_base = &regs->u;
+    iov.iov_len = sizeof(regs->u);
 
 # ifdef __mips__
     /* PTRACE_GETREGSET has bugs with the MIPS o32 ABI at least. */
-    if (ptrace(PTRACE_GETREGS, pid, NULL, &regs->u) == -1)
+    if (ptrace(PTRACE_GETREGS, pid, NULL, iov.iov_base) == -1)
 	debug_return_bool(false);
 # else
-    struct iovec iov;
-    iov.iov_base = &regs->u;
-    iov.iov_len = sizeof(regs->u);
     if (ptrace(PTRACE_GETREGSET, pid, (void *)NT_PRSTATUS, &iov) == -1)
 	debug_return_bool(false);
 # endif /* __mips__ */
