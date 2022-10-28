@@ -31899,75 +31899,39 @@ printf "%s\n" "$sudo_cv_var_stack_protector" >&6; }
     fi
 fi
 if test "$enable_hardening" != "no"; then
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fstack-clash-protection" >&5
-printf %s "checking whether C compiler accepts -fstack-clash-protection... " >&6; }
-if test ${ax_cv_check_cflags___fstack_clash_protection+y}
+    # The gcc front-end may accept -fstack-clash-protection even if the
+    # machine-specific code does not support it.  We use a test program
+    # with a large stack allocation to try to cause the compiler to
+    # insert the stack clash protection code, or fail if not supported.
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler supports -fstack-clash-protection" >&5
+printf %s "checking whether C compiler supports -fstack-clash-protection... " >&6; }
+if test ${sudo_cv_check_cflags___fstack_clash_protection+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
 
-  ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -fstack-clash-protection"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+	    _CFLAGS="$CFLAGS"
+	    CFLAGS="$CFLAGS -fstack-clash-protection"
+	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-int
-main (void)
-{
+		int main(int argc, char *argv[]) { char buf[16384], *src = argv[0], *dst = buf; while ((*dst++ = *src++) != '\0'); return buf[argc]; }
 
-  ;
-  return 0;
-}
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"
 then :
-  ax_cv_check_cflags___fstack_clash_protection=yes
+  sudo_cv_check_cflags___fstack_clash_protection=yes
 else $as_nop
-  ax_cv_check_cflags___fstack_clash_protection=no
+  sudo_cv_check_cflags___fstack_clash_protection=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-  CFLAGS=$ax_check_save_flags
+	    CFLAGS="$_CFLAGS"
+
+
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fstack_clash_protection" >&5
-printf "%s\n" "$ax_cv_check_cflags___fstack_clash_protection" >&6; }
-if test x"$ax_cv_check_cflags___fstack_clash_protection" = xyes
-then :
-
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fstack-clash-protection" >&5
-printf %s "checking whether the linker accepts -fstack-clash-protection... " >&6; }
-if test ${ax_cv_check_ldflags___fstack_clash_protection+y}
-then :
-  printf %s "(cached) " >&6
-else $as_nop
-
-  ax_check_save_flags=$LDFLAGS
-  LDFLAGS="$LDFLAGS  -fstack-clash-protection"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main (void)
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"
-then :
-  ax_cv_check_ldflags___fstack_clash_protection=yes
-else $as_nop
-  ax_cv_check_ldflags___fstack_clash_protection=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
-  LDFLAGS=$ax_check_save_flags
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___fstack_clash_protection" >&5
-printf "%s\n" "$ax_cv_check_ldflags___fstack_clash_protection" >&6; }
-if test x"$ax_cv_check_ldflags___fstack_clash_protection" = xyes
-then :
-
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_check_cflags___fstack_clash_protection" >&5
+printf "%s\n" "$sudo_cv_check_cflags___fstack_clash_protection" >&6; }
+    if test X"$sudo_cv_check_cflags___fstack_clash_protection" = X"yes"; then
 
 if test ${HARDENING_CFLAGS+y}
 then :
@@ -32034,15 +31998,7 @@ else $as_nop
 
 fi
 
-
-else $as_nop
-  :
-fi
-
-
-else $as_nop
-  :
-fi
+    fi
 
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fcf-protection" >&5
 printf %s "checking whether C compiler accepts -fcf-protection... " >&6; }

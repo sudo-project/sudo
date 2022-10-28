@@ -4956,12 +4956,26 @@ if test "$enable_hardening" != "no" && test "$enable_ssp" != "no"; then
     fi
 fi
 if test "$enable_hardening" != "no"; then
-    AX_CHECK_COMPILE_FLAG([-fstack-clash-protection], [
-	AX_CHECK_LINK_FLAG([-fstack-clash-protection], [
-	    AX_APPEND_FLAG([-fstack-clash-protection], [HARDENING_CFLAGS])
-	    AX_APPEND_FLAG([-Wc,-fstack-clash-protection], [HARDENING_LDFLAGS])
-	])
-    ])
+    # The gcc front-end may accept -fstack-clash-protection even if the
+    # machine-specific code does not support it.  We use a test program
+    # with a large stack allocation to try to cause the compiler to
+    # insert the stack clash protection code, or fail if not supported.
+    AC_CACHE_CHECK([whether C compiler supports -fstack-clash-protection],
+	[sudo_cv_check_cflags___fstack_clash_protection],
+	[
+	    _CFLAGS="$CFLAGS"
+	    CFLAGS="$CFLAGS -fstack-clash-protection"
+	    AC_COMPILE_IFELSE([
+		AC_LANG_SOURCE([[int main(int argc, char *argv[]) { char buf[16384], *src = argv[0], *dst = buf; while ((*dst++ = *src++) != '\0'); return buf[argc]; }]])
+	    ], [sudo_cv_check_cflags___fstack_clash_protection=yes], [sudo_cv_check_cflags___fstack_clash_protection=no])
+	    CFLAGS="$_CFLAGS"
+	]
+    )
+    if test X"$sudo_cv_check_cflags___fstack_clash_protection" = X"yes"; then
+	AX_APPEND_FLAG([-fstack-clash-protection], [HARDENING_CFLAGS])
+	AX_APPEND_FLAG([-Wc,-fstack-clash-protection], [HARDENING_LDFLAGS])
+    fi
+
     AX_CHECK_COMPILE_FLAG([-fcf-protection], [
 	AX_CHECK_LINK_FLAG([-fcf-protection], [
 	    AX_APPEND_FLAG([-fcf-protection], [HARDENING_CFLAGS])
