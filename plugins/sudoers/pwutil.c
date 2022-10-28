@@ -901,11 +901,43 @@ done:
     debug_return_ptr(item->d.grlist);
 }
 
+static void
+sudo_debug_group_list(const char *user, char * const *groups, int level)
+{
+    size_t i, len = 0;
+    debug_decl(sudo_debug_group_list, SUDOERS_DEBUG_NSS);
+
+    if (!sudo_debug_needed(level))
+	debug_return;
+
+    for (i = 0; groups[i] != NULL; i++) {
+	len += strlen(groups[i]) + 1;
+    }
+    if (len != 0) {
+	char *groupstr = malloc(len);
+	if (groupstr != NULL) {
+	    char *cp = groupstr;
+	    for (i = 0; groups[i] != NULL; i++) {
+		size_t n = snprintf(cp, len, "%s%s", i ? "," : "", groups[i]);
+		if (n >= len)
+		    break;
+		cp += n;
+		len -= n;
+	    }
+	    sudo_debug_printf(level, "%s: %s", user, groupstr);
+	    free(groupstr);
+	}
+    }
+    debug_return;
+}
+
 int
 sudo_set_grlist(struct passwd *pw, char * const *groups)
 {
     struct cache_item key, *item;
     debug_decl(sudo_set_grlist, SUDOERS_DEBUG_NSS);
+
+    sudo_debug_group_list(pw->pw_name, groups, SUDO_DEBUG_DEBUG);
 
     if (grlist_cache == NULL) {
 	grlist_cache = rbcreate(cmp_pwnam);
@@ -937,7 +969,11 @@ sudo_set_grlist(struct passwd *pw, char * const *groups)
 	    sudo_grlist_delref_item(item);
 	    debug_return_int(-1);
 	}
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+	    "groups for user %s are already cached", pw->pw_name);
     }
+
     debug_return_int(0);
 }
 
@@ -1008,6 +1044,8 @@ sudo_set_gidlist(struct passwd *pw, char * const *gids, unsigned int type)
     struct cache_item key, *item;
     debug_decl(sudo_set_gidlist, SUDOERS_DEBUG_NSS);
 
+    sudo_debug_group_list(pw->pw_name, gids, SUDO_DEBUG_DEBUG);
+
     if (gidlist_cache == NULL) {
 	gidlist_cache = rbcreate(cmp_gidlist);
 	if (gidlist_cache == NULL) {
@@ -1039,7 +1077,11 @@ sudo_set_gidlist(struct passwd *pw, char * const *gids, unsigned int type)
 	    sudo_gidlist_delref_item(item);
 	    debug_return_int(-1);
 	}
+    } else {
+	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+	    "gids for user %s are already cached", pw->pw_name);
     }
+
     debug_return_int(0);
 }
 
