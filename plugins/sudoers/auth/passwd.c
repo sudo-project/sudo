@@ -63,7 +63,7 @@ sudo_passwd_init(struct passwd *pw, sudo_auth *auth)
 int
 sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
-    char sav, *epass;
+    char des_pass[9], *epass;
     char *pw_epasswd = auth->data;
     size_t pw_len;
     int matched = 0;
@@ -75,12 +75,12 @@ sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_c
 
     /*
      * Truncate to 8 chars if standard DES since not all crypt()'s do this.
-     * If this turns out not to be safe we will have to use OS #ifdef's (sigh).
      */
-    sav = pass[8];
     pw_len = strlen(pw_epasswd);
-    if (pw_len == DESLEN || HAS_AGEINFO(pw_epasswd, pw_len))
-	pass[8] = '\0';
+    if (pw_len == DESLEN || HAS_AGEINFO(pw_epasswd, pw_len)) {
+	strlcpy(des_pass, pass, sizeof(des_pass));
+	pass = des_pass;
+    }
 
     /*
      * Normal UN*X password check.
@@ -88,7 +88,6 @@ sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_c
      * only compare the first DESLEN characters in that case.
      */
     epass = (char *) crypt(pass, pw_epasswd);
-    pass[8] = sav;
     if (epass != NULL) {
 	if (HAS_AGEINFO(pw_epasswd, pw_len) && strlen(epass) == DESLEN)
 	    matched = !strncmp(pw_epasswd, epass, DESLEN);
