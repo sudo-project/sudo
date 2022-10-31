@@ -1367,8 +1367,9 @@ sudoers_trace_print(const char *msg)
     sudo_lbuf_append(&trace_lbuf, "%s", msg);
     if (strchr(msg, '\n') != NULL)
     {
+	/* We already parsed the newline so sudolineno is off by one. */
 	sudo_debug_printf2(NULL, NULL, 0, SUDOERS_DEBUG_PARSER|SUDO_DEBUG_DEBUG,
-	    "%s:%d: %s", sudoers, sudolineno, trace_lbuf.buf);
+	    "%s:%d: %s", sudoers, sudolineno - 1, trace_lbuf.buf);
 	trace_lbuf.len = 0;
     }
     return 0;
