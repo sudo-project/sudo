@@ -126,11 +126,11 @@ sudo_rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 }
 
 int
-sudo_rfc1938_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
+sudo_rfc1938_verify(struct passwd *pw, const char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     debug_decl(sudo_rfc1938_verify, SUDOERS_DEBUG_AUTH);
 
-    if (rfc1938verify((struct RFC1938 *) auth->data, pass) == 0)
+    if (rfc1938verify((struct RFC1938 *) auth->data, (char *)pass) == 0)
 	debug_return_int(AUTH_SUCCESS);
     else
 	debug_return_int(AUTH_FAILURE);

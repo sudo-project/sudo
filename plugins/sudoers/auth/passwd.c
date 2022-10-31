@@ -61,7 +61,7 @@ sudo_passwd_init(struct passwd *pw, sudo_auth *auth)
 
 #ifdef HAVE_CRYPT
 int
-sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
+sudo_passwd_verify(struct passwd *pw, const char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     char des_pass[9], *epass;
     char *pw_epasswd = auth->data;
@@ -99,7 +99,7 @@ sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_c
 }
 #else
 int
-sudo_passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
+sudo_passwd_verify(struct passwd *pw, const char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     char *pw_passwd = auth->data;
     int matched;

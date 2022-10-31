@@ -104,7 +104,7 @@ bsdauth_init(struct passwd *pw, sudo_auth *auth)
 }
 
 int
-bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
+bsdauth_verify(struct passwd *pw, const char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     char *pass;
     char *s;

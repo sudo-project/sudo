@@ -283,7 +283,7 @@ sudo_pam_init_quiet(struct passwd *pw, sudo_auth *auth)
 #endif /* _AIX */
 
 int
-sudo_pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
+sudo_pam_verify(struct passwd *pw, const char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
 	const char *envccname;
     const char *s;

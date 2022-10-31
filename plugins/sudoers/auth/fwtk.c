@@ -82,7 +82,7 @@ sudo_fwtk_init(struct passwd *pw, sudo_auth *auth)
 }
 
 int
-sudo_fwtk_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
+sudo_fwtk_verify(struct passwd *pw, const char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     char *pass;				/* Password from the user */
     char buf[SUDO_CONV_REPL_MAX + 12];	/* General prupose buffer */

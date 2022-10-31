@@ -14,7 +14,7 @@ typedef struct sudo_auth {
 
     int (*init)(struct passwd *pw, sudo_auth *auth);
     int (*setup)(struct passwd *pw, char **prompt, sudo_auth *auth);
-    int (*verify)(struct passwd *pw, char *p, sudo_auth *auth, struct sudo_conv_callback *callback);
+    int (*verify)(struct passwd *pw, const char *p, sudo_auth *auth, struct sudo_conv_callback *callback);
     int (*approval)(struct passwd *pw, sudo_auth *auth);
     int (*cleanup)(struct passwd *pw, sudo_auth *auth, bool force);
     int (*begin_session)(struct passwd *pw, char **user_env[], struct sudo_auth *auth);
