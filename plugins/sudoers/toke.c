@@ -5916,7 +5916,7 @@ sudoers_trace_print(const char *msg)
     {
 	/* We already parsed the newline so sudolineno is off by one. */
 	sudo_debug_printf2(NULL, NULL, 0, SUDOERS_DEBUG_PARSER|SUDO_DEBUG_DEBUG,
-	    "%s:%d: %s", sudoers, sudolineno - 1, trace_lbuf.buf);
+	    "sudoerslex: %s:%d: %s", sudoers, sudolineno - 1, trace_lbuf.buf);
 	trace_lbuf.len = 0;
     }
     return 0;
@@ -5934,6 +5934,7 @@ sudoers_input(char *buf, yy_size_t max_size)
 {
     char *cp;
     size_t avail = sudolinebuf.len - sudolinebuf.off;
+    debug_decl(sudoers_input, SUDOERS_DEBUG_PARSER);
 
     /* Refill line buffer if needed. */
     if (avail == 0) {
@@ -5978,6 +5979,9 @@ sudoers_eof:
 	    sudolinebuf.buf[avail] = '\0';
 	}
 
+	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s:%d: %.*s", sudoers, sudolineno,
+	    (int)(avail -1), sudolinebuf.buf);
+
 	sudolinebuf.len = avail;
 	sudolinebuf.off = 0;
 	sudolinebuf.toke_start = sudolinebuf.toke_end = 0;
@@ -5988,6 +5992,6 @@ sudoers_eof:
     memcpy(buf, sudolinebuf.buf + sudolinebuf.off, avail);
     sudolinebuf.off += avail;
 
-    return avail;
+    debug_return_size_t(avail);
 }
 
