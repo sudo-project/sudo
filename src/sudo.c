@@ -209,7 +209,7 @@ main(int argc, char *argv[], char *envp[])
     submit_envp = envp;
     sudo_mode = parse_args(argc, argv, &submit_optind, &nargc, &nargv,
 	&sudo_settings, &env_add);
-    sudo_debug_printf(SUDO_DEBUG_DEBUG, "sudo_mode %d", sudo_mode);
+    sudo_debug_printf(SUDO_DEBUG_DEBUG, "sudo_mode 0x%x", sudo_mode);
 
     /* Print sudo version early, in case of plugin init failure. */
     if (ISSET(sudo_mode, MODE_VERSION)) {
