@@ -357,6 +357,10 @@ host_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
 		matched = !m->negated;
 	    break;
     }
+    sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	"host %s (%s) matches sudoers host %s%s: %s", lhost, shost,
+	m->negated ? "!" : "", m->name ? m->name : "ALL",
+	matched == true ? "true" : "false");
     debug_return_int(matched);
 }
 
@@ -430,9 +434,6 @@ hostname_matches(const char *shost, const char *lhost, const char *pattern)
     } else {
 	rc = !strcasecmp(host, pattern);
     }
-    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	"host %s matches sudoers pattern %s: %s",
-	host, pattern, rc ? "true" : "false");
     debug_return_bool(rc);
 }
 

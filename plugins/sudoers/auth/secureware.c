@@ -71,7 +71,7 @@ sudo_secureware_init(struct passwd *pw, sudo_auth *auth)
 }
 
 int
-sudo_secureware_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
+sudo_secureware_verify(struct passwd *pw, const char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     char *pw_epasswd = auth->data;
     char *epass = NULL;

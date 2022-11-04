@@ -138,7 +138,7 @@ sudo_securid_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
  *
  * Arguments in:
  *     pw - struct passwd for username
- *     pass - UNUSED
+ *     prompt - UNUSED
  *     auth - sudo authentication structure for SecurID handle
  *
  * Results out:
@@ -146,9 +146,10 @@ sudo_securid_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
  *                   incorrect authentication, fatal on errors
  */
 int
-sudo_securid_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
+sudo_securid_verify(struct passwd *pw, const char *promp, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     SDI_HANDLE *sd = (SDI_HANDLE *) auth->data;
+    char *pass;
     int ret;
     debug_decl(sudo_securid_verify, SUDOERS_DEBUG_AUTH);
 

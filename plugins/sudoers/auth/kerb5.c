@@ -185,7 +185,7 @@ done:
 
 #ifdef HAVE_KRB5_VERIFY_USER
 int
-sudo_krb5_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
+sudo_krb5_verify(struct passwd *pw, const char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     krb5_context	sudo_context;
     krb5_principal	princ;
@@ -202,7 +202,7 @@ sudo_krb5_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_con
 }
 #else
 int
-sudo_krb5_verify(struct passwd *pw, char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
+sudo_krb5_verify(struct passwd *pw, const char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     krb5_context	sudo_context;
     krb5_principal	princ;

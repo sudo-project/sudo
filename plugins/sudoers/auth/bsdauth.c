@@ -104,7 +104,7 @@ bsdauth_init(struct passwd *pw, sudo_auth *auth)
 }
 
 int
-bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
+bsdauth_verify(struct passwd *pw, const char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     char *pass;
     char *s;
@@ -133,7 +133,7 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_con
 	pass = auth_getpass(prompt, SUDO_CONV_PROMPT_ECHO_OFF, callback);
     } else {
 	pass = auth_getpass(s, SUDO_CONV_PROMPT_ECHO_OFF, callback);
-	if (pass && *pass == '\0') {
+	if (pass != NULL && *pass == '\0') {
 	    if ((prompt = strrchr(s, '\n')))
 		prompt++;
 	    else
@@ -141,12 +141,12 @@ bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth, struct sudo_con
 
 	    /*
 	     * Append '[echo on]' to the last line of the challenge and
-	     * reprompt with echo turned on.
+	     * re-prompt with echo turned on.
 	     */
-	    len = strlen(prompt) - 1;
-	    while (isspace(prompt[len]) || prompt[len] == ':')
-		prompt[len--] = '\0';
-	    if (asprintf(&s, "%s [echo on]: ", prompt) == -1) {
+	    len = strlen(prompt);
+	    while (len > 0 && (isspace((unsigned char)prompt[len - 1]) || prompt[len - 1] == ':'))
+		len--;
+	    if (asprintf(&s, "%.*s [echo on]: ", (int)len, prompt) == -1) {
 		log_warningx(0, N_("unable to allocate memory"));
 		debug_return_int(AUTH_FATAL);
 	    }

@@ -1,3 +1,16 @@
+What's new in Sudo 1.9.12p1
+
+ * Sudo's configure script now does a better job of detecting when
+   the -fstack-clash-protection compiler option does not work.
+   GitHub issue #191.
+
+ * Fixed CVE-2022-43995, a potential out-of-bounds write for passwords
+   smaller than 8 characters when passwd authentication is enabled.
+   This does not affect configurations that use other authentication
+   methods such as PAM, AIX authentication or BSD authentication.
+
+ * Fixed a build error with some configurations compiling host_port.c.
+
 What's new in Sudo 1.9.12
 
  * Fixed a bug in the ptrace-based intercept mode where the current
