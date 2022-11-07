@@ -1697,8 +1697,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     char cwd[PATH_MAX];
     unsigned long msg;
     bool ret = false;
-    struct stat sb;
-    int i;
+    int i, oldcwd = -1;
     debug_decl(ptrace_intercept_execve, SUDO_DEBUG_EXEC);
 
     /* Do not check the policy if we are executing the initial command. */
@@ -1783,16 +1782,6 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	goto done;
     }
 
-    /*
-     * Short-circuit the policy check if the command doesn't exist.
-     * Otherwise, both sudo and the shell will report the error.
-     */
-    if (stat(pathname, &sb) == -1) {
-	ptrace_fail_syscall(pid, &regs, errno);
-	ret = true;
-	goto done;
-    }
-
     /* We can only pass the pathname to exececute via argv[0] (plugin API). */
     argv[0] = pathname;
     if (argc == 0) {
@@ -1806,8 +1795,9 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %d: checking policy for %s",
 	__func__, (int)pid, pathname);
     if (!intercept_check_policy(pathname, argc, argv, envc, envp, cwd,
-	    closure)) {
-	sudo_warnx("%s", U_(closure->errstr));
+	    &oldcwd, closure)) {
+	if (closure->errstr != NULL)
+	    sudo_warnx("%s", U_(closure->errstr));
     }
 
     switch (closure->state) {
@@ -1939,6 +1929,13 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     ret = true;
 
 done:
+    if (oldcwd != -1) {
+        if (fchdir(oldcwd) == -1) {
+            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+                "%s: unable to restore saved cwd", __func__);
+        }
+        close(oldcwd);
+    }
     free(buf);
     intercept_closure_reset(closure);
 
