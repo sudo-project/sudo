@@ -225,8 +225,13 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 		sudo_warn(U_("unable to set handler for signal %d"), signo);
 	}
 	sudo_debug_printf(SUDO_DEBUG_INFO, "kill parent SIG%s", signame);
-	if (killpg(ec->ppgrp, signo) != 0)
-	    sudo_warn("killpg(%d, SIG%s)", (int)ec->ppgrp, signame);
+	if (ec->ppgrp == ec->sudo_pid) {
+	    if (killpg(ec->ppgrp, signo) != 0)
+		sudo_warn("killpg(%d, SIG%s)", (int)ec->ppgrp, signame);
+	} else {
+	    if (kill(ec->sudo_pid, signo) != 0)
+		sudo_warn("kill(%d, SIG%s)", (int)ec->sudo_pid, signame);
+	}
 
 	/* Log the resume event. */
 	log_suspend(ec, SIGCONT);
