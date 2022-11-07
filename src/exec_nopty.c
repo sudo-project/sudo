@@ -757,8 +757,10 @@ handle_sigchld_nopty(struct exec_closure *ec)
 	    }
 
 	    /* If the main command is suspended, suspend sudo too. */
-	    if (pid == ec->cmnd_pid)
-		suspend_sudo_nopty(ec, signo, ec->ppgrp, ec->cmnd_pid);
+	    if (pid == ec->cmnd_pid) {
+		suspend_sudo_nopty(ec, signo, ec->sudo_pid, ec->ppgrp,
+		    ec->cmnd_pid);
+	    }
 	} else {
 	    if (WIFSIGNALED(status)) {
 		if (sig2str(WTERMSIG(status), signame) == -1) {

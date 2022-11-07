@@ -121,7 +121,7 @@ main(int argc, char *argv[])
     const char *errstr;
     sigset_t blocked, empty;
     struct sigaction sa;
-    pid_t child, pid, ppgrp;
+    pid_t child, my_pid, pid, my_pgrp;
     int ch, status;
     debug_decl_vars(main, SUDO_DEBUG_MAIN);
 
@@ -173,7 +173,8 @@ main(int argc, char *argv[])
     sigaction(SIGUSR1, &sa, NULL);
 
     /* Fork a shell. */
-    ppgrp = getpgrp();
+    my_pid = getpid();
+    my_pgrp = getpgrp();
     child = fork();
     switch (child) {
     case -1:
@@ -227,7 +228,8 @@ main(int argc, char *argv[])
 	    } else if (WIFSTOPPED(status)) {
 		if (exec_ptrace_stopped(pid, status, &closure)) {
 		    if (pid == child) {
-			suspend_sudo_nopty(NULL, WSTOPSIG(status), ppgrp, child);
+			suspend_sudo_nopty(NULL, WSTOPSIG(status), my_pid,
+			    my_pgrp, child);
 			if (kill(child, SIGCONT) != 0)
 			    sudo_warn("kill(%d, SIGCONT)", (int)child);
 		    }
