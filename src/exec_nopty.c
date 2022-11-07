@@ -374,7 +374,7 @@ read_callback(int fd, int what, void *v)
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"read %zd bytes from fd %d", n, fd);
 	    if (!iob->action(iob->buf + iob->len, n, iob)) {
-		terminate_command(iob->ec->cmnd_pid, true);
+		terminate_command(iob->ec->cmnd_pid, false);
 		iob->ec->cmnd_pid = -1;
 	    }
 	    iob->len += n;
@@ -671,7 +671,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 	    }
 	}
 	if (rc == -1)
-	    terminate_command(ec.cmnd_pid, true);
+	    terminate_command(ec.cmnd_pid, false);
     }
 
     /* Enable any I/O log events. */
@@ -690,7 +690,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 	/* error from callback */
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "event loop exited prematurely");
 	/* kill command */
-	terminate_command(ec.cmnd_pid, true);
+	terminate_command(ec.cmnd_pid, false);
 	ec.cmnd_pid = -1;
     }
 
