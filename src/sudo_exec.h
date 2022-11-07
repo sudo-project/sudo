@@ -74,6 +74,7 @@ struct exec_closure {
     struct sudo_event *sigwinch_event;
     struct command_status *cstat;
     void *intercept;
+    pid_t sudo_pid;
     pid_t monitor_pid;
     pid_t cmnd_pid;
     pid_t ppgrp;

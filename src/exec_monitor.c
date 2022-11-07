@@ -282,11 +282,13 @@ mon_signal_cb(int signo, int what, void *v)
 	 * reboot that call kill(-1, SIGTERM) to kill all other processes.
 	 */
 	if (USER_SIGNALED(sc->siginfo) && sc->siginfo->si_pid != 0) {
-	    pid_t si_pgrp = getpgid(sc->siginfo->si_pid);
+	    pid_t si_pgrp;
+
+	    if (sc->siginfo->si_pid == mc->cmnd_pid)
+		    debug_return;
+	    si_pgrp = getpgid(sc->siginfo->si_pid);
 	    if (si_pgrp != -1) {
 		if (si_pgrp == mc->cmnd_pgrp)
-		    debug_return;
-	    } else if (sc->siginfo->si_pid == mc->cmnd_pid) {
 		    debug_return;
 	    }
 	}

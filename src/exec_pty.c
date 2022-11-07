@@ -761,18 +761,21 @@ signal_cb_pty(int signo, int what, void *v)
 	break;
     default:
 	/*
-	 * Do not forward signals sent by a process in the command's process
-	 * group, as we don't want the command to indirectly kill itself.
-	 * For example, this can happen with some versions of reboot that
-	 * call kill(-1, SIGTERM) to kill all other processes.
+	 * Do not forward signals sent by the command itself or a member of the
+	 * command's process group (but only when either sudo or the command is
+	 * the process group leader).  We don't want the command to indirectly
+	 * kill itself.  For example, this can happen with some versions of
+	 * reboot that call kill(-1, SIGTERM) to kill all other processes.
 	 */
 	if (USER_SIGNALED(sc->siginfo) && sc->siginfo->si_pid != 0) {
-	    pid_t si_pgrp = getpgid(sc->siginfo->si_pid);
-	    if (si_pgrp != -1) {
-		if (si_pgrp == ec->ppgrp || si_pgrp == ec->cmnd_pid)
-		    debug_return;
-	    } else if (sc->siginfo->si_pid == ec->cmnd_pid) {
+	    pid_t si_pgrp;
+
+	    if (sc->siginfo->si_pid == ec->cmnd_pid)
 		debug_return;
+	    si_pgrp = getpgid(sc->siginfo->si_pid);
+	    if (si_pgrp != -1) {
+		if (si_pgrp == ec->cmnd_pid || si_pgrp == ec->sudo_pid)
+		    debug_return;
 	    }
 	}
 	/* Schedule signal to be forwarded to the command. */
@@ -851,8 +854,9 @@ fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
     debug_decl(fill_exec_closure, SUDO_DEBUG_EXEC);
 
     /* Fill in the non-event part of the closure. */
-    ec->cmnd_pid = -1;
+    ec->sudo_pid = getpid();
     ec->ppgrp = ppgrp;
+    ec->cmnd_pid = -1;
     ec->cstat = cstat;
     ec->details = details;
     ec->rows = user_details.ts_rows;

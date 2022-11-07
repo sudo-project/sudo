@@ -122,6 +122,7 @@ signal_cb_nopty(int signo, int what, void *v)
     struct sudo_ev_siginfo_container *sc = v;
     struct exec_closure *ec = sc->closure;
     char signame[SIG2STR_MAX];
+    pid_t si_pgrp;
     debug_decl(signal_cb_nopty, SUDO_DEBUG_EXEC);
 
     if (ec->cmnd_pid == -1)
@@ -151,38 +152,40 @@ signal_cb_nopty(int signo, int what, void *v)
     case SIGQUIT:
     case SIGTSTP:
 	/*
-	 * Only forward user-generated signals not sent by a process in
-	 * the command's own process group.  Signals sent by the kernel
-	 * may include SIGTSTP when the user presses ^Z.  Curses programs
-	 * often trap ^Z and send SIGTSTP to their own pgrp, so we don't
-	 * want to send an extra SIGTSTP.
+	 * Only forward user-generated signals not sent by a process other than
+	 * the command itself or a member of the command's process group (but
+	 * only when either sudo or the command is the process group leader).
+	 * Signals sent by the kernel may include SIGTSTP when the user presses
+	 * ^Z.  Curses programs often trap ^Z and send SIGTSTP to their own
+	 * process group, so we don't want to send an extra SIGTSTP.
 	 */
 	if (!USER_SIGNALED(sc->siginfo))
 	    debug_return;
 	if (sc->siginfo->si_pid != 0) {
-	    pid_t si_pgrp = getpgid(sc->siginfo->si_pid);
-	    if (si_pgrp != -1) {
-		if (si_pgrp == ec->ppgrp || si_pgrp == ec->cmnd_pid)
-		    debug_return;
-	    } else if (sc->siginfo->si_pid == ec->cmnd_pid) {
+	    if (sc->siginfo->si_pid == ec->cmnd_pid)
 		debug_return;
+	    si_pgrp = getpgid(sc->siginfo->si_pid);
+	    if (si_pgrp != -1) {
+		if (si_pgrp == ec->cmnd_pid || si_pgrp == ec->sudo_pid)
+		    debug_return;
 	    }
 	}
 	break;
     default:
 	/*
-	 * Do not forward signals sent by a process in the command's process
-	 * group, as we don't want the command to indirectly kill itself.
-	 * For example, this can happen with some versions of reboot that
-	 * call kill(-1, SIGTERM) to kill all other processes.
+	 * Do not forward signals sent by the command itself or a member of the
+	 * command's process group (but only when either sudo or the command is
+	 * the process group leader).  We don't want the command to indirectly
+	 * kill itself.  For example, this can happen with some versions of
+	 * reboot that call kill(-1, SIGTERM) to kill all other processes.
 	 */
 	if (USER_SIGNALED(sc->siginfo) && sc->siginfo->si_pid != 0) {
-	    pid_t si_pgrp = getpgid(sc->siginfo->si_pid);
-	    if (si_pgrp != -1) {
-		if (si_pgrp == ec->ppgrp || si_pgrp == ec->cmnd_pid)
-		    debug_return;
-	    } else if (sc->siginfo->si_pid == ec->cmnd_pid) {
+	    if (sc->siginfo->si_pid == ec->cmnd_pid)
 		debug_return;
+	    si_pgrp = getpgid(sc->siginfo->si_pid);
+	    if (si_pgrp != -1) {
+		if (si_pgrp == ec->cmnd_pid || si_pgrp == ec->sudo_pid)
+		    debug_return;
 	    }
 	}
 	break;
@@ -210,6 +213,7 @@ fill_exec_closure(struct exec_closure *ec,
     debug_decl(fill_exec_closure, SUDO_DEBUG_EXEC);
 
     /* Fill in the non-event part of the closure. */
+    ec->sudo_pid = getpid();
     ec->ppgrp = getpgrp();
     ec->cstat = cstat;
     ec->details = details;
