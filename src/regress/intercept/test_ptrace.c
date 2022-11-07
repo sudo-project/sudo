@@ -50,7 +50,7 @@ intercept_closure_reset(struct intercept_closure *closure)
 
 bool
 intercept_check_policy(const char *command, int argc, char **argv, int envc,
-    char **envp, const char *runcwd, void *v)
+    char **envp, const char *runcwd, int *oldcwd, void *v)
 {
     struct intercept_closure *closure = v;
     struct stat sb1, sb2;
@@ -67,6 +67,7 @@ intercept_check_policy(const char *command, int argc, char **argv, int envc,
 	sudo_debug_printf(SUDO_DEBUG_DIAG, "allowed %s", command);
 	closure->state = POLICY_TEST;
     }
+    *oldcwd = -1;
 
     debug_return_bool(true);
 }
@@ -101,6 +102,13 @@ int
 sudo_sigaction(int signo, struct sigaction *sa, struct sigaction *osa)
 {
     return sigaction(signo, sa, osa);
+}
+
+/* STUB */
+void
+log_suspend(struct exec_closure *ec, int signo)
+{
+    return;
 }
 
 int
