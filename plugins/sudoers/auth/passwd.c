@@ -95,6 +95,8 @@ sudo_passwd_verify(struct passwd *pw, const char *pass, sudo_auth *auth, struct 
 	    matched = !strcmp(pw_epasswd, epass);
     }
 
+    explicit_bzero(des_pass, sizeof(des_pass));
+
     debug_return_int(matched ? AUTH_SUCCESS : AUTH_FAILURE);
 }
 #else
