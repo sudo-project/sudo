@@ -688,7 +688,7 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
 		if (strncasecmp(attr, "cn=", 3) == 0) {
 		    for (attr += 3; *attr != '\0'; attr++) {
 			/* Handle escaped ',' chars. */
-			if (*attr == '\\')
+			if (*attr == '\\' && attr[1] != '\0')
 			    attr++;
 			if (*attr == ',') {
 			    attr++;
