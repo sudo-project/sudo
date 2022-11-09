@@ -24,6 +24,7 @@
 #include <config.h>
 
 #ifdef __linux__
+# include <sys/stat.h>
 # include <sys/utsname.h>
 #endif
 
