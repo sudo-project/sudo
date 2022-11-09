@@ -337,7 +337,7 @@ depend:
 	cd $(top_builddir) && ./config.status --file plugins/sudoers/Makefile
 
 harness: $(srcdir)/regress/harness.in
-	cd $(top_builddir) && ./config.status --file plugins/sudoers/regress/harness
+	cd $(top_builddir) && ./config.status --file plugins/sudoers/regress/harness && chmod +x plugins/sudoers/regress/harness
 
 Makefile: $(srcdir)/Makefile.in
 	cd $(top_builddir) && ./config.status --file plugins/sudoers/Makefile
