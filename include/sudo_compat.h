@@ -62,26 +62,6 @@
 # endif
 #endif
 
-#ifndef CMSG_ALIGN
-# define CMSG_ALIGN(p) \
-    (((size_t)(p) + sizeof(size_t) - 1) & ~(sizeof(size_t) - 1))
-#endif
-
-/* Length of the contents of a control message of length len. */
-#ifndef CMSG_LEN
-# define CMSG_LEN(len) (CMSG_ALIGN(sizeof(struct cmsghdr)) + (len))
-#endif
-
-/* Length of the space taken up by a padded control message of length len. */
-#ifndef CMSG_SPACE
-# define CMSG_SPACE(len) (CMSG_ALIGN(sizeof(struct cmsghdr)) + CMSG_ALIGN(len))
-#endif
-
-/* Given a pointer to struct cmsghdr, return a pointer to data. */
-#ifndef CMSG_DATA
-# define CMSG_DATA(cmsg) ((unsigned char *)(cmsg) + CMSG_ALIGN(sizeof(struct cmsghdr)))
-#endif
-
 /*
  * Some systems lack full limit definitions.
  */
