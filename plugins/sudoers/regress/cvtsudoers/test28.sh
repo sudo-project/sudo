@@ -5,7 +5,7 @@
 
 : ${CVTSUDOERS=cvtsudoers}
 
-$CVTSUDOERS -c "" -i ldif -f sudoers <<EOF
+$CVTSUDOERS -c "" -i ldif -b "ou=SUDOers,dc=sudo,dc=ws" -f sudoers <<EOF
 dn: dc=sudo,dc=ws
 objectClass: dcObject
 objectClass: organization

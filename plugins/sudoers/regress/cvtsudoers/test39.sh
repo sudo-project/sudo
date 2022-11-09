@@ -8,4 +8,5 @@
 
 : ${CVTSUDOERS=cvtsudoers}
 
-printf 'dn: cn= Manager\\' | $CVTSUDOERS -c "" -b dc=sudo,dc=ws -i ldif -f sudoers
+printf 'dn: cn= Manager\\' | \
+    $CVTSUDOERS -c "" -b "ou=SUDOers,dc=sudo,dc=ws" -i ldif -f sudoers
