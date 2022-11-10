@@ -17,12 +17,12 @@
 #ifndef SUDO_EXEC_PTRACE_H
 #define SUDO_EXEC_PTRACE_H
 
-#include <elf.h>
 #include <sys/prctl.h>
 #include <sys/ptrace.h>
 #include <sys/user.h>
 #include <asm/unistd.h>
 #include <linux/audit.h>
+#include <linux/elf.h>
 #include <linux/ptrace.h>
 #include <linux/seccomp.h>
 #include <linux/filter.h>
