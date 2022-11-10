@@ -432,11 +432,11 @@ role_to_sudoers(struct sudoers_parse_tree *parse_tree, struct sudo_role *role,
 	struct privilege *prev_priv = TAILQ_LAST(&us->privileges, privilege_list);
 	if (reuse_runas) {
 	    /* Runas users and groups same if as in previous privilege. */
-	    struct member_list *runasuserlist =
-		TAILQ_FIRST(&prev_priv->cmndlist)->runasuserlist;
-	    struct member_list *runasgrouplist =
-		TAILQ_FIRST(&prev_priv->cmndlist)->runasgrouplist;
 	    struct cmndspec *cmndspec = TAILQ_FIRST(&priv->cmndlist);
+	    const struct cmndspec *prev_cmndspec =
+		TAILQ_LAST(&prev_priv->cmndlist, cmndspec_list);
+	    struct member_list *runasuserlist = prev_cmndspec->runasuserlist;
+	    struct member_list *runasgrouplist = prev_cmndspec->runasgrouplist;
 
 	    /* Free duplicate runas lists. */
 	    if (cmndspec->runasuserlist != NULL) {
