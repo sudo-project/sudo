@@ -724,6 +724,10 @@ plugins/sudoers/pwutil_impl.c
 plugins/sudoers/redblack.c
 plugins/sudoers/redblack.h
 plugins/sudoers/regress/check_symbols/check_symbols.c
+plugins/sudoers/regress/corpus/seed/ldif/invalid_b64.ldif
+plugins/sudoers/regress/corpus/seed/ldif/pr196.ldif
+plugins/sudoers/regress/corpus/seed/ldif/sample.ldif
+plugins/sudoers/regress/corpus/seed/ldif/valid_b64.ldif
 plugins/sudoers/regress/corpus/seed/policy/policy.1
 plugins/sudoers/regress/corpus/seed/policy/policy.2
 plugins/sudoers/regress/corpus/seed/policy/policy.3

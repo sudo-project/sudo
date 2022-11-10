@@ -297,7 +297,8 @@ FUZZ_SUDOERS_CORPUS = $(top_builddir)/examples/sudoers \
 FUZZ_SUDOERS_LDIF_OBJS = fuzz_stubs.o fuzz_sudoers_ldif.o parse_ldif.o \
 			 ldap_util.lo fmtsudoers.lo locale.lo
 
-FUZZ_SUDOERS_LDIF_CORPUS = $(srcdir)/regress/sudoers/*.ldif.ok
+FUZZ_SUDOERS_LDIF_CORPUS = $(srcdir)/regress/sudoers/*.ldif.ok \
+			   $(srcdir)/regress/corpus/seed/ldif/*.ldif
 
 VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
