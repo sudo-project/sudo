@@ -71,7 +71,6 @@ LIBTOOL_DEPS = @LIBTOOL_DEPS@
 SHELL = @SHELL@
 
 EGREP = @EGREP@
-GREP = @GREP@
 SED = @SED@
 
 INSTALL = $(SHELL) $(scriptdir)/install-sh -c
@@ -119,7 +118,7 @@ check check-verbose check-fuzzer fuzz pre-install: config.status
 	done
 
 uncrustify.files: Makefile
-	$(GREP) '\.[ch]$$' $(top_srcdir)/MANIFEST | $(EGREP) -v '(/zlib/|/(arc4random|arc4random_uniform|chacha_private|charclass|fnmatch|getaddrinfo|getcwd|getdate|getentropy|getopt|getopt_long|glob|gram|inet_ntop|inet_pton|log_server.pb-c|mktemp|pw_dup|reallocarray|mktemp_test|protobuf-c|snprintf|stdbool|strlcat|strlcpy|sudo_queue|toke)\.[ch]$$)'  > uncrustify.files
+	$(EGREP) '\.[ch]$$' $(top_srcdir)/MANIFEST | $(EGREP) -v '(/zlib/|/(arc4random|arc4random_uniform|chacha_private|charclass|fnmatch|getaddrinfo|getcwd|getdate|getentropy|getopt|getopt_long|glob|gram|inet_ntop|inet_pton|log_server.pb-c|mktemp|pw_dup|reallocarray|mktemp_test|protobuf-c|snprintf|stdbool|strlcat|strlcpy|sudo_queue|toke)\.[ch]$$)'  > uncrustify.files
 
 reformat: uncrustify.files
 	( cd $(top_srcdir) && uncrustify -c etc/uncrustify.cfg --replace --no-backup -F $(top_builddir)/uncrustify.files )

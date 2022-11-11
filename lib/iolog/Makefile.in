@@ -35,7 +35,7 @@ cross_compiling = @CROSS_COMPILING@
 CC = @CC@
 LIBTOOL = @LIBTOOL@
 SHA1SUM = @SHA1SUM@
-GREP = @GREP@
+EGREP = @EGREP@
 SED = @SED@
 
 # Libraries
@@ -200,11 +200,9 @@ fuzz_iolog_json_seed_corpus.zip:
 	rm -rf $$tdir
 
 run-fuzz_iolog_json: fuzz_iolog_json
-	if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
-	    LC_ALL=C.UTF-8; export LC_ALL; \
-	else \
-	    LC_ALL=C; export LC_ALL; \
-	fi; \
+	l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'`; \
+	test -n "$$l" || l="C"; \
+	LC_ALL="$$l"; export LC_ALL; \
 	unset LANG || LANG=; \
 	unset LANGUAGE || LANGUAGE=; \
 	MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
@@ -227,11 +225,9 @@ fuzz_iolog_legacy_seed_corpus.zip:
 	rm -rf $$tdir
 
 run-fuzz_iolog_legacy: fuzz_iolog_legacy
-	if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
-	    LC_ALL=C.UTF-8; export LC_ALL; \
-	else \
-	    LC_ALL=C; export LC_ALL; \
-	fi; \
+	l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'`; \
+	test -n "$$l" || l="C"; \
+	LC_ALL="$$l"; export LC_ALL; \
 	unset LANG || LANG=; \
 	unset LANGUAGE || LANGUAGE=; \
 	MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
@@ -254,11 +250,9 @@ fuzz_iolog_timing_seed_corpus.zip:
 	rm -rf $$tdir
 
 run-fuzz_iolog_timing: fuzz_iolog_timing
-	if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
-	    LC_ALL=C.UTF-8; export LC_ALL; \
-	else \
-	    LC_ALL=C; export LC_ALL; \
-	fi; \
+	l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'`; \
+	test -n "$$l" || l="C"; \
+	LC_ALL="$$l"; export LC_ALL; \
 	unset LANG || LANG=; \
 	unset LANGUAGE || LANGUAGE=; \
 	MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
@@ -308,11 +302,9 @@ fuzz: run-fuzz_iolog_json run-fuzz_iolog_legacy run-fuzz_iolog_timing
 
 check-fuzzer: $(FUZZ_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
-		LC_ALL=C.UTF-8; export LC_ALL; \
-	    else \
-		LC_ALL=C; export LC_ALL; \
-	    fi; \
+	    l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'`; \
+	    test -n "$$l" || l="C"; \
+	    LC_ALL="$$l"; export LC_ALL; \
 	    unset LANG || LANG=; \
 	    unset LANGUAGE || LANGUAGE=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
@@ -327,11 +319,9 @@ check-fuzzer: $(FUZZ_PROGS)
 
 check: $(TEST_PROGS) check-fuzzer
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
-		LC_ALL=C.UTF-8; export LC_ALL; \
-	    else \
-		LC_ALL=C; export LC_ALL; \
-	    fi; \
+	    l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'`; \
+	    test -n "$$l" || l="C"; \
+	    LC_ALL="$$l"; export LC_ALL; \
 	    unset LANG || LANG=; \
 	    unset LANGUAGE || LANGUAGE=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \

@@ -55,7 +55,7 @@ CPP = @CPP@
 HOSTCPP = @CPP_FOR_BUILD@
 LIBTOOL = @LIBTOOL@
 SHA1SUM = @SHA1SUM@
-GREP = @GREP@
+EGREP = @EGREP@
 SED = @SED@
 AWK = @AWK@
 
@@ -342,11 +342,9 @@ fuzz_sudo_conf_seed_corpus.zip:
 	rm -rf $$tdir
 
 run-fuzz_sudo_conf: fuzz_sudo_conf
-	if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
-	    LC_ALL=C.UTF-8; export LC_ALL; \
-	else \
-	    LC_ALL=C; export LC_ALL; \
-	fi; \
+	l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'`; \
+	test -n "$$l" || l="C"; \
+	LC_ALL="$$l"; export LC_ALL; \
 	unset LANG || LANG=; \
 	unset LANGUAGE || LANGUAGE=; \
 	MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
@@ -408,11 +406,9 @@ fuzz: run-fuzz_sudo_conf
 
 check-fuzzer: $(FUZZ_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
-		LC_ALL=C.UTF-8; export LC_ALL; \
-	    else \
-		LC_ALL=C; export LC_ALL; \
-	    fi; \
+	    l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'`; \
+	    test -n "$$l" || l="C"; \
+	    LC_ALL="$$l"; export LC_ALL; \
 	    unset LANG || LANG=; \
 	    unset LANGUAGE || LANGUAGE=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
@@ -424,11 +420,9 @@ check-fuzzer: $(FUZZ_PROGS)
 # Note: some regress checks are run from srcdir for consistent error messages
 check: $(TEST_PROGS) check-fuzzer
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
-		LC_ALL=C.UTF-8; export LC_ALL; \
-	    else \
-		LC_ALL=C; export LC_ALL; \
-	    fi; \
+	    l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'`; \
+	    test -n "$$l" || l="C"; \
+	    LC_ALL="$$l"; export LC_ALL; \
 	    unset LANG || LANG=; \
 	    unset LANGUAGE || LANGUAGE=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
@@ -449,9 +443,9 @@ check: $(TEST_PROGS) check-fuzzer
 	    if test -f globtest; then \
 		mkdir -p `$(SED) 's@/[^/]*$$@@' $(srcdir)/regress/glob/files | sort -u`; \
 		touch `cat $(srcdir)/regress/glob/files`; \
-		chmod 0755 `$(GREP) '/r[^/]*$$' $(srcdir)/regress/glob/files`; \
-		chmod 0444 `$(GREP) '/s[^/]*$$' $(srcdir)/regress/glob/files`; \
-		chmod 0711 `$(GREP) '/t[^/]*$$' $(srcdir)/regress/glob/files`; \
+		chmod 0755 `$(EGREP) '/r[^/]*$$' $(srcdir)/regress/glob/files`; \
+		chmod 0444 `$(EGREP) '/s[^/]*$$' $(srcdir)/regress/glob/files`; \
+		chmod 0711 `$(EGREP) '/t[^/]*$$' $(srcdir)/regress/glob/files`; \
 		./globtest $(srcdir)/regress/glob/globtest.in || rval=`expr $$rval + $$?`; \
 		rm -rf fake; \
 	    fi; \
