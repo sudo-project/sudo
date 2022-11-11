@@ -3259,7 +3259,6 @@ as_fn_append ac_func_c_list " killpg HAVE_KILLPG"
 as_fn_append ac_func_c_list " nl_langinfo HAVE_NL_LANGINFO"
 as_fn_append ac_func_c_list " faccessat HAVE_FACCESSAT"
 as_fn_append ac_func_c_list " wordexp HAVE_WORDEXP"
-as_fn_append ac_func_c_list " getauxval HAVE_GETAUXVAL"
 as_fn_append ac_func_c_list " strtoull HAVE_STRTOULL"
 as_fn_append ac_func_c_list " seteuid HAVE_SETEUID"
 
@@ -21151,7 +21150,6 @@ done
 
 
 
-
   for ac_func in execvpe
 do :
   ac_fn_c_check_func "$LINENO" "execvpe" "ac_cv_func_execvpe"
@@ -21676,6 +21674,13 @@ esac
 	COMPAT_EXP="${COMPAT_EXP}${_sym}
 "
     done
+
+	ac_fn_c_check_func "$LINENO" "getauxval" "ac_cv_func_getauxval"
+if test "x$ac_cv_func_getauxval" = xyes
+then :
+  printf "%s\n" "#define HAVE_GETAUXVAL 1" >>confdefs.h
+
+fi
 
 
 fi

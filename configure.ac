@@ -2606,7 +2606,7 @@ dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
 AC_FUNC_FSEEKO
-AC_CHECK_FUNCS_ONCE([fexecve fmemopen killpg nl_langinfo faccessat wordexp getauxval strtoull])
+AC_CHECK_FUNCS_ONCE([fexecve fmemopen killpg nl_langinfo faccessat wordexp strtoull])
 AC_CHECK_FUNCS([execvpe], [SUDO_APPEND_INTERCEPT_EXP(execvpe)])
 AC_CHECK_FUNCS([pread], [
     # pread/pwrite on 32-bit HP-UX 11.x may not support large files
@@ -2720,6 +2720,7 @@ AC_CHECK_FUNCS([arc4random], [
     ], [
 	AC_LIBOBJ(getentropy)
 	SUDO_APPEND_COMPAT_EXP(sudo_getentropy)
+	AC_CHECK_FUNCS([getauxval])
     ])
     # arc4random.c wants pthread_atfork
     AC_CHECK_HEADERS([pthread.h], [
