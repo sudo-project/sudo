@@ -23256,29 +23256,6 @@ done
 esac
 # If any of the mktemp family are missing we use our own.
 if test X"$sudo_mktemp" = X"yes"; then
-
-  for ac_func in arc4random random lrand48
-do :
-  as_ac_var=`printf "%s\n" "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"
-then :
-  cat >>confdefs.h <<_ACEOF
-#define `printf "%s\n" "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
- break
-fi
-
-done
-    if test X"$ac_cv_func_arc4random" != X"yes"; then
-	ac_fn_c_check_func "$LINENO" "getentropy" "ac_cv_func_getentropy"
-if test "x$ac_cv_func_getentropy" = xyes
-then :
-  printf "%s\n" "#define HAVE_GETENTROPY 1" >>confdefs.h
-
-fi
-
-    fi
     case " $LIBOBJS " in
   *" mktemp.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS mktemp.$ac_objext"

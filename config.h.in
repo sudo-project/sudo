@@ -572,9 +572,6 @@
 /* Define to 1 if you have the <login_cap.h> header file. */
 #undef HAVE_LOGIN_CAP_H
 
-/* Define to 1 if you have the `lrand48' function. */
-#undef HAVE_LRAND48
-
 /* Define to 1 if you have the <machine/endian.h> header file. */
 #undef HAVE_MACHINE_ENDIAN_H
 
@@ -727,9 +724,6 @@
 
 /* Define to 1 if you have the `pw_dup' function. */
 #undef HAVE_PW_DUP
-
-/* Define to 1 if you have the `random' function. */
-#undef HAVE_RANDOM
 
 /* Define to 1 if you have the `reallocarray' function. */
 #undef HAVE_REALLOCARRAY

@@ -2965,10 +2965,6 @@ case "$host_os" in
 esac
 # If any of the mktemp family are missing we use our own.
 if test X"$sudo_mktemp" = X"yes"; then
-    AC_CHECK_FUNCS([arc4random random lrand48], [break])
-    if test X"$ac_cv_func_arc4random" != X"yes"; then
-	AC_CHECK_FUNCS([getentropy])
-    fi
     AC_LIBOBJ(mktemp)
     SUDO_APPEND_COMPAT_EXP(sudo_mkdtemp sudo_mkdtempat sudo_mkostempsat sudo_mkstemp sudo_mkstemps)
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }mktemp_test"
