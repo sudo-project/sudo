@@ -2074,7 +2074,7 @@ case "$host" in
 #include <linux/filter.h>
 		])
 		# We call getrandom via syscall(3) in case it is not in libc
-		AC_CHECK_HEADERS([linux/random.h])
+		AC_CHECK_HEADERS([linux/random.h sys/syscall.h])
 
 		# The glibc getentropy() emulation may fail on older kernels.
 		# We use our own getentropy() by default on Linux.
@@ -2455,7 +2455,7 @@ dnl
 AC_HEADER_DIRENT
 AC_HEADER_STDBOOL
 AC_HEADER_MAJOR
-AC_CHECK_HEADERS_ONCE([netgroup.h paths.h spawn.h wordexp.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h sys/syscall.h sys/statvfs.h])
+AC_CHECK_HEADERS_ONCE([netgroup.h paths.h spawn.h wordexp.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h sys/statvfs.h])
 AC_CHECK_HEADERS([utmps.h] [utmpx.h], [break])
 AC_CHECK_HEADERS([endian.h] [sys/endian.h] [machine/endian.h], [break])
 AC_CHECK_HEADERS([procfs.h] [sys/procfs.h], [AC_CHECK_MEMBERS(struct psinfo.pr_ttydev, [AC_CHECK_FUNCS([_ttyname_dev])], [], [AC_INCLUDES_DEFAULT

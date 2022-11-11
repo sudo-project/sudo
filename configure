@@ -3252,7 +3252,6 @@ as_fn_append ac_header_c_list " sys/bsdtypes.h sys_bsdtypes_h HAVE_SYS_BSDTYPES_
 as_fn_append ac_header_c_list " sys/select.h sys_select_h HAVE_SYS_SELECT_H"
 as_fn_append ac_header_c_list " sys/stropts.h sys_stropts_h HAVE_SYS_STROPTS_H"
 as_fn_append ac_header_c_list " sys/sysmacros.h sys_sysmacros_h HAVE_SYS_SYSMACROS_H"
-as_fn_append ac_header_c_list " sys/syscall.h sys_syscall_h HAVE_SYS_SYSCALL_H"
 as_fn_append ac_header_c_list " sys/statvfs.h sys_statvfs_h HAVE_SYS_STATVFS_H"
 as_fn_append ac_func_c_list " fexecve HAVE_FEXECVE"
 as_fn_append ac_func_c_list " fmemopen HAVE_FMEMOPEN"
@@ -17845,6 +17844,12 @@ then :
   printf "%s\n" "#define HAVE_LINUX_RANDOM_H 1" >>confdefs.h
 
 fi
+ac_fn_c_check_header_compile "$LINENO" "sys/syscall.h" "ac_cv_header_sys_syscall_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_syscall_h" = xyes
+then :
+  printf "%s\n" "#define HAVE_SYS_SYSCALL_H 1" >>confdefs.h
+
+fi
 
 
 		# The glibc getentropy() emulation may fail on older kernels.
@@ -19304,7 +19309,6 @@ printf "%s\n" "#define MAJOR_IN_SYSMACROS 1" >>confdefs.h
 fi
 
 fi
-
 
 
 
