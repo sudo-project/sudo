@@ -812,6 +812,8 @@ plugins/sudoers/regress/cvtsudoers/test39.out.ok
 plugins/sudoers/regress/cvtsudoers/test39.sh
 plugins/sudoers/regress/cvtsudoers/test4.out.ok
 plugins/sudoers/regress/cvtsudoers/test4.sh
+plugins/sudoers/regress/cvtsudoers/test40.out.ok
+plugins/sudoers/regress/cvtsudoers/test40.sh
 plugins/sudoers/regress/cvtsudoers/test5.out.ok
 plugins/sudoers/regress/cvtsudoers/test5.sh
 plugins/sudoers/regress/cvtsudoers/test6.out.ok
