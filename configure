@@ -17519,6 +17519,13 @@ printf "%s\n" "#define HAVE_DECL_SETAUTHDB $ac_have_decl" >>confdefs.h
 		# HP-UX won't unlink a shared lib that is open
 		INSTALL_BACKUP='~'
 
+		ac_fn_c_check_header_compile "$LINENO" "utmps.h" "ac_cv_header_utmps_h" "$ac_includes_default"
+if test "x$ac_cv_header_utmps_h" = xyes
+then :
+  printf "%s\n" "#define HAVE_UTMPS_H 1" >>confdefs.h
+
+fi
+
 		ac_fn_c_check_func "$LINENO" "pstat_getproc" "ac_cv_func_pstat_getproc"
 if test "x$ac_cv_func_pstat_getproc" = xyes
 then :
@@ -17639,6 +17646,13 @@ printf "%s\n" "$sudo_cv_var_daportable" >&6; }
 			    test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 			;;
 		esac
+		ac_fn_c_check_header_compile "$LINENO" "utmps.h" "ac_cv_header_utmps_h" "$ac_includes_default"
+if test "x$ac_cv_header_utmps_h" = xyes
+then :
+  printf "%s\n" "#define HAVE_UTMPS_H 1" >>confdefs.h
+
+fi
+
 		ac_fn_c_check_func "$LINENO" "pstat_getproc" "ac_cv_func_pstat_getproc"
 if test "x$ac_cv_func_pstat_getproc" = xyes
 then :
@@ -19321,19 +19335,15 @@ fi
 
 
 
-       for ac_header in utmps.h utmpx.h
-do :
-  as_ac_Header=`printf "%s\n" "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"
+if test X"$ac_cv_header_utmps_h" != X"yes"; then
+    ac_fn_c_check_header_compile "$LINENO" "utmpx.h" "ac_cv_header_utmpx_h" "$ac_includes_default"
+if test "x$ac_cv_header_utmpx_h" = xyes
 then :
-  cat >>confdefs.h <<_ACEOF
-#define `printf "%s\n" "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
- break
+  printf "%s\n" "#define HAVE_UTMPX_H 1" >>confdefs.h
+
 fi
 
-done
+fi
        for ac_header in endian.h sys/endian.h machine/endian.h
 do :
   as_ac_Header=`printf "%s\n" "ac_cv_header_$ac_header" | $as_tr_sh`
@@ -20147,7 +20157,7 @@ printf "%s\n" "$ac_cv_sizeof_time_t" >&6; }
 printf "%s\n" "#define SIZEOF_TIME_T $ac_cv_sizeof_time_t" >>confdefs.h
 
 
-if test $ac_cv_header_utmps_h = "yes"; then
+if test X"$ac_cv_header_utmps_h" = X"yes"; then
 
                 ac_fn_c_check_member "$LINENO" "struct utmps" "ut_id" "ac_cv_member_struct_utmps_ut_id" "
 #	include <sys/types.h>
@@ -20258,7 +20268,7 @@ fi
 fi
 
 
-elif test $ac_cv_header_utmpx_h = "yes"; then
+elif test X"$ac_cv_header_utmpx_h" = X"yes"; then
 
                 ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_id" "ac_cv_member_struct_utmpx_ut_id" "
 #	include <sys/types.h>

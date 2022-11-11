@@ -1914,6 +1914,7 @@ case "$host" in
 		# HP-UX won't unlink a shared lib that is open
 		INSTALL_BACKUP='~'
 
+		AC_CHECK_HEADERS([utmps.h])
 		AC_CHECK_FUNCS([pstat_getproc gethrtime])
 		;;
     *-*-hpux*)
@@ -1992,6 +1993,7 @@ case "$host" in
 			    test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 			;;
 		esac
+		AC_CHECK_HEADERS([utmps.h])
 		AC_CHECK_FUNCS([pstat_getproc gethrtime])
 		;;
     *-dec-osf*)
@@ -2456,7 +2458,9 @@ AC_HEADER_DIRENT
 AC_HEADER_STDBOOL
 AC_HEADER_MAJOR
 AC_CHECK_HEADERS_ONCE([netgroup.h paths.h spawn.h wordexp.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h sys/statvfs.h])
-AC_CHECK_HEADERS([utmps.h] [utmpx.h], [break])
+if test X"$ac_cv_header_utmps_h" != X"yes"; then
+    AC_CHECK_HEADERS([utmpx.h])
+fi
 AC_CHECK_HEADERS([endian.h] [sys/endian.h] [machine/endian.h], [break])
 AC_CHECK_HEADERS([procfs.h] [sys/procfs.h], [AC_CHECK_MEMBERS(struct psinfo.pr_ttydev, [AC_CHECK_FUNCS([_ttyname_dev])], [], [AC_INCLUDES_DEFAULT
 #ifdef HAVE_PROCFS_H
@@ -2553,9 +2557,9 @@ SUDO_SOCK_SIN_LEN
 AC_CHECK_SIZEOF([id_t])
 AC_CHECK_SIZEOF([long long])
 AC_CHECK_SIZEOF([time_t])
-if test $ac_cv_header_utmps_h = "yes"; then
+if test X"$ac_cv_header_utmps_h" = X"yes"; then
     SUDO_CHECK_UTMP_MEMBERS([utmps])
-elif test $ac_cv_header_utmpx_h = "yes"; then
+elif test X"$ac_cv_header_utmpx_h" = X"yes"; then
     SUDO_CHECK_UTMP_MEMBERS([utmpx])
 else
     SUDO_CHECK_UTMP_MEMBERS([utmp])
