@@ -572,9 +572,6 @@
 /* Define to 1 if you have the <login_cap.h> header file. */
 #undef HAVE_LOGIN_CAP_H
 
-/* Define to 1 if the system has the type `long long int'. */
-#undef HAVE_LONG_LONG_INT
-
 /* Define to 1 if you have the `lrand48' function. */
 #undef HAVE_LRAND48
 
@@ -1009,9 +1006,6 @@
 /* Define to 1 if you have the `unsetenv' function. */
 #undef HAVE_UNSETENV
 
-/* Define to 1 if the system has the type `unsigned long long int'. */
-#undef HAVE_UNSIGNED_LONG_LONG_INT
-
 /* Define to 1 if you have the <util.h> header file. */
 #undef HAVE_UTIL_H
 
@@ -1423,11 +1417,17 @@
 #undef inline
 #endif
 
+/* Define to `unsigned int' if <sys/types.h> does not define. */
+#undef int16_t
+
+/* Define to `unsigned int' if <sys/types.h> does not define. */
+#undef int32_t
+
+/* Define to `unsigned long long' if <sys/types.h> does not define. */
+#undef int64_t
+
 /* Define to `long long' if <sys/types.h> does not define. */
 #undef intmax_t
-
-/* Define to `int' if <sys/types.h> does not define. */
-#undef mode_t
 
 /* Define to an OS-specific initialization function or `os_init_common'. */
 #undef os_init
@@ -1443,6 +1443,9 @@
 
 /* Define to `int' if <sys/types.h> doesn't define. */
 #undef uid_t
+
+/* Define to `unsigned int' if <sys/types.h> does not define. */
+#undef uint16_t
 
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 #undef uint32_t

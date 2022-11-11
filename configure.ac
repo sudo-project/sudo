@@ -2506,10 +2506,6 @@ case "$host_os" in
 	fi
 	;;
 esac
-AC_SYS_POSIX_TERMIOS
-if test "$ac_cv_sys_posix_termios" != "yes"; then
-    AC_MSG_ERROR([must have POSIX termios to build sudo])
-fi
 SUDO_MAILDIR
 if test ${with_logincap-'no'} != "no"; then
     AC_CHECK_HEADERS([login_cap.h], [LOGINCAP_USAGE='[[-c class]] '; LCMAN=1
@@ -2533,23 +2529,21 @@ fi
 dnl
 dnl typedef checks
 dnl
-AC_TYPE_MODE_T
-AC_TYPE_UID_T
-AC_CHECK_TYPE([clockid_t], [], [AC_DEFINE(clockid_t, int)], [#include <sys/types.h>
-#include <time.h>])
+if test X"${ac_cv_header_stdint_h}${ac_cv_header_inttypes_h}" = X"nono"; then
+    AC_CHECK_TYPE(uint8_t, unsigned char)
+    AC_CHECK_TYPE(int16_t, unsigned int)
+    AC_CHECK_TYPE(uint16_t, unsigned int)
+    AC_CHECK_TYPE(int32_t, unsigned int)
+    AC_CHECK_TYPE(uint32_t, unsigned int)
+    AC_CHECK_TYPE(int64_t, unsigned long long)
+    AC_CHECK_TYPE(uint64_t, unsigned long long)
+    AC_CHECK_TYPE(intmax_t, long long)
+    AC_CHECK_TYPE(uintmax_t, unsigned long long)
+fi
 AC_CHECK_TYPE([sig_atomic_t], [], [AC_DEFINE(sig_atomic_t, int)], [#include <sys/types.h>
 #include <signal.h>])
 AC_CHECK_TYPES([struct in6_addr], [], [], [#include <sys/types.h>
 #include <netinet/in.h>])
-AC_TYPE_LONG_LONG_INT
-if test X"$ac_cv_type_long_long_int" != X"yes"; then
-    AC_MSG_ERROR([C compiler does not appear to support the long long int type])
-fi
-AC_CHECK_TYPE(intmax_t, long long)
-AC_CHECK_TYPE(uintmax_t, unsigned long long)
-AC_CHECK_TYPE(uint8_t, unsigned char)
-AC_CHECK_TYPE(uint32_t, unsigned int)
-AC_CHECK_TYPE(uint64_t, unsigned long long)
 AC_CHECK_TYPE(socklen_t, [], [AC_DEFINE(socklen_t, unsigned int)], [
 AC_INCLUDES_DEFAULT
 #include <sys/socket.h>])
