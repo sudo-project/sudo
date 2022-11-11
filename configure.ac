@@ -2404,20 +2404,20 @@ dnl
 AC_C_CONST
 AC_C_INLINE
 AC_C_VOLATILE
-AC_MSG_CHECKING([for variadic macro support in cpp])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
-AC_INCLUDES_DEFAULT
+if test X"$ac_cv_prog_cc_c99" = X"no"; then
+    AC_MSG_CHECKING([for variadic macro support in cpp])
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
 #if defined(__GNUC__) && __GNUC__ == 2
 # define sudo_fprintf(fp, fmt...) fprintf((fp), (fmt))
 #else
 # define sudo_fprintf(fp, ...) fprintf((fp), __VA_ARGS__)
-#endif
-], [sudo_fprintf(stderr, "a %s", "test");])], [AC_MSG_RESULT([yes])],
-[AC_MSG_RESULT([no])
- AC_DEFINE([NO_VARIADIC_MACROS], [1], [Define if your C preprocessor does not support variadic macros.])
- AC_MSG_WARN([your C preprocessor doesn't support variadic macros, debugging support will be limited])
- SUDO_APPEND_COMPAT_EXP(sudo_debug_printf_nvm_v1)
-])
+#endif], [sudo_fprintf(stderr, "a %s", "test");])], [AC_MSG_RESULT([yes])],
+    [AC_MSG_RESULT([no])
+	AC_DEFINE([NO_VARIADIC_MACROS], [1], [Define if your C preprocessor does not support variadic macros.])
+	AC_MSG_WARN([your C preprocessor doesn't support variadic macros, debugging support will be limited])
+	SUDO_APPEND_COMPAT_EXP(sudo_debug_printf_nvm_v1)
+    ])
+fi
 
 dnl
 dnl Program checks

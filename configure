@@ -18597,18 +18597,17 @@ printf "%s\n" "#define volatile /**/" >>confdefs.h
 
 fi
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for variadic macro support in cpp" >&5
+if test X"$ac_cv_build_prog_cc_c99" = X"no"; then
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for variadic macro support in cpp" >&5
 printf %s "checking for variadic macro support in cpp... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-
 $ac_includes_default
 #if defined(__GNUC__) && __GNUC__ == 2
 # define sudo_fprintf(fp, fmt...) fprintf((fp), (fmt))
 #else
 # define sudo_fprintf(fp, ...) fprintf((fp), __VA_ARGS__)
 #endif
-
 int
 main (void)
 {
@@ -18627,7 +18626,7 @@ printf "%s\n" "no" >&6; }
 
 printf "%s\n" "#define NO_VARIADIC_MACROS 1" >>confdefs.h
 
- { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: your C preprocessor doesn't support variadic macros, debugging support will be limited" >&5
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: your C preprocessor doesn't support variadic macros, debugging support will be limited" >&5
 printf "%s\n" "$as_me: WARNING: your C preprocessor doesn't support variadic macros, debugging support will be limited" >&2;}
 
     for _sym in sudo_debug_printf_nvm_v1; do
@@ -18638,6 +18637,7 @@ printf "%s\n" "$as_me: WARNING: your C preprocessor doesn't support variadic mac
 
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
 
 for ac_prog in gawk mawk nawk awk
 do
