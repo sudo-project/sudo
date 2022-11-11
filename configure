@@ -8685,7 +8685,7 @@ fi
 esac
 
 case "$host_os" in
-hiuxmpp*|hpux11.1[1-9]|hpux11.[2-9][0-9]|hpux1[2-9].*)
+hpux11.1[1-9]|hpux11.[2-9][0-9]|hpux1[2-9].*)
     # Prefer dlopen() over shl_load()
     : ${ac_cv_func_shl_load='no'}
     : ${ac_cv_lib_dld_shl_load='no'}
@@ -17500,45 +17500,52 @@ printf "%s\n" "#define HAVE_DECL_SETAUTHDB $ac_have_decl" >>confdefs.h
 
 		;;
     *-*-hiuxmpp*)
-		printf "%s\n" "#define PAM_SUN_CODEBASE 1" >>confdefs.h
+		# HI-UX/MPP is based on OSF/1
+
+		# ignore envariables wrt dynamic lib path
+
+if test ${SUDO_LDFLAGS+y}
+then :
+
+  case " $SUDO_LDFLAGS " in #(
+  *" -Wl,-no_library_replacement "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDO_LDFLAGS already contains -Wl,-no_library_replacement"; } >&5
+  (: SUDO_LDFLAGS already contains -Wl,-no_library_replacement) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDO_LDFLAGS " -Wl,-no_library_replacement"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDO_LDFLAGS=\"\$SUDO_LDFLAGS\""; } >&5
+  (: SUDO_LDFLAGS="$SUDO_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else $as_nop
+
+  SUDO_LDFLAGS=-Wl,-no_library_replacement
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDO_LDFLAGS=\"\$SUDO_LDFLAGS\""; } >&5
+  (: SUDO_LDFLAGS="$SUDO_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+
+fi
 
 
-		: ${mansectsu='1m'}
+		shadow_funcs="getprpwnam dispcrypt"
+		shadow_libs="-lsecurity"
+
+		# ":DEFAULT" must be appended to _RLD_LIST
+		RTLD_PRELOAD_VAR="_RLD_LIST"
+		RTLD_PRELOAD_DEFAULT="DEFAULT"
+		: ${mansectsu='8'}
 		: ${mansectform='4'}
 		: ${mansectmisc='5'}
-
-		# HP-UX does not clear /var/run so we need to do it
-		INIT_SCRIPT=hpux.sh
-		INIT_DIR=/sbin/init.d
-		RC_LINK=/sbin/rc2.d/S900sudo
-
-		# HP-UX shared libs must be executable.
-		# Load time is much greater if writable so use 0555.
-		SHLIB_MODE=0555
-
-		# HP-UX won't unlink a shared lib that is open
-		INSTALL_BACKUP='~'
-
-		ac_fn_c_check_header_compile "$LINENO" "utmps.h" "ac_cv_header_utmps_h" "$ac_includes_default"
-if test "x$ac_cv_header_utmps_h" = xyes
-then :
-  printf "%s\n" "#define HAVE_UTMPS_H 1" >>confdefs.h
-
-fi
-
-		ac_fn_c_check_func "$LINENO" "pstat_getproc" "ac_cv_func_pstat_getproc"
-if test "x$ac_cv_func_pstat_getproc" = xyes
-then :
-  printf "%s\n" "#define HAVE_PSTAT_GETPROC 1" >>confdefs.h
-
-fi
-ac_fn_c_check_func "$LINENO" "gethrtime" "ac_cv_func_gethrtime"
-if test "x$ac_cv_func_gethrtime" = xyes
-then :
-  printf "%s\n" "#define HAVE_GETHRTIME 1" >>confdefs.h
-
-fi
-
 		;;
     *-*-hpux*)
 		printf "%s\n" "#define PAM_SUN_CODEBASE 1" >>confdefs.h
@@ -21170,7 +21177,7 @@ then :
 
     # pread/pwrite on 32-bit HP-UX 11.x may not support large files
     case "$host_os" in
-	hpux*|hiuxmpp*)
+	hpux*)
 
   for ac_func in pread64 pwrite64
 do :
@@ -29299,7 +29306,7 @@ fi
     found=no
     # On HP-UX, libibmldap has a hidden dependency on libCsup
     case "$host_os" in
-	hpux*|hiuxmpp*) { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for main in -lCsup" >&5
+	hpux*) { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for main in -lCsup" >&5
 printf %s "checking for main in -lCsup... " >&6; }
 if test ${ac_cv_lib_Csup_main+y}
 then :
@@ -29999,7 +30006,7 @@ fi
 # so always link against -lpthread on HP-UX if it is available.
 # This check should go after all other libraries tests.
 case "$host_os" in
-    hpux*|hiuxmpp*)
+    hpux*)
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for main in -lpthread" >&5
 printf %s "checking for main in -lpthread... " >&6; }
 if test ${ac_cv_lib_pthread_main+y}
@@ -30594,7 +30601,7 @@ fi
 
 else
     case "$host_os" in
-	hpux*|hiuxmpp*)
+	hpux*)
 	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -Bhidden_def" >&5
 printf %s "checking whether C compiler accepts -Bhidden_def... " >&6; }
 if test ${ax_cv_check_cflags___Bhidden_def+y}
@@ -30820,7 +30827,7 @@ printf "%s\n" "$sudo_cv_var_solaris_ld_anon_map" >&6; }
 		LT_LDDEP="\$(shlib_map)"; LT_LDEXPORTS="-Wl,-M,\$(shlib_map)"
 	    fi
 	    ;;
-	hpux*|hiuxmpp*)
+	hpux*)
 	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether ld supports controlling exported symbols" >&5
 printf %s "checking whether ld supports controlling exported symbols... " >&6; }
 if test ${sudo_cv_var_hpux_ld_symbol_export+y}
@@ -34848,7 +34855,7 @@ printf "%s\n" "$as_me: WARNING: OpenSSL dev libraries not found, Sudo logsrv con
 fi
 if test "$with_pam" = "yes"; then
     case $host_os in
-	hpux*|hiuxmpp*)
+	hpux*)
 	    if test -f /usr/lib/security/libpam_hpsec.so.1; then
 		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: you may wish to add the following line to /etc/pam.conf" >&5
 printf "%s\n" "$as_me: you may wish to add the following line to /etc/pam.conf" >&6;}

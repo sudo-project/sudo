@@ -1658,12 +1658,12 @@ aix4.[[23]]|aix4.[[23]].*|aix[[5-9]]*)
 esac
 
 dnl
-dnl On HP-UX 11.11 and higher (and hiuxmpp) we prefer dlopen()
-dnl over shl_load().  Libtool defaults to shl_load() so we need
-dnl to prime the cache to override that default.
+dnl On HP-UX 11.11 and higher we prefer dlopen() over shl_load().
+dnl Libtool defaults to shl_load() so we need to prime the cache
+dnl to override that default.
 dnl
 case "$host_os" in
-hiuxmpp*|hpux11.1[[1-9]]|hpux11.[[2-9]][[0-9]]|hpux1[[2-9]].*)
+hpux11.1[[1-9]]|hpux11.[[2-9]][[0-9]]|hpux1[[2-9]].*)
     # Prefer dlopen() over shl_load()
     : ${ac_cv_func_shl_load='no'}
     : ${ac_cv_lib_dld_shl_load='no'}
@@ -1896,26 +1896,20 @@ case "$host" in
 		])
 		;;
     *-*-hiuxmpp*)
-		AC_DEFINE([PAM_SUN_CODEBASE])
+		# HI-UX/MPP is based on OSF/1
 
-		: ${mansectsu='1m'}
+		# ignore envariables wrt dynamic lib path
+		AX_APPEND_FLAG([-Wl,-no_library_replacement], [SUDO_LDFLAGS])
+
+		shadow_funcs="getprpwnam dispcrypt"
+		shadow_libs="-lsecurity"
+
+		# ":DEFAULT" must be appended to _RLD_LIST
+		RTLD_PRELOAD_VAR="_RLD_LIST"
+		RTLD_PRELOAD_DEFAULT="DEFAULT"
+		: ${mansectsu='8'}
 		: ${mansectform='4'}
 		: ${mansectmisc='5'}
-
-		# HP-UX does not clear /var/run so we need to do it
-		INIT_SCRIPT=hpux.sh
-		INIT_DIR=/sbin/init.d
-		RC_LINK=/sbin/rc2.d/S900sudo
-
-		# HP-UX shared libs must be executable.
-		# Load time is much greater if writable so use 0555.
-		SHLIB_MODE=0555
-
-		# HP-UX won't unlink a shared lib that is open
-		INSTALL_BACKUP='~'
-
-		AC_CHECK_HEADERS([utmps.h])
-		AC_CHECK_FUNCS([pstat_getproc gethrtime])
 		;;
     *-*-hpux*)
 		AC_DEFINE([PAM_SUN_CODEBASE])
@@ -2617,7 +2611,7 @@ AC_CHECK_FUNCS([execvpe], [SUDO_APPEND_INTERCEPT_EXP(execvpe)])
 AC_CHECK_FUNCS([pread], [
     # pread/pwrite on 32-bit HP-UX 11.x may not support large files
     case "$host_os" in
-	hpux*|hiuxmpp*)
+	hpux*)
 	    AC_CHECK_FUNCS([pread64 pwrite64], [
 		AC_CHECK_DECLS([pread64, pwrite64])
 	    ])
@@ -4403,7 +4397,7 @@ if test ${with_ldap-'no'} != "no"; then
     found=no
     # On HP-UX, libibmldap has a hidden dependency on libCsup
     case "$host_os" in
-	hpux*|hiuxmpp*) AC_CHECK_LIB(Csup, main, [IBMLDAP_EXTRA=" -lCsup"]);;
+	hpux*) AC_CHECK_LIB(Csup, main, [IBMLDAP_EXTRA=" -lCsup"]);;
     esac
     AC_SEARCH_LIBS([ldap_init], ["ibmldap${IBMLDAP_EXTRA}" "ibmldap -lidsldif${IBMLDAP_EXTRA}" "ldap" "ldap -llber" "ldap -llber -lssl -lcrypto" "ibmldap${IBMLDAP_EXTRA}]", [
 	test "${ac_cv_search_ldap_init}" != "none required" && LDAP_LIBS="${ac_cv_search_ldap_init}"
@@ -4568,7 +4562,7 @@ fi
 # so always link against -lpthread on HP-UX if it is available.
 # This check should go after all other libraries tests.
 case "$host_os" in
-    hpux*|hiuxmpp*)
+    hpux*)
 	AC_CHECK_LIB(pthread, main, [SUDO_LIBS="${SUDO_LIBS} -lpthread"])
 	AC_DEFINE(_REENTRANT)
 	;;
@@ -4671,7 +4665,7 @@ if test -n "$GCC"; then
     ])
 else
     case "$host_os" in
-	hpux*|hiuxmpp*)
+	hpux*)
 	    AX_CHECK_COMPILE_FLAG([-Bhidden_def], [
 		# HP-UX cc may not allow __declspec(dllexport) to be
 		# used in conjunction with #pragma HP_DEFINED_EXTERNAL
@@ -4767,7 +4761,7 @@ EOF
 		LT_LDDEP="\$(shlib_map)"; LT_LDEXPORTS="-Wl,-M,\$(shlib_map)"
 	    fi
 	    ;;
-	hpux*|hiuxmpp*)
+	hpux*)
 	    AC_CACHE_CHECK([whether ld supports controlling exported symbols],
 		[sudo_cv_var_hpux_ld_symbol_export],
 		[
@@ -5407,7 +5401,7 @@ if test "$openssl_missing" = "yes"; then
 fi
 if test "$with_pam" = "yes"; then
     case $host_os in
-	hpux*|hiuxmpp*)
+	hpux*)
 	    if test -f /usr/lib/security/libpam_hpsec.so.1; then
 		AC_MSG_NOTICE([you may wish to add the following line to /etc/pam.conf])
 		AC_MSG_NOTICE([sudo session required libpam_hpsec.so.1 bypass_umask bypass_last_login])
