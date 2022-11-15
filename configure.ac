@@ -5025,6 +5025,9 @@ if test -n "$GCC"; then
 	dnl
 	CFLAGS="${CFLAGS} -Wall -Wsign-compare -Wpointer-arith -Wno-unknown-pragmas -Wmissing-prototypes -Wwrite-strings"
 	AX_CHECK_COMPILE_FLAG([-Wshadow], [CFLAGS="$CFLAGS -Wshadow"])
+	AX_CHECK_COMPILE_FLAG([-Wvla], [CFLAGS="$CFLAGS -Wvla"])
+	AX_CHECK_COMPILE_FLAG([-Walloca], [CFLAGS="$CFLAGS -Walloca"])
+	AX_CHECK_COMPILE_FLAG([-Wtrampolines], [CFLAGS="$CFLAGS -Wtrampolines"])
 	dnl
 	dnl The fallthrough attribute is supported by gcc 7.0 and clang 10.
 	dnl This test relies on AC_LANG_WERROR.

@@ -32294,6 +32294,120 @@ else $as_nop
   :
 fi
 
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -Wvla" >&5
+printf %s "checking whether C compiler accepts -Wvla... " >&6; }
+if test ${ax_cv_check_cflags___Wvla+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+  ax_check_save_flags=$CFLAGS
+  CFLAGS="$CFLAGS  -Wvla"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  ax_cv_check_cflags___Wvla=yes
+else $as_nop
+  ax_cv_check_cflags___Wvla=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___Wvla" >&5
+printf "%s\n" "$ax_cv_check_cflags___Wvla" >&6; }
+if test x"$ax_cv_check_cflags___Wvla" = xyes
+then :
+  CFLAGS="$CFLAGS -Wvla"
+else $as_nop
+  :
+fi
+
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -Walloca" >&5
+printf %s "checking whether C compiler accepts -Walloca... " >&6; }
+if test ${ax_cv_check_cflags___Walloca+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+  ax_check_save_flags=$CFLAGS
+  CFLAGS="$CFLAGS  -Walloca"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  ax_cv_check_cflags___Walloca=yes
+else $as_nop
+  ax_cv_check_cflags___Walloca=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___Walloca" >&5
+printf "%s\n" "$ax_cv_check_cflags___Walloca" >&6; }
+if test x"$ax_cv_check_cflags___Walloca" = xyes
+then :
+  CFLAGS="$CFLAGS -Walloca"
+else $as_nop
+  :
+fi
+
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -Wtrampolines" >&5
+printf %s "checking whether C compiler accepts -Wtrampolines... " >&6; }
+if test ${ax_cv_check_cflags___Wtrampolines+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+  ax_check_save_flags=$CFLAGS
+  CFLAGS="$CFLAGS  -Wtrampolines"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  ax_cv_check_cflags___Wtrampolines=yes
+else $as_nop
+  ax_cv_check_cflags___Wtrampolines=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___Wtrampolines" >&5
+printf "%s\n" "$ax_cv_check_cflags___Wtrampolines" >&6; }
+if test x"$ax_cv_check_cflags___Wtrampolines" = xyes
+then :
+  CFLAGS="$CFLAGS -Wtrampolines"
+else $as_nop
+  :
+fi
+
 					{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether $CC supports the fallthrough attribute" >&5
 printf %s "checking whether $CC supports the fallthrough attribute... " >&6; }
 if test ${sudo_cv_var_fallthrough_attribute+y}
