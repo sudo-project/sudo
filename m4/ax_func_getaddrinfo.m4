@@ -26,7 +26,7 @@ AC_CACHE_VAL(ax_cv_func_getaddrinfo,
 int main() { return getaddrinfo(0, 0, 0, 0); }]])], [ax_cv_func_getaddrinfo=yes], [ax_cv_func_getaddrinfo=no])])
 AC_MSG_RESULT([$ax_cv_func_getaddrinfo])
 if test X"$ax_cv_func_getaddrinfo" = X"yes"; then
-    AC_DEFINE(HAVE_GETADDRINFO, 1, [Define to 1 if you have the `getaddrinfo' function.])
+    AC_DEFINE(HAVE_GETADDRINFO, 1, [Define to 1 if you have the 'getaddrinfo' function.])
 else
     # Not found in libc, check libsocket and libinet
     _found=no

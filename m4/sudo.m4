@@ -303,7 +303,7 @@ AC_DEFUN([SUDO_FUNC_UNSETENV_VOID],
     [sudo_cv_func_unsetenv_void=no])])
     if test $sudo_cv_func_unsetenv_void = yes; then
       AC_DEFINE(UNSETENV_VOID, 1,
-        [Define to 1 if the `unsetenv' function returns void instead of `int'.])
+        [Define to 1 if the 'unsetenv' function returns void instead of 'int'.])
     fi
   ])
 
@@ -319,7 +319,7 @@ int putenv(const char *string) {return 0;}], [])],
     [sudo_cv_func_putenv_const=no])
   ])
   if test $sudo_cv_func_putenv_const = yes; then
-    AC_DEFINE(PUTENV_CONST, const, [Define to const if the `putenv' takes a const argument.])
+    AC_DEFINE(PUTENV_CONST, const, [Define to const if the 'putenv' takes a const argument.])
   else
     AC_DEFINE(PUTENV_CONST, [])
   fi
@@ -341,7 +341,7 @@ int au_close(int d, int keep, au_event_t event, au_emod_t emod) {return 0;}], []
     [sudo_cv_func_au_close_solaris11=no])
   ])
   if test $sudo_cv_func_au_close_solaris11 = yes; then
-    AC_DEFINE(HAVE_AU_CLOSE_SOLARIS11, 1, [Define to 1 if the `au_close' functions takes 4 arguments like Solaris 11.])
+    AC_DEFINE(HAVE_AU_CLOSE_SOLARIS11, 1, [Define to 1 if the 'au_close' functions takes 4 arguments like Solaris 11.])
   fi
 ])
 
@@ -359,7 +359,7 @@ void SHA224Update(SHA2_CTX *context, const void *data, size_t len) {return;}], [
   ])
   if test $sudo_cv_func_sha2_void_ptr = yes; then
     AC_DEFINE(SHA2_VOID_PTR, 1,
-      [Define to 1 if the sha2 functions use `const void *' instead of `const unsigned char'.])
+      [Define to 1 if the sha2 functions use 'const void *' instead of 'const unsigned char'.])
   fi
 ])
 
@@ -429,25 +429,25 @@ AC_DEFUN([SUDO_CHECK_UTMP_MEMBERS], [
     dnl Check for utmp/utmpx/utmps struct members.
     dnl
     AC_CHECK_MEMBER([struct $1.ut_id], [
-	AC_DEFINE(HAVE_STRUCT_UTMP_UT_ID, 1, [Define to 1 if `ut_id' is a member of `struct utmp'.])
+	AC_DEFINE(HAVE_STRUCT_UTMP_UT_ID, 1, [Define to 1 if 'ut_id' is a member of 'struct utmp'.])
     ], [], [
 #	include <sys/types.h>
 #	include <$1.h>
     ])
     AC_CHECK_MEMBER([struct $1.ut_pid], [
-	AC_DEFINE(HAVE_STRUCT_UTMP_UT_PID, 1, [Define to 1 if `ut_pid' is a member of `struct utmp'.])
+	AC_DEFINE(HAVE_STRUCT_UTMP_UT_PID, 1, [Define to 1 if 'ut_pid' is a member of 'struct utmp'.])
     ], [], [
 #	include <sys/types.h>
 #	include <$1.h>
     ])
     AC_CHECK_MEMBER([struct $1.ut_tv], [
-	AC_DEFINE(HAVE_STRUCT_UTMP_UT_TV, 1, [Define to 1 if `ut_tv' is a member of `struct utmp'.])
+	AC_DEFINE(HAVE_STRUCT_UTMP_UT_TV, 1, [Define to 1 if 'ut_tv' is a member of 'struct utmp'.])
     ], [], [
 #	include <sys/types.h>
 #	include <$1.h>
     ])
     AC_CHECK_MEMBER([struct $1.ut_type], [
-	AC_DEFINE(HAVE_STRUCT_UTMP_UT_TYPE, 1, [Define to 1 if `ut_type' is a member of `struct utmp'.])
+	AC_DEFINE(HAVE_STRUCT_UTMP_UT_TYPE, 1, [Define to 1 if 'ut_type' is a member of 'struct utmp'.])
     ], [], [
 #	include <sys/types.h>
 #	include <$1.h>
@@ -467,12 +467,12 @@ AC_DEFUN([SUDO_CHECK_UTMP_MEMBERS], [
     dnl __e_termination visible when _GNU_SOURCE is *not* defined.
     dnl
     AC_CHECK_MEMBER([struct $1.ut_exit.__e_termination], [
-	AC_DEFINE(HAVE_STRUCT_UTMP_UT_EXIT, 1, [Define to 1 if `ut_exit' is a member of `struct utmp'.])
-	AC_DEFINE(HAVE_STRUCT_UTMP_UT_EXIT___E_TERMINATION, 1, [Define to 1 if `ut_exit.__e_termination' is a member of `struct utmp'.])
+	AC_DEFINE(HAVE_STRUCT_UTMP_UT_EXIT, 1, [Define to 1 if 'ut_exit' is a member of 'struct utmp'.])
+	AC_DEFINE(HAVE_STRUCT_UTMP_UT_EXIT___E_TERMINATION, 1, [Define to 1 if 'ut_exit.__e_termination' is a member of 'struct utmp'.])
     ], [
 	AC_CHECK_MEMBER([struct $1.ut_exit.e_termination], [
-	    AC_DEFINE(HAVE_STRUCT_UTMP_UT_EXIT, 1, [Define to 1 if `ut_exit' is a member of `struct utmp'.])
-	    AC_DEFINE(HAVE_STRUCT_UTMP_UT_EXIT_E_TERMINATION, 1, [Define to 1 if `ut_exit.e_termination' is a member of `struct utmp'.])
+	    AC_DEFINE(HAVE_STRUCT_UTMP_UT_EXIT, 1, [Define to 1 if 'ut_exit' is a member of 'struct utmp'.])
+	    AC_DEFINE(HAVE_STRUCT_UTMP_UT_EXIT_E_TERMINATION, 1, [Define to 1 if 'ut_exit.e_termination' is a member of 'struct utmp'.])
 	], [], [
 #	    include <sys/types.h>
 #	    include <$1.h>
