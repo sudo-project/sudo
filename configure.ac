@@ -1478,7 +1478,7 @@ AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])
 		SUDO_OBJS="${SUDO_OBJS} selinux.o"
 		PROGS="${PROGS} sesh"
 		SEMAN=1
-		AC_CHECK_LIB(selinux, setkeycreatecon,
+		AC_CHECK_LIB([selinux], [setkeycreatecon],
 		    [AC_DEFINE(HAVE_SETKEYCREATECON)])
 		;;
     no)		;;
@@ -2049,7 +2049,7 @@ case "$host" in
 		fi
 		# IRIX <= 4 needs -lsun
 		if test "$OSMAJOR" -le 4; then
-		    AC_CHECK_LIB(sun, getpwnam, [LIBS="${LIBS} -lsun"])
+		    AC_CHECK_LIB([sun], [getpwnam], [LIBS="${LIBS} -lsun"])
 		fi
 		# ":DEFAULT" must be appended to _RLD_LIST
 		RTLD_PRELOAD_VAR="_RLD_LIST"
@@ -2114,7 +2114,7 @@ case "$host" in
 		: ${mansectmisc='5'}
 		;;
     *-ncr-sysv4*|*-ncr-sysvr4*)
-		AC_CHECK_LIB(c89, strcasecmp, [LIBS="${LIBS} -lc89"])
+		AC_CHECK_LIB([c89], [strcasecmp], [LIBS="${LIBS} -lc89"])
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		: ${mansectmisc='5'}
@@ -2518,7 +2518,7 @@ if test ${with_logincap-'no'} != "no"; then
 fi
 if test ${with_project-'no'} != "no"; then
     AC_CHECK_HEADER(project.h, [
-	AC_CHECK_LIB(project, setproject, [
+	AC_CHECK_LIB([project], [setproject], [
 	    AC_DEFINE(HAVE_PROJECT_H)
 	    SUDO_LIBS="${SUDO_LIBS} -lproject"
 	])
@@ -2724,7 +2724,7 @@ AC_CHECK_FUNCS([arc4random], [
     ])
     # arc4random.c wants pthread_atfork
     AC_CHECK_HEADERS([pthread.h], [
-	AC_CHECK_LIB(pthread, main, [LIBPTHREAD="-lpthread"])
+	AC_CHECK_LIB([pthread], [main], [LIBPTHREAD="-lpthread"])
 	AC_CHECK_FUNCS([pthread_atfork])
     ])
 ])
@@ -2761,7 +2761,7 @@ AC_CHECK_FUNCS([sysctl], [AC_CHECK_FUNCS([devname])
 ])
 
 AC_CHECK_FUNCS([openpty], [AC_CHECK_HEADERS([libutil.h util.h pty.h], [break])], [
-    AC_CHECK_LIB(util, openpty, [
+    AC_CHECK_LIB([util], [openpty], [
 	AC_CHECK_HEADERS([libutil.h util.h pty.h], [break])
 	case "$SUDO_LIBS" in
 	    *-lutil*) ;;
@@ -2858,7 +2858,7 @@ AC_CHECK_FUNCS([freezero], [], [
 ])
 AC_CHECK_FUNCS(nanosleep, [], [
     # On Solaris, nanosleep is in librt
-    AC_CHECK_LIB(rt, nanosleep, [
+    AC_CHECK_LIB([rt], [nanosleep], [
 	AC_DEFINE(HAVE_NANOSLEEP)
 	LIBRT="-lrt"
     ], [
@@ -2926,7 +2926,7 @@ else
 fi
 AC_CHECK_FUNCS([clock_gettime], [], [
     # On Solaris, clock_gettime is in librt
-    AC_CHECK_LIB(rt, clock_gettime, [
+    AC_CHECK_LIB([rt], [clock_gettime], [
 	AC_DEFINE(HAVE_CLOCK_GETTIME)
 	LIBRT="-lrt"
     ])
@@ -3060,7 +3060,7 @@ if test "${enable_openssl-no}" != no; then
 	libssl="`$PKG_CONFIG --libs-only-l $pkg_openssl | sed 's/^ *-l//'`"
 	libssl_extra="`echo $libssl | sed 's/^[[^ ]]* *//'`"
 	libssl="`echo $libssl | sed 's/ .*//'`"
-	AC_CHECK_LIB($libssl, SSL_new, [STATIC=""], [STATIC="--static"], [$libssl_extra])
+	AC_CHECK_LIB([$libssl], [SSL_new], [STATIC=""], [STATIC="--static"], [$libssl_extra])
 	LDFLAGS="$O_LDFLAGS"
 
 	# Use pkg-config to determine OpenSSL libs and cflags
@@ -3094,7 +3094,7 @@ if test "${enable_openssl-no}" != no; then
 			;;
 		    esac
 	    done
-	    AC_CHECK_LIB($libcrypto, EVP_MD_CTX_new, [DIGEST=digest_openssl.lo], [], [$libcrypto_extra])
+	    AC_CHECK_LIB([$libcrypto], [EVP_MD_CTX_new], [DIGEST=digest_openssl.lo], [], [$libcrypto_extra])
 	    LDFLAGS="$O_LDFLAGS"
 
 	    # Use pkg-config to determine libcrypto libs and cflags
@@ -3123,7 +3123,7 @@ if test "${enable_openssl-no}" != no; then
 	if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
 	    SUDO_APPEND_LIBPATH(LDFLAGS, [${enable_openssl}/lib])
 	fi
-	AC_CHECK_LIB(ssl, SSL_new, [
+	AC_CHECK_LIB([ssl], [SSL_new], [
 	    # Check OPENSSL_VERSION_NUMBER in headers
 	    O_CPPFLAGS="$CPPFLAGS"
 	    if test "$enable_openssl" != "yes" -a "$enable_openssl" != "maybe"; then
@@ -3147,7 +3147,7 @@ if test "${enable_openssl-no}" != no; then
 	    LIBTLS="${LIBTLS} -lssl -lcrypto"
 
 	    # Use OpenSSL's sha2 functions if possible
-	    AC_CHECK_LIB(crypto, EVP_MD_CTX_new, [
+	    AC_CHECK_LIB([crypto], [EVP_MD_CTX_new], [
 		DIGEST=digest_openssl.lo
 	    ])
 ], [
@@ -3230,7 +3230,7 @@ if test "${enable_wolfssl-no}" != no; then
 	libssl="`$PKG_CONFIG --libs-only-l wolfssl | sed 's/^ *-l//'`"
 	libssl_extra=`echo $libssl | sed 's/^[[^ ]]* *//'`
 	libssl=`echo $libssl | sed 's/ .*//'`
-	AC_CHECK_LIB($libssl, wolfSSL_new, [STATIC=""], [STATIC="--static"], [$libssl_extra])
+	AC_CHECK_LIB([$libssl], [wolfSSL_new], [STATIC=""], [STATIC="--static"], [$libssl_extra])
 
 	# Use wolfSSL's sha2 functions if possible
 	AC_CHECK_DECL([EVP_MD_CTX_new], [DIGEST=digest_openssl.lo], [], [
@@ -3338,7 +3338,7 @@ if test "$DIGEST" = "digest.lo"; then
 	FOUND_SHA2=yes
 	AC_CHECK_FUNCS([SHA224Update], [SUDO_FUNC_SHA2_VOID_PTR], [
 	    # On some systems, SHA224Update is in libmd
-	    AC_CHECK_LIB(md, SHA224Update, [
+	    AC_CHECK_LIB([md], [SHA224Update], [
 		AC_DEFINE(HAVE_SHA224UPDATE)
 		SUDO_FUNC_SHA2_VOID_PTR
 		LIBMD="-lmd"
@@ -3656,7 +3656,7 @@ dnl prepend the include dir to make sure we get the right zlib header.
 dnl
 case "$enable_zlib" in
     yes)
-	AC_CHECK_LIB(z, gzclearerr, [
+	AC_CHECK_LIB([z], [gzclearerr], [
 	    AC_CHECK_HEADERS([zlib.h], [ZLIB="-lz"], [enable_zlib=builtin])
 	])
 	;;
@@ -3877,7 +3877,7 @@ if test ${with_pam-"no"} != "no"; then
     # Check for pam_start() in libpam first, then for pam_appl.h.
     #
     found_pam_lib=no
-    AC_CHECK_LIB(pam, pam_start, [found_pam_lib=yes], [], [$lt_cv_dlopen_libs])
+    AC_CHECK_LIB([pam], [pam_start], [found_pam_lib=yes], [], [$lt_cv_dlopen_libs])
     #
     # Some PAM implementations (macOS for example) put the PAM headers
     # in /usr/include/pam instead of /usr/include/security...
@@ -4080,11 +4080,11 @@ if test ${with_kerb5-'no'} != "no"; then
 		AC_DEFINE(HAVE_HEIMDAL)
 		# XXX - need to check whether -lcrypo is needed!
 		SUDOERS_LIBS="${SUDOERS_LIBS} -lkrb5 -lcrypto -ldes -lcom_err -lasn1"
-		AC_CHECK_LIB(roken, main, [SUDOERS_LIBS="${SUDOERS_LIBS} -lroken"])
+		AC_CHECK_LIB([roken], [main], [SUDOERS_LIBS="${SUDOERS_LIBS} -lroken"])
 	    ], [
 		AC_MSG_RESULT(no)
 		SUDOERS_LIBS="${SUDOERS_LIBS} -lkrb5 -lk5crypto -lcom_err"
-		AC_CHECK_LIB(krb5support, main, [SUDOERS_LIBS="${SUDOERS_LIBS} -lkrb5support"])
+		AC_CHECK_LIB([krb5support], [main], [SUDOERS_LIBS="${SUDOERS_LIBS} -lkrb5support"])
 	])
 	AUTH_OBJS="$AUTH_OBJS kerb5.lo"
     fi
@@ -4202,8 +4202,8 @@ if test "${with_skey-'no'}" = "yes"; then
 	    AC_MSG_WARN([unable to locate skey.h, you will have to edit the Makefile and add -I/path/to/skey/includes to CPPFLAGS])
 	fi
     fi
-    AC_CHECK_LIB(skey, main, [found=yes], [AC_MSG_WARN([unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDOERS_LDFLAGS])])
-    AC_CHECK_LIB(skey, skeyaccess, AC_DEFINE(HAVE_SKEYACCESS))
+    AC_CHECK_LIB([skey], [main], [found=yes], [AC_MSG_WARN([unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDOERS_LDFLAGS])])
+    AC_CHECK_LIB([skey], [skeyaccess], [AC_DEFINE(HAVE_SKEYACCESS)])
 
     AC_MSG_CHECKING([for RFC1938-compliant skeychallenge])
     AC_COMPILE_IFELSE(
@@ -4251,7 +4251,7 @@ if test "${with_opie-'no'}" = "yes"; then
 	    AC_MSG_WARN([unable to locate opie.h, you will have to edit the Makefile and add -I/path/to/opie/includes to CPPFLAGS])
 	fi
     fi
-    AC_CHECK_LIB(opie, main, [found=yes], [AC_MSG_WARN([unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDOERS_LDFLAGS])])
+    AC_CHECK_LIB([opie], [main], [found=yes], [AC_MSG_WARN([unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDOERS_LDFLAGS])])
     LDFLAGS="$O_LDFLAGS"
     SUDOERS_LIBS="${SUDOERS_LIBS} -lopie"
     AUTH_OBJS="$AUTH_OBJS rfc1938.lo"
@@ -4394,7 +4394,7 @@ if test ${with_ldap-'no'} != "no"; then
     found=no
     # On HP-UX, libibmldap has a hidden dependency on libCsup
     case "$host_os" in
-	hpux*) AC_CHECK_LIB(Csup, main, [IBMLDAP_EXTRA=" -lCsup"]);;
+	hpux*) AC_CHECK_LIB([Csup], [main], [IBMLDAP_EXTRA=" -lCsup"]);;
     esac
     AC_SEARCH_LIBS([ldap_init], ["ibmldap${IBMLDAP_EXTRA}" "ibmldap -lidsldif${IBMLDAP_EXTRA}" "ldap" "ldap -llber" "ldap -llber -lssl -lcrypto" "ibmldap${IBMLDAP_EXTRA}]", [
 	test "${ac_cv_search_ldap_init}" != "none required" && LDAP_LIBS="${ac_cv_search_ldap_init}"
@@ -4446,13 +4446,15 @@ if test ${with_ldap-'no'} != "no"; then
     AC_CHECK_FUNCS([ldap_search_ext_s ldap_search_st], [break])
 
     if test X"$check_gss_krb5_ccache_name" = X"yes"; then
-	AC_CHECK_LIB(gssapi, gss_krb5_ccache_name,
+	AC_CHECK_LIB([gssapi], [gss_krb5_ccache_name], [
 	    AC_DEFINE(HAVE_GSS_KRB5_CCACHE_NAME)
-	    [LDAP_LIBS="${LDAP_LIBS} -lgssapi"],
-	    AC_CHECK_LIB(gssapi_krb5, gss_krb5_ccache_name,
+	    LDAP_LIBS="${LDAP_LIBS} -lgssapi"
+	], [
+	    AC_CHECK_LIB(gssapi_krb5, gss_krb5_ccache_name, [
 		AC_DEFINE(HAVE_GSS_KRB5_CCACHE_NAME)
-		[LDAP_LIBS="${LDAP_LIBS} -lgssapi_krb5"])
-	)
+		LDAP_LIBS="${LDAP_LIBS} -lgssapi_krb5"
+	    ])
+	])
 
 	# gssapi headers may be separate or part of Kerberos V
 	found=no
@@ -4560,7 +4562,7 @@ fi
 # This check should go after all other libraries tests.
 case "$host_os" in
     hpux*)
-	AC_CHECK_LIB(pthread, main, [SUDO_LIBS="${SUDO_LIBS} -lpthread"])
+	AC_CHECK_LIB([pthread], [main], [SUDO_LIBS="${SUDO_LIBS} -lpthread"])
 	AC_DEFINE(_REENTRANT)
 	;;
 esac
