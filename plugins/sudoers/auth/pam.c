@@ -723,7 +723,8 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 		if (strlen(pass) >= PAM_MAX_RESP_SIZE) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 			"password longer than %d", PAM_MAX_RESP_SIZE);
-		    explicit_bzero(pass, strlen(pass));
+		    freezero(pass, strlen(pass));
+		    pass = NULL;
 		    goto bad;
 		}
 		reply[n].resp = pass;	/* auth_getpass() malloc's a copy */
