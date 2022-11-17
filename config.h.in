@@ -1389,7 +1389,7 @@
 /* Define for large files, on AIX-style hosts. */
 #undef _LARGE_FILES
 
-/* Number of bits in a time_t, on hosts where this is settable. */
+/* Number of bits in a timestamp, on hosts where this is settable. */
 #undef _TIME_BITS
 
 #if !defined __MINGW_USE_VC2005_COMPAT && defined __MINGW32__
