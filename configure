@@ -7551,10 +7551,10 @@ ac_link='$CC_FOR_BUILD -o conftest$ac_build_exeext $CFLAGS_FOR_BUILD $CPPFLAGS_F
 ac_compiler_gnu=$ac_cv_build_c_compiler_gnu
 
 
-was_set_ac_cv_c_compiler_gnu=${ac_cv_c_compiler_gnu+y}
-if test ${was_set_ac_cv_c_compiler_gnu}
+was_set_c_compiler_gnu=${ac_cv_c_compiler_gnu+y}
+if test ${was_set_c_compiler_gnu}
 then :
-  saved_ac_cv_c_compiler_gnu=$ac_cv_c_compiler_gnu
+  saved_c_compiler_gnu=$ac_cv_c_compiler_gnu
     { ac_cv_c_compiler_gnu=; unset ac_cv_c_compiler_gnu;}
 fi
 
@@ -8312,9 +8312,9 @@ ac_link='$CC_FOR_BUILD -o conftest$ac_build_exeext $CFLAGS_FOR_BUILD $CPPFLAGS_F
 ac_compiler_gnu=$ac_cv_build_c_compiler_gnu
 
 
-if test ${was_set_ac_cv_c_compiler_gnu}
+if test ${was_set_c_compiler_gnu}
 then :
-  ac_cv_c_compiler_gnu=saved_ac_cv_c_compiler_gnu
+  ac_cv_c_compiler_gnu=$saved_c_compiler_gnu
 fi
 
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -31437,7 +31437,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___static_libgcc" >&5
 printf "%s\n" "$ax_cv_check_cflags___static_libgcc" >&6; }
-if test x"$ax_cv_check_cflags___static_libgcc" = xyes
+if test "x$ax_cv_check_cflags___static_libgcc" = xyes
 then :
 
 if test ${LT_LDFLAGS+y}
@@ -31672,7 +31672,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fvisibility_hidden" >&5
 printf "%s\n" "$ax_cv_check_cflags___fvisibility_hidden" >&6; }
-if test x"$ax_cv_check_cflags___fvisibility_hidden" = xyes
+if test "x$ax_cv_check_cflags___fvisibility_hidden" = xyes
 then :
 
 	printf "%s\n" "#define HAVE_DSO_VISIBILITY 1" >>confdefs.h
@@ -31722,7 +31722,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___Bhidden_def" >&5
 printf "%s\n" "$ax_cv_check_cflags___Bhidden_def" >&6; }
-if test x"$ax_cv_check_cflags___Bhidden_def" = xyes
+if test "x$ax_cv_check_cflags___Bhidden_def" = xyes
 then :
 
 		# HP-UX cc may not allow __declspec(dllexport) to be
@@ -31809,7 +31809,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___xldscope_hidden" >&5
 printf "%s\n" "$ax_cv_check_cflags___xldscope_hidden" >&6; }
-if test x"$ax_cv_check_cflags___xldscope_hidden" = xyes
+if test "x$ax_cv_check_cflags___xldscope_hidden" = xyes
 then :
 
 		printf "%s\n" "#define HAVE_DSO_VISIBILITY 1" >>confdefs.h
@@ -32011,7 +32011,7 @@ fi
 eval ac_res=\$$as_CACHEVAR
 	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 printf "%s\n" "$ac_res" >&6; }
-if test x"`eval 'as_val=${'$as_CACHEVAR'};printf "%s\n" "$as_val"'`" = xyes
+if eval test \"x\$"$as_CACHEVAR"\" = x"yes"
 then :
 
 
@@ -32149,7 +32149,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fno_omit_frame_pointer" >&5
 printf "%s\n" "$ax_cv_check_cflags___fno_omit_frame_pointer" >&6; }
-if test x"$ax_cv_check_cflags___fno_omit_frame_pointer" = xyes
+if test "x$ax_cv_check_cflags___fno_omit_frame_pointer" = xyes
 then :
 
 
@@ -32250,7 +32250,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fsanitize_fuzzer_no_link" >&5
 printf "%s\n" "$ax_cv_check_cflags___fsanitize_fuzzer_no_link" >&6; }
-if test x"$ax_cv_check_cflags___fsanitize_fuzzer_no_link" = xyes
+if test "x$ax_cv_check_cflags___fsanitize_fuzzer_no_link" = xyes
 then :
 
 
@@ -32391,7 +32391,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fno_omit_frame_pointer" >&5
 printf "%s\n" "$ax_cv_check_cflags___fno_omit_frame_pointer" >&6; }
-if test x"$ax_cv_check_cflags___fno_omit_frame_pointer" = xyes
+if test "x$ax_cv_check_cflags___fno_omit_frame_pointer" = xyes
 then :
 
 
@@ -32528,7 +32528,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fno_pie" >&5
 printf "%s\n" "$ax_cv_check_cflags___fno_pie" >&6; }
-if test x"$ax_cv_check_cflags___fno_pie" = xyes
+if test "x$ax_cv_check_cflags___fno_pie" = xyes
 then :
 
 		_CFLAGS="$CFLAGS"
@@ -32619,7 +32619,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fPIE" >&5
 printf "%s\n" "$ax_cv_check_cflags___fPIE" >&6; }
-if test x"$ax_cv_check_cflags___fPIE" = xyes
+if test "x$ax_cv_check_cflags___fPIE" = xyes
 then :
 
 		_CFLAGS="$CFLAGS"
@@ -33056,7 +33056,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fcf_protection" >&5
 printf "%s\n" "$ax_cv_check_cflags___fcf_protection" >&6; }
-if test x"$ax_cv_check_cflags___fcf_protection" = xyes
+if test "x$ax_cv_check_cflags___fcf_protection" = xyes
 then :
 
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fcf-protection" >&5
@@ -33473,7 +33473,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___Wshadow" >&5
 printf "%s\n" "$ax_cv_check_cflags___Wshadow" >&6; }
-if test x"$ax_cv_check_cflags___Wshadow" = xyes
+if test "x$ax_cv_check_cflags___Wshadow" = xyes
 then :
   CFLAGS="$CFLAGS -Wshadow"
 else case e in #(
@@ -33514,7 +33514,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___Wvla" >&5
 printf "%s\n" "$ax_cv_check_cflags___Wvla" >&6; }
-if test x"$ax_cv_check_cflags___Wvla" = xyes
+if test "x$ax_cv_check_cflags___Wvla" = xyes
 then :
   CFLAGS="$CFLAGS -Wvla"
 else case e in #(
@@ -33555,7 +33555,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___Walloca" >&5
 printf "%s\n" "$ax_cv_check_cflags___Walloca" >&6; }
-if test x"$ax_cv_check_cflags___Walloca" = xyes
+if test "x$ax_cv_check_cflags___Walloca" = xyes
 then :
   CFLAGS="$CFLAGS -Walloca"
 else case e in #(
@@ -33596,7 +33596,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___Wtrampolines" >&5
 printf "%s\n" "$ax_cv_check_cflags___Wtrampolines" >&6; }
-if test x"$ax_cv_check_cflags___Wtrampolines" = xyes
+if test "x$ax_cv_check_cflags___Wtrampolines" = xyes
 then :
   CFLAGS="$CFLAGS -Wtrampolines"
 else case e in #(
