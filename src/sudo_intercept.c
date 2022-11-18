@@ -96,7 +96,7 @@ copy_vector(char * const *src)
     for (i = 0; i < len; i++) {
 	copy[i] = sudo_mmap_strdup(src[i]);
 	if (copy[i] == NULL) {
-	    sudo_mmap_free(copy);
+	    free_vector(copy);
 	    debug_return_ptr(NULL);
 	}
     }
