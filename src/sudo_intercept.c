@@ -82,7 +82,7 @@ static char **
 copy_vector(char * const *src)
 {
     char **copy;
-    int i, len = 0;
+    int i, j, len = 0;
     debug_decl(copy_vector, SUDO_DEBUG_EXEC);
 
     if (src != NULL) {
@@ -96,6 +96,9 @@ copy_vector(char * const *src)
     for (i = 0; i < len; i++) {
 	copy[i] = sudo_mmap_strdup(src[i]);
 	if (copy[i] == NULL) {
+	    for (j = 0; j < i; j++) {
+	        sudo_mmap_free(copy[j]);
+	    }
 	    sudo_mmap_free(copy);
 	    debug_return_ptr(NULL);
 	}
