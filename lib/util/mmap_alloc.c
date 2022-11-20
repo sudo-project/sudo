@@ -116,8 +116,10 @@ sudo_mmap_strdup_v1(const char *str)
 	return NULL;
     }
     newstr = sudo_mmap_alloc_v1(len + 1);
-    memcpy(newstr, str, len);
-    newstr[len] = '\0';
+    if (newstr != NULL) {
+        memcpy(newstr, str, len);
+        newstr[len] = '\0';
+    }
 
     return newstr;
 }
