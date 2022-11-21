@@ -246,12 +246,12 @@ void
 display_lecture(struct sudo_conv_callback *callback)
 {
     struct getpass_closure *closure;
-    struct sudo_conv_message msg;
-    struct sudo_conv_reply repl;
+    struct sudo_conv_message msg[2];
+    struct sudo_conv_reply repl[2];
     char buf[BUFSIZ];
     struct stat sb;
     ssize_t nread;
-    int fd;
+    int fd, msgcount = 1;
     debug_decl(lecture, SUDOERS_DEBUG_AUTH);
 
     if (callback == NULL || (closure = callback->closure) == NULL)
@@ -273,9 +273,9 @@ display_lecture(struct sudo_conv_callback *callback)
 		(void) fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
 		while ((nread = read(fd, buf, sizeof(buf) - 1)) > 0) {
 		    buf[nread] = '\0';
-		    msg.msg_type = SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY;
-		    msg.msg = buf;
-		    sudo_conv(1, &msg, &repl, NULL);
+		    msg[0].msg_type = SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY;
+		    msg[0].msg = buf;
+		    sudo_conv(1, msg, repl, NULL);
 		}
 		if (nread == 0) {
 		    close(fd);
@@ -297,14 +297,19 @@ display_lecture(struct sudo_conv_callback *callback)
     }
 
     /* Default sudo lecture. */
-    msg.msg_type = SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY;
-    msg.msg = _("\n"
+    msg[0].msg_type = SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY;
+    msg[0].msg = _("\n"
 	"We trust you have received the usual lecture from the local System\n"
 	"Administrator. It usually boils down to these three things:\n\n"
 	"    #1) Respect the privacy of others.\n"
 	"    #2) Think before you type.\n"
 	"    #3) With great power comes great responsibility.\n\n");
-    sudo_conv(1, &msg, &repl, NULL);
+    if (!def_pwfeedback) {
+	msg[1].msg_type = SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY;
+	msg[1].msg = _("For security reasons, the password you type will not be visible.\n\n");
+	msgcount++;
+    }
+    sudo_conv(msgcount, msg, repl, NULL);
 
 done:
     closure->lectured = true;
