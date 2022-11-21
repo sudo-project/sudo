@@ -75,7 +75,7 @@ char ** create_str_array(size_t count, ...);
             success = 0; \
         } \
         if (!cleanup(success)) { \
-            printf("FAILED: deitialization of testcase %s at %s:%d\n", #testcase, __FILE__, __LINE__); \
+            printf("FAILED: deinitialization of testcase %s at %s:%d\n", #testcase, __FILE__, __LINE__); \
             success = 0; \
         } \
         if (!success) { \

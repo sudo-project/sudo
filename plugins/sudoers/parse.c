@@ -208,7 +208,7 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
 }
 
 /*
- * Apply cmndspec-specific settngs including SELinux role/type,
+ * Apply cmndspec-specific settings including SELinux role/type,
  * Solaris privs, and command tags.
  */
 static bool
