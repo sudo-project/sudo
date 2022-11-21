@@ -666,10 +666,10 @@ intercept_read(int fd, struct intercept_closure *closure)
 	    goto done;
 	default:
 	    if (errno == EINTR || errno == EAGAIN) {
-		debug_return_bool(true);
 		sudo_debug_printf(
 		    SUDO_DEBUG_WARN|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
 		    "reading intercept token");
+		debug_return_bool(true);
 	    }
 	    sudo_warn("recv");
 	    goto done;
