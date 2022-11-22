@@ -70,6 +70,7 @@ journal_fdopen(int fd, const char *journal_path,
 {
     debug_decl(journal_fdopen, SUDO_DEBUG_UTIL);
 
+    free(closure->journal_path);
     closure->journal_path = strdup(journal_path);
     if (closure->journal_path == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -77,6 +78,8 @@ journal_fdopen(int fd, const char *journal_path,
     }
 
     /* Defer fdopen() until last--it cannot be undone. */
+    if (closure->journal != NULL)
+	fclose(closure->journal);
     if ((closure->journal = fdopen(fd, "r+")) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to fdopen journal file %s", journal_path);
