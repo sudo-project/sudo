@@ -188,7 +188,7 @@ union YYSTYPE
     const char *cstring;
     int tok;
 
-#line 192 "y.tab.h"
+#line 192 "gram.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
