@@ -1874,9 +1874,9 @@ sudo_ldap_result_add_entry(struct ldap_result *lres, LDAPMessage *entry)
     last = sudo_ldap_result_last_search(lres);
     if (last != NULL) {
 	bv = sudo_ldap_get_values_len(last->ldap, entry, "sudoOrder", &rc);
-	if (rc == LDAP_NO_MEMORY) {
-	    /* XXX - return error */
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	if (bv == NULL) {
+	    if (rc == LDAP_NO_MEMORY)
+		debug_return_ptr(NULL);
 	} else {
 	    if (ldap_count_values_len(bv) > 0) {
 		/* Get the value of this attribute, 0 if not present. */
