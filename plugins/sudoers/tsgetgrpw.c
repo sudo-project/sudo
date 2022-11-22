@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2005, 2008, 2010-2015
+ * Copyright (c) 2005, 2008, 2010-2015, 2022
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -67,8 +67,8 @@ testsudoers_setpwfile(const char *file)
 	testsudoers_endpwent();
 }
 
-void
-testsudoers_setpwent(void)
+static int
+open_passwd(int reset)
 {
     if (pwf == NULL) {
 	pwf = fopen(pwfile, "r");
@@ -78,10 +78,27 @@ testsudoers_setpwent(void)
 		pwf = NULL;
 	    }
 	}
-    } else {
+	if (pwf == NULL)
+	    return 0;
+    } else if (reset) {
 	rewind(pwf);
     }
-    pw_stayopen = 1;
+    return 1;
+}
+
+int
+testsudoers_setpassent(int stayopen)
+{
+    if (!open_passwd(1))
+	return 0;
+    pw_stayopen = stayopen;
+    return 1;
+}
+
+void
+testsudoers_setpwent(void)
+{
+    testsudoers_setpassent(0);
 }
 
 void
@@ -103,6 +120,9 @@ testsudoers_getpwent(void)
     id_t id;
     char *cp, *colon;
     const char *errstr;
+
+    if (!open_passwd(0))
+	return NULL;
 
 next_entry:
     if ((colon = fgets(pwbuf, sizeof(pwbuf), pwf)) == NULL)
@@ -151,16 +171,8 @@ testsudoers_getpwnam(const char *name)
 {
     struct passwd *pw;
 
-    if (pwf == NULL) {
-	if ((pwf = fopen(pwfile, "r")) == NULL)
-	    return NULL;
-	if (fcntl(fileno(pwf), F_SETFD, FD_CLOEXEC) == -1) {
-	    fclose(pwf);
-	    return NULL;
-	}
-    } else {
-	rewind(pwf);
-    }
+    if (!open_passwd(1))
+	return NULL;
     while ((pw = testsudoers_getpwent()) != NULL) {
 	if (strcmp(pw->pw_name, name) == 0)
 	    break;
@@ -177,16 +189,8 @@ testsudoers_getpwuid(uid_t uid)
 {
     struct passwd *pw;
 
-    if (pwf == NULL) {
-	if ((pwf = fopen(pwfile, "r")) == NULL)
-	    return NULL;
-	if (fcntl(fileno(pwf), F_SETFD, FD_CLOEXEC) == -1) {
-	    fclose(pwf);
-	    return NULL;
-	}
-    } else {
-	rewind(pwf);
-    }
+    if (!open_passwd(1))
+	return NULL;
     while ((pw = testsudoers_getpwent()) != NULL) {
 	if (pw->pw_uid == uid)
 	    break;
@@ -203,11 +207,11 @@ testsudoers_setgrfile(const char *file)
 {
     grfile = file;
     if (grf != NULL)
-	endgrent();
+	testsudoers_endgrent();
 }
 
-void
-testsudoers_setgrent(void)
+static int
+open_group(int reset)
 {
     if (grf == NULL) {
 	grf = fopen(grfile, "r");
@@ -217,10 +221,27 @@ testsudoers_setgrent(void)
 		grf = NULL;
 	    }
 	}
-    } else {
+	if (grf == NULL)
+	    return 0;
+    } else if (reset) {
 	rewind(grf);
     }
-    gr_stayopen = 1;
+    return 1;
+}
+
+int
+testsudoers_setgroupent(int stayopen)
+{
+    if (!open_group(1))
+	return 0;
+    gr_stayopen = stayopen;
+    return 1;
+}
+
+void
+testsudoers_setgrent(void)
+{
+    testsudoers_setgroupent(0);
 }
 
 void
@@ -243,6 +264,9 @@ testsudoers_getgrent(void)
     char *cp, *colon;
     const char *errstr;
     int n;
+
+    if (!open_group(0))
+	return NULL;
 
 next_entry:
     if ((colon = fgets(grbuf, sizeof(grbuf), grf)) == NULL)
@@ -287,16 +311,8 @@ testsudoers_getgrnam(const char *name)
 {
     struct group *gr;
 
-    if (grf == NULL) {
-	if ((grf = fopen(grfile, "r")) == NULL)
-	    return NULL;
-	if (fcntl(fileno(grf), F_SETFD, FD_CLOEXEC) == -1) {
-	    fclose(grf);
-	    grf = NULL;
-	}
-    } else {
-	rewind(grf);
-    }
+    if (!open_group(1))
+	return NULL;
     while ((gr = testsudoers_getgrent()) != NULL) {
 	if (strcmp(gr->gr_name, name) == 0)
 	    break;
@@ -313,16 +329,8 @@ testsudoers_getgrgid(gid_t gid)
 {
     struct group *gr;
 
-    if (grf == NULL) {
-	if ((grf = fopen(grfile, "r")) == NULL)
-	    return NULL;
-	if (fcntl(fileno(grf), F_SETFD, FD_CLOEXEC) == -1) {
-	    fclose(grf);
-	    grf = NULL;
-	}
-    } else {
-	rewind(grf);
-    }
+    if (!open_group(1))
+	return NULL;
     while ((gr = testsudoers_getgrent()) != NULL) {
 	if (gr->gr_gid == gid)
 	    break;
