@@ -136,9 +136,9 @@ fi
 if [ "$crossbuild" = "false" ]; then
     case "$osversion" in
 	FreeBSD*|macos*)
-	    # Use the system compiler on FreeBSD and macOS
-	    if [ -z "$CC" -a -x /usr/bin/cc ]; then
-		CC=/usr/bin/cc; export CC
+	    # Use clang, not gcc, on FreeBSD and macOS
+	    if [ -z "$CC" ]; then
+		CC=clang; export CC
 	    fi
 	    ;;
     esac
