@@ -692,7 +692,7 @@ matches_env_check(const char *var, bool *full_match)
 	} else {
 	    const char *val = strchr(var, '=');
 	    if (val != NULL)
-		keepit = !strpbrk(++val, "/%");
+		keepit = !strpbrk(val + 1, "/%");
 	}
     }
     debug_return_int(keepit);

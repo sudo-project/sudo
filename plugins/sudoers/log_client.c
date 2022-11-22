@@ -1085,7 +1085,7 @@ done:
 static bool
 fmt_initial_message(struct client_closure *closure)
 {
-    bool ret = true;
+    bool ret = false;
     debug_decl(fmt_initial_message, SUDOERS_DEBUG_UTIL);
 
     closure->state = closure->initial_state;
@@ -1116,7 +1116,6 @@ fmt_initial_message(struct client_closure *closure)
 	break;
     default:
 	sudo_warnx(U_("%s: unexpected state %d"), __func__, closure->state);
-	ret = false;
 	break;
     }
     debug_return_bool(ret);

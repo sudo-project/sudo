@@ -300,7 +300,7 @@ next_entry:
 	    gr.gr_mem[n] = cp;
 	    cp = strtok_r(NULL, ",", &last);
 	}
-	gr.gr_mem[n++] = NULL;
+	gr.gr_mem[n] = NULL;
     } else
 	gr.gr_mem = NULL;
     return &gr;

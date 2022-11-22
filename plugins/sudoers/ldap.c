@@ -204,7 +204,7 @@ static int
 sudo_ldap_init(LDAP **ldp, const char *host, int port)
 {
     LDAP *ld;
-    int ret = LDAP_CONNECT_ERROR;
+    int ret;
     debug_decl(sudo_ldap_init, SUDOERS_DEBUG_LDAP);
 
 #ifdef HAVE_LDAPSSL_INIT
@@ -281,8 +281,10 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 	ret = ldap_set_option(ld, LDAP_OPT_HOST_NAME, host);
 #else
 	DPRINTF2("ldap_init(%s, %d)", host, port);
-	if ((ld = ldap_init((char *)host, port)) == NULL)
+	if ((ld = ldap_init((char *)host, port)) == NULL) {
+	    ret = LDAP_LOCAL_ERROR;
 	    goto done;
+	}
 	ret = LDAP_SUCCESS;
 #endif
     }

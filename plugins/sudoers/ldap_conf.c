@@ -509,7 +509,7 @@ sudo_krb5_ccname_path(const char *old_ccname)
 static bool
 sudo_check_krb5_ccname(const char *ccname)
 {
-    int fd = -1;
+    int fd;
     const char *ccname_path;
     debug_decl(sudo_check_krb5_ccname, SUDOERS_DEBUG_LDAP);
 

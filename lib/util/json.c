@@ -156,7 +156,7 @@ json_append_string(struct json_container *jsonc, const char *str)
 	    break;
 	}
 	*cp++ = ch;
-	*cp++ = '\0';
+	*cp = '\0';
 	if (!json_append_buf(jsonc, buf))
 		debug_return_bool(false);
     }

@@ -355,7 +355,7 @@ os_init_common(int argc, char *argv[], char *envp[])
 static void
 fix_fds(void)
 {
-    int miss[3], devnull = -1;
+    int miss[3];
     debug_decl(fix_fds, SUDO_DEBUG_UTIL);
 
     /*
@@ -366,7 +366,8 @@ fix_fds(void)
     miss[STDOUT_FILENO] = fcntl(STDOUT_FILENO, F_GETFL, 0) == -1;
     miss[STDERR_FILENO] = fcntl(STDERR_FILENO, F_GETFL, 0) == -1;
     if (miss[STDIN_FILENO] || miss[STDOUT_FILENO] || miss[STDERR_FILENO]) {
-	devnull = open(_PATH_DEVNULL, O_RDWR, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+	int devnull =
+	    open(_PATH_DEVNULL, O_RDWR, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
 	if (devnull == -1)
 	    sudo_fatal(U_("unable to open %s"), _PATH_DEVNULL);
 	if (miss[STDIN_FILENO] && dup2(devnull, STDIN_FILENO) == -1)
@@ -1105,7 +1106,7 @@ format_plugin_settings(struct plugin_container *plugin)
 		goto bad;
 	}
     }
-    plugin_settings[++i] = NULL;
+    plugin_settings[i + 1] = NULL;
 
     /* Add to list of vectors to be garbage collected at exit. */
     if (!gc_add(GC_VECTOR, plugin_settings))

@@ -185,7 +185,7 @@ static bool
 open_cmnd(const char *path, const char *runchroot,
     const struct command_digest_list *digests, int *fdp)
 {
-    int fd = -1;
+    int fd;
     char pathbuf[PATH_MAX];
     debug_decl(open_cmnd, SUDOERS_DEBUG_MATCH);
 

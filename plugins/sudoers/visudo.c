@@ -540,7 +540,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
     }
     editor_argv[ac++] = (char *)"--";
     editor_argv[ac++] = sp->tpath;
-    editor_argv[ac++] = NULL;
+    editor_argv[ac] = NULL;
 
     /*
      * Do the edit:
