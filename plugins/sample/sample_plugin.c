@@ -239,6 +239,7 @@ oom:
     while (i > 0) {
 	free(command_info[i--]);
     }
+    free(command_info);
     return NULL;
 }
 
