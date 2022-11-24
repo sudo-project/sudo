@@ -971,8 +971,6 @@ check_syntax(const char *file, bool quiet, bool strict, bool check_owner,
 	    sudo_warn(U_("unable to open %s"), file);
 	goto done;
     }
-    if (!init_defaults())
-	sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
     init_parser(file, quiet, true);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     if (sudoersparse() && !parse_error) {
