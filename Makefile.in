@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2010-2015, 2017-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2010-2015, 2017-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -373,10 +373,9 @@ check-dist: update-pot compile-po mkdefaults
 dist: check-dist force-dist
 
 force-dist: ChangeLog $(srcdir)/MANIFEST
-	cd $(top_srcdir) && \
-	pax -w -x ustar -s '/^/$(PACKAGE_TARNAME)-$(VERSION)\//' \
-	    -f ../$(PACKAGE_TARNAME)-$(VERSION).tar \
-	    `$(SED) 's/[ 	].*//' $(srcdir)/MANIFEST` && \
+	cd $(top_srcdir) && $(SED) 's/[ 	].*//' MANIFEST | \
+	pax -w -x ustar -f ../$(PACKAGE_TARNAME)-$(VERSION).tar \
+	    -s '/^/$(PACKAGE_TARNAME)-$(VERSION)\//' && \
 	gzip -9f ../$(PACKAGE_TARNAME)-$(VERSION).tar && \
 	ls -l ../$(PACKAGE_TARNAME)-$(VERSION).tar.gz
 
