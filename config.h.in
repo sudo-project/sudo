@@ -1476,10 +1476,17 @@
 #endif
 
 /* For functions that call exit() directly. */
-#if __GNUC_PREREQ__(2, 5)
-# define sudo_noreturn		__attribute__((__noreturn__))
-#else
-# define sudo_noreturn
+#ifdef __has_c_attribute
+# if __has_c_attribute(__noreturn__)
+#  define sudo_noreturn		[[__noreturn__]]
+# endif
+#endif
+#ifndef sudo_noreturn
+# if __GNUC_PREREQ__(2, 5)
+#  define sudo_noreturn		__attribute__((__noreturn__))
+# else
+#  define sudo_noreturn
+# endif
 #endif
 
 /* For malloc-like functions that return uninitialized or zeroed memory. */
@@ -1505,6 +1512,20 @@
 # define sudo_printflike(_f, _v)
 # define sudo_printf0like(_f, _v)
 # define sudo_attr_fmt_arg(_f)
+#endif
+
+/* C23 defines a fallthrough attribute, gcc 7.0 and clang 10 have their own. */
+#ifdef __has_c_attribute
+# if __has_c_attribute(__fallthrough__)
+# define FALLTHROUGH		[[__fallthrough__]]
+# endif
+#endif
+#ifndef FALLTHROUGH
+# if defined(HAVE_FALLTHROUGH_ATTRIBUTE)
+#  define FALLTHROUGH		__attribute__((__fallthrough__))
+# else
+#  define FALLTHROUGH		do { } while (0)
+# endif
 #endif
 
 /* Symbol visibility controls. */
