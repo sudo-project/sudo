@@ -4649,7 +4649,7 @@ dnl
 if test -n "$GCC"; then
     AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [
 	AC_DEFINE(HAVE_DSO_VISIBILITY)
-	CFLAGS="${CFLAGS} -fvisibility=hidden"
+	AX_APPEND_FLAG([-fvisibility=hidden], [CFLAGS])
 	LT_LDEXPORTS=
 	LT_LDDEP=
     ])
@@ -4676,7 +4676,7 @@ else
 		)
 		if test "$sudo_cv_var_hpux_declspec_libc_function" = "yes"; then
 		    AC_DEFINE(HAVE_DSO_VISIBILITY)
-		    CFLAGS="${CFLAGS} -Bhidden_def"
+		    AX_APPEND_FLAG([-Bhidden_def], [CFLAGS])
 		    LT_LDEXPORTS=
 		    LT_LDDEP=
 		fi
@@ -4685,7 +4685,7 @@ else
 	solaris2*)
 	    AX_CHECK_COMPILE_FLAG([-xldscope=hidden], [
 		AC_DEFINE(HAVE_DSO_VISIBILITY)
-		CFLAGS="${CFLAGS} -xldscope=hidden"
+		AX_APPEND_FLAG([-xldscope=hidden], [CFLAGS])
 		LT_LDEXPORTS=
 		LT_LDDEP=
 	    ])
@@ -5012,53 +5012,60 @@ dnl
 dnl We add -Wall and -Werror after all tests so they don't cause failures
 dnl
 if test -n "$GCC"; then
+    #
+    # The fallthrough attribute is supported by gcc 7.0 and clang 10.
+    # This test relies on AC_LANG_WERROR.
+    #
+    AC_CACHE_CHECK([whether $CC supports the fallthrough attribute],
+	[sudo_cv_var_fallthrough_attribute],
+	[AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+	    int main(int argc, char *argv[])
+	    {
+		int num = argc + 1;
+		switch (num) {
+		    case 1:
+			num = 0;
+			__attribute__((__fallthrough__));
+		    case 0:
+			num++;
+		}
+		return num;
+	    }
+	]])],
+	[
+	    sudo_cv_var_fallthrough_attribute=yes
+	],
+	[
+	    sudo_cv_var_fallthrough_attribute=no]
+	)]
+    )
+    if test X"$sudo_cv_var_fallthrough_attribute" = X"yes"; then
+	AC_DEFINE(HAVE_FALLTHROUGH_ATTRIBUTE)
+    fi
     if test X"$enable_warnings" = X"yes" -o X"$with_devel" = X"yes"; then
 	dnl
 	dnl Default warnings for development use.
 	dnl
-	CFLAGS="${CFLAGS} -Wall -Wsign-compare -Wpointer-arith -Wno-unknown-pragmas -Wmissing-prototypes -Wwrite-strings"
-	AX_CHECK_COMPILE_FLAG([-Wshadow], [CFLAGS="$CFLAGS -Wshadow"])
-	AX_CHECK_COMPILE_FLAG([-Wvla], [CFLAGS="$CFLAGS -Wvla"])
-	AX_CHECK_COMPILE_FLAG([-Walloca], [CFLAGS="$CFLAGS -Walloca"])
-	AX_CHECK_COMPILE_FLAG([-Wtrampolines], [CFLAGS="$CFLAGS -Wtrampolines"])
-	dnl
-	dnl The fallthrough attribute is supported by gcc 7.0 and clang 10.
-	dnl This test relies on AC_LANG_WERROR.
-	dnl
-	AC_CACHE_CHECK([whether $CC supports the fallthrough attribute],
-	    [sudo_cv_var_fallthrough_attribute],
-	    [AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
-		int main(int argc, char *argv[])
-		{
-		    int num = argc + 1;
-		    switch (num) {
-			case 1:
-			    num = 0;
-			    __attribute__((__fallthrough__));
-			case 0:
-			    num++;
-		    }
-		    return num;
-		}
-	    ]])],
-	    [
-		sudo_cv_var_fallthrough_attribute=yes
-	    ],
-	    [
-		sudo_cv_var_fallthrough_attribute=no]
-	    )]
-	)
+	AX_APPEND_FLAG([-Wall], [CFLAGS])
+	AX_APPEND_FLAG([-Wmissing-prototypes], [CFLAGS])
+	AX_APPEND_FLAG([-Wno-unknown-pragmas], [CFLAGS])
+	AX_APPEND_FLAG([-Wpointer-arith], [CFLAGS])
+	AX_APPEND_FLAG([-Wshadow], [CFLAGS])
+	AX_APPEND_FLAG([-Wsign-compare], [CFLAGS])
+	AX_APPEND_FLAG([-Wwrite-strings], [CFLAGS])
+	AX_CHECK_COMPILE_FLAG([-Wvla], [AX_APPEND_FLAG([-Wvla], [CFLAGS])])
+	AX_CHECK_COMPILE_FLAG([-Walloca], [AX_APPEND_FLAG([-Walloca], [CFLAGS])])
+	AX_CHECK_COMPILE_FLAG([-Wtrampolines], [AX_APPEND_FLAG([-Wtrampolines], [CFLAGS])])
 	if test X"$sudo_cv_var_fallthrough_attribute" = X"yes"; then
-	    AC_DEFINE(HAVE_FALLTHROUGH_ATTRIBUTE)
-	    CFLAGS="$CFLAGS -Wimplicit-fallthrough"
+	    AX_APPEND_FLAG([-Wimplicit-fallthrough], [CFLAGS])
 	fi
     fi
     if test X"$enable_werror" = X"yes"; then
-	CFLAGS="${CFLAGS} -Werror"
+	AX_APPEND_FLAG([-Werror], [CFLAGS])
     fi
     case "$host_os" in
 	# Avoid unwanted warnings on macOS
-	darwin*) CFLAGS="${CFLAGS} -Wno-deprecated-declarations";;
+	darwin*) AX_APPEND_FLAG([-Wno-deprecated-declarations], [CFLAGS]);;
     esac
 fi
 

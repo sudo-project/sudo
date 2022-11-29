@@ -31802,7 +31802,40 @@ then :
 
 	printf "%s\n" "#define HAVE_DSO_VISIBILITY 1" >>confdefs.h
 
-	CFLAGS="${CFLAGS} -fvisibility=hidden"
+
+if test ${CFLAGS+y}
+then :
+
+  case " $CFLAGS " in #(
+  *" -fvisibility=hidden "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -fvisibility=hidden"; } >&5
+  (: CFLAGS already contains -fvisibility=hidden) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CFLAGS " -fvisibility=hidden"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  CFLAGS=-fvisibility=hidden
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
 	LT_LDEXPORTS=
 	LT_LDDEP=
 
@@ -31889,7 +31922,40 @@ printf "%s\n" "$sudo_cv_var_hpux_declspec_libc_function" >&6; }
 		if test "$sudo_cv_var_hpux_declspec_libc_function" = "yes"; then
 		    printf "%s\n" "#define HAVE_DSO_VISIBILITY 1" >>confdefs.h
 
-		    CFLAGS="${CFLAGS} -Bhidden_def"
+
+if test ${CFLAGS+y}
+then :
+
+  case " $CFLAGS " in #(
+  *" -Bhidden_def "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -Bhidden_def"; } >&5
+  (: CFLAGS already contains -Bhidden_def) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CFLAGS " -Bhidden_def"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  CFLAGS=-Bhidden_def
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
 		    LT_LDEXPORTS=
 		    LT_LDDEP=
 		fi
@@ -31939,7 +32005,40 @@ then :
 
 		printf "%s\n" "#define HAVE_DSO_VISIBILITY 1" >>confdefs.h
 
-		CFLAGS="${CFLAGS} -xldscope=hidden"
+
+if test ${CFLAGS+y}
+then :
+
+  case " $CFLAGS " in #(
+  *" -xldscope=hidden "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -xldscope=hidden"; } >&5
+  (: CFLAGS already contains -xldscope=hidden) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CFLAGS " -xldscope=hidden"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  CFLAGS=-xldscope=hidden
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
 		LT_LDEXPORTS=
 		LT_LDDEP=
 
@@ -33563,46 +33662,290 @@ printf "%s\n" "#define os_init $OS_INIT" >>confdefs.h
 
 
 if test -n "$GCC"; then
-    if test X"$enable_warnings" = X"yes" -o X"$with_devel" = X"yes"; then
-				CFLAGS="${CFLAGS} -Wall -Wsign-compare -Wpointer-arith -Wno-unknown-pragmas -Wmissing-prototypes -Wwrite-strings"
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -Wshadow" >&5
-printf %s "checking whether C compiler accepts -Wshadow... " >&6; }
-if test ${ax_cv_check_cflags___Wshadow+y}
+    #
+    # The fallthrough attribute is supported by gcc 7.0 and clang 10.
+    # This test relies on AC_LANG_WERROR.
+    #
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether $CC supports the fallthrough attribute" >&5
+printf %s "checking whether $CC supports the fallthrough attribute... " >&6; }
+if test ${sudo_cv_var_fallthrough_attribute+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
-  e)
-  ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -Wshadow"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  e) cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-int
-main (void)
-{
+	    int main(int argc, char *argv[])
+	    {
+		int num = argc + 1;
+		switch (num) {
+		    case 1:
+			num = 0;
+			__attribute__((__fallthrough__));
+		    case 0:
+			num++;
+		}
+		return num;
+	    }
 
-  ;
-  return 0;
-}
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"
 then :
-  ax_cv_check_cflags___Wshadow=yes
+
+	    sudo_cv_var_fallthrough_attribute=yes
+
 else case e in #(
-  e) ax_cv_check_cflags___Wshadow=no ;;
+  e)
+	    sudo_cv_var_fallthrough_attribute=no
+	 ;;
 esac
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-  CFLAGS=$ax_check_save_flags ;;
+     ;;
 esac
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___Wshadow" >&5
-printf "%s\n" "$ax_cv_check_cflags___Wshadow" >&6; }
-if test "x$ax_cv_check_cflags___Wshadow" = xyes
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_fallthrough_attribute" >&5
+printf "%s\n" "$sudo_cv_var_fallthrough_attribute" >&6; }
+    if test X"$sudo_cv_var_fallthrough_attribute" = X"yes"; then
+	printf "%s\n" "#define HAVE_FALLTHROUGH_ATTRIBUTE 1" >>confdefs.h
+
+    fi
+    if test X"$enable_warnings" = X"yes" -o X"$with_devel" = X"yes"; then
+
+if test ${CFLAGS+y}
 then :
-  CFLAGS="$CFLAGS -Wshadow"
+
+  case " $CFLAGS " in #(
+  *" -Wall "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -Wall"; } >&5
+  (: CFLAGS already contains -Wall) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CFLAGS " -Wall"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
 else case e in #(
-  e) : ;;
+  e)
+  CFLAGS=-Wall
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
+
+if test ${CFLAGS+y}
+then :
+
+  case " $CFLAGS " in #(
+  *" -Wmissing-prototypes "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -Wmissing-prototypes"; } >&5
+  (: CFLAGS already contains -Wmissing-prototypes) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CFLAGS " -Wmissing-prototypes"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  CFLAGS=-Wmissing-prototypes
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
+
+if test ${CFLAGS+y}
+then :
+
+  case " $CFLAGS " in #(
+  *" -Wno-unknown-pragmas "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -Wno-unknown-pragmas"; } >&5
+  (: CFLAGS already contains -Wno-unknown-pragmas) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CFLAGS " -Wno-unknown-pragmas"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  CFLAGS=-Wno-unknown-pragmas
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
+
+if test ${CFLAGS+y}
+then :
+
+  case " $CFLAGS " in #(
+  *" -Wpointer-arith "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -Wpointer-arith"; } >&5
+  (: CFLAGS already contains -Wpointer-arith) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CFLAGS " -Wpointer-arith"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  CFLAGS=-Wpointer-arith
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
+
+if test ${CFLAGS+y}
+then :
+
+  case " $CFLAGS " in #(
+  *" -Wshadow "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -Wshadow"; } >&5
+  (: CFLAGS already contains -Wshadow) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CFLAGS " -Wshadow"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  CFLAGS=-Wshadow
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
+
+if test ${CFLAGS+y}
+then :
+
+  case " $CFLAGS " in #(
+  *" -Wsign-compare "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -Wsign-compare"; } >&5
+  (: CFLAGS already contains -Wsign-compare) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CFLAGS " -Wsign-compare"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  CFLAGS=-Wsign-compare
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
+
+if test ${CFLAGS+y}
+then :
+
+  case " $CFLAGS " in #(
+  *" -Wwrite-strings "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -Wwrite-strings"; } >&5
+  (: CFLAGS already contains -Wwrite-strings) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CFLAGS " -Wwrite-strings"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  CFLAGS=-Wwrite-strings
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
 esac
 fi
 
@@ -33641,7 +33984,40 @@ fi
 printf "%s\n" "$ax_cv_check_cflags___Wvla" >&6; }
 if test "x$ax_cv_check_cflags___Wvla" = xyes
 then :
-  CFLAGS="$CFLAGS -Wvla"
+
+if test ${CFLAGS+y}
+then :
+
+  case " $CFLAGS " in #(
+  *" -Wvla "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -Wvla"; } >&5
+  (: CFLAGS already contains -Wvla) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CFLAGS " -Wvla"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  CFLAGS=-Wvla
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
 else case e in #(
   e) : ;;
 esac
@@ -33682,7 +34058,40 @@ fi
 printf "%s\n" "$ax_cv_check_cflags___Walloca" >&6; }
 if test "x$ax_cv_check_cflags___Walloca" = xyes
 then :
-  CFLAGS="$CFLAGS -Walloca"
+
+if test ${CFLAGS+y}
+then :
+
+  case " $CFLAGS " in #(
+  *" -Walloca "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -Walloca"; } >&5
+  (: CFLAGS already contains -Walloca) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CFLAGS " -Walloca"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  CFLAGS=-Walloca
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
 else case e in #(
   e) : ;;
 esac
@@ -33723,64 +34132,154 @@ fi
 printf "%s\n" "$ax_cv_check_cflags___Wtrampolines" >&6; }
 if test "x$ax_cv_check_cflags___Wtrampolines" = xyes
 then :
-  CFLAGS="$CFLAGS -Wtrampolines"
+
+if test ${CFLAGS+y}
+then :
+
+  case " $CFLAGS " in #(
+  *" -Wtrampolines "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -Wtrampolines"; } >&5
+  (: CFLAGS already contains -Wtrampolines) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CFLAGS " -Wtrampolines"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  CFLAGS=-Wtrampolines
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
 else case e in #(
   e) : ;;
 esac
 fi
 
-					{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether $CC supports the fallthrough attribute" >&5
-printf %s "checking whether $CC supports the fallthrough attribute... " >&6; }
-if test ${sudo_cv_var_fallthrough_attribute+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+	if test X"$sudo_cv_var_fallthrough_attribute" = X"yes"; then
 
-		int main(int argc, char *argv[])
-		{
-		    int num = argc + 1;
-		    switch (num) {
-			case 1:
-			    num = 0;
-			    __attribute__((__fallthrough__));
-			case 0:
-			    num++;
-		    }
-		    return num;
-		}
-
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
+if test ${CFLAGS+y}
 then :
 
-		sudo_cv_var_fallthrough_attribute=yes
+  case " $CFLAGS " in #(
+  *" -Wimplicit-fallthrough "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -Wimplicit-fallthrough"; } >&5
+  (: CFLAGS already contains -Wimplicit-fallthrough) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CFLAGS " -Wimplicit-fallthrough"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
 
 else case e in #(
   e)
-		sudo_cv_var_fallthrough_attribute=no
-	     ;;
+  CFLAGS=-Wimplicit-fallthrough
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
 esac
 fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-	 ;;
-esac
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_fallthrough_attribute" >&5
-printf "%s\n" "$sudo_cv_var_fallthrough_attribute" >&6; }
-	if test X"$sudo_cv_var_fallthrough_attribute" = X"yes"; then
-	    printf "%s\n" "#define HAVE_FALLTHROUGH_ATTRIBUTE 1" >>confdefs.h
 
-	    CFLAGS="$CFLAGS -Wimplicit-fallthrough"
 	fi
     fi
     if test X"$enable_werror" = X"yes"; then
-	CFLAGS="${CFLAGS} -Werror"
+
+if test ${CFLAGS+y}
+then :
+
+  case " $CFLAGS " in #(
+  *" -Werror "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -Werror"; } >&5
+  (: CFLAGS already contains -Werror) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CFLAGS " -Werror"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  CFLAGS=-Werror
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
     fi
     case "$host_os" in
 	# Avoid unwanted warnings on macOS
-	darwin*) CFLAGS="${CFLAGS} -Wno-deprecated-declarations";;
+	darwin*)
+if test ${CFLAGS+y}
+then :
+
+  case " $CFLAGS " in #(
+  *" -Wno-deprecated-declarations "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -Wno-deprecated-declarations"; } >&5
+  (: CFLAGS already contains -Wno-deprecated-declarations) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CFLAGS " -Wno-deprecated-declarations"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  CFLAGS=-Wno-deprecated-declarations
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS\""; } >&5
+  (: CFLAGS="$CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+;;
     esac
 fi
 
