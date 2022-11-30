@@ -7,20 +7,20 @@
 
 use strict;
 use warnings;
-use Socket;
-use POSIX qw(setsid :sys_wait_h :signal_h);
 use Fcntl ":flock";
 use File::Temp ":mktemp";
 use FileHandle;
-use Getopt::Long;
-use Pod::Usage;
-use IPC::Open3;
+use Getopt::Long qw(:config no_ignore_case bundling);
 use IO::Socket::IP -register;
+use IPC::Run qw(harness start pump finish run timeout);
+use POSIX qw(setsid :sys_wait_h :signal_h);
 use Parse::CPAN::Meta;
+use Pod::Usage;
 
 my $checklogs = 0;
 my $cleanup_only = 0;
 my $conf_file = 'build_pkgs.conf';
+my $debug = 0;
 my $help = 0;
 my $ignore_cache = 0;
 my $quiet = 0;
@@ -35,15 +35,20 @@ my $main_pid = $$;
 GetOptions("check-logs" => \$checklogs,
 	   "cleanup" => \$cleanup_only,
 	   "config|c=s" => \$conf_file,
-	   "help" => \$help,
-	   "quiet" => \$quiet,
-	   "verbose" => \$verbose,
-	   "ignore-cache" => \$ignore_cache,
-	   "file=s" => \$tarball,
+	   "debug|d" => \$debug,
+	   "help|h" => \$help,
+	   "quiet|q" => \$quiet,
+	   "verbose|v" => \$verbose,
+	   "ignore-cache|i" => \$ignore_cache,
+	   "file|f=s" => \$tarball,
 	   "repository|R=s" => \$repo,
 	   "revision|r=s" => \$rev)
 	   or pod2usage(2);
 pod2usage(1) if $help;
+
+# Debug and verbose override quiet.
+$verbose = 1 if $debug;
+$quiet = 0 if $verbose;
 
 # Read config data (using Parse::CPAN::Meta is cheating a bit).
 my @yaml = Parse::CPAN::Meta->load_file($conf_file) ||
@@ -131,12 +136,11 @@ $INFO = "USR1" unless exists $SIG{INFO};
 
 $SIG{$INFO} = \&info;
 $SIG{CHLD} = \&reaper;
-$SIG{INT} = \&killall;
-$SIG{TERM} = \&killall;
-$SIG{HUP} = \&killall;
-
-# We redirect input from /dev/null for non-interactive commands.
-open(my $devnull, "+>", "/dev/null") or die "$0: can't open /dev/null: $!\n";
+$SIG{HUP} = \&shut_down;
+$SIG{INT} = \&shut_down;
+$SIG{QUIT} = \&shut_down;
+$SIG{TERM} = \&shut_down;
+$SIG{__DIE__} = \&die_hook;
 
 # Prevent macOS from going to sleep while we are running.
 system("/usr/bin/caffeinate -i -w $main_pid") if -x "/usr/bin/caffeinate";
@@ -155,7 +159,7 @@ foreach my $platform (@platforms) {
 
 # Open persistent ssh connections to VM servers
 foreach my $server (keys %vm_servers) {
-    open_persistent_connection($server);
+    $active_hosts{$server} = 1 if open_persistent_connection($server) == 0;
 }
 
 # Power on VMs as needed
@@ -241,7 +245,7 @@ sub cleanup_build_dir {
 
     # Remove any remove temporary directories
     my $status = run_remote_command($conf, "rm -rf sudo_build.????????",
-	'>&STDERR');
+	\*STDERR);
     exit($status >> 8);
 }
 
@@ -285,6 +289,7 @@ sub run_job {
     $SIG{$INFO} = "DEFAULT";
     $SIG{INT} = \&worker_cleanup;
     $SIG{TERM} = \&worker_cleanup;
+    $SIG{__DIE__} = undef;
     sigprocmask(SIG_SETMASK, $oldsigset);
 
     # Show platform and ssh host in ps.
@@ -312,7 +317,7 @@ sub run_job {
     my $temporary;
     for (my $i = 0; $i < 20; $i++) {
 	$temporary = mktemp("sudo_build.XXXXXXXX");
-	$status = run_remote_command($conf, "mkdir $temporary", '>&BUILDLOG');
+	$status = run_remote_command($conf, "mkdir $temporary", \*BUILDLOG);
 	last if $status == 0;
     }
     if ($status != 0) {
@@ -320,12 +325,12 @@ sub run_job {
 	exit(1);
     }
 
-    my $files = "${build_script} ${test_script} ${tarball}";
-    printf BUILDLOG "copy %s -> %s:%s\n", $files, $host, "$temporary/";
-    $status = copy_to_remote($files, "$temporary/", $host, '>&BUILDLOG',
+    my @files = ($build_script, $test_script, $tarball);
+    printf BUILDLOG "copy %s -> %s:%s\n", join(' ', @files), $host, "$temporary/";
+    $status = copy_to_remote(\@files, "$temporary/", $host, \*BUILDLOG,
 	$conf->{"proxy_cmd"});
     if ($status != 0) {
-	warn "$platform: unable to scp $files $host:$temporary/" unless $exiting;
+	warn "$platform: unable to copy files to $host:$temporary/" unless $exiting;
 	$exit_value = 1;
 	goto remove_tmp;
     }
@@ -336,7 +341,7 @@ sub run_job {
 	    "${cache}/config.cache.${platform}",
 	    $host, "$temporary/config.cache";
 	copy_to_remote("${cache}/config.cache.${platform}",
-	    "$temporary/config.cache", $host, '>&BUILDLOG',
+	    "$temporary/config.cache", $host, \*BUILDLOG,
 	    $conf->{"proxy_cmd"});
     }
 
@@ -348,7 +353,8 @@ sub run_job {
     }
 
     $status = run_remote_command($conf,
-	"cd $temporary && ./$build_script_base ${osversion}$tarball_base", '>&BUILDLOG');
+	"cd $temporary && ./$build_script_base ${osversion}$tarball_base",
+	\*BUILDLOG);
     if ($status != 0) {
 	warn "$platform: build failed on $host\n" unless $exiting;
 	$exit_value = 2;
@@ -358,7 +364,7 @@ sub run_job {
     printf BUILDLOG "copy %s:%s -> %s\n", $host,
 	"$temporary/artifacts/*", $artifacts;
     $status = copy_from_remote("$temporary/artifacts/\*", $artifacts,
-	$host, '>&BUILDLOG', $conf->{"proxy_cmd"});
+	$host, \*BUILDLOG, $conf->{"proxy_cmd"});
     if ($status != 0) {
 	warn "$platform: unable to scp $host:$temporary/artifacts/* $artifacts" unless $exiting;
 	$exit_value = 4;
@@ -371,7 +377,7 @@ sub run_job {
 	    "$temporary/config.cache", "${cache}/config.cache.${platform}";
 	$status = copy_from_remote("$temporary/config.cache",
 	    "${cache}/config.cache.${platform}", $host,
-	    '>&BUILDLOG', $conf->{"proxy_cmd"});
+	    \*BUILDLOG, $conf->{"proxy_cmd"});
     }
 
     $now = localtime();
@@ -386,7 +392,7 @@ sub run_job {
 	}
 	print TESTLOG "Test started $now\n\n";
 	$status = run_remote_command($conf,
-	    "cd $temporary && ./$test_script_base $srcdir", '>&TESTLOG');
+	    "cd $temporary && ./$test_script_base $srcdir", \*TESTLOG, "-tt");
 	print TESTLOG "\nTest completed $now\n";
 	if ($status != 0) {
 	    warn "$platform: test failure on $host\n" unless $exiting;
@@ -397,7 +403,7 @@ sub run_job {
 
     # Remove temporary build dir
 remove_tmp:
-    run_remote_command($conf, "rm -rf \"$temporary\"", '>&BUILDLOG');
+    run_remote_command($conf, "rm -rf \"$temporary\"", \*BUILDLOG);
     close(BUILDLOG);
 
     exit($exit_value);
@@ -479,26 +485,46 @@ sub reaper {
     $SIG{CHLD} = \&reaper;
 }
 
-sub killall {
+# Kill all workers and wait for them to finish.
+# Note that the reaper is not called for the workers.
+sub kill_workers {
+    my $signame = shift;
+    my @jobs = keys %workers;
+
+    if (@jobs) {
+	$SIG{CHLD} = undef;
+	foreach (@jobs) {
+	    kill($signame, $_);
+	}
+	sleep(2);
+	foreach (@jobs) {
+	    kill(SIGKILL, $_);
+	}
+	for (;;) {
+	    last unless waitpid(-1, WNOHANG) > 0;
+	}
+    }
+}
+
+# Shut down cleanly on signal and exit.
+sub shut_down {
     my $signame = shift;
 
     print "Shutting down...\n" if $verbose;
 
-    $SIG{CHLD} = undef;
-    foreach (keys %workers) {
-	kill($signame, $_);
-    }
-    sleep(2);
-    foreach (keys %workers) {
-	kill(SIGKILL, $_);
-    }
-    for (;;) {
-        last unless waitpid(-1, WNOHANG) > 0;
-    }
-
+    kill_workers($signame);
     exit(1);
 }
 
+# Hook that is called when we die().
+sub die_hook {
+    # Don't do anything special if called from an eval block
+    die @_ if $^S;
+
+    kill_workers(SIGTERM);
+}
+
+# Signal handler for SIGINFO (or SIGUSR1 on non-BSD).
 sub info {
     while (my ($host, $c) = each %concurrency) {
 	if (exists $c->{'queue'}) {
@@ -517,18 +543,17 @@ sub info {
 
 # Build up the ssh command line
 sub ssh_cmdline {
-    my ($dest, $cmd, $opts) = @_;
-    my $cmdline;
+    my ($host, $cmd, @opts) = @_;
 
-    $cmdline = 'ssh -n -x -oPreferredAuthentications=publickey -oStrictHostKeyChecking=no -oServerAliveInterval=15 -oServerAliveCountMax=3';
-    $cmdline .= ' ' . $opts if defined($opts);
-    $cmdline .= ' ' . $dest;
-    $cmdline .= ' "' . $cmd . '"' if defined($cmd);
+    my @cmdline = qw(ssh -x -oPreferredAuthentications=publickey -oStrictHostKeyChecking=no -oServerAliveInterval=15 -oServerAliveCountMax=3);
+    push(@cmdline, @opts) if @opts;
+    push(@cmdline, $host);
+    push(@cmdline, $cmd) if defined($cmd);
 
-    $cmdline;
+    @cmdline;
 }
 
-# Use scp to copy a file from local to remote
+# Use scp to copy one or more files from local to remote
 sub copy_to_remote {
     my ($src, $dst, $host, $output, $proxy) = @_;
 
@@ -538,9 +563,12 @@ sub copy_to_remote {
 	return $status if $status != 0;
     }
 
-    my $cmdline = "scp -Bq -oPreferredAuthentications=publickey -oStrictHostKeyChecking=no -oControlPath=$sockets/$host $src $host:$dst";
-    my $child = open3($devnull, $output, $output, $cmdline);
-    waitpid($child, 0);
+    my @cmd = qw(scp -Bq -oPreferredAuthentications=publickey -oStrictHostKeyChecking=no);
+    push(@cmd, "-oControlPath=$sockets/$host");
+    push(@cmd, ref $src ? @$src : $src);
+    push(@cmd, "$host:$dst");
+    run(\@cmd, '<', \undef, '>&', $output, debug => $debug);
+
     return $?;
 }
 
@@ -554,16 +582,18 @@ sub copy_from_remote {
 	return $status if $status != 0;
     }
 
-    my $cmdline = "scp -Bq -oPreferredAuthentications=publickey -oStrictHostKeyChecking=no -oControlPath=$sockets/$host $host:$src $dst";
-    my $child = open3($devnull, $output, $output, $cmdline);
-    waitpid($child, 0);
+    my @cmd = qw(scp -Bq -oPreferredAuthentications=publickey -oStrictHostKeyChecking=no);
+    push(@cmd, "-oControlPath=$sockets/$host");
+    push(@cmd, "$host:$src", $dst);
+    run(\@cmd, '<', \undef, '>&', $output, debug => $debug);
+
     return $?;
 }
 
 # Run a command over ssh on the remote host and to output handle.
 # A persistent connection is opened if one does not already exit.
 sub run_remote_command {
-    my ($conf, $cmd, $output) = @_;
+    my ($conf, $cmd, $output, @opts) = @_;
     my $host = $conf->{'ssh_host'};
     my $sock_file = "$sockets/$host";
     my ($writer, $child);
@@ -587,11 +617,23 @@ sub run_remote_command {
     }
 
     # No need for proxy here, the persistent connection handles it.
-    my $cmdline = ssh_cmdline($host, $cmd, "-S $sock_file");
-
-    #warn "$host: $cmdline\n" if $debug;
-    $child = open3($devnull, $output, $output, $cmdline);
-    waitpid($child, 0);
+    # For tty mode, we need to allocate a pty and do things the hard way.
+    my @cmdline = ssh_cmdline($host, $cmd, "-S", $sock_file, @opts);
+    if (grep(@opts, "-t")) {
+	my ($inbuf, $outbuf);
+	my $h = harness(\@cmdline, '<pty<', \$inbuf, '>pty>', \$outbuf, debug => $debug);
+	for (;;) {
+	    pump $h;
+	    if (defined($outbuf)) {
+		print $output $outbuf;
+		undef $outbuf;
+	    }
+	    last unless $h->pumpable;
+	}
+	$h->finish();
+    } else {
+	run(\@cmdline, '<', \undef, '>&', $output, debug => $debug);
+    }
 
     return $?;
 }
@@ -600,33 +642,32 @@ sub run_remote_command {
 # The connection will persist until shut down.
 sub open_persistent_connection {
     my ($dest, $output, $proxy) = @_;
-    my ($cmdline, $outbuf);
+    my ($outbuf, @cmdline);
 
     # Handle user@host form
     my @tmp = split(/\@/, $dest);
     my $host = pop(@tmp);
 
-    my $ssh_opts = "-f -M -N -S $sockets/$host -oControlPersist=yes";
-    $ssh_opts .= " -oProxyCommand=\"$proxy\"" if defined($proxy);
+    my @ssh_opts = qw(-f -M -N -oControlPersist=yes);
+    push(@ssh_opts, "-S", "$sockets/$host");
+    push(@ssh_opts, "-oProxyCommand=$proxy") if defined($proxy);
 
     if (-S "$sockets/$host") {
-	$cmdline = ssh_cmdline($dest, undef, "-S $sockets/$host -Ocheck");
-	$outbuf = `ssh -S $sockets/$host -Ocheck $host 2>&1`;
+	@cmdline = ("ssh", "-S", "$sockets/$host", "-Ocheck", $host);
+	run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
 	return 0 if $outbuf =~ /^Master running/;
 	unlink("$sockets/$host");
     }
 
-    $cmdline = ssh_cmdline($dest, undef, $ssh_opts);
-    $outbuf = `$cmdline 2>&1`;
+    @cmdline = ssh_cmdline($dest, undef, @ssh_opts);
+    run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
     if (length($outbuf) > 0) {
 	if ($outbuf =~ /already exists, disabling multiplexing/) {
 	    # We may lose the race to create the socket, that's OK.
 	    $? = 0;
 	} else {
-	    # Write to $output if set to something like '>&BUILDLOG'
-	    local *STDERR;
-	    open *STDERR, $output if defined($output);
-	    warn $outbuf;
+	    $output = \*STDERR unless defined($output);
+	    print $output $outbuf;
 	}
     }
 
@@ -636,25 +677,26 @@ sub open_persistent_connection {
 # Close a persistent connection
 sub close_persistent_connection {
     my $host = shift;
-    my $ret = 0;
+    my $ret = 1;
+
+    # Strip off optional user@ if present.
+    $host =~ s/^.*@//;
 
     if (-S "$sockets/$host") {
-	# TODO: error handling
-	my $output = `ssh -oControlPath=$sockets/$host -Oexit $host 2>&1`;
-	$ret = $?;
+	my $outbuf;
+	my @cmdline = ("ssh", "-S", "$sockets/$host", "-Oexit", $host);
+	run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
+	$ret = 0 unless ($? == 0 && $outbuf =~ /Exit request sent/);
     }
 
     $ret;
 }
 
-# Close all persistent connections, regardless of who opened them.
+# Close all active persistent connections.
 sub close_persistent_connections {
-    return unless defined($sockets);
-    if (opendir(my $dir, $sockets)) {
-	my @connections = grep { !/^\./ && -S "$sockets/$_" } readdir($dir);
-	closedir($dir);
-	foreach my $h (@connections) {
-	    close_persistent_connection($h);
+    if (defined($sockets)) {
+	foreach my $host (keys %active_hosts) {
+	    close_persistent_connection($host);
 	}
     }
 }
@@ -662,32 +704,43 @@ sub close_persistent_connections {
 sub vm_is_running {
     # vim-cmd vmsvc/power.getstate VMID
     my ($host, $vmid) = @_;
+    my $outbuf;
 
-    my $cmd = "ssh -l root $host vim-cmd vmsvc/power.getstate $vmid 2>&1";
-    my @output = `$cmd`;
-    return 1 if grep(/Powered on/, @output);
-    return 0;
+    my @cmdline = ssh_cmdline($host, "vim-cmd vmsvc/power.getstate $vmid");
+    run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
+
+    $outbuf =~ /Powered on/;
 }
 
 sub vm_poweron {
     # vim-cmd vmsvc/power.on VMID
     my ($host, $vmid) = @_;
+    my $outbuf;
 
     print "Powering on VM $vmid on $host\n" if $verbose;
-    my $cmd = "ssh -l root $host vim-cmd vmsvc/power.on $vmid 2>&1";
-    my @output = `$cmd`;
-    return 1 if grep(/Powering on VM/, @output);
-    return 0;
+    my @cmdline = ssh_cmdline($host, "vim-cmd vmsvc/power.on $vmid");
+    run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
+
+    $outbuf =~ /Powering on VM/;
 }
 
 sub vm_shutdown {
     # vim-cmd vmsvc/power.shutdown VMID
     my ($host, $vmid) = @_;
+    my $outbuf;
 
     print "Shutting down VM $vmid on $host\n" if $verbose;
-    my $cmd = "ssh -l root $host vim-cmd vmsvc/power.shutdown $vmid 2>&1";
-    # Cannot complete operation because VMware Tools is not running in this virtual machine
-    system($cmd);
+    my @cmdline = ssh_cmdline($host, "vim-cmd vmsvc/power.shutdown $vmid");
+    run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
+
+    # Check for, e.g. vim.fault.ToolsUnavailable or vim.fault.InvalidPowerState
+    if ($outbuf =~ /vim\.fault\.ToolsUnavailable/) {
+	warn "unable to shut down $vmid @ $host: VM tools not installed\n";
+    } elsif ($outbuf =~ /vim\.fault\.InvalidPowerState/) {
+	# Not powered on, ignore the error
+	$outbuf = "";
+    }
+    $outbuf !~ /vim\.fault\./;
 }
 
 # Try to connect to port 22 on the host.
@@ -737,21 +790,20 @@ sub create_tarball {
 
 sub start_ssh_agent {
     # Use existing agent if possible
-    if (exists $ENV{'SSH_AUTH_SOCK'} && exists $ENV{'SSH_AGENT_PID'}) {
-	if (-S $ENV{'SSH_AUTH_SOCK'} && kill(0, $ENV{'SSH_AGENT_PID'})) {
-	    return undef;
-	}
+    if (exists $ENV{'SSH_AUTH_SOCK'} && -S $ENV{'SSH_AUTH_SOCK'}) {
+	return undef;
     }
 
     # Need to start a new agent and add keys
-    my $output = `ssh-agent -s`;
-    foreach (split(/\n/, $output)) {
-	s/;.*//;
+    my @cmdline = qw(ssh-agent -s);
+    run(\@cmdline, '<', \undef, '>&', sub {
+	$_ = shift;
+	s/;[^;]*$//;
 	my ($var, $val) = (/^([^=]+)=(.*)$/);
 	if (defined($var) && defined($val)) {
 	    $ENV{$var} = $val;
 	}
-    }
+    });
     system("ssh-add");
 
     return $ENV{'SSH_AGENT_PID'};
@@ -832,6 +884,7 @@ sub grep_log {
 	    s/\x1b\[[\d;]*m//g;	# remove escape codes
 	    if (/[Ww]arning:|[Ee]rror:|\*\*\* |ftp: /) {
 		# Some things we ignore
+		next if /ermanently added .* to the list of known hosts/;
 		next if /warning\/error mail subject/;
 		next if /must be cleared at boot time|Clock skew detected|in the future|-no(-fast)?-install|remember to run 'libtool --finish|has not been installed in|relinking '/;
 		# RPM warnings we don't care about
