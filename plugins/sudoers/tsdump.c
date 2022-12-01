@@ -50,10 +50,10 @@ union timestamp_entry_storage {
 
 sudo_dso_public int main(int argc, char *argv[]);
 
-static sudo_noreturn void usage(void);
 static void dump_entry(struct timestamp_entry *entry, off_t pos);
 static bool valid_entry(union timestamp_entry_storage *u, off_t pos);
 static bool convert_entry(union timestamp_entry_storage *record, struct timespec *off);
+sudo_noreturn static void usage(void);
 
 /*
  * tsdump: a simple utility to dump the contents of a time stamp file.

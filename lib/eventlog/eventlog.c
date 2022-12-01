@@ -349,7 +349,7 @@ closefrom_nodebug(int lowfd)
 
 #define MAX_MAILFLAGS	63
 
-static sudo_noreturn void
+sudo_noreturn static void
 exec_mailer(int pipein)
 {
     const struct eventlog_config *evl_conf = eventlog_getconf();

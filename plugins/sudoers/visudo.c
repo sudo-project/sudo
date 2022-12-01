@@ -96,9 +96,9 @@ static bool reparse_sudoers(char *, int, char **, bool, bool);
 static int run_command(const char *, char *const *);
 static void parse_sudoers_options(void);
 static void setup_signals(void);
-static sudo_noreturn void help(void);
-static sudo_noreturn void usage(void);
 static void visudo_cleanup(void);
+sudo_noreturn static void help(void);
+sudo_noreturn static void usage(void);
 
 extern void get_hostname(void);
 

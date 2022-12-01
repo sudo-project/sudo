@@ -175,8 +175,6 @@ extern time_t get_date(char *);
 static int list_sessions(int, char **, const char *, const char *, const char *);
 static int parse_expr(struct search_node_list *, char **, bool);
 static void read_keyboard(int fd, int what, void *v);
-static sudo_noreturn void help(void);
-static sudo_noreturn void usage(void);
 static int replay_session(int iolog_dir_fd, const char *iolog_dir,
     struct timespec *offset, struct timespec *max_wait, const char *decimal,
     bool interactive, bool suspend_wait);
@@ -184,6 +182,8 @@ static void sudoreplay_cleanup(void);
 static void write_output(int fd, int what, void *v);
 static void restore_terminal_size(void);
 static void setup_terminal(struct eventlog *evlog, bool interactive, bool resize);
+sudo_noreturn static void help(void);
+sudo_noreturn static void usage(void);
 
 #define VALID_ID(s) (isalnum((unsigned char)(s)[0]) && \
     isalnum((unsigned char)(s)[1]) && isalnum((unsigned char)(s)[2]) && \

@@ -47,9 +47,9 @@ int tgetpass_flags;
 /*
  * Local functions.
  */
-static sudo_noreturn void help(void);
-static sudo_noreturn void usage_excl(void);
-static sudo_noreturn void usage_excl_ticket(void);
+sudo_noreturn static void help(void);
+sudo_noreturn static void usage_excl(void);
+sudo_noreturn static void usage_excl_ticket(void);
 
 /*
  * Mapping of command line flags to name/value settings.
