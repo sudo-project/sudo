@@ -1154,6 +1154,8 @@ __find_arguments(const char *fmt0, va_list ap, union arg **argtable)
 	for (;;) {
 		for (cp = fmt; (ch = *fmt) != '\0' && ch != '%'; fmt++)
 			/* void */;
+		if ( ch == '\0' )
+			goto done;
 		fmt++;		/* skip over '%' */
 
 		flags = 0;
