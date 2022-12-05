@@ -31602,84 +31602,9 @@ fi
 	;;
 esac
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,--allow-multiple-definition" >&5
-printf %s "checking whether the linker accepts -Wl,--allow-multiple-definition... " >&6; }
-if test ${ax_cv_check_ldflags___Wl___allow_multiple_definition+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e)
-  ax_check_save_flags=$LDFLAGS
-  LDFLAGS="$LDFLAGS  -Wl,--allow-multiple-definition"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
 
-int
-main (void)
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"
-then :
-  ax_cv_check_ldflags___Wl___allow_multiple_definition=yes
-else case e in #(
-  e) ax_cv_check_ldflags___Wl___allow_multiple_definition=no ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
-  LDFLAGS=$ax_check_save_flags ;;
-esac
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl___allow_multiple_definition" >&5
-printf "%s\n" "$ax_cv_check_ldflags___Wl___allow_multiple_definition" >&6; }
-if test x"$ax_cv_check_ldflags___Wl___allow_multiple_definition" = xyes
-then :
-
-if test ${LDFLAGS+y}
-then :
-
-  case " $LDFLAGS " in #(
-  *" -Wl,--allow-multiple-definition "*) :
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS already contains -Wl,--allow-multiple-definition"; } >&5
-  (: LDFLAGS already contains -Wl,--allow-multiple-definition) 2>&5
-  ac_status=$?
-  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } ;; #(
-  *) :
-
-     as_fn_append LDFLAGS " -Wl,--allow-multiple-definition"
-     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
-  (: LDFLAGS="$LDFLAGS") 2>&5
-  ac_status=$?
-  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-     ;;
-esac
-
-else case e in #(
-  e)
-  LDFLAGS=-Wl,--allow-multiple-definition
-  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
-  (: LDFLAGS="$LDFLAGS") 2>&5
-  ac_status=$?
-  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-   ;;
-esac
-fi
-
-else case e in #(
-  e) : ;;
-esac
-fi
-
-
-if test -n "$GCC"; then
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fvisibility=hidden" >&5
+                    if test -n "$GCC"; then
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fvisibility=hidden" >&5
 printf %s "checking whether C compiler accepts -fvisibility=hidden... " >&6; }
 if test ${ax_cv_check_cflags___fvisibility_hidden+y}
 then :
@@ -31715,7 +31640,7 @@ printf "%s\n" "$ax_cv_check_cflags___fvisibility_hidden" >&6; }
 if test "x$ax_cv_check_cflags___fvisibility_hidden" = xyes
 then :
 
-	printf "%s\n" "#define HAVE_DSO_VISIBILITY 1" >>confdefs.h
+	    printf "%s\n" "#define HAVE_DSO_VISIBILITY 1" >>confdefs.h
 
 
 if test ${CFLAGS+y}
@@ -31751,16 +31676,16 @@ else case e in #(
 esac
 fi
 
-	LT_LDEXPORTS=
-	LT_LDDEP=
+	    LT_LDEXPORTS=
+	    LT_LDDEP=
 
 else case e in #(
   e) : ;;
 esac
 fi
 
-else
-    case "$host_os" in
+    else
+	case "$host_os" in
 	hpux*)
 	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -Bhidden_def" >&5
 printf %s "checking whether C compiler accepts -Bhidden_def... " >&6; }
@@ -31963,29 +31888,29 @@ esac
 fi
 
 	    ;;
-    esac
-fi
+	esac
+    fi
 
-if test "$lt_cv_prog_gnu_ld" = "yes"; then
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether ld supports anonymous map files" >&5
+                                if test "$lt_cv_prog_gnu_ld" = "yes"; then
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether ld supports anonymous map files" >&5
 printf %s "checking whether ld supports anonymous map files... " >&6; }
 if test ${sudo_cv_var_gnu_ld_anon_map+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
-	    sudo_cv_var_gnu_ld_anon_map=no
-	    cat > conftest.map <<-EOF
-	    {
-		global: foo;
-		local:  *;
-	    };
-EOF
-	    _CFLAGS="$CFLAGS"
-	    CFLAGS="$CFLAGS $lt_prog_compiler_pic"
-	    _LDFLAGS="$LDFLAGS"
-	    LDFLAGS="$LDFLAGS -fpic -shared -Wl,--version-script,./conftest.map"
-	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+		sudo_cv_var_gnu_ld_anon_map=no
+		cat > conftest.map <<-EOF
+		{
+		    global: foo;
+		    local:  *;
+		};
+		EOF
+		_CFLAGS="$CFLAGS"
+		CFLAGS="$CFLAGS $lt_prog_compiler_pic"
+		_LDFLAGS="$LDFLAGS"
+		LDFLAGS="$LDFLAGS -fpic -shared -Wl,--version-script,./conftest.map"
+		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 int foo;
 int
@@ -32002,19 +31927,20 @@ then :
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
-	    CFLAGS="$_CFLAGS"
-	    LDFLAGS="$_LDFLAGS"
+		CFLAGS="$_CFLAGS"
+		LDFLAGS="$_LDFLAGS"
+		rm -f conftest.map
 
-     ;;
+	 ;;
 esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_gnu_ld_anon_map" >&5
 printf "%s\n" "$sudo_cv_var_gnu_ld_anon_map" >&6; }
-    if test "$sudo_cv_var_gnu_ld_anon_map" = "yes"; then
-	LT_LDDEP="\$(shlib_map)"; LT_LDEXPORTS="-Wl,--version-script,\$(shlib_map)"
-    fi
-else
-    case "$host_os" in
+	if test "$sudo_cv_var_gnu_ld_anon_map" = "yes"; then
+	    LT_LDDEP="\$(shlib_map)"; LT_LDEXPORTS="-Wl,--version-script,\$(shlib_map)"
+	fi
+    else
+	case "$host_os" in
 	solaris2*)
 	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether ld supports anonymous map files" >&5
 printf %s "checking whether ld supports anonymous map files... " >&6; }
@@ -32025,11 +31951,11 @@ else case e in #(
   e)
 		    sudo_cv_var_solaris_ld_anon_map=no
 		    cat > conftest.map <<-EOF
-		    {
-			global: foo;
-			local:  *;
-		    };
-EOF
+			{
+			    global: foo;
+			    local:  *;
+			};
+			EOF
 		    _CFLAGS="$CFLAGS"
 		    CFLAGS="$CFLAGS $lt_prog_compiler_pic"
 		    _LDFLAGS="$LDFLAGS"
@@ -32053,6 +31979,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
 		    CFLAGS="$_CFLAGS"
 		    LDFLAGS="$_LDFLAGS"
+		    rm -f conftest.map
 
 	     ;;
 esac
@@ -32111,8 +32038,85 @@ printf "%s\n" "$sudo_cv_var_hpux_ld_symbol_export" >&6; }
 		LT_LDDEP="\$(shlib_opt)"; LT_LDEXPORTS="-Wl,-c,\$(shlib_opt)"
 	    fi
 	    ;;
-    esac
+	esac
+    fi
+
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,--allow-multiple-definition" >&5
+printf %s "checking whether the linker accepts -Wl,--allow-multiple-definition... " >&6; }
+if test ${ax_cv_check_ldflags___Wl___allow_multiple_definition+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -Wl,--allow-multiple-definition"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ax_cv_check_ldflags___Wl___allow_multiple_definition=yes
+else case e in #(
+  e) ax_cv_check_ldflags___Wl___allow_multiple_definition=no ;;
+esac
 fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl___allow_multiple_definition" >&5
+printf "%s\n" "$ax_cv_check_ldflags___Wl___allow_multiple_definition" >&6; }
+if test x"$ax_cv_check_ldflags___Wl___allow_multiple_definition" = xyes
+then :
+
+if test ${LDFLAGS+y}
+then :
+
+  case " $LDFLAGS " in #(
+  *" -Wl,--allow-multiple-definition "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS already contains -Wl,--allow-multiple-definition"; } >&5
+  (: LDFLAGS already contains -Wl,--allow-multiple-definition) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LDFLAGS " -Wl,--allow-multiple-definition"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  LDFLAGS=-Wl,--allow-multiple-definition
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
+else case e in #(
+  e) : ;;
+esac
+fi
+
 
 if test "$enable_sanitizer" != "no"; then
     as_CACHEVAR=`printf "%s\n" "ax_cv_check_cflags__$enable_sanitizer" | sed "$as_sed_sh"`

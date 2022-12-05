@@ -434,6 +434,7 @@ m4/lt~obsolete.m4
 m4/python.m4
 m4/runlog.m4
 m4/sudo.m4
+m4/visibility.m4
 pathnames.h.in
 plugins/audit_json/Makefile.in
 plugins/audit_json/audit_json.c
