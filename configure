@@ -31602,18 +31602,19 @@ fi
 	;;
 esac
 
-if test -n "$GCC"; then
-    if test -z "$enable_pie"; then
-	case "$host_os" in
-	    linux*)
-		# Attempt to build with PIE support
-		enable_pie="maybe"
-		;;
-	esac
-    fi
-    if test -n "$enable_pie"; then
-	if test "$enable_pie" = "no"; then
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fno-pie" >&5
+
+                    if test -n "$GCC"; then
+	if test X"$enable_pie" = X""; then
+	    case "$host_os" in
+		linux*)
+		    # Attempt to build with PIE support
+		    enable_pie="maybe"
+		    ;;
+	    esac
+	fi
+	if test X"$enable_pie" != X""; then
+	    if test "$enable_pie" = "no"; then
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fno-pie" >&5
 printf %s "checking whether C compiler accepts -fno-pie... " >&6; }
 if test ${ax_cv_check_cflags___fno_pie+y}
 then :
@@ -31649,9 +31650,9 @@ printf "%s\n" "$ax_cv_check_cflags___fno_pie" >&6; }
 if test "x$ax_cv_check_cflags___fno_pie" = xyes
 then :
 
-		_CFLAGS="$CFLAGS"
-		CFLAGS="$CFLAGS -fno-pie"
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -nopie" >&5
+		    _CFLAGS="$CFLAGS"
+		    CFLAGS="$CFLAGS -fno-pie"
+		    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -nopie" >&5
 printf %s "checking whether the linker accepts -nopie... " >&6; }
 if test ${ax_cv_check_ldflags___nopie+y}
 then :
@@ -31688,23 +31689,23 @@ printf "%s\n" "$ax_cv_check_ldflags___nopie" >&6; }
 if test x"$ax_cv_check_ldflags___nopie" = xyes
 then :
 
-		    PIE_CFLAGS="-fno-pie"
-		    PIE_LDFLAGS="-nopie"
+			PIE_CFLAGS="-fno-pie"
+			PIE_LDFLAGS="-nopie"
 
 else case e in #(
   e) : ;;
 esac
 fi
 
-		CFLAGS="$_CFLAGS"
+		    CFLAGS="$_CFLAGS"
 
 else case e in #(
   e) : ;;
 esac
 fi
 
-	else
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fPIE" >&5
+	    else
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fPIE" >&5
 printf %s "checking whether C compiler accepts -fPIE... " >&6; }
 if test ${ax_cv_check_cflags___fPIE+y}
 then :
@@ -31740,9 +31741,9 @@ printf "%s\n" "$ax_cv_check_cflags___fPIE" >&6; }
 if test "x$ax_cv_check_cflags___fPIE" = xyes
 then :
 
-		_CFLAGS="$CFLAGS"
-		CFLAGS="$CFLAGS -fPIE"
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -pie" >&5
+		    _CFLAGS="$CFLAGS"
+		    CFLAGS="$CFLAGS -fPIE"
+		    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -pie" >&5
 printf %s "checking whether the linker accepts -pie... " >&6; }
 if test ${ax_cv_check_ldflags___pie+y}
 then :
@@ -31779,7 +31780,7 @@ printf "%s\n" "$ax_cv_check_ldflags___pie" >&6; }
 if test x"$ax_cv_check_ldflags___pie" = xyes
 then :
 
-		    if test "$enable_pie" = "maybe"; then
+			if test "$enable_pie" = "maybe"; then
 
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for working PIE support" >&5
 printf %s "checking for working PIE support... " >&6; }
@@ -31819,32 +31820,32 @@ then :
   enable_pie=yes
 fi
 
-		    fi
-		    if test "$enable_pie" = "yes"; then
-			PIE_CFLAGS="-fPIE"
-			PIE_LDFLAGS="-Wc,-fPIE -pie"
-		    fi
+			fi
+			if test "$enable_pie" = "yes"; then
+			    PIE_CFLAGS="-fPIE"
+			    PIE_LDFLAGS="-Wc,-fPIE -pie"
+			fi
 
 else case e in #(
   e) : ;;
 esac
 fi
 
-		CFLAGS="$_CFLAGS"
+		    CFLAGS="$_CFLAGS"
 
 else case e in #(
   e) : ;;
 esac
 fi
 
+	    fi
 	fi
     fi
-fi
-if test "$enable_pie" != "yes"; then
-    # Solaris 11.1 and higher supports tagging binaries to use ASLR
-    case "$host_os" in
-	solaris2.1[1-9]|solaris2.[2-9][0-9])
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-z,aslr" >&5
+    if test X"$enable_pie" != X"yes"; then
+	# Solaris 11.1 and higher supports tagging binaries to use ASLR
+	case "$host_os" in
+	    solaris2.1[1-9]|solaris2.[2-9][0-9])
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-z,aslr" >&5
 printf %s "checking whether the linker accepts -Wl,-z,aslr... " >&6; }
 if test ${ax_cv_check_ldflags___Wl__z_aslr+y}
 then :
@@ -31881,6 +31882,7 @@ printf "%s\n" "$ax_cv_check_ldflags___Wl__z_aslr" >&6; }
 if test x"$ax_cv_check_ldflags___Wl__z_aslr" = xyes
 then :
 
+
 if test ${PIE_LDFLAGS+y}
 then :
 
@@ -31914,14 +31916,15 @@ else case e in #(
 esac
 fi
 
+
 else case e in #(
   e) : ;;
 esac
 fi
 
-	    ;;
-    esac
-fi
+		;;
+	esac
+    fi
 
 
                     if test -n "$GCC"; then
