@@ -1646,6 +1646,11 @@ AC_CANONICAL_HOST
 AC_CONFIG_MACRO_DIR([m4])
 
 dnl
+dnl Relies on CC host being set
+dnl
+SUDO_PVS_STUDIO_CFG
+
+dnl
 dnl On AIX we need to force libtool to install .so files for the plugins
 dnl instead of a .a file that contains the .so.  We do this by enabling
 dnl runtime linking (where the .so file is installed).  This must happen
@@ -2303,37 +2308,6 @@ case "$host" in
 		;;
 esac
 
-if test X"$enable_pvs_studio" = X"yes"; then
-    # Determine preprocessor type
-    case "$CC" in
-    *clang*) preprocessor=clang;;
-    *gcc*) preprocessor=gcc;;
-    *)
-	case `$CC --version 2>&1` in
-	    *clang*) preprocessor=clang;;
-	    *gcc*) preprocessor=gcc;;
-	    *) AC_MSG_ERROR([Compiler must be gcc or clang for PVS-Studio.]);;
-	esac
-	;;
-    esac
-
-    # Determine platform (currently linux or macos)
-    case "$host" in
-    x86_64-*-linux*) pvs_platform=linux64;;
-    *86-*-linux*) pvs_platform=linux32;;
-    *-*-darwin*) pvs_platform=macos;;
-    *) AC_MSG_ERROR([PVS-Studio does not support $host.]);;
-    esac
-
-    # create basic PVS-Studio.cfg file
-    cat > PVS-Studio.cfg <<-EOF
-	preprocessor = $preprocessor
-	platform = $pvs_platform
-	analysis-mode = 4
-	language = C
-EOF
-fi
-
 dnl
 dnl Library preloading to support NOEXEC
 dnl
@@ -2404,20 +2378,7 @@ dnl
 AC_C_CONST
 AC_C_INLINE
 AC_C_VOLATILE
-if test X"$ac_cv_prog_cc_c99" = X"no"; then
-    AC_MSG_CHECKING([for variadic macro support in cpp])
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
-#if defined(__GNUC__) && __GNUC__ == 2
-# define sudo_fprintf(fp, fmt...) fprintf((fp), (fmt))
-#else
-# define sudo_fprintf(fp, ...) fprintf((fp), __VA_ARGS__)
-#endif], [sudo_fprintf(stderr, "a %s", "test");])], [AC_MSG_RESULT([yes])],
-    [AC_MSG_RESULT([no])
-	AC_DEFINE([NO_VARIADIC_MACROS], [1], [Define if your C preprocessor does not support variadic macros.])
-	AC_MSG_WARN([your C preprocessor doesn't support variadic macros, debugging support will be limited])
-	SUDO_APPEND_COMPAT_EXP(sudo_debug_printf_nvm_v1)
-    ])
-fi
+SUDO_CPP_VARIADIC_MACROS
 
 dnl
 dnl Program checks

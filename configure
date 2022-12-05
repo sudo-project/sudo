@@ -8776,6 +8776,38 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 
 
+
+    if test X"$enable_pvs_studio" = X"yes"; then
+	# Determine preprocessor type
+	case "$CC" in
+	*clang*) preprocessor=clang;;
+	*gcc*) preprocessor=gcc;;
+	*)  case `$CC --version 2>&1` in
+	    *clang*) preprocessor=clang;;
+	    *gcc*) preprocessor=gcc;;
+	    *) as_fn_error $? "Compiler must be gcc or clang for PVS-Studio." "$LINENO" 5;;
+	    esac
+	    ;;
+	esac
+
+	# Determine platform (currently linux or macos)
+	case "$host" in
+	x86_64-*-linux*) pvs_platform=linux64;;
+	*86-*-linux*) pvs_platform=linux32;;
+	*-*-darwin*) pvs_platform=macos;;
+	*) as_fn_error $? "PVS-Studio does not support $host." "$LINENO" 5;;
+	esac
+
+	# Create a basic PVS-Studio.cfg file
+	cat > PVS-Studio.cfg <<-EOF
+		preprocessor = $preprocessor
+		platform = $pvs_platform
+		analysis-mode = 4
+		language = C
+	EOF
+    fi
+
+
 case "$host_os" in
 aix4.[23]|aix4.[23].*|aix[5-9]*)
 
@@ -18574,37 +18606,6 @@ fi
 		;;
 esac
 
-if test X"$enable_pvs_studio" = X"yes"; then
-    # Determine preprocessor type
-    case "$CC" in
-    *clang*) preprocessor=clang;;
-    *gcc*) preprocessor=gcc;;
-    *)
-	case `$CC --version 2>&1` in
-	    *clang*) preprocessor=clang;;
-	    *gcc*) preprocessor=gcc;;
-	    *) as_fn_error $? "Compiler must be gcc or clang for PVS-Studio." "$LINENO" 5;;
-	esac
-	;;
-    esac
-
-    # Determine platform (currently linux or macos)
-    case "$host" in
-    x86_64-*-linux*) pvs_platform=linux64;;
-    *86-*-linux*) pvs_platform=linux32;;
-    *-*-darwin*) pvs_platform=macos;;
-    *) as_fn_error $? "PVS-Studio does not support $host." "$LINENO" 5;;
-    esac
-
-    # create basic PVS-Studio.cfg file
-    cat > PVS-Studio.cfg <<-EOF
-	preprocessor = $preprocessor
-	platform = $pvs_platform
-	analysis-mode = 4
-	language = C
-EOF
-fi
-
 if test X"$enable_intercept" = X"no"; then
     intercept_file=disabled
 fi
@@ -18905,9 +18906,15 @@ printf "%s\n" "#define volatile /**/" >>confdefs.h
 
 fi
 
-if test X"$ac_cv_build_prog_cc_c99" = X"no"; then
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for variadic macro support in cpp" >&5
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for variadic macro support in cpp" >&5
 printf %s "checking for variadic macro support in cpp... " >&6; }
+if test ${sudo_cv_cpp_variadic_macros+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+  sudo_cv_cpp_variadic_macros=yes
+  if test X"$ac_cv_build_prog_cc_c99" = X"no"; then
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 $ac_includes_default
@@ -18920,21 +18927,30 @@ int
 main (void)
 {
 sudo_fprintf(stderr, "a %s", "test");
+
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"
 then :
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
+
 else case e in #(
-  e) { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
+  e) sudo_cv_cpp_variadic_macros=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+  fi
+   ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_cpp_variadic_macros" >&5
+printf "%s\n" "$sudo_cv_cpp_variadic_macros" >&6; }
+  if test X"$sudo_cv_cpp_variadic_macros" = X"no"; then
 
 printf "%s\n" "#define NO_VARIADIC_MACROS 1" >>confdefs.h
 
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: your C preprocessor doesn't support variadic macros, debugging support will be limited" >&5
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: your C preprocessor doesn't support variadic macros, debugging support will be limited" >&5
 printf "%s\n" "$as_me: WARNING: your C preprocessor doesn't support variadic macros, debugging support will be limited" >&2;}
 
     for _sym in sudo_debug_printf_nvm_v1; do
@@ -18942,11 +18958,8 @@ printf "%s\n" "$as_me: WARNING: your C preprocessor doesn't support variadic mac
 "
     done
 
-     ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
+  fi
+
 
 for ac_prog in gawk mawk nawk awk
 do

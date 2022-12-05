@@ -549,6 +549,62 @@ fi
 ])
 
 dnl
+dnl Create PVS-Studio.cfg for supported platforms or throw an error.
+dnl
+AC_DEFUN([SUDO_PVS_STUDIO_CFG], [
+    if test X"$enable_pvs_studio" = X"yes"; then
+	# Determine preprocessor type
+	case "$CC" in
+	*clang*) preprocessor=clang;;
+	*gcc*) preprocessor=gcc;;
+	*)  case `$CC --version 2>&1` in
+	    *clang*) preprocessor=clang;;
+	    *gcc*) preprocessor=gcc;;
+	    *) AC_MSG_ERROR([Compiler must be gcc or clang for PVS-Studio.]);;
+	    esac
+	    ;;
+	esac
+
+	# Determine platform (currently linux or macos)
+	case "$host" in
+	x86_64-*-linux*) pvs_platform=linux64;;
+	*86-*-linux*) pvs_platform=linux32;;
+	*-*-darwin*) pvs_platform=macos;;
+	*) AC_MSG_ERROR([PVS-Studio does not support $host.]);;
+	esac
+
+	# Create a basic PVS-Studio.cfg file
+	cat > PVS-Studio.cfg <<-EOF
+		preprocessor = $preprocessor
+		platform = $pvs_platform
+		analysis-mode = 4
+		language = C
+	EOF
+    fi
+])
+
+AC_DEFUN([SUDO_CPP_VARIADIC_MACROS],
+[AC_CACHE_CHECK([for variadic macro support in cpp],
+[sudo_cv_cpp_variadic_macros], [
+  sudo_cv_cpp_variadic_macros=yes
+  if test X"$ac_cv_prog_cc_c99" = X"no"; then
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
+#if defined(__GNUC__) && __GNUC__ == 2
+# define sudo_fprintf(fp, fmt...) fprintf((fp), (fmt))
+#else
+# define sudo_fprintf(fp, ...) fprintf((fp), __VA_ARGS__)
+#endif], [sudo_fprintf(stderr, "a %s", "test");
+    ])], [], [sudo_cv_cpp_variadic_macros=no])
+  fi
+  ])
+  if test X"$sudo_cv_cpp_variadic_macros" = X"no"; then
+    AC_DEFINE([NO_VARIADIC_MACROS], [1], [Define if your C preprocessor does not support variadic macros.])
+    AC_MSG_WARN([your C preprocessor doesn't support variadic macros, debugging support will be limited])
+    SUDO_APPEND_COMPAT_EXP(sudo_debug_printf_nvm_v1)
+  fi
+])
+
+dnl
 dnl private versions of AC_DEFINE and AC_DEFINE_UNQUOTED that don't support
 dnl tracing that we use to define paths for pathnames.h so autoheader doesn't
 dnl put them in config.h.in.  An awful hack.
