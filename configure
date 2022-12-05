@@ -31602,6 +31602,327 @@ fi
 	;;
 esac
 
+if test -n "$GCC"; then
+    if test -z "$enable_pie"; then
+	case "$host_os" in
+	    linux*)
+		# Attempt to build with PIE support
+		enable_pie="maybe"
+		;;
+	esac
+    fi
+    if test -n "$enable_pie"; then
+	if test "$enable_pie" = "no"; then
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fno-pie" >&5
+printf %s "checking whether C compiler accepts -fno-pie... " >&6; }
+if test ${ax_cv_check_cflags___fno_pie+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+  ax_check_save_flags=$CFLAGS
+  CFLAGS="$CFLAGS  -fno-pie"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  ax_cv_check_cflags___fno_pie=yes
+else case e in #(
+  e) ax_cv_check_cflags___fno_pie=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fno_pie" >&5
+printf "%s\n" "$ax_cv_check_cflags___fno_pie" >&6; }
+if test "x$ax_cv_check_cflags___fno_pie" = xyes
+then :
+
+		_CFLAGS="$CFLAGS"
+		CFLAGS="$CFLAGS -fno-pie"
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -nopie" >&5
+printf %s "checking whether the linker accepts -nopie... " >&6; }
+if test ${ax_cv_check_ldflags___nopie+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -nopie"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ax_cv_check_ldflags___nopie=yes
+else case e in #(
+  e) ax_cv_check_ldflags___nopie=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___nopie" >&5
+printf "%s\n" "$ax_cv_check_ldflags___nopie" >&6; }
+if test x"$ax_cv_check_ldflags___nopie" = xyes
+then :
+
+		    PIE_CFLAGS="-fno-pie"
+		    PIE_LDFLAGS="-nopie"
+
+else case e in #(
+  e) : ;;
+esac
+fi
+
+		CFLAGS="$_CFLAGS"
+
+else case e in #(
+  e) : ;;
+esac
+fi
+
+	else
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fPIE" >&5
+printf %s "checking whether C compiler accepts -fPIE... " >&6; }
+if test ${ax_cv_check_cflags___fPIE+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+  ax_check_save_flags=$CFLAGS
+  CFLAGS="$CFLAGS  -fPIE"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  ax_cv_check_cflags___fPIE=yes
+else case e in #(
+  e) ax_cv_check_cflags___fPIE=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fPIE" >&5
+printf "%s\n" "$ax_cv_check_cflags___fPIE" >&6; }
+if test "x$ax_cv_check_cflags___fPIE" = xyes
+then :
+
+		_CFLAGS="$CFLAGS"
+		CFLAGS="$CFLAGS -fPIE"
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -pie" >&5
+printf %s "checking whether the linker accepts -pie... " >&6; }
+if test ${ax_cv_check_ldflags___pie+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -pie"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ax_cv_check_ldflags___pie=yes
+else case e in #(
+  e) ax_cv_check_ldflags___pie=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___pie" >&5
+printf "%s\n" "$ax_cv_check_ldflags___pie" >&6; }
+if test x"$ax_cv_check_ldflags___pie" = xyes
+then :
+
+		    if test "$enable_pie" = "maybe"; then
+
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for working PIE support" >&5
+printf %s "checking for working PIE support... " >&6; }
+if test ${sudo_cv_working_pie+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+	if test "$cross_compiling" = yes
+then :
+  sudo_cv_working_pie=no
+else case e in #(
+  e) cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$ac_includes_default
+int main() { char *p = malloc(1024); if (p == NULL) return 1; memset(p, 0, 1024); return 0; }
+_ACEOF
+if ac_fn_c_try_run "$LINENO"
+then :
+  sudo_cv_working_pie=yes
+else case e in #(
+  e) sudo_cv_working_pie=no ;;
+esac
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext ;;
+esac
+fi
+
+     ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_working_pie" >&5
+printf "%s\n" "$sudo_cv_working_pie" >&6; }
+    if test $sudo_cv_working_pie = yes
+then :
+  enable_pie=yes
+fi
+
+		    fi
+		    if test "$enable_pie" = "yes"; then
+			PIE_CFLAGS="-fPIE"
+			PIE_LDFLAGS="-Wc,-fPIE -pie"
+		    fi
+
+else case e in #(
+  e) : ;;
+esac
+fi
+
+		CFLAGS="$_CFLAGS"
+
+else case e in #(
+  e) : ;;
+esac
+fi
+
+	fi
+    fi
+fi
+if test "$enable_pie" != "yes"; then
+    # Solaris 11.1 and higher supports tagging binaries to use ASLR
+    case "$host_os" in
+	solaris2.1[1-9]|solaris2.[2-9][0-9])
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-z,aslr" >&5
+printf %s "checking whether the linker accepts -Wl,-z,aslr... " >&6; }
+if test ${ax_cv_check_ldflags___Wl__z_aslr+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -Wl,-z,aslr"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ax_cv_check_ldflags___Wl__z_aslr=yes
+else case e in #(
+  e) ax_cv_check_ldflags___Wl__z_aslr=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__z_aslr" >&5
+printf "%s\n" "$ax_cv_check_ldflags___Wl__z_aslr" >&6; }
+if test x"$ax_cv_check_ldflags___Wl__z_aslr" = xyes
+then :
+
+if test ${PIE_LDFLAGS+y}
+then :
+
+  case " $PIE_LDFLAGS " in #(
+  *" -Wl,-z,aslr "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : PIE_LDFLAGS already contains -Wl,-z,aslr"; } >&5
+  (: PIE_LDFLAGS already contains -Wl,-z,aslr) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append PIE_LDFLAGS " -Wl,-z,aslr"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : PIE_LDFLAGS=\"\$PIE_LDFLAGS\""; } >&5
+  (: PIE_LDFLAGS="$PIE_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  PIE_LDFLAGS=-Wl,-z,aslr
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : PIE_LDFLAGS=\"\$PIE_LDFLAGS\""; } >&5
+  (: PIE_LDFLAGS="$PIE_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
+else case e in #(
+  e) : ;;
+esac
+fi
+
+	    ;;
+    esac
+fi
+
 
                     if test -n "$GCC"; then
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fvisibility=hidden" >&5
@@ -32042,7 +32363,8 @@ printf "%s\n" "$sudo_cv_var_hpux_ld_symbol_export" >&6; }
     fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,--allow-multiple-definition" >&5
+    if test X"${enable_sanitizer}{enable_fuzzer}" != X"nono"; then
+					{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,--allow-multiple-definition" >&5
 printf %s "checking whether the linker accepts -Wl,--allow-multiple-definition... " >&6; }
 if test ${ax_cv_check_ldflags___Wl___allow_multiple_definition+y}
 then :
@@ -32079,21 +32401,21 @@ printf "%s\n" "$ax_cv_check_ldflags___Wl___allow_multiple_definition" >&6; }
 if test x"$ax_cv_check_ldflags___Wl___allow_multiple_definition" = xyes
 then :
 
-if test ${LDFLAGS+y}
+if test ${ASAN_LDFLAGS+y}
 then :
 
-  case " $LDFLAGS " in #(
+  case " $ASAN_LDFLAGS " in #(
   *" -Wl,--allow-multiple-definition "*) :
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS already contains -Wl,--allow-multiple-definition"; } >&5
-  (: LDFLAGS already contains -Wl,--allow-multiple-definition) 2>&5
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_LDFLAGS already contains -Wl,--allow-multiple-definition"; } >&5
+  (: ASAN_LDFLAGS already contains -Wl,--allow-multiple-definition) 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; } ;; #(
   *) :
 
-     as_fn_append LDFLAGS " -Wl,--allow-multiple-definition"
-     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
-  (: LDFLAGS="$LDFLAGS") 2>&5
+     as_fn_append ASAN_LDFLAGS " -Wl,--allow-multiple-definition"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_LDFLAGS=\"\$ASAN_LDFLAGS\""; } >&5
+  (: ASAN_LDFLAGS="$ASAN_LDFLAGS") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -32102,9 +32424,9 @@ esac
 
 else case e in #(
   e)
-  LDFLAGS=-Wl,--allow-multiple-definition
-  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
-  (: LDFLAGS="$LDFLAGS") 2>&5
+  ASAN_LDFLAGS=-Wl,--allow-multiple-definition
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : ASAN_LDFLAGS=\"\$ASAN_LDFLAGS\""; } >&5
+  (: ASAN_LDFLAGS="$ASAN_LDFLAGS") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -32117,9 +32439,10 @@ else case e in #(
 esac
 fi
 
+    fi
 
-if test "$enable_sanitizer" != "no"; then
-    as_CACHEVAR=`printf "%s\n" "ax_cv_check_cflags__$enable_sanitizer" | sed "$as_sed_sh"`
+                    if test X"$enable_sanitizer" != X"no"; then
+	as_CACHEVAR=`printf "%s\n" "ax_cv_check_cflags__$enable_sanitizer" | sed "$as_sed_sh"`
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts $enable_sanitizer" >&5
 printf %s "checking whether C compiler accepts $enable_sanitizer... " >&6; }
 if eval test \${$as_CACHEVAR+y}
@@ -32259,7 +32582,7 @@ else case e in #(
 esac
 fi
 
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fno-omit-frame-pointer" >&5
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fno-omit-frame-pointer" >&5
 printf %s "checking whether C compiler accepts -fno-omit-frame-pointer... " >&6; }
 if test ${ax_cv_check_cflags___fno_omit_frame_pointer+y}
 then :
@@ -32335,32 +32658,33 @@ else case e in #(
 esac
 fi
 
-	printf "%s\n" "#define NO_LEAKS 1" >>confdefs.h
+	    printf "%s\n" "#define NO_LEAKS 1" >>confdefs.h
 
-					case `$CC --version 2>&1` in
-	*gcc*)
-	    libasan=`$CC -print-file-name=libasan.so 2>/dev/null`
-	    if test -n "$libasan" -a X"$libasan" != X"libasan.so"; then
-		# libasan.so may be a linker script
-		libasan="`awk 'BEGIN {lib=ARGV[1]} /^INPUT/ {lib=$3} END {print lib}' \"$libasan\"`"
-		cat >>confdefs.h <<EOF
+	    	    	    	    	    case `$CC --version 2>&1` in
+	    *gcc*)
+		libasan=`$CC -print-file-name=libasan.so 2>/dev/null`
+		if test -n "$libasan" -a X"$libasan" != X"libasan.so"; then
+		    # libasan.so may be a linker script
+		    libasan="`awk 'BEGIN {lib=ARGV[1]} /^INPUT/ {lib=} END {print lib}' \"$libasan\"`"
+		    cat >>confdefs.h <<EOF
 #define _PATH_ASAN_LIB "$libasan"
 EOF
 
-	    fi
-	    ;;
-	esac
+		fi
+		;;
+	    esac
 
 else case e in #(
   e)
-	as_fn_error $? "$CC does not support the $enable_sanitizer flag" "$LINENO" 5
-     ;;
+	    as_fn_error $? "$CC does not support the $enable_sanitizer flag" "$LINENO" 5
+	 ;;
 esac
 fi
 
-fi
-if test "$enable_fuzzer" = "yes"; then
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fsanitize=fuzzer-no-link" >&5
+    fi
+
+    if test X"$enable_fuzzer" = X"yes"; then
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fsanitize=fuzzer-no-link" >&5
 printf %s "checking whether C compiler accepts -fsanitize=fuzzer-no-link... " >&6; }
 if test ${ax_cv_check_cflags___fsanitize_fuzzer_no_link+y}
 then :
@@ -32498,10 +32822,10 @@ else case e in #(
 esac
 fi
 
-	if test -z "$FUZZ_ENGINE"; then
-	    FUZZ_ENGINE="-fsanitize=fuzzer"
-	fi
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fno-omit-frame-pointer" >&5
+	    if test -z "$FUZZ_ENGINE"; then
+		FUZZ_ENGINE="-fsanitize=fuzzer"
+	    fi
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fno-omit-frame-pointer" >&5
 printf %s "checking whether C compiler accepts -fno-omit-frame-pointer... " >&6; }
 if test ${ax_cv_check_cflags___fno_omit_frame_pointer+y}
 then :
@@ -32577,7 +32901,7 @@ else case e in #(
 esac
 fi
 
-	# Use CFLAGS, not CPPFLAGS to match oss-fuzz behavior
+	    # Use CFLAGS, not CPPFLAGS to match oss-fuzz behavior
 
 if test ${CFLAGS+y}
 then :
@@ -32612,341 +32936,20 @@ else case e in #(
 esac
 fi
 
-	printf "%s\n" "#define NO_LEAKS 1" >>confdefs.h
+	    printf "%s\n" "#define NO_LEAKS 1" >>confdefs.h
 
 
 else case e in #(
   e)
-	as_fn_error $? "$CC does not support the -fsanitize=fuzzer-no-link flag" "$LINENO" 5
-     ;;
+	    as_fn_error $? "$CC does not support the -fsanitize=fuzzer-no-link flag" "$LINENO" 5
+	 ;;
 esac
 fi
 
-else
-    # Not using compiler fuzzing support, link with stub library.
-    FUZZ_ENGINE='$(top_builddir)/lib/fuzzstub/libsudo_fuzzstub.la'
-fi
-
-if test -n "$GCC"; then
-    if test -z "$enable_pie"; then
-	case "$host_os" in
-	    linux*)
-		# Attempt to build with PIE support
-		enable_pie="maybe"
-		;;
-	esac
+    else
+	# Not using compiler fuzzing support, link with stub library.
+	FUZZ_ENGINE='$(top_builddir)/lib/fuzzstub/libsudo_fuzzstub.la'
     fi
-    if test -n "$enable_pie"; then
-	if test "$enable_pie" = "no"; then
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fno-pie" >&5
-printf %s "checking whether C compiler accepts -fno-pie... " >&6; }
-if test ${ax_cv_check_cflags___fno_pie+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e)
-  ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -fno-pie"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main (void)
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
-then :
-  ax_cv_check_cflags___fno_pie=yes
-else case e in #(
-  e) ax_cv_check_cflags___fno_pie=no ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-  CFLAGS=$ax_check_save_flags ;;
-esac
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fno_pie" >&5
-printf "%s\n" "$ax_cv_check_cflags___fno_pie" >&6; }
-if test "x$ax_cv_check_cflags___fno_pie" = xyes
-then :
-
-		_CFLAGS="$CFLAGS"
-		CFLAGS="$CFLAGS -fno-pie"
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -nopie" >&5
-printf %s "checking whether the linker accepts -nopie... " >&6; }
-if test ${ax_cv_check_ldflags___nopie+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e)
-  ax_check_save_flags=$LDFLAGS
-  LDFLAGS="$LDFLAGS  -nopie"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main (void)
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"
-then :
-  ax_cv_check_ldflags___nopie=yes
-else case e in #(
-  e) ax_cv_check_ldflags___nopie=no ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
-  LDFLAGS=$ax_check_save_flags ;;
-esac
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___nopie" >&5
-printf "%s\n" "$ax_cv_check_ldflags___nopie" >&6; }
-if test x"$ax_cv_check_ldflags___nopie" = xyes
-then :
-
-		    PIE_CFLAGS="-fno-pie"
-		    PIE_LDFLAGS="-nopie"
-
-else case e in #(
-  e) : ;;
-esac
-fi
-
-		CFLAGS="$_CFLAGS"
-
-else case e in #(
-  e) : ;;
-esac
-fi
-
-	else
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fPIE" >&5
-printf %s "checking whether C compiler accepts -fPIE... " >&6; }
-if test ${ax_cv_check_cflags___fPIE+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e)
-  ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -fPIE"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main (void)
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
-then :
-  ax_cv_check_cflags___fPIE=yes
-else case e in #(
-  e) ax_cv_check_cflags___fPIE=no ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-  CFLAGS=$ax_check_save_flags ;;
-esac
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fPIE" >&5
-printf "%s\n" "$ax_cv_check_cflags___fPIE" >&6; }
-if test "x$ax_cv_check_cflags___fPIE" = xyes
-then :
-
-		_CFLAGS="$CFLAGS"
-		CFLAGS="$CFLAGS -fPIE"
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -pie" >&5
-printf %s "checking whether the linker accepts -pie... " >&6; }
-if test ${ax_cv_check_ldflags___pie+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e)
-  ax_check_save_flags=$LDFLAGS
-  LDFLAGS="$LDFLAGS  -pie"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main (void)
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"
-then :
-  ax_cv_check_ldflags___pie=yes
-else case e in #(
-  e) ax_cv_check_ldflags___pie=no ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
-  LDFLAGS=$ax_check_save_flags ;;
-esac
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___pie" >&5
-printf "%s\n" "$ax_cv_check_ldflags___pie" >&6; }
-if test x"$ax_cv_check_ldflags___pie" = xyes
-then :
-
-		    if test "$enable_pie" = "maybe"; then
-
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for working PIE support" >&5
-printf %s "checking for working PIE support... " >&6; }
-if test ${sudo_cv_working_pie+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e)
-	if test "$cross_compiling" = yes
-then :
-  sudo_cv_working_pie=no
-else case e in #(
-  e) cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$ac_includes_default
-int main() { char *p = malloc(1024); if (p == NULL) return 1; memset(p, 0, 1024); return 0; }
-_ACEOF
-if ac_fn_c_try_run "$LINENO"
-then :
-  sudo_cv_working_pie=yes
-else case e in #(
-  e) sudo_cv_working_pie=no ;;
-esac
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext ;;
-esac
-fi
-
-     ;;
-esac
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_working_pie" >&5
-printf "%s\n" "$sudo_cv_working_pie" >&6; }
-    if test $sudo_cv_working_pie = yes
-then :
-  enable_pie=yes
-fi
-
-		    fi
-		    if test "$enable_pie" = "yes"; then
-			PIE_CFLAGS="-fPIE"
-			PIE_LDFLAGS="-Wc,-fPIE -pie"
-		    fi
-
-else case e in #(
-  e) : ;;
-esac
-fi
-
-		CFLAGS="$_CFLAGS"
-
-else case e in #(
-  e) : ;;
-esac
-fi
-
-	fi
-    fi
-fi
-if test "$enable_pie" != "yes"; then
-    # Solaris 11.1 and higher supports tagging binaries to use ASLR
-    case "$host_os" in
-	solaris2.1[1-9]|solaris2.[2-9][0-9])
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-z,aslr" >&5
-printf %s "checking whether the linker accepts -Wl,-z,aslr... " >&6; }
-if test ${ax_cv_check_ldflags___Wl__z_aslr+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e)
-  ax_check_save_flags=$LDFLAGS
-  LDFLAGS="$LDFLAGS  -Wl,-z,aslr"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main (void)
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"
-then :
-  ax_cv_check_ldflags___Wl__z_aslr=yes
-else case e in #(
-  e) ax_cv_check_ldflags___Wl__z_aslr=no ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
-  LDFLAGS=$ax_check_save_flags ;;
-esac
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__z_aslr" >&5
-printf "%s\n" "$ax_cv_check_ldflags___Wl__z_aslr" >&6; }
-if test x"$ax_cv_check_ldflags___Wl__z_aslr" = xyes
-then :
-
-if test ${PIE_LDFLAGS+y}
-then :
-
-  case " $PIE_LDFLAGS " in #(
-  *" -Wl,-z,aslr "*) :
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : PIE_LDFLAGS already contains -Wl,-z,aslr"; } >&5
-  (: PIE_LDFLAGS already contains -Wl,-z,aslr) 2>&5
-  ac_status=$?
-  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } ;; #(
-  *) :
-
-     as_fn_append PIE_LDFLAGS " -Wl,-z,aslr"
-     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : PIE_LDFLAGS=\"\$PIE_LDFLAGS\""; } >&5
-  (: PIE_LDFLAGS="$PIE_LDFLAGS") 2>&5
-  ac_status=$?
-  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-     ;;
-esac
-
-else case e in #(
-  e)
-  PIE_LDFLAGS=-Wl,-z,aslr
-  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : PIE_LDFLAGS=\"\$PIE_LDFLAGS\""; } >&5
-  (: PIE_LDFLAGS="$PIE_LDFLAGS") 2>&5
-  ac_status=$?
-  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-   ;;
-esac
-fi
-
-else case e in #(
-  e) : ;;
-esac
-fi
-
-	    ;;
-    esac
-fi
 
 
     if test "$enable_hardening" != "no"; then

@@ -433,6 +433,7 @@ m4/ltversion.m4
 m4/lt~obsolete.m4
 m4/python.m4
 m4/runlog.m4
+m4/sanitizer.m4
 m4/sudo.m4
 m4/visibility.m4
 pathnames.h.in
