@@ -30275,9 +30275,10 @@ fi
     COMMON_OBJS="${COMMON_OBJS} event_select.lo"
 fi
 
-if test ${with_ldap-'no'} != "no"; then
-    O_LDFLAGS="$LDFLAGS"
-    if test "$with_ldap" != "yes"; then
+
+    if test ${with_ldap-'no'} != "no"; then
+	O_LDFLAGS="$LDFLAGS"
+	if test "$with_ldap" != "yes"; then
 
 
 if test ${SUDOERS_LDFLAGS+y}
@@ -30350,8 +30351,8 @@ fi
 
     fi
 
-	LDFLAGS="$LDFLAGS -L${with_ldap}/lib"
-	if test -d "${with_ldap}/lib64"; then
+	    LDFLAGS="$LDFLAGS -L${with_ldap}/lib"
+	    if test -d "${with_ldap}/lib64"; then
 
 
 if test ${SUDOERS_LDFLAGS+y}
@@ -30424,8 +30425,8 @@ fi
 
     fi
 
-	    LDFLAGS="$LDFLAGS -L${with_ldap}/lib64"
-	fi
+		LDFLAGS="$LDFLAGS -L${with_ldap}/lib64"
+	    fi
 
 if test ${CPPFLAGS+y}
 then :
@@ -30460,22 +30461,22 @@ else case e in #(
 esac
 fi
 
-	with_ldap=yes
-    fi
-    SUDOERS_OBJS="${SUDOERS_OBJS} ldap.lo ldap_conf.lo"
-    case "$SUDOERS_OBJS" in
-	*ldap_util.lo*) ;;
-	*) SUDOERS_OBJS="${SUDOERS_OBJS} ldap_util.lo";;
-    esac
-    LDAP=""
+	    with_ldap=yes
+	fi
+	SUDOERS_OBJS="${SUDOERS_OBJS} ldap.lo ldap_conf.lo"
+	case "$SUDOERS_OBJS" in
+	    *ldap_util.lo*) ;;
+	    *) SUDOERS_OBJS="${SUDOERS_OBJS} ldap_util.lo";;
+	esac
+	LDAP=""
 
-    _LIBS="$LIBS"
-    LDAP_LIBS=""
-    IBMLDAP_EXTRA=""
-    found=no
-    # On HP-UX, libibmldap has a hidden dependency on libCsup
-    case "$host_os" in
-	hpux*) { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for main in -lCsup" >&5
+	_LIBS="$LIBS"
+	LDAP_LIBS=""
+	IBMLDAP_EXTRA=""
+	found=no
+	# On HP-UX, libibmldap has a hidden dependency on libCsup
+	case "$host_os" in
+	    hpux*) { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for main in -lCsup" >&5
 printf %s "checking for main in -lCsup... " >&6; }
 if test ${ac_cv_lib_Csup_main+y}
 then :
@@ -30514,8 +30515,8 @@ then :
   IBMLDAP_EXTRA=" -lCsup"
 fi
 ;;
-    esac
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing ldap_init" >&5
+	esac
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing ldap_init" >&5
 printf %s "checking for library containing ldap_init... " >&6; }
 if test ${ac_cv_search_ldap_init+y}
 then :
@@ -30580,37 +30581,28 @@ if test "$ac_res" != no
 then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
-	test "${ac_cv_search_ldap_init}" != "none required" && LDAP_LIBS="${ac_cv_search_ldap_init}"
-	found=yes
+	    test "${ac_cv_search_ldap_init}" != "none required" && LDAP_LIBS="${ac_cv_search_ldap_init}"
+	    found=yes
 
 fi
 
-    # If nothing linked, try -lldap and hope for the best
-    if test "$found" = "no"; then
-	LDAP_LIBS="-lldap"
-    fi
-    LIBS="${_LIBS} ${LDAP_LIBS}"
-        OLIBS="$LIBS"
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether lber.h defines LBER_OPT_DEBUG_LEVEL" >&5
-printf %s "checking whether lber.h defines LBER_OPT_DEBUG_LEVEL... " >&6; }
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <sys/types.h>
-#   include <lber.h>
-int
-main (void)
-{
-int opt=LBER_OPT_DEBUG_LEVEL;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
+	# If nothing linked, try -lldap and hope for the best
+	if test "$found" = "no"; then
+	    LDAP_LIBS="-lldap"
+	fi
+	LIBS="${_LIBS} ${LDAP_LIBS}"
+
+	#
+	# Check if we need to link with -llber for ber_set_option()
+	#
+	OLIBS="$LIBS"
+	ac_fn_check_decl "$LINENO" "LBER_OPT_DEBUG_LEVEL" "ac_cv_have_decl_LBER_OPT_DEBUG_LEVEL" "$ac_includes_default
+#include <lber.h>
+" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl_LBER_OPT_DEBUG_LEVEL" = xyes
 then :
 
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing ber_set_option" >&5
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing ber_set_option" >&5
 printf %s "checking for library containing ber_set_option... " >&6; }
 if test ${ac_cv_search_ber_set_option+y}
 then :
@@ -30680,24 +30672,23 @@ else case e in #(
 esac
 fi
 
-	if test X"$found" = X"yes" -a X"$LIBS" != X"$OLIBS"; then
-	    LDAP_LIBS="$LDAP_LIBS -llber"
-	fi
+	    if test X"$found" = X"yes" -a X"$LIBS" != X"$OLIBS"; then
+		LDAP_LIBS="$LDAP_LIBS -llber"
+	    fi
 
+fi
+	LIBS="$OLIBS"
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether lber.h is needed when including ldap.h" >&5
+printf %s "checking whether lber.h is needed when including ldap.h... " >&6; }
+if test ${sudo_cv_header_lber_h+y}
+then :
+  printf %s "(cached) " >&6
 else case e in #(
   e)
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-     ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether lber.h is needed" >&5
-printf %s "checking whether lber.h is needed... " >&6; }
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <sys/types.h>
-#   include <ldap.h>
+#include <ldap.h>
 int
 main (void)
 {
@@ -30708,22 +30699,31 @@ main (void)
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
+
+		# No need to explicitly include lber.h when including ldap.h.
+		sudo_cv_header_lber_h=no
+
 else case e in #(
   e)
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-    printf "%s\n" "#define HAVE_LBER_H 1" >>confdefs.h
- ;;
+		sudo_cv_header_lber_h=yes
+	     ;;
 esac
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
+	 ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_header_lber_h" >&5
+printf "%s\n" "$sudo_cv_header_lber_h" >&6; }
+	if test X"$sudo_cv_header_lber_h" = X"yes"; then
+	    printf "%s\n" "#define HAVE_LBER_H 1" >>confdefs.h
 
-    if test ${enable_sasl-'yes'} = "yes"; then
-	found_sasl_h=no
-	       for ac_header in sasl/sasl.h sasl.h
+	fi
+
+	if test ${enable_sasl-'yes'} = "yes"; then
+	    found_sasl_h=no
+	           for ac_header in sasl/sasl.h sasl.h
 do :
   as_ac_Header=`printf "%s\n" "ac_cv_header_$ac_header" | sed "$as_sed_sh"`
 ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -30733,29 +30733,29 @@ then :
 #define `printf "%s\n" "HAVE_$ac_header" | sed "$as_sed_cpp"` 1
 _ACEOF
 
-	    found_sasl_h=yes
-	    ac_fn_c_check_func "$LINENO" "ldap_sasl_interactive_bind_s" "ac_cv_func_ldap_sasl_interactive_bind_s"
+		found_sasl_h=yes
+		ac_fn_c_check_func "$LINENO" "ldap_sasl_interactive_bind_s" "ac_cv_func_ldap_sasl_interactive_bind_s"
 if test "x$ac_cv_func_ldap_sasl_interactive_bind_s" = xyes
 then :
   printf "%s\n" "#define HAVE_LDAP_SASL_INTERACTIVE_BIND_S 1" >>confdefs.h
 
 fi
 
-	    break
+		break
 
 fi
 
 done
-	if test X${enable_sasl} = X"yes"; then
-	    if test X"$found_sasl_h" != X"yes"; then
-		as_fn_error $? "--enable-sasl specified but unable to locate SASL development headers." "$LINENO" 5
-	    fi
-	    if test X"$ac_cv_func_ldap_sasl_interactive_bind_s" != X"yes"; then :
-		as_fn_error $? "--enable-sasl specified but SASL support is missing in your LDAP library" "$LINENO" 5
+	    if test X${enable_sasl} = X"yes"; then
+		if test X"$found_sasl_h" != X"yes"; then
+		    as_fn_error $? "--enable-sasl specified but unable to locate SASL development headers." "$LINENO" 5
+		fi
+		if test X"$ac_cv_func_ldap_sasl_interactive_bind_s" != X"yes"; then :
+		    as_fn_error $? "--enable-sasl specified but SASL support is missing in your LDAP library" "$LINENO" 5
+		fi
 	    fi
 	fi
-    fi
-           for ac_header in ldapssl.h ldap_ssl.h mps/ldap_ssl.h
+	       for ac_header in ldapssl.h ldap_ssl.h mps/ldap_ssl.h
 do :
   as_ac_Header=`printf "%s\n" "ac_cv_header_$ac_header" | sed "$as_sed_sh"`
 ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "#include <ldap.h>
@@ -30769,7 +30769,7 @@ _ACEOF
 fi
 
 done
-    ac_fn_c_check_func "$LINENO" "ldap_initialize" "ac_cv_func_ldap_initialize"
+	ac_fn_c_check_func "$LINENO" "ldap_initialize" "ac_cv_func_ldap_initialize"
 if test "x$ac_cv_func_ldap_initialize" = xyes
 then :
   printf "%s\n" "#define HAVE_LDAP_INITIALIZE 1" >>confdefs.h
@@ -30851,8 +30851,8 @@ fi
 
 done
 
-    if test X"$check_gss_krb5_ccache_name" = X"yes"; then
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for gss_krb5_ccache_name in -lgssapi" >&5
+	if test X"$check_gss_krb5_ccache_name" = X"yes"; then
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for gss_krb5_ccache_name in -lgssapi" >&5
 printf %s "checking for gss_krb5_ccache_name in -lgssapi... " >&6; }
 if test ${ac_cv_lib_gssapi_gss_krb5_ccache_name+y}
 then :
@@ -30898,13 +30898,13 @@ printf "%s\n" "$ac_cv_lib_gssapi_gss_krb5_ccache_name" >&6; }
 if test "x$ac_cv_lib_gssapi_gss_krb5_ccache_name" = xyes
 then :
 
-	    printf "%s\n" "#define HAVE_GSS_KRB5_CCACHE_NAME 1" >>confdefs.h
+		printf "%s\n" "#define HAVE_GSS_KRB5_CCACHE_NAME 1" >>confdefs.h
 
-	    LDAP_LIBS="${LDAP_LIBS} -lgssapi"
+		LDAP_LIBS="${LDAP_LIBS} -lgssapi"
 
 else case e in #(
   e)
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for gss_krb5_ccache_name in -lgssapi_krb5" >&5
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for gss_krb5_ccache_name in -lgssapi_krb5" >&5
 printf %s "checking for gss_krb5_ccache_name in -lgssapi_krb5... " >&6; }
 if test ${ac_cv_lib_gssapi_krb5_gss_krb5_ccache_name+y}
 then :
@@ -30950,28 +30950,28 @@ printf "%s\n" "$ac_cv_lib_gssapi_krb5_gss_krb5_ccache_name" >&6; }
 if test "x$ac_cv_lib_gssapi_krb5_gss_krb5_ccache_name" = xyes
 then :
 
-		printf "%s\n" "#define HAVE_GSS_KRB5_CCACHE_NAME 1" >>confdefs.h
+		    printf "%s\n" "#define HAVE_GSS_KRB5_CCACHE_NAME 1" >>confdefs.h
 
-		LDAP_LIBS="${LDAP_LIBS} -lgssapi_krb5"
+		    LDAP_LIBS="${LDAP_LIBS} -lgssapi_krb5"
 
 fi
 
-	 ;;
+	     ;;
 esac
 fi
 
 
-	# gssapi headers may be separate or part of Kerberos V
-	found=no
-	O_CPPFLAGS="$CPPFLAGS"
-	for dir in "" "kerberosV" "krb5" "kerberos5" "kerberosv5"; do
-	    test X"$dir" != X"" && CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
-	    # Use AC_PREPROC_IFELSE to check existence to avoid caching
-	    # since we test with multiple values of CPPFLAGS
-	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+	    # gssapi headers may be separate or part of Kerberos V
+	    found=no
+	    O_CPPFLAGS="$CPPFLAGS"
+	    for dir in "" "kerberosV" "krb5" "kerberos5" "kerberosv5"; do
+		test X"$dir" != X"" && CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
+		# Use AC_PREPROC_IFELSE to check existence to avoid caching
+		# since we test with multiple values of CPPFLAGS
+		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-		#include <gssapi/gssapi.h>
+		    #include <gssapi/gssapi.h>
 int
 main (void)
 {
@@ -30984,21 +30984,21 @@ _ACEOF
 if ac_fn_c_try_cpp "$LINENO"
 then :
 
-		ac_fn_c_check_header_compile "$LINENO" "gssapi/gssapi.h" "ac_cv_header_gssapi_gssapi_h" "$ac_includes_default"
+		    ac_fn_c_check_header_compile "$LINENO" "gssapi/gssapi.h" "ac_cv_header_gssapi_gssapi_h" "$ac_includes_default"
 if test "x$ac_cv_header_gssapi_gssapi_h" = xyes
 then :
   printf "%s\n" "#define HAVE_GSSAPI_GSSAPI_H 1" >>confdefs.h
 
 fi
 
-		break
+		    break
 
 else case e in #(
   e)
-		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+		    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-		    #include <gssapi.h>
+			#include <gssapi.h>
 int
 main (void)
 {
@@ -31011,41 +31011,42 @@ _ACEOF
 if ac_fn_c_try_cpp "$LINENO"
 then :
 
-		    ac_fn_c_check_header_compile "$LINENO" "gssapi.h" "ac_cv_header_gssapi_h" "$ac_includes_default"
+			ac_fn_c_check_header_compile "$LINENO" "gssapi.h" "ac_cv_header_gssapi_h" "$ac_includes_default"
 if test "x$ac_cv_header_gssapi_h" = xyes
 then :
   printf "%s\n" "#define HAVE_GSSAPI_H 1" >>confdefs.h
 
 fi
 
-		    break
+			break
 
 fi
 rm -f conftest.err conftest.i conftest.$ac_ext
-	     ;;
+		 ;;
 esac
 fi
 rm -f conftest.err conftest.i conftest.$ac_ext
-	done
-	if test X"$ac_cv_header_gssapi_gssapi_h" != X"no"; then
-	    ac_fn_c_check_header_compile "$LINENO" "gssapi/gssapi_krb5.h" "ac_cv_header_gssapi_gssapi_krb5_h" "$ac_includes_default"
+	    done
+	    if test X"$ac_cv_header_gssapi_gssapi_h" != X"no"; then
+		ac_fn_c_check_header_compile "$LINENO" "gssapi/gssapi_krb5.h" "ac_cv_header_gssapi_gssapi_krb5_h" "$ac_includes_default"
 if test "x$ac_cv_header_gssapi_gssapi_krb5_h" = xyes
 then :
   printf "%s\n" "#define HAVE_GSSAPI_GSSAPI_KRB5_H 1" >>confdefs.h
 
 fi
 
-	elif test X"$ac_cv_header_gssapi_h" = X"no"; then
-	    CPPFLAGS="$O_CPPFLAGS"
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: unable to locate gssapi.h, you will have to edit the Makefile and add -I/path/to/gssapi/includes to CPPFLAGS" >&5
+	    elif test X"$ac_cv_header_gssapi_h" = X"no"; then
+		CPPFLAGS="$O_CPPFLAGS"
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: unable to locate gssapi.h, you will have to edit the Makefile and add -I/path/to/gssapi/includes to CPPFLAGS" >&5
 printf "%s\n" "$as_me: WARNING: unable to locate gssapi.h, you will have to edit the Makefile and add -I/path/to/gssapi/includes to CPPFLAGS" >&2;}
+	    fi
 	fi
+
+	SUDOERS_LIBS="${SUDOERS_LIBS} ${LDAP_LIBS}"
+	LIBS="$_LIBS"
+	LDFLAGS="$O_LDFLAGS"
     fi
 
-    SUDOERS_LIBS="${SUDOERS_LIBS} ${LDAP_LIBS}"
-    LIBS="$_LIBS"
-    LDFLAGS="$O_LDFLAGS"
-fi
 
 #
 # How to do dynamic object loading.
