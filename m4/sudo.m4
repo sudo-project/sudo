@@ -563,6 +563,7 @@ AC_DEFUN([SUDO_MAILDIR], [
     maillock.h)
 	# Use MAILDIR from maillock.h
 	SUDO_DEFINE(_PATH_MAILDIR, MAILDIR)
+	AC_DEFINE(HAVE_MAILLOCK_H)
 	;;
     *)
 	SUDO_DEFINE_UNQUOTED(_PATH_MAILDIR, "$sudo_cv_mail_dir")

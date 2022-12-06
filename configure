@@ -20269,6 +20269,8 @@ printf "%s\n" "$sudo_cv_mail_dir" >&6; }
 #define _PATH_MAILDIR MAILDIR
 EOF
 
+	printf "%s\n" "#define HAVE_MAILLOCK_H 1" >>confdefs.h
+
 	;;
     *)
 	cat >>confdefs.h <<EOF
