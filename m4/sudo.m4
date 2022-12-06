@@ -2,7 +2,7 @@ dnl Local m4 macros for autoconf (used by sudo)
 dnl
 dnl SPDX-License-Identifier: ISC
 dnl
-dnl Copyright (c) 1994-1996, 1998-2005, 2007-2015
+dnl Copyright (c) 1994-1996, 1998-2005, 2007-2022
 dnl	Todd C. Miller <Todd.Miller@sudo.ws>
 dnl
 dnl Permission to use, copy, modify, and distribute this software for any
@@ -17,9 +17,6 @@ dnl WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
-dnl XXX - should cache values in all cases!!!
-dnl
-dnl checks for programs
 
 dnl
 dnl check for sendmail in well-known locations
@@ -58,100 +55,117 @@ AC_DEFUN([SUDO_PROG_BSHELL], [
 ])dnl
 
 dnl
-dnl check for utmp file
+dnl Check for path to utmp file if not using getutid(), etc.
 dnl
-AC_DEFUN([SUDO_PATH_UTMP], [AC_MSG_CHECKING([for utmp file path])
-found=no
-for p in "/var/run/utmp" "/var/adm/utmp" "/etc/utmp"; do
-    if test -r "$p"; then
-	found=yes
-	AC_MSG_RESULT([$p])
-	SUDO_DEFINE_UNQUOTED(_PATH_UTMP, "$p")
-	break
+AC_DEFUN([SUDO_PATH_UTMP], [
+    AC_CACHE_CHECK([for utmp file path], [sudo_cv_path_UTMP], [
+	sudo_cv_path_UTMP=no
+	for p in "/var/run/utmp" "/var/adm/utmp" "/etc/utmp"; do
+	    if test -r "$p"; then
+		sudo_cv_path_UTMP="$p"
+		break
+	    fi
+	done
+    ])
+    if test X"$sudo_cv_path_UTMP" != X"no"; then
+	SUDO_DEFINE_UNQUOTED(_PATH_UTMP, "$sudo_cv_path_UTMP")
     fi
-done
-if test X"$found" != X"yes"; then
-    AC_MSG_RESULT([not found])
-fi
-])dnl
+])
 
 dnl
 dnl Where the log file goes, use /var/log if it exists, else /{var,usr}/adm
 dnl
-AC_DEFUN([SUDO_LOGFILE], [AC_MSG_CHECKING(for log file location)
-    if test "${with_logpath-yes}" != "yes"; then
+AC_DEFUN([SUDO_LOGFILE], [
+    if test -n "$with_logpath"; then
 	logpath="$with_logpath"
     else
-	# Default value of logpath set in configure.ac
-	for d in /var/log /var/adm /usr/adm; do
-	    if test -d "$d"; then
-		logpath="$d/sudo.log"
-		break
-	    fi
-	done
+	AC_CACHE_CHECK([for log file location], [sudo_cv_log_path], [
+	    # Default value of logpath set in configure.ac
+	    sudo_cv_log_path="$logpath"
+	    for d in /var/log /var/adm /usr/adm; do
+		if test -d "$d"; then
+		    sudo_cv_log_path="$d/sudo.log"
+		    break
+		fi
+	    done
+	])
+	logpath="$sudo_cv_log_path"
     fi
-    AC_MSG_RESULT($logpath)
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_LOGFILE, "$logpath")
-])dnl
+])
 
 dnl
 dnl Detect time zone file directory, if any.
 dnl
-AC_DEFUN([SUDO_TZDIR], [AC_MSG_CHECKING(time zone data directory)
-tzdir="$with_tzdir"
-if test -z "$tzdir"; then
-    tzdir=no
-    for d in /usr/share /usr/share/lib /usr/lib /etc; do
-	if test -d "$d/zoneinfo"; then
-	    tzdir="$d/zoneinfo"
-	    break
-	fi
-    done
-fi
-AC_MSG_RESULT([$tzdir])
-if test "${tzdir}" != "no"; then
-    SUDO_DEFINE_UNQUOTED(_PATH_ZONEINFO, "$tzdir")
-fi
-])dnl
+AC_DEFUN([SUDO_TZDIR], [
+    if test -n "$with_tzdir"; then
+	tzdir="$with_tzdir"
+    else
+	AC_CACHE_CHECK([time zone data directory], [sudo_cv_tz_dir], [
+	    sudo_cv_tz_dir=no
+	    for d in /usr/share /usr/share/lib /usr/lib /etc; do
+		if test -d "$d/zoneinfo"; then
+		    sudo_cv_tz_dir="$d/zoneinfo"
+		    break
+		fi
+	    done
+	])
+	tzdir="$sudo_cv_tz_dir"
+    fi
+    if test X"$tzdir" != X"no"; then
+	SUDO_DEFINE_UNQUOTED(_PATH_ZONEINFO, "$tzdir")
+    fi
+])
 
 dnl
 dnl Parent directory for time stamp dir.
 dnl
-AC_DEFUN([SUDO_RUNDIR], [AC_MSG_CHECKING(for sudo run dir location)
-if test -n "$with_rundir"; then
-    rundir="$with_rundir"
-elif test -n "$runstatedir" && test "$runstatedir" != '${localstatedir}/run'; then
-    rundir="$runstatedir/sudo"
-else
-    # No --with-rundir or --runstatedir specified
-    for d in /run /var/run /var/db /var/lib /var/adm /usr/adm; do
-	if test -d "$d"; then
-	    rundir="$d/sudo"
-	    break
-	fi
-    done
-fi
-AC_MSG_RESULT([$rundir])
-SUDO_DEFINE_UNQUOTED(_PATH_SUDO_TIMEDIR, "$rundir/ts")
-SUDO_DEFINE_UNQUOTED(_PATH_SUDO_LOGSRVD_PID, "$rundir/sudo_logsrvd.pid")
-])dnl
+AC_DEFUN([SUDO_RUNDIR], [
+    if test -n "$with_rundir"; then
+	rundir="$with_rundir"
+    elif test -n "$runstatedir" && test "$runstatedir" != '${localstatedir}/run'; then
+	rundir="$runstatedir/sudo"
+    else
+	# No --with-rundir or --runstatedir specified
+	AC_CACHE_CHECK([for sudo run dir location], [sudo_cv_run_dir], [
+	    sudo_cv_run_dir=no
+	    for d in /run /var/run /var/db /var/lib /var/adm /usr/adm; do
+		if test -d "$d"; then
+		    sudo_cv_run_dir="$d/sudo"
+		    break
+		fi
+	    done
+	])
+	rundir="$sudo_cv_run_dir"
+    fi
+    if test X"$rundir" != X"no"; then
+	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_TIMEDIR, "$rundir/ts")
+	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_LOGSRVD_PID, "$rundir/sudo_logsrvd.pid")
+    fi
+])
 
 dnl
 dnl Parent directory for the lecture status dir.
 dnl
-AC_DEFUN([SUDO_VARDIR], [AC_MSG_CHECKING(for sudo var dir location)
-vardir="$with_vardir"
-if test -z "$vardir"; then
-    for d in /var/db /var/lib /var/adm /usr/adm; do
-	if test -d "$d"; then
-	    vardir="$d/sudo"
-	    break
-	fi
-    done
-fi
-AC_MSG_RESULT([$vardir])
-SUDO_DEFINE_UNQUOTED(_PATH_SUDO_LECTURE_DIR, "$vardir/lectured")
-])dnl
+AC_DEFUN([SUDO_VARDIR], [
+    if test -n "$with_vardir"; then
+	vardir="$with_vardir"
+    else
+	AC_CACHE_CHECK([for sudo var dir location], [sudo_cv_var_dir], [
+	    sudo_cv_var_dir=no
+	    for d in /var/db /var/lib /var/adm /usr/adm; do
+		if test -d "$d"; then
+		    sudo_cv_var_dir="$d/sudo"
+		    break
+		fi
+	    done
+	])
+	vardir="$sudo_cv_var_dir"
+    fi
+    if test X"$vardir" != X"no"; then
+	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_LECTURE_DIR, "$vardir/lectured")
+    fi
+])
 
 dnl
 dnl Where the sudo_logsrvd relay temporary log files go, use
@@ -159,68 +173,68 @@ dnl /var/log/sudo_logsrvd if /var/log exists, else
 dnl /{var,usr}/adm/sudo_logsrvd
 dnl
 AC_DEFUN([SUDO_RELAY_DIR], [
-    AC_MSG_CHECKING(for sudo_logsrvd relay dir location)
     if test "${with_relaydir-yes}" != "yes"; then
 	relay_dir="$with_relaydir"
     else
-	# Default value of relay_dir set in configure.ac
-	for d in /var/log /var/adm /usr/adm; do
-	    if test -d "$d"; then
-		relay_dir="$d/sudo_logsrvd"
-		break
-	    fi
-	done
+	AC_CACHE_CHECK([for sudo_logsrvd relay dir location], [sudo_cv_relay_dir], [
+	    # Default value of relay_dir set in configure.ac
+	    sudo_cv_relay_dir="$relay_dir"
+	    for d in /var/log /var/adm /usr/adm; do
+		if test -d "$d"; then
+		    sudo_cv_relay_dir="$d/sudo_logsrvd"
+		    break
+		fi
+	    done
+	])
+	relay_dir="$sudo_cv_relay_dir"
     fi
-    if test "${with_relaydir}" != "no"; then
-	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_RELAY_DIR, "$relay_dir")
-    fi
-    AC_MSG_RESULT($relay_dir)
-])dnl
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_RELAY_DIR, "$relay_dir")
+])
 
 dnl
 dnl Where the I/O log files go, use /var/log/sudo-io if
 dnl /var/log exists, else /{var,usr}/adm/sudo-io
 dnl
 AC_DEFUN([SUDO_IO_LOGDIR], [
-    AC_MSG_CHECKING(for I/O log dir location)
     if test "${with_iologdir-yes}" != "yes"; then
 	iolog_dir="$with_iologdir"
     else
-	# Default value of iolog_dir set in configure.ac
-	for d in /var/log /var/adm /usr/adm; do
-	    if test -d "$d"; then
-		iolog_dir="$d/sudo-io"
-		break
-	    fi
-	done
+	AC_CACHE_CHECK([for I/O log dir location], [sudo_cv_iolog_dir], [
+	    # Default value of iolog_dir set in configure.ac
+	    sudo_cv_iolog_dir="$iolog_dir"
+	    for d in /var/log /var/adm /usr/adm; do
+		if test -d "$d"; then
+		    sudo_cv_iolog_dir="$d/sudo-io"
+		    break
+		fi
+	    done
+	])
+	iolog_dir="$sudo_cv_iolog_dir"
     fi
-    if test "${with_iologdir}" != "no"; then
-	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_IO_LOGDIR, "$iolog_dir")
-    fi
-    AC_MSG_RESULT($iolog_dir)
-])dnl
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_IO_LOGDIR, "$iolog_dir")
+])
 
 dnl
 dnl Where the log files go, use /var/log if it exists, else /{var,usr}/adm
 dnl
 AC_DEFUN([SUDO_LOGDIR], [
-    AC_MSG_CHECKING(for log dir location)
     if test "${with_logdir-yes}" != "yes"; then
 	log_dir="$with_logdir"
     else
-	# Default value of log_dir set in configure.ac
-	for d in /var/log /var/adm /usr/adm; do
-	    if test -d "$d"; then
-		log_dir="$d"
-		break
-	    fi
-	done
+	AC_CACHE_CHECK([for log dir location], [sudo_cv_log_dir], [
+	    # Default value of log_dir set in configure.ac
+	    sudo_cv_log_dir="$log_dir"
+	    for d in /var/log /var/adm /usr/adm; do
+		if test -d "$d"; then
+		    sudo_cv_log_dir="$d"
+		    break
+		fi
+	    done
+	])
+	log_dir="$sudo_cv_log_dir"
     fi
-    if test "${with_logdir}" != "no"; then
-	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_LOGDIR, "$log_dir")
-    fi
-    AC_MSG_RESULT($log_dir)
-])dnl
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_LOGDIR, "$log_dir")
+])
 
 dnl
 dnl check for working fnmatch(3)
@@ -520,32 +534,40 @@ dnl Determine the mail spool location
 dnl NOTE: must be run *after* check for paths.h
 dnl
 AC_DEFUN([SUDO_MAILDIR], [
-maildir=no
-if test X"$ac_cv_header_paths_h" = X"yes"; then
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
+    AC_CACHE_CHECK([for the user mail spool directory], [sudo_cv_mail_dir], [
+	sudo_cv_mail_dir=no
+	if test X"$ac_cv_header_paths_h" = X"yes"; then
+	    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
 #include <paths.h>],
-[char *p = _PATH_MAILDIR;])], [maildir=yes], [])
-fi
-if test $maildir = no; then
-    # Solaris has maillock.h which defines MAILDIR
-    AC_CHECK_HEADERS(maillock.h, [
-	SUDO_DEFINE(_PATH_MAILDIR, MAILDIR)
-	maildir=yes
-    ])
-    if test $maildir = no; then
-	for d in /var/mail /var/spool/mail /usr/spool/mail; do
-	    if test -d "$d"; then
-		maildir=yes
-		SUDO_DEFINE_UNQUOTED(_PATH_MAILDIR, "$d")
-		break
-	    fi
-	done
-	if test $maildir = no; then
-	    # unable to find mail dir, hope for the best
-	    SUDO_DEFINE_UNQUOTED(_PATH_MAILDIR, "/var/mail")
+	    [char *p = _PATH_MAILDIR;])], [sudo_cv_mail_dir="paths.h"], [])
 	fi
-    fi
-fi
+	if test $sudo_cv_mail_dir = no; then
+	    # Solaris has maillock.h which defines MAILDIR
+	    AC_CHECK_HEADERS(maillock.h, [
+		sudo_cv_mail_dir=maillock.h
+	    ], [
+		sudo_cv_mail_dir=/var/mail
+		for d in /var/mail /var/spool/mail /usr/spool/mail; do
+		    if test -d "$d"; then
+			sudo_cv_mail_dir="$d"
+			break
+		    fi
+		done
+	    ])
+	fi
+    ])
+    case "$sudo_cv_mail_dir" in
+    paths.h)
+	# _PATH_MAILDIR already present in paths.h.
+	;;
+    maillock.h)
+	# Use MAILDIR from maillock.h
+	SUDO_DEFINE(_PATH_MAILDIR, MAILDIR)
+	;;
+    *)
+	SUDO_DEFINE_UNQUOTED(_PATH_MAILDIR, "$sudo_cv_mail_dir")
+	;;
+    esac
 ])
 
 dnl

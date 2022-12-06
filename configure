@@ -20208,9 +20208,16 @@ printf "%s\n" "$sudo_cv_xopen_source_extended" >&6; }
 	;;
 esac
 
-maildir=no
-if test X"$ac_cv_header_paths_h" = X"yes"; then
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for the user mail spool directory" >&5
+printf %s "checking for the user mail spool directory... " >&6; }
+if test ${sudo_cv_mail_dir+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+	sudo_cv_mail_dir=no
+	if test X"$ac_cv_header_paths_h" = X"yes"; then
+	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 $ac_includes_default
 #include <paths.h>
@@ -20224,48 +20231,59 @@ char *p = _PATH_MAILDIR;
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"
 then :
-  maildir=yes
+  sudo_cv_mail_dir="paths.h"
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-if test $maildir = no; then
-    # Solaris has maillock.h which defines MAILDIR
-           for ac_header in maillock.h
+	fi
+	if test $sudo_cv_mail_dir = no; then
+	    # Solaris has maillock.h which defines MAILDIR
+	           for ac_header in maillock.h
 do :
   ac_fn_c_check_header_compile "$LINENO" "maillock.h" "ac_cv_header_maillock_h" "$ac_includes_default"
 if test "x$ac_cv_header_maillock_h" = xyes
 then :
   printf "%s\n" "#define HAVE_MAILLOCK_H 1" >>confdefs.h
 
+		sudo_cv_mail_dir=maillock.h
+
+else case e in #(
+  e)
+		sudo_cv_mail_dir=/var/mail
+		for d in /var/mail /var/spool/mail /usr/spool/mail; do
+		    if test -d "$d"; then
+			sudo_cv_mail_dir="$d"
+			break
+		    fi
+		done
+	     ;;
+esac
+fi
+
+done
+	fi
+     ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_mail_dir" >&5
+printf "%s\n" "$sudo_cv_mail_dir" >&6; }
+    case "$sudo_cv_mail_dir" in
+    paths.h)
+	# _PATH_MAILDIR already present in paths.h.
+	;;
+    maillock.h)
+	# Use MAILDIR from maillock.h
 	cat >>confdefs.h <<\EOF
 #define _PATH_MAILDIR MAILDIR
 EOF
 
-	maildir=yes
-
-fi
-
-done
-    if test $maildir = no; then
-	for d in /var/mail /var/spool/mail /usr/spool/mail; do
-	    if test -d "$d"; then
-		maildir=yes
-		cat >>confdefs.h <<EOF
-#define _PATH_MAILDIR "$d"
+	;;
+    *)
+	cat >>confdefs.h <<EOF
+#define _PATH_MAILDIR "$sudo_cv_mail_dir"
 EOF
 
-		break
-	    fi
-	done
-	if test $maildir = no; then
-	    # unable to find mail dir, hope for the best
-	    cat >>confdefs.h <<EOF
-#define _PATH_MAILDIR "/var/mail"
-EOF
-
-	fi
-    fi
-fi
+	;;
+    esac
 
 if test ${with_logincap-'no'} != "no"; then
            for ac_header in login_cap.h
@@ -31228,180 +31246,260 @@ fi
 esac
 
 if test "$utmp_style" = "LEGACY"; then
+
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for utmp file path" >&5
 printf %s "checking for utmp file path... " >&6; }
-found=no
-for p in "/var/run/utmp" "/var/adm/utmp" "/etc/utmp"; do
-    if test -r "$p"; then
-	found=yes
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $p" >&5
-printf "%s\n" "$p" >&6; }
+if test ${sudo_cv_path_UTMP+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+	sudo_cv_path_UTMP=no
+	for p in "/var/run/utmp" "/var/adm/utmp" "/etc/utmp"; do
+	    if test -r "$p"; then
+		sudo_cv_path_UTMP="$p"
+		break
+	    fi
+	done
+     ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_path_UTMP" >&5
+printf "%s\n" "$sudo_cv_path_UTMP" >&6; }
+    if test X"$sudo_cv_path_UTMP" != X"no"; then
 	cat >>confdefs.h <<EOF
-#define _PATH_UTMP "$p"
+#define _PATH_UTMP "$sudo_cv_path_UTMP"
 EOF
 
-	break
     fi
-done
-if test X"$found" != X"yes"; then
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: not found" >&5
-printf "%s\n" "not found" >&6; }
-fi
 
 fi
 
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for log dir location" >&5
-printf %s "checking for log dir location... " >&6; }
     if test "${with_logdir-yes}" != "yes"; then
 	log_dir="$with_logdir"
     else
-	# Default value of log_dir set in configure.ac
-	for d in /var/log /var/adm /usr/adm; do
-	    if test -d "$d"; then
-		log_dir="$d"
-		break
-	    fi
-	done
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for log dir location" >&5
+printf %s "checking for log dir location... " >&6; }
+if test ${sudo_cv_log_dir+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+	    # Default value of log_dir set in configure.ac
+	    sudo_cv_log_dir="$log_dir"
+	    for d in /var/log /var/adm /usr/adm; do
+		if test -d "$d"; then
+		    sudo_cv_log_dir="$d"
+		    break
+		fi
+	    done
+	 ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_log_dir" >&5
+printf "%s\n" "$sudo_cv_log_dir" >&6; }
+	log_dir="$sudo_cv_log_dir"
     fi
-    if test "${with_logdir}" != "no"; then
-	cat >>confdefs.h <<EOF
+    cat >>confdefs.h <<EOF
 #define _PATH_SUDO_LOGDIR "$log_dir"
 EOF
 
-    fi
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $log_dir" >&5
-printf "%s\n" "$log_dir" >&6; }
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for log file location" >&5
-printf %s "checking for log file location... " >&6; }
-    if test "${with_logpath-yes}" != "yes"; then
+
+    if test -n "$with_logpath"; then
 	logpath="$with_logpath"
     else
-	# Default value of logpath set in configure.ac
-	for d in /var/log /var/adm /usr/adm; do
-	    if test -d "$d"; then
-		logpath="$d/sudo.log"
-		break
-	    fi
-	done
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for log file location" >&5
+printf %s "checking for log file location... " >&6; }
+if test ${sudo_cv_log_path+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+	    # Default value of logpath set in configure.ac
+	    sudo_cv_log_path="$logpath"
+	    for d in /var/log /var/adm /usr/adm; do
+		if test -d "$d"; then
+		    sudo_cv_log_path="$d/sudo.log"
+		    break
+		fi
+	    done
+	 ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_log_path" >&5
+printf "%s\n" "$sudo_cv_log_path" >&6; }
+	logpath="$sudo_cv_log_path"
     fi
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $logpath" >&5
-printf "%s\n" "$logpath" >&6; }
     cat >>confdefs.h <<EOF
 #define _PATH_SUDO_LOGFILE "$logpath"
 EOF
 
 
 
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for sudo_logsrvd relay dir location" >&5
-printf %s "checking for sudo_logsrvd relay dir location... " >&6; }
     if test "${with_relaydir-yes}" != "yes"; then
 	relay_dir="$with_relaydir"
     else
-	# Default value of relay_dir set in configure.ac
-	for d in /var/log /var/adm /usr/adm; do
-	    if test -d "$d"; then
-		relay_dir="$d/sudo_logsrvd"
-		break
-	    fi
-	done
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for sudo_logsrvd relay dir location" >&5
+printf %s "checking for sudo_logsrvd relay dir location... " >&6; }
+if test ${sudo_cv_relay_dir+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+	    # Default value of relay_dir set in configure.ac
+	    sudo_cv_relay_dir="$relay_dir"
+	    for d in /var/log /var/adm /usr/adm; do
+		if test -d "$d"; then
+		    sudo_cv_relay_dir="$d/sudo_logsrvd"
+		    break
+		fi
+	    done
+	 ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_relay_dir" >&5
+printf "%s\n" "$sudo_cv_relay_dir" >&6; }
+	relay_dir="$sudo_cv_relay_dir"
     fi
-    if test "${with_relaydir}" != "no"; then
-	cat >>confdefs.h <<EOF
+    cat >>confdefs.h <<EOF
 #define _PATH_SUDO_RELAY_DIR "$relay_dir"
 EOF
 
-    fi
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $relay_dir" >&5
-printf "%s\n" "$relay_dir" >&6; }
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for sudo run dir location" >&5
+
+    if test -n "$with_rundir"; then
+	rundir="$with_rundir"
+    elif test -n "$runstatedir" && test "$runstatedir" != '${localstatedir}/run'; then
+	rundir="$runstatedir/sudo"
+    else
+	# No --with-rundir or --runstatedir specified
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for sudo run dir location" >&5
 printf %s "checking for sudo run dir location... " >&6; }
-if test -n "$with_rundir"; then
-    rundir="$with_rundir"
-elif test -n "$runstatedir" && test "$runstatedir" != '${localstatedir}/run'; then
-    rundir="$runstatedir/sudo"
-else
-    # No --with-rundir or --runstatedir specified
-    for d in /run /var/run /var/db /var/lib /var/adm /usr/adm; do
-	if test -d "$d"; then
-	    rundir="$d/sudo"
-	    break
-	fi
-    done
+if test ${sudo_cv_run_dir+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+	    sudo_cv_run_dir=no
+	    for d in /run /var/run /var/db /var/lib /var/adm /usr/adm; do
+		if test -d "$d"; then
+		    sudo_cv_run_dir="$d/sudo"
+		    break
+		fi
+	    done
+	 ;;
+esac
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $rundir" >&5
-printf "%s\n" "$rundir" >&6; }
-cat >>confdefs.h <<EOF
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_run_dir" >&5
+printf "%s\n" "$sudo_cv_run_dir" >&6; }
+	rundir="$sudo_cv_run_dir"
+    fi
+    if test X"$rundir" != X"no"; then
+	cat >>confdefs.h <<EOF
 #define _PATH_SUDO_TIMEDIR "$rundir/ts"
 EOF
 
-cat >>confdefs.h <<EOF
+	cat >>confdefs.h <<EOF
 #define _PATH_SUDO_LOGSRVD_PID "$rundir/sudo_logsrvd.pid"
 EOF
 
+    fi
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for sudo var dir location" >&5
+
+    if test -n "$with_vardir"; then
+	vardir="$with_vardir"
+    else
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for sudo var dir location" >&5
 printf %s "checking for sudo var dir location... " >&6; }
-vardir="$with_vardir"
-if test -z "$vardir"; then
-    for d in /var/db /var/lib /var/adm /usr/adm; do
-	if test -d "$d"; then
-	    vardir="$d/sudo"
-	    break
-	fi
-    done
+if test ${sudo_cv_var_dir+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+	    sudo_cv_var_dir=no
+	    for d in /var/db /var/lib /var/adm /usr/adm; do
+		if test -d "$d"; then
+		    sudo_cv_var_dir="$d/sudo"
+		    break
+		fi
+	    done
+	 ;;
+esac
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $vardir" >&5
-printf "%s\n" "$vardir" >&6; }
-cat >>confdefs.h <<EOF
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_dir" >&5
+printf "%s\n" "$sudo_cv_var_dir" >&6; }
+	vardir="$sudo_cv_var_dir"
+    fi
+    if test X"$vardir" != X"no"; then
+	cat >>confdefs.h <<EOF
 #define _PATH_SUDO_LECTURE_DIR "$vardir/lectured"
 EOF
 
+    fi
 
 
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for I/O log dir location" >&5
-printf %s "checking for I/O log dir location... " >&6; }
     if test "${with_iologdir-yes}" != "yes"; then
 	iolog_dir="$with_iologdir"
     else
-	# Default value of iolog_dir set in configure.ac
-	for d in /var/log /var/adm /usr/adm; do
-	    if test -d "$d"; then
-		iolog_dir="$d/sudo-io"
-		break
-	    fi
-	done
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for I/O log dir location" >&5
+printf %s "checking for I/O log dir location... " >&6; }
+if test ${sudo_cv_iolog_dir+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+	    # Default value of iolog_dir set in configure.ac
+	    sudo_cv_iolog_dir="$iolog_dir"
+	    for d in /var/log /var/adm /usr/adm; do
+		if test -d "$d"; then
+		    sudo_cv_iolog_dir="$d/sudo-io"
+		    break
+		fi
+	    done
+	 ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_iolog_dir" >&5
+printf "%s\n" "$sudo_cv_iolog_dir" >&6; }
+	iolog_dir="$sudo_cv_iolog_dir"
     fi
-    if test "${with_iologdir}" != "no"; then
-	cat >>confdefs.h <<EOF
+    cat >>confdefs.h <<EOF
 #define _PATH_SUDO_IO_LOGDIR "$iolog_dir"
 EOF
 
-    fi
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $iolog_dir" >&5
-printf "%s\n" "$iolog_dir" >&6; }
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking time zone data directory" >&5
+
+    if test -n "$with_tzdir"; then
+	tzdir="$with_tzdir"
+    else
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking time zone data directory" >&5
 printf %s "checking time zone data directory... " >&6; }
-tzdir="$with_tzdir"
-if test -z "$tzdir"; then
-    tzdir=no
-    for d in /usr/share /usr/share/lib /usr/lib /etc; do
-	if test -d "$d/zoneinfo"; then
-	    tzdir="$d/zoneinfo"
-	    break
-	fi
-    done
+if test ${sudo_cv_tz_dir+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+	    sudo_cv_tz_dir=no
+	    for d in /usr/share /usr/share/lib /usr/lib /etc; do
+		if test -d "$d/zoneinfo"; then
+		    sudo_cv_tz_dir="$d/zoneinfo"
+		    break
+		fi
+	    done
+	 ;;
+esac
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $tzdir" >&5
-printf "%s\n" "$tzdir" >&6; }
-if test "${tzdir}" != "no"; then
-    cat >>confdefs.h <<EOF
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_tz_dir" >&5
+printf "%s\n" "$sudo_cv_tz_dir" >&6; }
+	tzdir="$sudo_cv_tz_dir"
+    fi
+    if test X"$tzdir" != X"no"; then
+	cat >>confdefs.h <<EOF
 #define _PATH_ZONEINFO "$tzdir"
 EOF
 
-fi
+    fi
 
 
 
