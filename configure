@@ -27286,14 +27286,15 @@ printf "%s\n" "#define __func__ __FUNCTION__" >>confdefs.h
     fi
 fi
 
-# gettext() and friends may be located in libc (Linux and Solaris)
-# or in libintl.  However, it is possible to have libintl installed
-# even when gettext() is present in libc.  In the case of GNU libintl,
-# gettext() will be defined to gettext_libintl in libintl.h.
-# Since gcc prefers /usr/local/include to /usr/include, we need to
-# make sure we use the gettext() that matches the include file.
-if test "$enable_nls" != "no"; then
-    if test "$enable_nls" != "yes"; then
+
+    # gettext() and friends may be located in libc (Linux and Solaris)
+    # or in libintl.  However, it is possible to have libintl installed
+    # even when gettext() is present in libc.  In the case of GNU libintl,
+    # gettext() will be defined to gettext_libintl in libintl.h.
+    # Since gcc prefers /usr/local/include to /usr/include, we need to
+    # make sure we use the gettext() that matches the include file.
+    if test "$enable_nls" != "no"; then
+	if test "$enable_nls" != "yes"; then
 
 if test ${CPPFLAGS+y}
 then :
@@ -27400,32 +27401,32 @@ fi
 
     fi
 
-    fi
-    OLIBS="$LIBS"
-    for l in "libc" "-lintl" "-lintl -liconv"; do
-	if test "$l" = "libc"; then
-	    # If user specified a dir for libintl ignore libc
-	    if test "$enable_nls" != "yes"; then
-		continue
-	    fi
-	    gettext_name=sudo_cv_gettext
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for gettext" >&5
-printf %s "checking for gettext... " >&6; }
-	else
-	    LIBS="$OLIBS $l"
-	    gettext_name=sudo_cv_gettext"`echo $l|sed -e 's/ //g' -e 's/-/_/g'`"
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for gettext in $l" >&5
-printf %s "checking for gettext in $l... " >&6; }
 	fi
-	if eval test \${$gettext_name+y}
+	OLIBS="$LIBS"
+	for l in "libc" "-lintl" "-lintl -liconv"; do
+	    if test "$l" = "libc"; then
+		# If user specified a dir for libintl ignore libc
+		if test "$enable_nls" != "yes"; then
+		    continue
+		fi
+		gettext_name=sudo_cv_gettext
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for gettext" >&5
+printf %s "checking for gettext... " >&6; }
+	    else
+		LIBS="$OLIBS $l"
+		gettext_name=sudo_cv_gettext"`echo $l|sed -e 's/ //g' -e 's/-/_/g'`"
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for gettext in $l" >&5
+printf %s "checking for gettext in $l... " >&6; }
+	    fi
+	    if eval test \${$gettext_name+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
-		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+		    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-			#include <libintl.h>
+			    #include <libintl.h>
 int
 main (void)
 {
@@ -27440,46 +27441,46 @@ then :
   eval $gettext_name=yes
 else case e in #(
   e) eval $gettext_name=no
-		 ;;
+		     ;;
 esac
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
-	 ;;
+	     ;;
 esac
 fi
 
-	eval gettext_result="\$$gettext_name"
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $gettext_result" >&5
+	    eval gettext_result="\$$gettext_name"
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $gettext_result" >&5
 printf "%s\n" "$gettext_result" >&6; }
-	if test "$gettext_result" = "yes"; then
-	    ac_fn_c_check_func "$LINENO" "ngettext" "ac_cv_func_ngettext"
+	    if test "$gettext_result" = "yes"; then
+		ac_fn_c_check_func "$LINENO" "ngettext" "ac_cv_func_ngettext"
 if test "x$ac_cv_func_ngettext" = xyes
 then :
   printf "%s\n" "#define HAVE_NGETTEXT 1" >>confdefs.h
 
 fi
 
-	    break
-	fi
-    done
-    LIBS="$OLIBS"
+		break
+	    fi
+	done
+	LIBS="$OLIBS"
 
-    if test "$sudo_cv_gettext" = "yes"; then
-	SUDO_NLS=enabled
-	# For Solaris we need links from lang to lang.UTF-8 in localedir
-	case "$host_os" in
-	    solaris2*) LOCALEDIR_SUFFIX=".UTF-8";;
-	esac
-    elif test "$sudo_cv_gettext_lintl" = "yes"; then
-	SUDO_NLS=enabled
-	LIBINTL="-lintl"
-    elif test "$sudo_cv_gettext_lintl_liconv" = "yes"; then
-	SUDO_NLS=enabled
-	LIBINTL="-lintl -liconv"
-    fi
-    if test X"$SUDO_NLS" = X"enabled"; then
-	printf "%s\n" "#define HAVE_LIBINTL_H 1" >>confdefs.h
+	if test "$sudo_cv_gettext" = "yes"; then
+	    SUDO_NLS=enabled
+	    # For Solaris we need links from lang to lang.UTF-8 in localedir
+	    case "$host_os" in
+		solaris2*) LOCALEDIR_SUFFIX=".UTF-8";;
+	    esac
+	elif test "$sudo_cv_gettext_lintl" = "yes"; then
+	    SUDO_NLS=enabled
+	    LIBINTL="-lintl"
+	elif test "$sudo_cv_gettext_lintl_liconv" = "yes"; then
+	    SUDO_NLS=enabled
+	    LIBINTL="-lintl -liconv"
+	fi
+	if test X"$SUDO_NLS" = X"enabled"; then
+	    printf "%s\n" "#define HAVE_LIBINTL_H 1" >>confdefs.h
 
 
     for _sym in sudo_warn_gettext_v1; do
@@ -27487,8 +27488,9 @@ fi
 "
     done
 
+	fi
     fi
-fi
+
 
 case "$enable_zlib" in
     yes)
