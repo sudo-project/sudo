@@ -26398,6 +26398,7 @@ fi
 
     _LIBS="$LIBS"
     LIBS="${LIBS} ${NET_LIBS}"
+    found=true
     ac_fn_c_check_func "$LINENO" "socket" "ac_cv_func_socket"
 if test "x$ac_cv_func_socket" = xyes
 then :
@@ -26406,6 +26407,7 @@ else case e in #(
   e)
 	# Look for socket in network libraries appending to NET_LIBS as needed.
 	# May need to link with -lnsl and -lsocket due to unresolved symbols
+	found=false
 	for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
 	    _libs=
 	    for lib in $libs; do
@@ -26502,6 +26504,7 @@ ONET_LIBS="$NET_LIBS"
 
     _LIBS="$LIBS"
     LIBS="${LIBS} ${NET_LIBS}"
+    found=true
     ac_fn_c_check_func "$LINENO" "inet_pton" "ac_cv_func_inet_pton"
 if test "x$ac_cv_func_inet_pton" = xyes
 then :
@@ -26520,6 +26523,7 @@ else case e in #(
   e)
 	# Look for inet_pton in network libraries appending to NET_LIBS as needed.
 	# May need to link with -lnsl and -lsocket due to unresolved symbols
+	found=false
 	for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
 	    _libs=
 	    for lib in $libs; do
@@ -26641,6 +26645,7 @@ fi
 
     _LIBS="$LIBS"
     LIBS="${LIBS} ${NET_LIBS}"
+    found=true
     ac_fn_c_check_func "$LINENO" "inet_ntop" "ac_cv_func_inet_ntop"
 if test "x$ac_cv_func_inet_ntop" = xyes
 then :
@@ -26652,6 +26657,7 @@ else case e in #(
   e)
 	# Look for inet_ntop in network libraries appending to NET_LIBS as needed.
 	# May need to link with -lnsl and -lsocket due to unresolved symbols
+	found=false
 	for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
 	    _libs=
 	    for lib in $libs; do
@@ -26766,6 +26772,7 @@ fi
 
     _LIBS="$LIBS"
     LIBS="${LIBS} ${NET_LIBS}"
+    found=true
     ac_fn_c_check_func "$LINENO" "syslog" "ac_cv_func_syslog"
 if test "x$ac_cv_func_syslog" = xyes
 then :
@@ -26774,6 +26781,7 @@ else case e in #(
   e)
 	# Look for syslog in network libraries appending to NET_LIBS as needed.
 	# May need to link with -lnsl and -lsocket due to unresolved symbols
+	found=false
 	for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
 	    _libs=
 	    for lib in $libs; do
@@ -26985,6 +26993,7 @@ case " $LIBOBJS " in
 
     _LIBS="$LIBS"
     LIBS="${LIBS} ${NET_LIBS}"
+    found=true
     ac_fn_c_check_func "$LINENO" "gethostbyname" "ac_cv_func_gethostbyname"
 if test "x$ac_cv_func_gethostbyname" = xyes
 then :
@@ -26993,6 +27002,7 @@ else case e in #(
   e)
 	# Look for gethostbyname in network libraries appending to NET_LIBS as needed.
 	# May need to link with -lnsl and -lsocket due to unresolved symbols
+	found=false
 	for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
 	    _libs=
 	    for lib in $libs; do

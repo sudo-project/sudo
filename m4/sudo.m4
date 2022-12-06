@@ -303,9 +303,11 @@ AC_DEFUN([SUDO_CHECK_LIB], [
 AC_DEFUN([SUDO_CHECK_NET_FUNC], [
     _LIBS="$LIBS"
     LIBS="${LIBS} ${NET_LIBS}"
+    found=true
     AC_CHECK_FUNC([$1], [$2], [
 	# Look for $1 in network libraries appending to NET_LIBS as needed.
 	# May need to link with -lnsl and -lsocket due to unresolved symbols
+	found=false
 	for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
 	    _libs=
 	    for lib in $libs; do
