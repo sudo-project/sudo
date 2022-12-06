@@ -3382,9 +3382,12 @@ AC_CHECK_FUNCS([strsignal], [], [
     AC_LIBOBJ(strsignal)
     SUDO_APPEND_COMPAT_EXP(sudo_strsignal)
     HAVE_SIGLIST="false"
-    AC_CHECK_DECLS([sys_siglist, _sys_siglist], [
-	HAVE_SIGLIST="true"
-    ], [ ], [
+    AC_CHECK_DECLS([sys_siglist], [HAVE_SIGLIST="true"], [
+	AC_CHECK_DECLS([_sys_siglist], [HAVE_SIGLIST="true"], [], [
+AC_INCLUDES_DEFAULT
+#include <signal.h>
+	])
+    ], [
 AC_INCLUDES_DEFAULT
 #include <signal.h>
     ])

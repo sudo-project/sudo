@@ -27942,11 +27942,10 @@ fi
 printf "%s\n" "#define HAVE_DECL_SYS_SIGLIST $ac_have_decl" >>confdefs.h
 if test $ac_have_decl = 1
 then :
-
-	HAVE_SIGLIST="true"
-
-fi
-ac_fn_check_decl "$LINENO" "_sys_siglist" "ac_cv_have_decl__sys_siglist" "
+  HAVE_SIGLIST="true"
+else case e in #(
+  e)
+	ac_fn_check_decl "$LINENO" "_sys_siglist" "ac_cv_have_decl__sys_siglist" "
 $ac_includes_default
 #include <signal.h>
 
@@ -27961,9 +27960,11 @@ fi
 printf "%s\n" "#define HAVE_DECL__SYS_SIGLIST $ac_have_decl" >>confdefs.h
 if test $ac_have_decl = 1
 then :
+  HAVE_SIGLIST="true"
+fi
 
-	HAVE_SIGLIST="true"
-
+     ;;
+esac
 fi
 
     if test "$HAVE_SIGLIST" != "true"; then
