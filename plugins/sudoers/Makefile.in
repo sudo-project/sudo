@@ -431,7 +431,7 @@ fuzz_policy_seed_corpus.zip:
 	rm -rf $$tdir
 
 run-fuzz_policy: fuzz_policy
-	l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'`; \
+	l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'` || true; \
 	test -n "$$l" || l="C"; \
 	LC_ALL="$$l"; export LC_ALL; \
 	unset LANG || LANG=; \
@@ -456,7 +456,7 @@ fuzz_sudoers_seed_corpus.zip:
 	rm -rf $$tdir
 
 run-fuzz_sudoers: fuzz_sudoers
-	l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'`; \
+	l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'` || true; \
 	test -n "$$l" || l="C"; \
 	LC_ALL="$$l"; export LC_ALL; \
 	unset LANG || LANG=; \
@@ -481,7 +481,7 @@ fuzz_sudoers_ldif_seed_corpus.zip:
 	rm -rf $$tdir
 
 run-fuzz_sudoers_ldif: fuzz_sudoers_ldif
-	l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'`; \
+	l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'` || true; \
 	test -n "$$l" || l="C"; \
 	LC_ALL="$$l"; export LC_ALL; \
 	unset LANG || LANG=; \
@@ -629,7 +629,7 @@ fuzz: run-fuzz_policy run-fuzz_sudoers run-fuzz_sudoers_ldif
 
 check-fuzzer: $(FUZZ_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'`; \
+	    l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'` || true; \
 	    test -n "$$l" || l="C"; \
 	    LC_ALL="$$l"; export LC_ALL; \
 	    unset LANG || LANG=; \
@@ -646,7 +646,7 @@ check-fuzzer: $(FUZZ_PROGS)
 
 check: $(TEST_PROGS) visudo testsudoers cvtsudoers check-fuzzer
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'`; \
+	    l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'` || true; \
 	    test -n "$$l" || l="C"; \
 	    LC_ALL="$$l"; export LC_ALL; \
 	    unset LANG || LANG=; \

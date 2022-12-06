@@ -228,7 +228,7 @@ check-fuzzer:
 
 check: $(TEST_PROGS) check-fuzzer
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'`; \
+	    l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'` || true; \
 	    test -n "$$l" || l="C"; \
 	    LC_ALL="$$l"; export LC_ALL; \
 	    unset LANG || LANG=; \
