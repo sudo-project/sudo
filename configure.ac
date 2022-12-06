@@ -3419,8 +3419,7 @@ if test x"${ac_cv_func_sig2str}${ac_cv_func_str2sig}" != x"yesyes"; then
 	HAVE_SIGNAME="false"
 	AC_CHECK_DECLS([sys_signame], [HAVE_SIGNAME="true"], [
 	    AC_CHECK_DECLS([_sys_signame], [HAVE_SIGNAME="true"], [
-	    ], [
-		AC_CHECK_DECLS([sys_sigabbrev], [HAVE_SIGNAME="true"], [] [
+		AC_CHECK_DECLS([sys_sigabbrev], [HAVE_SIGNAME="true"], [], [
 AC_INCLUDES_DEFAULT
 #include <signal.h>
 		])
