@@ -17464,14 +17464,7 @@ if test -n "$sudo_cv_prev_host"; then
 	as_fn_error $? "config.cache was created on a different host; remove it and re-run configure." "$LINENO" 5
     fi
 fi
-if test ${sudo_cv_prev_host+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) sudo_cv_prev_host="$host" ;;
-esac
-fi
-
+sudo_cv_prev_host="$host"
 
 if test -n "$host_os"; then
     OS=`echo $host_os | sed 's/[0-9].*//'`

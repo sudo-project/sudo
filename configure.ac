@@ -1778,7 +1778,7 @@ if test -n "$sudo_cv_prev_host"; then
 	AC_MSG_ERROR([config.cache was created on a different host; remove it and re-run configure.])
     fi
 fi
-AC_CACHE_VAL(sudo_cv_prev_host, sudo_cv_prev_host="$host")
+sudo_cv_prev_host="$host"
 
 dnl
 dnl We want to be able to differentiate between different rev's
