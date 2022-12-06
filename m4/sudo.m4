@@ -300,6 +300,41 @@ AC_DEFUN([SUDO_CHECK_LIB], [
     fi
 ])
 
+AC_DEFUN([SUDO_CHECK_NET_FUNC], [
+    _LIBS="$LIBS"
+    LIBS="${LIBS} ${NET_LIBS}"
+    AC_CHECK_FUNC([$1], [$2], [
+	# Look for $1 in network libraries appending to NET_LIBS as needed.
+	# May need to link with -lnsl and -lsocket due to unresolved symbols
+	for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
+	    _libs=
+	    for lib in $libs; do
+		case "$NET_LIBS" in
+		    *"$lib"*)   ;;
+		    *)		_libs="$_libs $lib";;
+		esac
+	    done
+	    libs="${_libs# }"
+	    test -z "$libs" && continue
+	    lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
+	    extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
+	    SUDO_CHECK_LIB($lib, $1, [
+		found=true
+		NET_LIBS="${NET_LIBS}${NET_LIBS+ }$lib";;
+		INET_PTON_LIBS="$libs"
+		case "$libs" in
+		    *-lresolv*)
+			AC_DEFINE(NEED_RESOLV_H)
+			;;
+		esac
+		break
+	    ], [], [$extralibs])
+	done
+    ])
+    LIBS="$_LIBS"
+    AS_IF([test $found = true], [$2], [$3])
+])
+
 dnl
 dnl check unsetenv() return value
 dnl

@@ -3022,135 +3022,49 @@ if test "$DIGEST" = "digest.lo"; then
 fi
 
 dnl
-dnl If socket(2) not in libc, check -lsocket and -linet
-dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
+dnl Network functions may live in libsocket, libinet, libnsl, or libresolv.
+dnl Order is important here.
 dnl
-OLIBS="$LIBS"
-LIBS="${LIBS} ${NET_LIBS}"
-AC_CHECK_FUNC([socket], [], [
-    for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
-	_libs=
-	for lib in $libs; do
-	    case "$NET_LIBS" in
-		*"$lib"*)   ;;
-		*)	    _libs="$_libs $lib";;
-	    esac
-	done
-	libs="${_libs# }"
-	test -z "$libs" && continue
-	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
-	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
-	SUDO_CHECK_LIB($lib, socket, [NET_LIBS="${NET_LIBS} $libs"; break], [], [$extralibs])
-    done
-])
-LIBS="$OLIBS"
+SUDO_CHECK_NET_FUNC([socket])
+
 dnl
-dnl If inet_pton(3) not in libc, check -lnsl and -linet
-dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
-dnl Some systems may have inet_pton() in libresolv.
+dnl We need to keep track of inet_pton()'s dependent libraries for
+dnl our getaddrinfo() replacement.
 dnl
-OLIBS="$LIBS"
-LIBS="${LIBS} ${NET_LIBS}"
-found=false
-INET_PTON_LIBS=
-AC_CHECK_FUNC([inet_pton], [
-    found=true
+ONET_LIBS="$NET_LIBS"
+SUDO_CHECK_NET_FUNC([inet_pton], [
     AC_DEFINE(HAVE_INET_PTON)
-], [
-    for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
-	_libs=
-	for lib in $libs; do
-	    case "$NET_LIBS" in
-		*"$lib"*)   ;;
-		*)		_libs="$_libs $lib";;
-	    esac
-	done
-	libs="${_libs# }"
-	test -z "$libs" && continue
-	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
-	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
-	SUDO_CHECK_LIB($lib, inet_pton, [
-	    found=true
-	    AC_DEFINE(HAVE_INET_PTON)
-	    NET_LIBS="${NET_LIBS} $libs"
-	    INET_PTON_LIBS="$libs"
-	    case "$libs" in
-		*-lresolv*)
-		    AC_DEFINE(NEED_RESOLV_H)
-		    ;;
-	    esac
-	    break
-	], [], [$extralibs])
+    INET_PTON_LIBS=
+    for lib in $NET_LIBS; do
+	case "$ONET_LIBS" in
+	    *"$lib"*) ;;
+	    *) INET_PTON_LIBS="${INET_PTON_LIBS}${INET_PTON_LIBS+ }$lib";;
+	esac
     done
-])
-LIBS="$OLIBS"
-if test X"$found" != X"true"; then
+], [
     AC_LIBOBJ(inet_pton)
     SUDO_APPEND_COMPAT_EXP(sudo_inet_pton)
-fi
+])
+
 dnl
-dnl If inet_ntop(3) not in libc, check -lnsl and -linet
-dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
-dnl Some systems may have inet_ntop() in libresolv.
+dnl The check for inet_ntop() must follow inet_pton() for INET_PTON_LIBS.
 dnl
-OLIBS="$LIBS"
-LIBS="${LIBS} ${NET_LIBS}"
-found=false
-AC_CHECK_FUNC([inet_ntop], [
-    found=true
+SUDO_CHECK_NET_FUNC([inet_ntop], [
     AC_DEFINE(HAVE_INET_NTOP)
 ], [
-    for libs in "-lsocket" "-linet" "-lsocket -lnsl" "-lresolv"; do
-	_libs=
-	for lib in $libs; do
-	    case "$NET_LIBS" in
-		*"$lib"*)   ;;
-		*)		_libs="$_libs $lib";;
-	    esac
-	done
-	libs="${_libs# }"
-	test -z "$libs" && continue
-	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
-	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
-	SUDO_CHECK_LIB($lib, inet_ntop, [
-	    found=true
-	    AC_DEFINE(HAVE_INET_NTOP)
-	    NET_LIBS="${NET_LIBS} $libs"
-	    break
-	], [], [$extralibs])
-    done
-])
-LIBS="$OLIBS"
-if test X"$found" != X"true"; then
     AC_LIBOBJ(inet_ntop)
     SUDO_APPEND_COMPAT_EXP(sudo_inet_ntop)
-fi
-dnl
-dnl If syslog(3) not in libc, check -lsocket, -lnsl and -linet
-dnl
-OLIBS="$LIBS"
-LIBS="${LIBS} ${NET_LIBS}"
-AC_CHECK_FUNC([syslog], [], [
-    for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
-	_libs=
-	for lib in $libs; do
-	    case "$NET_LIBS" in
-		*"$lib"*)   ;;
-		*)	    _libs="$_libs $lib";;
-	    esac
-	done
-	libs="${_libs# }"
-	test -z "$libs" && continue
-	lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
-	extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
-	SUDO_CHECK_LIB($lib, syslog, [NET_LIBS="${NET_LIBS} $libs"; break], [], [$extralibs])
-    done
 ])
-LIBS="$OLIBS"
-#
-# Check for getaddrinfo and add any required libs to NET_LIBS.
-# If it was added to LIBOBJS we need to export the symbols.
-#
+
+dnl
+dnl The check for syslog() must be last so we can detect INET_PTON_LIBS.
+dnl
+SUDO_CHECK_NET_FUNC([syslog])
+
+dnl
+dnl Check for getaddrinfo and add any required libs to NET_LIBS.
+dnl If it was added to LIBOBJS we need to export the symbols.
+dnl
 OLIBS="$LIBS"
 GETADDRINFO_LIBS=
 AX_FUNC_GETADDRINFO
@@ -3163,22 +3077,7 @@ case " $LIBOBJS " in
 	    LT_DEP_LIBS="${LT_DEP_LIBS}${LT_DEP_LIBS+ }${INET_PTON_LIBS}"
 	    LIBS="${LIBS}${LIBS+ }${INET_PTON_LIBS}"
 	fi
-	AC_CHECK_FUNC([gethostbyname], [], [
-	    for libs in "-lsocket" "-linet" "-lsocket -lnsl"; do
-		_libs=
-		for lib in $libs; do
-		    case "$LT_DEP_LIBS" in
-			*"$lib"*)   ;;
-			*)	    _libs="$_libs $lib";;
-		    esac
-		done
-		libs="${_libs# }"
-		test -z "$libs" && continue
-		lib="`echo \"$libs\"|sed -e 's/^-l//' -e 's/ .*$//'`"
-		extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
-		SUDO_CHECK_LIB($lib, gethostbyname, [LT_DEP_LIBS="${LT_DEP_LIBS} $libs"; break], [], [$extralibs])
-	    done
-	])
+	SUDO_CHECK_NET_FUNC([gethostbyname])
 	;;
     *)
 	for lib in $LIBS; do
@@ -4407,10 +4306,13 @@ echo "  prefix			: $prefix" >&AS_MESSAGE_FD
 echo "  compiler			: $CC" >&AS_MESSAGE_FD
 echo "  compiler options		: $CFLAGS" >&AS_MESSAGE_FD
 echo "  preprocessor options		: $CPPFLAGS" >&AS_MESSAGE_FD
-echo "  linker options		: $LDFLAGS" >&AS_MESSAGE_FD
 echo "  front-end libraries		: $SUDO_LIBS" >&AS_MESSAGE_FD
-echo "  sudoers libraries		: $SUDOERS_LIBS" >&AS_MESSAGE_FD
+echo "  front-end linker options	: $SUDO_LDFLAGS" >&AS_MESSAGE_FD
+echo "  network libraries		: $NET_LIBS" >&AS_MESSAGE_FD
 echo "  extra libraries		: $LIBS" >&AS_MESSAGE_FD
+echo "  extra linker options		: $LDFLAGS" >&AS_MESSAGE_FD
+echo "  sudoers libraries		: $SUDOERS_LIBS" >&AS_MESSAGE_FD
+echo "  sudoers linker options	: $SUDOERS_LDFLAGS" >&AS_MESSAGE_FD
 if test "${enable_sanitizer-no}" != "no"; then
     echo "  sanitizer options		: ${enable_sanitizer}" >&AS_MESSAGE_FD
 fi
