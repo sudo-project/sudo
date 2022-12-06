@@ -3237,11 +3237,18 @@ AC_CHECK_FUNCS([getprogname], [
     SUDO_APPEND_COMPAT_EXP(sudo_getprogname)
     SUDO_APPEND_COMPAT_EXP(sudo_setprogname)
 ])
+
 dnl
 dnl Check for __func__ or __FUNCTION__
 dnl
 AC_CACHE_CHECK([for __func__], sudo_cv___func__, [
-AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[if (__func__[0] == '\0') return 1;]])], [sudo_cv___func__=yes], [sudo_cv___func__=no])])
+    if test X"$ac_cv_prog_cc_c99" = X"no"; then
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[if (__func__[0] == '\0') return 1;]])], [sudo_cv___func__=yes], [sudo_cv___func__=no])
+    else
+	# C99 and higher support __func__
+	sudo_cv___func__=yes
+    fi
+])
 if test "$sudo_cv___func__" = "yes"; then
     AC_DEFINE(HAVE___FUNC__)
 elif test -n "$GCC"; then
@@ -3410,9 +3417,18 @@ if test x"${ac_cv_func_sig2str}${ac_cv_func_str2sig}" != x"yesyes"; then
     if test x"${ac_cv_func_sigabbrev_np}" != x"yes"; then
 	COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }strsig_test"
 	HAVE_SIGNAME="false"
-	AC_CHECK_DECLS([sys_signame, _sys_signame, sys_sigabbrev], [
-	    HAVE_SIGNAME="true"
-	], [ ], [
+	AC_CHECK_DECLS([sys_signame], [HAVE_SIGNAME="true"], [
+	    AC_CHECK_DECLS([_sys_signame], [HAVE_SIGNAME="true"], [
+	    ], [
+		AC_CHECK_DECLS([sys_sigabbrev], [HAVE_SIGNAME="true"], [] [
+AC_INCLUDES_DEFAULT
+#include <signal.h>
+		])
+	    ], [
+AC_INCLUDES_DEFAULT
+#include <signal.h>
+	    ])
+	], [
 AC_INCLUDES_DEFAULT
 #include <signal.h>
 	])

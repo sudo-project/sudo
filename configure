@@ -27211,6 +27211,7 @@ esac
 fi
 
 done
+
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for __func__" >&5
 printf %s "checking for __func__... " >&6; }
 if test ${sudo_cv___func__+y}
@@ -27218,7 +27219,8 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+    if test X"$ac_cv_build_prog_cc_c99" = X"no"; then
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 int
@@ -27237,7 +27239,12 @@ else case e in #(
 esac
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext ;;
+    conftest$ac_exeext conftest.$ac_ext
+    else
+	# C99 and higher support __func__
+	sudo_cv___func__=yes
+    fi
+ ;;
 esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv___func__" >&5
@@ -28067,13 +28074,30 @@ fi
 printf "%s\n" "#define HAVE_DECL_SYS_SIGNAME $ac_have_decl" >>confdefs.h
 if test $ac_have_decl = 1
 then :
-
-	    HAVE_SIGNAME="true"
-
+  HAVE_SIGNAME="true"
+else case e in #(
+  e)
+	    ac_fn_check_decl "$LINENO" "_sys_signame" "ac_cv_have_decl__sys_signame" "
+		ac_fn_check_decl "$LINENO" "sys_sigabbrev" "ac_cv_have_decl_sys_sigabbrev" "$ac_includes_default" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl_sys_sigabbrev" = xyes
+then :
+  ac_have_decl=1
+else case e in #(
+  e) ac_have_decl=0 ;;
+esac
 fi
-ac_fn_check_decl "$LINENO" "_sys_signame" "ac_cv_have_decl__sys_signame" "
+printf "%s\n" "#define HAVE_DECL_SYS_SIGABBREV $ac_have_decl" >>confdefs.h
+if test $ac_have_decl = 1
+then :
+  HAVE_SIGNAME=\"true\"
+else case e in #(
+  e)
 $ac_includes_default
 #include <signal.h>
+		 ;;
+esac
+fi
+
 
 " "$ac_c_undeclared_builtin_options" "CFLAGS"
 if test "x$ac_cv_have_decl__sys_signame" = xyes
@@ -28086,28 +28110,11 @@ fi
 printf "%s\n" "#define HAVE_DECL__SYS_SIGNAME $ac_have_decl" >>confdefs.h
 if test $ac_have_decl = 1
 then :
-
-	    HAVE_SIGNAME="true"
-
+  HAVE_SIGNAME="true"
 fi
-ac_fn_check_decl "$LINENO" "sys_sigabbrev" "ac_cv_have_decl_sys_sigabbrev" "
-$ac_includes_default
-#include <signal.h>
 
-" "$ac_c_undeclared_builtin_options" "CFLAGS"
-if test "x$ac_cv_have_decl_sys_sigabbrev" = xyes
-then :
-  ac_have_decl=1
-else case e in #(
-  e) ac_have_decl=0 ;;
+	 ;;
 esac
-fi
-printf "%s\n" "#define HAVE_DECL_SYS_SIGABBREV $ac_have_decl" >>confdefs.h
-if test $ac_have_decl = 1
-then :
-
-	    HAVE_SIGNAME="true"
-
 fi
 
 	if test "$HAVE_SIGNAME" != "true"; then
