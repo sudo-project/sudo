@@ -1270,7 +1270,7 @@ AC_ARG_ENABLE(log-host,
     *)		AC_MSG_WARN([ignoring unknown argument to --enable-log-host: $enableval])
 		;;
   esac
-], AC_MSG_RESULT(no))
+])
 
 AC_ARG_ENABLE(noargs-shell,
 [AS_HELP_STRING([--enable-noargs-shell], [If sudo is given no arguments run a shell])],
@@ -1739,33 +1739,36 @@ dnl
 AC_PATH_PROG(SHA1SUM, [sha1sum], [openssl dgst -sha1])
 AC_PATH_PROG(UNAMEPROG, [uname], [uname])
 AC_PATH_PROG(TRPROG, [tr], [tr])
-AC_PATH_PROG(MANDOCPROG, [mandoc], [mandoc])
-if test "$MANDOCPROG" != "mandoc"; then
+AC_CACHE_CHECK([for mandoc or nroff], [ac_cv_path_NROFF], [
+    AC_PATH_PROGS_FEATURE_CHECK([NROFF], [mandoc nroff], [ac_cv_path_NROFF="$ac_path_NROFF"], [ac_cv_path_NROFF=no])
+])
+case "$ac_cv_path_NROFF" in
+*mandoc|no)
+    # Prefer mdoc format for mandoc (or when no formatter is present).
     : ${MANTYPE='mdoc'}
-else
-    AC_PATH_PROG(NROFFPROG, [nroff])
-    if test -n "$NROFFPROG"; then
-	test -n "$MANTYPE" && sudo_cv_var_mantype="$MANTYPE"
-	AC_CACHE_CHECK([which macro set to use for manual pages],
-	    [sudo_cv_var_mantype],
-	    [
-		sudo_cv_var_mantype="man"
-		echo ".Sh NAME" > conftest
-		echo ".Nm sudo" >> conftest
-		echo ".Nd sudo" >> conftest
-		echo ".Sh DESCRIPTION" >> conftest
-		echo "sudo" >> conftest
-		if $NROFFPROG -mdoc conftest >/dev/null 2>&1; then
-		    sudo_cv_var_mantype="mdoc"
-		fi
-		rm -f conftest
-	    ]
-	)
-	MANTYPE="$sudo_cv_var_mantype"
-    else
-	: ${MANTYPE='mdoc'}
-    fi
-fi
+    ;;
+*)
+    # Check whether nroff supports -mdoc, this may produce incorrect
+    # results when cross-compiling.
+    test -n "$MANTYPE" && sudo_cv_var_mantype="$MANTYPE"
+    AC_CACHE_CHECK([which macro set to use for manual pages],
+	[sudo_cv_var_mantype],
+	[
+	    sudo_cv_var_mantype="man"
+	    echo ".Sh NAME" > conftest
+	    echo ".Nm sudo" >> conftest
+	    echo ".Nd sudo" >> conftest
+	    echo ".Sh DESCRIPTION" >> conftest
+	    echo "sudo" >> conftest
+	    if $ac_cv_path_NROFF -mdoc conftest >/dev/null 2>&1; then
+		sudo_cv_var_mantype="mdoc"
+	    fi
+	    rm -f conftest
+	]
+    )
+    MANTYPE="$sudo_cv_var_mantype"
+    ;;
+esac
 
 dnl
 dnl If a config.cache exists make sure it matches the current host.

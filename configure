@@ -673,8 +673,6 @@ PYTHON
 FLEX
 YFLAGS
 YACC
-NROFFPROG
-MANDOCPROG
 TRPROG
 UNAMEPROG
 SHA1SUM
@@ -6497,10 +6495,6 @@ printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-log-host: 
 		;;
   esac
 
-else case e in #(
-  e) { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; } ;;
-esac
 fi
 
 
@@ -17387,19 +17381,16 @@ printf "%s\n" "no" >&6; }
 fi
 
 
-# Extract the first word of "mandoc", so it can be a program name with args.
-set dummy mandoc; ac_word=$2
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-printf %s "checking for $ac_word... " >&6; }
-if test ${ac_cv_path_MANDOCPROG+y}
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for mandoc or nroff" >&5
+printf %s "checking for mandoc or nroff... " >&6; }
+if test ${ac_cv_path_NROFF+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
-  e) case $MANDOCPROG in
-  [\\/]* | ?:[\\/]*)
-  ac_cv_path_MANDOCPROG="$MANDOCPROG" # Let the user override the test with a path.
-  ;;
-  *)
+  e)
+    if test -z "$NROFF"; then
+  ac_path_NROFF_found=false
+  # Loop through the user's path and test for each of PROGNAME-LIST
   as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
 do
@@ -17409,110 +17400,64 @@ do
     */) ;;
     *) as_dir=$as_dir/ ;;
   esac
+    for ac_prog in mandoc nroff
+   do
     for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
-    ac_cv_path_MANDOCPROG="$as_dir$ac_word$ac_exec_ext"
-    printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
+      ac_path_NROFF="$as_dir$ac_prog$ac_exec_ext"
+      as_fn_executable_p "$ac_path_NROFF" || continue
+ac_cv_path_NROFF="$ac_path_NROFF"
+      $ac_path_NROFF_found && break 3
+    done
+  done
   done
 IFS=$as_save_IFS
+  if test -z "$ac_cv_path_NROFF"; then
+    ac_cv_path_NROFF=no
+  fi
+else
+  ac_cv_path_NROFF=$NROFF
+fi
 
-  test -z "$ac_cv_path_MANDOCPROG" && ac_cv_path_MANDOCPROG="mandoc"
-  ;;
-esac ;;
+ ;;
 esac
 fi
-MANDOCPROG=$ac_cv_path_MANDOCPROG
-if test -n "$MANDOCPROG"; then
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $MANDOCPROG" >&5
-printf "%s\n" "$MANDOCPROG" >&6; }
-else
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-fi
-
-
-if test "$MANDOCPROG" != "mandoc"; then
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_path_NROFF" >&5
+printf "%s\n" "$ac_cv_path_NROFF" >&6; }
+case "$ac_cv_path_NROFF" in
+*mandoc|no)
+    # Prefer mdoc format for mandoc (or when no formatter is present).
     : ${MANTYPE='mdoc'}
-else
-    # Extract the first word of "nroff", so it can be a program name with args.
-set dummy nroff; ac_word=$2
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-printf %s "checking for $ac_word... " >&6; }
-if test ${ac_cv_path_NROFFPROG+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) case $NROFFPROG in
-  [\\/]* | ?:[\\/]*)
-  ac_cv_path_NROFFPROG="$NROFFPROG" # Let the user override the test with a path.
-  ;;
-  *)
-  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  case $as_dir in #(((
-    '') as_dir=./ ;;
-    */) ;;
-    *) as_dir=$as_dir/ ;;
-  esac
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
-    ac_cv_path_NROFFPROG="$as_dir$ac_word$ac_exec_ext"
-    printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  ;;
-esac ;;
-esac
-fi
-NROFFPROG=$ac_cv_path_NROFFPROG
-if test -n "$NROFFPROG"; then
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $NROFFPROG" >&5
-printf "%s\n" "$NROFFPROG" >&6; }
-else
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-fi
-
-
-    if test -n "$NROFFPROG"; then
-	test -n "$MANTYPE" && sudo_cv_var_mantype="$MANTYPE"
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking which macro set to use for manual pages" >&5
+    ;;
+*)
+    # Check whether nroff supports -mdoc, this may produce incorrect
+    # results when cross-compiling.
+    test -n "$MANTYPE" && sudo_cv_var_mantype="$MANTYPE"
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking which macro set to use for manual pages" >&5
 printf %s "checking which macro set to use for manual pages... " >&6; }
 if test ${sudo_cv_var_mantype+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
-		sudo_cv_var_mantype="man"
-		echo ".Sh NAME" > conftest
-		echo ".Nm sudo" >> conftest
-		echo ".Nd sudo" >> conftest
-		echo ".Sh DESCRIPTION" >> conftest
-		echo "sudo" >> conftest
-		if $NROFFPROG -mdoc conftest >/dev/null 2>&1; then
-		    sudo_cv_var_mantype="mdoc"
-		fi
-		rm -f conftest
+	    sudo_cv_var_mantype="man"
+	    echo ".Sh NAME" > conftest
+	    echo ".Nm sudo" >> conftest
+	    echo ".Nd sudo" >> conftest
+	    echo ".Sh DESCRIPTION" >> conftest
+	    echo "sudo" >> conftest
+	    if $ac_cv_path_NROFF -mdoc conftest >/dev/null 2>&1; then
+		sudo_cv_var_mantype="mdoc"
+	    fi
+	    rm -f conftest
 
-	 ;;
+     ;;
 esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_mantype" >&5
 printf "%s\n" "$sudo_cv_var_mantype" >&6; }
-	MANTYPE="$sudo_cv_var_mantype"
-    else
-	: ${MANTYPE='mdoc'}
-    fi
-fi
+    MANTYPE="$sudo_cv_var_mantype"
+    ;;
+esac
 
 if test -n "$sudo_cv_prev_host"; then
     if test "$sudo_cv_prev_host" != "$host"; then
