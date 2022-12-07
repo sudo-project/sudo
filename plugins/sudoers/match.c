@@ -118,9 +118,11 @@ userlist_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
     int matched = UNSPEC;
     debug_decl(userlist_matches, SUDOERS_DEBUG_MATCH);
 
-    TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
-	if ((matched = user_matches(parse_tree, pw, m)) != UNSPEC)
-	    break;
+    if (list) {
+	TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
+	    if ((matched = user_matches(parse_tree, pw, m)) != UNSPEC)
+		break;
+	}
     }
     debug_return_int(matched);
 }
