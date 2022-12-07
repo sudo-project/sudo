@@ -26472,7 +26472,7 @@ fi
 printf "%s\n" "yes" >&6; }
 
 		found=true
-		NET_LIBS="${NET_LIBS}${NET_LIBS+ }$lib"
+		NET_LIBS="${NET_LIBS}${NET_LIBS+ }$libs"
 		INET_PTON_LIBS="$libs"
 		case "$libs" in
 		    *-lresolv*)
@@ -26588,7 +26588,7 @@ fi
 printf "%s\n" "yes" >&6; }
 
 		found=true
-		NET_LIBS="${NET_LIBS}${NET_LIBS+ }$lib"
+		NET_LIBS="${NET_LIBS}${NET_LIBS+ }$libs"
 		INET_PTON_LIBS="$libs"
 		case "$libs" in
 		    *-lresolv*)
@@ -26722,7 +26722,7 @@ fi
 printf "%s\n" "yes" >&6; }
 
 		found=true
-		NET_LIBS="${NET_LIBS}${NET_LIBS+ }$lib"
+		NET_LIBS="${NET_LIBS}${NET_LIBS+ }$libs"
 		INET_PTON_LIBS="$libs"
 		case "$libs" in
 		    *-lresolv*)
@@ -26846,7 +26846,7 @@ fi
 printf "%s\n" "yes" >&6; }
 
 		found=true
-		NET_LIBS="${NET_LIBS}${NET_LIBS+ }$lib"
+		NET_LIBS="${NET_LIBS}${NET_LIBS+ }$libs"
 		INET_PTON_LIBS="$libs"
 		case "$libs" in
 		    *-lresolv*)
@@ -27067,7 +27067,7 @@ fi
 printf "%s\n" "yes" >&6; }
 
 		found=true
-		NET_LIBS="${NET_LIBS}${NET_LIBS+ }$lib"
+		NET_LIBS="${NET_LIBS}${NET_LIBS+ }$libs"
 		INET_PTON_LIBS="$libs"
 		case "$libs" in
 		    *-lresolv*)

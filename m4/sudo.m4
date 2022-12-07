@@ -322,7 +322,7 @@ AC_DEFUN([SUDO_CHECK_NET_FUNC], [
 	    extralibs="`echo \"$libs\"|sed 's/^-l[[^ ]]*//'`"
 	    SUDO_CHECK_LIB($lib, $1, [
 		found=true
-		NET_LIBS="${NET_LIBS}${NET_LIBS+ }$lib"
+		NET_LIBS="${NET_LIBS}${NET_LIBS+ }$libs"
 		INET_PTON_LIBS="$libs"
 		case "$libs" in
 		    *-lresolv*)
