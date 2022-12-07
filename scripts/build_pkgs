@@ -135,7 +135,6 @@ my $INFO = "INFO";
 $INFO = "USR1" unless exists $SIG{INFO};
 
 $SIG{$INFO} = \&info;
-$SIG{CHLD} = \&reaper;
 $SIG{HUP} = \&shut_down;
 $SIG{INT} = \&shut_down;
 $SIG{QUIT} = \&shut_down;
@@ -176,6 +175,10 @@ foreach my $vm_host (keys %vm_servers) {
 	}
     }
 }
+
+# We want to catch the jobs as they finish but not any of the other
+# commands started via run() or system() above.
+$SIG{CHLD} = \&reaper;
 
 # We limit the number of concurrent jobs a single host can support.
 # In the future, this may be set on a per-host basis.
@@ -625,6 +628,7 @@ sub run_remote_command {
 	for (;;) {
 	    pump $h;
 	    if (defined($outbuf)) {
+		$outbuf =~ s/\r+$//gm;
 		print $output $outbuf;
 		undef $outbuf;
 	    }
@@ -645,16 +649,24 @@ sub open_persistent_connection {
     my ($outbuf, @cmdline);
 
     # Handle user@host form
-    my @tmp = split(/\@/, $dest);
-    my $host = pop(@tmp);
+    $dest =~ /([^@]+)$/;
+    my $host = $1;
 
-    my @ssh_opts = qw(-f -M -N -oControlPersist=yes);
+    my @ssh_opts = qw(-M -N -oControlPersist=yes);
     push(@ssh_opts, "-S", "$sockets/$host");
     push(@ssh_opts, "-oProxyCommand=$proxy") if defined($proxy);
+
+    # Lock socket dir to prevent race conditions
+    sysopen(SOCKDIR, $sockets, O_RDONLY) || die "$0: unable to open $sockets: $!\n";
+    flock(SOCKDIR, LOCK_EX) || die "$0: unable to lock $sockets: $!\n";
 
     if (-S "$sockets/$host") {
 	@cmdline = ("ssh", "-S", "$sockets/$host", "-Ocheck", $host);
 	run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
+	if ($outbuf =~ /^Master running/) {
+	    close(SOCKDIR);
+	    return 0;
+	}
 	return 0 if $outbuf =~ /^Master running/;
 	unlink("$sockets/$host");
     }
@@ -662,15 +674,11 @@ sub open_persistent_connection {
     @cmdline = ssh_cmdline($dest, undef, @ssh_opts);
     run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
     if (length($outbuf) > 0) {
-	if ($outbuf =~ /already exists, disabling multiplexing/) {
-	    # We may lose the race to create the socket, that's OK.
-	    $? = 0;
-	} else {
-	    $output = \*STDERR unless defined($output);
-	    print $output $outbuf;
-	}
+	$output = \*STDERR unless defined($output);
+	print $output $outbuf;
     }
 
+    close(SOCKDIR);
     return $?;
 }
 
