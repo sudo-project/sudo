@@ -35,6 +35,23 @@
 #include "sudo_lbuf.h"
 #include <gram.h>
 
+static int
+runas_matches_pw(struct sudoers_parse_tree *parse_tree,
+    const struct cmndspec *cs, const struct passwd *pw)
+{
+    debug_decl(runas_matches_pw, SUDOERS_DEBUG_PARSER);
+
+    if (cs->runasuserlist != NULL)
+	debug_return_int(userlist_matches(parse_tree, pw, cs->runasuserlist));
+
+    if (cs->runasgrouplist == NULL) {
+	/* No explicit runas user or group, use default. */
+	if (userpw_matches(def_runas_default, pw->pw_name, pw))
+	    debug_return_int(ALLOW);
+    }
+    debug_return_int(UNSPEC);
+}
+
 /*
  * Look up the user in the sudoers parse tree for pseudo-commands like
  * list, verify and kill.
@@ -101,12 +118,10 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
 			continue;
 		    }
 		    /* Runas user must match list user or root. */
-		    if (userlist_matches(nss->parse_tree, list_pw,
-			    cs->runasuserlist) == DENY) {
+		    if (runas_matches_pw(nss->parse_tree, cs, list_pw) == DENY)
 			continue;
-		    }
-		    if (root_pw == NULL || userlist_matches(nss->parse_tree,
-			    root_pw, cs->runasuserlist) != ALLOW) {
+		    if (root_pw == NULL || runas_matches_pw(nss->parse_tree,
+			    cs, root_pw) != ALLOW) {
 			continue;
 		    }
 		    if (cmnd_matches(nss->parse_tree, cs->cmnd, cs->runchroot,
