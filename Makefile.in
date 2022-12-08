@@ -234,17 +234,24 @@ depend: siglist.c signame.c
 	    --file $(top_builddir)/src/Makefile
 
 ChangeLog:
-	if test -d $(srcdir)/.hg; then \
-	    if hg log -R $(srcdir) --template=changelog -r "sort(branch(.) or follow(), -date)" > $@.tmp; then \
-		mv -f $@.tmp $(srcdir)/$@; \
-	    else \
-		rm -f $@.tmp; \
-	    fi; \
-	elif test -d $(srcdir)/.git; then \
-	    $(scriptdir)/log2cl.pl -R $(srcdir)/.git > $(srcdir)/$@; \
+	if test -d $(srcdir)/.hg && hg -R $(srcdir) identify -ibt >stamp-$@.tmp 2>&1; then \
+	    cmp stamp-$@.tmp stamp-$@ >/dev/null 2>&1 || { \
+		mv -f stamp-$@.tmp stamp-$@; \
+		if hg log -R $(srcdir) --template=changelog -r "sort(branch(.) or follow(), -date)" > $@.tmp; then \
+		    mv -f $@.tmp $(srcdir)/$@; \
+		fi; \
+	    }; \
+	elif test -d $(srcdir)/.git && git --git-dir $(srcdir)/.git describe --tags >stamp-$@.tmp 2>&1; then \
+	    cmp stamp-$@.tmp stamp-$@ >/dev/null 2>&1 || { \
+		mv -f stamp-$@.tmp stamp-$@; \
+		if $(scriptdir)/log2cl.pl -R $(srcdir)/.git > $@.tmp; then \
+		    mv -f $@.tmp $(srcdir)/$@; \
+		fi; \
+	    }; \
 	elif test ! -f $(srcdir)/$@; then \
 	    echo "ChangeLog data not available" > $(srcdir)/$@; \
 	fi
+	rm -f $@.tmp stamp-$@.tmp
 
 config.status:
 	@if [ ! -s config.status ]; then \
