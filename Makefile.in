@@ -233,25 +233,30 @@ depend: siglist.c signame.c
 	    --file $(top_builddir)/plugins/python/Makefile \
 	    --file $(top_builddir)/src/Makefile
 
+# Only try to build ChangeLog from a repo checkout, not a release tarball.
+# The CODEOWNERS file is not present in the release tarball.
 ChangeLog:
-	if test -d $(srcdir)/.hg && hg -R $(srcdir) identify -ibt >stamp-$@.tmp 2>&1; then \
-	    cmp stamp-$@.tmp stamp-$@ >/dev/null 2>&1 || { \
-		mv -f stamp-$@.tmp stamp-$@; \
-		if hg log -R $(srcdir) --template=changelog -r "sort(branch(.) or follow(), -date)" > $@.tmp; then \
-		    mv -f $@.tmp $(srcdir)/$@; \
-		fi; \
-	    }; \
-	elif test -d $(srcdir)/.git && git --git-dir $(srcdir)/.git describe --tags >stamp-$@.tmp 2>&1; then \
-	    cmp stamp-$@.tmp stamp-$@ >/dev/null 2>&1 || { \
-		mv -f stamp-$@.tmp stamp-$@; \
-		if $(scriptdir)/log2cl.pl -R $(srcdir)/.git > $@.tmp; then \
-		    mv -f $@.tmp $(srcdir)/$@; \
-		fi; \
-	    }; \
-	elif test ! -f $(srcdir)/$@; then \
+	if test -f $(srcdir)/docs/CODEOWNERS; then \
+	    if test -d $(srcdir)/.hg && hg -R $(srcdir) identify -ibt >stamp-$@.tmp 2>&1; then \
+		cmp stamp-$@.tmp stamp-$@ >/dev/null 2>&1 || { \
+		    mv -f stamp-$@.tmp stamp-$@; \
+		    if hg log -R $(srcdir) --template=changelog -r "sort(branch(.) or follow(), -date)" > $@.tmp; then \
+			mv -f $@.tmp $(srcdir)/$@; \
+		    fi; \
+		}; \
+	    elif test -d $(srcdir)/.git && git --git-dir $(srcdir)/.git describe --tags >stamp-$@.tmp 2>&1; then \
+		cmp stamp-$@.tmp stamp-$@ >/dev/null 2>&1 || { \
+		    mv -f stamp-$@.tmp stamp-$@; \
+		    if $(scriptdir)/log2cl.pl -R $(srcdir)/.git > $@.tmp; then \
+			mv -f $@.tmp $(srcdir)/$@; \
+		    fi; \
+		}; \
+	    fi; \
+	    rm -f $@.tmp stamp-$@.tmp; \
+	fi
+	if test ! -f $(srcdir)/$@; then \
 	    echo "ChangeLog data not available" > $(srcdir)/$@; \
 	fi
-	rm -f $@.tmp stamp-$@.tmp
 
 config.status:
 	@if [ ! -s config.status ]; then \
