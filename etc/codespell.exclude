@@ -31,4 +31,4 @@
 .Nd edit the sudoers file
  * If path doesn't end in /, return true iff cmnd & path name the same inode;
  *	Tim Fraser
-		echo ".Nd sudo" >> conftest
+	    echo ".Nd sudo" >> conftest
