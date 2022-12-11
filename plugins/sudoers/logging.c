@@ -348,12 +348,16 @@ log_failure(int status, int flags)
     debug_decl(log_failure, SUDOERS_DEBUG_LOGGING);
 
     /* The user doesn't always get to see the log message (path info). */
-    if (!ISSET(status, FLAG_NO_USER | FLAG_NO_HOST) && def_path_info &&
-	(flags == NOT_FOUND_DOT || flags == NOT_FOUND))
+    if (!ISSET(status, FLAG_NO_USER | FLAG_NO_HOST) && list_pw == NULL &&
+	    def_path_info && (flags == NOT_FOUND_DOT || flags == NOT_FOUND))
 	inform_user = false;
     ret = log_denial(status, inform_user);
 
     if (!inform_user) {
+	const char *cmnd = user_cmnd;
+	if (ISSET(sudo_mode, MODE_CHECK))
+	    cmnd = list_cmnd ? list_cmnd : NewArgv[1];
+
 	/*
 	 * We'd like to not leak path info at all here, but that can
 	 * *really* confuse the users.  To really close the leak we'd
@@ -362,9 +366,9 @@ log_failure(int status, int flags)
 	 * their path to just contain a single dir.
 	 */
 	if (flags == NOT_FOUND)
-	    sudo_warnx(U_("%s: command not found"), user_cmnd);
+	    sudo_warnx(U_("%s: command not found"), cmnd);
 	else if (flags == NOT_FOUND_DOT)
-	    sudo_warnx(U_("ignoring \"%s\" found in '.'\nUse \"sudo ./%s\" if this is the \"%s\" you wish to run."), user_cmnd, user_cmnd, user_cmnd);
+	    sudo_warnx(U_("ignoring \"%s\" found in '.'\nUse \"sudo ./%s\" if this is the \"%s\" you wish to run."), cmnd, cmnd, cmnd);
     }
 
     debug_return_bool(ret);

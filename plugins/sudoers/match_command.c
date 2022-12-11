@@ -844,16 +844,18 @@ command_matches(const char *sudoers_cmnd, const char *sudoers_args,
     /* Check for pseudo-commands */
     if (sudoers_cmnd[0] != '/') {
 	/*
-	 * Return true if both sudoers_cmnd and user_cmnd are "sudoedit" AND
+	 * Return true if sudoers_cmnd and user_cmnd match a pseudo-command AND
 	 *  a) there are no args in sudoers OR
 	 *  b) there are no args on command line and none req by sudoers OR
 	 *  c) there are args in sudoers and on command line and they match
 	 */
-	if (strcmp(sudoers_cmnd, "sudoedit") == 0 &&
-	    strcmp(user_cmnd, "sudoedit") == 0 &&
-	    command_args_match(sudoers_cmnd, sudoers_args)) {
-	    /* No need to set safe_cmnd since user_cmnd matches sudoers_cmnd */
-	    rc = true;
+	if (strcmp(sudoers_cmnd, "list") == 0 ||
+		strcmp(sudoers_cmnd, "sudoedit") == 0) {
+	    if (strcmp(user_cmnd, sudoers_cmnd) == 0 &&
+		    command_args_match(sudoers_cmnd, sudoers_args)) {
+		/* No need to set safe_cmnd since user_cmnd == sudoers_cmnd */
+		rc = true;
+	    }
 	}
 	goto done;
     }

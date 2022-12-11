@@ -60,6 +60,7 @@ static int
 sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
     int validated, int pwflag)
 {
+    char *saved_runchroot;
     struct passwd *root_pw = NULL;
     struct sudo_nss *nss;
     struct cmndspec *cs;
@@ -82,6 +83,11 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
     } else {
 	SET(validated, FLAG_NO_CHECK);
     }
+
+    /* Don't use chroot setting for pseudo-commands. */
+    saved_runchroot = def_runchroot;
+    def_runchroot = NULL;
+
     TAILQ_FOREACH(nss, snl, entries) {
 	if (nss->query(nss, pw) == -1) {
 	    /* The query function should have printed an error message. */
@@ -111,19 +117,34 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
 		    if (match == ALLOW)
 			continue;
 
-		    /* Only check runas/command when listing another user. */
+		    /*
+		     * Root can list any user's privileges.
+		     * A user may always list their own privileges.
+		     */
 		    if (user_uid == 0 || list_pw == NULL ||
 			    user_uid == list_pw->pw_uid) {
 			match = ALLOW;
 			continue;
 		    }
-		    /* Runas user must match list user or root. */
-		    if (runas_matches_pw(nss->parse_tree, cs, list_pw) == DENY)
+
+		    /*
+		     * To list another user's prilileges, the runas
+		     * user must match the list user or root.
+		     */
+		    switch (runas_matches_pw(nss->parse_tree, cs, list_pw)) {
+		    case DENY:
 			continue;
-		    if (root_pw == NULL || runas_matches_pw(nss->parse_tree,
-			    cs, root_pw) != ALLOW) {
+		    case ALLOW:
+			break;
+		    default:
+			if (root_pw != NULL && runas_matches_pw(nss->parse_tree,
+				cs, root_pw) == ALLOW) {
+			    break;
+			}
 			continue;
 		    }
+
+		    /* Match command: "list" or ALL. */
 		    if (cmnd_matches(nss->parse_tree, cs->cmnd, cs->runchroot,
 			    NULL) == ALLOW) {
 			match = ALLOW;
@@ -143,6 +164,10 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
 	SET(validated, FLAG_CHECK_USER);
     else if (nopass == true)
 	def_authenticate = false;
+
+    /* Restore original def_runchroot. */
+    def_runchroot = saved_runchroot;
+
     debug_return_int(validated);
 }
 
@@ -963,11 +988,21 @@ static int
 display_cmnd_check(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
     time_t now)
 {
-    int host_match, runas_match, cmnd_match;
+    int host_match, runas_match, cmnd_match = UNSPEC;
+    char *saved_user_cmnd, *saved_user_base;
     struct cmndspec *cs;
     struct privilege *priv;
     struct userspec *us;
     debug_decl(display_cmnd_check, SUDOERS_DEBUG_PARSER);
+
+    /*
+     * For "sudo -l command", user_cmnd is "list" and the actual
+     * command we are checking is in list_cmnd.
+     */
+    saved_user_cmnd = user_cmnd;
+    saved_user_base = user_base;
+    user_cmnd = list_cmnd;
+    user_base = sudo_basename(user_cmnd);
 
     TAILQ_FOREACH_REVERSE(us, &parse_tree->userspecs, userspec_list, entries) {
 	if (userlist_matches(parse_tree, pw, &us->users) != ALLOW)
@@ -991,12 +1026,15 @@ display_cmnd_check(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 		    cmnd_match = cmnd_matches(parse_tree, cs->cmnd,
 			cs->runchroot, NULL);
 		    if (cmnd_match != UNSPEC)
-			debug_return_int(cmnd_match);
+			goto done;
 		}
 	    }
 	}
     }
-    debug_return_int(UNSPEC);
+done:
+    user_cmnd = saved_user_cmnd;
+    user_base = saved_user_base;
+    debug_return_int(cmnd_match);
 }
 
 /*
@@ -1029,8 +1067,8 @@ display_cmnd(struct sudo_nss_list *snl, struct passwd *pw)
 	    break;
     }
     if (match == ALLOW) {
-	const int len = sudo_printf(SUDO_CONV_INFO_MSG, "%s%s%s\n",
-	    safe_cmnd, user_args ? " " : "", user_args ? user_args : "");
+	/* For "sudo -l cmd" user_args includes the command being checked. */
+	const int len = sudo_printf(SUDO_CONV_INFO_MSG, "%s\n", user_args);
 	ret = len < 0 ? -1 : true;
     }
     debug_return_int(ret);

@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "October 20, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "December 9, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1025,9 +1025,12 @@ Edit_Spec ::= "sudoedit" file name+ |
               "sudoedit" regex |
               "sudoedit"
 
+List_Spec ::= "list"
+
 Cmnd ::= Digest_List? '!'* command |
          '!'* directory |
          '!'* Edit_Spec |
+         '!'* List_Spec |
          '!'* Cmnd_Alias
 .RE
 .fi
@@ -1096,9 +1099,43 @@ character from being interpreted as a regular expression, the
 must be escaped with a
 \(oq\e\(cq.
 .PP
-The built-in command
+There are two commands built into
+\fBsudo\fR
+itself:
+\(lqlist\(rq
+and
+\(lqsudoedit\(rq.
+Unlike other commands, these two must be specified in the
+\fIsudoers\fR
+file
+\fIwithout\fR
+a leading path.
+.PP
+The
+\(lqlist\(rq
+built-in can be used to permit a user to list another user's privileges with
+\fBsudo\fR's
+\fB\-U\fR
+option.
+For example,
+\(lqsudo -l -U otheruser\(rq.
+A user with the
+\(lqlist\(rq
+privilege is able to list another user's privileges even if they
+don't have permission to run commands as that user.
+By default, only root or a user with the ability to run any command as
+either root or the specified
+\fIuser\fR
+on the current host may use the
+\fB\-U\fR
+option.
+No command line arguments may be specified with the
+\(lqlist\(rq
+built-in.
+.PP
+The
 \(lqsudoedit\(rq
-is used to permit a user to run
+built-in is used to permit a user to run
 \fBsudo\fR
 with the
 \fB\-e\fR

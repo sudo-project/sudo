@@ -750,6 +750,14 @@ sha512			{
 			    return SHA512_TOK;
 			}
 
+list			{
+			    /* No command line args. */
+			    LEXTRACE("COMMAND ");
+			    if (!fill_cmnd(sudoerstext, sudoersleng))
+				yyterminate();
+			    return COMMAND;
+			}			/* sudo -l -U otheruser */
+
 sudoedit		{
 			    BEGIN GOTCMND;
 			    LEXTRACE("COMMAND ");
