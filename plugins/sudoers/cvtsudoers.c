@@ -272,7 +272,7 @@ main(int argc, char *argv[])
 	if (strcasecmp(conf->input_format, "ldif") == 0) {
 	    input_format = format_ldif;
 	} else if (strcasecmp(conf->input_format, "sudoers") == 0) {
-	    input_format = format_sudoers;
+	    input_format = format_sudoers; // -V1048
 	} else {
 	    sudo_warnx(U_("unsupported input format %s"), conf->input_format);
 	    usage();
@@ -286,7 +286,7 @@ main(int argc, char *argv[])
 	    output_format = format_json;
 	    conf->store_options = true;
 	} else if (strcasecmp(conf->output_format, "ldif") == 0) {
-	    output_format = format_ldif;
+	    output_format = format_ldif; // -V1048
 	    conf->store_options = true;
 	} else if (strcasecmp(conf->output_format, "sudoers") == 0) {
 	    output_format = format_sudoers;
