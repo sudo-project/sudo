@@ -309,7 +309,6 @@ python_plugin_construct(struct PluginContext *plugin_ctx, unsigned int version,
 
     if (py_kwargs == NULL) {
         py_log_last_error("Failed to construct plugin instance");
-        rc = SUDO_RC_ERROR;
     } else {
         rc = python_plugin_construct_custom(plugin_ctx, py_kwargs);
     }

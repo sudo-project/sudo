@@ -132,7 +132,6 @@ python_plugin_policy_check(int argc, char * const argv[],
                               &PyTuple_Type, &py_argv_out,
                               &PyTuple_Type, &py_user_env_out))
         {
-            rc = SUDO_RC_ERROR;
             goto cleanup;
         }
     } else {
