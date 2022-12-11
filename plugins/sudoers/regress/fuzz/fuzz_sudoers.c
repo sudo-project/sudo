@@ -401,6 +401,7 @@ done:
     sudo_freegrcache();
     free(user_cmnd);
     free(safe_cmnd);
+    free(list_cmnd);
     memset(&sudo_user, 0, sizeof(sudo_user));
     sudoers_setlocale(SUDOERS_LOCALE_USER, NULL);
     sudoers_debug_deregister();

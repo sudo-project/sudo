@@ -985,24 +985,26 @@ set_cmnd_path(const char *runchroot)
 
     cmnd_in = ISSET(sudo_mode, MODE_CHECK) ? NewArgv[1] : NewArgv[0];
 
+    free(list_cmnd);
+    list_cmnd = NULL;
     free(user_cmnd);
     user_cmnd = NULL;
     if (def_secure_path && !user_is_exempt())
 	path = def_secure_path;
     if (!set_perms(PERM_RUNAS))
-	debug_return_int(NOT_FOUND_ERROR);
+	goto error;
     ret = find_path(cmnd_in, &cmnd_out, user_stat, path,
 	runchroot, def_ignore_dot, NULL);
     if (!restore_perms())
-	debug_return_int(NOT_FOUND_ERROR);
+	goto error;
     if (ret == NOT_FOUND) {
 	/* Failed as root, try as invoking user. */
 	if (!set_perms(PERM_USER))
-	    debug_return_int(false);
+	    goto error;
 	ret = find_path(cmnd_in, &cmnd_out, user_stat, path,
 	    runchroot, def_ignore_dot, NULL);
 	if (!restore_perms())
-	    debug_return_int(NOT_FOUND_ERROR);
+	    goto error;
     }
 
     if (ISSET(sudo_mode, MODE_CHECK))
@@ -1011,6 +1013,9 @@ set_cmnd_path(const char *runchroot)
 	user_cmnd = cmnd_out;
 
     debug_return_int(ret);
+error:
+    free(cmnd_out);
+    debug_return_int(NOT_FOUND_ERROR);
 }
 
 /*
