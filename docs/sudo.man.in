@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDO" "@mansectsu@" "September 13, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "December 12, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -837,8 +837,8 @@ There are two distinct ways
 \fBsudo\fR
 can run a command.
 .PP
-If an I/O logging plugin is configured or if the security policy
-explicitly requests it, a new pseudo-terminal
+If an I/O logging plugin is configured to log terminal I/O, or if
+the security policy explicitly requests it, a new pseudo-terminal
 (\(lqpty\(rq)
 is allocated and
 fork(2)
@@ -850,16 +850,17 @@ The
 \fImonitor\fR
 creates a new terminal session with itself as the leader and the pty as its
 controlling terminal, calls
-fork(2),
-sets up the execution environment as described above, and then uses the
+fork(2)
+again, sets up the execution environment as described above, and then uses the
 execve(2)
 system call to run the command in the child process.
 The
 \fImonitor\fR
 exists to relay job control signals between the user's
-existing terminal and the pty the command is being run in.
-This makes it possible to suspend and resume the command.
-Without the monitor, the command would be in what POSIX terms an
+terminal and the pty the command is being run in.
+This makes it possible to suspend and resume the command normally.
+Without the
+\fImonitor\fR, \fIthe command would be in what POSIX terms an\fR
 \(lqorphaned process group\(rq
 and it would not receive any job control signals from the kernel.
 When the command exits or is terminated by a signal, the
@@ -869,8 +870,9 @@ passes the command's exit status to the main
 process and exits.
 After receiving the command's exit status, the main
 \fBsudo\fR
-passes the command's exit status to the security policy's close function
-and exits.
+process passes the command's exit status to the security policy's
+close function, as well as the close function of any configured audit
+plugin, and exits.
 .PP
 If no pty is used,
 \fBsudo\fR
@@ -882,7 +884,8 @@ system call to run the command in the child process.
 The main
 \fBsudo\fR
 process waits until the command has completed, then passes the
-command's exit status to the security policy's close function and exits.
+command's exit status to the security policy's close function, as
+well as the close function of any configured audit plugins, and exits.
 As a special case, if the policy plugin does not define a close
 function,
 \fBsudo\fR
@@ -970,14 +973,6 @@ are run using the
 family of functions instead of
 \fBsystem\fR()
 (which interposes a shell between the command and the calling process).
-.PP
-If no I/O logging plugins are loaded and the policy plugin has not
-defined a
-\fBclose\fR()
-function, set a command timeout, or required that the command be
-run in a new pty,
-\fBsudo\fR
-may execute the command directly instead of running it as a child process.
 .SS "Plugins"
 Plugins may be specified via
 \fIPlugin\fR
