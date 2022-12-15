@@ -23,6 +23,7 @@
 
 #include <config.h>
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_STDBOOL_H
@@ -116,18 +117,19 @@ json_append_buf(struct json_container *jsonc, const char *str)
 
 /*
  * Append a quoted JSON string, escaping special chars and expanding as needed.
- * Does not support unicode escapes.
+ * Treats strings as 8-bit ASCII, escaping control characters.
  */
 static bool
 json_append_string(struct json_container *jsonc, const char *str)
 {
-    char ch;
+    const char hex[] = "0123456789abcdef";
+    unsigned char ch;
     debug_decl(json_append_string, SUDO_DEBUG_UTIL);
 
     if (!json_append_buf(jsonc, "\""))
 	    debug_return_bool(false);
     while ((ch = *str++) != '\0') {
-	char buf[3], *cp = buf;
+	char buf[sizeof("\\u0000")], *cp = buf;
 
 	switch (ch) {
 	case '"':
@@ -153,6 +155,17 @@ json_append_string(struct json_container *jsonc, const char *str)
 	case '\t':
 	    *cp++ = '\\';
 	    ch = 't';
+	    break;
+	default:
+	    if (iscntrl(ch)) {
+		/* Escape control characters like \u0000 */
+		*cp++ = '\\';
+		*cp++ = 'u';
+		*cp++ = '0';
+		*cp++ = '0';
+		*cp++ = hex[ch >> 4];
+		ch &= 0x0f;
+	    }
 	    break;
 	}
 	*cp++ = ch;
