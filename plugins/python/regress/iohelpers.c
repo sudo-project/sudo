@@ -140,10 +140,13 @@ str_array_snprint(char *out_str, size_t max_len, char **str_array, int array_len
 char *
 str_replaced(const char *source, size_t dest_len, const char *old, const char *new)
 {
-    char *result = calloc(1, dest_len);
+    char *result = malloc(dest_len);
     char *dest = result;
     char *pos = NULL;
     size_t old_len = strlen(old);
+
+    if (result == NULL)
+        return NULL;
 
     while ((pos = strstr(source, old)) != NULL) {
         size_t len = snprintf(dest, dest_len,
@@ -170,6 +173,8 @@ void
 str_replace_in_place(char *string, size_t max_length, const char *old, const char *new)
 {
     char *replaced = str_replaced(string, max_length, old, new);
-    strlcpy(string, replaced, max_length);
-    free(replaced);
+    if (replaced != NULL) {
+        strlcpy(string, replaced, max_length);
+        free(replaced);
+    }
 }
