@@ -164,7 +164,7 @@ json_append_string(struct json_container *jsonc, const char *str)
 		*cp++ = '0';
 		*cp++ = '0';
 		*cp++ = hex[ch >> 4];
-		ch &= 0x0f;
+		ch = hex[ch & 0x0f];
 	    }
 	    break;
 	}
@@ -180,8 +180,8 @@ json_append_string(struct json_container *jsonc, const char *str)
 }
 
 bool
-sudo_json_init_v1(struct json_container *jsonc, int indent, bool minimal,
-    bool memfatal)
+sudo_json_init_v2(struct json_container *jsonc, int indent, bool minimal,
+    bool memfatal, bool quiet)
 {
     debug_decl(sudo_json_init, SUDO_DEBUG_UTIL);
 
@@ -190,6 +190,7 @@ sudo_json_init_v1(struct json_container *jsonc, int indent, bool minimal,
     jsonc->indent_increment = indent;
     jsonc->minimal = minimal;
     jsonc->memfatal = memfatal;
+    jsonc->quiet = quiet;
     jsonc->buf = malloc(64 * 1024);
     if (jsonc->buf == NULL) {
 	if (jsonc->memfatal) {
@@ -204,6 +205,13 @@ sudo_json_init_v1(struct json_container *jsonc, int indent, bool minimal,
     jsonc->bufsize = 64 * 1024;
 
     debug_return_bool(true);
+}
+
+bool
+sudo_json_init_v1(struct json_container *jsonc, int indent, bool minimal,
+    bool memfatal)
+{
+    return sudo_json_init_v2(jsonc, indent, minimal, memfatal, false);
 }
 
 void
@@ -309,69 +317,83 @@ static bool
 sudo_json_add_value_int(struct json_container *jsonc, const char *name,
     struct json_value *value, bool as_object)
 {
+    struct json_container saved_container = *jsonc;
     char numbuf[(((sizeof(long long) * 8) + 2) / 3) + 2];
     debug_decl(sudo_json_add_value, SUDO_DEBUG_UTIL);
 
     /* Add comma if we are continuing an object/array. */
     if (jsonc->need_comma) {
 	if (!json_append_buf(jsonc, ","))
-	    debug_return_bool(false);
+	    goto bad;
     }
     if (!json_new_line(jsonc))
-	debug_return_bool(false);
+	goto bad;
     jsonc->need_comma = true;
 
     if (as_object) {
 	if (!json_append_buf(jsonc, jsonc->minimal ? "{" : "{ "))
-	    debug_return_bool(false);
+	    goto bad;
     }
 
     /* name */
     if (name != NULL) {
 	if (!json_append_string(jsonc, name))
-	    debug_return_bool(false);
+	    goto bad;
 	if (!json_append_buf(jsonc, jsonc->minimal ? ":" : ": "))
-	    debug_return_bool(false);
+	    goto bad;
     }
 
     /* value */
     switch (value->type) {
     case JSON_STRING:
 	if (!json_append_string(jsonc, value->u.string))
-	    debug_return_bool(false);
+	    goto bad;
 	break;
     case JSON_ID:
 	snprintf(numbuf, sizeof(numbuf), "%u", (unsigned int)value->u.id);
 	if (!json_append_buf(jsonc, numbuf))
-	    debug_return_bool(false);
+	    goto bad;
 	break;
     case JSON_NUMBER:
 	snprintf(numbuf, sizeof(numbuf), "%lld", value->u.number);
 	if (!json_append_buf(jsonc, numbuf))
-	    debug_return_bool(false);
+	    goto bad;
 	break;
     case JSON_NULL:
 	if (!json_append_buf(jsonc, "null"))
-	    debug_return_bool(false);
+	    goto bad;
 	break;
     case JSON_BOOL:
 	if (!json_append_buf(jsonc, value->u.boolean ? "true" : "false"))
-	    debug_return_bool(false);
+	    goto bad;
 	break;
     case JSON_ARRAY:
-	sudo_fatalx("internal error: can't print JSON_ARRAY");
-	break;
+	if (!jsonc->quiet)
+	    sudo_warnx("internal error: add JSON_ARRAY as a value");
+	goto bad;
     case JSON_OBJECT:
-	sudo_fatalx("internal error: can't print JSON_OBJECT");
-	break;
+	if (!jsonc->quiet)
+	    sudo_warnx("internal error: add JSON_OBJECT as a value");
+	goto bad;
+    default:
+	if (!jsonc->quiet)
+	    sudo_warnx("internal error: unknown JSON type %d", value->type);
+	goto bad;
     }
 
     if (as_object) {
 	if (!json_append_buf(jsonc, jsonc->minimal ? "}" : " }"))
-	    debug_return_bool(false);
+	    goto bad;
     }
 
     debug_return_bool(true);
+bad:
+    /* Restore container but handle reallocation of buf. */
+    saved_container.buf = jsonc->buf;
+    saved_container.bufsize = jsonc->bufsize;
+    *jsonc = saved_container;
+    jsonc->buf[jsonc->buflen] = '\0';
+    debug_return_bool(false);
 }
 
 bool

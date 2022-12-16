@@ -111,10 +111,11 @@ PVS_IGNORE = 'V707,V011,V002,V536'
 PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
 
 # Regression tests
-TEST_PROGS = conf_test hltq_test parseln_test progname_test parse_gids_test \
-	     getgids getgrouplist_test multiarch_test open_parent_dir_test \
-	     strsplit_test strtobool_test strtoid_test strtomode_test \
-	     strtonum_test uuid_test @COMPAT_TEST_PROGS@
+TEST_PROGS = conf_test getgids getgrouplist_test hltq_test json_test \
+             multiarch_test open_parent_dir_test parse_gids_test parseln_test \
+	     progname_test strsplit_test strtobool_test strtoid_test \
+	     strtomode_test strtonum_test uuid_test @COMPAT_TEST_PROGS@
+
 TEST_LIBS = @LIBS@
 TEST_LDFLAGS = @LDFLAGS@
 TEST_VERBOSE =
@@ -164,13 +165,15 @@ CLOSEFROM_TEST_OBJS = closefrom_test.lo closefrom.lo
 
 CONF_TEST_OBJS = conf_test.lo sudo_conf.lo
 
-HLTQ_TEST_OBJS = hltq_test.lo
-
 FNM_TEST_OBJS = fnm_test.lo fnmatch.lo
 
 GLOBTEST_OBJS = globtest.lo glob.lo
 
 GETDELIM_TEST_OBJS = getdelim_test.lo getdelim.lo
+
+HLTQ_TEST_OBJS = hltq_test.lo
+
+JSON_TEST_OBJS = json_test.lo json.lo
 
 MULTIARCH_TEST_OBJS = multiarch_test.lo multiarch.lo
 
@@ -283,6 +286,9 @@ getdelim_test: $(GETDELIM_TEST_OBJS) libsudo_util.la
 
 hltq_test: $(HLTQ_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(HLTQ_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+
+json_test: $(JSON_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(JSON_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 mktemp_test: $(MKTEMP_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(MKTEMP_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
@@ -467,6 +473,7 @@ check: $(TEST_PROGS) check-fuzzer
 	    ./strtonum_test || rval=`expr $$rval + $$?`; \
 	    ./uuid_test || rval=`expr $$rval + $$?`; \
 	    ./hltq_test || rval=`expr $$rval + $$?`; \
+	    ./json_test || rval=`expr $$rval + $$?`; \
 	    ./progname_test || rval=`expr $$rval + $$?`; \
 	    rm -f ./progname_test2; ln -s ./progname_test ./progname_test2; \
 	    ./progname_test2 || rval=`expr $$rval + $$?`; \
@@ -975,6 +982,18 @@ json.i: $(srcdir)/json.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 json.plog: json.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/json.c --i-file $< --output-file $@
+json_test.lo: $(srcdir)/regress/json/json_test.c $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
+              $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/json/json_test.c
+json_test.i: $(srcdir)/regress/json/json_test.c $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
+              $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+json_test.plog: json_test.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/json/json_test.c --i-file $< --output-file $@
 key_val.lo: $(srcdir)/key_val.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \

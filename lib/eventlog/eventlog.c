@@ -880,7 +880,7 @@ format_json(int event_type, struct eventlog_args *args,
 	debug_return_str(NULL);
     }
 
-    if (!sudo_json_init(&jsonc, 4, compact, false))
+    if (!sudo_json_init(&jsonc, 4, compact, false, false))
 	goto bad;
     if (!sudo_json_open_object(&jsonc, type_str))
 	goto bad;

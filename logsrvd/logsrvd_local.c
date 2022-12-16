@@ -312,7 +312,7 @@ store_exit_info_json(int dfd, struct eventlog *evlog)
     off_t pos;
     debug_decl(store_exit_info_json, SUDO_DEBUG_UTIL);
 
-    if (!sudo_json_init(&jsonc, 4, false, false))
+    if (!sudo_json_init(&jsonc, 4, false, false, false))
         goto done;
 
     fd = iolog_openat(dfd, "log.json", O_RDWR);

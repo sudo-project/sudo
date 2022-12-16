@@ -160,7 +160,7 @@ iolog_write_info_file_json(int dfd, struct eventlog *evlog)
     int fd = -1;
     debug_decl(iolog_write_info_file_json, SUDO_DEBUG_UTIL);
 
-    if (!sudo_json_init(&jsonc, 4, false, false))
+    if (!sudo_json_init(&jsonc, 4, false, false, false))
 	debug_return_bool(false);
 
     /* Timestamp */

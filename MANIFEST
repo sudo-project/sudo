@@ -280,6 +280,7 @@ lib/util/regress/glob/files
 lib/util/regress/glob/globtest.c
 lib/util/regress/glob/globtest.in
 lib/util/regress/harness.in
+lib/util/regress/json/json_test.c
 lib/util/regress/mktemp/mktemp_test.c
 lib/util/regress/multiarch/multiarch_test.c
 lib/util/regress/open_parent_dir/open_parent_dir_test.c

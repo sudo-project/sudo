@@ -202,7 +202,7 @@ main(int argc, char *argv[])
 
 	ntests++;
 
-	if (!sudo_json_init(&jsonc, 4, false, true)) {
+	if (!sudo_json_init(&jsonc, 4, false, true, true)) {
 	    errors++;
 	    continue;
 	}

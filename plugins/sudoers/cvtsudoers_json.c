@@ -899,7 +899,7 @@ convert_sudoers_json(struct sudoers_parse_tree *parse_tree,
     }
 
     /* 4 space indent, non-compact, exit on memory allocation failure. */
-    sudo_json_init(&jsonc, 4, false, true);
+    sudo_json_init(&jsonc, 4, false, true, false);
 
     /* Dump Defaults in JSON format. */
     if (!ISSET(conf->suppress, SUPPRESS_DEFAULTS)) {
