@@ -112,9 +112,10 @@ PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
 
 # Regression tests
 TEST_PROGS = conf_test getgids getgrouplist_test hltq_test json_test \
-             multiarch_test open_parent_dir_test parse_gids_test parseln_test \
-	     progname_test strsplit_test strtobool_test strtoid_test \
-	     strtomode_test strtonum_test uuid_test @COMPAT_TEST_PROGS@
+	     multiarch_test open_parent_dir_test parse_gids_test \
+	     parseln_test progname_test regex_test strsplit_test \
+	     strtobool_test strtoid_test strtomode_test strtonum_test \
+	     uuid_test @COMPAT_TEST_PROGS@
 
 TEST_LIBS = @LIBS@
 TEST_LDFLAGS = @LDFLAGS@
@@ -178,6 +179,8 @@ JSON_TEST_OBJS = json_test.lo json.lo
 MULTIARCH_TEST_OBJS = multiarch_test.lo multiarch.lo
 
 OPEN_PARENT_DIR_TEST_OBJS = open_parent_dir_test.lo mkdir_parents.lo
+
+REGEX_TEST_OBJS = regex_test.lo regex.lo
 
 STRTOBOOL_TEST_OBJS = strtobool_test.lo strtobool.lo
 
@@ -317,6 +320,9 @@ getgrouplist_test: $(GETGROUPLIST_TEST_OBJS) libsudo_util.la
 strsplit_test: $(STRSPLIT_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(STRSPLIT_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
+regex_test: $(REGEX_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(REGEX_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+
 strsig_test: $(STRSIG_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(STRSIG_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
@@ -437,12 +443,6 @@ check: $(TEST_PROGS) check-fuzzer
 	    if test -f closefrom_test; then \
 		./closefrom_test || rval=`expr $$rval + $$?`; \
 	    fi; \
-	    if test -f parse_gids_test; then \
-		./parse_gids_test || rval=`expr $$rval + $$?`; \
-	    fi; \
-	    if test -f strsplit_test; then \
-		./strsplit_test || rval=`expr $$rval + $$?`; \
-	    fi; \
 	    if test -f fnm_test; then \
 		./fnm_test $(srcdir)/regress/fnmatch/fnm_test.in || rval=`expr $$rval + $$?`; \
 	    fi; \
@@ -467,6 +467,9 @@ check: $(TEST_PROGS) check-fuzzer
 	    ./getgrouplist_test || rval=`expr $$rval + $$?`; \
 	    ./multiarch_test || rval=`expr $$rval + $$?`; \
 	    ./open_parent_dir_test || rval=`expr $$rval + $$?`; \
+	    ./parse_gids_test || rval=`expr $$rval + $$?`; \
+	    ./regex_test || rval=`expr $$rval + $$?`; \
+	    ./strsplit_test || rval=`expr $$rval + $$?`; \
 	    ./strtobool_test || rval=`expr $$rval + $$?`; \
 	    ./strtoid_test || rval=`expr $$rval + $$?`; \
 	    ./strtomode_test || rval=`expr $$rval + $$?`; \
@@ -984,13 +987,13 @@ json.plog: json.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/json.c --i-file $< --output-file $@
 json_test.lo: $(srcdir)/regress/json/json_test.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
-              $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
-              $(top_builddir)/config.h
+              $(incdir)/sudo_json.h $(incdir)/sudo_plugin.h \
+              $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/json/json_test.c
 json_test.i: $(srcdir)/regress/json/json_test.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
-              $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
-              $(top_builddir)/config.h
+              $(incdir)/sudo_json.h $(incdir)/sudo_plugin.h \
+              $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 json_test.plog: json_test.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/json/json_test.c --i-file $< --output-file $@
@@ -1288,6 +1291,18 @@ regex.i: $(srcdir)/regex.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 regex.plog: regex.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regex.c --i-file $< --output-file $@
+regex_test.lo: $(srcdir)/regress/regex/regex_test.c $(incdir)/compat/stdbool.h \
+               $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
+               $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
+               $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/regex/regex_test.c
+regex_test.i: $(srcdir)/regress/regex/regex_test.c $(incdir)/compat/stdbool.h \
+               $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
+               $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
+               $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+regex_test.plog: regex_test.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/regex/regex_test.c --i-file $< --output-file $@
 roundup.lo: $(srcdir)/roundup.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \

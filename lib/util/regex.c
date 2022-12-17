@@ -26,6 +26,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <regex.h>
 
 #include "sudo_compat.h"
@@ -60,11 +61,32 @@ check_pattern(const char *pattern)
 	case '?':
 	case '*':
 	case '+':
-	    if (prev == '?' || prev == '*' || prev == '+') {
+	    if (prev == '?' || prev == '*' || prev == '+' || prev == '{' ) {
 		/* Invalid repetition operator. */
 		debug_return_int(REG_BADRPT);
 	    }
 	    break;
+	case '{':
+	    /* Match bound: {[0-9]([0-9,]*)} */
+	    if (isdigit((unsigned char)*cp)) {
+		do {
+		    cp++;
+		    /* Allow digits to be escaped. */
+		    if (cp[0] == '\\' && isdigit((unsigned char)cp[1]))
+			cp++;
+		} while (isdigit((unsigned char)*cp) || *cp == ',');
+		if (*cp == '}') {
+		    if (prev == '?' || prev == '*' || prev == '+' || prev == '{' ) {
+			/* Invalid repetition operator. */
+			debug_return_int(REG_BADRPT);
+		    }
+		    /* Skip past '}', prev will be set to '{' below */
+		    cp++;
+		    break;
+		}
+	    }
+	    prev = '\0';
+	    continue;
 	}
 	prev = ch;
     }
