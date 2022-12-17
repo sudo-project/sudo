@@ -6886,7 +6886,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -16510,7 +16510,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -16581,7 +16581,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -16633,7 +16633,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -16680,7 +16680,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -16727,7 +16727,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -18054,7 +18054,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -18194,7 +18194,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -19331,7 +19331,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -19399,7 +19399,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -20320,7 +20320,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -21688,7 +21688,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -22650,7 +22650,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -23381,7 +23381,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -23890,7 +23890,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -24525,7 +24525,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -24748,7 +24748,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -25033,7 +25033,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -25291,7 +25291,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -25471,7 +25471,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -26289,7 +26289,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -26438,7 +26438,7 @@ else case e in #(
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -26554,7 +26554,7 @@ else case e in #(
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -26688,7 +26688,7 @@ else case e in #(
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -26812,7 +26812,7 @@ else case e in #(
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -27033,7 +27033,7 @@ else case e in #(
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -27583,7 +27583,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -28297,7 +28297,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -29602,7 +29602,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -29973,7 +29973,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -30096,7 +30096,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -30170,7 +30170,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -30611,7 +30611,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -30697,7 +30697,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -30948,7 +30948,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -31000,7 +31000,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.
    The 'extern "C"' is for builds by C++ compilers;
-   although this is not generally supported in C code, supporting it here
+   although this is not generally supported in C code supporting it here
    has little cost and some practical benefit (sr 110532).  */
 #ifdef __cplusplus
 extern "C"
@@ -32842,7 +32842,7 @@ fi
 		libasan=`$CC -print-file-name=libasan.so 2>/dev/null`
 		if test -n "$libasan" -a X"$libasan" != X"libasan.so"; then
 		    # libasan.so may be a linker script
-		    libasan="`awk 'BEGIN {lib=ARGV[1]} /^INPUT/ {lib=} END {print lib}' \"$libasan\"`"
+		    libasan="`awk 'BEGIN {lib=ARGV[1]} /^INPUT/ {lib=$3} END {print lib}' \"$libasan\"`"
 		    cat >>confdefs.h <<EOF
 #define _PATH_ASAN_LIB "$libasan"
 EOF
