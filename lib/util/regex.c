@@ -36,30 +36,23 @@
 static char errbuf[1024];
 
 /*
- * Like strdup but collapses repeated '?', '*' and '+' ops in a regex.
- * Glibc regcomp() has a bug where it uses excessive memory for repeated
- * '+' ops.  Collapse them to avoid running the fuzzer out of memory.
+ * Check pattern for invalid repetition sequences.
+ * This is implementation-specific behavior, not all regcomp(3) forbid them.
+ * Glibc allows it but uses excessive memory for repeated '+' ops.
  */
-static char *
-dup_pattern(const char *src)
+static int
+check_pattern(const char *pattern)
 {
-    char *dst, *ret;
+    debug_decl(check_pattern, SUDO_DEBUG_UTIL);
+    const char *cp = pattern;
     char ch, prev = '\0';
-    size_t len;
-    debug_decl(dup_pattern, SUDO_DEBUG_UTIL);
 
-    len = strlen(src);
-    ret = malloc(len + 1);
-    if (ret == NULL)
-	debug_return_ptr(NULL);
-
-    dst = ret;
-    while ((ch = *src++) != '\0') {
+    while ((ch = *cp++) != '\0') {
 	switch (ch) {
 	case '\\':
-	    if (*src != '\0') {
-		*dst++ = '\\';
-		*dst++ = *src++;
+	    if (*cp != '\0') {
+		/* Skip escaped character. */
+		cp++;
 		prev = '\0';
 		continue;
 	    }
@@ -67,17 +60,16 @@ dup_pattern(const char *src)
 	case '?':
 	case '*':
 	case '+':
-	    if (ch == prev) {
-		continue;
+	    if (prev == '?' || prev == '*' || prev == '+') {
+		/* Invalid repetition operator. */
+		debug_return_int(REG_BADRPT);
 	    }
 	    break;
 	}
-	*dst++ = ch;
 	prev = ch;
     }
-    *dst = '\0';
 
-    debug_return_ptr(ret);
+    debug_return_int(0);
 }
 
 /*
@@ -108,22 +100,19 @@ sudo_regex_compile_v1(void *v, const char *pattern, const char **errstr)
     cp = pattern[0] == '^' ? pattern + 1 : pattern;
     if (strncmp(cp, "(?i)", 4) == 0) {
 	cflags |= REG_ICASE;
-	copy = dup_pattern(pattern + 4);
+	copy = strdup(pattern + 4);
 	if (copy == NULL) {
 	    *errstr = N_("unable to allocate memory");
 	    debug_return_bool(false);
 	}
 	if (pattern[0] == '^')
 	    copy[0] = '^';
-    } else {
-	copy = dup_pattern(pattern);
-	if (copy == NULL) {
-	    *errstr = N_("unable to allocate memory");
-	    debug_return_bool(false);
-	}
+	pattern = copy;
     }
 
-    errcode = regcomp(preg, copy, cflags);
+    errcode = check_pattern(pattern);
+    if (errcode == 0)
+	errcode = regcomp(preg, pattern, cflags);
     if (errcode == 0) {
 	if (preg == &rebuf)
 	    regfree(&rebuf);
