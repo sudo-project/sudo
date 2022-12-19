@@ -479,10 +479,13 @@ selinux_edit_create_tfiles(struct command_details *command_details,
 	break;
     case SESH_ERR_BAD_PATHS:
 	sudo_fatalx("%s", U_("sesh: internal error: odd number of paths"));
+	goto done;
     case SESH_ERR_NO_FILES:
 	sudo_fatalx("%s", U_("sesh: unable to create temporary files"));
+	goto done;
     case SESH_ERR_KILLED:
 	sudo_fatalx("%s", U_("sesh: killed by a signal"));
+	goto done;
     default:
 	sudo_warnx(U_("sesh: unknown error %d"), error);
 	goto done;
