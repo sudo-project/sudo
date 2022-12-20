@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd December 12, 2022
+.Dd December 20, 2022
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -55,7 +55,7 @@
 .Op Fl p Ar prompt
 .Op Fl U Ar user
 .Op Fl u Ar user
-.Op Ar command
+.Op Ar command Op Ar arg ...
 .Nm sudo
 .Op Fl ABbEHnPS
 .if \n(BA \{\
@@ -78,7 +78,7 @@
 .Op Fl u Ar user
 .Op Ar VAR Ns = Ns Ar value
 .Op Fl i | s
-.Op Ar command
+.Op Ar command Op Ar arg ...
 .Nm sudoedit
 .Op Fl ABkNnS
 .if \n(BA \{\
@@ -181,8 +181,9 @@ option (described below), is implied.
 Security policies and audit plugins may log successful and failed attempts
 to run
 .Nm .
-If an I/O plugin is configured, the running command's input and
-output may be logged as well.
+If an I/O plugin is configured, the running
+.Ar command Ns 's
+input and output may be logged as well.
 .Pp
 The options are as follows:
 .Bl -tag -width Fl
@@ -233,21 +234,26 @@ authentication.
 Ring the bell as part of the password prompt when a terminal is present.
 This option has no effect if an askpass program is used.
 .It Fl b , -background
-Run the given command in the background.
+Run the given
+.Ar command
+in the background.
 It is not possible to use shell job control to manipulate background
 processes started by
 .Nm .
-Most interactive commands will fail to work properly in background
-mode.
+Most interactive
+.Ar command Ns s
+will fail to work properly in background mode.
 .It Fl C Ar num , Fl -close-from Ns = Ns Ar num
 Close all file descriptors greater than or equal to
 .Ar num
-before executing a command.
+before executing a
+.Ar command .
 Values less than three are not permitted.
 By default,
 .Nm
 will close all open file descriptors other than standard input,
-standard output, and standard error when executing a command.
+standard output, and standard error when executing a
+.Ar command .
 The security policy may restrict the user's ability to use this option.
 The
 .Em sudoers
@@ -258,8 +264,9 @@ option when the administrator has enabled the
 option.
 .if \n(LC \{\
 .It Fl c Ar class , Fl -login-class Ns = Ns Ar class
-Run the command with resource limits and scheduling priority of
-the specified login
+Run the
+.Ar command
+with resource limits and scheduling priority of the specified login
 .Ar class .
 The
 .Ar class
@@ -273,10 +280,14 @@ If
 is
 .Cm - ,
 the default login class of the target user will be used.
-Otherwise, the command must be run as the superuser (user-ID 0), or
+Otherwise, the
+.Ar command
+must be run as the superuser (user-ID 0), or
 .Nm
 must be run from a shell that is already running as the superuser.
-If the command is being run as a login shell, additional
+If the
+.Ar command
+is being run as a login shell, additional
 .Pa /etc/login.conf
 settings, such as the umask and environment variables, will
 be applied, if present.
@@ -285,7 +296,9 @@ This option is only available on systems with
 login classes.
 .\}
 .It Fl D Ar directory , Fl -chdir Ns = Ns Ar directory
-Run the command in the specified
+Run the
+.Ar command
+in the specified
 .Ar directory
 instead of the current working directory.
 The security policy may return an error if the user does not have
@@ -303,7 +316,10 @@ The security policy may return an error if the user does not have
 permission to preserve the environment.
 This option may be specified multiple times.
 .It Fl e , -edit
-Edit one or more files instead of running a command.
+Edit one or more
+.Ar file Ns s
+instead of running a
+.Ar command .
 In lieu of a path name, the string "sudoedit" is used when consulting
 the security policy.
 If the user is authorized by the policy, the following steps are
@@ -354,7 +370,9 @@ not be edited unless that user is root (version 1.8.16 and higher).
 Users are never allowed to edit device special files.
 .Pp
 If the specified file does not exist, it will be created.
-Unlike most commands run by
+Unlike most
+.Ar command Ns s
+run by
 .Em sudo ,
 the editor is run with the invoking user's environment unmodified.
 If the temporary file becomes empty after editing, the user will
@@ -365,7 +383,9 @@ is unable to update a file with its edited version, the user will
 receive a warning and the edited copy will remain in a temporary
 file.
 .It Fl g Ar group , Fl -group Ns = Ns Ar group
-Run the command with the primary group set to
+Run the
+.Ar command
+with the primary group set to
 .Ar group
 instead of the primary group specified by the target
 user's password database entry.
@@ -378,13 +398,17 @@ prefixed with the
 character (e.g.,
 .Ql #0
 for GID 0).
-When running a command as a GID, many shells require that the
+When running a
+.Ar command
+as a GID, many shells require that the
 .Ql #
 be escaped with a backslash
 .Pq Ql \e .
 If no
 .Fl u
-option is specified, the command will be run as the invoking user.
+option is specified, the
+.Ar command
+will be run as the invoking user.
 In either case, the primary group will be set to
 .Ar group .
 The
@@ -404,12 +428,16 @@ Depending on the policy, this may be the default behavior.
 .It Fl h , -help
 Display a short help message to the standard output and exit.
 .It Fl h Ar host , Fl -host Ns = Ns Ar host
-Run the command on the specified
+Run the
+.Ar command
+on the specified
 .Ar host
-if the security policy plugin supports remote commands.
+if the security policy plugin supports remote
+.Ar command Ns s.
 The
 .Em sudoers
-plugin does not currently support running remote commands.
+plugin does not currently support running remote
+.Ar command Ns s.
 This may also be used in conjunction with the
 .Fl l
 option to list a user's privileges for the remote host.
@@ -422,25 +450,35 @@ This means that login-specific resource files such as
 or
 .Pa .login
 will be read by the shell.
-If a command is specified, it is passed to the shell as a simple
-command using the
+If a
+.Ar command
+is specified, it is passed to the shell as a simple
+.Ar command
+using the
 .Fl c
 option.
-The command and any arguments are concatenated, separated by spaces,
-after escaping each character
+The
+.Ar command
+and any
+.Ar arg Ns s
+are concatenated, separated by spaces, after escaping each character
 .Pq including white space
 with a backslash
 .Pq Ql \e
 except for alphanumerics, underscores,
 hyphens, and dollar signs.
-If no command is specified, an interactive shell is executed.
+If no
+.Ar command
+is specified, an interactive shell is executed.
 .Nm
 attempts to change to that user's home directory before running the
 shell.
-The command is run with an environment similar to the one
-a user would receive at log in.
-Most shells behave differently when a command is specified
-as compared to an interactive session; consult the shell's manual
+The
+.Ar command
+is run with an environment similar to the one a user would receive at log in.
+Most shells behave differently when a
+.Ar command
+is specified as compared to an interactive session; consult the shell's manual
 for details.
 The
 .Em Command environment
@@ -448,18 +486,24 @@ section in the
 .Xr sudoers @mansectform@
 manual documents how the
 .Fl i
-option affects the environment in which a command is run when the
+option affects the environment in which a
+.Ar command
+is run when the
 .Em sudoers
 policy is in use.
 .It Fl K , -remove-timestamp
 Similar to the
 .Fl k
 option, except that it removes the user's cached credentials entirely
-and may not be used in conjunction with a command or other option.
+and may not be used in conjunction with a
+.Ar command
+or other option.
 This option does not require a password.
 Not all security policies support credential caching.
 .It Fl k , -reset-timestamp
-When used without a command, invalidates the user's cached credentials.
+When used without a
+.Ar command ,
+invalidates the user's cached credentials.
 In other words, the next time
 .Nm
 is run a password will be required.
@@ -470,8 +514,9 @@ permissions from a
 .Pa .logout
 file.
 .Pp
-When used in conjunction with a command or an option that may require
-a password, this option will cause
+When used in conjunction with a
+.Ar command
+or an option that may require a password, this option will cause
 .Nm
 to ignore the user's cached credentials.
 As a result,
@@ -483,9 +528,8 @@ Not all security policies support credential caching.
 .It Fl l , Fl -list
 If no
 .Ar command
-is specified,
-list the allowed (and forbidden) commands for the
-invoking user (or the user specified by the
+is specified, list the privileges for the invoking user (or the
+user specified by the
 .Fl U
 option) on the current host.
 A longer list format is used if this option is specified multiple times
@@ -494,8 +538,10 @@ and the security policy supports a verbose output format.
 If a
 .Ar command
 is specified and is permitted by the security policy, the fully-qualified
-path to the command is displayed along with any command line
-arguments.
+path to the
+.Ar command
+is displayed along with any
+.Ar arg Ns s.
 If a
 .Ar command
 is specified but not allowed by the policy,
@@ -508,13 +554,15 @@ Unlike the
 .Fl k
 flag, existing cached credentials are used if they are valid.
 To detect when the user's cached credentials are valid (or when no
-authentication is required), the following command can be used:
+authentication is required), the following can be used:
 .Dl sudo -Nnv
 .Pp
 Not all security policies support credential caching.
 .It Fl n , -non-interactive
 Avoid prompting the user for input of any kind.
-If a password is required for the command to run,
+If a password is required for the
+.Ar command
+to run,
 .Nm
 will display an error message and exit.
 .It Fl P , -preserve-groups
@@ -551,8 +599,9 @@ and
 flags in
 .Xr sudoers @mansectform@ )
 .It \&%U
-expanded to the login name of the user the command will be run as
-(defaults to root unless the
+expanded to the login name of the user the
+.Ar command
+will be run as (defaults to root unless the
 .Fl u
 option is also specified)
 .It %u
@@ -579,13 +628,15 @@ Change to the specified root
 .Ar directory
 (see
 .Xr chroot @mansectsu@ )
-before running the command.
+before running the
+.Ar command .
 The security policy may return an error if the user does not have
 permission to specify the root directory.
 .if \n(SL \{\
 .It Fl r Ar role , Fl -role Ns = Ns Ar role
-Run the command with an SELinux security context that includes
-the specified
+Run the
+.Ar command
+with an SELinux security context that includes the specified
 .Ar role .
 .\}
 .It Fl S , -stdin
@@ -596,25 +647,33 @@ Run the shell specified by the
 .Ev SHELL
 environment variable if it is set or the shell specified by the
 invoking user's password database entry.
-If a command is specified, it is passed to the shell as a simple
-command using the
+If a
+.Ar command
+is specified, it is passed to the shell as a simple command using the
 .Fl c
 option.
-The command and any arguments are concatenated, separated by spaces,
-after escaping each character
+The
+.Ar command
+and any
+.Ar arg Ns s
+are concatenated, separated by spaces, after escaping each character
 .Pq including white space
 with a backslash
 .Pq Ql \e
 except for alphanumerics, underscores,
 hyphens, and dollar signs.
-If no command is specified, an interactive shell is executed.
-Most shells behave differently when a command is specified
-as compared to an interactive session; consult the shell's manual
+If no
+.Ar command
+is specified, an interactive shell is executed.
+Most shells behave differently when a
+.Ar command
+is specified as compared to an interactive session; consult the shell's manual
 for details.
 .if \n(SL \{\
 .It Fl t Ar type , Fl -type Ns = Ns Ar type
-Run the command with an SELinux security context that includes
-the specified
+Run the
+.Ar command
+with an SELinux security context that includes the specified
 .Ar type .
 If no
 .Ar type
@@ -629,21 +688,27 @@ instead of for the invoking user.
 The security policy may restrict listing other users' privileges.
 When using the
 .Em sudoers
-policy, only root or a user with the ability to run any command as
-either root or the specified
+policy, only root or a user with the ability to run any
+.Ar command
+as either root or the specified
 .Ar user
 on the current host may use this option.
 .It Fl T Ar timeout , Fl -command-timeout Ns = Ns Ar timeout
-Used to set a timeout for the command.
-If the timeout expires before the command has exited, the
-command will be terminated.
-The security policy may restrict the ability to set command timeouts.
+Used to set a timeout for the
+.Ar command .
+If the timeout expires before the
+.Ar command
+has exited, the
+.Ar command
+will be terminated.
+The security policy may restrict the user's ability to set timeouts.
 The
 .Em sudoers
 policy requires that user-specified timeouts be explicitly enabled.
 .It Fl u Ar user , Fl -user Ns = Ns Ar user
-Run the command as a user other than the default target user
-(usually
+Run the
+.Ar command
+as a user other than the default target user (usually
 .Em root ) .
 The
 .Ar user
@@ -654,7 +719,9 @@ prefixed with the
 character (e.g.,
 .Ql #0
 for UID 0).
-When running commands as a UID, many shells require that the
+When running
+.Ar command Ns s as
+a UID, many shells require that the
 .Ql #
 be escaped with a backslash
 .Pq Ql \e .
@@ -672,7 +739,7 @@ Print the
 version string as well as the version string of any configured plugins.
 If the invoking user is already root, the
 .Fl V
-option will display the arguments passed to configure when
+option will display the options passed to configure when
 .Nm
 was built; plugins may display additional information such as
 default options.
@@ -683,14 +750,17 @@ For the
 .Em sudoers
 plugin, this extends the
 .Nm
-timeout for another @timeout@ minutes by default, but does not run a command.
+timeout for another @timeout@ minutes by default, but does not run a
+.Ar command .
 Not all security policies support cached credentials.
 .It Fl -
 The
 .Fl -
-option indicates that
+is used to delimit the end of the
 .Nm
-should stop processing command line arguments.
+options.
+Subsequent options are passed to the
+.Ar command .
 .El
 .Pp
 Options that take a value may only be specified once unless
@@ -700,25 +770,32 @@ scripts that invoke
 .Nm sudo
 with user-controlled input.
 .Pp
-Environment variables to be set for the command may also be passed
-on the command line in the form of
+Environment variables to be set for the
+.Ar command
+may also be passed as options to
+.Nm
+in the form
 .Ar VAR Ns = Ns Ar value ,
-e.g.,
+for example
 .Ev LD_LIBRARY_PATH Ns = Ns Pa /usr/local/pkg/lib .
-Variables passed on the command line are subject to restrictions
+Environment variables may be subject to restrictions
 imposed by the security policy plugin.
 The
 .Em sudoers
-policy subjects variables passed on the command line to the same
-restrictions as normal environment variables with one important
-exception.
+policy subjects environment variables passed as options to the same
+restrictions as existing environment variables with one important
+difference.
 If the
 .Em setenv
 option is set in
 .Em sudoers ,
-the command to be run has the
+the
+.Ar command
+to be run has the
 .Dv SETENV
-tag set or the command matched is
+tag set or the
+.Ar command
+matched is
 .Sy ALL ,
 the user may set variables that would otherwise be forbidden.
 See
@@ -727,8 +804,10 @@ for more information.
 .Sh COMMAND EXECUTION
 When
 .Nm
-executes a command, the security policy specifies the execution
-environment for the command.
+executes a
+.Ar command ,
+the security policy specifies the execution environment for the
+.Ar command .
 Typically, the real and effective user and group and IDs are set to
 match those of the target user, as specified in the password database,
 and the group vector is initialized based on the group database
@@ -771,7 +850,8 @@ scheduling priority (aka nice value)
 .Ss Process model
 There are two distinct ways
 .Nm
-can run a command.
+can run a
+.Ar command .
 .Pp
 If an I/O logging plugin is configured to log terminal I/O, or if
 the security policy explicitly requests it, a new pseudo-terminal
@@ -789,26 +869,42 @@ controlling terminal, calls
 .Xr fork 2
 again, sets up the execution environment as described above, and then uses the
 .Xr execve 2
-system call to run the command in the child process.
+system call to run the
+.Ar command
+in the child process.
 The
 .Em monitor
 exists to relay job control signals between the user's
-terminal and the pty the command is being run in.
-This makes it possible to suspend and resume the command normally.
+terminal and the pty the
+.Ar command
+is being run in.
+This makes it possible to suspend and resume the
+.Ar command
+normally.
 Without the
-.Em monitor , the command would be in what POSIX terms an
+.Em monitor ,
+the
+.Ar command
+would be in what POSIX terms an
 .Dq orphaned process group
 and it would not receive any job control signals from the kernel.
-When the command exits or is terminated by a signal, the
+When the
+.Ar command
+exits or is terminated by a signal, the
 .Em monitor
-passes the command's exit status to the main
+passes the
+.Ar command Ns 's
+exit status to the main
 .Nm
 process and exits.
-After receiving the command's exit status, the main
+After receiving the
+.Ar command Ns 's
+exit status, the main
 .Nm
-process passes the command's exit status to the security policy's
-close function, as well as the close function of any configured audit
-plugin, and exits.
+process passes the
+.Ar command Ns 's
+exit status to the security policy's close function, as well as the
+close function of any configured audit plugin, and exits.
 .Pp
 If no pty is used,
 .Nm
@@ -816,23 +912,31 @@ calls
 .Xr fork 2 ,
 sets up the execution environment as described above, and uses the
 .Xr execve 2
-system call to run the command in the child process.
+system call to run the
+.Ar command
+in the child process.
 The main
 .Nm
-process waits until the command has completed, then passes the
-command's exit status to the security policy's close function, as
-well as the close function of any configured audit plugins, and exits.
+process waits until the
+.Ar command
+has completed, then passes the
+.Ar command Ns 's
+exit status to the security policy's close function, as well as the
+close function of any configured audit plugins, and exits.
 As a special case, if the policy plugin does not define a close
 function,
 .Nm
-will execute the command directly instead of calling
+will execute the
+.Ar command
+directly instead of calling
 .Xr fork 2
 first.
 The
 .Em sudoers
 policy plugin will only define a close function when I/O logging
 is enabled, a pty is required, an SELinux role is specified, the
-command has an associated timeout, or the
+.Ar command
+has an associated timeout, or the
 .Em pam_session
 or
 .Em pam_setcred
@@ -845,41 +949,57 @@ are enabled by default on systems using PAM.
 .Pp
 On systems that use PAM, the security policy's close function
 is responsible for closing the PAM session.
-It may also log the command's exit status.
+It may also log the
+.Ar command Ns 's
+exit status.
 .Ss Signal handling
-When the command is run as a child of the
+When the
+.Ar command
+is run as a child of the
 .Nm
 process,
 .Nm
-will relay signals it receives to the command.
+will relay signals it receives to the
+.Ar command .
 The
 .Dv SIGINT
 and
 .Dv SIGQUIT
-signals are only relayed when the command is being run in a new pty
-or when the signal was sent by a user process, not the kernel.
-This prevents the command from receiving
+signals are only relayed when the
+.Ar command
+is being run in a new pty or when the signal was sent by a user
+process, not the kernel.
+This prevents the
+.Ar command
+from receiving
 .Dv SIGINT
 twice each time the user enters control-C.
 Some signals, such as
 .Dv SIGSTOP
 and
 .Dv SIGKILL ,
-cannot be caught and thus will not be relayed to the command.
+cannot be caught and thus will not be relayed to the
+.Ar command .
 As a general rule,
 .Dv SIGTSTP
 should be used instead of
 .Dv SIGSTOP
-when you wish to suspend a command being run by
+when you wish to suspend a
+.Ar command
+being run by
 .Nm .
 .Pp
 As a special case,
 .Nm
-will not relay signals that were sent by the command it is running.
-This prevents the command from accidentally killing itself.
+will not relay signals that were sent by the
+.Ar command
+it is running.
+This prevents the
+.Ar command
+from accidentally killing itself.
 On some systems, the
 .Xr reboot @mansectsu@
-command sends
+utility sends
 .Dv SIGTERM
 to all non-system processes other than itself before rebooting
 the system.
@@ -891,9 +1011,13 @@ signal it received back to
 .Xr reboot @mansectsu@ ,
 which might then exit before the system was actually rebooted,
 leaving it in a half-dead state similar to single user mode.
-Note, however, that this check only applies to the command run by
+Note, however, that this check only applies to the
+.Ar command
+run by
 .Nm
-and not any other processes that the command may create.
+and not any other processes that the
+.Ar command
+may create.
 As a result, running a script that calls
 .Xr reboot @mansectsu@
 or
@@ -908,7 +1032,9 @@ are run using the
 .Fn exec
 family of functions instead of
 .Fn system
-(which interposes a shell between the command and the calling process).
+(which interposes a shell between the
+.Ar command
+and the calling process).
 .Ss Plugins
 Plugins may be specified via
 .Em Plugin
@@ -938,27 +1064,38 @@ manual for more information about the
 .Nm
 plugin architecture.
 .Sh EXIT VALUE
-Upon successful execution of a command, the exit status from
+Upon successful execution of a
+.Ar command ,
+the exit status from
 .Nm
 will be the exit status of the program that was executed.
-If the command terminated due to receipt of a signal,
+If the
+.Ar command
+terminated due to receipt of a signal,
 .Nm
-will send itself the same signal that terminated the command.
+will send itself the same signal that terminated the
+.Ar command .
 .Pp
 If the
 .Fl l
-option was specified without a command,
+option was specified without a
+.Ar command ,
 .Nm
 will exit with a value of 0 if the user is allowed to run
 .Nm
 and they authenticated successfully (as required by the security policy).
-If a command is specified with the
+If a
+.Ar command
+is specified with the
 .Fl l
-option, the exit value will only be 0 if the command is permitted by the
-security policy, otherwise it will be 1.
+option, the exit value will only be 0 if the
+.Ar command
+is permitted by the security policy, otherwise it will be 1.
 .Pp
 If there is an authentication failure, a configuration/permission
-problem, or if the given command cannot be executed,
+problem, or if the given
+.Ar command
+cannot be executed,
 .Nm
 exits with a value of 1.
 In the latter case, the error string is printed to the standard error.
@@ -982,12 +1119,15 @@ your
 is on a machine that is currently unreachable.
 .Sh SECURITY NOTES
 .Nm
-tries to be safe when executing external commands.
+tries to be safe when executing external
+.Ar command Ns s.
 .Pp
 To prevent command spoofing,
 .Nm
 checks "." and "" (both denoting current directory) last when
-searching for a command in the user's
+searching for a
+.Ar command
+in the user's
 .Ev PATH
 (if one or both are in the
 .Ev PATH ) .
@@ -1004,27 +1144,43 @@ be granted
 .Nm
 privileges to execute files that are writable by the user or
 that reside in a directory that is writable by the user.
-If the user can modify or replace the command there is no way
-to limit what additional commands they can run.
+If the user can modify or replace the
+.Ar command
+there is no way to limit what additional
+.Ar command Ns s
+they can run.
 .Pp
 By default,
 .Nm
-will only log the command it explicitly runs.
-If a user runs a command such as
+will only log the
+.Ar command
+it explicitly runs.
+If a user runs a
+.Ar command
+such as
 .Ql sudo su
 or
 .Ql sudo sh ,
-subsequent commands run from that shell are not subject to
+subsequent
+.Ar command Ns s
+run from that shell are not subject to
 .Nm sudo Ns 's
 security policy.
-The same is true for commands that offer shell escapes (including
-most editors).
-If I/O logging is enabled, subsequent commands will have their input and/or
-output logged, but there will not be traditional logs for those commands.
-Because of this, care must be taken when giving users access to commands via
+The same is true for
+.Ar command Ns s
+that offer shell escapes (including most editors).
+If I/O logging is enabled, subsequent
+.Ar command Ns s
+will have their input and/or output logged, but there will not be
+traditional logs for those
+.Ar command Ns s.
+Because of this, care must be taken when giving users access to
+.Ar command Ns s
+via
 .Nm
-to verify that the command does not inadvertently give the user an
-effective root shell.
+to verify that the
+.Ar command
+does not inadvertently give the user an effective root shell.
 For information on ways to address this, see the
 .Em Preventing shell escapes
 section in
@@ -1033,7 +1189,9 @@ section in
 To prevent the disclosure of potentially sensitive information,
 .Nm
 disables core dumps by default while it is executing (they are
-re-enabled for the command that is run).
+re-enabled for the
+.Ar command
+that is run).
 This historical practice dates from a time when most operating
 systems allowed set-user-ID processes to dump core by default.
 To aid in debugging
@@ -1053,7 +1211,8 @@ manual for more information.
 .Sh ENVIRONMENT
 .Nm
 utilizes the following environment variables.
-The security policy has control over the actual content of the command's
+The security policy has control over the actual content of the
+.Ar command Ns 's
 environment.
 .Bl -tag -width 15n
 .It Ev EDITOR
@@ -1128,9 +1287,13 @@ if no terminal is available or if the
 .Fl A
 option is specified.
 .It Ev SUDO_COMMAND
-Set to the command run by sudo, including command line arguments.
-The command line arguments are truncated at 4096 characters to
-prevent a potential execution error.
+Set to the
+.Ar command
+run by sudo, including any
+.Ar arg Ns s.
+The
+.Ar arg Ns s
+are truncated at 4096 characters to prevent a potential execution error.
 .It Ev SUDO_EDITOR
 Default editor to use in
 .Fl e
@@ -1204,7 +1367,9 @@ $ sudo shutdown -r +15 "quick reboot"
 .Ed
 .Pp
 To make a usage listing of the directories in the /home partition.
-The commands are run in a sub-shell to allow the
+The
+.Ar commands
+are run in a sub-shell to allow the
 .Ql cd
 command and file redirection to work.
 .Bd -literal -offset 4n
@@ -1325,8 +1490,8 @@ The user did not enter a password before the password timeout
 .It Li you do not exist in the passwd database
 Your user-ID does not appear in the system passwd database.
 .It Li you may not specify environment variables in edit mode
-It is only possible to specify environment variables when running
-a command.
+It is only possible to specify environment variables when running a
+.Ar command .
 When editing a file, the editor is run with the user's environment unmodified.
 .El
 .Sh SEE ALSO
@@ -1360,9 +1525,12 @@ exhaustive list of people who have contributed to
 .Nm .
 .Sh CAVEATS
 There is no easy way to prevent a user from gaining a root shell
-if that user is allowed to run arbitrary commands via
+if that user is allowed to run arbitrary
+.Ar commands
+via
 .Nm .
-Also, many programs (such as editors) allow the user to run commands
+Also, many programs (such as editors) allow the user to run
+.Ar command Ns s
 via shell escapes, thus avoiding
 .Nm sudo Ns 's
 checks.
@@ -1374,16 +1542,21 @@ functionality.
 .Pp
 It is not meaningful to run the
 .Ql cd
-command directly via sudo, e.g.,
+.Ar command
+directly via sudo, e.g.,
 .Bd -literal -offset 4n
 $ sudo cd /usr/local/protected
 .Ed
 .Pp
-since when the command exits the parent process (your shell) will
-still be the same.
-See the
-.Sx EXAMPLES
-section for more information.
+since when the
+.Ar command
+exits the parent process (your shell) will still be the same.
+The
+.Fl D
+option can be used to run a
+.Ar command
+in a specific
+.Ar directory .
 .Pp
 Running shell scripts via
 .Nm

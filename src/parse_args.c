@@ -52,7 +52,7 @@ sudo_noreturn static void usage_excl(void);
 sudo_noreturn static void usage_excl_ticket(void);
 
 /*
- * Mapping of command line flags to name/value settings.
+ * Mapping of command line options to name/value settings.
  * Do not reorder, indexes must match ARG_ defines in sudo.h.
  */
 static struct sudo_settings sudo_settings[] = {
