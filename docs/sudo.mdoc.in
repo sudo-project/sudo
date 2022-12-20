@@ -529,7 +529,8 @@ Not all security policies support credential caching.
 If no
 .Ar command
 is specified, list the privileges for the invoking user (or the
-user specified by the
+.Ar user
+specified by the
 .Fl U
 option) on the current host.
 A longer list format is used if this option is specified multiple times
@@ -688,11 +689,17 @@ instead of for the invoking user.
 The security policy may restrict listing other users' privileges.
 When using the
 .Em sudoers
-policy, only root or a user with the ability to run any
-.Ar command
-as either root or the specified
+policy, the
+.Fl U
+option is restricted to the root user and users with either the
+.Dq list
+priviege for the specified
 .Ar user
-on the current host may use this option.
+or the ability to run any
+.Ar command
+as root or
+.Ar user
+on the current host.
 .It Fl T Ar timeout , Fl -command-timeout Ns = Ns Ar timeout
 Used to set a timeout for the
 .Ar command .
