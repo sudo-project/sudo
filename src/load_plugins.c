@@ -82,7 +82,21 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
 	}
 	status = stat(fullpath, sb);
     }
-    if (status == -1) {
+#ifdef _AIX
+    if (status == -1 && errno == ENOENT) {
+	/* Check for AIX path(module) syntax. */
+	char *cp = strrchr(fullpath, '(');
+	if (cp != NULL) {
+	    /* Only for archive files (e.g. sudoers.a). */
+	    if (cp > fullpath + 2 && cp[-2] == '.' && cp[-1] == 'a') {
+		*cp = '\0';
+		status = stat(fullpath, sb);
+		*cp = '(';
+	    }
+	}
+    }
+#endif /* _AIX */
+    if (status == -1 && errno == ENOENT) {
 	char *newpath = sudo_stat_multiarch(fullpath, sb);
 	if (newpath != NULL) {
 	    len = strlcpy(fullpath, newpath, pathsize);

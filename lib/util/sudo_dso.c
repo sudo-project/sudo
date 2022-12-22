@@ -240,7 +240,7 @@ sudo_dso_load_v1(const char *path, int mode)
     cp = strrchr(path, '(');
     if (cp != NULL) {
 	size_t len = strlen(cp);
-	if (len > 2 && cp[len - 1] == '\0')
+	if (len > 2 && cp[len - 1] == ')')
 	    SET(flags, RTLD_MEMBER);
     }
 # endif /* RTLD_MEMBER */
