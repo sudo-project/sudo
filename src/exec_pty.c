@@ -1167,7 +1167,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     /* Check for early termination or suspend signals before we fork. */
     if (sudo_terminated(cstat)) {
 	sigprocmask(SIG_SETMASK, &oset, NULL);
-	debug_return_int(true);
+	debug_return_bool(true);
     }
 
     ec.monitor_pid = sudo_debug_fork();
