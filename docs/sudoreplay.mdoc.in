@@ -197,7 +197,7 @@ Evaluates to true if the command was run as the specified
 By default,
 .Nm sudo
 runs commands as the
-.Em root
+.Sy root
 user.
 .It todate Ar date
 Evaluates to true if the command was run on or prior to

@@ -767,7 +767,7 @@ policy requires that user-specified timeouts be explicitly enabled.
 Run the
 \fIcommand\fR
 as a user other than the default target user (usually
-\fIroot\fR).
+\fBroot\fR).
 The
 \fIuser\fR
 may be either a user name or a numeric user-ID

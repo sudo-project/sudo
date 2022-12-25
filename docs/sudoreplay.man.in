@@ -214,7 +214,7 @@ Evaluates to true if the command was run as the specified
 By default,
 \fBsudo\fR
 runs commands as the
-\fIroot\fR
+\fBroot\fR
 user.
 .TP 8n
 todate \fIdate\fR
