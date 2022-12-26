@@ -332,6 +332,17 @@ Defaults are listed in brackets after the description.
         via the user's PATH) and the default libtool that comes
         with sudo.
 
+    --with-aix-soname=svr4
+        Starting with version 1.9.13, sudo will build AIX-style
+        shared libraries and dynamic shared objects by default
+        instead of svr4-style..  This means that the default sudo
+        plugins are now .a (archive) files that contain a .so shared
+        object file instead of bare .so files.  This was done to
+        improve compatibility with the AIX Freeware ecosystem,
+        specifically, the AIX Freeware build of OpenSSL.  To restore
+        the old, pre-1.9.13 behavior, run configure using the
+        --with-aix-soname=svr4 option.
+
 ### Optional features:
 
     --disable-root-mailer

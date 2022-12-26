@@ -1,6 +1,25 @@
 Notes on upgrading from an older release
 ========================================
 
+ * Upgrading from a version prior to 1.9.13:
+   
+   Sudo now builds AIX-style shared libraries and dynamic shared
+   objects by default instead of svr4-style.  This means that the
+   default sudo plugins are now .a (archive) files that contain a
+   .so shared object file instead of bare .so files.  This was done
+   to improve compatibility with the AIX Freeware ecosystem,
+   specifically, the AIX Freeware build of OpenSSL.  When loading
+   a .a file as a plugin the name of the included .so file must
+   also be specified, for example /usr/libexec/sudo/sudoers.a(sudoers.so).
+
+   Sudo is still capable of loading svr4-style .so plugins and if
+   a .so file is requested, either via sudo.conf or the sudoers
+   file, and only the .a file is present, sudo will convert the
+   path from plugin.so to plugin.a(plugin.so).  This ensures
+   compatibility with existing configurations.  To restore the old,
+   pre-1.9.13 behavior, run configure using the --with-aix-soname=svr4
+   option.
+
  * Upgrading from a version prior to 1.9.10:
 
    Sudo now interprets a command line argument in sudoers that

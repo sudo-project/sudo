@@ -1,3 +1,79 @@
+What's new in Sudo 1.9.13
+
+ * Fixed a bug running relative commands via sudo when "log_subcmds"
+   is enabled.  GitHub issue #194.
+
+ * Fixed a signal handling bug when running sudo commands in a shell
+   script.  Signals were not being forwarded to the command when
+   the sudo process was not run in its own process group.
+
+ * Fixed a bug in cvtsudoers' LDIF parsing when the file ends without
+   a newline and a backslash is the last character of the file.
+
+ * Fixed a compilation error on Linux/aarch64.  GitHub issue #197.
+
+ * Fixed a potential use-after-free bug with cvtsudoers filtering.
+   GitHub issue #198.
+
+ * Added a reminder to the default lecture that the password will
+   not echo. This line is only displayed when the pwfeedback option
+   is disabled. GitHub issue #195.
+
+ * Fixed potential memory leaks in error paths.  GitHub issues #199,
+   #202.
+
+ * Fixed potential NULL dereferences on memory allocation failure.
+   GitHub issues #204, #211.
+
+ * Sudo now uses C23-style attributes in function prototypes instead
+   of gcc-style attributes if supported.
+
+ * Fixed a potential crash introduced in the fix for GitHub issue #134.
+   If a user's sudoers entry did not have any RunAs user's set,
+   running "sudo -U otheruser -l" would dereference a NULL pointer.
+
+ * Added a new "list" pseudo-command in sudoers to allow a user to
+   list another user's privileges.  Previously, only root or a user
+   with the ability to run any command as either root or the target
+   user on the current host could use the -U option.  This also
+   includes a fix to the log entry when a user lacks permission to
+   run "sudo -U otheruser -l command".  Previously, the logs would
+   indicate that the user tried to run the actual command, now the
+   log entry includes the list operation.
+
+ * JSON logging now escapes control characters if they happen to
+   appear in the command or environment.
+
+ * New Albanian translation from translationproject.org.
+
+ * Regular expressions in sudoers or logsrvd.conf may no longer
+   contain consecutive repetition operators.  This is implementation-
+   specific behavior according to POSIX, but some implementations
+   will allocate excessive amounts of memory.  This mainly affects
+   the fuzzers.
+
+ * Sudo now builds AIX-style shared libraries and dynamic shared
+   objects by default instead of svr4-style. This means that the
+   default sudo plugins are now .a (archive) files that contain a
+   .so shared object file instead of bare .so files.  This was done
+   to improve compatibility with the AIX Freeware ecosystem,
+   specifically, the AIX Freeware build of OpenSSL.  Sudo will still
+   load svr4-style .so plugins and if a .so file is requested,
+   either via sudo.conf or the sudoers file, and only the .a file
+   is present, sudo will convert the path from plugin.so to
+   plugin.a(plugin.so) when loading it.  This ensures compatibility
+   with existing configurations.  To restore the old, pre-1.9.13
+   behavior, run configure using the --with-aix-soname=svr4 option.
+
+ * Sudo no longer checks the ownership and mode of the plugins that
+   it loads.  Plugins are configured via either the sudo.conf or
+   sudoers file which are trusted configuration files.  These checks
+   suffered from time-of-check vs. time-of-use race conditions and
+   complicate loading plugins that are not simple paths.  Ownership
+   and mode checks are still performed when loading the sudo.conf
+   and sudoers files, which do not suffer from race conditions.
+   The sudo.conf "developer_mode" setting is no longer used.
+
 What's new in Sudo 1.9.12p1
 
  * Sudo's configure script now does a better job of detecting when
