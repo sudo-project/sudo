@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "December 22, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "December 26, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -72,9 +72,9 @@ plugin, the following configuration can be used.
 .nf
 .sp
 .RS 4n
-Plugin sudoers_audit @sudoers_module@
-Plugin sudoers_policy @sudoers_module@
-Plugin sudoers_io @sudoers_module@
+Plugin sudoers_audit @sudoers_plugin@
+Plugin sudoers_policy @sudoers_plugin@
+Plugin sudoers_io @sudoers_plugin@
 .RE
 .fi
 .PP
@@ -87,7 +87,7 @@ sudo.conf(@mansectform@)
 file.
 Plugin arguments, if any, should be listed after the path to the plugin
 (i.e., after
-\fI@sudoers_module@\fR).
+\fI@sudoers_plugin@\fR).
 The arguments are only effective for the plugin that opens (and parses) the
 \fIsudoers\fR
 file.
@@ -105,7 +105,7 @@ For example:
 .nf
 .sp
 .RS 4n
-Plugin sudoers_audit @sudoers_module@ sudoers_mode=0400 error_recovery=false
+Plugin sudoers_audit @sudoers_plugin@ sudoers_mode=0400 error_recovery=false
 .RE
 .fi
 .PP

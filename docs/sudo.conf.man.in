@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "December 22, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "December 26, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -127,7 +127,7 @@ In other words:
 .nf
 .sp
 .RS 4n
-Plugin sudoers_policy @sudoers_module@
+Plugin sudoers_policy @sudoers_plugin@
 .RE
 .fi
 .PP
@@ -135,7 +135,7 @@ is equivalent to:
 .nf
 .sp
 .RS 4n
-Plugin sudoers_policy @plugindir@/@sudoers_module@
+Plugin sudoers_policy @plugindir@/@sudoers_plugin@
 .RE
 .fi
 .PP
@@ -149,7 +149,7 @@ For example:
 .nf
 .sp
 .RS 4n
-Plugin sudoers_policy @sudoers_module@
+Plugin sudoers_policy @sudoers_plugin@
 .RE
 .fi
 .PP
@@ -164,7 +164,7 @@ For example, to override the compile-time default sudoers file mode:
 .nf
 .sp
 .RS 4n
-Plugin sudoers_policy @sudoers_module@ sudoers_mode=0440
+Plugin sudoers_policy @sudoers_plugin@ sudoers_mode=0440
 .RE
 .fi
 .PP
@@ -191,9 +191,9 @@ This is equivalent to the following:
 .nf
 .sp
 .RS 4n
-Plugin sudoers_policy @sudoers_module@
-Plugin sudoers_io @sudoers_module@
-Plugin sudoers_audit @sudoers_module@
+Plugin sudoers_policy @sudoers_plugin@
+Plugin sudoers_io @sudoers_plugin@
+Plugin sudoers_audit @sudoers_plugin@
 .RE
 .fi
 .PP
@@ -595,7 +595,7 @@ entries are also supported starting with
 \fBsudo\fR
 1.8.12 and are matched by either the base name of the plugin that was loaded
 (for example
-\fI@sudoers_module@\fR)
+\fI@sudoers_plugin@\fR)
 or by the plugin's fully-qualified path name.
 Previously, the
 \fBsudoers\fR
@@ -714,9 +714,9 @@ front-end configuration
 # The plugin_options are optional.
 #
 # The sudoers plugin is used by default if no Plugin lines are present.
-#Plugin sudoers_policy @sudoers_module@
-#Plugin sudoers_io @sudoers_module@
-#Plugin sudoers_audit @sudoers_module@
+#Plugin sudoers_policy @sudoers_plugin@
+#Plugin sudoers_io @sudoers_plugin@
+#Plugin sudoers_audit @sudoers_plugin@
 
 #
 # Sudo askpass:

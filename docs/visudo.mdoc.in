@@ -20,7 +20,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd December 22, 2022
+.Dd December 26, 2022
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -314,11 +314,11 @@ plugin to override the default
 path name, user-ID, group-ID, and file mode.
 These arguments, if present, should be listed after the path to the plugin
 (i.e., after
-.Pa @sudoers_module@ ) .
+.Pa @sudoers_plugin@ ) .
 Multiple arguments may be specified, separated by white space.
 For example:
 .Bd -literal -offset 4n
-Plugin sudoers_policy @sudoers_module@ sudoers_mode=0400
+Plugin sudoers_policy @sudoers_plugin@ sudoers_mode=0400
 .Ed
 .Pp
 The following arguments are supported:

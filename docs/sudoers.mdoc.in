@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd December 22, 2022
+.Dd December 26, 2022
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -70,9 +70,9 @@ to use the
 .Nm
 plugin, the following configuration can be used.
 .Bd -literal -offset 4n
-Plugin sudoers_audit @sudoers_module@
-Plugin sudoers_policy @sudoers_module@
-Plugin sudoers_io @sudoers_module@
+Plugin sudoers_audit @sudoers_plugin@
+Plugin sudoers_policy @sudoers_plugin@
+Plugin sudoers_io @sudoers_plugin@
 .Ed
 .Pp
 Starting with
@@ -84,7 +84,7 @@ plugin in the
 file.
 Plugin arguments, if any, should be listed after the path to the plugin
 (i.e., after
-.Pa @sudoers_module@ ) .
+.Pa @sudoers_plugin@ ) .
 The arguments are only effective for the plugin that opens (and parses) the
 .Em sudoers
 file.
@@ -100,7 +100,7 @@ plugin.
 Multiple arguments may be specified, separated by white space.
 For example:
 .Bd -literal -offset 4n
-Plugin sudoers_audit @sudoers_module@ sudoers_mode=0400 error_recovery=false
+Plugin sudoers_audit @sudoers_plugin@ sudoers_mode=0400 error_recovery=false
 .Ed
 .Pp
 The following plugin arguments are supported:

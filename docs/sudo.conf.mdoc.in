@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.Dd December 22, 2022
+.Dd December 26, 2022
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -122,12 +122,12 @@ setting, which defaults to
 .Pa @plugindir@ .
 In other words:
 .Bd -literal -offset 4n
-Plugin sudoers_policy @sudoers_module@
+Plugin sudoers_policy @sudoers_plugin@
 .Ed
 .Pp
 is equivalent to:
 .Bd -literal -offset 4n
-Plugin sudoers_policy @plugindir@/@sudoers_module@
+Plugin sudoers_policy @plugindir@/@sudoers_plugin@
 .Ed
 .Pp
 If the plugin was compiled statically into the
@@ -138,7 +138,7 @@ should be specified without a leading directory,
 as it does not actually exist in the file system.
 For example:
 .Bd -literal -offset 4n
-Plugin sudoers_policy @sudoers_module@
+Plugin sudoers_policy @sudoers_plugin@
 .Ed
 .Pp
 Starting with
@@ -150,7 +150,7 @@ are passed as arguments to the plugin's
 function.
 For example, to override the compile-time default sudoers file mode:
 .Bd -literal -offset 4n
-Plugin sudoers_policy @sudoers_module@ sudoers_mode=0440
+Plugin sudoers_policy @sudoers_plugin@ sudoers_mode=0440
 .Ed
 .Pp
 See the
@@ -174,9 +174,9 @@ plugin will be used as the default security policy, for I/O logging
 (if enabled by the policy), and for auditing.
 This is equivalent to the following:
 .Bd -literal -offset 4n
-Plugin sudoers_policy @sudoers_module@
-Plugin sudoers_io @sudoers_module@
-Plugin sudoers_audit @sudoers_module@
+Plugin sudoers_policy @sudoers_plugin@
+Plugin sudoers_io @sudoers_plugin@
+Plugin sudoers_audit @sudoers_plugin@
 .Ed
 .Pp
 Starting with
@@ -542,7 +542,7 @@ entries are also supported starting with
 .Nm sudo
 1.8.12 and are matched by either the base name of the plugin that was loaded
 (for example
-.Pa @sudoers_module@ )
+.Pa @sudoers_plugin@ )
 or by the plugin's fully-qualified path name.
 Previously, the
 .Nm sudoers
@@ -646,9 +646,9 @@ front-end configuration
 # The plugin_options are optional.
 #
 # The sudoers plugin is used by default if no Plugin lines are present.
-#Plugin sudoers_policy @sudoers_module@
-#Plugin sudoers_io @sudoers_module@
-#Plugin sudoers_audit @sudoers_module@
+#Plugin sudoers_policy @sudoers_plugin@
+#Plugin sudoers_io @sudoers_plugin@
+#Plugin sudoers_audit @sudoers_plugin@
 
 #
 # Sudo askpass:
