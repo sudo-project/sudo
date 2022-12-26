@@ -11,9 +11,9 @@
 # The plugin_options are optional.
 #
 # The sudoers plugin is used by default if no Plugin lines are present.
-#Plugin sudoers_policy sudoers.so
-#Plugin sudoers_io sudoers.so
-#Plugin sudoers_audit sudoers.so
+#Plugin sudoers_policy @sudoers_module@
+#Plugin sudoers_io @sudoers_module@
+#Plugin sudoers_audit @sudoers_module@
 
 #
 # Sudo askpass:
@@ -51,7 +51,7 @@
 # The compiled-in value is usually sufficient and should only be changed
 # if you rename or move the sudo_intercept.so file.
 #
-#Path intercept @plugindir@/sudo_intercept.so
+#Path intercept @intercept_file@
 
 #
 # Sudo noexec:
@@ -65,7 +65,7 @@
 # The compiled-in value is usually sufficient and should only be changed
 # if you rename or move the sudo_noexec.so file.
 #
-#Path noexec @plugindir@/sudo_noexec.so
+#Path noexec @noexec_file@
 
 #
 # Sudo plugin directory:

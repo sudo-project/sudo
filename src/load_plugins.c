@@ -34,9 +34,6 @@
 #include "sudo_plugin_int.h"
 #include "sudo_dso.h"
 
-/* We always use the same name for the sudoers plugin, regardless of the OS */
-#define SUDOERS_PLUGIN	"sudoers.so"
-
 #ifdef ENABLE_SUDO_PLUGIN_API
 static int
 sudo_stat_plugin(struct plugin_info *info, char *fullpath,
@@ -55,7 +52,7 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
     } else {
 #ifdef STATIC_SUDOERS_PLUGIN
 	/* Check static symbols. */
-	if (strcmp(info->path, SUDOERS_PLUGIN) == 0) {
+	if (strcmp(info->path, _PATH_SUDOERS_PLUGIN) == 0) {
 	    if (strlcpy(fullpath, info->path, pathsize) >= pathsize) {
 		errno = ENAMETOOLONG;
 		goto done;
@@ -466,7 +463,7 @@ sudo_load_sudoers_plugin(const char *symbol_name, bool optional)
 	goto done;
     }
     info->symbol_name = strdup(symbol_name);
-    info->path = strdup(SUDOERS_PLUGIN);
+    info->path = strdup(_PATH_SUDOERS_PLUGIN);
     if (info->symbol_name == NULL || info->path == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	free_plugin_info(info);

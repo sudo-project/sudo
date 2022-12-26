@@ -178,6 +178,7 @@ AC_SUBST([editor])
 AC_SUBST([pam_session])
 AC_SUBST([pam_login_service])
 AC_SUBST([plugindir])
+AC_SUBST([sudoers_plugin])
 #
 # Begin initial values for man page substitution
 #
@@ -226,6 +227,7 @@ secure_path="not set"
 pam_session=on
 pam_login_service=sudo
 plugindir="$libexecdir/sudo"
+sudoers_plugin="sudoers.so"
 DIGEST=digest.lo
 devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
 #
@@ -1651,18 +1653,6 @@ dnl
 SUDO_PVS_STUDIO_CFG
 
 dnl
-dnl On AIX we need to force libtool to install .so files for the plugins
-dnl instead of a .a file that contains the .so.  We do this by enabling
-dnl runtime linking (where the .so file is installed).  This must happen
-dnl before the call to LT_INIT
-dnl
-case "$host_os" in
-aix4.[[23]]|aix4.[[23]].*|aix[[5-9]]*)
-    AX_APPEND_FLAG([-Wl,-brtl], [LDFLAGS])
-    ;;
-esac
-
-dnl
 dnl On HP-UX 11.11 and higher we prefer dlopen() over shl_load().
 dnl Libtool defaults to shl_load() so we need to prime the cache
 dnl to override that default.
@@ -1680,6 +1670,25 @@ dnl Libtool init, we require libtool 2.2.6b or higher
 dnl
 LT_PREREQ([2.2.6b])
 LT_INIT([dlopen])
+
+dnl
+dnl AIX supports two distinct flavors of shared libraries.
+dnl Traditional AIX shared libs are .a files with a .so inside.
+dnl AIX SVR4-style shared libs are plain .so files.  The --with-aix-soname
+dnl option can be used to select the type.  We need to set the default
+dnl values to match.  This must come after the LT_INIT() call.
+dnl
+case "$host_os" in
+aix*)
+    if test X"$aix_use_runtimelinking" != X"yes"; then
+	# Using traditional AIX dynamic shared objects in an archive file.
+	noexec_file="$libexecdir/sudo/sudo_noexec.a(sudo_noexec.so)"
+	intercept_file="$libexecdir/sudo/sudo_intercept.a(sudo_intercept.so)"
+	sudoers_plugin="sudoers.a(sudoers.so)"
+    fi
+    ;;
+esac
+SUDO_DEFINE_UNQUOTED([_PATH_SUDOERS_PLUGIN], ["$sudoers_plugin"])
 
 dnl
 dnl Allow the user to specify an alternate libtool.
@@ -4156,28 +4165,28 @@ fi
 _intercept_file=
 while test X"$intercept_file" != X"$_intercept_file"; do
     _intercept_file="$intercept_file"
-    eval intercept_file="$_intercept_file"
+    eval "intercept_file=\"$_intercept_file\""
 done
 
 # Update exec_prefix in noexec_file
 _noexec_file=
 while test X"$noexec_file" != X"$_noexec_file"; do
     _noexec_file="$noexec_file"
-    eval noexec_file="$_noexec_file"
+    eval "noexec_file=\"$_noexec_file\""
 done
 
 # Update exec_prefix in sesh_file
 _sesh_file=
 while test X"$sesh_file" != X"$_sesh_file"; do
     _sesh_file="$sesh_file"
-    eval sesh_file="$_sesh_file"
+    eval "sesh_file=\"$_sesh_file\""
 done
 
 # Update exec_prefix in plugindir
 _plugindir=
 while test X"$plugindir" != X"$_plugindir"; do
     _plugindir="$plugindir"
-    eval plugindir="$_plugindir"
+    eval "plugindir=\"$_plugindir\""
 done
 exec_prefix="$oexec_prefix"
 
@@ -4410,6 +4419,7 @@ echo "  mail if command not allowed	: ${mail_no_perms}" >&AS_MESSAGE_FD
 echo " Pathnames:" >&AS_MESSAGE_FD
 echo "  log directory			: ${log_dir}" >&AS_MESSAGE_FD
 echo "  plugin directory		: ${plugindir}" >&AS_MESSAGE_FD
+echo "  sudoers plugin			: ${sudoers_plugin}" >&AS_MESSAGE_FD
 echo "  run directory			: ${rundir}" >&AS_MESSAGE_FD
 echo "  var directory			: ${vardir}" >&AS_MESSAGE_FD
 echo "  I/O log directory		: ${iolog_dir}" >&AS_MESSAGE_FD
@@ -4424,6 +4434,7 @@ if test ${with_netsvc-"no"} != "no"; then
 elif test ${with_nsswitch-"yes"} != "no"; then
     echo "  nsswitch file			: ${nsswitch_conf}" >&AS_MESSAGE_FD
 fi
+echo "  intercept file			: ${intercept_file}" >&AS_MESSAGE_FD
 echo "  noexec file			: ${noexec_file}" >&AS_MESSAGE_FD
 echo "  secure path			: ${with_secure_path-no}" >&AS_MESSAGE_FD
 echo "  askpass helper file		: ${with_askpass-no}" >&AS_MESSAGE_FD

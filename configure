@@ -721,6 +721,7 @@ OBJEXT
 EXEEXT
 ac_ct_CC
 CC
+sudoers_plugin
 plugindir
 pam_login_service
 pam_session
@@ -3592,6 +3593,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -3640,6 +3642,7 @@ secure_path="not set"
 pam_session=on
 pam_login_service=sudo
 plugindir="$libexecdir/sudo"
+sudoers_plugin="sudoers.so"
 DIGEST=digest.lo
 devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
 #
@@ -8801,45 +8804,6 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 	EOF
     fi
 
-
-case "$host_os" in
-aix4.[23]|aix4.[23].*|aix[5-9]*)
-
-if test ${LDFLAGS+y}
-then :
-
-  case " $LDFLAGS " in #(
-  *" -Wl,-brtl "*) :
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS already contains -Wl,-brtl"; } >&5
-  (: LDFLAGS already contains -Wl,-brtl) 2>&5
-  ac_status=$?
-  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } ;; #(
-  *) :
-
-     as_fn_append LDFLAGS " -Wl,-brtl"
-     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
-  (: LDFLAGS="$LDFLAGS") 2>&5
-  ac_status=$?
-  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-     ;;
-esac
-
-else case e in #(
-  e)
-  LDFLAGS=-Wl,-brtl
-  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
-  (: LDFLAGS="$LDFLAGS") 2>&5
-  ac_status=$?
-  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-   ;;
-esac
-fi
-
-    ;;
-esac
 
 case "$host_os" in
 hpux11.1[1-9]|hpux11.[2-9][0-9]|hpux1[2-9].*)
@@ -17174,6 +17138,21 @@ CC=$lt_save_CC
 
 # Only expand once:
 
+
+
+case "$host_os" in
+aix*)
+    if test X"$aix_use_runtimelinking" != X"yes"; then
+	# Using traditional AIX dynamic shared objects in an archive file.
+	noexec_file="$libexecdir/sudo/sudo_noexec.a(sudo_noexec.so)"
+	intercept_file="$libexecdir/sudo/sudo_intercept.a(sudo_intercept.so)"
+	sudoers_plugin="sudoers.a(sudoers.so)"
+    fi
+    ;;
+esac
+cat >>confdefs.h <<EOF
+#define _PATH_SUDOERS_PLUGIN "$sudoers_plugin"
+EOF
 
 
 
@@ -34505,28 +34484,28 @@ fi
 _intercept_file=
 while test X"$intercept_file" != X"$_intercept_file"; do
     _intercept_file="$intercept_file"
-    eval intercept_file="$_intercept_file"
+    eval "intercept_file=\"$_intercept_file\""
 done
 
 # Update exec_prefix in noexec_file
 _noexec_file=
 while test X"$noexec_file" != X"$_noexec_file"; do
     _noexec_file="$noexec_file"
-    eval noexec_file="$_noexec_file"
+    eval "noexec_file=\"$_noexec_file\""
 done
 
 # Update exec_prefix in sesh_file
 _sesh_file=
 while test X"$sesh_file" != X"$_sesh_file"; do
     _sesh_file="$sesh_file"
-    eval sesh_file="$_sesh_file"
+    eval "sesh_file=\"$_sesh_file\""
 done
 
 # Update exec_prefix in plugindir
 _plugindir=
 while test X"$plugindir" != X"$_plugindir"; do
     _plugindir="$plugindir"
-    eval plugindir="$_plugindir"
+    eval "plugindir=\"$_plugindir\""
 done
 exec_prefix="$oexec_prefix"
 
@@ -36931,6 +36910,7 @@ echo "  mail if command not allowed	: ${mail_no_perms}" >&6
 echo " Pathnames:" >&6
 echo "  log directory			: ${log_dir}" >&6
 echo "  plugin directory		: ${plugindir}" >&6
+echo "  sudoers plugin			: ${sudoers_plugin}" >&6
 echo "  run directory			: ${rundir}" >&6
 echo "  var directory			: ${vardir}" >&6
 echo "  I/O log directory		: ${iolog_dir}" >&6
@@ -36945,6 +36925,7 @@ if test ${with_netsvc-"no"} != "no"; then
 elif test ${with_nsswitch-"yes"} != "no"; then
     echo "  nsswitch file			: ${nsswitch_conf}" >&6
 fi
+echo "  intercept file			: ${intercept_file}" >&6
 echo "  noexec file			: ${noexec_file}" >&6
 echo "  secure path			: ${with_secure_path-no}" >&6
 echo "  askpass helper file		: ${with_askpass-no}" >&6

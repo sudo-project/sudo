@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "May 31, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "December 22, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -127,7 +127,7 @@ In other words:
 .nf
 .sp
 .RS 4n
-Plugin sudoers_policy sudoers.so
+Plugin sudoers_policy @sudoers_module@
 .RE
 .fi
 .PP
@@ -135,7 +135,7 @@ is equivalent to:
 .nf
 .sp
 .RS 4n
-Plugin sudoers_policy @plugindir@/sudoers.so
+Plugin sudoers_policy @plugindir@/@sudoers_module@
 .RE
 .fi
 .PP
@@ -149,7 +149,7 @@ For example:
 .nf
 .sp
 .RS 4n
-Plugin sudoers_policy sudoers.so
+Plugin sudoers_policy @sudoers_module@
 .RE
 .fi
 .PP
@@ -164,7 +164,7 @@ For example, to override the compile-time default sudoers file mode:
 .nf
 .sp
 .RS 4n
-Plugin sudoers_policy sudoers.so sudoers_mode=0440
+Plugin sudoers_policy @sudoers_module@ sudoers_mode=0440
 .RE
 .fi
 .PP
@@ -191,9 +191,9 @@ This is equivalent to the following:
 .nf
 .sp
 .RS 4n
-Plugin sudoers_policy sudoers.so
-Plugin sudoers_io sudoers.so
-Plugin sudoers_audit sudoers.so
+Plugin sudoers_policy @sudoers_module@
+Plugin sudoers_io @sudoers_module@
+Plugin sudoers_audit @sudoers_module@
 .RE
 .fi
 .PP
@@ -626,7 +626,7 @@ entries are also supported starting with
 \fBsudo\fR
 1.8.12 and are matched by either the base name of the plugin that was loaded
 (for example
-\fIsudoers.so\fR)
+\fI@sudoers_module@\fR)
 or by the plugin's fully-qualified path name.
 Previously, the
 \fBsudoers\fR
@@ -745,9 +745,9 @@ front-end configuration
 # The plugin_options are optional.
 #
 # The sudoers plugin is used by default if no Plugin lines are present.
-#Plugin sudoers_policy sudoers.so
-#Plugin sudoers_io sudoers.so
-#Plugin sudoers_audit sudoers.so
+#Plugin sudoers_policy @sudoers_module@
+#Plugin sudoers_io @sudoers_module@
+#Plugin sudoers_audit @sudoers_module@
 
 #
 # Sudo askpass:
@@ -870,7 +870,7 @@ front-end configuration
 # Multiple subsystem@priority may be specified, separated by a comma.
 #
 #Debug sudo @log_dir@/sudo_debug all@debug
-#Debug sudoers.so @log_dir@/sudoers_debug all@debug
+#Debug @sudoers_plugin@ @log_dir@/sudoers_debug all@debug
 .RE
 .fi
 .SH "SEE ALSO"
