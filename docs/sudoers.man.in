@@ -4794,7 +4794,7 @@ name used when the
 \fB\-A\fR
 option is specified.
 The default value is either
-\(oq@pam_service@\(cq
+\(oqsudo\(cq
 or
 \(oq@pam_login_service@\(cq,
 depending on whether or not the

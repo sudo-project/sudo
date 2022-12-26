@@ -4528,7 +4528,7 @@ name used when the
 .Fl A
 option is specified.
 The default value is either
-.Ql @pam_service@
+.Ql sudo
 or
 .Ql @pam_login_service@ ,
 depending on whether or not the
