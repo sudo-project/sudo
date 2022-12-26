@@ -35,145 +35,54 @@
 #include "sudo_dso.h"
 
 #ifdef ENABLE_SUDO_PLUGIN_API
-static int
-sudo_stat_plugin(struct plugin_info *info, char *fullpath,
-    size_t pathsize, struct stat *sb)
+static bool
+sudo_qualify_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
 {
-    int status = -1;
-    size_t len;
+    const char *plugin_dir = sudo_conf_plugin_dir_path();
+    int len;
     debug_decl(sudo_stat_plugin, SUDO_DEBUG_PLUGIN);
 
     if (info->path[0] == '/') {
 	if (strlcpy(fullpath, info->path, pathsize) >= pathsize) {
 	    errno = ENAMETOOLONG;
-	    goto done;
+	    goto bad;
 	}
-	status = stat(fullpath, sb);
     } else {
 #ifdef STATIC_SUDOERS_PLUGIN
 	/* Check static symbols. */
 	if (strcmp(info->path, _PATH_SUDOERS_PLUGIN) == 0) {
 	    if (strlcpy(fullpath, info->path, pathsize) >= pathsize) {
 		errno = ENAMETOOLONG;
-		goto done;
+		goto bad;
 	    }
-	    /* Plugin is static, fake up struct stat. */
-	    memset(sb, 0, sizeof(*sb));
-	    sb->st_uid = ROOT_UID;
-	    sb->st_mode = S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH;
-	    status = 0;
-	    goto done;
 	}
 #endif /* STATIC_SUDOERS_PLUGIN */
 
-	if (sudo_conf_plugin_dir_path() == NULL) {
+	if (plugin_dir == NULL) {
 	    errno = ENOENT;
-	    goto done;
+	    goto bad;
 	}
-
-	len = snprintf(fullpath, pathsize, "%s%s", sudo_conf_plugin_dir_path(),
-	    info->path);
-	if (len >= pathsize) {
+	len = snprintf(fullpath, pathsize, "%s%s", plugin_dir, info->path);
+	if (len < 0 || (size_t)len >= pathsize) {
 	    errno = ENAMETOOLONG;
-	    goto done;
-	}
-	status = stat(fullpath, sb);
-    }
-#ifdef _AIX
-    if (status == -1 && errno == ENOENT) {
-	len = strlen(fullpath);
-	if (len > 2 && fullpath[len - 1] == ')') {
-	    /* Check for AIX shlib.a(member) dlopen(3) syntax. */
-	    char *cp = strrchr(fullpath, '(');
-	    if (cp != NULL) {
-		/* Only for archive files (e.g. sudoers.a). */
-		if (cp > fullpath + 2 && cp[-2] == '.' && cp[-1] == 'a') {
-		    *cp = '\0';
-		    status = stat(fullpath, sb);
-		    *cp = '(';
-		}
-	    }
-	} else if (len > 3 && strcmp(&fullpath[len - 3], ".so") == 0) {
-	    /*
-	     * Check for AIX-style shlib.a if shlib.so does not exist for
-	     * compatibility with sudo versions that use SVR4-style shlibs.
-	     */
-	    fullpath[len - 2] = 'a';
-	    fullpath[len - 1] = '\0';
-	    len--;
-	    status = stat(fullpath, sb);
-	    if (status == 0) {
-		/* Use info->path as the member of the .a file. */
-		int n = snprintf(fullpath + len, pathsize - len, "(%s)",
-		    sudo_basename(info->path));
-		if (n < 0 || (size_t)n >= pathsize - len) {
-		    errno = ENAMETOOLONG;
-		    goto done;
-		}
-	    }
+	    goto bad;
 	}
     }
-#endif /* _AIX */
-    if (status == -1 && errno == ENOENT) {
-	char *newpath = sudo_stat_multiarch(fullpath, sb);
-	if (newpath != NULL) {
-	    len = strlcpy(fullpath, newpath, pathsize);
-	    free(newpath);
-	    if (len >= pathsize) {
-		errno = ENAMETOOLONG;
-		goto done;
-	    }
-	    status = 0;
-	}
-    }
-done:
-    debug_return_int(status);
-}
-
-static bool
-sudo_check_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
-{
-    struct stat sb;
-    bool ret = false;
-    debug_decl(sudo_check_plugin, SUDO_DEBUG_PLUGIN);
-
-    if (sudo_stat_plugin(info, fullpath, pathsize, &sb) != 0) {
-	sudo_warnx(U_("error in %s, line %d while loading plugin \"%s\""),
-	    _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-	if (info->path[0] == '/') {
-	    sudo_warn("%s", info->path);
-	} else {
-	    sudo_warn("%s%s",
-		sudo_conf_plugin_dir_path() ? sudo_conf_plugin_dir_path() : "",
-		info->path);
-	}
-	goto done;
-    }
-
-    if (!sudo_conf_developer_mode()) {
-        if (sb.st_uid != ROOT_UID) {
-            sudo_warnx(U_("error in %s, line %d while loading plugin \"%s\""),
-                _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-            sudo_warnx(U_("%s must be owned by uid %d"), fullpath, ROOT_UID);
-            goto done;
-        }
-        if ((sb.st_mode & (S_IWGRP|S_IWOTH)) != 0) {
-            sudo_warnx(U_("error in %s, line %d while loading plugin \"%s\""),
-                _PATH_SUDO_CONF, info->lineno, info->symbol_name);
-            sudo_warnx(U_("%s must be only be writable by owner"), fullpath);
-            goto done;
-        }
-    }
-    ret = true;
-
-done:
-    debug_return_bool(ret);
+    debug_return_bool(true);
+bad:
+    sudo_warnx(U_("error in %s, line %d while loading plugin \"%s\""),
+	_PATH_SUDO_CONF, info->lineno, info->symbol_name);
+    if (info->path[0] != '/' && plugin_dir != NULL)
+	sudo_warn("%s%s", plugin_dir, info->path);
+    else
+	sudo_warn("%s", info->path);
+    debug_return_bool(false);
 }
 #else
 static bool
-sudo_check_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
+sudo_qualify_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
 {
-    debug_decl(sudo_check_plugin, SUDO_DEBUG_PLUGIN);
+    debug_decl(sudo_qualify_plugin, SUDO_DEBUG_PLUGIN);
     (void)strlcpy(fullpath, info->path, pathsize);
     debug_return_bool(true);
 }
@@ -299,8 +208,8 @@ sudo_load_plugin(struct plugin_info *info, bool quiet)
     bool ret = false;
     debug_decl(sudo_load_plugin, SUDO_DEBUG_PLUGIN);
 
-    /* Check plugin owner/mode and fill in path */
-    if (!sudo_check_plugin(info, path, sizeof(path)))
+    /* Fill in path from info and plugin dir. */
+    if (!sudo_qualify_plugin(info, path, sizeof(path)))
 	goto done;
 
     /* Open plugin and map in symbol */
