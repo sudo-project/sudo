@@ -124,7 +124,7 @@ sudo_dso_findsym_v1(void *vhandle, const char *symbol)
     }
 
     /*
-     * Note that the behavior of of SUDO_DSO_NEXT and SUDO_DSO_SELF 
+     * Note that the behavior of of SUDO_DSO_NEXT and SUDO_DSO_SELF
      * differs from most implementations when called from
      * a shared library.
      */
@@ -176,7 +176,7 @@ sudo_dso_strerror_v1(void)
 # endif
 
 # if defined(__linux__)
-/* 
+/*
  * On Linux systems that use multi-arch, the actual DSO may be
  * in a machine-specific subdirectory.  If the specified path
  * contains /lib/ or /libexec/, insert a multi-arch directory
@@ -215,6 +215,7 @@ sudo_dso_load_v1(const char *path, int mode)
     void *ret;
 # ifdef RTLD_MEMBER
     char *cp;
+    size_t pathlen;
 # endif
 
     /* Check prelinked symbols first. */
@@ -236,28 +237,58 @@ sudo_dso_load_v1(const char *path, int mode)
 	SET(flags, RTLD_LOCAL);
 
 # ifdef RTLD_MEMBER
-    /* Check for AIX path(module) syntax and add RTLD_MEMBER for a module. */
-    cp = strrchr(path, '(');
-    if (cp != NULL) {
-	size_t len = strlen(cp);
-	if (len > 2 && cp[len - 1] == ')')
+    /* Check for AIX shlib.a(member) syntax and dlopen() with RTLD_MEMBER. */
+    pathlen = strlen(path);
+    if (pathlen > 2 && path[pathlen - 1] == ')') {
+	cp = strrchr(path, '(');
+	if (cp != NULL && cp > path + 2 && cp[-2] == '.' && cp[-1] == 'a') {
+	    /* Only for archive files (e.g. sudoers.a). */
 	    SET(flags, RTLD_MEMBER);
+	}
     }
 # endif /* RTLD_MEMBER */
     ret = dlopen(path, flags);
 # if defined(RTLD_MEMBER)
-    /*
-     * If we try to dlopen() an AIX .a file without an explicit member
-     * it will fail with ENOEXEC.  Try again using the default member.
-     */
-    if (ret == NULL && !ISSET(flags, RTLD_MEMBER) && errno == ENOEXEC) {
-	if (asprintf(&cp, "%s(%s)", path, SUDO_DSO_MEMBER) != -1) {
-	    ret = dlopen(cp, flags|RTLD_MEMBER);
-	    free(cp);
-	}
-	if (ret == NULL) {
-	    /* Retry with the original path so we get the correct error. */
-	    ret = dlopen(path, flags);
+    /* Special fallback handling for AIX shared objects. */
+    if (ret == NULL && !ISSET(flags, RTLD_MEMBER)) {
+	switch (errno) {
+	case ENOEXEC:
+	    /*
+	     * If we try to dlopen() an AIX .a file without an explicit member
+	     * it will fail with ENOEXEC.  Try again using the default member.
+	     */
+	    if (pathlen > 2 && strcmp(&path[pathlen - 2], ".a") == 0) {
+		int len = asprintf(&cp, "%s(%s)", path, SUDO_DSO_MEMBER);
+		if (len != -1) {
+		    ret = dlopen(cp, flags|RTLD_MEMBER);
+		    free(cp);
+		}
+		if (ret == NULL) {
+		    /* Retry with the original path to get the correct error. */
+		    ret = dlopen(path, flags);
+		}
+	    }
+	    break;
+	case ENOENT:
+	    /*
+	     * If the .so file is missing but the .a file exists, try to
+	     * dlopen() the AIX .a file using the .so name as the member.
+	     * This is for compatibility with versions of sudo that use
+	     * SVR4-style shared libs, not AIX-style shared libs.
+	     */
+	    if (pathlen > 3 && strcmp(&path[pathlen - 3], ".so") == 0) {
+		int len = asprintf(&cp, "%.*s.a(%s)", (int)(pathlen - 3),
+		    path, sudo_basename(path));
+		if (len != -1) {
+		    ret = dlopen(cp, flags|RTLD_MEMBER);
+		    free(cp);
+		}
+		if (ret == NULL) {
+		    /* Retry with the original path to get the correct error. */
+		    ret = dlopen(path, flags);
+		}
+	    }
+	    break;
 	}
     }
 # endif /* RTLD_MEMBER */

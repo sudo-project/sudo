@@ -81,14 +81,35 @@ sudo_stat_plugin(struct plugin_info *info, char *fullpath,
     }
 #ifdef _AIX
     if (status == -1 && errno == ENOENT) {
-	/* Check for AIX path(module) syntax. */
-	char *cp = strrchr(fullpath, '(');
-	if (cp != NULL) {
-	    /* Only for archive files (e.g. sudoers.a). */
-	    if (cp > fullpath + 2 && cp[-2] == '.' && cp[-1] == 'a') {
-		*cp = '\0';
-		status = stat(fullpath, sb);
-		*cp = '(';
+	len = strlen(fullpath);
+	if (len > 2 && fullpath[len - 1] == ')') {
+	    /* Check for AIX shlib.a(member) dlopen(3) syntax. */
+	    char *cp = strrchr(fullpath, '(');
+	    if (cp != NULL) {
+		/* Only for archive files (e.g. sudoers.a). */
+		if (cp > fullpath + 2 && cp[-2] == '.' && cp[-1] == 'a') {
+		    *cp = '\0';
+		    status = stat(fullpath, sb);
+		    *cp = '(';
+		}
+	    }
+	} else if (len > 3 && strcmp(&fullpath[len - 3], ".so") == 0) {
+	    /*
+	     * Check for AIX-style shlib.a if shlib.so does not exist for
+	     * compatibility with sudo versions that use SVR4-style shlibs.
+	     */
+	    fullpath[len - 2] = 'a';
+	    fullpath[len - 1] = '\0';
+	    len--;
+	    status = stat(fullpath, sb);
+	    if (status == 0) {
+		/* Use info->path as the member of the .a file. */
+		int n = snprintf(fullpath + len, pathsize - len, "(%s)",
+		    sudo_basename(info->path));
+		if (n < 0 || (size_t)n >= pathsize - len) {
+		    errno = ENAMETOOLONG;
+		    goto done;
+		}
 	    }
 	}
     }
