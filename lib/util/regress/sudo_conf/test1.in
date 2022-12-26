@@ -56,15 +56,6 @@ Path noexec /usr/libexec/sudo_noexec.so
 Set disable_coredump false
 
 #
-# Developer mode:
-#
-# By default, sudo enforces that each plugin it loads is only modifiable as
-# non root user. This might not be very convenient for plugin development,
-# so this can be disabled by setting "developer_mode" to true.
-#
-Set developer_mode true
-
-#
 # User groups:
 #
 # Sudo passes the user's group list to the policy plugin.

@@ -401,37 +401,6 @@ This setting is only available in
 version 1.8.4 and higher.
 .RE
 .TP 10n
-developer_mode
-By default
-\fBsudo\fR
-refuses to load plugins which can be modified by other than the root user.
-The plugin should be owned by root and write access permissions should be
-disabled for
-\(lqgroup\(rq
-and
-\(lqother\(rq\&.
-To make development of a plugin easier, you can disable that by setting
-\(lqdeveloper_mode\(rq
-option to true in
-\fBsudo.conf\fR
-as follows:
-.nf
-.sp
-.RS 14n
-Set developer_mode true
-.RE
-.fi
-.RS 10n
-.sp
-This creates a security risk and is not recommended for production systems,
-it is intended to be used in a development environment (VM, container, etc).
-Before enabling developer mode, be sure that you understand the implications.
-.sp
-This setting is only available in
-\fBsudo\fR
-version 1.9.0 and higher.
-.RE
-.TP 10n
 group_source
 \fBsudo\fR
 passes the invoking user's group list to the policy and I/O plugins.
@@ -809,14 +778,6 @@ front-end configuration
 # specified without a fully qualified path name.
 #
 #Path plugin_dir @plugindir@
-
-#
-# Sudo developer mode:
-#   Set developer_mode true|false
-#
-# Allow loading of plugins that are owned by non-root or are writable
-# by "group" or "other".  Should only be used during plugin development.
-#Set developer_mode true
 
 #
 # Core dumps:

@@ -1882,32 +1882,13 @@ file,
 \fBsudo\fR
 will not load the Python interpreter or the Python libraries.
 .PP
-By default, a Python plugin can only import Python modules which are
-owned by
-\fBroot\fR
-and are only writable by the owner.
-The reason for this is to prevent a file getting imported accidentally
-which is modifiable by a non-root user.
 As
 \fBsudo\fR
-plugins run as
+runs plugins as
 \fBroot\fR,
-accidentally importing such file would make it possible for any user
-(having write access) to execute any code with administrative rights.
-.PP
-However, during development of a plugin this might not be very convenient.
-The
-sudo.conf(@mansectform@)
-\fIdeveloper_mode\fR
-option can be used to disable it.
-For example:
-.RS 6n
-Set developer_mode true
-.RE
-.PP
-This creates a security risk and is not recommended for production systems,
-it is intended to be used in a development environment (VM, container, etc).
-Before enabling developer mode, be sure that you understand the implications.
+care must be taken when writing Python plugins to avoid creating
+security vulnerabilities, just as one would when writing plugins
+in C.
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
