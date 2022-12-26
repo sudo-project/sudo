@@ -754,7 +754,7 @@ front-end configuration
 # The compiled-in value is usually sufficient and should only be changed
 # if you rename or move the sudo_intercept.so file.
 #
-#Path intercept @plugindir@/sudo_intercept.so
+#Path intercept @intercept_file@
 
 #
 # Sudo noexec:
@@ -768,7 +768,7 @@ front-end configuration
 # The compiled-in value is usually sufficient and should only be changed
 # if you rename or move the sudo_noexec.so file.
 #
-#Path noexec @plugindir@/sudo_noexec.so
+#Path noexec @noexec_file@
 
 #
 # Sudo plugin directory:
