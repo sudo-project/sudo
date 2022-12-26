@@ -31,9 +31,6 @@
 #endif
 #define TESTDATA_DIR SRC_DIR "/regress/testdata/"
 
-extern const char *sudo_conf_developer_mode;
-extern const char *sudo_conf_normal_mode;
-
 #define TEMP_PATH_TEMPLATE "/tmp/sudo_check_python_exampleXXXXXX"
 
 extern struct TestData {

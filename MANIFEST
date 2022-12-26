@@ -465,7 +465,6 @@ plugins/python/pyhelpers.h
 plugins/python/pyhelpers_cpychecker.h
 plugins/python/python_baseplugin.c
 plugins/python/python_convmessage.c
-plugins/python/python_importblocker.c
 plugins/python/python_loghandler.c
 plugins/python/python_plugin.exp
 plugins/python/python_plugin_approval.c
@@ -553,8 +552,6 @@ plugins/python/regress/testdata/check_loading_succeeds_with_missing_classname.st
 plugins/python/regress/testdata/check_multiple_approval_plugin_and_arguments.stderr
 plugins/python/regress/testdata/check_multiple_approval_plugin_and_arguments.stdout
 plugins/python/regress/testdata/check_python_plugins_do_not_affect_each_other.stdout
-plugins/python/regress/testdata/sudo.conf.developer_mode
-plugins/python/regress/testdata/sudo.conf.normal_mode
 plugins/python/regress/testhelpers.c
 plugins/python/regress/testhelpers.h
 plugins/python/sudo_python_debug.c

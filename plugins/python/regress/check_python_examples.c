@@ -118,10 +118,7 @@ init(void)
     VERIFY_TRUE(asprintf(&data.tmp_dir, TEMP_PATH_TEMPLATE) >= 0);
     VERIFY_NOT_NULL(mkdtemp(data.tmp_dir));
 
-    // by default we test in developer mode, so the python plugin can be loaded
     sudo_conf_clear_paths();
-    VERIFY_INT(sudo_conf_read(sudo_conf_developer_mode, SUDO_CONF_ALL), true);
-    VERIFY_TRUE(sudo_conf_developer_mode());
 
     // some default values for the plugin open:
     data.settings = create_str_array(1, NULL);
@@ -473,8 +470,7 @@ create_debug_config(const char *debug_spec)
     snprintf(config_path, sizeof(config_path), "%s/sudo.conf", data.tmp_dir);
 
     char *content = NULL;
-    if (asprintf(&content, "Set developer_mode true\n"
-                           "Debug %s %s/debug.log %s\n",
+    if (asprintf(&content, "Debug %s %s/debug.log %s\n",
                  "python_plugin.so", data.tmp_dir, debug_spec) < 0)
     {
         printf("Failed to allocate string\n");
@@ -627,16 +623,6 @@ check_loading_fails_with_wrong_path(void)
     str_array_free(&data.plugin_options);
     data.plugin_options = create_str_array(3, "ModulePath=/wrong_path.py", "ClassName=PluginName", NULL);
     return check_loading_fails("wrong_path");
-}
-
-static int
-check_loading_fails_plugin_is_not_owned_by_root(void)
-{
-    sudo_conf_clear_paths();
-    VERIFY_INT(sudo_conf_read(sudo_conf_normal_mode, SUDO_CONF_ALL), true);
-
-    create_debugging_plugin_options();
-    return check_loading_fails("not_owned_by_root");
 }
 
 static int
@@ -1553,7 +1539,6 @@ main(int argc, char *argv[])
     RUN_TEST(check_loading_fails_with_missing_classname());
     RUN_TEST(check_loading_fails_with_wrong_classname());
     RUN_TEST(check_loading_fails_with_wrong_path());
-    RUN_TEST(check_loading_fails_plugin_is_not_owned_by_root());
     RUN_TEST(check_plugin_unload());
 
     RUN_TEST(check_example_conversation_plugin_reason_log(false, "without_suspend"));

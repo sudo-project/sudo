@@ -23,9 +23,6 @@
 
 #include "testhelpers.h"
 
-const char *sudo_conf_developer_mode = TESTDATA_DIR "sudo.conf.developer_mode";
-const char *sudo_conf_normal_mode = TESTDATA_DIR "sudo.conf.normal_mode";
-
 struct TestData data;
 
 /*

@@ -518,10 +518,6 @@ python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_options
     }
     PyThreadState_Swap(plugin_ctx->py_interpreter);
 
-    if (!sudo_conf_developer_mode() && sudo_module_register_importblocker() < 0) {
-        goto cleanup;
-    }
-
     if (sudo_module_set_default_loghandler() < 0)
         goto cleanup;
 

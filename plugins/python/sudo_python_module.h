@@ -37,9 +37,6 @@ PyObject *sudo_module_create_class(const char *class_name, PyMethodDef *class_me
                                    PyObject *base_class);
 
 CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-int sudo_module_register_importblocker(void);
-
-CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 int sudo_module_register_conv_message(PyObject *py_module);
 
 CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
