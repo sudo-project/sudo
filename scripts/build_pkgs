@@ -792,7 +792,7 @@ sub wait_for_ssh {
 sub create_tarball {
     die "$0: unable to create directory $sudo_tmpdir/sudo: $!\n"
         unless mkdir("$sudo_tmpdir/sudo", 0755);
-    system("hg archive -R $repo -r $rev --type=files $sudo_tmpdir/sudo && hg log -R $repo --template=changelog -r 'sort(branch(.) or follow(), -date)' > $sudo_tmpdir/sudo/ChangeLog && cd $sudo_tmpdir && sed 's/^/sudo\\//' sudo/MANIFEST | GZIP=-9 pax -wz -x ustar -f sudo.tar.gz && rm -rf sudo");
+    system("hg archive -R $repo -r $rev --type=files $sudo_tmpdir/sudo && hg log -R $repo --template=changelog -r 'sort(branch(.) or follow(), -date)' > $sudo_tmpdir/sudo/ChangeLog && cd $sudo_tmpdir && sed -e 's/^/sudo\\//' -e 's/[ 	].*//' sudo/MANIFEST | GZIP=-9 pax -wz -x ustar -f sudo.tar.gz && rm -rf sudo");
     return $? ? undef : "$sudo_tmpdir/sudo.tar.gz";
 }
 
