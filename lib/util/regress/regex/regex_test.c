@@ -53,7 +53,13 @@ static struct regex_test test_data[] = {
     { "ab\\??", true },
     { "ab?\\?", true },
     { "ab{1}{1}", false },
+    { "ab{1}{1,1}", false },
+    { "ab{1}{,1}", false },
+    { "ab{1}{1,}", false },
     { "ab{1}\\{1}", true },
+    { "ab{1}\\{1,1}", true },
+    { "ab{1}\\{,1}", true },
+    { "ab{1}\\{1,}", true },
     { "ab+*", false },
     { "ab\\+*", true },
     { "ab+\\*", true },
@@ -66,6 +72,11 @@ static struct regex_test test_data[] = {
     { "ab{1}*", false },
     { "ab\\{1}*", true },
     { "ab{1}\\*", true },
+    { "ab{256}", false },
+    { "ab{,256}", false },
+    { "ab{256,}", false },
+    { "ab{1,256}", false },
+    { "ab{256,1}", false },
     { NULL }
 };
 
