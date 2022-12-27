@@ -387,8 +387,8 @@ still allow people to get their work done."
 	$docdir/LICENSE.md	ignore,ignore-others
 	$docdir/ChangeLog	ignore,ignore-others
 %endif
-%if X"$exampledir" != X"$docdir/examples"
 	$exampledir/		0755 ignore-others
+%if X"$exampledir" != X"$docdir/examples"
 	$exampledir/*		0644
 %endif
 	$exampledir/sudo_logsrv*     optional,ignore,ignore-others
@@ -403,6 +403,7 @@ still allow people to get their work done."
 %else
 	$sudoersdir/sudoers.dist $sudoers_mode $sudoers_uid:$sudoers_gid
 %endif
+	$sysconfdir/sudo_logsrvd.conf optional,ignore,ignore-others
 %if X"$aix_freeware" = X"true"
 	# Links for binaries from /opt/freeware to /usr
 	/usr/bin/cvtsudoers    	0755 root: symlink $bindir/cvtsudoers
