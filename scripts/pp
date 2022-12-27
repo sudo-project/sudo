@@ -1,6 +1,6 @@
 #!/bin/sh
-# Copyright 2021 One Identity LLC. ALL RIGHTS RESERVED
-pp_revision="20211119"
+# Copyright 2022 One Identity LLC. ALL RIGHTS RESERVED
+pp_revision="20221227"
  # Copyright 2018 One Identity LLC.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -3937,7 +3937,7 @@ pp_deb_check_required_programs () {
     needed= notfound=
     for prog in dpkg dpkg-deb install md5sum fakeroot
     do
-        if which $prog 2>/dev/null >/dev/null; then
+        if command -v $prog 2>/dev/null >/dev/null; then
 	    pp_debug "$prog: found"
 	else
 	    pp_debug "$prog: not found"
@@ -5600,7 +5600,7 @@ pp_rpm_detect_distro () {
 pp_rpm_detect_rpmbuild () {
     local cmd
     for cmd in rpmbuild rpm; do
-        if `which $cmd > /dev/null 2>&1`; then
+        if command -v $cmd > /dev/null 2>&1; then
             echo $cmd
             return 0
         fi
@@ -7999,7 +7999,7 @@ pp_bsd_check_required_programs () {
     # list of programs FreeBSD needs in order to create a binary package
     for prog in ${pp_bsd_required_programs:-"pkg"}
     do
-        if which $prog 2>&1 > /dev/null; then
+        if command -v $prog 2>&1 > /dev/null; then
             pp_debug "$prog: found"
         else
             pp_debug "$prog: not found"
@@ -8960,10 +8960,18 @@ pp_systemd_service_install_common () {
                 # we do this so we do not "orphan" the process. Because init started it and if we enable systemd
                 # it will not know about this process and will not be able to stop it.
                 if [ -x "/etc/init.d/$svc" ]; then
-                    /etc/init.d/$svc status > /dev/null 2>&1
+                    output="$(/etc/init.d/$svc status 2>&1)"
                     RUNNING=$?
                     if [ $RUNNING -eq 0 ]; then
-                        /etc/init.d/$svc stop > /dev/null 2>&1
+                        case "$output" in
+                            *"not running"*)
+                                # systemd is reporting the status (compatibility package is installed)
+                                RUNNING=1
+                                ;;
+                            *)  # it is really running
+                                /etc/init.d/$svc stop > /dev/null 2>&1
+                                ;;
+                        esac
                     fi
                 else
                     RUNNING=1
