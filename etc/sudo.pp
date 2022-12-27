@@ -139,7 +139,7 @@ still allow people to get their work done."
 	printf "$name ($pp_deb_version-$pp_deb_release) admin; urgency=low\n\n  * see upstream changelog\n\n -- $pp_deb_maintainer  `date '+%a, %d %b %Y %T %z'`\n" > ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog.Debian
 	chmod 644 ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog.Debian
 	gzip -9f ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog.Debian
-	# Create lintian override file
+	# Create lintian override file, must be tab indented for "<<-"
 	mkdir -p ${pp_wrkdir}/${name}/usr/share/lintian/overrides
 	cat >${pp_wrkdir}/${name}/usr/share/lintian/overrides/${name} <<-EOF
 	# The sudo binary must be setuid root
@@ -175,30 +175,14 @@ still allow people to get their work done."
 	esac
 
 	# Uncomment some Defaults in sudoers
-	# Note that the order must match that of sudoers.
 	case "$pp_rpm_distro" in
 	centos*|rhel*|f[0-9]*)
-		chmod u+w ${pp_destdir}${sudoersdir}/sudoers
-		/bin/ed - ${pp_destdir}${sudoersdir}/sudoers <<-'EOF'
-		/Locale settings/+1,s/^# //
-		/Desktop path settings/+1,s/^# //
-		/allow members of group wheel to execute any command/+1,s/^# //
-		w
-		q
-		EOF
-		chmod u-w ${pp_destdir}${sudoersdir}/sudoers
+		sed -e '/Locale settings/{ N;s/\(\n\)# /\1/; }' -e '/Desktop path settings/{ N;s/\(\n\)# /\1/; }' -e '/allow members of group wheel to execute any command/{ N;s/\(\n\)# /\1/; }' ${pp_destdir}${sudoersdir}/sudoers > ${pp_destdir}${sudoersdir}/sudoers.$$
+		mv -f ${pp_destdir}${sudoersdir}/sudoers.$$ ${pp_destdir}${sudoersdir}/sudoers
 		;;
 	sles*)
-		chmod u+w ${pp_destdir}${sudoersdir}/sudoers
-		/bin/ed - ${pp_destdir}${sudoersdir}/sudoers <<-'EOF'
-		/Locale settings/+1,s/^# //
-		/ConsoleKit session/+1,s/^# //
-		/allow any user to run sudo if they know the password/+2,s/^# //
-		/allow any user to run sudo if they know the password/+3,s/^# //
-		w
-		q
-		EOF
-		chmod u-w ${pp_destdir}${sudoersdir}/sudoers
+		sed -e '/Locale settings/{ N;s/\(\n\)# /\1/; }' -e '/ConsoleKit session/{ N;s/\(\n\)# /\1/; }' -e '/allow any user to run sudo if they know the password/{ N;N;N;s/\(\n\)# /\1/g; }' ${pp_destdir}${sudoersdir}/sudoers > ${pp_destdir}${sudoersdir}/sudoers.$$
+		mv -f ${pp_destdir}${sudoersdir}/sudoers.$$ ${pp_destdir}${sudoersdir}/sudoers
 		;;
 	esac
 
@@ -277,19 +261,10 @@ still allow people to get their work done."
 
 %if [deb]
 	# Uncomment some Defaults and the %sudo rule in sudoers
-	# Note that the order must match that of sudoers and be tab-indented.
-	chmod u+w ${pp_destdir}${sudoersdir}/sudoers
-	/bin/ed - ${pp_destdir}${sudoersdir}/sudoers <<-'EOF'
-	/Locale settings/+1,s/^# //
-	/X11 resource/+1,s/^# //
-	/^# \%sudo/,s/^# //
-	/^# Defaults secure_path/,s/^# //
-	/^# Defaults mail_badpass/,s/^# //
-	w
-	q
-	EOF
-	chmod u-w ${pp_destdir}${sudoersdir}/sudoers
+	sed -e '/Locale settings/{ N;s/\(\n\)# /\1/; }' -e '/X11 resource/{ N;s/\(\n\)# /\1/; }' -e 's/^# \(Defaults secure_path\)/\1/' -e 's/^# \(Defaults mail_badpass\)/\1/' -e 's/^# \(\%sudo\)/\1/' ${pp_destdir}${sudoersdir}/sudoers > ${pp_destdir}${sudoersdir}/sudoers.$$
+	mv -f ${pp_destdir}${sudoersdir}/sudoers.$$ ${pp_destdir}${sudoersdir}/sudoers
 	mkdir -p ${pp_destdir}/etc/pam.d
+	# Create Debian PAM file, must be tab indented for "<<-"
 	cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
 	#%PAM-1.0
 
@@ -366,6 +341,7 @@ still allow people to get their work done."
 	echo "Bugs: https://bugzilla.sudo.ws" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 
 %fixup [rpm]
+	# Must be tab indented for "<<-".
 	cat > %{pp_wrkdir}/${name}.spec.sed <<-'EOF'
 		/^%files/ {
 			i\
@@ -543,6 +519,7 @@ still allow people to get their work done."
 
 %post [rpm,deb]
 	# Create /usr/lib/tmpfiles.d/sudo.conf if systemd is configured.
+	# Must be tab indented for "<<-".
 	if [ -f /usr/lib/tmpfiles.d/systemd.conf ]; then
 		cat > /usr/lib/tmpfiles.d/sudo.conf <<-EOF
 		# Create an empty sudo time stamp directory on OSes using systemd.
