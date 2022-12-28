@@ -853,6 +853,9 @@ done:
     if (ret == -1) {
 	/* Free stashed copy of the environment. */
 	(void)env_init(NULL);
+
+	/* Free locally-allocated strings. */
+	free(iolog_path);
     } else {
 	/* Store settings to pass back to front-end. */
 	if (!sudoers_policy_store_result(ret, NewArgv, env_get(), cmnd_umask,
