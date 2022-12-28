@@ -374,7 +374,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	if (strncmp(line, "env=", sizeof("env=") - 1) == 0) {
 	    const char *cp = line + sizeof("env=") - 1;
 	    if (strchr(cp, '=') != NULL)
-		push(&env_add, line);
+		push(&env_add, cp);
 	    continue;
 	}
 
