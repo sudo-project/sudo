@@ -1145,7 +1145,8 @@ bool
 validate_env_vars(char * const env_vars[])
 {
     char * const *ep;
-    char *eq, errbuf[4096];
+    char errbuf[4096];
+    char *errpos = errbuf;
     bool okvar, ret = true;
     debug_decl(validate_env_vars, SUDOERS_DEBUG_ENV);
 
@@ -1153,7 +1154,6 @@ validate_env_vars(char * const env_vars[])
 	debug_return_bool(true);	/* nothing to do */
 
     /* Add user-specified environment variables. */
-    errbuf[0] = '\0';
     for (ep = env_vars; *ep != NULL; ep++) {
 	if (def_secure_path && !user_is_exempt() &&
 	    strncmp(*ep, "PATH=", 5) == 0) {
@@ -1164,20 +1164,21 @@ validate_env_vars(char * const env_vars[])
 	    okvar = !env_should_delete(*ep);
 	}
 	if (okvar == false) {
-	    /* Not allowed, add to error string, allocating as needed. */
-	    if ((eq = strchr(*ep, '=')) != NULL)
-		*eq = '\0';
-	    if (errbuf[0] != '\0')
-		(void)strlcat(errbuf, ", ", sizeof(errbuf));
-	    if (strlcat(errbuf, *ep, sizeof(errbuf)) >= sizeof(errbuf)) {
-		errbuf[sizeof(errbuf) - 4] = '\0';
-		(void)strlcat(errbuf, "...", sizeof(errbuf));
+	    /* Not allowed, append to error buffer if space remains. */
+	    if (errpos < &errbuf[sizeof(errbuf)]) {
+		size_t varlen = strcspn(*ep, "=");
+		int len = snprintf(errpos, sizeof(errbuf) - (errpos - errbuf),
+		    "%s%.*s", errpos != errbuf ? ", " : "", (int)varlen, *ep);
+		if (len >= ssizeof(errbuf) - (errpos - errbuf)) {
+		    memcpy(&errbuf[sizeof(errbuf) - 4], "...", 4);
+		    errpos = &errbuf[sizeof(errbuf)];
+		} else {
+		    errpos += len;
+		}
 	    }
-	    if (eq != NULL)
-		*eq = '=';
 	}
     }
-    if (errbuf[0] != '\0') {
+    if (errpos != errbuf) {
 	/* XXX - audit? */
 	log_warningx(0,
 	    N_("sorry, you are not allowed to set the following environment variables: %s"), errbuf);
