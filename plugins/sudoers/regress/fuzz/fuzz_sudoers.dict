@@ -1,5 +1,11 @@
 # Sudoers policy keywords (all are keyword = value)
 
+# Users and groups
+"root"
+"wheel"
+"staff"
+"sudo"
+
 # Aliases
 "Cmnd_Alias"
 "Cmd_Alias"
