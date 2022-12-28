@@ -1001,18 +1001,20 @@ rebuild_env(void)
 	 * Copy environ entries as long as they don't match env_delete or
 	 * env_check.
 	 */
-	for (ep = env.old_envp; *ep; ep++) {
-	    /* Add variable unless it matches a blocklist. */
-	    if (!env_should_delete(*ep)) {
-		if (strncmp(*ep, "SUDO_PS1=", 9) == 0)
-		    ps1 = *ep + 5;
-		else if (strncmp(*ep, "SHELL=", 6) == 0)
-		    SET(didvar, DID_SHELL);
-		else if (strncmp(*ep, "PATH=", 5) == 0)
-		    SET(didvar, DID_PATH);
-		else if (strncmp(*ep, "TERM=", 5) == 0)
-		    SET(didvar, DID_TERM);
-		CHECK_PUTENV(*ep, true, false);
+	if (env.old_envp != NULL) {
+	    for (ep = env.old_envp; *ep; ep++) {
+		/* Add variable unless it matches a blocklist. */
+		if (!env_should_delete(*ep)) {
+		    if (strncmp(*ep, "SUDO_PS1=", 9) == 0)
+			ps1 = *ep + 5;
+		    else if (strncmp(*ep, "SHELL=", 6) == 0)
+			SET(didvar, DID_SHELL);
+		    else if (strncmp(*ep, "PATH=", 5) == 0)
+			SET(didvar, DID_PATH);
+		    else if (strncmp(*ep, "TERM=", 5) == 0)
+			SET(didvar, DID_TERM);
+		    CHECK_PUTENV(*ep, true, false);
+		}
 	    }
 	}
     }
