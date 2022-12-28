@@ -919,25 +919,27 @@ rebuild_env(void)
 	}
 
 	/* Pull in vars we want to keep from the old environment. */
-	for (ep = env.old_envp; *ep; ep++) {
-	    bool keepit;
+	if (env.old_envp != NULL) {
+	    for (ep = env.old_envp; *ep; ep++) {
+		bool keepit;
 
-	    /*
-	     * Look up the variable in the env_check and env_keep lists.
-	     */
-	    keepit = env_should_keep(*ep);
+		/*
+		 * Look up the variable in the env_check and env_keep lists.
+		 */
+		keepit = env_should_keep(*ep);
 
-	    /*
-	     * Do SUDO_PS1 -> PS1 conversion.
-	     * This must happen *after* env_should_keep() is called.
-	     */
-	    if (strncmp(*ep, "SUDO_PS1=", 9) == 0)
-		ps1 = *ep + 5;
+		/*
+		 * Do SUDO_PS1 -> PS1 conversion.
+		 * This must happen *after* env_should_keep() is called.
+		 */
+		if (strncmp(*ep, "SUDO_PS1=", 9) == 0)
+		    ps1 = *ep + 5;
 
-	    if (keepit) {
-		/* Preserve variable. */
-		CHECK_PUTENV(*ep, true, false);
-		env_update_didvar(*ep, &didvar);
+		if (keepit) {
+		    /* Preserve variable. */
+		    CHECK_PUTENV(*ep, true, false);
+		    env_update_didvar(*ep, &didvar);
+		}
 	    }
 	}
 	didvar |= didvar << 16;		/* convert DID_* to KEPT_* */
