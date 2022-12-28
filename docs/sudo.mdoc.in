@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd December 20, 2022
+.Dd December 27, 2022
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -494,8 +494,15 @@ policy is in use.
 .It Fl K , -remove-timestamp
 Similar to the
 .Fl k
-option, except that it removes the user's cached credentials entirely
-and may not be used in conjunction with a
+option, except that it removes every cached credential for the user,
+regardless of the terminal or parent process ID.
+The next time
+.Nm
+is run, a password must be entered if the
+security policy requires authentication.
+It is not possible to use the
+.Fl K
+option in conjunction with a
 .Ar command
 or other option.
 This option does not require a password.
@@ -503,10 +510,25 @@ Not all security policies support credential caching.
 .It Fl k , -reset-timestamp
 When used without a
 .Ar command ,
-invalidates the user's cached credentials.
-In other words, the next time
+invalidates the user's cached credentials for the current session.
+The next time
 .Nm
-is run a password will be required.
+is run in the session, a password must be entered if the
+security policy requires authentication.
+By default, the
+.Nm sudoers
+policy uses a separate record in the credential cache for each
+terminal (or parent process ID if no terminal is present).
+This prevents the
+.Fl k
+option from interfering with
+.Nm
+commands run in a different terminal session.
+See the
+.Em timestamp_type
+option in
+.Xr sudoers @mansectform@
+for more information.
 This option does not require a password, and was added to allow a
 user to revoke
 .Nm

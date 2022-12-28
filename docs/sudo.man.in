@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDO" "@mansectsu@" "December 20, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "December 27, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -518,8 +518,15 @@ policy is in use.
 \fB\-K\fR, \fB\--remove-timestamp\fR
 Similar to the
 \fB\-k\fR
-option, except that it removes the user's cached credentials entirely
-and may not be used in conjunction with a
+option, except that it removes every cached credential for the user,
+regardless of the terminal or parent process ID.
+The next time
+\fBsudo\fR
+is run, a password must be entered if the
+security policy requires authentication.
+It is not possible to use the
+\fB\-K\fR
+option in conjunction with a
 \fIcommand\fR
 or other option.
 This option does not require a password.
@@ -528,10 +535,25 @@ Not all security policies support credential caching.
 \fB\-k\fR, \fB\--reset-timestamp\fR
 When used without a
 \fIcommand\fR,
-invalidates the user's cached credentials.
-In other words, the next time
+invalidates the user's cached credentials for the current session.
+The next time
 \fBsudo\fR
-is run a password will be required.
+is run in the session, a password must be entered if the
+security policy requires authentication.
+By default, the
+\fBsudoers\fR
+policy uses a separate record in the credential cache for each
+terminal (or parent process ID if no terminal is present).
+This prevents the
+\fB\-k\fR
+option from interfering with
+\fBsudo\fR
+commands run in a different terminal session.
+See the
+\fItimestamp_type\fR
+option in
+sudoers(@mansectform@)
+for more information.
 This option does not require a password, and was added to allow a
 user to revoke
 \fBsudo\fR
