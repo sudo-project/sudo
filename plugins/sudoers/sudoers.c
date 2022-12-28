@@ -794,8 +794,11 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
 
     /* Insert user-specified environment variables. */
-    if (!insert_env_vars(sudo_user.env_vars))
+    if (!insert_env_vars(sudo_user.env_vars)) {
+	sudo_warnx("%s",
+	    U_("error setting user-specified environment variables"));
 	goto done;
+    }
 
     /* Note: must call audit before uid change. */
     if (ISSET(sudo_mode, MODE_EDIT)) {

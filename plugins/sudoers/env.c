@@ -1159,7 +1159,11 @@ validate_env_vars(char * const env_vars[])
 
     /* Add user-specified environment variables. */
     for (ep = env_vars; *ep != NULL; ep++) {
-	if (def_secure_path && !user_is_exempt() &&
+	char *eq = strchr(*ep, '=');
+	if (ep == NULL || eq == *ep) {
+	    /* Must be in the form var=val. */
+	    okvar = false;
+	} else if (def_secure_path && !user_is_exempt() &&
 	    strncmp(*ep, "PATH=", 5) == 0) {
 	    okvar = false;
 	} else if (def_env_reset) {

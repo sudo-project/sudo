@@ -278,7 +278,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 
     /* Returns true if next option is an environment variable */
 #define is_envar (optind < argc && argv[optind][0] != '/' && \
-	    strchr(argv[optind], '=') != NULL)
+	    argv[optind][0] != '=' && strchr(argv[optind], '=') != NULL)
 
     /* Space for environment variables is lazy allocated. */
     memset(&extra_env, 0, sizeof(extra_env));
