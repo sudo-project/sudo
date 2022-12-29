@@ -461,6 +461,7 @@ check_example_group_plugin(void)
     return true;
 }
 
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
 static const char *
 create_debug_config(const char *debug_spec)
 {
@@ -512,6 +513,7 @@ check_example_group_plugin_is_able_to_debug(void)
 
     return true;
 }
+#endif /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
 
 static int
 check_plugin_unload(void)
@@ -525,6 +527,7 @@ check_plugin_unload(void)
     return true;
 }
 
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
 static int
 check_example_debugging(const char *debug_spec)
 {
@@ -555,6 +558,7 @@ check_example_debugging(const char *debug_spec)
     free(debug_flags_setting);
     return true;
 }
+#endif /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
 
 static int
 check_loading_fails(const char *name)
@@ -896,10 +900,12 @@ check_example_policy_plugin_validate_invalidate(void)
 {
     const char *errstr = NULL;
 
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     // the plugin does not do any meaningful for these, so using log to validate instead
     const char *config_path = create_debug_config("py_calls@diag");
     VERIFY_NOT_NULL(config_path);
     VERIFY_INT(sudo_conf_read(config_path, SUDO_CONF_ALL), true);
+#endif
 
     create_policy_plugin_options();
 
@@ -916,7 +922,9 @@ check_example_policy_plugin_validate_invalidate(void)
 
     python_policy->close(0, 0); // no command execution
 
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     VERIFY_LOG_LINES(expected_path("check_example_policy_plugin_validate_invalidate.log"));
+#endif
     VERIFY_STR(data.stderr_str, "");
     VERIFY_STR(data.stdout_str, "");
     return true;
@@ -1531,7 +1539,9 @@ main(int argc, char *argv[])
     RUN_TEST(check_plugin_unload());
 
     RUN_TEST(check_example_group_plugin());
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     RUN_TEST(check_example_group_plugin_is_able_to_debug());
+#endif
     RUN_TEST(check_plugin_unload());
 
     RUN_TEST(check_loading_fails_with_missing_path());
@@ -1584,6 +1594,7 @@ main(int argc, char *argv[])
     RUN_TEST(check_python_plugins_do_not_affect_each_other());
     RUN_TEST(check_plugin_unload());
 
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     RUN_TEST(check_example_debugging("plugin@err"));
     RUN_TEST(check_example_debugging("plugin@info"));
     RUN_TEST(check_example_debugging("load@diag"));
@@ -1594,6 +1605,7 @@ main(int argc, char *argv[])
     RUN_TEST(check_example_debugging("py_calls@info"));
     RUN_TEST(check_example_debugging("plugin@err"));
     RUN_TEST(check_plugin_unload());
+#endif /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
 
     if (ntests != 0) {
         printf("%s: %d tests run, %d errors, %d%% success rate\n",
