@@ -94,7 +94,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     struct eventlog *evlog = NULL;
     FILE *fp;
 
-    setprogname("fuzz_iolog_legacy");
+    initprogname("fuzz_iolog_legacy");
     if (getenv("SUDO_FUZZ_VERBOSE") == NULL)
 	sudo_warn_set_conversation(fuzz_conversation);
 

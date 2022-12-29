@@ -76,7 +76,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     size_t nwritten;
     int fd;
 
-    setprogname("fuzz_sudo_conf");
+    initprogname("fuzz_sudo_conf");
     if (getenv("SUDO_FUZZ_VERBOSE") == NULL)
 	sudo_warn_set_conversation(fuzz_conversation);
 
