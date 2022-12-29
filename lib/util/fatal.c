@@ -239,8 +239,10 @@ warning(const char *errstr, const char *fmt, va_list ap)
             fputs(": ", stderr);
             fputs(errstr, stderr);
         }
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
         if (sudo_term_is_raw(fileno(stderr)))
             putc('\r', stderr);
+#endif
         putc('\n', stderr);
     }
 

@@ -631,7 +631,6 @@ sudo_conf_init(int conf_types)
 int
 sudo_conf_read_v1(const char *conf_file, int conf_types)
 {
-    struct stat sb;
     FILE *fp = NULL;
     int fd, ret = false;
     char *prev_locale, *line = NULL;
@@ -652,14 +651,11 @@ sudo_conf_read_v1(const char *conf_file, int conf_types)
     if (prev_locale[0] != 'C' || prev_locale[1] != '\0')
         setlocale(LC_ALL, "C");
 
-    if (conf_file != NULL) {
-	fd = open(conf_file, O_RDONLY);
-	if (fd == -1) {
-	    sudo_warn(U_("unable to open %s"), conf_file);
-	    goto done;
-	}
-    } else {
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    if (conf_file == NULL) {
+	struct stat sb;
 	int error;
+
 	conf_file = _PATH_SUDO_CONF;
 	fd = sudo_secure_open_file(conf_file, ROOT_UID, -1, &sb, &error);
 	if (fd == -1) {
@@ -687,6 +683,17 @@ sudo_conf_read_v1(const char *conf_file, int conf_types)
 		    __func__, error);
 		break;
 	    }
+	    goto done;
+	}
+    } else
+#else
+    if (conf_file == NULL)
+	conf_file = _PATH_SUDO_CONF;
+#endif /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
+    {
+	fd = open(conf_file, O_RDONLY);
+	if (fd == -1) {
+	    sudo_warn(U_("unable to open %s"), conf_file);
 	    goto done;
 	}
     }
