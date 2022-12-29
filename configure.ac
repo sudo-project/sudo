@@ -2089,17 +2089,21 @@ case "$host" in
 		# We call getrandom via syscall(3) in case it is not in libc
 		AC_CHECK_HEADERS([linux/random.h sys/syscall.h])
 
-		# The glibc getentropy() emulation may fail on older kernels.
-		# We use our own getentropy() by default on Linux.
-		: ${ac_cv_func_getentropy='no'}
+		# Do not use our replacement functions when fuzzing, it may
+		# skew the coverage reports.
+		if test X"$enable_fuzzer" != X"no"; then
+		    # glibc's getentropy() emulation may fail on older kernels.
+		    # We use our own getentropy() by default on Linux.
+		    : ${ac_cv_func_getentropy='no'}
 
-		# The glibc arc4random() may fail in chroot on older kernels.
-		# We use our own arc4random() by default on Linux.
-		: ${ac_cv_func_arc4random='no'}
+		    # glibc's arc4random() may fail in chroot on older kernels.
+		    # We use our own arc4random() by default on Linux.
+		    : ${ac_cv_func_arc4random='no'}
 
-		# The glibc closefrom() emulation may fail in chroot.
-		# We use our own closefrom() by default on Linux.
-		: ${ac_cv_func_closefrom='no'}
+		    # glibc's closefrom() emulation may fail in chroot.
+		    # We use our own closefrom() by default on Linux.
+		    : ${ac_cv_func_closefrom='no'}
+		fi
 
 		# Linux 3.2 supports reading/writing a another process
 		# without using ptrace(2).
