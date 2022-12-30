@@ -238,7 +238,7 @@ run-fuzz_iolog_legacy: fuzz_iolog_legacy
 	for f in $(FUZZ_IOLOG_LEGACY_CORPUS); do \
 	    cp $$f $$corpus; \
 	done; \
-	./fuzz_iolog_legacy -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $(FUZZ_VERBOSE) $$corpus
+	./fuzz_iolog_legacy -dict=$(srcdir)/regress/fuzz/fuzz_iolog_legacy.dict -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $(FUZZ_VERBOSE) $$corpus
 
 fuzz_iolog_timing_seed_corpus.zip:
 	tdir=fuzz_iolog_timing.$$$$; \
@@ -263,7 +263,7 @@ run-fuzz_iolog_timing: fuzz_iolog_timing
 	for f in $(FUZZ_IOLOG_TIMING_CORPUS); do \
 	    cp $$f $$corpus; \
 	done; \
-	./fuzz_iolog_timing -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $(FUZZ_VERBOSE) $$corpus
+	./fuzz_iolog_timing -dict=$(srcdir)/regress/fuzz/fuzz_iolog_timing.dict -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $(FUZZ_VERBOSE) $$corpus
 
 pre-install:
 
