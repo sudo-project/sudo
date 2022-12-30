@@ -169,7 +169,9 @@ lib/iolog/regress/corpus/seed/timing/timing.4
 lib/iolog/regress/fuzz/fuzz_iolog_json.c
 lib/iolog/regress/fuzz/fuzz_iolog_json.dict
 lib/iolog/regress/fuzz/fuzz_iolog_legacy.c
+lib/iolog/regress/fuzz/fuzz_iolog_legacy.dict
 lib/iolog/regress/fuzz/fuzz_iolog_timing.c
+lib/iolog/regress/fuzz/fuzz_iolog_timing.dict
 lib/iolog/regress/host_port/host_port_test.c
 lib/iolog/regress/iolog_filter/check_iolog_filter.c
 lib/iolog/regress/iolog_filter/test1/log
