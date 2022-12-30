@@ -179,6 +179,7 @@ AC_SUBST([pam_session])
 AC_SUBST([pam_login_service])
 AC_SUBST([plugindir])
 AC_SUBST([sudoers_plugin])
+AC_SUBST([python_plugin])
 #
 # Begin initial values for man page substitution
 #
@@ -228,6 +229,7 @@ pam_session=on
 pam_login_service=sudo
 plugindir="$libexecdir/sudo"
 sudoers_plugin="sudoers.so"
+python_plugin="python_plugin.so"
 DIGEST=digest.lo
 devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
 #
@@ -1685,6 +1687,7 @@ aix*)
 	noexec_file="$libexecdir/sudo/sudo_noexec.a(sudo_noexec.so)"
 	intercept_file="$libexecdir/sudo/sudo_intercept.a(sudo_intercept.so)"
 	sudoers_plugin="sudoers.a(sudoers.so)"
+	python_plugin="python_plugin.a(python_plugin.so)"
     fi
     ;;
 esac
@@ -4424,6 +4427,9 @@ echo " Pathnames:" >&AS_MESSAGE_FD
 echo "  log directory			: ${log_dir}" >&AS_MESSAGE_FD
 echo "  plugin directory		: ${plugindir}" >&AS_MESSAGE_FD
 echo "  sudoers plugin			: ${sudoers_plugin}" >&AS_MESSAGE_FD
+if test "${enable_python-no}" != "no"; then
+    echo "  python plugin			: ${python_plugin}" >&AS_MESSAGE_FD
+fi
 echo "  run directory			: ${rundir}" >&AS_MESSAGE_FD
 echo "  var directory			: ${vardir}" >&AS_MESSAGE_FD
 echo "  I/O log directory		: ${iolog_dir}" >&AS_MESSAGE_FD

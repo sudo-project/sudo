@@ -723,6 +723,7 @@ OBJEXT
 EXEEXT
 ac_ct_CC
 CC
+python_plugin
 sudoers_plugin
 plugindir
 pam_login_service
@@ -3596,6 +3597,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -3645,6 +3647,7 @@ pam_session=on
 pam_login_service=sudo
 plugindir="$libexecdir/sudo"
 sudoers_plugin="sudoers.so"
+python_plugin="python_plugin.so"
 DIGEST=digest.lo
 devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
 #
@@ -17151,6 +17154,7 @@ aix*)
 	noexec_file="$libexecdir/sudo/sudo_noexec.a(sudo_noexec.so)"
 	intercept_file="$libexecdir/sudo/sudo_intercept.a(sudo_intercept.so)"
 	sudoers_plugin="sudoers.a(sudoers.so)"
+	python_plugin="python_plugin.a(python_plugin.so)"
     fi
     ;;
 esac
@@ -36640,6 +36644,9 @@ echo " Pathnames:" >&6
 echo "  log directory			: ${log_dir}" >&6
 echo "  plugin directory		: ${plugindir}" >&6
 echo "  sudoers plugin			: ${sudoers_plugin}" >&6
+if test "${enable_python-no}" != "no"; then
+    echo "  python plugin			: ${python_plugin}" >&6
+fi
 echo "  run directory			: ${rundir}" >&6
 echo "  var directory			: ${vardir}" >&6
 echo "  I/O log directory		: ${iolog_dir}" >&6
