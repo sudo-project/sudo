@@ -80,13 +80,6 @@
 #include "sudo_digest.h"
 #include "sudo_rand.h"
 
-/* Only use getrandom(2) when fuzzing. */
-#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
-# if !defined(SYS_getrandom) || !defined(GRND_NONBLOCK)
-#  undef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
-# endif
-#endif
-
 #if !defined(MAP_ANON) && defined(MAP_ANONYMOUS)
 # define MAP_ANON MAP_ANONYMOUS
 #endif
@@ -113,7 +106,6 @@
 int	sudo_getentropy(void *buf, size_t len);
 
 static int getentropy_getrandom(void *buf, size_t len);
-#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
 static int getentropy_sysctl(void *buf, size_t len);
 static int getentropy_urandom(void *buf, size_t len, const char *path,
     int devfscheck);
@@ -122,7 +114,22 @@ static int gotdata(char *buf, size_t len);
 #ifdef HAVE_DL_ITERATE_PHDR
 static int getentropy_phdr(struct dl_phdr_info *info, size_t size, void *data);
 #endif
-#endif /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
+
+static void *
+mmap_anon(void *addr, size_t len, int prot, int flags, off_t offset)
+{
+#ifdef MAP_ANON
+	return mmap(addr, len, prot, flags | MAP_ANON, -1, offset);
+#else
+	int fd;
+
+	if ((fd = open("/dev/zero", O_RDWR)) == -1)
+		return MAP_FAILED;
+	addr = mmap(addr, len, prot, flags, fd, offset);
+	close(fd);
+	return addr;
+#endif
+}
 
 int
 sudo_getentropy(void *buf, size_t len)
@@ -138,9 +145,7 @@ sudo_getentropy(void *buf, size_t len)
 	if (ret != -1)
 		return (ret);
 
-#if !defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION)
-
-#if defined(HAVE_OPENSSL)
+#ifdef HAVE_OPENSSL
 	if (RAND_bytes(buf, len) == 1)
 		return (0);
 #endif
@@ -188,44 +193,14 @@ sudo_getentropy(void *buf, size_t len)
 		return (ret);
 
 	errno = EIO;
-#endif /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
 	return (ret);
 }
 
-#if defined(SYS_getrandom) && defined(GRND_NONBLOCK)
-static int
-getentropy_getrandom(void *buf, size_t len)
-{
-	int pre_errno = errno;
-	int ret;
+/*
+ * This is an open source non-commercial project. Dear PVS-Studio, please check it.
+ * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+ */
 
-        /*
-         * Try descriptor-less getrandom(), in non-blocking mode.
-         *
-         * The design of Linux getrandom is broken.  It has an
-         * uninitialized phase coupled with blocking behaviour, which
-         * is unacceptable from within a library at boot time without
-         * possible recovery. See http://bugs.python.org/issue26839#msg267745
-         */
-	do {
-		ret = syscall(SYS_getrandom, buf, len, GRND_NONBLOCK);
-	} while (ret == -1 && errno == EINTR);
-
-	if (ret < 0 || (size_t)ret != len)
-		return (-1);
-	errno = pre_errno;
-	return (0);
-}
-#else
-static int
-getentropy_getrandom(void *buf, size_t len)
-{
-	errno = ENOTSUP;
-	return (-1);
-}
-#endif
-
-#if !defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION)
 /*
  * Basic validity checking; wish we could do better.
  */
@@ -363,6 +338,39 @@ getentropy_sysctl(void *buf, size_t len)
 }
 #endif
 
+#if defined(SYS_getrandom) && defined(GRND_NONBLOCK)
+static int
+getentropy_getrandom(void *buf, size_t len)
+{
+	int pre_errno = errno;
+	int ret;
+
+        /*
+         * Try descriptor-less getrandom(), in non-blocking mode.
+         *
+         * The design of Linux getrandom is broken.  It has an
+         * uninitialized phase coupled with blocking behaviour, which
+         * is unacceptable from within a library at boot time without
+         * possible recovery. See http://bugs.python.org/issue26839#msg267745
+         */
+	do {
+		ret = syscall(SYS_getrandom, buf, len, GRND_NONBLOCK);
+	} while (ret == -1 && errno == EINTR);
+
+	if (ret < 0 || (size_t)ret != len)
+		return (-1);
+	errno = pre_errno;
+	return (0);
+}
+#else
+static int
+getentropy_getrandom(void *buf, size_t len)
+{
+	errno = ENOTSUP;
+	return (-1);
+}
+#endif
+
 #ifdef HAVE_CLOCK_GETTIME
 static const int cl[] = {
 	CLOCK_REALTIME,
@@ -400,22 +408,6 @@ getentropy_phdr(struct dl_phdr_info *info, size_t size, void *data)
 	return (0);
 }
 #endif
-
-static void *
-mmap_anon(void *addr, size_t len, int prot, int flags, off_t offset)
-{
-#ifdef MAP_ANON
-	return mmap(addr, len, prot, flags | MAP_ANON, -1, offset);
-#else
-	int fd;
-
-	if ((fd = open("/dev/zero", O_RDWR)) == -1)
-		return MAP_FAILED;
-	addr = mmap(addr, len, prot, flags, fd, offset);
-	close(fd);
-	return addr;
-#endif
-}
 
 static int
 getentropy_fallback(void *buf, size_t len)
@@ -646,6 +638,5 @@ done:
 		freezero(results, digest_len);
 	return (ret);
 }
-#endif /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
 
 #endif /* HAVE_GETENTROPY */
