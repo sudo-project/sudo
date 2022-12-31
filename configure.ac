@@ -2092,9 +2092,9 @@ case "$host" in
 		# We call getrandom via syscall(3) in case it is not in libc
 		AC_CHECK_HEADERS([linux/random.h sys/syscall.h])
 
-		# Do not use our replacement functions when fuzzing, it may
-		# skew the coverage reports.
-		if test X"$enable_fuzzer" != X"no"; then
+		# Only use our replacement functions when not fuzzing,
+		# they may skew the coverage reports.
+		if test X"$enable_fuzzer" = X"no"; then
 		    # glibc's getentropy() emulation may fail on older kernels.
 		    # We use our own getentropy() by default on Linux.
 		    : ${ac_cv_func_getentropy='no'}
