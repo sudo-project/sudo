@@ -68,11 +68,19 @@ check_pattern(const char *pattern)
 	    }
 	    break;
 	case '{':
-	    /* Try to match bound: {[0-9]*,[0-9]*} */
+	    /* Try to match bound: {[0-9]*\?,[0-9]*} */
 	    b1 = strtoul(cp, &ep, 10);
-	    if (*ep == ',') {
+	    switch (ep[0]) {
+	    case '\\':
+		/* glibc allows the comma to be escaped */
+		if (ep[1] != ',')
+		    break;
+		ep++;
+		FALLTHROUGH;
+	    case ',':
 		cp = ep + 1;
 		b2 = strtoul(cp, &ep, 10);
+		break;
 	    }
 	    cp = ep;
 	    if (*cp == '}') {
