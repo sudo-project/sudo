@@ -1278,7 +1278,7 @@ env_file_next_local(void *cookie, int *errnum)
 	val_len = strlen(++val);
 
 	/* Strip leading and trailing single/double quotes */
-	if ((val[0] == '\'' || val[0] == '\"') && val[0] == val[val_len - 1]) {
+	if ((val[0] == '\'' || val[0] == '\"') && val[0] == val[val_len - 1] && val_len > 1) {
 	    val[val_len - 1] = '\0';
 	    val++;
 	    val_len -= 2;
