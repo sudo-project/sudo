@@ -202,6 +202,7 @@ lib/iolog/regress/iolog_json/test1.in
 lib/iolog/regress/iolog_json/test2.in
 lib/iolog/regress/iolog_json/test2.out.ok
 lib/iolog/regress/iolog_json/test3.in
+lib/iolog/regress/iolog_json/test3.out.ok
 lib/iolog/regress/iolog_mkpath/check_iolog_mkpath.c
 lib/iolog/regress/iolog_path/check_iolog_path.c
 lib/iolog/regress/iolog_path/data

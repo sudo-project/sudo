@@ -414,7 +414,6 @@ json_parse_string(char **strp)
     }
     while (src < end) {
 	char ch = *src++;
-	/* TODO: handle unicode escapes */
 	if (ch == '\\') {
 	    switch (*src) {
 	    case 'b':
@@ -432,6 +431,17 @@ json_parse_string(char **strp)
 	    case 't':
 		ch = '\t';
 		break;
+	    case 'u':
+		/* Only currently handles 8-bit ASCII. */
+		if (src[1] == '0' && src[2] == '0') {
+		    ch = sudo_hexchar(&src[3]);
+		    if (ch != -1) {
+			src += 4;
+			break;
+		    }
+		}
+		/* Not in \u00XX format. */
+		FALLTHROUGH;
 	    case '"':
 	    case '\\':
 	    default:
