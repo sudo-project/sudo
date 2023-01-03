@@ -53,6 +53,7 @@ iolog_mkdtemp(char *path)
     const uid_t iolog_uid = iolog_get_uid();
     const gid_t iolog_gid = iolog_get_gid();
     bool ok = false, uid_changed = false;
+    char *dir = sudo_basename(path);
     mode_t omask;
     int dfd;
     debug_decl(iolog_mkdtemp, SUDO_DEBUG_UTIL);
@@ -74,11 +75,11 @@ iolog_mkdtemp(char *path)
 	/* We cannot retry mkdtemp() so always open as iolog user */
 	if (!uid_changed)
 	    uid_changed = iolog_swapids(false);
-	if (mkdtempat(dfd, path) == NULL) {
+	if (mkdtempat(dfd, dir) == NULL) {
 	    sudo_warn(U_("unable to mkdir %s"), path);
 	    ok = false;
 	} else {
-	    if (chmod(path, iolog_dirmode) != 0) {
+	    if (fchmodat(dfd, dir, iolog_filemode, 0) != 0) {
 		/* Not a fatal error, pre-existing mode is 0700. */
 		sudo_warn(U_("unable to change mode of %s to 0%o"),
 		    path, (unsigned int)iolog_dirmode);
