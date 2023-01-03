@@ -97,8 +97,17 @@ main(int argc, char *argv[])
     }
 
     /* Clean up (avoid running via shell) */
-    execvp("rm", (char **)rmargs);
-    wait(&status);
+    switch (fork()) {
+    case -1:
+	sudo_warn("fork");
+	_exit(1);
+    case 0:
+	execvp("rm", (char **)rmargs);
+	_exit(1);
+    default:
+	wait(&status);
+	break;
+    }
 
     return errors;
 }
