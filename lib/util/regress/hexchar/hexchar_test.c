@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2014-2015 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2014-2015, 2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -27,8 +27,6 @@
 #include "sudo_compat.h"
 #include "sudo_util.h"
 
-int hexchar(const char *s);
-
 sudo_dso_public int main(int argc, char *argv[]);
 
 struct hexchar_test {
@@ -44,7 +42,7 @@ main(int argc, char *argv[])
     static const char xdigs_lower[] = "0123456789abcdef";
     static const char xdigs_upper[] = "0123456789ABCDEF";
 
-    initprogname(argc > 0 ? argv[0] : "check_hexchar");
+    initprogname(argc > 0 ? argv[0] : "hexchar_test");
 
     /* Build up test data. */
     ntests = 256 + 256 + 3;
@@ -68,9 +66,9 @@ main(int argc, char *argv[])
     test_data[ntests - 1].value = -1;
 
     for (i = 0; i < ntests; i++) {
-	result = hexchar(test_data[i].hex);
+	result = sudo_hexchar(test_data[i].hex);
 	if (result != test_data[i].value) {
-	    fprintf(stderr, "check_hexchar: expected %d, got %d\n",
+	    fprintf(stderr, "%s: expected %d, got %d\n", getprogname(),
 		test_data[i].value, result);
 	    errors++;
 	}

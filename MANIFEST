@@ -246,6 +246,7 @@ lib/util/getusershell.c
 lib/util/gidlist.c
 lib/util/glob.c
 lib/util/gmtime_r.c
+lib/util/hexchar.c
 lib/util/inet_ntop.c
 lib/util/inet_pton.c
 lib/util/isblank.c
@@ -290,6 +291,7 @@ lib/util/regress/glob/files
 lib/util/regress/glob/globtest.c
 lib/util/regress/glob/globtest.in
 lib/util/regress/harness.in
+lib/util/regress/hexchar/hexchar_test.c
 lib/util/regress/json/json_test.c
 lib/util/regress/mktemp/mktemp_test.c
 lib/util/regress/multiarch/multiarch_test.c
@@ -630,7 +632,6 @@ plugins/sudoers/gram.c
 plugins/sudoers/gram.h
 plugins/sudoers/gram.y
 plugins/sudoers/group_plugin.c
-plugins/sudoers/hexchar.c
 plugins/sudoers/ins_2001.h
 plugins/sudoers/ins_classic.h
 plugins/sudoers/ins_csops.h
@@ -858,7 +859,6 @@ plugins/sudoers/regress/parser/check_digest.c
 plugins/sudoers/regress/parser/check_digest.out.ok
 plugins/sudoers/regress/parser/check_fill.c
 plugins/sudoers/regress/parser/check_gentime.c
-plugins/sudoers/regress/parser/check_hexchar.c
 plugins/sudoers/regress/serialize_list/check_serialize_list.c
 plugins/sudoers/regress/starttime/check_starttime.c
 plugins/sudoers/regress/sudoers/test1.in

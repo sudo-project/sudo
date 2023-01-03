@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2011-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2011-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -111,8 +111,8 @@ PVS_IGNORE = 'V707,V011,V002,V536'
 PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
 
 # Regression tests
-TEST_PROGS = conf_test getgids getgrouplist_test hltq_test json_test \
-	     multiarch_test open_parent_dir_test parse_gids_test \
+TEST_PROGS = conf_test getgids getgrouplist_test hexchar_test hltq_test \
+	     json_test multiarch_test open_parent_dir_test parse_gids_test \
 	     parseln_test progname_test regex_test strsplit_test \
 	     strtobool_test strtoid_test strtomode_test strtonum_test \
 	     uuid_test @COMPAT_TEST_PROGS@
@@ -145,12 +145,13 @@ DEVEL = @DEVEL@
 SHELL = @SHELL@
 
 LTOBJS = basename.lo @DIGEST@ event.lo fatal.lo key_val.lo gethostname.lo \
-	 gettime.lo getgrouplist.lo gidlist.lo json.lo lbuf.lo locking.lo \
-	 logfac.lo logpri.lo mkdir_parents.lo mmap_alloc.lo multiarch.lo \
-	 parseln.lo progname.lo rcstr.lo regex.lo roundup.lo secure_path.lo \
-	 setgroups.lo strsplit.lo strtobool.lo strtoid.lo strtomode.lo \
-	 strtonum.lo sudo_conf.lo sudo_debug.lo sudo_dso.lo term.lo \
-	 ttyname_dev.lo ttysize.lo uuid.lo @COMMON_OBJS@ @LTLIBOBJS@
+	 gettime.lo getgrouplist.lo gidlist.lo hexchar.lo json.lo lbuf.lo \
+	 locking.lo logfac.lo logpri.lo mkdir_parents.lo mmap_alloc.lo \
+	 multiarch.lo parseln.lo progname.lo rcstr.lo regex.lo roundup.lo \
+	 secure_path.lo setgroups.lo strsplit.lo strtobool.lo strtoid.lo \
+	 strtomode.lo strtonum.lo sudo_conf.lo sudo_debug.lo sudo_dso.lo \
+	 term.lo ttyname_dev.lo ttysize.lo uuid.lo \
+	 @COMMON_OBJS@ @LTLIBOBJS@
 
 IOBJS = $(LTOBJS:.lo=.i)
 
@@ -173,6 +174,8 @@ GLOBTEST_OBJS = globtest.lo glob.lo
 GETDELIM_TEST_OBJS = getdelim_test.lo getdelim.lo
 
 HLTQ_TEST_OBJS = hltq_test.lo
+
+HEXCHAR_TEST_OBJS = hexchar_test.lo hexchar.lo
 
 JSON_TEST_OBJS = json_test.lo json.lo
 
@@ -289,6 +292,9 @@ getdelim_test: $(GETDELIM_TEST_OBJS) libsudo_util.la
 
 hltq_test: $(HLTQ_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(HLTQ_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+
+hexchar_test: $(HEXCHAR_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(HEXCHAR_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 json_test: $(JSON_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(JSON_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
@@ -476,6 +482,7 @@ check: $(TEST_PROGS) check-fuzzer
 	    ./strtonum_test || rval=`expr $$rval + $$?`; \
 	    ./uuid_test || rval=`expr $$rval + $$?`; \
 	    ./hltq_test || rval=`expr $$rval + $$?`; \
+	    ./hexchar_test || rval=`expr $$rval + $$?`; \
 	    ./json_test || rval=`expr $$rval + $$?`; \
 	    ./progname_test || rval=`expr $$rval + $$?`; \
 	    rm -f ./progname_test2; ln -s ./progname_test ./progname_test2; \
@@ -945,6 +952,28 @@ gmtime_r.i: $(srcdir)/gmtime_r.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 gmtime_r.plog: gmtime_r.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/gmtime_r.c --i-file $< --output-file $@
+hexchar.lo: $(srcdir)/hexchar.c $(incdir)/compat/stdbool.h \
+            $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+            $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+            $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/hexchar.c
+hexchar.i: $(srcdir)/hexchar.c $(incdir)/compat/stdbool.h \
+            $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+            $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+            $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+hexchar.plog: hexchar.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/hexchar.c --i-file $< --output-file $@
+hexchar_test.lo: $(srcdir)/regress/hexchar/hexchar_test.c \
+                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                 $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/hexchar/hexchar_test.c
+hexchar_test.i: $(srcdir)/regress/hexchar/hexchar_test.c \
+                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                 $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+hexchar_test.plog: hexchar_test.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/hexchar/hexchar_test.c --i-file $< --output-file $@
 hltq_test.lo: $(srcdir)/regress/tailq/hltq_test.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
               $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \

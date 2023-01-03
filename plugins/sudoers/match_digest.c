@@ -97,7 +97,7 @@ digest_matches(int fd, const char *path, const char *runchroot,
 	    /* Convert ascii hex to binary. */
 	    unsigned int i;
 	    for (i = 0; i < digest_len; i++) {
-		const int h = hexchar(&digest->digest_str[i + i]);
+		const int h = sudo_hexchar(&digest->digest_str[i + i]);
 		if (h == -1)
 		    goto bad_format;
 		sudoers_digest[i] = (unsigned char)h;
