@@ -30,6 +30,7 @@
 #include "sudo_compat.h"
 #include "sudo_debug.h"
 #include "sudo_lbuf.h"
+#include "sudo_util.h"
 
 void
 sudo_lbuf_init_v1(struct sudo_lbuf *lbuf, sudo_lbuf_output_t output,
@@ -76,11 +77,9 @@ sudo_lbuf_expand(struct sudo_lbuf *lbuf, unsigned int extra)
     }
 
     if (lbuf->len + extra + 1 > lbuf->size) {
-	unsigned int new_size = lbuf->len + extra + 1;
+	const unsigned int new_size = sudo_pow2_roundup(lbuf->len + extra + 1);
 	char *new_buf;
 
-	/* Round new_size up to the next multiple of 256. */
-	new_size = (new_size + 255) & ~255;
 	if ((new_buf = realloc(lbuf->buf, new_size)) == NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to allocate memory");
