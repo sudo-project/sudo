@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2007-2015 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2007-2015, 2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -64,17 +64,23 @@ sudo_lbuf_destroy_v1(struct sudo_lbuf *lbuf)
 }
 
 static bool
-sudo_lbuf_expand(struct sudo_lbuf *lbuf, int extra)
+sudo_lbuf_expand(struct sudo_lbuf *lbuf, unsigned int extra)
 {
     debug_decl(sudo_lbuf_expand, SUDO_DEBUG_UTIL);
 
-    if (lbuf->len + extra + 1 >= lbuf->size) {
-	char *new_buf;
-	int new_size = lbuf->size;
+    if (lbuf->len + extra + 1 <= lbuf->len) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "integer overflow updating lbuf->len");
+	lbuf->error = 1;
+	debug_return_bool(false);
+    }
 
-	do {
-	    new_size += 256;
-	} while (lbuf->len + extra + 1 >= new_size);
+    if (lbuf->len + extra + 1 > lbuf->size) {
+	unsigned int new_size = lbuf->len + extra + 1;
+	char *new_buf;
+
+	/* Round new_size up to the next multiple of 256. */
+	new_size = (new_size + 255) & ~255;
 	if ((new_buf = realloc(lbuf->buf, new_size)) == NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to allocate memory");
@@ -94,10 +100,11 @@ sudo_lbuf_expand(struct sudo_lbuf *lbuf, int extra)
 bool
 sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char *fmt, ...)
 {
-    int len, saved_len = lbuf->len;
+    unsigned int saved_len = lbuf->len;
     bool ret = false;
     const char *cp, *s;
     va_list ap;
+    int len;
     debug_decl(sudo_lbuf_append_quoted, SUDO_DEBUG_UTIL);
 
     if (sudo_lbuf_error(lbuf))
@@ -152,10 +159,11 @@ done:
 bool
 sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...)
 {
-    int len, saved_len = lbuf->len;
+    unsigned int saved_len = lbuf->len;
     bool ret = false;
     va_list ap;
     const char *s;
+    int len;
     debug_decl(sudo_lbuf_append, SUDO_DEBUG_UTIL);
 
     if (sudo_lbuf_error(lbuf))

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2007, 2010, 2011, 2013-2015
+ * Copyright (c) 2007, 2010, 2011, 2013-2015, 2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -27,11 +27,11 @@ struct sudo_lbuf {
     int (*output)(const char *);
     char *buf;
     const char *continuation;
-    int indent;
-    int len;
-    int size;
-    short cols;
-    short error;
+    unsigned int indent;
+    unsigned int len;
+    unsigned int size;
+    unsigned short cols;
+    unsigned short error;
 };
 
 typedef int (*sudo_lbuf_output_t)(const char *);
