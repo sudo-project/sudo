@@ -5925,13 +5925,18 @@ sudoers_trace_print(const char *msg)
 int
 sudoers_trace_print(const char *msg)
 {
-    sudo_lbuf_append(&trace_lbuf, "%s", msg);
-    if (strchr(msg, '\n') != NULL)
-    {
-	/* We already parsed the newline so sudolineno is off by one. */
-	sudo_debug_printf2(NULL, NULL, 0, SUDOERS_DEBUG_PARSER|SUDO_DEBUG_DEBUG,
-	    "sudoerslex: %s:%d: %s", sudoers, sudolineno - 1, trace_lbuf.buf);
-	trace_lbuf.len = 0;
+    const int sudo_debug_subsys = SUDOERS_DEBUG_PARSER;
+
+    if (sudo_debug_needed(SUDO_DEBUG_DEBUG)) {
+	sudo_lbuf_append(&trace_lbuf, "%s", msg);
+	if (strchr(msg, '\n') != NULL)
+	{
+	    /* We already parsed the newline so sudolineno is off by one. */
+	    sudo_debug_printf2(NULL, NULL, 0,
+		sudo_debug_subsys|SUDO_DEBUG_DEBUG, "sudoerslex: %s:%d: %s",
+		sudoers, sudolineno - 1, trace_lbuf.buf);
+	    trace_lbuf.len = 0;
+	}
     }
     return 0;
 }
