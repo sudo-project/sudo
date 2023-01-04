@@ -77,9 +77,11 @@ sudo_lbuf_expand(struct sudo_lbuf *lbuf, unsigned int extra)
     }
 
     if (lbuf->len + extra + 1 > lbuf->size) {
-	const unsigned int new_size = sudo_pow2_roundup(lbuf->len + extra + 1);
+	unsigned int new_size = sudo_pow2_roundup(lbuf->len + extra + 1);
 	char *new_buf;
 
+	if (new_size < 256)
+	    new_size = 256;
 	if ((new_buf = realloc(lbuf->buf, new_size)) == NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to allocate memory");
