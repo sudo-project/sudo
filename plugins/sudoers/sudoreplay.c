@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -196,7 +196,7 @@ sudo_noreturn static void usage(void);
     isalnum((unsigned char)(s)[3]) && isalnum((unsigned char)(s)[4]) && \
     (s)[5] == '/' && \
     isalnum((unsigned char)(s)[6]) && isalnum((unsigned char)(s)[7]) && \
-    (s)[6] == '\0')
+    (s)[8] == '\0')
 
 sudo_dso_public int main(int argc, char *argv[]);
 
