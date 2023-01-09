@@ -276,7 +276,7 @@ SHA256Pad(SHA2_CTX *ctx)
 	SHA256Update(ctx, (uint8_t *)"\200", 1);
 
 	/* Pad message such that the resulting length modulo 512 is 448. */
-	while ((ctx->count[0] & 504) != 448)
+	while ((ctx->count[0] & 511) != 448)
 		SHA256Update(ctx, (uint8_t *)"\0", 1);
 
 	/* Append length of message in bits and do final SHA256Transform(). */
@@ -490,7 +490,7 @@ SHA512Pad(SHA2_CTX *ctx)
 	SHA512Update(ctx, (uint8_t *)"\200", 1);
 
 	/* Pad message such that the resulting length modulo 1024 is 896. */
-	while ((ctx->count[0] & 1016) != 896)
+	while ((ctx->count[0] & 1023) != 896)
 		SHA512Update(ctx, (uint8_t *)"\0", 1);
 
 	/* Append length of message in bits and do final SHA512Transform(). */
