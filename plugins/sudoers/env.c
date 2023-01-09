@@ -1160,7 +1160,7 @@ validate_env_vars(char * const env_vars[])
     /* Add user-specified environment variables. */
     for (ep = env_vars; *ep != NULL; ep++) {
 	char *eq = strchr(*ep, '=');
-	if (ep == NULL || eq == *ep) {
+	if (eq == NULL || eq == *ep) {
 	    /* Must be in the form var=val. */
 	    okvar = false;
 	} else if (def_secure_path && !user_is_exempt() &&
