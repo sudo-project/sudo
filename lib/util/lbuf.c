@@ -288,12 +288,10 @@ sudo_lbuf_print_v1(struct sudo_lbuf *lbuf)
     /* For very small widths just give up... */
     len = lbuf->continuation ? strlen(lbuf->continuation) : 0;
     if (lbuf->cols <= lbuf->indent + len + 20) {
-	if (lbuf->len > 0) {
-	    lbuf->buf[lbuf->len] = '\0';
-	    lbuf->output(lbuf->buf);
-	    if (lbuf->buf[lbuf->len - 1] != '\n')
-		lbuf->output("\n");
-	}
+	lbuf->buf[lbuf->len] = '\0';
+	lbuf->output(lbuf->buf);
+	if (lbuf->buf[lbuf->len - 1] != '\n')
+	    lbuf->output("\n");
 	goto done;
     }
 
