@@ -1,3 +1,22 @@
+What's new in Sudo 1.9.12p2
+
+ * Fixed a compilation error on Linux/aarch64.  GitHub issue #197.
+
+ * Fixed a potential crash introduced in the fix for GitHub issue #134.
+   If a user's sudoers entry did not have any RunAs user's set,
+   running "sudo -U otheruser -l" would dereference a NULL pointer.
+
+ * Fixed a bug introduced in sudo 1.9.12 that could prevent sudo
+   from creating a I/O files when the "iolog_file" sudoers setting
+   contains six or more Xs.
+
+ * Fixed a compilation issue on AIX with the native compiler.
+   GitHub issue #231.
+
+ * Fixed CVE-2023-22809, a flaw in sudo's -e option (aka sudoedit)
+   that could allow a malicious user with sudoedit privileges to
+   edit arbitrary files.
+
 What's new in Sudo 1.9.12p1
 
  * Sudo's configure script now does a better job of detecting when
