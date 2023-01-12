@@ -131,7 +131,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char * const *files,
     const char *tmp, *cp, *ep = NULL;
     const char *edend = ed + edlen;
     struct stat user_editor_sb;
-    int nargc;
+    int nargc = 0;
     debug_decl(resolve_editor, SUDOERS_DEBUG_UTIL);
 
     /*
@@ -149,10 +149,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char * const *files,
     /* If we can't find the editor in the user's PATH, give up. */
     if (find_path(editor, &editor_path, &user_editor_sb, getenv("PATH"), NULL,
 	    0, allowlist) != FOUND) {
-	sudoers_gc_remove(GC_PTR, editor);
-	free(editor);
-	errno = ENOENT;
-	debug_return_str(NULL);
+	goto bad;
     }
 
     /* Count rest of arguments and allocate editor argv. */
@@ -173,6 +170,17 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char * const *files,
 	nargv[nargc] = copy_arg(cp, ep - cp);
 	if (nargv[nargc] == NULL)
 	    goto oom;
+
+	/*
+	 * We use "--" to separate the editor and arguments from the files
+	 * to edit.  The editor arguments themselves may not contain "--".
+	 */
+	if (strcmp(nargv[nargc], "--") == 0) {
+	    sudo_warnx(U_("ignoring editor: %.*s"), (int)edlen, ed);
+	    sudo_warnx("%s", U_("editor arguments may not contain \"--\""));
+	    errno = EINVAL;
+	    goto bad;
+	}
     }
     if (nfiles != 0) {
 	nargv[nargc++] = (char *)"--";
@@ -186,6 +194,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char * const *files,
     debug_return_str(editor_path);
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+bad:
     sudoers_gc_remove(GC_PTR, editor);
     free(editor);
     free(editor_path);
