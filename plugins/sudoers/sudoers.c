@@ -802,21 +802,32 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     /* Note: must call audit before uid change. */
     if (ISSET(sudo_mode, MODE_EDIT)) {
+	const char *env_editor = NULL;
 	char **edit_argv;
 	int edit_argc;
-	const char *env_editor;
 
 	free(safe_cmnd);
 	safe_cmnd = find_editor(NewArgc - 1, NewArgv + 1, &edit_argc,
 	    &edit_argv, NULL, &env_editor);
 	if (safe_cmnd == NULL) {
-	    if (errno != ENOENT)
+	    switch (errno) {
+	    case ENOENT:
+		audit_failure(NewArgv, N_("%s: command not found"),
+		    env_editor ? env_editor : def_editor);
+		sudo_warnx(U_("%s: command not found"),
+		    env_editor ? env_editor : def_editor);
+		goto bad;
+	    case EINVAL:
+		if (def_env_editor && env_editor != NULL) {
+		    /* User tried to do something funny with the editor. */
+		    log_warningx(SLOG_NO_STDERR|SLOG_AUDIT|SLOG_SEND_MAIL,
+			"invalid user-specified editor: %s", env_editor);
+		    goto bad;
+		}
+		FALLTHROUGH;
+	    default:
 		goto done;
-	    audit_failure(NewArgv, N_("%s: command not found"),
-		env_editor ? env_editor : def_editor);
-	    sudo_warnx(U_("%s: command not found"),
-		env_editor ? env_editor : def_editor);
-	    goto bad;
+	    }
 	}
 	/* find_editor() already g/c'd edit_argv[] */
 	if (NewArgv != saved_argv) {

@@ -365,7 +365,7 @@ static char *
 get_editor(int *editor_argc, char ***editor_argv)
 {
     char *editor_path = NULL, **allowlist = NULL;
-    const char *env_editor;
+    const char *env_editor = NULL;
     static const char *files[] = { "+1", "sudoers" };
     unsigned int allowlist_len = 0;
     debug_decl(get_editor, SUDOERS_DEBUG_UTIL);
@@ -399,7 +399,11 @@ get_editor(int *editor_argc, char ***editor_argv)
     if (editor_path == NULL) {
 	if (def_env_editor && env_editor != NULL) {
 	    /* We are honoring $EDITOR so this is a fatal error. */
-	    sudo_fatalx(U_("specified editor (%s) doesn't exist"), env_editor);
+	    if (errno == ENOENT) {
+		sudo_warnx(U_("specified editor (%s) doesn't exist"),
+		    env_editor);
+	    }
+	    exit(EXIT_FAILURE);
 	}
 	sudo_fatalx(U_("no editor found (editor path = %s)"), def_editor);
     }
