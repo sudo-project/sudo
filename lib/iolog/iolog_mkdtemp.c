@@ -79,7 +79,7 @@ iolog_mkdtemp(char *path)
 	    sudo_warn(U_("unable to mkdir %s"), path);
 	    ok = false;
 	} else {
-	    if (fchmodat(dfd, dir, iolog_filemode, 0) != 0) {
+	    if (fchmodat(dfd, dir, iolog_dirmode, 0) != 0) {
 		/* Not a fatal error, pre-existing mode is 0700. */
 		sudo_warn(U_("unable to change mode of %s to 0%o"),
 		    path, (unsigned int)iolog_dirmode);
