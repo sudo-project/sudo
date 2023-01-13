@@ -106,6 +106,8 @@ main(int argc, char *argv[])
 	_exit(1);
     default:
 	wait(&status);
+	if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
+	    errors++;
 	break;
     }
 
