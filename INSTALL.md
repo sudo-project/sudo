@@ -138,9 +138,9 @@ Defaults are listed in brackets after the description.
         The directory to be used for sudo-specific files that do
         not survive a system reboot.  This is typically where the
         time stamp directory is located.  By default, configure
-        will choose from the following list:
-            /run/sudo /var/run/sudo, /var/db/sudo, /var/lib/sudo,
-            /var/adm/sudo, /usr/adm/sudo
+        will choose from the following list: /run/sudo /var/run/sudo,
+        /var/db/sudo, /var/lib/sudo, /var/adm/sudo, /usr/adm/sudo.
+
         This directory should be cleared when the system reboots.
         On systems that lack /run or /var/run, the default rundir and
         vardir may be the same.  In this case, only the ts directory
@@ -150,8 +150,9 @@ Defaults are listed in brackets after the description.
         The directory to be used for sudo-specific files that survive
         a system reboot.  This is typically where the lecture status
         directory is stored.  By default, configure will choose
-        from the following list:
-            /var/db/sudo, /var/lib/sudo, /var/adm/sudo, /usr/adm/sudo
+        from the following list: /var/db/sudo, /var/lib/sudo,
+        /var/adm/sudo, /usr/adm/sudo.
+
         This directory should **not** be cleared when the system boots.
 
     --with-relaydir=DIR
@@ -165,8 +166,9 @@ Defaults are listed in brackets after the description.
         is only used when sanitizing the TZ environment variable
         to allow for fully-qualified paths in TZ.  By default,
         configure will look for an existing "zoneinfo" directory
-        in the following locations:
-            /usr/share /usr/share/lib /usr/lib /etc
+        in the following locations: /usr/share, /usr/share/lib,
+        /usr/lib, /etc.
+
         If no zoneinfo directory is found, the TZ variable may not
         contain a fully-qualified path.
 
