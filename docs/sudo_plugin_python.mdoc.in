@@ -2,7 +2,7 @@
 .\" SPDX-License-Identifier: ISC
 .\"
 .\" Copyright (c) 2019-2021 Robert Manner <robert.manner@oneidentity.com>
-.\" Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 11, 2022
+.Dd January 16, 2023
 .Dt SUDO_PLUGIN_PYTHON @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -33,7 +33,7 @@ plugin API described by
 .Pp
 The supported plugins types are:
 .Pp
-.Bl -bullet -compact -offset 4n -width 1n
+.Bl -bullet -compact -offset 1n -width 1n
 .It
 Policy plugin
 .It
@@ -555,7 +555,7 @@ function in the C
 .Nm sudo
 plugin API except that:
 .Pp
-.Bl -bullet -compact -offset 4n -width 1n
+.Bl -bullet -compact -offset 1n -width 1n
 .It
 It only gets called when there is a command to be executed
 (and not for a version query for example).
@@ -1215,7 +1215,7 @@ The default is to wait forever (no timeout).
 .Pp
 To specify the message type, the following constants are available:
 .Pp
-.Bl -bullet -compact -offset 4n -width 1n
+.Bl -bullet -compact -offset 1n -width 1n
 .It
 .Dv sudo.CONV.PROMPT_ECHO_OFF
 .It

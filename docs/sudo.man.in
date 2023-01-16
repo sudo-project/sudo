@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2022
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2023
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDO" "@mansectsu@" "December 27, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -369,7 +369,7 @@ their original location and the temporary versions are removed.
 .sp
 To help prevent the editing of unauthorized files, the following
 restrictions are enforced unless explicitly allowed by the security policy:
-.RS 16n
+.RS 13n
 .TP 3n
 \fB\(bu\fR
 Symbolic links may not be edited (version 1.8.15 and higher).

@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "September 13, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -57,24 +57,24 @@ file.
 .PP
 The following configuration sections are recognized:
 .PP
-.RS 6n
+.RS 1n
 .PD 0
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 server
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 relay
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 iolog
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 eventlog
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 syslog
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 logfile
 .RE

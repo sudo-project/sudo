@@ -3,7 +3,7 @@
 .\" SPDX-License-Identifier: ISC
 .\"
 .\" Copyright (c) 2019-2021 Robert Manner <robert.manner@oneidentity.com>
-.\" Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN_PYTHON" "5" "September 11, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN_PYTHON" "5" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -34,7 +34,7 @@ sudo_plugin(@mansectform@).
 .PP
 The supported plugins types are:
 .PP
-.RS 4n
+.RS 1n
 .PD 0
 .TP 3n
 \fB\(bu\fR
@@ -674,7 +674,7 @@ function in the C
 \fBsudo\fR
 plugin API except that:
 .sp
-.RS 10n
+.RS 7n
 .PD 0
 .TP 3n
 \fB\(bu\fR
@@ -1511,7 +1511,7 @@ The default is to wait forever (no timeout).
 .PP
 To specify the message type, the following constants are available:
 .PP
-.RS 4n
+.RS 1n
 .PD 0
 .TP 3n
 \fB\(bu\fR
