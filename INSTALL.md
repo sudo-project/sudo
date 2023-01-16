@@ -923,7 +923,7 @@ Defaults are listed in brackets after the description.
         the command they are trying is not listed in their sudoers file entry.  
         Sudoers option: mail_no_perms
 
-    --with-mailsubject="SUBJECT OF MAIL"
+    --with-mailsubject="SUBJECT"
         Subject of the mail sent to the "mailto" user. The token "%h"
         will expand to the hostname of the machine.
         The default value is "*** SECURITY information for %h ***".  
@@ -934,7 +934,7 @@ Defaults are listed in brackets after the description.
         This should go to a sysadmin at your site.  The default value is "root".  
         Sudoers option: mailto
 
-    --with-passprompt="PASSWORD PROMPT"
+    --with-passprompt="PROMPT"
         Default prompt to use when asking for a password; can be overridden
         via the -p option and the SUDO_PROMPT environment variable. Supports
         the "%H", "%h", "%U", and "%u" escapes as documented in the sudo
