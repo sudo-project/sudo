@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2018, 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2018, 2021-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "CVTSUDOERS" "1" "September 29, 2022" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
+.TH "CVTSUDOERS" "1" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -62,7 +62,7 @@ to make the policy rules specific to a host when merging multiple files.
 By default, the result is written to the standard output.
 .PP
 The options are as follows:
-.TP 12n
+.TP 8n
 \fB\-b\fR \fIdn\fR, \fB\--base\fR=\fIdn\fR
 The base DN (distinguished name) that will be used when performing
 LDAP queries.
@@ -73,12 +73,12 @@ If this option is not specified, the value of the
 \fRSUDOERS_BASE\fR
 environment variable will be used instead.
 Only necessary when converting to LDIF format.
-.TP 12n
+.TP 8n
 \fB\-c\fR \fIconf_file\fR, \fB\--config\fR=\fIconf_file\fR
 Specify the path to the configuration file.
 Defaults to
 \fI@sysconfdir@/cvtsudoers.conf\fR.
-.TP 12n
+.TP 8n
 \fB\-d\fR \fIdeftypes\fR, \fB\--defaults\fR=\fIdeftypes\fR
 Only convert
 \fIDefaults\fR
@@ -89,7 +89,7 @@ types may be specified, separated by a comma
 (\(oq\&,\(cq).
 The supported types are:
 .PP
-.RS 12n
+.RS 8n
 .PD 0
 .TP 10n
 all
@@ -124,19 +124,19 @@ option is not specified, all
 \fIDefaults\fR
 entries will be converted.
 .RE
-.TP 12n
+.TP 8n
 \fB\-e\fR, \fB\--expand-aliases\fR
 Expand aliases in
 \fIinput_file\fR.
 Aliases are preserved by default when the output
 \fIformat\fR
 is JSON or sudoers.
-.TP 12n
+.TP 8n
 \fB\-f\fR \fIoutput_format\fR, \fB\--output-format\fR=\fIoutput_format\fR
 Specify the output format (case-insensitive).
 The following formats are supported:
 .PP
-.RS 12n
+.RS 8n
 .PD 0
 .TP 10n
 CSV
@@ -192,22 +192,22 @@ output inline.
 .PP
 .RE
 .PD
-.TP 12n
+.TP 8n
 \fB\--group-file\fR=\fIfile\fR
 When the
 \fB\-M\fR
 option is also specified, perform group queries using
 \fIfile\fR
 instead of the system group database.
-.TP 12n
+.TP 8n
 \fB\-h\fR, \fB\--help\fR
 Display a short help message to the standard output and exit.
-.TP 12n
+.TP 8n
 \fB\-i\fR \fIinput_format\fR, \fB\--input-format\fR=\fIinput_format\fR
 Specify the input format.
 The following formats are supported:
 .PP
-.RS 12n
+.RS 8n
 .PD 0
 .TP 10n
 LDIF
@@ -227,12 +227,12 @@ This is the default input format.
 .PP
 .RE
 .PD
-.TP 12n
+.TP 8n
 \fB\-I\fR \fIincrement\fR, \fB\--increment\fR=\fIincrement\fR
 When generating LDIF output, increment each sudoOrder attribute by
 the specified number.
 Defaults to an increment of 1.
-.TP 12n
+.TP 8n
 \fB\-l\fR \fIlog_file\fR, \fB\--logfile\fR=\fIlog_file\fR
 Log conversion warnings to
 \fIlog_file\fR
@@ -240,7 +240,7 @@ instead of to the standard error.
 This is particularly useful when merging multiple
 \fIsudoers\fR
 files, which can generate a large number of warnings.
-.TP 12n
+.TP 8n
 \fB\-m\fR \fIfilter\fR, \fB\--match\fR=\fIfilter\fR
 Only output rules that match the specified
 \fIfilter\fR.
@@ -290,7 +290,7 @@ on the local system (see the
 option).
 Only aliases that are referenced by the filtered policy rules will
 be displayed.
-.TP 12n
+.TP 8n
 \fB\-M\fR, \fB\--match-local\fR
 When the
 \fB\-m\fR
@@ -305,7 +305,7 @@ is
 specified, users and groups in the filter do not need to exist on the
 local system, but all groups used for matching must be explicitly listed
 in the filter.
-.TP 12n
+.TP 8n
 \fB\-o\fR \fIoutput_file\fR, \fB\--output\fR=\fIoutput_file\fR
 Write the converted output to
 \fIoutput_file\fR.
@@ -316,7 +316,7 @@ is specified, or if it is
 the converted
 \fIsudoers\fR
 policy will be written to the standard output.
-.TP 12n
+.TP 8n
 \fB\-O\fR \fIstart_point\fR, \fB\--order-start\fR=\fIstart_point\fR
 When generating LDIF output, use the number specified by
 \fIstart_point\fR
@@ -329,14 +329,14 @@ option for details.
 Defaults to a starting point of 1.
 A starting point of 0 will disable the generation of sudoOrder
 attributes in the resulting LDIF file.
-.TP 12n
+.TP 8n
 \fB\--passwd-file\fR=\fIfile\fR
 When the
 \fB\-M\fR
 option is also specified, perform passwd queries using
 \fIfile\fR
 instead of the system passwd database.
-.TP 12n
+.TP 8n
 \fB\-p\fR, \fB\--prune-matches\fR
 When the
 \fB\-m\fR
@@ -344,7 +344,7 @@ option is also specified,
 \fBcvtsudoers\fR
 will prune out non-matching users, groups, and hosts from
 matching entries.
-.TP 12n
+.TP 8n
 \fB\-P\fR \fIpadding\fR, \fB\--padding\fR=\fIpadding\fR
 When generating LDIF output, construct the initial sudoOrder value by
 concatenating
@@ -368,7 +368,7 @@ If the number of sudoRole entries is larger than the padding would allow,
 \fBcvtsudoers\fR
 will exit with an error.
 By default, no padding is performed.
-.TP 12n
+.TP 8n
 \fB\-s\fR \fIsections\fR, \fB\--suppress\fR=\fIsections\fR
 Suppress the output of specific
 \fIsections\fR
@@ -382,7 +382,7 @@ and
 \fBprivileges\fR
 (which may be shortened to
 \fBprivs\fR).
-.TP 12n
+.TP 8n
 \fB\-V\fR, \fB\--version\fR
 Print the
 \fBcvtsudoers\fR

@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd May 17, 2022
+.Dd January 16, 2023
 .Dt SUDO_LOGSRVD @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -69,7 +69,7 @@ rereads its configuration file when it receives SIGHUP and writes server
 state to the debug file (if one is configured) when it receives SIGUSR1.
 .Pp
 The options are as follows:
-.Bl -tag -width Fl
+.Bl -tag -width Ds
 .It Fl f Ar file , Fl -file Ns = Ns Ar file
 Read configuration from
 .Ar file

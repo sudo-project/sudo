@@ -186,7 +186,7 @@ If an I/O plugin is configured, the running
 input and output may be logged as well.
 .Pp
 The options are as follows:
-.Bl -tag -width Fl
+.Bl -tag -width Ds
 .It Fl A , -askpass
 Normally, if
 .Nm

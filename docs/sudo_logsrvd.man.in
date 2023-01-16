@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD" "@mansectsu@" "May 17, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO_LOGSRVD" "@mansectsu@" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -71,29 +71,29 @@ rereads its configuration file when it receives SIGHUP and writes server
 state to the debug file (if one is configured) when it receives SIGUSR1.
 .PP
 The options are as follows:
-.TP 12n
+.TP 8n
 \fB\-f\fR \fIfile\fR, \fB\--file\fR=\fIfile\fR
 Read configuration from
 \fIfile\fR
 instead of the default,
 \fI@sysconfdir@/sudo_logsrvd.conf\fR.
-.TP 12n
+.TP 8n
 \fB\-h\fR, \fB\--help\fR
 Display a short help message to the standard output and exit.
-.TP 12n
+.TP 8n
 \fB\-n\fR, \fB\--no-fork\fR
 Run
 \fBsudo_logsrvd\fR
 in the foreground instead of detaching from the terminal and becoming
 a daemon.
-.TP 12n
+.TP 8n
 \fB\-R\fR \fIpercentage\fR, \fB\--random-drop\fR=\fIpercentage\fR
 For each message, there is a
 \fIpercentage\fR
 chance that the server will drop the connection.
 This is only intended for debugging the ability of a
 client to restart a connection.
-.TP 12n
+.TP 8n
 \fB\-V\fR, \fB\--version\fR
 Print the
 \fBsudo_logsrvd\fR
