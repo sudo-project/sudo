@@ -84,7 +84,7 @@ There are two
 settings that determine which editor
 \fBvisudo\fR
 will run.
-.TP 10n
+.TP 12n
 editor
 A colon
 (\(oq:\&\(cq)
@@ -116,7 +116,7 @@ The default editor path is
 which can be set at compile time via the
 \fR--with-editor\fR
 configure option.
-.TP 10n
+.TP 12n
 env_editor
 If set,
 \fBvisudo\fR
@@ -334,26 +334,26 @@ Plugin sudoers_policy @sudoers_plugin@ sudoers_mode=0400
 .fi
 .PP
 The following arguments are supported:
-.TP 10n
+.TP 6n
 sudoers_file=pathname
 The
 \fIsudoers_file\fR
 argument can be used to override the default path to the
 \fIsudoers\fR
 file.
-.TP 10n
+.TP 6n
 sudoers_uid=user-ID
 The
 \fIsudoers_uid\fR
 argument can be used to override the default owner of the sudoers file.
 It should be specified as a numeric user-ID.
-.TP 10n
+.TP 6n
 sudoers_gid=group-ID
 The
 \fIsudoers_gid\fR
 argument can be used to override the default group of the sudoers file.
 It must be specified as a numeric group-ID (not a group name).
-.TP 10n
+.TP 6n
 sudoers_mode=mode
 The
 \fIsudoers_mode\fR

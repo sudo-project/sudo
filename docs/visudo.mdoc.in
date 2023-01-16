@@ -82,7 +82,7 @@ There are two
 settings that determine which editor
 .Nm visudo
 will run.
-.Bl -tag -width 8n
+.Bl -tag -width "env_editor"
 .It editor
 A colon
 .Pq Ql :\&
@@ -322,7 +322,7 @@ Plugin sudoers_policy @sudoers_plugin@ sudoers_mode=0400
 .Ed
 .Pp
 The following arguments are supported:
-.Bl -tag -width 8n
+.Bl -tag -width 4n
 .It sudoers_file=pathname
 The
 .Em sudoers_file

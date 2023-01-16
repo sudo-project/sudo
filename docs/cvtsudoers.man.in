@@ -91,24 +91,24 @@ The supported types are:
 .PP
 .RS 8n
 .PD 0
-.TP 10n
+.TP 9n
 all
 All Defaults entries.
 .PD
-.TP 10n
+.TP 9n
 global
 Global Defaults entries that are applied regardless of
 user, runas, host, or command.
-.TP 10n
+.TP 9n
 user
 Per-user Defaults entries.
-.TP 10n
+.TP 9n
 runas
 Per-runas user Defaults entries.
-.TP 10n
+.TP 9n
 host
 Per-host Defaults entries.
-.TP 10n
+.TP 9n
 command
 Per-command Defaults entries.
 .PP
@@ -138,7 +138,7 @@ The following formats are supported:
 .PP
 .RS 8n
 .PD 0
-.TP 10n
+.TP 9n
 CSV
 CSV (comma-separated value) files are often used by spreadsheets
 and report generators.
@@ -146,7 +146,7 @@ See
 \fICSV output format\fR
 for more details.
 .PD
-.TP 10n
+.TP 9n
 JSON
 JSON (JavaScript Object Notation) files are usually easier for
 third-party applications to consume than the traditional
@@ -159,7 +159,7 @@ format.
 See
 \fIJSON output format\fR
 for more details.
-.TP 10n
+.TP 9n
 LDIF
 LDIF (LDAP Data Interchange Format) files can be imported into an LDAP
 server for use with
@@ -167,7 +167,7 @@ sudoers.ldap(@mansectform@).
 .sp
 Conversion to LDIF has the following limitations:
 .PP
-.RS 10n
+.RS 9n
 .PD 0
 .TP 3n
 \fB\(bu\fR
@@ -182,7 +182,7 @@ sudoers LDAP schema so they are expanded during the conversion.
 .PP
 .RE
 .PD
-.TP 10n
+.TP 9n
 sudoers
 Traditional sudoers format.
 A new sudoers file will be reconstructed from the parsed input file.
@@ -209,7 +209,7 @@ The following formats are supported:
 .PP
 .RS 8n
 .PD 0
-.TP 10n
+.TP 9n
 LDIF
 LDIF (LDAP Data Interchange Format) files can be exported from an LDAP
 server to convert security policies used by
@@ -219,7 +219,7 @@ that match the base DN will be processed.
 Not all sudoOptions specified in a sudoRole can be translated from
 LDIF to sudoers format.
 .PD
-.TP 10n
+.TP 9n
 sudoers
 Traditional sudoers format.
 This is the default input format.
@@ -899,30 +899,30 @@ The following names and values are supported:
 .PP
 .RS 6n
 .PD 0
-.TP 10n
+.TP 9n
 command
 A string containing the command to run.
 The special value
 \fBALL\fR
 it will match any command.
 .PD
-.TP 10n
+.TP 9n
 negated
 A boolean value that, if true, will negate any comparison performed
 with the object.
-.TP 10n
+.TP 9n
 sha224
 A string containing the SHA224 digest of the
 \fIcommand\fR.
-.TP 10n
+.TP 9n
 sha256
 A string containing the SHA256 digest of the
 \fIcommand\fR.
-.TP 10n
+.TP 9n
 sha384
 A string containing the SHA384 digest of the
 \fIcommand\fR.
-.TP 10n
+.TP 9n
 sha512
 A string containing the SHA512 digest of the
 \fIcommand\fR.
@@ -1072,7 +1072,7 @@ defaults_type,binding,name,operator,value
 .RS 6n
 .sp
 The fields are as follows:
-.TP 10n
+.TP 6n
 defaults_type
 The type of
 \fIDefaults\fR
@@ -1083,7 +1083,7 @@ setting; one of
 \fIdefaults_runas\fR,
 or
 \fIdefaults_user\fR.
-.TP 10n
+.TP 6n
 binding
 For
 \fIdefaults_command\fR,
@@ -1092,12 +1092,12 @@ For
 and
 \fIdefaults_user\fR
 this is the value that must match for the setting to be applied.
-.TP 10n
+.TP 6n
 name
 The name of the
 \fIDefaults\fR
 setting.
-.TP 10n
+.TP 6n
 operator
 The operator determines how the value is applied to the setting.
 It may be either
@@ -1108,8 +1108,9 @@ It may be either
 or
 \(oq-=\(cq
 (remove).
-.TP 10n
+.TP 6n
 value
+.br
 The setting's value, usually a string or, for
 settings used in a boolean context,
 \fItrue\fR
@@ -1141,7 +1142,7 @@ alias_type,alias_name,members
 .RS 6n
 .sp
 The fields are as follows:
-.TP 10n
+.TP 6n
 alias_type
 The type of alias; one of
 \fICmnd_Alias\fR,
@@ -1149,11 +1150,11 @@ The type of alias; one of
 \fIRunas_Alias\fR,
 or
 \fIUser_Alias\fR.
-.TP 10n
+.TP 6n
 alias_name
 The name of the alias; a string starting with an upper-case letter that
 consists of upper-case letters, digits, or underscores.
-.TP 10n
+.TP 6n
 members
 A comma-separated list of members belonging to the alias.
 Due to the use of commas,
@@ -1181,13 +1182,13 @@ rule,user,host,runusers,rungroups,options,command
 .RS 6n
 .sp
 The fields are as follows:
-.TP 10n
+.TP 6n
 rule
 This field indicates a
 \fIsudoers\fR
 \fIrule\fR
 entry.
-.TP 10n
+.TP 6n
 user
 The user the rule applies to.
 This may also be a Unix group (preceded by a
@@ -1202,7 +1203,7 @@ or a
 If set to the special value
 \fBALL\fR,
 it will match any user.
-.TP 10n
+.TP 6n
 host
 The host the rule applies to.
 This may also be a netgroup (preceded by a
@@ -1213,7 +1214,7 @@ or a
 If set to the special value
 \fBALL\fR,
 it will match any host.
-.TP 10n
+.TP 6n
 runusers
 An optional comma-separated list of users (or
 \fIRunas_Alias\fRes)
@@ -1224,9 +1225,8 @@ If set to the special value
 \fBALL\fR,
 it will match any user.
 If empty, the root user is assumed.
-.TP 10n
+.TP 6n
 rungroups
-.br
 An optional comma-separated list of groups (or
 \fIRunas_Alias\fRes)
 the command may be run as.
@@ -1238,7 +1238,7 @@ it will match any group.
 If empty, the
 \fIrunuser\fR's
 group is used.
-.TP 10n
+.TP 6n
 options
 An optional list of
 \fIDefaults\fR
@@ -1249,7 +1249,7 @@ entries in
 \fIsudoers\fR
 are converted to
 \fIoptions\fR.
-.TP 10n
+.TP 6n
 commands
 A list of commands, with optional arguments, that the user is allowed to run.
 If set to the special value

@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2022
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2023
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "December 26, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -110,7 +110,7 @@ Plugin sudoers_audit @sudoers_plugin@ sudoers_mode=0400 error_recovery=false
 .fi
 .PP
 The following plugin arguments are supported:
-.TP 10n
+.TP 6n
 error_recovery=bool
 The
 \fIerror_recovery\fR
@@ -129,40 +129,40 @@ A value of
 \fIfalse\fR
 will disable error recovery.
 Prior to version 1.9.3, no error recovery was performed.
-.TP 10n
+.TP 6n
 ldap_conf=pathname
 The
 \fIldap_conf\fR
 argument can be used to override the default path to the
 \fIldap.conf\fR
 file.
-.TP 10n
+.TP 6n
 ldap_secret=pathname
 The
 \fIldap_secret\fR
 argument can be used to override the default path to the
 \fIldap.secret\fR
 file.
-.TP 10n
+.TP 6n
 sudoers_file=pathname
 The
 \fIsudoers_file\fR
 argument can be used to override the default path to the
 \fIsudoers\fR
 file.
-.TP 10n
+.TP 6n
 sudoers_uid=user-ID
 The
 \fIsudoers_uid\fR
 argument can be used to override the default owner of the sudoers file.
 It should be specified as a numeric user-ID.
-.TP 10n
+.TP 6n
 sudoers_gid=group-ID
 The
 \fIsudoers_gid\fR
 argument can be used to override the default group of the sudoers file.
 It must be specified as a numeric group-ID (not a group name).
-.TP 10n
+.TP 6n
 sudoers_mode=mode
 The
 \fIsudoers_mode\fR
@@ -1670,16 +1670,16 @@ $ ppriv -l
 In addition, there are several
 \(lqspecial\(rq
 privilege strings:
-.TP 10n
+.TP 7n
 none
 the empty set
-.TP 10n
+.TP 7n
 all
 the set of all privileges
-.TP 10n
+.TP 7n
 zone
 the set of all privileges available in the current zone
-.TP 10n
+.TP 7n
 basic
 the default set of privileges normal users are granted at login time
 .PP
@@ -2113,21 +2113,21 @@ and
 fnmatch(3)
 functions as specified by
 IEEE Std 1003.1 (\(lqPOSIX.1\(rq).
-.TP 10n
+.TP 8n
 *
 Matches any set of zero or more characters (including white space).
-.TP 10n
+.TP 8n
 \&?
 Matches any single character (including white space).
-.TP 10n
+.TP 8n
 [...]
 Matches any character in the specified range.
-.TP 10n
+.TP 8n
 [!...]
 Matches any character
 \fInot\fR
 in the specified range.
-.TP 10n
+.TP 8n
 \ex
 For any character
 \(oqx\(cq,
@@ -5216,7 +5216,7 @@ It has the following possible values:
 .PP
 .RS 14n
 .PD 0
-.TP 10n
+.TP 6n
 all
 All the user's
 \fIsudoers\fR
@@ -5225,12 +5225,12 @@ the
 \fRNOPASSWD\fR
 flag set to avoid entering a password.
 .PD
-.TP 10n
+.TP 6n
 always
 The user must always enter a password to use the
 \fB\-l\fR
 option.
-.TP 10n
+.TP 6n
 any
 At least one of the user's
 \fIsudoers\fR
@@ -5238,8 +5238,9 @@ file entries for the current host
 must have the
 \fRNOPASSWD\fR
 flag set to avoid entering a password.
-.TP 10n
+.TP 6n
 never
+.br
 The user need never enter a password to use the
 \fB\-l\fR
 option.
@@ -5260,7 +5261,7 @@ Supported log formats are:
 .PP
 .RS 14n
 .PD 0
-.TP 10n
+.TP 6n
 json
 Logs in JSON format.
 JSON log entries contain the full user details as well as the execution
@@ -5269,7 +5270,7 @@ Due to limitations of the protocol, JSON events sent via
 \fIsyslog\fR
 may be truncated.
 .PD
-.TP 10n
+.TP 6n
 sudo
 Traditional sudo-style logs, see
 \fIEVENT LOGGING\fR
@@ -5823,7 +5824,7 @@ If options are present, the string must be enclosed in double quotes
 (\&"").
 .PP
 The following group provider plugins are installed by default:
-.TP 10n
+.TP 6n
 group_file
 The
 \fIgroup_file\fR
@@ -5836,11 +5837,11 @@ For example, if the group file to be used is
 \fI/etc/sudo-group\fR:
 .nf
 .sp
-.RS 10n
+.RS 6n
 Defaults group_plugin="group_file.so /etc/sudo-group"
 .RE
 .fi
-.TP 10n
+.TP 6n
 system_group
 The
 \fIsystem_group\fR
@@ -5853,7 +5854,7 @@ groups not present in the user's supplemental group vector.
 This plugin takes no options:
 .nf
 .sp
-.RS 10n
+.RS 6n
 Defaults group_plugin=system_group.so
 .RE
 .fi
@@ -6439,66 +6440,65 @@ The file may contain the following elements:
 .PP
 .RS 10n
 .PD 0
-.TP 10n
+.TP 6n
 timestamp
-.br
 A JSON object containing time the command was run.
 It consists of two values,
 \fIseconds\fR
 and
 \fInanoseconds\fR.
 .PD
-.TP 10n
+.TP 6n
 columns
 The number of columns of the terminal the command ran on, or zero
 if no terminal was present.
-.TP 10n
+.TP 6n
 command
 The fully-qualified path of the command that was run.
-.TP 10n
+.TP 6n
 lines
+.br
 The number of lines of the terminal the command ran on, or zero
 if no terminal was present.
-.TP 10n
+.TP 6n
 runargv
 A JSON array representing the command's argument vector as passed to the
 execve(2)
 system call.
-.TP 10n
+.TP 6n
 runenv
 A JSON array representing the command's environment as passed to the
 execve(2)
 system call.
-.TP 10n
+.TP 6n
 rungid
 The group ID the command ran as.
 This element is only present when the user specifies a group on the
 command line.
-.TP 10n
+.TP 6n
 rungroup
 The name of the group the command ran as.
 This element is only present when the user specifies a group on the
 command line.
-.TP 10n
+.TP 6n
 runuid
 The user ID the command ran as.
-.TP 10n
+.TP 6n
 runuser
 The name of the user the command ran as.
-.TP 10n
+.TP 6n
 submitcwd
-.br
 The current working directory at the time
 \fBsudo\fR
 was run.
-.TP 10n
+.TP 6n
 submithost
 The name of the host the command was run on.
-.TP 10n
+.TP 6n
 submituser
 The name of the user who ran the command via
 \fBsudo\fR.
-.TP 10n
+.TP 6n
 ttyname
 The path name of the terminal the user invoked
 \fBsudo\fR
@@ -7277,7 +7277,7 @@ Common programs that permit shell escapes include shells (obviously),
 editors, paginators, mail, and terminal programs.
 .PP
 There are four basic approaches to this problem:
-.TP 10n
+.TP 11n
 restrict
 Avoid giving users access to commands that allow the user to run
 arbitrary commands.
@@ -7290,9 +7290,8 @@ running editors via
 Due to the large number of programs that
 offer shell escapes, restricting users to the set of programs that
 do not is often unworkable.
-.TP 10n
+.TP 11n
 intercept
-.br
 On most systems,
 \fBsudo\fR's
 \fIintercept\fR
@@ -7392,11 +7391,11 @@ tag as documented in the User Specification section above.
 Here is that example again:
 .nf
 .sp
-.RS 10n
+.RS 11n
 chuck	research = INTERCEPT: ALL
 .RE
 .fi
-.RS 10n
+.RS 11n
 .sp
 This allows user
 \fBchuck\fR
@@ -7434,7 +7433,7 @@ See the description of the
 \fIintercept_verify\fR
 setting for more information.
 .RE
-.TP 10n
+.TP 11n
 log
 There are two separate but related ways to log additional commands.
 The first is to enable I/O logging using the
@@ -7457,7 +7456,7 @@ The
 flag uses the same mechanism as
 \fIintercept\fR
 (see above) and has the same limitations.
-.TP 10n
+.TP 11n
 noexec
 \fBsudo\fR's
 \fInoexec\fR
@@ -7509,11 +7508,11 @@ tag as documented in the User Specification section above.
 Here is that example again:
 .nf
 .sp
-.RS 10n
+.RS 11n
 aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
 .RE
 .fi
-.RS 10n
+.RS 11n
 .sp
 This allows user
 \fBaaron\fR

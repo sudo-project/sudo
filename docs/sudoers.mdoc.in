@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2022
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2023
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd December 26, 2022
+.Dd January 16, 2023
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -104,7 +104,7 @@ Plugin sudoers_audit @sudoers_plugin@ sudoers_mode=0400 error_recovery=false
 .Ed
 .Pp
 The following plugin arguments are supported:
-.Bl -tag -width 8n
+.Bl -tag -width 4n
 .It error_recovery=bool
 The
 .Em error_recovery
@@ -1594,7 +1594,7 @@ $ ppriv -l
 In addition, there are several
 .Dq special
 privilege strings:
-.Bl -tag -width 8n
+.Bl -tag -width "basic"
 .It none
 the empty set
 .It all
@@ -2008,7 +2008,7 @@ and
 .Xr fnmatch 3
 functions as specified by
 .St -p1003.1 .
-.Bl -tag -width 8n
+.Bl -tag -width "[!...]"
 .It *
 Matches any set of zero or more characters (including white space).
 .It \&?
@@ -2089,7 +2089,7 @@ For more information, see
 below.
 .Ss Exceptions to wildcard rules
 The following exceptions apply to the above rules:
-.Bl -tag -width 8n
+.Bl -tag -width "sudoedit"
 .It \&""
 If the empty string
 .Ql \&""
@@ -4902,7 +4902,7 @@ with the
 .Fl l
 option.
 It has the following possible values:
-.Bl -tag -width 8n
+.Bl -tag -width 4n
 .It all
 All the user's
 .Em sudoers
@@ -4938,7 +4938,7 @@ The default value is
 .It log_format
 The event log format.
 Supported log formats are:
-.Bl -tag -width 8n
+.Bl -tag -width 4n
 .It json
 Logs in JSON format.
 JSON log entries contain the full user details as well as the execution
@@ -5456,7 +5456,7 @@ If options are present, the string must be enclosed in double quotes
 .Pq \&"" .
 .Pp
 The following group provider plugins are installed by default:
-.Bl -tag -width 8n
+.Bl -tag -width 4n
 .It group_file
 The
 .Em group_file
@@ -5980,7 +5980,7 @@ that you expect.
 .Ss I/O log format
 For both local and remote I/O logs, each log is stored in a separate
 directory that contains the following files:
-.Bl -tag -width 8n
+.Bl -tag -width "log.json"
 .It Pa log
 A text file containing information about the command.
 The first line consists of the following colon-delimited fields:
@@ -6007,7 +6007,7 @@ in preference to the
 .Pa log
 file if it exists.
 The file may contain the following elements:
-.Bl -tag -width 8n
+.Bl -tag -width 4n
 .It timestamp
 A JSON object containing time the command was run.
 It consists of two values,
@@ -6727,7 +6727,7 @@ Common programs that permit shell escapes include shells (obviously),
 editors, paginators, mail, and terminal programs.
 .Pp
 There are four basic approaches to this problem:
-.Bl -tag -width 8n
+.Bl -tag -width "intercept"
 .It restrict
 Avoid giving users access to commands that allow the user to run
 arbitrary commands.
@@ -7173,7 +7173,7 @@ and higher.
 The following subsystems are used by the
 .Nm
 plugin:
-.Bl -tag -width 8n
+.Bl -tag -width "defaults"
 .It Em alias
 .Em User_Alias ,
 .Em Runas_Alias ,

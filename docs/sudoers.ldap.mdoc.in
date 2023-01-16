@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2003-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2003-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 13, 2022
+.Dd January 16, 2023
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1102,7 +1102,7 @@ will be unable to connect to it.
 The following
 .Ar level
 values are supported:
-.Bl -tag -width 8n -offset 4n
+.Bl -tag -width 4n -offset 4n
 .It never
 The server certificate will not be requested or checked.
 .It allow
@@ -1200,7 +1200,7 @@ precedence over earlier ones (unless
 is used, see below).
 The following sources are recognized:
 .Pp
-.Bl -tag -width 8n -offset 4n -compact
+.Bl -tag -width "files" -offset 4n -compact
 .It files
 read sudoers from
 .Pa @sysconfdir@/sudoers
