@@ -766,7 +766,7 @@ Defaults are listed in brackets after the description.
         the standard output.  This value may overridden at run-time
         in the sudo.conf file.
 
-    --with-badpass-message="BAD PASSWORD MESSAGE"
+    --with-badpass-message="MESSAGE"
         Message that is displayed if a user enters an incorrect password.
         The default is "Sorry, try again." unless insults are turned on.  
         Sudoers option: badpass_message
