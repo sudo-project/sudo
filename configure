@@ -31915,7 +31915,7 @@ else $as_nop
 	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-		int main(int argc, char *argv[]) { char buf[16384], *src = argv[0], *dst = buf; while ((*dst++ = *src++) != '\0'); return buf[argc]; }
+		int main(int argc, char *argv[]) { char buf[16384], *src = argv[0], *dst = buf; while ((*dst++ = *src++) != '\0') { continue; } return buf[argc]; }
 
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"
@@ -31932,6 +31932,41 @@ fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_check_cflags___fstack_clash_protection" >&5
 printf "%s\n" "$sudo_cv_check_cflags___fstack_clash_protection" >&6; }
     if test X"$sudo_cv_check_cflags___fstack_clash_protection" = X"yes"; then
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fstack-clash-protection" >&5
+printf %s "checking whether the linker accepts -fstack-clash-protection... " >&6; }
+if test ${ax_cv_check_ldflags___fstack_clash_protection+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -fstack-clash-protection"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ax_cv_check_ldflags___fstack_clash_protection=yes
+else $as_nop
+  ax_cv_check_ldflags___fstack_clash_protection=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___fstack_clash_protection" >&5
+printf "%s\n" "$ax_cv_check_ldflags___fstack_clash_protection" >&6; }
+if test x"$ax_cv_check_ldflags___fstack_clash_protection" = xyes
+then :
+
 
 if test ${HARDENING_CFLAGS+y}
 then :
@@ -31996,6 +32031,11 @@ else $as_nop
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
 
+fi
+
+
+else $as_nop
+  :
 fi
 
     fi
@@ -35006,7 +35046,6 @@ printf "%s\n" "$as_me: warning: the $rundir/ts directory must be cleared at boot
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 printf "%s\n" "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
-
 
 
 
