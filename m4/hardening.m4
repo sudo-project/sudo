@@ -30,7 +30,7 @@ AC_DEFUN([SUDO_CHECK_HARDENING], [
 	dnl
 	dnl The following tests rely on AC_LANG_WERROR.
 	dnl
-	if test "$enable_ssp" != "no"; then
+	if test -n "$GCC" -a "$enable_ssp" != "no"; then
 	    AC_CACHE_CHECK([for compiler stack protector support],
 		[sudo_cv_var_stack_protector],
 		[
@@ -86,31 +86,33 @@ AC_DEFUN([SUDO_CHECK_HARDENING], [
 	# machine-specific code does not support it.  We use a test program
 	# with a large stack allocation to try to cause the compiler to
 	# insert the stack clash protection code, or fail if not supported.
-	AC_CACHE_CHECK([whether C compiler supports -fstack-clash-protection],
-	    [sudo_cv_check_cflags___fstack_clash_protection],
-	    [
-		_CFLAGS="$CFLAGS"
-		CFLAGS="$CFLAGS -fstack-clash-protection"
-		AC_COMPILE_IFELSE([
-		    AC_LANG_SOURCE([[int main(int argc, char *argv[]) { char buf[16384], *src = argv[0], *dst = buf; while ((*dst++ = *src++) != '\0') { continue; } return buf[argc]; }]])
-		], [sudo_cv_check_cflags___fstack_clash_protection=yes], [sudo_cv_check_cflags___fstack_clash_protection=no])
-		CFLAGS="$_CFLAGS"
-	    ]
-	)
-	if test X"$sudo_cv_check_cflags___fstack_clash_protection" = X"yes"; then
-	    AX_CHECK_LINK_FLAG([-fstack-clash-protection], [
-		AX_APPEND_FLAG([-fstack-clash-protection], [HARDENING_CFLAGS])
-		AX_APPEND_FLAG([-Wc,-fstack-clash-protection], [HARDENING_LDFLAGS])
+	if test -n "$GCC"; then
+	    AC_CACHE_CHECK([whether C compiler supports -fstack-clash-protection],
+		[sudo_cv_check_cflags___fstack_clash_protection],
+		[
+		    _CFLAGS="$CFLAGS"
+		    CFLAGS="$CFLAGS -fstack-clash-protection"
+		    AC_COMPILE_IFELSE([
+			AC_LANG_SOURCE([[int main(int argc, char *argv[]) { char buf[16384], *src = argv[0], *dst = buf; while ((*dst++ = *src++) != '\0') { continue; } return buf[argc]; }]])
+		    ], [sudo_cv_check_cflags___fstack_clash_protection=yes], [sudo_cv_check_cflags___fstack_clash_protection=no])
+		    CFLAGS="$_CFLAGS"
+		]
+	    )
+	    if test X"$sudo_cv_check_cflags___fstack_clash_protection" = X"yes"; then
+		AX_CHECK_LINK_FLAG([-fstack-clash-protection], [
+		    AX_APPEND_FLAG([-fstack-clash-protection], [HARDENING_CFLAGS])
+		    AX_APPEND_FLAG([-Wc,-fstack-clash-protection], [HARDENING_LDFLAGS])
+		])
+	    fi
+
+	    # Check for control-flow transfer instrumentation (Intel CET).
+	    AX_CHECK_COMPILE_FLAG([-fcf-protection], [
+		AX_CHECK_LINK_FLAG([-fcf-protection], [
+		    AX_APPEND_FLAG([-fcf-protection], [HARDENING_CFLAGS])
+		    AX_APPEND_FLAG([-Wc,-fcf-protection], [HARDENING_LDFLAGS])
+		])
 	    ])
 	fi
-
-	# Check for control-flow transfer instrumentation (Intel CET).
-	AX_CHECK_COMPILE_FLAG([-fcf-protection], [
-	    AX_CHECK_LINK_FLAG([-fcf-protection], [
-		AX_APPEND_FLAG([-fcf-protection], [HARDENING_CFLAGS])
-		AX_APPEND_FLAG([-Wc,-fcf-protection], [HARDENING_LDFLAGS])
-	    ])
-	])
 
 	# Linker-specific hardening flags.
 	AX_CHECK_LINK_FLAG([-Wl,-z,relro], [AX_APPEND_FLAG([-Wl,-z,relro], [HARDENING_LDFLAGS])])

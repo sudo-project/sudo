@@ -4024,7 +4024,7 @@ dnl If compiler supports the -static-libgcc flag use it unless we have
 dnl GNU ld (which can avoid linking in libgcc when it is not needed).
 dnl This test relies on AC_LANG_WERROR
 dnl
-if test -n "$GCC" -a "$lt_cv_prog_gnu_ld" != "yes" -a -n "$GCC"; then
+if test -n "$GCC" -a "$lt_cv_prog_gnu_ld" != "yes"; then
     AX_CHECK_COMPILE_FLAG([-static-libgcc], [AX_APPEND_FLAG([-Wc,-static-libgcc], [LT_LDFLAGS])])
 fi
 

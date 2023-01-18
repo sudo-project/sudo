@@ -31317,7 +31317,7 @@ then :
 fi
 
 
-if test -n "$GCC" -a "$lt_cv_prog_gnu_ld" != "yes" -a -n "$GCC"; then
+if test -n "$GCC" -a "$lt_cv_prog_gnu_ld" != "yes"; then
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -static-libgcc" >&5
 printf %s "checking whether C compiler accepts -static-libgcc... " >&6; }
 if test ${ax_cv_check_cflags___static_libgcc+y}
@@ -32930,7 +32930,7 @@ printf "%s\n" "$sudo_cv_use_fortify_source" >&6; }
 	    CPPFLAGS="$O_CPPFLAGS"
 	fi
 
-				if test "$enable_ssp" != "no"; then
+				if test -n "$GCC" -a "$enable_ssp" != "no"; then
 	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for compiler stack protector support" >&5
 printf %s "checking for compiler stack protector support... " >&6; }
 if test ${sudo_cv_var_stack_protector+y}
@@ -33048,19 +33048,20 @@ printf "%s\n" "$sudo_cv_var_stack_protector" >&6; }
 	# machine-specific code does not support it.  We use a test program
 	# with a large stack allocation to try to cause the compiler to
 	# insert the stack clash protection code, or fail if not supported.
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler supports -fstack-clash-protection" >&5
+	if test -n "$GCC"; then
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler supports -fstack-clash-protection" >&5
 printf %s "checking whether C compiler supports -fstack-clash-protection... " >&6; }
 if test ${sudo_cv_check_cflags___fstack_clash_protection+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
-		_CFLAGS="$CFLAGS"
-		CFLAGS="$CFLAGS -fstack-clash-protection"
-		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+		    _CFLAGS="$CFLAGS"
+		    CFLAGS="$CFLAGS -fstack-clash-protection"
+		    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-		    int main(int argc, char *argv[]) { char buf[16384], *src = argv[0], *dst = buf; while ((*dst++ = *src++) != '\0') { continue; } return buf[argc]; }
+			int main(int argc, char *argv[]) { char buf[16384], *src = argv[0], *dst = buf; while ((*dst++ = *src++) != '\0') { continue; } return buf[argc]; }
 
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"
@@ -33071,15 +33072,15 @@ else case e in #(
 esac
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-		CFLAGS="$_CFLAGS"
+		    CFLAGS="$_CFLAGS"
 
-	 ;;
+	     ;;
 esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_check_cflags___fstack_clash_protection" >&5
 printf "%s\n" "$sudo_cv_check_cflags___fstack_clash_protection" >&6; }
-	if test X"$sudo_cv_check_cflags___fstack_clash_protection" = X"yes"; then
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fstack-clash-protection" >&5
+	    if test X"$sudo_cv_check_cflags___fstack_clash_protection" = X"yes"; then
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fstack-clash-protection" >&5
 printf %s "checking whether the linker accepts -fstack-clash-protection... " >&6; }
 if test ${ax_cv_check_ldflags___fstack_clash_protection+y}
 then :
@@ -33190,10 +33191,10 @@ else case e in #(
 esac
 fi
 
-	fi
+	    fi
 
-	# Check for control-flow transfer instrumentation (Intel CET).
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fcf-protection" >&5
+	    # Check for control-flow transfer instrumentation (Intel CET).
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fcf-protection" >&5
 printf %s "checking whether C compiler accepts -fcf-protection... " >&6; }
 if test ${ax_cv_check_cflags___fcf_protection+y}
 then :
@@ -33229,7 +33230,7 @@ printf "%s\n" "$ax_cv_check_cflags___fcf_protection" >&6; }
 if test "x$ax_cv_check_cflags___fcf_protection" = xyes
 then :
 
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fcf-protection" >&5
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fcf-protection" >&5
 printf %s "checking whether the linker accepts -fcf-protection... " >&6; }
 if test ${ax_cv_check_ldflags___fcf_protection+y}
 then :
@@ -33346,6 +33347,7 @@ else case e in #(
 esac
 fi
 
+	fi
 
 	# Linker-specific hardening flags.
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-z,relro" >&5
