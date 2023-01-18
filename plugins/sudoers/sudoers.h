@@ -433,6 +433,7 @@ extern struct sudo_user sudo_user;
 extern struct passwd *list_pw;
 extern bool force_umask;
 extern int sudo_mode;
+extern int sudoedit_nfiles;
 extern uid_t timestamp_uid;
 extern gid_t timestamp_gid;
 extern sudo_conv_t sudo_conv;

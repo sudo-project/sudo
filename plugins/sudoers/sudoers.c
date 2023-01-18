@@ -806,8 +806,9 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	char **edit_argv;
 	int edit_argc;
 
+	sudoedit_nfiles = NewArgc - 1;
 	free(safe_cmnd);
-	safe_cmnd = find_editor(NewArgc - 1, NewArgv + 1, &edit_argc,
+	safe_cmnd = find_editor(sudoedit_nfiles, NewArgv + 1, &edit_argc,
 	    &edit_argv, NULL, &env_editor);
 	if (safe_cmnd == NULL) {
 	    switch (errno) {

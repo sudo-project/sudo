@@ -58,6 +58,7 @@ struct sudo_plugin_event * (*plugin_event_alloc)(void);
 const char *path_ldap_conf = _PATH_LDAP_CONF;
 const char *path_ldap_secret = _PATH_LDAP_SECRET;
 static bool session_opened;
+int sudoedit_nfiles;
 
 extern sudo_dso_public struct policy_plugin sudoers_policy;
 
@@ -189,6 +190,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
     /* Parse command line settings. */
     sudo_user.flags = 0;
     user_closefrom = -1;
+    sudoedit_nfiles = 0;
     sudo_mode = 0;
     for (cur = info->settings; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "closefrom=")) {
@@ -653,7 +655,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     }
 
     /* Increase the length of command_info as needed, it is *not* checked. */
-    command_info = calloc(72, sizeof(char *));
+    command_info = calloc(73, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
 
@@ -715,6 +717,11 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     if (ISSET(sudo_mode, MODE_EDIT)) {
 	if ((command_info[info_len++] = strdup("sudoedit=true")) == NULL)
 	    goto oom;
+	if (sudoedit_nfiles > 0) {
+	    if (asprintf(&command_info[info_len++], "sudoedit_nfiles=%d",
+		sudoedit_nfiles) == -1)
+		goto oom;
+	}
 	if (!def_sudoedit_checkdir) {
 	    if ((command_info[info_len++] = strdup("sudoedit_checkdir=false")) == NULL)
 		goto oom;

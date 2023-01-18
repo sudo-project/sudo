@@ -189,11 +189,13 @@ TAILQ_HEAD(preserved_fd_list, preserved_fd);
 struct command_details {
     struct sudo_cred cred;
     mode_t umask;
+    int argc;
     int priority;
     int timeout;
     int closefrom;
     int flags;
     int execfd;
+    int nfiles;
     struct preserved_fd_list preserved_fds;
     struct passwd *pw;
     const char *command;

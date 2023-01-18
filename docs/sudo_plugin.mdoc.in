@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2009-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 7, 2022
+.Dd January 18, 2023
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -807,15 +807,20 @@ temporary copies of the files to be edited and then overwriting the
 originals with the temporary copies after editing is complete.
 If the plugin supports
 .Em sudoedit ,
-it should choose the editor to be used, potentially from a variable
-in the user's environment, such as
+it must set
+.Em sudoedit=true
+in the
+.Fa command_info
+list.
+The plugin is responsible for choosing the editor to be used,
+potentially from a variable in the user's environment, such as
 .Ev EDITOR ,
-and include it in
+and should be stored in
 .Fa argv_out
 (environment variables may include command line options).
 The files to be edited should be copied from
 .Fa argv
-into
+to
 .Fa argv_out ,
 separated from the
 editor and its arguments by a
@@ -826,11 +831,13 @@ The
 will be removed by
 .Nm sudo
 before the editor is executed.
-The plugin should also set
-.Em sudoedit=true
-in the
+The plugin may also set
+.Em sudoedit_nfiles
+to the number of files to be edited in the
 .Fa command_info
-list.
+list; this will only be used by the
+.Nm sudo
+front-end starting with API version 1.21.
 .Pp
 The
 .Fn check_policy
@@ -1377,6 +1384,24 @@ option can be used to restore the older behavior and allow
 .Nm sudoedit
 to open symbolic links.
 Only available starting with API version 1.8.
+.It sudoedit_nfiles=number
+The number of files to be edited by the user.
+If present, this is will be used by the
+.Nm sudo
+front-end to determine which elements of the
+.Fa argv_out
+vector are files to be edited.
+The
+.Ql --
+element must immediately precede the first file to be editied.
+If
+.Em sudoedit_nfiles
+is not specified, the
+.Nm sudo
+front-end will use the position of the
+.Ql --
+element to determine where the file list begins.
+Only available starting with API version 1.21.
 .It timeout=int
 Command timeout.
 If non-zero then when the timeout expires the command will be killed.
@@ -4823,6 +4848,12 @@ entry was added to the
 list.
 The
 .Em intercept_verify
+entry was added to the
+.Fa command_info
+list.
+.It Version 1.21 (sudo 1.9.13)
+The
+.Em sudoedit_nfiles
 entry was added to the
 .Fa command_info
 list.

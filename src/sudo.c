@@ -287,7 +287,8 @@ main(int argc, char *argv[], char *envp[])
 	    /* Setup command details and run command/edit. */
 	    command_info_to_details(command_info, &command_details);
 	    command_details.tty = user_details.tty;
-	    command_details.argv = argv_out;
+	    command_details.argv = nargv;
+	    command_details.argc = nargc;
 	    command_details.envp = run_envp;
 	    command_details.evbase = sudo_event_base;
 	    if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
@@ -833,6 +834,14 @@ command_info_to_details(char * const info[], struct command_details *details)
 		SET_FLAG("sudoedit=", CD_SUDOEDIT)
 		SET_FLAG("sudoedit_checkdir=", CD_SUDOEDIT_CHECKDIR)
 		SET_FLAG("sudoedit_follow=", CD_SUDOEDIT_FOLLOW)
+		if (strncmp("sudoedit_nfiles=", info[i], sizeof("sudoedit_nfiles=") - 1) == 0) {
+		    cp = info[i] + sizeof("sudoedit_nfiles=") - 1;
+		    details->nfiles = sudo_strtonum(cp, 1, INT_MAX,
+			&errstr);
+		    if (errstr != NULL)
+			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
+		    break;
+		}
 		break;
 	    case 't':
 		if (strncmp("timeout=", info[i], sizeof("timeout=") - 1) == 0) {
