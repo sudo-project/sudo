@@ -41,7 +41,7 @@ AC_DEFUN([SUDO_CHECK_PIE_SUPPORT], [
 	    fi
 	fi
     fi
-    if test X"$enable_pie" != X"yes"; then
+    if test X"$enable_pie" != X"yes" -a X"$with_gnu_ld" = X"no"; then
 	# Solaris 11.1 and higher supports tagging binaries to use ASLR
 	case "$host_os" in
 	    solaris2.1[[1-9]]|solaris2.[[2-9]][[0-9]])
