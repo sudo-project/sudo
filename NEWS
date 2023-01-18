@@ -10,8 +10,6 @@ What's new in Sudo 1.9.13
  * Fixed a bug in cvtsudoers' LDIF parsing when the file ends without
    a newline and a backslash is the last character of the file.
 
- * Fixed a compilation error on Linux/aarch64.  GitHub issue #197.
-
  * Fixed a potential use-after-free bug with cvtsudoers filtering.
    GitHub issue #198.
 
@@ -27,10 +25,6 @@ What's new in Sudo 1.9.13
 
  * Sudo now uses C23-style attributes in function prototypes instead
    of gcc-style attributes if supported.
-
- * Fixed a potential crash introduced in the fix for GitHub issue #134.
-   If a user's sudoers entry did not have any RunAs user's set,
-   running "sudo -U otheruser -l" would dereference a NULL pointer.
 
  * Added a new "list" pseudo-command in sudoers to allow a user to
    list another user's privileges.  Previously, only root or a user
@@ -73,6 +67,25 @@ What's new in Sudo 1.9.13
    and mode checks are still performed when loading the sudo.conf
    and sudoers files, which do not suffer from race conditions.
    The sudo.conf "developer_mode" setting is no longer used.
+
+What's new in Sudo 1.9.12p2
+
+ * Fixed a compilation error on Linux/aarch64.  GitHub issue #197.
+
+ * Fixed a potential crash introduced in the fix for GitHub issue #134.
+   If a user's sudoers entry did not have any RunAs user's set,
+   running "sudo -U otheruser -l" would dereference a NULL pointer.
+
+ * Fixed a bug introduced in sudo 1.9.12 that could prevent sudo
+   from creating a I/O files when the "iolog_file" sudoers setting
+   contains six or more Xs.
+
+ * Fixed a compilation issue on AIX with the native compiler.
+   GitHub issue #231.
+
+ * Fixed CVE-2023-22809, a flaw in sudo's -e option (aka sudoedit)
+   that could allow a malicious user with sudoedit privileges to
+   edit arbitrary files.
 
 What's new in Sudo 1.9.12p1
 
