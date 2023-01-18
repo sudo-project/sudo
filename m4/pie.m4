@@ -44,14 +44,16 @@ AC_DEFUN([SUDO_CHECK_PIE_SUPPORT], [
 	    fi
 	fi
     fi
-    if test X"$enable_pie" != X"yes" -a X"$with_gnu_ld" = X"no"; then
+    if test X"$enable_pie" != X"no" -a X"$with_gnu_ld" = X"no"; then
 	# Solaris 11.1 and higher ld supports PIE executables, ASLR,
 	# non-executable stack and non-executable heap.
 	case "$host_os" in
 	    solaris2.1[[1-9]]|solaris2.[[2-9]][[0-9]])
-		AX_CHECK_COMPILE_FLAG([-KPIC], [
+		# This assumes lt_prog_compiler_pic is a single flag,
+		# which is the case on Solaris.
+		if test -n "$lt_prog_compiler_pic"; then
 		    _CFLAGS="$CFLAGS"
-		    CFLAGS="$CFLAGS -KPIC"
+		    CFLAGS="$CFLAGS $lt_prog_compiler_pic"
 		    _LDFLAGS="$LDFLAGS"
 		    AX_CHECK_LINK_FLAG([-Wl,-ztype=pie], [
 			# Try building PIE if not disabled.
@@ -60,13 +62,13 @@ AC_DEFUN([SUDO_CHECK_PIE_SUPPORT], [
 			    SUDO_WORKING_PIE([enable_pie=yes], [])
 			fi
 			if test "$enable_pie" = "yes"; then
-			    PIE_CFLAGS="-KPIC"
-			    PIE_LDFLAGS="-Wc,-KPIC -Wl,-ztype=pie"
+			    PIE_CFLAGS="$lt_prog_compiler_pic"
+			    PIE_LDFLAGS="-Wc,$lt_prog_compiler_pic -Wl,-ztype=pie"
 			fi
 		    ])
 		    CFLAGS="$_CFLAGS"
 		    LDFLAGS="$_LDFLAGS"
-		])
+		fi
 		# These flags are only valid when linking an executable
 		# so we cannot add them to HARDENING_LDFLAGS.
 		AX_CHECK_LINK_FLAG([-Wl,-zaslr], [

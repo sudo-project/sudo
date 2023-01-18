@@ -31718,49 +31718,16 @@ fi
 	    fi
 	fi
     fi
-    if test X"$enable_pie" != X"yes" -a X"$with_gnu_ld" = X"no"; then
+    if test X"$enable_pie" != X"no" -a X"$with_gnu_ld" = X"no"; then
 	# Solaris 11.1 and higher ld supports PIE executables, ASLR,
 	# non-executable stack and non-executable heap.
 	case "$host_os" in
 	    solaris2.1[1-9]|solaris2.[2-9][0-9])
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -KPIC" >&5
-printf %s "checking whether C compiler accepts -KPIC... " >&6; }
-if test ${ax_cv_check_cflags___KPIC+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e)
-  ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -KPIC"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main (void)
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
-then :
-  ax_cv_check_cflags___KPIC=yes
-else case e in #(
-  e) ax_cv_check_cflags___KPIC=no ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-  CFLAGS=$ax_check_save_flags ;;
-esac
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___KPIC" >&5
-printf "%s\n" "$ax_cv_check_cflags___KPIC" >&6; }
-if test "x$ax_cv_check_cflags___KPIC" = xyes
-then :
-
+		# This assumes lt_prog_compiler_pic is a single flag,
+		# which is the case on Solaris.
+		if test -n "$lt_prog_compiler_pic"; then
 		    _CFLAGS="$CFLAGS"
-		    CFLAGS="$CFLAGS -KPIC"
+		    CFLAGS="$CFLAGS $lt_prog_compiler_pic"
 		    _LDFLAGS="$LDFLAGS"
 		    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-ztype=pie" >&5
 printf %s "checking whether the linker accepts -Wl,-ztype=pie... " >&6; }
@@ -31843,8 +31810,8 @@ fi
 
 			fi
 			if test "$enable_pie" = "yes"; then
-			    PIE_CFLAGS="-KPIC"
-			    PIE_LDFLAGS="-Wc,-KPIC -Wl,-ztype=pie"
+			    PIE_CFLAGS="$lt_prog_compiler_pic"
+			    PIE_LDFLAGS="-Wc,$lt_prog_compiler_pic -Wl,-ztype=pie"
 			fi
 
 else case e in #(
@@ -31854,12 +31821,7 @@ fi
 
 		    CFLAGS="$_CFLAGS"
 		    LDFLAGS="$_LDFLAGS"
-
-else case e in #(
-  e) : ;;
-esac
-fi
-
+		fi
 		# These flags are only valid when linking an executable
 		# so we cannot add them to HARDENING_LDFLAGS.
 		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-zaslr" >&5
