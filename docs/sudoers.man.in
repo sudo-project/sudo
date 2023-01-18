@@ -5877,14 +5877,31 @@ can log events via
 syslog(3),
 to a local log file, or both.
 The log format is almost identical in both cases.
+Any control characters present in the log data are formatted in octal
+with a leading
+\(oq#\(cq
+character.
+For example, a horizontal tab is stored as
+\(oq#011\(cq
+and an embedded carriage return is stored as
+\(oq#015\(cq.
+In addition, space characters in the command path are stored as
+\(oq#040\(cq.
+Command line arguments that contain spaces are enclosed in single quotes
+('').
+This makes it possible to distinguish multiple command line arguments
+from a single argument that contains spaces.
+Literal single quotes and backslash characters
+(\(oq\e\(cq)
+in command line arguments are escaped with a backslash.
 .SS "Accepted command log entries"
 Commands that sudo runs are logged using the following format (split
 into multiple lines for readability):
 .nf
 .sp
 .RS 4n
-date hostname progname: username : TTY=ttyname ; PWD=cwd ; \e
-    USER=runasuser ; GROUP=runasgroup ; TSID=logid ; \e
+date hostname progname: username : TTY=ttyname ; CHROOT=chroot ; \e
+    PWD=cwd ; USER=runasuser ; GROUP=runasgroup ; TSID=logid ; \e
     ENV=env_vars COMMAND=command
 .RE
 .fi
@@ -5933,6 +5950,9 @@ was run on, or
 \(lqunknown\(rq
 if there was no terminal present.
 .TP 14n
+chroot
+The root directory that the command was run in, if one was specified.
+.TP 14n
 cwd
 The current working directory that
 \fBsudo\fR
@@ -5957,7 +5977,7 @@ A list of environment variables specified on the command line,
 if specified.
 .TP 14n
 command
-The actual command that was executed.
+The actual command that was executed, including any command line arguments.
 .PP
 Messages are logged using the locale specified by
 \fIsudoers_locale\fR,
@@ -6195,17 +6215,21 @@ with a few important differences:
 1.\&
 The
 \fIprogname\fR
-and
-\fIhostname\fR
-fields are not present.
+field is not present.
 .TP 5n
 2.\&
-If the
-\fIlog_year\fR
-option is enabled,
-the date will also include the year.
+The
+\fIhostname\fR
+is only logged if the
+\fIlog_host\fR
+option is enabled.
 .TP 5n
 3.\&
+The date does not include the year unless the
+\fIlog_year\fR
+option is enabled.
+.TP 5n
+4.\&
 Lines that are longer than
 \fIloglinelen\fR
 characters (80 by default) are word-wrapped and continued on the

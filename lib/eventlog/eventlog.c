@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1994-1996, 1998-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1994-1996, 1998-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -51,23 +51,12 @@
 #include "sudo_compat.h"
 #include "sudo_debug.h"
 #include "sudo_eventlog.h"
+#include "sudo_lbuf.h"
 #include "sudo_fatal.h"
 #include "sudo_gettext.h"
 #include "sudo_json.h"
 #include "sudo_queue.h"
 #include "sudo_util.h"
-
-#define	LL_HOST_STR	"HOST="
-#define	LL_TTY_STR	"TTY="
-#define	LL_CHROOT_STR	"CHROOT="
-#define	LL_CWD_STR	"PWD="
-#define	LL_USER_STR	"USER="
-#define	LL_GROUP_STR	"GROUP="
-#define	LL_ENV_STR	"ENV="
-#define	LL_CMND_STR	"COMMAND="
-#define	LL_TSID_STR	"TSID="
-#define	LL_EXIT_STR	"EXIT="
-#define	LL_SIGNAL_STR	"SIGNAL="
 
 #define IS_SESSID(s) ( \
     isalnum((unsigned char)(s)[0]) && isalnum((unsigned char)(s)[1]) && \
@@ -93,26 +82,28 @@ new_logline(int event_type, int flags, struct eventlog_args *args,
     const struct eventlog *evlog)
 {
     const struct eventlog_config *evl_conf = eventlog_getconf();
-    char *line = NULL, *evstr = NULL;
     const char *iolog_file;
     const char *tty, *tsid = NULL;
     char exit_str[(((sizeof(int) * 8) + 2) / 3) + 2];
     char sessid[7], offsetstr[64] = "";
-    size_t len = 0;
+    struct sudo_lbuf lbuf;
     int i;
     debug_decl(new_logline, SUDO_DEBUG_UTIL);
+
+    sudo_lbuf_init(&lbuf, NULL, 0, NULL, 0);
 
     if (ISSET(flags, EVLOG_RAW) || evlog == NULL) {
 	if (args->reason != NULL) {
 	    if (args->errstr != NULL) {
-		if (asprintf(&line, "%s: %s", args->reason, args->errstr) == -1)
-		    goto oom;
+		sudo_lbuf_append_esc(&lbuf, LBUF_ESC_CNTRL, "%s: %s",
+		    args->reason, args->errstr);
 	    } else {
-		if ((line = strdup(args->reason)) == NULL)
-		    goto oom;
+		sudo_lbuf_append_esc(&lbuf, LBUF_ESC_CNTRL, "%s", args->reason);
 	    }
+	    if (sudo_lbuf_error(&lbuf))
+		goto oom;
 	}
-	debug_return_str(line);
+	debug_return_str(lbuf.buf);
     }
 
     /* A TSID may be a sudoers-style session ID or a free-form string. */
@@ -150,168 +141,89 @@ new_logline(int event_type, int flags, struct eventlog_args *args,
     }
 
     /*
-     * Compute line length
+     * Format the log line as an lbuf, escaping control characters in
+     * octal form (#0nn).  Error checking (ENOMEM) is done at the end.
      */
-    if (args->reason != NULL)
-	len += strlen(args->reason) + 3;
-    if (args->errstr != NULL)
-	len += strlen(args->errstr) + 3;
-    if (evlog->submithost != NULL && !evl_conf->omit_hostname)
-	len += sizeof(LL_HOST_STR) + 2 + strlen(evlog->submithost);
-    if (tty != NULL)
-	len += sizeof(LL_TTY_STR) + 2 + strlen(tty);
-    if (evlog->runchroot != NULL)
-	len += sizeof(LL_CHROOT_STR) + 2 + strlen(evlog->runchroot);
-    if (evlog->runcwd != NULL)
-	len += sizeof(LL_CWD_STR) + 2 + strlen(evlog->runcwd);
-    if (evlog->runuser != NULL)
-	len += sizeof(LL_USER_STR) + 2 + strlen(evlog->runuser);
-    if (evlog->rungroup != NULL)
-	len += sizeof(LL_GROUP_STR) + 2 + strlen(evlog->rungroup);
-    if (tsid != NULL) {
-	len += sizeof(LL_TSID_STR) + 2 + strlen(tsid) + strlen(offsetstr);
-    }
-    if (evlog->env_add != NULL) {
-	size_t evlen = 0;
-	char * const *ep;
-
-	for (ep = evlog->env_add; *ep != NULL; ep++)
-	    evlen += strlen(*ep) + 1;
-	if (evlen != 0) {
-	    if ((evstr = malloc(evlen)) == NULL)
-		goto oom;
-	    ep = evlog->env_add;
-	    if (strlcpy(evstr, *ep, evlen) >= evlen)
-		goto toobig;
-	    while (*++ep != NULL) {
-		if (strlcat(evstr, " ", evlen) >= evlen ||
-		    strlcat(evstr, *ep, evlen) >= evlen)
-		    goto toobig;
-	    }
-	    len += sizeof(LL_ENV_STR) + 2 + evlen;
-	}
-    }
-    if (evlog->command != NULL) {
-	len += sizeof(LL_CMND_STR) - 1 + strlen(evlog->command);
-	if (evlog->argv != NULL && evlog->argv[0] != NULL) {
-	    for (i = 1; evlog->argv[i] != NULL; i++)
-		len += strlen(evlog->argv[i]) + 1;
-	}
-	if (event_type == EVLOG_EXIT) {
-	    if (evlog->signal_name != NULL)
-		len += sizeof(LL_SIGNAL_STR) + 2 + strlen(evlog->signal_name);
-	    if (evlog->exit_value != -1) {
-		(void)snprintf(exit_str, sizeof(exit_str), "%d", evlog->exit_value);
-		len += sizeof(LL_EXIT_STR) + 2 + strlen(exit_str);
-	    }
-	}
-    }
-
-    /*
-     * Allocate and build up the line.
-     */
-    if ((line = malloc(++len)) == NULL)
-	goto oom;
-    line[0] = '\0';
-
     if (args->reason != NULL) {
-	if (strlcat(line, args->reason, len) >= len ||
-	    strlcat(line, args->errstr ? " : " : " ; ", len) >= len)
-	    goto toobig;
+	sudo_lbuf_append_esc(&lbuf, LBUF_ESC_CNTRL, "%s%s", args->reason,
+	    args->errstr ? " : " : " ; ");
     }
     if (args->errstr != NULL) {
-	if (strlcat(line, args->errstr, len) >= len ||
-	    strlcat(line, " ; ", len) >= len)
-	    goto toobig;
+	sudo_lbuf_append_esc(&lbuf, LBUF_ESC_CNTRL, "%s ; ", args->errstr);
     }
     if (evlog->submithost != NULL && !evl_conf->omit_hostname) {
-	if (strlcat(line, LL_HOST_STR, len) >= len ||
-	    strlcat(line, evlog->submithost, len) >= len ||
-	    strlcat(line, " ; ", len) >= len)
-	    goto toobig;
+	sudo_lbuf_append_esc(&lbuf, LBUF_ESC_CNTRL, "HOST=%s ; ",
+	    evlog->submithost);
     }
     if (tty != NULL) {
-	if (strlcat(line, LL_TTY_STR, len) >= len ||
-	    strlcat(line, tty, len) >= len ||
-	    strlcat(line, " ; ", len) >= len)
-	    goto toobig;
+	sudo_lbuf_append_esc(&lbuf, LBUF_ESC_CNTRL, "TTY=%s ; ", tty);
     }
     if (evlog->runchroot != NULL) {
-	if (strlcat(line, LL_CHROOT_STR, len) >= len ||
-	    strlcat(line, evlog->runchroot, len) >= len ||
-	    strlcat(line, " ; ", len) >= len)
-	    goto toobig;
+	sudo_lbuf_append_esc(&lbuf, LBUF_ESC_CNTRL, "CHROOT=%s ; ",
+	    evlog->runchroot);
     }
     if (evlog->runcwd != NULL) {
-	if (strlcat(line, LL_CWD_STR, len) >= len ||
-	    strlcat(line, evlog->runcwd, len) >= len ||
-	    strlcat(line, " ; ", len) >= len)
-	    goto toobig;
+	sudo_lbuf_append_esc(&lbuf, LBUF_ESC_CNTRL, "PWD=%s ; ",
+	    evlog->runcwd);
     }
     if (evlog->runuser != NULL) {
-	if (strlcat(line, LL_USER_STR, len) >= len ||
-	    strlcat(line, evlog->runuser, len) >= len ||
-	    strlcat(line, " ; ", len) >= len)
-	    goto toobig;
+	sudo_lbuf_append_esc(&lbuf, LBUF_ESC_CNTRL, "USER=%s ; ",
+	    evlog->runuser);
     }
     if (evlog->rungroup != NULL) {
-	if (strlcat(line, LL_GROUP_STR, len) >= len ||
-	    strlcat(line, evlog->rungroup, len) >= len ||
-	    strlcat(line, " ; ", len) >= len)
-	    goto toobig;
+	sudo_lbuf_append_esc(&lbuf, LBUF_ESC_CNTRL, "GROUP=%s ; ",
+	    evlog->rungroup);
     }
     if (tsid != NULL) {
-	if (strlcat(line, LL_TSID_STR, len) >= len ||
-	    strlcat(line, tsid, len) >= len ||
-	    strlcat(line, offsetstr, len) >= len ||
-	    strlcat(line, " ; ", len) >= len)
-	    goto toobig;
+	sudo_lbuf_append_esc(&lbuf, LBUF_ESC_CNTRL, "TSID=%s%s ; ", tsid,
+	    offsetstr);
     }
-    if (evstr != NULL) {
-	if (strlcat(line, LL_ENV_STR, len) >= len ||
-	    strlcat(line, evstr, len) >= len ||
-	    strlcat(line, " ; ", len) >= len)
-	    goto toobig;
-	free(evstr);
-	evstr = NULL;
+    if (evlog->env_add != NULL && evlog->env_add[0] != NULL) {
+	sudo_lbuf_append_esc(&lbuf, LBUF_ESC_CNTRL, "ENV=%s",
+	    evlog->env_add[0]);
+	for (i = 1; evlog->env_add[i] != NULL; i++) {
+	    sudo_lbuf_append_esc(&lbuf, LBUF_ESC_CNTRL, " %s",
+		evlog->env_add[i]);
+	}
     }
     if (evlog->command != NULL) {
-	if (strlcat(line, LL_CMND_STR, len) >= len)
-	    goto toobig;
-	if (strlcat(line, evlog->command, len) >= len)
-	    goto toobig;
+	sudo_lbuf_append_esc(&lbuf, LBUF_ESC_CNTRL|LBUF_ESC_BLANK,
+	    "COMMAND=%s", evlog->command);
 	if (evlog->argv != NULL && evlog->argv[0] != NULL) {
 	    for (i = 1; evlog->argv[i] != NULL; i++) {
-		if (strlcat(line, " ", len) >= len ||
-		    strlcat(line, evlog->argv[i], len) >= len)
-		    goto toobig;
+		sudo_lbuf_append(&lbuf, " ");
+		if (strchr(evlog->argv[i], ' ') != NULL) {
+		    /* Wrap args containing spaces in single quotes. */
+		    sudo_lbuf_append(&lbuf, "'");
+		    sudo_lbuf_append_esc(&lbuf, LBUF_ESC_CNTRL|LBUF_ESC_QUOTE,
+			"%s", evlog->argv[i]);
+		    sudo_lbuf_append(&lbuf, "'");
+		} else {
+		    /* Escape quotes here too for consistency. */
+		    sudo_lbuf_append_esc(&lbuf,
+			LBUF_ESC_CNTRL|LBUF_ESC_BLANK|LBUF_ESC_QUOTE,
+			"%s", evlog->argv[i]);
+		}
 	    }
 	}
 	if (event_type == EVLOG_EXIT) {
 	    if (evlog->signal_name != NULL) {
-		if (strlcat(line, " ; ", len) >= len ||
-		    strlcat(line, LL_SIGNAL_STR, len) >= len ||
-		    strlcat(line, evlog->signal_name, len) >= len)
-		    goto toobig;
+		sudo_lbuf_append_esc(&lbuf, LBUF_ESC_CNTRL, " ; SIGNAL=%s",
+		    evlog->signal_name);
 	    }
 	    if (evlog->exit_value != -1) {
-		if (strlcat(line, " ; ", len) >= len ||
-		    strlcat(line, LL_EXIT_STR, len) >= len ||
-		    strlcat(line, exit_str, len) >= len)
-		    goto toobig;
+		(void)snprintf(exit_str, sizeof(exit_str), "%d",
+		    evlog->exit_value);
+		sudo_lbuf_append_esc(&lbuf, LBUF_ESC_CNTRL, " ; EXIT=%s",
+		    exit_str);
 	    }
 	}
     }
-
-    debug_return_str(line);
+    if (!sudo_lbuf_error(&lbuf))
+	debug_return_str(lbuf.buf);
 oom:
-    free(evstr);
+    sudo_lbuf_destroy(&lbuf);
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    debug_return_str(NULL);
-toobig:
-    free(evstr);
-    free(line);
-    sudo_warnx(U_("internal error, %s overflow"), __func__);
     debug_return_str(NULL);
 }
 

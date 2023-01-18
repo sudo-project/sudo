@@ -62,6 +62,7 @@
 #include "sudo_debug.h"
 #include "sudo_event.h"
 #include "sudo_eventlog.h"
+#include "sudo_lbuf.h"
 #include "sudo_fatal.h"
 #include "sudo_gettext.h"
 #include "sudo_iolog.h"
@@ -373,6 +374,10 @@ main(int argc, char *argv[])
     if ((evlog = iolog_parse_loginfo(iolog_dir_fd, iolog_dir)) == NULL)
 	goto done;
     printf(_("Replaying sudo session: %s"), evlog->command);
+    if (evlog->argv != NULL && evlog->argv[0] != NULL) {
+	for (i = 1; evlog->argv[i] != NULL; i++)
+	    printf(" %s", evlog->argv[i]);
+    }
 
     /* Setup terminal if appropriate. */
     if (!isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO))
@@ -1315,11 +1320,57 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
     debug_return_int(av - argv);
 }
 
+static char *
+expand_command(struct eventlog *evlog, char **newbuf)
+{
+    size_t len, bufsize = strlen(evlog->command) + 1;
+    char *cp, *buf;
+    int ac;
+    debug_decl(expand_command, SUDO_DEBUG_UTIL);
+
+    if (evlog->argv == NULL || evlog->argv[0] == NULL || evlog->argv[1] == NULL) {
+	/* No arguments, we can use the command as-is. */
+	*newbuf = NULL;
+	debug_return_str(evlog->command);
+    }
+
+    /* Skip argv[0], we use evlog->command instead. */
+    for (ac = 1; evlog->argv[ac] != NULL; ac++)
+	bufsize += strlen(evlog->argv[ac]) + 1;
+
+    if ((buf = malloc(bufsize)) == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    cp = buf;
+
+    len = strlcpy(cp, evlog->command, bufsize);
+    if (len >= bufsize)
+	sudo_fatalx(U_("internal error, %s overflow"), __func__);
+    cp += len;
+    bufsize -= len;
+
+    for (ac = 1; evlog->argv[ac] != NULL; ac++) {
+	if (bufsize < 2)
+	    sudo_fatalx(U_("internal error, %s overflow"), __func__);
+	*cp++ = ' ';
+	bufsize--;
+
+	len = strlcpy(cp, evlog->argv[ac], bufsize);
+	if (len >= bufsize)
+	    sudo_fatalx(U_("internal error, %s overflow"), __func__);
+	cp += len;
+	bufsize -= len;
+    }
+
+    *newbuf = buf;
+    debug_return_str(buf);
+}
+
 static bool
 match_expr(struct search_node_list *head, struct eventlog *evlog, bool last_match)
 {
     struct search_node *sn;
     bool res = false, matched = last_match;
+    char *tofree;
     int rc;
     debug_decl(match_expr, SUDO_DEBUG_UTIL);
 
@@ -1353,13 +1404,15 @@ match_expr(struct search_node_list *head, struct eventlog *evlog, bool last_matc
 		res = strcmp(sn->u.user, evlog->submituser) == 0;
 	    break;
 	case ST_PATTERN:
-	    rc = regexec(&sn->u.cmdre, evlog->command, 0, NULL, 0);
+	    rc = regexec(&sn->u.cmdre, expand_command(evlog, &tofree),
+		0, NULL, 0);
 	    if (rc && rc != REG_NOMATCH) {
 		char buf[BUFSIZ];
 		regerror(rc, &sn->u.cmdre, buf, sizeof(buf));
 		sudo_fatalx("%s", buf);
 	    }
 	    res = rc == REG_NOMATCH ? 0 : 1;
+	    free(tofree);
 	    break;
 	case ST_FROMDATE:
 	    res = sudo_timespeccmp(&evlog->submit_time, &sn->u.tstamp, >=);
@@ -1380,12 +1433,13 @@ match_expr(struct search_node_list *head, struct eventlog *evlog, bool last_matc
 }
 
 static int
-list_session(char *log_dir, regex_t *re, const char *user, const char *tty)
+list_session(struct sudo_lbuf *lbuf, char *log_dir, regex_t *re,
+    const char *user, const char *tty)
 {
     char idbuf[7], *idstr, *cp;
     struct eventlog *evlog = NULL;
     const char *timestr;
-    int ret = -1;
+    int i, ret = -1;
     debug_decl(list_session, SUDO_DEBUG_UTIL);
 
     if ((evlog = iolog_parse_loginfo(-1, log_dir)) == NULL)
@@ -1417,23 +1471,71 @@ list_session(char *log_dir, regex_t *re, const char *user, const char *tty)
     }
     /* XXX - print lines + cols? */
     timestr = get_timestr(evlog->submit_time.tv_sec, 1);
-    printf("%s : %s : ", timestr ? timestr : "invalid date", evlog->submituser);
-    if (evlog->submithost != NULL)
-	printf("HOST=%s ; ", evlog->submithost);
-    if (evlog->ttyname != NULL)
-	printf("TTY=%s ; ", evlog->ttyname);
-    if (evlog->runchroot != NULL)
-	printf("CHROOT=%s ; ", evlog->runchroot);
-    if (evlog->runcwd != NULL || evlog->cwd != NULL)
-	printf("CWD=%s ; ", evlog->runcwd ? evlog->runcwd : evlog->cwd);
-    printf("USER=%s ; ", evlog->runuser);
-    if (evlog->rungroup != NULL)
-	printf("GROUP=%s ; ", evlog->rungroup);
-    printf("TSID=%s ; COMMAND=%s\n", idstr, evlog->command);
+    sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL, "%s : %s : ",
+	timestr ? timestr : "invalid date", evlog->submituser);
+    if (evlog->submithost != NULL) {
+	sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL, "HOST=%s ; ",
+	    evlog->submithost);
+    }
+    if (evlog->ttyname != NULL) {
+	sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL, "TTY=%s ; ",
+	    evlog->ttyname);
+    }
+    if (evlog->runchroot != NULL) {
+	sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL, "CHROOT=%s ; ",
+	    evlog->runchroot);
+    }
+    if (evlog->runcwd != NULL || evlog->cwd != NULL) {
+	sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL, "CWD=%s ; ",
+	    evlog->runcwd ? evlog->runcwd : evlog->cwd);
+    }
+    sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL, "USER=%s ; ", evlog->runuser);
+    if (evlog->rungroup != NULL) {
+	sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL, "GROUP=%s ; ",
+	    evlog->rungroup);
+    }
+    sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL, "TSID=%s ; ", idstr);
 
-    ret = 0;
+    /* 
+     * If we have both command and argv from info.json we can escape
+     * blanks in the the command and arguments.  If all we have is a
+     * single string containing both the command and arguments we cannot.
+     */
+    if (evlog->argv != NULL) {
+	/* Command plus argv from the info.json file. */
+	sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL|LBUF_ESC_BLANK,
+	    "COMMAND=%s", evlog->command);
+	if (evlog->argv[0] != NULL) {
+	    for (i = 1; evlog->argv[i] != NULL; i++) {
+		sudo_lbuf_append(lbuf, " ");
+		if (strchr(evlog->argv[i], ' ') != NULL) {
+		    /* Wrap args containing spaces in single quotes. */
+		    sudo_lbuf_append(lbuf, "'");
+		    sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL|LBUF_ESC_QUOTE,
+			"%s", evlog->argv[i]);
+		    sudo_lbuf_append(lbuf, "'");
+		} else {
+		    /* Escape quotes here too for consistency. */
+		    sudo_lbuf_append_esc(lbuf,
+			LBUF_ESC_CNTRL|LBUF_ESC_BLANK|LBUF_ESC_QUOTE,
+			"%s", evlog->argv[i]);
+		}
+	    }
+	}
+    } else {
+	/* Single string from the legacy info file. */
+	sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL, "COMMAND=%s",
+	    evlog->command);
+    }
+
+    if (!sudo_lbuf_error(lbuf)) {
+	puts(lbuf->buf);
+	ret = 0;
+    }
 
 done:
+    lbuf->error = 0;
+    lbuf->len = 0;
     eventlog_free(evlog);
     debug_return_int(ret);
 }
@@ -1453,6 +1555,7 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
     DIR *d;
     struct dirent *dp;
     struct stat sb;
+    struct sudo_lbuf lbuf;
     size_t sdlen, sessions_len = 0, sessions_size = 0;
     unsigned int i;
     int len;
@@ -1463,6 +1566,8 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
     const bool checked_type = false;
 #endif
     debug_decl(find_sessions, SUDO_DEBUG_UTIL);
+
+    sudo_lbuf_init(&lbuf, NULL, 0, NULL, 0);
 
     d = opendir(dir);
     if (d == NULL)
@@ -1524,7 +1629,7 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
 	    /* Check for dir with a log file. */
 	    if (lstat(pathbuf, &sb) == 0 && S_ISREG(sb.st_mode)) {
 		pathbuf[sdlen + len - 4] = '\0';
-		list_session(pathbuf, re, user, tty);
+		list_session(&lbuf, pathbuf, re, user, tty);
 	    } else {
 		/* Strip off "/log" and recurse if a non-log dir. */
 		pathbuf[sdlen + len - 4] = '\0';
@@ -1535,6 +1640,7 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
 	}
 	free(sessions);
     }
+    sudo_lbuf_destroy(&lbuf);
 
     debug_return_int(0);
 }

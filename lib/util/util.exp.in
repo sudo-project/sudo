@@ -100,6 +100,7 @@ sudo_json_init_v1
 sudo_json_init_v2
 sudo_json_open_array_v1
 sudo_json_open_object_v1
+sudo_lbuf_append_esc_v1
 sudo_lbuf_append_quoted_v1
 sudo_lbuf_append_v1
 sudo_lbuf_clearerr_v1

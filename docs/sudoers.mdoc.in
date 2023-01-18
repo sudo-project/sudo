@@ -5503,12 +5503,29 @@ can log events via
 .Xr syslog 3 ,
 to a local log file, or both.
 The log format is almost identical in both cases.
+Any control characters present in the log data are formatted in octal
+with a leading
+.Ql #
+character.
+For example, a horizontal tab is stored as
+.Ql #011
+and an embedded carriage return is stored as
+.Ql #015 .
+In addition, space characters in the command path are stored as
+.Ql #040 .
+Command line arguments that contain spaces are enclosed in single quotes
+.Pq '' .
+This makes it possible to distinguish multiple command line arguments
+from a single argument that contains spaces.
+Literal single quotes and backslash characters
+.Pq Ql \e
+in command line arguments are escaped with a backslash.
 .Ss Accepted command log entries
 Commands that sudo runs are logged using the following format (split
 into multiple lines for readability):
 .Bd -literal -offset 4n
-date hostname progname: username : TTY=ttyname ; PWD=cwd ; \e
-    USER=runasuser ; GROUP=runasgroup ; TSID=logid ; \e
+date hostname progname: username : TTY=ttyname ; CHROOT=chroot ; \e
+    PWD=cwd ; USER=runasuser ; GROUP=runasgroup ; TSID=logid ; \e
     ENV=env_vars COMMAND=command
 .Ed
 .Pp
@@ -5551,6 +5568,8 @@ or
 was run on, or
 .Dq unknown
 if there was no terminal present.
+.It chroot
+The root directory that the command was run in, if one was specified.
 .It cwd
 The current working directory that
 .Nm sudo
@@ -5570,7 +5589,7 @@ option is enabled.
 A list of environment variables specified on the command line,
 if specified.
 .It command
-The actual command that was executed.
+The actual command that was executed, including any command line arguments.
 .El
 .Pp
 Messages are logged using the locale specified by
@@ -5794,14 +5813,17 @@ with a few important differences:
 .It
 The
 .Em progname
-and
-.Em hostname
-fields are not present.
+field is not present.
 .It
-If the
+The
+.Em hostname
+is only logged if the
+.Em log_host
+option is enabled.
+.It
+The date does not include the year unless the
 .Em log_year
-option is enabled,
-the date will also include the year.
+option is enabled.
 .It
 Lines that are longer than
 .Em loglinelen
