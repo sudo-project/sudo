@@ -123,7 +123,11 @@ AC_DEFUN([SUDO_CHECK_HARDENING], [
 	else
 	    case "$host_os" in
 	    solaris2.1[[1-9]]|solaris2.[[2-9]][[0-9]])
-		# Solaris 11+ ld supports non-executable stack and heap
+		# Solaris 11+ ld supports tagging binaries to use ASLR
+		# as well as non-executable stack and heap.
+		AX_CHECK_LINK_FLAG([-Wl,-z,aslr], [
+		    AX_APPEND_FLAG([-Wl,-z,aslr], [HARDENING_LDFLAGS])
+		])
 		AX_CHECK_LINK_FLAG([-Wl,-z,nxheap], [
 		    AX_APPEND_FLAG([-Wl,-z,nxheap], [HARDENING_LDFLAGS])
 		])
