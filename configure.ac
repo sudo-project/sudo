@@ -2497,15 +2497,21 @@ case "$host_os" in
 esac
 SUDO_MAILDIR
 if test ${with_logincap-'no'} != "no"; then
-    AC_CHECK_HEADERS([login_cap.h], [LOGINCAP_USAGE='[[-c class]] '; LCMAN=1
+    AC_CHECK_HEADERS([login_cap.h], [
+	LOGINCAP_USAGE='[[-c class]] '
+	LCMAN=1
 	with_logincap=yes
-	case "$OS" in
-	    freebsd*|netbsd*)
-		SUDO_LIBS="${SUDO_LIBS} -lutil"
-		SUDOERS_LIBS="${SUDOERS_LIBS} -lutil"
-		;;
-	esac
     ])
+    if test "${with_logincap}" = "yes"; then
+	# setusercontext() is in libutil on NetBSD, FreeBSD, Dragonfly BSD.
+	_LIBS="$LIBS"
+	AC_SEARCH_LIBS([setusercontext], [util])
+	LIBS="$_LIBS"
+	if test "${ac_cv_search_setusercontext}" != "none required"; then
+	    SUDO_LIBS="${SUDO_LIBS} -lutil"
+	    SUDOERS_LIBS="${SUDOERS_LIBS} -lutil"
+	fi
+    fi
 fi
 if test ${with_project-'no'} != "no"; then
     AC_CHECK_HEADER(project.h, [

@@ -20072,18 +20072,90 @@ do :
 if test "x$ac_cv_header_login_cap_h" = xyes
 then :
   printf "%s\n" "#define HAVE_LOGIN_CAP_H 1" >>confdefs.h
- LOGINCAP_USAGE='[-c class] '; LCMAN=1
+
+	LOGINCAP_USAGE='[-c class] '
+	LCMAN=1
 	with_logincap=yes
-	case "$OS" in
-	    freebsd*|netbsd*)
-		SUDO_LIBS="${SUDO_LIBS} -lutil"
-		SUDOERS_LIBS="${SUDOERS_LIBS} -lutil"
-		;;
-	esac
 
 fi
 
 done
+    if test "${with_logincap}" = "yes"; then
+	# setusercontext() is in libutil on NetBSD, FreeBSD, Dragonfly BSD.
+	_LIBS="$LIBS"
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing setusercontext" >&5
+printf %s "checking for library containing setusercontext... " >&6; }
+if test ${ac_cv_search_setusercontext+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.
+   The 'extern "C"' is for builds by C++ compilers;
+   although this is not generally supported in C code supporting it here
+   has little cost and some practical benefit (sr 110532).  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char setusercontext (void);
+int
+main (void)
+{
+return setusercontext ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' util
+do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_search_setusercontext=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext
+  if test ${ac_cv_search_setusercontext+y}
+then :
+  break
+fi
+done
+if test ${ac_cv_search_setusercontext+y}
+then :
+
+else case e in #(
+  e) ac_cv_search_setusercontext=no ;;
+esac
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_setusercontext" >&5
+printf "%s\n" "$ac_cv_search_setusercontext" >&6; }
+ac_res=$ac_cv_search_setusercontext
+if test "$ac_res" != no
+then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+fi
+
+	LIBS="$_LIBS"
+	if test "${ac_cv_search_setusercontext}" != "none required"; then
+	    SUDO_LIBS="${SUDO_LIBS} -lutil"
+	    SUDOERS_LIBS="${SUDOERS_LIBS} -lutil"
+	fi
+    fi
 fi
 if test ${with_project-'no'} != "no"; then
     ac_fn_c_check_header_compile "$LINENO" "project.h" "ac_cv_header_project_h" "$ac_includes_default"
