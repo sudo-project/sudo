@@ -22410,70 +22410,96 @@ do :
 if test "x$ac_cv_func_sysctl" = xyes
 then :
   printf "%s\n" "#define HAVE_SYSCTL 1" >>confdefs.h
- ac_fn_c_check_func "$LINENO" "devname" "ac_cv_func_devname"
+
+    ac_fn_c_check_func "$LINENO" "devname" "ac_cv_func_devname"
 if test "x$ac_cv_func_devname" = xyes
 then :
   printf "%s\n" "#define HAVE_DEVNAME 1" >>confdefs.h
 
 fi
 
+    # Check for the various flavors of kinfo_proc
+    found=false
     ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "ki_structsize" "ac_cv_member_struct_kinfo_proc_ki_structsize" "
-#	include <sys/param.h>
-#	include <sys/sysctl.h>
-#	include <sys/user.h>
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#include <sys/user.h>
 
 "
 if test "x$ac_cv_member_struct_kinfo_proc_ki_structsize" = xyes
 then :
-  printf "%s\n" "#define HAVE_KINFO_PROC_FREEBSD 1" >>confdefs.h
 
-else case e in #(
-  e)
+	printf "%s\n" "#define HAVE_KINFO_PROC_FREEBSD 1" >>confdefs.h
+
+	found=true
+
+fi
+
+    if test "$found" = "false"; then
+	ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "kp_paddr" "ac_cv_member_struct_kinfo_proc_kp_paddr" "
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#include <sys/user.h>
+
+"
+if test "x$ac_cv_member_struct_kinfo_proc_kp_paddr" = xyes
+then :
+
+	    printf "%s\n" "#define HAVE_KINFO_PROC_DFLY 1" >>confdefs.h
+
+	    found=true
+
+fi
+
+    fi
+    if test "$found" = "false"; then
 	ac_fn_c_check_member "$LINENO" "struct kinfo_proc2" "p_paddr" "ac_cv_member_struct_kinfo_proc2_p_paddr" "
-#	    include <sys/param.h>
-#	    include <sys/sysctl.h>
+#include <sys/param.h>
+#include <sys/sysctl.h>
 
 "
 if test "x$ac_cv_member_struct_kinfo_proc2_p_paddr" = xyes
 then :
-  printf "%s\n" "#define HAVE_KINFO_PROC2_NETBSD 1" >>confdefs.h
 
-else case e in #(
-  e)
-	    ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "p_paddr" "ac_cv_member_struct_kinfo_proc_p_paddr" "
-#		include <sys/param.h>
-#		include <sys/sysctl.h>
+	    printf "%s\n" "#define HAVE_KINFO_PROC2_NETBSD 1" >>confdefs.h
+
+	    found=true
+
+fi
+
+    fi
+    if test "$found" = "false"; then
+	ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "p_paddr" "ac_cv_member_struct_kinfo_proc_p_paddr" "
+#include <sys/param.h>
+#include <sys/sysctl.h>
 
 "
 if test "x$ac_cv_member_struct_kinfo_proc_p_paddr" = xyes
 then :
-  printf "%s\n" "#define HAVE_KINFO_PROC_OPENBSD 1" >>confdefs.h
 
-else case e in #(
-  e)
-		ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "kp_proc" "ac_cv_member_struct_kinfo_proc_kp_proc" "
-#		    include <sys/param.h>
-#		    include <sys/sysctl.h>
+	    printf "%s\n" "#define HAVE_KINFO_PROC_OPENBSD 1" >>confdefs.h
+
+	    found=true
+
+fi
+
+    fi
+    if test "$found" = "false"; then
+	ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "kp_proc" "ac_cv_member_struct_kinfo_proc_kp_proc" "
+#include <sys/param.h>
+#include <sys/sysctl.h>
 
 "
 if test "x$ac_cv_member_struct_kinfo_proc_kp_proc" = xyes
 then :
-  printf "%s\n" "#define HAVE_KINFO_PROC_44BSD 1" >>confdefs.h
+
+	    printf "%s\n" "#define HAVE_KINFO_PROC_44BSD 1" >>confdefs.h
+
+	    found=true
 
 fi
 
-	     ;;
-esac
-fi
-
-	 ;;
-esac
-fi
-
-     ;;
-esac
-fi
-
+    fi
 
 fi
 
@@ -37183,6 +37209,7 @@ printf "%s\n" "$as_me: warning: the $rundir/ts directory must be cleared at boot
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 printf "%s\n" "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
+
 
 
 

@@ -2730,29 +2730,55 @@ if test "$utmp_style" = "LEGACY"; then
     AC_CHECK_FUNCS([getttyent ttyslot], [break])
 fi
 
-AC_CHECK_FUNCS([sysctl], [AC_CHECK_FUNCS([devname])
-    AC_CHECK_MEMBER([struct kinfo_proc.ki_structsize], [AC_DEFINE(HAVE_KINFO_PROC_FREEBSD)], [
-	AC_CHECK_MEMBER([struct kinfo_proc2.p_paddr], [AC_DEFINE(HAVE_KINFO_PROC2_NETBSD)], [
-	    AC_CHECK_MEMBER([struct kinfo_proc.p_paddr], [AC_DEFINE(HAVE_KINFO_PROC_OPENBSD)], [
-		AC_CHECK_MEMBER([struct kinfo_proc.kp_proc], [AC_DEFINE(HAVE_KINFO_PROC_44BSD)], [], [
-#		    include <sys/param.h>
-#		    include <sys/sysctl.h>
-		])
-	    ], [
-#		include <sys/param.h>
-#		include <sys/sysctl.h>
-	    ])
-	],
-	[
-#	    include <sys/param.h>
-#	    include <sys/sysctl.h>
-	])
-    ],
-    [
-#	include <sys/param.h>
-#	include <sys/sysctl.h>
-#	include <sys/user.h>
+AC_CHECK_FUNCS([sysctl], [
+    AC_CHECK_FUNCS([devname])
+    # Check for the various flavors of kinfo_proc
+    found=false
+    AC_CHECK_MEMBER([struct kinfo_proc.ki_structsize], [
+	AC_DEFINE(HAVE_KINFO_PROC_FREEBSD)
+	found=true
+    ], [], [
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#include <sys/user.h>
     ])
+    if test "$found" = "false"; then
+	AC_CHECK_MEMBER([struct kinfo_proc.kp_paddr], [
+	    AC_DEFINE(HAVE_KINFO_PROC_DFLY)
+	    found=true
+	], [], [
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#include <sys/user.h>
+	])
+    fi
+    if test "$found" = "false"; then
+	AC_CHECK_MEMBER([struct kinfo_proc2.p_paddr], [
+	    AC_DEFINE(HAVE_KINFO_PROC2_NETBSD)
+	    found=true
+	], [], [
+#include <sys/param.h>
+#include <sys/sysctl.h>
+	])
+    fi
+    if test "$found" = "false"; then
+	AC_CHECK_MEMBER([struct kinfo_proc.p_paddr], [
+	    AC_DEFINE(HAVE_KINFO_PROC_OPENBSD)
+	    found=true
+	], [], [
+#include <sys/param.h>
+#include <sys/sysctl.h>
+	])
+    fi
+    if test "$found" = "false"; then
+	AC_CHECK_MEMBER([struct kinfo_proc.kp_proc], [
+	    AC_DEFINE(HAVE_KINFO_PROC_44BSD)
+	    found=true
+	], [], [
+#include <sys/param.h>
+#include <sys/sysctl.h>
+	])
+    fi
 ])
 
 AC_CHECK_FUNCS([openpty], [AC_CHECK_HEADERS([libutil.h util.h pty.h], [break])], [
@@ -4647,6 +4673,7 @@ AH_TEMPLATE(HAVE_STRNLEN, [Define to 1 if you have the 'strnlen' function.])
 AH_TEMPLATE(PAM_SUN_CODEBASE, [Define to 1 if your system uses a Solaris-derived PAM and not Linux-PAM or OpenPAM.])
 AH_TEMPLATE(HAVE_KINFO_PROC_44BSD, [Define to 1 if your system has a 4.4BSD-style kinfo_proc struct.])
 AH_TEMPLATE(HAVE_KINFO_PROC_FREEBSD, [Define to 1 if your system has a FreeBSD-style kinfo_proc struct.])
+AH_TEMPLATE(HAVE_KINFO_PROC_DFLY, [Define to 1 if your system has a Dragonfly-style kinfo_proc struct.])
 AH_TEMPLATE(HAVE_KINFO_PROC2_NETBSD, [Define to 1 if your system has a NetBSD-style kinfo_proc2 struct.])
 AH_TEMPLATE(HAVE_KINFO_PROC_OPENBSD, [Define to 1 if your system has an OpenBSD-style kinfo_proc struct.])
 AH_TEMPLATE(HAVE_OPENSSL, [Define to 1 if you are using OpenSSL's TLS and sha2 functions.])

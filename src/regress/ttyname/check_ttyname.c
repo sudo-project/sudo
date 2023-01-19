@@ -91,6 +91,7 @@ main(int argc, char *argv[])
 #if defined(HAVE_KINFO_PROC2_NETBSD) || \
     defined(HAVE_KINFO_PROC_OPENBSD) || \
     defined(HAVE_KINFO_PROC_FREEBSD) || \
+    defined(HAVE_KINFO_PROC_DFLY) || \
     defined(HAVE_KINFO_PROC_44BSD) || \
     defined(HAVE__TTYNAME_DEV) || defined(HAVE_STRUCT_PSINFO_PR_TTYDEV) || \
     defined(HAVE_PSTAT_GETPROC) || defined(__linux__)

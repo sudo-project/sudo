@@ -46,7 +46,7 @@
 #include <dirent.h>
 #if defined(HAVE_KINFO_PROC2_NETBSD) || defined (HAVE_KINFO_PROC_OPENBSD) || defined(HAVE_KINFO_PROC_44BSD)
 # include <sys/sysctl.h>
-#elif defined(HAVE_KINFO_PROC_FREEBSD)
+#elif defined(HAVE_KINFO_PROC_FREEBSD) || defined(HAVE_KINFO_PROC_DFLY)
 # include <sys/param.h>
 # include <sys/sysctl.h>
 # include <sys/user.h>
@@ -79,6 +79,11 @@
 # define SUDO_KERN_PROC		KERN_PROC
 # define sudo_kinfo_proc	kinfo_proc
 # define sudo_kp_tdev		ki_tdev
+# define sudo_kp_namelen	4
+#elif defined(HAVE_KINFO_PROC_DFLY)
+# define SUDO_KERN_PROC		KERN_PROC
+# define sudo_kinfo_proc	kinfo_proc
+# define sudo_kp_tdev		kp_tdev
 # define sudo_kp_namelen	4
 #elif defined(HAVE_KINFO_PROC_44BSD)
 # define SUDO_KERN_PROC		KERN_PROC

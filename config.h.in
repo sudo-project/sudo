@@ -472,6 +472,9 @@
 /* Define to 1 if your system has a 4.4BSD-style kinfo_proc struct. */
 #undef HAVE_KINFO_PROC_44BSD
 
+/* Define to 1 if your system has a Dragonfly-style kinfo_proc struct. */
+#undef HAVE_KINFO_PROC_DFLY
+
 /* Define to 1 if your system has a FreeBSD-style kinfo_proc struct. */
 #undef HAVE_KINFO_PROC_FREEBSD
 

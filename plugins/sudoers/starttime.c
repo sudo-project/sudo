@@ -33,7 +33,7 @@
 #include <sys/stat.h>
 #if defined(HAVE_KINFO_PROC_44BSD) || defined (HAVE_KINFO_PROC_OPENBSD) || defined(HAVE_KINFO_PROC2_NETBSD)
 # include <sys/sysctl.h>
-#elif defined(HAVE_KINFO_PROC_FREEBSD)
+#elif defined(HAVE_KINFO_PROC_FREEBSD) || defined(HAVE_KINFO_PROC_DFLY)
 # include <sys/param.h>
 # include <sys/sysctl.h>
 # include <sys/user.h>
@@ -70,7 +70,7 @@
 # define SUDO_KERN_PROC		KERN_PROC
 # define sudo_kinfo_proc	kinfo_proc
 # define sudo_kp_namelen	6
-#elif defined(HAVE_KINFO_PROC_FREEBSD) || defined(HAVE_KINFO_PROC_44BSD)
+#elif defined(HAVE_KINFO_PROC_FREEBSD) || defined(HAVE_KINFO_PROC_DFLY) || defined(HAVE_KINFO_PROC_44BSD)
 # define SUDO_KERN_PROC		KERN_PROC
 # define sudo_kinfo_proc	kinfo_proc
 # define sudo_kp_namelen	4
@@ -113,8 +113,11 @@ get_starttime(pid_t pid, struct timespec *starttime)
     }
     if (rc != -1) {
 #if defined(HAVE_KINFO_PROC_FREEBSD)
-	/* FreeBSD and Dragonfly */
+	/* FreeBSD. */
 	TIMEVAL_TO_TIMESPEC(&ki_proc->ki_start, starttime);
+#elif defined(HAVE_KINFO_PROC_DFLY)
+	/* Dragonfly. */
+	TIMEVAL_TO_TIMESPEC(&ki_proc->kp_start, starttime);
 #elif defined(HAVE_KINFO_PROC_44BSD)
 	/* 4.4BSD and macOS */
 	TIMEVAL_TO_TIMESPEC(&ki_proc->kp_proc.p_starttime, starttime);
