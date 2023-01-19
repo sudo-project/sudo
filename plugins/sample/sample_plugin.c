@@ -86,7 +86,7 @@ policy_open(unsigned int version, sudo_conv_t conversation,
     if (!sudo_conv)
 	sudo_conv = conversation;
     if (!sudo_log)
-	sudo_log = sudo_printf;
+	sudo_log = sudo_plugin_printf;
 
     if (SUDO_API_VERSION_GET_MAJOR(version) != SUDO_API_VERSION_MAJOR) {
 	sudo_log(SUDO_CONV_ERROR_MSG,
@@ -414,7 +414,7 @@ io_open(unsigned int version, sudo_conv_t conversation,
     if (!sudo_conv)
 	sudo_conv = conversation;
     if (!sudo_log)
-	sudo_log = sudo_printf;
+	sudo_log = sudo_plugin_printf;
 
     /* Open input and output files. */
     snprintf(path, sizeof(path), "/var/tmp/sample-%u.output",
