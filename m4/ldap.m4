@@ -36,18 +36,20 @@ AC_DEFUN([SUDO_CHECK_LDAP], [
 	fi
 	LIBS="${_LIBS} ${LDAP_LIBS}"
 
-	#
-	# Check if we need to link with -llber for ber_set_option()
-	#
-	OLIBS="$LIBS"
 	AC_CHECK_DECL([LBER_OPT_DEBUG_LEVEL], [
-	    AC_SEARCH_LIBS([ber_set_option], [lber], [found=yes], [found=no])
-	    if test X"$found" = X"yes" -a X"$LIBS" != X"$OLIBS"; then
-		LDAP_LIBS="$LDAP_LIBS -llber"
-	    fi
+	    case "$LDAP_LIBS" in
+	    *-llber*)
+		# Already linking with -llber
+		;;
+	    *)	# Link with -llber for ber_set_option() if it exists
+		AC_CHECK_LIB([lber], [ber_set_option], [found=yes], [found=no])
+		if test X"$found" = X"yes"; then
+		    LDAP_LIBS="$LDAP_LIBS -llber"
+		fi
+		;;
+	    esac
 	], [], [AC_INCLUDES_DEFAULT
 #include <lber.h>])
-	LIBS="$OLIBS"
 	AC_CACHE_CHECK([whether lber.h is needed when including ldap.h], [sudo_cv_header_lber_h], [
 	    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
 #include <ldap.h>]], [[(void)ldap_init(0, 0)]])], [

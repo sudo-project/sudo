@@ -2452,6 +2452,26 @@ AC_SYS_LARGEFILE
 AC_SYS_YEAR2038
 
 #
+# Don't allow undefined symbols, even in shared libraries, if possible.
+# This will detect missing symbols at build-time instead of run-time.
+# We must set this *before* the library tests.
+#
+case "$host_os" in
+    freebsd*|dragonfly*|openbsd*)
+	# On FreeBSD and Dragonfly, environ is filled in by the
+	# dynamic loader so we cannot use -Wl,--no-undefined.
+	# https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=263265
+	# OpenBSD shared libraries don't link explicitly with libc
+	# which results in undefined references errors.
+	# Ideally we would link a shared object with -Wl,--no-undefined
+	# and see if it works but this is not easy in a libtool world.
+	;;
+    *)
+	AX_CHECK_LINK_FLAG([-Wl,--no-undefined], [AX_APPEND_FLAG([-Wl,--no-undefined], [LDFLAGS])])
+	;;
+esac
+
+#
 # HP-UX may need to define _XOPEN_SOURCE_EXTENDED to expose MSG_WAITALL.
 # Also, HP-UX 11.23 has a broken sys/types.h when large files support
 # is enabled and _XOPEN_SOURCE_EXTENDED is not also defined.

@@ -19825,6 +19825,100 @@ fi
 
 
 #
+# Don't allow undefined symbols, even in shared libraries, if possible.
+# This will detect missing symbols at build-time instead of run-time.
+# We must set this *before* the library tests.
+#
+case "$host_os" in
+    freebsd*|dragonfly*|openbsd*)
+	# On FreeBSD and Dragonfly, environ is filled in by the
+	# dynamic loader so we cannot use -Wl,--no-undefined.
+	# https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=263265
+	# OpenBSD shared libraries don't link explicitly with libc
+	# which results in undefined references errors.
+	# Ideally we would link a shared object with -Wl,--no-undefined
+	# and see if it works but this is not easy in a libtool world.
+	;;
+    *)
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,--no-undefined" >&5
+printf %s "checking whether the linker accepts -Wl,--no-undefined... " >&6; }
+if test ${ax_cv_check_ldflags___Wl___no_undefined+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -Wl,--no-undefined"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ax_cv_check_ldflags___Wl___no_undefined=yes
+else case e in #(
+  e) ax_cv_check_ldflags___Wl___no_undefined=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl___no_undefined" >&5
+printf "%s\n" "$ax_cv_check_ldflags___Wl___no_undefined" >&6; }
+if test x"$ax_cv_check_ldflags___Wl___no_undefined" = xyes
+then :
+
+if test ${LDFLAGS+y}
+then :
+
+  case " $LDFLAGS " in #(
+  *" -Wl,--no-undefined "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS already contains -Wl,--no-undefined"; } >&5
+  (: LDFLAGS already contains -Wl,--no-undefined) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LDFLAGS " -Wl,--no-undefined"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  LDFLAGS=-Wl,--no-undefined
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS\""; } >&5
+  (: LDFLAGS="$LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
+else case e in #(
+  e) : ;;
+esac
+fi
+
+	;;
+esac
+
+#
 # HP-UX may need to define _XOPEN_SOURCE_EXTENDED to expose MSG_WAITALL.
 # Also, HP-UX 11.23 has a broken sys/types.h when large files support
 # is enabled and _XOPEN_SOURCE_EXTENDED is not also defined.
@@ -30373,23 +30467,25 @@ fi
 	fi
 	LIBS="${_LIBS} ${LDAP_LIBS}"
 
-	#
-	# Check if we need to link with -llber for ber_set_option()
-	#
-	OLIBS="$LIBS"
 	ac_fn_check_decl "$LINENO" "LBER_OPT_DEBUG_LEVEL" "ac_cv_have_decl_LBER_OPT_DEBUG_LEVEL" "$ac_includes_default
 #include <lber.h>
 " "$ac_c_undeclared_builtin_options" "CFLAGS"
 if test "x$ac_cv_have_decl_LBER_OPT_DEBUG_LEVEL" = xyes
 then :
 
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing ber_set_option" >&5
-printf %s "checking for library containing ber_set_option... " >&6; }
-if test ${ac_cv_search_ber_set_option+y}
+	    case "$LDAP_LIBS" in
+	    *-llber*)
+		# Already linking with -llber
+		;;
+	    *)	# Link with -llber for ber_set_option() if it exists
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for ber_set_option in -llber" >&5
+printf %s "checking for ber_set_option in -llber... " >&6; }
+if test ${ac_cv_lib_lber_ber_set_option+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
-  e) ac_func_search_save_LIBS=$LIBS
+  e) ac_check_lib_save_LIBS=$LIBS
+LIBS="-llber  $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -30411,54 +30507,35 @@ return ber_set_option ();
   return 0;
 }
 _ACEOF
-for ac_lib in '' lber
-do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"
+if ac_fn_c_try_link "$LINENO"
 then :
-  ac_cv_search_ber_set_option=$ac_res
+  ac_cv_lib_lber_ber_set_option=yes
+else case e in #(
+  e) ac_cv_lib_lber_ber_set_option=no ;;
+esac
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext
-  if test ${ac_cv_search_ber_set_option+y}
-then :
-  break
-fi
-done
-if test ${ac_cv_search_ber_set_option+y}
-then :
-
-else case e in #(
-  e) ac_cv_search_ber_set_option=no ;;
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS ;;
 esac
 fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS ;;
-esac
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_ber_set_option" >&5
-printf "%s\n" "$ac_cv_search_ber_set_option" >&6; }
-ac_res=$ac_cv_search_ber_set_option
-if test "$ac_res" != no
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_lber_ber_set_option" >&5
+printf "%s\n" "$ac_cv_lib_lber_ber_set_option" >&6; }
+if test "x$ac_cv_lib_lber_ber_set_option" = xyes
 then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
   found=yes
 else case e in #(
   e) found=no ;;
 esac
 fi
 
-	    if test X"$found" = X"yes" -a X"$LIBS" != X"$OLIBS"; then
-		LDAP_LIBS="$LDAP_LIBS -llber"
-	    fi
+		if test X"$found" = X"yes"; then
+		    LDAP_LIBS="$LDAP_LIBS -llber"
+		fi
+		;;
+	    esac
 
 fi
-	LIBS="$OLIBS"
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether lber.h is needed when including ldap.h" >&5
 printf %s "checking whether lber.h is needed when including ldap.h... " >&6; }
 if test ${sudo_cv_header_lber_h+y}
