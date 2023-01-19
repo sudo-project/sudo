@@ -450,6 +450,21 @@
 /* Define to 1 if you have the 'innetgr' function. */
 #undef HAVE_INNETGR
 
+/* Define to 1 if the system has the type 'int16_t'. */
+#undef HAVE_INT16_T
+
+/* Define to 1 if the system has the type 'int32_t'. */
+#undef HAVE_INT32_T
+
+/* Define to 1 if the system has the type 'int64_t'. */
+#undef HAVE_INT64_T
+
+/* Define to 1 if the system has the type 'int8_t'. */
+#undef HAVE_INT8_T
+
+/* Define to 1 if the system has the type 'intmax_t'. */
+#undef HAVE_INTMAX_T
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
@@ -798,6 +813,9 @@
 /* Define to 1 if you have the 'sigabbrev_np' function. */
 #undef HAVE_SIGABBREV_NP
 
+/* Define to 1 if the system has the type 'sig_atomic_t'. */
+#undef HAVE_SIG_ATOMIC_T
+
 /* Define to 1 if you use S/Key. */
 #undef HAVE_SKEY
 
@@ -806,6 +824,9 @@
 
 /* Define to 1 if you have the 'snprintf' function. */
 #undef HAVE_SNPRINTF
+
+/* Define to 1 if the system has the type 'socklen_t'. */
+#undef HAVE_SOCKLEN_T
 
 /* Define to 1 to enable Solaris audit support. */
 #undef HAVE_SOLARIS_AUDIT
@@ -993,6 +1014,21 @@
 
 /* Define to 1 if you have the 'ttyslot' function. */
 #undef HAVE_TTYSLOT
+
+/* Define to 1 if the system has the type 'uint16_t'. */
+#undef HAVE_UINT16_T
+
+/* Define to 1 if the system has the type 'uint32_t'. */
+#undef HAVE_UINT32_T
+
+/* Define to 1 if the system has the type 'uint64_t'. */
+#undef HAVE_UINT64_T
+
+/* Define to 1 if the system has the type 'uint8_t'. */
+#undef HAVE_UINT8_T
+
+/* Define to 1 if the system has the type 'uintmax_t'. */
+#undef HAVE_UINTMAX_T
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
@@ -1406,9 +1442,6 @@
    __func__ */
 #undef __func__
 
-/* Define to 'int' if <time.h> does not define. */
-#undef clockid_t
-
 /* Define to empty if 'const' does not conform to ANSI C. */
 #undef const
 
@@ -1421,51 +1454,60 @@
 #undef inline
 #endif
 
-/* Define to 'unsigned int' if <sys/types.h> does not define. */
-#undef int16_t
-
-/* Define to 'unsigned int' if <sys/types.h> does not define. */
-#undef int32_t
-
-/* Define to 'unsigned long long' if <sys/types.h> does not define. */
-#undef int64_t
-
-/* Define to 'long long' if <sys/types.h> does not define. */
-#undef intmax_t
-
 /* Define to an OS-specific initialization function or 'os_init_common'. */
 #undef os_init
-
-/* Define to 'int' if <signal.h> does not define. */
-#undef sig_atomic_t
 
 /* Define to 'unsigned int' if <sys/types.h> does not define. */
 #undef size_t
 
-/* Define to 'unsigned int' if <sys/socket.h> doesn't define. */
-#undef socklen_t
-
 /* Define to 'int' if <sys/types.h> doesn't define. */
 #undef uid_t
-
-/* Define to 'unsigned int' if <sys/types.h> does not define. */
-#undef uint16_t
-
-/* Define to 'unsigned int' if <sys/types.h> does not define. */
-#undef uint32_t
-
-/* Define to 'unsigned long long' if <sys/types.h> does not define. */
-#undef uint64_t
-
-/* Define to 'unsigned char' if <sys/types.h> does not define. */
-#undef uint8_t
-
-/* Define to 'unsigned long long' if <sys/types.h> does not define. */
-#undef uintmax_t
 
 /* Define to empty if the keyword 'volatile' does not work. Warning: valid
    code using 'volatile' can become incorrect without. Disable with care. */
 #undef volatile
+
+/* Define C99 types if stdint.h and inttypes.h are missing. */
+#if !defined(HAVE_STDINT_H) && !defined(HAVE_INTTYPES_H)
+# ifndef HAVE_INT8_T
+typedef char			int8_t;
+# endif
+# ifndef HAVE_UINT8_T
+typedef	unsigned char		uint8_t;
+# endif
+# ifndef HAVE_INT16_T
+typedef short			int16_t;
+# endif
+# ifndef HAVE_UINT16_T
+typedef unsigned short		uint16_t;
+# endif
+# ifndef HAVE_INT32_T
+typedef int			int32_t;
+# endif
+# ifndef HAVE_UINT32_T
+typedef unsigned int		uint32_t;
+# endif
+# ifndef HAVE_INT64_T
+typedef long long		int64_t;
+# endif
+# ifndef HAVE_UINT64_T
+typedef unsigned long long	uint64_t;
+# endif
+# ifndef HAVE_INTMAX_T
+typedef long long		intmax_t;
+# endif
+# ifndef HAVE_UINTMAX_T
+typedef unsigned long long	uintmax_t;
+# endif
+#endif /* !HAVE_STDINT_H && !HAVE_INTTYPES_H */
+
+#ifndef HAVE_SIG_ATOMIC_T
+typedef int			sig_atomic_t;
+#endif
+
+#ifndef HAVE_SOCKLEN_T
+typedef unsigned int		socklen_t;
+#endif
 
 #ifndef __GNUC_PREREQ__
 # ifdef __GNUC__

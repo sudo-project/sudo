@@ -20220,116 +20220,98 @@ fi
 
 fi
 if test X"${ac_cv_header_stdint_h}${ac_cv_header_inttypes_h}" = X"nono"; then
-    ac_fn_c_check_type "$LINENO" "uint8_t" "ac_cv_type_uint8_t" "$ac_includes_default"
+    ac_fn_c_check_type "$LINENO" "int8_t" "ac_cv_type_int8_t" "$ac_includes_default"
+if test "x$ac_cv_type_int8_t" = xyes
+then :
+
+printf "%s\n" "#define HAVE_INT8_T 1" >>confdefs.h
+
+
+fi
+ac_fn_c_check_type "$LINENO" "uint8_t" "ac_cv_type_uint8_t" "$ac_includes_default"
 if test "x$ac_cv_type_uint8_t" = xyes
 then :
 
-else case e in #(
-  e)
-printf "%s\n" "#define uint8_t unsigned char" >>confdefs.h
- ;;
-esac
-fi
+printf "%s\n" "#define HAVE_UINT8_T 1" >>confdefs.h
 
-    ac_fn_c_check_type "$LINENO" "int16_t" "ac_cv_type_int16_t" "$ac_includes_default"
+
+fi
+ac_fn_c_check_type "$LINENO" "int16_t" "ac_cv_type_int16_t" "$ac_includes_default"
 if test "x$ac_cv_type_int16_t" = xyes
 then :
 
-else case e in #(
-  e)
-printf "%s\n" "#define int16_t unsigned int" >>confdefs.h
- ;;
-esac
-fi
+printf "%s\n" "#define HAVE_INT16_T 1" >>confdefs.h
 
-    ac_fn_c_check_type "$LINENO" "uint16_t" "ac_cv_type_uint16_t" "$ac_includes_default"
+
+fi
+ac_fn_c_check_type "$LINENO" "uint16_t" "ac_cv_type_uint16_t" "$ac_includes_default"
 if test "x$ac_cv_type_uint16_t" = xyes
 then :
 
-else case e in #(
-  e)
-printf "%s\n" "#define uint16_t unsigned int" >>confdefs.h
- ;;
-esac
-fi
+printf "%s\n" "#define HAVE_UINT16_T 1" >>confdefs.h
 
-    ac_fn_c_check_type "$LINENO" "int32_t" "ac_cv_type_int32_t" "$ac_includes_default"
+
+fi
+ac_fn_c_check_type "$LINENO" "int32_t" "ac_cv_type_int32_t" "$ac_includes_default"
 if test "x$ac_cv_type_int32_t" = xyes
 then :
 
-else case e in #(
-  e)
-printf "%s\n" "#define int32_t unsigned int" >>confdefs.h
- ;;
-esac
-fi
+printf "%s\n" "#define HAVE_INT32_T 1" >>confdefs.h
 
-    ac_fn_c_check_type "$LINENO" "uint32_t" "ac_cv_type_uint32_t" "$ac_includes_default"
+
+fi
+ac_fn_c_check_type "$LINENO" "uint32_t" "ac_cv_type_uint32_t" "$ac_includes_default"
 if test "x$ac_cv_type_uint32_t" = xyes
 then :
 
-else case e in #(
-  e)
-printf "%s\n" "#define uint32_t unsigned int" >>confdefs.h
- ;;
-esac
-fi
+printf "%s\n" "#define HAVE_UINT32_T 1" >>confdefs.h
 
-    ac_fn_c_check_type "$LINENO" "int64_t" "ac_cv_type_int64_t" "$ac_includes_default"
+
+fi
+ac_fn_c_check_type "$LINENO" "int64_t" "ac_cv_type_int64_t" "$ac_includes_default"
 if test "x$ac_cv_type_int64_t" = xyes
 then :
 
-else case e in #(
-  e)
-printf "%s\n" "#define int64_t unsigned long long" >>confdefs.h
- ;;
-esac
-fi
+printf "%s\n" "#define HAVE_INT64_T 1" >>confdefs.h
 
-    ac_fn_c_check_type "$LINENO" "uint64_t" "ac_cv_type_uint64_t" "$ac_includes_default"
+
+fi
+ac_fn_c_check_type "$LINENO" "uint64_t" "ac_cv_type_uint64_t" "$ac_includes_default"
 if test "x$ac_cv_type_uint64_t" = xyes
 then :
 
-else case e in #(
-  e)
-printf "%s\n" "#define uint64_t unsigned long long" >>confdefs.h
- ;;
-esac
-fi
+printf "%s\n" "#define HAVE_UINT64_T 1" >>confdefs.h
 
-    ac_fn_c_check_type "$LINENO" "intmax_t" "ac_cv_type_intmax_t" "$ac_includes_default"
+
+fi
+ac_fn_c_check_type "$LINENO" "intmax_t" "ac_cv_type_intmax_t" "$ac_includes_default"
 if test "x$ac_cv_type_intmax_t" = xyes
 then :
 
-else case e in #(
-  e)
-printf "%s\n" "#define intmax_t long long" >>confdefs.h
- ;;
-esac
-fi
+printf "%s\n" "#define HAVE_INTMAX_T 1" >>confdefs.h
 
-    ac_fn_c_check_type "$LINENO" "uintmax_t" "ac_cv_type_uintmax_t" "$ac_includes_default"
+
+fi
+ac_fn_c_check_type "$LINENO" "uintmax_t" "ac_cv_type_uintmax_t" "$ac_includes_default"
 if test "x$ac_cv_type_uintmax_t" = xyes
 then :
 
-else case e in #(
-  e)
-printf "%s\n" "#define uintmax_t unsigned long long" >>confdefs.h
- ;;
-esac
+printf "%s\n" "#define HAVE_UINTMAX_T 1" >>confdefs.h
+
+
 fi
 
 fi
-ac_fn_c_check_type "$LINENO" "sig_atomic_t" "ac_cv_type_sig_atomic_t" "#include <sys/types.h>
+ac_fn_c_check_type "$LINENO" "sig_atomic_t" "ac_cv_type_sig_atomic_t" "
+$ac_includes_default
 #include <signal.h>
 "
 if test "x$ac_cv_type_sig_atomic_t" = xyes
 then :
 
-else case e in #(
-  e) printf "%s\n" "#define sig_atomic_t int" >>confdefs.h
- ;;
-esac
+printf "%s\n" "#define HAVE_SIG_ATOMIC_T 1" >>confdefs.h
+
+
 fi
 
 ac_fn_c_check_type "$LINENO" "struct in6_addr" "ac_cv_type_struct_in6_addr" "#include <sys/types.h>
@@ -20350,10 +20332,9 @@ $ac_includes_default
 if test "x$ac_cv_type_socklen_t" = xyes
 then :
 
-else case e in #(
-  e) printf "%s\n" "#define socklen_t unsigned int" >>confdefs.h
- ;;
-esac
+printf "%s\n" "#define HAVE_SOCKLEN_T 1" >>confdefs.h
+
+
 fi
 
 
@@ -37209,9 +37190,6 @@ printf "%s\n" "$as_me: warning: the $rundir/ts directory must be cleared at boot
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 printf "%s\n" "$as_me:          You may need to create a startup item to do this." >&6;}
 fi
-
-
-
 
 
 

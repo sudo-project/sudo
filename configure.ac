@@ -2523,21 +2523,14 @@ dnl
 dnl typedef checks
 dnl
 if test X"${ac_cv_header_stdint_h}${ac_cv_header_inttypes_h}" = X"nono"; then
-    AC_CHECK_TYPE(uint8_t, unsigned char)
-    AC_CHECK_TYPE(int16_t, unsigned int)
-    AC_CHECK_TYPE(uint16_t, unsigned int)
-    AC_CHECK_TYPE(int32_t, unsigned int)
-    AC_CHECK_TYPE(uint32_t, unsigned int)
-    AC_CHECK_TYPE(int64_t, unsigned long long)
-    AC_CHECK_TYPE(uint64_t, unsigned long long)
-    AC_CHECK_TYPE(intmax_t, long long)
-    AC_CHECK_TYPE(uintmax_t, unsigned long long)
+    AC_CHECK_TYPES([int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t, intmax_t, uintmax_t])
 fi
-AC_CHECK_TYPE([sig_atomic_t], [], [AC_DEFINE(sig_atomic_t, int)], [#include <sys/types.h>
+AC_CHECK_TYPES([sig_atomic_t], [], [], [
+AC_INCLUDES_DEFAULT
 #include <signal.h>])
 AC_CHECK_TYPES([struct in6_addr], [], [], [#include <sys/types.h>
 #include <netinet/in.h>])
-AC_CHECK_TYPE(socklen_t, [], [AC_DEFINE(socklen_t, unsigned int)], [
+AC_CHECK_TYPES(socklen_t, [], [], [
 AC_INCLUDES_DEFAULT
 #include <sys/socket.h>])
 SUDO_UID_T_LEN
@@ -4651,9 +4644,6 @@ AH_TEMPLATE(UMASK_OVERRIDE, [Define to 1 to use the umask specified in sudoers e
 AH_TEMPLATE(USE_INSULTS, [Define to 1 if you want to insult the user for entering an incorrect password.])
 AH_TEMPLATE(USE_STOW, [Define to 1 if you use GNU stow packaging.])
 AH_TEMPLATE(WITHOUT_PASSWD, [Define to avoid using the passwd/shadow file for authentication.])
-AH_TEMPLATE(clockid_t, [Define to 'int' if <time.h> does not define.])
-AH_TEMPLATE(sig_atomic_t, [Define to 'int' if <signal.h> does not define.])
-AH_TEMPLATE(socklen_t, [Define to 'unsigned int' if <sys/socket.h> doesn't define.])
 AH_TEMPLATE(HAVE___FUNC__, [Define to 1 if the compiler supports the C99 __func__ variable.])
 AH_TEMPLATE(HAVE___INTERPOSE, [Define to 1 if you have dyld with __interpose attribute support.])
 AH_TEMPLATE(SUDO_KRB5_INSTANCE, [An instance string to append to the username (separated by a slash) for Kerberos V authentication.])
@@ -4692,7 +4682,49 @@ dnl
 AH_TOP([#ifndef SUDO_CONFIG_H
 #define SUDO_CONFIG_H])
 
-AH_BOTTOM([#ifndef __GNUC_PREREQ__
+AH_BOTTOM([/* Define C99 types if stdint.h and inttypes.h are missing. */
+#if !defined(HAVE_STDINT_H) && !defined(HAVE_INTTYPES_H)
+# ifndef HAVE_INT8_T
+typedef char			int8_t;
+# endif
+# ifndef HAVE_UINT8_T
+typedef	unsigned char		uint8_t;
+# endif
+# ifndef HAVE_INT16_T
+typedef short			int16_t;
+# endif
+# ifndef HAVE_UINT16_T
+typedef unsigned short		uint16_t;
+# endif
+# ifndef HAVE_INT32_T
+typedef int			int32_t;
+# endif
+# ifndef HAVE_UINT32_T
+typedef unsigned int		uint32_t;
+# endif
+# ifndef HAVE_INT64_T
+typedef long long		int64_t;
+# endif
+# ifndef HAVE_UINT64_T
+typedef unsigned long long	uint64_t;
+# endif
+# ifndef HAVE_INTMAX_T
+typedef long long		intmax_t;
+# endif
+# ifndef HAVE_UINTMAX_T
+typedef unsigned long long	uintmax_t;
+# endif
+#endif /* !HAVE_STDINT_H && !HAVE_INTTYPES_H */
+
+#ifndef HAVE_SIG_ATOMIC_T
+typedef int			sig_atomic_t;
+#endif
+
+#ifndef HAVE_SOCKLEN_T
+typedef unsigned int		socklen_t;
+#endif
+
+#ifndef __GNUC_PREREQ__
 # ifdef __GNUC__
 #  define __GNUC_PREREQ__(ma, mi) \
 	((__GNUC__ > (ma)) || (__GNUC__ == (ma) && __GNUC_MINOR__ >= (mi)))
