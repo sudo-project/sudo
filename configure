@@ -17454,11 +17454,9 @@ fi
 sudo_cv_prev_host="$host"
 
 if test -n "$host_os"; then
-    OS=`echo $host_os | sed 's/[0-9].*//'`
     OSREV=`echo $host_os | sed 's/^[^0-9\.]*\([0-9\.]*\).*$/\1/'`
     OSMAJOR=`echo $OSREV | sed 's/\..*$//'`
 else
-    OS="unknown"
     OSREV=0
     OSMAJOR=0
 fi
@@ -31543,7 +31541,7 @@ fi
 
 fi
 
-case "$OS" in
+case "$host_os" in
     netbsd*)
 	;;
     *)

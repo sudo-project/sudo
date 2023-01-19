@@ -1796,11 +1796,9 @@ dnl
 dnl We want to be able to differentiate between different rev's
 dnl
 if test -n "$host_os"; then
-    OS=`echo $host_os | sed 's/[[0-9]].*//'`
     OSREV=`echo $host_os | sed 's/^[[^0-9\.]]*\([[0-9\.]]*\).*$/\1/'`
     OSMAJOR=`echo $OSREV | sed 's/\..*$//'`
 else
-    OS="unknown"
     OSREV=0
     OSMAJOR=0
 fi
@@ -4059,7 +4057,7 @@ dnl We want to use DT_RUNPATH in preference to DT_RPATH in ELF binaries.
 dnl Otherwise, LD_LIBRARY_PATH does not work when running the tests.
 dnl We don't do this on NetBSD where RPATH already supports LD_LIBRARY_PATH.
 dnl
-case "$OS" in
+case "$host_os" in
     netbsd*)
 	;;
     *)
