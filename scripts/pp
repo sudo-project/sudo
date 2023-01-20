@@ -1,6 +1,6 @@
 #!/bin/sh
-# Copyright 2022 One Identity LLC. ALL RIGHTS RESERVED
-pp_revision="20221227"
+# Copyright 2023 One Identity LLC. ALL RIGHTS RESERVED
+pp_revision="20230120"
  # Copyright 2018 One Identity LLC.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -7929,7 +7929,7 @@ pp_bsd_munge_text () {
 }
 
 pp_backend_bsd_detect () {
-	test x"$1" = x"FreeBSD"
+    test x"$1" = x"FreeBSD" -o x"$1" = x"DragonFly"
 }
 
 pp_backend_bsd_init () {
@@ -7937,7 +7937,7 @@ pp_backend_bsd_init () {
     # Get the OS revision
     pp_bsd_detect_os
 
-    # Get the arch (i386/amd64)
+    # Get the arch (i386/x86_64)
     pp_bsd_detect_arch
 
     pp_bsd_name=
@@ -7951,6 +7951,13 @@ pp_backend_bsd_init () {
     pp_bsd_prefix="/usr/local/"
     pp_bsd_desc=
     pp_bsd_message=
+
+    # FreeBSD uses package.txz, DragonFly uses package.pkg.
+    if [ "$pp_bsd_os" = "DragonFly" ]; then
+        pp_bsd_pkg_sfx=pkg
+    else
+        pp_bsd_pkg_sfx=txz
+    fi
 
     # pp_bsd_category must be in array format comma separated
     # pp_bsd_category=[security,network]
@@ -8028,7 +8035,7 @@ pp_bsd_detect_os () {
 pp_bsd_detect_arch() {
     pp_bsd_platform="`uname -m`" 
     case $pp_bsd_platform in
-        amd64) pp_bsd_platform_std=x86_64;;
+        amd64|x86_64) pp_bsd_platform_std=x86_64;;
         i386)  pp_bsd_platform_std=i386;;
         *)     pp_bsd_platform_std=unknown;;
     esac
@@ -8203,8 +8210,8 @@ pp_bsd_make_data() {
                             mkdir -p `dirname "$datadir$path"`
                         fi
 
-                        pp_debug "install -D $datadir -o $o -g $g -h sha256 -m ${m} -v $pp_destdir$p $datadir$path"
-                        pp_bsd_fakeroot install -D $datadir -o $o -g $g -h sha256 -m ${m} -v $pp_destdir$p $datadir$path
+                        pp_debug "install -D $datadir -o $o -g $g -m ${m} -v $pp_destdir$p $datadir$path"
+                        pp_bsd_fakeroot install -D $datadir -o $o -g $g -m ${m} -v $pp_destdir$p $datadir$path
                         echo "  \"$path\": \"-\", \"$path\": {uname: $o, gname: $g, perm: ${m}}" >> $outfilelist
                         ;; 
                 esac
@@ -8358,12 +8365,12 @@ pp_backend_bsd() {
 
 pp_bsd_name () {
     typeset cmp="${1:-run}"
-    echo `pp_bsd_cmp_full_name $cmp`"-${pp_bsd_version:-$version}.txz"
+    echo `pp_bsd_cmp_full_name $cmp`"-${pp_bsd_version:-$version}.${pp_bsd_pkg_sfx}"
 }
 
 pp_backend_bsd_names () {
     for cmp in $pp_components; do
-    	echo `pp_bsd_cmp_full_name $cmp`"-${pp_bsd_version:-$version}.txz"
+    	echo `pp_bsd_cmp_full_name $cmp`"-${pp_bsd_version:-$version}.${pp_bsd_pkg_sfx}"
     done
 }
 
@@ -8379,8 +8386,8 @@ pp_backend_bsd_probe () {
 
 pp_backend_bsd_vas_platforms() {
     case "${pp_bsd_platform_std}" in
-        x86_64) echo "FreeBSD-x86_64.txz FreeBSD-i386.txz";;
-        i386)   echo "FreeBSD-i386.txz";;
+        x86_64) echo "FreeBSD-x86_64.${pp_bsd_pkg_sfx} FreeBSD-i386.${pp_bsd_pkg_sfx}";;
+        i386)   echo "FreeBSD-i386.${pp_bsd_pkg_sfx}";;
         *) pp_die "unknown architecture $pp_bsd_platform_std";;
     esac
 }

@@ -436,7 +436,7 @@ case "$osversion" in
 		$configure_opts"
 	PPVARS="${PPVARS}${PPVARS+$space}aix_freeware=true"
 	;;
-    FreeBSD*)
+    FreeBSD*|DragonFly*)
 	# Encrypted remote I/O log support.
 	with_openssl=true
 
