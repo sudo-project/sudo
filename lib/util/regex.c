@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -68,17 +68,23 @@ check_pattern(const char *pattern)
 	    }
 	    break;
 	case '{':
-	    /* Try to match bound: {[0-9]*\?,[0-9]*} */
+	    /*
+	     * Try to match bound: {\?[0-9]*\?,\?[0-9]*}
+	     * GNU libc supports a backslash before the bound and comma.
+	     */
+	    if (cp[0] == '\\' && isdigit((unsigned char)cp[1]))
+		cp++;
 	    b1 = strtoul(cp, &ep, 10);
 	    switch (ep[0]) {
 	    case '\\':
-		/* glibc allows the comma to be escaped */
 		if (ep[1] != ',')
 		    break;
 		ep++;
 		FALLTHROUGH;
 	    case ',':
 		cp = ep + 1;
+		if (cp[0] == '\\' && isdigit((unsigned char)cp[1]))
+		    cp++;
 		b2 = strtoul(cp, &ep, 10);
 		break;
 	    }
