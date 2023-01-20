@@ -2455,21 +2455,30 @@ AC_SYS_YEAR2038
 # but is incompatible with the sanitizers/fuzzers.
 # We must set this *before* the library tests.
 #
-if test X"${enable_sanitizer}{enable_fuzzer}" = X"nono"; then
-    case "$host_os" in
-	freebsd*|dragonfly*|openbsd*)
-	    # On FreeBSD and Dragonfly, environ is filled in by the
-	    # dynamic loader so we cannot use -Wl,--no-undefined.
-	    # https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=263265
-	    # OpenBSD shared libraries don't link explicitly with libc
-	    # which results in undefined references errors.
-	    # Ideally we would link a shared object with -Wl,--no-undefined
-	    # and see if it works but this is not easy in a libtool world.
-	    ;;
-	*)
-	    AX_CHECK_LINK_FLAG([-Wl,--no-undefined], [AX_APPEND_FLAG([-Wl,--no-undefined], [LDFLAGS])])
-	    ;;
-    esac
+if test -n "$GCC" -a X"${enable_sanitizer}${enable_fuzzer}" = X"nono"; then
+    # On FreeBSD and Dragonfly, environ is filled in by the dynamic loader
+    # so -Wl,--no-undefined causes a link error when environ is used.
+    # https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=263265
+    # We use errno because OpenBSD shared libraries don't explicitly
+    # link with libc, which can result in undefined reference errors.
+    AC_CACHE_CHECK([the linker accepts -Wl,--no-undefined],
+	[sudo_cv_var_ld___no_undefined],
+	[
+	    sudo_cv_var_ld___no_undefined=no
+	    _CFLAGS="$CFLAGS"
+	    CFLAGS="$CFLAGS $lt_prog_compiler_pic"
+	    _LDFLAGS="$LDFLAGS"
+	    LDFLAGS="$LDFLAGS $lt_prog_compiler_pic -shared -Wl,--no-undefined"
+	    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <errno.h>
+extern char **environ;]], [[int ret = ((long)environ & 0xff) + errno; return ret;]])],
+		[sudo_cv_var_ld___no_undefined=yes])
+	    CFLAGS="$_CFLAGS"
+	    LDFLAGS="$_LDFLAGS"
+	]
+    )
+    if test "$sudo_cv_var_ld___no_undefined" = "yes"; then
+	AX_APPEND_FLAG([-Wl,--no-undefined], [LDFLAGS])
+    fi
 fi
 
 #
@@ -2482,12 +2491,12 @@ case "$host_os" in
     hpux*)
 	AC_CACHE_CHECK([whether sys/socket.h needs _XOPEN_SOURCE_EXTENDED for MSG_WAITALL], [sudo_cv_xopen_source_extended],
 	[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
-#	include <sys/socket.h>], [int a = MSG_WAITALL; return a;])],
+[#	include <sys/socket.h>]], [[int a = MSG_WAITALL; return a;]])],
 	[sudo_cv_xopen_source_extended=no], [
 	    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#define _XOPEN_SOURCE_EXTENDED
 	    AC_INCLUDES_DEFAULT
-#	    include <sys/socket.h>
-#	    include <net/if.h>], [int a = MSG_WAITALL; return a;])],
+[#	    include <sys/socket.h>
+#	    include <net/if.h>]], [[int a = MSG_WAITALL; return a;]])],
 	    [sudo_cv_xopen_source_extended=yes],
 	    [sudo_cv_xopen_source_extended=error])
 	])])

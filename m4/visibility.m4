@@ -71,7 +71,7 @@ AC_DEFUN([SUDO_SYMBOL_VISIBILITY], [
 		_CFLAGS="$CFLAGS"
 		CFLAGS="$CFLAGS $lt_prog_compiler_pic"
 		_LDFLAGS="$LDFLAGS"
-		LDFLAGS="$LDFLAGS -fpic -shared -Wl,--version-script,./conftest.map"
+		LDFLAGS="$LDFLAGS $lt_prog_compiler_pic -shared -Wl,--version-script,./conftest.map"
 		AC_LINK_IFELSE([AC_LANG_PROGRAM([[int foo;]], [[]])],
 		    [sudo_cv_var_gnu_ld_anon_map=yes])
 		CFLAGS="$_CFLAGS"

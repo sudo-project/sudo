@@ -19828,54 +19828,51 @@ fi
 # but is incompatible with the sanitizers/fuzzers.
 # We must set this *before* the library tests.
 #
-if test X"${enable_sanitizer}{enable_fuzzer}" = X"nono"; then
-    case "$host_os" in
-	freebsd*|dragonfly*|openbsd*)
-	    # On FreeBSD and Dragonfly, environ is filled in by the
-	    # dynamic loader so we cannot use -Wl,--no-undefined.
-	    # https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=263265
-	    # OpenBSD shared libraries don't link explicitly with libc
-	    # which results in undefined references errors.
-	    # Ideally we would link a shared object with -Wl,--no-undefined
-	    # and see if it works but this is not easy in a libtool world.
-	    ;;
-	*)
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,--no-undefined" >&5
-printf %s "checking whether the linker accepts -Wl,--no-undefined... " >&6; }
-if test ${ax_cv_check_ldflags___Wl___no_undefined+y}
+if test -n "$GCC" -a X"${enable_sanitizer}${enable_fuzzer}" = X"nono"; then
+    # On FreeBSD and Dragonfly, environ is filled in by the dynamic loader
+    # so -Wl,--no-undefined causes a link error when environ is used.
+    # https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=263265
+    # We use errno because OpenBSD shared libraries don't explicitly
+    # link with libc, which can result in undefined reference errors.
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking the linker accepts -Wl,--no-undefined" >&5
+printf %s "checking the linker accepts -Wl,--no-undefined... " >&6; }
+if test ${sudo_cv_var_ld___no_undefined+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
-  ax_check_save_flags=$LDFLAGS
-  LDFLAGS="$LDFLAGS  -Wl,--no-undefined"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+	    sudo_cv_var_ld___no_undefined=no
+	    _CFLAGS="$CFLAGS"
+	    CFLAGS="$CFLAGS $lt_prog_compiler_pic"
+	    _LDFLAGS="$LDFLAGS"
+	    LDFLAGS="$LDFLAGS $lt_prog_compiler_pic -shared -Wl,--no-undefined"
+	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-
+#include <errno.h>
+extern char **environ;
 int
 main (void)
 {
-
+int ret = ((long)environ & 0xff) + errno; return ret;
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  ax_cv_check_ldflags___Wl___no_undefined=yes
-else case e in #(
-  e) ax_cv_check_ldflags___Wl___no_undefined=no ;;
-esac
+  sudo_cv_var_ld___no_undefined=yes
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
-  LDFLAGS=$ax_check_save_flags ;;
+	    CFLAGS="$_CFLAGS"
+	    LDFLAGS="$_LDFLAGS"
+
+     ;;
 esac
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl___no_undefined" >&5
-printf "%s\n" "$ax_cv_check_ldflags___Wl___no_undefined" >&6; }
-if test x"$ax_cv_check_ldflags___Wl___no_undefined" = xyes
-then :
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_ld___no_undefined" >&5
+printf "%s\n" "$sudo_cv_var_ld___no_undefined" >&6; }
+    if test "$sudo_cv_var_ld___no_undefined" = "yes"; then
 
 if test ${LDFLAGS+y}
 then :
@@ -19910,13 +19907,7 @@ else case e in #(
 esac
 fi
 
-else case e in #(
-  e) : ;;
-esac
-fi
-
-	    ;;
-    esac
+    fi
 fi
 
 #
@@ -32523,7 +32514,7 @@ else case e in #(
 		_CFLAGS="$CFLAGS"
 		CFLAGS="$CFLAGS $lt_prog_compiler_pic"
 		_LDFLAGS="$LDFLAGS"
-		LDFLAGS="$LDFLAGS -fpic -shared -Wl,--version-script,./conftest.map"
+		LDFLAGS="$LDFLAGS $lt_prog_compiler_pic -shared -Wl,--version-script,./conftest.map"
 		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 int foo;
