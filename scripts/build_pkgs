@@ -349,14 +349,18 @@ sub run_job {
     }
 
     # Unpack tarball and run build script.
-    # When cross-building, pass the target system on the command line.
-    my $osversion = "";
+    my $build_args = "";
     if (exists $conf->{"crossbuild"}) {
-	$osversion = "--osversion " . $conf->{"crossbuild"} . " ";
+	# When cross-building, pass the target system on the command line.
+	$build_args .= "--osversion " . $conf->{"crossbuild"} . " ";
+    }
+    if (!$ignore_cache) {
+	# Name of the config.cache file, if using.
+	$build_args .= "--cache-file config.cache ";
     }
 
     $status = run_remote_command($conf,
-	"cd $temporary && ./$build_script_base ${osversion}$tarball_base",
+	"cd $temporary && ./$build_script_base ${build_args}$tarball_base",
 	\*BUILDLOG);
     if ($status != 0) {
 	warn "$platform: build failed on $host\n" unless $exiting;
@@ -364,14 +368,16 @@ sub run_job {
 	goto remove_tmp;
     }
 
-    printf BUILDLOG "copy %s:%s -> %s\n", $host,
-	"$temporary/artifacts/*", $artifacts;
-    $status = copy_from_remote("$temporary/artifacts/\*", $artifacts,
-	$host, \*BUILDLOG, $conf->{"proxy_cmd"});
-    if ($status != 0) {
-	warn "$platform: unable to scp $host:$temporary/artifacts/* $artifacts" unless $exiting;
-	$exit_value = 4;
-	goto remove_tmp;
+    if (!exists $conf->{'omit_artifacts'} || !$conf->{'omit_artifacts'}) {
+	printf BUILDLOG "copy %s:%s -> %s\n", $host,
+	    "$temporary/artifacts/*", $artifacts;
+	$status = copy_from_remote("$temporary/artifacts/\*", $artifacts,
+	    $host, \*BUILDLOG, $conf->{"proxy_cmd"});
+	if ($status != 0) {
+	    warn "$platform: unable to scp $host:$temporary/artifacts/* $artifacts" unless $exiting;
+	    $exit_value = 4;
+	    goto remove_tmp;
+	}
     }
 
     # Update config.cache file if using.
@@ -822,12 +828,22 @@ sub default_build_script {
     open(my $fh, ">", $fname);
     print $fh <<~'EOF';
     #!/bin/sh
-    case "$1" in
-    --osversion)
-        osversion="$2"
-        shift 2
-        ;;
-    esac
+    CONFIGURE_OPTS=
+    while test $# != 0; do
+        case "$1" in
+        --cache-file)
+            CONFIGURE_OPTS="--cache-file=../$2"
+            shift 2
+            ;;
+        --osversion)
+            osversion="$2"
+            shift 2
+            ;;
+        *)
+            break
+            ;;
+            esac
+    done
 
     if [ -z "$1" ] || [ \! -r "$1" ]; then
         echo "No tarball specified"
@@ -850,7 +866,7 @@ sub default_build_script {
         osversion="`./scripts/pp --probe`"
     fi
 
-    ./scripts/mkpkg --osversion="$osversion" || exit 1
+    ./scripts/mkpkg $CONFIGURE_OPTS --osversion="$osversion" || exit 1
     for f in *.rpm *.deb *.bff *.depot *.pkg *.txz ../artifacts; do
         if [ -f "$f" ]; then
             mv "$f" ../artifacts
@@ -1109,6 +1125,11 @@ OS-architecture, for example I<rhel8-x86_64> or I<aix72-powerpc>.
 Each platform supports the following settings:
 
 =over 4
+
+=item omit_artifacts
+
+If set to true, avoid copying any artifacts built for this platform.
+This can be used to build on systems where we don't publish packages.
 
 =item crossbuild
 
