@@ -358,6 +358,9 @@ sub run_job {
 	# Name of the config.cache file, if using.
 	$build_args .= "--cache-file config.cache ";
     }
+    if (exists $conf->{"no_packages"} && $conf->{"no_packages"}) {
+	$build_args .= "--no-packages ";
+    }
 
     $status = run_remote_command($conf,
 	"cd $temporary && ./$build_script_base ${build_args}$tarball_base",
@@ -828,16 +831,20 @@ sub default_build_script {
     open(my $fh, ">", $fname);
     print $fh <<~'EOF';
     #!/bin/sh
-    CONFIGURE_OPTS=
+    configure_opts=
     while test $# != 0; do
         case "$1" in
         --cache-file)
-            CONFIGURE_OPTS="--cache-file=../$2"
+            configure_opts="${configure_opts} --cache-file=../$2"
             shift 2
             ;;
         --osversion)
             osversion="$2"
             shift 2
+            ;;
+        --no-packages)
+            configure_opts="${configure_opts} --build-only"
+            shift
             ;;
         *)
             break
@@ -866,7 +873,7 @@ sub default_build_script {
         osversion="`./scripts/pp --probe`"
     fi
 
-    ./scripts/mkpkg $CONFIGURE_OPTS --osversion="$osversion" || exit 1
+    ./scripts/mkpkg $configure_opts --osversion="$osversion" || exit 1
     for f in *.rpm *.deb *.bff *.depot *.pkg *.txz ../artifacts; do
         if [ -f "$f" ]; then
             mv "$f" ../artifacts

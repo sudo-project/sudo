@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2010-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2010-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 # Build a binary package using polypkg
-# Usage: mkpkg [--debug] [--flavor flavor] [--platform platform] [--osversion ver]
+# Usage: mkpkg [--build-only] [--debug] [--flavor flavor] [--platform platform] [--osversion ver]
 #
 
 # Make sure IFS is set to space, tab, newline in that order.
@@ -28,10 +28,11 @@ nl='
 IFS=" 	$nl"
 
 # Parse arguments
-usage="usage: mkpkg [--debug] [--flavor flavor] [--platform platform] [--osversion ver]"
+usage="usage: mkpkg [--build-only] [--debug] [--flavor flavor] [--platform platform] [--osversion ver]"
 debug=0
 flavor=vanilla
 crossbuild=false
+build_packages=true;
 while test $# -gt 0; do
     case "$1" in
 	--debug)
@@ -80,6 +81,9 @@ while test $# -gt 0; do
 	    crossbuild=true
 	    configure_opts="${configure_opts}${configure_opts+$tab}$1"
 	    ;;
+	--build-only)
+	    build_packages=false
+	    ;;
 	*)
 	    # Pass unknown options to configure
 	    configure_opts="${configure_opts}${configure_opts+$tab}$1"
@@ -91,10 +95,14 @@ done
 scriptdir=`dirname $0`
 configure="${scriptdir}/../configure"
 
-: ${osversion="`$scriptdir/pp --probe`"}
-test -n "$osversion" || exit 1
+: ${osversion="`$scriptdir/pp --probe 2>/dev/null || echo unknown`"}
 osrelease=`echo "$osversion" | sed -e 's/^[^0-9]*//' -e 's/-.*$//'`
 : ${MAKE=make}
+
+if [ $build_packages = true -a $osversion = unknown ]; then
+    echo "unable to determine platform" 1>&2
+    exit 1
+fi
 
 # If using GNU make, set number of jobs
 if ${MAKE} --version 2>&1 | grep GNU >/dev/null; then
@@ -545,7 +553,9 @@ if [ -r Makefile ]; then
 fi
 ${configure} "$@" || exit $?
 ${MAKE} $make_opts || exit $?
-${MAKE} $make_opts PPFLAGS="$PPFLAGS" PPVARS="$PPVARS" package
+if [ $build_packages = true ]; then
+    ${MAKE} $make_opts PPFLAGS="$PPFLAGS" PPVARS="$PPVARS" package
+fi
 exitval=$?
 test $debug -eq 0 && rm -rf destdir
 
