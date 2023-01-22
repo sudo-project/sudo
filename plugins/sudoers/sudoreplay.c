@@ -191,14 +191,6 @@ sudo_noreturn static void usage(void);
     isalnum((unsigned char)(s)[3]) && isalnum((unsigned char)(s)[4]) && \
     isalnum((unsigned char)(s)[5]) && (s)[6] == '\0')
 
-#define IS_IDLOG(s) ( \
-    isalnum((unsigned char)(s)[0]) && isalnum((unsigned char)(s)[1]) && \
-    (s)[2] == '/' && \
-    isalnum((unsigned char)(s)[3]) && isalnum((unsigned char)(s)[4]) && \
-    (s)[5] == '/' && \
-    isalnum((unsigned char)(s)[6]) && isalnum((unsigned char)(s)[7]) && \
-    (s)[8] == '\0')
-
 sudo_dso_public int main(int argc, char *argv[]);
 
 int
@@ -1436,10 +1428,9 @@ static int
 list_session(struct sudo_lbuf *lbuf, char *log_dir, regex_t *re,
     const char *user, const char *tty)
 {
-    char idbuf[7], *idstr, *cp;
     struct eventlog *evlog = NULL;
     const char *timestr;
-    int i, ret = -1;
+    int ret = -1;
     debug_decl(list_session, SUDO_DEBUG_UTIL);
 
     if ((evlog = iolog_parse_loginfo(-1, log_dir)) == NULL)
@@ -1449,86 +1440,17 @@ list_session(struct sudo_lbuf *lbuf, char *log_dir, regex_t *re,
 	    evlog->runuser == NULL) {
 	goto done;
     }
+    evlog->iolog_file = log_dir + strlen(session_dir) + 1;
 
     /* Match on search expression if there is one. */
     if (!STAILQ_EMPTY(&search_expr) && !match_expr(&search_expr, evlog, true))
 	goto done;
 
-    /* Convert from /var/log/sudo-sessions/00/00/01 to 000001 */
-    cp = log_dir + strlen(session_dir) + 1;
-    if (IS_IDLOG(cp)) {
-	idbuf[0] = cp[0];
-	idbuf[1] = cp[1];
-	idbuf[2] = cp[3];
-	idbuf[3] = cp[4];
-	idbuf[4] = cp[6];
-	idbuf[5] = cp[7];
-	idbuf[6] = '\0';
-	idstr = idbuf;
-    } else {
-	/* Not an id, use as-is. */
-	idstr = cp;
-    }
-    /* XXX - print lines + cols? */
     timestr = get_timestr(evlog->submit_time.tv_sec, 1);
     sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL, "%s : %s : ",
 	timestr ? timestr : "invalid date", evlog->submituser);
-    if (evlog->submithost != NULL) {
-	sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL, "HOST=%s ; ",
-	    evlog->submithost);
-    }
-    if (evlog->ttyname != NULL) {
-	sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL, "TTY=%s ; ",
-	    evlog->ttyname);
-    }
-    if (evlog->runchroot != NULL) {
-	sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL, "CHROOT=%s ; ",
-	    evlog->runchroot);
-    }
-    if (evlog->runcwd != NULL || evlog->cwd != NULL) {
-	sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL, "CWD=%s ; ",
-	    evlog->runcwd ? evlog->runcwd : evlog->cwd);
-    }
-    sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL, "USER=%s ; ", evlog->runuser);
-    if (evlog->rungroup != NULL) {
-	sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL, "GROUP=%s ; ",
-	    evlog->rungroup);
-    }
-    sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL, "TSID=%s ; ", idstr);
 
-    /* 
-     * If we have both command and argv from info.json we can escape
-     * blanks in the the command and arguments.  If all we have is a
-     * single string containing both the command and arguments we cannot.
-     */
-    if (evlog->argv != NULL) {
-	/* Command plus argv from the info.json file. */
-	sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL|LBUF_ESC_BLANK,
-	    "COMMAND=%s", evlog->command);
-	if (evlog->argv[0] != NULL) {
-	    for (i = 1; evlog->argv[i] != NULL; i++) {
-		sudo_lbuf_append(lbuf, " ");
-		if (strchr(evlog->argv[i], ' ') != NULL) {
-		    /* Wrap args containing spaces in single quotes. */
-		    sudo_lbuf_append(lbuf, "'");
-		    sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL|LBUF_ESC_QUOTE,
-			"%s", evlog->argv[i]);
-		    sudo_lbuf_append(lbuf, "'");
-		} else {
-		    /* Escape quotes here too for consistency. */
-		    sudo_lbuf_append_esc(lbuf,
-			LBUF_ESC_CNTRL|LBUF_ESC_BLANK|LBUF_ESC_QUOTE,
-			"%s", evlog->argv[i]);
-		}
-	    }
-	}
-    } else {
-	/* Single string from the legacy info file. */
-	sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL, "COMMAND=%s",
-	    evlog->command);
-    }
-
-    if (!sudo_lbuf_error(lbuf)) {
+    if (eventlog_store_sudo(EVLOG_ACCEPT, evlog, lbuf)) {
 	puts(lbuf->buf);
 	ret = 0;
     }

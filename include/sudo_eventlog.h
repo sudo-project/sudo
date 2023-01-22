@@ -47,9 +47,10 @@ enum eventlog_format {
 };
 
 /* Eventlog flag values. */
-#define EVLOG_RAW	0x01
-#define EVLOG_MAIL	0x02
-#define EVLOG_MAIL_ONLY	0x04
+#define EVLOG_RAW	0x01	/* only include message and errstr */
+#define EVLOG_MAIL	0x02	/* mail the log message too */
+#define EVLOG_MAIL_ONLY	0x04	/* only mail the message, no other logging */
+#define EVLOG_CWD	0x08	/* log cwd if no runcwd and use CWD, not PWD */
 
 /*
  * Maximum number of characters to log per entry.  The syslogger
@@ -126,6 +127,7 @@ struct eventlog {
 
 /* Callback from eventlog code to write log info */
 struct json_container;
+struct sudo_lbuf;
 typedef bool (*eventlog_json_callback_t)(struct json_container *, void *);
 
 bool eventlog_accept(const struct eventlog *evlog, int flags, eventlog_json_callback_t info_cb, void *info);
@@ -133,6 +135,7 @@ bool eventlog_exit(const struct eventlog *evlog, int flags);
 bool eventlog_alert(const struct eventlog *evlog, int flags, struct timespec *alert_time, const char *reason, const char *errstr);
 bool eventlog_reject(const struct eventlog *evlog, int flags, const char *reason, eventlog_json_callback_t info_cb, void *info);
 bool eventlog_store_json(struct json_container *jsonc, const struct eventlog *evlog);
+bool eventlog_store_sudo(int event_type, const struct eventlog *evlog, struct sudo_lbuf *lbuf);
 size_t eventlog_writeln(FILE *fp, char *line, size_t len, size_t maxlen);
 void eventlog_free(struct eventlog *evlog);
 void eventlog_set_type(int type);
