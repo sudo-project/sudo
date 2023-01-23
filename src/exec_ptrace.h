@@ -22,14 +22,21 @@
 #include <sys/user.h>
 #include <asm/unistd.h>
 #include <linux/audit.h>
-#include <linux/elf.h>
 #include <linux/ptrace.h>
 #include <linux/seccomp.h>
 #include <linux/filter.h>
 
+/* Older kernel headers may be missing some EM_* defines in linux/elf.h. */
+#include <elf.h>
+
 /* Older systems may not support execveat(2). */
 #ifndef __NR_execveat
 # define __NR_execveat	-1
+#endif
+
+/* In case userland elf.h doesn't define NT_ARM_SYSTEM_CALL. */
+#if defined(__aarch64__) && !defined(NT_ARM_SYSTEM_CALL)
+# define NT_ARM_SYSTEM_CALL 0x404
 #endif
 
 /* In case userland doesn't define __X32_SYSCALL_BIT. */
