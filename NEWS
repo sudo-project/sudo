@@ -68,6 +68,25 @@ What's new in Sudo 1.9.13
    and sudoers files, which do not suffer from race conditions.
    The sudo.conf "developer_mode" setting is no longer used.
 
+ * Control characters in sudo log messages and "sudoreplay -l"
+   output are now escaped in octal format.  Space characters in the
+   command path are also escaped.  Command line arguments that
+   contain spaces are surrounded by single quotes and any literal
+   single quote or backslash characters are escaped with a backslash.
+   This makes it possible to distinguish multiple command line
+   arguments from a single argument that contains spaces.
+
+ * Improved support for DragonFly BSD which uses a different struct
+   procinfo than either FreeBSD or 4.4BSD.
+
+ * Fixed a compilation error on Linux arm systems running older
+   kernels that may not define EM_ARM in linux/elf-em.h.
+   GitHub issue #232.
+
+ * Fixed a compilation error when LDFLAGS contains -Wl,--no-undefined.
+   Sudo will now link using -Wl,--no-undefined by default if possible.
+   GitHub issue #234.
+
 What's new in Sudo 1.9.12p2
 
  * Fixed a compilation error on Linux/aarch64.  GitHub issue #197.
