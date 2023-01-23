@@ -76,7 +76,11 @@ static struct regex_test test_data[] = {
     { "ab{,256}", false },
     { "ab{256,}", false },
     { "ab{1,256}", false },
+    { "ab{1,\\256}", false },
+    { "ab{1,2\\56}", false },
     { "ab{256,1}", false },
+    { "ab{\\256,1}", false },
+    { "ab{2\\56,1}", false },
     { NULL }
 };
 
