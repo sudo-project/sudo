@@ -971,8 +971,8 @@ static char *
 get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
     int *argc_out, char ***argv_out, int *envc_out, char ***envp_out)
 {
-    char *pathname, **argv, **envp, *argbuf = NULL;
-    unsigned long path_addr, argv_addr, envp_addr;
+    char *argbuf, **argv, **envp, *pathname = NULL;
+    unsigned long argv_addr, envp_addr, path_addr;
     size_t bufsize, len, off = 0;
     int i, argc, envc = 0;
     debug_decl(get_execve_info, SUDO_DEBUG_EXEC);
@@ -992,11 +992,8 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
 	"%s: %d: path 0x%lx, argv 0x%lx, envp 0x%lx", __func__,
 	(int)pid, path_addr, argv_addr, envp_addr);
 
-    /* Read the pathname. */
-    if (path_addr == 0) {
-	/* execve(2) will fail with EINVAL */
-	pathname = NULL;
-    } else {
+    /* Read the pathname, if not NULL. */
+    if (path_addr != 0) {
 	len = ptrace_read_string(pid, path_addr, argbuf, bufsize);
 	if (len == (size_t)-1) {
 	    sudo_debug_printf(
@@ -1004,7 +1001,7 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
 		"unable to read execve pathname for process %d", (int)pid);
 	    goto bad;
 	}
-	pathname = argbuf;
+	/* Defer setting pathname until after all reallocations are done. */
 	off = len;
     }
 
@@ -1037,6 +1034,10 @@ get_execve_info(pid_t pid, struct sudo_ptrace_regs *regs, char **pathname_out,
 	    "unable to read execve envp for process %d", (int)pid);
 	goto bad;
     }
+
+    /* Set pathname now that argbuf has been fully allocated. */
+    if (path_addr != 0)
+	pathname = argbuf;
 
     /* Convert offsets in argv and envp to pointers. */
     argv = (char **)(argbuf + (unsigned long)argv);
