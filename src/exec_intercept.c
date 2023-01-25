@@ -407,7 +407,7 @@ intercept_check_policy(const char *command, int argc, char **argv, int envc,
      */
     if (stat(command, &sb) == -1) {
 	closure->errstr = NULL;
-	closure->state = POLICY_REJECT;
+	closure->state = POLICY_ERROR;
 	goto done;
     }
 

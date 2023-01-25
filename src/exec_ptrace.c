@@ -1920,9 +1920,12 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	    }
 	}
 	break;
-    default:
+    case POLICY_REJECT:
 	/* If rejected, fake the syscall and set return to EACCES */
-	ptrace_fail_syscall(pid, &regs, EACCES);
+	errno = EACCES;
+	FALLTHROUGH;
+    default:
+	ptrace_fail_syscall(pid, &regs, errno);
 	break;
     }
 
