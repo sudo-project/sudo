@@ -315,7 +315,7 @@ still allow people to get their work done."
 %endif
 
 %depend [deb]
-	libc6, libpam0g, libpam-modules, zlib1g, libselinux1
+	libc6, libpam0g, libpam-modules, zlib1g, libapparmor1
 
 %fixup [deb]
 	# Add Conflicts, Replaces headers and add libldap dependency as needed.
