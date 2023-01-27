@@ -87,6 +87,10 @@ What's new in Sudo 1.9.13
    Sudo will now link using -Wl,--no-undefined by default if possible.
    GitHub issue #234.
 
+ * Fixed a bug executing a command with a very long argument vector
+   when "log_subcmds" or "intercept" is enabled on a system where
+   "intercept_type" is set to "trace".  GitHub issue #194.
+
 What's new in Sudo 1.9.12p2
 
  * Fixed a compilation error on Linux/aarch64.  GitHub issue #197.
