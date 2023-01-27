@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2023 One Identity LLC. ALL RIGHTS RESERVED
-pp_revision="20230120"
+pp_revision="20230127"
  # Copyright 2018 One Identity LLC.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -5569,6 +5569,8 @@ pp_rpm_detect_distro () {
        pp_rpm_distro=`sed -n \
          -e 's/^Red Hat Linux.*release \([0-9][0-9\.]*\).*/rh\1/p' \
          -e 's/^Red Hat Enterprise Linux.*release \([0-9][0-9\.]*\).*/rhel\1/p' \
+         -e 's/^Rocky Linux.*release \([0-9][0-9\.]*\).*/rocky\1/p' \
+         -e 's/^AlmaLinux.*release \([0-9][0-9\.]*\).*/alma\1/p' \
          -e 's/^CentOS.*release \([0-9][0-9\.]*\).*/centos\1/p' \
        /etc/redhat-release`
     elif test -f /etc/SuSE-release; then

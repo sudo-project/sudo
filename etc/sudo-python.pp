@@ -47,7 +47,7 @@
 
 	# For RedHat the doc dir is expected to include version and release
 	case "$pp_rpm_distro" in
-	centos*|rhel*|f[0-9]*)
+	alma*|centos*|rhel*|rocky*|f[0-9]*)
 		docdir="${docdir}-${pp_rpm_version}-${pp_rpm_release}"
 		exampledir="${docdir}/examples"
 		;;
@@ -87,7 +87,7 @@
 	# Add distro info to release
 	osrelease=`echo "$pp_rpm_distro" | sed -e 's/^[^0-9]*\([0-9]\{1,2\}\).*/\1/'`
 	case "$pp_rpm_distro" in
-	centos*|rhel*|f[0-9]*)
+	alma*|centos*|rhel*|rocky*|f[0-9]*)
 		# CentOS Stream has a single-digit version
 		if test $osrelease -lt 10; then
 		    osrelease="${osrelease}0"
