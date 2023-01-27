@@ -33757,7 +33757,7 @@ fi
 	fi
 
 	# Linker-specific hardening flags.
-	if test a X"$with_gnu_ld" = X"yes"; then
+	if test X"$with_gnu_ld" = X"yes"; then
 	    # GNU ld, and similar (gold, lld, etc).
 	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-z,relro" >&5
 printf %s "checking whether the linker accepts -Wl,-z,relro... " >&6; }

@@ -115,7 +115,7 @@ AC_DEFUN([SUDO_CHECK_HARDENING], [
 	fi
 
 	# Linker-specific hardening flags.
-	if test a X"$with_gnu_ld" = X"yes"; then
+	if test X"$with_gnu_ld" = X"yes"; then
 	    # GNU ld, and similar (gold, lld, etc).
 	    AX_CHECK_LINK_FLAG([-Wl,-z,relro], [AX_APPEND_FLAG([-Wl,-z,relro], [HARDENING_LDFLAGS])])
 	    AX_CHECK_LINK_FLAG([-Wl,-z,now], [AX_APPEND_FLAG([-Wl,-z,now], [HARDENING_LDFLAGS])])
