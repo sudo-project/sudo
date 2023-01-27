@@ -1328,7 +1328,7 @@
 /* Define to 1 if you use GNU stow packaging. */
 #undef USE_STOW
 
-/* Enable extensions on AIX 3, Interix.  */
+/* Enable extensions on AIX, Interix, z/OS.  */
 #ifndef _ALL_SOURCE
 # undef _ALL_SOURCE
 #endif
