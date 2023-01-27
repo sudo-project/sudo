@@ -113,10 +113,10 @@ if ${MAKE} --version 2>&1 | grep GNU >/dev/null; then
 	    NJOBS=`sysctl -n hw.ncpu`
 	    ;;
 	Linux)
-	    if [ -r /proc/cpuinfo ]; then
-		for c in `sed -n 's/^cpu cores[	 ]*: *//p' /proc/cpuinfo`; do
-		    NJOBS=`expr $NJOBS + $c`
-		done
+	    if [ -x /usr/bin/nproc ]; then
+		NJOBS=`/usr/bin/nproc`
+	    elif [ -r /proc/cpuinfo ]; then
+		NJOBS=`grep ^processor /proc/cpuinfo | wc -l`
 	    fi
 	    ;;
 	SunOS)
