@@ -144,16 +144,18 @@ $SIG{__DIE__} = \&die_hook;
 # Prevent macOS from going to sleep while we are running.
 system("/usr/bin/caffeinate -i -w $main_pid") if -x "/usr/bin/caffeinate";
 
-# Keep track of which vmids belong to which VM server.
+# Keep track of which platforms belong to which VM server.
 my %vm_servers;
 my %active_hosts;
 foreach my $platform (@platforms) {
-    if (exists $configs->{$platform}->{'vm_host'} && exists $configs->{$platform}->{'vmid'}) {
-	my $vm_host = $configs->{$platform}->{'vm_host'};
-	push(@{$vm_servers{$vm_host}}, $configs->{$platform}->{'vmid'});
+    my $conf = $configs->{$platform};
+
+    if (exists $conf->{'vm_host'}) {
+	my $vm_host = $conf->{'vm_host'};
+	push(@{$vm_servers{$vm_host}}, $conf);
     }
     # Track the number of times an ssh host is used
-    $active_hosts{$configs->{$platform}->{'ssh_host'}}++;
+    $active_hosts{$conf->{'ssh_host'}}++;
 }
 
 # Open persistent ssh connections to VM servers
@@ -163,14 +165,14 @@ foreach my $server (keys %vm_servers) {
 
 # Power on VMs as needed
 foreach my $vm_host (keys %vm_servers) {
-    my $ids = $vm_servers{$vm_host};
+    my $vm_confs = $vm_servers{$vm_host};
     delete $vm_servers{$vm_host};
-    while (my $vmid = pop @{$ids}) {
-	if (!vm_is_running($vm_host, $vmid)) {
-	    if (vm_poweron($vm_host, $vmid)) {
-		push(@{$vm_servers{$vm_host}}, $vmid);
+    while (my $conf = pop @{$vm_confs}) {
+	if (!vm_is_running($vm_host, $conf)) {
+	    if (vm_poweron($vm_host, $conf)) {
+		push(@{$vm_servers{$vm_host}}, $conf);
 	    } else {
-		warn "unable to start VM $vm_host, ID $vmid";
+		warn "unable to start VM " . $conf->{'ssh_host'} . " on $vm_host";
 	    }
 	}
     }
@@ -467,15 +469,14 @@ sub reaper {
 		# Close persistent connection if no longer needed
 		close_persistent_connection($host);
 
-		if (exists $conf->{'vm_host'} && exists $conf->{'vmid'}) {
+		if (exists $conf->{'vm_host'}) {
 		    my $vm_host = $conf->{'vm_host'};
-		    my $vmid = $conf->{'vmid'};
 		    if (exists $vm_servers{$vm_host}) {
 			for (my $i = 0; $i < scalar @{$vm_servers{$vm_host}}; $i++) {
 			    # Shut down now-unused VM and remove from list.
-			    if (${$vm_servers{$vm_host}}[$i] eq $vmid) {
+			    if (${$vm_servers{$vm_host}}[$i] eq $conf) {
 				splice(@{$vm_servers{$vm_host}}, $i, 1);
-				vm_shutdown($vm_host, $vmid);
+				vm_shutdown($vm_host, $conf);
 			    }
 			}
 		    }
@@ -720,10 +721,10 @@ sub close_persistent_connections {
 
 sub vm_is_running {
     # vim-cmd vmsvc/power.getstate VMID
-    my ($host, $vmid) = @_;
+    my ($host, $conf) = @_;
     my $outbuf;
 
-    my @cmdline = ssh_cmdline($host, "vim-cmd vmsvc/power.getstate $vmid");
+    my @cmdline = ssh_cmdline($host, "vim-cmd vmsvc/power.getstate " . $conf->{'vmid'});
     run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
 
     $outbuf =~ /Powered on/;
@@ -731,11 +732,11 @@ sub vm_is_running {
 
 sub vm_poweron {
     # vim-cmd vmsvc/power.on VMID
-    my ($host, $vmid) = @_;
+    my ($host, $conf) = @_;
     my $outbuf;
 
-    print "Powering on VM $vmid on $host\n" if $verbose;
-    my @cmdline = ssh_cmdline($host, "vim-cmd vmsvc/power.on $vmid");
+    printf("Powering on VM %s on %s\n", $conf->{'ssh_host'}, $host) if $verbose;
+    my @cmdline = ssh_cmdline($host, "vim-cmd vmsvc/power.on " . $conf->{'vmid'});
     run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
 
     $outbuf =~ /Powering on VM/;
@@ -743,16 +744,24 @@ sub vm_poweron {
 
 sub vm_shutdown {
     # vim-cmd vmsvc/power.shutdown VMID
-    my ($host, $vmid) = @_;
+    my ($host, $conf) = @_;
+    my $ssh_host = $conf->{'ssh_host'};
     my $outbuf;
 
-    print "Shutting down VM $vmid on $host\n" if $verbose;
-    my @cmdline = ssh_cmdline($host, "vim-cmd vmsvc/power.shutdown $vmid");
+    printf("Shutting down VM %s on %s\n", $ssh_host, $host) if $verbose;
+    my @cmdline = ssh_cmdline($host, "vim-cmd vmsvc/power.shutdown " . $conf->{'vmid'});
     run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
 
     # Check for, e.g. vim.fault.ToolsUnavailable or vim.fault.InvalidPowerState
     if ($outbuf =~ /vim\.fault\.ToolsUnavailable/) {
-	warn "unable to shut down $vmid @ $host: VM tools not installed\n";
+	# VM tools not installed, login directly to shut down
+	if (exists $conf->{'shutdown'}) {
+	    # login directly to shut down
+	    @cmdline = ssh_cmdline($ssh_host, $conf->{'shutdown'});
+	    run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
+	} else {
+	    warn "unable to shut down $ssh_host on $host: VM tools not installed\n";
+	}
     } elsif ($outbuf =~ /vim\.fault\.InvalidPowerState/) {
 	# Not powered on, ignore the error
 	$outbuf = "";
@@ -958,9 +967,9 @@ END {
     return unless $$ == $main_pid;
 
     # Power down VMs cleanly if any are still running
-    while (my ($vm_host, $ids) = each %vm_servers) {
-	foreach my $vmid (@{$ids}) {
-	    vm_shutdown($vm_host, $vmid);
+    while (my ($vm_host, $configs) = each %vm_servers) {
+	foreach my $conf (@{$configs}) {
+	    vm_shutdown($vm_host, $conf);
 	}
     }
 
@@ -1150,6 +1159,11 @@ The proxy command to pass to ssh via the I<ProxyCommand> option.
 =item schroot
 
 The name of the I<schroot> on I<ssh_host> to run the build inside.
+
+=item shutdown
+
+A command to run to shut down a virtual machine when the OS doesn't
+support performing a graceful VM shutdown.
 
 =item ssh_host
 
