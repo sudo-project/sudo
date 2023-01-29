@@ -399,10 +399,10 @@ set_var_disable_coredump(const char *strval, const char *conf_file,
     if (val == -1) {
 	sudo_warnx(U_("invalid value for %s \"%s\" in %s, line %u"),
 	    "disable_coredump", strval, conf_file, lineno);
-	debug_return_int(0);
+	debug_return_int(false);
     }
     sudo_conf_data.settings.disable_coredump = val;
-    debug_return_int(1);
+    debug_return_int(true);
 }
 
 static int
@@ -420,9 +420,9 @@ set_var_group_source(const char *strval, const char *conf_file,
     } else {
 	sudo_warnx(U_("unsupported group source \"%s\" in %s, line %u"), strval,
 	    conf_file, lineno);
-	debug_return_int(0);
+	debug_return_int(false);
     }
-    debug_return_int(1);
+    debug_return_int(true);
 }
 
 static int
@@ -436,10 +436,10 @@ set_var_max_groups(const char *strval, const char *conf_file,
     if (max_groups <= 0) {
 	sudo_warnx(U_("invalid max groups \"%s\" in %s, line %u"), strval,
 	    conf_file, lineno);
-	debug_return_int(0);
+	debug_return_int(false);
     }
     sudo_conf_data.settings.max_groups = max_groups;
-    debug_return_int(1);
+    debug_return_int(true);
 }
 
 static int
@@ -452,10 +452,10 @@ set_var_probe_interfaces(const char *strval, const char *conf_file,
     if (val == -1) {
 	sudo_warnx(U_("invalid value for %s \"%s\" in %s, line %u"),
 	    "probe_interfaces", strval, conf_file, lineno);
-	debug_return_int(0);
+	debug_return_int(false);
     }
     sudo_conf_data.settings.probe_interfaces = val;
-    debug_return_int(1);
+    debug_return_int(true);
 }
 
 const char *
