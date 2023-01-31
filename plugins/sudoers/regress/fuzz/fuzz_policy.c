@@ -177,6 +177,10 @@ fuzz_hook_stub(struct sudo_hook *hook)
  * can look up "localhost" and returns an error for anything else.
  */
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+/* Avoid compilation errors if getaddrinfo() or freeaddrinfo() are macros. */
+# undef getaddrinfo
+# undef freeaddrinfo
+
 int
 # ifdef HAVE_GETADDRINFO
 getaddrinfo(
