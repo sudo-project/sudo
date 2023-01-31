@@ -27654,6 +27654,65 @@ case "$enable_zlib" in
 	;;
 esac
 
+ac_fn_check_decl "$LINENO" "NSIG" "ac_cv_have_decl_NSIG" "
+$ac_includes_default
+#include <signal.h>
+
+" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl_NSIG" = xyes
+then :
+  ac_have_decl=1
+else case e in #(
+  e) ac_have_decl=0 ;;
+esac
+fi
+printf "%s\n" "#define HAVE_DECL_NSIG $ac_have_decl" >>confdefs.h
+if test $ac_have_decl = 1
+then :
+
+else case e in #(
+  e)
+    ac_fn_check_decl "$LINENO" "_NSIG" "ac_cv_have_decl__NSIG" "
+$ac_includes_default
+#include <signal.h>
+
+" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl__NSIG" = xyes
+then :
+  ac_have_decl=1
+else case e in #(
+  e) ac_have_decl=0 ;;
+esac
+fi
+printf "%s\n" "#define HAVE_DECL__NSIG $ac_have_decl" >>confdefs.h
+if test $ac_have_decl = 1
+then :
+
+else case e in #(
+  e)
+	ac_fn_check_decl "$LINENO" "__NSIG" "ac_cv_have_decl___NSIG" "
+$ac_includes_default
+#include <signal.h>
+
+" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl___NSIG" = xyes
+then :
+  ac_have_decl=1
+else case e in #(
+  e) ac_have_decl=0 ;;
+esac
+fi
+printf "%s\n" "#define HAVE_DECL___NSIG $ac_have_decl" >>confdefs.h
+
+     ;;
+esac
+fi
+
+ ;;
+esac
+fi
+
+
 ac_fn_check_decl "$LINENO" "errno" "ac_cv_have_decl_errno" "
 $ac_includes_default
 #include <errno.h>

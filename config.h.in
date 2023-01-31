@@ -155,6 +155,10 @@
    don't. */
 #undef HAVE_DECL_LLONG_MIN
 
+/* Define to 1 if you have the declaration of 'NSIG', and to 0 if you don't.
+   */
+#undef HAVE_DECL_NSIG
+
 /* Define to 1 if you have the declaration of 'PATH_MAX', and to 0 if you
    don't. */
 #undef HAVE_DECL_PATH_MAX
@@ -231,6 +235,10 @@
    don't. */
 #undef HAVE_DECL__INNETGR
 
+/* Define to 1 if you have the declaration of '_NSIG', and to 0 if you don't.
+   */
+#undef HAVE_DECL__NSIG
+
 /* Define to 1 if you have the declaration of '_POSIX_PATH_MAX', and to 0 if
    you don't. */
 #undef HAVE_DECL__POSIX_PATH_MAX
@@ -242,6 +250,10 @@
 /* Define to 1 if you have the declaration of '_sys_signame', and to 0 if you
    don't. */
 #undef HAVE_DECL__SYS_SIGNAME
+
+/* Define to 1 if you have the declaration of '__NSIG', and to 0 if you don't.
+   */
+#undef HAVE_DECL___NSIG
 
 /* Define to 1 if you have the 'devname' function. */
 #undef HAVE_DEVNAME

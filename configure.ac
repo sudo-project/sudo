@@ -3283,6 +3283,24 @@ case "$enable_zlib" in
 esac
 
 dnl
+dnl Check for NSIG, _NSIG or __NSIG declarations in signal.h
+dnl
+AC_CHECK_DECLS([NSIG], [], [
+    AC_CHECK_DECLS([_NSIG], [], [
+	AC_CHECK_DECLS([__NSIG], [], [], [
+AC_INCLUDES_DEFAULT
+#include <signal.h>
+	])
+    ], [
+AC_INCLUDES_DEFAULT
+#include <signal.h>
+    ])
+], [
+AC_INCLUDES_DEFAULT
+#include <signal.h>
+])
+
+dnl
 dnl Check for errno declaration in errno.h
 dnl
 AC_CHECK_DECLS([errno], [], [], [

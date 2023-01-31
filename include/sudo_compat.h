@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2008, 2009-2022
+ * Copyright (c) 1996, 1998-2005, 2008, 2009-2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -205,10 +205,10 @@ extern int errno;
 #endif /* !HAVE_DECL_ERRNO */
 
 /* Not all systems define NSIG in signal.h */
-#if !defined(NSIG)
-# if defined(_NSIG)
+#if !defined(HAVE_DECL_NSIG) || !HAVE_DECL_NSIG
+# if defined(HAVE_DECL__NSIG) && HAVE_DECL__NSIG
 #  define NSIG _NSIG
-# elif defined(__NSIG)
+# elif defined(HAVE_DECL___NSIG) && HAVE_DECL___NSIG
 #  define NSIG __NSIG
 # else
 #  define NSIG 64
