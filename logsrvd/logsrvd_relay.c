@@ -347,9 +347,11 @@ connect_relay_next(struct connection_closure *closure)
     case AF_INET:
 	addr = (char *)&relay->sa_un.sin.sin_addr;
 	break;
+#ifdef HAVE_STRUCT_IN6_ADDR
     case AF_INET6:
 	addr = (char *)&relay->sa_un.sin6.sin6_addr;
 	break;
+#endif
     default:
 	errno = EAFNOSUPPORT;
 	sudo_warn("connect");

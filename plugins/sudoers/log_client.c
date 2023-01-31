@@ -504,9 +504,11 @@ connect_server(const char *host, const char *port, bool tls,
 	case AF_INET:
 	    addr = (char *)&((struct sockaddr_in *)res->ai_addr)->sin_addr;
 	    break;
+#ifdef HAVE_STRUCT_IN6_ADDR
 	case AF_INET6:
 	    addr = (char *)&((struct sockaddr_in6 *)res->ai_addr)->sin6_addr;
 	    break;
+#endif
 	default:
             cause = "ai_family";
 	    save_errno = EAFNOSUPPORT;

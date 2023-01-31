@@ -1415,7 +1415,7 @@ new_connection(int sock, bool tls, const union sockaddr_union *sa_un,
     if (sa_un->sa.sa_family == AF_INET) {
         inet_ntop(AF_INET, &sa_un->sin.sin_addr, closure->ipaddr,
             sizeof(closure->ipaddr));
-#if defined(HAVE_STRUCT_IN6_ADDR)
+#ifdef HAVE_STRUCT_IN6_ADDR
     } else if (sa_un->sa.sa_family == AF_INET6) {
         inet_ntop(AF_INET6, &sa_un->sin6.sin6_addr, closure->ipaddr,
             sizeof(closure->ipaddr));
@@ -1675,9 +1675,11 @@ server_dump_stats(void)
 	case AF_INET:
 	    inet_ntop(AF_INET, &sa_un->sin.sin_addr, ipaddr, sizeof(ipaddr));
 	    break;
+#ifdef HAVE_STRUCT_IN6_ADDR
 	case AF_INET6:
 	    inet_ntop(AF_INET6, &sa_un->sin6.sin6_addr, ipaddr, sizeof(ipaddr));
 	    break;
+#endif /* HAVE_STRUCT_IN6_ADDR */
 	default:
 	    (void)strlcpy(ipaddr, "[unknown]", sizeof(ipaddr));
 	    break;
