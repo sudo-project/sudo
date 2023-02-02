@@ -73,7 +73,7 @@ pty_cleanup(void)
 {
     debug_decl(cleanup, SUDO_DEBUG_EXEC);
 
-    if (io_fds[SFD_USERTTY] != -1)
+    if (ttymode != TERM_COOKED)
 	sudo_term_restore(io_fds[SFD_USERTTY], false);
     if (utmp_user != NULL)
 	utmp_logout(ptyname, 0);
@@ -482,7 +482,7 @@ write_callback(int fd, int what, void *v)
  * We already closed the follower so reads from the leader will not block.
  */
 static void
-pty_finish(struct command_status *cstat)
+pty_finish(struct exec_closure *ec, struct command_status *cstat)
 {
     int flags;
     debug_decl(pty_finish, SUDO_DEBUG_EXEC);
@@ -499,8 +499,12 @@ pty_finish(struct command_status *cstat)
     free_io_bufs();
 
     /* Restore terminal settings. */
-    if (io_fds[SFD_USERTTY] != -1)
-	sudo_term_restore(io_fds[SFD_USERTTY], false);
+    if (ttymode != TERM_COOKED) {
+	/* Only restore the terminal if sudo is the foreground process. */
+	const pid_t tcpgrp = tcgetpgrp(io_fds[SFD_USERTTY]);
+	if (tcpgrp == ec->ppgrp)
+	    sudo_term_restore(io_fds[SFD_USERTTY], false);
+    }
 
     /* Update utmp */
     if (utmp_user != NULL)
@@ -1325,7 +1329,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     } while (evloop_retries-- > 0);
 
     /* Flush any remaining output, free I/O bufs and events, do logout. */
-    pty_finish(cstat);
+    pty_finish(&ec, cstat);
 
     /* Free things up. */
     free_exec_closure(&ec);
