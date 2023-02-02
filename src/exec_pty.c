@@ -865,12 +865,13 @@ fwdchannel_cb(int sock, int what, void *v)
  */
 static void
 fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
-    struct command_details *details, pid_t ppgrp, int backchannel)
+    struct command_details *details, pid_t sudo_pid, pid_t ppgrp,
+    int backchannel)
 {
     debug_decl(fill_exec_closure, SUDO_DEBUG_EXEC);
 
     /* Fill in the non-event part of the closure. */
-    ec->sudo_pid = getpid();
+    ec->sudo_pid = sudo_pid;
     ec->ppgrp = ppgrp;
     ec->cmnd_pid = -1;
     ec->cstat = cstat;
@@ -996,7 +997,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     sigset_t set, oset;
     struct sigaction sa;
     struct stat sb;
-    pid_t ppgrp;
+    pid_t ppgrp, sudo_pid;
     debug_decl(exec_pty, SUDO_DEBUG_EXEC);
 
     /*
@@ -1051,6 +1052,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
      */
     init_ttyblock();
     ppgrp = getpgrp();	/* parent's pgrp, so child can signal us */
+    sudo_pid = getpid();
 
     /* Determine whether any of std{in,out,err} should be logged. */
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
@@ -1111,6 +1113,16 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	    io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
 		log_stdin, read_callback, write_callback, &ec, &iobufs);
 	    io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
+	}
+
+	if (foreground && ppgrp != sudo_pid) {
+	    /*
+	     * If sudo is not the process group leader and stdin is not
+	     * a tty we may be running as a background job via a shell
+	     * script.  Start the command in the background to avoid
+	     * changing the terminal mode from a background process.
+	     */
+	    SET(details->flags, CD_EXEC_BG);
 	}
     }
     if (io_fds[SFD_STDOUT] == -1 || !isatty(STDOUT_FILENO)) {
@@ -1258,7 +1270,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
      * Fill in exec closure, allocate event base, signal events and
      * the backchannel event.
      */
-    fill_exec_closure(&ec, cstat, details, ppgrp, sv[0]);
+    fill_exec_closure(&ec, cstat, details, sudo_pid, ppgrp, sv[0]);
 
     /* Create event and closure for intercept mode. */
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
