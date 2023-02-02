@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -224,13 +224,24 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 	    if (sudo_sigaction(signo, &sa, &osa) != 0)
 		sudo_warn(U_("unable to set handler for signal %d"), signo);
 	}
-	sudo_debug_printf(SUDO_DEBUG_INFO, "kill parent SIG%s", signame);
-	if (ec->ppgrp == ec->sudo_pid) {
-	    if (killpg(ec->ppgrp, signo) != 0)
-		sudo_warn("killpg(%d, SIG%s)", (int)ec->ppgrp, signame);
-	} else {
-	    if (kill(ec->sudo_pid, signo) != 0)
-		sudo_warn("kill(%d, SIG%s)", (int)ec->sudo_pid, signame);
+	/*
+	 * We stop sudo's process group, even if sudo is not the process
+	 * group leader.  If we only send the signal to sudo itself,
+	 * the shell will not notice if it is not in monitor mode.
+	 * This can happen when sudo is run from a shell script, for
+	 * example.  In this case we need to signal the shell itself.
+	 * If the process group leader is no longer present, we must kill
+	 * the command since there will be no one to resume us.
+	 */
+	sudo_debug_printf(SUDO_DEBUG_INFO, "killpg(%d, SIG%s) [parent]",
+	    (int)ec->ppgrp, signame);
+	if ((ec->ppgrp != ec->sudo_pid && kill(ec->ppgrp, 0) == -1) ||
+		killpg(ec->ppgrp, signo) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR,
+		"no parent to suspend, terminating command.");
+	    terminate_command(ec->cmnd_pid, true);
+	    ec->cmnd_pid = -1;
+	    break;
 	}
 
 	/* Log the resume event. */
@@ -1073,6 +1084,8 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 
 	/* Are we the foreground process? */
 	foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ppgrp;
+	sudo_debug_printf(SUDO_DEBUG_INFO, "sudo is running in the %s",
+	    foreground ? "foreground" : "background");
     }
 
     /*
