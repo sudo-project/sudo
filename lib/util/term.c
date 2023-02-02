@@ -115,6 +115,7 @@ tcsetattr_nobg(int fd, int flags, struct termios *tp)
 {
     struct sigaction sa, osa;
     int rc;
+    debug_decl(tcsetattr_nobg, SUDO_DEBUG_UTIL);
 
     /*
      * If we receive SIGTTOU from tcsetattr() it means we are
@@ -131,7 +132,7 @@ tcsetattr_nobg(int fd, int flags, struct termios *tp)
     } while (rc != 0 && errno == EINTR && !got_sigttou);
     sigaction(SIGTTOU, &osa, NULL);
 
-    return rc;
+    debug_return_int(rc);
 }
 
 /*
