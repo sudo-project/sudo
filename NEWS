@@ -91,6 +91,14 @@ What's new in Sudo 1.9.13
    when "log_subcmds" or "intercept" is enabled on a system where
    "intercept_type" is set to "trace".  GitHub issue #194.
 
+ * When sudo is configured to run a command in a pseudo-terminal
+   but the standard input is not connected to a terminal, the command
+   will now be run as a background process.  This works around a
+   problem running sudo commands in the background from a shell
+   script where changing the terminal to raw mode could interfere
+   with the interactive shell that ran the script.
+   GitHub issue #237.
+
 What's new in Sudo 1.9.12p2
 
  * Fixed a compilation error on Linux/aarch64.  GitHub issue #197.
