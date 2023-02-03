@@ -75,7 +75,7 @@ pty_cleanup(void)
 
     if (ttymode != TERM_COOKED) {
 	if (!sudo_term_restore(io_fds[SFD_USERTTY], false))
-	    sudo_warnx("%s", U_("unable to restore terminal settings"));
+	    sudo_warn("%s", U_("unable to restore terminal settings"));
     }
     if (utmp_user != NULL)
 	utmp_logout(ptyname, 0);
@@ -210,7 +210,7 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 	/* Restore original tty mode before suspending. */
 	if (ttymode != TERM_COOKED) {
 	    if (!sudo_term_restore(io_fds[SFD_USERTTY], false))
-		sudo_warnx("%s", U_("unable to restore terminal settings"));
+		sudo_warn("%s", U_("unable to restore terminal settings"));
 	}
 
 	/* Log the suspend event. */
@@ -508,7 +508,7 @@ pty_finish(struct exec_closure *ec, struct command_status *cstat)
 	const pid_t tcpgrp = tcgetpgrp(io_fds[SFD_USERTTY]);
 	if (tcpgrp == ec->ppgrp) {
 	    if (!sudo_term_restore(io_fds[SFD_USERTTY], false))
-		sudo_warnx("%s", U_("unable to restore terminal settings"));
+		sudo_warn("%s", U_("unable to restore terminal settings"));
 	}
     }
 
