@@ -73,8 +73,10 @@ pty_cleanup(void)
 {
     debug_decl(cleanup, SUDO_DEBUG_EXEC);
 
-    if (ttymode != TERM_COOKED)
-	sudo_term_restore(io_fds[SFD_USERTTY], false);
+    if (ttymode != TERM_COOKED) {
+	if (!sudo_term_restore(io_fds[SFD_USERTTY], false))
+	    sudo_warnx("%s", U_("unable to restore terminal settings"));
+    }
     if (utmp_user != NULL)
 	utmp_logout(ptyname, 0);
 
@@ -206,8 +208,10 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 	del_io_events(true);
 
 	/* Restore original tty mode before suspending. */
-	if (ttymode != TERM_COOKED)
-	    sudo_term_restore(io_fds[SFD_USERTTY], false);
+	if (ttymode != TERM_COOKED) {
+	    if (!sudo_term_restore(io_fds[SFD_USERTTY], false))
+		sudo_warnx("%s", U_("unable to restore terminal settings"));
+	}
 
 	/* Log the suspend event. */
 	log_suspend(ec, signo);
@@ -502,8 +506,10 @@ pty_finish(struct exec_closure *ec, struct command_status *cstat)
     if (ttymode != TERM_COOKED) {
 	/* Only restore the terminal if sudo is the foreground process. */
 	const pid_t tcpgrp = tcgetpgrp(io_fds[SFD_USERTTY]);
-	if (tcpgrp == ec->ppgrp)
-	    sudo_term_restore(io_fds[SFD_USERTTY], false);
+	if (tcpgrp == ec->ppgrp) {
+	    if (!sudo_term_restore(io_fds[SFD_USERTTY], false))
+		sudo_warnx("%s", U_("unable to restore terminal settings"));
+	}
     }
 
     /* Update utmp */
