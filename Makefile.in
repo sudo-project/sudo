@@ -47,7 +47,6 @@ install_uid = 0
 install_gid = 0
 
 # sudoers owner and mode for package building
-sudoersdir = $(sysconfdir)
 sudoers_uid = @SUDOERS_UID@
 sudoers_gid = @SUDOERS_GID@
 sudoers_mode = @SUDOERS_MODE@
@@ -409,7 +408,6 @@ package: @PPFILES@
 		docdir=$(docdir) \
 		exampledir=$(exampledir) \
 		sysconfdir=$(sysconfdir) \
-		sudoersdir=$(sudoersdir) \
 		sudoers_uid=$(sudoers_uid) \
 		sudoers_gid=$(sudoers_gid) \
 		sudoers_mode=$(sudoers_mode) \

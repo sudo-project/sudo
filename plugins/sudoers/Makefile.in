@@ -72,7 +72,7 @@ TESTSUDOERS_LIBS = $(NET_LIBS)
 
 # C preprocessor defines
 CPPDEFS = -DLIBDIR=\"$(libdir)\" -DLOCALEDIR=\"$(localedir)\" \
-	  -D_PATH_SUDOERS=\"$(sudoersdir)/sudoers\" \
+	  -D_PATH_SUDOERS=\"$(sysconfdir)/sudoers\" \
 	  -D_PATH_CVTSUDOERS_CONF=\"$(sysconfdir)/cvtsudoers.conf\" \
 	  -DSUDOERS_UID=$(sudoers_uid) -DSUDOERS_GID=$(sudoers_gid) \
 	  -DSUDOERS_MODE=$(sudoers_mode)
@@ -134,9 +134,6 @@ shlib_opt = sudoers.opt
 
 # Directory in which to install the sudoers plugin
 plugindir = @plugindir@
-
-# Directory in which to install the sudoers file
-sudoersdir = $(sysconfdir)
 
 # User and group ids the installed files should be "owned" by
 install_uid = 0
@@ -546,9 +543,9 @@ sudoers: $(srcdir)/sudoers.in
 
 pre-install: visudo
 	@if test X"$(cross_compiling)" != X"yes" -a X"$(DESTDIR)" = X""; then \
-	    if test -r $(sudoersdir)/sudoers; then \
+	    if test -r $(sysconfdir)/sudoers; then \
 		echo "Checking existing sudoers file for syntax errors."; \
-		./visudo -c -f $(sudoersdir)/sudoers; \
+		./visudo -c -f $(sysconfdir)/sudoers; \
 	    fi; \
 	fi
 
@@ -557,7 +554,7 @@ install: install-plugin install-binaries install-sudoers install-doc
 install-dirs:
 	$(SHELL) $(scriptdir)/mkinstalldirs $(DESTDIR)$(plugindir) \
 	    $(DESTDIR)$(sbindir) $(DESTDIR)$(bindir) \
-	    $(DESTDIR)$(sudoersdir) $(DESTDIR)$(docdir) \
+	    $(DESTDIR)$(sysconfdir) $(DESTDIR)$(docdir) \
 	    `echo $(DESTDIR)$(rundir)|$(SED) 's,/[^/]*$$,,'` \
 	    `echo $(DESTDIR)$(vardir)|$(SED) 's,/[^/]*$$,,'`
 	$(INSTALL) -d $(INSTALL_OWNER) -m 0711 $(DESTDIR)$(rundir)
@@ -582,10 +579,10 @@ install-plugin: sudoers.la install-dirs
 	esac
 
 install-sudoers: install-dirs
-	$(INSTALL) -d $(INSTALL_OWNER) -m 0750 $(DESTDIR)$(sudoersdir)/sudoers.d
-	$(INSTALL) $(INSTALL_OWNER) -m $(sudoers_mode) sudoers $(DESTDIR)$(sudoersdir)/sudoers.dist
-	test -r $(DESTDIR)$(sudoersdir)/sudoers || \
-	    cp -p $(DESTDIR)$(sudoersdir)/sudoers.dist $(DESTDIR)$(sudoersdir)/sudoers
+	$(INSTALL) -d $(INSTALL_OWNER) -m 0750 $(DESTDIR)$(sysconfdir)/sudoers.d
+	$(INSTALL) $(INSTALL_OWNER) -m $(sudoers_mode) sudoers $(DESTDIR)$(sysconfdir)/sudoers.dist
+	test -r $(DESTDIR)$(sysconfdir)/sudoers || \
+	    cp -p $(DESTDIR)$(sysconfdir)/sudoers.dist $(DESTDIR)$(sysconfdir)/sudoers
 
 install-fuzzer: $(FUZZ_PROGS) $(FUZZ_SEED_CORPUS)
 	@if test X"$(FUZZ_DESTDIR)" = X""; then \
@@ -605,9 +602,9 @@ uninstall:
 		$(DESTDIR)$(bindir)/sudoreplay$(INSTALL_BACKUP) \
 		$(DESTDIR)$(sbindir)/visudo$(INSTALL_BACKUP) \
 		$(DESTDIR)$(plugindir)/sudoers.so$(INSTALL_BACKUP)
-	-cmp $(DESTDIR)$(sudoersdir)/sudoers $(DESTDIR)$(sudoersdir)/sudoers.dist >/dev/null && \
-	    rm -f $(DESTDIR)$(sudoersdir)/sudoers
-	-rm -f $(DESTDIR)$(sudoersdir)/sudoers.dist
+	-cmp $(DESTDIR)$(sysconfdir)/sudoers $(DESTDIR)$(sysconfdir)/sudoers.dist >/dev/null && \
+	    rm -f $(DESTDIR)$(sysconfdir)/sudoers
+	-rm -f $(DESTDIR)$(sysconfdir)/sudoers.dist
 
 splint:
 	splint $(SPLINT_OPTS) -I$(incdir) -I$(top_builddir) -I$(devdir) -I$(srcdir) $(srcdir)/*.c $(srcdir)/auth/*.c
