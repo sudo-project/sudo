@@ -5655,8 +5655,9 @@ then :
 esac
 fi
 
-if test "$mail_no_user" = "on"; then
-    printf "%s\n" "#define SEND_MAIL_WHEN_NO_USER 1" >>confdefs.h
+if test "$mail_no_user" = "on"
+then :
+  printf "%s\n" "#define SEND_MAIL_WHEN_NO_USER 1" >>confdefs.h
 
 fi
 
@@ -6035,8 +6036,9 @@ then :
 esac
 fi
 
-if test "$env_editor" = "on"; then
-    printf "%s\n" "#define ENV_EDITOR 1" >>confdefs.h
+if test "$env_editor" = "on"
+then :
+  printf "%s\n" "#define ENV_EDITOR 1" >>confdefs.h
 
 fi
 
@@ -6331,16 +6333,22 @@ else case e in #(
 esac
 fi
 
-if test X"$with_askpass" != X"no"; then
+if test X"$with_askpass" != X"no"
+then :
+
     cat >>confdefs.h <<EOF
 #define _PATH_SUDO_ASKPASS "$with_askpass"
 EOF
 
-else
+
+else case e in #(
+  e)
     cat >>confdefs.h <<EOF
 #define _PATH_SUDO_ASKPASS NULL
 EOF
 
+ ;;
+esac
 fi
 
 
@@ -6633,12 +6641,18 @@ printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-env-reset:
 
 fi
 
-if test "$env_reset" = "on"; then
+if test "$env_reset" = "on"
+then :
+
     printf "%s\n" "#define ENV_RESET 1" >>confdefs.h
 
-else
+
+else case e in #(
+  e)
     printf "%s\n" "#define ENV_RESET 0" >>confdefs.h
 
+ ;;
+esac
 fi
 
 # Check whether --enable-warnings was given.
@@ -6700,8 +6714,11 @@ fi
 if test ${enable_sanitizer+y}
 then :
   enableval=$enable_sanitizer;
-if test X"$enable_sanitizer" = X"yes"; then
-    enable_sanitizer="-fsanitize=address,undefined"
+    if test X"$enable_sanitizer" = X"yes"
+then :
+
+	enable_sanitizer="-fsanitize=address,undefined"
+
 fi
 
 else case e in #(
@@ -7001,8 +7018,9 @@ else case e in #(
 esac
 fi
 
-if test "$enable_offensive_insults" = "yes"; then
-    printf "%s\n" "#define OFFENSIVE_INSULTS 1" >>confdefs.h
+if test "$enable_offensive_insults" = "yes"
+then :
+  printf "%s\n" "#define OFFENSIVE_INSULTS 1" >>confdefs.h
 
 fi
 
@@ -7074,13 +7092,19 @@ esac
 fi
 
 
-if test X"${enable_log_client}${enable_log_server}" = X"nono"; then
+if test X"${enable_log_client}${enable_log_server}" = X"nono"
+then :
+
     # No need for liblogsrv.la
     LOGSRV_SRC=
     LIBLOGSRV=
+
 fi
-if test X"$LOGSRVD_SRC" != X""; then
+if test X"$LOGSRVD_SRC" != X""
+then :
+
     PPFILES="$PPFILES "'$(srcdir)/etc/sudo-logsrvd.pp'
+
 fi
 
 # Check whether --enable-openssl was given.
@@ -7090,9 +7114,12 @@ then :
 else case e in #(
   e)
     # Enable OpenSSL by default unless logsrvd and client are disabled
-    if test X"${enable_log_client}${enable_log_server}" != X"nono"; then
+    if test X"${enable_log_client}${enable_log_server}" != X"nono"
+then :
+
 	enable_openssl=maybe
-    fi
+
+fi
  ;;
 esac
 fi
@@ -7120,11 +7147,14 @@ fi
 if test ${enable_gcrypt+y}
 then :
   enableval=$enable_gcrypt;
-    if test "${enable_openssl-no}${enable_wolfssl-no}" != "nono"; then
+    if test "${enable_openssl-no}${enable_wolfssl-no}" != "nono"
+then :
+
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring --enable-gcrypt when OpenSSL or wolfSSL is enabled." >&5
 printf "%s\n" "$as_me: WARNING: ignoring --enable-gcrypt when OpenSSL or wolfSSL is enabled." >&2;}
 	enable_gcrypt=no
-    fi
+
+fi
 
 fi
 
@@ -7489,8 +7519,11 @@ else
   RANLIB="$ac_cv_prog_RANLIB"
 fi
 
-if test X"$AR" = X"false"; then
+if test X"$AR" = X"false"
+then :
+
     as_fn_error $? "the \"ar\" utility is required to build sudo" "$LINENO" 5
+
 fi
 
 
@@ -8733,14 +8766,20 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-if test "x$ac_cv_prog_cc_c89" = "xno"; then
+if test "x$ac_cv_prog_cc_c89" = "xno"
+then :
+
     as_fn_error $? "Sudo version $PACKAGE_VERSION requires an ANSI C compiler to build." "$LINENO" 5
+
 fi
 
-if test "$enable_static" = "no"; then
+if test "$enable_static" = "no"
+then :
+
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring --disable-static, sudo does not install static libs" >&5
 printf "%s\n" "$as_me: WARNING: ignoring --disable-static, sudo does not install static libs" >&2;}
     enable_static=yes
+
 fi
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking host system type" >&5
@@ -17149,13 +17188,16 @@ CC=$lt_save_CC
 
 case "$host_os" in
 aix*)
-    if test X"$aix_use_runtimelinking" != X"yes"; then
+    if test X"$aix_use_runtimelinking" != X"yes"
+then :
+
 	# Using traditional AIX dynamic shared objects in an archive file.
 	noexec_file="$libexecdir/sudo/sudo_noexec.a(sudo_noexec.so)"
 	intercept_file="$libexecdir/sudo/sudo_intercept.a(sudo_intercept.so)"
 	sudoers_plugin="sudoers.a(sudoers.so)"
 	python_plugin="python_plugin.a(python_plugin.so)"
-    fi
+
+fi
     ;;
 esac
 cat >>confdefs.h <<EOF
@@ -17179,7 +17221,9 @@ esac
 fi
 
 
-if test "$enable_shared" = "no"; then
+if test "$enable_shared" = "no"
+then :
+
     enable_intercept=no
     with_noexec=no
     enable_dlopen=no
@@ -17187,6 +17231,7 @@ if test "$enable_shared" = "no"; then
     lt_cv_dlopen_libs=
     ac_cv_func_dlopen=no
     LT_LDFLAGS=-static
+
 fi
 LIBDL="$lt_cv_dlopen_libs"
 SHLIB_ENABLE="$enable_dlopen"
@@ -17446,19 +17491,31 @@ printf "%s\n" "$sudo_cv_var_mantype" >&6; }
     ;;
 esac
 
-if test -n "$sudo_cv_prev_host"; then
-    if test "$sudo_cv_prev_host" != "$host"; then
+if test -n "$sudo_cv_prev_host"
+then :
+
+    if test "$sudo_cv_prev_host" != "$host"
+then :
+
 	as_fn_error $? "config.cache was created on a different host; remove it and re-run configure." "$LINENO" 5
-    fi
+
+fi
+
 fi
 sudo_cv_prev_host="$host"
 
-if test -n "$host_os"; then
+if test -n "$host_os"
+then :
+
     OSREV=`echo $host_os | sed 's/^[^0-9\.]*\([0-9\.]*\).*$/\1/'`
     OSMAJOR=`echo $OSREV | sed 's/\..*$//'`
-else
+
+else case e in #(
+  e)
     OSREV=0
     OSMAJOR=0
+ ;;
+esac
 fi
 
 case "$host" in
@@ -17479,9 +17536,12 @@ case "$host" in
 		SUDO_OBJS="${SUDO_OBJS} solaris.o"
 
 		# AFS support needs -lucb
-		if test "$with_AFS" = "yes"; then
+		if test "$with_AFS" = "yes"
+then :
+
 		    AFS_LIBS="-lc -lucb"
-		fi
+
+fi
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		: ${mansectmisc='5'}
@@ -17509,9 +17569,12 @@ done
 		# For AIX we build in support for both LAM and PAM
 		# and choose which to use based on auth_type in
 		# /etc/security/login.cfg
-		if test X"${with_pam}${with_aixauth}" = X""; then
+		if test X"${with_pam}${with_aixauth}" = X""
+then :
+
 		    AUTH_EXCL_DEF="AIX_AUTH PAM"
-		fi
+
+fi
 
 		# AIX analog of nsswitch.conf, enabled by default
 
@@ -17526,9 +17589,12 @@ then :
 		esac
 fi
 
-		if test -z "$with_nsswitch" -a -z "$with_netsvc"; then
+		if test -z "$with_nsswitch" -a -z "$with_netsvc"
+then :
+
 		    with_netsvc="/etc/netsvc.conf"
-		fi
+
+fi
 
 		# LDR_PRELOAD is only supported in AIX 5.3 and later
 		case "$OSREV" in
@@ -17542,9 +17608,12 @@ fi
 
 		# strnlen/strndup may be broken on AIX < 6 depending
 		# on the libc version, use our own.
-		if test $OSMAJOR -lt 6; then
+		if test $OSMAJOR -lt 6
+then :
+
 		    : ${ac_cv_func_strnlen='no'}
-		fi
+
+fi
 
 		# fmemopen(3) has a bug wrt feof() on some AIX versions.
 		# https://www.ibm.com/support/pages/apar/IJ11845
@@ -17552,19 +17621,31 @@ fi
 
 		# getdelim() may or may not be present on AIX <= 6.1.
 		# bos610 is missing getdelim but bos61J has it.
-		if test "$enable_package_build" = "yes"; then
-		    if test $OSMAJOR -le 6; then
+		if test "$enable_package_build" = "yes"
+then :
+
+		    if test $OSMAJOR -le 6
+then :
+
 			: ${ac_cv_func_getdelim='no'}
-		    fi
-		fi
+
+fi
+
+fi
 
 		# memset_s() may or may ont be present on AIX <= 7.1.
 		# bos710 is missing memset_s but bos71L has it.
-		if test "$enable_package_build" = "yes"; then
-		    if test $OSMAJOR -le 7; then
+		if test "$enable_package_build" = "yes"
+then :
+
+		    if test $OSMAJOR -le 7
+then :
+
 			: ${ac_cv_func_memset_s='no'}
-		    fi
-		fi
+
+fi
+
+fi
 
 		# Remove timedir on boot, AIX does not have /var/run
 		INIT_SCRIPT=aix.sh
@@ -17781,9 +17862,11 @@ fi
 
 
 		# AFS support needs -lBSD
-		if test "$with_AFS" = "yes"; then
-		    AFS_LIBS="-lc -lBSD"
-		fi
+		if test "$with_AFS" = "yes"
+then :
+  AFS_LIBS="-lc -lBSD"
+		]
+fi
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		: ${mansectmisc='5'}
@@ -17801,7 +17884,9 @@ fi
 		INSTALL_BACKUP='~'
 
 		# The HP bundled compiler cannot generate shared libs
-		if test -z "$GCC"; then
+		if test -z "$GCC"
+then :
+
 		    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for HP bundled C compiler" >&5
 printf %s "checking for HP bundled C compiler... " >&6; }
 if test ${sudo_cv_var_hpccbundled+y}
@@ -17818,20 +17903,30 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_hpccbundled" >&5
 printf "%s\n" "$sudo_cv_var_hpccbundled" >&6; }
-		    if test "$sudo_cv_var_hpccbundled" = "yes"; then
+		    if test "$sudo_cv_var_hpccbundled" = "yes"
+then :
+
 			as_fn_error $? "The HP bundled C compiler is unable to build Sudo, you must use gcc or the HP ANSI C compiler instead." "$LINENO" 5
-		    fi
-		fi
+
+fi
+
+fi
 
 		# Build PA-RISC1.1 objects for better portability
 		case "$host_cpu" in
 		    hppa[2-9]*)
 			_CFLAGS="$CFLAGS"
-			if test -n "$GCC"; then
+			if test -n "$GCC"
+then :
+
 			    portable_flag="-march=1.1"
-			else
+
+else case e in #(
+  e)
 			    portable_flag="+DAportable"
-			fi
+			 ;;
+esac
+fi
 			CFLAGS="$CFLAGS $portable_flag"
 			{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether $CC understands $portable_flag" >&5
 printf %s "checking whether $CC understands $portable_flag... " >&6; }
@@ -17866,9 +17961,12 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_daportable" >&5
 printf "%s\n" "$sudo_cv_var_daportable" >&6; }
-			if test X"$sudo_cv_var_daportable" != X"yes"; then
+			if test X"$sudo_cv_var_daportable" != X"yes"
+then :
+
 			    CFLAGS="$_CFLAGS"
-			fi
+
+fi
 			;;
 		esac
 
@@ -17962,11 +18060,17 @@ fi
 
 		shadow_funcs="getprpwnam dispcrypt"
 		# OSF/1 4.x and higher need -ldb too
-		if test $OSMAJOR -lt 4; then
+		if test $OSMAJOR -lt 4
+then :
+
 		    shadow_libs="-lsecurity -laud -lm"
-		else
+
+else case e in #(
+  e)
 		    shadow_libs="-lsecurity -ldb -laud -lm"
-		fi
+		 ;;
+esac
+fi
 
 		# use SIA by default, if we have it
 		test "$CHECKSIA" = "true" && AUTH_EXCL_DEF="SIA"
@@ -18015,15 +18119,26 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
     *-*-irix*)
 		printf "%s\n" "#define _BSD_TYPES 1" >>confdefs.h
 
-		if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
-		    if test -d "/usr/share/man/local"; then
+		if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'
+then :
+
+		    if test -d "/usr/share/man/local"
+then :
+
 			mandir="/usr/share/man/local"
-		    else
+
+else case e in #(
+  e)
 			mandir="/usr/man/local"
-		    fi
-		fi
+		     ;;
+esac
+fi
+
+fi
 		# IRIX <= 4 needs -lsun
-		if test "$OSMAJOR" -le 4; then
+		if test "$OSMAJOR" -le 4
+then :
+
 		    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for getpwnam in -lsun" >&5
 printf %s "checking for getpwnam in -lsun... " >&6; }
 if test ${ac_cv_lib_sun_getpwnam+y}
@@ -18072,7 +18187,8 @@ then :
   LIBS="${LIBS} -lsun"
 fi
 
-		fi
+
+fi
 		# ":DEFAULT" must be appended to _RLD_LIST
 		RTLD_PRELOAD_VAR="_RLD_LIST"
 		RTLD_PRELOAD_DEFAULT="DEFAULT"
@@ -18118,7 +18234,9 @@ fi
 
 		# Only use our replacement functions when not fuzzing,
 		# they may skew the coverage reports.
-		if test X"$enable_fuzzer" = X"no"; then
+		if test X"$enable_fuzzer" = X"no"
+then :
+
 		    # glibc's getentropy() emulation may fail on older kernels.
 		    # We use our own getentropy() by default on Linux.
 		    : ${ac_cv_func_getentropy='no'}
@@ -18130,7 +18248,8 @@ fi
 		    # glibc's closefrom() emulation may fail in chroot.
 		    # We use our own closefrom() by default on Linux.
 		    : ${ac_cv_func_closefrom='no'}
-		fi
+
+fi
 
 		# Linux 3.2 supports reading/writing a another process
 		# without using ptrace(2).
@@ -18229,7 +18348,9 @@ fi
     *-*-bsdi*)
 		SKIP_SETREUID=yes
 		# Check for newer BSD auth API
-		if test -z "$with_bsdauth"; then
+		if test -z "$with_bsdauth"
+then :
+
 
   for ac_func in auth_challenge
 do :
@@ -18241,7 +18362,8 @@ then :
 fi
 
 done
-		fi
+
+fi
 		;;
     *-*-freebsd*)
 		printf "%s\n" "#define _BSD_SOURCE 1" >>confdefs.h
@@ -18254,17 +18376,23 @@ done
 		    SKIP_SETREUID=yes
 		    ;;
 		esac
-		if test "${with_skey-'no'}" = "yes"; then
+		if test "${with_skey-'no'}" = "yes"
+then :
+
 		     SUDOERS_LIBS="${SUDOERS_LIBS} -lmd"
-		fi
+
+fi
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='maybe'}
 
 		# Examples go in share/examples/sudo
-		if test X"$with_exampledir" = X""; then
+		if test X"$with_exampledir" = X""
+then :
+
 		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
-		fi
+
+fi
 		;;
     *-*-*openbsd*)
 		printf "%s\n" "#define _BSD_SOURCE 1" >>confdefs.h
@@ -18279,20 +18407,29 @@ done
 		SKIP_SETREUID=yes
 
 		# OpenBSD >= 3.0 supports BSD auth
-		if test -z "$with_bsdauth"; then
-		    if test "$OSMAJOR" -ge 3; then
+		if test -z "$with_bsdauth"
+then :
+
+		    if test "$OSMAJOR" -ge 3
+then :
+
 			AUTH_EXCL_DEF="BSD_AUTH"
-		    fi
-		fi
+
+fi
+
+fi
 		: ${with_logincap='maybe'}
 
 		# Newer OpenBSD only fills in pw_password for getpwnam_shadow()
 		shadow_funcs="getpwnam_shadow"
 
 		# Examples go in share/examples/sudo
-		if test X"$with_exampledir" = X""; then
+		if test X"$with_exampledir" = X""
+then :
+
 		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
-		fi
+
+fi
 		;;
     *-*-*netbsd*)
 		# NetBSD has a real setreuid(2) starting with 1.3.2
@@ -18310,51 +18447,72 @@ done
 
 
 		# Examples go in share/examples/sudo
-		if test X"$with_exampledir" = X""; then
+		if test X"$with_exampledir" = X""
+then :
+
 		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
-		fi
+
+fi
 		;;
     *-*-dragonfly*)
 		printf "%s\n" "#define _BSD_SOURCE 1" >>confdefs.h
 
 
-		if test "${with_skey-'no'}" = "yes"; then
+		if test "${with_skey-'no'}" = "yes"
+then :
+
 		     SUDOERS_LIBS="${SUDOERS_LIBS} -lmd"
-		fi
+
+fi
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='yes'}
 
 		# Examples go in share/examples/sudo
-		if test X"$with_exampledir" = X""; then
+		if test X"$with_exampledir" = X""
+then :
+
 		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
-		fi
+
+fi
 		;;
     *-*-*bsd*)
 		CHECKSHADOW="false"
 		# Examples go in share/examples/sudo
-		if test X"$with_exampledir" = X""; then
+		if test X"$with_exampledir" = X""
+then :
+
 		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
-		fi
+
+fi
 		;;
     *-*-darwin*)
 		# Darwin has a real setreuid(2) starting with 9.0
-		if test $OSMAJOR -lt 9; then
+		if test $OSMAJOR -lt 9
+then :
+
 		    SKIP_SETREUID=yes
-		fi
+
+fi
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='yes'}
 		# Darwin has a broken poll(), Apple radar 3710161
 		: ${enable_poll='no'}
 		# Darwin 8 and above can interpose library symbols cleanly
-		if test $OSMAJOR -ge 8; then
+		if test $OSMAJOR -ge 8
+then :
+
 		    printf "%s\n" "#define HAVE___INTERPOSE 1" >>confdefs.h
 
 		    dlyld_interpose=yes
-		else
+
+else case e in #(
+  e)
 		    RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
-		fi
+		 ;;
+esac
+fi
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
 
 		# Build sudo_noexec.so as a shared library, not a module.
@@ -18489,9 +18647,12 @@ fi
 
 
 		# Examples go in share/examples/sudo
-		if test X"$with_exampledir" = X""; then
+		if test X"$with_exampledir" = X""
+then :
+
 		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
-		fi
+
+fi
 		;;
     *-*-nextstep*)
 		# lockf() is broken on the NeXT
@@ -18533,13 +18694,21 @@ fi
 		;;
 esac
 
-if test X"$enable_intercept" = X"no"; then
+if test X"$enable_intercept" = X"no"
+then :
+
     intercept_file=disabled
+
 fi
-if test X"$with_noexec" = X"no"; then
+if test X"$with_noexec" = X"no"
+then :
+
     noexec_file=disabled
+
 fi
-if test X"${intercept_file} ${noexec_file}" != X"disabled disabled"; then
+if test X"${intercept_file} ${noexec_file}" != X"disabled disabled"
+then :
+
     cat >>confdefs.h <<EOF
 #define RTLD_PRELOAD_VAR "$RTLD_PRELOAD_VAR"
 EOF
@@ -18548,36 +18717,49 @@ EOF
 #define RTLD_PRELOAD_DELIM '$RTLD_PRELOAD_DELIM'
 EOF
 
-    if test -n "$RTLD_PRELOAD_DEFAULT"; then
+    if test -n "$RTLD_PRELOAD_DEFAULT"
+then :
+
 	cat >>confdefs.h <<EOF
 #define RTLD_PRELOAD_DEFAULT "$RTLD_PRELOAD_DEFAULT"
 EOF
 
-    fi
-    if test -n "$RTLD_PRELOAD_ENABLE_VAR"; then
+
+fi
+    if test -n "$RTLD_PRELOAD_ENABLE_VAR"
+then :
+
 	cat >>confdefs.h <<EOF
 #define RTLD_PRELOAD_ENABLE_VAR "$RTLD_PRELOAD_ENABLE_VAR"
 EOF
 
-    fi
+
+fi
+
 fi
 
 AUTH_REG=${AUTH_REG# }
 AUTH_EXCL=${AUTH_EXCL# }
-if test -n "$AUTH_EXCL"; then
-    if test -n "$AUTH_REG"; then
-	as_fn_error $? "Cannot mix mutually exclusive ($AUTH_EXCL) and regular ($AUTH_REG) authentication methods" "$LINENO" 5
-    fi
+if test -n "$AUTH_EXCL" -a -n "$AUTH_REG"
+then :
+
+    as_fn_error $? "Cannot mix mutually exclusive ($AUTH_EXCL) and regular ($AUTH_REG) authentication methods" "$LINENO" 5
+
 fi
-if test X"${with_skey}${with_opie}" = X"yesyes"; then
+if test X"${with_skey}${with_opie}" = X"yesyes"
+then :
+
     as_fn_error $? "cannot use both S/Key and OPIE" "$LINENO" 5
+
 fi
 
 : ${mansectsu='8'}
 : ${mansectform='5'}
 : ${mansectmisc='7'}
 
-if test -n "$with_libpath"; then
+if test -n "$with_libpath"
+then :
+
     for i in ${with_libpath}; do
 
 
@@ -18652,8 +18834,11 @@ fi
     fi
 
     done
+
 fi
-if test -n "$with_libraries"; then
+if test -n "$with_libraries"
+then :
+
     for i in ${with_libraries}; do
 	case $i in
 	    -l*)	;;
@@ -18663,6 +18848,7 @@ if test -n "$with_libraries"; then
 	esac
 	LIBS="${LIBS} ${i}"
     done
+
 fi
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for an ANSI C-conforming const" >&5
@@ -19137,7 +19323,9 @@ fi
 EOF
 
 
-if test -z "$with_sendmail"; then
+if test -z "$with_sendmail"
+then :
+
 
     # Extract the first word of "sendmail", so it can be a program name with args.
 set dummy sendmail; ac_word=$2
@@ -19191,6 +19379,7 @@ EOF
 
 
     with_sendmail="$ac_cv_path_SENDMAILPROG"
+
 fi
 
     # Extract the first word of "vi", so it can be a program name with args.
@@ -19244,16 +19433,22 @@ fi
 EOF
 
 
-if test -z "$with_editor"; then
+if test -z "$with_editor"
+then :
+
     editor="$ac_cv_path_VIPROG"
+
 fi
-if test X"$with_logfac" = X""; then
+if test X"$with_logfac" = X""
+then :
+
     ac_fn_check_decl "$LINENO" "LOG_AUTHPRIV" "ac_cv_have_decl_LOG_AUTHPRIV" "#include <syslog.h>
 " "$ac_c_undeclared_builtin_options" "CFLAGS"
 if test "x$ac_cv_have_decl_LOG_AUTHPRIV" = xyes
 then :
   logfac=authpriv
 fi
+
 fi
 
 printf "%s\n" "#define LOGFAC \"$logfac\"" >>confdefs.h
@@ -19577,13 +19772,16 @@ fi
 
 
 
-if test X"$ac_cv_header_utmps_h" != X"yes"; then
+if test X"$ac_cv_header_utmps_h" != X"yes"
+then :
+
     ac_fn_c_check_header_compile "$LINENO" "utmpx.h" "ac_cv_header_utmpx_h" "$ac_includes_default"
 if test "x$ac_cv_header_utmpx_h" = xyes
 then :
   printf "%s\n" "#define HAVE_UTMPX_H 1" >>confdefs.h
 
 fi
+
 
 fi
        for ac_header in endian.h sys/endian.h machine/endian.h
@@ -19840,7 +20038,9 @@ fi
 # but is incompatible with the sanitizers/fuzzers.
 # We must set this *before* the library tests.
 #
-if test -n "$GCC" -a X"${enable_sanitizer}${enable_fuzzer}" = X"nono"; then
+if test -n "$GCC" -a X"${enable_sanitizer}${enable_fuzzer}" = X"nono"
+then :
+
     # On FreeBSD and Dragonfly, environ is filled in by the dynamic loader
     # so -Wl,--no-undefined causes a link error when environ is used.
     # https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=263265
@@ -19884,7 +20084,9 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_ld___no_undefined" >&5
 printf "%s\n" "$sudo_cv_var_ld___no_undefined" >&6; }
-    if test "$sudo_cv_var_ld___no_undefined" = "yes"; then
+    if test "$sudo_cv_var_ld___no_undefined" = "yes"
+then :
+
 
 if test ${LDFLAGS+y}
 then :
@@ -19919,7 +20121,9 @@ else case e in #(
 esac
 fi
 
-    fi
+
+fi
+
 fi
 
 #
@@ -19983,10 +20187,13 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_xopen_source_extended" >&5
 printf "%s\n" "$sudo_cv_xopen_source_extended" >&6; }
-	if test "$sudo_cv_xopen_source_extended" = "yes"; then
+	if test "$sudo_cv_xopen_source_extended" = "yes"
+then :
+
 	    printf "%s\n" "#define _XOPEN_SOURCE_EXTENDED 1" >>confdefs.h
 
-	fi
+
+fi
 	;;
 esac
 
@@ -20069,7 +20276,9 @@ EOF
 	;;
     esac
 
-if test ${with_logincap-'no'} != "no"; then
+if test ${with_logincap-'no'} != "no"
+then :
+
            for ac_header in login_cap.h
 do :
   ac_fn_c_check_header_compile "$LINENO" "login_cap.h" "ac_cv_header_login_cap_h" "$ac_includes_default"
@@ -20084,7 +20293,9 @@ then :
 fi
 
 done
-    if test "${with_logincap}" = "yes"; then
+    if test "${with_logincap}" = "yes"
+then :
+
 	# setusercontext() is in libutil on NetBSD, FreeBSD, Dragonfly BSD.
 	_LIBS="$LIBS"
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing setusercontext" >&5
@@ -20155,13 +20366,20 @@ then :
 fi
 
 	LIBS="$_LIBS"
-	if test "${ac_cv_search_setusercontext}" != "none required"; then
+	if test "${ac_cv_search_setusercontext}" != "none required"
+then :
+
 	    SUDO_LIBS="${SUDO_LIBS} -lutil"
 	    SUDOERS_LIBS="${SUDOERS_LIBS} -lutil"
-	fi
-    fi
+
 fi
-if test ${with_project-'no'} != "no"; then
+
+fi
+
+fi
+if test ${with_project-'no'} != "no"
+then :
+
     ac_fn_c_check_header_compile "$LINENO" "project.h" "ac_cv_header_project_h" "$ac_includes_default"
 if test "x$ac_cv_header_project_h" = xyes
 then :
@@ -20224,8 +20442,11 @@ else case e in #(
 esac
 fi
 
+
 fi
-if test X"${ac_cv_header_stdint_h}${ac_cv_header_inttypes_h}" = X"nono"; then
+if test X"${ac_cv_header_stdint_h}${ac_cv_header_inttypes_h}" = X"nono"
+then :
+
     ac_fn_c_check_type "$LINENO" "int8_t" "ac_cv_type_int8_t" "$ac_includes_default"
 if test "x$ac_cv_type_int8_t" = xyes
 then :
@@ -20306,6 +20527,7 @@ printf "%s\n" "#define HAVE_UINTMAX_T 1" >>confdefs.h
 
 
 fi
+
 
 fi
 ac_fn_c_check_type "$LINENO" "sig_atomic_t" "ac_cv_type_sig_atomic_t" "
@@ -20700,7 +20922,9 @@ printf "%s\n" "$ac_cv_sizeof_time_t" >&6; }
 printf "%s\n" "#define SIZEOF_TIME_T $ac_cv_sizeof_time_t" >>confdefs.h
 
 
-if test X"$ac_cv_header_utmps_h" = X"yes"; then
+if test X"$ac_cv_header_utmps_h" = X"yes"
+then :
+
 
                 ac_fn_c_check_member "$LINENO" "struct utmps" "ut_id" "ac_cv_member_struct_utmps_ut_id" "
 #	include <sys/types.h>
@@ -20812,7 +21036,10 @@ esac
 fi
 
 
-elif test X"$ac_cv_header_utmpx_h" = X"yes"; then
+
+elif test X"$ac_cv_header_utmpx_h" = X"yes"
+then :
+
 
                 ac_fn_c_check_member "$LINENO" "struct utmpx" "ut_id" "ac_cv_member_struct_utmpx_ut_id" "
 #	include <sys/types.h>
@@ -20924,7 +21151,9 @@ esac
 fi
 
 
-else
+
+else case e in #(
+  e)
 
                 ac_fn_c_check_member "$LINENO" "struct utmp" "ut_id" "ac_cv_member_struct_utmp_ut_id" "
 #	include <sys/types.h>
@@ -21036,9 +21265,13 @@ esac
 fi
 
 
+ ;;
+esac
 fi
 
-if test ${enable_python-'no'} = "yes"; then
+if test ${enable_python-'no'} = "yes"
+then :
+
 
 
 
@@ -21417,6 +21650,7 @@ fi
     PYTHON_PLUGIN_SRC=plugins/python
     PYTHON_PLUGIN=
     ac_config_files="$ac_config_files $PYTHON_PLUGIN_SRC/Makefile"
+
 
 fi
 
@@ -22373,7 +22607,9 @@ _ACEOF
 fi
 
 done
-if test "$utmp_style" = "LEGACY"; then
+if test "$utmp_style" = "LEGACY"
+then :
+
 
   for ac_func in getttyent ttyslot
 do :
@@ -22388,6 +22624,7 @@ _ACEOF
 fi
 
 done
+
 fi
 
 
@@ -22422,7 +22659,9 @@ then :
 
 fi
 
-    if test "$found" = "false"; then
+    if test "$found" = "false"
+then :
+
 	ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "kp_paddr" "ac_cv_member_struct_kinfo_proc_kp_paddr" "
 #include <sys/param.h>
 #include <sys/sysctl.h>
@@ -22438,8 +22677,11 @@ then :
 
 fi
 
-    fi
-    if test "$found" = "false"; then
+
+fi
+    if test "$found" = "false"
+then :
+
 	ac_fn_c_check_member "$LINENO" "struct kinfo_proc2" "p_paddr" "ac_cv_member_struct_kinfo_proc2_p_paddr" "
 #include <sys/param.h>
 #include <sys/sysctl.h>
@@ -22454,8 +22696,11 @@ then :
 
 fi
 
-    fi
-    if test "$found" = "false"; then
+
+fi
+    if test "$found" = "false"
+then :
+
 	ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "p_paddr" "ac_cv_member_struct_kinfo_proc_p_paddr" "
 #include <sys/param.h>
 #include <sys/sysctl.h>
@@ -22470,8 +22715,11 @@ then :
 
 fi
 
-    fi
-    if test "$found" = "false"; then
+
+fi
+    if test "$found" = "false"
+then :
+
 	ac_fn_c_check_member "$LINENO" "struct kinfo_proc" "kp_proc" "ac_cv_member_struct_kinfo_proc_kp_proc" "
 #include <sys/param.h>
 #include <sys/sysctl.h>
@@ -22486,7 +22734,8 @@ then :
 
 fi
 
-    fi
+
+fi
 
 fi
 
@@ -22734,7 +22983,9 @@ printf "%s\n" "#define PUTENV_CONST const" >>confdefs.h
 
   fi
 
-if test -z "$SKIP_SETRESUID"; then
+if test -z "$SKIP_SETRESUID"
+then :
+
 
   for ac_func in setresuid
 do :
@@ -22778,8 +23029,11 @@ done
 fi
 
 done
+
 fi
-if test -z "$SKIP_SETREUID"; then
+if test -z "$SKIP_SETRESUID"
+then :
+
     ac_fn_c_check_func "$LINENO" "setreuid" "ac_cv_func_setreuid"
 if test "x$ac_cv_func_setreuid" = xyes
 then :
@@ -22787,10 +23041,13 @@ then :
 
 fi
 
+
 fi
 
 
-if test X"$with_interfaces" != X"no"; then
+if test X"$with_interfaces" != X"no"
+then :
+
 
   for ac_func in getifaddrs
 do :
@@ -22808,6 +23065,7 @@ fi
 fi
 
 done
+
 fi
 
   for ac_func in lockf
@@ -23691,7 +23949,9 @@ esac
 esac
 fi
 
-if test X"$ac_cv_func_strnlen_working" = X"yes"; then
+if test X"$ac_cv_func_strnlen_working" = X"yes"
+then :
+
     printf "%s\n" "#define HAVE_STRNLEN 1" >>confdefs.h
 
 
@@ -23721,7 +23981,9 @@ esac
 fi
 
 done
-else
+
+else case e in #(
+  e)
     # Broken or missing strnlen, use our own.
 
     for _sym in sudo_strnlen; do
@@ -23742,6 +24004,8 @@ esac
 "
     done
 
+ ;;
+esac
 fi
 
   for ac_func in clock_gettime
@@ -23864,10 +24128,13 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_optreset" >&5
 printf "%s\n" "$sudo_cv_optreset" >&6; }
-    if test "$sudo_cv_optreset" = "yes"; then
+    if test "$sudo_cv_optreset" = "yes"
+then :
+
 	printf "%s\n" "#define HAVE_OPTRESET 1" >>confdefs.h
 
-    fi
+
+fi
  ;;
 esac
 fi
@@ -23978,7 +24245,9 @@ done
 	;;
 esac
 # If any of the mktemp family are missing we use our own.
-if test X"$sudo_mktemp" = X"yes"; then
+if test X"$sudo_mktemp" = X"yes"
+then :
+
     case " $LIBOBJS " in
   *" mktemp.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS mktemp.$ac_objext"
@@ -23992,6 +24261,7 @@ esac
     done
 
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }mktemp_test"
+
 fi
 ac_fn_c_check_func "$LINENO" "snprintf" "ac_cv_func_snprintf"
 if test "x$ac_cv_func_snprintf" = xyes
@@ -24122,7 +24392,9 @@ printf "%s\n" "$as_me: WARNING: Replacing missing/broken (v)snprintf() with sudo
 printf "%s\n" "#define PREFER_PORTABLE_SNPRINTF 1" >>confdefs.h
 
 fi
-if test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"; then
+if test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"
+then :
+
     # System has a C99-compliant v?snprintf(), check for v?asprintf()
 
   for ac_func in asprintf
@@ -24178,7 +24450,9 @@ esac
 fi
 
 done
-else
+
+else case e in #(
+  e)
     # Missing or non-compliant v?snprintf(), assume missing/bad v?asprintf()
 
     for _sym in sudo_snprintf sudo_vsnprintf sudo_asprintf sudo_vasprintf; do
@@ -24186,6 +24460,8 @@ else
 "
     done
 
+ ;;
+esac
 fi
 ac_fn_c_check_member "$LINENO" "struct tm" "tm_gmtoff" "ac_cv_member_struct_tm_tm_gmtoff" "
 $ac_includes_default
@@ -24247,8 +24523,9 @@ then :
 
 fi
 
-if test X"$with_noexec" != X"no"; then
-    # Check for non-standard exec functions
+if test X"$with_noexec" != X"no"
+then :
+  # Check for non-standard exec functions
     ac_fn_c_check_func "$LINENO" "exect" "ac_cv_func_exect"
 if test "x$ac_cv_func_exect" = xyes
 then :
@@ -24269,7 +24546,9 @@ then :
 fi
 
     # Check for posix_spawn, and posix_spawnp
-    if test X"$ac_cv_header_spawn_h" = X"yes"; then
+    if test X"$ac_cv_header_spawn_h" = X"yes"
+then :
+
 	ac_fn_c_check_func "$LINENO" "posix_spawn" "ac_cv_func_posix_spawn"
 if test "x$ac_cv_func_posix_spawn" = xyes
 then :
@@ -24283,7 +24562,9 @@ then :
 
 fi
 
-    fi
+
+fi
+]
 fi
 
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -25982,14 +26263,20 @@ fi
     fi
 
 
-if test "$DIGEST" = "digest.lo"; then
-    if test "${enable_gcrypt-no}" != no; then
+if test "$DIGEST" = "digest.lo"
+then :
+
+    if test "${enable_gcrypt-no}" != no
+then :
+
 	# Use gcrypt's sha2 functions
 	printf "%s\n" "#define HAVE_GCRYPT 1" >>confdefs.h
 
 	DIGEST=digest_gcrypt.lo
 	LIBMD="-lgcrypt"
-	if test "$enable_gcrypt" != "yes"; then
+	if test "$enable_gcrypt" != "yes"
+then :
+
 
 if test ${CPPFLAGS+y}
 then :
@@ -26096,8 +26383,11 @@ fi
 
     fi
 
-	fi
-    else
+
+fi
+
+else case e in #(
+  e)
 	# Use sudo's sha2 functions if not in libmd or libc.
 	FOUND_SHA2=no
 	ac_fn_c_check_header_compile "$LINENO" "sha2.h" "ac_cv_header_sha2_h" "$ac_includes_default"
@@ -26257,7 +26547,9 @@ done
 
 fi
 
-	if test X"$FOUND_SHA2" = X"no"; then
+	if test X"$FOUND_SHA2" = X"no"
+then :
+
 	    case " $LIBOBJS " in
   *" sha2.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS sha2.$ac_objext"
@@ -26270,8 +26562,12 @@ esac
 "
     done
 
-	fi
-    fi
+
+fi
+     ;;
+esac
+fi
+
 fi
 
 
@@ -26865,10 +27161,13 @@ case " $LIBOBJS " in
 
 	# We need libsudo_util to pull in dependent libraries for
 	# inet_pton(), gethostbyname(), and getservbyname()
-	if test -n "${INET_PTON_LIBS}"; then
+	if test -n "${INET_PTON_LIBS}"
+then :
+
 	    LT_DEP_LIBS="${LT_DEP_LIBS}${LT_DEP_LIBS+ }${INET_PTON_LIBS}"
 	    LIBS="${LIBS}${LIBS+ }${INET_PTON_LIBS}"
-	fi
+
+fi
 
     _LIBS="$LIBS"
     LIBS="${LIBS} ${NET_LIBS}"
@@ -26981,7 +27280,9 @@ fi
 		*) GETADDRINFO_LIBS="${GETADDRINFO_LIBS}${GETADDRINFO_LIBS+ }$lib";;
 	    esac
 	done
-	if test -n "${GETADDRINFO_LIBS}"; then
+	if test -n "${GETADDRINFO_LIBS}"
+then :
+
 	    # We need libsudo_util to pull in dependent libraries for
 	    # gai_strerror()
 	    LT_DEP_LIBS="${LT_DEP_LIBS}${LT_DEP_LIBS+ }${GETADDRINFO_LIBS}"
@@ -26994,7 +27295,8 @@ fi
 		    *)		NET_LIBS="${NET_LIBS}${NET_LIBS+ }$lib";;
 		esac
 	    done
-	fi
+
+fi
 	;;
 esac
 LIBS="$OLIBS"
@@ -27032,10 +27334,14 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_func_va_copy" >&5
 printf "%s\n" "$sudo_cv_func_va_copy" >&6; }
-if test "$sudo_cv_func_va_copy" = "yes"; then
+if test "$sudo_cv_func_va_copy" = "yes"
+then :
+
     printf "%s\n" "#define HAVE_VA_COPY 1" >>confdefs.h
 
-else
+
+else case e in #(
+  e)
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for __va_copy" >&5
 printf %s "checking for __va_copy... " >&6; }
 if test ${sudo_cv_func___va_copy+y}
@@ -27069,10 +27375,15 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_func___va_copy" >&5
 printf "%s\n" "$sudo_cv_func___va_copy" >&6; }
-    if test "$sudo_cv_func___va_copy" = "yes"; then
+    if test "$sudo_cv_func___va_copy" = "yes"
+then :
+
 	printf "%s\n" "#define HAVE___VA_COPY 1" >>confdefs.h
 
-    fi
+
+fi
+ ;;
+esac
 fi
 
 
@@ -27136,10 +27447,13 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv___progname" >&5
 printf "%s\n" "$sudo_cv___progname" >&6; }
-    if test "$sudo_cv___progname" = "yes"; then
+    if test "$sudo_cv___progname" = "yes"
+then :
+
 	printf "%s\n" "#define HAVE___PROGNAME 1" >>confdefs.h
 
-    fi
+
+fi
 
     for _sym in sudo_getprogname; do
 	COMPAT_EXP="${COMPAT_EXP}${_sym}
@@ -27165,7 +27479,9 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
-    if test X"$ac_cv_build_prog_cc_c99" = X"no"; then
+    if test X"$ac_cv_build_prog_cc_c99" = X"no"
+then :
+
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -27186,19 +27502,28 @@ esac
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
-    else
+
+else case e in #(
+  e)
 	# C99 and higher support __func__
 	sudo_cv___func__=yes
-    fi
+     ;;
+esac
+fi
  ;;
 esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv___func__" >&5
 printf "%s\n" "$sudo_cv___func__" >&6; }
-if test "$sudo_cv___func__" = "yes"; then
+if test "$sudo_cv___func__" = "yes"
+then :
+
     printf "%s\n" "#define HAVE___FUNC__ 1" >>confdefs.h
 
-elif test -n "$GCC"; then
+
+elif test -n "$GCC"
+then :
+
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for __FUNCTION__" >&5
 printf %s "checking for __FUNCTION__... " >&6; }
 if test ${sudo_cv___FUNCTION__+y}
@@ -27230,13 +27555,17 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv___FUNCTION__" >&5
 printf "%s\n" "$sudo_cv___FUNCTION__" >&6; }
-    if test "$sudo_cv___FUNCTION__" = "yes"; then
+    if test "$sudo_cv___FUNCTION__" = "yes"
+then :
+
 	printf "%s\n" "#define HAVE___FUNC__ 1" >>confdefs.h
 
 
 printf "%s\n" "#define __func__ __FUNCTION__" >>confdefs.h
 
-    fi
+
+fi
+
 fi
 
 
@@ -27644,13 +27973,19 @@ case "$enable_zlib" in
 
 	ac_config_files="$ac_config_files lib/zlib/Makefile"
 
-	if test X"$enable_shared" = X"no" -o "$enable_zlib" = "static"; then
-	    if test "$enable_zlib" = "shared"; then
+	if test X"$enable_shared" = X"no" -o "$enable_zlib" = "static"
+then :
+
+	    if test "$enable_zlib" = "shared"
+then :
+
 		as_fn_error $? "unable to build shared libraries on this system" "$LINENO" 5
-	    fi
+
+fi
 	    # Build as convenience library
 	    ZLIB_LDFLAGS=-no-install
-	fi
+
+fi
 	;;
 esac
 
@@ -27828,7 +28163,9 @@ esac
 fi
 printf "%s\n" "#define HAVE_DECL_SIZE_MAX $ac_have_decl" >>confdefs.h
 
-if test "$ac_cv_have_decl_LLONG_MAX" != "yes"; then
+if test "$ac_cv_have_decl_LLONG_MAX" != "yes"
+then :
+
     ac_fn_check_decl "$LINENO" "QUAD_MAX" "ac_cv_have_decl_QUAD_MAX" "
 #include <sys/types.h>
 #include <limits.h>
@@ -27843,8 +28180,11 @@ esac
 fi
 printf "%s\n" "#define HAVE_DECL_QUAD_MAX $ac_have_decl" >>confdefs.h
 
+
 fi
-if test "$ac_cv_have_decl_LLONG_MIN" != "yes"; then
+if test "$ac_cv_have_decl_LLONG_MIN" != "yes"
+then :
+
     ac_fn_check_decl "$LINENO" "QUAD_MIN" "ac_cv_have_decl_QUAD_MIN" "
 #include <sys/types.h>
 #include <limits.h>
@@ -27859,8 +28199,11 @@ esac
 fi
 printf "%s\n" "#define HAVE_DECL_QUAD_MIN $ac_have_decl" >>confdefs.h
 
+
 fi
-if test "$ac_cv_have_decl_ULLONG_MAX" != "yes"; then
+if test "$ac_cv_have_decl_ULLONG_MAX" != "yes"
+then :
+
     ac_fn_check_decl "$LINENO" "UQUAD_MAX" "ac_cv_have_decl_UQUAD_MAX" "
 #include <sys/types.h>
 #include <limits.h>
@@ -27875,8 +28218,11 @@ esac
 fi
 printf "%s\n" "#define HAVE_DECL_UQUAD_MAX $ac_have_decl" >>confdefs.h
 
+
 fi
-if test "$ac_cv_have_decl_SIZE_MAX" != "yes"; then
+if test "$ac_cv_have_decl_SIZE_MAX" != "yes"
+then :
+
     ac_fn_check_decl "$LINENO" "SIZE_T_MAX" "ac_cv_have_decl_SIZE_T_MAX" "
 #include <sys/types.h>
 #include <limits.h>
@@ -27891,8 +28237,11 @@ esac
 fi
 printf "%s\n" "#define HAVE_DECL_SIZE_T_MAX $ac_have_decl" >>confdefs.h
 
+
 fi
-if test "$ac_cv_have_decl_PATH_MAX" != "yes"; then
+if test "$ac_cv_have_decl_PATH_MAX" != "yes"
+then :
+
     ac_fn_check_decl "$LINENO" "_POSIX_PATH_MAX" "ac_cv_have_decl__POSIX_PATH_MAX" "
 #include <sys/types.h>
 #include <limits.h>
@@ -27906,6 +28255,7 @@ else case e in #(
 esac
 fi
 printf "%s\n" "#define HAVE_DECL__POSIX_PATH_MAX $ac_have_decl" >>confdefs.h
+
 
 fi
 
@@ -27972,14 +28322,17 @@ fi
 esac
 fi
 
-    if test "$HAVE_SIGLIST" != "true"; then
+    if test "$HAVE_SIGLIST" != "true"
+then :
+
 	case " $LIBOBJS " in
   *" siglist.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS siglist.$ac_objext"
  ;;
 esac
 
-    fi
+
+fi
  ;;
 esac
 fi
@@ -28054,7 +28407,9 @@ fi
 
 done
 
-if test x"${ac_cv_func_sig2str}${ac_cv_func_str2sig}" != x"yesyes"; then
+if test x"${ac_cv_func_sig2str}${ac_cv_func_str2sig}" != x"yesyes"
+then :
+
     ac_fn_c_check_func "$LINENO" "sigabbrev_np" "ac_cv_func_sigabbrev_np"
 if test "x$ac_cv_func_sigabbrev_np" = xyes
 then :
@@ -28062,7 +28417,9 @@ then :
 
 fi
 
-    if test x"${ac_cv_func_sigabbrev_np}" != x"yes"; then
+    if test x"${ac_cv_func_sigabbrev_np}" != x"yes"
+then :
+
 	COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }strsig_test"
 	HAVE_SIGNAME="false"
 	ac_fn_check_decl "$LINENO" "sys_signame" "ac_cv_have_decl_sys_signame" "
@@ -28127,7 +28484,9 @@ fi
 esac
 fi
 
-	if test "$HAVE_SIGNAME" != "true"; then
+	if test "$HAVE_SIGNAME" != "true"
+then :
+
 	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for undeclared sys_sigabbrev" >&5
 printf %s "checking for undeclared sys_sigabbrev... " >&6; }
 if test ${sudo_cv_var_sys_sigabbrev+y}
@@ -28161,10 +28520,14 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_sys_sigabbrev" >&5
 printf "%s\n" "$sudo_cv_var_sys_sigabbrev" >&6; }
-	    if test "$sudo_cv_var_sys_sigabbrev" = yes; then
+	    if test "$sudo_cv_var_sys_sigabbrev" = yes
+then :
+
 		printf "%s\n" "#define HAVE_SYS_SIGABBREV 1" >>confdefs.h
 
-	    else
+
+else case e in #(
+  e)
 		case " $LIBOBJS " in
   *" signame.$ac_objext "* ) ;;
   *) LIBOBJS="$LIBOBJS signame.$ac_objext"
@@ -28172,9 +28535,14 @@ printf "%s\n" "$sudo_cv_var_sys_sigabbrev" >&6; }
 esac
 
 		SIGNAME=signame.lo
-	    fi
-	fi
-    fi
+	     ;;
+esac
+fi
+
+fi
+
+fi
+
 fi
 
 OLIBS="$LIBS"
@@ -28188,22 +28556,30 @@ fi
 
 LIBS="$OLIBS"
 
-if test ${with_netsvc-"no"} != "no"; then
+if test ${with_netsvc-"no"} != "no"
+then :
+
     cat >>confdefs.h <<EOF
 #define _PATH_NETSVC_CONF "${with_netsvc-/etc/netsvc.conf}"
 EOF
 
     netsvc_conf=${with_netsvc-/etc/netsvc.conf}
-elif test ${with_nsswitch-"yes"} != "no"; then
+
+elif test ${with_nsswitch-"yes"} != "no"
+then :
+
     cat >>confdefs.h <<EOF
 #define _PATH_NSSWITCH_CONF "${with_nsswitch-/etc/nsswitch.conf}"
 EOF
 
     nsswitch_conf=${with_nsswitch-/etc/nsswitch.conf}
+
 fi
 
 
-if test -z "${AUTH_EXCL}${AUTH_REG}" -a -n "$AUTH_EXCL_DEF"; then
+if test -z "${AUTH_EXCL}${AUTH_REG}" -a -n "$AUTH_EXCL_DEF"
+then :
+
     for auth in $AUTH_EXCL_DEF; do
 	case $auth in
 	    AIX_AUTH)	with_aixauth=maybe;;
@@ -28212,9 +28588,12 @@ if test -z "${AUTH_EXCL}${AUTH_REG}" -a -n "$AUTH_EXCL_DEF"; then
 	    SIA)	CHECKSIA=true;;
 	esac
     done
+
 fi
 
-if test ${with_pam-"no"} != "no"; then
+if test ${with_pam-"no"} != "no"
+then :
+
     #
     # Check for pam_start() in libpam first, then for pam_appl.h.
     #
@@ -28287,26 +28666,49 @@ _ACEOF
 fi
 
 done
-    if test "$found_pam_lib" = "yes" -a "$found_pam_hdrs" = "yes"; then
+    if test "$found_pam_lib" = "yes" -a "$found_pam_hdrs" = "yes"
+then :
+
 	# Found both PAM libs and headers
 	with_pam=yes
-    elif test "$with_pam" = "yes"; then
-	if test "$found_pam_lib" = "no"; then
-	    as_fn_error $? "--with-pam specified but unable to locate PAM development library." "$LINENO" 5
-	fi
-	if test "$found_pam_hdrs" = "no"; then
-	    as_fn_error $? "--with-pam specified but unable to locate PAM development headers." "$LINENO" 5
-	fi
-    elif test "$found_pam_lib" != "$found_pam_hdrs"; then
-	if test "$found_pam_lib" = "no"; then
-	    as_fn_error $? "found PAM headers but no PAM development library; specify --without-pam to build without PAM" "$LINENO" 5
-	fi
-	if test "$found_pam_hdrs" = "no"; then
-	    as_fn_error $? "found PAM library but no PAM development headers; specify --without-pam to build without PAM" "$LINENO" 5
-	fi
-    fi
 
-    if test "$with_pam" = "yes"; then
+elif test "$with_pam" = "yes"
+then :
+
+	if test "$found_pam_lib" = "no"
+then :
+
+	    as_fn_error $? "--with-pam specified but unable to locate PAM development library." "$LINENO" 5
+
+fi
+	if test "$found_pam_hdrs" = "no"
+then :
+
+	    as_fn_error $? "--with-pam specified but unable to locate PAM development headers." "$LINENO" 5
+
+fi
+
+elif test "$found_pam_lib" != "$found_pam_hdrs"
+then :
+
+	if test "$found_pam_lib" = "no"
+then :
+
+	    as_fn_error $? "found PAM headers but no PAM development library; specify --without-pam to build without PAM" "$LINENO" 5
+
+fi
+	if test "$found_pam_hdrs" = "no"
+then :
+
+	    as_fn_error $? "found PAM library but no PAM development headers; specify --without-pam to build without PAM" "$LINENO" 5
+
+fi
+
+fi
+
+    if test "$with_pam" = "yes"
+then :
+
 	# Older PAM implementations lack pam_getenvlist
 	OLIBS="$LIBS"
 	LIBS="$LIBS -lpam $lt_cv_dlopen_libs"
@@ -28357,10 +28759,14 @@ printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-pam-sessio
 	    esac
 fi
 
-    fi
+
 fi
 
-if test ${with_aixauth-'no'} != "no"; then
+fi
+
+if test ${with_aixauth-'no'} != "no"
+then :
+
 
   for ac_func in authenticate
 do :
@@ -28372,7 +28778,9 @@ then :
 fi
 
 done
-    if test "${with_aixauth}" = "yes"; then
+    if test "${with_aixauth}" = "yes"
+then :
+
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: using AIX general authentication" >&5
 printf "%s\n" "$as_me: using AIX general authentication" >&6;}
 	printf "%s\n" "#define HAVE_AIXAUTH 1" >>confdefs.h
@@ -28380,10 +28788,14 @@ printf "%s\n" "$as_me: using AIX general authentication" >&6;}
 	AUTH_OBJS="$AUTH_OBJS aix_auth.lo";
 	SUDOERS_LIBS="${SUDOERS_LIBS} -ls"
 	AUTH_EXCL=AIX_AUTH
-    fi
+
 fi
 
-if test ${with_bsdauth-'no'} != "no"; then
+fi
+
+if test ${with_bsdauth-'no'} != "no"
+then :
+
     ac_fn_c_check_header_compile "$LINENO" "bsd_auth.h" "ac_cv_header_bsd_auth_h" "$ac_includes_default"
 if test "x$ac_cv_header_bsd_auth_h" = xyes
 then :
@@ -28397,9 +28809,12 @@ else case e in #(
 esac
 fi
 
+
 fi
 
-if test ${CHECKSIA-'false'} = "true"; then
+if test ${CHECKSIA-'false'} = "true"
+then :
+
 
   for ac_func in sia_ses_init
 do :
@@ -28414,14 +28829,22 @@ esac
 fi
 
 done
-    if test "$found" = "true"; then
+    if test "$found" = "true"
+then :
+
 	AUTH_EXCL=SIA
 	AUTH_OBJS="$AUTH_OBJS sia.lo"
-    fi
+
 fi
 
-if test ${with_fwtk-'no'} != "no"; then
-    if test "$with_fwtk" != "yes"; then
+fi
+
+if test ${with_fwtk-'no'} != "no"
+then :
+
+    if test "$with_fwtk" != "yes"
+then :
+
 
 
 if test ${SUDOERS_LDFLAGS+y}
@@ -28529,19 +28952,30 @@ esac
 fi
 
 	with_fwtk=yes
-    fi
+
+fi
     SUDOERS_LIBS="${SUDOERS_LIBS} -lauth -lfwall"
     AUTH_OBJS="$AUTH_OBJS fwtk.lo"
+
 fi
 
-if test ${with_SecurID-'no'} != "no"; then
-    if test "$with_SecurID" != "yes"; then
-	:
-    elif test -d /usr/ace/examples; then
+if test ${with_SecurID-'no'} != "no"
+then :
+
+    if test "$with_SecurID" != "yes"
+then :
+
+elif test -d /usr/ace/examples
+then :
+
 	with_SecurID=/usr/ace/examples
-    else
+
+else case e in #(
+  e)
 	with_SecurID=/usr/ace
-    fi
+     ;;
+esac
+fi
 
 if test ${CPPFLAGS+y}
 then :
@@ -28650,18 +29084,24 @@ fi
 
     SUDOERS_LIBS="${SUDOERS_LIBS} -laceclnt -lpthread"
     AUTH_OBJS="$AUTH_OBJS securid5.lo";
+
 fi
 
 
-if test -z "${AUTH_EXCL}" -a -n "$AUTH_DEF"; then
+if test -z "${AUTH_EXCL}" -a -n "$AUTH_DEF"
+then :
+
     for auth in $AUTH_DEF; do
 	case $auth in
 	    passwd)	: ${with_passwd='maybe'};;
 	esac
     done
+
 fi
 
-if test ${with_kerb5-'no'} != "no"; then
+if test ${with_kerb5-'no'} != "no"
+then :
+
     # Extract the first word of "krb5-config", so it can be a program name with args.
 set dummy krb5-config; ac_word=$2
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -28706,7 +29146,9 @@ printf "%s\n" "no" >&6; }
 fi
 
 
-    if test -n "$KRB5CONFIG"; then
+    if test -n "$KRB5CONFIG"
+then :
+
 	printf "%s\n" "#define HAVE_KERB5 1" >>confdefs.h
 
 	AUTH_OBJS="$AUTH_OBJS kerb5.lo"
@@ -28777,10 +29219,14 @@ printf "%s\n" "no" >&6; }
 esac
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-    else
+
+else case e in #(
+  e)
 	printf "%s\n" "#define HAVE_KERB5 1" >>confdefs.h
 
-				if test "$with_kerb5" = "yes"; then
+				if test "$with_kerb5" = "yes"
+then :
+
 	    found=no
 	    O_CPPFLAGS="$CPPFLAGS"
 	    for dir in "" "kerberosV/" "krb5/" "kerberos5/" "kerberosv5/"; do
@@ -28802,12 +29248,17 @@ then :
 fi
 rm -f conftest.err conftest.i conftest.$ac_ext
 	    done
-	    if test X"$found" = X"no"; then
+	    if test X"$found" = X"no"
+then :
+
 		CPPFLAGS="$O_CPPFLAGS"
 		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: unable to locate Kerberos V include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS" >&5
 printf "%s\n" "$as_me: WARNING: unable to locate Kerberos V include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS" >&2;}
-	    fi
-	else
+
+fi
+
+else case e in #(
+  e)
 
 
 if test ${SUDOERS_LDFLAGS+y}
@@ -28914,7 +29365,9 @@ else case e in #(
 esac
 fi
 
-	fi
+	 ;;
+esac
+fi
 
 				{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether we are using Heimdal" >&5
 printf %s "checking whether we are using Heimdal... " >&6; }
@@ -29027,7 +29480,9 @@ esac
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
 	AUTH_OBJS="$AUTH_OBJS kerb5.lo"
-    fi
+     ;;
+esac
+fi
     _LIBS="$LIBS"
     LIBS="${LIBS} ${SUDOERS_LIBS}"
     ac_fn_c_check_func "$LINENO" "krb5_verify_user" "ac_cv_func_krb5_verify_user"
@@ -29089,10 +29544,13 @@ printf "%s\n" "$sudo_cv_krb5_get_init_creds_opt_free_two_args" >&6; }
 fi
 
 done
-    if test X"$sudo_cv_krb5_get_init_creds_opt_free_two_args" = X"yes"; then
+    if test X"$sudo_cv_krb5_get_init_creds_opt_free_two_args" = X"yes"
+then :
+
   	printf "%s\n" "#define HAVE_KRB5_GET_INIT_CREDS_OPT_FREE_TWO_ARGS 1" >>confdefs.h
 
-    fi
+
+fi
     LIBS="$_LIBS"
     # Check whether --enable-kerb5-instance was given.
 if test ${enable_kerb5_instance+y}
@@ -29109,14 +29567,18 @@ EOF
 	esac
 fi
 
+
 fi
 
-if test ${with_AFS-'no'} = "yes"; then
+if test ${with_AFS-'no'} = "yes"
+then :
 
     # looks like the "standard" place for AFS libs is /usr/afsws/lib
     AFSLIBDIRS="/usr/lib/afs /usr/afsws/lib /usr/afsws/lib/afs"
     for i in $AFSLIBDIRS; do
-	if test -d ${i}; then
+	if test -d ${i}
+then :
+
 
 
 if test ${SUDOERS_LDFLAGS+y}
@@ -29190,31 +29652,43 @@ fi
     fi
 
 	    FOUND_AFSLIBDIR=true
-	fi
+
+fi
     done
-    if test -z "$FOUND_AFSLIBDIR"; then
+    if test -z "$FOUND_AFSLIBDIR"
+then :
+
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDOERS_LDFLAGS or rerun configure with the --with-libpath options." >&5
 printf "%s\n" "$as_me: WARNING: unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDOERS_LDFLAGS or rerun configure with the --with-libpath options." >&2;}
-    fi
+
+fi
 
     # Order is important here.  Note that we build AFS_LIBS from right to left
     # since AFS_LIBS may be initialized with BSD compat libs that must go last
     AFS_LIBS="-laudit ${AFS_LIBS}"
     for i in $AFSLIBDIRS; do
-	if test -f ${i}/util.a; then
+	if test -f ${i}/util.a
+then :
+
 	    AFS_LIBS="${i}/util.a ${AFS_LIBS}"
 	    FOUND_UTIL_A=true
 	    break;
-	fi
+
+fi
     done
-    if test -z "$FOUND_UTIL_A"; then
+    if test -z "$FOUND_UTIL_A"
+then :
+
 	AFS_LIBS="-lutil ${AFS_LIBS}"
-    fi
+
+fi
     AFS_LIBS="-lkauth -lprot -lubik -lauth -lrxkad -lsys -ldes -lrx -llwp -lcom_err ${AFS_LIBS}"
 
     # AFS includes may live in /usr/include on some machines...
     for i in /usr/afsws/include; do
-	if test -d ${i}; then
+	if test -d ${i}
+then :
+
 
 if test ${CPPFLAGS+y}
 then :
@@ -29250,26 +29724,38 @@ esac
 fi
 
 	    FOUND_AFSINCDIR=true
-	fi
+
+fi
     done
 
-    if test -z "$FOUND_AFSLIBDIR"; then
+    if test -z "$FOUND_AFSLIBDIR"
+then :
+
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: unable to locate AFS include dir, you may have to edit the Makefile and add -I/path/to/afs/includes to CPPFLAGS or rerun configure with the --with-incpath options." >&5
 printf "%s\n" "$as_me: WARNING: unable to locate AFS include dir, you may have to edit the Makefile and add -I/path/to/afs/includes to CPPFLAGS or rerun configure with the --with-incpath options." >&2;}
-    fi
 
-    AUTH_OBJS="$AUTH_OBJS afs.lo"
 fi
 
-if test ${with_DCE-'no'} = "yes"; then
+    AUTH_OBJS="$AUTH_OBJS afs.lo"
+
+fi
+
+if test ${with_DCE-'no'} = "yes"
+then :
+
     DCE_OBJS="${DCE_OBJS} dce_pwent.o"
     SUDOERS_LIBS="${SUDOERS_LIBS} -ldce"
     AUTH_OBJS="$AUTH_OBJS dce.lo"
+
 fi
 
-if test "${with_skey-'no'}" = "yes"; then
+if test "${with_skey-'no'}" = "yes"
+then :
+
     O_LDFLAGS="$LDFLAGS"
-    if test "$with_skey" != "yes"; then
+    if test "$with_skey" != "yes"
+then :
+
 
 if test ${CPPFLAGS+y}
 then :
@@ -29387,7 +29873,9 @@ else case e in #(
 esac
 fi
 
-    else
+
+else case e in #(
+  e)
 	found=no
 	O_CPPFLAGS="$CPPFLAGS"
 	for dir in "" "/usr/local" "/usr/contrib"; do
@@ -29400,9 +29888,13 @@ then :
 fi
 
 	done
-	if test "$found" = "no" -o -z "$dir"; then
+	if test "$found" = "no" -o -z "$dir"
+then :
+
 	    CPPFLAGS="$O_CPPFLAGS"
-	else
+
+else case e in #(
+  e)
 	    LDFLAGS="$LDFLAGS -L${dir}/lib"
 
 
@@ -29476,12 +29968,19 @@ fi
 
     fi
 
-	fi
-	if test "$found" = "no"; then
+	 ;;
+esac
+fi
+	if test "$found" = "no"
+then :
+
 	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: unable to locate skey.h, you will have to edit the Makefile and add -I/path/to/skey/includes to CPPFLAGS" >&5
 printf "%s\n" "$as_me: WARNING: unable to locate skey.h, you will have to edit the Makefile and add -I/path/to/skey/includes to CPPFLAGS" >&2;}
-	fi
-    fi
+
+fi
+     ;;
+esac
+fi
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for main in -lskey" >&5
 printf %s "checking for main in -lskey... " >&6; }
 if test ${ac_cv_lib_skey_main+y}
@@ -29612,11 +30111,16 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
     LDFLAGS="$O_LDFLAGS"
     SUDOERS_LIBS="${SUDOERS_LIBS} -lskey"
     AUTH_OBJS="$AUTH_OBJS rfc1938.lo"
+
 fi
 
-if test "${with_opie-'no'}" = "yes"; then
+if test "${with_opie-'no'}" = "yes"
+then :
+
     O_LDFLAGS="$LDFLAGS"
-    if test "$with_opie" != "yes"; then
+    if test "$with_opie" != "yes"
+then :
+
 
 if test ${CPPFLAGS+y}
 then :
@@ -29743,7 +30247,9 @@ else case e in #(
 esac
 fi
 rm -f conftest.err conftest.i conftest.$ac_ext
-    else
+
+else case e in #(
+  e)
 	found=no
 	O_CPPFLAGS="$CPPFLAGS"
 	for dir in "" "/usr/local" "/usr/contrib"; do
@@ -29765,9 +30271,13 @@ then :
 fi
 rm -f conftest.err conftest.i conftest.$ac_ext
 	done
-	if test "$found" = "no" -o -z "$dir"; then
+	if test "$found" = "no" -o -z "$dir"
+then :
+
 	    CPPFLAGS="$O_CPPFLAGS"
-	else
+
+else case e in #(
+  e)
 	    LDFLAGS="$LDFLAGS -L${dir}/lib"
 
 
@@ -29841,12 +30351,19 @@ fi
 
     fi
 
-	fi
-	if test "$found" = "no"; then
+	 ;;
+esac
+fi
+	if test "$found" = "no"
+then :
+
 	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: unable to locate opie.h, you will have to edit the Makefile and add -I/path/to/opie/includes to CPPFLAGS" >&5
 printf "%s\n" "$as_me: WARNING: unable to locate opie.h, you will have to edit the Makefile and add -I/path/to/opie/includes to CPPFLAGS" >&2;}
-	fi
-    fi
+
+fi
+     ;;
+esac
+fi
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for main in -lopie" >&5
 printf %s "checking for main in -lopie... " >&6; }
 if test ${ac_cv_lib_opie_main+y}
@@ -29893,9 +30410,12 @@ fi
     LDFLAGS="$O_LDFLAGS"
     SUDOERS_LIBS="${SUDOERS_LIBS} -lopie"
     AUTH_OBJS="$AUTH_OBJS rfc1938.lo"
+
 fi
 
-if test ${with_passwd-'no'} != "no"; then
+if test ${with_passwd-'no'} != "no"
+then :
+
                 _LIBS="$LIBS"
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing crypt" >&5
 printf %s "checking for library containing crypt... " >&6; }
@@ -29966,13 +30486,18 @@ then :
 
 fi
 
-    if test "${ac_cv_search_crypt}" != "no"; then
+    if test "${ac_cv_search_crypt}" != "no"
+then :
+
 	printf "%s\n" "#define HAVE_CRYPT 1" >>confdefs.h
 
-    fi
+
+fi
     LIBS="$_LIBS"
 
-    if test "$CHECKSHADOW" = "true" -a -n "$shadow_funcs"; then
+    if test "$CHECKSHADOW" = "true" -a -n "$shadow_funcs"
+then :
+
 	_LIBS="$LIBS"
 	LIBS="$LIBS $shadow_libs"
 	found=no
@@ -30013,13 +30538,19 @@ then :
 fi
 
 	done
-	if test "$found" = "no"; then
+	if test "$found" = "no"
+then :
+
 	    shadow_libs=
-	fi
+
+fi
 	CHECKSHADOW=false
 	LIBS="$_LIBS"
-    fi
-    if test "$CHECKSHADOW" = "true"; then
+
+fi
+    if test "$CHECKSHADOW" = "true"
+then :
+
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing getspnam" >&5
 printf %s "checking for library containing getspnam... " >&6; }
 if test ${ac_cv_search_getspnam+y}
@@ -30092,8 +30623,11 @@ then :
 
 fi
 
-    fi
-    if test "$CHECKSHADOW" = "true"; then
+
+fi
+    if test "$CHECKSHADOW" = "true"
+then :
+
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing getprpwnam" >&5
 printf %s "checking for library containing getprpwnam... " >&6; }
 if test ${ac_cv_search_getprpwnam+y}
@@ -30167,12 +30701,18 @@ then :
 
 fi
 
-    fi
-    if test -n "$shadow_libs"; then
+
+fi
+    if test -n "$shadow_libs"
+then :
+
 	# sudoers needs to link with shadow libs for password auth
 	SUDOERS_LIBS="$SUDOERS_LIBS $shadow_libs"
-    fi
-    if test -n "$SECUREWARE"; then
+
+fi
+    if test -n "$SECUREWARE"
+then :
+
 	_LIBS="$LIBS"
 	LIBS="$LIBS $shadow_libs"
 	ac_fn_c_check_func "$LINENO" "bigcrypt" "ac_cv_func_bigcrypt"
@@ -30199,10 +30739,14 @@ fi
 
 done
 	LIBS="$_LIBS"
-    fi
+
 fi
 
-if test X"$with_bsm_audit" = X"yes"; then
+fi
+
+if test X"$with_bsm_audit" = X"yes"
+then :
+
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether au_close() takes 4 arguments" >&5
 printf %s "checking whether au_close() takes 4 arguments... " >&6; }
 if test ${sudo_cv_func_au_close_solaris11+y}
@@ -30244,9 +30788,12 @@ printf "%s\n" "#define HAVE_AU_CLOSE_SOLARIS11 1" >>confdefs.h
 
   fi
 
+
 fi
 
-if test X"$enable_poll" = X""; then
+if test X"$enable_poll" = X""
+then :
+
 
   for ac_func in ppoll poll
 do :
@@ -30264,7 +30811,10 @@ esac
 fi
 
 done
-elif test X"$enable_poll" = X"yes"; then
+
+elif test X"$enable_poll" = X"yes"
+then :
+
 
   for ac_func in ppoll
 do :
@@ -30280,10 +30830,15 @@ esac
 fi
 
 done
+
 fi
-if test "$enable_poll" = "yes"; then
+if test "$enable_poll" = "yes"
+then :
+
     COMMON_OBJS="${COMMON_OBJS} event_poll.lo"
-else
+
+else case e in #(
+  e)
     ac_fn_c_check_func "$LINENO" "pselect" "ac_cv_func_pselect"
 if test "x$ac_cv_func_pselect" = xyes
 then :
@@ -30292,6 +30847,8 @@ then :
 fi
 
     COMMON_OBJS="${COMMON_OBJS} event_select.lo"
+ ;;
+esac
 fi
 
 
@@ -31058,7 +31615,9 @@ case "$lt_cv_dlopen" in
     dlopen)
 	printf "%s\n" "#define HAVE_DLOPEN 1" >>confdefs.h
 
-	if test "$enable_static_sudoers" = "yes"; then
+	if test "$enable_static_sudoers" = "yes"
+then :
+
 	    printf "%s\n" "#define STATIC_SUDOERS_PLUGIN 1" >>confdefs.h
 
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
@@ -31099,15 +31658,21 @@ fi
 
 	    SUDOERS_LT_STATIC="--tag=disable-shared"
 	    LT_STATIC=""
-	else
+
+else case e in #(
+  e)
 	    SUDOERS_LT_STATIC="--tag=disable-static"
 	    LT_STATIC="--tag=disable-static"
-	fi
+	 ;;
+esac
+fi
 	;;
     shl_load)
 	printf "%s\n" "#define HAVE_SHL_LOAD 1" >>confdefs.h
 
-	if test "$enable_static_sudoers" = "yes"; then
+	if test "$enable_static_sudoers" = "yes"
+then :
+
 	    printf "%s\n" "#define STATIC_SUDOERS_PLUGIN 1" >>confdefs.h
 
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
@@ -31148,15 +31713,22 @@ fi
 
 	    SUDOERS_LT_STATIC="--tag=disable-shared"
 	    LT_STATIC=""
-	else
+
+else case e in #(
+  e)
 	    SUDOERS_LT_STATIC="--tag=disable-static"
 	    LT_STATIC="--tag=disable-static"
-	fi
+	 ;;
+esac
+fi
 	;;
     *)
-	if test X"${ac_cv_func_dlopen}" = X"yes"; then
+	if test X"${ac_cv_func_dlopen}" = X"yes"
+then :
+
 	    as_fn_error $? "dlopen present but libtool doesn't appear to support your platform." "$LINENO" 5
-	fi
+
+fi
 	# Preload sudoers module symbols
 	printf "%s\n" "#define STATIC_SUDOERS_PLUGIN 1" >>confdefs.h
 
@@ -31177,10 +31749,16 @@ fi
 # We can only disable linking with the shared libsudo_util if
 # sudoers is linked statically too.
 #
-if test "$enable_shared_libutil" = "no"; then
-    if test X"$STATIC_SUDOERS" = X""; then
+if test "$enable_shared_libutil" = "no"
+then :
+
+    if test X"$STATIC_SUDOERS" = X""
+then :
+
 	as_fn_error $? "--disable-shared-libutil may only be specified with --enable-static-sudoers or when dynamic linking is disabled." "$LINENO" 5
-    else
+
+else case e in #(
+  e)
 	# Do not install libsudo_util.
 
 if test ${LIBUTIL_LDFLAGS+y}
@@ -31216,7 +31794,10 @@ else case e in #(
 esac
 fi
 
-    fi
+     ;;
+esac
+fi
+
 fi
 
 # On HP-UX, you cannot dlopen() a shared object that uses pthreads unless
@@ -31270,7 +31851,8 @@ fi
 	;;
 esac
 
-if test "$utmp_style" = "LEGACY"; then
+if test "$utmp_style" = "LEGACY"
+then :
 
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for utmp file path" >&5
 printf %s "checking for utmp file path... " >&6; }
@@ -31538,7 +32120,9 @@ then :
 fi
 
 
-if test -n "$GCC" -a "$lt_cv_prog_gnu_ld" != "yes"; then
+if test -n "$GCC" -a "$lt_cv_prog_gnu_ld" != "yes"
+then :
+
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -static-libgcc" >&5
 printf %s "checking whether C compiler accepts -static-libgcc... " >&6; }
 if test ${ax_cv_check_cflags___static_libgcc+y}
@@ -31612,6 +32196,7 @@ else case e in #(
   e) : ;;
 esac
 fi
+
 
 fi
 
@@ -34063,22 +34648,30 @@ fi
 case "$with_passwd" in
 yes|maybe)
     AUTH_OBJS="$AUTH_OBJS getspwuid.lo passwd.lo"
-    if test "${ac_cv_search_crypt}" = "no"; then
+    if test "${ac_cv_search_crypt}" = "no"
+then :
+
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: no crypt function found, assuming plaintext passwords" >&5
 printf "%s\n" "$as_me: WARNING: no crypt function found, assuming plaintext passwords" >&2;}
-    fi
+
+fi
     ;;
 *)
     printf "%s\n" "#define WITHOUT_PASSWD 1" >>confdefs.h
 
-    if test -z "$AUTH_OBJS"; then
+    if test -z "$AUTH_OBJS"
+then :
+
 	as_fn_error $? "no authentication methods defined." "$LINENO" 5
-    fi
+
+fi
     ;;
 esac
 AUTH_OBJS=${AUTH_OBJS# }
 
-if test -n "$LIBS"; then
+if test -n "$LIBS"
+then :
+
     L="$LIBS"
     LIBS=
     for l in ${L}; do
@@ -34088,13 +34681,16 @@ if test -n "$LIBS"; then
 	done
 	test $dupe = 0 && LIBS="${LIBS} $l"
     done
+
 fi
 
 
 printf "%s\n" "#define os_init $OS_INIT" >>confdefs.h
 
 
-if test -n "$GCC"; then
+if test -n "$GCC"
+then :
+
     #
     # The fallthrough attribute is supported by gcc 7.0 and clang 10.
     # This test relies on AC_LANG_WERROR.
@@ -34139,11 +34735,16 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_fallthrough_attribute" >&5
 printf "%s\n" "$sudo_cv_var_fallthrough_attribute" >&6; }
-    if test X"$sudo_cv_var_fallthrough_attribute" = X"yes"; then
+    if test X"$sudo_cv_var_fallthrough_attribute" = X"yes"
+then :
+
 	printf "%s\n" "#define HAVE_FALLTHROUGH_ATTRIBUTE 1" >>confdefs.h
 
-    fi
-    if test X"$enable_warnings" = X"yes" -o X"$with_devel" = X"yes"; then
+
+fi
+    if test X"$enable_warnings" = X"yes" -o X"$with_devel" = X"yes"
+then :
+
 
 if test ${CFLAGS+y}
 then :
@@ -34604,7 +35205,9 @@ else case e in #(
 esac
 fi
 
-	if test X"$sudo_cv_var_fallthrough_attribute" = X"yes"; then
+	if test X"$sudo_cv_var_fallthrough_attribute" = X"yes"
+then :
+
 
 if test ${CFLAGS+y}
 then :
@@ -34639,9 +35242,13 @@ else case e in #(
 esac
 fi
 
-	fi
-    fi
-    if test X"$enable_werror" = X"yes"; then
+
+fi
+
+fi
+    if test X"$enable_werror" = X"yes"
+then :
+
 
 if test ${CFLAGS+y}
 then :
@@ -34676,7 +35283,8 @@ else case e in #(
 esac
 fi
 
-    fi
+
+fi
     case "$host_os" in
 	# Avoid unwanted warnings on macOS
 	darwin*)
@@ -34714,6 +35322,7 @@ esac
 fi
 ;;
     esac
+
 fi
 
 CROSS_COMPILING="$cross_compiling"
@@ -34778,7 +35387,9 @@ case "$EXAMPLES" in
 	;;
 esac
 
-if test X"$enable_intercept" != X"no"; then
+if test X"$enable_intercept" != X"no"
+then :
+
     SUDO_OBJS="${SUDO_OBJS} intercept.pb-c.o"
     PROGS="${PROGS} sudo_intercept.la"
     INSTALL_INTERCEPT="install-intercept"
@@ -34787,8 +35398,11 @@ if test X"$enable_intercept" != X"no"; then
 #define _PATH_SUDO_INTERCEPT "$intercept_file"
 EOF
 
+
 fi
-if test X"$with_noexec" != X"no"; then
+if test X"$with_noexec" != X"no"
+then :
+
     PROGS="${PROGS} sudo_noexec.la"
     INSTALL_NOEXEC="install-noexec"
 
@@ -34796,19 +35410,28 @@ if test X"$with_noexec" != X"no"; then
 #define _PATH_SUDO_NOEXEC "$noexec_file"
 EOF
 
+
 fi
-if test X"$with_selinux" != X"no"; then
+if test X"$with_selinux" != X"no"
+then :
+
     cat >>confdefs.h <<EOF
 #define _PATH_SUDO_SESH "$sesh_file"
 EOF
 
-else
+
+else case e in #(
+  e)
     cat >>confdefs.h <<EOF
 #define _PATH_SUDO_SESH NULL
 EOF
 
+ ;;
+esac
 fi
-if test X"$enable_shared" != X"no"; then
+if test X"$enable_shared" != X"no"
+then :
+
     cat >>confdefs.h <<EOF
 #define _PATH_SUDO_PLUGIN_DIR "$plugindir/"
 EOF
@@ -34816,11 +35439,15 @@ EOF
 
 printf "%s\n" "#define ENABLE_SUDO_PLUGIN_API 1" >>confdefs.h
 
-else
+
+else case e in #(
+  e)
     cat >>confdefs.h <<EOF
 #define _PATH_SUDO_PLUGIN_DIR NULL
 EOF
 
+ ;;
+esac
 fi
 
 if test X"$LDFLAGS_R" != X""; then
@@ -34864,11 +35491,17 @@ test "$localstatedir" = '${prefix}/var' && localstatedir='$(prefix)/var'
 test "$runstatedir" = '${localstatedir}/run' && runstatedir='$(localstatedir)/run'
 test "$sysconfdir" = '${prefix}/etc' && sysconfdir='/etc'
 
-if test X"$INIT_SCRIPT" != X""; then
+if test X"$INIT_SCRIPT" != X""
+then :
+
     ac_config_files="$ac_config_files etc/init.d/$INIT_SCRIPT"
 
-elif test X"$TMPFILES_D" != X""; then
+
+elif test X"$TMPFILES_D" != X""
+then :
+
     ac_config_files="$ac_config_files etc/init.d/sudo.conf"
+
 
 fi
 
@@ -37223,25 +37856,34 @@ if test "${enable_env_debug+set}" = "set"; then
 fi
 echo "" >&6
 
-if test "$openssl_missing" = "yes"; then
+if test "$openssl_missing" = "yes"
+then :
+
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: OpenSSL dev libraries not found, Sudo logsrv connections will not be encrypted." >&5
 printf "%s\n" "$as_me: WARNING: OpenSSL dev libraries not found, Sudo logsrv connections will not be encrypted." >&2;}
+
 fi
-if test "$with_pam" = "yes"; then
+if test "$with_pam" = "yes"
+then :
+
     case $host_os in
 	hpux*)
-	    if test -f /usr/lib/security/libpam_hpsec.so.1; then
+	    if test -f /usr/lib/security/libpam_hpsec.so.1
+then :
+
 		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: you may wish to add the following line to /etc/pam.conf" >&5
 printf "%s\n" "$as_me: you may wish to add the following line to /etc/pam.conf" >&6;}
 		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: sudo session required libpam_hpsec.so.1 bypass_umask bypass_last_login" >&5
 printf "%s\n" "$as_me: sudo session required libpam_hpsec.so.1 bypass_umask bypass_last_login" >&6;}
-	    fi
+
+fi
 	    ;;
 	linux*)
 	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: you will need to customize examples/pam.conf and install it as /etc/pam.d/sudo" >&5
 printf "%s\n" "$as_me: you will need to customize examples/pam.conf and install it as /etc/pam.d/sudo" >&6;}
 	    ;;
     esac
+
 fi
 case "$rundir" in
     /run/*|/var/run/*)
@@ -37251,11 +37893,14 @@ case "$rundir" in
 	clear_rundir=1
 	;;
 esac
-if test $clear_rundir -eq 1; then
+if test $clear_rundir -eq 1
+then :
+
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: warning: the $rundir/ts directory must be cleared at boot time." >&5
 printf "%s\n" "$as_me: warning: the $rundir/ts directory must be cleared at boot time." >&6;}
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}:          You may need to create a startup item to do this." >&5
 printf "%s\n" "$as_me:          You may need to create a startup item to do this." >&6;}
+
 fi
 
 

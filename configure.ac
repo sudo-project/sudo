@@ -3,7 +3,7 @@ dnl Use the top-level autogen.sh script to generate configure and config.h.in
 dnl
 dnl SPDX-License-Identifier: ISC
 dnl
-dnl Copyright (c) 1994-1996, 1998-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+dnl Copyright (c) 1994-1996, 1998-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 dnl
 dnl Permission to use, copy, modify, and distribute this software for any
 dnl purpose with or without fee is hereby granted, provided that the above
@@ -739,9 +739,7 @@ AC_ARG_WITH(mail-if-no-user, [AS_HELP_STRING([--without-mail-if-no-user], [do no
     *)		AC_MSG_ERROR([--with-mail-if-no-user does not take an argument.])
 		;;
 esac])
-if test "$mail_no_user" = "on"; then
-    AC_DEFINE(SEND_MAIL_WHEN_NO_USER)
-fi
+AS_IF([test "$mail_no_user" = "on"], [AC_DEFINE(SEND_MAIL_WHEN_NO_USER)])
 
 AC_ARG_WITH(mail-if-no-host, [AS_HELP_STRING([--with-mail-if-no-host], [send mail if user in sudoers but not for this host])],
 [case $with_mail_if_no_host in
@@ -975,9 +973,7 @@ AC_ARG_WITH(env-editor, [AS_HELP_STRING([--with-env-editor], [Use the environmen
     *)		AC_MSG_ERROR([--with-env-editor does not take an argument.])
 		;;
 esac])
-if test "$env_editor" = "on"; then
-    AC_DEFINE(ENV_EDITOR)
-fi
+AS_IF([test "$env_editor" = "on"], [AC_DEFINE(ENV_EDITOR)])
 
 AC_ARG_WITH(passwd-tries, [AS_HELP_STRING([--with-passwd-tries], [number of tries to enter password (default is 3)])],
 [case $with_passwd_tries in
@@ -1153,11 +1149,11 @@ AC_ARG_WITH(askpass, [AS_HELP_STRING([--with-askpass=PATH], [Fully qualified pat
 esac], [
     with_askpass=no
 ])
-if test X"$with_askpass" != X"no"; then
+AS_IF([test X"$with_askpass" != X"no"], [
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_ASKPASS, "$with_askpass")
-else
+], [
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_ASKPASS, NULL)
-fi
+])
 
 AC_ARG_WITH(exampledir, [AS_HELP_STRING([--with-exampledir=DIR], [path to install sudo examples in])],
 [case $with_exampledir in
@@ -1338,11 +1334,11 @@ AC_ARG_ENABLE(env_reset,
 		;;
   esac
 ])
-if test "$env_reset" = "on"; then
+AS_IF([test "$env_reset" = "on"], [
     AC_DEFINE(ENV_RESET, 1)
-else
+], [
     AC_DEFINE(ENV_RESET, 0)
-fi
+])
 
 AC_ARG_ENABLE(warnings,
 [AS_HELP_STRING([--enable-warnings], [Whether to enable compiler warnings])],
@@ -1377,9 +1373,9 @@ AC_ARG_ENABLE(pie,
 
 AC_ARG_ENABLE(sanitizer,
 [AS_HELP_STRING([--enable-sanitizer], [Build sudo with sanitizer support.])], [
-if test X"$enable_sanitizer" = X"yes"; then
-    enable_sanitizer="-fsanitize=address,undefined"
-fi
+    AS_IF([test X"$enable_sanitizer" = X"yes"], [
+	enable_sanitizer="-fsanitize=address,undefined"
+    ])
 ], [enable_sanitizer=no])
 
 AC_ARG_ENABLE(fuzzer,
@@ -1526,9 +1522,7 @@ AC_DEFINE_UNQUOTED(TIMESTAMP_TYPE, $timestamp_type)
 AC_ARG_ENABLE(offensive_insults,
 [AS_HELP_STRING([--enable-offensive-insults], [Enable potentially offensive sudo insults.])],
 [], [enable_offensive_insults=no])
-if test "$enable_offensive_insults" = "yes"; then
-    AC_DEFINE(OFFENSIVE_INSULTS)
-fi
+AS_IF([test "$enable_offensive_insults" = "yes"], [AC_DEFINE(OFFENSIVE_INSULTS)])
 
 AC_ARG_ENABLE(package_build,
 [AS_HELP_STRING([--enable-package-build], [Enable options for package building.])],
@@ -1572,14 +1566,14 @@ AC_ARG_ENABLE(log-client,
   esac
 ], [AC_DEFINE([SUDOERS_LOG_CLIENT])])
 
-if test X"${enable_log_client}${enable_log_server}" = X"nono"; then
+AS_IF([test X"${enable_log_client}${enable_log_server}" = X"nono"], [
     # No need for liblogsrv.la
     LOGSRV_SRC=
     LIBLOGSRV=
-fi
-if test X"$LOGSRVD_SRC" != X""; then
+])
+AS_IF([test X"$LOGSRVD_SRC" != X""], [
     PPFILES="$PPFILES "'$(srcdir)/etc/sudo-logsrvd.pp'
-fi
+])
 
 dnl
 dnl Do OpenSSL / wolfSSL / gcrypt after logsrv options
@@ -1588,9 +1582,9 @@ AC_ARG_ENABLE(openssl,
 [AS_HELP_STRING([--enable-openssl], [Use OpenSSL's TLS and sha2 functions])],
 [], [
     # Enable OpenSSL by default unless logsrvd and client are disabled
-    if test X"${enable_log_client}${enable_log_server}" != X"nono"; then
+    AS_IF([test X"${enable_log_client}${enable_log_server}" != X"nono"], [
 	enable_openssl=maybe
-    fi
+    ])
 ])
 AC_ARG_ENABLE(openssl-pkgconfig-template,
 [AS_HELP_STRING([--enable-openssl-pkgconfig-template], [A printf format string used to construct the OpenSSL pkg-config name])],
@@ -1603,10 +1597,10 @@ AC_ARG_ENABLE(wolfssl,
 
 AC_ARG_ENABLE(gcrypt,
 [AS_HELP_STRING([--enable-gcrypt], [Use GNU crypt's sha2 functions])], [
-    if test "${enable_openssl-no}${enable_wolfssl-no}" != "nono"; then
+    AS_IF([test "${enable_openssl-no}${enable_wolfssl-no}" != "nono"], [
 	AC_MSG_WARN([ignoring --enable-gcrypt when OpenSSL or wolfSSL is enabled.])
 	enable_gcrypt=no
-    fi
+    ])
 ])
 
 AC_ARG_ENABLE(python,
@@ -1625,23 +1619,23 @@ dnl
 AC_PROG_CPP
 AC_CHECK_TOOL(AR, ar, false)
 AC_CHECK_TOOL(RANLIB, ranlib, :)
-if test X"$AR" = X"false"; then
+AS_IF([test X"$AR" = X"false"], [
     AC_MSG_ERROR([the "ar" utility is required to build sudo])
-fi
+])
 AX_PROG_CC_FOR_BUILD
 
-if test "x$ac_cv_prog_cc_c89" = "xno"; then
+AS_IF([test "x$ac_cv_prog_cc_c89" = "xno"], [
     AC_MSG_ERROR([Sudo version $PACKAGE_VERSION requires an ANSI C compiler to build.])
-fi
+])
 
 dnl
 dnl If the user specified --disable-static, override them or we'll
 dnl be unable to build the executables in the sudoers plugin dir.
 dnl
-if test "$enable_static" = "no"; then
+AS_IF([test "$enable_static" = "no"], [
     AC_MSG_WARN([ignoring --disable-static, sudo does not install static libs])
     enable_static=yes
-fi
+])
 
 dnl
 dnl Set host variables and m4 macro dir
@@ -1682,13 +1676,13 @@ dnl values to match.  This must come after the LT_INIT() call.
 dnl
 case "$host_os" in
 aix*)
-    if test X"$aix_use_runtimelinking" != X"yes"; then
+    AS_IF([test X"$aix_use_runtimelinking" != X"yes"], [
 	# Using traditional AIX dynamic shared objects in an archive file.
 	noexec_file="$libexecdir/sudo/sudo_noexec.a(sudo_noexec.so)"
 	intercept_file="$libexecdir/sudo/sudo_intercept.a(sudo_intercept.so)"
 	sudoers_plugin="sudoers.a(sudoers.so)"
 	python_plugin="python_plugin.a(python_plugin.so)"
-    fi
+    ])
     ;;
 esac
 SUDO_DEFINE_UNQUOTED([_PATH_SUDOERS_PLUGIN], ["$sudoers_plugin"])
@@ -1711,7 +1705,7 @@ esac])
 dnl
 dnl Defer enable_intercept and with_noexec until after libtool magic runs
 dnl
-if test "$enable_shared" = "no"; then
+AS_IF([test "$enable_shared" = "no"], [
     enable_intercept=no
     with_noexec=no
     enable_dlopen=no
@@ -1719,7 +1713,7 @@ if test "$enable_shared" = "no"; then
     lt_cv_dlopen_libs=
     ac_cv_func_dlopen=no
     LT_LDFLAGS=-static
-fi
+])
 LIBDL="$lt_cv_dlopen_libs"
 SHLIB_ENABLE="$enable_dlopen"
 
@@ -1785,23 +1779,23 @@ esac
 dnl
 dnl If a config.cache exists make sure it matches the current host.
 dnl
-if test -n "$sudo_cv_prev_host"; then
-    if test "$sudo_cv_prev_host" != "$host"; then
+AS_IF([test -n "$sudo_cv_prev_host"], [
+    AS_IF([test "$sudo_cv_prev_host" != "$host"], [
 	AC_MSG_ERROR([config.cache was created on a different host; remove it and re-run configure.])
-    fi
-fi
+    ])
+])
 sudo_cv_prev_host="$host"
 
 dnl
 dnl We want to be able to differentiate between different rev's
 dnl
-if test -n "$host_os"; then
+AS_IF([test -n "$host_os"], [
     OSREV=`echo $host_os | sed 's/^[[^0-9\.]]*\([[0-9\.]]*\).*$/\1/'`
     OSMAJOR=`echo $OSREV | sed 's/\..*$//'`
-else
+], [
     OSREV=0
     OSMAJOR=0
-fi
+])
 
 case "$host" in
     *-*-solaris2*)
@@ -1820,9 +1814,9 @@ case "$host" in
 		SUDO_OBJS="${SUDO_OBJS} solaris.o"
 
 		# AFS support needs -lucb
-		if test "$with_AFS" = "yes"; then
+		AS_IF([test "$with_AFS" = "yes"], [
 		    AFS_LIBS="-lc -lucb"
-		fi
+		])
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		: ${mansectmisc='5'}
@@ -1838,9 +1832,9 @@ case "$host" in
 		# For AIX we build in support for both LAM and PAM
 		# and choose which to use based on auth_type in
 		# /etc/security/login.cfg
-		if test X"${with_pam}${with_aixauth}" = X""; then
+		AS_IF([test X"${with_pam}${with_aixauth}" = X""], [
 		    AUTH_EXCL_DEF="AIX_AUTH PAM"
-		fi
+		])
 
 		# AIX analog of nsswitch.conf, enabled by default
 		AC_ARG_WITH(netsvc, [AS_HELP_STRING([--with-netsvc[[=PATH]]], [path to netsvc.conf])],
@@ -1850,9 +1844,9 @@ case "$host" in
 				;;
 		    *)		;;
 		esac])
-		if test -z "$with_nsswitch" -a -z "$with_netsvc"; then
+		AS_IF([test -z "$with_nsswitch" -a -z "$with_netsvc"], [
 		    with_netsvc="/etc/netsvc.conf"
-		fi
+		])
 
 		# LDR_PRELOAD is only supported in AIX 5.3 and later
 		case "$OSREV" in
@@ -1866,9 +1860,9 @@ case "$host" in
 
 		# strnlen/strndup may be broken on AIX < 6 depending
 		# on the libc version, use our own.
-		if test $OSMAJOR -lt 6; then
+		AS_IF([test $OSMAJOR -lt 6], [
 		    : ${ac_cv_func_strnlen='no'}
-		fi
+		])
 
 		# fmemopen(3) has a bug wrt feof() on some AIX versions.
 		# https://www.ibm.com/support/pages/apar/IJ11845
@@ -1876,19 +1870,19 @@ case "$host" in
 
 		# getdelim() may or may not be present on AIX <= 6.1.
 		# bos610 is missing getdelim but bos61J has it.
-		if test "$enable_package_build" = "yes"; then
-		    if test $OSMAJOR -le 6; then
+		AS_IF([test "$enable_package_build" = "yes"], [
+		    AS_IF([test $OSMAJOR -le 6], [
 			: ${ac_cv_func_getdelim='no'}
-		    fi
-		fi
+		    ])
+		])
 
 		# memset_s() may or may ont be present on AIX <= 7.1.
 		# bos710 is missing memset_s but bos71L has it.
-		if test "$enable_package_build" = "yes"; then
-		    if test $OSMAJOR -le 7; then
+		AS_IF([test "$enable_package_build" = "yes"], [
+		    AS_IF([test $OSMAJOR -le 7], [
 			: ${ac_cv_func_memset_s='no'}
-		    fi
-		fi
+		    ])
+		])
 
 		# Remove timedir on boot, AIX does not have /var/run
 		INIT_SCRIPT=aix.sh
@@ -1933,9 +1927,9 @@ case "$host" in
 		AC_DEFINE([PAM_SUN_CODEBASE])
 
 		# AFS support needs -lBSD
-		if test "$with_AFS" = "yes"; then
+		AS_IF([test "$with_AFS" = "yes"], 
 		    AFS_LIBS="-lc -lBSD"
-		fi
+		])
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		: ${mansectmisc='5'}
@@ -1953,7 +1947,7 @@ case "$host" in
 		INSTALL_BACKUP='~'
 
 		# The HP bundled compiler cannot generate shared libs
-		if test -z "$GCC"; then
+		AS_IF([test -z "$GCC"], [
 		    AC_CACHE_CHECK([for HP bundled C compiler],
 			[sudo_cv_var_hpccbundled],
 			[if $CC -V 2>&1 | grep '^(Bundled)' >/dev/null 2>&1; then
@@ -1962,20 +1956,20 @@ case "$host" in
 			    sudo_cv_var_hpccbundled=no
 			fi]
 		    )
-		    if test "$sudo_cv_var_hpccbundled" = "yes"; then
+		    AS_IF([test "$sudo_cv_var_hpccbundled" = "yes"], [
 			AC_MSG_ERROR([The HP bundled C compiler is unable to build Sudo, you must use gcc or the HP ANSI C compiler instead.])
-		    fi
-		fi
+		    ])
+		])
 
 		# Build PA-RISC1.1 objects for better portability
 		case "$host_cpu" in
 		    hppa[[2-9]]*)
 			_CFLAGS="$CFLAGS"
-			if test -n "$GCC"; then
+			AS_IF([test -n "$GCC"], [
 			    portable_flag="-march=1.1"
-			else
+			], [
 			    portable_flag="+DAportable"
-			fi
+			])
 			CFLAGS="$CFLAGS $portable_flag"
 			AC_CACHE_CHECK([whether $CC understands $portable_flag],
 			    [sudo_cv_var_daportable],
@@ -1986,9 +1980,9 @@ case "$host" in
 				)
 			    ]
 			)
-			if test X"$sudo_cv_var_daportable" != X"yes"; then
+			AS_IF([test X"$sudo_cv_var_daportable" != X"yes"], [
 			    CFLAGS="$_CFLAGS"
-			fi
+			])
 			;;
 		esac
 
@@ -2027,11 +2021,11 @@ case "$host" in
 
 		shadow_funcs="getprpwnam dispcrypt"
 		# OSF/1 4.x and higher need -ldb too
-		if test $OSMAJOR -lt 4; then
+		AS_IF([test $OSMAJOR -lt 4], [
 		    shadow_libs="-lsecurity -laud -lm"
-		else
+		], [
 		    shadow_libs="-lsecurity -ldb -laud -lm"
-		fi
+		])
 
 		# use SIA by default, if we have it
 		test "$CHECKSIA" = "true" && AUTH_EXCL_DEF="SIA"
@@ -2058,17 +2052,17 @@ case "$host" in
 		;;
     *-*-irix*)
 		AC_DEFINE([_BSD_TYPES])
-		if test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'; then
-		    if test -d "/usr/share/man/local"; then
+		AS_IF([test "$prefix" = "/usr/local" -a "$mandir" = '${datarootdir}/man'], [
+		    AS_IF([test -d "/usr/share/man/local"], [
 			mandir="/usr/share/man/local"
-		    else
+		    ], [
 			mandir="/usr/man/local"
-		    fi
-		fi
+		    ])
+		])
 		# IRIX <= 4 needs -lsun
-		if test "$OSMAJOR" -le 4; then
+		AS_IF([test "$OSMAJOR" -le 4], [
 		    AC_CHECK_LIB([sun], [getpwnam], [LIBS="${LIBS} -lsun"])
-		fi
+		])
 		# ":DEFAULT" must be appended to _RLD_LIST
 		RTLD_PRELOAD_VAR="_RLD_LIST"
 		RTLD_PRELOAD_DEFAULT="DEFAULT"
@@ -2092,7 +2086,7 @@ case "$host" in
 
 		# Only use our replacement functions when not fuzzing,
 		# they may skew the coverage reports.
-		if test X"$enable_fuzzer" = X"no"; then
+		AS_IF([test X"$enable_fuzzer" = X"no"], [
 		    # glibc's getentropy() emulation may fail on older kernels.
 		    # We use our own getentropy() by default on Linux.
 		    : ${ac_cv_func_getentropy='no'}
@@ -2104,7 +2098,7 @@ case "$host" in
 		    # glibc's closefrom() emulation may fail in chroot.
 		    # We use our own closefrom() by default on Linux.
 		    : ${ac_cv_func_closefrom='no'}
-		fi
+		])
 
 		# Linux 3.2 supports reading/writing a another process
 		# without using ptrace(2).
@@ -2150,9 +2144,9 @@ case "$host" in
     *-*-bsdi*)
 		SKIP_SETREUID=yes
 		# Check for newer BSD auth API
-		if test -z "$with_bsdauth"; then
+		AS_IF([test -z "$with_bsdauth"], [
 		    AC_CHECK_FUNCS([auth_challenge], [AUTH_EXCL_DEF="BSD_AUTH"])
-		fi
+		])
 		;;
     *-*-freebsd*)
 		AC_DEFINE([_BSD_SOURCE])
@@ -2164,17 +2158,17 @@ case "$host" in
 		    SKIP_SETREUID=yes
 		    ;;
 		esac
-		if test "${with_skey-'no'}" = "yes"; then
+		AS_IF([test "${with_skey-'no'}" = "yes"], [
 		     SUDOERS_LIBS="${SUDOERS_LIBS} -lmd"
-		fi
+		])
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='maybe'}
 
 		# Examples go in share/examples/sudo
-		if test X"$with_exampledir" = X""; then
+		AS_IF([test X"$with_exampledir" = X""], [
 		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
-		fi
+		])
 		;;
     *-*-*openbsd*)
 		AC_DEFINE([_BSD_SOURCE])
@@ -2188,20 +2182,20 @@ case "$host" in
 		SKIP_SETREUID=yes
 
 		# OpenBSD >= 3.0 supports BSD auth
-		if test -z "$with_bsdauth"; then
-		    if test "$OSMAJOR" -ge 3; then
+		AS_IF([test -z "$with_bsdauth"], [
+		    AS_IF([test "$OSMAJOR" -ge 3], [
 			AUTH_EXCL_DEF="BSD_AUTH"
-		    fi
-		fi
+		    ])
+		])
 		: ${with_logincap='maybe'}
 
 		# Newer OpenBSD only fills in pw_password for getpwnam_shadow()
 		shadow_funcs="getpwnam_shadow"
 
 		# Examples go in share/examples/sudo
-		if test X"$with_exampledir" = X""; then
+		AS_IF([test X"$with_exampledir" = X""], [
 		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
-		fi
+		])
 		;;
     *-*-*netbsd*)
 		# NetBSD has a real setreuid(2) starting with 1.3.2
@@ -2218,49 +2212,49 @@ case "$host" in
 		AC_DEFINE([_OPENBSD_SOURCE])
 
 		# Examples go in share/examples/sudo
-		if test X"$with_exampledir" = X""; then
+		AS_IF([test X"$with_exampledir" = X""], [
 		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
-		fi
+		])
 		;;
     *-*-dragonfly*)
 		AC_DEFINE([_BSD_SOURCE])
 
-		if test "${with_skey-'no'}" = "yes"; then
+		AS_IF([test "${with_skey-'no'}" = "yes"], [
 		     SUDOERS_LIBS="${SUDOERS_LIBS} -lmd"
-		fi
+		])
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='yes'}
 
 		# Examples go in share/examples/sudo
-		if test X"$with_exampledir" = X""; then
+		AS_IF([test X"$with_exampledir" = X""], [
 		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
-		fi
+		])
 		;;
     *-*-*bsd*)
 		CHECKSHADOW="false"
 		# Examples go in share/examples/sudo
-		if test X"$with_exampledir" = X""; then
+		AS_IF([test X"$with_exampledir" = X""], [
 		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
-		fi
+		])
 		;;
     *-*-darwin*)
 		# Darwin has a real setreuid(2) starting with 9.0
-		if test $OSMAJOR -lt 9; then
+		AS_IF([test $OSMAJOR -lt 9], [
 		    SKIP_SETREUID=yes
-		fi
+		])
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='yes'}
 		# Darwin has a broken poll(), Apple radar 3710161
 		: ${enable_poll='no'}
 		# Darwin 8 and above can interpose library symbols cleanly
-		if test $OSMAJOR -ge 8; then
+		AS_IF([test $OSMAJOR -ge 8], [
 		    AC_DEFINE(HAVE___INTERPOSE)
 		    dlyld_interpose=yes
-		else
+		], [
 		    RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
-		fi
+		])
 		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
 
 		# Build sudo_noexec.so as a shared library, not a module.
@@ -2281,9 +2275,9 @@ case "$host" in
 		AX_CHECK_LINK_FLAG([-Wl,-force_flat_namespace], [AX_APPEND_FLAG([-Wl,-force_flat_namespace], [SUDO_LDFLAGS])])
 
 		# Examples go in share/examples/sudo
-		if test X"$with_exampledir" = X""; then
+		AS_IF([test X"$with_exampledir" = X""], [
 		    exampledir='$(datarootdir)/examples/$(PACKAGE_TARNAME)'
-		fi
+		])
 		;;
     *-*-nextstep*)
 		# lockf() is broken on the NeXT
@@ -2328,39 +2322,37 @@ esac
 dnl
 dnl Library preloading to support NOEXEC
 dnl
-if test X"$enable_intercept" = X"no"; then
+AS_IF([test X"$enable_intercept" = X"no"], [
     intercept_file=disabled
-fi
-if test X"$with_noexec" = X"no"; then
+])
+AS_IF([test X"$with_noexec" = X"no"], [
     noexec_file=disabled
-fi
-if test X"${intercept_file} ${noexec_file}" != X"disabled disabled"; then
+])
+AS_IF([test X"${intercept_file} ${noexec_file}" != X"disabled disabled"], [
     SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_VAR, "$RTLD_PRELOAD_VAR")
     SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_DELIM, '$RTLD_PRELOAD_DELIM')
-    if test -n "$RTLD_PRELOAD_DEFAULT"; then
+    AS_IF([test -n "$RTLD_PRELOAD_DEFAULT"], [
 	SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_DEFAULT, "$RTLD_PRELOAD_DEFAULT")
-    fi
-    if test -n "$RTLD_PRELOAD_ENABLE_VAR"; then
+    ])
+    AS_IF([test -n "$RTLD_PRELOAD_ENABLE_VAR"], [
 	SUDO_DEFINE_UNQUOTED(RTLD_PRELOAD_ENABLE_VAR, "$RTLD_PRELOAD_ENABLE_VAR")
-    fi
-fi
+    ])
+])
 
 dnl
 dnl Check for mixing mutually exclusive and regular auth methods
 dnl
 AUTH_REG=${AUTH_REG# }
 AUTH_EXCL=${AUTH_EXCL# }
-if test -n "$AUTH_EXCL"; then
-    if test -n "$AUTH_REG"; then
-	AC_MSG_ERROR([Cannot mix mutually exclusive ($AUTH_EXCL) and regular ($AUTH_REG) authentication methods])
-    fi
-fi
+AS_IF([test -n "$AUTH_EXCL" -a -n "$AUTH_REG"], [
+    AC_MSG_ERROR([Cannot mix mutually exclusive ($AUTH_EXCL) and regular ($AUTH_REG) authentication methods])
+])
 dnl
 dnl Only one of S/Key and OPIE may be specified
 dnl
-if test X"${with_skey}${with_opie}" = X"yesyes"; then
+AS_IF([test X"${with_skey}${with_opie}" = X"yesyes"], [
     AC_MSG_ERROR([cannot use both S/Key and OPIE])
-fi
+])
 
 dnl
 dnl Use BSD-style man sections by default
@@ -2372,12 +2364,12 @@ dnl
 dnl
 dnl Add in any libpaths or libraries specified via configure
 dnl
-if test -n "$with_libpath"; then
+AS_IF([test -n "$with_libpath"], [
     for i in ${with_libpath}; do
 	SUDO_APPEND_LIBPATH(LDFLAGS, [$i])
     done
-fi
-if test -n "$with_libraries"; then
+])
+AS_IF([test -n "$with_libraries"], [
     for i in ${with_libraries}; do
 	case $i in
 	    -l*)	;;
@@ -2387,7 +2379,7 @@ if test -n "$with_libraries"; then
 	esac
 	LIBS="${LIBS} ${i}"
     done
-fi
+])
 
 dnl
 dnl C compiler checks (to be done after os checks)
@@ -2405,23 +2397,23 @@ AC_PROG_YACC
 AC_PATH_PROG([FLEX], [flex], [flex])
 SUDO_PROG_MV
 SUDO_PROG_BSHELL
-if test -z "$with_sendmail"; then
+AS_IF([test -z "$with_sendmail"], [
     SUDO_PROG_SENDMAIL
     with_sendmail="$ac_cv_path_SENDMAILPROG"
-fi
+])
 SUDO_PROG_VI
 dnl
 dnl Use fully-qualified path to vi in the manual
 dnl
-if test -z "$with_editor"; then
+AS_IF([test -z "$with_editor"], [
     editor="$ac_cv_path_VIPROG"
-fi
+])
 dnl
 dnl Check for authpriv support in syslog
 dnl
-if test X"$with_logfac" = X""; then
+AS_IF([test X"$with_logfac" = X""], [
     AC_CHECK_DECL([LOG_AUTHPRIV], [logfac=authpriv], [], [#include <syslog.h>])
-fi
+])
 AC_DEFINE_UNQUOTED(LOGFAC, "$logfac", [The syslog facility sudo will use.])
 dnl
 dnl Header file checks
@@ -2430,9 +2422,9 @@ AC_HEADER_DIRENT
 AC_HEADER_STDBOOL
 AC_HEADER_MAJOR
 AC_CHECK_HEADERS_ONCE([netgroup.h paths.h spawn.h wordexp.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h sys/sysmacros.h sys/statvfs.h])
-if test X"$ac_cv_header_utmps_h" != X"yes"; then
+AS_IF([test X"$ac_cv_header_utmps_h" != X"yes"], [
     AC_CHECK_HEADERS([utmpx.h])
-fi
+])
 AC_CHECK_HEADERS([endian.h] [sys/endian.h] [machine/endian.h], [break])
 AC_CHECK_HEADERS([procfs.h] [sys/procfs.h], [AC_CHECK_MEMBERS(struct psinfo.pr_ttydev, [AC_CHECK_FUNCS([_ttyname_dev])], [], [AC_INCLUDES_DEFAULT
 #ifdef HAVE_PROCFS_H
@@ -2455,7 +2447,7 @@ AC_SYS_YEAR2038
 # but is incompatible with the sanitizers/fuzzers.
 # We must set this *before* the library tests.
 #
-if test -n "$GCC" -a X"${enable_sanitizer}${enable_fuzzer}" = X"nono"; then
+AS_IF([test -n "$GCC" -a X"${enable_sanitizer}${enable_fuzzer}" = X"nono"], [
     # On FreeBSD and Dragonfly, environ is filled in by the dynamic loader
     # so -Wl,--no-undefined causes a link error when environ is used.
     # https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=263265
@@ -2476,10 +2468,10 @@ extern char **environ;]], [[int ret = ((long)environ & 0xff) + errno; return ret
 	    LDFLAGS="$_LDFLAGS"
 	]
     )
-    if test "$sudo_cv_var_ld___no_undefined" = "yes"; then
+    AS_IF([test "$sudo_cv_var_ld___no_undefined" = "yes"], [
 	AX_APPEND_FLAG([-Wl,--no-undefined], [LDFLAGS])
-    fi
-fi
+    ])
+])
 
 #
 # HP-UX may need to define _XOPEN_SOURCE_EXTENDED to expose MSG_WAITALL.
@@ -2500,43 +2492,43 @@ case "$host_os" in
 	    [sudo_cv_xopen_source_extended=yes],
 	    [sudo_cv_xopen_source_extended=error])
 	])])
-	if test "$sudo_cv_xopen_source_extended" = "yes"; then
+	AS_IF([test "$sudo_cv_xopen_source_extended" = "yes"], [
 	    AC_DEFINE([_XOPEN_SOURCE_EXTENDED])
-	fi
+	])
 	;;
 esac
 SUDO_MAILDIR
-if test ${with_logincap-'no'} != "no"; then
+AS_IF([test ${with_logincap-'no'} != "no"], [
     AC_CHECK_HEADERS([login_cap.h], [
 	LOGINCAP_USAGE='[[-c class]] '
 	LCMAN=1
 	with_logincap=yes
     ])
-    if test "${with_logincap}" = "yes"; then
+    AS_IF([test "${with_logincap}" = "yes"], [
 	# setusercontext() is in libutil on NetBSD, FreeBSD, Dragonfly BSD.
 	_LIBS="$LIBS"
 	AC_SEARCH_LIBS([setusercontext], [util])
 	LIBS="$_LIBS"
-	if test "${ac_cv_search_setusercontext}" != "none required"; then
+	AS_IF([test "${ac_cv_search_setusercontext}" != "none required"], [
 	    SUDO_LIBS="${SUDO_LIBS} -lutil"
 	    SUDOERS_LIBS="${SUDOERS_LIBS} -lutil"
-	fi
-    fi
-fi
-if test ${with_project-'no'} != "no"; then
+	])
+    ])
+])
+AS_IF([test ${with_project-'no'} != "no"], [
     AC_CHECK_HEADER(project.h, [
 	AC_CHECK_LIB([project], [setproject], [
 	    AC_DEFINE(HAVE_PROJECT_H)
 	    SUDO_LIBS="${SUDO_LIBS} -lproject"
 	])
     ], [with_project=no])
-fi
+])
 dnl
 dnl typedef checks
 dnl
-if test X"${ac_cv_header_stdint_h}${ac_cv_header_inttypes_h}" = X"nono"; then
+AS_IF([test X"${ac_cv_header_stdint_h}${ac_cv_header_inttypes_h}" = X"nono"], [
     AC_CHECK_TYPES([int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t, intmax_t, uintmax_t])
-fi
+])
 AC_CHECK_TYPES([sig_atomic_t], [], [], [
 AC_INCLUDES_DEFAULT
 #include <signal.h>])
@@ -2551,18 +2543,18 @@ SUDO_SOCK_SIN_LEN
 AC_CHECK_SIZEOF([id_t])
 AC_CHECK_SIZEOF([long long])
 AC_CHECK_SIZEOF([time_t])
-if test X"$ac_cv_header_utmps_h" = X"yes"; then
+AS_IF([test X"$ac_cv_header_utmps_h" = X"yes"], [
     SUDO_CHECK_UTMP_MEMBERS([utmps])
-elif test X"$ac_cv_header_utmpx_h" = X"yes"; then
+], [test X"$ac_cv_header_utmpx_h" = X"yes"], [
     SUDO_CHECK_UTMP_MEMBERS([utmpx])
-else
+], [
     SUDO_CHECK_UTMP_MEMBERS([utmp])
-fi
+])
 
 dnl
 dnl Python plugin support
 dnl
-if test ${enable_python-'no'} = "yes"; then
+AS_IF([test ${enable_python-'no'} = "yes"], [
     AM_PATH_PYTHON([3])
 
     AC_ARG_VAR([PYTHON_INCLUDE], [Include flags for python, bypassing python-config])
@@ -2599,7 +2591,7 @@ if test ${enable_python-'no'} = "yes"; then
     PYTHON_PLUGIN_SRC=plugins/python
     PYTHON_PLUGIN=
     AC_CONFIG_FILES([$PYTHON_PLUGIN_SRC/Makefile])
-fi
+])
 
 dnl
 dnl Function checks
@@ -2731,9 +2723,9 @@ AC_CHECK_FUNCS([arc4random], [
 
 utmp_style=LEGACY
 AC_CHECK_FUNCS([getutsid getutxid getutid], [utmp_style=POSIX; break])
-if test "$utmp_style" = "LEGACY"; then
+AS_IF([test "$utmp_style" = "LEGACY"], [
     AC_CHECK_FUNCS([getttyent ttyslot], [break])
-fi
+])
 
 AC_CHECK_FUNCS([sysctl], [
     AC_CHECK_FUNCS([devname])
@@ -2747,7 +2739,7 @@ AC_CHECK_FUNCS([sysctl], [
 #include <sys/sysctl.h>
 #include <sys/user.h>
     ])
-    if test "$found" = "false"; then
+    AS_IF([test "$found" = "false"], [
 	AC_CHECK_MEMBER([struct kinfo_proc.kp_paddr], [
 	    AC_DEFINE(HAVE_KINFO_PROC_DFLY)
 	    found=true
@@ -2756,8 +2748,8 @@ AC_CHECK_FUNCS([sysctl], [
 #include <sys/sysctl.h>
 #include <sys/user.h>
 	])
-    fi
-    if test "$found" = "false"; then
+    ])
+    AS_IF([test "$found" = "false"], [
 	AC_CHECK_MEMBER([struct kinfo_proc2.p_paddr], [
 	    AC_DEFINE(HAVE_KINFO_PROC2_NETBSD)
 	    found=true
@@ -2765,8 +2757,8 @@ AC_CHECK_FUNCS([sysctl], [
 #include <sys/param.h>
 #include <sys/sysctl.h>
 	])
-    fi
-    if test "$found" = "false"; then
+    ])
+    AS_IF([test "$found" = "false"], [
 	AC_CHECK_MEMBER([struct kinfo_proc.p_paddr], [
 	    AC_DEFINE(HAVE_KINFO_PROC_OPENBSD)
 	    found=true
@@ -2774,8 +2766,8 @@ AC_CHECK_FUNCS([sysctl], [
 #include <sys/param.h>
 #include <sys/sysctl.h>
 	])
-    fi
-    if test "$found" = "false"; then
+    ])
+    AS_IF([test "$found" = "false"], [
 	AC_CHECK_MEMBER([struct kinfo_proc.kp_proc], [
 	    AC_DEFINE(HAVE_KINFO_PROC_44BSD)
 	    found=true
@@ -2783,7 +2775,7 @@ AC_CHECK_FUNCS([sysctl], [
 #include <sys/param.h>
 #include <sys/sysctl.h>
 	])
-    fi
+    ])
 ])
 
 AC_CHECK_FUNCS([openpty], [AC_CHECK_HEADERS([libutil.h util.h pty.h], [break])], [
@@ -2806,20 +2798,20 @@ AC_CHECK_FUNCS([openpty], [AC_CHECK_HEADERS([libutil.h util.h pty.h], [break])],
 ])
 AC_CHECK_FUNCS([unsetenv], [SUDO_FUNC_UNSETENV_VOID], [])
 SUDO_FUNC_PUTENV_CONST
-if test -z "$SKIP_SETRESUID"; then
+AS_IF([test -z "$SKIP_SETRESUID"], [
     AC_CHECK_FUNCS([setresuid], [
 	SKIP_SETREUID=yes
 	AC_CHECK_DECLS([setresuid])
 	AC_CHECK_FUNCS([getresuid], [AC_CHECK_DECLS([getresuid])])
     ])
-fi
-if test -z "$SKIP_SETREUID"; then
+])
+AS_IF([test -z "$SKIP_SETRESUID"], [
     AC_CHECK_FUNCS([setreuid])
-fi
+])
 AC_CHECK_FUNCS_ONCE([seteuid])
-if test X"$with_interfaces" != X"no"; then
+AS_IF([test X"$with_interfaces" != X"no"], [
     AC_CHECK_FUNCS([getifaddrs], [AC_CHECK_FUNCS([freeifaddrs])])
-fi
+])
 AC_CHECK_FUNCS([lockf], [break])
 AC_CHECK_FUNCS([innetgr], [
     AC_CHECK_DECLS([innetgr], [], [], [
@@ -2937,19 +2929,19 @@ AC_CHECK_FUNCS([strlcat], [], [
     SUDO_APPEND_COMPAT_EXP(sudo_strlcat)
 ])
 AC_CHECK_FUNC([strnlen], [AC_FUNC_STRNLEN], [AC_LIBOBJ(strnlen)])
-if test X"$ac_cv_func_strnlen_working" = X"yes"; then
+AS_IF([test X"$ac_cv_func_strnlen_working" = X"yes"], [
     AC_DEFINE(HAVE_STRNLEN)
     AC_CHECK_FUNCS([strndup], [], [
 	AC_LIBOBJ(strndup)
 	SUDO_APPEND_COMPAT_EXP(sudo_strndup)
     ])
-else
+], [
     # Broken or missing strnlen, use our own.
     SUDO_APPEND_COMPAT_EXP(sudo_strnlen)
     # Avoid libc strndup() since it is usually implemented using strnlen()
     AC_LIBOBJ(strndup)
     SUDO_APPEND_COMPAT_EXP(sudo_strndup)
-fi
+])
 AC_CHECK_FUNCS([clock_gettime], [], [
     # On Solaris, clock_gettime is in librt
     AC_CHECK_LIB([rt], [clock_gettime], [
@@ -2962,9 +2954,9 @@ AC_CHECK_FUNCS([getopt_long], [], [
     SUDO_APPEND_COMPAT_EXP(sudo_getopt_long sudo_getopt_long_only)
     AC_CACHE_CHECK([for optreset], sudo_cv_optreset, [
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[extern int optreset; optreset = 1; return optreset;]])], [sudo_cv_optreset=yes], [sudo_cv_optreset=no])])
-    if test "$sudo_cv_optreset" = "yes"; then
+    AS_IF([test "$sudo_cv_optreset" = "yes"], [
 	AC_DEFINE(HAVE_OPTRESET)
-    fi
+    ])
 ])
 AC_CHECK_FUNCS([closefrom], [], [AC_LIBOBJ(closefrom)
     SUDO_APPEND_COMPAT_EXP(sudo_closefrom)
@@ -2991,13 +2983,13 @@ case "$host_os" in
 	;;
 esac
 # If any of the mktemp family are missing we use our own.
-if test X"$sudo_mktemp" = X"yes"; then
+AS_IF([test X"$sudo_mktemp" = X"yes"], [
     AC_LIBOBJ(mktemp)
     SUDO_APPEND_COMPAT_EXP(sudo_mkdtemp sudo_mkdtempat sudo_mkostempsat sudo_mkstemp sudo_mkstemps)
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }mktemp_test"
-fi
+])
 AX_FUNC_SNPRINTF
-if test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"; then
+AS_IF([test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"], [
     # System has a C99-compliant v?snprintf(), check for v?asprintf()
     AC_CHECK_FUNCS([asprintf], [], [
 	AC_LIBOBJ(snprintf)
@@ -3007,10 +2999,10 @@ if test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"
 	AC_LIBOBJ(snprintf)
 	SUDO_APPEND_COMPAT_EXP(sudo_vasprintf)
     ])
-else
+], [
     # Missing or non-compliant v?snprintf(), assume missing/bad v?asprintf()
     SUDO_APPEND_COMPAT_EXP(sudo_snprintf sudo_vsnprintf sudo_asprintf sudo_vasprintf)
-fi
+])
 AC_CHECK_MEMBERS([struct tm.tm_gmtoff], [], [], [
 AC_INCLUDES_DEFAULT
 #include <errno.h>
@@ -3030,14 +3022,14 @@ AC_CHECK_FUNCS([setpassent setgroupent])
 dnl
 dnl Function checks for sudo_noexec
 dnl
-if test X"$with_noexec" != X"no"; then
+AS_IF([test X"$with_noexec" != X"no"],
     # Check for non-standard exec functions
     AC_CHECK_FUNCS([exect execvP execvpe])
     # Check for posix_spawn, and posix_spawnp
-    if test X"$ac_cv_header_spawn_h" = X"yes"; then
+    AS_IF([test X"$ac_cv_header_spawn_h" = X"yes"], [
 	AC_CHECK_FUNCS([posix_spawn posix_spawnp])
-    fi
-fi
+    ])
+])
 
 dnl
 dnl Check for the dirfd function/macro.  If not found, look for dd_fd in DIR.
@@ -3058,17 +3050,17 @@ SUDO_CHECK_OPENSSL
 dnl
 dnl Check for sha2 functions if not using openssl or wolfssl
 dnl
-if test "$DIGEST" = "digest.lo"; then
-    if test "${enable_gcrypt-no}" != no; then
+AS_IF([test "$DIGEST" = "digest.lo"], [
+    AS_IF([test "${enable_gcrypt-no}" != no], [
 	# Use gcrypt's sha2 functions
 	AC_DEFINE(HAVE_GCRYPT)
 	DIGEST=digest_gcrypt.lo
 	LIBMD="-lgcrypt"
-	if test "$enable_gcrypt" != "yes"; then
+	AS_IF([test "$enable_gcrypt" != "yes"], [
 	    AX_APPEND_FLAG([-I${enable_gcrypt}/include], [CPPFLAGS])
 	    SUDO_APPEND_LIBPATH(LDFLAGS, [${enable_gcrypt}/lib])
-	fi
-    else
+	])
+    ], [
 	# Use sudo's sha2 functions if not in libmd or libc.
 	FOUND_SHA2=no
 	AC_CHECK_HEADER([sha2.h], [
@@ -3085,12 +3077,12 @@ if test "$DIGEST" = "digest.lo"; then
 		])
 	    ])
 	])
-	if test X"$FOUND_SHA2" = X"no"; then
+	AS_IF([test X"$FOUND_SHA2" = X"no"], [
 	    AC_LIBOBJ(sha2)
 	    SUDO_APPEND_COMPAT_EXP(sudo_SHA224Final sudo_SHA224Init sudo_SHA224Pad sudo_SHA224Transform sudo_SHA224Update sudo_SHA256Final sudo_SHA256Init sudo_SHA256Pad sudo_SHA256Transform sudo_SHA256Update sudo_SHA384Final sudo_SHA384Init sudo_SHA384Pad sudo_SHA384Transform sudo_SHA384Update sudo_SHA512Final sudo_SHA512Init sudo_SHA512Pad sudo_SHA512Transform sudo_SHA512Update)
-	fi
-    fi
-fi
+	])
+    ])
+])
 
 dnl
 dnl Network functions may live in libsocket, libinet, libnsl, or libresolv.
@@ -3144,10 +3136,10 @@ case " $LIBOBJS " in
 	SUDO_APPEND_COMPAT_EXP(sudo_getaddrinfo sudo_freeaddrinfo sudo_gai_strerror)
 	# We need libsudo_util to pull in dependent libraries for
 	# inet_pton(), gethostbyname(), and getservbyname()
-	if test -n "${INET_PTON_LIBS}"; then
+	AS_IF([test -n "${INET_PTON_LIBS}"], [
 	    LT_DEP_LIBS="${LT_DEP_LIBS}${LT_DEP_LIBS+ }${INET_PTON_LIBS}"
 	    LIBS="${LIBS}${LIBS+ }${INET_PTON_LIBS}"
-	fi
+	])
 	SUDO_CHECK_NET_FUNC([gethostbyname])
 	;;
     *)
@@ -3157,7 +3149,7 @@ case " $LIBOBJS " in
 		*) GETADDRINFO_LIBS="${GETADDRINFO_LIBS}${GETADDRINFO_LIBS+ }$lib";;
 	    esac
 	done
-	if test -n "${GETADDRINFO_LIBS}"; then
+	AS_IF([test -n "${GETADDRINFO_LIBS}"], [
 	    # We need libsudo_util to pull in dependent libraries for
 	    # gai_strerror()
 	    LT_DEP_LIBS="${LT_DEP_LIBS}${LT_DEP_LIBS+ }${GETADDRINFO_LIBS}"
@@ -3170,7 +3162,7 @@ case " $LIBOBJS " in
 		    *)		NET_LIBS="${NET_LIBS}${NET_LIBS+ }$lib";;
 		esac
 	    done
-	fi
+	])
 	;;
 esac
 LIBS="$OLIBS"
@@ -3183,18 +3175,18 @@ AC_CACHE_CHECK([for va_copy], sudo_cv_func_va_copy, [
 	va_list ap1, ap2;]], [[va_copy(ap1, ap2);]])],
 	[sudo_cv_func_va_copy=yes], [sudo_cv_func_va_copy=no])
 ])
-if test "$sudo_cv_func_va_copy" = "yes"; then
+AS_IF([test "$sudo_cv_func_va_copy" = "yes"], [
     AC_DEFINE(HAVE_VA_COPY)
-else
+], [
     AC_CACHE_CHECK([for __va_copy], sudo_cv_func___va_copy, [
 	AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <stdarg.h>
 	    va_list ap1, ap2;]], [[__va_copy(ap1, ap2);]])],
 	    [sudo_cv_func___va_copy=yes], [sudo_cv_func___va_copy=no])
     ])
-    if test "$sudo_cv_func___va_copy" = "yes"; then
+    AS_IF([test "$sudo_cv_func___va_copy" = "yes"], [
 	AC_DEFINE(HAVE___VA_COPY)
-    fi
-fi
+    ])
+])
 
 dnl
 dnl Check for getprogname()/setprogname() or __progname
@@ -3204,9 +3196,9 @@ AC_CHECK_FUNCS([getprogname], [
 ], [
     AC_CACHE_CHECK([for __progname], sudo_cv___progname, [
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[extern char *__progname; if (__progname[0] == '\0') return 1;]])], [sudo_cv___progname=yes], [sudo_cv___progname=no])])
-    if test "$sudo_cv___progname" = "yes"; then
+    AS_IF([test "$sudo_cv___progname" = "yes"], [
 	AC_DEFINE(HAVE___PROGNAME)
-    fi
+    ])
     SUDO_APPEND_COMPAT_EXP(sudo_getprogname)
     SUDO_APPEND_COMPAT_EXP(sudo_setprogname)
 ])
@@ -3215,23 +3207,23 @@ dnl
 dnl Check for __func__ or __FUNCTION__
 dnl
 AC_CACHE_CHECK([for __func__], sudo_cv___func__, [
-    if test X"$ac_cv_prog_cc_c99" = X"no"; then
+    AS_IF([test X"$ac_cv_prog_cc_c99" = X"no"], [
 	AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[if (__func__[0] == '\0') return 1;]])], [sudo_cv___func__=yes], [sudo_cv___func__=no])
-    else
+    ], [
 	# C99 and higher support __func__
 	sudo_cv___func__=yes
-    fi
+    ])
 ])
-if test "$sudo_cv___func__" = "yes"; then
+AS_IF([test "$sudo_cv___func__" = "yes"], [
     AC_DEFINE(HAVE___FUNC__)
-elif test -n "$GCC"; then
+], [test -n "$GCC"], [
     AC_CACHE_CHECK([for __FUNCTION__], sudo_cv___FUNCTION__, [
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[if(__FUNCTION__[0] == '\0') return 1;]])], [sudo_cv___FUNCTION__=yes], [sudo_cv___FUNCTION__=no])])
-    if test "$sudo_cv___FUNCTION__" = "yes"; then
+    AS_IF([test "$sudo_cv___FUNCTION__" = "yes"], [
 	AC_DEFINE(HAVE___FUNC__)
 	AC_DEFINE(__func__, __FUNCTION__, [Define to __FUNCTION__ if your compiler supports __FUNCTION__ but not __func__])
-    fi
-fi
+    ])
+])
 
 SUDO_CHECK_GETTEXT
 
@@ -3272,13 +3264,13 @@ case "$enable_zlib" in
 	ZLIB_SRC=lib/zlib
 	AC_CONFIG_HEADERS([lib/zlib/zconf.h])
 	AC_CONFIG_FILES([lib/zlib/Makefile])
-	if test X"$enable_shared" = X"no" -o "$enable_zlib" = "static"; then
-	    if test "$enable_zlib" = "shared"; then
+	AS_IF([test X"$enable_shared" = X"no" -o "$enable_zlib" = "static"], [
+	    AS_IF([test "$enable_zlib" = "shared"], [
 		AC_MSG_ERROR([unable to build shared libraries on this system])
-	    fi
+	    ])
 	    # Build as convenience library
 	    ZLIB_LDFLAGS=-no-install
-	fi
+	])
 	;;
 esac
 
@@ -3335,36 +3327,36 @@ AC_CHECK_DECLS([SIZE_MAX], [], [], [
 dnl
 dnl Try to find equivalents for missing types
 dnl
-if test "$ac_cv_have_decl_LLONG_MAX" != "yes"; then
+AS_IF([test "$ac_cv_have_decl_LLONG_MAX" != "yes"], [
     AC_CHECK_DECLS([QUAD_MAX], [], [], [[
 #include <sys/types.h>
 #include <limits.h>
     ]])
-fi
-if test "$ac_cv_have_decl_LLONG_MIN" != "yes"; then
+])
+AS_IF([test "$ac_cv_have_decl_LLONG_MIN" != "yes"], [
     AC_CHECK_DECLS([QUAD_MIN], [], [], [[
 #include <sys/types.h>
 #include <limits.h>
     ]])
-fi
-if test "$ac_cv_have_decl_ULLONG_MAX" != "yes"; then
+])
+AS_IF([test "$ac_cv_have_decl_ULLONG_MAX" != "yes"], [
     AC_CHECK_DECLS([UQUAD_MAX], [], [], [[
 #include <sys/types.h>
 #include <limits.h>
     ]])
-fi
-if test "$ac_cv_have_decl_SIZE_MAX" != "yes"; then
+])
+AS_IF([test "$ac_cv_have_decl_SIZE_MAX" != "yes"], [
     AC_CHECK_DECLS([SIZE_T_MAX], [], [], [[
 #include <sys/types.h>
 #include <limits.h>
     ]])
-fi
-if test "$ac_cv_have_decl_PATH_MAX" != "yes"; then
+])
+AS_IF([test "$ac_cv_have_decl_PATH_MAX" != "yes"], [
     AC_CHECK_DECLS([_POSIX_PATH_MAX], [], [], [[
 #include <sys/types.h>
 #include <limits.h>
     ]])
-fi
+])
 
 dnl
 dnl Check for strsignal() or sys_siglist
@@ -3382,9 +3374,9 @@ AC_INCLUDES_DEFAULT
 AC_INCLUDES_DEFAULT
 #include <signal.h>
     ])
-    if test "$HAVE_SIGLIST" != "true"; then
+    AS_IF([test "$HAVE_SIGLIST" != "true"], [
 	AC_LIBOBJ(siglist)
-    fi
+    ])
 ])
 
 dnl
@@ -3406,9 +3398,9 @@ dnl
 dnl Check for sys_signame or sys_sigabbrev if missing sig2str() or str2sig().
 dnl Also enable unit tests for sig2str() and str2sig().
 dnl
-if test x"${ac_cv_func_sig2str}${ac_cv_func_str2sig}" != x"yesyes"; then
+AS_IF([test x"${ac_cv_func_sig2str}${ac_cv_func_str2sig}" != x"yesyes"], [
     AC_CHECK_FUNCS([sigabbrev_np])
-    if test x"${ac_cv_func_sigabbrev_np}" != x"yes"; then
+    AS_IF([test x"${ac_cv_func_sigabbrev_np}" != x"yes"], [
 	COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }strsig_test"
 	HAVE_SIGNAME="false"
 	AC_CHECK_DECLS([sys_signame], [HAVE_SIGNAME="true"], [
@@ -3425,7 +3417,7 @@ AC_INCLUDES_DEFAULT
 AC_INCLUDES_DEFAULT
 #include <signal.h>
 	])
-	if test "$HAVE_SIGNAME" != "true"; then
+	AS_IF([test "$HAVE_SIGNAME" != "true"], [
 	    AC_CACHE_CHECK([for undeclared sys_sigabbrev],
 		[sudo_cv_var_sys_sigabbrev],
 		[AC_LINK_IFELSE(
@@ -3435,15 +3427,15 @@ AC_INCLUDES_DEFAULT
 		    )
 		]
 	    )
-	    if test "$sudo_cv_var_sys_sigabbrev" = yes; then
+	    AS_IF([test "$sudo_cv_var_sys_sigabbrev" = yes], [
 		AC_DEFINE(HAVE_SYS_SIGABBREV)
-	    else
+	    ], [
 		AC_LIBOBJ(signame)
 		SIGNAME=signame.lo
-	    fi
-	fi
-    fi
-fi
+	    ])
+	])
+    ])
+])
 
 dnl
 dnl Check for dl_iterate_phdr, may require -ldl
@@ -3456,13 +3448,13 @@ LIBS="$OLIBS"
 dnl
 dnl nsswitch.conf and its equivalents
 dnl
-if test ${with_netsvc-"no"} != "no"; then
+AS_IF([test ${with_netsvc-"no"} != "no"], [
     SUDO_DEFINE_UNQUOTED(_PATH_NETSVC_CONF, "${with_netsvc-/etc/netsvc.conf}")
     netsvc_conf=${with_netsvc-/etc/netsvc.conf}
-elif test ${with_nsswitch-"yes"} != "no"; then
+], [test ${with_nsswitch-"yes"} != "no"], [
     SUDO_DEFINE_UNQUOTED(_PATH_NSSWITCH_CONF, "${with_nsswitch-/etc/nsswitch.conf}")
     nsswitch_conf=${with_nsswitch-/etc/nsswitch.conf}
-fi
+])
 
 dnl
 dnl Mutually exclusive auth checks come first, followed by
@@ -3473,7 +3465,7 @@ dnl
 dnl Convert default authentication methods to with_* if
 dnl no explicit authentication scheme was specified.
 dnl
-if test -z "${AUTH_EXCL}${AUTH_REG}" -a -n "$AUTH_EXCL_DEF"; then
+AS_IF([test -z "${AUTH_EXCL}${AUTH_REG}" -a -n "$AUTH_EXCL_DEF"], [
     for auth in $AUTH_EXCL_DEF; do
 	case $auth in
 	    AIX_AUTH)	with_aixauth=maybe;;
@@ -3482,13 +3474,13 @@ if test -z "${AUTH_EXCL}${AUTH_REG}" -a -n "$AUTH_EXCL_DEF"; then
 	    SIA)	CHECKSIA=true;;
 	esac
     done
-fi
+])
 
 dnl
 dnl PAM support.  Systems that use PAM by default set with_pam=default
 dnl and we do the actual tests here.
 dnl
-if test ${with_pam-"no"} != "no"; then
+AS_IF([test ${with_pam-"no"} != "no"], [
     #
     # Check for pam_start() in libpam first, then for pam_appl.h.
     #
@@ -3500,26 +3492,26 @@ if test ${with_pam-"no"} != "no"; then
     #
     found_pam_hdrs=no
     AC_CHECK_HEADERS([security/pam_appl.h] [pam/pam_appl.h], [found_pam_hdrs=yes; break])
-    if test "$found_pam_lib" = "yes" -a "$found_pam_hdrs" = "yes"; then
+    AS_IF([test "$found_pam_lib" = "yes" -a "$found_pam_hdrs" = "yes"], [
 	# Found both PAM libs and headers
 	with_pam=yes
-    elif test "$with_pam" = "yes"; then
-	if test "$found_pam_lib" = "no"; then
+    ], [test "$with_pam" = "yes"], [
+	AS_IF([test "$found_pam_lib" = "no"], [
 	    AC_MSG_ERROR([--with-pam specified but unable to locate PAM development library.])
-	fi
-	if test "$found_pam_hdrs" = "no"; then
+	])
+	AS_IF([test "$found_pam_hdrs" = "no"], [
 	    AC_MSG_ERROR([--with-pam specified but unable to locate PAM development headers.])
-	fi
-    elif test "$found_pam_lib" != "$found_pam_hdrs"; then
-	if test "$found_pam_lib" = "no"; then
+	])
+    ], [test "$found_pam_lib" != "$found_pam_hdrs"], [
+	AS_IF([test "$found_pam_lib" = "no"], [
 	    AC_MSG_ERROR([found PAM headers but no PAM development library; specify --without-pam to build without PAM])
-	fi
-	if test "$found_pam_hdrs" = "no"; then
+	])
+	AS_IF([test "$found_pam_hdrs" = "no"], [
 	    AC_MSG_ERROR([found PAM library but no PAM development headers; specify --without-pam to build without PAM])
-	fi
-    fi
+	])
+    ])
 
-    if test "$with_pam" = "yes"; then
+    AS_IF([test "$with_pam" = "yes"], [
 	# Older PAM implementations lack pam_getenvlist
 	OLIBS="$LIBS"
 	LIBS="$LIBS -lpam $lt_cv_dlopen_libs"
@@ -3552,77 +3544,75 @@ if test ${with_pam-"no"} != "no"; then
 		*)	AC_MSG_WARN([ignoring unknown argument to --enable-pam-session: $enableval])
 			;;
 	    esac])
-    fi
-fi
+    ])
+])
 
 dnl
 dnl AIX general authentication
 dnl We may build in support for both AIX LAM and PAM and select
 dnl which one to use at run-time.
 dnl
-if test ${with_aixauth-'no'} != "no"; then
+AS_IF([test ${with_aixauth-'no'} != "no"], [
     AC_CHECK_FUNCS([authenticate], [with_aixauth=yes])
-    if test "${with_aixauth}" = "yes"; then
+    AS_IF([test "${with_aixauth}" = "yes"], [
 	AC_MSG_NOTICE([using AIX general authentication])
 	AC_DEFINE(HAVE_AIXAUTH)
 	AUTH_OBJS="$AUTH_OBJS aix_auth.lo";
 	SUDOERS_LIBS="${SUDOERS_LIBS} -ls"
 	AUTH_EXCL=AIX_AUTH
-    fi
-fi
+    ])
+])
 
 dnl
 dnl BSD authentication
 dnl If set to "maybe" only enable if no other exclusive method in use.
 dnl
-if test ${with_bsdauth-'no'} != "no"; then
+AS_IF([test ${with_bsdauth-'no'} != "no"], [
     AC_CHECK_HEADER(bsd_auth.h, AC_DEFINE(HAVE_BSD_AUTH_H)
 	[AUTH_OBJS="$AUTH_OBJS bsdauth.lo"]
 	[BSDAUTH_USAGE='[[-a type]] ']
 	[AUTH_EXCL=BSD_AUTH; BAMAN=1],
 	[AC_MSG_ERROR([BSD authentication was specified but bsd_auth.h could not be found])])
-fi
+])
 
 dnl
 dnl SIA authentication for Tru64 Unix
 dnl
-if test ${CHECKSIA-'false'} = "true"; then
+AS_IF([test ${CHECKSIA-'false'} = "true"], [
     AC_CHECK_FUNCS([sia_ses_init], [found=true], [found=false])
-    if test "$found" = "true"; then
+    AS_IF([test "$found" = "true"], [
 	AUTH_EXCL=SIA
 	AUTH_OBJS="$AUTH_OBJS sia.lo"
-    fi
-fi
+    ])
+])
 
 dnl
 dnl extra FWTK libs + includes
 dnl
-if test ${with_fwtk-'no'} != "no"; then
-    if test "$with_fwtk" != "yes"; then
+AS_IF([test ${with_fwtk-'no'} != "no"], [
+    AS_IF([test "$with_fwtk" != "yes"], [
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_fwtk}])
 	AX_APPEND_FLAG([-I${with_fwtk}], [CPPFLAGS])
 	with_fwtk=yes
-    fi
+    ])
     SUDOERS_LIBS="${SUDOERS_LIBS} -lauth -lfwall"
     AUTH_OBJS="$AUTH_OBJS fwtk.lo"
-fi
+])
 
 dnl
 dnl extra SecurID lib + includes
 dnl
-if test ${with_SecurID-'no'} != "no"; then
-    if test "$with_SecurID" != "yes"; then
-	:
-    elif test -d /usr/ace/examples; then
+AS_IF([test ${with_SecurID-'no'} != "no"], [
+    AS_IF([test "$with_SecurID" != "yes"], [], [test -d /usr/ace/examples], [
 	with_SecurID=/usr/ace/examples
-    else
+    ], [
 	with_SecurID=/usr/ace
-    fi
+    ])
     AX_APPEND_FLAG([-I${with_SecurID}], [CPPFLAGS])
     SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_SecurID}])
     SUDOERS_LIBS="${SUDOERS_LIBS} -laceclnt -lpthread"
     AUTH_OBJS="$AUTH_OBJS securid5.lo";
-fi
+])
 
 dnl
 dnl Non-mutually exclusive auth checks come next.
@@ -3633,21 +3623,21 @@ dnl
 dnl Convert default authentication methods to with_* if
 dnl no explicit authentication scheme was specified.
 dnl
-if test -z "${AUTH_EXCL}" -a -n "$AUTH_DEF"; then
+AS_IF([test -z "${AUTH_EXCL}" -a -n "$AUTH_DEF"], [
     for auth in $AUTH_DEF; do
 	case $auth in
 	    passwd)	: ${with_passwd='maybe'};;
 	esac
     done
-fi
+])
 
 dnl
 dnl Kerberos V
 dnl There is an easy way and a hard way...
 dnl
-if test ${with_kerb5-'no'} != "no"; then
+AS_IF([test ${with_kerb5-'no'} != "no"], [
     AC_CHECK_PROG(KRB5CONFIG, krb5-config, yes, "")
-    if test -n "$KRB5CONFIG"; then
+    AS_IF([test -n "$KRB5CONFIG"], [
 	AC_DEFINE(HAVE_KERB5)
 	AUTH_OBJS="$AUTH_OBJS kerb5.lo"
 	for f in `krb5-config --cflags`; do
@@ -3665,27 +3655,27 @@ if test ${with_kerb5-'no'} != "no"; then
 		AC_MSG_RESULT(no)
 	    ]
 	)
-    else
+    ], [
 	AC_DEFINE(HAVE_KERB5)
 	dnl
 	dnl Use the specified directory, if any, else search for correct inc dir
 	dnl
-	if test "$with_kerb5" = "yes"; then
+	AS_IF([test "$with_kerb5" = "yes"], [
 	    found=no
 	    O_CPPFLAGS="$CPPFLAGS"
 	    for dir in "" "kerberosV/" "krb5/" "kerberos5/" "kerberosv5/"; do
 		CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
 		AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[#include <krb5.h>]])], [found=yes; break])
 	    done
-	    if test X"$found" = X"no"; then
+	    AS_IF([test X"$found" = X"no"], [
 		CPPFLAGS="$O_CPPFLAGS"
 		AC_MSG_WARN([unable to locate Kerberos V include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS])
-	    fi
-	else
+	    ])
+	], [
 	    dnl XXX - try to include krb5.h here too
 	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_kerb5}/lib])
 	    AX_APPEND_FLAG([-I${with_kerb5}/include], [CPPFLAGS])
-	fi
+	])
 
 	dnl
 	dnl Try to determine whether we have Heimdal or MIT Kerberos
@@ -3703,7 +3693,7 @@ if test ${with_kerb5-'no'} != "no"; then
 		AC_CHECK_LIB([krb5support], [main], [SUDOERS_LIBS="${SUDOERS_LIBS} -lkrb5support"])
 	])
 	AUTH_OBJS="$AUTH_OBJS kerb5.lo"
-    fi
+    ])
     _LIBS="$LIBS"
     LIBS="${LIBS} ${SUDOERS_LIBS}"
     AC_CHECK_FUNCS([krb5_verify_user krb5_init_secure_context])
@@ -3719,9 +3709,9 @@ if test ${with_kerb5-'no'} != "no"; then
 	    ]
 	)
     ])
-    if test X"$sudo_cv_krb5_get_init_creds_opt_free_two_args" = X"yes"; then
+    AS_IF([test X"$sudo_cv_krb5_get_init_creds_opt_free_two_args" = X"yes"], [
   	AC_DEFINE(HAVE_KRB5_GET_INIT_CREDS_OPT_FREE_TWO_ARGS)
-    fi
+    ])
     LIBS="$_LIBS"
     AC_ARG_ENABLE(kerb5-instance,
     [AS_HELP_STRING([--enable-kerb5-instance], [instance string to append to the username (separated by a slash)])],
@@ -3732,92 +3722,91 @@ if test ${with_kerb5-'no'} != "no"; then
 	    *)		SUDO_DEFINE_UNQUOTED(SUDO_KRB5_INSTANCE, "$enableval")
 			;;
 	esac])
-fi
+])
 
 dnl
 dnl extra AFS libs and includes
 dnl
-if test ${with_AFS-'no'} = "yes"; then
-
+AS_IF([test ${with_AFS-'no'} = "yes"], [
     # looks like the "standard" place for AFS libs is /usr/afsws/lib
     AFSLIBDIRS="/usr/lib/afs /usr/afsws/lib /usr/afsws/lib/afs"
     for i in $AFSLIBDIRS; do
-	if test -d ${i}; then
+	AS_IF([test -d ${i}], [
 	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [$i])
 	    FOUND_AFSLIBDIR=true
-	fi
+	])
     done
-    if test -z "$FOUND_AFSLIBDIR"; then
+    AS_IF([test -z "$FOUND_AFSLIBDIR"], [
 	AC_MSG_WARN([unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDOERS_LDFLAGS or rerun configure with the --with-libpath options.])
-    fi
+    ])
 
     # Order is important here.  Note that we build AFS_LIBS from right to left
     # since AFS_LIBS may be initialized with BSD compat libs that must go last
     AFS_LIBS="-laudit ${AFS_LIBS}"
     for i in $AFSLIBDIRS; do
-	if test -f ${i}/util.a; then
+	AS_IF([test -f ${i}/util.a], [
 	    AFS_LIBS="${i}/util.a ${AFS_LIBS}"
 	    FOUND_UTIL_A=true
 	    break;
-	fi
+	])
     done
-    if test -z "$FOUND_UTIL_A"; then
+    AS_IF([test -z "$FOUND_UTIL_A"], [
 	AFS_LIBS="-lutil ${AFS_LIBS}"
-    fi
+    ])
     AFS_LIBS="-lkauth -lprot -lubik -lauth -lrxkad -lsys -ldes -lrx -llwp -lcom_err ${AFS_LIBS}"
 
     # AFS includes may live in /usr/include on some machines...
     for i in /usr/afsws/include; do
-	if test -d ${i}; then
+	AS_IF([test -d ${i}], [
 	    AX_APPEND_FLAG([-I${i}], [CPPFLAGS])
 	    FOUND_AFSINCDIR=true
-	fi
+	])
     done
 
-    if test -z "$FOUND_AFSLIBDIR"; then
+    AS_IF([test -z "$FOUND_AFSLIBDIR"], [
 	AC_MSG_WARN([unable to locate AFS include dir, you may have to edit the Makefile and add -I/path/to/afs/includes to CPPFLAGS or rerun configure with the --with-incpath options.])
-    fi
+    ])
 
     AUTH_OBJS="$AUTH_OBJS afs.lo"
-fi
+])
 
 dnl
 dnl extra DCE obj + lib
 dnl Order of libs in HP-UX 10.x is important, -ldce must be last.
 dnl
-if test ${with_DCE-'no'} = "yes"; then
+AS_IF([test ${with_DCE-'no'} = "yes"], [
     DCE_OBJS="${DCE_OBJS} dce_pwent.o"
     SUDOERS_LIBS="${SUDOERS_LIBS} -ldce"
     AUTH_OBJS="$AUTH_OBJS dce.lo"
-fi
+])
 
 dnl
 dnl extra S/Key lib and includes
 dnl
-if test "${with_skey-'no'}" = "yes"; then
+AS_IF([test "${with_skey-'no'}" = "yes"], [
     O_LDFLAGS="$LDFLAGS"
-    if test "$with_skey" != "yes"; then
+    AS_IF([test "$with_skey" != "yes"], [
 	AX_APPEND_FLAG([-I${with_skey}/include], [CPPFLAGS])
 	LDFLAGS="$LDFLAGS -L${with_skey}/lib"
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_skey}/lib])
 	AC_CHECK_HEADER([skey.h], [found=yes], [found=no], [#include <stdio.h>])
-    else
+    ], [
 	found=no
 	O_CPPFLAGS="$CPPFLAGS"
 	for dir in "" "/usr/local" "/usr/contrib"; do
 	    test -n "$dir" && CPPFLAGS="$O_CPPFLAGS -I${dir}/include"
 	    AC_CHECK_HEADER([skey.h], [found=yes; break], [], [#include <stdio.h>])
 	done
-	if test "$found" = "no" -o -z "$dir"; then
+	AS_IF([test "$found" = "no" -o -z "$dir"], [
 	    CPPFLAGS="$O_CPPFLAGS"
-	else
+	], [
 	    LDFLAGS="$LDFLAGS -L${dir}/lib"
 	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${dir}/lib])
-	fi
-	if test "$found" = "no"; then
+	])
+	AS_IF([test "$found" = "no"], [
 	    AC_MSG_WARN([unable to locate skey.h, you will have to edit the Makefile and add -I/path/to/skey/includes to CPPFLAGS])
-	fi
-    fi
+	])
+    ])
     AC_CHECK_LIB([skey], [main], [found=yes], [AC_MSG_WARN([unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDOERS_LDFLAGS])])
     AC_CHECK_LIB([skey], [skeyaccess], [AC_DEFINE(HAVE_SKEYACCESS)])
 
@@ -3838,47 +3827,47 @@ if test "${with_skey-'no'}" = "yes"; then
     LDFLAGS="$O_LDFLAGS"
     SUDOERS_LIBS="${SUDOERS_LIBS} -lskey"
     AUTH_OBJS="$AUTH_OBJS rfc1938.lo"
-fi
+])
 
 dnl
 dnl extra OPIE lib and includes
 dnl
-if test "${with_opie-'no'}" = "yes"; then
+AS_IF([test "${with_opie-'no'}" = "yes"], [
     O_LDFLAGS="$LDFLAGS"
-    if test "$with_opie" != "yes"; then
+    AS_IF([test "$with_opie" != "yes"], [
 	AX_APPEND_FLAG([-I${with_opie}/include], [CPPFLAGS])
 	LDFLAGS="$LDFLAGS -L${with_opie}/lib"
 	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_opie}/lib])
 	AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[#include <opie.h>]])], [found=yes], [found=no])
-    else
+    ], [
 	found=no
 	O_CPPFLAGS="$CPPFLAGS"
 	for dir in "" "/usr/local" "/usr/contrib"; do
 	    test -n "$dir" && CPPFLAGS="$O_CPPFLAGS -I${dir}/include"
 	    AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[#include <opie.h>]])], [found=yes; break])
 	done
-	if test "$found" = "no" -o -z "$dir"; then
+	AS_IF([test "$found" = "no" -o -z "$dir"], [
 	    CPPFLAGS="$O_CPPFLAGS"
-	else
+	], [
 	    LDFLAGS="$LDFLAGS -L${dir}/lib"
 	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${dir}/lib])
-	fi
-	if test "$found" = "no"; then
+	])
+	AS_IF([test "$found" = "no"], [
 	    AC_MSG_WARN([unable to locate opie.h, you will have to edit the Makefile and add -I/path/to/opie/includes to CPPFLAGS])
-	fi
-    fi
+	])
+    ])
     AC_CHECK_LIB([opie], [main], [found=yes], [AC_MSG_WARN([unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDOERS_LDFLAGS])])
     LDFLAGS="$O_LDFLAGS"
     SUDOERS_LIBS="${SUDOERS_LIBS} -lopie"
     AUTH_OBJS="$AUTH_OBJS rfc1938.lo"
-fi
+])
 
 dnl
 dnl Check for shadow password routines if we have not already done so.
 dnl If there is a specific list of functions to check we do that first.
 dnl Otherwise, we check for SVR4-style and then SecureWare-style.
 dnl
-if test ${with_passwd-'no'} != "no"; then
+AS_IF([test ${with_passwd-'no'} != "no"], [
     dnl
     dnl if crypt(3) not in libc, look elsewhere
     dnl
@@ -3886,12 +3875,12 @@ if test ${with_passwd-'no'} != "no"; then
     AC_SEARCH_LIBS([crypt], [crypt crypt_d ufc], [
 	test "${ac_cv_search_crypt}" != "none required" && shadow_libs="${shadow_libs} ${ac_cv_search_crypt}"
     ])
-    if test "${ac_cv_search_crypt}" != "no"; then
+    AS_IF([test "${ac_cv_search_crypt}" != "no"], [
 	AC_DEFINE(HAVE_CRYPT)
-    fi
+    ])
     LIBS="$_LIBS"
 
-    if test "$CHECKSHADOW" = "true" -a -n "$shadow_funcs"; then
+    AS_IF([test "$CHECKSHADOW" = "true" -a -n "$shadow_funcs"], [
 	_LIBS="$LIBS"
 	LIBS="$LIBS $shadow_libs"
 	found=no
@@ -3924,32 +3913,32 @@ if test ${with_passwd-'no'} != "no"; then
 		found=yes
 	    ])
 	done
-	if test "$found" = "no"; then
+	AS_IF([test "$found" = "no"], [
 	    shadow_libs=
-	fi
+	])
 	CHECKSHADOW=false
 	LIBS="$_LIBS"
-    fi
-    if test "$CHECKSHADOW" = "true"; then
+    ])
+    AS_IF([test "$CHECKSHADOW" = "true"], [
 	AC_SEARCH_LIBS([getspnam], [gen shadow], [
 	    AC_DEFINE(HAVE_GETSPNAM)
 	    test "${ac_cv_search_getspnam}" != "none required" && shadow_libs="${shadow_libs} ${ac_cv_search_getspnam}"
 	    CHECKSHADOW=false
 	])
-    fi
-    if test "$CHECKSHADOW" = "true"; then
+    ])
+    AS_IF([test "$CHECKSHADOW" = "true"], [
 	AC_SEARCH_LIBS([getprpwnam], [sec security prot], [
 	    AC_DEFINE(HAVE_GETPRPWNAM)
 	    test "${ac_cv_search_getprpwnam}" != "none required" && shadow_libs="${shadow_libs} ${ac_cv_search_getprpwnam}"
 	    SECUREWARE=1
 	    CHECKSHADOW=false
 	])
-    fi
-    if test -n "$shadow_libs"; then
+    ])
+    AS_IF([test -n "$shadow_libs"], [
 	# sudoers needs to link with shadow libs for password auth
 	SUDOERS_LIBS="$SUDOERS_LIBS $shadow_libs"
-    fi
-    if test -n "$SECUREWARE"; then
+    ])
+    AS_IF([test -n "$SECUREWARE"], [
 	_LIBS="$LIBS"
 	LIBS="$LIBS $shadow_libs"
 	AC_CHECK_FUNCS([bigcrypt])
@@ -3957,30 +3946,30 @@ if test ${with_passwd-'no'} != "no"; then
 	# set_auth_parameters() and initprivs() are called from sudo.c
 	AC_CHECK_FUNCS([set_auth_parameters initprivs], [test -n "$shadow_libs" && SUDO_LIBS="$SUDO_LIBS $shadow_libs"])
 	LIBS="$_LIBS"
-    fi
-fi
+    ])
+])
 
 dnl
 dnl Solaris 11 added a 4th argument to the au_close() function
 dnl
-if test X"$with_bsm_audit" = X"yes"; then
+AS_IF([test X"$with_bsm_audit" = X"yes"], [
     SUDO_FUNC_AU_CLOSE_SOLARIS11
-fi
+])
 
 dnl
 dnl Choose event subsystem backend: poll or select
 dnl
-if test X"$enable_poll" = X""; then
+AS_IF([test X"$enable_poll" = X""], [
     AC_CHECK_FUNCS([ppoll poll], [enable_poll=yes; break], [enable_poll=no])
-elif test X"$enable_poll" = X"yes"; then
+], [test X"$enable_poll" = X"yes"], [
     AC_CHECK_FUNCS([ppoll], [], AC_DEFINE(HAVE_POLL))
-fi
-if test "$enable_poll" = "yes"; then
+])
+AS_IF([test "$enable_poll" = "yes"], [
     COMMON_OBJS="${COMMON_OBJS} event_poll.lo"
-else
+], [
     AC_CHECK_FUNCS([pselect])
     COMMON_OBJS="${COMMON_OBJS} event_select.lo"
-fi
+])
 
 dnl
 dnl If LDAP support is enabled, add sudo ldap objects to SUDOERS_OBJS
@@ -3995,36 +3984,36 @@ SUDO_CHECK_LDAP
 case "$lt_cv_dlopen" in
     dlopen)
 	AC_DEFINE(HAVE_DLOPEN)
-	if test "$enable_static_sudoers" = "yes"; then
+	AS_IF([test "$enable_static_sudoers" = "yes"], [
 	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
 	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
 	    AX_APPEND_FLAG([-no-install], [SUDOERS_LDFLAGS])
 	    SUDOERS_LT_STATIC="--tag=disable-shared"
 	    LT_STATIC=""
-	else
+	], [
 	    SUDOERS_LT_STATIC="--tag=disable-static"
 	    LT_STATIC="--tag=disable-static"
-	fi
+	])
 	;;
     shl_load)
 	AC_DEFINE(HAVE_SHL_LOAD)
-	if test "$enable_static_sudoers" = "yes"; then
+	AS_IF([test "$enable_static_sudoers" = "yes"], [
 	    AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	    SUDO_OBJS="${SUDO_OBJS} preload.o"
 	    STATIC_SUDOERS="\$(top_builddir)/plugins/sudoers/sudoers.la"
 	    AX_APPEND_FLAG([-no-install], [SUDOERS_LDFLAGS])
 	    SUDOERS_LT_STATIC="--tag=disable-shared"
 	    LT_STATIC=""
-	else
+	], [
 	    SUDOERS_LT_STATIC="--tag=disable-static"
 	    LT_STATIC="--tag=disable-static"
-	fi
+	])
 	;;
     *)
-	if test X"${ac_cv_func_dlopen}" = X"yes"; then
+	AS_IF([test X"${ac_cv_func_dlopen}" = X"yes"], [
 	    AC_MSG_ERROR([dlopen present but libtool doesn't appear to support your platform.])
-	fi
+	])
 	# Preload sudoers module symbols
 	AC_DEFINE(STATIC_SUDOERS_PLUGIN)
 	SUDO_OBJS="${SUDO_OBJS} preload.o"
@@ -4044,14 +4033,14 @@ fi
 # We can only disable linking with the shared libsudo_util if
 # sudoers is linked statically too.
 #
-if test "$enable_shared_libutil" = "no"; then
-    if test X"$STATIC_SUDOERS" = X""; then
+AS_IF([test "$enable_shared_libutil" = "no"], [
+    AS_IF([test X"$STATIC_SUDOERS" = X""], [
 	AC_MSG_ERROR([--disable-shared-libutil may only be specified with --enable-static-sudoers or when dynamic linking is disabled.])
-    else
+    ], [
 	# Do not install libsudo_util.
 	AX_APPEND_FLAG([-no-install], [LIBUTIL_LDFLAGS])
-    fi
-fi
+    ])
+])
 
 # On HP-UX, you cannot dlopen() a shared object that uses pthreads unless
 # the main program is linked against -lpthread.  We have no knowledge of
@@ -4068,9 +4057,7 @@ esac
 dnl
 dnl Check for log file, timestamp and iolog locations
 dnl
-if test "$utmp_style" = "LEGACY"; then
-    SUDO_PATH_UTMP
-fi
+AS_IF([test "$utmp_style" = "LEGACY"], [SUDO_PATH_UTMP])
 SUDO_LOGDIR
 SUDO_LOGFILE
 SUDO_RELAY_DIR
@@ -4097,9 +4084,9 @@ dnl If compiler supports the -static-libgcc flag use it unless we have
 dnl GNU ld (which can avoid linking in libgcc when it is not needed).
 dnl This test relies on AC_LANG_WERROR
 dnl
-if test -n "$GCC" -a "$lt_cv_prog_gnu_ld" != "yes"; then
+AS_IF([test -n "$GCC" -a "$lt_cv_prog_gnu_ld" != "yes"], [
     AX_CHECK_COMPILE_FLAG([-static-libgcc], [AX_APPEND_FLAG([-Wc,-static-libgcc], [LT_LDFLAGS])])
-fi
+])
 
 dnl
 dnl We want to use DT_RUNPATH in preference to DT_RPATH in ELF binaries.
@@ -4125,15 +4112,15 @@ dnl
 case "$with_passwd" in
 yes|maybe)
     AUTH_OBJS="$AUTH_OBJS getspwuid.lo passwd.lo"
-    if test "${ac_cv_search_crypt}" = "no"; then
+    AS_IF([test "${ac_cv_search_crypt}" = "no"], [
 	AC_MSG_WARN([no crypt function found, assuming plaintext passwords])
-    fi
+    ])
     ;;
 *)
     AC_DEFINE(WITHOUT_PASSWD)
-    if test -z "$AUTH_OBJS"; then
+    AS_IF([test -z "$AUTH_OBJS"], [
 	AC_MSG_ERROR([no authentication methods defined.])
-    fi
+    ])
     ;;
 esac
 AUTH_OBJS=${AUTH_OBJS# }
@@ -4141,7 +4128,7 @@ AUTH_OBJS=${AUTH_OBJS# }
 dnl
 dnl LIBS may contain duplicates from SUDO_LIBS, SUDOERS_LIBS, or NET_LIBS
 dnl
-if test -n "$LIBS"; then
+AS_IF([test -n "$LIBS"], [
     L="$LIBS"
     LIBS=
     for l in ${L}; do
@@ -4151,7 +4138,7 @@ if test -n "$LIBS"; then
 	done
 	test $dupe = 0 && LIBS="${LIBS} $l"
     done
-fi
+])
 
 dnl
 dnl OS-specific initialization
@@ -4161,7 +4148,7 @@ AC_DEFINE_UNQUOTED(os_init, $OS_INIT, [Define to an OS-specific initialization f
 dnl
 dnl We add -Wall and -Werror after all tests so they don't cause failures
 dnl
-if test -n "$GCC"; then
+AS_IF([test -n "$GCC"], [
     #
     # The fallthrough attribute is supported by gcc 7.0 and clang 10.
     # This test relies on AC_LANG_WERROR.
@@ -4189,10 +4176,10 @@ if test -n "$GCC"; then
 	    sudo_cv_var_fallthrough_attribute=no]
 	)]
     )
-    if test X"$sudo_cv_var_fallthrough_attribute" = X"yes"; then
+    AS_IF([test X"$sudo_cv_var_fallthrough_attribute" = X"yes"], [
 	AC_DEFINE(HAVE_FALLTHROUGH_ATTRIBUTE)
-    fi
-    if test X"$enable_warnings" = X"yes" -o X"$with_devel" = X"yes"; then
+    ])
+    AS_IF([test X"$enable_warnings" = X"yes" -o X"$with_devel" = X"yes"], [
 	dnl
 	dnl Default warnings for development use.
 	dnl
@@ -4206,18 +4193,18 @@ if test -n "$GCC"; then
 	AX_CHECK_COMPILE_FLAG([-Wvla], [AX_APPEND_FLAG([-Wvla], [CFLAGS])])
 	AX_CHECK_COMPILE_FLAG([-Walloca], [AX_APPEND_FLAG([-Walloca], [CFLAGS])])
 	AX_CHECK_COMPILE_FLAG([-Wtrampolines], [AX_APPEND_FLAG([-Wtrampolines], [CFLAGS])])
-	if test X"$sudo_cv_var_fallthrough_attribute" = X"yes"; then
+	AS_IF([test X"$sudo_cv_var_fallthrough_attribute" = X"yes"], [
 	    AX_APPEND_FLAG([-Wimplicit-fallthrough], [CFLAGS])
-	fi
-    fi
-    if test X"$enable_werror" = X"yes"; then
+	])
+    ])
+    AS_IF([test X"$enable_werror" = X"yes"], [
 	AX_APPEND_FLAG([-Werror], [CFLAGS])
-    fi
+    ])
     case "$host_os" in
 	# Avoid unwanted warnings on macOS
 	darwin*) AX_APPEND_FLAG([-Wno-deprecated-declarations], [CFLAGS]);;
     esac
-fi
+])
 
 dnl
 dnl Skip regress tests and sudoers validation checks if cross compiling.
@@ -4293,30 +4280,30 @@ esac
 dnl
 dnl Defer setting _PATH_SUDO_NOEXEC, etc until after exec_prefix is set
 dnl
-if test X"$enable_intercept" != X"no"; then
+AS_IF([test X"$enable_intercept" != X"no"], [
     SUDO_OBJS="${SUDO_OBJS} intercept.pb-c.o"
     PROGS="${PROGS} sudo_intercept.la"
     INSTALL_INTERCEPT="install-intercept"
 
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_INTERCEPT, "$intercept_file", [The fully qualified pathname of sudo_intercept.so])
-fi
-if test X"$with_noexec" != X"no"; then
+])
+AS_IF([test X"$with_noexec" != X"no"], [
     PROGS="${PROGS} sudo_noexec.la"
     INSTALL_NOEXEC="install-noexec"
 
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, "$noexec_file", [The fully qualified pathname of sudo_noexec.so])
-fi
-if test X"$with_selinux" != X"no"; then
+])
+AS_IF([test X"$with_selinux" != X"no"], [
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESH, "$sesh_file")
-else
+], [
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESH, NULL)
-fi
-if test X"$enable_shared" != X"no"; then
+])
+AS_IF([test X"$enable_shared" != X"no"], [
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$plugindir/")
     AC_DEFINE(ENABLE_SUDO_PLUGIN_API, 1, [Define to 1 to enable sudo's plugin interface.])
-else
+], [
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, NULL)
-fi
+])
 
 dnl
 dnl Add -R options to LDFLAGS, etc.
@@ -4371,11 +4358,11 @@ test "$sysconfdir" = '${prefix}/etc' && sysconfdir='/etc'
 dnl
 dnl Substitute into the Makefile and man pages
 dnl
-if test X"$INIT_SCRIPT" != X""; then
+AS_IF([test X"$INIT_SCRIPT" != X""], [
     AC_CONFIG_FILES([etc/init.d/$INIT_SCRIPT])
-elif test X"$TMPFILES_D" != X""; then
+], [test X"$TMPFILES_D" != X""], [
     AC_CONFIG_FILES([etc/init.d/sudo.conf])
-fi
+])
 
 AC_CONFIG_FILES([Makefile docs/Makefile examples/Makefile examples/sudoers examples/sudo.conf examples/sudo_logsrvd.conf examples/syslog.conf include/Makefile lib/eventlog/Makefile lib/fuzzstub/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/protobuf-c/Makefile lib/util/Makefile lib/util/regress/harness lib/util/util.exp logsrvd/Makefile src/intercept.exp src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/sample_approval/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/regress/harness plugins/sudoers/sudoers])
 AC_CONFIG_COMMANDS([harness], [chmod +x lib/util/regress/harness plugins/sudoers/regress/harness])
@@ -4554,22 +4541,22 @@ echo "" >&AS_MESSAGE_FD
 dnl
 dnl Display any warnings/info the user needs to know about at the end.
 dnl
-if test "$openssl_missing" = "yes"; then
+AS_IF([test "$openssl_missing" = "yes"], [
     AC_MSG_WARN([OpenSSL dev libraries not found, Sudo logsrv connections will not be encrypted.])
-fi
-if test "$with_pam" = "yes"; then
+])
+AS_IF([test "$with_pam" = "yes"], [
     case $host_os in
 	hpux*)
-	    if test -f /usr/lib/security/libpam_hpsec.so.1; then
+	    AS_IF([test -f /usr/lib/security/libpam_hpsec.so.1], [
 		AC_MSG_NOTICE([you may wish to add the following line to /etc/pam.conf])
 		AC_MSG_NOTICE([sudo session required libpam_hpsec.so.1 bypass_umask bypass_last_login])
-	    fi
+	    ])
 	    ;;
 	linux*)
 	    AC_MSG_NOTICE([you will need to customize examples/pam.conf and install it as /etc/pam.d/sudo])
 	    ;;
     esac
-fi
+])
 dnl
 dnl Warn user if they may need to clear rundir manually.
 dnl
@@ -4581,10 +4568,10 @@ case "$rundir" in
 	clear_rundir=1
 	;;
 esac
-if test $clear_rundir -eq 1; then
+AS_IF([test $clear_rundir -eq 1], [
     AC_MSG_NOTICE([warning: the $rundir/ts directory must be cleared at boot time.])
     AC_MSG_NOTICE([         You may need to create a startup item to do this.])
-fi
+])
 
 dnl
 dnl Autoheader templates
