@@ -556,7 +556,6 @@ AC_DEFUN([SUDO_APPEND_COMPAT_EXP], [
 ])
 
 dnl
-dnl
 dnl Append one or more symbols to INTERCEPT_EXP
 dnl
 AC_DEFUN([SUDO_APPEND_INTERCEPT_EXP], [
@@ -679,4 +678,37 @@ m4_define([SUDO_DEFINE_UNQUOTED],
 [cat >>confdefs.h <<EOF
 [@%:@define] $1 m4_if($#, 2, [$2], $#, 3, [$2], 1)
 EOF
+])
+
+dnl
+dnl Expand Makefile-style variables in $1 and store the result in $2.
+dnl Used to expand file paths for use in man pages and pathnames.h.
+dnl
+AC_DEFUN([SUDO_EXPAND_PATH], [
+    $2="$1"
+    while :; do
+	$2="`echo \"$$2\" | sed -e 's/(/{/g' -e 's/)/}/g'`"
+	case "$$2" in
+	*\${[[A-Za-z]]*}*)
+	    eval $2="$$2"
+	    ;;
+	*)
+	    break
+	    ;;
+    esac
+done
+case "$$2" in
+    NONE/*)
+        $2="${ac_default_prefix}${$2#NONE}"
+        ;;
+esac
+])
+
+dnl
+dnl Expand Makefile-style variables in $1 and define as the string $2.
+dnl Used to define file paths in pathnames.h.
+dnl
+AC_DEFUN([SUDO_DEFINE_PATH], [
+    SUDO_EXPAND_PATH([$1], [_sudo_define_path_exp])
+    SUDO_DEFINE_UNQUOTED($2, "$_sudo_define_path_exp")
 ])

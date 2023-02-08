@@ -1060,7 +1060,7 @@ check_syntax(const char *path, bool quiet, bool strict, bool check_owner,
 	if (fd == -1 || (sudoersin = fdopen(fd, "r")) == NULL) {
 	    if (!quiet)
 		sudo_warn(U_("unable to open %s"), fname);
-	    if (fd != -1
+	    if (fd != -1)
 		close(fd);
 	    goto done;
 	}

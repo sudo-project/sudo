@@ -4257,26 +4257,6 @@ while test X"$plugindir" != X"$_plugindir"; do
 done
 exec_prefix="$oexec_prefix"
 
-# Convert exampledir to something that can be used in the man pages
-# I wish there was a better way to expand this.
-EXAMPLES="$exampledir"
-while :; do
-    EXAMPLES="`echo \"$EXAMPLES\" | sed -e 's/(/{/g' -e 's/)/}/g'`"
-    case "$EXAMPLES" in
-    *\${[[A-Za-z]]*}*)
-	eval EXAMPLES="$EXAMPLES"
-	;;
-    *)
-	break
-	;;
-    esac
-done
-case "$EXAMPLES" in
-    NONE/*)
-	EXAMPLES="${ac_default_prefix}${EXAMPLES#NONE}"
-	;;
-esac
-
 dnl
 dnl Defer setting _PATH_SUDO_NOEXEC, etc until after exec_prefix is set
 dnl
@@ -4354,6 +4334,15 @@ test "$localedir" = '${datarootdir}/locale' && localedir='$(datarootdir)/locale'
 test "$localstatedir" = '${prefix}/var' && localstatedir='$(prefix)/var'
 test "$runstatedir" = '${localstatedir}/run' && runstatedir='$(localstatedir)/run'
 test "$sysconfdir" = '${prefix}/etc' && sysconfdir='/etc'
+
+# Expand config file paths for use in pathnames.h (after config dir override)
+SUDO_DEFINE_PATH([$cvtsudoers_conf], [_PATH_CVTSUDOERS_CONF])
+SUDO_DEFINE_PATH([$sudo_conf], [_PATH_SUDO_CONF])
+SUDO_DEFINE_PATH([$sudo_logsrvd_conf], [_PATH_SUDO_LOGSRVD_CONF])
+SUDO_DEFINE_PATH([$sudoers_path], [_PATH_SUDOERS])
+
+# Convert exampledir to something that can be used in the man pages
+SUDO_EXPAND_PATH([$exampledir], [EXAMPLES])
 
 dnl
 dnl Substitute into the Makefile and man pages

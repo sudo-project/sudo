@@ -35508,26 +35508,6 @@ while test X"$plugindir" != X"$_plugindir"; do
 done
 exec_prefix="$oexec_prefix"
 
-# Convert exampledir to something that can be used in the man pages
-# I wish there was a better way to expand this.
-EXAMPLES="$exampledir"
-while :; do
-    EXAMPLES="`echo \"$EXAMPLES\" | sed -e 's/(/{/g' -e 's/)/}/g'`"
-    case "$EXAMPLES" in
-    *\${[A-Za-z]*}*)
-	eval EXAMPLES="$EXAMPLES"
-	;;
-    *)
-	break
-	;;
-    esac
-done
-case "$EXAMPLES" in
-    NONE/*)
-	EXAMPLES="${ac_default_prefix}${EXAMPLES#NONE}"
-	;;
-esac
-
 if test X"$enable_intercept" != X"no"
 then :
 
@@ -35631,6 +35611,129 @@ test "$localedir" = '${datarootdir}/locale' && localedir='$(datarootdir)/locale'
 test "$localstatedir" = '${prefix}/var' && localstatedir='$(prefix)/var'
 test "$runstatedir" = '${localstatedir}/run' && runstatedir='$(localstatedir)/run'
 test "$sysconfdir" = '${prefix}/etc' && sysconfdir='/etc'
+
+# Expand config file paths for use in pathnames.h
+
+
+    _sudo_define_path_exp="$cvtsudoers_conf"
+    while :; do
+	_sudo_define_path_exp="`echo \"$_sudo_define_path_exp\" | sed -e 's/(/{/g' -e 's/)/}/g'`"
+	case "$_sudo_define_path_exp" in
+	*\${[A-Za-z]*}*)
+	    eval _sudo_define_path_exp="$_sudo_define_path_exp"
+	    ;;
+	*)
+	    break
+	    ;;
+    esac
+done
+case "$_sudo_define_path_exp" in
+    NONE/*)
+        _sudo_define_path_exp="${ac_default_prefix}${_sudo_define_path_exp#NONE}"
+        ;;
+esac
+
+    cat >>confdefs.h <<EOF
+#define _PATH_CVTSUDOERS_CONF "$_sudo_define_path_exp"
+EOF
+
+
+
+
+    _sudo_define_path_exp="$sudo_conf"
+    while :; do
+	_sudo_define_path_exp="`echo \"$_sudo_define_path_exp\" | sed -e 's/(/{/g' -e 's/)/}/g'`"
+	case "$_sudo_define_path_exp" in
+	*\${[A-Za-z]*}*)
+	    eval _sudo_define_path_exp="$_sudo_define_path_exp"
+	    ;;
+	*)
+	    break
+	    ;;
+    esac
+done
+case "$_sudo_define_path_exp" in
+    NONE/*)
+        _sudo_define_path_exp="${ac_default_prefix}${_sudo_define_path_exp#NONE}"
+        ;;
+esac
+
+    cat >>confdefs.h <<EOF
+#define _PATH_SUDO_CONF "$_sudo_define_path_exp"
+EOF
+
+
+
+
+    _sudo_define_path_exp="$sudo_logsrvd_conf"
+    while :; do
+	_sudo_define_path_exp="`echo \"$_sudo_define_path_exp\" | sed -e 's/(/{/g' -e 's/)/}/g'`"
+	case "$_sudo_define_path_exp" in
+	*\${[A-Za-z]*}*)
+	    eval _sudo_define_path_exp="$_sudo_define_path_exp"
+	    ;;
+	*)
+	    break
+	    ;;
+    esac
+done
+case "$_sudo_define_path_exp" in
+    NONE/*)
+        _sudo_define_path_exp="${ac_default_prefix}${_sudo_define_path_exp#NONE}"
+        ;;
+esac
+
+    cat >>confdefs.h <<EOF
+#define _PATH_SUDO_LOGSRVD_CONF "$_sudo_define_path_exp"
+EOF
+
+
+
+
+    _sudo_define_path_exp="$sudoers_path"
+    while :; do
+	_sudo_define_path_exp="`echo \"$_sudo_define_path_exp\" | sed -e 's/(/{/g' -e 's/)/}/g'`"
+	case "$_sudo_define_path_exp" in
+	*\${[A-Za-z]*}*)
+	    eval _sudo_define_path_exp="$_sudo_define_path_exp"
+	    ;;
+	*)
+	    break
+	    ;;
+    esac
+done
+case "$_sudo_define_path_exp" in
+    NONE/*)
+        _sudo_define_path_exp="${ac_default_prefix}${_sudo_define_path_exp#NONE}"
+        ;;
+esac
+
+    cat >>confdefs.h <<EOF
+#define _PATH_SUDOERS "$_sudo_define_path_exp"
+EOF
+
+
+
+# Convert exampledir to something that can be used in the man pages
+
+    EXAMPLES="$exampledir"
+    while :; do
+	EXAMPLES="`echo \"$EXAMPLES\" | sed -e 's/(/{/g' -e 's/)/}/g'`"
+	case "$EXAMPLES" in
+	*\${[A-Za-z]*}*)
+	    eval EXAMPLES="$EXAMPLES"
+	    ;;
+	*)
+	    break
+	    ;;
+    esac
+done
+case "$EXAMPLES" in
+    NONE/*)
+        EXAMPLES="${ac_default_prefix}${EXAMPLES#NONE}"
+        ;;
+esac
+
 
 if test X"$INIT_SCRIPT" != X""
 then :
