@@ -99,6 +99,9 @@ What's new in Sudo 1.9.13
    with the interactive shell that ran the script.
    GitHub issue #237.
 
+ * A missing include file in sudoers is no longer a fatal error
+   unless the error_recovery plugin argument has been set to false.
+
 What's new in Sudo 1.9.12p2
 
  * Fixed a compilation error on Linux/aarch64.  GitHub issue #197.
