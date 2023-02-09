@@ -51,7 +51,6 @@ struct sudoers_exec_args {
 
 static unsigned int sudo_version;
 static const char *interfaces_string;
-bool sudoers_recovery = true;
 sudo_conv_t sudo_conv;
 sudo_printf_t sudo_printf;
 struct sudo_plugin_event * (*plugin_event_alloc)(void);
