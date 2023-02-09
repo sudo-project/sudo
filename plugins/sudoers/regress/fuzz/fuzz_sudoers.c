@@ -50,7 +50,6 @@ struct sudo_user sudo_user;
 struct passwd *list_pw;
 sudo_conv_t sudo_conv = fuzz_conversation;
 sudo_printf_t sudo_printf = fuzz_printf;
-bool sudoers_recovery = true;
 int sudo_mode;
 
 FILE *
