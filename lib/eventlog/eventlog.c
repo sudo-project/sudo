@@ -1259,7 +1259,7 @@ eventlog_accept(const struct eventlog *evlog, int flags,
     const int log_type = evl_conf->type;
     struct eventlog_args args = { NULL };
     bool ret = true;
-    debug_decl(log_accept, SUDO_DEBUG_UTIL);
+    debug_decl(eventlog_accept, SUDO_DEBUG_UTIL);
 
     args.event_time = &evlog->submit_time;
     args.json_info_cb = info_cb;
@@ -1286,7 +1286,7 @@ eventlog_reject(const struct eventlog *evlog, int flags, const char *reason,
     const int log_type = evl_conf->type;
     struct eventlog_args args = { NULL };
     bool ret = true;
-    debug_decl(log_reject, SUDO_DEBUG_UTIL);
+    debug_decl(eventlog_reject, SUDO_DEBUG_UTIL);
 
     args.reason = reason;
     args.event_time = &evlog->submit_time;
@@ -1314,7 +1314,7 @@ eventlog_alert(const struct eventlog *evlog, int flags,
     const int log_type = evl_conf->type;
     struct eventlog_args args = { NULL };
     bool ret = true;
-    debug_decl(log_alert, SUDO_DEBUG_UTIL);
+    debug_decl(eventlog_alert, SUDO_DEBUG_UTIL);
 
     args.reason = reason;
     args.errstr = errstr;
@@ -1330,6 +1330,50 @@ eventlog_alert(const struct eventlog *evlog, int flags,
 	    ret = false;
     }
 
+    debug_return_bool(ret);
+}
+
+bool
+eventlog_mail(const struct eventlog *evlog, int flags,
+    struct timespec *event_time, const char *reason, const char *errstr,
+    char * const extra[])
+{
+    struct eventlog_args args = { NULL };
+    struct sudo_lbuf lbuf;
+    bool ret = false;
+    debug_decl(eventlog_mail, SUDO_DEBUG_UTIL);
+
+    args.reason = reason;
+    args.errstr = errstr;
+    args.event_time = event_time;
+
+    sudo_lbuf_init(&lbuf, NULL, 0, NULL, 0);
+    if (!new_logline(EVLOG_ALERT, flags, &args, evlog, &lbuf))
+	goto done;
+
+    if (extra != NULL) {
+	/* Each extra message is written on its own line. */
+	while (*extra != NULL) {
+	    sudo_lbuf_append(&lbuf, "\n");
+	    sudo_lbuf_append_esc(&lbuf, LBUF_ESC_CNTRL, "%s", *extra);
+	    if (sudo_lbuf_error(&lbuf)) {
+		sudo_debug_printf(
+		    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		    "unable to format mail message");
+		goto done;
+	    }
+	    extra++;
+	}
+    }
+
+    ret = send_mail(evlog, lbuf.buf);
+    if (!ret) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to mail log line");
+    }
+
+done:
+    sudo_lbuf_destroy(&lbuf);
     debug_return_bool(ret);
 }
 

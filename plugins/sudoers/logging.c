@@ -780,13 +780,13 @@ gai_log_warning(int flags, int errnum, const char *fmt, ...)
 bool
 mail_parse_errors(void)
 {
-    const int evl_flags = EVLOG_MAIL|EVLOG_MAIL_ONLY|EVLOG_RAW;
+    const int evl_flags = EVLOG_RAW;
     struct parse_error *pe;
     struct eventlog evlog;
-    char *cp, *mailbody = NULL;
+    char **errors = NULL;
     struct timespec now;
-    size_t len, n;
-    bool ret;
+    bool ret = false;
+    size_t n;
     debug_decl(mail_parse_errors, SUDOERS_DEBUG_LOGGING);
 
     if (STAILQ_EMPTY(&parse_error_list))
@@ -794,50 +794,32 @@ mail_parse_errors(void)
 
     if (sudo_gettime_real(&now) == -1) {
 	sudo_warn("%s", U_("unable to get time of day"));
-	ret = false;
 	goto done;
     }
     sudoers_to_eventlog(&evlog, safe_cmnd, NewArgv, env_get(),
 	sudo_user.uuid_str);
 
-    len = strlen(_("problem parsing sudoers")) + 1;
+    /* Convert parse_error_list to a string vector. */
+    n = 0;
     STAILQ_FOREACH(pe, &parse_error_list, entries) {
-	len += strlen(_(pe->errstr)) + 1;
+	n++;
     }
-    mailbody = malloc(len);
-    if (mailbody == NULL) {
+    errors = reallocarray(NULL, n + 1, sizeof(char *));
+    if (errors == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	ret = false;
 	goto done;
     }
-    cp = mailbody;
-
-    n = strlcpy(cp, _("problem parsing sudoers"), len);
-    if (n >= len) {
-	sudo_warnx(U_("internal error, %s overflow"), __func__);
-	ret = false;
-	goto done;
-    }
-    cp += n;
-    len -= n;
-
+    n = 0;
     STAILQ_FOREACH(pe, &parse_error_list, entries) {
-	n = snprintf(cp, len, "\n%s", _(pe->errstr));
-	if (n >= len) {
-	    sudo_warnx(U_("internal error, %s overflow"), __func__);
-	    ret = false;
-	    goto done;
-	}
-	cp += n;
-	len -= n;
+	errors[n++] = _(pe->errstr);
     }
+    errors[n] = NULL;
 
-    ret = eventlog_alert(&evlog, evl_flags, &now, mailbody, NULL);
-    if (!log_server_alert(&evlog, &now, mailbody, NULL))
-	ret = false;
+    ret = eventlog_mail(&evlog, evl_flags, &now, _("problem parsing sudoers"),
+	NULL, errors);
 
 done:
-    free(mailbody);
+    free(errors);
     while ((pe = STAILQ_FIRST(&parse_error_list)) != NULL) {
 	STAILQ_REMOVE_HEAD(&parse_error_list, entries);
 	free(pe->errstr);
