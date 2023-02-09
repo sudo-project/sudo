@@ -350,7 +350,7 @@ exec_mailer(int pipein)
 
 /* Send a message to the mailto user */
 static bool
-send_mail(const struct eventlog *evlog, const char *fmt, ...)
+send_mail(const struct eventlog *evlog, const char *message)
 {
     const struct eventlog_config *evl_conf = eventlog_getconf();
     const char *cp, *timefmt = evl_conf->time_fmt;
@@ -363,7 +363,6 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
     int fd, len, pfd[2], status;
     pid_t pid, rv;
     struct stat sb;
-    va_list ap;
 #if defined(HAVE_NL_LANGINFO) && defined(CODESET)
     char *locale;
 #endif
@@ -537,9 +536,7 @@ send_mail(const struct eventlog *evlog, const char *fmt, ...)
     } else {
 	(void) fprintf(mail, "\n\n%s : ", timebuf);
     }
-    va_start(ap, fmt);
-    (void) vfprintf(mail, fmt, ap);
-    va_end(ap);
+    fputs(message, mail);
     fputs("\n\n", mail);
 
     fclose(mail);
@@ -1039,7 +1036,7 @@ do_syslog(int event_type, int flags, struct eventlog_args *args,
 	    goto done;
 
 	if (ISSET(flags, EVLOG_MAIL)) {
-	    if (!send_mail(evlog, "%s", lbuf.buf)) {
+	    if (!send_mail(evlog, lbuf.buf)) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "unable to mail log line");
 	    }
@@ -1224,7 +1221,7 @@ do_logfile(int event_type, int flags, struct eventlog_args *args,
 	    goto done;
 
 	if (ISSET(flags, EVLOG_MAIL)) {
-	    if (!send_mail(evlog, "%s", lbuf.buf)) {
+	    if (!send_mail(evlog, lbuf.buf)) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "unable to mail log line");
 	    }
