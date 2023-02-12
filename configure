@@ -23694,6 +23694,33 @@ fi
 
 done
 
+  for ac_func in realpath
+do :
+  ac_fn_c_check_func "$LINENO" "realpath" "ac_cv_func_realpath"
+if test "x$ac_cv_func_realpath" = xyes
+then :
+  printf "%s\n" "#define HAVE_REALPATH 1" >>confdefs.h
+
+else case e in #(
+  e)
+    case " $LIBOBJS " in
+  *" realpath.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS realpath.$ac_objext"
+ ;;
+esac
+
+
+    for _sym in sudo_realpath; do
+	COMPAT_EXP="${COMPAT_EXP}${_sym}
+"
+    done
+
+ ;;
+esac
+fi
+
+done
+
   for ac_func in strlcpy
 do :
   ac_fn_c_check_func "$LINENO" "strlcpy" "ac_cv_func_strlcpy"
@@ -28018,6 +28045,19 @@ else case e in #(
 esac
 fi
 printf "%s\n" "#define HAVE_DECL_SSIZE_MAX $ac_have_decl" >>confdefs.h
+ac_fn_check_decl "$LINENO" "SYMLOOP_MAX" "ac_cv_have_decl_SYMLOOP_MAX" "
+#include <sys/types.h>
+#include <limits.h>
+
+" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl_SYMLOOP_MAX" = xyes
+then :
+  ac_have_decl=1
+else case e in #(
+  e) ac_have_decl=0 ;;
+esac
+fi
+printf "%s\n" "#define HAVE_DECL_SYMLOOP_MAX $ac_have_decl" >>confdefs.h
 
 ac_fn_check_decl "$LINENO" "SIZE_MAX" "ac_cv_have_decl_SIZE_MAX" "
 #include <sys/types.h>
@@ -28130,6 +28170,25 @@ else case e in #(
 esac
 fi
 printf "%s\n" "#define HAVE_DECL__POSIX_PATH_MAX $ac_have_decl" >>confdefs.h
+
+
+fi
+if test "$ac_cv_have_decl_SYMLOOP_MAX" != "yes"
+then :
+
+    ac_fn_check_decl "$LINENO" "_POSIX_SYMLOOP_MAX" "ac_cv_have_decl__POSIX_SYMLOOP_MAX" "
+#include <sys/types.h>
+#include <limits.h>
+
+" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl__POSIX_SYMLOOP_MAX" = xyes
+then :
+  ac_have_decl=1
+else case e in #(
+  e) ac_have_decl=0 ;;
+esac
+fi
+printf "%s\n" "#define HAVE_DECL__POSIX_SYMLOOP_MAX $ac_have_decl" >>confdefs.h
 
 
 fi

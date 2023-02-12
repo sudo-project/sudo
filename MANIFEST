@@ -276,6 +276,7 @@ lib/util/pw_dup.c
 lib/util/pwrite.c
 lib/util/rcstr.c
 lib/util/reallocarray.c
+lib/util/realpath.c
 lib/util/regex.c
 lib/util/regress/closefrom/closefrom_test.c
 lib/util/regress/corpus/seed/sudo_conf/sudo.conf.1

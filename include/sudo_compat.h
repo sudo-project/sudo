@@ -103,6 +103,14 @@
 # endif
 #endif
 
+#if defined(HAVE_DECL_SYMLOOP_MAX) && !HAVE_DECL_SYMLOOP_MAX
+# if defined(HAVE_DECL__POSIX_SYMLOOP_MAX) && HAVE_DECL__POSIX_SYMLOOP_MAX
+#  define SYMLOOP_MAX		_POSIX_SYMLOOP_MAX
+# else
+#  define SYMLOOP_MAX		8
+# endif
+#endif
+
 /* ACCESSPERMS and ALLPERMS are handy BSDisms. */
 #ifndef ACCESSPERMS
 # define ACCESSPERMS	00777
@@ -552,6 +560,11 @@ sudo_dso_public void *sudo_reallocarray(void *ptr, size_t nmemb, size_t size);
 # undef reallocarray
 # define reallocarray(_a, _b, _c) sudo_reallocarray((_a), (_b), (_c))
 #endif /* HAVE_REALLOCARRAY */
+#ifndef HAVE_REALPATH
+sudo_dso_public void *sudo_realpath(const char *path, char *resolved);
+# undef realpath
+# define realpath(_a, _b) sudo_realpath((_a), (_b))
+#endif /* HAVE_REALPATH */
 #ifndef HAVE_DUP3
 sudo_dso_public int sudo_dup3(int oldd, int newd, int flags);
 # undef dup3
