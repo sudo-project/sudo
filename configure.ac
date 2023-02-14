@@ -3022,7 +3022,7 @@ AC_CHECK_FUNCS([setpassent setgroupent])
 dnl
 dnl Function checks for sudo_noexec
 dnl
-AS_IF([test X"$with_noexec" != X"no"],
+AS_IF([test X"$with_noexec" != X"no"], [
     # Check for non-standard exec functions
     AC_CHECK_FUNCS([exect execvP execvpe])
     # Check for posix_spawn, and posix_spawnp
