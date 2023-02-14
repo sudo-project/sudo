@@ -34,8 +34,8 @@
 #include "sudo_exec.h"
 
 void
-suspend_sudo_nopty(struct exec_closure *ec, int signo, pid_t ppgrp,
-    pid_t cmnd_pid)
+suspend_sudo_nopty(struct exec_closure *ec, int signo, pid_t my_pid,
+    pid_t my_pgrp, pid_t cmnd_pid)
 {
     struct sigaction sa, osa;
     pid_t saved_pgrp = -1;
@@ -67,9 +67,9 @@ suspend_sudo_nopty(struct exec_closure *ec, int signo, pid_t ppgrp,
 	 * pgrp and let it continue.
 	 */
 	if (signo == SIGTTOU || signo == SIGTTIN) {
-	    if (saved_pgrp == ppgrp) {
+	    if (saved_pgrp == my_pgrp) {
 		pid_t cmnd_pgrp = getpgid(cmnd_pid);
-		if (cmnd_pgrp != ppgrp) {
+		if (cmnd_pgrp != my_pgrp) {
 		    if (tcsetpgrp_nobg(fd, cmnd_pgrp) == 0) {
 			if (killpg(cmnd_pgrp, SIGCONT) != 0)
 			    sudo_warn("kill(%d, SIGCONT)", (int)cmnd_pgrp);
@@ -92,8 +92,8 @@ suspend_sudo_nopty(struct exec_closure *ec, int signo, pid_t ppgrp,
 	if (sudo_sigaction(SIGTSTP, &sa, &osa) != 0)
 	    sudo_warn(U_("unable to set handler for signal %d"), SIGTSTP);
     }
-    if (kill(getpid(), signo) != 0)
-	sudo_warn("kill(%d, %d)", (int)getpid(), signo);
+    if (kill(my_pid, signo) != 0)
+	sudo_warn("kill(%d, %d)", (int)my_pid, signo);
     if (signo == SIGTSTP) {
 	if (sudo_sigaction(SIGTSTP, &osa, NULL) != 0)
 	    sudo_warn(U_("unable to restore handler for signal %d"), SIGTSTP);
@@ -110,7 +110,7 @@ suspend_sudo_nopty(struct exec_closure *ec, int signo, pid_t ppgrp,
 	 * It is possible that we are no longer the foreground process,
 	 * use tcsetpgrp_nobg() to prevent sudo from receiving SIGTTOU.
 	 */
-	if (saved_pgrp != ppgrp)
+	if (saved_pgrp != my_pgrp)
 	    tcsetpgrp_nobg(fd, saved_pgrp);
 	close(fd);
     }

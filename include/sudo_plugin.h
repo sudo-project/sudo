@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,7 +21,7 @@
 
 /* API version major/minor */
 #define SUDO_API_VERSION_MAJOR 1
-#define SUDO_API_VERSION_MINOR 20
+#define SUDO_API_VERSION_MINOR 21
 #define SUDO_API_MKVERSION(x, y) (((x) << 16) | (y))
 #define SUDO_API_VERSION SUDO_API_MKVERSION(SUDO_API_VERSION_MAJOR, SUDO_API_VERSION_MINOR)
 

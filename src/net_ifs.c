@@ -683,13 +683,14 @@ get_net_ifs(char **addrinfo_out)
      * Get the size of the interface buffer (if possible).
      * We over-allocate a bit in case interfaces come up afterward.
      */
+    i = 0;
 # if defined(SIOCGSIZIFCONF)
     /* AIX */
     if (ioctl(sock, SIOCGSIZIFCONF, &i) != -1) {
 	buflen = i + (sizeof(struct ifreq) * 4);
     } else
 # elif defined(SIOCGIFANUM)
-    /* SCO OpenServer 5 */
+    /* SCO OpenServer 5/6 */
     if (ioctl(sock, SIOCGIFANUM, &i) != -1) {
 	buflen = (i + 4) * sizeof(struct ifreq);
     } else

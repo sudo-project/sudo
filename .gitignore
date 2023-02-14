@@ -3,7 +3,6 @@
 **/*.l[ao]
 **/*.lai
 **/*.map
-**/*.mo
 **/*.o
 **/*.plog
 
@@ -24,6 +23,7 @@ libtool
 pathnames.h
 ChangeLog
 PVS-Studio.cfg
+stamp-*
 uncrustify.files
 
 docs/*.man

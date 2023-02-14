@@ -64,8 +64,6 @@ _call_plugin_open(struct IOPluginContext *io_ctx, int argc, char * const argv[],
     if (py_argv != NULL && py_command_info != NULL) {
         rc = python_plugin_api_rc_call(plugin_ctx, CALLBACK_PYNAME(open),
                                        Py_BuildValue("(OO)", py_argv, py_command_info));
-    } else {
-        rc = SUDO_RC_ERROR;
     }
 
     if (rc != SUDO_RC_OK)

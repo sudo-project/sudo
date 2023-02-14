@@ -437,7 +437,7 @@ audit_write_exit_record(int exit_status, int error)
 	goto done;
     }
 
-    if (!sudo_json_init(&jsonc, 4, false, false))
+    if (!sudo_json_init(&jsonc, 4, false, false, false))
 	goto oom;
     if (!sudo_json_open_object(&jsonc, "exit"))
 	goto oom;
@@ -522,7 +522,7 @@ audit_write_record(const char *audit_str, const char *plugin_name,
 	goto done;
     }
 
-    if (!sudo_json_init(&jsonc, 4, false, false))
+    if (!sudo_json_init(&jsonc, 4, false, false, false))
 	goto oom;
     if (!sudo_json_open_object(&jsonc, audit_str))
 	goto oom;

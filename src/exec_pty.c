@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -73,8 +73,10 @@ pty_cleanup(void)
 {
     debug_decl(cleanup, SUDO_DEBUG_EXEC);
 
-    if (io_fds[SFD_USERTTY] != -1)
-	sudo_term_restore(io_fds[SFD_USERTTY], false);
+    if (ttymode != TERM_COOKED) {
+	if (!sudo_term_restore(io_fds[SFD_USERTTY], false))
+	    sudo_warn("%s", U_("unable to restore terminal settings"));
+    }
     if (utmp_user != NULL)
 	utmp_logout(ptyname, 0);
 
@@ -206,8 +208,10 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 	del_io_events(true);
 
 	/* Restore original tty mode before suspending. */
-	if (ttymode != TERM_COOKED)
-	    sudo_term_restore(io_fds[SFD_USERTTY], false);
+	if (ttymode != TERM_COOKED) {
+	    if (!sudo_term_restore(io_fds[SFD_USERTTY], false))
+		sudo_warn("%s", U_("unable to restore terminal settings"));
+	}
 
 	/* Log the suspend event. */
 	log_suspend(ec, signo);
@@ -224,9 +228,25 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 	    if (sudo_sigaction(signo, &sa, &osa) != 0)
 		sudo_warn(U_("unable to set handler for signal %d"), signo);
 	}
-	sudo_debug_printf(SUDO_DEBUG_INFO, "kill parent SIG%s", signame);
-	if (killpg(ec->ppgrp, signo) != 0)
-	    sudo_warn("killpg(%d, SIG%s)", (int)ec->ppgrp, signame);
+	/*
+	 * We stop sudo's process group, even if sudo is not the process
+	 * group leader.  If we only send the signal to sudo itself,
+	 * the shell will not notice if it is not in monitor mode.
+	 * This can happen when sudo is run from a shell script, for
+	 * example.  In this case we need to signal the shell itself.
+	 * If the process group leader is no longer present, we must kill
+	 * the command since there will be no one to resume us.
+	 */
+	sudo_debug_printf(SUDO_DEBUG_INFO, "killpg(%d, SIG%s) [parent]",
+	    (int)ec->ppgrp, signame);
+	if ((ec->ppgrp != ec->sudo_pid && kill(ec->ppgrp, 0) == -1) ||
+		killpg(ec->ppgrp, signo) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR,
+		"no parent to suspend, terminating command.");
+	    terminate_command(ec->cmnd_pid, true);
+	    ec->cmnd_pid = -1;
+	    break;
+	}
 
 	/* Log the resume event. */
 	log_suspend(ec, SIGCONT);
@@ -466,7 +486,7 @@ write_callback(int fd, int what, void *v)
  * We already closed the follower so reads from the leader will not block.
  */
 static void
-pty_finish(struct command_status *cstat)
+pty_finish(struct exec_closure *ec, struct command_status *cstat)
 {
     int flags;
     debug_decl(pty_finish, SUDO_DEBUG_EXEC);
@@ -483,8 +503,14 @@ pty_finish(struct command_status *cstat)
     free_io_bufs();
 
     /* Restore terminal settings. */
-    if (io_fds[SFD_USERTTY] != -1)
-	sudo_term_restore(io_fds[SFD_USERTTY], false);
+    if (ttymode != TERM_COOKED) {
+	/* Only restore the terminal if sudo is the foreground process. */
+	const pid_t tcpgrp = tcgetpgrp(io_fds[SFD_USERTTY]);
+	if (tcpgrp == ec->ppgrp) {
+	    if (!sudo_term_restore(io_fds[SFD_USERTTY], false))
+		sudo_warn("%s", U_("unable to restore terminal settings"));
+	}
+    }
 
     /* Update utmp */
     if (utmp_user != NULL)
@@ -761,18 +787,21 @@ signal_cb_pty(int signo, int what, void *v)
 	break;
     default:
 	/*
-	 * Do not forward signals sent by a process in the command's process
-	 * group, as we don't want the command to indirectly kill itself.
-	 * For example, this can happen with some versions of reboot that
-	 * call kill(-1, SIGTERM) to kill all other processes.
+	 * Do not forward signals sent by the command itself or a member of the
+	 * command's process group (but only when either sudo or the command is
+	 * the process group leader).  We don't want the command to indirectly
+	 * kill itself.  For example, this can happen with some versions of
+	 * reboot that call kill(-1, SIGTERM) to kill all other processes.
 	 */
 	if (USER_SIGNALED(sc->siginfo) && sc->siginfo->si_pid != 0) {
-	    pid_t si_pgrp = getpgid(sc->siginfo->si_pid);
-	    if (si_pgrp != -1) {
-		if (si_pgrp == ec->ppgrp || si_pgrp == ec->cmnd_pid)
-		    debug_return;
-	    } else if (sc->siginfo->si_pid == ec->cmnd_pid) {
+	    pid_t si_pgrp;
+
+	    if (sc->siginfo->si_pid == ec->cmnd_pid)
 		debug_return;
+	    si_pgrp = getpgid(sc->siginfo->si_pid);
+	    if (si_pgrp != -1) {
+		if (si_pgrp == ec->cmnd_pid || si_pgrp == ec->sudo_pid)
+		    debug_return;
 	    }
 	}
 	/* Schedule signal to be forwarded to the command. */
@@ -846,13 +875,15 @@ fwdchannel_cb(int sock, int what, void *v)
  */
 static void
 fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
-    struct command_details *details, pid_t ppgrp, int backchannel)
+    struct command_details *details, pid_t sudo_pid, pid_t ppgrp,
+    int backchannel)
 {
     debug_decl(fill_exec_closure, SUDO_DEBUG_EXEC);
 
     /* Fill in the non-event part of the closure. */
-    ec->cmnd_pid = -1;
+    ec->sudo_pid = sudo_pid;
     ec->ppgrp = ppgrp;
+    ec->cmnd_pid = -1;
     ec->cstat = cstat;
     ec->details = details;
     ec->rows = user_details.ts_rows;
@@ -976,7 +1007,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     sigset_t set, oset;
     struct sigaction sa;
     struct stat sb;
-    pid_t ppgrp;
+    pid_t ppgrp, sudo_pid;
     debug_decl(exec_pty, SUDO_DEBUG_EXEC);
 
     /*
@@ -1031,6 +1062,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
      */
     init_ttyblock();
     ppgrp = getpgrp();	/* parent's pgrp, so child can signal us */
+    sudo_pid = getpid();
 
     /* Determine whether any of std{in,out,err} should be logged. */
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
@@ -1064,6 +1096,8 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 
 	/* Are we the foreground process? */
 	foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ppgrp;
+	sudo_debug_printf(SUDO_DEBUG_INFO, "sudo is running in the %s",
+	    foreground ? "foreground" : "background");
     }
 
     /*
@@ -1089,6 +1123,16 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	    io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
 		log_stdin, read_callback, write_callback, &ec, &iobufs);
 	    io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
+	}
+
+	if (foreground && ppgrp != sudo_pid) {
+	    /*
+	     * If sudo is not the process group leader and stdin is not
+	     * a tty we may be running as a background job via a shell
+	     * script.  Start the command in the background to avoid
+	     * changing the terminal mode from a background process.
+	     */
+	    SET(details->flags, CD_EXEC_BG);
 	}
     }
     if (io_fds[SFD_STDOUT] == -1 || !isatty(STDOUT_FILENO)) {
@@ -1158,7 +1202,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     /* Check for early termination or suspend signals before we fork. */
     if (sudo_terminated(cstat)) {
 	sigprocmask(SIG_SETMASK, &oset, NULL);
-	debug_return_int(true);
+	debug_return_bool(true);
     }
 
     ec.monitor_pid = sudo_debug_fork();
@@ -1236,7 +1280,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
      * Fill in exec closure, allocate event base, signal events and
      * the backchannel event.
      */
-    fill_exec_closure(&ec, cstat, details, ppgrp, sv[0]);
+    fill_exec_closure(&ec, cstat, details, sudo_pid, ppgrp, sv[0]);
 
     /* Create event and closure for intercept mode. */
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
@@ -1291,7 +1335,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     } while (evloop_retries-- > 0);
 
     /* Flush any remaining output, free I/O bufs and events, do logout. */
-    pty_finish(cstat);
+    pty_finish(&ec, cstat);
 
     /* Free things up. */
     free_exec_closure(&ec);

@@ -68,7 +68,7 @@ strvec_join(char *const argv[], char sep, size_t (*cpy)(char *, const char *, si
 	*dst++ = sep;
 	size--;
     }
-    *--dst = '\0';
+    dst[-1] = '\0';
 
     debug_return_str(result);
 }

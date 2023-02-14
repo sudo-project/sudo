@@ -1,6 +1,6 @@
 Sudo is distributed under the following license:
 
-    Copyright (c) 1994-1996, 1998-2022
+    Copyright (c) 1994-1996, 1998-2023
         Todd C. Miller <Todd.Miller@sudo.ws>
 
     Permission to use, copy, modify, and distribute this software for any
@@ -148,14 +148,15 @@ following license:
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions
     are met:
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-    3. Neither the name of the University nor the names of its contributors
-       may be used to endorse or promote products derived from this software
-       without specific prior written permission.
+
+        1. Redistributions of source code must retain the above copyright
+           notice, this list of conditions and the following disclaimer.
+        2. Redistributions in binary form must reproduce the above copyright
+           notice, this list of conditions and the following disclaimer in the
+           documentation and/or other materials provided with the distribution.
+        3. Neither the name of the University nor the names of its contributors
+           may be used to endorse or promote products derived from this software
+           without specific prior written permission.
 
     THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -176,6 +177,7 @@ The file fnmatch.c bears the following license:
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
+
         * Redistributions of source code must retain the above copyright
           notice, this list of conditions and the following disclaimer.
         * Redistributions in binary form must reproduce the above copyright
@@ -207,11 +209,12 @@ The file getopt_long.c bears the following license:
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions
     are met:
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
+
+        1. Redistributions of source code must retain the above copyright
+           notice, this list of conditions and the following disclaimer.
+        2. Redistributions in binary form must reproduce the above copyright
+           notice, this list of conditions and the following disclaimer in the
+           documentation and/or other materials provided with the distribution.
 
     THIS SOFTWARE IS PROVIDED BY THE NETBSD FOUNDATION, INC. AND CONTRIBUTORS
     ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
@@ -244,9 +247,9 @@ The file inet_pton.c bears the following license:
 
 The file arc4random.c bears the following license:
 
-    Copyright (c) 1996, David Mazieres <dm@uun.org>
-    Copyright (c) 2008, Damien Miller <djm@openbsd.org>
-    Copyright (c) 2013, Markus Friedl <markus@openbsd.org>
+    Copyright (c) 1996, David Mazieres <dm@uun.org>  
+    Copyright (c) 2008, Damien Miller <djm@openbsd.org>  
+    Copyright (c) 2013, Markus Friedl <markus@openbsd.org>  
     Copyright (c) 2014, Theo de Raadt <deraadt@openbsd.org>
 
     Permission to use, copy, modify, and distribute this software for any
@@ -279,7 +282,7 @@ The file arc4random_uniform.c bears the following license:
 
 The file getentropy.c bears the following license:
 
-    Copyright (c) 2014 Theo de Raadt <deraadt@openbsd.org>
+    Copyright (c) 2014 Theo de Raadt <deraadt@openbsd.org>  
     Copyright (c) 2014 Bob Beck <beck@obtuse.com>
 
     Permission to use, copy, modify, and distribute this software for any
@@ -306,13 +309,14 @@ The embedded copy of zlib bears the following license:
     including commercial applications, and to alter it and redistribute it
     freely, subject to the following restrictions:
 
-    1. The origin of this software must not be misrepresented; you must not
-       claim that you wrote the original software. If you use this software
-       in a product, an acknowledgment in the product documentation would be
-       appreciated but is not required.
-    2. Altered source versions must be plainly marked as such, and must not be
-       misrepresented as being the original software.
-    3. This notice may not be removed or altered from any source distribution.
+        1. The origin of this software must not be misrepresented; you must not
+           claim that you wrote the original software. If you use this software
+           in a product, an acknowledgment in the product documentation would be
+           appreciated but is not required.
+        2. Altered source versions must be plainly marked as such, and must not
+           be misrepresented as being the original software.
+        3. This notice may not be removed or altered from any source
+           distribution.
 
     Jean-loup Gailly        Mark Adler
     jloup@gzip.org          madler@alumni.caltech.edu

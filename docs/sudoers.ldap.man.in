@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2003-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2003-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOERS.LDAP" "@mansectform@" "September 13, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "@mansectform@" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1197,19 +1197,21 @@ The following
 \fIlevel\fR
 values are supported:
 .RS 10n
-.TP 10n
+.TP 6n
 never
+.br
 The server certificate will not be requested or checked.
-.TP 10n
+.TP 6n
 allow
+.br
 The server certificate will be requested.
 A missing or invalid certificate is ignored and not considered an error.
-.TP 10n
+.TP 6n
 try
 The server certificate will be requested.
 A missing certificate is ignored but an invalid certificate will
 result in a connection error.
-.TP 10n
+.TP 6n
 demand | \fIhard\fR
 The server certificate will be requested.
 A missing or invalid certificate will result in a connection error.
@@ -1305,11 +1307,11 @@ The following sources are recognized:
 .PP
 .RS 4n
 .PD 0
-.TP 10n
+.TP 7n
 files
 read sudoers from
 \fI@sysconfdir@/sudoers\fR
-.TP 10n
+.TP 7n
 ldap
 read sudoers from LDAP
 .RE

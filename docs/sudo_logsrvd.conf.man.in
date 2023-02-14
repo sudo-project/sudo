@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "September 13, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -57,24 +57,24 @@ file.
 .PP
 The following configuration sections are recognized:
 .PP
-.RS 6n
+.RS 1n
 .PD 0
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 server
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 relay
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 iolog
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 eventlog
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 syslog
-.TP 4n
+.TP 3n
 \fB\(bu\fR
 logfile
 .RE
@@ -86,7 +86,7 @@ The
 \fIserver\fR
 section configures the address and port the server will listen on.
 The following keys are recognized:
-.TP 10n
+.TP 6n
 listen_address = host[:port][(tls)]
 The host name or IP address, optional port to listen on and
 an optional Transport Layer Security (TLS) flag in parentheses.
@@ -115,19 +115,19 @@ connections and port 30344 will be used for TLS connections.
 .sp
 The default value is:
 .nf
-.RS 16n
+.RS 12n
 listen_address = *:30343
 listen_address = *:30344(tls)
 .RE
 .fi
-.RS 10n
+.RS 6n
 which will listen on all configured network interfaces for both
 plaintext and TLS connections.
 Multiple
 \fIlisten_address\fR
 lines may be specified to listen on more than one port or interface.
 .RE
-.TP 10n
+.TP 6n
 server_log = string
 Where to log server warning and error messages.
 Supported values are
@@ -144,7 +144,7 @@ is only effective when used in conjunction with the
 option.
 The default value is
 \fIsyslog\fR.
-.TP 10n
+.TP 6n
 pid_file = path
 The path to the file containing the process ID of the running
 \fBsudo_logsrvd\fR.
@@ -160,7 +160,7 @@ If
 refers to a symbolic link, it will be ignored.
 The default value is
 \fI@rundir@/sudo_logsrvd.pid\fR.
-.TP 10n
+.TP 6n
 tcp_keepalive = boolean
 If true,
 \fBsudo_logsrvd\fR
@@ -170,7 +170,7 @@ If the client does not respond to a message in time, the connection will
 be closed.
 Defaults to
 \fItrue\fR.
-.TP 10n
+.TP 6n
 timeout = number
 The amount of time, in seconds,
 \fBsudo_logsrvd\fR
@@ -178,7 +178,7 @@ will wait for the client to respond.
 A value of 0 will disable the timeout.
 The default value is
 \fI30\fR.
-.TP 10n
+.TP 6n
 tls_cacert = path
 The path to a certificate authority bundle file, in PEM format,
 to use instead of the system's default certificate authority database
@@ -187,12 +187,12 @@ The default is to use
 \fI/etc/ssl/sudo/cacert.pem\fR
 if it exists, otherwise the system's default certificate authority
 database is used.
-.TP 10n
+.TP 6n
 tls_cert = path
 The path to the server's certificate file, in PEM format.
 The default value is
 \fI/etc/ssl/sudo/certs/logsrvd_cert.pem\fR.
-.TP 10n
+.TP 6n
 tls_checkpeer = bool
 If true, client certificates will be validated by
 \fBsudo_logsrvd\fR;
@@ -205,7 +205,7 @@ setting must be set to a CA bundle that contains the CA certificate
 used to generate the client certificate.
 The default value is
 \fIfalse\fR.
-.TP 10n
+.TP 6n
 tls_ciphers_v12 = string
 A list of ciphers to use for connections secured by TLS version 1.2 only,
 separated by a colon
@@ -220,7 +220,7 @@ The default value is
 which consists of encryption cipher suites with key lengths larger than
 128 bits, and some cipher suites with 128-bit keys.
 Cipher suites that offer no authentication are excluded.
-.TP 10n
+.TP 6n
 tls_ciphers_v13 = string
 A list of ciphers to use for connections secured by TLS version 1.3 only,
 separated by a colon
@@ -228,47 +228,47 @@ separated by a colon
 Supported cipher suites depend on the version of OpenSSL used,
 but should include the following:
 .sp
-.RS 16n
+.RS 12n
 .PD 0
-.TP 10n
+.TP 6n
 TLS_AES_128_GCM_SHA256
-.TP 10n
+.TP 6n
 TLS_AES_256_GCM_SHA384
-.TP 10n
+.TP 6n
 TLS_CHACHA20_POLY1305_SHA256
-.TP 10n
+.TP 6n
 TLS_AES_128_CCM_SHA256
-.TP 10n
+.TP 6n
 TLS_AES_128_CCM_8_SHA256
 .RE
-.RS 10n
+.RS 6n
 .sp
 The default cipher suite is
 \(lqTLS_AES_256_GCM_SHA384\(rq.
 .RE
 .PD
-.TP 10n
+.TP 6n
 tls_dhparams = path
 The path to a file containing custom Diffie-Hellman parameters in PEM format.
 This file can be created with the following command:
 .nf
 .sp
-.RS 10n
+.RS 6n
 openssl dhparam -out /etc/sudo_logsrvd_dhparams.pem 2048
 .RE
 .fi
-.RS 10n
+.RS 6n
 .sp
 By default,
 \fBsudo_logsrvd\fR
 will use the OpenSSL defaults for Diffie-Hellman key generation.
 .RE
-.TP 10n
+.TP 6n
 tls_key = path
 The path to the server's private key file, in PEM format.
 The default value is
 \fI/etc/ssl/sudo/private/logsrvd_key.pem\fR.
-.TP 10n
+.TP 6n
 tls_verify = bool
 If true,
 \fBsudo_logsrvd\fR
@@ -292,7 +292,7 @@ They are only present in this section to make it possible for the relay
 connection to use a different set of TLS parameters from the client-facing
 server.
 The following keys are recognized:
-.TP 10n
+.TP 6n
 connect_timeout = number
 The amount of time, in seconds,
 \fBsudo_logsrvd\fR
@@ -307,7 +307,7 @@ will wait for the relay to respond.
 A value of 0 will disable the timeout.
 The default value is
 \fI30\fR.
-.TP 10n
+.TP 6n
 relay_dir = path
 The directory in which log messages are temporarily stored before they
 are sent to the relay host.
@@ -315,7 +315,7 @@ Messages are stored in the wire format specified by
 sudo_logsrv.proto(@mansectform@)
 The default value is
 \fI@relay_dir@\fR.
-.TP 10n
+.TP 6n
 relay_host = host[:port][(tls)]
 The relay host name or IP address, optional port to connect to and
 an optional Transport Layer Security (TLS) flag in parentheses.
@@ -340,13 +340,13 @@ protocol.
 If multiple
 \fIrelay_host\fR
 lines are specified, the first available relay host will be used.
-.TP 10n
+.TP 6n
 retry_interval = number
 The number of seconds to wait after a connection error before making
 a new attempt to forward a message to a relay host.
 The default value is
 \fI30\fR.
-.TP 10n
+.TP 6n
 store_first = boolean
 If true,
 \fBsudo_logsrvd\fR
@@ -356,7 +356,7 @@ and the log is relayed.
 If the network connection is interrupted before the log can be fully
 transferred, it will be retransmitted later.
 The default is to relay logs in real-time.
-.TP 10n
+.TP 6n
 tcp_keepalive = boolean
 If true,
 \fBsudo_logsrvd\fR
@@ -365,7 +365,7 @@ This enables the periodic transmission of keepalive messages to the relay
 server.
 If the relay does not respond to a message in time, the connection will
 be closed.
-.TP 10n
+.TP 6n
 timeout = number
 The amount of time, in seconds,
 \fBsudo_logsrvd\fR
@@ -373,7 +373,7 @@ will wait for the relay server to respond after a connection has succeeded.
 A value of 0 will disable the timeout.
 The default value is
 \fI30\fR.
-.TP 10n
+.TP 6n
 tls_cacert = path
 The path to a certificate authority bundle file, in PEM format,
 to use instead of the system's default certificate authority database
@@ -382,13 +382,13 @@ The default is to use the value specified in the
 \fIserver\fR
 section, or the system's default certificate authority database if
 no value is set.
-.TP 10n
+.TP 6n
 tls_cert = path
 The path to the server's certificate file, in PEM format.
 The default is to use the value specified in the
 \fIserver\fR
 section.
-.TP 10n
+.TP 6n
 tls_checkpeer = bool
 If true, the relay host's certificate will be validated by
 \fBsudo_logsrvd\fR;
@@ -402,7 +402,7 @@ used to generate the relay certificate.
 The default is to use the value specified in the
 \fIserver\fR
 section.
-.TP 10n
+.TP 6n
 tls_ciphers_v12 = string
 A list of ciphers to use for connections secured by TLS version 1.2 only,
 separated by a colon
@@ -415,7 +415,7 @@ for full details.
 The default is to use the value specified in the
 \fIserver\fR
 section.
-.TP 10n
+.TP 6n
 tls_ciphers_v13 = string
 A list of ciphers to use for connections secured by TLS version 1.3 only,
 separated by a colon
@@ -427,19 +427,19 @@ section for more information.
 The default is to use the value specified in the
 \fIserver\fR
 section.
-.TP 10n
+.TP 6n
 tls_dhparams = path
 The path to a file containing custom Diffie-Hellman parameters in PEM format.
 The default is to use the value specified in the
 \fIserver\fR
 section.
-.TP 10n
+.TP 6n
 tls_key = path
 The path to the server's private key file, in PEM format.
 The default is to use the value specified in the
 \fIserver\fR
 section.
-.TP 10n
+.TP 6n
 tls_verify = bool
 If true, the server's certificate used for relaying will be verified at startup.
 If false, no verification is performed of the server certificate.
@@ -455,7 +455,7 @@ section configures I/O log parameters.
 These settings are identical to the I/O configuration in
 sudoers(@mansectform@).
 The following keys are recognized:
-.TP 10n
+.TP 6n
 iolog_compress = boolean
 If set, I/O logs will be compressed using
 \fBzlib\fR.
@@ -463,7 +463,7 @@ Enabling compression can make it harder to view the logs in real-time as
 the program is executing due to buffering.
 The default value is
 \fIfalse\fR.
-.TP 10n
+.TP 6n
 iolog_dir = path
 The top-level directory to use when constructing the path
 name for the I/O log directory.
@@ -475,7 +475,7 @@ The following percent
 (\(oq%\(cq)
 escape sequences are supported:
 .PP
-.RS 10n
+.RS 6n
 .PD 0
 .TP 6n
 %{seq}
@@ -514,7 +514,7 @@ character, the string
 \(oq%%\(cq
 should be used.
 .RE
-.TP 10n
+.TP 6n
 iolog_file = path
 The path name, relative to
 \fIiolog_dir\fR,
@@ -550,7 +550,7 @@ overwritten unless
 ends in six or
 more
 \fIX\fRs.
-.TP 10n
+.TP 6n
 iolog_flush = boolean
 If set, I/O log data is flushed to disk after each write instead of
 buffering it.
@@ -561,7 +561,7 @@ I/O logs are always flushed before sending a commit point to the client
 regardless of this setting.
 The default value is
 \fItrue\fR.
-.TP 10n
+.TP 6n
 iolog_group = name
 The group name to look up when setting the group-ID on new I/O log
 files and directories.
@@ -575,7 +575,7 @@ If neither
 nor
 \fIiolog_user\fR
 are set, I/O log files and directories are created with group-ID 0.
-.TP 10n
+.TP 6n
 iolog_mode = mode
 The file mode to use when creating I/O log files.
 Mode bits for read and write permissions for owner, group, or other
@@ -587,7 +587,7 @@ to match the read and write bits specified by
 \fIiolog_mode\fR.
 The default value is
 \fI0600\fR.
-.TP 10n
+.TP 6n
 iolog_user = name
 The user name to look up when setting the owner of new
 I/O log files and directories.
@@ -596,7 +596,7 @@ If
 is set, it will be used instead of the user's primary group-ID.
 By default, I/O log files and directories are created with user and
 group-ID 0.
-.TP 10n
+.TP 6n
 log_passwords = bool
 Most programs that require a user's password will disable echo before
 reading the password to avoid displaying the plaintext password on
@@ -625,7 +625,7 @@ option is set), only the
 first character of the password will be replaced in the I/O log.
 The default value is
 \fItrue\fR.
-.TP 10n
+.TP 6n
 maxseq = number
 The maximum sequence number that will be substituted for the
 \(lq%{seq}\(rq
@@ -643,7 +643,7 @@ base 36 sequence number
 will be silently truncated to 2176782336.
 The default value is
 \fI2176782336\fR.
-.TP 10n
+.TP 6n
 passprompt_regex = string
 One or more POSIX extended regular expressions used to
 match password prompts in the terminal output when

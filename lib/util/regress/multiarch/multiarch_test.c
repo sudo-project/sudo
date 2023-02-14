@@ -165,9 +165,15 @@ main(int argc, char *argv[])
 	    sudo_warnx("%s: expected %s got %s", test_data[ch].inpath,
 		test_data[ch].outpath, outpath);
 	    errors++;
-	    free(outpath);
 	}
+	/* For test_data[5], inpath is allocated and outpath is NULL. */
+	if (test_data[ch].outpath != NULL)
+	    free(test_data[ch].outpath);
+	else
+	    free((char *)test_data[ch].inpath);
+	free(outpath);
     }
+    free(test_data);
 
     if (ntests != 0) {
 	printf("%s: %d tests run, %d errors, %d%% success rate\n",

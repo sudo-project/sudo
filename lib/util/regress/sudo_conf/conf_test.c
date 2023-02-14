@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2013-2014 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -89,18 +89,20 @@ sudo_conf_dump(void)
     struct sudo_debug_file *debug_file;
     struct plugin_info *info;
 
-    printf("Set developer_mode %s\n",
-	sudo_conf_developer_mode() ? "true" : "false");
     printf("Set disable_coredump %s\n",
 	sudo_conf_disable_coredump() ? "true" : "false");
     printf("Set group_source %s\n",
 	sudo_conf_group_source() == GROUP_SOURCE_ADAPTIVE ? "adaptive" :
 	sudo_conf_group_source() == GROUP_SOURCE_STATIC ? "static" : "dynamic");
     printf("Set max_groups %d\n", sudo_conf_max_groups());
+    printf("Set probe_interfaces %s\n",
+	sudo_conf_probe_interfaces() ? "true" : "false");
     if (sudo_conf_askpass_path() != NULL)
 	printf("Path askpass %s\n", sudo_conf_askpass_path());
     if (sudo_conf_sesh_path() != NULL)
 	printf("Path sesh %s\n", sudo_conf_sesh_path());
+    if (sudo_conf_intercept_path() != NULL)
+	printf("Path intercept %s\n", sudo_conf_intercept_path());
     if (sudo_conf_noexec_path() != NULL)
 	printf("Path noexec %s\n", sudo_conf_noexec_path());
     if (sudo_conf_plugin_dir_path() != NULL)

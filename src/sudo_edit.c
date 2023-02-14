@@ -628,9 +628,10 @@ int
 sudo_edit(struct command_details *command_details)
 {
     struct command_details saved_command_details;
-    char **nargv = NULL, **ap, **files = NULL;
+    char **nargv = NULL, **files = NULL;
+    int nfiles = command_details->nfiles;
     int errors, i, ac, nargc, ret;
-    int editor_argc = 0, nfiles = 0;
+    int editor_argc = 0;
     struct timespec times[2];
     struct tempfile *tf = NULL;
     debug_decl(sudo_edit, SUDO_DEBUG_EDIT);
@@ -650,17 +651,31 @@ sudo_edit(struct command_details *command_details)
     if (!set_tmpdir(&user_details.cred))
 	goto cleanup;
 
-    /*
-     * The user's editor must be separated from the files to be
-     * edited by a "--" option.
-     */
-    for (ap = command_details->argv; *ap != NULL; ap++) {
-	if (files)
-	    nfiles++;
-	else if (strcmp(*ap, "--") == 0)
-	    files = ap + 1;
-	else
-	    editor_argc++;
+    if (nfiles > 0) {
+	/*
+	 * The plugin specified the number of files to edit, use it.
+	 */
+	editor_argc = command_details->argc - nfiles;
+	if (editor_argc < 2 || strcmp(command_details->argv[editor_argc - 1], "--") != 0) {
+	    sudo_warnx("%s", U_("plugin error: invalid file list for sudoedit"));
+	    goto cleanup;
+	}
+
+	/* We don't include the "--" when running the user's editor. */
+	files = &command_details->argv[editor_argc--];
+    } else {
+	/*
+	 * Compute the number of files to edit by looking for the "--"
+	 * option which separate the editor from the files.
+	 */
+	for (i = 0; command_details->argv[i] != NULL; i++) {
+	    if (strcmp(command_details->argv[i], "--") == 0) {
+		editor_argc = i;
+		files = &command_details->argv[i + 1];
+		nfiles = command_details->argc - (i + 1);
+		break;
+	    }
+	}
     }
     if (nfiles == 0) {
 	sudo_warnx("%s", U_("plugin error: missing file list for sudoedit"));
@@ -717,6 +732,7 @@ sudo_edit(struct command_details *command_details)
     command_details->cred = user_details.cred;
     command_details->cred.euid = user_details.cred.uid;
     command_details->cred.egid = user_details.cred.gid;
+    command_details->argc = nargc;
     command_details->argv = nargv;
     ret = run_command(command_details);
     if (sudo_gettime_real(&times[1]) == -1) {
@@ -726,6 +742,7 @@ sudo_edit(struct command_details *command_details)
 
     /* Restore saved command_details. */
     command_details->cred = saved_command_details.cred;
+    command_details->argc = saved_command_details.argc;
     command_details->argv = saved_command_details.argv;
 
     /* Copy contents of temp files to real ones. */

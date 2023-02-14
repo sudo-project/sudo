@@ -61,12 +61,12 @@ enum sudoers_formats {
  * Function Prototypes
  */
 static void dump_sudoers(struct sudo_lbuf *lbuf);
-static sudo_noreturn void usage(void);
 static void set_runaspw(const char *);
 static void set_runasgr(const char *);
 static bool cb_runas_default(const char *file, int line, int column, const union sudo_defs_val *, int);
 static int testsudoers_error(const char *msg);
 static int testsudoers_output(const char *buf);
+sudo_noreturn static void usage(void);
 
 /* testsudoers_pwutil.c */
 extern struct cache_item *testsudoers_make_gritem(gid_t gid, const char *group);

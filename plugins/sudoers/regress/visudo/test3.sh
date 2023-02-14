@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # Sudo Bug 361:
-# Excerises a bug in the redblack tree code.
+# Exercises a bug in the redblack tree code.
 #
 
 : ${VISUDO=visudo}

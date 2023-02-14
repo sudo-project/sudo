@@ -74,6 +74,7 @@ struct exec_closure {
     struct sudo_event *sigwinch_event;
     struct command_status *cstat;
     void *intercept;
+    pid_t sudo_pid;
     pid_t monitor_pid;
     pid_t cmnd_pid;
     pid_t ppgrp;
@@ -232,6 +233,6 @@ bool set_exec_filter(void);
 int exec_ptrace_seize(pid_t child);
 
 /* suspend_nopty.c */
-void suspend_sudo_nopty(struct exec_closure *ec, int signo, pid_t ppgrp, pid_t cmnd_pid);
+void suspend_sudo_nopty(struct exec_closure *ec, int signo, pid_t my_pid, pid_t my_pgrp, pid_t cmnd_pid);
 
 #endif /* SUDO_EXEC_H */

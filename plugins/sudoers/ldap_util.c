@@ -77,7 +77,7 @@ sudo_ldap_parse_option(char *optstr, char **varp, char **valp)
 
     /* check for equals sign past first char */
     cp = strchr(var, '=');
-    if (cp > var) {
+    if (cp != NULL && cp > var) {
 	val = cp + 1;
 	op = cp[-1];	/* peek for += or -= cases */
 	if (op == '+' || op == '-') {

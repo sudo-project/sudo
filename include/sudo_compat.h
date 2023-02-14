@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2008, 2009-2022
+ * Copyright (c) 1996, 1998-2005, 2008, 2009-2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -37,12 +37,6 @@
  * Macros and functions that may be missing on some operating systems.
  */
 
-#ifdef HAVE_FALLTHROUGH_ATTRIBUTE
-# define FALLTHROUGH 	__attribute__((__fallthrough__))
-#else
-# define FALLTHROUGH 	do { } while (0)
-#endif
-
 /*
  * Given the pointer x to the member m of the struct s, return
  * a pointer to the containing structure.
@@ -60,26 +54,6 @@
 # else
 #  define va_copy(d, s) memcpy(&(d), &(s), sizeof(d));
 # endif
-#endif
-
-#ifndef CMSG_ALIGN
-# define CMSG_ALIGN(p) \
-    (((size_t)(p) + sizeof(size_t) - 1) & ~(sizeof(size_t) - 1))
-#endif
-
-/* Length of the contents of a control message of length len. */
-#ifndef CMSG_LEN
-# define CMSG_LEN(len) (CMSG_ALIGN(sizeof(struct cmsghdr)) + (len))
-#endif
-
-/* Length of the space taken up by a padded control message of length len. */
-#ifndef CMSG_SPACE
-# define CMSG_SPACE(len) (CMSG_ALIGN(sizeof(struct cmsghdr)) + CMSG_ALIGN(len))
-#endif
-
-/* Given a pointer to struct cmsghdr, return a pointer to data. */
-#ifndef CMSG_DATA
-# define CMSG_DATA(cmsg) ((unsigned char *)(cmsg) + CMSG_ALIGN(sizeof(struct cmsghdr)))
 #endif
 
 /*
@@ -231,10 +205,10 @@ extern int errno;
 #endif /* !HAVE_DECL_ERRNO */
 
 /* Not all systems define NSIG in signal.h */
-#if !defined(NSIG)
-# if defined(_NSIG)
+#if !defined(HAVE_DECL_NSIG) || !HAVE_DECL_NSIG
+# if defined(HAVE_DECL__NSIG) && HAVE_DECL__NSIG
 #  define NSIG _NSIG
-# elif defined(__NSIG)
+# elif defined(HAVE_DECL___NSIG) && HAVE_DECL___NSIG
 #  define NSIG __NSIG
 # else
 #  define NSIG 64

@@ -348,12 +348,16 @@ log_failure(int status, int flags)
     debug_decl(log_failure, SUDOERS_DEBUG_LOGGING);
 
     /* The user doesn't always get to see the log message (path info). */
-    if (!ISSET(status, FLAG_NO_USER | FLAG_NO_HOST) && def_path_info &&
-	(flags == NOT_FOUND_DOT || flags == NOT_FOUND))
+    if (!ISSET(status, FLAG_NO_USER | FLAG_NO_HOST) && list_pw == NULL &&
+	    def_path_info && (flags == NOT_FOUND_DOT || flags == NOT_FOUND))
 	inform_user = false;
     ret = log_denial(status, inform_user);
 
     if (!inform_user) {
+	const char *cmnd = user_cmnd;
+	if (ISSET(sudo_mode, MODE_CHECK))
+	    cmnd = list_cmnd ? list_cmnd : NewArgv[1];
+
 	/*
 	 * We'd like to not leak path info at all here, but that can
 	 * *really* confuse the users.  To really close the leak we'd
@@ -362,9 +366,9 @@ log_failure(int status, int flags)
 	 * their path to just contain a single dir.
 	 */
 	if (flags == NOT_FOUND)
-	    sudo_warnx(U_("%s: command not found"), user_cmnd);
+	    sudo_warnx(U_("%s: command not found"), cmnd);
 	else if (flags == NOT_FOUND_DOT)
-	    sudo_warnx(U_("ignoring \"%s\" found in '.'\nUse \"sudo ./%s\" if this is the \"%s\" you wish to run."), user_cmnd, user_cmnd, user_cmnd);
+	    sudo_warnx(U_("ignoring \"%s\" found in '.'\nUse \"sudo ./%s\" if this is the \"%s\" you wish to run."), cmnd, cmnd, cmnd);
     }
 
     debug_return_bool(ret);
@@ -776,13 +780,13 @@ gai_log_warning(int flags, int errnum, const char *fmt, ...)
 bool
 mail_parse_errors(void)
 {
-    const int evl_flags = EVLOG_MAIL|EVLOG_MAIL_ONLY|EVLOG_RAW;
+    const int evl_flags = EVLOG_RAW;
     struct parse_error *pe;
     struct eventlog evlog;
-    char *cp, *mailbody = NULL;
+    char **errors = NULL;
     struct timespec now;
-    size_t len, n;
-    bool ret;
+    bool ret = false;
+    size_t n;
     debug_decl(mail_parse_errors, SUDOERS_DEBUG_LOGGING);
 
     if (STAILQ_EMPTY(&parse_error_list))
@@ -790,50 +794,32 @@ mail_parse_errors(void)
 
     if (sudo_gettime_real(&now) == -1) {
 	sudo_warn("%s", U_("unable to get time of day"));
-	ret = false;
 	goto done;
     }
     sudoers_to_eventlog(&evlog, safe_cmnd, NewArgv, env_get(),
 	sudo_user.uuid_str);
 
-    len = strlen(_("problem parsing sudoers")) + 1;
+    /* Convert parse_error_list to a string vector. */
+    n = 0;
     STAILQ_FOREACH(pe, &parse_error_list, entries) {
-	len += strlen(_(pe->errstr)) + 1;
+	n++;
     }
-    mailbody = malloc(len);
-    if (mailbody == NULL) {
+    errors = reallocarray(NULL, n + 1, sizeof(char *));
+    if (errors == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	ret = false;
 	goto done;
     }
-    cp = mailbody;
-
-    n = strlcpy(cp, _("problem parsing sudoers"), len);
-    if (n >= len) {
-	sudo_warnx(U_("internal error, %s overflow"), __func__);
-	ret = false;
-	goto done;
-    }
-    cp += n;
-    len -= n;
-
+    n = 0;
     STAILQ_FOREACH(pe, &parse_error_list, entries) {
-	n = snprintf(cp, len, "\n%s", _(pe->errstr));
-	if (n >= len) {
-	    sudo_warnx(U_("internal error, %s overflow"), __func__);
-	    ret = false;
-	    goto done;
-	}
-	cp += n;
-	len -= n;
+	errors[n++] = _(pe->errstr);
     }
+    errors[n] = NULL;
 
-    ret = eventlog_alert(&evlog, evl_flags, &now, mailbody, NULL);
-    if (!log_server_alert(&evlog, &now, mailbody, NULL))
-	ret = false;
+    ret = eventlog_mail(&evlog, evl_flags, &now, _("problem parsing sudoers"),
+	NULL, errors);
 
 done:
-    free(mailbody);
+    free(errors);
     while ((pe = STAILQ_FIRST(&parse_error_list)) != NULL) {
 	STAILQ_REMOVE_HEAD(&parse_error_list, entries);
 	free(pe->errstr);

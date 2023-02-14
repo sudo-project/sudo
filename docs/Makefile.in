@@ -32,7 +32,7 @@ scriptdir = $(top_srcdir)/scripts
 # Tools to use
 SED = @SED@
 IGOR = igor
-MANDOC = @MANDOCPROG@
+MANDOC = mandoc
 MANCOMPRESS = @MANCOMPRESS@
 MANCOMPRESSEXT = @MANCOMPRESSEXT@
 TR = @TRPROG@

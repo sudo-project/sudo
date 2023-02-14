@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2011-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2011-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -55,7 +55,7 @@ CPP = @CPP@
 HOSTCPP = @CPP_FOR_BUILD@
 LIBTOOL = @LIBTOOL@
 SHA1SUM = @SHA1SUM@
-GREP = @GREP@
+EGREP = @EGREP@
 SED = @SED@
 AWK = @AWK@
 
@@ -111,10 +111,12 @@ PVS_IGNORE = 'V707,V011,V002,V536'
 PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
 
 # Regression tests
-TEST_PROGS = conf_test hltq_test parseln_test progname_test parse_gids_test \
-	     getgids getgrouplist_test multiarch_test open_parent_dir_test \
-	     strsplit_test strtobool_test strtoid_test strtomode_test \
-	     strtonum_test uuid_test @COMPAT_TEST_PROGS@
+TEST_PROGS = conf_test getgids getgrouplist_test hexchar_test hltq_test \
+	     json_test multiarch_test open_parent_dir_test parse_gids_test \
+	     parseln_test progname_test regex_test strsplit_test \
+	     strtobool_test strtoid_test strtomode_test strtonum_test \
+	     uuid_test @COMPAT_TEST_PROGS@
+
 TEST_LIBS = @LIBS@
 TEST_LDFLAGS = @LDFLAGS@
 TEST_VERBOSE =
@@ -143,12 +145,13 @@ DEVEL = @DEVEL@
 SHELL = @SHELL@
 
 LTOBJS = basename.lo @DIGEST@ event.lo fatal.lo key_val.lo gethostname.lo \
-	 gettime.lo getgrouplist.lo gidlist.lo json.lo lbuf.lo locking.lo \
-	 logfac.lo logpri.lo mkdir_parents.lo mmap_alloc.lo multiarch.lo \
-	 parseln.lo progname.lo rcstr.lo regex.lo roundup.lo secure_path.lo \
-	 setgroups.lo strsplit.lo strtobool.lo strtoid.lo strtomode.lo \
-	 strtonum.lo sudo_conf.lo sudo_debug.lo sudo_dso.lo term.lo \
-	 ttyname_dev.lo ttysize.lo uuid.lo @COMMON_OBJS@ @LTLIBOBJS@
+	 gettime.lo getgrouplist.lo gidlist.lo hexchar.lo json.lo lbuf.lo \
+	 locking.lo logfac.lo logpri.lo mkdir_parents.lo mmap_alloc.lo \
+	 multiarch.lo parseln.lo progname.lo rcstr.lo regex.lo roundup.lo \
+	 secure_path.lo setgroups.lo strsplit.lo strtobool.lo strtoid.lo \
+	 strtomode.lo strtonum.lo sudo_conf.lo sudo_debug.lo sudo_dso.lo \
+	 term.lo ttyname_dev.lo ttysize.lo uuid.lo \
+	 @COMMON_OBJS@ @LTLIBOBJS@
 
 IOBJS = $(LTOBJS:.lo=.i)
 
@@ -164,17 +167,23 @@ CLOSEFROM_TEST_OBJS = closefrom_test.lo closefrom.lo
 
 CONF_TEST_OBJS = conf_test.lo sudo_conf.lo
 
-HLTQ_TEST_OBJS = hltq_test.lo
-
 FNM_TEST_OBJS = fnm_test.lo fnmatch.lo
 
 GLOBTEST_OBJS = globtest.lo glob.lo
 
 GETDELIM_TEST_OBJS = getdelim_test.lo getdelim.lo
 
+HLTQ_TEST_OBJS = hltq_test.lo
+
+HEXCHAR_TEST_OBJS = hexchar_test.lo hexchar.lo
+
+JSON_TEST_OBJS = json_test.lo json.lo
+
 MULTIARCH_TEST_OBJS = multiarch_test.lo multiarch.lo
 
 OPEN_PARENT_DIR_TEST_OBJS = open_parent_dir_test.lo mkdir_parents.lo
+
+REGEX_TEST_OBJS = regex_test.lo regex.lo
 
 STRTOBOOL_TEST_OBJS = strtobool_test.lo strtobool.lo
 
@@ -284,6 +293,12 @@ getdelim_test: $(GETDELIM_TEST_OBJS) libsudo_util.la
 hltq_test: $(HLTQ_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(HLTQ_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
+hexchar_test: $(HEXCHAR_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(HEXCHAR_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+
+json_test: $(JSON_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(JSON_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+
 mktemp_test: $(MKTEMP_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(MKTEMP_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
@@ -310,6 +325,9 @@ getgrouplist_test: $(GETGROUPLIST_TEST_OBJS) libsudo_util.la
 
 strsplit_test: $(STRSPLIT_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(STRSPLIT_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+
+regex_test: $(REGEX_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(REGEX_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 strsig_test: $(STRSIG_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(STRSIG_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
@@ -342,11 +360,9 @@ fuzz_sudo_conf_seed_corpus.zip:
 	rm -rf $$tdir
 
 run-fuzz_sudo_conf: fuzz_sudo_conf
-	if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
-	    LC_ALL=C.UTF-8; export LC_ALL; \
-	else \
-	    LC_ALL=C; export LC_ALL; \
-	fi; \
+	l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'` || true; \
+	test -n "$$l" || l="C"; \
+	LC_ALL="$$l"; export LC_ALL; \
 	unset LANG || LANG=; \
 	unset LANGUAGE || LANGUAGE=; \
 	MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
@@ -408,11 +424,9 @@ fuzz: run-fuzz_sudo_conf
 
 check-fuzzer: $(FUZZ_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
-		LC_ALL=C.UTF-8; export LC_ALL; \
-	    else \
-		LC_ALL=C; export LC_ALL; \
-	    fi; \
+	    l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'` || true; \
+	    test -n "$$l" || l="C"; \
+	    LC_ALL="$$l"; export LC_ALL; \
 	    unset LANG || LANG=; \
 	    unset LANGUAGE || LANGUAGE=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
@@ -424,11 +438,9 @@ check-fuzzer: $(FUZZ_PROGS)
 # Note: some regress checks are run from srcdir for consistent error messages
 check: $(TEST_PROGS) check-fuzzer
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
-		LC_ALL=C.UTF-8; export LC_ALL; \
-	    else \
-		LC_ALL=C; export LC_ALL; \
-	    fi; \
+	    l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'` || true; \
+	    test -n "$$l" || l="C"; \
+	    LC_ALL="$$l"; export LC_ALL; \
 	    unset LANG || LANG=; \
 	    unset LANGUAGE || LANGUAGE=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
@@ -437,21 +449,15 @@ check: $(TEST_PROGS) check-fuzzer
 	    if test -f closefrom_test; then \
 		./closefrom_test || rval=`expr $$rval + $$?`; \
 	    fi; \
-	    if test -f parse_gids_test; then \
-		./parse_gids_test || rval=`expr $$rval + $$?`; \
-	    fi; \
-	    if test -f strsplit_test; then \
-		./strsplit_test || rval=`expr $$rval + $$?`; \
-	    fi; \
 	    if test -f fnm_test; then \
 		./fnm_test $(srcdir)/regress/fnmatch/fnm_test.in || rval=`expr $$rval + $$?`; \
 	    fi; \
 	    if test -f globtest; then \
 		mkdir -p `$(SED) 's@/[^/]*$$@@' $(srcdir)/regress/glob/files | sort -u`; \
 		touch `cat $(srcdir)/regress/glob/files`; \
-		chmod 0755 `$(GREP) '/r[^/]*$$' $(srcdir)/regress/glob/files`; \
-		chmod 0444 `$(GREP) '/s[^/]*$$' $(srcdir)/regress/glob/files`; \
-		chmod 0711 `$(GREP) '/t[^/]*$$' $(srcdir)/regress/glob/files`; \
+		chmod 0755 `$(EGREP) '/r[^/]*$$' $(srcdir)/regress/glob/files`; \
+		chmod 0444 `$(EGREP) '/s[^/]*$$' $(srcdir)/regress/glob/files`; \
+		chmod 0711 `$(EGREP) '/t[^/]*$$' $(srcdir)/regress/glob/files`; \
 		./globtest $(srcdir)/regress/glob/globtest.in || rval=`expr $$rval + $$?`; \
 		rm -rf fake; \
 	    fi; \
@@ -467,12 +473,17 @@ check: $(TEST_PROGS) check-fuzzer
 	    ./getgrouplist_test || rval=`expr $$rval + $$?`; \
 	    ./multiarch_test || rval=`expr $$rval + $$?`; \
 	    ./open_parent_dir_test || rval=`expr $$rval + $$?`; \
+	    ./parse_gids_test || rval=`expr $$rval + $$?`; \
+	    ./regex_test || rval=`expr $$rval + $$?`; \
+	    ./strsplit_test || rval=`expr $$rval + $$?`; \
 	    ./strtobool_test || rval=`expr $$rval + $$?`; \
 	    ./strtoid_test || rval=`expr $$rval + $$?`; \
 	    ./strtomode_test || rval=`expr $$rval + $$?`; \
 	    ./strtonum_test || rval=`expr $$rval + $$?`; \
 	    ./uuid_test || rval=`expr $$rval + $$?`; \
 	    ./hltq_test || rval=`expr $$rval + $$?`; \
+	    ./hexchar_test || rval=`expr $$rval + $$?`; \
+	    ./json_test || rval=`expr $$rval + $$?`; \
 	    ./progname_test || rval=`expr $$rval + $$?`; \
 	    rm -f ./progname_test2; ln -s ./progname_test ./progname_test2; \
 	    ./progname_test2 || rval=`expr $$rval + $$?`; \
@@ -941,6 +952,28 @@ gmtime_r.i: $(srcdir)/gmtime_r.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 gmtime_r.plog: gmtime_r.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/gmtime_r.c --i-file $< --output-file $@
+hexchar.lo: $(srcdir)/hexchar.c $(incdir)/compat/stdbool.h \
+            $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+            $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+            $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/hexchar.c
+hexchar.i: $(srcdir)/hexchar.c $(incdir)/compat/stdbool.h \
+            $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+            $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+            $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+hexchar.plog: hexchar.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/hexchar.c --i-file $< --output-file $@
+hexchar_test.lo: $(srcdir)/regress/hexchar/hexchar_test.c \
+                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                 $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/hexchar/hexchar_test.c
+hexchar_test.i: $(srcdir)/regress/hexchar/hexchar_test.c \
+                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                 $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+hexchar_test.plog: hexchar_test.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/hexchar/hexchar_test.c --i-file $< --output-file $@
 hltq_test.lo: $(srcdir)/regress/tailq/hltq_test.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
               $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
@@ -981,6 +1014,18 @@ json.i: $(srcdir)/json.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 json.plog: json.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/json.c --i-file $< --output-file $@
+json_test.lo: $(srcdir)/regress/json/json_test.c $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
+              $(incdir)/sudo_json.h $(incdir)/sudo_plugin.h \
+              $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/json/json_test.c
+json_test.i: $(srcdir)/regress/json/json_test.c $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
+              $(incdir)/sudo_json.h $(incdir)/sudo_plugin.h \
+              $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+json_test.plog: json_test.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/json/json_test.c --i-file $< --output-file $@
 key_val.lo: $(srcdir)/key_val.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
@@ -1275,6 +1320,18 @@ regex.i: $(srcdir)/regex.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 regex.plog: regex.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regex.c --i-file $< --output-file $@
+regex_test.lo: $(srcdir)/regress/regex/regex_test.c $(incdir)/compat/stdbool.h \
+               $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
+               $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
+               $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/regex/regex_test.c
+regex_test.i: $(srcdir)/regress/regex/regex_test.c $(incdir)/compat/stdbool.h \
+               $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
+               $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
+               $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+regex_test.plog: regex_test.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/regex/regex_test.c --i-file $< --output-file $@
 roundup.lo: $(srcdir)/roundup.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \

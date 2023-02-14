@@ -86,7 +86,7 @@ policy_open(unsigned int version, sudo_conv_t conversation,
     if (!sudo_conv)
 	sudo_conv = conversation;
     if (!sudo_log)
-	sudo_log = sudo_printf;
+	sudo_log = sudo_plugin_printf;
 
     if (SUDO_API_VERSION_GET_MAJOR(version) != SUDO_API_VERSION_MAJOR) {
 	sudo_log(SUDO_CONV_ERROR_MSG,
@@ -201,33 +201,46 @@ check_passwd(void)
 static char **
 build_command_info(const char *command)
 {
-    static char **command_info;
+    char **command_info;
     int i = 0;
 
     /* Setup command info. */
     command_info = calloc(32, sizeof(char *));
     if (command_info == NULL)
-	return NULL;
-    if ((command_info[i++] = sudo_new_key_val("command", command)) == NULL ||
-	asprintf(&command_info[i++], "runas_euid=%ld", (long)runas_uid) == -1 ||
-	asprintf(&command_info[i++], "runas_uid=%ld", (long)runas_uid) == -1) {
-	return NULL;
-    }
+	goto oom;
+    if ((command_info[i] = sudo_new_key_val("command", command)) == NULL)
+	goto oom;
+    i++;
+    if (asprintf(&command_info[i], "runas_euid=%ld", (long)runas_uid) == -1)
+	goto oom;
+    i++;
+    if (asprintf(&command_info[i++], "runas_uid=%ld", (long)runas_uid) == -1)
+	goto oom;
+    i++;
     if (runas_gid != (gid_t)-1) {
-	if (asprintf(&command_info[i++], "runas_gid=%ld", (long)runas_gid) == -1 ||
-	    asprintf(&command_info[i++], "runas_egid=%ld", (long)runas_gid) == -1) {
-	    return NULL;
-	}
-    }
-    if (use_sudoedit) {
-	command_info[i] = strdup("sudoedit=true");
-	if (command_info[i++] == NULL)
-		return NULL;
+	if (asprintf(&command_info[i++], "runas_gid=%ld", (long)runas_gid) == -1)
+	    goto oom;
+	i++;
+	if (asprintf(&command_info[i++], "runas_egid=%ld", (long)runas_gid) == -1)
+	    goto oom;
+	i++;
     }
 #ifdef USE_TIMEOUT
-    command_info[i++] = "timeout=30";
+    if ((command_info[i] = strdup("timeout=30")) == NULL)
+	goto oom;
+    i++;
 #endif
+    if (use_sudoedit) {
+	if ((command_info[i] = strdup("sudoedit=true")) == NULL)
+	    goto oom;
+    }
     return command_info;
+oom:
+    while (i > 0) {
+	free(command_info[i--]);
+    }
+    free(command_info);
+    return NULL;
 }
 
 static char *
@@ -401,7 +414,7 @@ io_open(unsigned int version, sudo_conv_t conversation,
     if (!sudo_conv)
 	sudo_conv = conversation;
     if (!sudo_log)
-	sudo_log = sudo_printf;
+	sudo_log = sudo_plugin_printf;
 
     /* Open input and output files. */
     snprintf(path, sizeof(path), "/var/tmp/sample-%u.output",

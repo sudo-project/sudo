@@ -35,3 +35,9 @@ We prefer all communications to be in English.
 ## Disclosure Policy
 
 The Sudo Project follows the principle of [Coordinated Vulnerability Disclosure](https://vuls.cert.org/confluence/display/CVD/Executive+Summary).  Disclosure is usually coordinated using the [distros mailing list](https://oss-security.openwall.org/wiki/mailing-lists/distros).
+
+## Security Advisories
+
+The Sudo web site contains an archive of [sudo security advisories](https://www.sudo.ws/security/advisories/).
+Additionally, information about vulnerabilities in sudo is sent to the
+[oss-security mailing list](https://oss-security.openwall.org/wiki/mailing-lists/oss-security) once the information becomes public.

@@ -36,7 +36,7 @@ cross_compiling = @CROSS_COMPILING@
 # Compiler & tools to use
 CC = @CC@
 LIBTOOL = @LIBTOOL@
-GREP = @GREP@
+EGREP = @EGREP@
 SED = @SED@
 AWK = @AWK@
 
@@ -115,13 +115,14 @@ install_gid = 0
 
 SHELL = @SHELL@
 
-EXAMPLES = example_conversation.py  example_debugging.py  example_group_plugin.py  example_io_plugin.py  example_policy_plugin.py \
-           example_audit_plugin.py example_approval_plugin.py
+EXAMPLES = example_approval_plugin.py example_audit_plugin.py \
+           example_conversation.py example_debugging.py \
+           example_group_plugin.py example_io_plugin.py example_policy_plugin.py
 
-OBJS =	python_plugin_common.lo python_plugin_policy.lo python_plugin_io.lo python_plugin_group.lo pyhelpers.lo \
-	python_loghandler.lo \
-	python_importblocker.lo python_convmessage.lo sudo_python_module.lo sudo_python_debug.lo \
-	python_baseplugin.lo python_plugin_audit.lo python_plugin_approval.lo
+OBJS = python_plugin_common.lo python_plugin_policy.lo python_plugin_io.lo \
+       python_plugin_group.lo pyhelpers.lo python_loghandler.lo \
+       python_convmessage.lo sudo_python_module.lo sudo_python_debug.lo \
+       python_baseplugin.lo python_plugin_audit.lo python_plugin_approval.lo
 
 IOBJS = $(OBJS:.lo=.i)
 
@@ -228,11 +229,9 @@ check-fuzzer:
 
 check: $(TEST_PROGS) check-fuzzer
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
-		LC_ALL=C.UTF-8; export LC_ALL; \
-	    else \
-		LC_ALL=C; export LC_ALL; \
-	    fi; \
+	    l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'` || true; \
+	    test -n "$$l" || l="C"; \
+	    LC_ALL="$$l"; export LC_ALL; \
 	    unset LANG || LANG=; \
 	    unset LANGUAGE || LANGUAGE=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
@@ -344,26 +343,6 @@ python_convmessage.i: $(srcdir)/python_convmessage.c \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 python_convmessage.plog: python_convmessage.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_convmessage.c --i-file $< --output-file $@
-python_importblocker.lo: $(srcdir)/python_importblocker.c \
-                         $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
-                         $(incdir)/sudo_debug.h $(incdir)/sudo_plugin.h \
-                         $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-                         $(srcdir)/pyhelpers.h \
-                         $(srcdir)/pyhelpers_cpychecker.h \
-                         $(srcdir)/sudo_python_debug.h \
-                         $(srcdir)/sudo_python_module.h $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/python_importblocker.c
-python_importblocker.i: $(srcdir)/python_importblocker.c \
-                         $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
-                         $(incdir)/sudo_debug.h $(incdir)/sudo_plugin.h \
-                         $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-                         $(srcdir)/pyhelpers.h \
-                         $(srcdir)/pyhelpers_cpychecker.h \
-                         $(srcdir)/sudo_python_debug.h \
-                         $(srcdir)/sudo_python_module.h $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
-python_importblocker.plog: python_importblocker.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_importblocker.c --i-file $< --output-file $@
 python_loghandler.lo: $(srcdir)/python_loghandler.c $(incdir)/compat/stdbool.h \
                       $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                       $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \

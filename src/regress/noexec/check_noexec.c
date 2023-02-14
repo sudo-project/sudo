@@ -179,7 +179,7 @@ try_wordexp(void)
 }
 #endif
 
-static sudo_noreturn void
+sudo_noreturn static void
 usage(void)
 {
     fprintf(stderr, "usage: %s [-v] rexec | /path/to/sudo_noexec.so\n",

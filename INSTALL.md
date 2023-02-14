@@ -138,9 +138,9 @@ Defaults are listed in brackets after the description.
         The directory to be used for sudo-specific files that do
         not survive a system reboot.  This is typically where the
         time stamp directory is located.  By default, configure
-        will choose from the following list:
-            /run/sudo /var/run/sudo, /var/db/sudo, /var/lib/sudo,
-            /var/adm/sudo, /usr/adm/sudo
+        will choose from the following list: /run/sudo /var/run/sudo,
+        /var/db/sudo, /var/lib/sudo, /var/adm/sudo, /usr/adm/sudo.
+
         This directory should be cleared when the system reboots.
         On systems that lack /run or /var/run, the default rundir and
         vardir may be the same.  In this case, only the ts directory
@@ -150,8 +150,9 @@ Defaults are listed in brackets after the description.
         The directory to be used for sudo-specific files that survive
         a system reboot.  This is typically where the lecture status
         directory is stored.  By default, configure will choose
-        from the following list:
-            /var/db/sudo, /var/lib/sudo, /var/adm/sudo, /usr/adm/sudo
+        from the following list: /var/db/sudo, /var/lib/sudo,
+        /var/adm/sudo, /usr/adm/sudo.
+
         This directory should **not** be cleared when the system boots.
 
     --with-relaydir=DIR
@@ -165,8 +166,9 @@ Defaults are listed in brackets after the description.
         is only used when sanitizing the TZ environment variable
         to allow for fully-qualified paths in TZ.  By default,
         configure will look for an existing "zoneinfo" directory
-        in the following locations:
-            /usr/share /usr/share/lib /usr/lib /etc
+        in the following locations: /usr/share, /usr/share/lib,
+        /usr/lib, /etc.
+
         If no zoneinfo directory is found, the TZ variable may not
         contain a fully-qualified path.
 
@@ -331,6 +333,17 @@ Defaults are listed in brackets after the description.
         place of a path to denote the default system libtool (obtained
         via the user's PATH) and the default libtool that comes
         with sudo.
+
+    --with-aix-soname=svr4
+        Starting with version 1.9.13, sudo will build AIX-style
+        shared libraries and dynamic shared objects by default
+        instead of svr4-style..  This means that the default sudo
+        plugins are now .a (archive) files that contain a .so shared
+        object file instead of bare .so files.  This was done to
+        improve compatibility with the AIX Freeware ecosystem,
+        specifically, the AIX Freeware build of OpenSSL.  To restore
+        the old, pre-1.9.13 behavior, run configure using the
+        --with-aix-soname=svr4 option.
 
 ### Optional features:
 
@@ -753,7 +766,7 @@ Defaults are listed in brackets after the description.
         the standard output.  This value may overridden at run-time
         in the sudo.conf file.
 
-    --with-badpass-message="BAD PASSWORD MESSAGE"
+    --with-badpass-message="MESSAGE"
         Message that is displayed if a user enters an incorrect password.
         The default is "Sorry, try again." unless insults are turned on.  
         Sudoers option: badpass_message
@@ -910,7 +923,7 @@ Defaults are listed in brackets after the description.
         the command they are trying is not listed in their sudoers file entry.  
         Sudoers option: mail_no_perms
 
-    --with-mailsubject="SUBJECT OF MAIL"
+    --with-mailsubject="SUBJECT"
         Subject of the mail sent to the "mailto" user. The token "%h"
         will expand to the hostname of the machine.
         The default value is "*** SECURITY information for %h ***".  
@@ -921,7 +934,7 @@ Defaults are listed in brackets after the description.
         This should go to a sysadmin at your site.  The default value is "root".  
         Sudoers option: mailto
 
-    --with-passprompt="PASSWORD PROMPT"
+    --with-passprompt="PROMPT"
         Default prompt to use when asking for a password; can be overridden
         via the -p option and the SUDO_PROMPT environment variable. Supports
         the "%H", "%h", "%U", and "%u" escapes as documented in the sudo

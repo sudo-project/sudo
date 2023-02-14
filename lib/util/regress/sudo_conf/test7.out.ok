@@ -1,7 +1,7 @@
-Set developer_mode false
 Set disable_coredump true
 Set group_source adaptive
 Set max_groups -1
+Set probe_interfaces true
 Debug sudo /var/log/sudo_debug all@info
 Debug sudo /var/log/sudo_debug util@debug
 Debug visudo /var/log/sudo_debug match@debug

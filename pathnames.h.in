@@ -182,6 +182,10 @@
 # undef _PATH_SUDO_DEVSEARCH
 #endif /* _PATH_SUDO_DEVSEARCH */
 
+#ifndef _PATH_SUDOERS_PLUGIN
+# undef _PATH_SUDOERS_PLUGIN
+#endif /* _PATH_SUDOERS_PLUGIN */
+
 #ifndef _PATH_ASAN_LIB
 # undef	_PATH_ASAN_LIB
 #endif /* _PATH_ASAN_LIB */

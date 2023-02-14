@@ -149,6 +149,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char * const *files,
     /* If we can't find the editor in the user's PATH, give up. */
     if (find_path(editor, &editor_path, &user_editor_sb, getenv("PATH"), NULL,
 	    0, allowlist) != FOUND) {
+	errno = ENOENT;
 	goto bad;
     }
 

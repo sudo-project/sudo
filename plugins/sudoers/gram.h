@@ -173,7 +173,7 @@ extern int sudoersdebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 87 "gram.y"
+#line 88 "gram.y"
 
     struct cmndspec *cmndspec;
     struct defaults *defaults;
@@ -188,7 +188,7 @@ union YYSTYPE
     const char *cstring;
     int tok;
 
-#line 192 "y.tab.h"
+#line 192 "gram.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

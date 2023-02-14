@@ -787,10 +787,8 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 	}
     }
 
-    if (!sudoers_debug_register(plugin_path, &debug_files)) {
-	ret = -1;
+    if (!sudoers_debug_register(plugin_path, &debug_files))
 	goto done;
-    }
 
     /* If we have no command (because -V was specified) just return. */
     if (argc == 0)

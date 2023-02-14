@@ -132,7 +132,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (fp == NULL)
         return 0;
 
-    setprogname("fuzz_sudoers_ldif");
+    initprogname("fuzz_sudoers_ldif");
     sudoers_debug_register(getprogname(), NULL);
     if (getenv("SUDO_FUZZ_VERBOSE") == NULL)
 	sudo_warn_set_conversation(fuzz_conversation);
@@ -140,7 +140,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     /* Initialize defaults and parse LDIF-format sudoers. */
     init_defaults();
     init_parse_tree(&parse_tree, NULL, NULL);
-    sudoers_parse_ldif(&parse_tree, fp, NULL, true);
+    sudoers_parse_ldif(&parse_tree, fp, "ou=SUDOers,dc=sudo,dc=ws", true);
 
     /* Cleanup. */
     free_parse_tree(&parse_tree);

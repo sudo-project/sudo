@@ -102,6 +102,7 @@ struct sudo_user {
     char *cmnd;
     char *cmnd_args;
     char *cmnd_base;
+    char *cmnd_list;
     char *cmnd_safe;
     char *cmnd_saved;
     char *class_name;
@@ -248,6 +249,7 @@ struct sudo_user {
 #define user_runhost		(sudo_user.runhost)
 #define user_srunhost		(sudo_user.srunhost)
 #define user_ccname		(sudo_user.krb5_ccname)
+#define list_cmnd		(sudo_user.cmnd_list)
 #define safe_cmnd		(sudo_user.cmnd_safe)
 #define saved_cmnd		(sudo_user.cmnd_saved)
 #define cmnd_fd			(sudo_user.execfd)
@@ -431,6 +433,7 @@ extern struct sudo_user sudo_user;
 extern struct passwd *list_pw;
 extern bool force_umask;
 extern int sudo_mode;
+extern int sudoedit_nfiles;
 extern uid_t timestamp_uid;
 extern gid_t timestamp_gid;
 extern sudo_conv_t sudo_conv;

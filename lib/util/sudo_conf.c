@@ -74,7 +74,6 @@ struct sudo_conf_path_table {
 
 struct sudo_conf_settings {
     bool updated;
-    bool developer_mode;
     bool disable_coredump;
     bool probe_interfaces;
     int group_source;
@@ -94,14 +93,12 @@ static struct sudo_conf_table sudo_conf_table[] = {
     { NULL }
 };
 
-static int set_var_developer_mode(const char *entry, const char *conf_file, unsigned int);
 static int set_var_disable_coredump(const char *entry, const char *conf_file, unsigned int);
 static int set_var_group_source(const char *entry, const char *conf_file, unsigned int);
 static int set_var_max_groups(const char *entry, const char *conf_file, unsigned int);
 static int set_var_probe_interfaces(const char *entry, const char *conf_file, unsigned int);
 
 static struct sudo_conf_table sudo_conf_var_table[] = {
-    { "developer_mode", sizeof("developer_mode") - 1, set_var_developer_mode },
     { "disable_coredump", sizeof("disable_coredump") - 1, set_var_disable_coredump },
     { "group_source", sizeof("group_source") - 1, set_var_group_source },
     { "max_groups", sizeof("max_groups") - 1, set_var_max_groups },
@@ -140,7 +137,6 @@ static struct sudo_conf_table sudo_conf_var_table[] = {
 
 #define SUDO_CONF_SETTINGS_INITIALIZER	{				\
     false,			/* updated */				\
-    false,			/* developer_mode */			\
     true,			/* disable_coredump */			\
     true,			/* probe_interfaces */			\
     GROUP_SOURCE_DEFAULT,	/* group_source */			\
@@ -394,22 +390,6 @@ oom:
 }
 
 static int
-set_var_developer_mode(const char *strval, const char *conf_file,
-    unsigned int lineno)
-{
-    int val = sudo_strtobool(strval);
-    debug_decl(set_var_developer_mode, SUDO_DEBUG_UTIL);
-
-    if (val == -1) {
-        sudo_warnx(U_("invalid value for %s \"%s\" in %s, line %u"),
-            "developer_mode", strval, conf_file, lineno);
-        debug_return_bool(false);
-    }
-    sudo_conf_data.settings.developer_mode = val;
-    debug_return_bool(true);
-}
-
-static int
 set_var_disable_coredump(const char *strval, const char *conf_file,
     unsigned int lineno)
 {
@@ -419,10 +399,10 @@ set_var_disable_coredump(const char *strval, const char *conf_file,
     if (val == -1) {
 	sudo_warnx(U_("invalid value for %s \"%s\" in %s, line %u"),
 	    "disable_coredump", strval, conf_file, lineno);
-	debug_return_bool(false);
+	debug_return_int(false);
     }
     sudo_conf_data.settings.disable_coredump = val;
-    debug_return_bool(true);
+    debug_return_int(true);
 }
 
 static int
@@ -440,9 +420,9 @@ set_var_group_source(const char *strval, const char *conf_file,
     } else {
 	sudo_warnx(U_("unsupported group source \"%s\" in %s, line %u"), strval,
 	    conf_file, lineno);
-	debug_return_bool(false);
+	debug_return_int(false);
     }
-    debug_return_bool(true);
+    debug_return_int(true);
 }
 
 static int
@@ -456,10 +436,10 @@ set_var_max_groups(const char *strval, const char *conf_file,
     if (max_groups <= 0) {
 	sudo_warnx(U_("invalid max groups \"%s\" in %s, line %u"), strval,
 	    conf_file, lineno);
-	debug_return_bool(false);
+	debug_return_int(false);
     }
     sudo_conf_data.settings.max_groups = max_groups;
-    debug_return_bool(true);
+    debug_return_int(true);
 }
 
 static int
@@ -472,10 +452,10 @@ set_var_probe_interfaces(const char *strval, const char *conf_file,
     if (val == -1) {
 	sudo_warnx(U_("invalid value for %s \"%s\" in %s, line %u"),
 	    "probe_interfaces", strval, conf_file, lineno);
-	debug_return_bool(false);
+	debug_return_int(false);
     }
     sudo_conf_data.settings.probe_interfaces = val;
-    debug_return_bool(true);
+    debug_return_int(true);
 }
 
 const char *
@@ -569,7 +549,8 @@ sudo_conf_debug_files_v1(const char *progname)
 bool
 sudo_conf_developer_mode_v1(void)
 {
-    return sudo_conf_data.settings.developer_mode;
+    /* Developer mode was removed in sudo 1.9.13. */
+    return false;
 }
 
 bool
@@ -650,7 +631,6 @@ sudo_conf_init(int conf_types)
 int
 sudo_conf_read_v1(const char *conf_file, int conf_types)
 {
-    struct stat sb;
     FILE *fp = NULL;
     int fd, ret = false;
     char *prev_locale, *line = NULL;
@@ -671,14 +651,11 @@ sudo_conf_read_v1(const char *conf_file, int conf_types)
     if (prev_locale[0] != 'C' || prev_locale[1] != '\0')
         setlocale(LC_ALL, "C");
 
-    if (conf_file != NULL) {
-	fd = open(conf_file, O_RDONLY);
-	if (fd == -1) {
-	    sudo_warn(U_("unable to open %s"), conf_file);
-	    goto done;
-	}
-    } else {
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    if (conf_file == NULL) {
+	struct stat sb;
 	int error;
+
 	conf_file = _PATH_SUDO_CONF;
 	fd = sudo_secure_open_file(conf_file, ROOT_UID, -1, &sb, &error);
 	if (fd == -1) {
@@ -706,6 +683,17 @@ sudo_conf_read_v1(const char *conf_file, int conf_types)
 		    __func__, error);
 		break;
 	    }
+	    goto done;
+	}
+    } else
+#else
+    if (conf_file == NULL)
+	conf_file = _PATH_SUDO_CONF;
+#endif /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
+    {
+	fd = open(conf_file, O_RDONLY);
+	if (fd == -1) {
+	    sudo_warn(U_("unable to open %s"), conf_file);
 	    goto done;
 	}
     }

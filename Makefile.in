@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2010-2015, 2017-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2010-2015, 2017-2022 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -47,7 +47,6 @@ install_uid = 0
 install_gid = 0
 
 # sudoers owner and mode for package building
-sudoersdir = $(sysconfdir)
 sudoers_uid = @SUDOERS_UID@
 sudoers_gid = @SUDOERS_GID@
 sudoers_mode = @SUDOERS_MODE@
@@ -71,7 +70,6 @@ LIBTOOL_DEPS = @LIBTOOL_DEPS@
 SHELL = @SHELL@
 
 EGREP = @EGREP@
-GREP = @GREP@
 SED = @SED@
 
 INSTALL = $(SHELL) $(scriptdir)/install-sh -c
@@ -119,7 +117,7 @@ check check-verbose check-fuzzer fuzz pre-install: config.status
 	done
 
 uncrustify.files: Makefile
-	$(GREP) '\.[ch]$$' $(top_srcdir)/MANIFEST | $(EGREP) -v '(/zlib/|/(arc4random|arc4random_uniform|chacha_private|charclass|fnmatch|getaddrinfo|getcwd|getdate|getentropy|getopt|getopt_long|glob|gram|inet_ntop|inet_pton|log_server.pb-c|mktemp|pw_dup|reallocarray|mktemp_test|protobuf-c|snprintf|stdbool|strlcat|strlcpy|sudo_queue|toke)\.[ch]$$)'  > uncrustify.files
+	$(EGREP) '\.[ch]$$' $(top_srcdir)/MANIFEST | $(EGREP) -v '(/zlib/|/(arc4random|arc4random_uniform|chacha_private|charclass|fnmatch|getaddrinfo|getcwd|getdate|getentropy|getopt|getopt_long|glob|gram|inet_ntop|inet_pton|log_server.pb-c|mktemp|pw_dup|reallocarray|mktemp_test|protobuf-c|snprintf|stdbool|strlcat|strlcpy|sudo_queue|toke)\.[ch]$$)'  > uncrustify.files
 
 reformat: uncrustify.files
 	( cd $(top_srcdir) && uncrustify -c etc/uncrustify.cfg --replace --no-backup -F $(top_builddir)/uncrustify.files )
@@ -234,16 +232,28 @@ depend: siglist.c signame.c
 	    --file $(top_builddir)/plugins/python/Makefile \
 	    --file $(top_builddir)/src/Makefile
 
+# Only try to build ChangeLog from a repo checkout, not a release tarball.
+# The CODEOWNERS file is not present in the release tarball.
 ChangeLog:
-	if test -d $(srcdir)/.hg; then \
-	    if hg log -R $(srcdir) --template=changelog -r "sort(branch(.) or follow(), -date)" > $@.tmp; then \
-		mv -f $@.tmp $(srcdir)/$@; \
-	    else \
-		rm -f $@.tmp; \
+	if test -f $(srcdir)/docs/CODEOWNERS; then \
+	    if test -d $(srcdir)/.hg && hg -R $(srcdir) identify -ibt >stamp-$@.tmp 2>&1; then \
+		cmp stamp-$@.tmp stamp-$@ >/dev/null 2>&1 || { \
+		    mv -f stamp-$@.tmp stamp-$@; \
+		    if hg log -R $(srcdir) --template=changelog -r "sort(branch(.) or follow(), -date)" > $@.tmp; then \
+			mv -f $@.tmp $(srcdir)/$@; \
+		    fi; \
+		}; \
+	    elif test -d $(srcdir)/.git && git --git-dir $(srcdir)/.git describe --tags >stamp-$@.tmp 2>&1; then \
+		cmp stamp-$@.tmp stamp-$@ >/dev/null 2>&1 || { \
+		    mv -f stamp-$@.tmp stamp-$@; \
+		    if $(scriptdir)/log2cl.pl -R $(srcdir)/.git > $@.tmp; then \
+			mv -f $@.tmp $(srcdir)/$@; \
+		    fi; \
+		}; \
 	    fi; \
-	elif test -d $(srcdir)/.git; then \
-	    $(scriptdir)/log2cl.pl -R $(srcdir)/.git > $(srcdir)/$@; \
-	elif test ! -f $(srcdir)/$@; then \
+	    rm -f $@.tmp stamp-$@.tmp; \
+	fi
+	if test ! -f $(srcdir)/$@; then \
 	    echo "ChangeLog data not available" > $(srcdir)/$@; \
 	fi
 
@@ -374,10 +384,9 @@ check-dist: update-pot compile-po mkdefaults
 dist: check-dist force-dist
 
 force-dist: ChangeLog $(srcdir)/MANIFEST
-	cd $(top_srcdir) && \
-	pax -w -x ustar -s '/^/$(PACKAGE_TARNAME)-$(VERSION)\//' \
-	    -f ../$(PACKAGE_TARNAME)-$(VERSION).tar \
-	    `$(SED) 's/[ 	].*//' $(srcdir)/MANIFEST` && \
+	cd $(top_srcdir) && $(SED) 's/[ 	].*//' MANIFEST | \
+	pax -w -x ustar -f ../$(PACKAGE_TARNAME)-$(VERSION).tar \
+	    -s '/^/$(PACKAGE_TARNAME)-$(VERSION)\//' && \
 	gzip -9f ../$(PACKAGE_TARNAME)-$(VERSION).tar && \
 	ls -l ../$(PACKAGE_TARNAME)-$(VERSION).tar.gz
 
@@ -399,7 +408,6 @@ package: @PPFILES@
 		docdir=$(docdir) \
 		exampledir=$(exampledir) \
 		sysconfdir=$(sysconfdir) \
-		sudoersdir=$(sudoersdir) \
 		sudoers_uid=$(sudoers_uid) \
 		sudoers_gid=$(sudoers_gid) \
 		sudoers_mode=$(sudoers_mode) \

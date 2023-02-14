@@ -50,6 +50,6 @@ struct intercept_closure {
 };
 
 void intercept_closure_reset(struct intercept_closure *closure);
-bool intercept_check_policy(const char *command, int argc, char **argv, int envc, char **envp, const char *runcwd, void *closure);
+bool intercept_check_policy(const char *command, int argc, char **argv, int envc, char **envp, const char *runcwd, int *oldcwd, void *closure);
 
 #endif /* SUDO_EXEC_INTERCEPT_H */

@@ -28,6 +28,11 @@
 
 #include "sudo_plugin.h"	/* for conversation function */
 
+/* No output to debug files when fuzzing. */
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+# define SUDO_ERROR_WRAP 0
+#endif
+
 /*
  * We wrap fatal/fatalx and warn/warnx so that the same output can
  * go to the debug file, if there is one.

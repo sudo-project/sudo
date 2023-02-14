@@ -442,14 +442,21 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	sudoers_gc_remove(GC_PTR, NewArgv);
 	free(NewArgv);
     }
-    NewArgc = argc;
-    NewArgv = reallocarray(NULL, NewArgc + 2, sizeof(char *));
+    NewArgv = reallocarray(NULL, argc + 2, sizeof(char *));
     if (NewArgv == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
     }
     sudoers_gc_add(GC_PTR, NewArgv);
-    memcpy(NewArgv, argv, argc * sizeof(char *));
+    if (ISSET(sudo_mode, MODE_CHECK)) {
+	/* For "sudo -l [-U otheruser] command" */
+	NewArgv[0] = (char *)"list";
+	memcpy(NewArgv + 1, argv, argc * sizeof(char *));
+	NewArgc = argc + 1;
+    } else {
+	memcpy(NewArgv, argv, argc * sizeof(char *));
+	NewArgc = argc;
+    }
     NewArgv[NewArgc] = NULL;
     if (ISSET(sudo_mode, MODE_LOGIN_SHELL) && runas_pw != NULL) {
 	NewArgv[0] = strdup(runas_pw->pw_shell);
@@ -646,8 +653,8 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     } else if (cmnd_status == NOT_FOUND) {
 	if (ISSET(sudo_mode, MODE_CHECK)) {
 	    audit_failure(NewArgv, N_("%s: command not found"),
-		NewArgv[0]);
-	    sudo_warnx(U_("%s: command not found"), NewArgv[0]);
+		NewArgv[1]);
+	    sudo_warnx(U_("%s: command not found"), NewArgv[1]);
 	} else {
 	    audit_failure(NewArgv, N_("%s: command not found"),
 		user_cmnd);
@@ -787,8 +794,11 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
 
     /* Insert user-specified environment variables. */
-    if (!insert_env_vars(sudo_user.env_vars))
+    if (!insert_env_vars(sudo_user.env_vars)) {
+	sudo_warnx("%s",
+	    U_("error setting user-specified environment variables"));
 	goto done;
+    }
 
     /* Note: must call audit before uid change. */
     if (ISSET(sudo_mode, MODE_EDIT)) {
@@ -796,8 +806,9 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	char **edit_argv;
 	int edit_argc;
 
+	sudoedit_nfiles = NewArgc - 1;
 	free(safe_cmnd);
-	safe_cmnd = find_editor(NewArgc - 1, NewArgv + 1, &edit_argc,
+	safe_cmnd = find_editor(sudoedit_nfiles, NewArgv + 1, &edit_argc,
 	    &edit_argv, NULL, &env_editor);
 	if (safe_cmnd == NULL) {
 	    switch (errno) {
@@ -857,6 +868,9 @@ done:
     if (ret == -1) {
 	/* Free stashed copy of the environment. */
 	(void)env_init(NULL);
+
+	/* Free locally-allocated strings. */
+	free(iolog_path);
     } else {
 	/* Store settings to pass back to front-end. */
 	if (!sudoers_policy_store_result(ret, NewArgv, env_get(), cmnd_umask,
@@ -981,31 +995,45 @@ init_vars(char * const envp[])
 int
 set_cmnd_path(const char *runchroot)
 {
+    const char *cmnd_in;
+    char *cmnd_out = NULL;
     char *path = user_path;
     int ret;
     debug_decl(set_cmnd_path, SUDOERS_DEBUG_PLUGIN);
 
+    cmnd_in = ISSET(sudo_mode, MODE_CHECK) ? NewArgv[1] : NewArgv[0];
+
+    free(list_cmnd);
+    list_cmnd = NULL;
     free(user_cmnd);
     user_cmnd = NULL;
     if (def_secure_path && !user_is_exempt())
 	path = def_secure_path;
     if (!set_perms(PERM_RUNAS))
-	debug_return_int(NOT_FOUND_ERROR);
-    ret = find_path(NewArgv[0], &user_cmnd, user_stat, path,
+	goto error;
+    ret = find_path(cmnd_in, &cmnd_out, user_stat, path,
 	runchroot, def_ignore_dot, NULL);
     if (!restore_perms())
-	debug_return_int(NOT_FOUND_ERROR);
+	goto error;
     if (ret == NOT_FOUND) {
 	/* Failed as root, try as invoking user. */
 	if (!set_perms(PERM_USER))
-	    debug_return_int(false);
-	ret = find_path(NewArgv[0], &user_cmnd, user_stat, path,
+	    goto error;
+	ret = find_path(cmnd_in, &cmnd_out, user_stat, path,
 	    runchroot, def_ignore_dot, NULL);
 	if (!restore_perms())
-	    debug_return_int(NOT_FOUND_ERROR);
+	    goto error;
     }
 
+    if (ISSET(sudo_mode, MODE_CHECK))
+	list_cmnd = cmnd_out;
+    else
+	user_cmnd = cmnd_out;
+
     debug_return_int(ret);
+error:
+    free(cmnd_out);
+    debug_return_int(NOT_FOUND_ERROR);
 }
 
 /*
@@ -1869,6 +1897,7 @@ sudo_user_free(void)
     free(user_runhost);
     free(user_cmnd);
     free(user_args);
+    free(list_cmnd);
     free(safe_cmnd);
     free(saved_cmnd);
     free(user_stat);

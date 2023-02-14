@@ -50,7 +50,7 @@ intercept_closure_reset(struct intercept_closure *closure)
 
 bool
 intercept_check_policy(const char *command, int argc, char **argv, int envc,
-    char **envp, const char *runcwd, void *v)
+    char **envp, const char *runcwd, int *oldcwd, void *v)
 {
     struct intercept_closure *closure = v;
     struct stat sb1, sb2;
@@ -67,6 +67,7 @@ intercept_check_policy(const char *command, int argc, char **argv, int envc,
 	sudo_debug_printf(SUDO_DEBUG_DIAG, "allowed %s", command);
 	closure->state = POLICY_TEST;
     }
+    *oldcwd = -1;
 
     debug_return_bool(true);
 }
@@ -103,6 +104,13 @@ sudo_sigaction(int signo, struct sigaction *sa, struct sigaction *osa)
     return sigaction(signo, sa, osa);
 }
 
+/* STUB */
+void
+log_suspend(struct exec_closure *ec, int signo)
+{
+    return;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -113,7 +121,7 @@ main(int argc, char *argv[])
     const char *errstr;
     sigset_t blocked, empty;
     struct sigaction sa;
-    pid_t child, pid, ppgrp;
+    pid_t child, my_pid, pid, my_pgrp;
     int ch, status;
     debug_decl_vars(main, SUDO_DEBUG_MAIN);
 
@@ -165,7 +173,8 @@ main(int argc, char *argv[])
     sigaction(SIGUSR1, &sa, NULL);
 
     /* Fork a shell. */
-    ppgrp = getpgrp();
+    my_pid = getpid();
+    my_pgrp = getpgrp();
     child = fork();
     switch (child) {
     case -1:
@@ -219,7 +228,8 @@ main(int argc, char *argv[])
 	    } else if (WIFSTOPPED(status)) {
 		if (exec_ptrace_stopped(pid, status, &closure)) {
 		    if (pid == child) {
-			suspend_sudo_nopty(NULL, WSTOPSIG(status), ppgrp, child);
+			suspend_sudo_nopty(NULL, WSTOPSIG(status), my_pid,
+			    my_pgrp, child);
 			if (kill(child, SIGCONT) != 0)
 			    sudo_warn("kill(%d, SIGCONT)", (int)child);
 		    }

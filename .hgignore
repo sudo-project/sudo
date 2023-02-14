@@ -3,7 +3,6 @@
 \.l[ao]$
 \.lai$
 \.map$
-\.mo$
 \.o$
 \.plog$
 
@@ -21,6 +20,7 @@ Makefile$
 
 ^ChangeLog$
 ^PVS-Studio\.cfg$
+^stamp-
 ^uncrustify\.files$
 ^docs/.*\.man$
 ^docs/.*\.mdoc$

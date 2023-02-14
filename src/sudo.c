@@ -287,7 +287,8 @@ main(int argc, char *argv[], char *envp[])
 	    /* Setup command details and run command/edit. */
 	    command_info_to_details(command_info, &command_details);
 	    command_details.tty = user_details.tty;
-	    command_details.argv = argv_out;
+	    command_details.argv = nargv;
+	    command_details.argc = nargc;
 	    command_details.envp = run_envp;
 	    command_details.evbase = sudo_event_base;
 	    if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
@@ -355,7 +356,7 @@ os_init_common(int argc, char *argv[], char *envp[])
 static void
 fix_fds(void)
 {
-    int miss[3], devnull = -1;
+    int miss[3];
     debug_decl(fix_fds, SUDO_DEBUG_UTIL);
 
     /*
@@ -366,7 +367,8 @@ fix_fds(void)
     miss[STDOUT_FILENO] = fcntl(STDOUT_FILENO, F_GETFL, 0) == -1;
     miss[STDERR_FILENO] = fcntl(STDERR_FILENO, F_GETFL, 0) == -1;
     if (miss[STDIN_FILENO] || miss[STDOUT_FILENO] || miss[STDERR_FILENO]) {
-	devnull = open(_PATH_DEVNULL, O_RDWR, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+	int devnull =
+	    open(_PATH_DEVNULL, O_RDWR, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
 	if (devnull == -1)
 	    sudo_fatal(U_("unable to open %s"), _PATH_DEVNULL);
 	if (miss[STDIN_FILENO] && dup2(devnull, STDIN_FILENO) == -1)
@@ -832,6 +834,14 @@ command_info_to_details(char * const info[], struct command_details *details)
 		SET_FLAG("sudoedit=", CD_SUDOEDIT)
 		SET_FLAG("sudoedit_checkdir=", CD_SUDOEDIT_CHECKDIR)
 		SET_FLAG("sudoedit_follow=", CD_SUDOEDIT_FOLLOW)
+		if (strncmp("sudoedit_nfiles=", info[i], sizeof("sudoedit_nfiles=") - 1) == 0) {
+		    cp = info[i] + sizeof("sudoedit_nfiles=") - 1;
+		    details->nfiles = sudo_strtonum(cp, 1, INT_MAX,
+			&errstr);
+		    if (errstr != NULL)
+			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
+		    break;
+		}
 		break;
 	    case 't':
 		if (strncmp("timeout=", info[i], sizeof("timeout=") - 1) == 0) {
@@ -1105,7 +1115,7 @@ format_plugin_settings(struct plugin_container *plugin)
 		goto bad;
 	}
     }
-    plugin_settings[++i] = NULL;
+    plugin_settings[i + 1] = NULL;
 
     /* Add to list of vectors to be garbage collected at exit. */
     if (!gc_add(GC_VECTOR, plugin_settings))

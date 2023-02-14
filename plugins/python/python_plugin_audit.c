@@ -62,8 +62,6 @@ _call_plugin_open(struct AuditPluginContext *audit_ctx, int submit_optind, char 
     if (py_submit_argv != NULL) {
         rc = python_plugin_api_rc_call(plugin_ctx, CALLBACK_PYNAME(open),
                                        Py_BuildValue("(iO)", submit_optind, py_submit_argv));
-    } else {
-        rc = SUDO_RC_ERROR;
     }
 
     Py_XDECREF(py_submit_argv);

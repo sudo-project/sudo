@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2009-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN" "5" "October 7, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "January 18, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -909,15 +909,20 @@ temporary copies of the files to be edited and then overwriting the
 originals with the temporary copies after editing is complete.
 If the plugin supports
 \fIsudoedit\fR,
-it should choose the editor to be used, potentially from a variable
-in the user's environment, such as
+it must set
+\fIsudoedit=true\fR
+in the
+\fIcommand_info\fR
+list.
+The plugin is responsible for choosing the editor to be used,
+potentially from a variable in the user's environment, such as
 \fREDITOR\fR,
-and include it in
+and should be stored in
 \fIargv_out\fR
 (environment variables may include command line options).
 The files to be edited should be copied from
 \fIargv\fR
-into
+to
 \fIargv_out\fR,
 separated from the
 editor and its arguments by a
@@ -928,11 +933,13 @@ The
 will be removed by
 \fBsudo\fR
 before the editor is executed.
-The plugin should also set
-\fIsudoedit=true\fR
-in the
+The plugin may also set
+\fIsudoedit_nfiles\fR
+to the number of files to be edited in the
 \fIcommand_info\fR
-list.
+list; this will only be used by the
+\fBsudo\fR
+front-end starting with API version 1.21.
 .sp
 The
 \fBcheck_policy\fR()
@@ -1535,6 +1542,25 @@ option can be used to restore the older behavior and allow
 \fBsudoedit\fR
 to open symbolic links.
 Only available starting with API version 1.8.
+.TP 6n
+sudoedit_nfiles=number
+The number of files to be edited by the user.
+If present, this is will be used by the
+\fBsudo\fR
+front-end to determine which elements of the
+\fIargv_out\fR
+vector are files to be edited.
+The
+\(oq--\(cq
+element must immediately precede the first file to be editied.
+If
+\fIsudoedit_nfiles\fR
+is not specified, the
+\fBsudo\fR
+front-end will use the position of the
+\(oq--\(cq
+element to determine where the file list begins.
+Only available starting with API version 1.21.
 .TP 6n
 timeout=int
 Command timeout.
@@ -5438,6 +5464,13 @@ entry was added to the
 list.
 The
 \fIintercept_verify\fR
+entry was added to the
+\fIcommand_info\fR
+list.
+.TP 6n
+Version 1.21 (sudo 1.9.13)
+The
+\fIsudoedit_nfiles\fR
 entry was added to the
 \fIcommand_info\fR
 list.

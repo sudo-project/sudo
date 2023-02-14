@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2022
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2023
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDO" "@mansectsu@" "September 13, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -58,7 +58,7 @@
 [\fB\-p\fR\ \fIprompt\fR]
 [\fB\-U\fR\ \fIuser\fR]
 [\fB\-u\fR\ \fIuser\fR]
-[\fIcommand\fR]
+[\fIcommand\fR\ [\fIarg\ ...\fR]]
 .br
 .HP 5n
 \fBsudo\fR
@@ -77,7 +77,7 @@
 [\fB\-u\fR\ \fIuser\fR]
 [\fIVAR\fR=\fIvalue\fR]
 [\fB\-i\fR\ |\ \fB\-s\fR]
-[\fIcommand\fR]
+[\fIcommand\fR\ [\fIarg\ ...\fR]]
 .br
 .HP 9n
 \fBsudoedit\fR
@@ -177,11 +177,12 @@ option (described below), is implied.
 Security policies and audit plugins may log successful and failed attempts
 to run
 \fBsudo\fR.
-If an I/O plugin is configured, the running command's input and
-output may be logged as well.
+If an I/O plugin is configured, the running
+\fIcommand\fR's
+input and output may be logged as well.
 .PP
 The options are as follows:
-.TP 12n
+.TP 8n
 \fB\-A\fR, \fB\--askpass\fR
 Normally, if
 \fBsudo\fR
@@ -202,19 +203,18 @@ used.
 For example:
 .nf
 .sp
-.RS 16n
+.RS 12n
 # Path to askpass helper program
 Path askpass /usr/X11R6/bin/ssh-askpass
 .RE
 .fi
-.RS 12n
+.RS 8n
 .sp
 If no askpass program is available,
 \fBsudo\fR
 will exit with an error.
 .RE
-.if \n(BA \{\
-.TP 12n
+.TP 8n
 \fB\-a\fR \fItype\fR, \fB\--auth-type\fR=\fItype\fR
 Use the specified
 BSD
@@ -230,29 +230,33 @@ entry in
 This option is only available on systems that support
 BSD
 authentication.
-.\}
-.TP 12n
+.TP 8n
 \fB\-B\fR, \fB\--bell\fR
 Ring the bell as part of the password prompt when a terminal is present.
 This option has no effect if an askpass program is used.
-.TP 12n
+.TP 8n
 \fB\-b\fR, \fB\--background\fR
-Run the given command in the background.
+Run the given
+\fIcommand\fR
+in the background.
 It is not possible to use shell job control to manipulate background
 processes started by
 \fBsudo\fR.
-Most interactive commands will fail to work properly in background
-mode.
-.TP 12n
+Most interactive
+\fIcommand\fRs
+will fail to work properly in background mode.
+.TP 8n
 \fB\-C\fR \fInum\fR, \fB\--close-from\fR=\fInum\fR
 Close all file descriptors greater than or equal to
 \fInum\fR
-before executing a command.
+before executing a
+\fIcommand\fR.
 Values less than three are not permitted.
 By default,
 \fBsudo\fR
 will close all open file descriptors other than standard input,
-standard output, and standard error when executing a command.
+standard output, and standard error when executing a
+\fIcommand\fR.
 The security policy may restrict the user's ability to use this option.
 The
 \fIsudoers\fR
@@ -261,11 +265,11 @@ policy only permits use of the
 option when the administrator has enabled the
 \fIclosefrom_override\fR
 option.
-.if \n(LC \{\
-.TP 12n
+.TP 8n
 \fB\-c\fR \fIclass\fR, \fB\--login-class\fR=\fIclass\fR
-Run the command with resource limits and scheduling priority of
-the specified login
+Run the
+\fIcommand\fR
+with resource limits and scheduling priority of the specified login
 \fIclass\fR.
 The
 \fIclass\fR
@@ -279,31 +283,36 @@ If
 is
 \fB-\fR,
 the default login class of the target user will be used.
-Otherwise, the command must be run as the superuser (user-ID 0), or
+Otherwise, the
+\fIcommand\fR
+must be run as the superuser (user-ID 0), or
 \fBsudo\fR
 must be run from a shell that is already running as the superuser.
-If the command is being run as a login shell, additional
+If the
+\fIcommand\fR
+is being run as a login shell, additional
 \fI/etc/login.conf\fR
 settings, such as the umask and environment variables, will
 be applied, if present.
 This option is only available on systems with
 BSD
 login classes.
-.\}
-.TP 12n
+.TP 8n
 \fB\-D\fR \fIdirectory\fR, \fB\--chdir\fR=\fIdirectory\fR
-Run the command in the specified
+Run the
+\fIcommand\fR
+in the specified
 \fIdirectory\fR
 instead of the current working directory.
 The security policy may return an error if the user does not have
 permission to specify the working directory.
-.TP 12n
+.TP 8n
 \fB\-E\fR, \fB\--preserve-env\fR
 Indicates to the security policy that the user wishes to
 preserve their existing environment variables.
 The security policy may return an error if the user does not have
 permission to preserve the environment.
-.TP 12n
+.TP 8n
 \fB\--preserve-env=list\fR
 Indicates to the security policy that the user wishes to add the
 comma-separated list of environment variables to those preserved
@@ -311,14 +320,17 @@ from the user's environment.
 The security policy may return an error if the user does not have
 permission to preserve the environment.
 This option may be specified multiple times.
-.TP 12n
+.TP 8n
 \fB\-e\fR, \fB\--edit\fR
-Edit one or more files instead of running a command.
+Edit one or more
+\fIfile\fRs
+instead of running a
+\fIcommand\fR.
 In lieu of a path name, the string "sudoedit" is used when consulting
 the security policy.
 If the user is authorized by the policy, the following steps are
 taken:
-.RS 16n
+.RS 12n
 .TP 5n
 1.\&
 Temporary copies are made of the files to be edited with the owner
@@ -349,11 +361,11 @@ option is used.
 If they have been modified, the temporary files are copied back to
 their original location and the temporary versions are removed.
 .RE
-.RS 12n
+.RS 8n
 .sp
 To help prevent the editing of unauthorized files, the following
 restrictions are enforced unless explicitly allowed by the security policy:
-.RS 16n
+.RS 9n
 .TP 3n
 \fB\(bu\fR
 Symbolic links may not be edited (version 1.8.15 and higher).
@@ -371,7 +383,9 @@ not be edited unless that user is root (version 1.8.16 and higher).
 Users are never allowed to edit device special files.
 .sp
 If the specified file does not exist, it will be created.
-Unlike most commands run by
+Unlike most
+\fIcommand\fRs
+run by
 \fIsudo\fR,
 the editor is run with the invoking user's environment unmodified.
 If the temporary file becomes empty after editing, the user will
@@ -382,9 +396,11 @@ is unable to update a file with its edited version, the user will
 receive a warning and the edited copy will remain in a temporary
 file.
 .RE
-.TP 12n
+.TP 8n
 \fB\-g\fR \fIgroup\fR, \fB\--group\fR=\fIgroup\fR
-Run the command with the primary group set to
+Run the
+\fIcommand\fR
+with the primary group set to
 \fIgroup\fR
 instead of the primary group specified by the target
 user's password database entry.
@@ -397,13 +413,17 @@ prefixed with the
 character (e.g.,
 \(oq#0\(cq
 for GID 0).
-When running a command as a GID, many shells require that the
+When running a
+\fIcommand\fR
+as a GID, many shells require that the
 \(oq#\(cq
 be escaped with a backslash
 (\(oq\e\(cq).
 If no
 \fB\-u\fR
-option is specified, the command will be run as the invoking user.
+option is specified, the
+\fIcommand\fR
+will be run as the invoking user.
 In either case, the primary group will be set to
 \fIgroup\fR.
 The
@@ -414,28 +434,32 @@ the
 option as long as the
 \fB\-P\fR
 option is not in use.
-.TP 12n
+.TP 8n
 \fB\-H\fR, \fB\--set-home\fR
 Request that the security policy set the
 \fRHOME\fR
 environment variable to the home directory specified by the target
 user's password database entry.
 Depending on the policy, this may be the default behavior.
-.TP 12n
+.TP 8n
 \fB\-h\fR, \fB\--help\fR
 Display a short help message to the standard output and exit.
-.TP 12n
+.TP 8n
 \fB\-h\fR \fIhost\fR, \fB\--host\fR=\fIhost\fR
-Run the command on the specified
+Run the
+\fIcommand\fR
+on the specified
 \fIhost\fR
-if the security policy plugin supports remote commands.
+if the security policy plugin supports remote
+\fIcommand\fRs.
 The
 \fIsudoers\fR
-plugin does not currently support running remote commands.
+plugin does not currently support running remote
+\fIcommand\fRs.
 This may also be used in conjunction with the
 \fB\-l\fR
 option to list a user's privileges for the remote host.
-.TP 12n
+.TP 8n
 \fB\-i\fR, \fB\--login\fR
 Run the shell specified by the target user's password database entry
 as a login shell.
@@ -445,25 +469,35 @@ This means that login-specific resource files such as
 or
 \fI.login\fR
 will be read by the shell.
-If a command is specified, it is passed to the shell as a simple
-command using the
+If a
+\fIcommand\fR
+is specified, it is passed to the shell as a simple
+\fIcommand\fR
+using the
 \fB\-c\fR
 option.
-The command and any arguments are concatenated, separated by spaces,
-after escaping each character
+The
+\fIcommand\fR
+and any
+\fIarg\fRs
+are concatenated, separated by spaces, after escaping each character
 (including white space)
 with a backslash
 (\(oq\e\(cq)
 except for alphanumerics, underscores,
 hyphens, and dollar signs.
-If no command is specified, an interactive shell is executed.
+If no
+\fIcommand\fR
+is specified, an interactive shell is executed.
 \fBsudo\fR
 attempts to change to that user's home directory before running the
 shell.
-The command is run with an environment similar to the one
-a user would receive at log in.
-Most shells behave differently when a command is specified
-as compared to an interactive session; consult the shell's manual
+The
+\fIcommand\fR
+is run with an environment similar to the one a user would receive at log in.
+Most shells behave differently when a
+\fIcommand\fR
+is specified as compared to an interactive session; consult the shell's manual
 for details.
 The
 \fICommand environment\fR
@@ -471,23 +505,51 @@ section in the
 sudoers(@mansectform@)
 manual documents how the
 \fB\-i\fR
-option affects the environment in which a command is run when the
+option affects the environment in which a
+\fIcommand\fR
+is run when the
 \fIsudoers\fR
 policy is in use.
-.TP 12n
+.TP 8n
 \fB\-K\fR, \fB\--remove-timestamp\fR
 Similar to the
 \fB\-k\fR
-option, except that it removes the user's cached credentials entirely
-and may not be used in conjunction with a command or other option.
+option, except that it removes every cached credential for the user,
+regardless of the terminal or parent process ID.
+The next time
+\fBsudo\fR
+is run, a password must be entered if the
+security policy requires authentication.
+It is not possible to use the
+\fB\-K\fR
+option in conjunction with a
+\fIcommand\fR
+or other option.
 This option does not require a password.
 Not all security policies support credential caching.
-.TP 12n
+.TP 8n
 \fB\-k\fR, \fB\--reset-timestamp\fR
-When used without a command, invalidates the user's cached credentials.
-In other words, the next time
+When used without a
+\fIcommand\fR,
+invalidates the user's cached credentials for the current session.
+The next time
 \fBsudo\fR
-is run a password will be required.
+is run in the session, a password must be entered if the
+security policy requires authentication.
+By default, the
+\fBsudoers\fR
+policy uses a separate record in the credential cache for each
+terminal (or parent process ID if no terminal is present).
+This prevents the
+\fB\-k\fR
+option from interfering with
+\fBsudo\fR
+commands run in a different terminal session.
+See the
+\fItimestamp_type\fR
+option in
+sudoers(@mansectform@)
+for more information.
 This option does not require a password, and was added to allow a
 user to revoke
 \fBsudo\fR
@@ -495,8 +557,9 @@ permissions from a
 \fI.logout\fR
 file.
 .sp
-When used in conjunction with a command or an option that may require
-a password, this option will cause
+When used in conjunction with a
+\fIcommand\fR
+or an option that may require a password, this option will cause
 \fBsudo\fR
 to ignore the user's cached credentials.
 As a result,
@@ -505,13 +568,13 @@ will prompt for a password (if one is required by the security
 policy) and will not update the user's cached credentials.
 .sp
 Not all security policies support credential caching.
-.TP 12n
+.TP 8n
 \fB\-l\fR, \fB\--list\fR
 If no
 \fIcommand\fR
-is specified,
-list the allowed (and forbidden) commands for the
-invoking user (or the user specified by the
+is specified, list the privileges for the invoking user (or the
+\fIuser\fR
+specified by the
 \fB\-U\fR
 option) on the current host.
 A longer list format is used if this option is specified multiple times
@@ -520,14 +583,16 @@ and the security policy supports a verbose output format.
 If a
 \fIcommand\fR
 is specified and is permitted by the security policy, the fully-qualified
-path to the command is displayed along with any command line
-arguments.
+path to the
+\fIcommand\fR
+is displayed along with any
+\fIarg\fRs.
 If a
 \fIcommand\fR
 is specified but not allowed by the policy,
 \fBsudo\fR
 will exit with a status value of 1.
-.TP 12n
+.TP 8n
 \fB\-N\fR, \fB\--no-update\fR
 Do not update the user's cached credentials, even if the user successfully
 authenticates.
@@ -535,21 +600,23 @@ Unlike the
 \fB\-k\fR
 flag, existing cached credentials are used if they are valid.
 To detect when the user's cached credentials are valid (or when no
-authentication is required), the following command can be used:
-.RS 18n
+authentication is required), the following can be used:
+.RS 14n
 sudo -Nnv
 .RE
-.RS 12n
+.RS 8n
 .sp
 Not all security policies support credential caching.
 .RE
-.TP 12n
+.TP 8n
 \fB\-n\fR, \fB\--non-interactive\fR
 Avoid prompting the user for input of any kind.
-If a password is required for the command to run,
+If a password is required for the
+\fIcommand\fR
+to run,
 \fBsudo\fR
 will display an error message and exit.
-.TP 12n
+.TP 8n
 \fB\-P\fR, \fB\--preserve-groups\fR
 Preserve the invoking user's group vector unaltered.
 By default, the
@@ -558,7 +625,7 @@ policy will initialize the group vector to the list of groups the
 target user is a member of.
 The real and effective group-IDs, however, are still set to match
 the target user.
-.TP 12n
+.TP 8n
 \fB\-p\fR \fIprompt\fR, \fB\--prompt\fR=\fIprompt\fR
 Use a custom password prompt with optional escape sequences.
 The following percent
@@ -567,7 +634,7 @@ escape sequences are supported by the
 \fIsudoers\fR
 policy:
 .PP
-.RS 12n
+.RS 8n
 .PD 0
 .TP 4n
 %H
@@ -592,8 +659,9 @@ flags in
 sudoers(@mansectform@))
 .TP 4n
 \&%U
-expanded to the login name of the user the command will be run as
-(defaults to root unless the
+expanded to the login name of the user the
+\fIcommand\fR
+will be run as (defaults to root unless the
 \fB\-u\fR
 option is also specified)
 .TP 4n
@@ -617,58 +685,64 @@ specified by a PAM module unless the
 flag is disabled in
 \fIsudoers\fR.
 .RE
-.TP 12n
+.TP 8n
 \fB\-R\fR \fIdirectory\fR, \fB\--chroot\fR=\fIdirectory\fR
 Change to the specified root
 \fIdirectory\fR
 (see
 chroot(@mansectsu@))
-before running the command.
+before running the
+\fIcommand\fR.
 The security policy may return an error if the user does not have
 permission to specify the root directory.
-.if \n(SL \{\
-.TP 12n
+.TP 8n
 \fB\-r\fR \fIrole\fR, \fB\--role\fR=\fIrole\fR
-Run the command with an SELinux security context that includes
-the specified
+Run the
+\fIcommand\fR
+with an SELinux security context that includes the specified
 \fIrole\fR.
-.\}
-.TP 12n
+.TP 8n
 \fB\-S\fR, \fB\--stdin\fR
 Write the prompt to the standard error and read the password from the
 standard input instead of using the terminal device.
-.TP 12n
+.TP 8n
 \fB\-s\fR, \fB\--shell\fR
 Run the shell specified by the
 \fRSHELL\fR
 environment variable if it is set or the shell specified by the
 invoking user's password database entry.
-If a command is specified, it is passed to the shell as a simple
-command using the
+If a
+\fIcommand\fR
+is specified, it is passed to the shell as a simple command using the
 \fB\-c\fR
 option.
-The command and any arguments are concatenated, separated by spaces,
-after escaping each character
+The
+\fIcommand\fR
+and any
+\fIarg\fRs
+are concatenated, separated by spaces, after escaping each character
 (including white space)
 with a backslash
 (\(oq\e\(cq)
 except for alphanumerics, underscores,
 hyphens, and dollar signs.
-If no command is specified, an interactive shell is executed.
-Most shells behave differently when a command is specified
-as compared to an interactive session; consult the shell's manual
+If no
+\fIcommand\fR
+is specified, an interactive shell is executed.
+Most shells behave differently when a
+\fIcommand\fR
+is specified as compared to an interactive session; consult the shell's manual
 for details.
-.if \n(SL \{\
-.TP 12n
+.TP 8n
 \fB\-t\fR \fItype\fR, \fB\--type\fR=\fItype\fR
-Run the command with an SELinux security context that includes
-the specified
+Run the
+\fIcommand\fR
+with an SELinux security context that includes the specified
 \fItype\fR.
 If no
 \fItype\fR
 is specified, the default type is derived from the role.
-.\}
-.TP 12n
+.TP 8n
 \fB\-U\fR \fIuser\fR, \fB\--other-user\fR=\fIuser\fR
 Used in conjunction with the
 \fB\-l\fR
@@ -678,24 +752,36 @@ instead of for the invoking user.
 The security policy may restrict listing other users' privileges.
 When using the
 \fIsudoers\fR
-policy, only root or a user with the ability to run any command as
-either root or the specified
+policy, the
+\fB\-U\fR
+option is restricted to the root user and users with either the
+\(lqlist\(rq
+priviege for the specified
 \fIuser\fR
-on the current host may use this option.
-.TP 12n
+or the ability to run any
+\fIcommand\fR
+as root or
+\fIuser\fR
+on the current host.
+.TP 8n
 \fB\-T\fR \fItimeout\fR, \fB\--command-timeout\fR=\fItimeout\fR
-Used to set a timeout for the command.
-If the timeout expires before the command has exited, the
-command will be terminated.
-The security policy may restrict the ability to set command timeouts.
+Used to set a timeout for the
+\fIcommand\fR.
+If the timeout expires before the
+\fIcommand\fR
+has exited, the
+\fIcommand\fR
+will be terminated.
+The security policy may restrict the user's ability to set timeouts.
 The
 \fIsudoers\fR
 policy requires that user-specified timeouts be explicitly enabled.
-.TP 12n
+.TP 8n
 \fB\-u\fR \fIuser\fR, \fB\--user\fR=\fIuser\fR
-Run the command as a user other than the default target user
-(usually
-\fIroot\fR).
+Run the
+\fIcommand\fR
+as a user other than the default target user (usually
+\fBroot\fR).
 The
 \fIuser\fR
 may be either a user name or a numeric user-ID
@@ -705,7 +791,9 @@ prefixed with the
 character (e.g.,
 \(oq#0\(cq
 for UID 0).
-When running commands as a UID, many shells require that the
+When running
+\fIcommand\fRs as
+a UID, many shells require that the
 \(oq#\(cq
 be escaped with a backslash
 (\(oq\e\(cq).
@@ -717,18 +805,18 @@ policy allows UIDs that are not in the password database as long as the
 \fItargetpw\fR
 option is not set.
 Other security policies may not support this.
-.TP 12n
+.TP 8n
 \fB\-V\fR, \fB\--version\fR
 Print the
 \fBsudo\fR
 version string as well as the version string of any configured plugins.
 If the invoking user is already root, the
 \fB\-V\fR
-option will display the arguments passed to configure when
+option will display the options passed to configure when
 \fBsudo\fR
 was built; plugins may display additional information such as
 default options.
-.TP 12n
+.TP 8n
 \fB\-v\fR, \fB\--validate\fR
 Update the user's cached credentials, authenticating the user
 if necessary.
@@ -736,15 +824,18 @@ For the
 \fIsudoers\fR
 plugin, this extends the
 \fBsudo\fR
-timeout for another @timeout@ minutes by default, but does not run a command.
+timeout for another @timeout@ minutes by default, but does not run a
+\fIcommand\fR.
 Not all security policies support cached credentials.
-.TP 12n
+.TP 8n
 \fB\--\fR
 The
 \fB\--\fR
-option indicates that
+is used to delimit the end of the
 \fBsudo\fR
-should stop processing command line arguments.
+options.
+Subsequent options are passed to the
+\fIcommand\fR.
 .PP
 Options that take a value may only be specified once unless
 otherwise indicated in the description.
@@ -753,25 +844,32 @@ scripts that invoke
 \fBsudo\fR
 with user-controlled input.
 .PP
-Environment variables to be set for the command may also be passed
-on the command line in the form of
+Environment variables to be set for the
+\fIcommand\fR
+may also be passed as options to
+\fBsudo\fR
+in the form
 \fIVAR\fR=\fIvalue\fR,
-e.g.,
+for example
 \fRLD_LIBRARY_PATH\fR=\fI/usr/local/pkg/lib\fR.
-Variables passed on the command line are subject to restrictions
+Environment variables may be subject to restrictions
 imposed by the security policy plugin.
 The
 \fIsudoers\fR
-policy subjects variables passed on the command line to the same
-restrictions as normal environment variables with one important
-exception.
+policy subjects environment variables passed as options to the same
+restrictions as existing environment variables with one important
+difference.
 If the
 \fIsetenv\fR
 option is set in
 \fIsudoers\fR,
-the command to be run has the
+the
+\fIcommand\fR
+to be run has the
 \fRSETENV\fR
-tag set or the command matched is
+tag set or the
+\fIcommand\fR
+matched is
 \fBALL\fR,
 the user may set variables that would otherwise be forbidden.
 See
@@ -780,8 +878,10 @@ for more information.
 .SH "COMMAND EXECUTION"
 When
 \fBsudo\fR
-executes a command, the security policy specifies the execution
-environment for the command.
+executes a
+\fIcommand\fR,
+the security policy specifies the execution environment for the
+\fIcommand\fR.
 Typically, the real and effective user and group and IDs are set to
 match those of the target user, as specified in the password database,
 and the group vector is initialized based on the group database
@@ -835,10 +935,11 @@ scheduling priority (aka nice value)
 .SS "Process model"
 There are two distinct ways
 \fBsudo\fR
-can run a command.
+can run a
+\fIcommand\fR.
 .PP
-If an I/O logging plugin is configured or if the security policy
-explicitly requests it, a new pseudo-terminal
+If an I/O logging plugin is configured to log terminal I/O, or if
+the security policy explicitly requests it, a new pseudo-terminal
 (\(lqpty\(rq)
 is allocated and
 fork(2)
@@ -850,27 +951,45 @@ The
 \fImonitor\fR
 creates a new terminal session with itself as the leader and the pty as its
 controlling terminal, calls
-fork(2),
-sets up the execution environment as described above, and then uses the
+fork(2)
+again, sets up the execution environment as described above, and then uses the
 execve(2)
-system call to run the command in the child process.
+system call to run the
+\fIcommand\fR
+in the child process.
 The
 \fImonitor\fR
 exists to relay job control signals between the user's
-existing terminal and the pty the command is being run in.
-This makes it possible to suspend and resume the command.
-Without the monitor, the command would be in what POSIX terms an
+terminal and the pty the
+\fIcommand\fR
+is being run in.
+This makes it possible to suspend and resume the
+\fIcommand\fR
+normally.
+Without the
+\fImonitor\fR,
+the
+\fIcommand\fR
+would be in what POSIX terms an
 \(lqorphaned process group\(rq
 and it would not receive any job control signals from the kernel.
-When the command exits or is terminated by a signal, the
+When the
+\fIcommand\fR
+exits or is terminated by a signal, the
 \fImonitor\fR
-passes the command's exit status to the main
+passes the
+\fIcommand\fR's
+exit status to the main
 \fBsudo\fR
 process and exits.
-After receiving the command's exit status, the main
+After receiving the
+\fIcommand\fR's
+exit status, the main
 \fBsudo\fR
-passes the command's exit status to the security policy's close function
-and exits.
+process passes the
+\fIcommand\fR's
+exit status to the security policy's close function, as well as the
+close function of any configured audit plugin, and exits.
 .PP
 If no pty is used,
 \fBsudo\fR
@@ -878,22 +997,31 @@ calls
 fork(2),
 sets up the execution environment as described above, and uses the
 execve(2)
-system call to run the command in the child process.
+system call to run the
+\fIcommand\fR
+in the child process.
 The main
 \fBsudo\fR
-process waits until the command has completed, then passes the
-command's exit status to the security policy's close function and exits.
+process waits until the
+\fIcommand\fR
+has completed, then passes the
+\fIcommand\fR's
+exit status to the security policy's close function, as well as the
+close function of any configured audit plugins, and exits.
 As a special case, if the policy plugin does not define a close
 function,
 \fBsudo\fR
-will execute the command directly instead of calling
+will execute the
+\fIcommand\fR
+directly instead of calling
 fork(2)
 first.
 The
 \fIsudoers\fR
 policy plugin will only define a close function when I/O logging
 is enabled, a pty is required, an SELinux role is specified, the
-command has an associated timeout, or the
+\fIcommand\fR
+has an associated timeout, or the
 \fIpam_session\fR
 or
 \fIpam_setcred\fR
@@ -906,41 +1034,57 @@ are enabled by default on systems using PAM.
 .PP
 On systems that use PAM, the security policy's close function
 is responsible for closing the PAM session.
-It may also log the command's exit status.
+It may also log the
+\fIcommand\fR's
+exit status.
 .SS "Signal handling"
-When the command is run as a child of the
+When the
+\fIcommand\fR
+is run as a child of the
 \fBsudo\fR
 process,
 \fBsudo\fR
-will relay signals it receives to the command.
+will relay signals it receives to the
+\fIcommand\fR.
 The
 \fRSIGINT\fR
 and
 \fRSIGQUIT\fR
-signals are only relayed when the command is being run in a new pty
-or when the signal was sent by a user process, not the kernel.
-This prevents the command from receiving
+signals are only relayed when the
+\fIcommand\fR
+is being run in a new pty or when the signal was sent by a user
+process, not the kernel.
+This prevents the
+\fIcommand\fR
+from receiving
 \fRSIGINT\fR
 twice each time the user enters control-C.
 Some signals, such as
 \fRSIGSTOP\fR
 and
 \fRSIGKILL\fR,
-cannot be caught and thus will not be relayed to the command.
+cannot be caught and thus will not be relayed to the
+\fIcommand\fR.
 As a general rule,
 \fRSIGTSTP\fR
 should be used instead of
 \fRSIGSTOP\fR
-when you wish to suspend a command being run by
+when you wish to suspend a
+\fIcommand\fR
+being run by
 \fBsudo\fR.
 .PP
 As a special case,
 \fBsudo\fR
-will not relay signals that were sent by the command it is running.
-This prevents the command from accidentally killing itself.
+will not relay signals that were sent by the
+\fIcommand\fR
+it is running.
+This prevents the
+\fIcommand\fR
+from accidentally killing itself.
 On some systems, the
 reboot(@mansectsu@)
-command sends
+utility sends
 \fRSIGTERM\fR
 to all non-system processes other than itself before rebooting
 the system.
@@ -952,9 +1096,13 @@ signal it received back to
 reboot(@mansectsu@),
 which might then exit before the system was actually rebooted,
 leaving it in a half-dead state similar to single user mode.
-Note, however, that this check only applies to the command run by
+Note, however, that this check only applies to the
+\fIcommand\fR
+run by
 \fBsudo\fR
-and not any other processes that the command may create.
+and not any other processes that the
+\fIcommand\fR
+may create.
 As a result, running a script that calls
 reboot(@mansectsu@)
 or
@@ -969,15 +1117,9 @@ are run using the
 \fBexec\fR()
 family of functions instead of
 \fBsystem\fR()
-(which interposes a shell between the command and the calling process).
-.PP
-If no I/O logging plugins are loaded and the policy plugin has not
-defined a
-\fBclose\fR()
-function, set a command timeout, or required that the command be
-run in a new pty,
-\fBsudo\fR
-may execute the command directly instead of running it as a child process.
+(which interposes a shell between the
+\fIcommand\fR
+and the calling process).
 .SS "Plugins"
 Plugins may be specified via
 \fIPlugin\fR
@@ -1007,27 +1149,38 @@ manual for more information about the
 \fBsudo\fR
 plugin architecture.
 .SH "EXIT VALUE"
-Upon successful execution of a command, the exit status from
+Upon successful execution of a
+\fIcommand\fR,
+the exit status from
 \fBsudo\fR
 will be the exit status of the program that was executed.
-If the command terminated due to receipt of a signal,
+If the
+\fIcommand\fR
+terminated due to receipt of a signal,
 \fBsudo\fR
-will send itself the same signal that terminated the command.
+will send itself the same signal that terminated the
+\fIcommand\fR.
 .PP
 If the
 \fB\-l\fR
-option was specified without a command,
+option was specified without a
+\fIcommand\fR,
 \fBsudo\fR
 will exit with a value of 0 if the user is allowed to run
 \fBsudo\fR
 and they authenticated successfully (as required by the security policy).
-If a command is specified with the
+If a
+\fIcommand\fR
+is specified with the
 \fB\-l\fR
-option, the exit value will only be 0 if the command is permitted by the
-security policy, otherwise it will be 1.
+option, the exit value will only be 0 if the
+\fIcommand\fR
+is permitted by the security policy, otherwise it will be 1.
 .PP
 If there is an authentication failure, a configuration/permission
-problem, or if the given command cannot be executed,
+problem, or if the given
+\fIcommand\fR
+cannot be executed,
 \fBsudo\fR
 exits with a value of 1.
 In the latter case, the error string is printed to the standard error.
@@ -1051,12 +1204,15 @@ your
 is on a machine that is currently unreachable.
 .SH "SECURITY NOTES"
 \fBsudo\fR
-tries to be safe when executing external commands.
+tries to be safe when executing external
+\fIcommand\fRs.
 .PP
 To prevent command spoofing,
 \fBsudo\fR
 checks "." and "" (both denoting current directory) last when
-searching for a command in the user's
+searching for a
+\fIcommand\fR
+in the user's
 \fRPATH\fR
 (if one or both are in the
 \fRPATH\fR).
@@ -1073,27 +1229,43 @@ be granted
 \fBsudo\fR
 privileges to execute files that are writable by the user or
 that reside in a directory that is writable by the user.
-If the user can modify or replace the command there is no way
-to limit what additional commands they can run.
+If the user can modify or replace the
+\fIcommand\fR
+there is no way to limit what additional
+\fIcommand\fRs
+they can run.
 .PP
 By default,
 \fBsudo\fR
-will only log the command it explicitly runs.
-If a user runs a command such as
+will only log the
+\fIcommand\fR
+it explicitly runs.
+If a user runs a
+\fIcommand\fR
+such as
 \(oqsudo su\(cq
 or
 \(oqsudo sh\(cq,
-subsequent commands run from that shell are not subject to
+subsequent
+\fIcommand\fRs
+run from that shell are not subject to
 \fBsudo\fR's
 security policy.
-The same is true for commands that offer shell escapes (including
-most editors).
-If I/O logging is enabled, subsequent commands will have their input and/or
-output logged, but there will not be traditional logs for those commands.
-Because of this, care must be taken when giving users access to commands via
+The same is true for
+\fIcommand\fRs
+that offer shell escapes (including most editors).
+If I/O logging is enabled, subsequent
+\fIcommand\fRs
+will have their input and/or output logged, but there will not be
+traditional logs for those
+\fIcommand\fRs.
+Because of this, care must be taken when giving users access to
+\fIcommand\fRs
+via
 \fBsudo\fR
-to verify that the command does not inadvertently give the user an
-effective root shell.
+to verify that the
+\fIcommand\fR
+does not inadvertently give the user an effective root shell.
 For information on ways to address this, see the
 \fIPreventing shell escapes\fR
 section in
@@ -1102,7 +1274,9 @@ sudoers(@mansectform@).
 To prevent the disclosure of potentially sensitive information,
 \fBsudo\fR
 disables core dumps by default while it is executing (they are
-re-enabled for the command that is run).
+re-enabled for the
+\fIcommand\fR
+that is run).
 This historical practice dates from a time when most operating
 systems allowed set-user-ID processes to dump core by default.
 To aid in debugging
@@ -1125,7 +1299,8 @@ manual for more information.
 .SH "ENVIRONMENT"
 \fBsudo\fR
 utilizes the following environment variables.
-The security policy has control over the actual content of the command's
+The security policy has control over the actual content of the
+\fIcommand\fR's
 environment.
 .TP 17n
 \fREDITOR\fR
@@ -1207,9 +1382,13 @@ if no terminal is available or if the
 option is specified.
 .TP 17n
 \fRSUDO_COMMAND\fR
-Set to the command run by sudo, including command line arguments.
-The command line arguments are truncated at 4096 characters to
-prevent a potential execution error.
+Set to the
+\fIcommand\fR
+run by sudo, including any
+\fIarg\fRs.
+The
+\fIarg\fRs
+are truncated at 4096 characters to prevent a potential execution error.
 .TP 17n
 \fRSUDO_EDITOR\fR
 Default editor to use in
@@ -1307,7 +1486,9 @@ $ sudo shutdown -r +15 "quick reboot"
 .fi
 .PP
 To make a usage listing of the directories in the /home partition.
-The commands are run in a sub-shell to allow the
+The
+\fIcommands\fR
+are run in a sub-shell to allow the
 \(oqcd\(cq
 command and file redirection to work.
 .nf
@@ -1445,8 +1626,8 @@ The user did not enter a password before the password timeout
 Your user-ID does not appear in the system passwd database.
 .TP 6n
 \fRyou may not specify environment variables in edit mode\fR
-It is only possible to specify environment variables when running
-a command.
+It is only possible to specify environment variables when running a
+\fIcommand\fR.
 When editing a file, the editor is run with the user's environment unmodified.
 .SH "SEE ALSO"
 su(1),
@@ -1480,9 +1661,12 @@ exhaustive list of people who have contributed to
 \fBsudo\fR.
 .SH "CAVEATS"
 There is no easy way to prevent a user from gaining a root shell
-if that user is allowed to run arbitrary commands via
+if that user is allowed to run arbitrary
+\fIcommands\fR
+via
 \fBsudo\fR.
-Also, many programs (such as editors) allow the user to run commands
+Also, many programs (such as editors) allow the user to run
+\fIcommand\fRs
 via shell escapes, thus avoiding
 \fBsudo\fR's
 checks.
@@ -1494,7 +1678,8 @@ functionality.
 .PP
 It is not meaningful to run the
 \(oqcd\(cq
-command directly via sudo, e.g.,
+\fIcommand\fR
+directly via sudo, e.g.,
 .nf
 .sp
 .RS 4n
@@ -1502,11 +1687,15 @@ $ sudo cd /usr/local/protected
 .RE
 .fi
 .PP
-since when the command exits the parent process (your shell) will
-still be the same.
-See the
-\fIEXAMPLES\fR
-section for more information.
+since when the
+\fIcommand\fR
+exits the parent process (your shell) will still be the same.
+The
+\fB\-D\fR
+option can be used to run a
+\fIcommand\fR
+in a specific
+\fIdirectory\fR.
 .PP
 Running shell scripts via
 \fBsudo\fR

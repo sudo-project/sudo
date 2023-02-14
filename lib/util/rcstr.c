@@ -49,8 +49,10 @@ sudo_rcstr_dup(const char *src)
     debug_decl(sudo_rcstr_dup, SUDO_DEBUG_UTIL);
 
     dst = sudo_rcstr_alloc(len);
-    memcpy(dst, src, len);
-    dst[len] = '\0';
+    if (dst != NULL) {
+        memcpy(dst, src, len);
+        dst[len] = '\0';
+    }
     debug_return_ptr(dst);
 }
 

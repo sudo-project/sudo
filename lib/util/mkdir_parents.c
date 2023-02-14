@@ -106,7 +106,7 @@ sudo_open_parent_dir_v1(const char *path, uid_t uid, gid_t gid, mode_t mode,
 
     /* Iterate over path components, skipping the last one. */
     pathend = cp + strlen(cp);
-    for (cp = sudo_strsplit(cp, pathend, "/", &ep); cp != NULL && *ep != '\0';
+    for (cp = sudo_strsplit(cp, pathend, "/", &ep); cp != NULL && ep < pathend;
 	cp = sudo_strsplit(NULL, pathend, "/", &ep)) {
 	size_t len = (size_t)(ep - cp);
 	int dfd;

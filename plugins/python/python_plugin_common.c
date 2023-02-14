@@ -309,7 +309,6 @@ python_plugin_construct(struct PluginContext *plugin_ctx, unsigned int version,
 
     if (py_kwargs == NULL) {
         py_log_last_error("Failed to construct plugin instance");
-        rc = SUDO_RC_ERROR;
     } else {
         rc = python_plugin_construct_custom(plugin_ctx, py_kwargs);
     }
@@ -518,10 +517,6 @@ python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_options
         goto cleanup;
     }
     PyThreadState_Swap(plugin_ctx->py_interpreter);
-
-    if (!sudo_conf_developer_mode() && sudo_module_register_importblocker() < 0) {
-        goto cleanup;
-    }
 
     if (sudo_module_set_default_loghandler() < 0)
         goto cleanup;

@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2010-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2010-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.Dd May 31, 2022
+.Dd January 16, 2023
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -34,7 +34,7 @@ debug flags, and other settings.
 The
 .Nm
 file supports the following directives, described in detail below.
-.Bl -tag -width 8n
+.Bl -tag -width "Plugin"
 .It Plugin
 an approval, audit, I/O logging, or security policy plugin
 .It Path
@@ -122,12 +122,12 @@ setting, which defaults to
 .Pa @plugindir@ .
 In other words:
 .Bd -literal -offset 4n
-Plugin sudoers_policy sudoers.so
+Plugin sudoers_policy @sudoers_plugin@
 .Ed
 .Pp
 is equivalent to:
 .Bd -literal -offset 4n
-Plugin sudoers_policy @plugindir@/sudoers.so
+Plugin sudoers_policy @plugindir@/@sudoers_plugin@
 .Ed
 .Pp
 If the plugin was compiled statically into the
@@ -138,7 +138,7 @@ should be specified without a leading directory,
 as it does not actually exist in the file system.
 For example:
 .Bd -literal -offset 4n
-Plugin sudoers_policy sudoers.so
+Plugin sudoers_policy @sudoers_plugin@
 .Ed
 .Pp
 Starting with
@@ -150,7 +150,7 @@ are passed as arguments to the plugin's
 function.
 For example, to override the compile-time default sudoers file mode:
 .Bd -literal -offset 4n
-Plugin sudoers_policy sudoers.so sudoers_mode=0440
+Plugin sudoers_policy @sudoers_plugin@ sudoers_mode=0440
 .Ed
 .Pp
 See the
@@ -174,9 +174,9 @@ plugin will be used as the default security policy, for I/O logging
 (if enabled by the policy), and for auditing.
 This is equivalent to the following:
 .Bd -literal -offset 4n
-Plugin sudoers_policy sudoers.so
-Plugin sudoers_io sudoers.so
-Plugin sudoers_audit sudoers.so
+Plugin sudoers_policy @sudoers_plugin@
+Plugin sudoers_io @sudoers_plugin@
+Plugin sudoers_audit @sudoers_plugin@
 .Ed
 .Pp
 Starting with
@@ -225,7 +225,7 @@ version 1.8.16 and higher.
 The following plugin-agnostic paths may be set in the
 .Pa @sysconfdir@/sudo.conf
 file:
-.Bl -tag -width 8n
+.Bl -tag -width 4n
 .It askpass
 The fully qualified path to a helper program used to read the user's
 password when no terminal is available.
@@ -332,7 +332,7 @@ The default value is
 The
 .Nm
 file also supports the following front-end settings:
-.Bl -tag -width 8n
+.Bl -tag -width 4n
 .It disable_coredump
 Core dumps of
 .Nm sudo
@@ -368,34 +368,6 @@ command is used to configure core dump behavior.
 This setting is only available in
 .Nm sudo
 version 1.8.4 and higher.
-.It developer_mode
-By default
-.Nm sudo
-refuses to load plugins which can be modified by other than the root user.
-The plugin should be owned by root and write access permissions should be
-disabled for
-.Dq group
-and
-.Sm off
-.Dq other
-\&.
-.Sm on
-To make development of a plugin easier, you can disable that by setting
-.Dq developer_mode
-option to true in
-.Nm sudo.conf
-as follows:
-.Bd -literal -offset 4n
-Set developer_mode true
-.Ed
-.Pp
-This creates a security risk and is not recommended for production systems,
-it is intended to be used in a development environment (VM, container, etc).
-Before enabling developer mode, be sure that you understand the implications.
-.Pp
-This setting is only available in
-.Nm sudo
-version 1.9.0 and higher.
 .It group_source
 .Nm sudo
 passes the invoking user's group list to the policy and I/O plugins.
@@ -426,7 +398,7 @@ setting allows the administrator to change this default behavior.
 Supported values for
 .Em group_source
 are:
-.Bl -tag -width 8n
+.Bl -tag -width 4n
 .It static
 Use the static group list that the kernel returns.
 Retrieving the group list this way is very fast but it is subject
@@ -570,7 +542,7 @@ entries are also supported starting with
 .Nm sudo
 1.8.12 and are matched by either the base name of the plugin that was loaded
 (for example
-.Pa sudoers.so )
+.Pa @sudoers_plugin@ )
 or by the plugin's fully-qualified path name.
 Previously, the
 .Nm sudoers
@@ -674,9 +646,9 @@ front-end configuration
 # The plugin_options are optional.
 #
 # The sudoers plugin is used by default if no Plugin lines are present.
-#Plugin sudoers_policy sudoers.so
-#Plugin sudoers_io sudoers.so
-#Plugin sudoers_audit sudoers.so
+#Plugin sudoers_policy @sudoers_plugin@
+#Plugin sudoers_io @sudoers_plugin@
+#Plugin sudoers_audit @sudoers_plugin@
 
 #
 # Sudo askpass:
@@ -714,7 +686,7 @@ front-end configuration
 # The compiled-in value is usually sufficient and should only be changed
 # if you rename or move the sudo_intercept.so file.
 #
-#Path intercept @plugindir@/sudo_intercept.so
+#Path intercept @intercept_file@
 
 #
 # Sudo noexec:
@@ -728,7 +700,7 @@ front-end configuration
 # The compiled-in value is usually sufficient and should only be changed
 # if you rename or move the sudo_noexec.so file.
 #
-#Path noexec @plugindir@/sudo_noexec.so
+#Path noexec @noexec_file@
 
 #
 # Sudo plugin directory:
@@ -738,14 +710,6 @@ front-end configuration
 # specified without a fully qualified path name.
 #
 #Path plugin_dir @plugindir@
-
-#
-# Sudo developer mode:
-#   Set developer_mode true|false
-#
-# Allow loading of plugins that are owned by non-root or are writable
-# by "group" or "other".  Should only be used during plugin development.
-#Set developer_mode true
 
 #
 # Core dumps:
@@ -799,7 +763,7 @@ front-end configuration
 # Multiple subsystem@priority may be specified, separated by a comma.
 #
 #Debug sudo @log_dir@/sudo_debug all@debug
-#Debug sudoers.so @log_dir@/sudoers_debug all@debug
+#Debug @sudoers_plugin@ @log_dir@/sudoers_debug all@debug
 .Ed
 .Sh SEE ALSO
 .Xr sudo_plugin @mansectform@ ,

@@ -45,11 +45,12 @@ const char *path_plugin_dir = _PATH_SUDO_PLUGIN_DIR;
  * Returns true on success, rewriting path and filling in sb, else false.
  */
 static bool
-group_plugin_fallback(char *path, size_t pathsize, struct stat *sb)
+group_plugin_fallback(char *path, size_t pathsize)
 {
 #if defined(__LP64__)
     char newpath[PATH_MAX];
     bool ret = false;
+    struct stat sb;
     int len;
     debug_decl(group_plugin_fallback, SUDOERS_DEBUG_UTIL);
 
@@ -109,7 +110,7 @@ group_plugin_fallback(char *path, size_t pathsize, struct stat *sb)
 	errno = ENAMETOOLONG;
 	goto done;
     }
-    if (stat(newpath, sb) == -1) {
+    if (stat(newpath, &sb) == -1) {
 	goto done;
     }
     if (strlcpy(path, newpath, pathsize) >= pathsize) {
@@ -132,7 +133,6 @@ done:
 int
 group_plugin_load(const char *plugin_info)
 {
-    struct stat sb;
     char *args, path[PATH_MAX];
     char **argv = NULL;
     int len, rc = -1;
@@ -157,30 +157,14 @@ group_plugin_load(const char *plugin_info)
 	    (*plugin_info != '/') ? path_plugin_dir : "", plugin_info);
 	goto done;
     }
-    if (stat(path, &sb) != 0) {
-	sudo_warn("%s", path);
-	goto done;
-    }
 
     for (;;) {
-	if (!sudo_conf_developer_mode()) {
-	    /* Check owner and mode of plugin path. */
-	    if (sb.st_uid != ROOT_UID) {
-		sudo_warnx(U_("%s must be owned by uid %d"), path, ROOT_UID);
-		goto done;
-	    }
-	    if ((sb.st_mode & (S_IWGRP|S_IWOTH)) != 0) {
-		sudo_warnx(U_("%s must only be writable by owner"), path);
-		goto done;
-	    }
-	}
-
 	group_handle = sudo_dso_load(path, SUDO_DSO_LAZY|SUDO_DSO_GLOBAL);
 	if (group_handle != NULL) {
 	    break;
 	}
 
-	if (!retry || !group_plugin_fallback(path, sizeof(path), &sb)) {
+	if (!retry || !group_plugin_fallback(path, sizeof(path))) {
 	    const char *errstr = sudo_dso_strerror();
 	    sudo_warnx(U_("unable to load %s: %s"), path,
 		errstr ? errstr : "unknown error");

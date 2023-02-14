@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -26,6 +26,8 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+#include <limits.h>
 #include <regex.h>
 
 #include "sudo_compat.h"
@@ -36,30 +38,56 @@
 static char errbuf[1024];
 
 /*
- * Like strdup but collapses repeated '?', '*' and '+' ops in a regex.
- * Glibc regcomp() has a bug where it uses excessive memory for repeated
- * '+' ops.  Collapse them to avoid running the fuzzer out of memory.
+ * Parse a number between 0 and INT_MAX, handling escaped digits.
+ * Returns the number on success or -1 on error.
+ * Sets endp to the first non-matching character.
  */
-static char *
-dup_pattern(const char *src)
+static int
+parse_num(const char *str, char **endp)
 {
-    char *dst, *ret;
-    char ch, prev = '\0';
-    size_t len;
-    debug_decl(dup_pattern, SUDO_DEBUG_UTIL);
+    debug_decl(check_pattern, SUDO_DEBUG_UTIL);
+    const unsigned int lastval = INT_MAX / 10;
+    const unsigned int remainder = INT_MAX % 10;
+    unsigned int result = 0;
+    unsigned char ch;
 
-    len = strlen(src);
-    ret = malloc(len + 1);
-    if (ret == NULL)
-	debug_return_ptr(NULL);
+    while ((ch = *str++) != '\0') {
+	if (ch == '\\' && isdigit((unsigned int)str[0]))
+	    ch = *str++;
+	else if (!isdigit(ch))
+	    break;
+	ch -= '0';
+	if (result > lastval || (result == lastval && ch > remainder)) {
+	    result = -1;
+	    break;
+	}
+	result *= 10;
+	result += ch;
+    }
+    *endp = (char *)(str - 1);
 
-    dst = ret;
-    while ((ch = *src++) != '\0') {
+    debug_return_int(result);
+}
+
+/*
+ * Check pattern for invalid repetition sequences.
+ * This is implementation-specific behavior, not all regcomp(3) forbid them.
+ * Glibc allows it but uses excessive memory for repeated '+' ops.
+ */
+static int
+check_pattern(const char *pattern)
+{
+    debug_decl(check_pattern, SUDO_DEBUG_UTIL);
+    const char *cp = pattern;
+    int b1, b2 = 0;
+    char ch, *ep, prev = '\0';
+
+    while ((ch = *cp++) != '\0') {
 	switch (ch) {
 	case '\\':
-	    if (*src != '\0') {
-		*dst++ = '\\';
-		*dst++ = *src++;
+	    if (*cp != '\0') {
+		/* Skip escaped character. */
+		cp++;
 		prev = '\0';
 		continue;
 	    }
@@ -67,17 +95,49 @@ dup_pattern(const char *src)
 	case '?':
 	case '*':
 	case '+':
-	    if (ch == prev) {
-		continue;
+	    if (prev == '?' || prev == '*' || prev == '+' || prev == '{' ) {
+		/* Invalid repetition operator. */
+		debug_return_int(REG_BADRPT);
 	    }
 	    break;
+	case '{':
+	    /*
+	     * Try to match bound: {[0-9\\]*\?,[0-9\\]*}
+	     * GNU libc supports escaped digits and commas.
+	     */
+	    b1 = parse_num(cp, &ep);
+	    switch (ep[0]) {
+	    case '\\':
+		if (ep[1] != ',')
+		    break;
+		ep++;
+		FALLTHROUGH;
+	    case ',':
+		cp = ep + 1;
+		b2 = parse_num(cp, &ep);
+		break;
+	    }
+	    cp = ep;
+	    if (*cp == '}') {
+		if (b1 < 0 || b1 > 255 || b2 < 0 || b2 > 255) {
+		    /* Invalid bound value. */
+		    debug_return_int(REG_BADBR);
+		}
+		if (prev == '?' || prev == '*' || prev == '+' || prev == '{' ) {
+		    /* Invalid repetition operator. */
+		    debug_return_int(REG_BADRPT);
+		}
+		/* Skip past '}', prev will be set to '{' below */
+		cp++;
+		break;
+	    }
+	    prev = '\0';
+	    continue;
 	}
-	*dst++ = ch;
 	prev = ch;
     }
-    *dst = '\0';
 
-    debug_return_ptr(ret);
+    debug_return_int(0);
 }
 
 /*
@@ -108,22 +168,19 @@ sudo_regex_compile_v1(void *v, const char *pattern, const char **errstr)
     cp = pattern[0] == '^' ? pattern + 1 : pattern;
     if (strncmp(cp, "(?i)", 4) == 0) {
 	cflags |= REG_ICASE;
-	copy = dup_pattern(pattern + 4);
+	copy = strdup(pattern + 4);
 	if (copy == NULL) {
 	    *errstr = N_("unable to allocate memory");
 	    debug_return_bool(false);
 	}
 	if (pattern[0] == '^')
 	    copy[0] = '^';
-    } else {
-	copy = dup_pattern(pattern);
-	if (copy == NULL) {
-	    *errstr = N_("unable to allocate memory");
-	    debug_return_bool(false);
-	}
+	pattern = copy;
     }
 
-    errcode = regcomp(preg, copy, cflags);
+    errcode = check_pattern(pattern);
+    if (errcode == 0)
+	errcode = regcomp(preg, pattern, cflags);
     if (errcode == 0) {
 	if (preg == &rebuf)
 	    regfree(&rebuf);

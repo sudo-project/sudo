@@ -96,9 +96,9 @@ static bool reparse_sudoers(char *, int, char **, bool, bool);
 static int run_command(const char *, char *const *);
 static void parse_sudoers_options(void);
 static void setup_signals(void);
-static sudo_noreturn void help(void);
-static sudo_noreturn void usage(void);
 static void visudo_cleanup(void);
+sudo_noreturn static void help(void);
+sudo_noreturn static void usage(void);
 
 extern void get_hostname(void);
 
@@ -544,7 +544,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
     }
     editor_argv[ac++] = (char *)"--";
     editor_argv[ac++] = sp->tpath;
-    editor_argv[ac++] = NULL;
+    editor_argv[ac] = NULL;
 
     /*
      * Do the edit:
@@ -975,8 +975,6 @@ check_syntax(const char *file, bool quiet, bool strict, bool check_owner,
 	    sudo_warn(U_("unable to open %s"), file);
 	goto done;
     }
-    if (!init_defaults())
-	sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
     init_parser(file, quiet, true);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     if (sudoersparse() && !parse_error) {

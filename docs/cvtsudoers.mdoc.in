@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2018, 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2018, 2021-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 29, 2022
+.Dd January 16, 2023
 .Dt CVTSUDOERS 1
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -60,7 +60,7 @@ to make the policy rules specific to a host when merging multiple files.
 By default, the result is written to the standard output.
 .Pp
 The options are as follows:
-.Bl -tag -width Fl
+.Bl -tag -width Ds
 .It Fl b Ar dn , Fl -base Ns = Ns Ar dn
 The base DN (distinguished name) that will be used when performing
 LDAP queries.
@@ -84,7 +84,7 @@ One or more
 types may be specified, separated by a comma
 .Pq Ql \&, .
 The supported types are:
-.Bl -tag -width 8n
+.Bl -tag -width "command"
 .It all
 All Defaults entries.
 .It global
@@ -120,7 +120,7 @@ is JSON or sudoers.
 .It Fl f Ar output_format , Fl -output-format Ns = Ns Ar output_format
 Specify the output format (case-insensitive).
 The following formats are supported:
-.Bl -tag -width 8n
+.Bl -tag -width "sudoers"
 .It CSV
 CSV (comma-separated value) files are often used by spreadsheets
 and report generators.
@@ -170,7 +170,7 @@ Display a short help message to the standard output and exit.
 .It Fl i Ar input_format , Fl -input-format Ns = Ns Ar input_format
 Specify the input format.
 The following formats are supported:
-.Bl -tag -width 8n
+.Bl -tag -width "sudoers"
 .It LDIF
 LDIF (LDAP Data Interchange Format) files can be exported from an LDAP
 server to convert security policies used by
@@ -783,7 +783,7 @@ array consists of one or more objects containing
 .Dq name:value
 pair elements.
 The following names and values are supported:
-.Bl -tag -width 8n
+.Bl -tag -width "command"
 .It command
 A string containing the command to run.
 The special value
@@ -941,7 +941,7 @@ defaults_type,binding,name,operator,value
 .Ed
 .Pp
 The fields are as follows:
-.Bl -tag -width 8n
+.Bl -tag -width 4n
 .It defaults_type
 The type of
 .Em Defaults
@@ -998,7 +998,7 @@ alias_type,alias_name,members
 .Ed
 .Pp
 The fields are as follows:
-.Bl -tag -width 8n
+.Bl -tag -width 4n
 .It alias_type
 The type of alias; one of
 .Em Cmnd_Alias ,
@@ -1027,7 +1027,7 @@ rule,user,host,runusers,rungroups,options,command
 .Ed
 .Pp
 The fields are as follows:
-.Bl -tag -width 8n
+.Bl -tag -width 4n
 .It rule
 This field indicates a
 .Em sudoers

@@ -52,7 +52,7 @@
 static sudo_printf_t sudo_log;
 
 extern void mysetgrfile(const char *);
-extern void mysetgrent(void);
+extern int mysetgroupent(int);
 extern void myendgrent(void);
 extern struct group *mygetgrnam(const char *);
 
@@ -89,7 +89,8 @@ sample_init(int version, sudo_printf_t sudo_printf, char *const argv[])
     }
 
     mysetgrfile(argv[0]);
-    mysetgrent();
+    if (!mysetgroupent(1))
+	return false;
 
     return true;
 }

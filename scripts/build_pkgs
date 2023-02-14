@@ -1,0 +1,1227 @@
+#!/usr/bin/env perl
+#
+# Build sudo packages on the various build hosts and copy back artifacts.
+# Uses the ssh agent to avoid prompting for password when connecting.
+# This script is used to build sudo release packages and probably not
+# useful for anything else.
+
+use strict;
+use warnings;
+use Fcntl ":flock";
+use File::Temp ":mktemp";
+use FileHandle;
+use Getopt::Long qw(:config no_ignore_case bundling);
+use IO::Socket::IP -register;
+use IPC::Run qw(harness start pump finish run timeout);
+use POSIX qw(setsid :sys_wait_h :signal_h);
+use Parse::CPAN::Meta;
+use Pod::Usage;
+
+my $checklogs = 0;
+my $cleanup_only = 0;
+my $conf_file = 'build_pkgs.conf';
+my $debug = 0;
+my $help = 0;
+my $ignore_cache = 0;
+my $quiet = 0;
+my $repo = "/repos/sudo";
+my $rev = "tip";
+my $sudo_tmpdir;
+my $tarball;
+my $tarball_base;
+my $verbose = 0;
+my $main_pid = $$;
+
+GetOptions("check-logs" => \$checklogs,
+	   "cleanup" => \$cleanup_only,
+	   "config|c=s" => \$conf_file,
+	   "debug|d" => \$debug,
+	   "help|h" => \$help,
+	   "quiet|q" => \$quiet,
+	   "verbose|v" => \$verbose,
+	   "ignore-cache|i" => \$ignore_cache,
+	   "file|f=s" => \$tarball,
+	   "repository|R=s" => \$repo,
+	   "revision|r=s" => \$rev)
+	   or pod2usage(2);
+pod2usage(1) if $help;
+
+# Debug and verbose override quiet.
+$verbose = 1 if $debug;
+$quiet = 0 if $verbose;
+
+# Read config data (using Parse::CPAN::Meta is cheating a bit).
+my @yaml = Parse::CPAN::Meta->load_file($conf_file) ||
+    die "$0: unable to read $conf_file: $!\n";
+die "$0: missing required home setting in $conf_file\n"
+    unless (defined($yaml[0]) && exists $yaml[0]->{'home'});
+die "$0: missing required platforms setting in $conf_file\n"
+    unless (defined($yaml[0]) && exists $yaml[0]->{'platforms'});
+my $configs = $yaml[0]->{'platforms'};
+
+# If no platforms were specified on the command line, build everything.
+my @platforms;
+if (scalar @ARGV != 0) {
+    foreach (@ARGV) {
+	die "Unknown platform $_\n" unless exists $configs->{$_};
+	push(@platforms, $_);
+    }
+} else {
+    @platforms = keys %{$configs};
+}
+
+my $top = $yaml[0]->{'home'};
+my $artifacts = $yaml[0]->{'artifacts'} // "${top}/artifacts";
+my $logs = $yaml[0]->{'logs'} // "${top}/logs";
+my $sockets = "${top}/connections";
+my $cache = "${top}/cache";
+my $exiting = 0;
+my $failed_jobs = 0;
+my $build_script = $yaml[0]->{'build_script'};
+my $test_script = $yaml[0]->{'test_script'};
+my ($build_script_base, $test_script_base, $srcdir, $sudo_version);
+
+# In check-only mode just grep the build logs.
+check_logs() if $checklogs;
+
+# Start ssh agent if one is not already running.
+my $agent_pid = start_ssh_agent();
+
+unless ($cleanup_only) {
+    # If no tarball specified, create an archive from the repo.
+    $sudo_tmpdir = mkdtemp("/var/tmp/sudo-XXXXXXXX") ||
+	die "$0: unable to create temporary directory: $!\n";
+    if (defined($tarball)) {
+	warn "$0: building packages from $tarball\n";
+	die "$0: can't access $tarball\n" unless -f $tarball;
+    } else {
+	warn "$0: building packages from $rev of $repo\n";
+	$tarball = create_tarball() ||
+	    die "$0: unable to create tarball from $repo\n";
+    }
+    $tarball =~ m:^(.*/)?([^/]+)$:;
+    $tarball_base = $2;
+
+    # Find top-level source directory in tarball
+    $srcdir = `tar -ztf $tarball | sed 1q`;
+    chomp($srcdir);
+    $srcdir =~ s:/.*::;
+    die "$0: unable to determine source dir from tarball\n" unless $srcdir;
+    if ($srcdir =~ /^sudo-(.*)$/) {
+	$sudo_version = $1;
+    } else {
+	$sudo_version = $rev;
+    }
+
+    # If no build or test script specified, use defaults.
+    $build_script = default_build_script() unless defined($build_script);
+    $build_script =~ m:^(.*/)?([^/]+)$:;
+    $build_script_base = $2;
+    $test_script = default_test_script() unless defined($test_script);
+    $test_script =~ m:^(.*/)?([^/]+)$:;
+    $test_script_base = $2;
+
+    # Create required directories
+    foreach my $dir (sort $top, $artifacts, $cache, $logs, $sockets, "$artifacts/$sudo_version") {
+	unless (-d $dir) {
+	    mkdir($dir, 0755) || die "$0: unable to mkdir $dir: $!\n";
+	}
+    }
+    $artifacts .= "/$sudo_version";
+}
+
+# Linux and SYSV don't support SIGINFO
+my $INFO = "INFO";
+$INFO = "USR1" unless exists $SIG{INFO};
+
+$SIG{$INFO} = \&info;
+$SIG{HUP} = \&shut_down;
+$SIG{INT} = \&shut_down;
+$SIG{QUIT} = \&shut_down;
+$SIG{TERM} = \&shut_down;
+$SIG{__DIE__} = \&die_hook;
+
+# Prevent macOS from going to sleep while we are running.
+system("/usr/bin/caffeinate -i -w $main_pid") if -x "/usr/bin/caffeinate";
+
+# Keep track of which platforms belong to which VM server.
+my %vm_servers;
+my %active_hosts;
+foreach my $platform (@platforms) {
+    my $conf = $configs->{$platform};
+
+    if (exists $conf->{'vm_host'}) {
+	my $vm_host = $conf->{'vm_host'};
+	push(@{$vm_servers{$vm_host}}, $conf);
+    }
+    # Track the number of times an ssh host is used
+    $active_hosts{$conf->{'ssh_host'}}++;
+}
+
+# Open persistent ssh connections to VM servers
+foreach my $server (keys %vm_servers) {
+    $active_hosts{$server} = 1 if open_persistent_connection($server) == 0;
+}
+
+# Power on VMs as needed
+foreach my $vm_host (keys %vm_servers) {
+    my $vm_confs = $vm_servers{$vm_host};
+    delete $vm_servers{$vm_host};
+    while (my $conf = pop @{$vm_confs}) {
+	if (!vm_is_running($vm_host, $conf)) {
+	    if (vm_poweron($vm_host, $conf)) {
+		push(@{$vm_servers{$vm_host}}, $conf);
+	    } else {
+		warn "unable to start VM " . $conf->{'ssh_host'} . " on $vm_host";
+	    }
+	}
+    }
+}
+
+# We want to catch the jobs as they finish but not any of the other
+# commands started via run() or system() above.
+$SIG{CHLD} = \&reaper;
+
+# We limit the number of concurrent jobs a single host can support.
+# In the future, this may be set on a per-host basis.
+# If a host already is at the limit, we queue the job until a worker
+# for that host completes.
+my %workers;
+my %concurrency;
+my $max_jobs = $yaml[0]->{'max_jobs'} // 2;
+
+foreach my $platform (@platforms) {
+    my $conf = $configs->{$platform};
+    if (!exists $conf->{'ssh_host'}) {
+	warn "$platform: ssh_host not defined\n";
+	return;
+    }
+
+    run_job($platform, $conf);
+}
+
+print "Waiting for workers to finish...\n" if $verbose;
+while (scalar(keys %workers) != 0) {
+    # This sleep will be interrupted by SIGCHLD
+    sleep(5);
+}
+
+# Disable reaper now that we've waited for our children
+$SIG{CHLD} = undef;
+
+# Summarize results
+if (!$quiet && !$cleanup_only) {
+    printf("%-16s%-16s%s\n", "Platform", "Build", "Test");
+    foreach my $platform (@platforms) {
+	my $conf = $configs->{$platform};
+	printf("%-16s%-16s%s\n", $platform, $conf->{'status_build'},
+	    $conf->{'status_test'});
+    }
+}
+
+exit($failed_jobs);
+
+# Signal handler for worker to kill existing jobs.
+sub worker_cleanup {
+    my $signo = shift;
+
+    # Avoid warnings when we kill the worker jobs
+    $exiting = $signo;
+
+    # Kill everything else in our process group (ssh jobs, etc)
+    $SIG{$signo} = "IGNORE";
+    kill($signo, -getpgrp());
+
+    # Worker will clean up and exit
+    sleep 1;
+
+    # Restore default handler so parent can kill us if cleanup fails
+    $SIG{$signo} = "DEFAULT";
+}
+
+# Connect to build host and remove stale temporary directories.
+sub cleanup_build_dir {
+    my ($host, $conf) = @_;
+
+    # Wait for VM to power on
+    if (exists $conf->{"vm_host"}) {
+	die "unable to connect to $host\n" unless wait_for_ssh($host);
+    }
+
+    # Remove any remove temporary directories
+    my $status = run_remote_command($conf, "rm -rf sudo_build.????????",
+	\*STDERR);
+    exit($status >> 8);
+}
+
+# Run a build job for the platform or queue it if no worker is available.
+sub run_job {
+    my ($platform, $conf) = @_;
+    my ($vm_host, $status, $logfile);
+    my $host = $conf->{'ssh_host'};
+    my $exit_value = 0;
+
+    # Block signals during critical section
+    my $sigset = POSIX::SigSet->new(SIGCHLD, SIGHUP, SIGINT, SIGTERM);
+    my $oldsigset = POSIX::SigSet->new();
+    sigprocmask(SIG_BLOCK, $sigset, $oldsigset);
+
+    # Check max concurrent connections for the build host.
+    if (exists $concurrency{$host} && $concurrency{$host}->{'jobs'} >= $max_jobs) {
+	# Defer job until an existing build job completes.
+	push(@{$concurrency{$host}->{'queue'}}, $platform);
+	sigprocmask(SIG_SETMASK, $oldsigset);
+	return;
+    }
+    $concurrency{$host}->{'jobs'}++;
+
+    defined(my $child = fork) || die "Can't fork: $!\n";
+    if ($child) {
+	# Parent.  Stash pid to map child to host in reaper and return.
+	$workers{$child} = { "platform" => $platform, "ssh_host" => $host };
+	sigprocmask(SIG_SETMASK, $oldsigset);
+
+	print "Started $platform \@ $host ($child)\n" if $verbose;
+	return;
+    }
+
+    # Worker runs in its own session to simplify signal handling.
+    setsid();
+
+    # Update signal handlers for worker.
+    $SIG{CHLD} = "DEFAULT";
+    $SIG{HUP} = \&worker_cleanup;
+    $SIG{$INFO} = "DEFAULT";
+    $SIG{INT} = \&worker_cleanup;
+    $SIG{TERM} = \&worker_cleanup;
+    $SIG{__DIE__} = undef;
+    sigprocmask(SIG_SETMASK, $oldsigset);
+
+    # Show platform and ssh host in ps.
+    $0 = "build_pkgs: $platform ($host)";
+
+    # Cleanup and exit in --clean mode
+    cleanup_build_dir($host, $conf) if $cleanup_only;
+
+    # Output goes to log file
+    if (!open(BUILDLOG, ">", "${logs}/${platform}.build")) {
+	die "unable to create ${logs}/${platform}.build: $!\n";
+    }
+    my $now = localtime();
+    print BUILDLOG "Build for ${platform} \@ ${host} started $now\n\n";
+
+    # Wait for VM to power on
+    if (exists $conf->{"vm_host"}) {
+	if (!wait_for_ssh($host)) {
+	    print BUILDLOG "$platform: unable to connect to $host\n";
+	    exit(1);
+	}
+    }
+
+    # Create temporary directory on build host
+    my $temporary;
+    for (my $i = 0; $i < 20; $i++) {
+	$temporary = mktemp("sudo_build.XXXXXXXX");
+	$status = run_remote_command($conf, "mkdir $temporary", \*BUILDLOG);
+	last if $status == 0;
+    }
+    if ($status != 0) {
+	print BUILDLOG "unable to mkdir ${host}:${temporary}\n";
+	exit(1);
+    }
+
+    my @files = ($build_script, $test_script, $tarball);
+    printf BUILDLOG "copy %s -> %s:%s\n", join(' ', @files), $host, "$temporary/";
+    $status = copy_to_remote(\@files, "$temporary/", $host, \*BUILDLOG,
+	$conf->{"proxy_cmd"});
+    if ($status != 0) {
+	warn "$platform: unable to copy files to $host:$temporary/" unless $exiting;
+	$exit_value = 1;
+	goto remove_tmp;
+    }
+
+    # Copy config.cache file if there is one
+    if (!$ignore_cache && -f "${cache}/config.cache.${platform}") {
+	printf BUILDLOG "copy %s -> %s:%s\n",
+	    "${cache}/config.cache.${platform}",
+	    $host, "$temporary/config.cache";
+	copy_to_remote("${cache}/config.cache.${platform}",
+	    "$temporary/config.cache", $host, \*BUILDLOG,
+	    $conf->{"proxy_cmd"});
+    }
+
+    # Unpack tarball and run build script.
+    my $build_args = "";
+    if (exists $conf->{"crossbuild"}) {
+	# When cross-building, pass the target system on the command line.
+	$build_args .= "--osversion " . $conf->{"crossbuild"} . " ";
+    }
+    if (!$ignore_cache) {
+	# Name of the config.cache file, if using.
+	$build_args .= "--cache-file config.cache ";
+    }
+    if (exists $conf->{"no_packages"} && $conf->{"no_packages"}) {
+	$build_args .= "--no-packages ";
+    }
+
+    $status = run_remote_command($conf,
+	"cd $temporary && ./$build_script_base ${build_args}$tarball_base",
+	\*BUILDLOG);
+    if ($status != 0) {
+	warn "$platform: build failed on $host\n" unless $exiting;
+	$exit_value = 2;
+	goto remove_tmp;
+    }
+
+    if (!exists $conf->{'omit_artifacts'} || !$conf->{'omit_artifacts'}) {
+	printf BUILDLOG "copy %s:%s -> %s\n", $host,
+	    "$temporary/artifacts/*", $artifacts;
+	$status = copy_from_remote("$temporary/artifacts/\*", $artifacts,
+	    $host, \*BUILDLOG, $conf->{"proxy_cmd"});
+	if ($status != 0) {
+	    warn "$platform: unable to scp $host:$temporary/artifacts/* $artifacts" unless $exiting;
+	    $exit_value = 4;
+	    goto remove_tmp;
+	}
+    }
+
+    # Update config.cache file if using.
+    if (!$ignore_cache) {
+	printf BUILDLOG "copy %s:%s -> %s\n", $host,
+	    "$temporary/config.cache", "${cache}/config.cache.${platform}";
+	$status = copy_from_remote("$temporary/config.cache",
+	    "${cache}/config.cache.${platform}", $host,
+	    \*BUILDLOG, $conf->{"proxy_cmd"});
+    }
+
+    $now = localtime();
+    print BUILDLOG "\nBuild completed $now\n";
+
+    # Run tests unless cross-compiling
+    unless (exists $conf->{'crossbuild'}) {
+	if (!open(TESTLOG, ">", "${logs}/${platform}.test")) {
+	    warn "unable to create ${logs}/${platform}.test: $!\n";
+	    $exit_value = 128;
+	    goto remove_tmp;
+	}
+	print TESTLOG "Test started $now\n\n";
+	$status = run_remote_command($conf,
+	    "cd $temporary && ./$test_script_base $srcdir", \*TESTLOG, "-tt");
+	print TESTLOG "\nTest completed $now\n";
+	if ($status != 0) {
+	    warn "$platform: test failure on $host\n" unless $exiting;
+	    $exit_value = 129;
+	}
+	close(TESTLOG);
+    }
+
+    # Remove temporary build dir
+remove_tmp:
+    run_remote_command($conf, "rm -rf \"$temporary\"", \*BUILDLOG);
+    close(BUILDLOG);
+
+    exit($exit_value);
+}
+
+sub reaper {
+    my $child;
+
+    for (;;) {
+	$child = waitpid(-1, WNOHANG);
+	last if $child <= 0;
+
+	if (exists $workers{$child}) {
+	    my $w = $workers{$child};
+	    my $platform = $w->{'platform'};
+	    my $host = $w->{'ssh_host'};
+	    my $conf = $configs->{$platform};
+	    print "Finished $platform \@ $host ($child)\n" if $verbose;
+
+	    # Check for warnings/errors in the log file
+	    my @warnings = grep_log("${logs}/${platform}.build");
+	    foreach (@warnings) {
+		warn "$platform: $_\n";
+	    }
+
+	    if ($? == 0) {
+		$conf->{'status_build'} = scalar @warnings ? "WARNING" : "SUCCESS";
+		$conf->{'status_test'} =
+		    $conf->{'crossbuild'} ? "N/A" : "SUCCESS";
+	    } else {
+		if (($? >> 8) < 128) {
+		    # Build failed
+		    $conf->{'status_build'} = "FAILED";
+		    $conf->{'status_test'} = "N/A"
+		} else {
+		    # Build OK, test failed
+		    $conf->{'status_build'} = scalar @warnings ? "WARNING" : "SUCCESS";
+		    $conf->{'status_test'} = "FAILED";
+		}
+		$failed_jobs++;
+	    }
+
+	    # Remove the dead process
+	    delete $workers{$child};
+
+	    # One less worker is now using the host
+	    $active_hosts{$host}--;
+	    if ($active_hosts{$host} == 0) {
+		# Close persistent connection if no longer needed
+		close_persistent_connection($host);
+
+		if (exists $conf->{'vm_host'}) {
+		    my $vm_host = $conf->{'vm_host'};
+		    if (exists $vm_servers{$vm_host}) {
+			for (my $i = 0; $i < scalar @{$vm_servers{$vm_host}}; $i++) {
+			    # Shut down now-unused VM and remove from list.
+			    if (${$vm_servers{$vm_host}}[$i] eq $conf) {
+				splice(@{$vm_servers{$vm_host}}, $i, 1);
+				vm_shutdown($vm_host, $conf);
+			    }
+			}
+		    }
+                }
+            }
+
+	    # Check for deferred jobs if invoked via signal.
+	    if (defined($_[0])) {
+		$concurrency{$host}->{'jobs'}--;
+		if (exists $concurrency{$host}->{'queue'}) {
+		    if (int(@{$concurrency{$host}->{'queue'}})) {
+			my $platform = pop(@{$concurrency{$host}->{'queue'}});
+			run_job($platform, $configs->{$platform});
+		    }
+		}
+	    }
+	}
+    }
+    $SIG{CHLD} = \&reaper;
+}
+
+# Kill all workers and wait for them to finish.
+# Note that the reaper is not called for the workers.
+sub kill_workers {
+    my $signame = shift;
+    my @jobs = keys %workers;
+
+    if (@jobs) {
+	$SIG{CHLD} = undef;
+	foreach (@jobs) {
+	    kill($signame, $_);
+	}
+	sleep(2);
+	foreach (@jobs) {
+	    kill(SIGKILL, $_);
+	}
+	for (;;) {
+	    last unless waitpid(-1, WNOHANG) > 0;
+	}
+    }
+}
+
+# Shut down cleanly on signal and exit.
+sub shut_down {
+    my $signame = shift;
+
+    print "Shutting down...\n" if $verbose;
+
+    kill_workers($signame);
+    exit(1);
+}
+
+# Hook that is called when we die().
+sub die_hook {
+    # Don't do anything special if called from an eval block
+    die @_ if $^S;
+
+    kill_workers(SIGTERM);
+}
+
+# Signal handler for SIGINFO (or SIGUSR1 on non-BSD).
+sub info {
+    while (my ($host, $c) = each %concurrency) {
+	if (exists $c->{'queue'}) {
+	    foreach my $platform (@{$c->{'queue'}}) {
+		warn "Queued $platform @ $host\n";
+	    }
+	}
+    }
+    while (my ($pid, $w) = each %workers) {
+	my $platform = $w->{'platform'};
+	my $host = $w->{'ssh_host'};
+	warn "Running $platform @ $host ($pid)\n";
+    }
+    $SIG{$INFO} = \&info if defined($_[0]);
+}
+
+# Build up the ssh command line
+sub ssh_cmdline {
+    my ($host, $cmd, @opts) = @_;
+
+    my @cmdline = qw(ssh -x -oPreferredAuthentications=publickey -oStrictHostKeyChecking=no -oServerAliveInterval=15 -oServerAliveCountMax=3);
+    push(@cmdline, @opts) if @opts;
+    push(@cmdline, $host);
+    push(@cmdline, $cmd) if defined($cmd);
+
+    @cmdline;
+}
+
+# Use scp to copy one or more files from local to remote
+sub copy_to_remote {
+    my ($src, $dst, $host, $output, $proxy) = @_;
+
+    # Open persistent connection if needed
+    unless (-S "$sockets/$host") {
+	my $status = open_persistent_connection($host, $output, $proxy);
+	return $status if $status != 0;
+    }
+
+    my @cmd = qw(scp -Bq -oPreferredAuthentications=publickey -oStrictHostKeyChecking=no);
+    push(@cmd, "-oControlPath=$sockets/$host");
+    push(@cmd, ref $src ? @$src : $src);
+    push(@cmd, "$host:$dst");
+    run(\@cmd, '<', \undef, '>&', $output, debug => $debug);
+
+    return $?;
+}
+
+# Use scp to copy a file from remote to local
+sub copy_from_remote {
+    my ($src, $dst, $host, $output, $proxy) = @_;
+
+    # Open persistent connection if needed
+    unless (-S "$sockets/$host") {
+	my $status = open_persistent_connection($host, $output, $proxy);
+	return $status if $status != 0;
+    }
+
+    my @cmd = qw(scp -Bq -oPreferredAuthentications=publickey -oStrictHostKeyChecking=no);
+    push(@cmd, "-oControlPath=$sockets/$host");
+    push(@cmd, "$host:$src", $dst);
+    run(\@cmd, '<', \undef, '>&', $output, debug => $debug);
+
+    return $?;
+}
+
+# Run a command over ssh on the remote host and to output handle.
+# A persistent connection is opened if one does not already exit.
+sub run_remote_command {
+    my ($conf, $cmd, $output, @opts) = @_;
+    my $host = $conf->{'ssh_host'};
+    my $sock_file = "$sockets/$host";
+    my ($writer, $child);
+
+    # Open persistent connection if needed
+    unless (-S $sock_file) {
+	my $status = open_persistent_connection($host, $output, $conf->{'proxy_cmd'});
+	return $status if $status != 0;
+    }
+
+    # Run command in schroot if necessary
+    if (exists $conf->{'schroot'}) {
+	my $schroot = $conf->{'schroot'};
+	# Wrap in a shell if command uses special characters
+	if ($cmd =~ /[\$\{\}\[\]\&\|\;\?\*]/) {
+	    $cmd =~ s/'/\\\'/g;
+	    $cmd = "schroot -c $schroot -- sh -c '$cmd'";
+	} else {
+	    $cmd = "schroot -c $schroot -- $cmd";
+	}
+    }
+
+    # No need for proxy here, the persistent connection handles it.
+    # For tty mode, we need to allocate a pty and do things the hard way.
+    my @cmdline = ssh_cmdline($host, $cmd, "-S", $sock_file, @opts);
+    if (grep(@opts, "-t")) {
+	my ($inbuf, $outbuf);
+	my $h = harness(\@cmdline, '<pty<', \$inbuf, '>pty>', \$outbuf, debug => $debug);
+	for (;;) {
+	    pump $h;
+	    if (defined($outbuf)) {
+		$outbuf =~ s/\r+$//gm;
+		print $output $outbuf;
+		undef $outbuf;
+	    }
+	    last unless $h->pumpable;
+	}
+	$h->finish();
+    } else {
+	run(\@cmdline, '<', \undef, '>&', $output, debug => $debug);
+    }
+
+    return $?;
+}
+
+# Open a persistent connection to the specified host.
+# The connection will persist until shut down.
+sub open_persistent_connection {
+    my ($dest, $output, $proxy) = @_;
+    my ($outbuf, @cmdline);
+
+    # Handle user@host form
+    $dest =~ /([^@]+)$/;
+    my $host = $1;
+
+    my @ssh_opts = qw(-M -N -oControlPersist=yes);
+    push(@ssh_opts, "-S", "$sockets/$host");
+    push(@ssh_opts, "-oProxyCommand=$proxy") if defined($proxy);
+
+    # Lock socket dir to prevent race conditions
+    sysopen(SOCKDIR, $sockets, O_RDONLY) || die "$0: unable to open $sockets: $!\n";
+    flock(SOCKDIR, LOCK_EX) || die "$0: unable to lock $sockets: $!\n";
+
+    if (-S "$sockets/$host") {
+	@cmdline = ("ssh", "-S", "$sockets/$host", "-Ocheck", $host);
+	run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
+	if ($outbuf =~ /^Master running/) {
+	    close(SOCKDIR);
+	    return 0;
+	}
+	return 0 if $outbuf =~ /^Master running/;
+	unlink("$sockets/$host");
+    }
+
+    @cmdline = ssh_cmdline($dest, undef, @ssh_opts);
+    run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
+    if (length($outbuf) > 0) {
+	$output = \*STDERR unless defined($output);
+	print $output $outbuf;
+    }
+
+    close(SOCKDIR);
+    return $?;
+}
+
+# Close a persistent connection
+sub close_persistent_connection {
+    my $host = shift;
+    my $ret = 1;
+
+    # Strip off optional user@ if present.
+    $host =~ s/^.*@//;
+
+    if (-S "$sockets/$host") {
+	my $outbuf;
+	my @cmdline = ("ssh", "-S", "$sockets/$host", "-Oexit", $host);
+	run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
+	$ret = 0 unless ($? == 0 && $outbuf =~ /Exit request sent/);
+    }
+
+    $ret;
+}
+
+# Close all active persistent connections.
+sub close_persistent_connections {
+    if (defined($sockets)) {
+	foreach my $host (keys %active_hosts) {
+	    close_persistent_connection($host);
+	}
+    }
+}
+
+sub vm_is_running {
+    # vim-cmd vmsvc/power.getstate VMID
+    my ($host, $conf) = @_;
+    my $outbuf;
+
+    my @cmdline = ssh_cmdline($host, "vim-cmd vmsvc/power.getstate " . $conf->{'vmid'});
+    run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
+
+    $outbuf =~ /Powered on/;
+}
+
+sub vm_poweron {
+    # vim-cmd vmsvc/power.on VMID
+    my ($host, $conf) = @_;
+    my $outbuf;
+
+    printf("Powering on VM %s on %s\n", $conf->{'ssh_host'}, $host) if $verbose;
+    my @cmdline = ssh_cmdline($host, "vim-cmd vmsvc/power.on " . $conf->{'vmid'});
+    run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
+
+    $outbuf =~ /Powering on VM/;
+}
+
+sub vm_shutdown {
+    # vim-cmd vmsvc/power.shutdown VMID
+    my ($host, $conf) = @_;
+    my $ssh_host = $conf->{'ssh_host'};
+    my $outbuf;
+
+    printf("Shutting down VM %s on %s\n", $ssh_host, $host) if $verbose;
+    my @cmdline = ssh_cmdline($host, "vim-cmd vmsvc/power.shutdown " . $conf->{'vmid'});
+    run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
+
+    # Check for, e.g. vim.fault.ToolsUnavailable or vim.fault.InvalidPowerState
+    if ($outbuf =~ /vim\.fault\.ToolsUnavailable/) {
+	# VM tools not installed, login directly to shut down
+	if (exists $conf->{'shutdown'}) {
+	    # login directly to shut down
+	    @cmdline = ssh_cmdline($ssh_host, $conf->{'shutdown'});
+	    run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
+	} else {
+	    warn "unable to shut down $ssh_host on $host: VM tools not installed\n";
+	}
+    } elsif ($outbuf =~ /vim\.fault\.InvalidPowerState/) {
+	# Not powered on, ignore the error
+	$outbuf = "";
+    }
+    $outbuf !~ /vim\.fault\./;
+}
+
+# Try to connect to port 22 on the host.
+# Returns 1 on success, 0 on failure
+sub ping_ssh {
+    my $host = shift;
+    my $ret = 0;
+
+    # Create socket and connect
+    my $sock = IO::Socket::IP->new(
+	PeerHost => $host,
+	PeerPort => "22",
+	Timeout  => 20,
+	Type     => SOCK_STREAM
+    );
+
+    if (defined($sock) && defined($_ = <$sock>)) {
+	$ret = 1 if /^SSH/;
+	close($sock);
+    }
+
+    return $ret;
+}
+
+sub wait_for_ssh {
+    my $host = shift;
+
+    # Sleep until sshd is available (or we time out)
+    my $sleeptime = 10;
+    my $timeout = $sleeptime * 30;
+    while ($timeout > 0) {
+	sleep($sleeptime);
+	$timeout -= $sleeptime;
+	return 1 if ping_ssh($host);
+    }
+
+    return 0;
+}
+
+# Create a tarball from an archive $repo
+sub create_tarball {
+    die "$0: unable to create directory $sudo_tmpdir/sudo: $!\n"
+        unless mkdir("$sudo_tmpdir/sudo", 0755);
+    system("hg archive -R $repo -r $rev --type=files $sudo_tmpdir/sudo && hg log -R $repo --template=changelog -r 'sort(branch(.) or follow(), -date)' > $sudo_tmpdir/sudo/ChangeLog && cd $sudo_tmpdir && sed -e 's/^/sudo\\//' -e 's/[ 	].*//' sudo/MANIFEST | GZIP=-9 pax -wz -x ustar -f sudo.tar.gz && rm -rf sudo");
+    return $? ? undef : "$sudo_tmpdir/sudo.tar.gz";
+}
+
+sub start_ssh_agent {
+    # Use existing agent if possible
+    if (exists $ENV{'SSH_AUTH_SOCK'} && -S $ENV{'SSH_AUTH_SOCK'}) {
+	return undef;
+    }
+
+    # Need to start a new agent and add keys
+    my @cmdline = qw(ssh-agent -s);
+    run(\@cmdline, '<', \undef, '>&', sub {
+	$_ = shift;
+	s/;[^;]*$//;
+	my ($var, $val) = (/^([^=]+)=(.*)$/);
+	if (defined($var) && defined($val)) {
+	    $ENV{$var} = $val;
+	}
+    });
+    system("ssh-add");
+
+    return $ENV{'SSH_AGENT_PID'};
+}
+
+sub default_build_script {
+    my $fname = "${sudo_tmpdir}/build.sh";
+    open(my $fh, ">", $fname);
+    print $fh <<~'EOF';
+    #!/bin/sh
+    configure_opts=
+    while test $# != 0; do
+        case "$1" in
+        --cache-file)
+            configure_opts="${configure_opts} --cache-file=../$2"
+            shift 2
+            ;;
+        --osversion)
+            osversion="$2"
+            shift 2
+            ;;
+        --no-packages)
+            configure_opts="${configure_opts} --build-only"
+            shift
+            ;;
+        *)
+            break
+            ;;
+            esac
+    done
+
+    if [ -z "$1" ] || [ \! -r "$1" ]; then
+        echo "No tarball specified"
+        exit 1
+    fi
+    gunzip -c $1 | tar xf -
+    if [ $? -ne 0 ]; then
+        echo "Unable to extract tarball"
+        exit 1
+    fi
+    rm -f $1
+
+    mkdir artifacts || exit 1
+
+    # Assume src directory in tar file matches its name.
+    sudodir="`echo $1|sed 's/.tar.gz$//'`"
+    cd "$sudodir" || exit 1
+
+    if [ -z "$osversion" ]; then
+        osversion="`./scripts/pp --probe`"
+    fi
+
+    ./scripts/mkpkg $configure_opts --osversion="$osversion" || exit 1
+    for f in *.rpm *.deb *.bff *.depot *.pkg *.txz ../artifacts; do
+        if [ -f "$f" ]; then
+            mv "$f" ../artifacts
+        fi
+    done
+    EOF
+    chmod(0755, $fh);
+    close($fh);
+
+    return $fname;
+}
+
+sub default_test_script {
+    my $fname = "${sudo_tmpdir}/test.sh";
+    open(my $fh, ">", $fname);
+    print $fh <<~'EOF';
+    #!/bin/sh
+    if [ -z "$1" ]; then
+        echo "usage: test.sh workdir"
+        exit 1
+    fi
+    cd "$1" || exit 1
+    exec make check
+    EOF
+    chmod(0755, $fh);
+    close($fh);
+
+    return $fname;
+}
+
+# Look for warnings/errors in the log file
+sub grep_log {
+    my $log = shift;
+    my @warnings;
+
+    if (open(my $fh, "<", $log)) {
+	while (<$fh>) {
+	    s/[\r\n]+$//;	# kill carriage returns too
+	    s/\x1b\[[\d;]*m//g;	# remove escape codes
+	    if (/[Ww]arning:|[Ee]rror:|\*\*\* |ftp: /) {
+		# Some things we ignore
+		next if /ermanently added .* to the list of known hosts/;
+		next if /warning\/error mail subject/;
+		next if /must be cleared at boot time|Clock skew detected|in the future|-no(-fast)?-install|remember to run 'libtool --finish|has not been installed in|relinking '/;
+		# RPM warnings we don't care about
+		next if /warning: (Installed .but unpackaged. file.s. found:|Deprecated external dependency generator is used!|absolute symlink)/;
+		# Solaris ld may warn about the gcc dwarf2 unwinder
+		next if /warning: unwind table: .* suspicious InitialLoc value 0: binary search table will be incomplete if section requires runtime relocation/;
+		# Solaris Studio compiler warns about anonymous unions
+		next if /warning: anonymous union declaration/;
+		# HP-UX shl_t uses type-punning
+		next if /sudo_dso.c:.*warning: type-punning to incomplete type might break strict-aliasing rules/;
+		# Bogus HP-UX 11.23 warning about PTHREAD_MUTEX_INITIALIZER
+		next if /arc4random.h:.*(missing braces around initializer|near initialization for 'arc4random_mtx)/;
+		if ($log eq "vasaix53.vintela.com.log") {
+		    # Bogus wait(2) macros on AIX 5.3
+		    next if /warning: signed and unsigned type in conditional expression/;
+		}
+		push(@warnings, $_);
+	    }
+	}
+	close($fh);
+    }
+
+    return @warnings;
+}
+
+sub check_logs {
+    foreach my $platform (@platforms) {
+	my @warnings = grep_log("${logs}/${platform}.build");
+	foreach (@warnings) {
+	    warn "$platform: $_\n";
+	}
+    }
+    exit(0);
+}
+
+1;
+
+END {
+    # Only do cleanup in the main process
+    return unless $$ == $main_pid;
+
+    # Power down VMs cleanly if any are still running
+    while (my ($vm_host, $configs) = each %vm_servers) {
+	foreach my $conf (@{$configs}) {
+	    vm_shutdown($vm_host, $conf);
+	}
+    }
+
+    # Close any persistent ssh connections still running
+    close_persistent_connections();
+
+    # Remove temp directory used to generate the tarball.
+    if (defined($sudo_tmpdir)) {
+	system("rm -rf \"$sudo_tmpdir\"");
+    }
+
+    # Kill ssh-agent if we started one ourselves
+    if (defined($agent_pid)) {
+	kill(SIGINT, $agent_pid);
+	waitpid($agent_pid, 0);
+    }
+}
+
+__END__
+=head1 NAME
+
+build_pkgs - Build sudo packages on multiple hosts simultaneously
+
+=head1 SYNOPSIS
+
+build_pkgs [-c config_file] [-f tarball] [-h] [-i] [-q] [-R repo] [-r rev] [-v] [platform ...]
+
+build_pkgs [--check-logs] [--config config_file] [--file tarball] [--help] [--ignore-cache] [--quiet] [--repository repo] [--revision rev] [--verbose] [platform ...]
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<--check-logs>
+
+Check the existing build logs for warnings and errors and exit.
+If no platform is specified, check the build logs of all configured
+platforms.
+
+=item B<-c> I<config_file>, B<--config> I<config_file>
+
+Use the specified configuration file for settings and platform
+configuration.
+
+=item B<-f> I<tarball>, B<--file> I<tarball>
+
+Build packages from the specified tar file.  If this option is not
+specified, a distribution tarball will be generated from the tip
+of the source repo.
+
+=item B<-h>, B<--help>
+
+Print a brief help message and exit.
+
+=item B<-i>, B<--ignore-cache>
+
+Do not use an existing config.cache file when configuring sudo.
+
+=item B<-q>, B<--quiet>
+
+Do not print a summary at the end detailing the success or failure
+of each build and test run.
+
+=item B<-R> I<repo>, B<--repository> I<repo>
+
+The URL of the sudo Mercurial source repo to use if the B<--tarball>
+option is not specified.
+
+=item B<-r> I<rev>, B<--revision> I<rev>
+
+The revision to check out if the B<--tarball> option is not specified.
+If no revision is specified, the tip of the repo will be used.
+
+=item B<-v>, B<--verbose>
+
+Print additional information about the progress of builds as the
+script runs.
+
+=back
+
+=head1 DESCRIPTION
+
+B<build_pkgs> builds sudo packages on multiple systems at the same
+time, logging each build and test job to a separate log file.  When
+B<build_pkgs> finishes all its jobs, it prints a summary of each
+platform with the status of the build and test scripts.
+
+For each build host, B<build_pkgs> performs the following steps:
+
+=over 4
+
+=item 1.
+
+Open a persistent ssh connection to the build host.
+This connection is used for all build server -> client interaction.
+
+=item 2.
+
+Create a temporary directory on the build host.
+
+=item 3.
+
+Copy the release tarball (or repo archive) to the build host along
+with a config.cache file (if using), build and test scripts.
+
+=item 4.
+
+Run the build script on the build host, which will unpack the tarball
+and build the package(s).
+
+=item 5.
+
+If the build was successful, run the test script on the build host.
+
+=item 6.
+
+If the build was successful, copy the artifacts from the build host
+to the artifacts directory.
+
+=item 7.
+
+The temporary directory is removed from the build host.
+
+=back
+
+=head2 Configuration file
+
+The configuration file is in YAML format.  The supported settings
+are as follows:
+
+=over 4
+
+=item home
+
+The top directory that B<build_pkgs> will use.  By default, this
+is the parent directory of the logs, artifacts, cache and connections
+directories.
+
+=item logs
+
+The directory to store log files in.  By default, this is I<logs>
+under the I<home> directory.
+
+=item artifacts
+
+The directory in which to store built artifacts.  By default, this
+is I<artifacts> under the I<home> directory.
+
+=item build_script
+
+A custom build script to run on the build host.  By default,
+B<sudo_sudo> will use a script that just unpacks the tarball and
+runs the I<mkpkg> script.
+
+=item test_script
+
+A custom test script to run on the build host.  By default,
+B<sudo_sudo> will use a script that just runs I<make check> from
+within the build directory.
+
+=item max_jobs
+
+The number of build jobs to run simultaneously on a single host.
+
+=item platforms
+
+The platform configuration.  Platform are generally of the form
+OS-architecture, for example I<rhel8-x86_64> or I<aix72-powerpc>.
+Each platform supports the following settings:
+
+=over 4
+
+=item omit_artifacts
+
+If set to true, avoid copying any artifacts built for this platform.
+This can be used to build on systems where we don't publish packages.
+
+=item crossbuild
+
+The name of the platform to cross-compile for.  If specified, this
+value is passed via the B<--osversion> option to the B<mkpkg> script.
+
+=item proxy_cmd
+
+The proxy command to pass to ssh via the I<ProxyCommand> option.
+
+=item schroot
+
+The name of the I<schroot> on I<ssh_host> to run the build inside.
+
+=item shutdown
+
+A command to run to shut down a virtual machine when the OS doesn't
+support performing a graceful VM shutdown.
+
+=item ssh_host
+
+The build host to connect to.  A username may be prefixed in the
+form user@host.
+
+=item vm_host
+
+The ESXi server that hosts I<ssh_host>.  If a I<vmid> is also set,
+B<build_pkgs> will power on/off the VM on demand.
+
+=item vmid
+
+The ESXi virtual machine ID for the build host.  If I<vm_host> is
+also set, B<build_pkgs> will power on/off the VM on demand.
+
+=back
+
+=back
+
+The I<home> and I<platform> settings are mandatory.
+
+=head1 EXAMPLES
+
+Below is an example configuration file:
+
+ # File locations.
+ home: /home/sudo-build
+ logs: /var/log/sudo-build
+ artifacts: /home/sudo-build/artifacts
+
+ # Custom build and test scripts.
+ build_script: /home/sudo-build/scripts/build.sh
+ test_script: /home/sudo-build/scripts/test.sh
+
+ # Run up to two simultaneous jobs on each build host.
+ max_jobs: 2
+
+ # Ubuntu 22.04 LTS (Jammy Jellyfish)
+ jammy-x86_64:
+   schroot: jammy
+   ssh_host: linux-build
+
+ # macOS 11 and 12 builds on a single macOS 12 virtual machine.
+ # If the VM is not running, it will be started and shut down when done.
+  macos12:
+    ssh_host: macos-build
+    vm_host: root@esxi
+    vmid: 150
+  macos11:
+    crossbuild: macos1100-i386
+    ssh_host: macos-build
+    vm_host: root@esxi
+    vmid: 150
+
+=head1 SIGNALS
+
+When sent the C<SIGINFO> signal (or C<SIGUSR1> on system that don't
+support C<SIGINFO>), B<build_pkgs> will output the currently running
+build jobs as well as those jobs that are queued up waiting for a
+slot on the build host.

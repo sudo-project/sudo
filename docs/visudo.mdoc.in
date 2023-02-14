@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1996,1998-2005, 2007-2022
+.\" Copyright (c) 1996,1998-2005, 2007-2023
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -20,7 +20,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd October 4, 2022
+.Dd January 16, 2023
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -82,7 +82,7 @@ There are two
 settings that determine which editor
 .Nm visudo
 will run.
-.Bl -tag -width 8n
+.Bl -tag -width "env_editor"
 .It editor
 A colon
 .Pq Ql :\&
@@ -163,7 +163,7 @@ configure option.
 .El
 .Pp
 The options are as follows:
-.Bl -tag -width Fl
+.Bl -tag -width Ds
 .It Fl c , -check
 Enable
 .Em check-only
@@ -314,15 +314,15 @@ plugin to override the default
 path name, user-ID, group-ID, and file mode.
 These arguments, if present, should be listed after the path to the plugin
 (i.e., after
-.Pa sudoers.so ) .
+.Pa @sudoers_plugin@ ) .
 Multiple arguments may be specified, separated by white space.
 For example:
 .Bd -literal -offset 4n
-Plugin sudoers_policy sudoers.so sudoers_mode=0400
+Plugin sudoers_policy @sudoers_plugin@ sudoers_mode=0400
 .Ed
 .Pp
 The following arguments are supported:
-.Bl -tag -width 8n
+.Bl -tag -width 4n
 .It sudoers_file=pathname
 The
 .Em sudoers_file

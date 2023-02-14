@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_SENDLOG" "@mansectsu@" "February 16, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO_SENDLOG" "@mansectsu@" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -48,31 +48,32 @@ sudo_logsrvd(@mansectsu@)
 for central storage.
 .PP
 The options are as follows:
-.TP 12n
+.TP 8n
 \fB\-A\fR, \fB\--accept-only\fR
 Only send the accept event, not the I/O associated with the log.
 This can be used to test the logging of accept events without
 any associated I/O.
-.TP 12n
+.TP 8n
 \fB\-b\fR, \fB\--ca-bundle\fR
 The path to a certificate authority bundle file, in PEM format,
 to use instead of the system's default certificate authority database
 when authenticating the log server.
 The default is to use the system's default certificate authority database.
-.TP 12n
+.TP 8n
 \fB\-c\fR, \fB\--cert\fR
 The path to the client's certificate file in PEM format.
 This setting is required when the connection to the remote log server
 is secured with TLS.
-.TP 12n
+.TP 8n
 \fB\--help\fR
+.br
 Display a short help message to the standard output and exit.
-.TP 12n
+.TP 8n
 \fB\-h\fR, \fB\--host\fR
 Connect to the specified
 \fIhost\fR
 instead of localhost.
-.TP 12n
+.TP 8n
 \fB\-i\fR, \fB\--iolog-id\fR
 Use the specified
 \fIiolog-id\fR
@@ -83,13 +84,12 @@ is reported by the server when it creates the remote I/O log.
 This option may only be used in conjunction with the
 \fB\-r\fR
 option.
-.TP 12n
+.TP 8n
 \fB\-k\fR, \fB\--key\fR
-.br
 The path to the client's private key file in PEM format.
 This setting is required when the connection to the remote log server
 is secured with TLS.
-.TP 12n
+.TP 8n
 \fB\-n\fR, \fB\--no-verify\fR
 If specified, the server's certificate will not be verified during
 the TLS handshake.
@@ -99,13 +99,13 @@ verifies that the server's certificate is valid and that it contains either
 the server's host name or its IP address.
 This setting is only supported when the connection to the remote log server
 is secured with TLS.
-.TP 12n
+.TP 8n
 \fB\-p\fR, \fB\--port\fR
 Use the specified network
 \fIport\fR
 when connecting to the log server instead of the
 default, port 30344.
-.TP 12n
+.TP 8n
 \fB\-r\fR, \fB\--restart\fR
 Restart an interrupted connection to the log server.
 The specified
@@ -119,14 +119,14 @@ and is usually the last commit point received from the server.
 The
 \fB\-i\fR
 option must also be specified when restarting a transfer.
-.TP 12n
+.TP 8n
 \fB\-R\fR, \fB\--reject\fR
 Send a reject event for the command using the specified
 \fIreject-reason\fR,
 even though it was actually accepted locally.
 This can be used to test the logging of reject events; no I/O
 will be sent.
-.TP 12n
+.TP 8n
 \fB\-s\fR, \fB\--stop-after\fR
 Stop sending log records and close the connection when
 \fIstop-point\fR
@@ -139,14 +139,14 @@ The
 \fIstop-point\fR
 is an elapsed time specified in the form
 \(lqseconds,nanoseconds\(rq.
-.TP 12n
+.TP 8n
 \fB\-t\fR, \fB\--test\fR
 Open
 \fInumber\fR
 simultaneous connections to the log server and send the specified
 I/O log file on each one.
 This option is useful for performance testing.
-.TP 12n
+.TP 8n
 \fB\-V\fR, \fB\--version\fR
 Print the
 \fBsudo_sendlog\fR

@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2009-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOREPLAY" "@mansectsu@" "September 13, 2022" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDOREPLAY" "@mansectsu@" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -122,13 +122,13 @@ When the session has finished, the terminal is restored to its
 original size if it was changed during playback.
 .PP
 The options are as follows:
-.TP 12n
+.TP 8n
 \fB\-d\fR \fIdir\fR, \fB\--directory\fR=\fIdir\fR
 Store session logs in
 \fIdir\fR
 instead of the default,
 \fI@iolog_dir@\fR.
-.TP 12n
+.TP 8n
 \fB\-f\fR \fIfilter\fR, \fB\--filter\fR=\fIfilter\fR
 Select which I/O type(s) to display.
 By default,
@@ -143,7 +143,7 @@ argument is a comma-separated list, consisting of one or more of following:
 \fIttyin\fR,
 and
 \fIttyout\fR.
-.TP 12n
+.TP 8n
 \fB\-F\fR, \fB\--follow\fR
 Enable
 \(lqfollow mode\(rq.
@@ -158,10 +158,10 @@ have been cleared on the session's timing file.
 Versions of
 \fBsudo\fR
 prior to 1.9.1 do not clear the write bits upon completion.
-.TP 12n
+.TP 8n
 \fB\-h\fR, \fB\--help\fR
 Display a short help message to the standard output and exit.
-.TP 12n
+.TP 8n
 \fB\-l\fR, \fB\--list\fR [\fIsearch expression\fR]
 Enable
 \(lqlist mode\(rq.
@@ -170,12 +170,21 @@ In this mode,
 will list available sessions in a format similar to the
 \fBsudo\fR
 log file format, sorted by file name (or sequence number).
+Any control characters present in the log data are formated in octal
+with a leading
+\(oq#\(cq
+character.
+For example, a horizontal tab is displayed as
+\(oq#011\(cq
+and an embedded carriage return is displayed as
+\(oq#015\(cq.
+.sp
 If a
 \fIsearch expression\fR
 is specified, it will be used to restrict the IDs that are displayed.
 An expression is composed of the following predicates:
 .PP
-.RS 12n
+.RS 8n
 .PD 0
 .TP 8n
 command \fIpattern\fR
@@ -214,7 +223,7 @@ Evaluates to true if the command was run as the specified
 By default,
 \fBsudo\fR
 runs commands as the
-\fIroot\fR
+\fBroot\fR
 user.
 .TP 8n
 todate \fIdate\fR
@@ -258,7 +267,7 @@ operator is optional, adjacent predicates have an implied
 unless separated by an
 \fIor\fR.
 .RE
-.TP 12n
+.TP 8n
 \fB\-m\fR, \fB\--max-wait\fR \fImax_wait\fR
 Specify an upper bound on how long to wait between key presses or output data.
 By default,
@@ -277,16 +286,16 @@ The value may be specified as a floating point number, e.g.,
 A
 \fImax_wait\fR
 of zero or less will eliminate the pauses entirely.
-.TP 12n
+.TP 8n
 \fB\-n\fR, \fB\--non-interactive\fR
 Do not prompt for user input or attempt to re-size the terminal.
 The session is written to the standard output, not directly to
 the user's terminal.
-.TP 12n
+.TP 8n
 \fB\-R\fR, \fB\--no-resize\fR
 Do not attempt to re-size the terminal to match the terminal size
 of the session.
-.TP 12n
+.TP 8n
 \fB\-S\fR, \fB\--suspend-wait\fR
 Wait while the command was suspended.
 By default,
@@ -298,7 +307,7 @@ If the
 option is specified,
 \fBsudoreplay\fR
 will wait instead.
-.TP 12n
+.TP 8n
 \fB\-s\fR, \fB\--speed\fR \fIspeed_factor\fR
 This option causes
 \fBsudoreplay\fR
@@ -314,7 +323,7 @@ would make the output twice as fast whereas a
 of
 \fI.5\fR
 would make the output twice as slow.
-.TP 12n
+.TP 8n
 \fB\-V\fR, \fB\--version\fR
 Print the
 \fBsudoreplay\fR

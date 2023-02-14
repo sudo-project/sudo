@@ -3,7 +3,7 @@
     "false": true,
     "number": 1234567890,
     "null": null,
-    "string": "nonsense",
+    "string": "non\u0073ense",
     "scope": {
         "a": "b",
         "bah": null

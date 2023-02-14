@@ -37,16 +37,6 @@ still allow people to get their work done."
 %if [macos]
 	# System Integrity Protection on macOS won't allow us to write
 	# directly to /etc or /var.  We must install in /private instead.
-	case "$sudoersdir" in
-	/etc|/etc/*)
-	    mkdir -p ${pp_destdir}/private
-	    chmod 755 ${pp_destdir}/private
-	    if test -d ${pp_destdir}/etc; then
-		mv ${pp_destdir}/etc ${pp_destdir}/private/etc
-	    fi
-	    sudoersdir="/private${sudoersdir}"
-	    ;;
-	esac
 	case "$sysconfdir" in
 	/etc|/etc/*)
 	    mkdir -p ${pp_destdir}/private
@@ -91,12 +81,12 @@ still allow people to get their work done."
 		pp_rpm_requires="audit-libs >= $linux_audit"
 	fi
 	# The package manager will handle an existing sudoers file
-	rm -f ${pp_destdir}$sudoersdir/sudoers.dist
+	rm -f ${pp_destdir}${sysconfdir}/sudoers.dist
 %else
 	# For all but RPM and Debian we copy sudoers in a post-install script.
-	rm -f ${pp_destdir}$sudoersdir/sudoers
+	rm -f ${pp_destdir}${sysconfdir}/sudoers
 	# We install sudo.conf from the example dir in a post-install script.
-	rm -f ${pp_destdir}$sysconfdir/sudo.conf
+	rm -f ${pp_destdir}${sysconfdir}/sudo.conf
 %endif
 
 	# Stash original docdir and exampledir
@@ -139,7 +129,7 @@ still allow people to get their work done."
 	printf "$name ($pp_deb_version-$pp_deb_release) admin; urgency=low\n\n  * see upstream changelog\n\n -- $pp_deb_maintainer  `date '+%a, %d %b %Y %T %z'`\n" > ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog.Debian
 	chmod 644 ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog.Debian
 	gzip -9f ${pp_wrkdir}/${name}/usr/share/doc/${name}/changelog.Debian
-	# Create lintian override file
+	# Create lintian override file, must be tab indented for "<<-"
 	mkdir -p ${pp_wrkdir}/${name}/usr/share/lintian/overrides
 	cat >${pp_wrkdir}/${name}/usr/share/lintian/overrides/${name} <<-EOF
 	# The sudo binary must be setuid root
@@ -175,30 +165,14 @@ still allow people to get their work done."
 	esac
 
 	# Uncomment some Defaults in sudoers
-	# Note that the order must match that of sudoers.
 	case "$pp_rpm_distro" in
 	centos*|rhel*|f[0-9]*)
-		chmod u+w ${pp_destdir}${sudoersdir}/sudoers
-		/bin/ed - ${pp_destdir}${sudoersdir}/sudoers <<-'EOF'
-		/Locale settings/+1,s/^# //
-		/Desktop path settings/+1,s/^# //
-		/allow members of group wheel to execute any command/+1,s/^# //
-		w
-		q
-		EOF
-		chmod u-w ${pp_destdir}${sudoersdir}/sudoers
+		sed -e '/Locale settings/{ N;s/\(\n\)# /\1/; }' -e '/Desktop path settings/{ N;s/\(\n\)# /\1/; }' -e '/allow members of group wheel to execute any command/{ N;s/\(\n\)# /\1/; }' ${pp_destdir}${sysconfdir}/sudoers > ${pp_destdir}${sysconfdir}/sudoers.$$
+		mv -f ${pp_destdir}${sysconfdir}/sudoers.$$ ${pp_destdir}${sysconfdir}/sudoers
 		;;
 	sles*)
-		chmod u+w ${pp_destdir}${sudoersdir}/sudoers
-		/bin/ed - ${pp_destdir}${sudoersdir}/sudoers <<-'EOF'
-		/Locale settings/+1,s/^# //
-		/ConsoleKit session/+1,s/^# //
-		/allow any user to run sudo if they know the password/+2,s/^# //
-		/allow any user to run sudo if they know the password/+3,s/^# //
-		w
-		q
-		EOF
-		chmod u-w ${pp_destdir}${sudoersdir}/sudoers
+		sed -e '/Locale settings/{ N;s/\(\n\)# /\1/; }' -e '/ConsoleKit session/{ N;s/\(\n\)# /\1/; }' -e '/allow any user to run sudo if they know the password/{ N;N;N;s/\(\n\)# /\1/g; }' ${pp_destdir}${sysconfdir}/sudoers > ${pp_destdir}${sysconfdir}/sudoers.$$
+		mv -f ${pp_destdir}${sysconfdir}/sudoers.$$ ${pp_destdir}${sysconfdir}/sudoers
 		;;
 	esac
 
@@ -277,19 +251,10 @@ still allow people to get their work done."
 
 %if [deb]
 	# Uncomment some Defaults and the %sudo rule in sudoers
-	# Note that the order must match that of sudoers and be tab-indented.
-	chmod u+w ${pp_destdir}${sudoersdir}/sudoers
-	/bin/ed - ${pp_destdir}${sudoersdir}/sudoers <<-'EOF'
-	/Locale settings/+1,s/^# //
-	/X11 resource/+1,s/^# //
-	/^# \%sudo/,s/^# //
-	/^# Defaults secure_path/,s/^# //
-	/^# Defaults mail_badpass/,s/^# //
-	w
-	q
-	EOF
-	chmod u-w ${pp_destdir}${sudoersdir}/sudoers
+	sed -e '/Locale settings/{ N;s/\(\n\)# /\1/; }' -e '/X11 resource/{ N;s/\(\n\)# /\1/; }' -e 's/^# \(Defaults secure_path\)/\1/' -e 's/^# \(Defaults mail_badpass\)/\1/' -e 's/^# \(\%sudo\)/\1/' ${pp_destdir}${sysconfdir}/sudoers > ${pp_destdir}${sysconfdir}/sudoers.$$
+	mv -f ${pp_destdir}${sysconfdir}/sudoers.$$ ${pp_destdir}${sysconfdir}/sudoers
 	mkdir -p ${pp_destdir}/etc/pam.d
+	# Create Debian PAM file, must be tab indented for "<<-"
 	cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
 	#%PAM-1.0
 
@@ -340,7 +305,7 @@ still allow people to get their work done."
 %endif
 
 %depend [deb]
-	libc6, libpam0g, libpam-modules, zlib1g, libselinux1
+	libc6, libpam0g, libpam-modules, zlib1g, libapparmor1
 
 %fixup [deb]
 	# Add Conflicts, Replaces headers and add libldap dependency as needed.
@@ -366,6 +331,7 @@ still allow people to get their work done."
 	echo "Bugs: https://bugzilla.sudo.ws" >> %{pp_wrkdir}/%{name}/DEBIAN/control
 
 %fixup [rpm]
+	# Must be tab indented for "<<-".
 	cat > %{pp_wrkdir}/${name}.spec.sed <<-'EOF'
 		/^%files/ {
 			i\
@@ -401,7 +367,7 @@ still allow people to get their work done."
 	$libexecdir/sudo/sesh	0755 optional,ignore-others
 	$libexecdir/sudo/python*     optional,ignore,ignore-others
 	$libexecdir/sudo/*	$shlib_mode optional
-	$sudoersdir/sudoers.d/	0750 $sudoers_uid:$sudoers_gid
+	$sysconfdir/sudoers.d/	0750 $sudoers_uid:$sudoers_gid
 	$rundir/		0711 root:
 	$vardir/		0711 root: ignore-others
 	$vardir/lectured/	0700 root:
@@ -411,8 +377,8 @@ still allow people to get their work done."
 	$docdir/LICENSE.md	ignore,ignore-others
 	$docdir/ChangeLog	ignore,ignore-others
 %endif
-%if X"$exampledir" != X"$docdir/examples"
 	$exampledir/		0755 ignore-others
+%if X"$exampledir" != X"$docdir/examples"
 	$exampledir/*		0644
 %endif
 	$exampledir/sudo_logsrv*     optional,ignore,ignore-others
@@ -422,11 +388,12 @@ still allow people to get their work done."
 	$localedir/*/LC_MESSAGES/* 0644    optional
 	/etc/pam.d/*		0644 volatile,optional
 %if [rpm,deb]
-	$sudoersdir/sudoers $sudoers_mode $sudoers_uid:$sudoers_gid volatile
+	$sysconfdir/sudoers $sudoers_mode $sudoers_uid:$sudoers_gid volatile
 	$sysconfdir/sudo.conf 0644 root: volatile
 %else
-	$sudoersdir/sudoers.dist $sudoers_mode $sudoers_uid:$sudoers_gid
+	$sysconfdir/sudoers.dist $sudoers_mode $sudoers_uid:$sudoers_gid
 %endif
+	$sysconfdir/sudo_logsrvd.conf optional,ignore,ignore-others
 %if X"$aix_freeware" = X"true"
 	# Links for binaries from /opt/freeware to /usr
 	/usr/bin/cvtsudoers    	0755 root: symlink $bindir/cvtsudoers
@@ -474,19 +441,17 @@ still allow people to get their work done."
 %post [!rpm,deb]
 	# Don't overwrite existing sudoers or sudo.conf files
 %if [solaris]
-	sudoersdir=${PKG_INSTALL_ROOT}%{sudoersdir}
 	sysconfdir=${PKG_INSTALL_ROOT}%{sysconfdir}
 	exampledir=${PKG_INSTALL_ROOT}%{exampledir}
 %else
-	sudoersdir=%{sudoersdir}
 	sysconfdir=%{sysconfdir}
 	exampledir=%{exampledir}
 %endif
-	if test ! -r $sudoersdir/sudoers; then
-		cp $sudoersdir/sudoers.dist $sudoersdir/sudoers
-		chmod %{sudoers_mode} $sudoersdir/sudoers
-		chown %{sudoers_uid} $sudoersdir/sudoers
-		chgrp %{sudoers_gid} $sudoersdir/sudoers
+	if test ! -r $sysconfdir/sudoers; then
+		cp $sysconfdir/sudoers.dist $sysconfdir/sudoers
+		chmod %{sudoers_mode} $sysconfdir/sudoers
+		chown %{sudoers_uid} $sysconfdir/sudoers
+		chgrp %{sudoers_gid} $sysconfdir/sudoers
 	fi
 	if test ! -r $sysconfdir/sudo.conf; then
 		cp $exampledir/sudo.conf $sysconfdir/sudo.conf
@@ -499,7 +464,7 @@ still allow people to get their work done."
 
 	# dpkg-deb does not maintain the mode on the sudoers file, and
 	# installs it 0640 when sudo requires 0440
-	chmod %{sudoers_mode} %{sudoersdir}/sudoers
+	chmod %{sudoers_mode} %{sysconfdir}/sudoers
 
 	# create symlink to ease transition to new path for ldap config
 	# if old config file exists and new one doesn't
@@ -543,6 +508,7 @@ still allow people to get their work done."
 
 %post [rpm,deb]
 	# Create /usr/lib/tmpfiles.d/sudo.conf if systemd is configured.
+	# Must be tab indented for "<<-".
 	if [ -f /usr/lib/tmpfiles.d/systemd.conf ]; then
 		cat > /usr/lib/tmpfiles.d/sudo.conf <<-EOF
 		# Create an empty sudo time stamp directory on OSes using systemd.

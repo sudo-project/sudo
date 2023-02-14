@@ -47,12 +47,12 @@ int tgetpass_flags;
 /*
  * Local functions.
  */
-static sudo_noreturn void help(void);
-static sudo_noreturn void usage_excl(void);
-static sudo_noreturn void usage_excl_ticket(void);
+sudo_noreturn static void help(void);
+sudo_noreturn static void usage_excl(void);
+sudo_noreturn static void usage_excl_ticket(void);
 
 /*
- * Mapping of command line flags to name/value settings.
+ * Mapping of command line options to name/value settings.
  * Do not reorder, indexes must match ARG_ defines in sudo.h.
  */
 static struct sudo_settings sudo_settings[] = {
@@ -278,7 +278,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 
     /* Returns true if next option is an environment variable */
 #define is_envar (optind < argc && argv[optind][0] != '/' && \
-	    strchr(argv[optind], '=') != NULL)
+	    argv[optind][0] != '=' && strchr(argv[optind], '=') != NULL)
 
     /* Space for environment variables is lazy allocated. */
     memset(&extra_env, 0, sizeof(extra_env));

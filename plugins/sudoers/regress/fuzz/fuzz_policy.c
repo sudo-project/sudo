@@ -177,6 +177,10 @@ fuzz_hook_stub(struct sudo_hook *hook)
  * can look up "localhost" and returns an error for anything else.
  */
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+/* Avoid compilation errors if getaddrinfo() or freeaddrinfo() are macros. */
+# undef getaddrinfo
+# undef freeaddrinfo
+
 int
 # ifdef HAVE_GETADDRINFO
 getaddrinfo(
@@ -266,7 +270,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (fp == NULL)
         return 0;
 
-    setprogname("fuzz_policy");
+    initprogname("fuzz_policy");
     sudoers_debug_register(getprogname(), NULL);
     if (getenv("SUDO_FUZZ_VERBOSE") == NULL)
 	sudo_warn_set_conversation(fuzz_conversation);
@@ -374,7 +378,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	if (strncmp(line, "env=", sizeof("env=") - 1) == 0) {
 	    const char *cp = line + sizeof("env=") - 1;
 	    if (strchr(cp, '=') != NULL)
-		push(&env_add, line);
+		push(&env_add, cp);
 	    continue;
 	}
 

@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2009-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 13, 2022
+.Dd January 16, 2023
 .Dt SUDOREPLAY @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -118,7 +118,7 @@ When the session has finished, the terminal is restored to its
 original size if it was changed during playback.
 .Pp
 The options are as follows:
-.Bl -tag -width Fl
+.Bl -tag -width Ds
 .It Fl d Ar dir , Fl -directory Ns = Ns Ar dir
 Store session logs in
 .Ar dir
@@ -162,6 +162,16 @@ In this mode,
 will list available sessions in a format similar to the
 .Nm sudo
 log file format, sorted by file name (or sequence number).
+Any control characters present in the log data are formatted in octal
+with a leading
+.Ql #
+character.
+For example, a horizontal tab is displayed as
+.Ql #011
+and an embedded carriage return is displayed as
+.Ql #015 .
+Space characters in the command name and arguments are also formatted in octal.
+.Pp
 If a
 .Ar search expression
 is specified, it will be used to restrict the IDs that are displayed.
@@ -197,7 +207,7 @@ Evaluates to true if the command was run as the specified
 By default,
 .Nm sudo
 runs commands as the
-.Em root
+.Sy root
 user.
 .It todate Ar date
 Evaluates to true if the command was run on or prior to

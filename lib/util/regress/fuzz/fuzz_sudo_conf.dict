@@ -12,7 +12,6 @@
 "devsearch"
 
 # Variables
-"developer_mode"
 "disable_coredump"
 "group_source"
 "max_groups"

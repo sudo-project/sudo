@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2005,2008,2010-2015 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2005,2008,2010-2015,2022 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -47,6 +47,7 @@ static int gr_stayopen;
 void mysetgrfile(const char *);
 void mysetgrent(void);
 void myendgrent(void);
+int mysetgroupent(int);
 struct group *mygetgrent(void);
 struct group *mygetgrnam(const char *);
 struct group *mygetgrgid(gid_t);
@@ -59,8 +60,8 @@ mysetgrfile(const char *file)
 	myendgrent();
 }
 
-void
-mysetgrent(void)
+static int
+open_group(int reset)
 {
     if (grf == NULL) {
 	grf = fopen(grfile, "r");
@@ -70,10 +71,27 @@ mysetgrent(void)
 		grf = NULL;
 	    }
 	}
-    } else {
+	if (grf == NULL)
+	    return 0;
+    } else if (reset) {
 	rewind(grf);
     }
-    gr_stayopen = 1;
+    return 1;
+}
+
+int
+mysetgroupent(int stayopen)
+{
+    if (!open_group(1))
+	return 0;
+    gr_stayopen = stayopen;
+    return 1;
+}
+
+void
+mysetgrent(void)
+{
+    mysetgroupent(0);
 }
 
 void
@@ -96,6 +114,9 @@ mygetgrent(void)
     char *cp, *colon;
     const char *errstr;
     int n;
+
+    if (!open_group(0))
+	return NULL;
 
 next_entry:
     if ((colon = fgets(grbuf, sizeof(grbuf), grf)) == NULL)
@@ -129,7 +150,7 @@ next_entry:
 	    gr.gr_mem[n] = cp;
 	    cp = strtok_r(NULL, ",", &last);
 	}
-	gr.gr_mem[n++] = NULL;
+	gr.gr_mem[n] = NULL;
     } else
 	gr.gr_mem = NULL;
     return &gr;
@@ -140,16 +161,8 @@ mygetgrnam(const char *name)
 {
     struct group *gr;
 
-    if (grf == NULL) {
-	if ((grf = fopen(grfile, "r")) == NULL)
-	    return NULL;
-	if (fcntl(fileno(grf), F_SETFD, FD_CLOEXEC) == -1) {
-	    fclose(grf);
-	    return NULL;
-	}
-    } else {
-	rewind(grf);
-    }
+    if (!open_group(1))
+	return NULL;
     while ((gr = mygetgrent()) != NULL) {
 	if (strcmp(gr->gr_name, name) == 0)
 	    break;
@@ -166,16 +179,8 @@ mygetgrgid(gid_t gid)
 {
     struct group *gr;
 
-    if (grf == NULL) {
-	if ((grf = fopen(grfile, "r")) == NULL)
-	    return NULL;
-	if (fcntl(fileno(grf), F_SETFD, FD_CLOEXEC) == -1) {
-	    fclose(grf);
-	    return NULL;
-	}
-    } else {
-	rewind(grf);
-    }
+    if (!open_group(1))
+	return NULL;
     while ((gr = mygetgrent()) != NULL) {
 	if (gr->gr_gid == gid)
 	    break;

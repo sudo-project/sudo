@@ -2,7 +2,7 @@
 .\" SPDX-License-Identifier: ISC
 .\"
 .\" Copyright (c) 2019-2021 Robert Manner <robert.manner@oneidentity.com>
-.\" Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 11, 2022
+.Dd January 16, 2023
 .Dt SUDO_PLUGIN_PYTHON @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -33,7 +33,7 @@ plugin API described by
 .Pp
 The supported plugins types are:
 .Pp
-.Bl -bullet -compact -offset 4n -width 1n
+.Bl -bullet -compact -offset 1n -width 1n
 .It
 Policy plugin
 .It
@@ -128,7 +128,7 @@ Running the Python interpreter and bridging between C and Python is
 handled by the
 .Nm sudo
 plugin
-.Pa python_plugin.so .
+.Pa @python_plugin@ .
 This shared object can be loaded like any other dynamic
 .Nm sudo
 plugin and should receive the path and the class name of the Python
@@ -137,17 +137,17 @@ plugin it is loading as arguments.
 Example usage in
 .Xr sudo.conf @mansectform@ :
 .Bd -literal -offset 4n
-Plugin python_policy python_plugin.so ModulePath=<path> ClassName=<class>
-Plugin python_io python_plugin.so ModulePath=<path> ClassName=<class>
-Plugin python_audit python_plugin.so ModulePath=<path> ClassName=<class>
-Plugin python_approval python_plugin.so ModulePath=<path> ClassName=<class>
+Plugin python_policy @python_plugin@ ModulePath=<path> ClassName=<class>
+Plugin python_io @python_plugin@ ModulePath=<path> ClassName=<class>
+Plugin python_audit @python_plugin@ ModulePath=<path> ClassName=<class>
+Plugin python_approval @python_plugin@ ModulePath=<path> ClassName=<class>
 .Ed
 .Pp
 Example group provider plugin usage in the
 .Em sudoers
 file:
 .Bd -literal -offset 4n
-Defaults group_plugin="python_plugin.so ModulePath=<path> ClassName=<class>"
+Defaults group_plugin="@python_plugin@ ModulePath=<path> ClassName=<class>"
 .Ed
 .Pp
 The plugin arguments are as follows:
@@ -179,7 +179,7 @@ Policy plugins must be registered in
 .Xr sudo.conf @mansectform@ .
 For example:
 .Bd -literal -offset 4n
-Plugin python_policy python_plugin.so ModulePath=<path> ClassName=<class>
+Plugin python_policy @python_plugin@ ModulePath=<path> ClassName=<class>
 .Ed
 .Pp
 Currently, only a single policy plugin may be specified in
@@ -464,7 +464,7 @@ Sudo ships with an example Python policy plugin.
 To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
 .Bd -literal
-Plugin python_policy python_plugin.so \e
+Plugin python_policy @python_plugin@ \e
     ModulePath=@EXAMPLES@/example_policy_plugin.py \e
     ClassName=SudoPolicyPlugin
 .Ed
@@ -479,7 +479,7 @@ I/O plugins must be registered in
 .Xr sudo.conf @mansectform@ .
 For example:
 .Bd -literal -offset 4n
-Plugin python_io python_plugin.so ModulePath=<path> ClassName=<class>
+Plugin python_io @python_plugin@ ModulePath=<path> ClassName=<class>
 .Ed
 .Pp
 Sudo supports loading multiple I/O plugins.
@@ -555,7 +555,7 @@ function in the C
 .Nm sudo
 plugin API except that:
 .Pp
-.Bl -bullet -compact -offset 4n -width 1n
+.Bl -bullet -compact -offset 1n -width 1n
 .It
 It only gets called when there is a command to be executed
 (and not for a version query for example).
@@ -706,7 +706,7 @@ Sudo ships with a Python I/O plugin example.
 To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
 .Bd -literal -offset 4n
-Plugin python_io python_plugin.so \e
+Plugin python_io @python_plugin@ \e
     ModulePath=@EXAMPLES@/example_io_plugin.py \e
     ClassName=SudoIOPlugin
 .Ed
@@ -715,7 +715,7 @@ Audit plugins must be registered in
 .Xr sudo.conf @mansectform@ .
 For example:
 .Bd -literal -offset 4n
-Plugin python_audit python_plugin.so ModulePath=<path> ClassName=<class>
+Plugin python_audit @python_plugin@ ModulePath=<path> ClassName=<class>
 .Ed
 .Pp
 Sudo supports loading multiple audit plugins.
@@ -955,7 +955,7 @@ Sudo ships with a Python Audit plugin example.
 To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
 .Bd -literal -offset 4n
-Plugin python_audit python_plugin.so \e
+Plugin python_audit @python_plugin@ \e
     ModulePath=@EXAMPLES@/example_audit_plugin.py \e
     ClassName=SudoAuditPlugin
 .Ed
@@ -966,7 +966,7 @@ Approval plugins must be registered in
 .Xr sudo.conf @mansectform@ .
 For example:
 .Bd -literal -offset 4n
-Plugin python_approval python_plugin.so ModulePath=<path> ClassName=<class>
+Plugin python_approval @python_plugin@ ModulePath=<path> ClassName=<class>
 .Ed
 .Pp
 Sudo supports loading multiple approval plugins.
@@ -1064,7 +1064,7 @@ Sudo ships with a Python Approval plugin example.
 To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
 .Bd -literal -offset 4n
-Plugin python_approval python_plugin.so \e
+Plugin python_approval @python_plugin@ \e
     ModulePath=@EXAMPLES@/example_approval_plugin.py \e
     ClassName=BusinessHoursApprovalPlugin
 .Ed
@@ -1077,7 +1077,7 @@ A group provider plugin is registered in the
 file.
 For example:
 .Bd -literal -offset 4n
-Defaults group_plugin="python_plugin.so ModulePath=<path> ClassName=<class>"
+Defaults group_plugin="@python_plugin@ ModulePath=<path> ClassName=<class>"
 .Ed
 .Pp
 Currently, only a single group plugin can be registered in
@@ -1141,7 +1141,7 @@ To try it, register it in the
 .Em sudoers
 file by adding the following lines:
 .Bd -literal -offset 4n
-Defaults group_plugin="python_plugin.so \e
+Defaults group_plugin="@python_plugin@ \e
     ModulePath=@EXAMPLES@/example_group_plugin.py \e
     ClassName=SudoGroupPlugin"
 .Ed
@@ -1215,7 +1215,7 @@ The default is to wait forever (no timeout).
 .Pp
 To specify the message type, the following constants are available:
 .Pp
-.Bl -bullet -compact -offset 4n -width 1n
+.Bl -bullet -compact -offset 1n -width 1n
 .It
 .Dv sudo.CONV.PROMPT_ECHO_OFF
 .It
@@ -1279,7 +1279,7 @@ Sudo ships with an example plugin demonstrating the Python conversation API.
 To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
 .Bd -literal -offset 4n
-Plugin python_io python_plugin.so \e
+Plugin python_io @python_plugin@ \e
     ModulePath=@EXAMPLES@/example_conversation.py \e
     ClassName=ReasonLoggerIOPlugin
 .Ed
@@ -1329,12 +1329,12 @@ To enable debug messages, add a
 line to
 .Xr sudo.conf @mansectform@
 with the program set to
-.Pa python_plugin.so .
+.Pa @python_plugin@ .
 For example, to store debug output in
 .Pa @log_dir@/sudo_python_debug ,
 use a line like the following:
 .Bd -literal -offset 4n
-Debug python_plugin.so @log_dir@/sudo_python_debug \e
+Debug @python_plugin@ @log_dir@/sudo_python_debug \e
     plugin@trace,c_calls@trace
 .Ed
 .Pp
@@ -1346,7 +1346,7 @@ For example to just see the debug output of
 .Fn sudo.debug
 calls, use:
 .Bd -literal -offset 4n
-Debug python_plugin.so @log_dir@/sudo_python_debug plugin@trace
+Debug @python_plugin@ @log_dir@/sudo_python_debug plugin@trace
 .Ed
 .Pp
 See
@@ -1428,11 +1428,11 @@ Sudo ships with an example debug plugin.
 To try it, register it by adding the following lines to
 .Pa @sysconfdir@/sudo.conf :
 .Bd -literal -offset 4n
-Plugin python_io python_plugin.so \e
+Plugin python_io @python_plugin@ \e
     ModulePath=@EXAMPLES@/example_debugging.py \e
     ClassName=DebugDemoPlugin
 
-Debug python_plugin.so \e
+Debug @python_plugin@ \e
     @log_dir@/sudo_python_debug plugin@trace,c_calls@trace
 .Ed
 .Ss Option conversion API
@@ -1523,7 +1523,7 @@ If you believe you have found a bug in
 you can submit a bug report at https://bugzilla.sudo.ws/
 .Sh SECURITY CONSIDERATIONS
 All Python plugin handling is implemented inside the
-.Pa python_plugin.so
+.Pa @python_plugin@
 dynamic plugin.
 Therefore, if no Python plugin is registered in
 .Xr sudo.conf @mansectform@
@@ -1533,30 +1533,13 @@ file,
 .Nm sudo
 will not load the Python interpreter or the Python libraries.
 .Pp
-By default, a Python plugin can only import Python modules which are
-owned by
-.Em root
-and are only writable by the owner.
-The reason for this is to prevent a file getting imported accidentally
-which is modifiable by a non-root user.
 As
 .Nm sudo
-plugins run as
-.Em root ,
-accidentally importing such file would make it possible for any user
-(having write access) to execute any code with administrative rights.
-.Pp
-However, during development of a plugin this might not be very convenient.
-The
-.Xr sudo.conf @mansectform@
-.Em developer_mode
-option can be used to disable it.
-For example:
-.Dl Set developer_mode true
-.Pp
-This creates a security risk and is not recommended for production systems,
-it is intended to be used in a development environment (VM, container, etc).
-Before enabling developer mode, be sure that you understand the implications.
+runs plugins as
+.Sy root ,
+care must be taken when writing Python plugins to avoid creating
+security vulnerabilities, just as one would when writing plugins
+in C.
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or

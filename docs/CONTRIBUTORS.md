@@ -231,6 +231,7 @@ https://translationproject.org for more details.
     Rasmussen, Sebastian
     Regueiro, Leandro
     Sarıer, Özgür
+    Selimaj, Agron
     Sendón, Abel
     Șerbănescu, Daniel
     Shahedany, Eshagh

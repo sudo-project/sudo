@@ -907,7 +907,7 @@ sudo_debug_group_list(const char *user, char * const *groups, int level)
     size_t i, len = 0;
     debug_decl(sudo_debug_group_list, SUDOERS_DEBUG_NSS);
 
-    if (!sudo_debug_needed(level))
+    if (groups == NULL || !sudo_debug_needed(level))
 	debug_return;
 
     for (i = 0; groups[i] != NULL; i++) {

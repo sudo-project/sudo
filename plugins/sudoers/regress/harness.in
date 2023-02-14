@@ -189,8 +189,8 @@ sudoers)
 	    echo "$group/$test: FAIL"
 	    diff $out $out_ok || true
 	fi
+	ntests=`expr $ntests + 1`
 	if test -s $err_ok; then
-	    ntests=`expr $ntests + 1`
 	    if cmp $err $err_ok >/dev/null; then
 		if [ $verbose -eq 1 ]; then
 		    echo "$group/$test (stderr): OK"

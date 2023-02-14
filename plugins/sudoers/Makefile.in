@@ -47,7 +47,7 @@ LIBTOOL = @LIBTOOL@
 SHA1SUM = @SHA1SUM@
 FLEX = @FLEX@
 YACC = @YACC@
-GREP = @GREP@
+EGREP = @EGREP@
 SED = @SED@
 AWK = @AWK@
 
@@ -72,7 +72,7 @@ TESTSUDOERS_LIBS = $(NET_LIBS)
 
 # C preprocessor defines
 CPPDEFS = -DLIBDIR=\"$(libdir)\" -DLOCALEDIR=\"$(localedir)\" \
-	  -D_PATH_SUDOERS=\"$(sudoersdir)/sudoers\" \
+	  -D_PATH_SUDOERS=\"$(sysconfdir)/sudoers\" \
 	  -D_PATH_CVTSUDOERS_CONF=\"$(sysconfdir)/cvtsudoers.conf\" \
 	  -DSUDOERS_UID=$(sudoers_uid) -DSUDOERS_GID=$(sudoers_gid) \
 	  -DSUDOERS_MODE=$(sudoers_mode)
@@ -135,9 +135,6 @@ shlib_opt = sudoers.opt
 # Directory in which to install the sudoers plugin
 plugindir = @plugindir@
 
-# Directory in which to install the sudoers file
-sudoersdir = $(sysconfdir)
-
 # User and group ids the installed files should be "owned" by
 install_uid = 0
 install_gid = 0
@@ -159,7 +156,7 @@ PROGS = sudoers.la visudo sudoreplay cvtsudoers testsudoers
 # Regression tests
 TEST_PROGS = check_addr check_base64 check_digest check_editor \
 	     check_env_pattern check_exptilde check_fill check_gentime \
-	     check_hexchar check_iolog_plugin check_serialize_list \
+	     check_iolog_plugin check_serialize_list \
 	     check_starttime check_unesc @SUDOERS_TEST_PROGS@
 TEST_VERBOSE =
 HARNESS = $(SHELL) regress/harness $(TEST_VERBOSE)
@@ -178,7 +175,7 @@ AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
 LIBPARSESUDOERS_OBJS = alias.lo b64_decode.lo defaults.lo digestname.lo \
 		       exptilde.lo filedigest.lo gentime.lo gram.lo \
-		       hexchar.lo match.lo match_addr.lo match_command.lo \
+		       match.lo match_addr.lo match_command.lo \
 		       match_digest.lo pwutil.lo pwutil_impl.lo \
 		       redblack.lo strlist.lo sudoers_debug.lo timeout.lo \
 		       timestr.lo toke.lo toke_util.lo
@@ -237,11 +234,9 @@ CHECK_ENV_MATCH_OBJS = check_env_pattern.o env_pattern.lo sudoers_debug.lo
 
 CHECK_EXPTILDE_OBJS = check_exptilde.o exptilde.lo pwutil.lo pwutil_impl.lo redblack.lo sudoers_debug.lo
 
-CHECK_FILL_OBJS = check_fill.o hexchar.lo toke_util.lo sudoers_debug.lo
+CHECK_FILL_OBJS = check_fill.o toke_util.lo sudoers_debug.lo
 
 CHECK_GENTIME_OBJS = check_gentime.o gentime.lo sudoers_debug.lo
-
-CHECK_HEXCHAR_OBJS = check_hexchar.o hexchar.lo sudoers_debug.lo
 
 CHECK_IOLOG_PLUGIN_OBJS = check_iolog_plugin.o iolog.lo log_client.lo \
 			  locale.lo pwutil.lo pwutil_impl.lo redblack.lo \
@@ -297,7 +292,8 @@ FUZZ_SUDOERS_CORPUS = $(top_builddir)/examples/sudoers \
 FUZZ_SUDOERS_LDIF_OBJS = fuzz_stubs.o fuzz_sudoers_ldif.o parse_ldif.o \
 			 ldap_util.lo fmtsudoers.lo locale.lo
 
-FUZZ_SUDOERS_LDIF_CORPUS = $(srcdir)/regress/sudoers/*.ldif.ok
+FUZZ_SUDOERS_LDIF_CORPUS = $(srcdir)/regress/sudoers/*.ldif.ok \
+			   $(srcdir)/regress/corpus/seed/ldif/*.ldif
 
 VERSION = @PACKAGE_VERSION@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
@@ -337,7 +333,7 @@ depend:
 	cd $(top_builddir) && ./config.status --file plugins/sudoers/Makefile
 
 harness: $(srcdir)/regress/harness.in
-	cd $(top_builddir) && ./config.status --file plugins/sudoers/regress/harness
+	cd $(top_builddir) && ./config.status --file plugins/sudoers/regress/harness && chmod +x plugins/sudoers/regress/harness
 
 Makefile: $(srcdir)/Makefile.in
 	cd $(top_builddir) && ./config.status --file plugins/sudoers/Makefile
@@ -392,9 +388,6 @@ check_fill: $(CHECK_FILL_OBJS) $(LIBUTIL)
 check_gentime: $(CHECK_GENTIME_OBJS) $(LIBUTIL)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_GENTIME_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(LIBS)
 
-check_hexchar: $(CHECK_HEXCHAR_OBJS) $(LIBUTIL)
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_HEXCHAR_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(LIBS)
-
 check_iolog_plugin: $(CHECK_IOLOG_PLUGIN_OBJS) $(LIBUTIL) $(LIBIOLOG) $(LIBLOGSRV)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_PLUGIN_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(LIBIOLOG) $(LIBLOGSRV) @LIBTLS@
 
@@ -430,11 +423,9 @@ fuzz_policy_seed_corpus.zip:
 	rm -rf $$tdir
 
 run-fuzz_policy: fuzz_policy
-	if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
-	    LC_ALL=C.UTF-8; export LC_ALL; \
-	else \
-	    LC_ALL=C; export LC_ALL; \
-	fi; \
+	l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'` || true; \
+	test -n "$$l" || l="C"; \
+	LC_ALL="$$l"; export LC_ALL; \
 	unset LANG || LANG=; \
 	unset LANGUAGE || LANGUAGE=; \
 	MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
@@ -457,11 +448,9 @@ fuzz_sudoers_seed_corpus.zip:
 	rm -rf $$tdir
 
 run-fuzz_sudoers: fuzz_sudoers
-	if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
-	    LC_ALL=C.UTF-8; export LC_ALL; \
-	else \
-	    LC_ALL=C; export LC_ALL; \
-	fi; \
+	l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'` || true; \
+	test -n "$$l" || l="C"; \
+	LC_ALL="$$l"; export LC_ALL; \
 	unset LANG || LANG=; \
 	unset LANGUAGE || LANGUAGE=; \
 	MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
@@ -484,11 +473,9 @@ fuzz_sudoers_ldif_seed_corpus.zip:
 	rm -rf $$tdir
 
 run-fuzz_sudoers_ldif: fuzz_sudoers_ldif
-	if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
-	    LC_ALL=C.UTF-8; export LC_ALL; \
-	else \
-	    LC_ALL=C; export LC_ALL; \
-	fi; \
+	l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'` || true; \
+	test -n "$$l" || l="C"; \
+	LC_ALL="$$l"; export LC_ALL; \
 	unset LANG || LANG=; \
 	unset LANGUAGE || LANGUAGE=; \
 	MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
@@ -518,7 +505,7 @@ $(devdir)/gram.c $(devdir)/gram.h: $(srcdir)/gram.y prologue
 	    else \
 		gram_y="$(srcdir)/gram.y"; \
 	    fi; \
-	    cmd='$(YACC) -d -p sudoers '"$$gram_y"'; cp prologue $(devdir)/gram.c; $(SED) -e "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"gram.c\"/" -e "/^# *include <limits.h>/{N;s/__STDC_VERSION__ && 199901 <= __STDC_VERSION__/HAVE_STDINT_H/;}" y.tab.c >> $(devdir)/gram.c; rm -f y.tab.c; mv -f y.tab.h $(devdir)/gram.h'; \
+	    cmd='$(YACC) -d -p sudoers '"$$gram_y"'; cp prologue $(devdir)/gram.c; $(SED) -e "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"gram.c\"/" -e "/^# *include <limits.h>/{N;s/__STDC_VERSION__ && 199901 <= __STDC_VERSION__/HAVE_STDINT_H/;}" y.tab.c >> $(devdir)/gram.c; sed -e "s/^\\(#line .*\\) \"y\\.tab\\.h\"/\1 \"gram.h\"/" y.tab.h > $(devdir)/gram.h'; rm -f y.tab.[ch]; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
@@ -556,9 +543,9 @@ sudoers: $(srcdir)/sudoers.in
 
 pre-install: visudo
 	@if test X"$(cross_compiling)" != X"yes" -a X"$(DESTDIR)" = X""; then \
-	    if test -r $(sudoersdir)/sudoers; then \
+	    if test -r $(sysconfdir)/sudoers; then \
 		echo "Checking existing sudoers file for syntax errors."; \
-		./visudo -c -f $(sudoersdir)/sudoers; \
+		./visudo -c -f $(sysconfdir)/sudoers; \
 	    fi; \
 	fi
 
@@ -567,7 +554,7 @@ install: install-plugin install-binaries install-sudoers install-doc
 install-dirs:
 	$(SHELL) $(scriptdir)/mkinstalldirs $(DESTDIR)$(plugindir) \
 	    $(DESTDIR)$(sbindir) $(DESTDIR)$(bindir) \
-	    $(DESTDIR)$(sudoersdir) $(DESTDIR)$(docdir) \
+	    $(DESTDIR)$(sysconfdir) $(DESTDIR)$(docdir) \
 	    `echo $(DESTDIR)$(rundir)|$(SED) 's,/[^/]*$$,,'` \
 	    `echo $(DESTDIR)$(vardir)|$(SED) 's,/[^/]*$$,,'`
 	$(INSTALL) -d $(INSTALL_OWNER) -m 0711 $(DESTDIR)$(rundir)
@@ -592,10 +579,10 @@ install-plugin: sudoers.la install-dirs
 	esac
 
 install-sudoers: install-dirs
-	$(INSTALL) -d $(INSTALL_OWNER) -m 0750 $(DESTDIR)$(sudoersdir)/sudoers.d
-	$(INSTALL) $(INSTALL_OWNER) -m $(sudoers_mode) sudoers $(DESTDIR)$(sudoersdir)/sudoers.dist
-	test -r $(DESTDIR)$(sudoersdir)/sudoers || \
-	    cp -p $(DESTDIR)$(sudoersdir)/sudoers.dist $(DESTDIR)$(sudoersdir)/sudoers
+	$(INSTALL) -d $(INSTALL_OWNER) -m 0750 $(DESTDIR)$(sysconfdir)/sudoers.d
+	$(INSTALL) $(INSTALL_OWNER) -m $(sudoers_mode) sudoers $(DESTDIR)$(sysconfdir)/sudoers.dist
+	test -r $(DESTDIR)$(sysconfdir)/sudoers || \
+	    cp -p $(DESTDIR)$(sysconfdir)/sudoers.dist $(DESTDIR)$(sysconfdir)/sudoers
 
 install-fuzzer: $(FUZZ_PROGS) $(FUZZ_SEED_CORPUS)
 	@if test X"$(FUZZ_DESTDIR)" = X""; then \
@@ -615,9 +602,9 @@ uninstall:
 		$(DESTDIR)$(bindir)/sudoreplay$(INSTALL_BACKUP) \
 		$(DESTDIR)$(sbindir)/visudo$(INSTALL_BACKUP) \
 		$(DESTDIR)$(plugindir)/sudoers.so$(INSTALL_BACKUP)
-	-cmp $(DESTDIR)$(sudoersdir)/sudoers $(DESTDIR)$(sudoersdir)/sudoers.dist >/dev/null && \
-	    rm -f $(DESTDIR)$(sudoersdir)/sudoers
-	-rm -f $(DESTDIR)$(sudoersdir)/sudoers.dist
+	-cmp $(DESTDIR)$(sysconfdir)/sudoers $(DESTDIR)$(sysconfdir)/sudoers.dist >/dev/null && \
+	    rm -f $(DESTDIR)$(sysconfdir)/sudoers
+	-rm -f $(DESTDIR)$(sysconfdir)/sudoers.dist
 
 splint:
 	splint $(SPLINT_OPTS) -I$(incdir) -I$(top_builddir) -I$(devdir) -I$(srcdir) $(srcdir)/*.c $(srcdir)/auth/*.c
@@ -634,11 +621,9 @@ fuzz: run-fuzz_policy run-fuzz_sudoers run-fuzz_sudoers_ldif
 
 check-fuzzer: $(FUZZ_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
-		LC_ALL=C.UTF-8; export LC_ALL; \
-	    else \
-		LC_ALL=C; export LC_ALL; \
-	    fi; \
+	    l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'` || true; \
+	    test -n "$$l" || l="C"; \
+	    LC_ALL="$$l"; export LC_ALL; \
 	    unset LANG || LANG=; \
 	    unset LANGUAGE || LANGUAGE=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
@@ -653,11 +638,9 @@ check-fuzzer: $(FUZZ_PROGS)
 
 check: $(TEST_PROGS) visudo testsudoers cvtsudoers check-fuzzer
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    if locale -a 2>&1 | $(GREP) '^C.UTF-8$$' >/dev/null 2>&1; then \
-		LC_ALL=C.UTF-8; export LC_ALL; \
-	    else \
-		LC_ALL=C; export LC_ALL; \
-	    fi; \
+	    l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'` || true; \
+	    test -n "$$l" || l="C"; \
+	    LC_ALL="$$l"; export LC_ALL; \
 	    unset LANG || LANG=; \
 	    unset LANGUAGE || LANGUAGE=; \
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
@@ -676,7 +659,6 @@ check: $(TEST_PROGS) visudo testsudoers cvtsudoers check-fuzzer
 	    ./check_exptilde || rval=`expr $$rval + $$?`; \
 	    ./check_fill || rval=`expr $$rval + $$?`; \
 	    ./check_gentime || rval=`expr $$rval + $$?`; \
-	    ./check_hexchar || rval=`expr $$rval + $$?`; \
 	    mkdir -p regress/iolog_plugin; \
 	    ./check_iolog_plugin regress/iolog_plugin/iolog || rval=`expr $$rval + $$?`; \
 	    ./check_serialize_list || rval=`expr $$rval + $$?`; \
@@ -1127,16 +1109,6 @@ check_gentime.i: $(srcdir)/regress/parser/check_gentime.c \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 check_gentime.plog: check_gentime.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/parser/check_gentime.c --i-file $< --output-file $@
-check_hexchar.o: $(srcdir)/regress/parser/check_hexchar.c \
-                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
-                 $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/parser/check_hexchar.c
-check_hexchar.i: $(srcdir)/regress/parser/check_hexchar.c \
-                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
-                 $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
-check_hexchar.plog: check_hexchar.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/parser/check_hexchar.c --i-file $< --output-file $@
 check_iolog_plugin.o: $(srcdir)/regress/iolog_plugin/check_iolog_plugin.c \
                       $(devdir)/def_data.c $(devdir)/def_data.h \
                       $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -1933,28 +1905,6 @@ group_plugin.i: $(srcdir)/group_plugin.c $(devdir)/def_data.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 group_plugin.plog: group_plugin.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/group_plugin.c --i-file $< --output-file $@
-hexchar.lo: $(srcdir)/hexchar.c $(devdir)/def_data.h \
-            $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
-            $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
-            $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
-            $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
-            $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
-            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-            $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/hexchar.c
-hexchar.i: $(srcdir)/hexchar.c $(devdir)/def_data.h \
-            $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
-            $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
-            $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
-            $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
-            $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
-            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-            $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
-hexchar.plog: hexchar.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/hexchar.c --i-file $< --output-file $@
 interfaces.lo: $(srcdir)/interfaces.c $(devdir)/def_data.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \

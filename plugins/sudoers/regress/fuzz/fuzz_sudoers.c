@@ -50,7 +50,6 @@ struct sudo_user sudo_user;
 struct passwd *list_pw;
 sudo_conv_t sudo_conv = fuzz_conversation;
 sudo_printf_t sudo_printf = fuzz_printf;
-bool sudoers_recovery = true;
 int sudo_mode;
 
 FILE *
@@ -208,7 +207,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (fp == NULL)
         return 0;
 
-    setprogname("fuzz_sudoers");
+    initprogname("fuzz_sudoers");
     sudoers_debug_register(getprogname(), NULL);
     if (getenv("SUDO_FUZZ_VERBOSE") == NULL)
 	sudo_warn_set_conversation(fuzz_conversation);
@@ -401,6 +400,7 @@ done:
     sudo_freegrcache();
     free(user_cmnd);
     free(safe_cmnd);
+    free(list_cmnd);
     memset(&sudo_user, 0, sizeof(sudo_user));
     sudoers_setlocale(SUDOERS_LOCALE_USER, NULL);
     sudoers_debug_deregister();

@@ -361,34 +361,36 @@ bad:
  */
 bool
 intercept_check_policy(const char *command, int argc, char **argv, int envc,
-    char **envp, const char *runcwd, void *v)
+    char **envp, const char *runcwd, int *oldcwd, void *v)
 {
     struct intercept_closure *closure = v;
     char **command_info = NULL;
     char **command_info_copy = NULL;
     char **user_env_out = NULL;
     char **run_argv = NULL;
-    bool ret = true;
     int i, rc, saved_dir = -1;
+    bool ret = true;
+    struct stat sb;
     debug_decl(intercept_check_policy, SUDO_DEBUG_EXEC);
 
-    if (ISSET(closure->details->flags, CD_INTERCEPT)) {
-	/* Change to runcwd for the policy check if necessary. */
-	if (*command != '/') {
-	    if (runcwd == NULL || (saved_dir = open(".", O_RDONLY)) == -1 ||
-		    chdir(runcwd) == -1) {
-		if (runcwd == NULL) {
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-			"relative command path but no runcwd specified");
-		} else if (saved_dir == -1) {
-		    sudo_debug_printf(
-			SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-			"unable to open current directory for reading");
-		} else {
-		    sudo_debug_printf(
-			SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-			"unable to chdir for %s", runcwd);
-		}
+    /* Change to runcwd before the policy check if necessary. */
+    if (*command != '/') {
+	if (runcwd == NULL || (saved_dir = open(".", O_RDONLY)) == -1 ||
+		chdir(runcwd) == -1) {
+	    if (runcwd == NULL) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "relative command path but no runcwd specified");
+	    } else if (saved_dir == -1) {
+		sudo_debug_printf(
+		    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		    "unable to open current directory for reading");
+	    } else {
+		sudo_debug_printf(
+		    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		    "unable to chdir for %s", runcwd);
+	    }
+	    if (ISSET(closure->details->flags, CD_INTERCEPT)) {
+		/* Inability to change cwd is fatal in intercept mode. */
 		if (closure->errstr == NULL)
 		    closure->errstr = N_("command rejected by policy");
 		audit_reject(policy_plugin.name, SUDO_POLICY_PLUGIN,
@@ -397,7 +399,19 @@ intercept_check_policy(const char *command, int argc, char **argv, int envc,
 		goto done;
 	    }
 	}
+    }
 
+    /*
+     * Short-circuit the policy check if the command doesn't exist.
+     * Otherwise, both sudo and the shell will report the error.
+     */
+    if (stat(command, &sb) == -1) {
+	closure->errstr = NULL;
+	closure->state = POLICY_ERROR;
+	goto done;
+    }
+
+    if (ISSET(closure->details->flags, CD_INTERCEPT)) {
 	/* We don't currently have a good way to validate the environment. */
 	sudo_debug_set_active_instance(policy_plugin.debug_instance);
 	rc = policy_plugin.u.policy->check_policy(argc, argv, NULL,
@@ -504,6 +518,14 @@ oom:
     closure->errstr = N_("unable to allocate memory");
 
 bad:
+    if (saved_dir != -1) {
+	if (fchdir(saved_dir) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		"%s: unable to restore saved cwd", __func__);
+	}
+	close(saved_dir);
+	saved_dir = -1;
+    }
     if (closure->errstr == NULL)
 	closure->errstr = N_("policy plugin error");
     audit_error(policy_plugin.name, SUDO_POLICY_PLUGIN, closure->errstr,
@@ -512,20 +534,13 @@ bad:
     ret = false;
 
 done:
-    if (saved_dir != -1) {
-	if (fchdir(saved_dir) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-		"%s: unable to restore saved cwd", __func__);
-	}
-	close(saved_dir);
-    }
-
     if (command_info_copy != NULL) {
 	for (i = 0; command_info_copy[i] != NULL; i++) {
 	    free(command_info_copy[i]);
 	}
 	free(command_info_copy);
     }
+    *oldcwd = saved_dir;
 
     debug_return_bool(ret);
 }
@@ -536,6 +551,7 @@ intercept_check_policy_req(PolicyCheckRequest *req,
 {
     char **argv = NULL;
     bool ret = false;
+    int oldcwd = -1;
     size_t n;
     debug_decl(intercept_check_policy_req, SUDO_DEBUG_EXEC);
 
@@ -573,9 +589,17 @@ intercept_check_policy_req(PolicyCheckRequest *req,
     argv[n] = NULL;
 
     ret = intercept_check_policy(req->command, req->n_argv, argv, req->n_envp,
-	req->envp, req->cwd, closure);
+	req->envp, req->cwd, &oldcwd, closure);
 
 done:
+    if (oldcwd != -1) {
+	if (fchdir(oldcwd) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		"%s: unable to restore saved cwd", __func__);
+	}
+	close(oldcwd);
+    }
+
     free(argv);
 
     debug_return_bool(ret);
@@ -642,10 +666,10 @@ intercept_read(int fd, struct intercept_closure *closure)
 	    goto done;
 	default:
 	    if (errno == EINTR || errno == EAGAIN) {
-		debug_return_bool(true);
 		sudo_debug_printf(
 		    SUDO_DEBUG_WARN|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
 		    "reading intercept token");
+		debug_return_bool(true);
 	    }
 	    sudo_warn("recv");
 	    goto done;

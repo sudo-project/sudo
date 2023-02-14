@@ -1,10 +1,9 @@
 This is a sample sudo policy plugin.  See the sudo_plugin manual for
 information on writing your own plugin.
 
-The sample policy plugin is not built or installed by default.  To
-build and install the plugin, change to the plugins/sample directory
-and run "make".  It can be installed by running "make install" as
-the superuser from the same directory.
+The sample policy plugin is not installed by default.  It can be installed
+by running "make install" as the superuser from the plugins/sample
+directory.
 
 To actually use the sample plugin, you'll need to modify the
 /etc/sudo.conf file.  Caution: you should not make changes to

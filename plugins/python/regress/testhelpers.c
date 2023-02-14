@@ -23,9 +23,6 @@
 
 #include "testhelpers.h"
 
-const char *sudo_conf_developer_mode = TESTDATA_DIR "sudo.conf.developer_mode";
-const char *sudo_conf_normal_mode = TESTDATA_DIR "sudo.conf.normal_mode";
-
 struct TestData data;
 
 /*
@@ -93,10 +90,22 @@ create_str_array(size_t count, ...)
 
     va_start(args, count);
 
-    char ** result = calloc(count, sizeof(char *));
-    for (size_t i = 0; i < count; ++i) {
-        const char *str = va_arg(args, char *);
-        result[i] = (str == NULL ? NULL : strdup(str));
+    char **result = calloc(count, sizeof(char *));
+    if (result != NULL) {
+        for (size_t i = 0; i < count; ++i) {
+            const char *str = va_arg(args, char *);
+            if (str != NULL) {
+                result[i] = strdup(str);
+                if (result[i] == NULL) {
+                    while (i > 0) {
+                        free(result[--i]);
+                    }
+                    free(result);
+                    result = NULL;
+                    break;
+                }
+            }
+        }
     }
 
     va_end(args);
@@ -164,6 +173,8 @@ fake_conversation(int num_msgs, const struct sudo_conv_message msgs[],
             return 1; // simulates user interruption (conversation error)
 
         replies[i].reply = strdup(data.conv_replies[i]);
+        if (replies[i].reply == NULL)
+            return 1; // memory allocation error
     }
 
     return 0; // simulate user answered just fine

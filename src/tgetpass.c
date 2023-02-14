@@ -247,7 +247,8 @@ restore:
     /* Restore old tty settings. */
     if (!ISSET(flags, TGP_ECHO)) {
 	/* Restore old tty settings if possible. */
-	(void) sudo_term_restore(input, true);
+	if (!sudo_term_restore(input, true))
+	    sudo_warn("%s", U_("unable to restore terminal settings"));
     }
     if (ttyfd != -1)
 	(void) close(ttyfd);

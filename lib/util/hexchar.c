@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2013-2015 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2015, 2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -23,18 +23,20 @@
 
 #include <config.h>
 
-#include "sudoers.h"
+#include "sudo_compat.h"
+#include "sudo_debug.h"
+#include "sudo_util.h"
 
 /*
  * Converts a two-byte hex string to decimal.
- * Returns the decimal value or -1 for invalid input.
+ * Returns a value 0-255 on success or -1 for invalid input.
  */
 int
-hexchar(const char *s)
+sudo_hexchar_v1(const char *s)
 {
     unsigned char result[2];
     int i;
-    debug_decl(hexchar, SUDOERS_DEBUG_UTIL);
+    debug_decl(sudo_hexchar, SUDO_DEBUG_UTIL);
 
     for (i = 0; i < 2; i++) {
 	switch (s[i]) {

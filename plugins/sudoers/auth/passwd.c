@@ -95,6 +95,8 @@ sudo_passwd_verify(struct passwd *pw, const char *pass, sudo_auth *auth, struct 
 	    matched = !strcmp(pw_epasswd, epass);
     }
 
+    explicit_bzero(des_pass, sizeof(des_pass));
+
     debug_return_int(matched ? AUTH_SUCCESS : AUTH_FAILURE);
 }
 #else
@@ -115,11 +117,14 @@ sudo_passwd_verify(struct passwd *pw, const char *pass, sudo_auth *auth, struct 
 int
 sudo_passwd_cleanup(struct passwd *pw, sudo_auth *auth, bool force)
 {
-    char *pw_epasswd = auth->data;
     debug_decl(sudo_passwd_cleanup, SUDOERS_DEBUG_AUTH);
 
-    if (pw_epasswd != NULL)
-	freezero(pw_epasswd, strlen(pw_epasswd));
+    if (auth->data != NULL) {
+	/* Zero out encrypted password before freeing. */
+	size_t len = strlen((char *)auth->data);
+	freezero(auth->data, len);
+	auth->data = NULL;
+    }
 
     debug_return_int(AUTH_SUCCESS);
 }

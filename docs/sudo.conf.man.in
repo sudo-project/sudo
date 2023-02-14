@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2010-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2010-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "May 31, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -35,19 +35,19 @@ debug flags, and other settings.
 The
 \fBsudo.conf\fR
 file supports the following directives, described in detail below.
-.TP 10n
+.TP 8n
 Plugin
 an approval, audit, I/O logging, or security policy plugin
-.TP 10n
+.TP 8n
 Path
 a plugin-agnostic path
-.TP 10n
+.TP 8n
 Set
 a front-end setting, such as
 \fIdisable_coredump\fR
 or
 \fIgroup_source\fR
-.TP 10n
+.TP 8n
 Debug
 debug flags to aid in debugging
 \fBsudo\fR,
@@ -127,7 +127,7 @@ In other words:
 .nf
 .sp
 .RS 4n
-Plugin sudoers_policy sudoers.so
+Plugin sudoers_policy @sudoers_plugin@
 .RE
 .fi
 .PP
@@ -135,7 +135,7 @@ is equivalent to:
 .nf
 .sp
 .RS 4n
-Plugin sudoers_policy @plugindir@/sudoers.so
+Plugin sudoers_policy @plugindir@/@sudoers_plugin@
 .RE
 .fi
 .PP
@@ -149,7 +149,7 @@ For example:
 .nf
 .sp
 .RS 4n
-Plugin sudoers_policy sudoers.so
+Plugin sudoers_policy @sudoers_plugin@
 .RE
 .fi
 .PP
@@ -164,7 +164,7 @@ For example, to override the compile-time default sudoers file mode:
 .nf
 .sp
 .RS 4n
-Plugin sudoers_policy sudoers.so sudoers_mode=0440
+Plugin sudoers_policy @sudoers_plugin@ sudoers_mode=0440
 .RE
 .fi
 .PP
@@ -191,9 +191,9 @@ This is equivalent to the following:
 .nf
 .sp
 .RS 4n
-Plugin sudoers_policy sudoers.so
-Plugin sudoers_io sudoers.so
-Plugin sudoers_audit sudoers.so
+Plugin sudoers_policy @sudoers_plugin@
+Plugin sudoers_io @sudoers_plugin@
+Plugin sudoers_audit @sudoers_plugin@
 .RE
 .fi
 .PP
@@ -246,7 +246,7 @@ version 1.8.16 and higher.
 The following plugin-agnostic paths may be set in the
 \fI@sysconfdir@/sudo.conf\fR
 file:
-.TP 10n
+.TP 6n
 askpass
 The fully qualified path to a helper program used to read the user's
 password when no terminal is available.
@@ -262,9 +262,8 @@ The value of
 may be overridden by the
 \fRSUDO_ASKPASS\fR
 environment variable.
-.TP 10n
+.TP 6n
 devsearch
-.br
 An ordered, colon-separated search path of directories to look in for
 device nodes.
 This is used when mapping the process's tty device number to a device name
@@ -286,9 +285,8 @@ or
 functions, for example
 BSD,
 macOS and Solaris.
-.TP 10n
+.TP 6n
 intercept
-.br
 The fully-qualified path to a shared library containing a wrappers for the
 execve(2),
 execl(3),
@@ -308,7 +306,7 @@ functionality on systems that support
 or its equivalent.
 The default value is
 \fI@intercept_file@\fR.
-.TP 10n
+.TP 6n
 noexec
 The fully-qualified path to a shared library containing wrappers
 for the
@@ -337,14 +335,13 @@ functionality on systems that support
 or its equivalent.
 The default value is
 \fI@noexec_file@\fR.
-.TP 10n
+.TP 6n
 plugin_dir
 The default directory to use when searching for plugins
 that are specified without a fully qualified path name.
 The default value is
 \fI@plugindir@\fR.
-.if \n(SL \{\
-.TP 10n
+.TP 6n
 sesh
 The fully-qualified path to the
 \fBsesh\fR
@@ -359,7 +356,7 @@ The default value is
 The
 \fBsudo.conf\fR
 file also supports the following front-end settings:
-.TP 10n
+.TP 6n
 disable_coredump
 Core dumps of
 \fBsudo\fR
@@ -374,11 +371,11 @@ to false in
 as follows:
 .nf
 .sp
-.RS 14n
+.RS 10n
 Set disable_coredump false
 .RE
 .fi
-.RS 10n
+.RS 6n
 .sp
 All modern operating systems place restrictions on core dumps
 from set-user-ID processes like
@@ -400,38 +397,7 @@ This setting is only available in
 \fBsudo\fR
 version 1.8.4 and higher.
 .RE
-.TP 10n
-developer_mode
-By default
-\fBsudo\fR
-refuses to load plugins which can be modified by other than the root user.
-The plugin should be owned by root and write access permissions should be
-disabled for
-\(lqgroup\(rq
-and
-\(lqother\(rq\&.
-To make development of a plugin easier, you can disable that by setting
-\(lqdeveloper_mode\(rq
-option to true in
-\fBsudo.conf\fR
-as follows:
-.nf
-.sp
-.RS 14n
-Set developer_mode true
-.RE
-.fi
-.RS 10n
-.sp
-This creates a security risk and is not recommended for production systems,
-it is intended to be used in a development environment (VM, container, etc).
-Before enabling developer mode, be sure that you understand the implications.
-.sp
-This setting is only available in
-\fBsudo\fR
-version 1.9.0 and higher.
-.RE
-.TP 10n
+.TP 6n
 group_source
 \fBsudo\fR
 passes the invoking user's group list to the policy and I/O plugins.
@@ -441,10 +407,10 @@ with NFS).
 On systems with the
 getconf(1)
 utility, running:
-.RS 16n
+.RS 12n
 getconf NGROUPS_MAX
 .RE
-.RS 10n
+.RS 6n
 will return the maximum number of groups.
 .sp
 However, it is still possible to be a member of a larger number of
@@ -465,7 +431,7 @@ setting allows the administrator to change this default behavior.
 Supported values for
 \fIgroup_source\fR
 are:
-.TP 10n
+.TP 6n
 static
 Use the static group list that the kernel returns.
 Retrieving the group list this way is very fast but it is subject
@@ -477,7 +443,7 @@ after the user logs in.
 This was the default behavior prior to
 \fBsudo\fR
 1.8.7.
-.TP 10n
+.TP 6n
 dynamic
 Always query the group database directly.
 It is
@@ -497,7 +463,7 @@ HP-UX, Linux, macOS, and Solaris.
 This is the default behavior on macOS in
 \fBsudo\fR
 1.9.6 and higher.
-.TP 10n
+.TP 6n
 adaptive
 Only query the group database if the static group list returned
 by the kernel has the maximum number of entries.
@@ -510,7 +476,7 @@ For example, to cause
 to only use the kernel's static list of groups for the user:
 .nf
 .sp
-.RS 14n
+.RS 10n
 Set group_source static
 .RE
 .fi
@@ -519,7 +485,7 @@ This setting is only available in
 \fBsudo\fR
 version 1.8.7 and higher.
 .RE
-.TP 10n
+.TP 6n
 max_groups
 The maximum number of user groups to retrieve from the group database.
 Values less than one or larger than 1024 will be ignored.
@@ -537,7 +503,7 @@ version 1.8.7 and higher.
 It should not be required in
 \fBsudo\fR
 versions 1.8.24 and higher and may be removed in a later release.
-.TP 10n
+.TP 6n
 probe_interfaces
 By default,
 \fBsudo\fR
@@ -551,11 +517,11 @@ If IP-based matching is not required, network interface probing
 can be disabled as follows:
 .nf
 .sp
-.RS 14n
+.RS 10n
 Set probe_interfaces false
 .RE
 .fi
-.RS 10n
+.RS 6n
 .sp
 This setting is only available in
 \fBsudo\fR
@@ -626,7 +592,7 @@ entries are also supported starting with
 \fBsudo\fR
 1.8.12 and are matched by either the base name of the plugin that was loaded
 (for example
-\fIsudoers.so\fR)
+\fI@sudoers_plugin@\fR)
 or by the plugin's fully-qualified path name.
 Previously, the
 \fBsudoers\fR
@@ -745,9 +711,9 @@ front-end configuration
 # The plugin_options are optional.
 #
 # The sudoers plugin is used by default if no Plugin lines are present.
-#Plugin sudoers_policy sudoers.so
-#Plugin sudoers_io sudoers.so
-#Plugin sudoers_audit sudoers.so
+#Plugin sudoers_policy @sudoers_plugin@
+#Plugin sudoers_io @sudoers_plugin@
+#Plugin sudoers_audit @sudoers_plugin@
 
 #
 # Sudo askpass:
@@ -785,7 +751,7 @@ front-end configuration
 # The compiled-in value is usually sufficient and should only be changed
 # if you rename or move the sudo_intercept.so file.
 #
-#Path intercept @plugindir@/sudo_intercept.so
+#Path intercept @intercept_file@
 
 #
 # Sudo noexec:
@@ -799,7 +765,7 @@ front-end configuration
 # The compiled-in value is usually sufficient and should only be changed
 # if you rename or move the sudo_noexec.so file.
 #
-#Path noexec @plugindir@/sudo_noexec.so
+#Path noexec @noexec_file@
 
 #
 # Sudo plugin directory:
@@ -809,14 +775,6 @@ front-end configuration
 # specified without a fully qualified path name.
 #
 #Path plugin_dir @plugindir@
-
-#
-# Sudo developer mode:
-#   Set developer_mode true|false
-#
-# Allow loading of plugins that are owned by non-root or are writable
-# by "group" or "other".  Should only be used during plugin development.
-#Set developer_mode true
 
 #
 # Core dumps:
@@ -870,7 +828,7 @@ front-end configuration
 # Multiple subsystem@priority may be specified, separated by a comma.
 #
 #Debug sudo @log_dir@/sudo_debug all@debug
-#Debug sudoers.so @log_dir@/sudoers_debug all@debug
+#Debug @sudoers_plugin@ @log_dir@/sudoers_debug all@debug
 .RE
 .fi
 .SH "SEE ALSO"

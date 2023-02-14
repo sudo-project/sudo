@@ -414,7 +414,6 @@ json_parse_string(char **strp)
     }
     while (src < end) {
 	char ch = *src++;
-	/* TODO: handle unicode escapes */
 	if (ch == '\\') {
 	    switch (*src) {
 	    case 'b':
@@ -432,6 +431,17 @@ json_parse_string(char **strp)
 	    case 't':
 		ch = '\t';
 		break;
+	    case 'u':
+		/* Only currently handles 8-bit ASCII. */
+		if (src[1] == '0' && src[2] == '0') {
+		    ch = sudo_hexchar(&src[3]);
+		    if (ch != -1) {
+			src += 4;
+			break;
+		    }
+		}
+		/* Not in \u00XX format. */
+		FALLTHROUGH;
 	    case '"':
 	    case '\\':
 	    default:
@@ -539,45 +549,6 @@ iolog_parse_json_object(struct json_object *object, struct eventlog *evlog)
 		goto done;
 	    }
 	}
-    }
-
-    /* Merge cmd and argv as sudoreplay expects. */
-    if (evlog->command != NULL && evlog->argv != NULL && evlog->argv[0] != NULL) {
-	size_t len, bufsize = strlen(evlog->command) + 1;
-	char *cp, *buf;
-	int ac;
-
-	/* Skip argv[0], we use evlog->command instead. */
-	for (ac = 1; evlog->argv[ac] != NULL; ac++)
-	    bufsize += strlen(evlog->argv[ac]) + 1;
-
-	if ((buf = malloc(bufsize)) == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    goto done;
-	}
-	cp = buf;
-
-	len = strlcpy(cp, evlog->command, bufsize);
-	if (len >= bufsize)
-	    sudo_fatalx(U_("internal error, %s overflow"), __func__);
-	cp += len;
-	bufsize -= len;
-
-	for (ac = 1; evlog->argv[ac] != NULL; ac++) {
-	    if (bufsize < 2)
-		sudo_fatalx(U_("internal error, %s overflow"), __func__);
-	    *cp++ = ' ';
-	    bufsize--;
-
-	    len = strlcpy(cp, evlog->argv[ac], bufsize);
-	    if (len >= bufsize)
-		sudo_fatalx(U_("internal error, %s overflow"), __func__);
-	    cp += len;
-	    bufsize -= len;
-	}
-
-	free(evlog->command);
-	evlog->command = buf;
     }
 
     ret = true;

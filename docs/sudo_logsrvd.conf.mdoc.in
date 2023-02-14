@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 13, 2022
+.Dd January 16, 2023
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -56,7 +56,7 @@ file.
 .Pp
 The following configuration sections are recognized:
 .Pp
-.Bl -bullet -compact -offset indent
+.Bl -bullet -compact -offset 1n -width 1n
 .It
 server
 .It
@@ -77,7 +77,7 @@ The
 .Em server
 section configures the address and port the server will listen on.
 The following keys are recognized:
-.Bl -tag -width 8n
+.Bl -tag -width 4n
 .It listen_address = host Ns Oo : Ns port Oc Ns Op (tls)
 The host name or IP address, optional port to listen on and
 an optional Transport Layer Security (TLS) flag in parentheses.
@@ -206,7 +206,7 @@ separated by a colon
 Supported cipher suites depend on the version of OpenSSL used,
 but should include the following:
 .Pp
-.Bl -tag -compact -width 8n -offset indent
+.Bl -tag -compact -width 4n -offset indent
 .It TLS_AES_128_GCM_SHA256
 .It TLS_AES_256_GCM_SHA384
 .It TLS_CHACHA20_POLY1305_SHA256
@@ -254,7 +254,7 @@ They are only present in this section to make it possible for the relay
 connection to use a different set of TLS parameters from the client-facing
 server.
 The following keys are recognized:
-.Bl -tag -width 8n
+.Bl -tag -width 4n
 .It connect_timeout = number
 The amount of time, in seconds,
 .Nm sudo_logsrvd
@@ -404,7 +404,7 @@ section configures I/O log parameters.
 These settings are identical to the I/O configuration in
 .Xr sudoers @mansectform@ .
 The following keys are recognized:
-.Bl -tag -width 8n
+.Bl -tag -width 4n
 .It iolog_compress = boolean
 If set, I/O logs will be compressed using
 .Sy zlib .

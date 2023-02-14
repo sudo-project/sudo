@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2007-2015 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2007-2015, 2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,6 +30,7 @@
 #include "sudo_compat.h"
 #include "sudo_debug.h"
 #include "sudo_lbuf.h"
+#include "sudo_util.h"
 
 void
 sudo_lbuf_init_v1(struct sudo_lbuf *lbuf, sudo_lbuf_output_t output,
@@ -64,17 +65,23 @@ sudo_lbuf_destroy_v1(struct sudo_lbuf *lbuf)
 }
 
 static bool
-sudo_lbuf_expand(struct sudo_lbuf *lbuf, int extra)
+sudo_lbuf_expand(struct sudo_lbuf *lbuf, unsigned int extra)
 {
     debug_decl(sudo_lbuf_expand, SUDO_DEBUG_UTIL);
 
-    if (lbuf->len + extra + 1 >= lbuf->size) {
-	char *new_buf;
-	int new_size = lbuf->size;
+    if (lbuf->len + extra + 1 <= lbuf->len) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "integer overflow updating lbuf->len");
+	lbuf->error = 1;
+	debug_return_bool(false);
+    }
 
-	do {
-	    new_size += 256;
-	} while (lbuf->len + extra + 1 >= new_size);
+    if (lbuf->len + extra + 1 > lbuf->size) {
+	unsigned int new_size = sudo_pow2_roundup(lbuf->len + extra + 1);
+	char *new_buf;
+
+	if (new_size < 1024)
+	    new_size = 1024;
 	if ((new_buf = realloc(lbuf->buf, new_size)) == NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to allocate memory");
@@ -88,16 +95,123 @@ sudo_lbuf_expand(struct sudo_lbuf *lbuf, int extra)
 }
 
 /*
+ * Escape a character in octal form (#0n) and store it as a string
+ * in buf, which must have at least 6 bytes available.
+ * Returns the length of buf, not counting the terminating NUL byte.
+ */
+static int
+escape(unsigned char ch, char *buf)
+{
+    const int len = ch < 0100 ? (ch < 010 ? 3 : 4) : 5;
+
+    /* Work backwards from the least significant digit to most significant. */
+    switch (len) {
+    case 5:
+	buf[4] = (ch & 7) + '0';
+	ch >>= 3;
+	FALLTHROUGH;
+    case 4:
+	buf[3] = (ch & 7) + '0';
+	ch >>= 3;
+	FALLTHROUGH;
+    case 3:
+	buf[2] = (ch & 7) + '0';
+	buf[1] = '0';
+	buf[0] = '#';
+	break;
+    }
+    buf[len] = '\0';
+
+    return len;
+}
+
+/*
+ * Parse the format and append strings, only %s and %% escapes are supported.
+ * Any non-printable characters are escaped in octal as #0nn.
+ */
+bool
+sudo_lbuf_append_esc_v1(struct sudo_lbuf *lbuf, int flags, const char *fmt, ...)
+{
+    unsigned int saved_len = lbuf->len;
+    bool ret = false;
+    const char *s;
+    va_list ap;
+    debug_decl(sudo_lbuf_append_esc, SUDO_DEBUG_UTIL);
+
+    if (sudo_lbuf_error(lbuf))
+	debug_return_bool(false);
+
+#define should_escape(ch) \
+    ((ISSET(flags, LBUF_ESC_CNTRL) && iscntrl((unsigned char)ch)) || \
+    (ISSET(flags, LBUF_ESC_BLANK) && isblank((unsigned char)ch)))
+#define should_quote(ch) \
+    (ISSET(flags, LBUF_ESC_QUOTE) && (ch == '\'' || ch == '\\'))
+
+    va_start(ap, fmt);
+    while (*fmt != '\0') {
+	if (fmt[0] == '%' && fmt[1] == 's') {
+	    if ((s = va_arg(ap, char *)) == NULL)
+		s = "(NULL)";
+	    while (*s != '\0') {
+		if (should_escape(*s)) {
+		    if (!sudo_lbuf_expand(lbuf, sizeof("#0177") - 1))
+			goto done;
+		    lbuf->len += escape(*s++, lbuf->buf + lbuf->len);
+		    continue;
+		}
+		if (should_quote(*s)) {
+		    if (!sudo_lbuf_expand(lbuf, 2))
+			goto done;
+		    lbuf->buf[lbuf->len++] = '\\';
+		    lbuf->buf[lbuf->len++] = *s++;
+		    continue;
+		}
+		if (!sudo_lbuf_expand(lbuf, 1))
+		    goto done;
+		lbuf->buf[lbuf->len++] = *s++;
+	    }
+	    fmt += 2;
+	    continue;
+	}
+	if (should_escape(*fmt)) {
+	    if (!sudo_lbuf_expand(lbuf, sizeof("#0177") - 1))
+		goto done;
+	    if (*fmt == '\'') {
+		lbuf->buf[lbuf->len++] = '\\';
+		lbuf->buf[lbuf->len++] = *fmt++;
+	    } else {
+		lbuf->len += escape(*fmt++, lbuf->buf + lbuf->len);
+	    }
+	    continue;
+	}
+	if (!sudo_lbuf_expand(lbuf, 1))
+	    goto done;
+	lbuf->buf[lbuf->len++] = *fmt++;
+    }
+    ret = true;
+
+done:
+    if (!ret)
+	lbuf->len = saved_len;
+    if (lbuf->size != 0)
+	lbuf->buf[lbuf->len] = '\0';
+    va_end(ap);
+
+    debug_return_bool(ret);
+}
+
+/*
  * Parse the format and append strings, only %s and %% escapes are supported.
  * Any characters in set are quoted with a backslash.
  */
 bool
 sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char *fmt, ...)
 {
-    int len, saved_len = lbuf->len;
+    unsigned int saved_len = lbuf->len;
     bool ret = false;
     const char *cp, *s;
     va_list ap;
+    int len;
     debug_decl(sudo_lbuf_append_quoted, SUDO_DEBUG_UTIL);
 
     if (sudo_lbuf_error(lbuf))
@@ -152,10 +266,11 @@ done:
 bool
 sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...)
 {
-    int len, saved_len = lbuf->len;
+    unsigned int saved_len = lbuf->len;
     bool ret = false;
     va_list ap;
     const char *s;
+    int len;
     debug_decl(sudo_lbuf_append, SUDO_DEBUG_UTIL);
 
     if (sudo_lbuf_error(lbuf))
@@ -279,12 +394,10 @@ sudo_lbuf_print_v1(struct sudo_lbuf *lbuf)
     /* For very small widths just give up... */
     len = lbuf->continuation ? strlen(lbuf->continuation) : 0;
     if (lbuf->cols <= lbuf->indent + len + 20) {
-	if (lbuf->len > 0) {
-	    lbuf->buf[lbuf->len] = '\0';
-	    lbuf->output(lbuf->buf);
-	    if (lbuf->buf[lbuf->len - 1] != '\n')
-		lbuf->output("\n");
-	}
+	lbuf->buf[lbuf->len] = '\0';
+	lbuf->output(lbuf->buf);
+	if (lbuf->buf[lbuf->len - 1] != '\n')
+	    lbuf->output("\n");
 	goto done;
     }
 

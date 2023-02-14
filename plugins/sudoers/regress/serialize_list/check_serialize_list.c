@@ -60,6 +60,7 @@ test_serialize_list(int *ntests_out, int *errors_out)
     }
 
 done:
+    free(result);
     *ntests_out = ntests;
     *errors_out = errors;
 }

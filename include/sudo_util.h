@@ -184,6 +184,9 @@
 # define ignore_result(x)	(void)(x)
 #endif
 
+/* Forward struct declarations. */
+struct stat;
+
 /* aix.c */
 sudo_dso_public int aix_getauthregistry_v1(char *user, char *saved_registry);
 #define aix_getauthregistry(_a, _b) aix_getauthregistry_v1((_a), (_b))
@@ -218,6 +221,10 @@ sudo_dso_public int sudo_parse_gids_v1(const char *gidstr, const gid_t *basegid,
 /* getgrouplist.c */
 sudo_dso_public int sudo_getgrouplist2_v1(const char *name, gid_t basegid, GETGROUPS_T **groupsp, int *ngroupsp);
 #define sudo_getgrouplist2(_a, _b, _c, _d) sudo_getgrouplist2_v1((_a), (_b), (_c), (_d))
+
+/* hexchar.c */
+sudo_dso_public int sudo_hexchar_v1(const char *s);
+#define sudo_hexchar(_a) sudo_hexchar_v1(_a)
 
 /* key_val.c */
 sudo_dso_public char *sudo_new_key_val_v1(const char *key, const char *value);
@@ -296,7 +303,6 @@ sudo_dso_public unsigned int sudo_pow2_roundup_v1(unsigned int len);
 #define SUDO_PATH_WRONG_OWNER		-3
 #define SUDO_PATH_WORLD_WRITABLE	-4
 #define SUDO_PATH_GROUP_WRITABLE	-5
-struct stat;
 sudo_dso_public int sudo_secure_dir_v1(const char *path, uid_t uid, gid_t gid, struct stat *sb);
 #define sudo_secure_dir(_a, _b, _c, _d) sudo_secure_dir_v1((_a), (_b), (_c), (_d))
 sudo_dso_public int sudo_secure_file_v1(const char *path, uid_t uid, gid_t gid, struct stat *sb);

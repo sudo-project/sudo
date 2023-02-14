@@ -49,6 +49,7 @@
  * Globals
  */
 bool sudoers_warnings = true;
+bool sudoers_recovery = true;
 bool sudoers_strict = false;
 bool parse_error = false;
 
@@ -215,22 +216,18 @@ entry		:	'\n' {
 			    yyerrok;
 			}
 		|	include {
-			    if (!push_include($1, false)) {
-				parser_leak_remove(LEAK_PTR, $1);
-				free($1);
-				YYERROR;
-			    }
+			    const bool success = push_include($1, false);
 			    parser_leak_remove(LEAK_PTR, $1);
 			    free($1);
+			    if (!success && !sudoers_recovery)
+				YYERROR;
 			}
 		|	includedir {
-			    if (!push_include($1, true)) {
-				parser_leak_remove(LEAK_PTR, $1);
-				free($1);
-				YYERROR;
-			    }
+			    const bool success = push_include($1, true);
 			    parser_leak_remove(LEAK_PTR, $1);
 			    free($1);
+			    if (!success && !sudoers_recovery)
+				YYERROR;
 			}
 		|	userlist privileges '\n' {
 			    if (!add_userspec($1, $2)) {

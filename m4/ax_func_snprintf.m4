@@ -1,5 +1,5 @@
 # ===========================================================================
-#     http://www.gnu.org/software/autoconf-archive/ax_func_snprintf.html
+#     https://www.gnu.org/software/autoconf-archive/ax_func_snprintf.html
 # ===========================================================================
 #
 # SYNOPSIS
@@ -24,8 +24,9 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 5
+#serial 7
 
+AU_ALIAS([AC_FUNC_SNPRINTF], [AX_FUNC_SNPRINTF])
 AC_DEFUN([AX_FUNC_SNPRINTF],
 [AC_CHECK_FUNCS(snprintf vsnprintf)
 AC_MSG_CHECKING(for working snprintf)

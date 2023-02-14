@@ -3,7 +3,7 @@
 .\" SPDX-License-Identifier: ISC
 .\"
 .\" Copyright (c) 2019-2021 Robert Manner <robert.manner@oneidentity.com>
-.\" Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN_PYTHON" "5" "September 11, 2022" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN_PYTHON" "5" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -34,7 +34,7 @@ sudo_plugin(@mansectform@).
 .PP
 The supported plugins types are:
 .PP
-.RS 4n
+.RS 1n
 .PD 0
 .TP 3n
 \fB\(bu\fR
@@ -151,7 +151,7 @@ Running the Python interpreter and bridging between C and Python is
 handled by the
 \fBsudo\fR
 plugin
-\fIpython_plugin.so\fR.
+\fI@python_plugin@\fR.
 This shared object can be loaded like any other dynamic
 \fBsudo\fR
 plugin and should receive the path and the class name of the Python
@@ -162,10 +162,10 @@ sudo.conf(@mansectform@):
 .nf
 .sp
 .RS 4n
-Plugin python_policy python_plugin.so ModulePath=<path> ClassName=<class>
-Plugin python_io python_plugin.so ModulePath=<path> ClassName=<class>
-Plugin python_audit python_plugin.so ModulePath=<path> ClassName=<class>
-Plugin python_approval python_plugin.so ModulePath=<path> ClassName=<class>
+Plugin python_policy @python_plugin@ ModulePath=<path> ClassName=<class>
+Plugin python_io @python_plugin@ ModulePath=<path> ClassName=<class>
+Plugin python_audit @python_plugin@ ModulePath=<path> ClassName=<class>
+Plugin python_approval @python_plugin@ ModulePath=<path> ClassName=<class>
 .RE
 .fi
 .PP
@@ -175,7 +175,7 @@ file:
 .nf
 .sp
 .RS 4n
-Defaults group_plugin="python_plugin.so ModulePath=<path> ClassName=<class>"
+Defaults group_plugin="@python_plugin@ ModulePath=<path> ClassName=<class>"
 .RE
 .fi
 .PP
@@ -210,7 +210,7 @@ For example:
 .nf
 .sp
 .RS 4n
-Plugin python_policy python_plugin.so ModulePath=<path> ClassName=<class>
+Plugin python_policy @python_plugin@ ModulePath=<path> ClassName=<class>
 .RE
 .fi
 .PP
@@ -568,7 +568,7 @@ To try it, register it by adding the following lines to
 .nf
 .sp
 .RS 0n
-Plugin python_policy python_plugin.so \e
+Plugin python_policy @python_plugin@ \e
     ModulePath=@EXAMPLES@/example_policy_plugin.py \e
     ClassName=SudoPolicyPlugin
 .RE
@@ -586,7 +586,7 @@ For example:
 .nf
 .sp
 .RS 4n
-Plugin python_io python_plugin.so ModulePath=<path> ClassName=<class>
+Plugin python_io @python_plugin@ ModulePath=<path> ClassName=<class>
 .RE
 .fi
 .PP
@@ -674,7 +674,7 @@ function in the C
 \fBsudo\fR
 plugin API except that:
 .sp
-.RS 10n
+.RS 7n
 .PD 0
 .TP 3n
 \fB\(bu\fR
@@ -868,7 +868,7 @@ To try it, register it by adding the following lines to
 .nf
 .sp
 .RS 4n
-Plugin python_io python_plugin.so \e
+Plugin python_io @python_plugin@ \e
     ModulePath=@EXAMPLES@/example_io_plugin.py \e
     ClassName=SudoIOPlugin
 .RE
@@ -880,7 +880,7 @@ For example:
 .nf
 .sp
 .RS 4n
-Plugin python_audit python_plugin.so ModulePath=<path> ClassName=<class>
+Plugin python_audit @python_plugin@ ModulePath=<path> ClassName=<class>
 .RE
 .fi
 .PP
@@ -1188,7 +1188,7 @@ To try it, register it by adding the following lines to
 .nf
 .sp
 .RS 4n
-Plugin python_audit python_plugin.so \e
+Plugin python_audit @python_plugin@ \e
     ModulePath=@EXAMPLES@/example_audit_plugin.py \e
     ClassName=SudoAuditPlugin
 .RE
@@ -1202,7 +1202,7 @@ For example:
 .nf
 .sp
 .RS 4n
-Plugin python_approval python_plugin.so ModulePath=<path> ClassName=<class>
+Plugin python_approval @python_plugin@ ModulePath=<path> ClassName=<class>
 .RE
 .fi
 .PP
@@ -1332,7 +1332,7 @@ To try it, register it by adding the following lines to
 .nf
 .sp
 .RS 4n
-Plugin python_approval python_plugin.so \e
+Plugin python_approval @python_plugin@ \e
     ModulePath=@EXAMPLES@/example_approval_plugin.py \e
     ClassName=BusinessHoursApprovalPlugin
 .RE
@@ -1348,7 +1348,7 @@ For example:
 .nf
 .sp
 .RS 4n
-Defaults group_plugin="python_plugin.so ModulePath=<path> ClassName=<class>"
+Defaults group_plugin="@python_plugin@ ModulePath=<path> ClassName=<class>"
 .RE
 .fi
 .PP
@@ -1429,7 +1429,7 @@ file by adding the following lines:
 .nf
 .sp
 .RS 4n
-Defaults group_plugin="python_plugin.so \e
+Defaults group_plugin="@python_plugin@ \e
     ModulePath=@EXAMPLES@/example_group_plugin.py \e
     ClassName=SudoGroupPlugin"
 .RE
@@ -1511,7 +1511,7 @@ The default is to wait forever (no timeout).
 .PP
 To specify the message type, the following constants are available:
 .PP
-.RS 4n
+.RS 1n
 .PD 0
 .TP 3n
 \fB\(bu\fR
@@ -1590,7 +1590,7 @@ To try it, register it by adding the following lines to
 .nf
 .sp
 .RS 4n
-Plugin python_io python_plugin.so \e
+Plugin python_io @python_plugin@ \e
     ModulePath=@EXAMPLES@/example_conversation.py \e
     ClassName=ReasonLoggerIOPlugin
 .RE
@@ -1644,14 +1644,14 @@ To enable debug messages, add a
 line to
 sudo.conf(@mansectform@)
 with the program set to
-\fIpython_plugin.so\fR.
+\fI@python_plugin@\fR.
 For example, to store debug output in
 \fI@log_dir@/sudo_python_debug\fR,
 use a line like the following:
 .nf
 .sp
 .RS 4n
-Debug python_plugin.so @log_dir@/sudo_python_debug \e
+Debug @python_plugin@ @log_dir@/sudo_python_debug \e
     plugin@trace,c_calls@trace
 .RE
 .fi
@@ -1666,7 +1666,7 @@ calls, use:
 .nf
 .sp
 .RS 4n
-Debug python_plugin.so @log_dir@/sudo_python_debug plugin@trace
+Debug @python_plugin@ @log_dir@/sudo_python_debug plugin@trace
 .RE
 .fi
 .PP
@@ -1769,11 +1769,11 @@ To try it, register it by adding the following lines to
 .nf
 .sp
 .RS 4n
-Plugin python_io python_plugin.so \e
+Plugin python_io @python_plugin@ \e
     ModulePath=@EXAMPLES@/example_debugging.py \e
     ClassName=DebugDemoPlugin
 
-Debug python_plugin.so \e
+Debug @python_plugin@ \e
     @log_dir@/sudo_python_debug plugin@trace,c_calls@trace
 .RE
 .fi
@@ -1872,7 +1872,7 @@ If you believe you have found a bug in
 you can submit a bug report at https://bugzilla.sudo.ws/
 .SH "SECURITY CONSIDERATIONS"
 All Python plugin handling is implemented inside the
-\fIpython_plugin.so\fR
+\fI@python_plugin@\fR
 dynamic plugin.
 Therefore, if no Python plugin is registered in
 sudo.conf(@mansectform@)
@@ -1882,32 +1882,13 @@ file,
 \fBsudo\fR
 will not load the Python interpreter or the Python libraries.
 .PP
-By default, a Python plugin can only import Python modules which are
-owned by
-\fIroot\fR
-and are only writable by the owner.
-The reason for this is to prevent a file getting imported accidentally
-which is modifiable by a non-root user.
 As
 \fBsudo\fR
-plugins run as
-\fIroot\fR,
-accidentally importing such file would make it possible for any user
-(having write access) to execute any code with administrative rights.
-.PP
-However, during development of a plugin this might not be very convenient.
-The
-sudo.conf(@mansectform@)
-\fIdeveloper_mode\fR
-option can be used to disable it.
-For example:
-.RS 6n
-Set developer_mode true
-.RE
-.PP
-This creates a security risk and is not recommended for production systems,
-it is intended to be used in a development environment (VM, container, etc).
-Before enabling developer mode, be sure that you understand the implications.
+runs plugins as
+\fBroot\fR,
+care must be taken when writing Python plugins to avoid creating
+security vulnerabilities, just as one would when writing plugins
+in C.
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or

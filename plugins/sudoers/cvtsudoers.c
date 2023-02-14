@@ -87,8 +87,6 @@ static struct option long_opts[] = {
 };
 
 sudo_dso_public int main(int argc, char *argv[]);
-static sudo_noreturn void help(void);
-static sudo_noreturn void usage(void);
 static bool convert_sudoers_sudoers(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
 static bool parse_sudoers(const char *input_file, struct cvtsudoers_config *conf);
 static bool parse_ldif(struct sudoers_parse_tree *parse_tree, const char *input_file, struct cvtsudoers_config *conf);
@@ -101,6 +99,8 @@ static void filter_userspecs(struct sudoers_parse_tree *parse_tree, struct cvtsu
 static void filter_defaults(struct sudoers_parse_tree *parse_tree, struct cvtsudoers_config *conf);
 static void alias_remove_unused(struct sudoers_parse_tree *parse_tree);
 static void alias_prune(struct sudoers_parse_tree *parse_tree, struct cvtsudoers_config *conf);
+sudo_noreturn static void help(void);
+sudo_noreturn static void usage(void);
 
 int
 main(int argc, char *argv[])
@@ -272,7 +272,7 @@ main(int argc, char *argv[])
 	if (strcasecmp(conf->input_format, "ldif") == 0) {
 	    input_format = format_ldif;
 	} else if (strcasecmp(conf->input_format, "sudoers") == 0) {
-	    input_format = format_sudoers;
+	    input_format = format_sudoers; // -V1048
 	} else {
 	    sudo_warnx(U_("unsupported input format %s"), conf->input_format);
 	    usage();
@@ -286,7 +286,7 @@ main(int argc, char *argv[])
 	    output_format = format_json;
 	    conf->store_options = true;
 	} else if (strcasecmp(conf->output_format, "ldif") == 0) {
-	    output_format = format_ldif;
+	    output_format = format_ldif; // -V1048
 	    conf->store_options = true;
 	} else if (strcasecmp(conf->output_format, "sudoers") == 0) {
 	    output_format = format_sudoers;

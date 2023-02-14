@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2018, 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2018, 2021-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "CVTSUDOERS" "1" "September 29, 2022" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
+.TH "CVTSUDOERS" "1" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -62,7 +62,7 @@ to make the policy rules specific to a host when merging multiple files.
 By default, the result is written to the standard output.
 .PP
 The options are as follows:
-.TP 12n
+.TP 8n
 \fB\-b\fR \fIdn\fR, \fB\--base\fR=\fIdn\fR
 The base DN (distinguished name) that will be used when performing
 LDAP queries.
@@ -73,12 +73,12 @@ If this option is not specified, the value of the
 \fRSUDOERS_BASE\fR
 environment variable will be used instead.
 Only necessary when converting to LDIF format.
-.TP 12n
+.TP 8n
 \fB\-c\fR \fIconf_file\fR, \fB\--config\fR=\fIconf_file\fR
 Specify the path to the configuration file.
 Defaults to
 \fI@sysconfdir@/cvtsudoers.conf\fR.
-.TP 12n
+.TP 8n
 \fB\-d\fR \fIdeftypes\fR, \fB\--defaults\fR=\fIdeftypes\fR
 Only convert
 \fIDefaults\fR
@@ -89,26 +89,26 @@ types may be specified, separated by a comma
 (\(oq\&,\(cq).
 The supported types are:
 .PP
-.RS 12n
+.RS 8n
 .PD 0
-.TP 10n
+.TP 9n
 all
 All Defaults entries.
 .PD
-.TP 10n
+.TP 9n
 global
 Global Defaults entries that are applied regardless of
 user, runas, host, or command.
-.TP 10n
+.TP 9n
 user
 Per-user Defaults entries.
-.TP 10n
+.TP 9n
 runas
 Per-runas user Defaults entries.
-.TP 10n
+.TP 9n
 host
 Per-host Defaults entries.
-.TP 10n
+.TP 9n
 command
 Per-command Defaults entries.
 .PP
@@ -124,21 +124,21 @@ option is not specified, all
 \fIDefaults\fR
 entries will be converted.
 .RE
-.TP 12n
+.TP 8n
 \fB\-e\fR, \fB\--expand-aliases\fR
 Expand aliases in
 \fIinput_file\fR.
 Aliases are preserved by default when the output
 \fIformat\fR
 is JSON or sudoers.
-.TP 12n
+.TP 8n
 \fB\-f\fR \fIoutput_format\fR, \fB\--output-format\fR=\fIoutput_format\fR
 Specify the output format (case-insensitive).
 The following formats are supported:
 .PP
-.RS 12n
+.RS 8n
 .PD 0
-.TP 10n
+.TP 9n
 CSV
 CSV (comma-separated value) files are often used by spreadsheets
 and report generators.
@@ -146,7 +146,7 @@ See
 \fICSV output format\fR
 for more details.
 .PD
-.TP 10n
+.TP 9n
 JSON
 JSON (JavaScript Object Notation) files are usually easier for
 third-party applications to consume than the traditional
@@ -159,7 +159,7 @@ format.
 See
 \fIJSON output format\fR
 for more details.
-.TP 10n
+.TP 9n
 LDIF
 LDIF (LDAP Data Interchange Format) files can be imported into an LDAP
 server for use with
@@ -167,7 +167,7 @@ sudoers.ldap(@mansectform@).
 .sp
 Conversion to LDIF has the following limitations:
 .PP
-.RS 10n
+.RS 9n
 .PD 0
 .TP 3n
 \fB\(bu\fR
@@ -182,7 +182,7 @@ sudoers LDAP schema so they are expanded during the conversion.
 .PP
 .RE
 .PD
-.TP 10n
+.TP 9n
 sudoers
 Traditional sudoers format.
 A new sudoers file will be reconstructed from the parsed input file.
@@ -192,24 +192,24 @@ output inline.
 .PP
 .RE
 .PD
-.TP 12n
+.TP 8n
 \fB\--group-file\fR=\fIfile\fR
 When the
 \fB\-M\fR
 option is also specified, perform group queries using
 \fIfile\fR
 instead of the system group database.
-.TP 12n
+.TP 8n
 \fB\-h\fR, \fB\--help\fR
 Display a short help message to the standard output and exit.
-.TP 12n
+.TP 8n
 \fB\-i\fR \fIinput_format\fR, \fB\--input-format\fR=\fIinput_format\fR
 Specify the input format.
 The following formats are supported:
 .PP
-.RS 12n
+.RS 8n
 .PD 0
-.TP 10n
+.TP 9n
 LDIF
 LDIF (LDAP Data Interchange Format) files can be exported from an LDAP
 server to convert security policies used by
@@ -219,7 +219,7 @@ that match the base DN will be processed.
 Not all sudoOptions specified in a sudoRole can be translated from
 LDIF to sudoers format.
 .PD
-.TP 10n
+.TP 9n
 sudoers
 Traditional sudoers format.
 This is the default input format.
@@ -227,12 +227,12 @@ This is the default input format.
 .PP
 .RE
 .PD
-.TP 12n
+.TP 8n
 \fB\-I\fR \fIincrement\fR, \fB\--increment\fR=\fIincrement\fR
 When generating LDIF output, increment each sudoOrder attribute by
 the specified number.
 Defaults to an increment of 1.
-.TP 12n
+.TP 8n
 \fB\-l\fR \fIlog_file\fR, \fB\--logfile\fR=\fIlog_file\fR
 Log conversion warnings to
 \fIlog_file\fR
@@ -240,7 +240,7 @@ instead of to the standard error.
 This is particularly useful when merging multiple
 \fIsudoers\fR
 files, which can generate a large number of warnings.
-.TP 12n
+.TP 8n
 \fB\-m\fR \fIfilter\fR, \fB\--match\fR=\fIfilter\fR
 Only output rules that match the specified
 \fIfilter\fR.
@@ -290,7 +290,7 @@ on the local system (see the
 option).
 Only aliases that are referenced by the filtered policy rules will
 be displayed.
-.TP 12n
+.TP 8n
 \fB\-M\fR, \fB\--match-local\fR
 When the
 \fB\-m\fR
@@ -305,7 +305,7 @@ is
 specified, users and groups in the filter do not need to exist on the
 local system, but all groups used for matching must be explicitly listed
 in the filter.
-.TP 12n
+.TP 8n
 \fB\-o\fR \fIoutput_file\fR, \fB\--output\fR=\fIoutput_file\fR
 Write the converted output to
 \fIoutput_file\fR.
@@ -316,7 +316,7 @@ is specified, or if it is
 the converted
 \fIsudoers\fR
 policy will be written to the standard output.
-.TP 12n
+.TP 8n
 \fB\-O\fR \fIstart_point\fR, \fB\--order-start\fR=\fIstart_point\fR
 When generating LDIF output, use the number specified by
 \fIstart_point\fR
@@ -329,14 +329,14 @@ option for details.
 Defaults to a starting point of 1.
 A starting point of 0 will disable the generation of sudoOrder
 attributes in the resulting LDIF file.
-.TP 12n
+.TP 8n
 \fB\--passwd-file\fR=\fIfile\fR
 When the
 \fB\-M\fR
 option is also specified, perform passwd queries using
 \fIfile\fR
 instead of the system passwd database.
-.TP 12n
+.TP 8n
 \fB\-p\fR, \fB\--prune-matches\fR
 When the
 \fB\-m\fR
@@ -344,7 +344,7 @@ option is also specified,
 \fBcvtsudoers\fR
 will prune out non-matching users, groups, and hosts from
 matching entries.
-.TP 12n
+.TP 8n
 \fB\-P\fR \fIpadding\fR, \fB\--padding\fR=\fIpadding\fR
 When generating LDIF output, construct the initial sudoOrder value by
 concatenating
@@ -368,7 +368,7 @@ If the number of sudoRole entries is larger than the padding would allow,
 \fBcvtsudoers\fR
 will exit with an error.
 By default, no padding is performed.
-.TP 12n
+.TP 8n
 \fB\-s\fR \fIsections\fR, \fB\--suppress\fR=\fIsections\fR
 Suppress the output of specific
 \fIsections\fR
@@ -382,7 +382,7 @@ and
 \fBprivileges\fR
 (which may be shortened to
 \fBprivs\fR).
-.TP 12n
+.TP 8n
 \fB\-V\fR, \fB\--version\fR
 Print the
 \fBcvtsudoers\fR
@@ -899,30 +899,30 @@ The following names and values are supported:
 .PP
 .RS 6n
 .PD 0
-.TP 10n
+.TP 9n
 command
 A string containing the command to run.
 The special value
 \fBALL\fR
 it will match any command.
 .PD
-.TP 10n
+.TP 9n
 negated
 A boolean value that, if true, will negate any comparison performed
 with the object.
-.TP 10n
+.TP 9n
 sha224
 A string containing the SHA224 digest of the
 \fIcommand\fR.
-.TP 10n
+.TP 9n
 sha256
 A string containing the SHA256 digest of the
 \fIcommand\fR.
-.TP 10n
+.TP 9n
 sha384
 A string containing the SHA384 digest of the
 \fIcommand\fR.
-.TP 10n
+.TP 9n
 sha512
 A string containing the SHA512 digest of the
 \fIcommand\fR.
@@ -1072,7 +1072,7 @@ defaults_type,binding,name,operator,value
 .RS 6n
 .sp
 The fields are as follows:
-.TP 10n
+.TP 6n
 defaults_type
 The type of
 \fIDefaults\fR
@@ -1083,7 +1083,7 @@ setting; one of
 \fIdefaults_runas\fR,
 or
 \fIdefaults_user\fR.
-.TP 10n
+.TP 6n
 binding
 For
 \fIdefaults_command\fR,
@@ -1092,12 +1092,12 @@ For
 and
 \fIdefaults_user\fR
 this is the value that must match for the setting to be applied.
-.TP 10n
+.TP 6n
 name
 The name of the
 \fIDefaults\fR
 setting.
-.TP 10n
+.TP 6n
 operator
 The operator determines how the value is applied to the setting.
 It may be either
@@ -1108,8 +1108,9 @@ It may be either
 or
 \(oq-=\(cq
 (remove).
-.TP 10n
+.TP 6n
 value
+.br
 The setting's value, usually a string or, for
 settings used in a boolean context,
 \fItrue\fR
@@ -1141,7 +1142,7 @@ alias_type,alias_name,members
 .RS 6n
 .sp
 The fields are as follows:
-.TP 10n
+.TP 6n
 alias_type
 The type of alias; one of
 \fICmnd_Alias\fR,
@@ -1149,11 +1150,11 @@ The type of alias; one of
 \fIRunas_Alias\fR,
 or
 \fIUser_Alias\fR.
-.TP 10n
+.TP 6n
 alias_name
 The name of the alias; a string starting with an upper-case letter that
 consists of upper-case letters, digits, or underscores.
-.TP 10n
+.TP 6n
 members
 A comma-separated list of members belonging to the alias.
 Due to the use of commas,
@@ -1181,13 +1182,13 @@ rule,user,host,runusers,rungroups,options,command
 .RS 6n
 .sp
 The fields are as follows:
-.TP 10n
+.TP 6n
 rule
 This field indicates a
 \fIsudoers\fR
 \fIrule\fR
 entry.
-.TP 10n
+.TP 6n
 user
 The user the rule applies to.
 This may also be a Unix group (preceded by a
@@ -1202,7 +1203,7 @@ or a
 If set to the special value
 \fBALL\fR,
 it will match any user.
-.TP 10n
+.TP 6n
 host
 The host the rule applies to.
 This may also be a netgroup (preceded by a
@@ -1213,7 +1214,7 @@ or a
 If set to the special value
 \fBALL\fR,
 it will match any host.
-.TP 10n
+.TP 6n
 runusers
 An optional comma-separated list of users (or
 \fIRunas_Alias\fRes)
@@ -1224,9 +1225,8 @@ If set to the special value
 \fBALL\fR,
 it will match any user.
 If empty, the root user is assumed.
-.TP 10n
+.TP 6n
 rungroups
-.br
 An optional comma-separated list of groups (or
 \fIRunas_Alias\fRes)
 the command may be run as.
@@ -1238,7 +1238,7 @@ it will match any group.
 If empty, the
 \fIrunuser\fR's
 group is used.
-.TP 10n
+.TP 6n
 options
 An optional list of
 \fIDefaults\fR
@@ -1249,7 +1249,7 @@ entries in
 \fIsudoers\fR
 are converted to
 \fIoptions\fR.
-.TP 10n
+.TP 6n
 commands
 A list of commands, with optional arguments, that the user is allowed to run.
 If set to the special value

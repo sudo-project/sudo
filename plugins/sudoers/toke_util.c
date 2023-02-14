@@ -51,7 +51,7 @@ copy_string(char *dst, const char *src, size_t len)
 
     while (len--) {
 	if (*src == '\\' && len) {
-	    if (src[1] == 'x' && len >= 3 && (h = hexchar(src + 2)) != -1) {
+	    if (src[1] == 'x' && len >= 3 && (h = sudo_hexchar(src + 2)) != -1) {
 		*dst++ = h;
 		src += 4;
 		len -= 3;

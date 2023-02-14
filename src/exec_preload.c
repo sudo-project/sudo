@@ -63,8 +63,10 @@ fmtstr(sudo_alloc_fn_t alloc_fn, sudo_free_fn_t free_fn, const char *ofmt, ...)
     for (fmt = ofmt; *fmt != '\0'; ) {
 	if (fmt[0] == '%') {
 	    switch (fmt[1]) {
-	    case '%':
 	    case 'c':
+		(void)va_arg(ap, int);
+		FALLTHROUGH;
+	    case '%':
 		size++;
 		fmt += 2;
 		continue;
