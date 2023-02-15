@@ -171,12 +171,12 @@ sudo_dso_public int  sudo_fatal_callback_deregister_v1(sudo_fatal_callback_t fun
 sudo_dso_public int  sudo_fatal_callback_register_v1(sudo_fatal_callback_t func);
 sudo_dso_public char *sudo_warn_gettext_v1(const char *domainname, const char *msgid) sudo_attr_fmt_arg(2);
 sudo_dso_public void sudo_warn_set_locale_func_v1(sudo_warn_setlocale_t func);
-sudo_dso_public sudo_noreturn void sudo_fatal_nodebug_v1(const char *fmt, ...) sudo_printf0like(1, 2);
-sudo_dso_public sudo_noreturn void sudo_fatalx_nodebug_v1(const char *fmt, ...) sudo_printflike(1, 2);
-sudo_dso_public sudo_noreturn void sudo_gai_fatal_nodebug_v1(int errnum, const char *fmt, ...) sudo_printflike(2, 3);
-sudo_dso_public sudo_noreturn void sudo_vfatal_nodebug_v1(const char *fmt, va_list ap) sudo_printf0like(1, 0);
-sudo_dso_public sudo_noreturn void sudo_vfatalx_nodebug_v1(const char *fmt, va_list ap) sudo_printflike(1, 0);
-sudo_dso_public sudo_noreturn void sudo_gai_vfatal_nodebug_v1(int errnum, const char *fmt, va_list ap) sudo_printflike(2, 0);
+sudo_noreturn sudo_dso_public void sudo_fatal_nodebug_v1(const char *fmt, ...) sudo_printf0like(1, 2);
+sudo_noreturn sudo_dso_public void sudo_fatalx_nodebug_v1(const char *fmt, ...) sudo_printflike(1, 2);
+sudo_noreturn sudo_dso_public void sudo_gai_fatal_nodebug_v1(int errnum, const char *fmt, ...) sudo_printflike(2, 3);
+sudo_noreturn sudo_dso_public void sudo_vfatal_nodebug_v1(const char *fmt, va_list ap) sudo_printf0like(1, 0);
+sudo_noreturn sudo_dso_public void sudo_vfatalx_nodebug_v1(const char *fmt, va_list ap) sudo_printflike(1, 0);
+sudo_noreturn sudo_dso_public void sudo_gai_vfatal_nodebug_v1(int errnum, const char *fmt, va_list ap) sudo_printflike(2, 0);
 sudo_dso_public void sudo_warn_nodebug_v1(const char *fmt, ...) sudo_printf0like(1, 2);
 sudo_dso_public void sudo_warnx_nodebug_v1(const char *fmt, ...) sudo_printflike(1, 2);
 sudo_dso_public void sudo_gai_warn_nodebug_v1(int errnum, const char *fmt, ...) sudo_printflike(2, 3);
