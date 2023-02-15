@@ -357,7 +357,8 @@ clean:
 mostlyclean: clean
 
 distclean: clean
-	-rm -rf Makefile .libs $(shlib_map) $(shlib_opt) sudo_usage.h
+	-rm -rf Makefile intercept.exp sudo_usage.h \
+	    .libs $(shlib_map) $(shlib_opt)
 	@if [ -n "$(DEVEL)" -a "$(devdir)" != "$(srcdir)" ]; then \
 	    cmd='rm -rf $(GENERATED)'; \
 	    echo "$$cmd"; eval $$cmd; \

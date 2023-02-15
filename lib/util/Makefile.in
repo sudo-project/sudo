@@ -506,8 +506,9 @@ clean:
 mostlyclean: clean
 
 distclean: clean
-	-rm -rf Makefile mksiglist mksiglist.h siglist.c mksigname \
-	    mksigname.h signame.c .libs $(shlib_exp) $(shlib_map) $(shlib_opt)
+	-rm -rf Makefile mksiglist mksiglist.h siglist.c \
+	    mksigname mksigname.h signame.c regress/harness \
+	    .libs $(shlib_exp) $(shlib_map) $(shlib_opt)
 
 clobber: distclean
 
