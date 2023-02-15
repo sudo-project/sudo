@@ -195,7 +195,7 @@ fuzz_logsrvd_conf_seed_corpus.zip:
 	rm -rf $$tdir
 
 run-fuzz_logsrvd_conf: fuzz_logsrvd_conf
-	l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'` || true; \
+	l=`locale -a 2>&1 | $(EGREP) -i '^C\.UTF-?8$$' | $(SED) 1q` || true; \
 	test -n "$$l" || l="C"; \
 	LC_ALL="$$l"; export LC_ALL; \
 	unset LANG || LANG=; \
@@ -256,7 +256,7 @@ fuzz: run-fuzz_logsrvd_conf
 
 check-fuzzer: $(FUZZ_PROGS)
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'` || true; \
+	    l=`locale -a 2>&1 | $(EGREP) -i '^C\.UTF-?8$$' | $(SED) 1q` || true; \
 	    test -n "$$l" || l="C"; \
 	    LC_ALL="$$l"; export LC_ALL; \
 	    unset LANG || LANG=; \
@@ -269,7 +269,7 @@ check-fuzzer: $(FUZZ_PROGS)
 
 check: $(TEST_PROGS) check-fuzzer
 	@if test X"$(cross_compiling)" != X"yes"; then \
-	    l=`locale -a 2>&1 | $(EGREP) -i '^C.UTF-?8$$'` || true; \
+	    l=`locale -a 2>&1 | $(EGREP) -i '^C\.UTF-?8$$' | $(SED) 1q` || true; \
 	    test -n "$$l" || l="C"; \
 	    LC_ALL="$$l"; export LC_ALL; \
 	    unset LANG || LANG=; \
