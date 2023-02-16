@@ -2385,7 +2385,7 @@ dnl
 dnl C compiler checks (to be done after os checks)
 dnl AC_PROG_CC_STDC is deprecated in autoconf 2.70 and above.
 dnl
-m4_case(m4_defn([AC_AUTOCONF_VERSION]), [2.69*], [AC_PROG_CC_STDC])
+m4_bmatch(m4_defn([AC_AUTOCONF_VERSION]), [^2\.69], [AC_PROG_CC_STDC])
 AC_C_CONST
 AC_C_INLINE
 AC_C_VOLATILE
