@@ -277,6 +277,12 @@ case "$osversion" in
 	make_opts="${make_opts}${make_opts+ }"'docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
 	;;
     deb*|ubu*)
+	# Sudo-specific executables moved to /usr/libexec/sudo starting in
+	# Debian: Debian 12 (Bookworm)
+	# Ubuntu: Ubuntu 22.04 (Jammy Jellyfish)
+	# Previously, they were stored in /usr/lib/sudo.
+	libexec=lib
+
 	# AppArmor is enabled by default starting in
 	# Debian: Debian 10 (Buster)
 	# Ubuntu: Ubuntu 12.04 (Precise Pangolin)
@@ -286,10 +292,16 @@ case "$osversion" in
 		if [ -z $osmajor ] || [ $osmajor -ge 10 ]; then
 		    with_apparmor=true
 		fi
+		if [ -z $osmajor ] || [ $osmajor -ge 12 ]; then
+		    libexec=libexec
+		fi
 		;;
 	    ubu*)
 		if [ -z $osmajor ] || [ $osmajor -ge 14 ]; then
 		    with_apparmor=true
+		fi
+		if [ -z $osmajor ] || [ $osmajor -ge 22 ]; then
+		    libexec=libexec
 		fi
 		;;
 	esac
@@ -338,7 +350,7 @@ case "$osversion" in
 		--disable-root-mailer
 		--with-sendmail=/usr/sbin/sendmail
 		--mandir=/usr/share/man
-		--libexecdir=/usr/lib
+		--libexecdir=/usr/$libexec
 		--with-linux-audit
 		$configure_opts"
 	# Use correct libaudit dependency
