@@ -17,7 +17,7 @@ dnl WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
-AC_PREREQ([2.70])
+AC_PREREQ([2.69])
 AC_INIT([sudo], [1.9.13], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
@@ -2383,7 +2383,9 @@ AS_IF([test -n "$with_libraries"], [
 
 dnl
 dnl C compiler checks (to be done after os checks)
+dnl AC_PROG_CC_STDC is deprecated in autoconf 2.70 and above.
 dnl
+m4_case(m4_defn([AC_AUTOCONF_VERSION]), [2.69*], [AC_PROG_CC_STDC])
 AC_C_CONST
 AC_C_INLINE
 AC_C_VOLATILE
@@ -2676,6 +2678,7 @@ AC_CHECK_FUNCS([getgrouplist], [], [
 		dnl	AC_DEFINE([HAVE___NSS_INITF_GROUP])
 		dnl    ])
 		dnl])
+		:
 	    ])
 	])
 	;;
