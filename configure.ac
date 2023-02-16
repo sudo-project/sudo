@@ -2439,7 +2439,17 @@ break)
 # Check for large file and 64-bit time support.
 #
 AC_SYS_LARGEFILE
-AC_SYS_YEAR2038
+m4_ifdef([AC_SYS_YEAR2038], [AC_SYS_YEAR2038], [
+    # GNU libc only allows setting _TIME_BITS when FILE_OFFSET_BITS is also set.    # GNU libc defines __TIMESIZE on systems where _TIME_BITS can be set.
+    AS_IF([test X"$ac_cv_sys_file_offset_bits" = X"yes"], [
+	AC_CHECK_DECL(__TIMESIZE, [
+	    AC_DEFINE([_TIME_BITS], [64], [Number of bits in a timestamp, on hosts where this is settable.])
+	], [], [
+AC_INCLUDES_DEFAULT
+#include <time.h>
+	])
+    ])
+])
 
 #
 # Don't allow undefined symbols, even in shared libraries, if possible.
