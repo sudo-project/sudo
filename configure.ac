@@ -17,8 +17,8 @@ dnl WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
-AC_PREREQ([2.70])
-AC_INIT([sudo], [1.9.13], [https://bugzilla.sudo.ws/], [sudo])
+AC_PREREQ([2.69])
+AC_INIT([sudo], [1.9.13p1], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 AC_CONFIG_AUX_DIR([scripts])
@@ -2383,7 +2383,9 @@ AS_IF([test -n "$with_libraries"], [
 
 dnl
 dnl C compiler checks (to be done after os checks)
+dnl AC_PROG_CC_STDC is deprecated in autoconf 2.70 and above.
 dnl
+m4_bmatch(m4_defn([AC_AUTOCONF_VERSION]), [^2\.69], [AC_PROG_CC_STDC])
 AC_C_CONST
 AC_C_INLINE
 AC_C_VOLATILE
@@ -2439,7 +2441,17 @@ break)
 # Check for large file and 64-bit time support.
 #
 AC_SYS_LARGEFILE
-AC_SYS_YEAR2038
+m4_ifdef([AC_SYS_YEAR2038], [AC_SYS_YEAR2038], [
+    # GNU libc only allows setting _TIME_BITS when FILE_OFFSET_BITS is also set.    # GNU libc defines __TIMESIZE on systems where _TIME_BITS can be set.
+    AS_IF([test X"$ac_cv_sys_file_offset_bits" = X"yes"], [
+	AC_CHECK_DECL(__TIMESIZE, [
+	    AC_DEFINE([_TIME_BITS], [64], [Number of bits in a timestamp, on hosts where this is settable.])
+	], [], [
+AC_INCLUDES_DEFAULT
+#include <time.h>
+	])
+    ])
+])
 
 #
 # Don't allow undefined symbols, even in shared libraries, if possible.
@@ -2666,6 +2678,7 @@ AC_CHECK_FUNCS([getgrouplist], [], [
 		dnl	AC_DEFINE([HAVE___NSS_INITF_GROUP])
 		dnl    ])
 		dnl])
+		:
 	    ])
 	])
 	;;
@@ -3022,7 +3035,7 @@ AC_CHECK_FUNCS([setpassent setgroupent])
 dnl
 dnl Function checks for sudo_noexec
 dnl
-AS_IF([test X"$with_noexec" != X"no"],
+AS_IF([test X"$with_noexec" != X"no"], [
     # Check for non-standard exec functions
     AC_CHECK_FUNCS([exect execvP execvpe])
     # Check for posix_spawn, and posix_spawnp

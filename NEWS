@@ -1,3 +1,22 @@
+What's new in Sudo 1.9.13p1
+
+ * Fixed a typo in the configure script that resulted in a line
+   like "]: command not found" in the output.  GitHub issue #238.
+
+ * Corrected the order of the C23 [[noreturn]] attribute in function
+   prototypes.  This fixes a build error with GCC 13.  GitHub issue
+   #239.
+
+ * The "check" make target misbehaved when there was more than
+   one version of the UTF-8 C locale in the output of "locale -a".
+   GitHub issue #241.
+
+ * Removed a dependency on the AC_SYS_YEAR2038 macro in configure.ac.
+   This was added in autoconf 2.72 but sudo's configure.ac only
+   required autoconf 2.70.
+
+ * Relaxed the autoconf version requirement to version 2.69.
+
 What's new in Sudo 1.9.13
 
  * Fixed a bug running relative commands via sudo when "log_subcmds"
