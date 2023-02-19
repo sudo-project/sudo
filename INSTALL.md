@@ -226,9 +226,11 @@ Defaults are listed in brackets after the description.
         -fstack-clash-protection, -fcf-protection and linking with
         -zrelro, -znow, and -znoexecstack where supported.
 
-    --disable-ssp
-        Disable use of the -fstack-protector compiler option.
-        This does not affect the other hardening options.
+    --disable-largefile
+        Disable support for large (64-bit) files on 32-bit systems
+        where the maximum file size is normally 4GB.  By default,
+        configure will enable support for 64-bit file sizes if
+        supported by the operating system.
 
     --disable-leaks
         Avoid leaking memory even when we are headed for exit,
@@ -278,6 +280,10 @@ Defaults are listed in brackets after the description.
         instead.  This option may only be used in conjunction with
         the --enable-static-sudoers option.
 
+    --disable-ssp
+        Disable use of the -fstack-protector compiler option.
+        This does not affect the other hardening options.
+
     --enable-static-sudoers
         By default, the sudoers plugin is built and installed as a
         dynamic shared object.  When the --enable-static-sudoers
@@ -293,6 +299,11 @@ Defaults are listed in brackets after the description.
         systemd.  If this option is not specified, configure will
         use the /usr/lib/tmpfiles.d directory if the file
         /usr/lib/tmpfiles.d/systemd.conf exists.
+
+    --disable-year2038
+	Disable support for dates after January 2038.  By default,
+        configure will enable support for 64-bit time_t values if
+	supported by the operating system.
 
     --enable-zlib[=location]
         Enable the use of the zlib compress library when storing
