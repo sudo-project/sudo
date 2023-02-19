@@ -47,6 +47,12 @@
 # include <sys/pstat.h>
 #endif
 
+#if defined(__gnu_hurd__)
+# include <hurd.h>
+# include <mach/task_info.h>
+# include <mach/time_value.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -296,6 +302,31 @@ get_starttime(pid_t pid, struct timespec *starttime)
 
     sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	"unable to get start time for %d via pstat_getproc", (int)pid);
+    debug_return_int(-1);
+}
+#elif defined(__gnu_hurd__)
+int
+get_starttime(pid_t pid, struct timespec *starttime)
+{
+    mach_msg_type_number_t count;
+    struct task_basic_info info;
+    kern_return_t error;
+    task_t target;
+    debug_decl(get_starttime, SUDOERS_DEBUG_UTIL);
+
+    target = pid2task(pid);
+    if (target != MACH_PORT_NULL) {
+	count = sizeof(info) / sizeof(integer_t);
+	error = task_info(target, TASK_BASIC_INFO, (task_info_t)&info, &count);
+	if (error == KERN_SUCCESS) {
+	    starttime->tv_sec = info.creation_time.seconds;
+	    starttime->tv_nsec = info.creation_time.microseconds * 1000;
+	    debug_return_int(0);
+	}
+    }
+
+    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	"unable to get start time for %d via task_info", (int)pid);
     debug_return_int(-1);
 }
 #else

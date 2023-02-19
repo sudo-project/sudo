@@ -32,7 +32,7 @@
 
 sudo_dso_public int main(int argc, char *argv[]);
 
-#if defined(sudo_kinfo_proc) || defined(__linux__) || defined(HAVE_STRUCT_PSINFO_PR_TTYDEV) || defined(HAVE_PSTAT_GETPROC)
+#if defined(sudo_kinfo_proc) || defined(__linux__) || defined(HAVE_STRUCT_PSINFO_PR_TTYDEV) || defined(HAVE_PSTAT_GETPROC) || defined(__gnu_hurd__)
 
 #ifdef __linux__
 static int
