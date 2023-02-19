@@ -37825,7 +37825,7 @@ if test ${with_netsvc-"no"} != "no"; then
 elif test ${with_nsswitch-"yes"} != "no"; then
     echo "  nsswitch file			: ${nsswitch_conf}" >&6
 fi
-echo "  intercept file			: ${intercept_file}" >&6
+echo "  intercept file		: ${intercept_file}" >&6
 echo "  noexec file			: ${noexec_file}" >&6
 echo "  secure path			: ${with_secure_path-no}" >&6
 echo "  askpass helper file		: ${with_askpass-no}" >&6

@@ -4517,7 +4517,7 @@ if test ${with_netsvc-"no"} != "no"; then
 elif test ${with_nsswitch-"yes"} != "no"; then
     echo "  nsswitch file			: ${nsswitch_conf}" >&AS_MESSAGE_FD
 fi
-echo "  intercept file			: ${intercept_file}" >&AS_MESSAGE_FD
+echo "  intercept file		: ${intercept_file}" >&AS_MESSAGE_FD
 echo "  noexec file			: ${noexec_file}" >&AS_MESSAGE_FD
 echo "  secure path			: ${with_secure_path-no}" >&AS_MESSAGE_FD
 echo "  askpass helper file		: ${with_askpass-no}" >&AS_MESSAGE_FD
