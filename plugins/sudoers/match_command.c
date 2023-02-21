@@ -736,7 +736,7 @@ static bool
 command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
     int rootfd, bool intercepted, const struct command_digest_list *digests)
 {
-    return command_matches_fnmatch(sudoers_cmnd, sudoers_args,
+    return command_matches_fnmatch(sudoers_cmnd, sudoers_args, rootfd,
 	intercepted, digests);
 }
 
