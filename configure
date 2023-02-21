@@ -700,6 +700,7 @@ FGREP
 EGREP
 GREP
 SED
+LIBTOOL
 host_os
 host_vendor
 host_cpu
@@ -722,6 +723,9 @@ CPP
 OBJEXT
 EXEEXT
 ac_ct_CC
+CPPFLAGS
+LDFLAGS
+CFLAGS
 CC
 python_plugin
 sudoers_plugin
@@ -867,11 +871,7 @@ ZLIB_LDFLAGS
 LIBUTIL_LDFLAGS
 SUDOERS_LDFLAGS
 SUDO_LDFLAGS
-LDFLAGS
-CPPFLAGS
 PROGS
-CFLAGS
-LIBTOOL
 target_alias
 host_alias
 build_alias
@@ -3449,12 +3449,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 ac_config_headers="$ac_config_headers config.h pathnames.h"
-
-
-
-
-
-
 
 
 
