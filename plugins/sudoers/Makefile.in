@@ -176,19 +176,20 @@ AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 LIBPARSESUDOERS_OBJS = alias.lo b64_decode.lo canon_path.lo defaults.lo \
 		       digestname.lo exptilde.lo filedigest.lo gentime.lo \
 		       gram.lo match.lo match_addr.lo match_command.lo \
-		       match_digest.lo pivot.lo pwutil.lo pwutil_impl.lo \
+		       match_digest.lo pwutil.lo pwutil_impl.lo \
 		       redblack.lo strlist.lo sudoers_debug.lo timeout.lo \
 		       timestr.lo toke.lo toke_util.lo
 
 LIBPARSESUDOERS_IOBJS = $(LIBPARSESUDOERS_OBJS:.lo=.i) passwd.i
 
-SUDOERS_OBJS = $(AUTH_OBJS) audit.lo boottime.lo check.lo editor.lo env.lo \
-	       sudoers_hooks.lo env_pattern.lo file.lo find_path.lo \
-	       fmtsudoers.lo gc.lo goodpath.lo group_plugin.lo interfaces.lo \
-	       iolog.lo iolog_path_escapes.lo locale.lo log_client.lo \
-	       logging.lo parse.lo policy.lo prompt.lo serialize_list.lo \
-	       set_perms.lo starttime.lo strlcpy_unesc.lo strvec_join.lo \
-	       sudo_nss.lo sudoers.lo timestamp.lo unesc_str.lo @SUDOERS_OBJS@
+SUDOERS_OBJS = $(AUTH_OBJS) audit.lo boottime.lo check.lo editor.lo \
+	       env.lo sudoers_hooks.lo env_pattern.lo file.lo \
+	       find_path.lo fmtsudoers.lo gc.lo goodpath.lo group_plugin.lo \
+	       interfaces.lo iolog.lo iolog_path_escapes.lo locale.lo \
+	       log_client.lo logging.lo parse.lo pivot.lo policy.lo \
+	       prompt.lo serialize_list.lo set_perms.lo starttime.lo \
+	       strlcpy_unesc.lo strvec_join.lo sudo_nss.lo sudoers.lo \
+	       timestamp.lo unesc_str.lo @SUDOERS_OBJS@
 
 SUDOERS_IOBJS = $(SUDOERS_OBJS:.lo=.i)
 

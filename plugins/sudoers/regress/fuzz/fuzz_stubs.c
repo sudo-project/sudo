@@ -56,6 +56,18 @@ init_eventlog_config(void)
     return;
 }
 
+bool
+pivot_root(const char *new_root, int fds[2])
+{
+    return true;
+}
+
+bool
+unpivot_root(int fds[2])
+{
+    return true;
+}
+
 int
 group_plugin_query(const char *user, const char *group, const struct passwd *pw)
 {

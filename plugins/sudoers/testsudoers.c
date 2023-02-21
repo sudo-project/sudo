@@ -506,6 +506,18 @@ init_eventlog_config(void)
     return;
 }
 
+bool
+pivot_root(const char *new_root, int fds[2])
+{
+    return true;
+}
+
+bool
+unpivot_root(int fds[2])
+{
+    return true;
+}
+
 int
 set_cmnd_path(const char *runchroot)
 {
