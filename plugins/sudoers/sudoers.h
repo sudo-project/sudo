@@ -288,12 +288,11 @@ struct timespec;
 #define YY_DECL int sudoerslex(void)
 
 /* goodpath.c */
-bool sudo_goodpath(const char *path, const char *runchroot, struct stat *sbp);
+bool sudo_goodpath(const char *path, struct stat *sbp);
 
 /* findpath.c */
 int find_path(const char *infile, char **outfile, struct stat *sbp,
-    const char *path, const char *runchroot, int ignore_dot,
-    char * const *allowlist);
+    const char *path, int ignore_dot, char * const *allowlist);
 
 /* check.c */
 int check_user(int validate, int mode);

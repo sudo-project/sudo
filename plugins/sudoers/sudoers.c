@@ -998,7 +998,7 @@ set_cmnd_path(const char *runchroot)
     const char *cmnd_in;
     char *cmnd_out = NULL;
     char *path = user_path;
-    int ret;
+    int ret, pivot_fds[2];
     debug_decl(set_cmnd_path, SUDOERS_DEBUG_PLUGIN);
 
     cmnd_in = ISSET(sudo_mode, MODE_CHECK) ? NewArgv[1] : NewArgv[0];
@@ -1009,10 +1009,16 @@ set_cmnd_path(const char *runchroot)
     user_cmnd = NULL;
     if (def_secure_path && !user_is_exempt())
 	path = def_secure_path;
+
+    /* Pivot root. */
+    if (runchroot != NULL) {
+	if (!pivot_root(runchroot, pivot_fds))
+	    goto error;
+    }
+
     if (!set_perms(PERM_RUNAS))
 	goto error;
-    ret = find_path(cmnd_in, &cmnd_out, user_stat, path,
-	runchroot, def_ignore_dot, NULL);
+    ret = find_path(cmnd_in, &cmnd_out, user_stat, path, def_ignore_dot, NULL);
     if (!restore_perms())
 	goto error;
     if (ret == NOT_FOUND) {
@@ -1020,7 +1026,7 @@ set_cmnd_path(const char *runchroot)
 	if (!set_perms(PERM_USER))
 	    goto error;
 	ret = find_path(cmnd_in, &cmnd_out, user_stat, path,
-	    runchroot, def_ignore_dot, NULL);
+	    def_ignore_dot, NULL);
 	if (!restore_perms())
 	    goto error;
     }
@@ -1030,8 +1036,14 @@ set_cmnd_path(const char *runchroot)
     else
 	user_cmnd = cmnd_out;
 
+    /* Restore root. */
+    if (runchroot != NULL)
+	(void)unpivot_root(pivot_fds);
+
     debug_return_int(ret);
 error:
+    if (runchroot != NULL)
+	(void)unpivot_root(pivot_fds);
     free(cmnd_out);
     debug_return_int(NOT_FOUND_ERROR);
 }
