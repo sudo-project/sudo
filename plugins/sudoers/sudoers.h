@@ -489,4 +489,8 @@ void unescape_string(char *str);
 /* serialize_list.c */
 char *serialize_list(const char *varname, struct list_members *members);
 
+/* pivot_root.c */
+bool pivot_root(const char *new_root, int fds[2]);
+bool unpivot_root(int fds[2]);
+
 #endif /* SUDOERS_SUDOERS_H */

@@ -661,6 +661,7 @@ plugins/sudoers/mkdefaults
 plugins/sudoers/parse.c
 plugins/sudoers/parse.h
 plugins/sudoers/parse_ldif.c
+plugins/sudoers/pivot.c
 plugins/sudoers/po/README
 plugins/sudoers/po/ast.mo
 plugins/sudoers/po/ast.po

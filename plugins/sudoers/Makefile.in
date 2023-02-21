@@ -176,7 +176,7 @@ AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 LIBPARSESUDOERS_OBJS = alias.lo b64_decode.lo defaults.lo digestname.lo \
 		       exptilde.lo filedigest.lo gentime.lo gram.lo \
 		       match.lo match_addr.lo match_command.lo \
-		       match_digest.lo pwutil.lo pwutil_impl.lo \
+		       match_digest.lo pivot.lo pwutil.lo pwutil_impl.lo \
 		       redblack.lo strlist.lo sudoers_debug.lo timeout.lo \
 		       timestr.lo toke.lo toke_util.lo
 
@@ -2378,6 +2378,26 @@ passwd.i: $(authdir)/passwd.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 passwd.plog: passwd.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(authdir)/passwd.c --i-file $< --output-file $@
+pivot.lo: $(srcdir)/pivot.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+          $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+          $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+          $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/pivot.c
+pivot.i: $(srcdir)/pivot.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
+          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+          $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+          $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+          $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(top_builddir)/config.h $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+pivot.plog: pivot.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/pivot.c --i-file $< --output-file $@
 policy.lo: $(srcdir)/policy.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
            $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
@@ -2925,8 +2945,9 @@ sudoreplay.o: $(srcdir)/sudoreplay.c $(incdir)/compat/getopt.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
               $(incdir)/sudo_event.h $(incdir)/sudo_eventlog.h \
               $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
-              $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
-              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/logging.h \
+              $(incdir)/sudo_iolog.h $(incdir)/sudo_lbuf.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/logging.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/sudoreplay.c
 sudoreplay.i: $(srcdir)/sudoreplay.c $(incdir)/compat/getopt.h \
@@ -2934,8 +2955,9 @@ sudoreplay.i: $(srcdir)/sudoreplay.c $(incdir)/compat/getopt.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
               $(incdir)/sudo_event.h $(incdir)/sudo_eventlog.h \
               $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
-              $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
-              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/logging.h \
+              $(incdir)/sudo_iolog.h $(incdir)/sudo_lbuf.h \
+              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+              $(incdir)/sudo_util.h $(srcdir)/logging.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 sudoreplay.plog: sudoreplay.i
