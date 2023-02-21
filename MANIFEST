@@ -740,6 +740,7 @@ plugins/sudoers/prompt.c
 plugins/sudoers/pwutil.c
 plugins/sudoers/pwutil.h
 plugins/sudoers/pwutil_impl.c
+plugins/sudoers/canon_path.c
 plugins/sudoers/redblack.c
 plugins/sudoers/redblack.h
 plugins/sudoers/regress/check_symbols/check_symbols.c

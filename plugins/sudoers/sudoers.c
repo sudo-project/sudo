@@ -1007,6 +1007,8 @@ set_cmnd_path(const char *runchroot)
     list_cmnd = NULL;
     free(user_cmnd);
     user_cmnd = NULL;
+    canon_path_free(user_cmnd_dir);
+    user_cmnd_dir = NULL;
     if (def_secure_path && !user_is_exempt())
 	path = def_secure_path;
 
@@ -1029,6 +1031,17 @@ set_cmnd_path(const char *runchroot)
 	    def_ignore_dot, NULL);
 	if (!restore_perms())
 	    goto error;
+    }
+
+    if (cmnd_out != NULL) {
+	char *slash = strrchr(cmnd_out, '/');
+	if (slash != NULL) {
+	    *slash = '\0';
+	    user_cmnd_dir = canon_path(cmnd_out);
+	    if (user_cmnd_dir == NULL && errno == ENOMEM)
+		goto error;
+	    *slash = '/';
+	}
     }
 
     if (ISSET(sudo_mode, MODE_CHECK))
@@ -1849,6 +1862,7 @@ sudoers_cleanup(void)
     sudo_user_free();
     sudo_freepwcache();
     sudo_freegrcache();
+    canon_path_free_cache();
 
     /* Clear globals */
     list_pw = NULL;
@@ -1908,6 +1922,7 @@ sudo_user_free(void)
 	    free(user_srunhost);
     free(user_runhost);
     free(user_cmnd);
+    canon_path_free(user_cmnd_dir);
     free(user_args);
     free(list_cmnd);
     free(safe_cmnd);

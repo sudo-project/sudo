@@ -102,6 +102,7 @@ struct sudo_user {
     char *cmnd;
     char *cmnd_args;
     char *cmnd_base;
+    char *cmnd_dir;
     char *cmnd_list;
     char *cmnd_safe;
     char *cmnd_saved;
@@ -239,6 +240,7 @@ struct sudo_user {
 #define user_ttypath		(sudo_user.ttypath)
 #define user_cwd		(sudo_user.cwd)
 #define user_cmnd		(sudo_user.cmnd)
+#define user_cmnd_dir		(sudo_user.cmnd_dir)
 #define user_args		(sudo_user.cmnd_args)
 #define user_base		(sudo_user.cmnd_base)
 #define user_stat		(sudo_user.cmnd_stat)
@@ -475,6 +477,11 @@ bool sudoers_gc_add(enum sudoers_gc_types type, void *ptr);
 bool sudoers_gc_remove(enum sudoers_gc_types type, void *ptr);
 void sudoers_gc_init(void);
 void sudoers_gc_run(void);
+
+/* canon_path.c */
+char *canon_path(const char *inpath);
+void canon_path_free(char *resolved);
+void canon_path_free_cache(void);
 
 /* strlcpy_unesc.c */
 size_t strlcpy_unescape(char *dst, const char *src, size_t size);
