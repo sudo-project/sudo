@@ -1525,9 +1525,20 @@ check_argv:
 	if (strcmp(argv[i], closure->run_argv[i]) != 0) {
 	    if (i == 0) {
 		/* Special case for argv[0] which may contain the basename. */
-		const char *base = sudo_basename(closure->run_argv[0]);
-		if (strcmp(argv[i], base) == 0)
-		    continue;
+		const char *base;
+		if (argv[0][0] == '/') {
+		    if (closure->run_argv[0][0] != '/') {
+			base = sudo_basename(argv[0]);
+			if (strcmp(base, closure->run_argv[0]) == 0)
+			    continue;
+		    }
+		} else {
+		    if (closure->run_argv[0][0] == '/') {
+			base = sudo_basename(closure->run_argv[0]);
+			if (strcmp(argv[0], base) == 0)
+			    continue;
+		    }
+		}
 	    }
 	    ret = false;
 	    sudo_warnx(
@@ -1695,7 +1706,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     struct sudo_ptrace_regs regs;
     bool path_mismatch = false;
     bool argv_mismatch = false;
-    char cwd[PATH_MAX];
+    char cwd[PATH_MAX], *orig_argv0;
     unsigned long msg;
     bool ret = false;
     int i, oldcwd = -1;
@@ -1784,6 +1795,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     }
 
     /* We can only pass the pathname to exececute via argv[0] (plugin API). */
+    orig_argv0 = argv[0];
     argv[0] = pathname;
     if (argc == 0) {
 	/* Rewrite an empty argv[] with the path to execute. */
@@ -1819,6 +1831,18 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	 */
 	if (strcmp(pathname, closure->command) != 0)
 	    path_mismatch = true;
+	if (!path_mismatch) {
+	    /* Path unchanged, restore original argv[0]. */
+	    if (strcmp(argv[0], orig_argv0) != 0) {
+		argv[0] = orig_argv0;
+		free(closure->run_argv[0]);
+		closure->run_argv[0] = strdup(orig_argv0);
+		if (closure->run_argv[0] == NULL) {
+		    sudo_warnx(U_("%s: %s"), __func__,
+			U_("unable to allocate memory"));
+		}
+	    }
+	}
 	for (i = 0; closure->run_argv[i] != NULL && argv[i] != NULL; i++) {
 	    if (strcmp(closure->run_argv[i], argv[i]) != 0) {
 		argv_mismatch = true;
