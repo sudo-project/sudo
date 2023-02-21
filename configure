@@ -3452,106 +3452,27 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+PROGS=sudo
+LT_LDDEP="\$(shlib_exp)"
+LT_LDEXPORTS="-export-symbols \$(shlib_exp)"
+BAMAN=0
+LCMAN=0
+PSMAN=0
+SEMAN=0
+AAMAN=0
+devdir='$(srcdir)'
+PRELOAD_MODULE='-module'
+LDAP='#'
+CONFIGURE_ARGS=$@
+SUDO_NLS=disabled
+exampledir='$(docdir)/examples'
+PYTHON_PLUGIN='#'
+LOGSRV_SRC='lib/logsrv'
+LOGSRVD_SRC='logsrvd'
+LOGSRVD_CONF='sudo_logsrvd.conf'
+LIBLOGSRV='$(top_builddir)/lib/logsrv/liblogsrv.la $(top_builddir)/lib/protobuf-c/libprotobuf-c.la'
+PPFILES='$(srcdir)/etc/sudo.pp'
+FUZZ_LD='$(CC)'
 
 
 
@@ -3647,62 +3568,19 @@ devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
 #
 # End initial values for man page substitution
 #
-INSTALL_BACKUP=
-INSTALL_INTERCEPT=
-INSTALL_NOEXEC=
-PRELOAD_MODULE=-module
-exampledir='$(docdir)/examples'
-devdir='$(srcdir)'
-PROGS="sudo"
 : ${MANDIRTYPE='man'}
 : ${SHLIB_MODE='0644'}
 : ${SUDOERS_MODE='0440'}
 : ${SUDOERS_UID='0'}
 : ${SUDOERS_GID='0'}
-DEVEL=
-LDAP="#"
-BAMAN=0
-LCMAN=0
-PSMAN=0
-SEMAN=0
-AAMAN=0
-LIBINTL=
-LIBCRYPTO=
-LIBMD=
-LIBTLS=
-ZLIB=
-ZLIB_SRC=
-AUTH_OBJS=
 AUTH_REG=
 AUTH_EXCL=
 AUTH_EXCL_DEF=
 AUTH_DEF=passwd
-SUDO_NLS=disabled
-LOCALEDIR_SUFFIX=
-LT_LDEXPORTS="-export-symbols \$(shlib_exp)"
-LT_LDDEP="\$(shlib_exp)"
-OS_INIT=os_init_common
-INIT_SCRIPT=
-INIT_DIR=
-RC_LINK=
-COMPAT_EXP=
-SIGNAME=
-FUZZ_ENGINE=
-FUZZ_LD='$(CC)'
-INTERCEPT_EXP=
-WEAK_ALIAS=no
 CHECKSHADOW=true
 shadow_funcs=
 shadow_libs=
-TMPFILES_D=
-CONFIGURE_ARGS="$@"
-PYTHON_PLUGIN=#
-LOGSRVD=
-LOGSRVD_SRC=logsrvd
-LOGSRV_SRC=lib/logsrv
-LOGSRVD_CONF='sudo_logsrvd.conf'
-LIBLOGSRV='$(top_builddir)/lib/logsrv/liblogsrv.la $(top_builddir)/lib/protobuf-c/libprotobuf-c.la'
-PPFILES='$(srcdir)/etc/sudo.pp'
+OS_INIT=os_init_common
 
 RTLD_PRELOAD_VAR="LD_PRELOAD"
 RTLD_PRELOAD_ENABLE_VAR=
