@@ -360,6 +360,7 @@ lib/util/strtonum.c
 lib/util/sudo_conf.c
 lib/util/sudo_debug.c
 lib/util/sudo_dso.c
+lib/util/suspend_parent.c
 lib/util/sys_siglist.h
 lib/util/sys_signame.h
 lib/util/term.c
@@ -599,6 +600,7 @@ plugins/sudoers/b64_encode.c
 plugins/sudoers/boottime.c
 plugins/sudoers/bsm_audit.c
 plugins/sudoers/bsm_audit.h
+plugins/sudoers/canon_path.c
 plugins/sudoers/check.c
 plugins/sudoers/check.h
 plugins/sudoers/check_aliases.c
@@ -740,7 +742,6 @@ plugins/sudoers/prompt.c
 plugins/sudoers/pwutil.c
 plugins/sudoers/pwutil.h
 plugins/sudoers/pwutil_impl.c
-plugins/sudoers/canon_path.c
 plugins/sudoers/redblack.c
 plugins/sudoers/redblack.h
 plugins/sudoers/regress/check_symbols/check_symbols.c
@@ -1269,8 +1270,6 @@ src/sudo_intercept_common.c
 src/sudo_noexec.c
 src/sudo_plugin_int.h
 src/sudo_usage.h.in
-src/suspend_nopty.c
-src/tcsetpgrp_nobg.c
 src/tgetpass.c
 src/ttyname.c
 src/utmp.c

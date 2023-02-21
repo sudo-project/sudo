@@ -336,9 +336,6 @@ int add_preserved_fd(struct preserved_fd_list *pfds, int fd);
 void closefrom_except(int startfd, struct preserved_fd_list *pfds);
 void parse_preserved_fds(struct preserved_fd_list *pfds, const char *fdstr);
 
-/* setpgrp_nobg.c */
-int tcsetpgrp_nobg(int fd, pid_t pgrp_id);
-
 /* limits.c */
 void disable_coredump(void);
 void restore_limits(void);

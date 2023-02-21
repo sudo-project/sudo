@@ -104,13 +104,6 @@ sudo_sigaction(int signo, struct sigaction *sa, struct sigaction *osa)
     return sigaction(signo, sa, osa);
 }
 
-/* STUB */
-void
-log_suspend(struct exec_closure *ec, int signo)
-{
-    return;
-}
-
 int
 main(int argc, char *argv[])
 {
@@ -228,8 +221,8 @@ main(int argc, char *argv[])
 	    } else if (WIFSTOPPED(status)) {
 		if (exec_ptrace_stopped(pid, status, &closure)) {
 		    if (pid == child) {
-			suspend_sudo_nopty(NULL, WSTOPSIG(status), my_pid,
-			    my_pgrp, child);
+			sudo_suspend_parent(WSTOPSIG(status), my_pid,
+			    my_pgrp, child, NULL, NULL);
 			if (kill(child, SIGCONT) != 0)
 			    sudo_warn("kill(%d, SIGCONT)", (int)child);
 		    }

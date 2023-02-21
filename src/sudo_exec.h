@@ -194,7 +194,7 @@ bool log_stdin(const char *buf, unsigned int n, struct io_buffer *iob);
 bool log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob);
 bool log_stdout(const char *buf, unsigned int n, struct io_buffer *iob);
 bool log_stderr(const char *buf, unsigned int n, struct io_buffer *iob);
-void log_suspend(struct exec_closure *ec, int signo);
+void log_suspend(void *v, int signo);
 void log_winchange(struct exec_closure *ec, unsigned int rows, unsigned int cols);
 void io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int, struct io_buffer *), void (*read_cb)(int fd, int what, void *v), void (*write_cb)(int fd, int what, void *v), struct exec_closure *ec, struct io_buffer_list *head);
 int safe_close(int fd);
@@ -231,8 +231,5 @@ char **sudo_preload_dso_mmap(char *const envp[], const char *dso_file, int inter
 bool exec_ptrace_stopped(pid_t pid, int status, void *intercept);
 bool set_exec_filter(void);
 int exec_ptrace_seize(pid_t child);
-
-/* suspend_nopty.c */
-void suspend_sudo_nopty(struct exec_closure *ec, int signo, pid_t my_pid, pid_t my_pgrp, pid_t cmnd_pid);
 
 #endif /* SUDO_EXEC_H */

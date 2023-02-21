@@ -533,8 +533,9 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
 
 /* Call I/O plugin suspend log method. */
 void
-log_suspend(struct exec_closure *ec, int signo)
+log_suspend(void *v, int signo)
 {
+    struct exec_closure *ec = v;
     struct plugin_container *plugin;
     const char *errstr = NULL;
     sigset_t omask;

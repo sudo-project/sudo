@@ -144,6 +144,7 @@ sudo_strtoid_v2
 sudo_strtoidx_v1
 sudo_strtomode_v1
 sudo_strtonum
+sudo_suspend_parent_v1
 sudo_term_cbreak_v1
 sudo_term_copy_v1
 sudo_term_eof

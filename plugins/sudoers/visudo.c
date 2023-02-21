@@ -93,7 +93,7 @@ static bool install_sudoers(struct sudoersfile *, bool, bool);
 static bool visudo_track_error(const char *file, int line, int column, const char *fmt, va_list args) sudo_printf0like(4, 0);
 static int print_unused(struct sudoers_parse_tree *, struct alias *, void *);
 static bool reparse_sudoers(char *, int, char **, bool, bool);
-static int run_command(const char *, char *const *);
+static int run_command(const char *, char *const *, bool);
 static void parse_sudoers_options(void);
 static void setup_signals(void);
 static void visudo_cleanup(void);
@@ -557,7 +557,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 	goto done;
     }
 
-    if (run_command(editor, editor_argv) != -1) {
+    if (run_command(editor, editor_argv, true) != -1) {
 	if (sudo_gettime_real(&times[1]) == -1) {
 	    sudo_warn("%s", U_("unable to read the clock"));
 	    goto done;
@@ -820,7 +820,7 @@ install_sudoers(struct sudoersfile *sp, bool set_owner, bool set_mode)
 	    av[3] = NULL;
 
 	    /* And run it... */
-	    if (run_command(_PATH_MV, av) != 0) {
+	    if (run_command(_PATH_MV, av, false) != 0) {
 		sudo_warnx(U_("command failed: '%s %s %s', %s unchanged"),
 		    _PATH_MV, sp->tpath, sp->path, sp->path);
 		goto done;
@@ -895,9 +895,9 @@ setup_signals(void)
 }
 
 static int
-run_command(const char *path, char *const *argv)
+run_command(const char *path, char *const *argv, bool foreground)
 {
-    int status;
+    int fd, status;
     pid_t pid, rv;
     debug_decl(run_command, SUDOERS_DEBUG_UTIL);
 
@@ -906,6 +906,14 @@ run_command(const char *path, char *const *argv)
 	    sudo_fatal(U_("unable to execute %s"), path);
 	    break;	/* NOTREACHED */
 	case 0:
+	    /* Run command as the foreground process of a new process group. */
+	    if (foreground) {
+		pid = getpid();
+		setpgid(0, pid);
+		fd = open(_PATH_TTY, O_RDWR);
+		if (fd != -1)
+		    tcsetpgrp(fd, pid);
+	    }
 	    closefrom(STDERR_FILENO + 1);
 	    execv(path, argv);
 	    sudo_warn(U_("unable to run %s"), path);
@@ -914,11 +922,19 @@ run_command(const char *path, char *const *argv)
     }
 
     for (;;) {
-	rv = waitpid(pid, &status, 0);
-	if (rv == -1 && errno != EINTR)
+	rv = waitpid(pid, &status, WUNTRACED);
+	if (rv == -1) {
+	    if (errno == EINTR)
+		continue;
 	    break;
-	if (rv != -1 && !WIFSTOPPED(status))
+	}
+	if (!WIFSTOPPED(status))
 	    break;
+	if (foreground) {
+	    sudo_suspend_parent(WSTOPSIG(status), getpid(), getpgrp(),
+		pid, NULL, NULL);
+	    killpg(pid, SIGCONT);
+	}
     }
 
     if (rv != -1)
