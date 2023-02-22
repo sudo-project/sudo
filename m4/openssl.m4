@@ -44,7 +44,9 @@ AC_DEFUN([SUDO_CHECK_OPENSSL], [
 			SUDO_APPEND_LIBPATH([LIBTLS], [$f])
 			;;
 		    *)
-			AX_APPEND_FLAG([$f], [LIBTLS])
+			# Do not use AX_APPEND_FLAG as it will break static builds by removing
+			# duplicates such as -lz or -latomic which are needed by -lssl and -lcrypto
+		        LIBTLS="$LIBTLS $f"
 			;;
 		esac
 	    done
