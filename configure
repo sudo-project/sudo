@@ -805,7 +805,6 @@ LOCALEDIR_SUFFIX
 SUDO_NLS
 LIBPTHREAD
 LIBTLS
-LIBMD
 LIBCRYPTO
 LIBINTL
 LIBRT
@@ -26175,7 +26174,7 @@ then :
 	printf "%s\n" "#define HAVE_GCRYPT 1" >>confdefs.h
 
 	DIGEST=digest_gcrypt.lo
-	LIBMD="-lgcrypt"
+	LIBCRYPTO="-lgcrypt"
 	if test "$enable_gcrypt" != "yes"
 then :
 
@@ -26431,7 +26430,7 @@ printf "%s\n" "#define SHA2_VOID_PTR 1" >>confdefs.h
 
   fi
 
-		    LIBMD="-lmd"
+		    LIBCRYPTO="-lmd"
 
 else case e in #(
   e)
@@ -37637,6 +37636,8 @@ echo "  preprocessor options		: $CPPFLAGS" >&6
 echo "  front-end libraries		: $SUDO_LIBS" >&6
 echo "  front-end linker options	: $SUDO_LDFLAGS" >&6
 echo "  network libraries		: $NET_LIBS" >&6
+echo "  Crypto library		: $LIBCRYPTO" >&6
+echo "  TLS libraries			: $LIBTLS" >&6
 echo "  extra libraries		: $LIBS" >&6
 echo "  extra linker options		: $LDFLAGS" >&6
 echo "  sudoers libraries		: $SUDOERS_LIBS" >&6
@@ -37738,7 +37739,7 @@ echo "  mail if command not allowed	: ${mail_no_perms}" >&6
 echo " Pathnames:" >&6
 echo "  log directory			: ${log_dir}" >&6
 echo "  plugin directory		: ${plugindir}" >&6
-echo "  sudoers plugin			: ${sudoers_plugin}" >&6
+echo "  sudoers plugin		: ${sudoers_plugin}" >&6
 if test "${enable_python-no}" != "no"; then
     echo "  python plugin			: ${python_plugin}" >&6
 fi

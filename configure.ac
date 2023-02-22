@@ -91,7 +91,6 @@ AC_SUBST([LIBDL])dnl
 AC_SUBST([LIBRT])dnl
 AC_SUBST([LIBINTL])dnl
 AC_SUBST([LIBCRYPTO])dnl
-AC_SUBST([LIBMD])dnl
 AC_SUBST([LIBTLS])dnl
 AC_SUBST([LIBPTHREAD])dnl
 AC_SUBST([SUDO_NLS], [disabled])dnl
@@ -3023,7 +3022,7 @@ AS_IF([test "$DIGEST" = "digest.lo"], [
 	# Use gcrypt's sha2 functions
 	AC_DEFINE(HAVE_GCRYPT)
 	DIGEST=digest_gcrypt.lo
-	LIBMD="-lgcrypt"
+	LIBCRYPTO="-lgcrypt"
 	AS_IF([test "$enable_gcrypt" != "yes"], [
 	    AX_APPEND_FLAG([-I${enable_gcrypt}/include], [CPPFLAGS])
 	    SUDO_APPEND_LIBPATH(LDFLAGS, [${enable_gcrypt}/lib])
@@ -3038,7 +3037,7 @@ AS_IF([test "$DIGEST" = "digest.lo"], [
 		AC_CHECK_LIB([md], [SHA224Update], [
 		    AC_DEFINE(HAVE_SHA224UPDATE)
 		    SUDO_FUNC_SHA2_VOID_PTR
-		    LIBMD="-lmd"
+		    LIBCRYPTO="-lmd"
 		], [
 		    # Does not have SHA224Update
 		    FOUND_SHA2=no
@@ -4359,6 +4358,8 @@ echo "  preprocessor options		: $CPPFLAGS" >&AS_MESSAGE_FD
 echo "  front-end libraries		: $SUDO_LIBS" >&AS_MESSAGE_FD
 echo "  front-end linker options	: $SUDO_LDFLAGS" >&AS_MESSAGE_FD
 echo "  network libraries		: $NET_LIBS" >&AS_MESSAGE_FD
+echo "  Crypto library		: $LIBCRYPTO" >&AS_MESSAGE_FD
+echo "  TLS libraries			: $LIBTLS" >&AS_MESSAGE_FD
 echo "  extra libraries		: $LIBS" >&AS_MESSAGE_FD
 echo "  extra linker options		: $LDFLAGS" >&AS_MESSAGE_FD
 echo "  sudoers libraries		: $SUDOERS_LIBS" >&AS_MESSAGE_FD
@@ -4460,7 +4461,7 @@ echo "  mail if command not allowed	: ${mail_no_perms}" >&AS_MESSAGE_FD
 echo " Pathnames:" >&AS_MESSAGE_FD
 echo "  log directory			: ${log_dir}" >&AS_MESSAGE_FD
 echo "  plugin directory		: ${plugindir}" >&AS_MESSAGE_FD
-echo "  sudoers plugin			: ${sudoers_plugin}" >&AS_MESSAGE_FD
+echo "  sudoers plugin		: ${sudoers_plugin}" >&AS_MESSAGE_FD
 if test "${enable_python-no}" != "no"; then
     echo "  python plugin			: ${python_plugin}" >&AS_MESSAGE_FD
 fi
