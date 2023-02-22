@@ -1,0 +1,15 @@
+Parses OK
+
+Entries for user root:
+
+ALL = CHROOT=/ /bin/ls
+	host  matched
+	runas matched
+	cmnd  allowed
+
+ALL = CWD=/ /bin/pwd
+	host  matched
+	runas matched
+	cmnd  allowed
+
+Command allowed

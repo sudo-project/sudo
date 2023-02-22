@@ -82,6 +82,7 @@ extern int (*trace_print)(const char *msg);
  */
 struct sudo_user sudo_user;
 struct passwd *list_pw;
+static const char *orig_cmnd;
 static char *runas_group, *runas_user;
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -203,14 +204,18 @@ main(int argc, char *argv[])
 	if (!dflag)
 	    usage();
 	user_name = argc ? *argv++ : (char *)"root";
-	user_cmnd = user_base = (char *)"true";
+	orig_cmnd = "true";
 	argc = 0;
     } else {
 	user_name = *argv++;
-	user_cmnd = *argv++;
-	user_base = sudo_basename(user_cmnd);
+	orig_cmnd = *argv++;
 	argc -= 2;
     }
+    user_cmnd = strdup(orig_cmnd);
+    if (user_cmnd == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    user_base = sudo_basename(user_cmnd);
+
     if ((sudo_user.pw = sudo_getpwnam(user_name)) == NULL)
 	sudo_fatalx(U_("unknown user %s"), user_name);
 
@@ -521,8 +526,13 @@ unpivot_root(int fds[2])
 int
 set_cmnd_path(const char *runchroot)
 {
-    /* Cannot return FOUND without also setting user_cmnd to a new value. */
-    return NOT_FOUND;
+    /* Reallocate user_cmnd to catch bugs in command_matches(). */
+    char *new_cmnd = strdup(orig_cmnd);
+    if (new_cmnd == NULL)
+	return NOT_FOUND_ERROR;
+    free(user_cmnd);
+    user_cmnd = new_cmnd;
+    return FOUND;
 }
 
 static bool
