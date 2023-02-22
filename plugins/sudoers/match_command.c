@@ -818,12 +818,16 @@ command_matches(const char *sudoers_cmnd, const char *sudoers_args,
 	/* Rule-specific runchroot, reset user_cmnd and user_stat. */
 	int status;
 
+	/* Save old user_cmnd first, set_cmnd_path() will free it. */
 	saved_user_cmnd = user_cmnd;
+	user_cmnd = NULL;
 	if (user_stat != NULL)
 	    saved_user_stat = *user_stat;
 	status = set_cmnd_path(runchroot);
-	if (status != FOUND)
+	if (status != FOUND) {
+	    user_cmnd = saved_user_cmnd;
 	    saved_user_cmnd = NULL;
+	}
 	if (info != NULL)
 	    info->status = status;
     }

@@ -260,7 +260,9 @@ main(int argc, char *argv[])
     }
 
     /* Mock up a fake sudo_user struct. */
-    user_cmnd = user_base = (char *)"";
+    user_cmnd = user_base = strdup("true");
+    if (user_cmnd == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (geteuid() == 0) {
 	const char *user = getenv("SUDO_USER");
 	if (user != NULL && *user != '\0')

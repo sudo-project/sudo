@@ -45,6 +45,9 @@ static int fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[]
 static int fuzz_printf(int msg_type, const char *fmt, ...);
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
+/* For set_cmnd_path() */
+static const char *orig_cmnd;
+
 /* Required to link with parser. */
 struct sudo_user sudo_user;
 struct passwd *list_pw;
@@ -104,8 +107,13 @@ init_envtables(void)
 int
 set_cmnd_path(const char *runchroot)
 {
-    /* Cannot return FOUND without also setting user_cmnd to a new value. */
-    return NOT_FOUND;
+    /* Reallocate user_cmnd to catch bugs in command_matches(). */
+    char *new_cmnd = strdup(orig_cmnd);
+    if (new_cmnd == NULL)
+        return NOT_FOUND_ERROR;
+    free(user_cmnd);
+    user_cmnd = new_cmnd;
+    return FOUND;
 }
 
 /* STUB */
@@ -277,11 +285,12 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     /* The minimum needed to perform matching (user_cmnd must be dynamic). */
     user_host = user_shost = user_runhost = user_srunhost = (char *)"localhost";
-    user_cmnd = strdup("/usr/bin/id");
+    orig_cmnd = (char *)"/usr/bin/id";
+    user_cmnd = strdup(orig_cmnd);
     if (user_cmnd == NULL)
 	goto done;
     user_args = (char *)"-u";
-    user_base = (char *)"id";
+    user_base = sudo_basename(user_cmnd);
 
     /* Add a fake network interfaces. */
     interfaces = get_interfaces();
