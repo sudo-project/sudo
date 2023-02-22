@@ -911,10 +911,13 @@ run_command(const char *path, char *const *argv, bool foreground)
 		pid = getpid();
 		setpgid(0, pid);
 		fd = open(_PATH_TTY, O_RDWR);
-		if (fd != -1 && tcsetpgrp(fd, pid) == -1) {
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-			"%s: unable to set foreground pgrp to %d (editor)",
-			__func__, pid);
+		if (fd != -1) {
+		    if (tcsetpgrp(fd, pid) == -1) {
+			sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+			    "%s: unable to set foreground pgrp to %d (editor)",
+			    __func__, (int)pid);
+		    }
+		    close(fd);
 		}
 	    }
 	    closefrom(STDERR_FILENO + 1);
