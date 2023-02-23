@@ -727,9 +727,17 @@ vlog_warning(int flags, int errnum, const char *fmt, va_list ap)
     }
 
     if (ISSET(flags, SLOG_PARSE_ERROR)) {
+	char *copy;
+
 	/* Journal parse error for later mailing. */
-	char *copy = strdup(message);
+	if (errstr != NULL) {
+	    if (asprintf(&copy, U_("%s: %s"), message, errstr) == -1)
+		copy = NULL;
+	} else {
+	    copy = strdup(message);
+	}
 	if (copy != NULL) {
+	    /* journal_parse_error() takes ownership of copy. */
 	    if (!journal_parse_error(copy))
 		ret = false;
 	}
