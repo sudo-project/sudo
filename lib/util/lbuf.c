@@ -70,6 +70,7 @@ sudo_lbuf_expand(struct sudo_lbuf *lbuf, unsigned int extra)
     debug_decl(sudo_lbuf_expand, SUDO_DEBUG_UTIL);
 
     if (lbuf->len + extra + 1 <= lbuf->len) {
+	errno = ENOMEM;
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "integer overflow updating lbuf->len");
 	lbuf->error = 1;
@@ -80,6 +81,13 @@ sudo_lbuf_expand(struct sudo_lbuf *lbuf, unsigned int extra)
 	unsigned int new_size = sudo_pow2_roundup(lbuf->len + extra + 1);
 	char *new_buf;
 
+	if (new_size < lbuf->size) {
+	    errno = ENOMEM;
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"integer overflow updating lbuf->size");
+	    lbuf->error = 1;
+	    debug_return_bool(false);
+	}
 	if (new_size < 1024)
 	    new_size = 1024;
 	if ((new_buf = realloc(lbuf->buf, new_size)) == NULL) {
