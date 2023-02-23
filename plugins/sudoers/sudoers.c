@@ -259,7 +259,7 @@ sudoers_init(void *info, sudoers_logger_t logger, char * const envp[])
 
 	/* Missing/invalid defaults is not a fatal error. */
 	if (nss->getdefs(nss) == -1) {
-	    log_warningx(SLOG_SEND_MAIL|SLOG_NO_STDERR,
+	    log_warningx(SLOG_PARSE_ERROR|SLOG_NO_STDERR,
 		N_("unable to get defaults from %s"), nss->source);
 	} else {
 	    (void)update_defaults(nss->parse_tree, NULL,
@@ -1174,12 +1174,11 @@ again:
 	 * user with a reasonable error message (unlike the lexer).
 	 */
 	if ((fp = fdopen(fd, "r")) == NULL) {
-	    log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), file);
+	    log_warning(SLOG_PARSE_ERROR, N_("unable to open %s"), file);
 	    close(fd);
 	} else {
 	    if (sb.st_size != 0 && fgetc(fp) == EOF) {
-		log_warning(SLOG_SEND_MAIL,
-		    N_("unable to read %s"), file);
+		log_warning(SLOG_PARSE_ERROR, N_("unable to read %s"), file);
 		fclose(fp);
 		fp = NULL;
 	    } else {
@@ -1204,22 +1203,22 @@ again:
 		}
 		errno = serrno;
 	    }
-	    log_warning(SLOG_SEND_MAIL, N_("unable to open %s"), file);
+	    log_warning(SLOG_PARSE_ERROR, N_("unable to open %s"), file);
 	    break;
 	case SUDO_PATH_BAD_TYPE:
-	    log_warningx(SLOG_SEND_MAIL,
+	    log_warningx(SLOG_PARSE_ERROR,
 		N_("%s is not a regular file"), file);
 	    break;
 	case SUDO_PATH_WRONG_OWNER:
-	    log_warningx(SLOG_SEND_MAIL,
+	    log_warningx(SLOG_PARSE_ERROR,
 		N_("%s is owned by uid %u, should be %u"), file,
 		(unsigned int) sb.st_uid, (unsigned int) sudoers_uid);
 	    break;
 	case SUDO_PATH_WORLD_WRITABLE:
-	    log_warningx(SLOG_SEND_MAIL, N_("%s is world writable"), file);
+	    log_warningx(SLOG_PARSE_ERROR, N_("%s is world writable"), file);
 	    break;
 	case SUDO_PATH_GROUP_WRITABLE:
-	    log_warningx(SLOG_SEND_MAIL,
+	    log_warningx(SLOG_PARSE_ERROR,
 		N_("%s is owned by gid %u, should be %u"), file,
 		(unsigned int) sb.st_gid, (unsigned int) sudoers_gid);
 	    break;
@@ -1360,7 +1359,7 @@ cb_fqdn(const char *file, int line, int column,
     /* First resolve user_host, setting user_host and user_shost. */
     if (resolve_host(user_host, &lhost, &shost) != 0) {
 	if ((rc = resolve_host(user_runhost, &lhost, &shost)) != 0) {
-	    gai_log_warning(SLOG_SEND_MAIL|SLOG_RAW_MSG, rc,
+	    gai_log_warning(SLOG_PARSE_ERROR|SLOG_RAW_MSG, rc,
 		N_("unable to resolve host %s"), user_host);
 	    debug_return_bool(false);
 	}

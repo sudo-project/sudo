@@ -638,6 +638,24 @@ done:
 }
 
 /*
+ * Add message to the parse error journal, which takes ownership of it.
+ * The message will be freed once the journal is processed.
+ */
+static bool
+journal_parse_error(char *message)
+{
+    struct parse_error *pe;
+    debug_decl(journal_parse_error, SUDOERS_DEBUG_LOGGING);
+
+    pe = malloc(sizeof(*pe));
+    if (pe == NULL)
+	debug_return_bool(false);
+    pe->errstr = message;
+    STAILQ_INSERT_TAIL(&parse_error_list, pe, entries);
+    debug_return_bool(false);
+}
+
+/*
  * Perform logging for log_warning()/log_warningx().
  */
 static bool
@@ -702,8 +720,19 @@ vlog_warning(int flags, int errnum, const char *fmt, va_list ap)
 	}
 	sudoers_to_eventlog(&evlog, safe_cmnd, NewArgv, env_get(),
 	    sudo_user.uuid_str);
-	eventlog_alert(&evlog, evl_flags, &now, message, errstr);
-	log_server_alert(&evlog, &now, message, errstr);
+	if (!eventlog_alert(&evlog, evl_flags, &now, message, errstr))
+	    ret = false;
+	if (!log_server_alert(&evlog, &now, message, errstr))
+	    ret = false;
+    }
+
+    if (ISSET(flags, SLOG_PARSE_ERROR)) {
+	/* Journal parse error for later mailing. */
+	char *copy = strdup(message);
+	if (copy != NULL) {
+	    if (!journal_parse_error(copy))
+		ret = false;
+	}
     }
 
     /*
@@ -838,10 +867,10 @@ log_parse_error(const char *file, int line, int column, const char *fmt,
     va_list args)
 {
     const int flags = SLOG_RAW_MSG|SLOG_NO_STDERR;
-    char *tofree = NULL;
+    char *message, *tofree = NULL;
     const char *errstr;
-    struct parse_error *pe;
     bool ret;
+    int len;
     debug_decl(log_parse_error, SUDOERS_DEBUG_LOGGING);
 
     if (fmt == NULL) {
@@ -863,21 +892,15 @@ log_parse_error(const char *file, int line, int column, const char *fmt,
     }
 
     /* Journal parse error for later mailing. */
-    pe = malloc(sizeof(*pe));
-    if (pe != NULL) {
-	int len;
-
-	if (line > 0) {
-	    len = asprintf(&pe->errstr, _("%s:%d:%d: %s"), file, line, column,
-		errstr);
-	} else {
-	    len = asprintf(&pe->errstr, _("%s: %s"), file, errstr);
-	}
-	if (len != -1) {
-	    STAILQ_INSERT_TAIL(&parse_error_list, pe, entries);
-	} else {
-	    free(pe);
-	}
+    if (line > 0) {
+	len = asprintf(&message, _("%s:%d:%d: %s"), file, line, column, errstr);
+    } else {
+	len = asprintf(&message, _("%s: %s"), file, errstr);
+    }
+    if (len != -1) {
+	journal_parse_error(message);
+    } else {
+	ret = false;
     }
 
     free(tofree);
