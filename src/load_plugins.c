@@ -55,6 +55,8 @@ sudo_qualify_plugin(struct plugin_info *info, char *fullpath, size_t pathsize)
 		errno = ENAMETOOLONG;
 		goto bad;
 	    }
+	    /* Plugin is static, do not fully-qualify. */
+	    debug_return_bool(true);
 	}
 #endif /* STATIC_SUDOERS_PLUGIN */
 
