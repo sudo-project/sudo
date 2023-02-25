@@ -1,3 +1,12 @@
+What's new in Sudo 1.9.13p2
+
+ * Fixed the --enable-static-sudoers option, broken in sudo 1.9.13.
+   GitHub issue #245.
+
+ * Fixed a potential double-free bug when matching a sudoers rule
+   that contains a per-command chroot directive (CHROOT=dir).  This
+   bug was introduced in sudo 1.9.8.
+
 What's new in Sudo 1.9.13p1
 
  * Fixed a typo in the configure script that resulted in a line
