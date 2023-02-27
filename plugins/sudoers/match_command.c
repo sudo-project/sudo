@@ -895,6 +895,7 @@ done:
     /* Restore user_cmnd and user_stat. */
     if (saved_user_cmnd != NULL) {
 	if (info != NULL) {
+	    free(info->cmnd_path);
 	    info->cmnd_path = user_cmnd;
 	    if (user_stat != NULL)
 		info->cmnd_stat = *user_stat;
