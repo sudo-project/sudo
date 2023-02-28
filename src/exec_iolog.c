@@ -184,7 +184,7 @@ add_io_events(struct sudo_event_base *evbase)
  * than /dev/tty.  Removes I/O events from the event base when done.
  */
 void
-del_io_events(bool nonblocking)
+del_io_events(int flags)
 {
     struct io_buffer *iob;
     struct sudo_event_base *evbase;
@@ -237,7 +237,7 @@ del_io_events(bool nonblocking)
      * We don't want to read from the pty or stdin since that might block
      * and the command is no longer running anyway.
      */
-    if (!nonblocking) {
+    if (!ISSET(flags, SUDO_EVLOOP_NONBLOCK)) {
 	/* Clear out iobufs from event base. */
 	SLIST_FOREACH(iob, &iobufs, entries) {
 	    if (iob->revent != NULL && !USERTTY_EVENT(iob->revent))
@@ -257,7 +257,7 @@ del_io_events(bool nonblocking)
 	}
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "%s: flushing remaining write buffers (blocking)", __func__);
-	(void) sudo_ev_dispatch(evbase);
+	(void) sudo_ev_loop(evbase, flags);
      
 	/* We should now have flushed all write buffers. */
 	SLIST_FOREACH(iob, &iobufs, entries) {

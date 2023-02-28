@@ -702,7 +702,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
 #endif
 
     /* Flush any remaining output. */
-    del_io_events(true);
+    del_io_events(SUDO_EVLOOP_NONBLOCK);
 
     /* Free things up. */
     free_io_bufs();

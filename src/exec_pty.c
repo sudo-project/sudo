@@ -205,7 +205,7 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
     case SIGSTOP:
     case SIGTSTP:
 	/* Flush any remaining output and deschedule I/O events. */
-	del_io_events(true);
+	del_io_events(SUDO_EVLOOP_NONBLOCK);
 
 	/* Restore original tty mode before suspending. */
 	if (ttymode != TERM_COOKED) {
@@ -499,7 +499,7 @@ pty_finish(struct exec_closure *ec, struct command_status *cstat)
 	    (void) fcntl(io_fds[SFD_USERTTY], F_SETFL, flags);
 	}
     }
-    del_io_events(false);
+    del_io_events(SUDO_EVLOOP_ONCE);
     free_io_bufs();
 
     /* Restore terminal settings. */

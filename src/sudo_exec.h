@@ -201,7 +201,7 @@ int safe_close(int fd);
 void ev_free_by_fd(struct sudo_event_base *evbase, int fd);
 void free_io_bufs(void);
 void add_io_events(struct sudo_event_base *evbase);
-void del_io_events(bool nonblocking);
+void del_io_events(int flags);
 void init_ttyblock(void);
 extern struct io_buffer_list iobufs;
 extern int ttymode;
