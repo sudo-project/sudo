@@ -505,7 +505,7 @@ $(devdir)/gram.c $(devdir)/gram.h: $(srcdir)/gram.y prologue
 	    else \
 		gram_y="$(srcdir)/gram.y"; \
 	    fi; \
-	    cmd='$(YACC) -d -p sudoers '"$$gram_y"'; cp prologue $(devdir)/gram.c; $(SED) -e "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"gram.c\"/" -e "/^# *include <limits.h>/{N;s/__STDC_VERSION__ && 199901 <= __STDC_VERSION__/HAVE_STDINT_H/;}" y.tab.c >> $(devdir)/gram.c; sed -e "s/^\\(#line .*\\) \"y\\.tab\\.h\"/\1 \"gram.h\"/" y.tab.h > $(devdir)/gram.h'; rm -f y.tab.[ch]; \
+	    cmd='$(YACC) -d -p sudoers '"$$gram_y"'; cp prologue $(devdir)/gram.c; $(SED) -e "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"gram.c\"/" -e "/^# *include <limits.h>/{N;s/__STDC_VERSION__ && 199901 <= __STDC_VERSION__/HAVE_STDINT_H/;}" y.tab.c >> $(devdir)/gram.c; sed -e "s/^\\(#line .*\\) \"y\\.tab\\.h\"/\1 \"gram.h\"/" y.tab.h > $(devdir)/gram.h; rm -f y.tab.[ch]'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
