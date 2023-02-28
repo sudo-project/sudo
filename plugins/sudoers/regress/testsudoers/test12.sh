@@ -14,4 +14,6 @@ User_Alias A1 = u1 u2 : A2 = u3, u4
 millert ALL = /fail : foo
 
 root ALL = ALL bar
+
+root ALL = baz
 EOF
