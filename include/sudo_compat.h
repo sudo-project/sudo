@@ -205,7 +205,7 @@ extern int errno;
 #endif /* !HAVE_DECL_ERRNO */
 
 /* Not all systems define NSIG in signal.h */
-#if !defined(HAVE_DECL_NSIG) || !HAVE_DECL_NSIG
+#if defined(HAVE_DECL_NSIG) && !HAVE_DECL_NSIG
 # if defined(HAVE_DECL__NSIG) && HAVE_DECL__NSIG
 #  define NSIG _NSIG
 # elif defined(HAVE_DECL___NSIG) && HAVE_DECL___NSIG
