@@ -9,6 +9,9 @@ millert ALL = /fail : foo
 sudoers:5:16: syntax error
 root ALL = ALL bar
                ^~~
+sudoers:7:12: expected a fully-qualified path name
+root ALL = baz
+           ^~~
 
 User_Alias A1 = u1
 
