@@ -978,6 +978,27 @@ cmnd		:	ALL {
 			    parser_leak_remove(LEAK_PTR, $1.args);
 			    parser_leak_add(LEAK_MEMBER, $$);
 			}
+		|	WORD {
+			    if (strcmp($1, "list") == 0) {
+				struct sudo_command *c;
+
+				if ((c = new_command($1, NULL)) == NULL) {
+				    sudoerserror(N_("unable to allocate memory"));
+				    YYERROR;
+				}
+				$$ = new_member((char *)c, COMMAND);
+				if ($$ == NULL) {
+				    free(c);
+				    sudoerserror(N_("unable to allocate memory"));
+				    YYERROR;
+				}
+				parser_leak_remove(LEAK_PTR, $1);
+				parser_leak_add(LEAK_MEMBER, $$);
+			    } else {
+				sudoerserror(N_("expected a fully-qualified path name"));
+				YYERROR;
+			    }
+			}
 		;
 
 hostaliases	:	hostalias
