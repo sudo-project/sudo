@@ -995,6 +995,13 @@ plugins/sudoers/regress/sudoers/test3.ldif.ok
 plugins/sudoers/regress/sudoers/test3.ldif2sudo.ok
 plugins/sudoers/regress/sudoers/test3.out.ok
 plugins/sudoers/regress/sudoers/test3.toke.ok
+plugins/sudoers/regress/sudoers/test30.in
+plugins/sudoers/regress/sudoers/test30.json.ok
+plugins/sudoers/regress/sudoers/test30.ldif.ok
+plugins/sudoers/regress/sudoers/test30.ldif2sudo.ok
+plugins/sudoers/regress/sudoers/test30.out.ok
+plugins/sudoers/regress/sudoers/test30.sudo.ok
+plugins/sudoers/regress/sudoers/test30.toke.ok
 plugins/sudoers/regress/sudoers/test4.in
 plugins/sudoers/regress/sudoers/test4.json.ok
 plugins/sudoers/regress/sudoers/test4.ldif.ok
