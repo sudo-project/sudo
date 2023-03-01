@@ -297,23 +297,31 @@ get_free_buf(size_t len, struct connection_closure *closure)
     if (buf != NULL) {
         TAILQ_REMOVE(&closure->free_bufs, buf, entries);
     } else {
-        if ((buf = calloc(1, sizeof(*buf))) == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    debug_return_ptr(NULL);
-	}
+        if ((buf = calloc(1, sizeof(*buf))) == NULL)
+	    goto oom;
     }
 
     if (len > buf->size) {
-	free(buf->data);
-	buf->size = sudo_pow2_roundup(len);
-	if ((buf->data = malloc(buf->size)) == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    free(buf);
-	    buf = NULL;
+	const unsigned int new_size = sudo_pow2_roundup(len);
+	if (new_size < len) {
+	    /* overflow */
+	    errno = ENOMEM;
+	    goto oom;
 	}
+	free(buf->data);
+	if ((buf->data = malloc(new_size)) == NULL)
+	    goto oom;
+	buf->size = new_size;
     }
 
     debug_return_ptr(buf);
+oom:
+    if (buf != NULL) {
+	free(buf->data);
+	free(buf);
+    }
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    debug_return_ptr(NULL);
 }
 
 static bool

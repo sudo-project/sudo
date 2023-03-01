@@ -732,13 +732,19 @@ fmt_client_message(struct client_closure *closure, ClientMessage *msg)
 
     /* Resize buffer as needed. */
     if (len > buf->size) {
-	free(buf->data);
-	buf->size = sudo_pow2_roundup(len);
-	if ((buf->data = malloc(buf->size)) == NULL) {
+	const unsigned int new_size = sudo_pow2_roundup(len);
+	if (new_size < len) {
+	    /* overflow */
+	    errno = ENOMEM;
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    buf->size = 0;
 	    goto done;
 	}
+	free(buf->data);
+	if ((buf->data = malloc(new_size)) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
+	buf->size = new_size;
     }
 
     memcpy(buf->data, &msg_len, sizeof(msg_len));
@@ -1633,16 +1639,19 @@ expand_buf(struct connection_buffer *buf, unsigned int needed)
 
     if (buf->size < needed) {
 	/* Expand buffer. */
-	needed = sudo_pow2_roundup(needed);
-	if ((newdata = malloc(needed)) == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    debug_return_bool(false);
+	const unsigned int newsize = sudo_pow2_roundup(needed);
+	if (newsize < needed) {
+	    /* overflow */
+	    errno = ENOMEM;
+	    goto oom;
 	}
+	if ((newdata = malloc(needed)) == NULL)
+	    goto oom;
 	if (buf->off > 0)
 	    memcpy(newdata, buf->data + buf->off, buf->len - buf->off);
 	free(buf->data);
 	buf->data = newdata;
-	buf->size = needed;
+	buf->size = newsize;
     } else {
 	/* Just reset existing buffer. */
 	if (buf->off > 0) {
@@ -1654,6 +1663,9 @@ expand_buf(struct connection_buffer *buf, unsigned int needed)
     buf->off = 0;
 
     debug_return_bool(true);
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    debug_return_bool(false);
 }
 
 /*
