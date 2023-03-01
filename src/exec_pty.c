@@ -469,10 +469,13 @@ write_callback(int fd, int what, void *v)
 		ev_free_by_fd(evbase, fd);
 	    }
 	}
-	/* Enable reader if buffer is not full. */
-	if (iob->revent != NULL &&
-	    (ttymode == TERM_RAW || !USERTTY_EVENT(iob->revent))) {
-	    if (iob->len != sizeof(iob->buf)) {
+	/*
+	 * Enable reader if buffer is not full but avoid reading /dev/tty
+	 * if not in raw mode or the command is no longer running.
+	 */
+	if (iob->revent != NULL && iob->len != sizeof(iob->buf)) {
+	    if (!USERTTY_EVENT(iob->revent) ||
+		    (ttymode == TERM_RAW && iob->ec->cmnd_pid != -1)) {
 		if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
 		    sudo_fatal("%s", U_("unable to add event to queue"));
 	    }

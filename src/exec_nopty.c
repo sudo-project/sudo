@@ -447,10 +447,15 @@ write_callback(int fd, int what, void *v)
 		ev_free_by_fd(evbase, fd);
 	    }
 	}
-	/* Enable reader if buffer is not full. */
+	/*
+	 * Enable reader if buffer is not full but avoid reading
+	 * /dev/tty if the command is no longer running.
+	 */
 	if (iob->revent != NULL && iob->len != sizeof(iob->buf)) {
-	    if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
-		sudo_fatal("%s", U_("unable to add event to queue"));
+	    if (!USERTTY_EVENT(iob->revent) || iob->ec->cmnd_pid != -1) {
+		if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
+		    sudo_fatal("%s", U_("unable to add event to queue"));
+	    }
 	}
     }
 
