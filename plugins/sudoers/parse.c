@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2005, 2007-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004-2005, 2007-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -67,7 +67,7 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
     struct privilege *priv;
     struct userspec *us;
     struct defaults *def;
-    int nopass, match = DENY;
+    int cmnd_match, nopass, match = DENY;
     enum def_tuple pwcheck;
     debug_decl(sudoers_lookup_pseudo, SUDOERS_DEBUG_PARSER);
 
@@ -133,26 +133,40 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
 		     */
 		    switch (runas_matches_pw(nss->parse_tree, cs, list_pw)) {
 		    case DENY:
-			continue;
+			break;
 		    case ALLOW:
+			/*
+			 * RunAs user matches list user.
+			 * Match on command "list" or ALL.
+			 */
+			cmnd_match = cmnd_matches(nss->parse_tree,
+			    cs->cmnd, cs->runchroot, NULL);
+			if (cmnd_match != UNSPEC) {
+			    match = cmnd_match;
+			    goto done;
+			}
 			break;
 		    default:
+			/*
+			 * RunAs user doesn't match list user.  Only allow
+			 * listing if the user has "sudo ALL" for root.
+			 */
 			if (root_pw != NULL && runas_matches_pw(nss->parse_tree,
 				cs, root_pw) == ALLOW) {
-			    break;
+			    cmnd_match = cmnd_matches_all(nss->parse_tree,
+				cs->cmnd, cs->runchroot, NULL);
+			    if (cmnd_match != UNSPEC) {
+				match = cmnd_match;
+				goto done;
+			    }
 			}
-			continue;
-		    }
-
-		    /* Match command: "list" or ALL. */
-		    if (cmnd_matches(nss->parse_tree, cs->cmnd, cs->runchroot,
-			    NULL) == ALLOW) {
-			match = ALLOW;
+			break;
 		    }
 		}
 	    }
 	}
     }
+done:
     if (root_pw != NULL)
 	sudo_pw_delref(root_pw);
     if (match == ALLOW || user_uid == 0) {
