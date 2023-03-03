@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2019
+ * Copyright (c) 1996, 1998-2005, 2007-2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -411,6 +411,44 @@ cmnd_matches(struct sudoers_parse_tree *parse_tree, const struct member *m,
 		rc = cmndlist_matches(parse_tree, &a->members, runchroot, info);
 		if (rc != UNSPEC)
 		    matched = m->negated ? !rc : rc;
+		alias_put(a);
+	    }
+	    break;
+    }
+    debug_return_int(matched);
+}
+
+/*
+ * Like cmnd_matches() but only matches against the ALL command.
+ * Returns ALLOW, DENY or UNSPEC.
+ */
+int
+cmnd_matches_all(struct sudoers_parse_tree *parse_tree, const struct member *m,
+    const char *runchroot, struct cmnd_info *info)
+{
+    const bool negated = m->negated;
+    struct sudo_command *c;
+    int matched = UNSPEC;
+    struct alias *a;
+    debug_decl(cmnd_matches_all, SUDOERS_DEBUG_MATCH);
+
+    switch (m->type) {
+	case ALL:
+	    c = (struct sudo_command *)m->name;
+	    if (command_matches(c->cmnd, c->args, runchroot, info, &c->digests))
+		matched = !negated;
+	    break;
+	case ALIAS:
+	    a = alias_get(parse_tree, m->name, CMNDALIAS);
+	    if (a != NULL) {
+		TAILQ_FOREACH_REVERSE(m, &a->members, member_list, entries) {
+		    matched = cmnd_matches_all(parse_tree, m, runchroot, info);
+		    if (matched != UNSPEC) {
+			if (negated)
+			    matched = !matched;
+			break;
+		    }
+		}
 		alias_put(a);
 	    }
 	    break;

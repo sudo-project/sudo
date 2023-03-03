@@ -405,6 +405,7 @@ bool netgr_matches(const char *netgr, const char *lhost, const char *shost, cons
 bool usergr_matches(const char *group, const char *user, const struct passwd *pw);
 bool userpw_matches(const char *sudoers_user, const char *user, const struct passwd *pw);
 int cmnd_matches(struct sudoers_parse_tree *parse_tree, const struct member *m, const char *runchroot, struct cmnd_info *info);
+int cmnd_matches_all(struct sudoers_parse_tree *parse_tree, const struct member *m, const char *runchroot, struct cmnd_info *info);
 int cmndlist_matches(struct sudoers_parse_tree *parse_tree, const struct member_list *list, const char *runchroot, struct cmnd_info *info);
 int host_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw, const char *host, const char *shost, const struct member *m);
 int hostlist_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw, const struct member_list *list);
