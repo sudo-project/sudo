@@ -1067,8 +1067,8 @@ display_cmnd(struct sudo_nss_list *snl, struct passwd *pw)
 	    break;
     }
     if (match == ALLOW) {
-	/* For "sudo -l cmd" user_args includes the command being checked. */
-	const int len = sudo_printf(SUDO_CONV_INFO_MSG, "%s\n", user_args);
+	const int len = sudo_printf(SUDO_CONV_INFO_MSG, "%s%s%s\n",
+	    list_cmnd, user_args ? " " : "", user_args ? user_args : "");
 	ret = len < 0 ? -1 : true;
     }
     debug_return_int(ret);

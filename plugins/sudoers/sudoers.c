@@ -1079,7 +1079,14 @@ set_cmnd(void)
 	/* set user_args */
 	free(user_args);
 	user_args = NULL;
-	if (NewArgc > 1) {
+	if (ISSET(sudo_mode, MODE_CHECK)) {
+	    if (NewArgc > 2) {
+		/* Skip the command being listed in NewArgv[1]. */
+		user_args = strvec_join(NewArgv + 2, ' ', NULL);
+		if (user_args == NULL)
+		    debug_return_int(NOT_FOUND_ERROR);
+	    }
+	} else if (NewArgc > 1) {
 	    if (ISSET(sudo_mode, MODE_SHELL|MODE_LOGIN_SHELL) &&
 		    ISSET(sudo_mode, MODE_RUN)) {
 		/*

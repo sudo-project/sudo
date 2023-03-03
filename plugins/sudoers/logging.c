@@ -322,9 +322,9 @@ log_denial(int status, bool inform_user)
 		"sudo on %s.\n"), user_name, user_srunhost);
 	} else {
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("Sorry, user %s is not allowed "
-		"to execute '%s%s%s' as %s%s%s on %s.\n"),
-		user_name, user_cmnd, user_args ? " " : "",
-		user_args ? user_args : "",
+		"to execute '%s%s%s%s' as %s%s%s on %s.\n"),
+		user_name, user_cmnd, list_cmnd ? list_cmnd : "",
+		user_args ? " " : "", user_args ? user_args : "",
 		list_pw ? list_pw->pw_name : runas_pw ?
 		runas_pw->pw_name : user_name, runas_gr ? ":" : "",
 		runas_gr ? runas_gr->gr_name : "", user_host);
