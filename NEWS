@@ -1,3 +1,19 @@
+What's new in Sudo 1.9.13p3
+
+ * Fixed a bug introduced in sudo 1.9.13 that caused a syntax error
+   when "list" was used as a user or host name.  GitHub issue #246.
+
+ * Fixed a bug that could cause sudo to hang when running a command
+   in a pseudo-terminal when there is still input buffered after a
+   command has exited.
+
+ * Fixed "sudo -U otheruser -l command".  This is a regression in
+   sudo 1.9.13.  GitHub issue #248.
+
+ * Fixed "sudo -l command args" when matching a command in sudoers
+   with command line arguments.  This is a regression in sudo 1.9.13.
+   GitHub issue #249.
+
 What's new in Sudo 1.9.13p2
 
  * Fixed the --enable-static-sudoers option, broken in sudo 1.9.13.
