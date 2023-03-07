@@ -111,11 +111,11 @@ PVS_IGNORE = 'V707,V011,V002,V536'
 PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
 
 # Regression tests
-TEST_PROGS = conf_test getgids getgrouplist_test hexchar_test hltq_test \
-	     json_test multiarch_test open_parent_dir_test parse_gids_test \
-	     parseln_test progname_test regex_test strsplit_test \
-	     strtobool_test strtoid_test strtomode_test strtonum_test \
-	     uuid_test @COMPAT_TEST_PROGS@
+TEST_PROGS = conf_test digest_test getgids getgrouplist_test hexchar_test \
+	     hltq_test json_test multiarch_test open_parent_dir_test \
+	     parse_gids_test parseln_test progname_test regex_test \
+	     strsplit_test strtobool_test strtoid_test strtomode_test \
+	     strtonum_test uuid_test @COMPAT_TEST_PROGS@
 
 TEST_LIBS = @LIBS@
 TEST_LDFLAGS = @LDFLAGS@
@@ -166,6 +166,8 @@ PROGNAME_TEST_OBJS = progname_test.lo progname.lo basename.lo
 CLOSEFROM_TEST_OBJS = closefrom_test.lo closefrom.lo
 
 CONF_TEST_OBJS = conf_test.lo sudo_conf.lo
+
+DIGEST_TEST_OBJS = digest_test.lo @DIGEST@
 
 FNM_TEST_OBJS = fnm_test.lo fnmatch.lo
 
@@ -280,6 +282,9 @@ closefrom_test: $(CLOSEFROM_TEST_OBJS) libsudo_util.la
 
 conf_test: $(CONF_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CONF_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+
+digest_test: $(DIGEST_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(DIGEST_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS) @LIBCRYPTO@
 
 fnm_test: $(FNM_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(FNM_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
@@ -449,6 +454,7 @@ check: $(TEST_PROGS) check-fuzzer
 	    if test -f closefrom_test; then \
 		./closefrom_test || rval=`expr $$rval + $$?`; \
 	    fi; \
+	    ./digest_test || rval=`expr $$rval + $$?`; \
 	    if test -f fnm_test; then \
 		./fnm_test $(srcdir)/regress/fnmatch/fnm_test.in || rval=`expr $$rval + $$?`; \
 	    fi; \
@@ -471,9 +477,16 @@ check: $(TEST_PROGS) check-fuzzer
 		./strsig_test || rval=`expr $$rval + $$?`; \
 	    fi; \
 	    ./getgrouplist_test || rval=`expr $$rval + $$?`; \
+	    ./hexchar_test || rval=`expr $$rval + $$?`; \
+	    ./hltq_test || rval=`expr $$rval + $$?`; \
+	    ./json_test || rval=`expr $$rval + $$?`; \
 	    ./multiarch_test || rval=`expr $$rval + $$?`; \
 	    ./open_parent_dir_test || rval=`expr $$rval + $$?`; \
 	    ./parse_gids_test || rval=`expr $$rval + $$?`; \
+	    ./progname_test || rval=`expr $$rval + $$?`; \
+	    rm -f ./progname_test2; ln -s ./progname_test ./progname_test2; \
+	    ./progname_test2 || rval=`expr $$rval + $$?`; \
+	    rm -f ./progname_test2; \
 	    ./regex_test || rval=`expr $$rval + $$?`; \
 	    ./strsplit_test || rval=`expr $$rval + $$?`; \
 	    ./strtobool_test || rval=`expr $$rval + $$?`; \
@@ -481,13 +494,6 @@ check: $(TEST_PROGS) check-fuzzer
 	    ./strtomode_test || rval=`expr $$rval + $$?`; \
 	    ./strtonum_test || rval=`expr $$rval + $$?`; \
 	    ./uuid_test || rval=`expr $$rval + $$?`; \
-	    ./hltq_test || rval=`expr $$rval + $$?`; \
-	    ./hexchar_test || rval=`expr $$rval + $$?`; \
-	    ./json_test || rval=`expr $$rval + $$?`; \
-	    ./progname_test || rval=`expr $$rval + $$?`; \
-	    rm -f ./progname_test2; ln -s ./progname_test ./progname_test2; \
-	    ./progname_test2 || rval=`expr $$rval + $$?`; \
-	    rm -f ./progname_test2; \
 	    AWK=$(AWK) $(HARNESS) sudo_conf || rval=`expr $$rval + $$?`; \
 	    AWK=$(AWK) $(HARNESS) sudo_parseln || rval=`expr $$rval + $$?`; \
 	    exit $$rval; \
@@ -651,6 +657,20 @@ digest_openssl.i: $(srcdir)/digest_openssl.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 digest_openssl.plog: digest_openssl.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/digest_openssl.c --i-file $< --output-file $@
+digest_test.lo: $(srcdir)/regress/digest/digest_test.c \
+                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                $(incdir)/sudo_digest.h $(incdir)/sudo_fatal.h \
+                $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
+                $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/digest/digest_test.c
+digest_test.i: $(srcdir)/regress/digest/digest_test.c \
+                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                $(incdir)/sudo_digest.h $(incdir)/sudo_fatal.h \
+                $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
+                $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+digest_test.plog: digest_test.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/digest/digest_test.c --i-file $< --output-file $@
 dup3.lo: $(srcdir)/dup3.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/dup3.c
 dup3.i: $(srcdir)/dup3.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
@@ -1629,9 +1649,17 @@ sudo_dso.i: $(srcdir)/sudo_dso.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 sudo_dso.plog: sudo_dso.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sudo_dso.c --i-file $< --output-file $@
-suspend_parent.lo: $(srcdir)/suspend_parent.c $(top_builddir)/config.h
+suspend_parent.lo: $(srcdir)/suspend_parent.c $(incdir)/compat/stdbool.h \
+                   $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                   $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/suspend_parent.c
-suspend_parent.i: $(srcdir)/suspend_parent.c $(top_builddir)/config.h
+suspend_parent.i: $(srcdir)/suspend_parent.c $(incdir)/compat/stdbool.h \
+                   $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
+                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                   $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 suspend_parent.plog: suspend_parent.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/suspend_parent.c --i-file $< --output-file $@

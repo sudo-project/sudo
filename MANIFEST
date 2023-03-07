@@ -282,6 +282,7 @@ lib/util/regress/closefrom/closefrom_test.c
 lib/util/regress/corpus/seed/sudo_conf/sudo.conf.1
 lib/util/regress/corpus/seed/sudo_conf/sudo.conf.2
 lib/util/regress/corpus/seed/sudo_conf/sudo.conf.3
+lib/util/regress/digest/digest_test.c
 lib/util/regress/fnmatch/fnm_test.c
 lib/util/regress/fnmatch/fnm_test.in
 lib/util/regress/fuzz/fuzz_sudo_conf.c
