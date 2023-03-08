@@ -302,12 +302,14 @@ struct defaults {
 /*
  * Parsed sudoers policy.
  */
+struct sudo_nss;
 struct sudoers_parse_tree {
     TAILQ_ENTRY(sudoers_parse_tree) entries;
     struct userspec_list userspecs;
     struct defaults_list defaults;
     struct rbtree *aliases;
     char *shost, *lhost;
+    struct sudo_nss *nss;
 };
 
 /*
@@ -380,7 +382,7 @@ void free_userspec(struct userspec *us);
 void free_userspecs(struct userspec_list *usl);
 void free_default(struct defaults *def);
 void free_defaults(struct defaults_list *defs);
-void init_parse_tree(struct sudoers_parse_tree *parse_tree, char *lhost, char *shost);
+void init_parse_tree(struct sudoers_parse_tree *parse_tree, char *lhost, char *shost, struct sudo_nss *nss);
 void free_parse_tree(struct sudoers_parse_tree *parse_tree);
 void reparent_parse_tree(struct sudoers_parse_tree *new_tree);
 bool parser_leak_add(enum parser_leak_types type, void *v);
@@ -401,7 +403,7 @@ struct group;
 struct passwd;
 bool group_matches(const char *sudoers_group, const struct group *gr);
 bool hostname_matches(const char *shost, const char *lhost, const char *pattern);
-bool netgr_matches(const char *netgr, const char *lhost, const char *shost, const char *user);
+bool netgr_matches(struct sudo_nss *nss, const char *netgr, const char *lhost, const char *shost, const char *user);
 bool usergr_matches(const char *group, const char *user, const struct passwd *pw);
 bool userpw_matches(const char *sudoers_user, const char *user, const struct passwd *pw);
 int cmnd_matches(struct sudoers_parse_tree *parse_tree, const struct member *m, const char *runchroot, struct cmnd_info *info);

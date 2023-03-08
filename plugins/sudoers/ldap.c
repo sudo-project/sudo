@@ -348,7 +348,9 @@ sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
 	    negated = true;
 	}
 	if (*val == '+') {
-	    if (netgr_matches(val, def_netgroup_tuple ? user_runhost : NULL,
+	    /* Custom innetgr() function not used here. */
+	    if (netgr_matches(NULL, val,
+		def_netgroup_tuple ? user_runhost : NULL,
 		def_netgroup_tuple ? user_srunhost : NULL, pw->pw_name))
 		ret = true;
 	    DPRINTF2("ldap sudoUser netgroup '%s%s' ... %s",
@@ -1766,7 +1768,7 @@ sudo_ldap_open(struct sudo_nss *nss)
     }
     handle->ld = ld;
     /* handle->pw = NULL; */
-    init_parse_tree(&handle->parse_tree, NULL, NULL);
+    init_parse_tree(&handle->parse_tree, NULL, NULL, nss);
     nss->handle = handle;
 
 done:

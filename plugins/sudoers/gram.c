@@ -3921,13 +3921,15 @@ free_userspec(struct userspec *us)
  * Takes ownership of lhost and shost.
  */
 void
-init_parse_tree(struct sudoers_parse_tree *parse_tree, char *lhost, char *shost)
+init_parse_tree(struct sudoers_parse_tree *parse_tree, char *lhost, char *shost,
+    struct sudo_nss *nss)
 {
     TAILQ_INIT(&parse_tree->userspecs);
     TAILQ_INIT(&parse_tree->defaults);
     parse_tree->aliases = NULL;
     parse_tree->shost = shost;
     parse_tree->lhost = lhost;
+    parse_tree->nss = nss;
 }
 
 /*

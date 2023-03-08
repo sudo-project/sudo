@@ -203,7 +203,7 @@ sudo_sss_check_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 	switch (*val) {
 	case '+':
 	    /* Netgroup spec found, check membership. */
-	    if (netgr_matches(val, def_netgroup_tuple ? host : NULL,
+	    if (netgr_matches(NULL, val, def_netgroup_tuple ? host : NULL,
 		def_netgroup_tuple ? shost : NULL, handle->pw->pw_name)) {
 		ret = true;
 	    }
@@ -638,7 +638,8 @@ sudo_sss_open(struct sudo_nss *nss)
     }
 
     /* The "parse tree" contains userspecs, defaults, aliases and hostnames. */
-    init_parse_tree(&handle->parse_tree, handle->ipa_host, handle->ipa_shost);
+    init_parse_tree(&handle->parse_tree, handle->ipa_host, handle->ipa_shost,
+	nss);
     nss->handle = handle;
 
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "handle=%p", handle);

@@ -79,7 +79,7 @@ user_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
 	    matched = !m->negated;
 	    break;
 	case NETGROUP:
-	    if (netgr_matches(m->name,
+	    if (netgr_matches(parse_tree->nss, m->name,
 		def_netgroup_tuple ? lhost : NULL,
 		def_netgroup_tuple ? shost : NULL, pw->pw_name))
 		matched = !m->negated;
@@ -174,7 +174,7 @@ runaslist_matches(struct sudoers_parse_tree *parse_tree,
 			user_matched = !m->negated;
 			break;
 		    case NETGROUP:
-			if (netgr_matches(m->name,
+			if (netgr_matches(parse_tree->nss, m->name,
 			    def_netgroup_tuple ? lhost : NULL,
 			    def_netgroup_tuple ? shost : NULL,
 			    runas_pw->pw_name))
@@ -332,7 +332,7 @@ host_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
 	    matched = !m->negated;
 	    break;
 	case NETGROUP:
-	    if (netgr_matches(m->name, lhost, shost,
+	    if (netgr_matches(parse_tree->nss, m->name, lhost, shost,
 		def_netgroup_tuple ? pw->pw_name : NULL))
 		matched = !m->negated;
 	    break;
@@ -670,7 +670,8 @@ sudo_getdomainname(void)
  * in which case that argument is not checked...
  */
 bool
-netgr_matches(const char *netgr, const char *lhost, const char *shost, const char *user)
+netgr_matches(struct sudo_nss *nss, const char *netgr,
+    const char *lhost, const char *shost, const char *user)
 {
 #ifdef HAVE_INNETGR
     const char *domain;
@@ -683,7 +684,6 @@ netgr_matches(const char *netgr, const char *lhost, const char *shost, const cha
 	debug_return_bool(false);
     }
 
-#ifdef HAVE_INNETGR
     /* make sure we have a valid netgroup, sudo style */
     if (*netgr++ != '+') {
 	sudo_debug_printf(SUDO_DEBUG_DIAG, "netgroup %s has no leading '+'",
@@ -694,16 +694,42 @@ netgr_matches(const char *netgr, const char *lhost, const char *shost, const cha
     /* get the domain name (if any) */
     domain = sudo_getdomainname();
 
-    if (innetgr(netgr, lhost, user, domain))
-	rc = true;
-    else if (lhost != shost && innetgr(netgr, shost, user, domain))
-	rc = true;
+    /* Use nss-specific innetgr() function if available. */
+    if (nss != NULL && nss->innetgr != NULL) {
+	switch (nss->innetgr(nss, netgr, lhost, user, domain)) {
+	case 0:
+	    if (lhost != shost) {
+		if (nss->innetgr(nss, netgr, shost, user, domain) == 1)
+		    rc = true;
+	    }
+	    goto done;
+	case 1:
+	    rc = true;
+	    goto done;
+	default:
+	    /* Not supported, use system innetgr(3). */
+	    break;
+	}
+    }
 
+#ifdef HAVE_INNETGR
+    /* Use system innetgr() function. */
+    if (innetgr(netgr, lhost, user, domain) == 1) {
+	rc = true;
+    } else if (lhost != shost) {
+	if (innetgr(netgr, shost, user, domain) == 1)
+	    rc = true;
+    }
+#else
+    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+	"%s: no system netgroup support", __func__);
+#endif /* HAVE_INNETGR */
+
+done:
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	"netgroup %s matches (%s|%s, %s, %s): %s", netgr, lhost ? lhost : "",
 	shost ? shost : "", user ? user : "", domain ? domain : "",
 	rc ? "true" : "false");
-#endif /* HAVE_INNETGR */
 
     debug_return_bool(rc);
 }

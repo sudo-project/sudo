@@ -74,7 +74,7 @@ sudo_file_open(struct sudo_nss *nss)
     if (handle != NULL) {
 	handle->fp = open_sudoers(sudoers_file, false, NULL);
 	if (handle->fp != NULL) {
-	    init_parse_tree(&handle->parse_tree, NULL, NULL);
+	    init_parse_tree(&handle->parse_tree, NULL, NULL, nss);
 	} else {
 	    free(handle);
 	    handle = NULL;

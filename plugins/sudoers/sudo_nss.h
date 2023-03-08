@@ -33,6 +33,8 @@ struct sudo_nss {
     struct sudoers_parse_tree *(*parse)(struct sudo_nss *nss);
     int (*query)(struct sudo_nss *nss, struct passwd *pw);
     int (*getdefs)(struct sudo_nss *nss);
+    int (*innetgr)(struct sudo_nss *nss, const char *netgr, const char *host,
+	const char *user, const char *domain);
     void *handle;
     struct sudoers_parse_tree *parse_tree;
     bool ret_if_found;

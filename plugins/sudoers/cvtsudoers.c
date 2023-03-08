@@ -134,7 +134,7 @@ main(int argc, char *argv[])
     textdomain("sudoers");
 
     /* Initialize early, before any "goto done". */
-    init_parse_tree(&merged_tree, NULL, NULL);
+    init_parse_tree(&merged_tree, NULL, NULL, NULL);
 
     /* Read debug and plugin sections of sudo.conf. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG|SUDO_CONF_PLUGINS) == -1)
@@ -390,7 +390,7 @@ main(int argc, char *argv[])
 	parse_tree = malloc(sizeof(*parse_tree));
 	if (parse_tree == NULL)
 	    sudo_fatalx("%s", U_("unable to allocate memory"));
-	init_parse_tree(parse_tree, lhost, shost);
+	init_parse_tree(parse_tree, lhost, shost, NULL);
 	TAILQ_INSERT_TAIL(&parse_trees, parse_tree, entries);
 
 	/* Setup defaults data structures. */
