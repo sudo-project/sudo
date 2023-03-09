@@ -412,7 +412,7 @@ install-fuzzer: $(FUZZ_PROGS) $(FUZZ_SEED_CORPUS)
 uninstall:
 	$(LIBTOOL) $(LTFLAGS) --mode=uninstall rm -f $(DESTDIR)$(libexecdir)/sudo/libsudo_util.la
 	-test -z "$(INSTALL_BACKUP)" || \
-	    rf -f $(DESTDIR)$(libexecdir)/sudo/libsudo_util.*~
+	    rm -f $(DESTDIR)$(libexecdir)/sudo/libsudo_util.*~
 
 splint:
 	splint $(SPLINT_OPTS) -I$(incdir) -I$(top_builddir) $(srcdir)/*.c
