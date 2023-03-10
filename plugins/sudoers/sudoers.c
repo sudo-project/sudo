@@ -1872,6 +1872,9 @@ sudoers_cleanup(void)
     sudo_freegrcache();
     canon_path_free_cache();
 
+    /* Run garbage collector. */
+    sudoers_gc_run();
+
     /* Clear globals */
     list_pw = NULL;
     saved_argv = NULL;

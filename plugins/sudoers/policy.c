@@ -1119,7 +1119,7 @@ sudoers_policy_close(int exit_status, int error_code)
     /* Free sudoers sources, sudo_user and passwd/group caches. */
     sudoers_cleanup();
 
-    /* command_info is freed by the g/c code. */
+    /* command_info was freed by the g/c code. */
     command_info = NULL;
 
     /* Free error message passed back to front-end, if any. */
