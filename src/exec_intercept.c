@@ -450,10 +450,11 @@ intercept_check_policy(const char *command, int argc, char **argv, int envc,
 	    goto oom;
 
 	/* Rebuild command_info[] with new command and runcwd. */
-	command_info = update_command_info(closure->details->info,
+	command_info_copy = update_command_info(closure->details->info,
 	    command, runcwd, NULL, closure);
-	if (command_info == NULL)
+	if (command_info_copy == NULL)
 	    goto oom;
+	command_info = command_info_copy;
 	closure->state = POLICY_ACCEPT;
 	run_argv = argv;
     }
