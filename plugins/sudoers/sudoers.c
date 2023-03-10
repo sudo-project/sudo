@@ -1872,6 +1872,9 @@ sudoers_cleanup(void)
     sudo_freegrcache();
     canon_path_free_cache();
 
+    /* We must free the cached environment before running g/c. */
+    env_init(NULL);
+
     /* Run garbage collector. */
     sudoers_gc_run();
 

@@ -498,13 +498,9 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	    sudoers_policy.close(0, 0);
 	else
 	    sudoers_cleanup();
-
-	/* Call a second time to free old env pointer. */
-	env_init(NULL);
     }
 
     sudoers_policy.deregister_hooks(SUDO_API_VERSION, fuzz_hook_stub);
-    sudoers_gc_run();
 
     free_dynamic_array(&plugin_args);
     free_dynamic_array(&settings);
