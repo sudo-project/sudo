@@ -189,7 +189,7 @@ sudo_ldap_innetgr_base(LDAP *ld, const char *base,
 	if (bv == NULL) {
 	    const int optrc = ldap_get_option(ld, LDAP_OPT_RESULT_CODE, &rc);
 	    if (optrc != LDAP_OPT_SUCCESS || rc == LDAP_NO_MEMORY)
-		debug_return_int(-1);
+		goto done;
 	} else {
 	    for (p = bv; *p != NULL && !ret; p++) {
 		char *val = (*p)->bv_val;
@@ -208,7 +208,7 @@ sudo_ldap_innetgr_base(LDAP *ld, const char *base,
 	if (bv == NULL) {
 	    const int optrc = ldap_get_option(ld, LDAP_OPT_RESULT_CODE, &rc);
 	    if (optrc != LDAP_OPT_SUCCESS || rc == LDAP_NO_MEMORY)
-		debug_return_int(-1);
+		goto done;
 	} else {
 	    for (p = bv; *p != NULL && !ret; p++) {
 		const char *val = (*p)->bv_val;
