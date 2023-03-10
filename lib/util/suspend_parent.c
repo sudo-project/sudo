@@ -132,7 +132,7 @@ sudo_suspend_parent_v1(int signo, pid_t my_pid, pid_t my_pgrp, pid_t cmnd_pid,
 
     /* Run callback before we suspend. */
     if (callback != NULL)
-	callback(callback, signo);
+	callback(closure, signo);
 
     if (signo == SIGTSTP) {
 	memset(&sa, 0, sizeof(sa));
@@ -151,7 +151,7 @@ sudo_suspend_parent_v1(int signo, pid_t my_pid, pid_t my_pgrp, pid_t cmnd_pid,
 
     /* Run callback on resume. */
     if (callback != NULL)
-	callback(callback, SIGCONT);
+	callback(closure, SIGCONT);
 
     if (saved_pgrp != -1) {
 	/*
