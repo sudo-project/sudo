@@ -187,8 +187,10 @@ sudoers_reinit_defaults(void)
     sudoers_error_hook = logger;
 
     /* No need to check the admin flag file multiple times. */
-    if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED))
+    if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED)) {
+	free(def_admin_flag);
 	def_admin_flag = NULL;
+    }
 
     debug_return_bool(true);
 }
