@@ -557,7 +557,7 @@ get_user_info(struct user_details *ud)
     info[i] = sudo_new_key_val("user", pw->pw_name);
     if (info[i] == NULL)
 	goto oom;
-    ud->username = info[i] + sizeof("user=") - 1;
+    ud->username = pw->pw_name;
 
     /* Stash user's shell for use with the -s flag; don't pass to plugin. */
     if ((ud->shell = getenv("SHELL")) == NULL || ud->shell[0] == '\0') {
