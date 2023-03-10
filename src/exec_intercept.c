@@ -199,13 +199,19 @@ intercept_connection_close(struct intercept_closure *closure)
 }
 
 void
-intercept_cleanup(void)
+intercept_cleanup(struct exec_closure *ec)
 {
     debug_decl(intercept_cleanup, SUDO_DEBUG_EXEC);
 
     if (accept_closure != NULL) {
+	/* DSO-based intercept. */
 	intercept_connection_close(accept_closure);
 	accept_closure = NULL;
+    } else if (ec->intercept != NULL) {
+	/* ptrace-based intercept. */
+	intercept_closure_reset(ec->intercept);
+	free(ec->intercept);
+	ec->intercept = NULL;
     }
 
     debug_return;

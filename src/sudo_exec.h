@@ -186,7 +186,7 @@ char **enable_monitor(char *envp[], const char *dso);
 
 /* exec_intercept.c */
 void *intercept_setup(int fd, struct sudo_event_base *evbase, struct command_details *details);
-void intercept_cleanup(void);
+void intercept_cleanup(struct exec_closure *ec);
 
 /* exec_iolog.c */
 bool log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob);

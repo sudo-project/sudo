@@ -533,7 +533,7 @@ free_exec_closure(struct exec_closure *ec)
     debug_decl(free_exec_closure, SUDO_DEBUG_EXEC);
 
     /* Free any remaining intercept resources. */
-    intercept_cleanup();
+    intercept_cleanup(ec);
 
     sudo_ev_base_free(ec->evbase);
     sudo_ev_free(ec->backchannel_event);
