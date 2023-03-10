@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2003-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2003-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * This code is derived from software contributed by Aaron Spangler.
  *
@@ -57,10 +57,6 @@ extern int ldapssl_set_strength(LDAP *ldap, int strength);
 
 #if !defined(LDAP_OPT_NETWORK_TIMEOUT) && defined(LDAP_OPT_CONNECT_TIMEOUT)
 # define LDAP_OPT_NETWORK_TIMEOUT LDAP_OPT_CONNECT_TIMEOUT
-#endif
-
-#ifndef LDAP_OPT_SUCCESS
-# define LDAP_OPT_SUCCESS LDAP_SUCCESS
 #endif
 
 #ifndef LDAPS_PORT

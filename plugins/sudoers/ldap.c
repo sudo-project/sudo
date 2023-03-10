@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2003-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2003-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * This code is derived from software contributed by Aaron Spangler.
  *
@@ -67,14 +67,6 @@
 #include "sudo_ldap_conf.h"
 #include "sudo_dso.h"
 
-#ifndef LDAP_OPT_RESULT_CODE
-# define LDAP_OPT_RESULT_CODE LDAP_OPT_ERROR_NUMBER
-#endif
-
-#ifndef LDAP_OPT_SUCCESS
-# define LDAP_OPT_SUCCESS LDAP_SUCCESS
-#endif
-
 #if defined(HAVE_LDAP_SASL_INTERACTIVE_BIND_S) && !defined(LDAP_SASL_QUIET)
 # define LDAP_SASL_QUIET	0
 #endif
@@ -82,21 +74,6 @@
 #ifndef HAVE_LDAP_UNBIND_EXT_S
 #define ldap_unbind_ext_s(a, b, c)	ldap_unbind_s(a)
 #endif
-
-#ifndef HAVE_LDAP_SEARCH_EXT_S
-# ifdef HAVE_LDAP_SEARCH_ST
-#  define ldap_search_ext_s(a, b, c, d, e, f, g, h, i, j, k)		\
-	ldap_search_st(a, b, c, d, e, f, i, k)
-# else
-#  define ldap_search_ext_s(a, b, c, d, e, f, g, h, i, j, k)		\
-	ldap_search_s(a, b, c, d, e, f, k)
-# endif
-#endif
-
-#define LDAP_FOREACH(var, ld, res)					\
-    for ((var) = ldap_first_entry((ld), (res));				\
-	(var) != NULL;							\
-	(var) = ldap_next_entry((ld), (var)))
 
 /* The TIMEFILTER_LENGTH is the length of the filter when timed entries
    are used. The length is computed as follows:
@@ -305,7 +282,7 @@ sudo_ldap_get_values_len(LDAP *ld, LDAPMessage *entry, const char *attr, int *rc
 
     bval = ldap_get_values_len(ld, entry, attr);
     if (bval == NULL) {
-	int optrc = ldap_get_option(ld, LDAP_OPT_RESULT_CODE, rc);
+	const int optrc = ldap_get_option(ld, LDAP_OPT_RESULT_CODE, rc);
 	if (optrc != LDAP_OPT_SUCCESS)
 	    *rc = optrc;
     } else {
@@ -341,7 +318,7 @@ sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
     /* walk through values */
     for (p = bv; *p != NULL && !ret; p++) {
 	bool negated = false;
-	char *val = (*p)->bv_val;
+	const char *val = (*p)->bv_val;
 
 	if (*val == '!') {
 	    val++;
@@ -554,122 +531,6 @@ sudo_ldap_build_default_filter(void)
 	debug_return_str(NULL);
 
     debug_return_str(filt);
-}
-
-/*
- * Determine length of query value after escaping characters
- * as per RFC 4515.
- */
-static size_t
-sudo_ldap_value_len(const char *value)
-{
-    const char *s;
-    size_t len = 0;
-
-    for (s = value; *s != '\0'; s++) {
-	switch (*s) {
-	case '\\':
-	case '(':
-	case ')':
-	case '*':
-	    len += 2;
-	    break;
-	}
-    }
-    len += (size_t)(s - value);
-    return len;
-}
-
-/*
- * Like strlcat() but escapes characters as per RFC 4515.
- */
-static size_t
-sudo_ldap_value_cat(char *dst, const char *src, size_t size)
-{
-    char *d = dst;
-    const char *s = src;
-    size_t n = size;
-    size_t dlen;
-
-    /* Find the end of dst and adjust bytes left but don't go past end */
-    while (n-- != 0 && *d != '\0')
-	d++;
-    dlen = d - dst;
-    n = size - dlen;
-
-    if (n == 0)
-	return dlen + strlen(s);
-    while (*s != '\0') {
-	switch (*s) {
-	case '\\':
-	    if (n < 3)
-		goto done;
-	    *d++ = '\\';
-	    *d++ = '5';
-	    *d++ = 'c';
-	    n -= 3;
-	    break;
-	case '(':
-	    if (n < 3)
-		goto done;
-	    *d++ = '\\';
-	    *d++ = '2';
-	    *d++ = '8';
-	    n -= 3;
-	    break;
-	case ')':
-	    if (n < 3)
-		goto done;
-	    *d++ = '\\';
-	    *d++ = '2';
-	    *d++ = '9';
-	    n -= 3;
-	    break;
-	case '*':
-	    if (n < 3)
-		goto done;
-	    *d++ = '\\';
-	    *d++ = '2';
-	    *d++ = 'a';
-	    n -= 3;
-	    break;
-	default:
-	    if (n < 1)
-		goto done;
-	    *d++ = *s;
-	    n--;
-	    break;
-	}
-	s++;
-    }
-done:
-    *d = '\0';
-    while (*s != '\0')
-	s++;
-    return dlen + (s - src);	/* count does not include NUL */
-}
-
-/*
- * Like strdup() but escapes characters as per RFC 4515.
- */
-static char *
-sudo_ldap_value_dup(const char *src)
-{
-    char *dst;
-    size_t size;
-
-    size = sudo_ldap_value_len(src) + 1;
-    dst = malloc(size);
-    if (dst == NULL)
-	return NULL;
-
-    *dst = '\0';
-    if (sudo_ldap_value_cat(dst, src, size) >= size) {
-	/* Should not be possible... */
-	free(dst);
-	dst = NULL;
-    }
-    return dst;
 }
 
 /*
