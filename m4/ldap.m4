@@ -11,7 +11,7 @@ AC_DEFUN([SUDO_CHECK_LDAP], [
 	    AX_APPEND_FLAG([-I${with_ldap}/include], [CPPFLAGS])
 	    with_ldap=yes
 	fi
-	SUDOERS_OBJS="${SUDOERS_OBJS} ldap.lo ldap_conf.lo"
+	SUDOERS_OBJS="${SUDOERS_OBJS} ldap.lo ldap_conf.lo ldap_innetgr.lo"
 	case "$SUDOERS_OBJS" in
 	    *ldap_util.lo*) ;;
 	    *) SUDOERS_OBJS="${SUDOERS_OBJS} ldap_util.lo";;

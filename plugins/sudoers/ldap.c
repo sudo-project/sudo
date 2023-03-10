@@ -1955,6 +1955,14 @@ sudo_ldap_parse(struct sudo_nss *nss)
     debug_return_ptr(&handle->parse_tree);
 }
 
+static int
+sudo_ldap_innetgr(struct sudo_nss *nss, const char *netgr, const char *host,
+    const char *user, const char *domain)
+{
+    const struct sudo_ldap_handle *handle = nss->handle;
+    return sudo_ldap_innetgr_int(handle->ld, netgr, host, user, domain);
+}
+
 #if 0
 /*
  * Create an ldap_result from an LDAP search result.
@@ -2013,5 +2021,6 @@ struct sudo_nss sudo_nss_ldap = {
     sudo_ldap_close,
     sudo_ldap_parse,
     sudo_ldap_query,
-    sudo_ldap_getdefs
+    sudo_ldap_getdefs,
+    sudo_ldap_innetgr
 };

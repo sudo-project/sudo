@@ -649,6 +649,7 @@ plugins/sudoers/iolog.c
 plugins/sudoers/iolog_path_escapes.c
 plugins/sudoers/ldap.c
 plugins/sudoers/ldap_conf.c
+plugins/sudoers/ldap_innetgr.c
 plugins/sudoers/ldap_util.c
 plugins/sudoers/linux_audit.c
 plugins/sudoers/linux_audit.h

@@ -2075,6 +2075,32 @@ ldap_conf.i: $(srcdir)/ldap_conf.c $(devdir)/def_data.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 ldap_conf.plog: ldap_conf.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/ldap_conf.c --i-file $< --output-file $@
+ldap_innetgr.lo: $(srcdir)/ldap_innetgr.c $(devdir)/def_data.h \
+                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                 $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                 $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                 $(srcdir)/sudo_ldap.h $(srcdir)/sudo_ldap_conf.h \
+                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                 $(top_builddir)/pathnames.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/ldap_innetgr.c
+ldap_innetgr.i: $(srcdir)/ldap_innetgr.c $(devdir)/def_data.h \
+                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                 $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                 $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                 $(srcdir)/sudo_ldap.h $(srcdir)/sudo_ldap_conf.h \
+                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                 $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+ldap_innetgr.plog: ldap_innetgr.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/ldap_innetgr.c --i-file $< --output-file $@
 ldap_util.lo: $(srcdir)/ldap_util.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \

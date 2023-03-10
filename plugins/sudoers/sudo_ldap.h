@@ -49,6 +49,9 @@
 /* Iterators used by sudo_ldap_role_to_priv() to handle bervar ** or char ** */
 typedef char * (*sudo_ldap_iter_t)(void **);
 
+/* ldap_innetgr.c */
+int sudo_ldap_innetgr_int(void *v, const char *netgr, const char *host, const char *user, const char *domain);
+
 /* ldap_util.c */
 bool sudo_ldap_is_negated(char **valp);
 size_t sudo_ldap_value_len(const char *value);
