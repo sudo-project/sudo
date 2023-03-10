@@ -1096,7 +1096,7 @@ intercept_setup(int fd, struct sudo_event_base *evbase,
 }
 
 void
-intercept_cleanup(void)
+intercept_cleanup(struct exec_closure *ec)
 {
     debug_decl(intercept_cleanup, SUDO_DEBUG_EXEC);
 
