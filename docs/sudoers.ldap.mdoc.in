@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 16, 2023
+.Dd March 10, 2023
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -753,8 +753,16 @@ Multiple
 .Sy NETGROUP_BASE
 lines may be specified, in which case they are queried in the order specified.
 .Pp
-This option can be used to query a user's netgroups directly via LDAP
-which is usually faster than fetching every
+When this option is enabled,
+.Nm sudo
+will query the LDAP server directly when matching netgroups present in a
+.Em sudoRole
+instead of relying on the C library's
+.Fn innetgr
+function.
+.Pp
+This option can also be used to query a user's netgroups directly
+via LDAP which is usually faster than fetching every
 .Em sudoRole
 object containing a
 .Em sudoUser

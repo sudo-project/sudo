@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOERS.LDAP" "@mansectform@" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "@mansectform@" "March 10, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -802,8 +802,16 @@ Multiple
 \fBNETGROUP_BASE\fR
 lines may be specified, in which case they are queried in the order specified.
 .sp
-This option can be used to query a user's netgroups directly via LDAP
-which is usually faster than fetching every
+When this option is enabled,
+\fBsudo\fR
+will query the LDAP server directly when matching netgroups present in a
+\fIsudoRole\fR
+instead of relying on the C library's
+\fBinnetgr\fR()
+function.
+.sp
+This option can also be used to query a user's netgroups directly
+via LDAP which is usually faster than fetching every
 \fIsudoRole\fR
 object containing a
 \fIsudoUser\fR
