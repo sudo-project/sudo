@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd March 10, 2023
+.Dd March 12, 2023
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -769,7 +769,7 @@ object containing a
 that begins with a
 .Ql +
 prefix.
-The NIS schema used by some LDAP servers need a modification to
+The NIS schema used by some LDAP servers needs a modification to
 support querying the
 .Em nisNetgroup
 object by its
@@ -787,6 +787,24 @@ attributetype ( 1.3.6.1.1.1.1.14 NAME 'nisNetgroupTriple'
    SUBSTR caseIgnoreIA5SubstringsMatch
    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
 .Ed
+.Pp
+Before enabling
+.Sy NETGROUP_BASE ,
+you should verify that your LDAP server supports matching
+.Em nisNetgroupTriple .
+For example, using
+.Sy ldapsearch :
+.Bd -literal -offset 4n
+$ ldapsearch -b $NETGROUP_BASE \e
+  '(&(objectClass=nisNetgroup)(nisNetgroupTriple=\28*,USER,\29))'
+.Ed
+.Pp
+where your
+.Em nisNetgroup
+data includes an object with the following
+.Em nisNetgroupTriple :
+.Pp
+.Dl nisNetgroupTriple: (,USER,)
 .It Sy NETGROUP_SEARCH_FILTER Ar ldap_filter
 An LDAP filter which is used to restrict the set of records returned
 when performing an LDAP netgroup query.
