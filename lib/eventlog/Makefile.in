@@ -34,6 +34,7 @@ incdir = $(top_srcdir)/include
 CC = @CC@
 LIBTOOL = @LIBTOOL@
 EGREP = @EGREP@
+SED = @SED@
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) -I$(top_srcdir) @CPPFLAGS@
