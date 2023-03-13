@@ -27,15 +27,16 @@
 #define SUDO_ERROR_WRAP 0
 
 #include "sudo_compat.h"
-#include "sudo_util.h"
+#include "sudo_eventlog.h"
 #include "sudo_fatal.h"
+#include "sudo_util.h"
 
-#include "iolog_json.h"
+#include "parse_json.h"
 
 sudo_dso_public int main(int argc, char *argv[]);
 
 static bool
-json_print_object(struct json_container *jsonc, struct json_object *object)
+json_print_object(struct json_container *jsonc, struct eventlog_json_object *object)
 {
     struct json_item *item;
     struct json_value json_value;
@@ -98,7 +99,7 @@ done:
 }
 
 static bool
-json_format(struct json_container *jsonc, struct json_object *object)
+json_format(struct json_container *jsonc, struct eventlog_json_object *object)
 {
     struct json_item *item;
     bool ret = false;
@@ -170,11 +171,10 @@ compare(FILE *fp, const char *infile, struct json_container *jsonc)
 int
 main(int argc, char *argv[])
 {
-    struct json_object root;
     int ch, i, ntests = 0, errors = 0;
     bool cat = false;
 
-    initprogname(argc > 0 ? argv[0] : "check_iolog_json");
+    initprogname(argc > 0 ? argv[0] : "check_parse_json");
 
     while ((ch = getopt(argc, argv, "c")) != -1) {
 	switch (ch) {
@@ -192,6 +192,7 @@ main(int argc, char *argv[])
 	usage();
 
     for (i = 0; i < argc; i++) {
+	struct eventlog_json_object *root;
 	struct json_container jsonc;
 	const char *infile = argv[i];
 	const char *outfile = argv[i];
@@ -213,13 +214,14 @@ main(int argc, char *argv[])
 	    errors++;
 	    continue;
 	}
-	if (!iolog_parse_json(infp, infile, &root)) {
+	root = eventlog_json_read(infp, infile);
+	if (root == NULL) {
 	    errors++;
 	    goto next;
 	}
 
 	/* Format as pretty-printed JSON */
-	if (!json_format(&jsonc, &root)) {
+	if (!json_format(&jsonc, root)) {
 	    errors++;
 	    goto next;
 	}
@@ -247,7 +249,7 @@ main(int argc, char *argv[])
 	}
 
 next:
-	free_json_items(&root.items);
+	eventlog_json_free(root);
 	sudo_json_free(&jsonc);
 	if (infp != NULL)
 	    fclose(infp);

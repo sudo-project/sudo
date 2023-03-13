@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2011-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2011-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -78,8 +78,8 @@ PVS_IGNORE = 'V707,V011,V002,V536'
 PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
 
 # Regression tests
-TEST_PROGS = check_iolog_filter check_iolog_json check_iolog_mkpath \
-	     check_iolog_path check_iolog_timing host_port_test
+TEST_PROGS = check_iolog_filter check_iolog_mkpath check_iolog_path \
+	     check_iolog_timing host_port_test
 TEST_LIBS = @LIBS@
 TEST_LDFLAGS = @LDFLAGS@
 TEST_VERBOSE =
@@ -122,8 +122,6 @@ CHECK_IOLOG_PATH_OBJS = check_iolog_path.lo
 CHECK_IOLOG_TIMING_OBJS = check_iolog_timing.lo
 
 CHECK_IOLOG_FILTER_OBJS = check_iolog_filter.lo
-
-CHECK_IOLOG_JSON_OBJS = check_iolog_json.lo
 
 HOST_PORT_TEST_OBJS = host_port_test.lo
 
@@ -174,9 +172,6 @@ check_iolog_timing: $(CHECK_IOLOG_TIMING_OBJS) libsudo_iolog.la
 
 check_iolog_filter: $(CHECK_IOLOG_FILTER_OBJS) libsudo_iolog.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_FILTER_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
-
-check_iolog_json: $(CHECK_IOLOG_JSON_OBJS) libsudo_iolog.la
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_JSON_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 host_port_test: $(HOST_PORT_TEST_OBJS) libsudo_iolog.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(HOST_PORT_TEST_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
@@ -328,7 +323,6 @@ check: $(TEST_PROGS) check-fuzzer
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    rval=0; \
 	    ./check_iolog_filter $(srcdir)/regress/iolog_filter/test[1-9]* || rval=`expr $$rval + $$?`; \
-	    ./check_iolog_json $(srcdir)/regress/iolog_json/*.in || rval=`expr $$rval + $$?`; \
 	    ./check_iolog_path $(srcdir)/regress/iolog_path/data || rval=`expr $$rval + $$?`; \
 	    ./check_iolog_mkpath || rval=`expr $$rval + $$?`; \
 	    ./check_iolog_timing || rval=`expr $$rval + $$?`; \
@@ -377,22 +371,6 @@ check_iolog_filter.i: $(srcdir)/regress/iolog_filter/check_iolog_filter.c \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 check_iolog_filter.plog: check_iolog_filter.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/iolog_filter/check_iolog_filter.c --i-file $< --output-file $@
-check_iolog_json.lo: $(srcdir)/regress/iolog_json/check_iolog_json.c \
-                     $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
-                     $(incdir)/sudo_fatal.h $(incdir)/sudo_json.h \
-                     $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
-                     $(incdir)/sudo_util.h $(srcdir)/iolog_json.h \
-                     $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/iolog_json/check_iolog_json.c
-check_iolog_json.i: $(srcdir)/regress/iolog_json/check_iolog_json.c \
-                     $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
-                     $(incdir)/sudo_fatal.h $(incdir)/sudo_json.h \
-                     $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
-                     $(incdir)/sudo_util.h $(srcdir)/iolog_json.h \
-                     $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
-check_iolog_json.plog: check_iolog_json.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/iolog_json/check_iolog_json.c --i-file $< --output-file $@
 check_iolog_mkpath.lo: $(srcdir)/regress/iolog_mkpath/check_iolog_mkpath.c \
                        $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                        $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
@@ -439,17 +417,15 @@ fuzz_iolog_json.lo: $(srcdir)/regress/fuzz/fuzz_iolog_json.c \
                     $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                     $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
                     $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
-                    $(incdir)/sudo_json.h $(incdir)/sudo_plugin.h \
-                    $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-                    $(srcdir)/iolog_json.h $(top_builddir)/config.h
+                    $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+                    $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/fuzz/fuzz_iolog_json.c
 fuzz_iolog_json.i: $(srcdir)/regress/fuzz/fuzz_iolog_json.c \
                     $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                     $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
                     $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
-                    $(incdir)/sudo_json.h $(incdir)/sudo_plugin.h \
-                    $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-                    $(srcdir)/iolog_json.h $(top_builddir)/config.h
+                    $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
+                    $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 fuzz_iolog_json.plog: fuzz_iolog_json.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/fuzz/fuzz_iolog_json.c --i-file $< --output-file $@
@@ -617,19 +593,13 @@ iolog_gets.plog: iolog_gets.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_gets.c --i-file $< --output-file $@
 iolog_json.lo: $(srcdir)/iolog_json.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
-               $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
-               $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
-               $(incdir)/sudo_json.h $(incdir)/sudo_plugin.h \
-               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-               $(srcdir)/iolog_json.h $(top_builddir)/config.h
+               $(incdir)/sudo_eventlog.h $(incdir)/sudo_iolog.h \
+               $(incdir)/sudo_queue.h $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog_json.c
 iolog_json.i: $(srcdir)/iolog_json.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
-               $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
-               $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
-               $(incdir)/sudo_json.h $(incdir)/sudo_plugin.h \
-               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-               $(srcdir)/iolog_json.h $(top_builddir)/config.h
+               $(incdir)/sudo_eventlog.h $(incdir)/sudo_iolog.h \
+               $(incdir)/sudo_queue.h $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 iolog_json.plog: iolog_json.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_json.c --i-file $< --output-file $@
