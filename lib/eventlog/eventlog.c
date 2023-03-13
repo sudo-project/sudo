@@ -189,6 +189,7 @@ new_logline(int event_type, int flags, struct eventlog_args *args,
 	    sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL, " %s",
 		evlog->env_add[i]);
 	}
+	sudo_lbuf_append(lbuf, " ; ");
     }
     if (evlog->command != NULL && evlog->argv != NULL) {
 	/* Command plus argv. */
