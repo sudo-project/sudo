@@ -673,9 +673,7 @@ bool
 netgr_matches(struct sudo_nss *nss, const char *netgr,
     const char *lhost, const char *shost, const char *user)
 {
-#ifdef HAVE_INNETGR
     const char *domain;
-#endif
     bool rc = false;
     debug_decl(netgr_matches, SUDOERS_DEBUG_MATCH);
 
