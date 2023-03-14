@@ -53,6 +53,8 @@ struct json_stack {
 };
 #define JSON_STACK_INTIALIZER(s) { 0, nitems((s).frames) };
 
+static char *iolog_file;
+
 static bool
 json_store_columns(struct json_item *item, struct eventlog *evlog)
 {
@@ -110,6 +112,29 @@ json_store_exit_value(struct json_item *item, struct eventlog *evlog)
 }
 
 static bool
+json_store_iolog_file(struct json_item *item, struct eventlog *evlog)
+{
+    debug_decl(json_store_iolog_file, SUDO_DEBUG_UTIL);
+
+    /* Do set evlog->iolog_file directly, it is a substring of iolog_path. */
+    free(iolog_file);
+    iolog_file = item->u.string;
+    item->u.string = NULL;
+    debug_return_bool(true);
+}
+
+static bool
+json_store_iolog_path(struct json_item *item, struct eventlog *evlog)
+{
+    debug_decl(json_store_iolog_path, SUDO_DEBUG_UTIL);
+
+    free(evlog->iolog_path);
+    evlog->iolog_path = item->u.string;
+    item->u.string = NULL;
+    debug_return_bool(true);
+}
+
+static bool
 json_store_lines(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_lines, SUDO_DEBUG_UTIL);
@@ -122,6 +147,17 @@ json_store_lines(struct json_item *item, struct eventlog *evlog)
     }
 
     evlog->lines = item->u.number;
+    debug_return_bool(true);
+}
+
+static bool
+json_store_peeraddr(struct json_item *item, struct eventlog *evlog)
+{
+    debug_decl(json_store_peeraddr, SUDO_DEBUG_UTIL);
+
+    free(evlog->peeraddr);
+    evlog->peeraddr = item->u.string;
+    item->u.string = NULL;
     debug_return_bool(true);
 }
 
@@ -189,6 +225,22 @@ json_store_runenv(struct json_item *item, struct eventlog *evlog)
     evlog->envp = json_array_to_strvec(&item->u.child);
 
     debug_return_bool(evlog->envp != NULL);
+}
+
+static bool
+json_store_runenv_override(struct json_item *item, struct eventlog *evlog)
+{
+    int i;
+    debug_decl(json_store_runenv_override, SUDO_DEBUG_UTIL);
+
+    if (evlog->env_add != NULL) {
+	for (i = 0; evlog->env_add[i] != NULL; i++)
+	    free(evlog->env_add[i]);
+	free(evlog->env_add);
+    }
+    evlog->env_add = json_array_to_strvec(&item->u.child);
+
+    debug_return_bool(evlog->env_add != NULL);
 }
 
 static bool
@@ -298,6 +350,17 @@ json_store_submituser(struct json_item *item, struct eventlog *evlog)
 }
 
 static bool
+json_store_submitgroup(struct json_item *item, struct eventlog *evlog)
+{
+    debug_decl(json_store_submitgroup, SUDO_DEBUG_UTIL);
+
+    free(evlog->submitgroup);
+    evlog->submitgroup = item->u.string;
+    item->u.string = NULL;
+    debug_return_bool(true);
+}
+
+static bool
 json_store_timespec(struct json_item *item, struct timespec *ts)
 {
     struct eventlog_json_object *object;
@@ -317,6 +380,12 @@ json_store_timespec(struct json_item *item, struct timespec *ts)
 	}
     }
     debug_return_bool(true);
+}
+
+static bool
+json_store_iolog_offset(struct json_item *item, struct eventlog *evlog)
+{
+    return json_store_timespec(item, &evlog->iolog_offset);
 }
 
 static bool
@@ -342,6 +411,21 @@ json_store_ttyname(struct json_item *item, struct eventlog *evlog)
     debug_return_bool(true);
 }
 
+static bool
+json_store_uuid(struct json_item *item, struct eventlog *evlog)
+{
+    bool ret = false;
+    debug_decl(json_store_uuid, SUDO_DEBUG_UTIL);
+
+    if (strlen(item->u.string) == sizeof(evlog->uuid_str) - 1) {
+	memcpy(evlog->uuid_str, item->u.string, sizeof(evlog->uuid_str));
+	ret = true;
+    }
+    free(item->u.string);
+    item->u.string = NULL;
+    debug_return_bool(ret);
+}
+
 static struct evlog_json_key {
     const char *name;
     enum json_value_type type;
@@ -351,10 +435,15 @@ static struct evlog_json_key {
     { "command", JSON_STRING, json_store_command },
     { "dumped_core", JSON_BOOL, json_store_dumped_core },
     { "exit_value", JSON_NUMBER, json_store_exit_value },
+    { "iolog_file", JSON_STRING, json_store_iolog_file },
+    { "iolog_path", JSON_STRING, json_store_iolog_path },
+    { "iolog_offset", JSON_OBJECT, json_store_iolog_offset },
     { "lines", JSON_NUMBER, json_store_lines },
+    { "peeraddr", JSON_STRING, json_store_peeraddr },
     { "run_time", JSON_OBJECT, json_store_run_time },
     { "runargv", JSON_ARRAY, json_store_runargv },
     { "runenv", JSON_ARRAY, json_store_runenv },
+    { "runenv_override", JSON_ARRAY, json_store_runenv_override },
     { "rungid", JSON_ID, json_store_rungid },
     { "rungroup", JSON_STRING, json_store_rungroup },
     { "runuid", JSON_ID, json_store_runuid },
@@ -364,9 +453,11 @@ static struct evlog_json_key {
     { "signal", JSON_STRING, json_store_signal },
     { "submitcwd", JSON_STRING, json_store_submitcwd },
     { "submithost", JSON_STRING, json_store_submithost },
+    { "submitgroup", JSON_STRING, json_store_submitgroup },
     { "submituser", JSON_STRING, json_store_submituser },
     { "timestamp", JSON_OBJECT, json_store_timestamp },
     { "ttyname", JSON_STRING, json_store_ttyname },
+    { "uuid", JSON_STRING, json_store_uuid },
     { NULL }
 };
 
@@ -561,9 +652,26 @@ eventlog_json_parse(struct eventlog_json_object *object, struct eventlog *evlog)
 	}
     }
 
+    /*
+     * iolog_file must be a substring of iolog_path.
+     */
+    if (iolog_file != NULL && evlog->iolog_path != NULL) {
+	const size_t filelen = strlen(iolog_file);
+	const size_t pathlen = strlen(evlog->iolog_path);
+	if (filelen <= pathlen) {
+	    const char *cp = &evlog->iolog_path[pathlen - filelen];
+	    if (strcmp(cp, iolog_file) == 0) {
+		evlog->iolog_file = cp;
+	    }
+	}
+    }
+
     ret = true;
 
 done:
+    free(iolog_file);
+    iolog_file = NULL;
+
     debug_return_bool(ret);
 }
 

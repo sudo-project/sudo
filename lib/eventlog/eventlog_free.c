@@ -67,6 +67,11 @@ eventlog_free(struct eventlog *evlog)
 		free(evlog->envp[i]);
 	    free(evlog->envp);
 	}
+	if (evlog->env_add != NULL) {
+	    for (i = 0; evlog->env_add[i] != NULL; i++)
+		free(evlog->env_add[i]);
+	    free(evlog->env_add);
+	}
 	free(evlog);
     }
 
