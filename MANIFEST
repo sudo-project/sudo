@@ -115,9 +115,9 @@ lib/eventlog/Makefile.in
 lib/eventlog/eventlog.c
 lib/eventlog/eventlog_conf.c
 lib/eventlog/eventlog_free.c
-lib/eventlog/eventlog_json.h
 lib/eventlog/logwrap.c
 lib/eventlog/parse_json.c
+lib/eventlog/parse_json.h
 lib/eventlog/regress/eventlog_store/store_json_test.c
 lib/eventlog/regress/eventlog_store/store_sudo_test.c
 lib/eventlog/regress/eventlog_store/test1.json.in
