@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2020, 2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -34,92 +34,6 @@
 #include "parse_json.h"
 
 sudo_dso_public int main(int argc, char *argv[]);
-
-static bool
-json_print_object(struct json_container *jsonc, struct eventlog_json_object *object)
-{
-    struct json_item *item;
-    struct json_value json_value;
-    bool ret = false;
-
-    TAILQ_FOREACH(item, &object->items, entries) {
-	switch (item->type) {
-	case JSON_STRING:
-	    json_value.type = JSON_STRING;
-	    json_value.u.string = item->u.string;
-	    if (!sudo_json_add_value(jsonc, item->name, &json_value))
-		goto oom;
-	    break;
-	case JSON_NUMBER:
-	    json_value.type = JSON_NUMBER;
-	    json_value.u.number = item->u.number;
-	    if (!sudo_json_add_value(jsonc, item->name, &json_value))
-		goto oom;
-	    break;
-	case JSON_OBJECT:
-	    if (!sudo_json_open_object(jsonc, item->name))
-		goto oom;
-	    if (!json_print_object(jsonc, &item->u.child))
-		goto done;
-	    if (!sudo_json_close_object(jsonc))
-		goto oom;
-	    break;
-	case JSON_ARRAY:
-	    if (!sudo_json_open_array(jsonc, item->name))
-		goto oom;
-	    if (!json_print_object(jsonc, &item->u.child))
-		goto done;
-	    if (!sudo_json_close_array(jsonc))
-		goto oom;
-	    break;
-	case JSON_BOOL:
-	    json_value.type = JSON_BOOL;
-	    json_value.u.boolean = item->u.boolean;
-	    if (!sudo_json_add_value(jsonc, item->name, &json_value))
-		goto oom;
-	    break;
-	case JSON_NULL:
-	    json_value.type = JSON_NULL;
-	    if (!sudo_json_add_value(jsonc, item->name, &json_value))
-		goto oom;
-	    break;
-	default:
-	    sudo_warnx("unsupported JSON type %d", item->type);
-	    goto done;
-	}
-    }
-
-    ret = true;
-    goto done;
-
-oom:
-    sudo_warnx("%s: %s", __func__, "unable to allocate memory");
-done:
-    return ret;
-}
-
-static bool
-json_format(struct json_container *jsonc, struct eventlog_json_object *object)
-{
-    struct json_item *item;
-    bool ret = false;
-
-    /* First object holds all the actual data. */
-    item = TAILQ_FIRST(&object->items);
-    if (item->type != JSON_OBJECT) {
-	sudo_warnx("expected JSON_OBJECT, got %d", item->type);
-	goto done;
-    }
-    object = &item->u.child;
-
-    if (!json_print_object(jsonc, object))
-	goto done;
-
-    ret = true;
-
-done:
-    return ret;
-}
 
 static void
 usage(void)
@@ -174,7 +88,7 @@ main(int argc, char *argv[])
     int ch, i, ntests = 0, errors = 0;
     bool cat = false;
 
-    initprogname(argc > 0 ? argv[0] : "check_parse_json");
+    initprogname(argc > 0 ? argv[0] : "store_json_test");
 
     while ((ch = getopt(argc, argv, "cv")) != -1) {
 	switch (ch) {
@@ -196,6 +110,7 @@ main(int argc, char *argv[])
 
     for (i = 0; i < argc; i++) {
 	struct eventlog_json_object *root;
+	struct eventlog *evlog = NULL;
 	struct json_container jsonc;
 	const char *infile = argv[i];
 	const char *outfile = argv[i];
@@ -223,8 +138,20 @@ main(int argc, char *argv[])
 	    goto next;
 	}
 
-	/* Format as pretty-printed JSON */
-	if (!json_format(&jsonc, root)) {
+	/* Convert JSON to event log. */
+	evlog = calloc(1, sizeof(*evlog));
+	if (evlog == NULL) {
+	    sudo_warnx("%s: %s", __func__, "unable to allocate memory");
+	    errors++;
+	    goto next;
+	}
+	if (!eventlog_json_parse(root, evlog)) {
+	    errors++;
+	    goto next;
+	}
+
+	/* Format event log as JSON. */
+	if (!eventlog_store_json(&jsonc, evlog)) {
 	    errors++;
 	    goto next;
 	}
@@ -252,6 +179,7 @@ main(int argc, char *argv[])
 	}
 
 next:
+	eventlog_free(evlog);
 	eventlog_json_free(root);
 	sudo_json_free(&jsonc);
 	if (infp != NULL)
