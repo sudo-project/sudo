@@ -49,7 +49,8 @@ LDFLAGS = @LDFLAGS@
 LTFLAGS = @LT_STATIC@
 
 # Libraries
-LT_LIBS = $(top_builddir)/lib/util/libsudo_util.la
+LIBUTIL = $(top_builddir)/lib/util/libsudo_util.la
+LT_LIBS = $(LIBUTIL)
 LIBS = $(LT_LIBS)
 
 # Address sanitizer flags
@@ -124,16 +125,16 @@ Makefile: $(srcdir)/Makefile.in
 libsudo_eventlog.la: $(LIBEVENTLOG_OBJS) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LIBEVENTLOG_OBJS) $(LT_LIBS)
 
-check_parse_json: $(CHECK_PARSE_JSON_OBJS)
+check_parse_json: $(CHECK_PARSE_JSON_OBJS) $(LIBUTIL)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_PARSE_JSON_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(LIBS)
 
-check_wrap: $(CHECK_WRAP_OBJS) $(LIBUTIL)
+check_wrap: $(CHECK_WRAP_OBJS) $(LIBUTIL) $(LIBUTIL)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_WRAP_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(LIBS)
 
-store_json_test: $(STORE_JSON_TEST_OBJS) libsudo_eventlog.la
+store_json_test: $(STORE_JSON_TEST_OBJS) $(LIBUTIL) libsudo_eventlog.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(STORE_JSON_TEST_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(LIBS) libsudo_eventlog.la
 
-store_sudo_test: $(STORE_SUDO_TEST_OBJS) libsudo_eventlog.la
+store_sudo_test: $(STORE_SUDO_TEST_OBJS) $(LIBUTIL) libsudo_eventlog.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(STORE_SUDO_TEST_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(LIBS) libsudo_eventlog.la
 
 pre-install:

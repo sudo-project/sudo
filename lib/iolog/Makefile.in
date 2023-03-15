@@ -39,7 +39,10 @@ EGREP = @EGREP@
 SED = @SED@
 
 # Libraries
-LT_LIBS = $(top_builddir)/lib/util/libsudo_util.la
+LIBEVENTLOG = $(top_builddir)/lib/eventlog/libsudo_eventlog.la
+LIBFUZZSTUB = $(top_builddir)/lib/fuzzstub/libsudo_fuzzstub.la
+LIBUTIL = $(top_builddir)/lib/util/libsudo_util.la
+LT_LIBS = $(LIBUTIL)
 LIBS = @LIBS@ @ZLIB@ $(LT_LIBS)
 
 # C preprocessor flags
@@ -85,12 +88,10 @@ TEST_LDFLAGS = @LDFLAGS@
 TEST_VERBOSE =
 
 # Fuzzers
-LIBFUZZSTUB = $(top_builddir)/lib/fuzzstub/libsudo_fuzzstub.la
 LIB_FUZZING_ENGINE = @FUZZ_ENGINE@
 FUZZ_PROGS = fuzz_iolog_json fuzz_iolog_legacy fuzz_iolog_timing
 FUZZ_SEED_CORPUS = ${FUZZ_PROGS:=_seed_corpus.zip}
-FUZZ_LIBS = $(LIB_FUZZING_ENGINE) libsudo_iolog.la \
-	    $(top_builddir)/lib/eventlog/libsudo_eventlog.la @LIBS@
+FUZZ_LIBS = libsudo_iolog.la $(LIBEVENTLOG) $(LIB_FUZZING_ENGINE) $(LIBS)
 FUZZ_LDFLAGS = @LDFLAGS@
 FUZZ_MAX_LEN = 4096
 FUZZ_RUNS = 8192
@@ -161,28 +162,28 @@ Makefile: $(srcdir)/Makefile.in
 libsudo_iolog.la: $(LIBIOLOG_OBJS) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LIBIOLOG_OBJS) $(LT_LIBS) @ZLIB@ @NET_LIBS@
 
-check_iolog_path: $(CHECK_IOLOG_PATH_OBJS) libsudo_iolog.la
+check_iolog_path: $(CHECK_IOLOG_PATH_OBJS) $(LIBUTIL) libsudo_iolog.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_PATH_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
-check_iolog_mkpath: $(CHECK_IOLOG_MKPATH_OBJS) libsudo_iolog.la
+check_iolog_mkpath: $(CHECK_IOLOG_MKPATH_OBJS) $(LIBUTIL) libsudo_iolog.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_MKPATH_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
-check_iolog_timing: $(CHECK_IOLOG_TIMING_OBJS) libsudo_iolog.la
+check_iolog_timing: $(CHECK_IOLOG_TIMING_OBJS) $(LIBUTIL) libsudo_iolog.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_TIMING_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
-check_iolog_filter: $(CHECK_IOLOG_FILTER_OBJS) libsudo_iolog.la
+check_iolog_filter: $(CHECK_IOLOG_FILTER_OBJS) $(LIBUTIL) libsudo_iolog.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_IOLOG_FILTER_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
-host_port_test: $(HOST_PORT_TEST_OBJS) libsudo_iolog.la
+host_port_test: $(HOST_PORT_TEST_OBJS) $(LIBUTIL) libsudo_iolog.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(HOST_PORT_TEST_OBJS) libsudo_iolog.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
-fuzz_iolog_json: $(FUZZ_IOLOG_JSON_OBJS) $(LIBFUZZSTUB) libsudo_iolog.la
+fuzz_iolog_json: $(FUZZ_IOLOG_JSON_OBJS) $(LIBFUZZSTUB) $(LIBEVENTLOG) $(LIBUTIL) libsudo_iolog.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_IOLOG_JSON_OBJS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS)
 
-fuzz_iolog_legacy: $(FUZZ_IOLOG_LEGACY_OBJS) $(LIBFUZZSTUB) libsudo_iolog.la
+fuzz_iolog_legacy: $(FUZZ_IOLOG_LEGACY_OBJS) $(LIBFUZZSTUB) $(LIBEVENTLOG) $(LIBUTIL) libsudo_iolog.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_IOLOG_LEGACY_OBJS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS)
 
-fuzz_iolog_timing: $(FUZZ_IOLOG_TIMING_OBJS) $(LIBFUZZSTUB) libsudo_iolog.la
+fuzz_iolog_timing: $(FUZZ_IOLOG_TIMING_OBJS) $(LIBFUZZSTUB) $(LIBEVENTLOG) $(LIBUTIL) libsudo_iolog.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link @FUZZ_LD@ -o $@ $(FUZZ_IOLOG_TIMING_OBJS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(FUZZ_LDFLAGS) $(FUZZ_LIBS)
 
 fuzz_iolog_json_seed_corpus.zip:
