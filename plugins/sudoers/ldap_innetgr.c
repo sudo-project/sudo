@@ -73,7 +73,7 @@ sudo_ldap_netgroup_match_str(const char *str, const char *ngstr, size_t nglen,
     }
     if (*ngstr == '-' && nglen == 1) {
 	/* '-' means no valid value. */
-	debug_return_bool(str == NULL);
+	debug_return_bool(false);
     }
     if (ignore_case) {
 	if (strncasecmp(str, ngstr, nglen) == 0 && str[nglen] == '\0')
