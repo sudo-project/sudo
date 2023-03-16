@@ -359,11 +359,6 @@ sudo_dso_public void sudo_freezero(void *p, size_t n);
 # undef freezero
 # define freezero(_a, _b) sudo_freezero((_a), (_b))
 #endif /* HAVE_FREEZERO */
-#ifdef PREFER_PORTABLE_GETCWD
-sudo_dso_public char *sudo_getcwd(char *, size_t size);
-# undef getcwd
-# define getcwd(_a, _b) sudo_getcwd((_a), (_b))
-#endif /* PREFER_PORTABLE_GETCWD */
 #ifndef HAVE_GETGROUPLIST
 sudo_dso_public int sudo_getgrouplist(const char *name, GETGROUPS_T basegid, GETGROUPS_T *groups, int *ngroupsp);
 # undef getgrouplist

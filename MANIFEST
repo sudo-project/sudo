@@ -251,7 +251,6 @@ lib/util/fnmatch.c
 lib/util/freezero.c
 lib/util/fstatat.c
 lib/util/getaddrinfo.c
-lib/util/getcwd.c
 lib/util/getdelim.c
 lib/util/getentropy.c
 lib/util/getgrouplist.c

@@ -813,12 +813,6 @@ getaddrinfo.i: $(srcdir)/getaddrinfo.c $(incdir)/compat/getaddrinfo.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 getaddrinfo.plog: getaddrinfo.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/getaddrinfo.c --i-file $< --output-file $@
-getcwd.lo: $(srcdir)/getcwd.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/getcwd.c
-getcwd.i: $(srcdir)/getcwd.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
-getcwd.plog: getcwd.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/getcwd.c --i-file $< --output-file $@
 getdelim.lo: $(srcdir)/getdelim.c $(incdir)/sudo_compat.h \
              $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/getdelim.c

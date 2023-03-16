@@ -1240,9 +1240,6 @@
 /* The passwd prompt timeout (in minutes). */
 #undef PASSWORD_TIMEOUT
 
-/* Define to 1 to enable replacement getcwd if system getcwd is broken. */
-#undef PREFER_PORTABLE_GETCWD
-
 /* Enable replacement (v)snprintf if system (v)snprintf is broken. */
 #undef PREFER_PORTABLE_SNPRINTF
 
