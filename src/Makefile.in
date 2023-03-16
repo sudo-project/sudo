@@ -45,8 +45,9 @@ INSTALL_OWNER = -o $(install_uid) -g $(install_gid)
 INSTALL_BACKUP = @INSTALL_BACKUP@
 
 # Libraries
-LT_LIBS = $(top_builddir)/lib/util/libsudo_util.la \
-	  $(top_builddir)/lib/protobuf-c/libprotobuf-c.la
+LIBPROTOBUF_C = $(top_builddir)/lib/protobuf-c/libprotobuf-c.la
+LIBUTIL = $(top_builddir)/lib/util/libsudo_util.la
+LT_LIBS = $(LIBUTIL) $(LIBPROTOBUF_C)
 LIBS = @LIBS@ @SUDO_LIBS@ @GETGROUPS_LIB@ @NET_LIBS@ $(LT_LIBS)
 
 # C preprocessor defines
@@ -229,16 +230,16 @@ sudo_noexec.la: sudo_noexec.lo
 sesh: $(SESH_OBJS) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(SESH_OBJS) $(LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(LIBS)
 
-check_net_ifs: $(CHECK_NET_IFS_OBJS) $(top_builddir)/lib/util/libsudo_util.la
+check_net_ifs: $(CHECK_NET_IFS_OBJS) $(LIBUTIL)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_NET_IFS_OBJS) $(TEST_LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LIBS)
 
-check_noexec: $(CHECK_NOEXEC_OBJS) $(top_builddir)/lib/util/libsudo_util.la sudo_noexec.la
+check_noexec: $(CHECK_NOEXEC_OBJS) $(LIBUTIL)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_NOEXEC_OBJS) $(TEST_LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LIBS)
 
-check_ttyname: $(CHECK_TTYNAME_OBJS) $(top_builddir)/lib/util/libsudo_util.la
+check_ttyname: $(CHECK_TTYNAME_OBJS) $(LIBUTIL)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CHECK_TTYNAME_OBJS) $(TEST_LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LIBS)
 
-test_ptrace: $(TEST_PTRACE_OBJS) $(top_builddir)/lib/util/libsudo_util.la
+test_ptrace: $(TEST_PTRACE_OBJS) $(LIBUTIL)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(TEST_PTRACE_OBJS) $(TEST_LDFLAGS) $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LIBS)
 
 pre-install:
