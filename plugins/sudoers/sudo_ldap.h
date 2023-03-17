@@ -41,6 +41,51 @@
 # endif
 #endif
 
+/* Macros for checking strlcpy/strlcat/sudo_ldap_value_cat return value. */
+#define CHECK_STRLCPY(d, s, l) do {					       \
+	if (strlcpy((d), (s), (l)) >= (l)) {				       \
+	    goto overflow;						       \
+	}								       \
+} while (0)
+#define CHECK_STRLCAT(d, s, l) do {					       \
+	if (strlcat((d), (s), (l)) >= (l)) {				       \
+	    goto overflow;						       \
+	}								       \
+} while (0)
+#define CHECK_LDAP_VCAT(d, s, l) do {					       \
+	if (sudo_ldap_value_cat((d), (s), (l)) >= (l)) {		       \
+	    goto overflow;						       \
+	}								       \
+} while (0)
+
+#if defined(__GNUC__) && __GNUC__ == 2
+# define DPRINTF1(fmt...) do {						\
+    sudo_debug_printf(SUDO_DEBUG_DIAG, fmt);				\
+    if (ldap_conf.debug >= 1) {						\
+	sudo_warnx_nodebug(fmt);					\
+    }									\
+} while (0)
+# define DPRINTF2(fmt...) do {						\
+    sudo_debug_printf(SUDO_DEBUG_INFO, fmt);				\
+    if (ldap_conf.debug >= 2) {						\
+	sudo_warnx_nodebug(fmt);					\
+    }									\
+} while (0)
+#else
+# define DPRINTF1(...) do {						\
+    sudo_debug_printf(SUDO_DEBUG_DIAG, __VA_ARGS__);			\
+    if (ldap_conf.debug >= 1) {						\
+	sudo_warnx_nodebug(__VA_ARGS__);				\
+    }									\
+} while (0)
+# define DPRINTF2(...) do {						\
+    sudo_debug_printf(SUDO_DEBUG_INFO, __VA_ARGS__);			\
+    if (ldap_conf.debug >= 2) {						\
+	sudo_warnx_nodebug(__VA_ARGS__);				\
+    }									\
+} while (0)
+#endif
+
 #define LDAP_FOREACH(var, ld, res)					\
     for ((var) = ldap_first_entry((ld), (res));				\
 	(var) != NULL;							\
