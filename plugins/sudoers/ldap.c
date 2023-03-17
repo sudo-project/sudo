@@ -1637,7 +1637,7 @@ done:
 }
 
 static int
-sudo_ldap_getdefs(struct sudo_nss *nss)
+sudo_ldap_getdefs(const struct sudo_nss *nss)
 {
     struct sudo_ldap_handle *handle = nss->handle;
     struct timeval tv, *tvp = NULL;
@@ -1784,7 +1784,7 @@ sudo_ldap_result_add_entry(struct ldap_result *lres, LDAPMessage *entry)
  * freeing the result with sudo_ldap_result_free().
  */
 static struct ldap_result *
-sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
+sudo_ldap_result_get(const struct sudo_nss *nss, struct passwd *pw)
 {
     struct sudo_ldap_handle *handle = nss->handle;
     struct ldap_config_str *base;
@@ -1887,7 +1887,7 @@ oom:
  * parse tree.
  */
 static int
-sudo_ldap_query(struct sudo_nss *nss, struct passwd *pw)
+sudo_ldap_query(const struct sudo_nss *nss, struct passwd *pw)
 {
     struct sudo_ldap_handle *handle = nss->handle;
     struct ldap_result *lres = NULL;
@@ -1941,7 +1941,7 @@ done:
  * The contents will be populated by the getdefs() and query() functions.
  */
 static struct sudoers_parse_tree *
-sudo_ldap_parse(struct sudo_nss *nss)
+sudo_ldap_parse(const struct sudo_nss *nss)
 {
     struct sudo_ldap_handle *handle = nss->handle;
     debug_decl(sudo_ldap_parse, SUDOERS_DEBUG_LDAP);
@@ -1956,8 +1956,8 @@ sudo_ldap_parse(struct sudo_nss *nss)
 }
 
 static int
-sudo_ldap_innetgr(struct sudo_nss *nss, const char *netgr, const char *host,
-    const char *user, const char *domain)
+sudo_ldap_innetgr(const struct sudo_nss *nss, const char *netgr,
+    const char *host, const char *user, const char *domain)
 {
     const struct sudo_ldap_handle *handle = nss->handle;
     return sudo_ldap_innetgr_int(handle->ld, netgr, host, user, domain);

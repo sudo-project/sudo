@@ -93,7 +93,7 @@ rewind_perms(void)
 }
 
 bool
-sudo_nss_can_continue(struct sudo_nss *nss, int match)
+sudo_nss_can_continue(const struct sudo_nss *nss, int match)
 {
     return true;
 }

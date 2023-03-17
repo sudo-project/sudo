@@ -131,7 +131,7 @@ log_warningx(int flags, const char *fmt, ...)
 }
 
 static int
-sudo_fuzz_query(struct sudo_nss *nss, struct passwd *pw)
+sudo_fuzz_query(const struct sudo_nss *nss, struct passwd *pw)
 {
     return 0;
 }

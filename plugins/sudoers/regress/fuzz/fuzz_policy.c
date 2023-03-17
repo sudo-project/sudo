@@ -594,7 +594,7 @@ sudo_file_close(struct sudo_nss *nss)
 
 /* STUB */
 static struct sudoers_parse_tree *
-sudo_file_parse(struct sudo_nss *nss)
+sudo_file_parse(const struct sudo_nss *nss)
 {
     static struct sudoers_parse_tree parse_tree;
 
@@ -603,14 +603,14 @@ sudo_file_parse(struct sudo_nss *nss)
 
 /* STUB */
 static int
-sudo_file_query(struct sudo_nss *nss, struct passwd *pw)
+sudo_file_query(const struct sudo_nss *nss, struct passwd *pw)
 {
     return 0;
 }
 
 /* STUB */
 static int
-sudo_file_getdefs(struct sudo_nss *nss)
+sudo_file_getdefs(const struct sudo_nss *nss)
 {
     /* Set some Defaults */
     set_default("log_input", NULL, true, "sudoers", 1, 1, false);

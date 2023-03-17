@@ -485,7 +485,7 @@ done:
 }
 
 static struct sss_sudo_result *
-sudo_sss_result_get(struct sudo_nss *nss, struct passwd *pw)
+sudo_sss_result_get(const struct sudo_nss *nss, struct passwd *pw)
 {
     struct sudo_sss_handle *handle = nss->handle;
     struct sss_sudo_result *sss_result = NULL;
@@ -651,7 +651,7 @@ sudo_sss_open(struct sudo_nss *nss)
  * Perform query for user and host and convert to sudoers parse tree.
  */
 static int
-sudo_sss_query(struct sudo_nss *nss, struct passwd *pw)
+sudo_sss_query(const struct sudo_nss *nss, struct passwd *pw)
 {
     struct sudo_sss_handle *handle = nss->handle;
     struct sss_sudo_result *sss_result = NULL;
@@ -715,7 +715,7 @@ done:
  * The contents will be populated by the getdefs() and query() functions.
  */
 static struct sudoers_parse_tree *
-sudo_sss_parse(struct sudo_nss *nss)
+sudo_sss_parse(const struct sudo_nss *nss)
 {
     struct sudo_sss_handle *handle = nss->handle;
     debug_decl(sudo_sss_parse, SUDOERS_DEBUG_SSSD);
@@ -730,7 +730,7 @@ sudo_sss_parse(struct sudo_nss *nss)
 }
 
 static int
-sudo_sss_getdefs(struct sudo_nss *nss)
+sudo_sss_getdefs(const struct sudo_nss *nss)
 {
     struct sudo_sss_handle *handle = nss->handle;
     struct sss_sudo_result *sss_result = NULL;
