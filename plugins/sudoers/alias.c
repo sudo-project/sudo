@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2005, 2007-2019
+ * Copyright (c) 2004-2005, 2007-2021, 2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -66,7 +66,8 @@ alias_compare(const void *v1, const void *v2)
  * alias to mark it as unused.
  */
 struct alias *
-alias_get(struct sudoers_parse_tree *parse_tree, const char *name, int type)
+alias_get(const struct sudoers_parse_tree *parse_tree, const char *name,
+    int type)
 {
     struct alias key;
     struct rbnode *node;
@@ -197,7 +198,7 @@ alias_apply(struct sudoers_parse_tree *parse_tree,
  * Returns true if there are no aliases in the parse_tree, else false.
  */
 bool
-no_aliases(struct sudoers_parse_tree *parse_tree)
+no_aliases(const struct sudoers_parse_tree *parse_tree)
 {
     debug_decl(no_aliases, SUDOERS_DEBUG_ALIAS);
     debug_return_bool(parse_tree->aliases == NULL ||

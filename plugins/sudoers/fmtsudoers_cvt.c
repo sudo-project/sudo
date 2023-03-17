@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2005, 2007-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004-2005, 2007-2021, 2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -37,7 +37,7 @@
  */
 bool
 sudoers_format_privilege(struct sudo_lbuf *lbuf,
-    struct sudoers_parse_tree *parse_tree, struct privilege *priv,
+    const struct sudoers_parse_tree *parse_tree, struct privilege *priv,
     bool expand_aliases)
 {
     struct cmndspec *cs, *prev_cs;
@@ -100,7 +100,7 @@ sudoers_format_privilege(struct sudo_lbuf *lbuf,
  */
 bool
 sudoers_format_userspec(struct sudo_lbuf *lbuf,
-    struct sudoers_parse_tree *parse_tree,
+    const struct sudoers_parse_tree *parse_tree,
     struct userspec *us, bool expand_aliases)
 {
     struct privilege *priv;
@@ -139,7 +139,7 @@ sudoers_format_userspec(struct sudo_lbuf *lbuf,
  */
 bool
 sudoers_format_userspecs(struct sudo_lbuf *lbuf,
-    struct sudoers_parse_tree *parse_tree, const char *separator,
+    const struct sudoers_parse_tree *parse_tree, const char *separator,
     bool expand_aliases, bool flush)
 {
     struct userspec *us;
@@ -164,7 +164,7 @@ sudoers_format_userspecs(struct sudo_lbuf *lbuf,
  */
 bool
 sudoers_format_default_line(struct sudo_lbuf *lbuf,
-    struct sudoers_parse_tree *parse_tree, struct defaults *d,
+    const struct sudoers_parse_tree *parse_tree, struct defaults *d,
     struct defaults **next, bool expand_aliases)
 {
     struct member *m;

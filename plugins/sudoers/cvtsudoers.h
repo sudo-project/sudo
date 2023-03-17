@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2018, 2021-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -90,13 +90,13 @@ extern struct cvtsudoers_filter *filters;
 void log_warnx(const char *fmt, ...) sudo_printflike(1, 2);
 
 /* cvtsudoers_csv.c */
-bool convert_sudoers_csv(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
+bool convert_sudoers_csv(const struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
 
 /* cvtsudoers_json.c */
-bool convert_sudoers_json(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
+bool convert_sudoers_json(const struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
 
 /* cvtsudoers_ldif.c */
-bool convert_sudoers_ldif(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
+bool convert_sudoers_ldif(const struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
 
 /* cvtsudoers_merge.c */
 struct sudoers_parse_tree *merge_sudoers(struct sudoers_parse_tree_list *parse_trees, struct sudoers_parse_tree *merged_tree);

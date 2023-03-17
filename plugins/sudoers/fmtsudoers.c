@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2005, 2007-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004-2005, 2007-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -40,8 +40,8 @@
  */
 static bool
 sudoers_format_member_int(struct sudo_lbuf *lbuf,
-    struct sudoers_parse_tree *parse_tree, char *name, int type, bool negated,
-    const char *separator, int alias_type)
+    const struct sudoers_parse_tree *parse_tree, char *name, int type,
+    bool negated, const char *separator, int alias_type)
 {
     struct alias *a;
     struct member *m;
@@ -136,7 +136,7 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
 
 bool
 sudoers_format_member(struct sudo_lbuf *lbuf,
-    struct sudoers_parse_tree *parse_tree, struct member *m,
+    const struct sudoers_parse_tree *parse_tree, struct member *m,
     const char *separator, int alias_type)
 {
     return sudoers_format_member_int(lbuf, parse_tree, m->name, m->type,
@@ -222,7 +222,7 @@ sudoers_defaults_list_to_tags(struct defaults_list *defs, struct cmndtag *tags)
  */
 bool
 sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
-    struct sudoers_parse_tree *parse_tree, struct cmndspec *cs,
+    const struct sudoers_parse_tree *parse_tree, struct cmndspec *cs,
     struct cmndspec *prev_cs, struct cmndtag tags, bool expand_aliases)
 {
     debug_decl(sudoers_format_cmndspec, SUDOERS_DEBUG_UTIL);

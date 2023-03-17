@@ -65,8 +65,8 @@ static struct member_list empty = TAILQ_HEAD_INITIALIZER(empty);
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-user_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
-    const struct member *m)
+user_matches(const struct sudoers_parse_tree *parse_tree,
+    const struct passwd *pw, const struct member *m)
 {
     const char *lhost = parse_tree->lhost ? parse_tree->lhost : user_runhost;
     const char *shost = parse_tree->shost ? parse_tree->shost : user_srunhost;
@@ -111,8 +111,8 @@ user_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-userlist_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
-    const struct member_list *list)
+userlist_matches(const struct sudoers_parse_tree *parse_tree,
+    const struct passwd *pw, const struct member_list *list)
 {
     struct member *m;
     int matched = UNSPEC;
@@ -147,7 +147,7 @@ runas_getgroups(void)
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-runaslist_matches(struct sudoers_parse_tree *parse_tree,
+runaslist_matches(const struct sudoers_parse_tree *parse_tree,
     const struct member_list *user_list, const struct member_list *group_list,
     struct member **matching_user, struct member **matching_group)
 {
@@ -285,7 +285,7 @@ runaslist_matches(struct sudoers_parse_tree *parse_tree,
  * Returns ALLOW, DENY or UNSPEC.
  */
 static int
-hostlist_matches_int(struct sudoers_parse_tree *parse_tree,
+hostlist_matches_int(const struct sudoers_parse_tree *parse_tree,
     const struct passwd *pw, const char *lhost, const char *shost,
     const struct member_list *list)
 {
@@ -306,8 +306,8 @@ hostlist_matches_int(struct sudoers_parse_tree *parse_tree,
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-hostlist_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
-    const struct member_list *list)
+hostlist_matches(const struct sudoers_parse_tree *parse_tree,
+    const struct passwd *pw, const struct member_list *list)
 {
     const char *lhost = parse_tree->lhost ? parse_tree->lhost : user_runhost;
     const char *shost = parse_tree->shost ? parse_tree->shost : user_srunhost;
@@ -320,8 +320,9 @@ hostlist_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-host_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
-    const char *lhost, const char *shost, const struct member *m)
+host_matches(const struct sudoers_parse_tree *parse_tree,
+    const struct passwd *pw, const char *lhost, const char *shost,
+    const struct member *m)
 {
     struct alias *a;
     int matched = UNSPEC;
@@ -369,7 +370,7 @@ host_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-cmndlist_matches(struct sudoers_parse_tree *parse_tree,
+cmndlist_matches(const struct sudoers_parse_tree *parse_tree,
     const struct member_list *list, const char *runchroot,
     struct cmnd_info *info)
 {
@@ -390,8 +391,8 @@ cmndlist_matches(struct sudoers_parse_tree *parse_tree,
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-cmnd_matches(struct sudoers_parse_tree *parse_tree, const struct member *m,
-    const char *runchroot, struct cmnd_info *info)
+cmnd_matches(const struct sudoers_parse_tree *parse_tree,
+    const struct member *m, const char *runchroot, struct cmnd_info *info)
 {
     struct alias *a;
     struct sudo_command *c;
@@ -423,8 +424,8 @@ cmnd_matches(struct sudoers_parse_tree *parse_tree, const struct member *m,
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-cmnd_matches_all(struct sudoers_parse_tree *parse_tree, const struct member *m,
-    const char *runchroot, struct cmnd_info *info)
+cmnd_matches_all(const struct sudoers_parse_tree *parse_tree,
+    const struct member *m, const char *runchroot, struct cmnd_info *info)
 {
     const bool negated = m->negated;
     struct sudo_command *c;

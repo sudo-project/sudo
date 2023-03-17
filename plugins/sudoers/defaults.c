@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1999-2005, 2007-2022
+ * Copyright (c) 1999-2005, 2007-2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -800,7 +800,7 @@ update_defaults(struct sudoers_parse_tree *parse_tree,
  * Check all defaults entries without actually setting them.
  */
 bool
-check_defaults(struct sudoers_parse_tree *parse_tree, bool quiet)
+check_defaults(const struct sudoers_parse_tree *parse_tree, bool quiet)
 {
     struct defaults *d;
     bool ret = true;
