@@ -216,14 +216,14 @@ entry		:	'\n' {
 			    yyerrok;
 			}
 		|	include {
-			    const bool success = push_include($1, false);
+			    const bool success = push_include($1);
 			    parser_leak_remove(LEAK_PTR, $1);
 			    free($1);
 			    if (!success && !sudoers_recovery)
 				YYERROR;
 			}
 		|	includedir {
-			    const bool success = push_include($1, true);
+			    const bool success = push_includedir($1);
 			    parser_leak_remove(LEAK_PTR, $1);
 			    free($1);
 			    if (!success && !sudoers_recovery)

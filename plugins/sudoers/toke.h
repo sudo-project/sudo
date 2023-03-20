@@ -38,7 +38,8 @@ bool ipv6_valid(const char *s);
 int sudoers_trace_print(const char *);
 void sudoerserrorf(const char *, ...) sudo_printf0like(1, 2);
 void sudoerserror(const char *);
-bool push_include(const char *, bool);
+bool push_include(const char *);
+bool push_includedir(const char *);
 
 #ifndef FLEX_SCANNER
 extern int (*trace_print)(const char *msg);

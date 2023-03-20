@@ -1675,7 +1675,7 @@ yyreduce:
   case 8: /* entry: include  */
 #line 218 "gram.y"
                                 {
-			    const bool success = push_include((yyvsp[0].string), false);
+			    const bool success = push_include((yyvsp[0].string));
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    free((yyvsp[0].string));
 			    if (!success && !sudoers_recovery)
@@ -1687,7 +1687,7 @@ yyreduce:
   case 9: /* entry: includedir  */
 #line 225 "gram.y"
                                    {
-			    const bool success = push_include((yyvsp[0].string), true);
+			    const bool success = push_includedir((yyvsp[0].string));
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    free((yyvsp[0].string));
 			    if (!success && !sudoers_recovery)

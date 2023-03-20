@@ -1197,8 +1197,8 @@ oflow:
  * A missing or insecure include dir is simply ignored.
  * Returns false on error, else true.
  */
-bool
-push_include(const char *opath, bool isdir)
+static bool
+push_include_int(const char *opath, bool isdir)
 {
     struct path_list *pl;
     char *path;
@@ -1302,6 +1302,18 @@ push_include(const char *opath, bool isdir)
     memset(&sudolinebuf, 0, sizeof(sudolinebuf));
 
     debug_return_bool(true);
+}
+
+bool
+push_include(const char *opath)
+{
+    return push_include_int(opath, false);
+}
+
+bool
+push_includedir(const char *opath)
+{
+    return push_include_int(opath, true);
 }
 
 /*
