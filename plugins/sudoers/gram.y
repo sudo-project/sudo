@@ -51,12 +51,12 @@
 bool sudoers_recovery = true;
 bool sudoers_strict = false;
 bool parse_error = false;
-int sudoers_verbose = 1;
 
 /* Optional logging function for parse errors. */
 sudoers_logger_t sudoers_error_hook;
 
 static int alias_line, alias_column;
+static int sudoers_verbose = 1;
 
 #ifdef NO_LEAKS
 static struct parser_leak_list parser_leak_list =
@@ -216,14 +216,14 @@ entry		:	'\n' {
 			    yyerrok;
 			}
 		|	include {
-			    const bool success = push_include($1);
+			    const bool success = push_include($1, sudoers_verbose);
 			    parser_leak_remove(LEAK_PTR, $1);
 			    free($1);
 			    if (!success && !sudoers_recovery)
 				YYERROR;
 			}
 		|	includedir {
-			    const bool success = push_includedir($1);
+			    const bool success = push_includedir($1, sudoers_verbose);
 			    parser_leak_remove(LEAK_PTR, $1);
 			    free($1);
 			    if (!success && !sudoers_recovery)

@@ -5494,7 +5494,7 @@ pl_compare(const void *v1, const void *v2)
  * If zero files are found, NULL is stored in pathsp.
  */
 static int
-read_dir_files(const char *dirpath, struct path_list ***pathsp)
+read_dir_files(const char *dirpath, struct path_list ***pathsp, int verbose)
 {
     DIR *dir;
     int i, count = 0;
@@ -5516,20 +5516,32 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 	goto oom;
     while ((dent = readdir(dir)) != NULL) {
 	const size_t namelen = NAMLEN(dent);
+	const char *name = dent->d_name;
 	struct path_list *pl;
 	struct stat sb;
 	size_t len;
 	char *path;
 
 	/* Ignore files that end in '~' or have a '.' in them. */
-	if (namelen == 0 || dent->d_name[namelen - 1] == '~'
-	    || strchr(dent->d_name, '.') != NULL) {
+	if (namelen == 0 || name[namelen - 1] == '~' || strchr(name, '.') != NULL) {
+	    /* Warn about ignored files not starting with '.' if verbose. */
+	    if (namelen > 0 && name[0] != '.' && verbose > 1) {
+		if (name[namelen - 1] == '~' ||
+			(namelen > 4 && strcmp(&name[namelen - 4], ".bak") == 0)) {
+		    fprintf(stderr, U_("%s/%s: %s"), dirpath, name,
+			U_("ignoring editor backup file"));
+		} else {
+		    fprintf(stderr, U_("%s/%s: %s"), dirpath, name,
+			U_("ignoring file name containing '.'"));
+		}
+		fputc('\n', stderr);
+	    }
 	    continue;
 	}
 	len = dirlen + 1 + namelen;
 	if ((path = sudo_rcstr_alloc(len)) == NULL)
 	    goto oom;
-	if ((size_t)snprintf(path, len + 1, "%s/%s", dirpath, dent->d_name) != len) {
+	if ((size_t)snprintf(path, len + 1, "%s/%s", dirpath, name) != len) {
 	    sudo_warnx(U_("internal error, %s overflow"), __func__);
 	    sudo_rcstr_delref(path);
 	    goto bad;
@@ -5584,13 +5596,13 @@ bad:
  * Returns the number of files or -1 on error.
  */
 static int
-switch_dir(struct include_stack *stack, char *dirpath)
+switch_dir(struct include_stack *stack, char *dirpath, int verbose)
 {
     struct path_list **paths = NULL;
     int count, i;
     debug_decl(switch_dir, SUDOERS_DEBUG_PARSER);
 
-    count = read_dir_files(dirpath, &paths);
+    count = read_dir_files(dirpath, &paths, verbose);
     if (count > 0) {
 	/* Sort the list as an array in reverse order. */
 	qsort(paths, count, sizeof(*paths), pl_compare);
@@ -5745,7 +5757,7 @@ oflow:
  * Returns false on error, else true.
  */
 static bool
-push_include_int(const char *opath, bool isdir)
+push_include_int(const char *opath, bool isdir, int verbose)
 {
     struct path_list *pl;
     char *path;
@@ -5760,8 +5772,10 @@ push_include_int(const char *opath, bool isdir)
 	struct include_stack *new_istack;
 
 	if (idepth > MAX_SUDOERS_DEPTH) {
-	    if (sudoers_verbose)
-		sudo_warnx(U_("%s: %s"), path, U_("too many levels of includes"));
+	    if (verbose > 0) {
+		fprintf(stderr, U_("%s: %s"), path, U_("too many levels of includes"));
+		fputc('\n', stderr);
+	    }
 	    sudoerserror(NULL);
 	    sudo_rcstr_delref(path);
 	    debug_return_bool(false);
@@ -5783,7 +5797,7 @@ push_include_int(const char *opath, bool isdir)
 
 	status = sudo_secure_dir(path, sudoers_uid, sudoers_gid, &sb);
 	if (status != SUDO_PATH_SECURE) {
-	    if (sudoers_verbose) {
+	    if (verbose > 0) {
 		switch (status) {
 		case SUDO_PATH_BAD_TYPE:
 		    errno = ENOTDIR;
@@ -5810,7 +5824,7 @@ push_include_int(const char *opath, bool isdir)
 	    sudo_rcstr_delref(path);
 	    debug_return_bool(true);
 	}
-	count = switch_dir(&istack[idepth], path);
+	count = switch_dir(&istack[idepth], path, verbose);
 	if (count <= 0) {
 	    /* switch_dir() called sudoerserror() for us */
 	    sudo_rcstr_delref(path);
@@ -5852,15 +5866,15 @@ push_include_int(const char *opath, bool isdir)
 }
 
 bool
-push_include(const char *opath)
+push_include(const char *opath, int verbose)
 {
-    return push_include_int(opath, false);
+    return push_include_int(opath, false, verbose);
 }
 
 bool
-push_includedir(const char *opath)
+push_includedir(const char *opath, int verbose)
 {
-    return push_include_int(opath, true);
+    return push_include_int(opath, true, verbose);
 }
 
 /*

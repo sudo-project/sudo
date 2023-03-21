@@ -134,12 +134,12 @@
 bool sudoers_recovery = true;
 bool sudoers_strict = false;
 bool parse_error = false;
-int sudoers_verbose = 1;
 
 /* Optional logging function for parse errors. */
 sudoers_logger_t sudoers_error_hook;
 
 static int alias_line, alias_column;
+static int sudoers_verbose = 1;
 
 #ifdef NO_LEAKS
 static struct parser_leak_list parser_leak_list =
@@ -1675,7 +1675,7 @@ yyreduce:
   case 8: /* entry: include  */
 #line 218 "gram.y"
                                 {
-			    const bool success = push_include((yyvsp[0].string));
+			    const bool success = push_include((yyvsp[0].string), sudoers_verbose);
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    free((yyvsp[0].string));
 			    if (!success && !sudoers_recovery)
@@ -1687,7 +1687,7 @@ yyreduce:
   case 9: /* entry: includedir  */
 #line 225 "gram.y"
                                    {
-			    const bool success = push_includedir((yyvsp[0].string));
+			    const bool success = push_includedir((yyvsp[0].string), sudoers_verbose);
 			    parser_leak_remove(LEAK_PTR, (yyvsp[0].string));
 			    free((yyvsp[0].string));
 			    if (!success && !sudoers_recovery)

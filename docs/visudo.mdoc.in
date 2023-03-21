@@ -20,7 +20,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.Dd January 16, 2023
+.Dd March 20, 2023
 .Dt VISUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -443,6 +443,31 @@ will ignore cycles when parsing
 the
 .Em sudoers
 file.
+.It Li ignoring editor backup file
+While processing a
+.Em @includedir
+or
+.Em #includedir ,
+a file was found with a name that ends in
+.Ql ~
+or
+.Em .bak .
+Such files are skipped by
+.Nm sudo
+and
+.Nm .
+.It Li ignoring file name containing '.'
+While processing a
+.Em @includedir
+or
+.Em #includedir ,
+a file was found with a name that contains a
+.Ql .\&
+character.
+Such files are skipped by
+.Nm sudo
+and
+.Nm .
 .It Li unknown defaults entry \&"name\&"
 The
 .Em sudoers
