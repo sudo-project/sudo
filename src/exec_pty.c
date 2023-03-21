@@ -231,7 +231,7 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 	    sa.sa_flags = SA_RESTART;
 	    sa.sa_handler = SIG_DFL;
 	    if (sudo_sigaction(signo, &sa, &osa) != 0)
-		sudo_warn(U_("unable to set handler for signal %d"), signo);
+		sudo_warn(U_("unable to set handler for SIG%s"), signame);
 	}
 	/*
 	 * We stop sudo's process group, even if sudo is not the process
@@ -285,7 +285,7 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 
 	if (signo != SIGSTOP) {
 	    if (sudo_sigaction(signo, &osa, NULL) != 0)
-		sudo_warn(U_("unable to restore handler for signal %d"), signo);
+		sudo_warn(U_("unable to restore handler for SIG%s"), signame);
 	}
 
 	ret = ttymode == TERM_RAW ? SIGCONT_FG : SIGCONT_BG;
@@ -528,13 +528,13 @@ pty_finish(struct exec_closure *ec, struct command_status *cstat)
 }
 
 /*
- * Send command status to the monitor (signal or window size change).
+ * Send command status to the monitor (currently just signal forwarding).
  */
 static void
 send_command_status(struct exec_closure *ec, int type, int val)
 {
     struct monitor_message *msg;
-    debug_decl(send_command, SUDO_DEBUG_EXEC);
+    debug_decl(send_command_status, SUDO_DEBUG_EXEC);
 
     if ((msg = calloc(1, sizeof(*msg))) == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -557,19 +557,22 @@ send_command_status(struct exec_closure *ec, int type, int val)
 static void
 schedule_signal(struct exec_closure *ec, int signo)
 {
-    char signame[SIG2STR_MAX];
     debug_decl(schedule_signal, SUDO_DEBUG_EXEC);
 
     if (signo == 0)
 	debug_return;
 
-    if (signo == SIGCONT_FG)
-	strlcpy(signame, "CONT_FG", sizeof(signame));
-    else if (signo == SIGCONT_BG)
-	strlcpy(signame, "CONT_BG", sizeof(signame));
-    else if (sig2str(signo, signame) == -1)
-	(void)snprintf(signame, sizeof(signame), "%d", signo);
-    sudo_debug_printf(SUDO_DEBUG_DIAG, "scheduled SIG%s for command", signame);
+    if (sudo_debug_needed(SUDO_DEBUG_DIAG)) {
+	char signame[SIG2STR_MAX];
+	if (signo == SIGCONT_FG)
+	    strlcpy(signame, "CONT_FG", sizeof(signame));
+	else if (signo == SIGCONT_BG)
+	    strlcpy(signame, "CONT_BG", sizeof(signame));
+	else if (sig2str(signo, signame) == -1)
+	    (void)snprintf(signame, sizeof(signame), "%d", signo);
+	sudo_debug_printf(SUDO_DEBUG_DIAG, "scheduled SIG%s for command",
+	    signame);
+    }
 
     send_command_status(ec, CMD_SIGNO, signo);
 
@@ -733,12 +736,16 @@ handle_sigchld_pty(struct exec_closure *ec)
 	    if (pid == ec->monitor_pid)
 		ec->monitor_pid = -1;
 	} else if (WIFSIGNALED(status)) {
-	    char signame[SIG2STR_MAX];
-
-	    if (sig2str(WTERMSIG(status), signame) == -1)
-		(void)snprintf(signame, sizeof(signame), "%d", WTERMSIG(status));
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: process %d killed, SIG%s",
-		__func__, (int)pid, signame);
+	    if (sudo_debug_needed(SUDO_DEBUG_INFO)) {
+		char signame[SIG2STR_MAX];
+		if (sig2str(WTERMSIG(status), signame) == -1) {
+		    (void)snprintf(signame, sizeof(signame), "%d",
+			WTERMSIG(status));
+		}
+		sudo_debug_printf(SUDO_DEBUG_INFO,
+		    "%s: process %d killed, SIG%s",
+		    __func__, (int)pid, signame);
+	    }
 	    if (pid == ec->monitor_pid)
 		ec->monitor_pid = -1;
 	} else if (WIFSTOPPED(status)) {
@@ -774,17 +781,19 @@ signal_cb_pty(int signo, int what, void *v)
 {
     struct sudo_ev_siginfo_container *sc = v;
     struct exec_closure *ec = sc->closure;
-    char signame[SIG2STR_MAX];
     debug_decl(signal_cb_pty, SUDO_DEBUG_EXEC);
 
     if (ec->monitor_pid == -1)
 	debug_return;
 
-    if (sig2str(signo, signame) == -1)
-	(void)snprintf(signame, sizeof(signame), "%d", signo);
-    sudo_debug_printf(SUDO_DEBUG_DIAG,
-	"%s: evbase %p, monitor: %d, signo %s(%d), cstat %p", __func__,
+    if (sudo_debug_needed(SUDO_DEBUG_DIAG)) {
+	char signame[SIG2STR_MAX];
+	if (sig2str(signo, signame) == -1)
+	    (void)snprintf(signame, sizeof(signame), "%d", signo);
+	sudo_debug_printf(SUDO_DEBUG_DIAG,
+	    "%s: evbase %p, monitor: %d, signo %s(%d), cstat %p", __func__,
 	ec->evbase, (int)ec->monitor_pid, signame, signo, ec->cstat);
+    }
 
     switch (signo) {
     case SIGCHLD:
@@ -828,7 +837,6 @@ static void
 fwdchannel_cb(int sock, int what, void *v)
 {
     struct exec_closure *ec = v;
-    char signame[SIG2STR_MAX];
     struct monitor_message *msg;
     ssize_t nsent;
     debug_decl(fwdchannel_cb, SUDO_DEBUG_EXEC);
@@ -836,14 +844,19 @@ fwdchannel_cb(int sock, int what, void *v)
     while ((msg = TAILQ_FIRST(&monitor_messages)) != NULL) {
 	switch (msg->cstat.type) {
 	case CMD_SIGNO:
-	    if (msg->cstat.val == SIGCONT_FG)
-		strlcpy(signame, "CONT_FG", sizeof(signame));
-	    else if (msg->cstat.val == SIGCONT_BG)
-		strlcpy(signame, "CONT_BG", sizeof(signame));
-	    else if (sig2str(msg->cstat.val, signame) == -1)
-		(void)snprintf(signame, sizeof(signame), "%d", msg->cstat.val);
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"sending SIG%s to monitor over backchannel", signame);
+	    if (sudo_debug_needed(SUDO_DEBUG_INFO)) {
+		char signame[SIG2STR_MAX];
+		if (msg->cstat.val == SIGCONT_FG)
+		    strlcpy(signame, "CONT_FG", sizeof(signame));
+		else if (msg->cstat.val == SIGCONT_BG)
+		    strlcpy(signame, "CONT_BG", sizeof(signame));
+		else if (sig2str(msg->cstat.val, signame) == -1) {
+		    (void)snprintf(signame, sizeof(signame), "%d",
+			msg->cstat.val);
+		}
+		sudo_debug_printf(SUDO_DEBUG_INFO,
+		    "sending SIG%s to monitor over backchannel", signame);
+	    }
 	    break;
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_INFO,

@@ -71,23 +71,25 @@ struct monitor_closure {
 static void
 deliver_signal(struct monitor_closure *mc, int signo, bool from_parent)
 {
-    char signame[SIG2STR_MAX];
     debug_decl(deliver_signal, SUDO_DEBUG_EXEC);
 
     /* Avoid killing more than a single process or process group. */
     if (mc->cmnd_pid <= 0)
 	debug_return;
 
-    if (signo == SIGCONT_FG)
-	(void)strlcpy(signame, "CONT_FG", sizeof(signame));
-    else if (signo == SIGCONT_BG)
-	(void)strlcpy(signame, "CONT_BG", sizeof(signame));
-    else if (sig2str(signo, signame) == -1)
-	(void)snprintf(signame, sizeof(signame), "%d", signo);
+    if (sudo_debug_needed(SUDO_DEBUG_INFO)) {
+	char signame[SIG2STR_MAX];
+	if (signo == SIGCONT_FG)
+	    (void)strlcpy(signame, "CONT_FG", sizeof(signame));
+	else if (signo == SIGCONT_BG)
+	    (void)strlcpy(signame, "CONT_BG", sizeof(signame));
+	else if (sig2str(signo, signame) == -1)
+	    (void)snprintf(signame, sizeof(signame), "%d", signo);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "received SIG%s%s",
+	    signame, from_parent ? " from parent" : "");
+    }
 
     /* Handle signal from parent or monitor. */
-    sudo_debug_printf(SUDO_DEBUG_INFO, "received SIG%s%s",
-	signame, from_parent ? " from parent" : "");
     switch (signo) {
     case SIGALRM:
 	terminate_command(mc->cmnd_pid, true);
