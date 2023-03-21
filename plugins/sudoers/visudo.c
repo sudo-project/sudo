@@ -899,9 +899,26 @@ setup_signals(void)
 static int
 run_command(const char *path, char *const *argv, bool foreground)
 {
-    int fd, status;
-    pid_t pid, rv;
+    int status, ttyfd;
+    pid_t pid, saved_pgrp;
+    int rv = -1;
     debug_decl(run_command, SUDOERS_DEBUG_UTIL);
+
+    if (foreground) {
+	/* Save original foreground process group id. */
+	ttyfd = open(_PATH_TTY, O_RDWR);
+	if (ttyfd != -1) {
+	    saved_pgrp = tcgetpgrp(ttyfd);
+	    if (saved_pgrp == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		    "%s: unable to get foreground pgrp", __func__);
+		close(ttyfd);
+		ttyfd = -1;
+	    }
+	}
+	if (ttyfd == -1)
+	    foreground = false;
+    }
 
     switch (pid = sudo_debug_fork()) {
 	case -1:
@@ -911,16 +928,21 @@ run_command(const char *path, char *const *argv, bool foreground)
 	    /* Run command as the foreground process of a new process group. */
 	    if (foreground) {
 		pid = getpid();
-		setpgid(0, pid);
-		fd = open(_PATH_TTY, O_RDWR);
-		if (fd != -1) {
-		    if (tcsetpgrp(fd, pid) == -1) {
-			sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-			    "%s: unable to set foreground pgrp to %d (editor)",
-			    __func__, (int)pid);
-		    }
-		    close(fd);
+		if (setpgid(0, pid) == -1) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+			"%s: unable to set pgrp to %d (editor)",
+			__func__, (int)pid);
+		} else {
+		    /* Wait for parent to grant us the controlling tty. */
+		    struct timespec ts = { 0, 1000 };  /* 1us */
+		    sudo_debug_printf(SUDO_DEBUG_DEBUG,
+			"%s: waiting for controlling tty", __func__);
+		    while (tcgetpgrp(ttyfd) != pid)
+			nanosleep(&ts, NULL);
+		    sudo_debug_printf(SUDO_DEBUG_DEBUG,
+			"%s: got controlling tty", __func__);
 		}
+		close(ttyfd);
 	    }
 	    closefrom(STDERR_FILENO + 1);
 	    execv(path, argv);
@@ -929,24 +951,67 @@ run_command(const char *path, char *const *argv, bool foreground)
 	    break;	/* NOTREACHED */
     }
 
+    /* Set child process group in both parent and child to avoid a race. */
+    if (foreground) {
+	if (setpgid(pid, pid) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		"%s: unable to set pgrp to %d (editor)",
+		__func__, (int)pid);
+	} else if (tcsetpgrp(ttyfd, pid) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		"%s: unable to set foreground pgrp to %d (editor)",
+		__func__, (int)pid);
+	}
+    }
+
     for (;;) {
-	rv = waitpid(pid, &status, WUNTRACED);
-	if (rv == -1) {
+	if (waitpid(pid, &status, WUNTRACED) == -1) {
 	    if (errno == EINTR)
 		continue;
 	    break;
 	}
-	if (!WIFSTOPPED(status))
+	if (WIFEXITED(status)) {
+	    rv = WEXITSTATUS(status);
+	    sudo_debug_printf(SUDO_DEBUG_DIAG, "%s: %d: exited %d",
+		__func__, pid, rv);
 	    break;
-	if (foreground) {
-	    sudo_suspend_parent(WSTOPSIG(status), getpid(), getpgrp(),
-		pid, NULL, NULL);
-	    killpg(pid, SIGCONT);
+	} else if (WIFSIGNALED(status)) {
+	    sudo_debug_printf(SUDO_DEBUG_DIAG, "%s: %d: killed by signal %d",
+		__func__, pid, WTERMSIG(status));
+	    break;
+	} else if (WIFSTOPPED(status)) {
+	    const int signo = WSTOPSIG(status);
+	    sudo_debug_printf(SUDO_DEBUG_DIAG, "%s: %d: suspended by signal %d",
+		__func__, pid, signo);
+	    if (foreground) {
+		sudo_suspend_parent(signo, getpid(), getpgrp(), pid,
+		    NULL, NULL);
+		killpg(pid, SIGCONT);
+	    }
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR,
+		"%d: unknown status 0x%x", pid, status);
 	}
     }
 
-    if (rv != -1)
-	rv = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+    if (foreground) {
+	/* Restore the original foreground process group. */
+	sigset_t mask, omask;
+	sigemptyset(&mask);
+	sigaddset(&mask, SIGTTOU);
+	sigprocmask(SIG_BLOCK, &mask, &omask);
+	sudo_debug_printf(SUDO_DEBUG_DEBUG,
+	    "%s: restoring foreground pgrp to %d (visudo)",
+	    __func__, (int)saved_pgrp);
+	if (tcsetpgrp(ttyfd, saved_pgrp) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		"%s: unable to restore foreground pgrp to %d (visudo)",
+		__func__, (int)saved_pgrp);
+	}
+	close(ttyfd);
+	sigprocmask(SIG_SETMASK, &omask, NULL);
+    }
+
     debug_return_int(rv);
 }
 
