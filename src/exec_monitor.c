@@ -24,7 +24,6 @@
 #include <config.h>
 
 #include <sys/types.h>
-#include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <stdio.h>
@@ -35,7 +34,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <termios.h>
 
 #include "sudo.h"
 #include "sudo_exec.h"
@@ -61,8 +59,6 @@ struct monitor_closure {
     pid_t mon_pgrp;
     int backchannel;
 };
-
-static bool tty_initialized;
 
 /*
  * Deliver a signal to the running command.
@@ -103,11 +99,6 @@ deliver_signal(struct monitor_closure *mc, int signo, bool from_parent)
 		"%s: unable to set foreground pgrp to %d (command)",
 		__func__, (int)mc->cmnd_pgrp);
 	}
-	/* Lazily initialize the pty if needed. */
-	if (!tty_initialized) {
-	    if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_FOLLOWER]))
-		    tty_initialized = true;
-	}
 	killpg(mc->cmnd_pid, SIGCONT);
 	break;
     case SIGCONT_BG:
@@ -127,34 +118,6 @@ deliver_signal(struct monitor_closure *mc, int signo, bool from_parent)
 	killpg(mc->cmnd_pid, signo);
 	break;
     }
-    debug_return;
-}
-
-/*
- * Unpack rows and cols from a CMD_TTYWINCH value, set the new window
- * size on the pty follower and inform the command of the change.
- */
-static void
-handle_winch(struct monitor_closure *mc, unsigned int wsize_packed)
-{
-    struct winsize wsize, owsize;
-    debug_decl(handle_winch, SUDO_DEBUG_EXEC);
-
-    /* Rows and columns are stored as two shorts packed into a single int. */
-    wsize.ws_row = wsize_packed & 0xffff;
-    wsize.ws_col = (wsize_packed >> 16) & 0xffff;
-
-    if (ioctl(io_fds[SFD_FOLLOWER], TIOCGWINSZ, &owsize) == 0 &&
-	(wsize.ws_row != owsize.ws_row || wsize.ws_col != owsize.ws_col)) {
-
-	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "window size change %dx%d -> %dx%d",
-	    owsize.ws_col, owsize.ws_row, wsize.ws_col, wsize.ws_row);
-
-	(void)ioctl(io_fds[SFD_FOLLOWER], TIOCSWINSZ, &wsize);
-	deliver_signal(mc, SIGWINCH, true);
-    }
-
     debug_return;
 }
 
@@ -368,16 +331,11 @@ mon_backchannel_cb(int fd, int what, void *v)
 	mc->cstat->val = n ? EIO : ECONNRESET;
 	sudo_ev_loopbreak(mc->evbase);
     } else {
-	switch (cstmp.type) {
-	case CMD_TTYWINCH:
-	    handle_winch(mc, cstmp.val);
-	    break;
-	case CMD_SIGNO:
+	if (cstmp.type == CMD_SIGNO) {
 	    deliver_signal(mc, cstmp.val, true);
-	    break;
-	default:
-	    sudo_warnx(U_("unexpected reply type on backchannel: %d"), cstmp.type);
-	    break;
+	} else {
+	    sudo_warnx(U_("unexpected reply type on backchannel: %d"),
+		cstmp.type);
 	}
     }
     debug_return;
@@ -556,9 +514,11 @@ exec_monitor(struct command_details *details, sigset_t *oset,
     int errpipe[2];
     debug_decl(exec_monitor, SUDO_DEBUG_EXEC);
 
-    /* The pty leader is not used by the monitor. */
+    /* Close fds the monitor doesn't use. */
     if (io_fds[SFD_LEADER] != -1)
 	close(io_fds[SFD_LEADER]);
+    if (io_fds[SFD_USERTTY] != -1)
+	close(io_fds[SFD_USERTTY]);
 
     /* Ignore any SIGTTIN or SIGTTOU we receive (shouldn't be possible). */
     memset(&sa, 0, sizeof(sa));
@@ -569,10 +529,6 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 	sudo_warn(U_("unable to set handler for signal %d"), SIGTTIN);
     if (sudo_sigaction(SIGTTOU, &sa, NULL) != 0)
 	sudo_warn(U_("unable to set handler for signal %d"), SIGTTOU);
-
-    /* If we are starting in the foreground, the pty was already initialized. */
-    if (foreground)
-	tty_initialized = true;
 
     /*
      * Start a new session with the parent as the session leader
@@ -630,8 +586,6 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 	/* child */
 	close(backchannel);
 	close(errpipe[0]);
-	if (io_fds[SFD_USERTTY] != -1)
-	    close(io_fds[SFD_USERTTY]);
 	/* setup tty and exec command */
 	exec_cmnd_pty(details, oset, foreground, intercept_fd, errpipe[1]);
 	if (write(errpipe[1], &errno, sizeof(int)) == -1)

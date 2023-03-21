@@ -225,7 +225,6 @@ struct command_status {
 #define CMD_WSTATUS	2
 #define CMD_SIGNO	3
 #define CMD_PID		4
-#define CMD_TTYWINCH	5
     int type;
     int val;
 };

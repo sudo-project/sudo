@@ -59,6 +59,7 @@ static struct monitor_message_list monitor_messages =
 
 static char ptyname[PATH_MAX];
 static bool foreground, pipeline;
+static bool tty_initialized;
 static const char *utmp_user;
 
 static void sync_ttysize(struct exec_closure *ec);
@@ -159,6 +160,10 @@ check_foreground(struct exec_closure *ec)
     if (io_fds[SFD_USERTTY] != -1) {
 	if ((ret = tcgetpgrp(io_fds[SFD_USERTTY])) != -1) {
 	    foreground = ret == ec->ppgrp;
+	    if (foreground && !tty_initialized) {
+		if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_FOLLOWER]))
+		    tty_initialized = true;
+	    }
 
 	    /* Also check for window size changes. */
 	    sync_ttysize(ec);
@@ -840,11 +845,6 @@ fwdchannel_cb(int sock, int what, void *v)
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"sending SIG%s to monitor over backchannel", signame);
 	    break;
-	case CMD_TTYWINCH:
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "sending window size change "
-		"to monitor over backchannelL %d x %d",
-		msg->cstat.val & 0xffff, (msg->cstat.val >> 16) & 0xffff);
-	    break;
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"sending cstat type %d, value %d to monitor over backchannel",
@@ -1192,6 +1192,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 		if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
 		    ttymode = TERM_RAW;
 	    }
+	    tty_initialized = true;
 	}
     }
 
@@ -1347,8 +1348,8 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 }
 
 /*
- * Check for tty size changes.
- * Passes the new window size to the I/O plugin and to the monitor.
+ * Propagate tty size change to pty being used by the command, pass
+ * new window size to I/O plugins and deliver SIGWINCH to the command.
  */
 static void
 sync_ttysize(struct exec_closure *ec)
@@ -1358,14 +1359,12 @@ sync_ttysize(struct exec_closure *ec)
 
     if (ioctl(io_fds[SFD_USERTTY], TIOCGWINSZ, &wsize) == 0) {
 	if (wsize.ws_row != ec->rows || wsize.ws_col != ec->cols) {
-	    const unsigned int wsize_packed = (wsize.ws_row & 0xffff) |
-		((wsize.ws_col & 0xffff) << 16);
-
 	    /* Log window change event. */
 	    log_winchange(ec, wsize.ws_row, wsize.ws_col);
 
-	    /* Send window change event to monitor process. */
-	    send_command_status(ec, CMD_TTYWINCH, wsize_packed);
+	    /* Update pty window size and send command SIGWINCH. */
+	    (void)ioctl(io_fds[SFD_LEADER], TIOCSWINSZ, &wsize);
+	    killpg(ec->cmnd_pid, SIGWINCH);
 
 	    /* Update rows/cols. */
 	    ec->rows = wsize.ws_row;
