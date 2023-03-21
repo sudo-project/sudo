@@ -326,9 +326,9 @@ int pam_prep_user(struct passwd *);
 int sudoersparse(void);
 extern char *login_style;
 extern bool parse_error;
-extern bool sudoers_warnings;
 extern bool sudoers_recovery;
 extern bool sudoers_strict;
+extern int sudoers_verbose;
 
 /* toke.l */
 YY_DECL;

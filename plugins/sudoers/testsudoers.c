@@ -273,8 +273,8 @@ main(int argc, char *argv[])
 	    sudo_fatal("%s", U_("unable to parse network address list"));
     }
 
-    /* Allocate space for data structures in the parser. */
-    init_parser("sudoers", false, true);
+    /* Initialize the parser and set sudoers filename to "sudoers". */
+    init_parser_ext("sudoers", true, 2);
 
     /*
      * Set runas passwd/group entries based on command line or sudoers.

@@ -312,7 +312,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     /* Initialize defaults and parse sudoers. */
     init_defaults();
-    init_parser("sudoers", false, true);
+    init_parser_ext("sudoers", true, 1);
     sudoersrestart(fp);
     sudoersparse();
     reparent_parse_tree(&parse_tree);
@@ -398,7 +398,7 @@ done:
     /* Cleanup. */
     fclose(fp);
     free_parse_tree(&parse_tree);
-    init_parser(NULL, true, true);
+    init_parser(NULL);
     if (sudo_user.pw != NULL)
 	sudo_pw_delref(sudo_user.pw);
     if (runas_pw != NULL)

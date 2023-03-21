@@ -85,7 +85,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2022
+ * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -131,10 +131,10 @@
 /*
  * Globals
  */
-bool sudoers_warnings = true;
 bool sudoers_recovery = true;
 bool sudoers_strict = false;
 bool parse_error = false;
+int sudoers_verbose = 1;
 
 /* Optional logging function for parse errors. */
 sudoers_logger_t sudoers_error_hook;
@@ -3399,7 +3399,7 @@ sudoerserrorf(const char *fmt, ...)
 	sudoers_error_hook(sudoers, this_lineno, column, fmt, ap);
 	va_end(ap);
     }
-    if (sudoers_warnings && fmt != NULL) {
+    if (sudoers_verbose > 0 && fmt != NULL) {
 	LEXTRACE("<*> ");
 #ifndef TRACELEXER
 	if (trace_print == NULL || trace_print == sudoers_trace_print) {
@@ -3965,7 +3965,7 @@ free_parse_tree(struct sudoers_parse_tree *parse_tree)
  * the current sudoers file to path.
  */
 bool
-init_parser(const char *path, bool quiet, bool strict)
+init_parser_ext(const char *path, bool strict, int verbose)
 {
     bool ret = true;
     debug_decl(init_parser, SUDOERS_DEBUG_PARSER);
@@ -3985,10 +3985,16 @@ init_parser(const char *path, bool quiet, bool strict)
     }
 
     parse_error = false;
-    sudoers_warnings = !quiet;
     sudoers_strict = strict;
+    sudoers_verbose = verbose;
 
     debug_return_bool(ret);
+}
+
+bool
+init_parser(const char *path)
+{
+    return init_parser_ext(path, false, 1);
 }
 
 /*

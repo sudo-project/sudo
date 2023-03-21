@@ -251,7 +251,7 @@ sudoers_init(void *info, sudoers_logger_t logger, char * const envp[])
     }
 
     /* Open and parse sudoers, set global defaults.  */
-    init_parser(sudoers_file, false, false);
+    init_parser(sudoers_file);
     TAILQ_FOREACH_SAFE(nss, snl, entries, nss_next) {
 	if (nss->open(nss) == -1 || (nss->parse_tree = nss->parse(nss)) == NULL) {
 	    TAILQ_REMOVE(snl, nss, entries);
@@ -865,7 +865,7 @@ done:
 
     if (def_group_plugin)
 	group_plugin_unload();
-    init_parser(NULL, false, false);
+    init_parser(NULL);
 
     if (ret == -1) {
 	/* Free stashed copy of the environment. */
@@ -1856,7 +1856,7 @@ sudoers_cleanup(void)
 	    nss->close(nss);
 	}
 	snl = NULL;
-	init_parser(NULL, false, false);
+	init_parser(NULL);
     }
     while ((def = TAILQ_FIRST(&initial_defaults)) != NULL) {
 	TAILQ_REMOVE(&initial_defaults, def, entries);

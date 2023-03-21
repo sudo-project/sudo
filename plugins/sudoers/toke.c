@@ -5760,7 +5760,7 @@ push_include_int(const char *opath, bool isdir)
 	struct include_stack *new_istack;
 
 	if (idepth > MAX_SUDOERS_DEPTH) {
-	    if (sudoers_warnings)
+	    if (sudoers_verbose)
 		sudo_warnx(U_("%s: %s"), path, U_("too many levels of includes"));
 	    sudoerserror(NULL);
 	    sudo_rcstr_delref(path);
@@ -5783,7 +5783,7 @@ push_include_int(const char *opath, bool isdir)
 
 	status = sudo_secure_dir(path, sudoers_uid, sudoers_gid, &sb);
 	if (status != SUDO_PATH_SECURE) {
-	    if (sudoers_warnings) {
+	    if (sudoers_verbose) {
 		switch (status) {
 		case SUDO_PATH_BAD_TYPE:
 		    errno = ENOTDIR;

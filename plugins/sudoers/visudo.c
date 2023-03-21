@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2022
+ * Copyright (c) 1996, 1998-2005, 2007-2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -293,7 +293,7 @@ main(int argc, char *argv[])
      */
     if ((sudoersin = open_sudoers(sudoers_file, true, NULL)) == NULL)
 	exit(EXIT_FAILURE);
-    init_parser(sudoers_file, quiet, true);
+    init_parser_ext(sudoers_file, true, quiet ? 0 : 2);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     (void) sudoersparse();
     (void) update_defaults(&parsed_policy, NULL,
@@ -654,7 +654,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	/* Clean slate for each parse */
 	if (!init_defaults())
 	    sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
-	init_parser(sp->path, quiet, true);
+	init_parser_ext(sp->path, true, quiet ? 0 : 2);
 	sp->errorline = -1;
 
 	/* Parse the sudoers temp file(s) */
@@ -999,7 +999,7 @@ check_syntax(const char *file, bool quiet, bool strict, bool check_owner,
 	    sudo_warn(U_("unable to open %s"), file);
 	goto done;
     }
-    init_parser(file, quiet, true);
+    init_parser_ext(file, true, quiet ? 0 : 2);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     if (sudoersparse() && !parse_error) {
 	if (!quiet)
