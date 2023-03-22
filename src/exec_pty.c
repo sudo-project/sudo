@@ -161,7 +161,7 @@ check_foreground(struct exec_closure *ec)
 	if ((ret = tcgetpgrp(io_fds[SFD_USERTTY])) != -1) {
 	    foreground = ret == ec->ppgrp;
 	    if (foreground && !tty_initialized) {
-		/* Lazily initialize the pty if needed. */
+		/* Re-initialize the pty if needed. */
 		if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_LEADER]))
 		    tty_initialized = true;
 	    }
@@ -1233,20 +1233,23 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	}
     }
 
+    /*
+     * Copy terminal settings from user tty -> pty.  If sudo is a
+     * background process, we'll re-init the pty when foregrounded.
+     */
+    if (!sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_LEADER])) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: unable to copy terminal settings to pty", __func__);
+	foreground = false;
+    }
+
+    /* Start in raw mode unless part of a pipeline or backgrounded. */
     if (foreground) {
-	/* Copy terminal attrs from user tty -> pty. */
-	if (!sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_LEADER])) {
-            sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-                "%s: unable to copy terminal settings to pty", __func__);
-	    foreground = false;
-	} else {
-	    /* Start in raw mode unless part of a pipeline or backgrounded. */
-	    if (!pipeline && !ISSET(details->flags, CD_EXEC_BG)) {
-		if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
-		    ttymode = TERM_RAW;
-	    }
-	    tty_initialized = true;
+	if (!pipeline && !ISSET(details->flags, CD_EXEC_BG)) {
+	    if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
+		ttymode = TERM_RAW;
 	}
+	tty_initialized = true;
     }
 
     /*
@@ -1412,6 +1415,9 @@ sync_ttysize(struct exec_closure *ec)
 
     if (ioctl(io_fds[SFD_USERTTY], TIOCGWINSZ, &wsize) == 0) {
 	if (wsize.ws_row != ec->rows || wsize.ws_col != ec->cols) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %hd x %hd -> %hd x %hd",
+		__func__, ec->rows, ec->cols, wsize.ws_row, wsize.ws_col);
+
 	    /* Log window change event. */
 	    log_winchange(ec, wsize.ws_row, wsize.ws_col);
 
