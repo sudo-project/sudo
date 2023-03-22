@@ -161,7 +161,8 @@ check_foreground(struct exec_closure *ec)
 	if ((ret = tcgetpgrp(io_fds[SFD_USERTTY])) != -1) {
 	    foreground = ret == ec->ppgrp;
 	    if (foreground && !tty_initialized) {
-		if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_FOLLOWER]))
+		/* Lazily initialize the pty if needed. */
+		if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_LEADER]))
 		    tty_initialized = true;
 	    }
 
@@ -1233,8 +1234,8 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     }
 
     if (foreground) {
-	/* Copy terminal attrs from user tty -> pty follower. */
-	if (!sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_FOLLOWER])) {
+	/* Copy terminal attrs from user tty -> pty. */
+	if (!sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_LEADER])) {
             sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
                 "%s: unable to copy terminal settings to pty", __func__);
 	    foreground = false;
