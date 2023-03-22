@@ -173,6 +173,43 @@ check_foreground(struct exec_closure *ec)
 }
 
 /*
+ * Restore the terminal when sudo is resumed in response to SIGCONT.
+ */
+static bool
+resume_terminal(struct exec_closure *ec)
+{
+    debug_decl(resume_terminal, SUDO_DEBUG_EXEC);
+
+    if (check_foreground(ec) == -1) {
+	/* User's tty was revoked. */
+	debug_return_bool(false);
+    }
+
+    /*
+     * We always resume the command in the foreground if sudo itself
+     * is the foreground process.  This helps work around poorly behaved
+     * programs that catch SIGTTOU/SIGTTIN but suspend themselves with
+     * SIGSTOP.  At worst, sudo will go into the background but upon
+     * resume the command will be runnable.  Otherwise, we can get into
+     * a situation where the command will immediately suspend itself.
+     */
+    sudo_debug_printf(SUDO_DEBUG_INFO, "parent is in %s, ttymode %d -> %d",
+	foreground ? "foreground" : "background", ttymode,
+	foreground ? TERM_RAW : TERM_COOKED);
+
+    if (foreground) {
+	/* Foreground process, set tty to raw mode. */
+	if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
+	    ttymode = TERM_RAW;
+    } else {
+	/* Background process, no access to tty. */
+	ttymode = TERM_COOKED;
+    }
+
+    debug_return_bool(true);
+}
+
+/*
  * Suspend sudo if the underlying command is suspended.
  * Returns SIGCONT_FG if the command should be resumed in the
  * foreground or SIGCONT_BG if it is a background process.
@@ -181,9 +218,20 @@ static int
 suspend_sudo_pty(struct exec_closure *ec, int signo)
 {
     char signame[SIG2STR_MAX];
-    struct sigaction sa, osa;
+    struct sigaction sa, osa, saved_sigcont;
     int ret = 0;
     debug_decl(suspend_sudo_pty, SUDO_DEBUG_EXEC);
+
+    /*
+     * Ignore SIGCONT when we suspend to avoid calling resume_terminal()
+     * multiple times.
+     */
+    memset(&sa, 0, sizeof(sa));
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    sa.sa_handler = SIG_IGN;
+    if (sudo_sigaction(signo, &sa, &saved_sigcont) != 0)
+	sudo_warn(U_("unable to set handler for SIGCONT"));
 
     switch (signo) {
     case SIGTTOU:
@@ -209,6 +257,7 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 	FALLTHROUGH;
     case SIGSTOP:
     case SIGTSTP:
+    default:
 	/* Flush any remaining output and deschedule I/O events. */
 	del_io_events(true);
 
@@ -226,13 +275,11 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 
 	/* Suspend self and continue command when we resume. */
 	if (signo != SIGSTOP) {
-	    memset(&sa, 0, sizeof(sa));
-	    sigemptyset(&sa.sa_mask);
-	    sa.sa_flags = SA_RESTART;
 	    sa.sa_handler = SIG_DFL;
 	    if (sudo_sigaction(signo, &sa, &osa) != 0)
 		sudo_warn(U_("unable to set handler for SIG%s"), signame);
 	}
+
 	/*
 	 * We stop sudo's process group, even if sudo is not the process
 	 * group leader.  If we only send the signal to sudo itself,
@@ -250,37 +297,6 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 		"no parent to suspend, terminating command.");
 	    terminate_command(ec->cmnd_pid, true);
 	    ec->cmnd_pid = -1;
-	    break;
-	}
-
-	/* Log the resume event. */
-	log_suspend(ec, SIGCONT);
-
-	/* Check foreground/background status on resume. */
-	if (check_foreground(ec) == -1) {
-	    /* User's tty was revoked. */
-	    break;
-	}
-
-	/*
-	 * We always resume the command in the foreground if sudo itself
-	 * is the foreground process.  This helps work around poorly behaved
-	 * programs that catch SIGTTOU/SIGTTIN but suspend themselves with
-	 * SIGSTOP.  At worst, sudo will go into the background but upon
-	 * resume the command will be runnable.  Otherwise, we can get into
-	 * a situation where the command will immediately suspend itself.
-	 */
-	sudo_debug_printf(SUDO_DEBUG_INFO, "parent is in %s, ttymode %d -> %d",
-	    foreground ? "foreground" : "background", ttymode,
-	    foreground ? TERM_RAW : TERM_COOKED);
-
-	if (foreground) {
-	    /* Foreground process, set tty to raw mode. */
-	    if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
-		ttymode = TERM_RAW;
-	} else {
-	    /* Background process, no access to tty. */
-	    ttymode = TERM_COOKED;
 	}
 
 	if (signo != SIGSTOP) {
@@ -288,9 +304,23 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 		sudo_warn(U_("unable to restore handler for SIG%s"), signame);
 	}
 
+	/* If we failed to suspend, the command is no longer running. */
+	if (ec->cmnd_pid == -1)
+	    break;
+
+	/* Log the resume event. */
+	log_suspend(ec, SIGCONT);
+
+	/* Restore the user's terminal settings. */
+	if (!resume_terminal(ec))
+	    break;
+
 	ret = ttymode == TERM_RAW ? SIGCONT_FG : SIGCONT_BG;
 	break;
     }
+
+    if (sudo_sigaction(signo, &saved_sigcont, NULL) != 0)
+	sudo_warn(U_("unable to restore handler for SIGCONT"));
 
     debug_return_int(ret);
 }
@@ -799,6 +829,9 @@ signal_cb_pty(int signo, int what, void *v)
     case SIGCHLD:
 	handle_sigchld_pty(ec);
 	break;
+    case SIGCONT:
+	resume_terminal(ec);
+	break;
     case SIGWINCH:
 	sync_ttysize(ec);
 	break;
@@ -984,6 +1017,13 @@ fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
     if (ec->sigchld_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (sudo_ev_add(ec->evbase, ec->sigchld_event, NULL, false) == -1)
+	sudo_fatal("%s", U_("unable to add event to queue"));
+
+    ec->sigcont_event = sudo_ev_alloc(SIGCONT,
+	SUDO_EV_SIGINFO, signal_cb_pty, ec);
+    if (ec->sigcont_event == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    if (sudo_ev_add(ec->evbase, ec->sigcont_event, NULL, false) == -1)
 	sudo_fatal("%s", U_("unable to add event to queue"));
 
     ec->sigwinch_event = sudo_ev_alloc(SIGWINCH,
