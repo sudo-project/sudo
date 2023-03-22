@@ -470,18 +470,6 @@
 /* Define to 1 if you have the 'innetgr' function. */
 #undef HAVE_INNETGR
 
-/* Define to 1 if the system has the type 'int16_t'. */
-#undef HAVE_INT16_T
-
-/* Define to 1 if the system has the type 'int32_t'. */
-#undef HAVE_INT32_T
-
-/* Define to 1 if the system has the type 'int64_t'. */
-#undef HAVE_INT64_T
-
-/* Define to 1 if the system has the type 'int8_t'. */
-#undef HAVE_INT8_T
-
 /* Define to 1 if the system has the type 'intmax_t'. */
 #undef HAVE_INTMAX_T
 
@@ -609,6 +597,9 @@
 
 /* Define to 1 if you have the <login_cap.h> header file. */
 #undef HAVE_LOGIN_CAP_H
+
+/* Define to 1 if the system has the type 'long long int'. */
+#undef HAVE_LONG_LONG_INT
 
 /* Define to 1 if you have the <machine/endian.h> header file. */
 #undef HAVE_MACHINE_ENDIAN_H
@@ -1038,18 +1029,6 @@
 /* Define to 1 if you have the 'ttyslot' function. */
 #undef HAVE_TTYSLOT
 
-/* Define to 1 if the system has the type 'uint16_t'. */
-#undef HAVE_UINT16_T
-
-/* Define to 1 if the system has the type 'uint32_t'. */
-#undef HAVE_UINT32_T
-
-/* Define to 1 if the system has the type 'uint64_t'. */
-#undef HAVE_UINT64_T
-
-/* Define to 1 if the system has the type 'uint8_t'. */
-#undef HAVE_UINT8_T
-
 /* Define to 1 if the system has the type 'uintmax_t'. */
 #undef HAVE_UINTMAX_T
 
@@ -1061,6 +1040,9 @@
 
 /* Define to 1 if you have the 'unsetenv' function. */
 #undef HAVE_UNSETENV
+
+/* Define to 1 if the system has the type 'unsigned long long int'. */
+#undef HAVE_UNSIGNED_LONG_LONG_INT
 
 /* Define to 1 if you have the <util.h> header file. */
 #undef HAVE_UTIL_H
@@ -1455,6 +1437,21 @@
 /* Number of bits in time_t, on hosts where this is settable. */
 #undef _TIME_BITS
 
+/* Define for Solaris 2.5.1 so the uint32_t typedef from <sys/synch.h>,
+   <pthread.h>, or <semaphore.h> is not used. If the typedef were allowed, the
+   #define below would cause a syntax error. */
+#undef _UINT32_T
+
+/* Define for Solaris 2.5.1 so the uint64_t typedef from <sys/synch.h>,
+   <pthread.h>, or <semaphore.h> is not used. If the typedef were allowed, the
+   #define below would cause a syntax error. */
+#undef _UINT64_T
+
+/* Define for Solaris 2.5.1 so the uint8_t typedef from <sys/synch.h>,
+   <pthread.h>, or <semaphore.h> is not used. If the typedef were allowed, the
+   #define below would cause a syntax error. */
+#undef _UINT8_T
+
 /* Define to 1 on platforms where this makes time_t a 64-bit type. */
 #undef __MINGW_USE_VC2005_COMPAT
 
@@ -1474,6 +1471,26 @@
 #undef inline
 #endif
 
+/* Define to the type of a signed integer type of width exactly 16 bits if
+   such a type exists and the standard includes do not define it. */
+#undef int16_t
+
+/* Define to the type of a signed integer type of width exactly 32 bits if
+   such a type exists and the standard includes do not define it. */
+#undef int32_t
+
+/* Define to the type of a signed integer type of width exactly 64 bits if
+   such a type exists and the standard includes do not define it. */
+#undef int64_t
+
+/* Define to the type of a signed integer type of width exactly 8 bits if such
+   a type exists and the standard includes do not define it. */
+#undef int8_t
+
+/* Define to the widest signed integer type if <stdint.h> and <inttypes.h> do
+   not define. */
+#undef intmax_t
+
 /* Define to an OS-specific initialization function or 'os_init_common'. */
 #undef os_init
 
@@ -1483,43 +1500,29 @@
 /* Define to 'int' if <sys/types.h> doesn't define. */
 #undef uid_t
 
+/* Define to the type of an unsigned integer type of width exactly 16 bits if
+   such a type exists and the standard includes do not define it. */
+#undef uint16_t
+
+/* Define to the type of an unsigned integer type of width exactly 32 bits if
+   such a type exists and the standard includes do not define it. */
+#undef uint32_t
+
+/* Define to the type of an unsigned integer type of width exactly 64 bits if
+   such a type exists and the standard includes do not define it. */
+#undef uint64_t
+
+/* Define to the type of an unsigned integer type of width exactly 8 bits if
+   such a type exists and the standard includes do not define it. */
+#undef uint8_t
+
+/* Define to the widest unsigned integer type if <stdint.h> and <inttypes.h>
+   do not define. */
+#undef uintmax_t
+
 /* Define to empty if the keyword 'volatile' does not work. Warning: valid
    code using 'volatile' can become incorrect without. Disable with care. */
 #undef volatile
-
-/* Define C99 types if stdint.h and inttypes.h are missing. */
-#if !defined(HAVE_STDINT_H) && !defined(HAVE_INTTYPES_H)
-# ifndef HAVE_INT8_T
-typedef char			int8_t;
-# endif
-# ifndef HAVE_UINT8_T
-typedef	unsigned char		uint8_t;
-# endif
-# ifndef HAVE_INT16_T
-typedef short			int16_t;
-# endif
-# ifndef HAVE_UINT16_T
-typedef unsigned short		uint16_t;
-# endif
-# ifndef HAVE_INT32_T
-typedef int			int32_t;
-# endif
-# ifndef HAVE_UINT32_T
-typedef unsigned int		uint32_t;
-# endif
-# ifndef HAVE_INT64_T
-typedef long long		int64_t;
-# endif
-# ifndef HAVE_UINT64_T
-typedef unsigned long long	uint64_t;
-# endif
-# ifndef HAVE_INTMAX_T
-typedef long long		intmax_t;
-# endif
-# ifndef HAVE_UINTMAX_T
-typedef unsigned long long	uintmax_t;
-# endif
-#endif /* !HAVE_STDINT_H && !HAVE_INTTYPES_H */
 
 #ifndef HAVE_SIG_ATOMIC_T
 typedef int			sig_atomic_t;

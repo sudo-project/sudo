@@ -2489,7 +2489,16 @@ dnl
 dnl typedef checks
 dnl
 AS_IF([test X"${ac_cv_header_stdint_h}${ac_cv_header_inttypes_h}" = X"nono"], [
-    AC_CHECK_TYPES([int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t, intmax_t, uintmax_t])
+    AC_TYPE_INT8_T
+    AC_TYPE_UINT8_T
+    AC_TYPE_INT16_T
+    AC_TYPE_UINT16_T
+    AC_TYPE_INT32_T
+    AC_TYPE_UINT32_T
+    AC_TYPE_INT64_T
+    AC_TYPE_UINT64_T
+    AC_TYPE_INTMAX_T
+    AC_TYPE_UINTMAX_T
 ])
 AC_CHECK_TYPES([sig_atomic_t], [], [], [
 AC_INCLUDES_DEFAULT
@@ -4673,41 +4682,7 @@ dnl
 AH_TOP([#ifndef SUDO_CONFIG_H
 #define SUDO_CONFIG_H])
 
-AH_BOTTOM([/* Define C99 types if stdint.h and inttypes.h are missing. */
-#if !defined(HAVE_STDINT_H) && !defined(HAVE_INTTYPES_H)
-# ifndef HAVE_INT8_T
-typedef char			int8_t;
-# endif
-# ifndef HAVE_UINT8_T
-typedef	unsigned char		uint8_t;
-# endif
-# ifndef HAVE_INT16_T
-typedef short			int16_t;
-# endif
-# ifndef HAVE_UINT16_T
-typedef unsigned short		uint16_t;
-# endif
-# ifndef HAVE_INT32_T
-typedef int			int32_t;
-# endif
-# ifndef HAVE_UINT32_T
-typedef unsigned int		uint32_t;
-# endif
-# ifndef HAVE_INT64_T
-typedef long long		int64_t;
-# endif
-# ifndef HAVE_UINT64_T
-typedef unsigned long long	uint64_t;
-# endif
-# ifndef HAVE_INTMAX_T
-typedef long long		intmax_t;
-# endif
-# ifndef HAVE_UINTMAX_T
-typedef unsigned long long	uintmax_t;
-# endif
-#endif /* !HAVE_STDINT_H && !HAVE_INTTYPES_H */
-
-#ifndef HAVE_SIG_ATOMIC_T
+AH_BOTTOM([#ifndef HAVE_SIG_ATOMIC_T
 typedef int			sig_atomic_t;
 #endif
 
