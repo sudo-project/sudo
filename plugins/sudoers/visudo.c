@@ -899,8 +899,8 @@ setup_signals(void)
 static int
 run_command(const char *path, char *const *argv, bool foreground)
 {
-    int status, ttyfd;
-    pid_t pid, saved_pgrp;
+    int status, ttyfd = -1;
+    pid_t pid, saved_pgrp = -1;
     int rv = -1;
     debug_decl(run_command, SUDOERS_DEBUG_UTIL);
 
