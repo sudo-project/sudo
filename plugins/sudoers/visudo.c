@@ -973,16 +973,16 @@ run_command(const char *path, char *const *argv, bool foreground)
 	if (WIFEXITED(status)) {
 	    rv = WEXITSTATUS(status);
 	    sudo_debug_printf(SUDO_DEBUG_DIAG, "%s: %d: exited %d",
-		__func__, pid, rv);
+		__func__, (int)pid, rv);
 	    break;
 	} else if (WIFSIGNALED(status)) {
 	    sudo_debug_printf(SUDO_DEBUG_DIAG, "%s: %d: killed by signal %d",
-		__func__, pid, WTERMSIG(status));
+		__func__, (int)pid, WTERMSIG(status));
 	    break;
 	} else if (WIFSTOPPED(status)) {
 	    const int signo = WSTOPSIG(status);
 	    sudo_debug_printf(SUDO_DEBUG_DIAG, "%s: %d: suspended by signal %d",
-		__func__, pid, signo);
+		__func__, (int)pid, signo);
 	    if (foreground) {
 		sudo_suspend_parent(signo, getpid(), getpgrp(), pid,
 		    NULL, NULL);
@@ -990,7 +990,7 @@ run_command(const char *path, char *const *argv, bool foreground)
 	    }
 	} else {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR,
-		"%d: unknown status 0x%x", pid, status);
+		"%d: unknown status 0x%x", (int)pid, status);
 	}
     }
 

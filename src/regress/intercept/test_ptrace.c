@@ -210,12 +210,12 @@ main(int argc, char *argv[])
 
 	    if (WIFEXITED(status)) {
 		sudo_debug_printf(SUDO_DEBUG_DIAG, "%d: exited %d",
-		    pid, WEXITSTATUS(status));
+		    (int)pid, WEXITSTATUS(status));
 		if (pid == child)
 		    return WEXITSTATUS(status);
 	    } else if (WIFSIGNALED(status)) {
 		sudo_debug_printf(SUDO_DEBUG_DIAG, "%d: killed by signal %d",
-		    pid, WTERMSIG(status));
+		    (int)pid, WTERMSIG(status));
 		if (pid == child)
 		    return WTERMSIG(status) | 128;
 	    } else if (WIFSTOPPED(status)) {
@@ -228,7 +228,7 @@ main(int argc, char *argv[])
 		    }
 		}
 	    } else {
-		sudo_fatalx("%d: unknown status 0x%x", pid, status);
+		sudo_fatalx("%d: unknown status 0x%x", (int)pid, status);
 	    }
 	}
     }
