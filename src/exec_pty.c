@@ -59,7 +59,6 @@ static struct monitor_message_list monitor_messages =
 
 static char ptyname[PATH_MAX];
 static bool foreground, pipeline;
-static bool tty_initialized;
 static const char *utmp_user;
 
 static void sync_ttysize(struct exec_closure *ec);
@@ -160,14 +159,6 @@ check_foreground(struct exec_closure *ec)
     if (io_fds[SFD_USERTTY] != -1) {
 	if ((ret = tcgetpgrp(io_fds[SFD_USERTTY])) != -1) {
 	    foreground = ret == ec->ppgrp;
-	    if (foreground && !tty_initialized) {
-		/* Re-initialize the pty if needed. */
-		if (sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_LEADER]))
-		    tty_initialized = true;
-	    }
-
-	    /* Also check for window size changes. */
-	    sync_ttysize(ec);
 	}
     }
     debug_return_int(ret);
@@ -186,14 +177,14 @@ resume_terminal(struct exec_closure *ec)
 	debug_return_bool(false);
     }
 
-    /*
-     * We always resume the command in the foreground if sudo itself
-     * is the foreground process.  This helps work around poorly behaved
-     * programs that catch SIGTTOU/SIGTTIN but suspend themselves with
-     * SIGSTOP.  At worst, sudo will go into the background but upon
-     * resume the command will be runnable.  Otherwise, we can get into
-     * a situation where the command will immediately suspend itself.
-     */
+    /* Update the pty settings based on the user's terminal. */
+    if (!sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_LEADER])) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: unable to copy terminal settings to pty", __func__);
+	debug_return_bool(false);
+    }
+    sync_ttysize(ec);
+
     sudo_debug_printf(SUDO_DEBUG_INFO, "parent is in %s, ttymode %d -> %d",
 	foreground ? "foreground" : "background", ttymode,
 	foreground ? TERM_RAW : TERM_COOKED);
@@ -234,6 +225,9 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
     if (sudo_sigaction(SIGCONT, &sa, &saved_sigcont) != 0)
 	sudo_warn(U_("unable to set handler for SIGCONT"));
 
+    if (sig2str(signo, signame) == -1)
+	(void)snprintf(signame, sizeof(signame), "%d", signo);
+
     switch (signo) {
     case SIGTTOU:
     case SIGTTIN:
@@ -248,6 +242,9 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 	    }
 	}
 	if (foreground) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"%s: command received SIG%s, parent running in the foregound",
+		__func__, signame);
 	    if (ttymode != TERM_RAW) {
 		if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
 		    ttymode = TERM_RAW;
@@ -271,9 +268,6 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 	/* Log the suspend event. */
 	log_suspend(ec, signo);
 
-	if (sig2str(signo, signame) == -1)
-	    (void)snprintf(signame, sizeof(signame), "%d", signo);
-
 	/* Suspend self and continue command when we resume. */
 	if (signo != SIGSTOP) {
 	    if (sudo_sigaction(signo, &sa, &osa) != 0)
@@ -289,12 +283,12 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 	 * If the process group leader is no longer present, we must kill
 	 * the command since there will be no one to resume us.
 	 */
-	sudo_debug_printf(SUDO_DEBUG_INFO, "killpg(%d, SIG%s) [parent]",
-	    (int)ec->ppgrp, signame);
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: killpg(%d, SIG%s) [parent]",
+	    __func__, (int)ec->ppgrp, signame);
 	if ((ec->ppgrp != ec->sudo_pid && kill(ec->ppgrp, 0) == -1) ||
 		killpg(ec->ppgrp, signo) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR,
-		"no parent to suspend, terminating command.");
+		"%s: no parent to suspend, terminating command.", __func__);
 	    terminate_command(ec->cmnd_pid, true);
 	    ec->cmnd_pid = -1;
 	}
@@ -311,10 +305,19 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 	/* Log the resume event. */
 	log_suspend(ec, SIGCONT);
 
-	/* Restore the user's terminal settings. */
+	/* Update the pty's terminal settings and restore /dev/tty settings. */
 	if (!resume_terminal(ec))
 	    break;
 
+	/*
+	 * We always resume the command in the foreground if sudo itself
+	 * is the foreground process (and we were able to set /dev/tty to
+	 * raw mode).  This helps work around poorly behaved programs that
+	 * catch SIGTTOU/SIGTTIN but suspend themselves with SIGSTOP.  At
+	 * worst, sudo will go into the background but upon resume the
+	 * command will be runnable.  Otherwise, we can get into a
+	 * situation where the command will immediately suspend itself.
+	 */
 	ret = ttymode == TERM_RAW ? SIGCONT_FG : SIGCONT_BG;
 	break;
     }
@@ -1249,7 +1252,6 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	    if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
 		ttymode = TERM_RAW;
 	}
-	tty_initialized = true;
     }
 
     /*
