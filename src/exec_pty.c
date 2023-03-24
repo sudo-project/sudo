@@ -57,31 +57,30 @@ TAILQ_HEAD(monitor_message_list, monitor_message);
 static struct monitor_message_list monitor_messages =
     TAILQ_HEAD_INITIALIZER(monitor_messages);
 
-/* Globals for the pty_cleanup() hook. */
-static char ptyname[PATH_MAX];
-
 static void sync_ttysize(struct exec_closure *ec);
 static void schedule_signal(struct exec_closure *ec, int signo);
 
 /*
  * Allocate a pty if /dev/tty is a tty.
- * Fills in io_fds[SFD_USERTTY], io_fds[SFD_LEADER], io_fds[SFD_FOLLOWER]
- * and ptyname globals.
+ * Fills in io_fds[SFD_USERTTY], io_fds[SFD_LEADER] and io_fds[SFD_FOLLOWER].
+ * Returns the dyamically allocated pty name on success, NULL on failure.
  */
-static bool
+static char *
 pty_setup(struct command_details *details, const char *tty)
 {
+    char *ptyname = NULL;
     debug_decl(pty_setup, SUDO_DEBUG_EXEC);
 
     io_fds[SFD_USERTTY] = open(_PATH_TTY, O_RDWR);
     if (io_fds[SFD_USERTTY] == -1) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: no %s, not allocating a pty",
 	    __func__, _PATH_TTY);
-	debug_return_bool(false);
+	debug_return_ptr(NULL);
     }
 
-    if (!get_pty(&io_fds[SFD_LEADER], &io_fds[SFD_FOLLOWER],
-	ptyname, sizeof(ptyname), details->cred.euid))
+    ptyname = get_pty(&io_fds[SFD_LEADER], &io_fds[SFD_FOLLOWER],
+	details->cred.euid);
+    if (ptyname == NULL)
 	sudo_fatal("%s", U_("unable to allocate pty"));
 
     /* Update tty name in command details (used by monitor, SELinux, AIX). */
@@ -96,7 +95,7 @@ pty_setup(struct command_details *details, const char *tty)
 	__func__, _PATH_TTY, io_fds[SFD_USERTTY], io_fds[SFD_LEADER],
 	io_fds[SFD_FOLLOWER]);
 
-    debug_return_bool(true);
+    debug_return_str(ptyname);
 }
 
 /*
@@ -134,8 +133,8 @@ pty_cleanup_int(struct exec_closure *ec, int wstatus, bool init_only)
     }
 
     /* Update utmp */
-    if (ISSET(ec->details->flags, CD_SET_UTMP) && ptyname[0] != '\0')
-	utmp_logout(ptyname, wstatus);
+    if (ISSET(ec->details->flags, CD_SET_UTMP) && ec->ptyname != NULL)
+	utmp_logout(ec->ptyname, wstatus);
 
     debug_return;
 }
@@ -1082,7 +1081,8 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     /*
      * Allocate a pty if sudo is running in a terminal.
      */
-    if (!pty_setup(details, user_details.tty))
+    ec.ptyname = pty_setup(details, user_details.tty);
+    if (ec.ptyname == NULL)
 	debug_return_bool(false);
 
     /* Register cleanup function */

@@ -551,6 +551,7 @@ free_exec_closure(struct exec_closure *ec)
     sudo_ev_free(ec->sigcont_event);
     sudo_ev_free(ec->siginfo_event);
     sudo_ev_free(ec->sigwinch_event);
+    free(ec->ptyname);
 
     debug_return;
 }

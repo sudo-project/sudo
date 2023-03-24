@@ -252,7 +252,7 @@ int parse_args(int argc, char **argv, int *old_optind, int *nargc,
 extern int tgetpass_flags;
 
 /* get_pty.c */
-bool get_pty(int *leader, int *follower, char *name, size_t namesz, uid_t uid);
+char *get_pty(int *leader, int *follower, uid_t uid);
 
 /* sudo.c */
 int policy_init_session(struct command_details *details);
