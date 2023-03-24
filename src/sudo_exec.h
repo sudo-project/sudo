@@ -213,7 +213,6 @@ void exec_nopty(struct command_details *details, struct command_status *cstat);
 
 /* exec_pty.c */
 bool exec_pty(struct command_details *details, struct command_status *cstat);
-int pty_make_controlling(void);
 extern int io_fds[6];
 
 /* exec_monitor.c */

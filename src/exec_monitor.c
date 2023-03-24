@@ -26,6 +26,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
+#include <sys/ioctl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -496,6 +497,29 @@ fill_exec_closure_monitor(struct monitor_closure *mc,
 }
 
 /*
+ * Make the tty follower the controlling tty.
+ */
+static bool
+pty_make_controlling(const char *follower)
+{
+    debug_decl(pty_make_controlling, SUDO_DEBUG_EXEC);
+
+    if (io_fds[SFD_FOLLOWER] != -1) {
+#ifdef TIOCSCTTY
+	if (ioctl(io_fds[SFD_FOLLOWER], TIOCSCTTY, NULL) != 0)
+	    debug_return_bool(false);
+#else
+	/* Set controlling tty by reopening pty follower. */
+	int fd = open(follower, O_RDWR);
+	if (fd == -1)
+	    debug_return_bool(false);
+	close(fd);
+#endif
+    }
+    debug_return_bool(true);
+}
+
+/*
  * Monitor process that creates a new session with the controlling tty,
  * resets signal handlers and forks a child to call exec_cmnd_pty().
  * Waits for status changes from the command and relays them to the
@@ -538,7 +562,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 	sudo_warn("setsid");
 	goto bad;
     }
-    if (pty_make_controlling() == -1) {
+    if (!pty_make_controlling(details->tty)) {
 	sudo_warn("%s", U_("unable to set controlling tty"));
 	goto bad;
     }

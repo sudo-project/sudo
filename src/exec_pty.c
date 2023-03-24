@@ -84,7 +84,7 @@ pty_setup(struct command_details *details, const char *tty)
 	ptyname, sizeof(ptyname), details->cred.euid))
 	sudo_fatal("%s", U_("unable to allocate pty"));
 
-    /* Update tty name in command details (used by SELinux and AIX). */
+    /* Update tty name in command details (used by monitor, SELinux, AIX). */
     details->tty = ptyname;
 
     /* Add entry to utmp/utmpx? */
@@ -159,28 +159,6 @@ static void
 pty_cleanup_hook(void)
 {
     pty_cleanup_int(NULL, 0, false);
-}
-
-/*
- * Make the tty follower the controlling tty.
- * This is only used by the monitor but ptyname[] is static.
- */
-int
-pty_make_controlling(void)
-{
-    if (io_fds[SFD_FOLLOWER] != -1) {
-#ifdef TIOCSCTTY
-	if (ioctl(io_fds[SFD_FOLLOWER], TIOCSCTTY, NULL) != 0)
-	    return -1;
-#else
-	/* Set controlling tty by reopening pty follower. */
-	int fd = open(ptyname, O_RDWR);
-	if (fd == -1)
-	    return -1;
-	close(fd);
-#endif
-    }
-    return 0;
 }
 
 /*
