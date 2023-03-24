@@ -80,6 +80,7 @@ struct exec_closure {
     pid_t ppgrp;
     short rows;
     short cols;
+    bool foreground;
 };
 
 /*

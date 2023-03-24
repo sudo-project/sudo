@@ -57,12 +57,11 @@ TAILQ_HEAD(monitor_message_list, monitor_message);
 static struct monitor_message_list monitor_messages =
     TAILQ_HEAD_INITIALIZER(monitor_messages);
 
+/* Globals for the pty_cleanup() hook. */
 static char ptyname[PATH_MAX];
-static bool foreground, pipeline;
 static const char *utmp_user;
 
 static void sync_ttysize(struct exec_closure *ec);
-static pid_t check_foreground(struct exec_closure *ec);
 static void schedule_signal(struct exec_closure *ec, int signo);
 
 /*
@@ -146,7 +145,7 @@ pty_make_controlling(void)
 
 /*
  * Check whether we are running in the foregroup.
- * Updates the foreground global and updates the window size.
+ * Updates the foreground flag and updates the window size.
  * Returns 0 if there is no tty, the foreground process group ID
  * on success, or -1 on failure (tty revoked).
  */
@@ -158,7 +157,7 @@ check_foreground(struct exec_closure *ec)
 
     if (io_fds[SFD_USERTTY] != -1) {
 	if ((ret = tcgetpgrp(io_fds[SFD_USERTTY])) != -1) {
-	    foreground = ret == ec->ppgrp;
+	    ec->foreground = ret == ec->ppgrp;
 	}
     }
     debug_return_int(ret);
@@ -186,10 +185,10 @@ resume_terminal(struct exec_closure *ec)
     sync_ttysize(ec);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "parent is in %s, ttymode %d -> %d",
-	foreground ? "foreground" : "background", ttymode,
-	foreground ? TERM_RAW : TERM_COOKED);
+	ec->foreground ? "foreground" : "background", ttymode,
+	ec->foreground ? TERM_RAW : TERM_COOKED);
 
-    if (foreground) {
+    if (ec->foreground) {
 	/* Foreground process, set tty to raw mode. */
 	if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
 	    ttymode = TERM_RAW;
@@ -235,13 +234,13 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 	 * If sudo is already the foreground process, just resume the command
 	 * in the foreground.  If not, we'll suspend sudo and resume later.
 	 */
-	if (!foreground) {
+	if (!ec->foreground) {
 	    if (check_foreground(ec) == -1) {
 		/* User's tty was revoked. */
 		break;
 	    }
 	}
-	if (foreground) {
+	if (ec->foreground) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"%s: command received SIG%s, parent running in the foregound",
 		__func__, signame);
@@ -1063,6 +1062,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     struct exec_closure ec = { 0 };
     struct plugin_container *plugin;
     int evloop_retries = -1;
+    bool pipeline = false;
     sigset_t set, oset;
     struct sigaction sa;
     struct stat sb;
@@ -1154,9 +1154,9 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	    log_ttyout, read_callback, write_callback, &ec, &iobufs);
 
 	/* Are we the foreground process? */
-	foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ppgrp;
+	ec.foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ppgrp;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "sudo is running in the %s",
-	    foreground ? "foreground" : "background");
+	    ec.foreground ? "foreground" : "background");
     }
 
     /*
@@ -1184,7 +1184,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	    io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
 	}
 
-	if (foreground && ppgrp != sudo_pid) {
+	if (ec.foreground && ppgrp != sudo_pid) {
 	    /*
 	     * If sudo is not the process group leader and stdin is not
 	     * a tty we may be running as a background job via a shell
@@ -1243,11 +1243,11 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     if (!sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_LEADER])) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: unable to copy terminal settings to pty", __func__);
-	foreground = false;
+	ec.foreground = false;
     }
 
     /* Start in raw mode unless part of a pipeline or backgrounded. */
-    if (foreground) {
+    if (ec.foreground) {
 	if (!pipeline && !ISSET(details->flags, CD_EXEC_BG)) {
 	    if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
 		ttymode = TERM_RAW;
@@ -1290,7 +1290,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	 * In this case, we rely on the command receiving SIGTTOU or SIGTTIN
 	 * when it needs access to the controlling tty.
 	 */                                                              
-	exec_monitor(details, &oset, foreground && !pipeline, sv[1],
+	exec_monitor(details, &oset, ec.foreground && !pipeline, sv[1],
 	    intercept_sv[1]);
 	cstat->type = CMD_ERRNO;
 	cstat->val = errno;
