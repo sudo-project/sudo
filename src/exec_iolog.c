@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -36,12 +36,13 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
-sigset_t ttyblock;
 int ttymode = TERM_COOKED;
 
 struct io_buffer_list iobufs = SLIST_HEAD_INITIALIZER(&iobufs);
 
 int io_fds[6] = { -1, -1, -1, -1, -1, -1 };
+
+static sigset_t ttyblock;
 
 /*
  * Remove and free any events associated with the specified
