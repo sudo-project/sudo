@@ -36,9 +36,9 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
-struct io_buffer_list iobufs = SLIST_HEAD_INITIALIZER(&iobufs);
-
 int io_fds[6] = { -1, -1, -1, -1, -1, -1 };
+
+static struct io_buffer_list iobufs = SLIST_HEAD_INITIALIZER(&iobufs);
 
 static sigset_t ttyblock;
 
@@ -103,8 +103,7 @@ void
 io_buf_new(int rfd, int wfd,
     bool (*action)(const char *, unsigned int, struct io_buffer *),
     void (*read_cb)(int fd, int what, void *v),
-    void (*write_cb)(int fd, int what, void *v),
-    struct exec_closure *ec, struct io_buffer_list *head)
+    void (*write_cb)(int fd, int what, void *v), struct exec_closure *ec)
 {
     int n;
     struct io_buffer *iob;
@@ -132,7 +131,7 @@ io_buf_new(int rfd, int wfd,
     iob->buf[0] = '\0';
     if (iob->revent == NULL || iob->wevent == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    SLIST_INSERT_HEAD(head, iob, entries);
+    SLIST_INSERT_HEAD(&iobufs, iob, entries);
 
     debug_return;
 }

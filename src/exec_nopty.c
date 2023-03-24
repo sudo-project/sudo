@@ -502,7 +502,7 @@ interpose_pipes(struct exec_closure *ec, int io_pipe[3][2])
 	    if (pipe2(io_pipe[STDIN_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
-		log_stdin, read_callback, write_callback, ec, &iobufs);
+		log_stdin, read_callback, write_callback, ec);
 	}
     }
     if (interpose[STDOUT_FILENO]) {
@@ -512,7 +512,7 @@ interpose_pipes(struct exec_closure *ec, int io_pipe[3][2])
 	    if (pipe2(io_pipe[STDOUT_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
-		log_stdout, read_callback, write_callback, ec, &iobufs);
+		log_stdout, read_callback, write_callback, ec);
 	}
     }
     if (interpose[STDERR_FILENO]) {
@@ -522,7 +522,7 @@ interpose_pipes(struct exec_closure *ec, int io_pipe[3][2])
 	    if (pipe2(io_pipe[STDERR_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
-		log_stderr, read_callback, write_callback, ec, &iobufs);
+		log_stderr, read_callback, write_callback, ec);
 	}
     }
     if (want_winch) {

@@ -195,14 +195,13 @@ bool log_stdout(const char *buf, unsigned int n, struct io_buffer *iob);
 bool log_stderr(const char *buf, unsigned int n, struct io_buffer *iob);
 void log_suspend(void *v, int signo);
 void log_winchange(struct exec_closure *ec, unsigned int rows, unsigned int cols);
-void io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int, struct io_buffer *), void (*read_cb)(int fd, int what, void *v), void (*write_cb)(int fd, int what, void *v), struct exec_closure *ec, struct io_buffer_list *head);
+void io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int, struct io_buffer *), void (*read_cb)(int fd, int what, void *v), void (*write_cb)(int fd, int what, void *v), struct exec_closure *ec);
 int safe_close(int fd);
 void ev_free_by_fd(struct sudo_event_base *evbase, int fd);
 void free_io_bufs(void);
 void add_io_events(struct exec_closure *ec);
 void del_io_events(bool nonblocking);
 void init_ttyblock(void);
-extern struct io_buffer_list iobufs;
 
 /* exec_nopty.c */
 void exec_nopty(struct command_details *details, struct command_status *cstat);
