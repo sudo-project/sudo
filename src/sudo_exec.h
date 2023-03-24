@@ -42,10 +42,6 @@
 # define USER_SIGNALED(_info) ((_info) != NULL && (_info)->si_code <= 0)
 #endif
 
-/* Values for ttymode. */
-#define TERM_COOKED     0
-#define TERM_RAW        1
-
 struct command_details;
 struct command_status;
 struct sudo_event_base;
@@ -207,7 +203,6 @@ void add_io_events(struct exec_closure *ec);
 void del_io_events(bool nonblocking);
 void init_ttyblock(void);
 extern struct io_buffer_list iobufs;
-extern int ttymode;
 
 /* exec_nopty.c */
 void exec_nopty(struct command_details *details, struct command_status *cstat);
