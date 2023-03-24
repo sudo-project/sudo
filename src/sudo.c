@@ -79,7 +79,6 @@ struct plugin_container_list approval_plugins = TAILQ_HEAD_INITIALIZER(approval_
 struct user_details user_details;
 const char *list_user; /* extern for parse_args.c */
 int sudo_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
-static struct command_details command_details;
 static int sudo_mode;
 static struct sudo_event_base *sudo_event_base;
 
@@ -108,7 +107,7 @@ static void gc_init(void);
 
 /* Policy plugin convenience functions. */
 static void policy_open(void);
-static void policy_close(int exit_status, int error);
+static void policy_close(const char *cmnd, int exit_status, int error);
 static int policy_show_version(int verbose);
 static bool policy_check(int argc, char * const argv[], char *env_add[],
     char **command_info[], char **run_argv[], char **run_envp[]);
@@ -143,6 +142,7 @@ static int submit_optind;
 int
 main(int argc, char *argv[], char *envp[])
 {
+    struct command_details command_details;
     int nargc, status = 0;
     char **nargv, **env_add;
     char **command_info = NULL, **argv_out = NULL, **run_envp = NULL;
@@ -332,7 +332,7 @@ main(int argc, char *argv[], char *envp[])
 access_denied:
     /* Policy/approval failure, close policy and audit plugins before exit. */
     if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15))
-	policy_close(0, EACCES);
+	policy_close(NULL, 0, EACCES);
     audit_close(SUDO_PLUGIN_NO_STATUS, 0);
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys,
 	EXIT_FAILURE);
@@ -1045,14 +1045,14 @@ run_command(struct command_details *details)
     case CMD_ERRNO:
 	/* exec_setup() or execve() returned an error. */
 	iolog_close(0, cstat.val);
-	policy_close(0, cstat.val);
+	policy_close(details->command, 0, cstat.val);
 	audit_close(SUDO_PLUGIN_EXEC_ERROR, cstat.val);
 	break;
     case CMD_WSTATUS:
 	/* Command ran, exited or was killed. */
 	status = cstat.val;
 	iolog_close(status, 0);
-	policy_close(status, 0);
+	policy_close(details->command, status, 0);
 	audit_close(SUDO_PLUGIN_WAIT_STATUS, cstat.val);
 	break;
     default:
@@ -1178,7 +1178,7 @@ policy_open(void)
 }
 
 static void
-policy_close(int exit_status, int error_code)
+policy_close(const char *cmnd, int exit_status, int error_code)
 {
     debug_decl(policy_close, SUDO_DEBUG_PCOMM);
 
@@ -1196,9 +1196,9 @@ policy_close(int exit_status, int error_code)
 	policy_plugin.u.policy->close(exit_status, error_code);
 	sudo_debug_set_active_instance(sudo_debug_instance);
     } else if (error_code != 0) {
-	if (command_details.command != NULL) {
+	if (cmnd != NULL) {
 	    errno = error_code;
-	    sudo_warn(U_("unable to execute %s"), command_details.command);
+	    sudo_warn(U_("unable to execute %s"), cmnd);
 	}
     }
 
@@ -1304,7 +1304,7 @@ policy_list(int argc, char * const argv[], int verbose, const char *user)
 
     /* Policy must be closed after auditing to avoid use after free. */
     if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15))
-	policy_close(0, 0);
+	policy_close(NULL, 0, 0);
     audit_close(SUDO_PLUGIN_NO_STATUS, 0);
 
     exit(ok != 1);
@@ -1348,7 +1348,7 @@ policy_validate(char * const argv[])
 
     /* Policy must be closed after auditing to avoid use after free. */
     if (policy_plugin.u.policy->version >= SUDO_API_MKVERSION(1, 15))
-	policy_close(0, 0);
+	policy_close(NULL, 0, 0);
     audit_close(SUDO_PLUGIN_NO_STATUS, 0);
 
     exit(ok != 1);
