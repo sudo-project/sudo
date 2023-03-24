@@ -36,8 +36,6 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
-int ttymode = TERM_COOKED;
-
 struct io_buffer_list iobufs = SLIST_HEAD_INITIALIZER(&iobufs);
 
 int io_fds[6] = { -1, -1, -1, -1, -1, -1 };
@@ -144,7 +142,7 @@ io_buf_new(int rfd, int wfd,
  * resuming from suspend.
  */
 void
-add_io_events(struct sudo_event_base *evbase)
+add_io_events(struct exec_closure *ec)
 {
     struct io_buffer *iob;
     debug_decl(add_io_events, SUDO_DEBUG_EXEC);
@@ -157,12 +155,12 @@ add_io_events(struct sudo_event_base *evbase)
     SLIST_FOREACH(iob, &iobufs, entries) {
 	/* Don't read from /dev/tty if we are not in the foreground. */
 	if (iob->revent != NULL &&
-	    (ttymode == TERM_RAW || !USERTTY_EVENT(iob->revent))) {
+	    (ec->term_raw || !USERTTY_EVENT(iob->revent))) {
 	    if (iob->len != sizeof(iob->buf)) {
 		sudo_debug_printf(SUDO_DEBUG_INFO,
 		    "added I/O revent %p, fd %d, events %d",
 		    iob->revent, iob->revent->fd, iob->revent->events);
-		if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
+		if (sudo_ev_add(ec->evbase, iob->revent, NULL, false) == -1)
 		    sudo_fatal("%s", U_("unable to add event to queue"));
 	    }
 	}
@@ -172,7 +170,7 @@ add_io_events(struct sudo_event_base *evbase)
 		sudo_debug_printf(SUDO_DEBUG_INFO,
 		    "added I/O wevent %p, fd %d, events %d",
 		    iob->wevent, iob->wevent->fd, iob->wevent->events);
-		if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
+		if (sudo_ev_add(ec->evbase, iob->wevent, NULL, false) == -1)
 		    sudo_fatal("%s", U_("unable to add event to queue"));
 	    }
 	}

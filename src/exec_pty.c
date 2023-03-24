@@ -65,24 +65,6 @@ static void sync_ttysize(struct exec_closure *ec);
 static void schedule_signal(struct exec_closure *ec, int signo);
 
 /*
- * Cleanup hook for sudo_fatal()/sudo_fatalx()
- */
-static void
-pty_cleanup(void)
-{
-    debug_decl(cleanup, SUDO_DEBUG_EXEC);
-
-    if (ttymode != TERM_COOKED) {
-	if (!sudo_term_restore(io_fds[SFD_USERTTY], false))
-	    sudo_warn("%s", U_("unable to restore terminal settings"));
-    }
-    if (utmp_user != NULL)
-	utmp_logout(ptyname, 0);
-
-    debug_return;
-}
-
-/*
  * Allocate a pty if /dev/tty is a tty.
  * Fills in io_fds[SFD_USERTTY], io_fds[SFD_LEADER], io_fds[SFD_FOLLOWER]
  * and ptyname globals.
@@ -119,6 +101,68 @@ pty_setup(struct command_details *details, const char *tty)
 	io_fds[SFD_FOLLOWER]);
 
     debug_return_bool(true);
+}
+
+/*
+ * Restore user's terminal settings and update utmp, as needed.
+ */
+static void
+pty_cleanup_int(struct exec_closure *ec, int wstatus, bool init_only)
+{
+    static struct exec_closure *saved_ec;
+    debug_decl(pty_cleanup, SUDO_DEBUG_EXEC);
+
+    /* If initializing, just store a pointer to the closure and return. */
+    if (init_only) {
+	saved_ec = ec;
+	debug_return;
+    }
+
+    /* Use the stored closure if one is not specified. */
+    if (ec == NULL) {
+	if (saved_ec == NULL)
+	    debug_return;
+	ec = saved_ec;
+    }
+
+    /* Restore terminal settings. */
+    if (ec->term_raw) {
+	/* Only restore the terminal if sudo is the foreground process. */
+	const pid_t tcpgrp = tcgetpgrp(io_fds[SFD_USERTTY]);
+	if (tcpgrp == ec->ppgrp) {
+	    if (sudo_term_restore(io_fds[SFD_USERTTY], false))
+		ec->term_raw = false;
+	    else
+		sudo_warn("%s", U_("unable to restore terminal settings"));
+	}
+    }
+
+    /* Update utmp */
+    if (utmp_user != NULL)
+	utmp_logout(ptyname, wstatus);
+
+    debug_return;
+}
+
+static inline void
+pty_cleanup(struct exec_closure *ec, int wstatus)
+{
+    pty_cleanup_int(ec, wstatus, false);
+}
+
+static inline void
+pty_cleanup_init(struct exec_closure *ec)
+{
+    pty_cleanup_int(ec, 0, true);
+}
+
+/*
+ * Cleanup hook for sudo_fatal()/sudo_fatalx()
+ */
+static void
+pty_cleanup_hook(void)
+{
+    pty_cleanup_int(NULL, 0, false);
 }
 
 /*
@@ -184,17 +228,18 @@ resume_terminal(struct exec_closure *ec)
     }
     sync_ttysize(ec);
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "parent is in %s, ttymode %d -> %d",
-	ec->foreground ? "foreground" : "background", ttymode,
-	ec->foreground ? TERM_RAW : TERM_COOKED);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "parent is in %s (%s -> %s)",
+	ec->foreground ? "foreground" : "background",
+	ec->term_raw ? "raw" : "cooked",
+	ec->foreground ? "raw" : "cooked");
 
     if (ec->foreground) {
 	/* Foreground process, set tty to raw mode. */
 	if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
-	    ttymode = TERM_RAW;
+	    ec->term_raw = true;
     } else {
 	/* Background process, no access to tty. */
-	ttymode = TERM_COOKED;
+	ec->term_raw = false;
     }
 
     debug_return_bool(true);
@@ -244,9 +289,9 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"%s: command received SIG%s, parent running in the foregound",
 		__func__, signame);
-	    if (ttymode != TERM_RAW) {
+	    if (!ec->term_raw) {
 		if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
-		    ttymode = TERM_RAW;
+		    ec->term_raw = true;
 	    }
 	    ret = SIGCONT_FG; /* resume command in foreground */
 	    break;
@@ -259,8 +304,10 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 	del_io_events(true);
 
 	/* Restore original tty mode before suspending. */
-	if (ttymode != TERM_COOKED) {
-	    if (!sudo_term_restore(io_fds[SFD_USERTTY], false))
+	if (ec->term_raw) {
+	    if (sudo_term_restore(io_fds[SFD_USERTTY], false))
+		ec->term_raw = false;
+	    else
 		sudo_warn("%s", U_("unable to restore terminal settings"));
 	}
 
@@ -317,7 +364,7 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 	 * command will be runnable.  Otherwise, we can get into a
 	 * situation where the command will immediately suspend itself.
 	 */
-	ret = ttymode == TERM_RAW ? SIGCONT_FG : SIGCONT_BG;
+	ret = ec->term_raw ? SIGCONT_FG : SIGCONT_BG;
 	break;
     }
 
@@ -512,7 +559,7 @@ write_callback(int fd, int what, void *v)
 	 */
 	if (iob->revent != NULL && iob->len != sizeof(iob->buf)) {
 	    if (!USERTTY_EVENT(iob->revent) ||
-		    (ttymode == TERM_RAW && iob->ec->cmnd_pid != -1)) {
+		    (iob->ec->term_raw && iob->ec->cmnd_pid != -1)) {
 		if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
 		    sudo_fatal("%s", U_("unable to add event to queue"));
 	    }
@@ -542,19 +589,8 @@ pty_finish(struct exec_closure *ec, struct command_status *cstat)
     del_io_events(false);
     free_io_bufs();
 
-    /* Restore terminal settings. */
-    if (ttymode != TERM_COOKED) {
-	/* Only restore the terminal if sudo is the foreground process. */
-	const pid_t tcpgrp = tcgetpgrp(io_fds[SFD_USERTTY]);
-	if (tcpgrp == ec->ppgrp) {
-	    if (!sudo_term_restore(io_fds[SFD_USERTTY], false))
-		sudo_warn("%s", U_("unable to restore terminal settings"));
-	}
-    }
-
-    /* Update utmp */
-    if (utmp_user != NULL)
-	utmp_logout(ptyname, cstat->type == CMD_WSTATUS ? cstat->val : 0);
+    /* Restore terminal settings and update utmp. */
+    pty_cleanup(ec, cstat->type == CMD_WSTATUS ? cstat->val : 0);
 
     debug_return;
 }
@@ -703,7 +739,7 @@ backchannel_cb(int fd, int what, void *v)
 		signo = suspend_sudo_pty(ec, WSTOPSIG(cstat.val));
 		schedule_signal(ec, signo);
 		/* Re-enable I/O events */
-		add_io_events(ec->evbase);
+		add_io_events(ec);
 	    } else {
 		/* Command exited or was killed, either way we are done. */
 		sudo_debug_printf(SUDO_DEBUG_INFO, "command exited or was killed");
@@ -798,7 +834,7 @@ handle_sigchld_pty(struct exec_closure *ec)
 	    kill(pid, SIGCONT);
 	    schedule_signal(ec, n);
 	    /* Re-enable I/O events */
-	    add_io_events(ec->evbase);
+	    add_io_events(ec);
 	} else {
 	    sudo_debug_printf(SUDO_DEBUG_WARN,
 		"%s: unexpected wait status 0x%x for process (%d)",
@@ -1076,7 +1112,8 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	debug_return_bool(false);
 
     /* Register cleanup function */
-    sudo_fatal_callback_register(pty_cleanup);
+    pty_cleanup_init(&ec);
+    sudo_fatal_callback_register(pty_cleanup_hook);
 
     /*
      * We communicate with the monitor over a bi-directional pair of sockets.
@@ -1253,7 +1290,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     if (ec.foreground) {
 	if (!pipeline && !ISSET(details->flags, CD_EXEC_BG)) {
 	    if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
-		ttymode = TERM_RAW;
+		ec.term_raw = true;
 	}
     }
 
@@ -1289,7 +1326,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	    close(io_pipe[STDERR_FILENO][0]);
 
 	/* Only run the cleanup hook in the parent. */
-	sudo_fatal_callback_deregister(pty_cleanup);
+	sudo_fatal_callback_deregister(pty_cleanup_hook);
 
 	/*                      
 	 * If stdin/stdout is not a tty, start command in the background
@@ -1372,7 +1409,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
      * and pass output from leader to stdout and IO plugin.
      * Try to recover on ENXIO, it means the tty was revoked.
      */
-    add_io_events(ec.evbase);
+    add_io_events(&ec);
     do {
 	if (sudo_ev_dispatch(ec.evbase) == -1)
 	    sudo_warn("%s", U_("error in event loop"));

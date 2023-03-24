@@ -81,6 +81,7 @@ struct exec_closure {
     short rows;
     short cols;
     bool foreground;
+    bool term_raw;
 };
 
 /*
@@ -201,7 +202,7 @@ void io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int, str
 int safe_close(int fd);
 void ev_free_by_fd(struct sudo_event_base *evbase, int fd);
 void free_io_bufs(void);
-void add_io_events(struct sudo_event_base *evbase);
+void add_io_events(struct exec_closure *ec);
 void del_io_events(bool nonblocking);
 void init_ttyblock(void);
 extern struct io_buffer_list iobufs;
