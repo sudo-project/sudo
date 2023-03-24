@@ -67,7 +67,7 @@ static void schedule_signal(struct exec_closure *ec, int signo);
 /*
  * Cleanup hook for sudo_fatal()/sudo_fatalx()
  */
-void
+static void
 pty_cleanup(void)
 {
     debug_decl(cleanup, SUDO_DEBUG_EXEC);
@@ -1075,6 +1075,9 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     if (!pty_setup(details, user_details.tty))
 	debug_return_bool(false);
 
+    /* Register cleanup function */
+    sudo_fatal_callback_register(pty_cleanup);
+
     /*
      * We communicate with the monitor over a bi-directional pair of sockets.
      * Parent sends signal info to monitor and monitor sends back wait status.
@@ -1284,6 +1287,10 @@ exec_pty(struct command_details *details, struct command_status *cstat)
 	    close(io_pipe[STDOUT_FILENO][0]);
 	if (io_pipe[STDERR_FILENO][0] != -1)
 	    close(io_pipe[STDERR_FILENO][0]);
+
+	/* Only run the cleanup hook in the parent. */
+	sudo_fatal_callback_deregister(pty_cleanup);
+
 	/*                      
 	 * If stdin/stdout is not a tty, start command in the background
 	 * since it might be part of a pipeline that reads from /dev/tty.
