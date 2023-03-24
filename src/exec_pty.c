@@ -59,7 +59,6 @@ static struct monitor_message_list monitor_messages =
 
 /* Globals for the pty_cleanup() hook. */
 static char ptyname[PATH_MAX];
-static const char *utmp_user;
 
 static void sync_ttysize(struct exec_closure *ec);
 static void schedule_signal(struct exec_closure *ec, int signo);
@@ -89,11 +88,8 @@ pty_setup(struct command_details *details, const char *tty)
     details->tty = ptyname;
 
     /* Add entry to utmp/utmpx? */
-    if (ISSET(details->flags, CD_SET_UTMP)) {
-	utmp_user =
-	    details->utmp_user ? details->utmp_user : user_details.username;
-	utmp_login(tty, ptyname, io_fds[SFD_FOLLOWER], utmp_user);
-    }
+    if (ISSET(details->flags, CD_SET_UTMP))
+	utmp_login(tty, ptyname, io_fds[SFD_FOLLOWER], details->utmp_user);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: %s fd %d, pty leader fd %d, pty follower fd %d",
@@ -138,7 +134,7 @@ pty_cleanup_int(struct exec_closure *ec, int wstatus, bool init_only)
     }
 
     /* Update utmp */
-    if (utmp_user != NULL)
+    if (ISSET(ec->details->flags, CD_SET_UTMP) && ptyname[0] != '\0')
 	utmp_logout(ptyname, wstatus);
 
     debug_return;

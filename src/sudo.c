@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -869,6 +869,8 @@ command_info_to_details(char * const info[], struct command_details *details)
 		break;
 	}
     }
+    if (details->utmp_user == NULL)
+	details->utmp_user = user_details.username;
 
     /* Only use ptrace(2) for intercept/log_subcmds if supported. */
     exec_ptrace_fix_flags(details);
