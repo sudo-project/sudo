@@ -79,7 +79,6 @@ struct plugin_container_list approval_plugins = TAILQ_HEAD_INITIALIZER(approval_
 struct user_details user_details;
 const char *list_user; /* extern for parse_args.c */
 int sudo_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
-static int sudo_mode;
 static struct sudo_event_base *sudo_event_base;
 
 struct sudo_gc_entry {
@@ -143,7 +142,7 @@ int
 main(int argc, char *argv[], char *envp[])
 {
     struct command_details command_details;
-    int nargc, status = 0;
+    int nargc, sudo_mode, status = 0;
     char **nargv, **env_add;
     char **command_info = NULL, **argv_out = NULL, **run_envp = NULL;
     const char * const allowed_prognames[] = { "sudo", "sudoedit", NULL };
