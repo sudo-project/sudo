@@ -711,7 +711,7 @@ usage_out(const char *buf)
  * The actual usage strings are in sudo_usage.h for configure substitution.
  */
 static void
-display_usage(int (*output)(const char *))
+display_usage(int (*output)(const char *), int cols)
 {
     struct sudo_lbuf lbuf;
     const char *uvec[6];
@@ -738,8 +738,7 @@ display_usage(int (*output)(const char *))
      * tty width.
      */
     ulen = (int)strlen(getprogname()) + 8;
-    sudo_lbuf_init(&lbuf, output, ulen, NULL,
-	user_details.ts_cols);
+    sudo_lbuf_init(&lbuf, output, ulen, NULL, cols);
     for (i = 0; uvec[i] != NULL; i++) {
 	sudo_lbuf_append(&lbuf, "usage: %s%s", getprogname(), uvec[i]);
 	sudo_lbuf_print(&lbuf);
@@ -753,7 +752,10 @@ display_usage(int (*output)(const char *))
 void
 usage(void)
 {
-    display_usage(usage_err);
+    int rows, cols;
+
+    sudo_get_ttysize(&rows, &cols);
+    display_usage(usage_err, cols);
     exit(EXIT_FAILURE);
 }
 
@@ -790,9 +792,11 @@ help(void)
     const int indent = 32;
     const char *pname = getprogname();
     bool sudoedit = false;
+    int rows, cols;
     debug_decl(help, SUDO_DEBUG_ARGS);
 
-    sudo_lbuf_init(&lbuf, usage_out, indent, NULL, user_details.ts_cols);
+    sudo_get_ttysize(&rows, &cols);
+    sudo_lbuf_init(&lbuf, usage_out, indent, NULL, cols);
     if (strcmp(pname, "sudoedit") == 0) {
 	sudoedit = true;
 	sudo_lbuf_append(&lbuf, _("%s - edit files as another user\n\n"), pname);
@@ -801,7 +805,7 @@ help(void)
     }
     sudo_lbuf_print(&lbuf);
 
-    display_usage(usage_out);
+    display_usage(usage_out, cols);
 
     sudo_lbuf_append(&lbuf, "%s", _("\nOptions:\n"));
     sudo_lbuf_append(&lbuf, "  -A, --askpass                 %s\n",
