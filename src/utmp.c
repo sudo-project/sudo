@@ -158,15 +158,10 @@ utmp_fill(const char *line, const char *user, sudo_utmp_t *ut_old,
 
     if (ut_old == NULL) {
 	memset(ut_new, 0, sizeof(*ut_new));
-	if (user == NULL) {
-	    strncpy(ut_new->ut_user, user_details.username,
-		sizeof(ut_new->ut_user));
-	}
     } else if (ut_old != ut_new) {
 	memcpy(ut_new, ut_old, sizeof(*ut_new));
     }
-    if (user != NULL)
-	strncpy(ut_new->ut_user, user, sizeof(ut_new->ut_user));
+    strncpy(ut_new->ut_user, user, sizeof(ut_new->ut_user));
     strncpy(ut_new->ut_line, line, sizeof(ut_new->ut_line));
 #if defined(HAVE_STRUCT_UTMP_UT_ID)
     utmp_setid(ut_old, ut_new);
