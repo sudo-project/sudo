@@ -200,7 +200,8 @@ struct command_details {
     struct passwd *pw;
     const char *command;
     const char *runas_user;
-    const char *cwd;
+    const char *runcwd;
+    const char *submitcwd;
     const char *login_class;
     const char *chroot;
     const char *selinux_role;

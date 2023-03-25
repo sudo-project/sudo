@@ -696,7 +696,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 	    case 'c':
 		SET_STRING("chroot=", chroot)
 		SET_STRING("command=", command)
-		SET_STRING("cwd=", cwd)
+		SET_STRING("cwd=", runcwd)
 		SET_FLAG("cwd_optional=", CD_CWD_OPTIONAL)
 		if (strncmp("closefrom=", info[i], sizeof("closefrom=") - 1) == 0) {
 		    cp = info[i] + sizeof("closefrom=") - 1;
@@ -870,6 +870,7 @@ command_info_to_details(char * const info[], struct command_details *details)
     }
     if (details->utmp_user == NULL)
 	details->utmp_user = user_details.username;
+    details->submitcwd = user_details.cwd;
 
     /* Only use ptrace(2) for intercept/log_subcmds if supported. */
     exec_ptrace_fix_flags(details);
