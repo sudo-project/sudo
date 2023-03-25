@@ -38,8 +38,6 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
-extern int tgetpass_flags; /* XXX */
-
 /*
  * Sudo conversation function.
  */
@@ -94,7 +92,7 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		    bool raw_tty = false;
 
 		    if (ISSET(msg->msg_type, SUDO_CONV_PREFER_TTY) &&
-			    !ISSET(tgetpass_flags, TGP_STDIN)) {
+			    !ISSET(flags, TGP_STDIN)) {
 			ttyfd = open(_PATH_TTY, O_WRONLY);
 			raw_tty = sudo_term_is_raw(ttyfd);
 		    } else {
