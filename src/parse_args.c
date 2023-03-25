@@ -227,11 +227,12 @@ parse_env_list(struct environment *e, char *list)
  */
 int
 parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
-    struct sudo_settings **settingsp, char ***env_addp)
+    struct sudo_settings **settingsp, char ***env_addp, const char **list_userp)
 {
     const char *progname, *short_opts = sudo_short_opts;
     struct option *long_opts = sudo_long_opts;
     struct environment extra_env;
+    const char *list_user = NULL;
     int mode = 0;		/* what mode is sudo to be run in? */
     int flags = 0;		/* mode flags */
     int valid_flags = DEFAULT_VALID_FLAGS;
@@ -689,6 +690,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
     *env_addp = extra_env.envp;
     *nargc = argc;
     *nargv = argv;
+    *list_userp = list_user;
     debug_return_int(mode | flags);
 }
 

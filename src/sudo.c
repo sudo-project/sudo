@@ -77,7 +77,6 @@ struct plugin_container_list io_plugins = TAILQ_HEAD_INITIALIZER(io_plugins);
 struct plugin_container_list audit_plugins = TAILQ_HEAD_INITIALIZER(audit_plugins);
 struct plugin_container_list approval_plugins = TAILQ_HEAD_INITIALIZER(approval_plugins);
 struct user_details user_details;
-const char *list_user; /* extern for parse_args.c */
 int sudo_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 static struct sudo_event_base *sudo_event_base;
 
@@ -146,6 +145,7 @@ main(int argc, char *argv[], char *envp[])
     char **nargv, **env_add;
     char **command_info = NULL, **argv_out = NULL, **run_envp = NULL;
     const char * const allowed_prognames[] = { "sudo", "sudoedit", NULL };
+    const char *list_user;
     sigset_t mask;
     debug_decl_vars(main, SUDO_DEBUG_MAIN);
 
@@ -207,7 +207,7 @@ main(int argc, char *argv[], char *envp[])
     submit_argv = argv;
     submit_envp = envp;
     sudo_mode = parse_args(argc, argv, &submit_optind, &nargc, &nargv,
-	&sudo_settings, &env_add);
+	&sudo_settings, &env_add, &list_user);
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "sudo_mode 0x%x", sudo_mode);
 
     /* Print sudo version early, in case of plugin init failure. */

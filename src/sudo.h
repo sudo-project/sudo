@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996, 1998-2005, 2007-2022
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -248,7 +248,8 @@ int sudo_execute(struct command_details *details, struct command_status *cstat);
 
 /* parse_args.c */
 int parse_args(int argc, char **argv, int *old_optind, int *nargc,
-    char ***nargv, struct sudo_settings **settingsp, char ***env_addp);
+    char ***nargv, struct sudo_settings **settingsp, char ***env_addp,
+    const char **list_user);
 extern int tgetpass_flags;
 
 /* get_pty.c */
@@ -270,7 +271,6 @@ bool audit_error(const char *plugin_name, unsigned int plugin_type,
     const char *audit_msg, char * const command_info[]);
 bool approval_check(char * const command_info[], char * const run_argv[],
     char * const run_envp[]);
-extern const char *list_user;
 extern struct user_details user_details;
 extern int sudo_debug_instance;
 
