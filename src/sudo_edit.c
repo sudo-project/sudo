@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2008, 2010-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004-2008, 2010-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -627,9 +627,10 @@ done:
  * of 1 on failure.
  */
 int
-sudo_edit(struct command_details *command_details, struct sudo_cred *user_cred)
+sudo_edit(struct command_details *command_details, struct user_details *user_details)
 {
     struct command_details saved_command_details;
+    struct sudo_cred *user_cred = &user_details->cred;
     char **nargv = NULL, **files = NULL;
     int nfiles = command_details->nfiles;
     int errors, i, ac, nargc, ret;
@@ -736,7 +737,7 @@ sudo_edit(struct command_details *command_details, struct sudo_cred *user_cred)
     command_details->cred.egid = user_cred->gid;
     command_details->argc = nargc;
     command_details->argv = nargv;
-    ret = run_command(command_details);
+    ret = run_command(command_details, user_details);
     if (sudo_gettime_real(&times[1]) == -1) {
 	sudo_warn("%s", U_("unable to read the clock"));
 	goto cleanup;

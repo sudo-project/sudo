@@ -243,6 +243,7 @@ void cleanup(int);
 /* tgetpass.c */
 char *tgetpass(const char *prompt, int timeout, int flags,
     struct sudo_conv_callback *callback);
+struct sudo_cred *sudo_askpass_cred(struct sudo_cred *cred);
 
 /* exec.c */
 int sudo_execute(struct command_details *details, struct user_details *ud, struct command_status *cstat);
@@ -258,7 +259,7 @@ char *get_pty(int *leader, int *follower, uid_t uid);
 
 /* sudo.c */
 int policy_init_session(struct command_details *details);
-int run_command(struct command_details *details);
+int run_command(struct command_details *command_details, struct user_details *user_details);
 int os_init_common(int argc, char *argv[], char *envp[]);
 bool gc_add(enum sudo_gc_types type, void *v);
 bool set_user_groups(struct command_details *details);
@@ -272,11 +273,10 @@ bool audit_error(const char *plugin_name, unsigned int plugin_type,
     const char *audit_msg, char * const command_info[]);
 bool approval_check(char * const command_info[], char * const run_argv[],
     char * const run_envp[]);
-struct sudo_cred *sudo_get_user_cred(void);
 extern int sudo_debug_instance;
 
 /* sudo_edit.c */
-int sudo_edit(struct command_details *command_details, struct sudo_cred *user_cred);
+int sudo_edit(struct command_details *command_details, struct user_details *user_details);
 
 /* parse_args.c */
 sudo_noreturn void usage(void);
