@@ -60,7 +60,7 @@ static char edit_tmpdir[MAX(sizeof(_PATH_VARTMP), sizeof(_PATH_TMP))];
  * Returns true on success, else false;
  */
 static bool
-set_tmpdir(struct sudo_cred *user_cred)
+set_tmpdir(const struct sudo_cred *user_cred)
 {
     const char *tdir = NULL;
     const char *tmpdirs[] = {
@@ -162,8 +162,8 @@ sudo_edit_mktemp(const char *ofile, char **tfile)
  * or -1 if a fatal error occurred.
  */
 static int
-sudo_edit_create_tfiles(struct command_details *command_details,
-    struct sudo_cred *user_cred, struct tempfile *tf, char *files[],
+sudo_edit_create_tfiles(const struct command_details *command_details,
+    const struct sudo_cred *user_cred, struct tempfile *tf, char *files[],
     int nfiles)
 {
     int i, j, tfd, ofd, rc;
@@ -266,8 +266,8 @@ sudo_edit_create_tfiles(struct command_details *command_details,
  * Returns the number of copy errors or 0 if completely successful.
  */
 static int
-sudo_edit_copy_tfiles(struct command_details *command_details,
-    struct sudo_cred *user_cred, struct tempfile *tf,
+sudo_edit_copy_tfiles(const struct command_details *command_details,
+    const struct sudo_cred *user_cred, struct tempfile *tf,
     int nfiles, struct timespec *times)
 {
     int i, tfd, ofd, errors = 0;
@@ -380,7 +380,7 @@ selinux_run_helper(uid_t uid, gid_t gid, int ngroups, GETGROUPS_T *groups,
 }
 
 static char *
-selinux_fmt_sudo_user(struct sudo_cred *user_cred)
+selinux_fmt_sudo_user(const struct sudo_cred *user_cred)
 {
     char *cp, *user_str;
     size_t user_size;
@@ -411,8 +411,8 @@ selinux_fmt_sudo_user(struct sudo_cred *user_cred)
 }
 
 static int
-selinux_edit_create_tfiles(struct command_details *command_details,
-    struct sudo_cred *user_cred, struct tempfile *tf,
+selinux_edit_create_tfiles(const struct command_details *command_details,
+    const struct sudo_cred *user_cred, struct tempfile *tf,
     char *files[], int nfiles)
 {
     const char **sesh_args, **sesh_ap;
@@ -518,8 +518,8 @@ done:
 }
 
 static int
-selinux_edit_copy_tfiles(struct command_details *command_details,
-    struct sudo_cred *user_cred, struct tempfile *tf,
+selinux_edit_copy_tfiles(const struct command_details *command_details,
+    const struct sudo_cred *user_cred, struct tempfile *tf,
     int nfiles, struct timespec *times)
 {
     const char **sesh_args, **sesh_ap;
@@ -627,10 +627,11 @@ done:
  * of 1 on failure.
  */
 int
-sudo_edit(struct command_details *command_details, struct user_details *user_details)
+sudo_edit(struct command_details *command_details,
+    const struct user_details *user_details)
 {
     struct command_details saved_command_details;
-    struct sudo_cred *user_cred = &user_details->cred;
+    const struct sudo_cred *user_cred = &user_details->cred;
     char **nargv = NULL, **files = NULL;
     int nfiles = command_details->nfiles;
     int errors, i, ac, nargc, ret;
@@ -786,7 +787,7 @@ cleanup:
  * Must have the ability to change the effective uid to use sudoedit.
  */
 int
-sudo_edit(struct command_details *command_details, struct sudo_cred *user_cred)
+sudo_edit(const struct command_details *command_details, const struct sudo_cred *user_cred)
 {
     debug_decl(sudo_edit, SUDO_DEBUG_EDIT);
     debug_return_int(W_EXITCODE(1, 0));

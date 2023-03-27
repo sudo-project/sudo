@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -361,7 +361,7 @@ sudo_terminated(struct command_status *cstat)
 }
 
 static bool
-sudo_needs_pty(struct command_details *details)
+sudo_needs_pty(const struct command_details *details)
 {
     struct plugin_container *plugin;
 
@@ -382,7 +382,7 @@ sudo_needs_pty(struct command_details *details)
  * sudo can exec the command directly (and not wait).
  */
 static bool
-direct_exec_allowed(struct command_details *details)
+direct_exec_allowed(const struct command_details *details)
 {
     struct plugin_container *plugin;
     debug_decl(direct_exec_allowed, SUDO_DEBUG_EXEC);
@@ -407,8 +407,9 @@ direct_exec_allowed(struct command_details *details)
  * we fact that we have two different controlling terminals to deal with.
  */
 int
-sudo_execute(struct command_details *details, struct user_details *user_details,
-    struct command_status *cstat)
+sudo_execute(struct command_details *details,
+    const struct user_details *user_details,
+    struct sudo_event_base *evbase, struct command_status *cstat)
 {
     debug_decl(sudo_execute, SUDO_DEBUG_EXEC);
 
@@ -462,7 +463,7 @@ sudo_execute(struct command_details *details, struct user_details *user_details,
      * is configured, this returns false and we run the command without a pty.
      */
     if (sudo_needs_pty(details)) {
-	if (exec_pty(details, user_details, cstat))
+	if (exec_pty(details, user_details, evbase, cstat))
 	    goto done;
     }
 
@@ -482,7 +483,7 @@ sudo_execute(struct command_details *details, struct user_details *user_details,
     /*
      * Run the command in the existing tty (if any) and wait for it to finish.
      */
-    exec_nopty(details, user_details, cstat);
+    exec_nopty(details, user_details, evbase, cstat);
 
 done:
     /* The caller will run any plugin close functions. */

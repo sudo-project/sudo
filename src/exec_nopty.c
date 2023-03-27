@@ -208,8 +208,8 @@ signal_cb_nopty(int signo, int what, void *v)
  */
 static void
 fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
-    struct command_details *details, struct user_details *user_details,
-    int errfd)
+    struct command_details *details, const struct user_details *user_details,
+    struct sudo_event_base *evbase, int errfd)
 {
     debug_decl(fill_exec_closure, SUDO_DEBUG_EXEC);
 
@@ -222,8 +222,7 @@ fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
     ec->cols = user_details->ts_cols;
 
     /* Setup event base and events. */
-    ec->evbase = details->evbase;
-    details->evbase = NULL;
+    ec->evbase = evbase;
 
     /* Event for command status via errfd. */
     ec->backchannel_event = sudo_ev_alloc(errfd,
@@ -536,8 +535,9 @@ interpose_pipes(struct exec_closure *ec, int io_pipe[3][2])
  * Execute a command and wait for it to finish.
  */
 void
-exec_nopty(struct command_details *details, struct user_details *user_details,
-    struct command_status *cstat)
+exec_nopty(struct command_details *details,
+    const struct user_details *user_details,
+    struct sudo_event_base *evbase, struct command_status *cstat)
 {
     int io_pipe[3][2] = { { -1, -1 }, { -1, -1 }, { -1, -1 } };
     int errpipe[2], intercept_sv[2] = { -1, -1 };
@@ -660,7 +660,7 @@ exec_nopty(struct command_details *details, struct user_details *user_details,
      * Fill in exec closure, allocate event base, signal events and
      * the error pipe event.
      */
-    fill_exec_closure(&ec, cstat, details, user_details, errpipe[0]);
+    fill_exec_closure(&ec, cstat, details, user_details, evbase, errpipe[0]);
 
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
 	int rc = 1;

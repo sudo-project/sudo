@@ -935,8 +935,8 @@ fwdchannel_cb(int sock, int what, void *v)
  */
 static void
 fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
-    struct command_details *details, struct user_details *user_details,
-    pid_t sudo_pid, pid_t ppgrp, int backchannel)
+    struct command_details *details, const struct user_details *user_details,
+    struct sudo_event_base *evbase, pid_t sudo_pid, pid_t ppgrp, int backchannel)
 {
     debug_decl(fill_exec_closure, SUDO_DEBUG_EXEC);
 
@@ -954,8 +954,7 @@ fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
     cstat->val = 0;
 
     /* Setup event base and events. */
-    ec->evbase = details->evbase;
-    details->evbase = NULL;
+    ec->evbase = evbase;
 
     /* Event for command status via backchannel. */
     ec->backchannel_event = sudo_ev_alloc(backchannel,
@@ -1063,7 +1062,8 @@ fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
  * we fact that we have two different controlling terminals to deal with.
  */
 bool
-exec_pty(struct command_details *details, struct user_details *user_details,
+exec_pty(struct command_details *details,
+    const struct user_details *user_details, struct sudo_event_base *evbase,
     struct command_status *cstat)
 {
     int io_pipe[3][2] = { { -1, -1 }, { -1, -1 }, { -1, -1 } };
@@ -1361,7 +1361,8 @@ exec_pty(struct command_details *details, struct user_details *user_details,
      * Fill in exec closure, allocate event base, signal events and
      * the backchannel event.
      */
-    fill_exec_closure(&ec, cstat, details, user_details, sudo_pid, ppgrp, sv[0]);
+    fill_exec_closure(&ec, cstat, details, user_details, evbase,
+	sudo_pid, ppgrp, sv[0]);
 
     /* Create event and closure for intercept mode. */
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {

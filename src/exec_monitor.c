@@ -42,7 +42,7 @@
 #include "sudo_plugin_int.h"
 
 struct monitor_closure {
-    struct command_details *details;
+    const struct command_details *details;
     struct sudo_event_base *evbase;
     struct sudo_event *errpipe_event;
     struct sudo_event *backchannel_event;
@@ -401,7 +401,7 @@ exec_cmnd_pty(struct command_details *details, sigset_t *mask,
  */
 static void
 fill_exec_closure_monitor(struct monitor_closure *mc,
-    struct command_details *details, struct command_status *cstat,
+    const struct command_details *details, struct command_status *cstat,
     int errfd, int backchannel)
 {
     debug_decl(fill_exec_closure_monitor, SUDO_DEBUG_EXEC);

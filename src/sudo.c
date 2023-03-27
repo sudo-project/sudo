@@ -292,7 +292,6 @@ main(int argc, char *argv[], char *envp[])
 	    command_details.argv = nargv;
 	    command_details.argc = nargc;
 	    command_details.envp = run_envp;
-	    command_details.evbase = sudo_event_base;
 	    if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
 		SET(command_details.flags, CD_LOGIN_SHELL);
 	    if (ISSET(sudo_mode, MODE_BACKGROUND))
@@ -1022,7 +1021,7 @@ done:
  */
 int
 run_command(struct command_details *command_details,
-    struct user_details *user_details)
+    const struct user_details *user_details)
 {
     struct command_status cstat;
     int status = W_EXITCODE(1, 0);
@@ -1044,7 +1043,7 @@ run_command(struct command_details *command_details,
 	debug_return_int(status);
     }
 
-    sudo_execute(command_details, user_details, &cstat);
+    sudo_execute(command_details, user_details, sudo_event_base, &cstat);
 
     switch (cstat.type) {
     case CMD_ERRNO:

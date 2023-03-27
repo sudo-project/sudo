@@ -185,7 +185,7 @@ char **disable_execute(char *envp[], const char *dso);
 char **enable_monitor(char *envp[], const char *dso);
 
 /* exec_intercept.c */
-void *intercept_setup(int fd, struct sudo_event_base *evbase, struct command_details *details);
+void *intercept_setup(int fd, struct sudo_event_base *evbase, const struct command_details *details);
 void intercept_cleanup(struct exec_closure *ec);
 
 /* exec_iolog.c */
@@ -205,10 +205,10 @@ void del_io_events(bool nonblocking);
 void init_ttyblock(void);
 
 /* exec_nopty.c */
-void exec_nopty(struct command_details *details, struct user_details *user_details, struct command_status *cstat);
+void exec_nopty(struct command_details *details, const struct user_details *user_details, struct sudo_event_base *evbase, struct command_status *cstat);
 
 /* exec_pty.c */
-bool exec_pty(struct command_details *details, struct user_details *user_details, struct command_status *cstat);
+bool exec_pty(struct command_details *details, const struct user_details *user_details, struct sudo_event_base *evbase, struct command_status *cstat);
 extern int io_fds[6];
 
 /* exec_monitor.c */

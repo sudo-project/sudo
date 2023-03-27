@@ -35,7 +35,7 @@ enum intercept_state {
 /* Closure for intercept_cb() */
 struct intercept_closure {
     union sudo_token_un token;
-    struct command_details *details;
+    const struct command_details *details;
     struct sudo_event ev;
     const char *errstr;
     char *command;		/* dynamically allocated */

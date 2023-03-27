@@ -98,7 +98,7 @@ enable_write_event(int fd, sudo_ev_callback_t callback,
  */
 void *
 intercept_setup(int fd, struct sudo_event_base *evbase,
-    struct command_details *details)
+    const struct command_details *details)
 {
     struct intercept_closure *closure;
     debug_decl(intercept_setup, SUDO_DEBUG_EXEC);
@@ -1086,7 +1086,7 @@ bad:
 #else /* _PATH_SUDO_INTERCEPT */
 void *
 intercept_setup(int fd, struct sudo_event_base *evbase,
-    struct command_details *details)
+    const struct command_details *details)
 {
     debug_decl(intercept_setup, SUDO_DEBUG_EXEC);
 

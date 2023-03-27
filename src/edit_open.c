@@ -100,7 +100,7 @@ switch_user(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups)
 }
 
 static bool
-group_matches(gid_t target, struct sudo_cred *cred)
+group_matches(gid_t target, const struct sudo_cred *cred)
 {
     int i;
     debug_decl(group_matches, SUDO_DEBUG_EDIT);
@@ -123,7 +123,7 @@ group_matches(gid_t target, struct sudo_cred *cred)
 }
 
 static bool
-is_writable(struct sudo_cred *user_cred, struct stat *sb)
+is_writable(const struct sudo_cred *user_cred, struct stat *sb)
 {
     debug_decl(is_writable, SUDO_DEBUG_EDIT);
 
@@ -153,7 +153,8 @@ is_writable(struct sudo_cred *user_cred, struct stat *sb)
  * Returns true if writable, false if not, or -1 on error.
  */
 int
-dir_is_writable(int dfd, struct sudo_cred *user_cred, struct sudo_cred *cur_cred)
+dir_is_writable(int dfd, const struct sudo_cred *user_cred,
+    const struct sudo_cred *cur_cred)
 {
     struct stat sb;
     int rc;
@@ -215,7 +216,8 @@ fallback:
  * Returns true if writable, false if not, or -1 on error.
  */
 int
-dir_is_writable(int dfd, struct sudo_cred *user_cred, struct sudo_cred *cur_cred)
+dir_is_writable(int dfd, const struct sudo_cred *user_cred,
+    const struct sudo_cred *cur_cred)
 {
     struct stat sb;
     debug_decl(dir_is_writable, SUDO_DEBUG_EDIT);
@@ -338,7 +340,7 @@ done:
 
 static int
 sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode,
-    struct sudo_cred *user_cred, struct sudo_cred *cur_cred)
+    const struct sudo_cred *user_cred, const struct sudo_cred *cur_cred)
 {
     const int dflags = DIR_OPEN_FLAGS;
     int dfd, fd, writable;
@@ -405,7 +407,7 @@ sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode,
 #ifdef O_NOFOLLOW
 int
 sudo_edit_open(char *path, int oflags, mode_t mode, int sflags,
-    struct sudo_cred *user_cred, struct sudo_cred *cur_cred)
+    const struct sudo_cred *user_cred, const struct sudo_cred *cur_cred)
 {
     int fd;
     debug_decl(sudo_edit_open, SUDO_DEBUG_EDIT);
@@ -434,7 +436,7 @@ sudo_edit_open(char *path, int oflags, mode_t mode, int sflags,
 #else
 int
 sudo_edit_open(char *path, int oflags, mode_t mode, int sflags,
-    struct sudo_cred *user_cred, struct sudo_cred *cur_cred)
+    const struct sudo_cred *user_cred, const struct sudo_cred *cur_cred)
 {
     struct stat sb;
     int fd;
@@ -486,8 +488,8 @@ sudo_edit_open(char *path, int oflags, mode_t mode, int sflags,
  * Does not modify the value of errno.
  */
 bool
-sudo_edit_parent_valid(char *path, int sflags, struct sudo_cred *user_cred,
-    struct sudo_cred *cur_cred)
+sudo_edit_parent_valid(char *path, int sflags,
+    const struct sudo_cred *user_cred, const struct sudo_cred *cur_cred)
 {
     const int serrno = errno;
     struct stat sb;
