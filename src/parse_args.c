@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996, 1998-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1993-1996, 1998-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -226,8 +226,9 @@ parse_env_list(struct environment *e, char *list)
  * for the command to be run (if we are running one).
  */
 int
-parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
-    struct sudo_settings **settingsp, char ***env_addp, const char **list_userp)
+parse_args(int argc, char **argv, const char *shell, int *old_optind,
+    int *nargc, char ***nargv, struct sudo_settings **settingsp,
+    char ***env_addp, const char **list_userp)
 {
     const char *progname, *short_opts = sudo_short_opts;
     struct option *long_opts = sudo_long_opts;
@@ -647,7 +648,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 	if (!gc_add(GC_PTR, av))
 	    exit(EXIT_FAILURE);
 
-	av[0] = (char *)user_details.shell; /* plugin may override shell */
+	av[0] = (char *)shell;	/* plugin may override shell */
 	if (cmnd != NULL) {
 	    av[1] = (char *)"-c";
 	    av[2] = cmnd;

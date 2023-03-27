@@ -66,7 +66,7 @@ static void schedule_signal(struct exec_closure *ec, int signo);
  * Returns the dyamically allocated pty name on success, NULL on failure.
  */
 static char *
-pty_setup(struct command_details *details, const char *tty)
+pty_setup(struct command_details *details)
 {
     char *ptyname = NULL;
     debug_decl(pty_setup, SUDO_DEBUG_EXEC);
@@ -83,12 +83,12 @@ pty_setup(struct command_details *details, const char *tty)
     if (ptyname == NULL)
 	sudo_fatal("%s", U_("unable to allocate pty"));
 
-    /* Update tty name in command details (used by monitor, SELinux, AIX). */
-    details->tty = ptyname;
-
     /* Add entry to utmp/utmpx? */
     if (ISSET(details->flags, CD_SET_UTMP))
-	utmp_login(tty, ptyname, io_fds[SFD_FOLLOWER], details->utmp_user);
+	utmp_login(details->tty, ptyname, io_fds[SFD_FOLLOWER], details->utmp_user);
+
+    /* Update tty name in command details (used by monitor, SELinux, AIX). */
+    details->tty = ptyname;
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: %s fd %d, pty leader fd %d, pty follower fd %d",
@@ -935,8 +935,8 @@ fwdchannel_cb(int sock, int what, void *v)
  */
 static void
 fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
-    struct command_details *details, pid_t sudo_pid, pid_t ppgrp,
-    int backchannel)
+    struct command_details *details, struct user_details *user_details,
+    pid_t sudo_pid, pid_t ppgrp, int backchannel)
 {
     debug_decl(fill_exec_closure, SUDO_DEBUG_EXEC);
 
@@ -946,8 +946,8 @@ fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
     ec->cmnd_pid = -1;
     ec->cstat = cstat;
     ec->details = details;
-    ec->rows = user_details.ts_rows;
-    ec->cols = user_details.ts_cols;
+    ec->rows = user_details->ts_rows;
+    ec->cols = user_details->ts_cols;
 
     /* Reset cstat for running the command. */
     cstat->type = CMD_INVALID;
@@ -1063,7 +1063,8 @@ fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
  * we fact that we have two different controlling terminals to deal with.
  */
 bool
-exec_pty(struct command_details *details, struct command_status *cstat)
+exec_pty(struct command_details *details, struct user_details *user_details,
+    struct command_status *cstat)
 {
     int io_pipe[3][2] = { { -1, -1 }, { -1, -1 }, { -1, -1 } };
     bool interpose[3] = { false, false, false };
@@ -1081,7 +1082,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
     /*
      * Allocate a pty if sudo is running in a terminal.
      */
-    ec.ptyname = pty_setup(details, user_details.tty);
+    ec.ptyname = pty_setup(details);
     if (ec.ptyname == NULL)
 	debug_return_bool(false);
 
@@ -1360,7 +1361,7 @@ exec_pty(struct command_details *details, struct command_status *cstat)
      * Fill in exec closure, allocate event base, signal events and
      * the backchannel event.
      */
-    fill_exec_closure(&ec, cstat, details, sudo_pid, ppgrp, sv[0]);
+    fill_exec_closure(&ec, cstat, details, user_details, sudo_pid, ppgrp, sv[0]);
 
     /* Create event and closure for intercept mode. */
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {

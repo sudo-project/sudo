@@ -76,7 +76,7 @@ struct plugin_container policy_plugin;
 struct plugin_container_list io_plugins = TAILQ_HEAD_INITIALIZER(io_plugins);
 struct plugin_container_list audit_plugins = TAILQ_HEAD_INITIALIZER(audit_plugins);
 struct plugin_container_list approval_plugins = TAILQ_HEAD_INITIALIZER(approval_plugins);
-struct user_details user_details;
+static struct user_details user_details;
 int sudo_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 static struct sudo_event_base *sudo_event_base;
 
@@ -206,8 +206,8 @@ main(int argc, char *argv[], char *envp[])
     /* Parse command line arguments, preserving the original argv/envp. */
     submit_argv = argv;
     submit_envp = envp;
-    sudo_mode = parse_args(argc, argv, &submit_optind, &nargc, &nargv,
-	&sudo_settings, &env_add, &list_user);
+    sudo_mode = parse_args(argc, argv, user_details.shell, &submit_optind,
+	&nargc, &nargv, &sudo_settings, &env_add, &list_user);
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "sudo_mode 0x%x", sudo_mode);
 
     /* Print sudo version early, in case of plugin init failure. */
@@ -295,7 +295,7 @@ main(int argc, char *argv[], char *envp[])
 	    if (ISSET(sudo_mode, MODE_BACKGROUND))
 		SET(command_details.flags, CD_BACKGROUND);
 	    if (ISSET(command_details.flags, CD_SUDOEDIT)) {
-		status = sudo_edit(&command_details);
+		status = sudo_edit(&command_details, &user_details.cred);
 	    } else {
 		status = run_command(&command_details);
 	    }
@@ -1039,7 +1039,7 @@ run_command(struct command_details *details)
 	debug_return_int(status);
     }
 
-    sudo_execute(details, &cstat);
+    sudo_execute(details, &user_details, &cstat);
 
     switch (cstat.type) {
     case CMD_ERRNO:
@@ -2151,6 +2151,16 @@ free_plugin_container(struct plugin_container *plugin, bool ioplugin)
 	free(plugin);
 
     debug_return;
+}
+
+/*
+ * Getter for the user cred.
+ * Needed for sudo_askpass() in tgetpass.c
+ */
+struct sudo_cred *
+sudo_get_user_cred(void)
+{
+    return &user_details.cred;
 }
 
 bool

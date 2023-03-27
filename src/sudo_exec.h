@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010-2017, 2020-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010-2017, 2020-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -42,6 +42,7 @@
 # define USER_SIGNALED(_info) ((_info) != NULL && (_info)->si_code <= 0)
 #endif
 
+struct user_details;
 struct command_details;
 struct command_status;
 struct sudo_event_base;
@@ -204,10 +205,10 @@ void del_io_events(bool nonblocking);
 void init_ttyblock(void);
 
 /* exec_nopty.c */
-void exec_nopty(struct command_details *details, struct command_status *cstat);
+void exec_nopty(struct command_details *details, struct user_details *user_details, struct command_status *cstat);
 
 /* exec_pty.c */
-bool exec_pty(struct command_details *details, struct command_status *cstat);
+bool exec_pty(struct command_details *details, struct user_details *user_details, struct command_status *cstat);
 extern int io_fds[6];
 
 /* exec_monitor.c */

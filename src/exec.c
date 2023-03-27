@@ -407,7 +407,8 @@ direct_exec_allowed(struct command_details *details)
  * we fact that we have two different controlling terminals to deal with.
  */
 int
-sudo_execute(struct command_details *details, struct command_status *cstat)
+sudo_execute(struct command_details *details, struct user_details *user_details,
+    struct command_status *cstat)
 {
     debug_decl(sudo_execute, SUDO_DEBUG_EXEC);
 
@@ -461,7 +462,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
      * is configured, this returns false and we run the command without a pty.
      */
     if (sudo_needs_pty(details)) {
-	if (exec_pty(details, cstat))
+	if (exec_pty(details, user_details, cstat))
 	    goto done;
     }
 
@@ -481,7 +482,7 @@ sudo_execute(struct command_details *details, struct command_status *cstat)
     /*
      * Run the command in the existing tty (if any) and wait for it to finish.
      */
-    exec_nopty(details, cstat);
+    exec_nopty(details, user_details, cstat);
 
 done:
     /* The caller will run any plugin close functions. */

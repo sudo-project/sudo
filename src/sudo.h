@@ -245,12 +245,12 @@ char *tgetpass(const char *prompt, int timeout, int flags,
     struct sudo_conv_callback *callback);
 
 /* exec.c */
-int sudo_execute(struct command_details *details, struct command_status *cstat);
+int sudo_execute(struct command_details *details, struct user_details *ud, struct command_status *cstat);
 
 /* parse_args.c */
-int parse_args(int argc, char **argv, int *old_optind, int *nargc,
-    char ***nargv, struct sudo_settings **settingsp, char ***env_addp,
-    const char **list_user);
+int parse_args(int argc, char **argv, const char *shell, int *old_optind,
+    int *nargc, char ***nargv, struct sudo_settings **settingsp,
+    char ***env_addp, const char **list_user);
 extern int tgetpass_flags;
 
 /* get_pty.c */
@@ -272,11 +272,11 @@ bool audit_error(const char *plugin_name, unsigned int plugin_type,
     const char *audit_msg, char * const command_info[]);
 bool approval_check(char * const command_info[], char * const run_argv[],
     char * const run_envp[]);
-extern struct user_details user_details;
+struct sudo_cred *sudo_get_user_cred(void);
 extern int sudo_debug_instance;
 
 /* sudo_edit.c */
-int sudo_edit(struct command_details *details);
+int sudo_edit(struct command_details *command_details, struct sudo_cred *user_cred);
 
 /* parse_args.c */
 sudo_noreturn void usage(void);

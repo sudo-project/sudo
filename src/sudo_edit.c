@@ -163,7 +163,8 @@ sudo_edit_mktemp(const char *ofile, char **tfile)
  */
 static int
 sudo_edit_create_tfiles(struct command_details *command_details,
-    struct tempfile *tf, char *files[], int nfiles)
+    struct sudo_cred *user_cred, struct tempfile *tf, char *files[],
+    int nfiles)
 {
     int i, j, tfd, ofd, rc;
     struct timespec times[2];
@@ -180,19 +181,18 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 	    command_details->cred.ngroups, command_details->cred.groups);
 	ofd = sudo_edit_open(files[i], O_RDONLY,
 	    S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, command_details->flags,
-	    &user_details.cred, &command_details->cred);
+	    user_cred, &command_details->cred);
 	if (ofd != -1 || errno == ENOENT) {
 	    if (ofd != -1) {
 		rc = fstat(ofd, &sb);
 	    } else {
 		/* New file, verify parent dir exists and is not writable. */
 		memset(&sb, 0, sizeof(sb));
-		if (sudo_edit_parent_valid(files[i], command_details->flags, &user_details.cred, &command_details->cred))
+		if (sudo_edit_parent_valid(files[i], command_details->flags, user_cred, &command_details->cred))
 		    rc = 0;
 	    }
 	}
-	switch_user(ROOT_UID, user_details.cred.egid,
-	    user_details.cred.ngroups, user_details.cred.groups);
+	switch_user(ROOT_UID, user_cred->egid, user_cred->ngroups, user_cred->groups);
 	if (ofd != -1 && !S_ISREG(sb.st_mode)) {
 	    sudo_warnx(U_("%s: not a regular file"), files[i]);
 	    close(ofd);
@@ -217,9 +217,9 @@ sudo_edit_create_tfiles(struct command_details *command_details,
 	tf[j].osize = sb.st_size; // -V614
 	mtim_get(&sb, tf[j].omtim);
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "seteuid(%u)", (unsigned int)user_details.cred.uid);
-	if (seteuid(user_details.cred.uid) != 0)
-	    sudo_fatal("seteuid(%u)", (unsigned int)user_details.cred.uid);
+	    "seteuid(%u)", (unsigned int)user_cred->uid);
+	if (seteuid(user_cred->uid) != 0)
+	    sudo_fatal("seteuid(%u)", (unsigned int)user_cred->uid);
 	tfd = sudo_edit_mktemp(tf[j].ofile, &tf[j].tfile);
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "seteuid(%u)", ROOT_UID);
@@ -267,7 +267,8 @@ sudo_edit_create_tfiles(struct command_details *command_details,
  */
 static int
 sudo_edit_copy_tfiles(struct command_details *command_details,
-    struct tempfile *tf, int nfiles, struct timespec *times)
+    struct sudo_cred *user_cred, struct tempfile *tf,
+    int nfiles, struct timespec *times)
 {
     int i, tfd, ofd, errors = 0;
     struct timespec ts;
@@ -278,16 +279,16 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
     /* Copy contents of temp files to real ones. */
     for (i = 0; i < nfiles; i++) {
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "seteuid(%u)", (unsigned int)user_details.cred.uid);
-	if (seteuid(user_details.cred.uid) != 0)
-	    sudo_fatal("seteuid(%u)", (unsigned int)user_details.cred.uid);
+	    "seteuid(%u)", (unsigned int)user_cred->uid);
+	if (seteuid(user_cred->uid) != 0)
+	    sudo_fatal("seteuid(%u)", (unsigned int)user_cred->uid);
 	tfd = sudo_edit_open(tf[i].tfile, O_RDONLY,
-	    S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, 0, &user_details.cred, NULL);
+	    S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, 0, user_cred, NULL);
 	if (seteuid(ROOT_UID) != 0)
 	    sudo_fatal("seteuid(ROOT_UID)");
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "seteuid(%u)", ROOT_UID);
-	if (tfd == -1 || !sudo_check_temp_file(tfd, tf[i].tfile, user_details.cred.uid, &sb)) {
+	if (tfd == -1 || !sudo_check_temp_file(tfd, tf[i].tfile, user_cred->uid, &sb)) {
 	    sudo_warnx(U_("%s left unmodified"), tf[i].ofile);
 	    if (tfd != -1)
 		close(tfd);
@@ -312,10 +313,9 @@ sudo_edit_copy_tfiles(struct command_details *command_details,
 	oldmask = umask(command_details->umask);
 	ofd = sudo_edit_open(tf[i].ofile, O_WRONLY|O_CREAT,
 	    S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, command_details->flags,
-	    &user_details.cred, &command_details->cred);
+	    user_cred, &command_details->cred);
 	umask(oldmask);
-	switch_user(ROOT_UID, user_details.cred.egid,
-	    user_details.cred.ngroups, user_details.cred.groups);
+	switch_user(ROOT_UID, user_cred->egid, user_cred->ngroups, user_cred->groups);
 	if (ofd == -1) {
 	    sudo_warn(U_("unable to write to %s"), tf[i].ofile);
 	    goto bad;
@@ -380,28 +380,28 @@ selinux_run_helper(uid_t uid, gid_t gid, int ngroups, GETGROUPS_T *groups,
 }
 
 static char *
-selinux_fmt_sudo_user(void)
+selinux_fmt_sudo_user(struct sudo_cred *user_cred)
 {
     char *cp, *user_str;
     size_t user_size;
     int i, len;
     debug_decl(selinux_fmt_sudo_user, SUDO_DEBUG_EDIT);
 
-    user_size = (MAX_UID_T_LEN + 1) * (2 + user_details.cred.ngroups);
+    user_size = (MAX_UID_T_LEN + 1) * (2 + user_cred->ngroups);
     if ((user_str = malloc(user_size)) == NULL)
 	debug_return_ptr(NULL);
 
     /* UID:GID: */
     len = snprintf(user_str, user_size, "%u:%u:",
-	(unsigned int)user_details.cred.uid, (unsigned int)user_details.cred.gid);
+	(unsigned int)user_cred->uid, (unsigned int)user_cred->gid);
     if (len < 0 || (size_t)len >= user_size)
 	sudo_fatalx(U_("internal error, %s overflow"), __func__);
 
     /* Supplementary GIDs */
     cp = user_str + len;
-    for (i = 0; i < user_details.cred.ngroups; i++) {
+    for (i = 0; i < user_cred->ngroups; i++) {
 	len = snprintf(cp, user_size - (cp - user_str), "%s%u",
-	    i ? "," : "", (unsigned int)user_details.cred.groups[i]);
+	    i ? "," : "", (unsigned int)user_cred->groups[i]);
 	if (len < 0 || (size_t)len >= user_size - (cp - user_str))
 	    sudo_fatalx(U_("internal error, %s overflow"), __func__);
 	cp += len;
@@ -412,7 +412,8 @@ selinux_fmt_sudo_user(void)
 
 static int
 selinux_edit_create_tfiles(struct command_details *command_details,
-    struct tempfile *tf, char *files[], int nfiles)
+    struct sudo_cred *user_cred, struct tempfile *tf,
+    char *files[], int nfiles)
 {
     const char **sesh_args, **sesh_ap;
     char *user_str = NULL;
@@ -434,7 +435,7 @@ selinux_edit_create_tfiles(struct command_details *command_details,
     if (!ISSET(command_details->flags, CD_SUDOEDIT_FOLLOW))
 	*sesh_ap++ = "--no-dereference";
     if (ISSET(command_details->flags, CD_SUDOEDIT_CHECKDIR)) {
-	if ((user_str = selinux_fmt_sudo_user()) == NULL) {
+	if ((user_str = selinux_fmt_sudo_user(user_cred)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
@@ -498,9 +499,9 @@ selinux_edit_create_tfiles(struct command_details *command_details,
 	    close(tfd);
 	    goto done;
 	}
-	if (fchown(tfd, user_details.cred.uid, user_details.cred.gid) != 0) {
+	if (fchown(tfd, user_cred->uid, user_cred->gid) != 0) {
 	    sudo_warn("unable to chown(%s) to %d:%d for editing",
-		tf[i].tfile, user_details.cred.uid, user_details.cred.gid);
+		tf[i].tfile, user_cred->uid, user_cred->gid);
 	    close(tfd);
 	    goto done;
 	}
@@ -518,7 +519,8 @@ done:
 
 static int
 selinux_edit_copy_tfiles(struct command_details *command_details,
-    struct tempfile *tf, int nfiles, struct timespec *times)
+    struct sudo_cred *user_cred, struct tempfile *tf,
+    int nfiles, struct timespec *times)
 {
     const char **sesh_args, **sesh_ap;
     char *user_str = NULL;
@@ -541,7 +543,7 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
     *sesh_ap++ = "sesh";
     *sesh_ap++ = "--edit-install";
     if (ISSET(command_details->flags, CD_SUDOEDIT_CHECKDIR)) {
-	if ((user_str = selinux_fmt_sudo_user()) == NULL) {
+	if ((user_str = selinux_fmt_sudo_user(user_cred)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
@@ -557,7 +559,7 @@ selinux_edit_copy_tfiles(struct command_details *command_details,
 	    sudo_warn(U_("unable to open %s"), tf[i].tfile);
 	    continue;
 	}
-	if (!sudo_check_temp_file(tfd, tf[i].tfile, user_details.cred.uid, &sb))
+	if (!sudo_check_temp_file(tfd, tf[i].tfile, user_cred->uid, &sb))
 	    continue;
 	mtim_get(&sb, ts);
 	if (tf[i].osize == sb.st_size && sudo_timespeccmp(&tf[i].omtim, &ts, ==)) {
@@ -625,7 +627,7 @@ done:
  * of 1 on failure.
  */
 int
-sudo_edit(struct command_details *command_details)
+sudo_edit(struct command_details *command_details, struct sudo_cred *user_cred)
 {
     struct command_details saved_command_details;
     char **nargv = NULL, **files = NULL;
@@ -648,7 +650,7 @@ sudo_edit(struct command_details *command_details)
     }
 
     /* Find a temporary directory writable by the user.  */
-    if (!set_tmpdir(&user_details.cred))
+    if (!set_tmpdir(user_cred))
 	goto cleanup;
 
     if (nfiles > 0) {
@@ -690,10 +692,10 @@ sudo_edit(struct command_details *command_details)
     }
 #ifdef HAVE_SELINUX
     if (ISSET(command_details->flags, CD_RBAC_ENABLED))
-	nfiles = selinux_edit_create_tfiles(command_details, tf, files, nfiles);
+	nfiles = selinux_edit_create_tfiles(command_details, user_cred, tf, files, nfiles);
     else 
 #endif
-	nfiles = sudo_edit_create_tfiles(command_details, tf, files, nfiles);
+	nfiles = sudo_edit_create_tfiles(command_details, user_cred, tf, files, nfiles);
     if (nfiles <= 0)
 	goto cleanup;
 
@@ -729,9 +731,9 @@ sudo_edit(struct command_details *command_details)
 	selinux_audit_role_change();
 #endif
     memcpy(&saved_command_details, command_details, sizeof(struct command_details));
-    command_details->cred = user_details.cred;
-    command_details->cred.euid = user_details.cred.uid;
-    command_details->cred.egid = user_details.cred.gid;
+    command_details->cred = *user_cred;
+    command_details->cred.euid = user_cred->uid;
+    command_details->cred.egid = user_cred->gid;
     command_details->argc = nargc;
     command_details->argv = nargv;
     ret = run_command(command_details);
@@ -748,10 +750,10 @@ sudo_edit(struct command_details *command_details)
     /* Copy contents of temp files to real ones. */
 #ifdef HAVE_SELINUX
     if (ISSET(command_details->flags, CD_RBAC_ENABLED))
-	errors = selinux_edit_copy_tfiles(command_details, tf, nfiles, times);
+	errors = selinux_edit_copy_tfiles(command_details, user_cred, tf, nfiles, times);
     else
 #endif
-	errors = sudo_edit_copy_tfiles(command_details, tf, nfiles, times);
+	errors = sudo_edit_copy_tfiles(command_details, user_cred, tf, nfiles, times);
     if (errors) {
 	/* Preserve the edited temporary files. */
 	ret = W_EXITCODE(1, 0);
@@ -783,7 +785,7 @@ cleanup:
  * Must have the ability to change the effective uid to use sudoedit.
  */
 int
-sudo_edit(struct command_details *command_details)
+sudo_edit(struct command_details *command_details, struct sudo_cred *user_cred)
 {
     debug_decl(sudo_edit, SUDO_DEBUG_EDIT);
     debug_return_int(W_EXITCODE(1, 0));
