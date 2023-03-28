@@ -796,7 +796,7 @@ For example, using
 .Sy ldapsearch :
 .Bd -literal -offset 4n
 $ ldapsearch -b $NETGROUP_BASE \e
-  '(&(objectClass=nisNetgroup)(nisNetgroupTriple=\28*,USER,\29))'
+  '(&(objectClass=nisNetgroup)(nisNetgroupTriple=\e28*,USER,\e29))'
 .Ed
 .Pp
 where your
