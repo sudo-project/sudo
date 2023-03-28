@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd January 16, 2023
+.Dd March 28, 2023
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1169,19 +1169,43 @@ Certain configuration options may be changed from their default
 values at run-time via one or more
 .Em Default_Entry
 lines.
-These may affect all users on any host, all users on a specific host, a
-specific user, a specific command, or commands being run as a specific user.
+These may affect all users on any host
+.Pq Sq Defaults ,
+all users on a specific host
+.Pq Sq Defaults@host ,
+a specific user
+.Pq Sq Defaults:user ,
+a specific command
+.Pq Sq Defaults!cmnd ,
+or commands being run as a specific user
+.Pq Sq Defaults>runasuser .
+.Pp
+White space is not permitted between
+.Sq Defaults
+and the
+.Ql @ ,
+.Ql \&: ,
+.Ql \&! ,
+or
+.Ql >
+characters.
+While a comma-separated list may be used in place of a single value after the
+.Ql @ ,
+.Ql \&: ,
+.Ql \&! ,
+or
+.Ql >
+character, using an alias instead of a list is often improve readability.
 Per-command entries may not include command line arguments.
 If you need to specify arguments, define a
 .Em Cmnd_Alias
-and reference
-that instead.
+and reference that instead.
 .Bd -literal
 Default_Type ::= 'Defaults' |
-                 'Defaults' '@' Host_List |
-                 'Defaults' ':' User_List |
-                 'Defaults' '!' Cmnd_List |
-                 'Defaults' '>' Runas_List
+                 'Defaults@' Host_List |
+                 'Defaults:' User_List |
+                 'Defaults!' Cmnd_List |
+                 'Defaults>' Runas_List
 
 Default_Entry ::= Default_Type Parameter_List
 
@@ -1332,7 +1356,7 @@ A fully-specified
 consists of two
 .Em Runas_List Ns s
 (as defined above) separated by a colon
-.Pq Ql :\&
+.Pq Ql \&:
 and enclosed in a set of parentheses.
 The first
 .Em Runas_List
