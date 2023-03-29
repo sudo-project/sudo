@@ -917,7 +917,7 @@ init_vars(char * const envp[])
 	     * YP/NIS/NIS+/LDAP/etc daemon has died.
 	     */
 	    if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE) {
-		sudo_warnx(U_("unknown uid %u"), (unsigned int) user_uid);
+		sudo_warnx(U_("unknown user %s"), user_name);
 		debug_return_bool(false);
 	    }
 
@@ -938,8 +938,7 @@ init_vars(char * const envp[])
 
     /* It is now safe to use log_warningx() and set_perms() */
     if (unknown_user) {
-	log_warningx(SLOG_SEND_MAIL, N_("unknown uid %u"),
-	    (unsigned int) user_uid);
+	log_warningx(SLOG_SEND_MAIL, N_("unknown user %s"), user_name);
 	debug_return_bool(false);
     }
 
