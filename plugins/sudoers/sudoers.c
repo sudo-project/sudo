@@ -83,8 +83,8 @@ static void set_callbacks(void);
  */
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-uid_t timestamp_uid;
-gid_t timestamp_gid;
+uid_t timestamp_uid = ROOT_UID;
+gid_t timestamp_gid = ROOT_GID;
 bool force_umask;
 int sudo_mode;
 
@@ -519,33 +519,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	    log_warningx(SLOG_AUDIT, N_("unknown group %s"),
 		runas_gr->gr_name);
 	    goto done;
-	}
-    }
-
-    /*
-     * Look up the timestamp dir owner if one is specified.
-     */
-    if (def_timestampowner) {
-	struct passwd *pw = NULL;
-
-	if (*def_timestampowner == '#') {
-	    const char *errstr;
-	    uid_t uid = sudo_strtoid(def_timestampowner + 1, &errstr);
-	    if (errstr == NULL)
-		pw = sudo_getpwuid(uid);
-	}
-	if (pw == NULL)
-	    pw = sudo_getpwnam(def_timestampowner);
-	if (pw != NULL) {
-	    timestamp_uid = pw->pw_uid;
-	    timestamp_gid = pw->pw_gid;
-	    sudo_pw_delref(pw);
-	} else {
-	    /* XXX - audit too? */
-	    log_warningx(SLOG_SEND_MAIL,
-		N_("timestamp owner (%s): No such user"), def_timestampowner);
-	    timestamp_uid = ROOT_UID;
-	    timestamp_gid = ROOT_GID;
 	}
     }
 
@@ -1500,6 +1473,39 @@ cb_runas_default(const char *file, int line, int column,
     debug_return_bool(true);
 }
 
+
+/*
+ * Callback for timestampowner sudoers setting.
+ */
+static bool
+cb_timestampowner(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
+{
+    struct passwd *pw = NULL;
+    const char *user = sd_un->str;
+    debug_decl(cb_timestampowner, SUDOERS_DEBUG_PLUGIN);
+
+    if (*user == '#') {
+	const char *errstr;
+	uid_t uid = sudo_strtoid(user + 1, &errstr);
+	if (errstr == NULL)
+	    pw = sudo_getpwuid(uid);
+    }
+    if (pw == NULL)
+	pw = sudo_getpwnam(user);
+    if (pw == NULL) {
+	log_warningx(SLOG_AUDIT|SLOG_PARSE_ERROR,
+	    N_("%s:%d:%d timestampowner: unknown user %s"), file, line,
+	    column, user);
+	debug_return_bool(false);
+    }
+    timestamp_uid = pw->pw_uid;
+    timestamp_gid = pw->pw_gid;
+    sudo_pw_delref(pw);
+
+    debug_return_bool(true);
+}
+
 /*
  * Callback for tty_tickets sudoers setting.
  */
@@ -1806,6 +1812,9 @@ set_callbacks(void)
 
     /* Set iolog_mode callback. */
     sudo_defs_table[I_IOLOG_MODE].callback = cb_iolog_mode;
+
+    /* Set timestampowner callback. */
+    sudo_defs_table[I_TIMESTAMPOWNER].callback = cb_timestampowner;
 
     /* Set tty_tickets callback. */
     sudo_defs_table[I_TTY_TICKETS].callback = cb_tty_tickets;
