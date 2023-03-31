@@ -399,7 +399,6 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
 		evlog->iolog_path = strdup(*cur + sizeof("iolog_path=") - 1);
 		if (evlog->iolog_path == NULL)
 		    goto oom;
-		evlog->iolog_file = sudo_basename(evlog->iolog_path);
 		continue;
 	    }
 	    if (strncmp(*cur, "iolog_stdin=", sizeof("iolog_stdin=") - 1) == 0) {

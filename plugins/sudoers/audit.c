@@ -227,7 +227,6 @@ audit_to_eventlog(struct eventlog *evlog, char * const command_info[],
 	    case 'i':
 		if (strncmp(*cur, "iolog_path=", sizeof("iolog_path=") - 1) == 0) {
 		    evlog->iolog_path = *cur + sizeof("iolog_path=") - 1;
-		    evlog->iolog_file = sudo_basename(evlog->iolog_path);
 		    continue;
 		}
 		break;
