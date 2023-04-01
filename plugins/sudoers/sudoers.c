@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996, 1998-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1993-1996, 1998-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -494,13 +494,11 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
      */
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     validated = sudoers_lookup(snl, sudo_user.pw, &cmnd_status, pwflag);
+    sudoers_setlocale(oldlocale, NULL);
     if (ISSET(validated, VALIDATE_ERROR)) {
 	/* The lookup function should have printed an error. */
 	goto done;
     }
-
-    /* Restore user's locale. */
-    sudoers_setlocale(oldlocale, NULL);
 
     if (safe_cmnd == NULL) {
 	if ((safe_cmnd = strdup(user_cmnd)) == NULL) {
