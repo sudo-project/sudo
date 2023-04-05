@@ -421,14 +421,6 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 
     unlimit_nproc();
 
-    /* Is root even allowed to run sudo? */
-    if (user_uid == 0 && !def_root_sudo) {
-	/* Not an audit event (should it be?). */
-	sudo_warnx("%s",
-	    U_("sudoers specifies that root is not allowed to sudo"));
-	goto bad;
-    }
-
     if (!set_perms(PERM_INITIAL))
 	goto bad;
 
@@ -477,6 +469,14 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     cmnd_status = set_cmnd();
     if (cmnd_status == NOT_FOUND_ERROR)
 	goto done;
+
+    /* Is root even allowed to run sudo? */
+    if (user_uid == 0 && !def_root_sudo) {
+	/* Not an audit event (should it be?). */
+	sudo_warnx("%s",
+	    U_("sudoers specifies that root is not allowed to sudo"));
+	goto bad;
+    }
 
     /* Check for -C overriding def_closefrom. */
     if (user_closefrom >= 0 && user_closefrom != def_closefrom) {
