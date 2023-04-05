@@ -426,7 +426,9 @@ bool cb_log_input(const char *file, int line, int column, const union sudo_defs_
 bool cb_log_output(const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
 int set_cmnd_path(const char *runchroot);
 int sudoers_init(void *info, sudoers_logger_t logger, char * const envp[]);
-int sudoers_policy_main(int argc, char *const argv[], int pwflag, char *env_add[], bool verbose, void *closure);
+int sudoers_check_cmnd(int argc, char *const argv[], char *env_add[], void *closure);
+int sudoers_list(int argc, char *const argv[], const char *list_user, bool verbose);
+int sudoers_validate_user(void);
 void sudoers_cleanup(void);
 void sudo_user_free(void);
 extern struct sudo_user sudo_user;

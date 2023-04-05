@@ -1183,7 +1183,7 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     exec_args.envp = user_env_out;
     exec_args.info = command_infop;
 
-    ret = sudoers_policy_main(argc, argv, 0, env_add, false, &exec_args);
+    ret = sudoers_check_cmnd(argc, argv, env_add, &exec_args);
 #ifndef NO_LEAKS
     if (ret == true && sudo_version >= SUDO_API_MKVERSION(1, 3)) {
 	/* Unset close function if we don't need it to avoid extra process. */
@@ -1204,8 +1204,6 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 static int
 sudoers_policy_validate(const char **errstr)
 {
-    char *argv[] = { (char *)"validate", NULL };
-    const int argc = 1;
     int ret;
     debug_decl(sudoers_policy_validate, SUDOERS_DEBUG_PLUGIN);
 
@@ -1216,7 +1214,7 @@ sudoers_policy_validate(const char **errstr)
 	debug_return_int(-1);
     }
 
-    ret = sudoers_policy_main(argc, argv, I_VERIFYPW, NULL, false, NULL);
+    ret = sudoers_validate_user();
 
     /* The audit functions set audit_msg on failure. */
     if (ret != 1 && audit_msg != NULL) {
@@ -1246,17 +1244,13 @@ static int
 sudoers_policy_list(int argc, char * const argv[], int verbose,
     const char *list_user, const char **errstr)
 {
-    char *list_argv[] = { (char *)"list", NULL };
     int ret;
     debug_decl(sudoers_policy_list, SUDOERS_DEBUG_PLUGIN);
 
-    if (argc == 0) {
+    if (argc == 0)
 	SET(sudo_mode, MODE_LIST);
-	argc = 1;
-	argv = list_argv;
-    } else {
+    else
 	SET(sudo_mode, MODE_CHECK);
-    }
 
     if ((sudo_mode & LIST_VALID_FLAGS) != sudo_mode) {
 	sudo_warnx(U_("%s: invalid mode flags from sudo front end: 0x%x"),
@@ -1264,18 +1258,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
 	debug_return_int(-1);
     }
 
-    if (list_user) {
-	list_pw = sudo_getpwnam(list_user);
-	if (list_pw == NULL) {
-	    sudo_warnx(U_("unknown user %s"), list_user);
-	    debug_return_int(-1);
-	}
-    }
-    ret = sudoers_policy_main(argc, argv, I_LISTPW, NULL, verbose, NULL);
-    if (list_user) {
-	sudo_pw_delref(list_pw);
-	list_pw = NULL;
-    }
+    ret = sudoers_list(argc, argv, list_user, verbose);
 
     /* The audit functions set audit_msg on failure. */
     if (ret != 1 && audit_msg != NULL) {
