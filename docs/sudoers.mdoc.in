@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd March 28, 2023
+.Dd April 6, 2023
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3988,8 +3988,7 @@ by default.
 .It use_pty
 If set, and
 .Nm sudo
-is running in a terminal, the command will be run in a pseudo-terminal
-(even if no I/O logging is being done).
+is running in a terminal, the command will be run in a new pseudo-terminal.
 If the
 .Nm sudo
 process is not attached to a terminal,
@@ -4005,7 +4004,7 @@ executing.
 By running the command in a separate pseudo-terminal, this attack is
 no longer possible.
 This flag is
-.Em off
+.Em on
 by default.
 .It user_command_timeouts
 If set, the user may specify a timeout on the command line.

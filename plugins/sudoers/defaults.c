@@ -559,6 +559,7 @@ init_defaults(void)
     def_log_format = sudo;
     def_runas_allow_unknown_id = false;
     def_noninteractive_auth = false;
+    def_use_pty = true;
 
     /* Syslog options need special care since they both strings and ints */
 #if (LOGGING & SLOG_SYSLOG)
