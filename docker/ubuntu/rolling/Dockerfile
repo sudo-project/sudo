@@ -2,9 +2,8 @@ FROM docker.io/library/ubuntu:rolling
 
 RUN DEBIAN_FRONTEND=noninteractive TZ=America/Denver apt-get update && \
     DEBIAN_FRONTEND=noninteractive TZ=America/Denver apt-get install -y \
-	build-essential curl dpkg-dev ed libldap2-dev libpam0g-dev \
-	libsasl2-dev libselinux1-dev libsepol-dev libssl-dev zlib1g-dev \
-	libaudit-dev libssl-dev python3-dev libpython3-dev libwolfssl-dev \
-	libapparmor-dev \
-	file lsb-release fakeroot pkg-config procps git ssh openssh-client
+        build-essential curl dpkg-dev ed fakeroot file git libapparmor-dev \
+	libaudit-dev libldap2-dev libpam0g-dev libpython3-dev libsasl2-dev \
+	libselinux1-dev libsepol-dev libssl-dev libwolfssl-dev lsb-release \
+	ncurses-term openssh-client pkg-config procps python3-dev ssh zlib1g-dev
 RUN useradd -ms /bin/bash build
