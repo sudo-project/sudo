@@ -2410,28 +2410,34 @@ AC_INCLUDES_DEFAULT
 # We must set this *before* the library tests.
 #
 AS_IF([test -n "$GCC" -a X"${enable_sanitizer}${enable_fuzzer}" = X"nono"], [
-    # On FreeBSD and Dragonfly, environ is filled in by the dynamic loader
-    # so -Wl,--no-undefined causes a link error when environ is used.
-    # https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=263265
-    # We use errno because OpenBSD shared libraries don't explicitly
-    # link with libc, which can result in undefined reference errors.
-    AC_CACHE_CHECK([the linker accepts -Wl,--no-undefined],
-	[sudo_cv_var_ld___no_undefined],
-	[
-	    sudo_cv_var_ld___no_undefined=no
-	    _CFLAGS="$CFLAGS"
-	    CFLAGS="$CFLAGS $lt_prog_compiler_pic"
-	    _LDFLAGS="$LDFLAGS"
-	    LDFLAGS="$LDFLAGS $lt_prog_compiler_pic -shared -Wl,--no-undefined"
-	    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <errno.h>
-extern char **environ;]], [[int ret = ((long)environ & 0xff) + errno; return ret;]])],
-		[sudo_cv_var_ld___no_undefined=yes])
-	    CFLAGS="$_CFLAGS"
-	    LDFLAGS="$_LDFLAGS"
-	]
-    )
-    AS_IF([test "$sudo_cv_var_ld___no_undefined" = "yes"], [
-	AX_APPEND_FLAG([-Wl,--no-undefined], [LDFLAGS])
+    AS_CASE([$host_os], [darwin*], [
+	# On macOS 13, using "-undefined dynamic_lookup" produces a
+	# warning.  Use the -no-undefined libtool option to avoid this.
+	    AX_APPEND_FLAG([-no-undefined], [LT_LDFLAGS])
+    ], [
+	# On FreeBSD and Dragonfly, environ is filled in by the dynamic loader
+	# so -Wl,--no-undefined causes a link error when environ is used.
+	# https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=263265
+	# We use errno because OpenBSD shared libraries don't explicitly
+	# link with libc, which can result in undefined reference errors.
+	AC_CACHE_CHECK([the linker accepts -Wl,--no-undefined],
+	    [sudo_cv_var_ld___no_undefined],
+	    [
+		sudo_cv_var_ld___no_undefined=no
+		_CFLAGS="$CFLAGS"
+		CFLAGS="$CFLAGS $lt_prog_compiler_pic"
+		_LDFLAGS="$LDFLAGS"
+		LDFLAGS="$LDFLAGS $lt_prog_compiler_pic -shared -Wl,--no-undefined"
+		AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <errno.h>
+    extern char **environ;]], [[int ret = ((long)environ & 0xff) + errno; return ret;]])],
+		    [sudo_cv_var_ld___no_undefined=yes])
+		CFLAGS="$_CFLAGS"
+		LDFLAGS="$_LDFLAGS"
+	    ]
+	)
+	AS_IF([test "$sudo_cv_var_ld___no_undefined" = "yes"], [
+	    AX_APPEND_FLAG([-Wl,--no-undefined], [LDFLAGS])
+	])
     ])
 ])
 

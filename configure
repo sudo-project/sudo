@@ -9201,6 +9201,8 @@ fi
 printf "%s\n" "$ac_cv_path_EGREP" >&6; }
  EGREP="$ac_cv_path_EGREP"
 
+         EGREP_TRADITIONAL=$EGREP
+ ac_cv_path_EGREP_TRADITIONAL=$EGREP
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for fgrep" >&5
 printf %s "checking for fgrep... " >&6; }
@@ -20055,27 +20057,69 @@ fi
 if test -n "$GCC" -a X"${enable_sanitizer}${enable_fuzzer}" = X"nono"
 then :
 
-    # On FreeBSD and Dragonfly, environ is filled in by the dynamic loader
-    # so -Wl,--no-undefined causes a link error when environ is used.
-    # https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=263265
-    # We use errno because OpenBSD shared libraries don't explicitly
-    # link with libc, which can result in undefined reference errors.
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking the linker accepts -Wl,--no-undefined" >&5
+    case $host_os in #(
+  darwin*) :
+
+	# On macOS 13, using "-undefined dynamic_lookup" produces a
+	# warning.  Use the -no-undefined libtool option to avoid this.
+
+if test ${LT_LDFLAGS+y}
+then :
+
+  case " $LT_LDFLAGS " in #(
+  *" -no-undefined "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LT_LDFLAGS already contains -no-undefined"; } >&5
+  (: LT_LDFLAGS already contains -no-undefined) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append LT_LDFLAGS " -no-undefined"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LT_LDFLAGS=\"\$LT_LDFLAGS\""; } >&5
+  (: LT_LDFLAGS="$LT_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  LT_LDFLAGS=-no-undefined
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : LT_LDFLAGS=\"\$LT_LDFLAGS\""; } >&5
+  (: LT_LDFLAGS="$LT_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
+     ;; #(
+  *) :
+
+	# On FreeBSD and Dragonfly, environ is filled in by the dynamic loader
+	# so -Wl,--no-undefined causes a link error when environ is used.
+	# https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=263265
+	# We use errno because OpenBSD shared libraries don't explicitly
+	# link with libc, which can result in undefined reference errors.
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking the linker accepts -Wl,--no-undefined" >&5
 printf %s "checking the linker accepts -Wl,--no-undefined... " >&6; }
 if test ${sudo_cv_var_ld___no_undefined+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
-	    sudo_cv_var_ld___no_undefined=no
-	    _CFLAGS="$CFLAGS"
-	    CFLAGS="$CFLAGS $lt_prog_compiler_pic"
-	    _LDFLAGS="$LDFLAGS"
-	    LDFLAGS="$LDFLAGS $lt_prog_compiler_pic -shared -Wl,--no-undefined"
-	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+		sudo_cv_var_ld___no_undefined=no
+		_CFLAGS="$CFLAGS"
+		CFLAGS="$CFLAGS $lt_prog_compiler_pic"
+		_LDFLAGS="$LDFLAGS"
+		LDFLAGS="$LDFLAGS $lt_prog_compiler_pic -shared -Wl,--no-undefined"
+		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <errno.h>
-extern char **environ;
+    extern char **environ;
 int
 main (void)
 {
@@ -20090,15 +20134,15 @@ then :
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
-	    CFLAGS="$_CFLAGS"
-	    LDFLAGS="$_LDFLAGS"
+		CFLAGS="$_CFLAGS"
+		LDFLAGS="$_LDFLAGS"
 
-     ;;
+	 ;;
 esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_var_ld___no_undefined" >&5
 printf "%s\n" "$sudo_cv_var_ld___no_undefined" >&6; }
-    if test "$sudo_cv_var_ld___no_undefined" = "yes"
+	if test "$sudo_cv_var_ld___no_undefined" = "yes"
 then :
 
 
@@ -20137,6 +20181,8 @@ fi
 
 
 fi
+     ;;
+esac
 
 fi
 
