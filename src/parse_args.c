@@ -796,7 +796,7 @@ help(void)
     int rows, cols;
     debug_decl(help, SUDO_DEBUG_ARGS);
 
-    sudo_get_ttysize(STDERR_FILENO, &rows, &cols);
+    sudo_get_ttysize(STDOUT_FILENO, &rows, &cols);
     sudo_lbuf_init(&lbuf, usage_out, indent, NULL, cols);
     if (strcmp(pname, "sudoedit") == 0) {
 	sudoedit = true;
