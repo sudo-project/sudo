@@ -533,6 +533,7 @@ get_user_info(struct user_details *ud)
     ud->pgid = getpgid(0);
     fd = open(_PATH_TTY, O_RDWR);
     if (fd != -1) {
+	sudo_get_ttysize(fd, &ud->ts_rows, &ud->ts_cols);
 	if ((ud->tcpgid = tcgetpgrp(fd)) == -1)
 	    ud->tcpgid = 0;
 	close(fd);
@@ -623,7 +624,6 @@ get_user_info(struct user_details *ud)
 	goto oom;
     ud->host = info[i] + sizeof("host=") - 1;
 
-    sudo_get_ttysize(STDERR_FILENO, &ud->ts_rows, &ud->ts_cols);
     if (asprintf(&info[++i], "lines=%d", ud->ts_rows) == -1)
 	goto oom;
     if (asprintf(&info[++i], "cols=%d", ud->ts_cols) == -1)
