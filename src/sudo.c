@@ -623,7 +623,7 @@ get_user_info(struct user_details *ud)
 	goto oom;
     ud->host = info[i] + sizeof("host=") - 1;
 
-    sudo_get_ttysize(&ud->ts_rows, &ud->ts_cols);
+    sudo_get_ttysize(STDERR_FILENO, &ud->ts_rows, &ud->ts_cols);
     if (asprintf(&info[++i], "lines=%d", ud->ts_rows) == -1)
 	goto oom;
     if (asprintf(&info[++i], "cols=%d", ud->ts_cols) == -1)

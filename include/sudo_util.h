@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2013-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -336,7 +336,8 @@ sudo_dso_public char *sudo_ttyname_dev_v1(dev_t tdev, char *name, size_t namelen
 
 /* ttysize.c */
 sudo_dso_public void sudo_get_ttysize_v1(int *rowp, int *colp);
-#define sudo_get_ttysize(_a, _b) sudo_get_ttysize_v1((_a), (_b))
+sudo_dso_public void sudo_get_ttysize_v2(int fd, int *rowp, int *colp);
+#define sudo_get_ttysize(_a, _b, _c) sudo_get_ttysize_v2((_a), (_b), (_c))
 
 /* uuid.c */
 sudo_dso_public void sudo_uuid_create_v1(unsigned char uuid_out[16]);
