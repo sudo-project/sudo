@@ -39,7 +39,7 @@ get_ttysize_ioctl(int fd, int *rowp, int *colp)
     struct winsize wsize;
     debug_decl(get_ttysize_ioctl, SUDO_DEBUG_UTIL);
 
-    if (isatty(fd) && ioctl(fd, TIOCGWINSZ, &wsize) == 0) {
+    if (fd != -1 && isatty(fd) && ioctl(fd, TIOCGWINSZ, &wsize) == 0) {
 	if (wsize.ws_row != 0 && wsize.ws_col != 0) {
 	    *rowp = wsize.ws_row;
 	    *colp = wsize.ws_col;

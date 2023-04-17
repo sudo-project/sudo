@@ -505,7 +505,7 @@ get_user_info(struct user_details *ud)
     unsigned int i = 0;
     mode_t mask;
     struct passwd *pw;
-    int fd, n;
+    int ttyfd, n;
     debug_decl(get_user_info, SUDO_DEBUG_UTIL);
 
     /*
@@ -531,12 +531,12 @@ get_user_info(struct user_details *ud)
     ud->pid = getpid();
     ud->ppid = getppid();
     ud->pgid = getpgid(0);
-    fd = open(_PATH_TTY, O_RDWR);
-    if (fd != -1) {
-	sudo_get_ttysize(fd, &ud->ts_rows, &ud->ts_cols);
-	if ((ud->tcpgid = tcgetpgrp(fd)) == -1)
+    ttyfd = open(_PATH_TTY, O_RDWR);
+    sudo_get_ttysize(ttyfd, &ud->ts_rows, &ud->ts_cols);
+    if (ttyfd != -1) {
+	if ((ud->tcpgid = tcgetpgrp(ttyfd)) == -1)
 	    ud->tcpgid = 0;
-	close(fd);
+	close(ttyfd);
     }
     if ((ud->sid = getsid(0)) == -1)
 	ud->sid = 0;
