@@ -185,7 +185,7 @@ get_process_ttyname(char *name, size_t namelen)
 
 	/* Missing /proc/pid/psinfo file. */
 	for (i = STDIN_FILENO; i <= STDERR_FILENO; i++) {
-	    if (isatty(i) && fstat(i, &sb) != -1) {
+	    if (sudo_isatty(i, &sb)) {
 		ret = sudo_ttyname_dev(sb.st_rdev, name, namelen);
 		goto done;
 	    }
@@ -286,7 +286,7 @@ get_process_ttyname(char *name, size_t namelen)
 
 	/* No parent pid found, /proc/self/stat is missing or corrupt. */
 	for (i = STDIN_FILENO; i <= STDERR_FILENO; i++) {
-	    if (isatty(i) && fstat(i, &sb) != -1) {
+	    if (sudo_isatty(i, &sb)) {
 		ret = sudo_ttyname_dev(sb.st_rdev, name, namelen);
 		goto done;
 	    }
@@ -347,25 +347,55 @@ done:
 char *
 get_process_ttyname(char *name, size_t namelen)
 {
+    struct stat sb;
     char *tty;
+    int i;
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL);
 
-    if ((tty = ttyname(STDIN_FILENO)) == NULL) {
-	if ((tty = ttyname(STDOUT_FILENO)) == NULL)
-	    tty = ttyname(STDERR_FILENO);
-    }
-    if (tty != NULL) {
-	if (strlcpy(name, tty, namelen) < namelen)
-	    debug_return_str(name);
-	errno = ERANGE;
-	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to store tty from ttyname");
-    } else {
-	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to resolve tty via ttyname");
-	errno = ENOENT;
+    for (i = STDIN_FILENO; i <= STDERR_FILENO; i++) {
+	/* Only call ttyname() on a character special device. */
+	if (fstat(i, &sb) == -1 || !S_ISCHR(sb.st_mode))
+	    continue;
+	if ((tty = ttyname(i)) == NULL)
+	    continue;
+
+	if (strlcpy(name, tty, namelen) >= namelen) {
+	    errno = ENAMETOOLONG;
+	    sudo_debug_printf(
+		SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		"unable to store tty from ttyname");
+	    debug_return_str(NULL);
+	}
+	debug_return_str(name);
     }
 
+    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	"unable to resolve tty via ttyname");
+    errno = ENOENT;
     debug_return_str(NULL);
 }
 #endif
+
+/*
+ * Like isatty(3) but stats the fd and stores the result in sb.
+ * Only calls isatty(3) if fd is a character special device.
+ * Returns true if a tty, else returns false and sets errno.
+ */
+bool
+sudo_isatty(int fd, struct stat *sb)
+{
+    bool ret = false;
+    debug_decl(sudo_isatty, SUDO_DEBUG_EXEC);
+
+    if (fstat(fd, sb) == 0) {
+        if (!S_ISCHR(sb->st_mode)) {
+            errno = ENOTTY;
+        } else {
+            ret = isatty(fd) == 1;
+        }
+    } else {
+	/* Always initialize sb. */
+	memset(sb, 0, sizeof(*sb));
+    }
+    debug_return_bool(ret);
+}

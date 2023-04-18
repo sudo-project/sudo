@@ -472,6 +472,7 @@ interpose_pipes(struct exec_closure *ec, int io_pipe[3][2])
     bool interpose[3] = { false, false, false };
     struct plugin_container *plugin;
     bool want_winch = false;
+    struct stat sb;
     debug_decl(interpose_pipes, SUDO_DEBUG_EXEC);
 
     /*
@@ -496,7 +497,7 @@ interpose_pipes(struct exec_closure *ec, int io_pipe[3][2])
      * use a pipe to interpose ourselves.
      */
     if (interpose[STDIN_FILENO]) {
-	if (!isatty(STDIN_FILENO)) {
+	if (!sudo_isatty(STDIN_FILENO, &sb)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdin not a tty, creating a pipe");
 	    if (pipe2(io_pipe[STDIN_FILENO], O_CLOEXEC) != 0)
@@ -506,7 +507,7 @@ interpose_pipes(struct exec_closure *ec, int io_pipe[3][2])
 	}
     }
     if (interpose[STDOUT_FILENO]) {
-	if (!isatty(STDOUT_FILENO)) {
+	if (!sudo_isatty(STDOUT_FILENO, &sb)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdout not a tty, creating a pipe");
 	    if (pipe2(io_pipe[STDOUT_FILENO], O_CLOEXEC) != 0)
@@ -516,7 +517,7 @@ interpose_pipes(struct exec_closure *ec, int io_pipe[3][2])
 	}
     }
     if (interpose[STDERR_FILENO]) {
-	if (!isatty(STDERR_FILENO)) {
+	if (!sudo_isatty(STDERR_FILENO, &sb)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stderr not a tty, creating a pipe");
 	    if (pipe2(io_pipe[STDERR_FILENO], O_CLOEXEC) != 0)

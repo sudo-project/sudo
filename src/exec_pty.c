@@ -1175,13 +1175,14 @@ exec_pty(struct command_details *details,
     /*
      * If stdin, stdout or stderr is not a tty and logging is enabled,
      * use a pipe to interpose ourselves instead of using the pty fd.
+     * We always use a pipe for stdin when in background mode.
      */
-    if (!isatty(STDIN_FILENO)) {
+    if (!sudo_isatty(STDIN_FILENO, &sb)) {
 	if (!interpose[STDIN_FILENO]) {
 	    /* Not logging stdin, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdin not a tty, not logging");
-	    if (fstat(STDIN_FILENO, &sb) == 0 && S_ISFIFO(sb.st_mode))
+	    if (S_ISFIFO(sb.st_mode))
 		pipeline = true;
 	    io_fds[SFD_STDIN] = dup(STDIN_FILENO);
 	    if (io_fds[SFD_STDIN] == -1)
@@ -1223,12 +1224,12 @@ exec_pty(struct command_details *details,
 	    close(io_pipe[STDIN_FILENO][1]);
 	    io_pipe[STDIN_FILENO][1] = -1;
     }
-    if (!isatty(STDOUT_FILENO)) {
+    if (!sudo_isatty(STDOUT_FILENO, &sb)) {
 	if (!interpose[STDOUT_FILENO]) {
 	    /* Not logging stdout, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdout not a tty, not logging");
-	    if (fstat(STDOUT_FILENO, &sb) == 0 && S_ISFIFO(sb.st_mode))
+	    if (S_ISFIFO(sb.st_mode))
 		pipeline = true;
 	    io_fds[SFD_STDOUT] = dup(STDOUT_FILENO);
 	    if (io_fds[SFD_STDOUT] == -1)
@@ -1244,12 +1245,12 @@ exec_pty(struct command_details *details,
 	    io_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
 	}
     }
-    if (!isatty(STDERR_FILENO)) {
+    if (!sudo_isatty(STDERR_FILENO, &sb)) {
 	if (!interpose[STDERR_FILENO]) {
 	    /* Not logging stderr, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stderr not a tty, not logging");
-	    if (fstat(STDERR_FILENO, &sb) == 0 && S_ISFIFO(sb.st_mode))
+	    if (S_ISFIFO(sb.st_mode))
 		pipeline = true;
 	    io_fds[SFD_STDERR] = dup(STDERR_FILENO);
 	    if (io_fds[SFD_STDERR] == -1)
