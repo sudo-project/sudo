@@ -3,6 +3,9 @@
 #ifndef SUDO_CONFIG_H
 #define SUDO_CONFIG_H
 
+/* Configure script arguments used to build sudo. */
+#undef CONFIGURE_ARGS
+
 /* Define to 1 if you want the insults from the "classic" version sudo. */
 #undef CLASSIC_INSULTS
 

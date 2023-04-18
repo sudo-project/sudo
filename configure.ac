@@ -86,7 +86,6 @@ AC_SUBST([LOGINCAP_USAGE])dnl
 AC_SUBST([ZLIB])dnl
 AC_SUBST([ZLIB_SRC])dnl
 AC_SUBST([LIBTOOL_DEPS])dnl
-AC_SUBST([CONFIGURE_ARGS], [$@])dnl
 AC_SUBST([LIBDL])dnl
 AC_SUBST([LIBRT])dnl
 AC_SUBST([LIBINTL])dnl
@@ -240,6 +239,7 @@ dnl
 dnl
 dnl Other variables
 dnl
+CONFIGURE_ARGS="$@"
 AUTH_REG=
 AUTH_EXCL=
 AUTH_EXCL_DEF=
@@ -1735,6 +1735,11 @@ AS_IF([test -n "$sudo_cv_prev_host"], [
     ])
 ])
 sudo_cv_prev_host="$host"
+
+dnl
+dnl Store configure arguments for "sudo -V"
+dnl
+SUDO_DEFINE_UNQUOTED([CONFIGURE_ARGS], "$CONFIGURE_ARGS")
 
 dnl
 dnl We want to be able to differentiate between different rev's
@@ -4686,7 +4691,10 @@ dnl
 dnl Bits to copy verbatim into config.h.in
 dnl
 AH_TOP([#ifndef SUDO_CONFIG_H
-#define SUDO_CONFIG_H])
+#define SUDO_CONFIG_H
+
+/* Configure script arguments used to build sudo. */
+#undef CONFIGURE_ARGS])
 
 AH_BOTTOM([#ifndef HAVE_SIG_ATOMIC_T
 typedef int			sig_atomic_t;

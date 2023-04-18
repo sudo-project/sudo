@@ -31,9 +31,4 @@
 #define SUDO_USAGE4 " [-ABbEHkNnPS] @BSDAUTH_USAGE@@SELINUX_USAGE@[-C num] [-D directory] @LOGINCAP_USAGE@[-g group] [-h host] [-p prompt] [-R directory] [-T timeout] [-u user] [VAR=value] [-i | -s] [command [arg ...]]"
 #define SUDO_USAGE5 " -e [-ABkNnS] @BSDAUTH_USAGE@@SELINUX_USAGE@[-C num] @LOGINCAP_USAGE@[-D directory] [-g group] [-h host] [-p prompt] [-R directory] [-T timeout] [-u user] file ..."
 
-/*
- * Configure script arguments used to build sudo.
- */
-#define CONFIGURE_ARGS "@CONFIGURE_ARGS@"
-
 #endif /* SUDO_USAGE_H */

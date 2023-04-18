@@ -809,7 +809,6 @@ LIBCRYPTO
 LIBINTL
 LIBRT
 LIBDL
-CONFIGURE_ARGS
 LIBTOOL_DEPS
 ZLIB_SRC
 ZLIB
@@ -3604,7 +3603,6 @@ AAMAN=0
 devdir='$(srcdir)'
 PRELOAD_MODULE='-module'
 LDAP='#'
-CONFIGURE_ARGS=$@
 SUDO_NLS=disabled
 exampledir='$(docdir)/examples'
 PYTHON_PLUGIN='#'
@@ -3714,6 +3712,7 @@ devsearch="/dev/pts:/dev/vt:/dev/term:/dev/zcons:/dev/pty:/dev"
 : ${SUDOERS_MODE='0440'}
 : ${SUDOERS_UID='0'}
 : ${SUDOERS_GID='0'}
+CONFIGURE_ARGS="$@"
 AUTH_REG=
 AUTH_EXCL=
 AUTH_EXCL_DEF=
@@ -17518,6 +17517,11 @@ fi
 
 fi
 sudo_cv_prev_host="$host"
+
+cat >>confdefs.h <<EOF
+#define CONFIGURE_ARGS "$CONFIGURE_ARGS"
+EOF
+
 
 if test -n "$host_os"
 then :
