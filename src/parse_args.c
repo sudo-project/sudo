@@ -695,56 +695,31 @@ parse_args(int argc, char **argv, const char *shell, int *old_optind,
     debug_return_int(mode | flags);
 }
 
-static int
-usage_err(const char *buf)
-{
-    return fputs(buf, stderr);
-}
-
-static int
-usage_out(const char *buf)
-{
-    return fputs(buf, stdout);
-}
-
 /*
  * Display usage message.
  * The actual usage strings are in sudo_usage.h for configure substitution.
  */
 static void
-display_usage(int (*output)(const char *), int cols)
+display_usage(FILE *fp)
 {
-    struct sudo_lbuf lbuf;
-    const char *uvec[6];
-    int i, ulen;
+    const char * const **uvecs = sudo_usage;
+    const char * const *uvec;
+    int i, indent;
 
     /*
      * Use usage vectors appropriate to the progname.
      */
-    if (strcmp(getprogname(), "sudoedit") == 0) {
-	uvec[0] = SUDO_USAGE0;
-	uvec[1] = &SUDO_USAGE5[3];	/* skip the leading "-e " */
-	uvec[2] = NULL;
-    } else {
-	uvec[0] = SUDO_USAGE1;
-	uvec[1] = SUDO_USAGE2;
-	uvec[2] = SUDO_USAGE3;
-	uvec[3] = SUDO_USAGE4;
-	uvec[4] = SUDO_USAGE5;
-	uvec[5] = NULL;
-    }
+    if (strcmp(getprogname(), "sudoedit") == 0)
+	uvecs = sudoedit_usage;
 
-    /*
-     * Print usage and wrap lines as needed, depending on the
-     * tty width.
-     */
-    ulen = (int)strlen(getprogname()) + 8;
-    sudo_lbuf_init(&lbuf, output, ulen, NULL, cols);
-    for (i = 0; uvec[i] != NULL; i++) {
-	sudo_lbuf_append(&lbuf, "usage: %s%s", getprogname(), uvec[i]);
-	sudo_lbuf_print(&lbuf);
+    indent = strlen(getprogname()) + 8;
+    while ((uvec = *uvecs) != NULL) {
+	(void)fprintf(fp, "usage: %s %s\n", getprogname(), uvec[0]);
+	for (i = 1; uvec[i] != NULL; i++) {
+	    (void)fprintf(fp, "%*s%s\n", indent, "", uvec[i]);
+	}
+	uvecs++;
     }
-    sudo_lbuf_destroy(&lbuf);
 }
 
 /*
@@ -753,10 +728,7 @@ display_usage(int (*output)(const char *), int cols)
 void
 usage(void)
 {
-    int rows, cols;
-
-    sudo_get_ttysize(STDERR_FILENO, &rows, &cols);
-    display_usage(usage_err, cols);
+    display_usage(stderr);
     exit(EXIT_FAILURE);
 }
 
@@ -786,6 +758,12 @@ usage_excl_ticket(void)
     usage();
 }
 
+static int
+help_out(const char *buf)
+{
+    return fputs(buf, stdout);
+}
+
 static void
 help(void)
 {
@@ -793,21 +771,17 @@ help(void)
     const int indent = 32;
     const char *pname = getprogname();
     bool sudoedit = false;
-    int rows, cols;
     debug_decl(help, SUDO_DEBUG_ARGS);
 
-    sudo_get_ttysize(STDOUT_FILENO, &rows, &cols);
-    sudo_lbuf_init(&lbuf, usage_out, indent, NULL, cols);
     if (strcmp(pname, "sudoedit") == 0) {
 	sudoedit = true;
-	sudo_lbuf_append(&lbuf, _("%s - edit files as another user\n\n"), pname);
+	(void)printf(_("%s - edit files as another user\n\n"), pname);
     } else {
-	sudo_lbuf_append(&lbuf, _("%s - execute a command as another user\n\n"), pname);
+	(void)printf(_("%s - execute a command as another user\n\n"), pname);
     }
-    sudo_lbuf_print(&lbuf);
+    display_usage(stdout);
 
-    display_usage(usage_out, cols);
-
+    sudo_lbuf_init(&lbuf, help_out, indent, NULL, 80);
     sudo_lbuf_append(&lbuf, "%s", _("\nOptions:\n"));
     sudo_lbuf_append(&lbuf, "  -A, --askpass                 %s\n",
 	_("use a helper program for password prompting"));
