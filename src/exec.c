@@ -440,7 +440,11 @@ sudo_execute(struct command_details *details,
 		cstat->val = errno;
 		debug_return_int(-1);
 	    case 0:
-		/* child continues without controlling terminal */
+		/*
+		 * Child continues in an orphaned process group.
+		 * Reads from the terminal fail with EIO.
+		 * Writes succeed unless tostop is set on the terminal.
+		 */
 		(void)setpgid(0, 0);
 		break;
 	    default:
