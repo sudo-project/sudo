@@ -145,6 +145,7 @@ $SIG{__DIE__} = \&die_hook;
 system("/usr/bin/caffeinate -i -w $main_pid") if -x "/usr/bin/caffeinate";
 
 # Keep track of which platforms belong to which VM server.
+my %pdu_servers;
 my %vm_servers;
 my %active_hosts;
 foreach my $platform (@platforms) {
@@ -156,6 +157,12 @@ foreach my $platform (@platforms) {
     }
     # Track the number of times an ssh host is used
     $active_hosts{$conf->{'ssh_host'}}++;
+
+    if (exists $conf->{'pdu_server'} && exists $conf->{'pdu_oid'}) {
+	my $agent = $conf->{"pdu_server"};
+	my $oid = $conf->{"pdu_oid"};
+	push(@{$pdu_servers{$agent, $oid}}, $conf);
+    }
 }
 
 # Open persistent ssh connections to VM servers
@@ -173,6 +180,22 @@ foreach my $vm_host (keys %vm_servers) {
 		push(@{$vm_servers{$vm_host}}, $conf);
 	    } else {
 		warn "unable to start VM " . $conf->{'ssh_host'} . " on $vm_host";
+	    }
+	}
+    }
+}
+
+# Power on servers connected to a PDU as needed
+foreach my $pdu_host (keys %pdu_servers) {
+    my $pdu_confs = $pdu_servers{$pdu_host};
+    delete $pdu_servers{$pdu_host};
+    while (my $conf = pop @{$pdu_confs}) {
+	if (!pdu_is_running($pdu_host, $conf)) {
+	    if (pdu_poweron($pdu_host, $conf)) {
+		push(@{$pdu_servers{$pdu_host}}, $conf);
+	    } else {
+		my ($agent, $oid) = split(/$;/, $pdu_host);
+		warn "unable to start server " . $conf->{'ssh_host'} . " on $agent ($oid)";
 	    }
 	}
     }
@@ -244,8 +267,8 @@ sub cleanup_build_dir {
     my ($host, $conf) = @_;
 
     # Wait for VM to power on
-    if (exists $conf->{"vm_host"}) {
-	die "unable to connect to $host\n" unless wait_for_ssh($host);
+    if (exists $conf->{"vm_host"} || exists $conf->{"pdu_server"}) {
+	die "unable to connect to $host\n" unless wait_for_ssh($conf);
     }
 
     # Remove any remove temporary directories
@@ -311,8 +334,8 @@ sub run_job {
     print BUILDLOG "Build for ${platform} \@ ${host} started $now\n\n";
 
     # Wait for VM to power on
-    if (exists $conf->{"vm_host"}) {
-	if (!wait_for_ssh($host)) {
+    if (exists $conf->{"vm_host"} || exists $conf->{"pdu_server"}) {
+	if (!wait_for_ssh($conf)) {
 	    print BUILDLOG "$platform: unable to connect to $host\n";
 	    exit(1);
 	}
@@ -722,9 +745,12 @@ sub close_persistent_connections {
 sub vm_is_running {
     # vim-cmd vmsvc/power.getstate VMID
     my ($host, $conf) = @_;
+    my @ssh_opts = ( "-S", "$sockets/$host" );
+    my $ssh_host = $conf->{'ssh_host'};
     my $outbuf;
 
-    my @cmdline = ssh_cmdline($host, "vim-cmd vmsvc/power.getstate " . $conf->{'vmid'});
+    my @cmdline = ssh_cmdline($host,
+	"vim-cmd vmsvc/power.getstate " . $conf->{'vmid'}, @ssh_opts);
     run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
 
     $outbuf =~ /Powered on/;
@@ -733,10 +759,13 @@ sub vm_is_running {
 sub vm_poweron {
     # vim-cmd vmsvc/power.on VMID
     my ($host, $conf) = @_;
+    my @ssh_opts = ( "-S", "$sockets/$host" );
+    my $ssh_host = $conf->{'ssh_host'};
     my $outbuf;
 
-    printf("Powering on VM %s on %s\n", $conf->{'ssh_host'}, $host) if $verbose;
-    my @cmdline = ssh_cmdline($host, "vim-cmd vmsvc/power.on " . $conf->{'vmid'});
+    printf("Powering on VM %s on %s\n", $ssh_host, $host) if $verbose;
+    my @cmdline = ssh_cmdline($host,
+	"vim-cmd vmsvc/power.on " . $conf->{'vmid'}, @ssh_opts);
     run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
 
     $outbuf =~ /Powering on VM/;
@@ -745,11 +774,13 @@ sub vm_poweron {
 sub vm_shutdown {
     # vim-cmd vmsvc/power.shutdown VMID
     my ($host, $conf) = @_;
+    my @ssh_opts = ( "-S", "$sockets/$host" );
     my $ssh_host = $conf->{'ssh_host'};
     my $outbuf;
 
     printf("Shutting down VM %s on %s\n", $ssh_host, $host) if $verbose;
-    my @cmdline = ssh_cmdline($host, "vim-cmd vmsvc/power.shutdown " . $conf->{'vmid'});
+    my @cmdline = ssh_cmdline($host,
+	"vim-cmd vmsvc/power.shutdown " . $conf->{'vmid'}, @ssh_opts);
     run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
 
     # Check for, e.g. vim.fault.ToolsUnavailable or vim.fault.InvalidPowerState
@@ -757,7 +788,8 @@ sub vm_shutdown {
 	# VM tools not installed, login directly to shut down
 	if (exists $conf->{'shutdown'}) {
 	    # login directly to shut down
-	    @cmdline = ssh_cmdline($ssh_host, $conf->{'shutdown'});
+	    @cmdline = ssh_cmdline($ssh_host, $conf->{'shutdown'}, "-S",
+		"$sockets/$ssh_host");
 	    run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
 	} else {
 	    warn "unable to shut down $ssh_host on $host: VM tools not installed\n";
@@ -769,16 +801,77 @@ sub vm_shutdown {
     $outbuf !~ /vim\.fault\./;
 }
 
-# Try to connect to port 22 on the host.
+sub pdu_is_running {
+    my ($host, $conf) = @_;
+    my ($agent, $oid) = split(/$;/, $host);
+    my $outbuf;
+
+    # Assumes module name matches first level of OID
+    my $module = $oid;
+    $module =~ s/::.*//;
+
+    my @cmdline = ("snmpget", "-m", "+$module", "-c", "public", "-v1",
+	$agent, $oid);
+    run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
+
+    $outbuf =~ /:\s*1$/;
+}
+
+sub pdu_poweron {
+    my ($host, $conf) = @_;
+    my ($agent, $oid) = split(/$;/, $host);
+    my $ssh_host = $conf->{'ssh_host'};
+    my $outbuf;
+
+    # Assumes module name matches first level of OID
+    my $module = $oid;
+    $module =~ s/::.*//;
+
+    printf("Powering on %s via %s\n", $ssh_host, $agent) if $verbose;
+    my @cmdline = ("snmpset", "-m", "+$module", "-c", "private", "-v1",
+	$agent, $oid, "i", "1");
+    run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
+
+    $outbuf =~ /:\s*1$/;
+}
+
+sub pdu_shutdown {
+    my ($host, $conf) = @_;
+    my ($agent, $oid) = split(/$;/, $host);
+    my $ssh_host = $conf->{'ssh_host'};
+    my @ssh_opts = ( "-S", "$sockets/$ssh_host" );
+    my $outbuf;
+
+    # Assumes module name matches first level of OID
+    my $module = $oid;
+    $module =~ s/::.*//;
+
+    printf("Powering off %s via %s\n", $ssh_host, $agent) if $verbose;
+
+    # Login via ssh to shut down (assume user can run poweroff w/o privs)
+    my @cmdline = ssh_cmdline($ssh_host, 'poweroff', @ssh_opts);
+    run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
+    # XXX - wait until we can't ping it?
+    sleep(1);
+
+    # Turn off power to the outlet using snmp
+    @cmdline = ("snmpset", "-m", "+$module", "-c", "private", "-v1", $agent,
+	$oid, "i", "0");
+    run(\@cmdline, '<', \undef, '>&', \$outbuf, debug => $debug);
+
+    $outbuf =~ /:\s*1$/;
+}
+
+# Try to connect to the specified port on the host looking for an SSH banner.
 # Returns 1 on success, 0 on failure
 sub ping_ssh {
-    my $host = shift;
+    my ($host, $port) = @_;
     my $ret = 0;
 
     # Create socket and connect
     my $sock = IO::Socket::IP->new(
 	PeerHost => $host,
-	PeerPort => "22",
+	PeerPort => "$port",
 	Timeout  => 20,
 	Type     => SOCK_STREAM
     );
@@ -792,7 +885,9 @@ sub ping_ssh {
 }
 
 sub wait_for_ssh {
-    my $host = shift;
+    my $conf = shift;
+    my $host = $conf->{'ssh_host'};
+    my $port = 22;
 
     # Sleep until sshd is available (or we time out)
     my $sleeptime = 10;
@@ -800,7 +895,7 @@ sub wait_for_ssh {
     while ($timeout > 0) {
 	sleep($sleeptime);
 	$timeout -= $sleeptime;
-	return 1 if ping_ssh($host);
+	return 1 if ping_ssh($host, $port);
     }
 
     return 0;
@@ -970,6 +1065,13 @@ END {
     while (my ($vm_host, $configs) = each %vm_servers) {
 	foreach my $conf (@{$configs}) {
 	    vm_shutdown($vm_host, $conf);
+	}
+    }
+
+    # Power down servers on a PDU cleanly if any are still running
+    while (my ($pdu_host, $configs) = each %pdu_servers) {
+	foreach my $conf (@{$configs}) {
+	    pdu_shutdown($pdu_host, $conf);
 	}
     }
 
