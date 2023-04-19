@@ -1150,10 +1150,8 @@ exec_pty(struct command_details *details,
 
     /*
      * Setup stdin/stdout/stderr for command, to be duped after forking.
-     * In background mode there is no stdin.
      */
-    if (!ISSET(details->flags, CD_BACKGROUND))
-	io_fds[SFD_STDIN] = io_fds[SFD_FOLLOWER];
+    io_fds[SFD_STDIN] = io_fds[SFD_FOLLOWER];
     io_fds[SFD_STDOUT] = io_fds[SFD_FOLLOWER];
     io_fds[SFD_STDERR] = io_fds[SFD_FOLLOWER];
 
@@ -1178,7 +1176,7 @@ exec_pty(struct command_details *details,
      * If stdin, stdout or stderr is not a tty and logging is enabled,
      * use a pipe to interpose ourselves instead of using the pty fd.
      */
-    if (io_fds[SFD_STDIN] == -1 || !isatty(STDIN_FILENO)) {
+    if (!isatty(STDIN_FILENO)) {
 	if (!interpose[STDIN_FILENO]) {
 	    /* Not logging stdin, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -1208,8 +1206,24 @@ exec_pty(struct command_details *details,
 	     */
 	    SET(details->flags, CD_EXEC_BG);
 	}
+    } else if (ISSET(details->flags, CD_BACKGROUND)) {
+	    /*
+	     * Running in background (sudo -b), no access to terminal input.
+	     * In non-pty mode, the command runs in an orphaned process
+	     * group and reads from the controlling terminal fail with EIO.
+	     * We cannot do the same while running in a pty but if we set
+	     * stdin to a half-closed pipe, reads from it will get EOF.
+	     */
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"terminal input not available, creating empty pipe");
+	    pipeline = true;
+	    if (pipe2(io_pipe[STDIN_FILENO], O_CLOEXEC) != 0)
+		sudo_fatal("%s", U_("unable to create pipe"));
+	    io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
+	    close(io_pipe[STDIN_FILENO][1]);
+	    io_pipe[STDIN_FILENO][1] = -1;
     }
-    if (io_fds[SFD_STDOUT] == -1 || !isatty(STDOUT_FILENO)) {
+    if (!isatty(STDOUT_FILENO)) {
 	if (!interpose[STDOUT_FILENO]) {
 	    /* Not logging stdout, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -1230,7 +1244,7 @@ exec_pty(struct command_details *details,
 	    io_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
 	}
     }
-    if (io_fds[SFD_STDERR] == -1 || !isatty(STDERR_FILENO)) {
+    if (!isatty(STDERR_FILENO)) {
 	if (!interpose[STDERR_FILENO]) {
 	    /* Not logging stderr, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
