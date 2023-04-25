@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+#include <netdb.h>
 #include <regex.h>
 #include <time.h>
 #include <unistd.h>
