@@ -189,12 +189,14 @@ main(int argc, char *argv[])
 
 next:
 	lbuf.len = 0;
+	eventlog_json_free(root);
 	eventlog_free(evlog);
 	if (infp != NULL)
 	    fclose(infp);
 	if (outfp != NULL && outfp != infp)
 	    fclose(outfp);
     }
+    sudo_lbuf_destroy(&lbuf);
 
     if (ntests != 0) {
 	printf("%s: %d test%s run, %d errors, %d%% success rate\n",
