@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <netdb.h>
 #include <regex.h>
 #include <time.h>
@@ -69,8 +70,8 @@ sudo_regex_compile_v1(void *v, const char *pattern, const char **errstr)
 
 /*
  * The fuzzing environment may not have DNS available, this may result
- * in long delays that cause a timeout when fuzzing.  This getaddrinfo()
- * can look up "localhost" and returns an error for anything else.
+ * in long delays that cause a timeout when fuzzing.
+ * This getaddrinfo() resolves every name as "localhost" (127.0.0.1).
  */
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
 /* Avoid compilation errors if getaddrinfo() or freeaddrinfo() are macros. */
@@ -88,12 +89,30 @@ sudo_getaddrinfo(
 {
     struct addrinfo *ai;
     struct in_addr addr;
+    unsigned short port = 0;
 
     /* Stub getaddrinfo(3) to avoid a DNS timeout in CIfuzz. */
-    if (strcmp(nodename, "localhost") != 0 || servname != NULL)
-	return EAI_FAIL;
+    if (servname == NULL) {
+	/* Must have either nodename or servname. */
+	if (nodename == NULL)
+	    return EAI_NONAME;
+    } else {
+	struct servent *servent;
+	const char *errstr;
 
-    /* Hard-code localhost. */
+	/* Parse servname as a port number or IPv4 TCP service name. */
+	port = sudo_strtonum(servname, 0, USHRT_MAX, &errstr);
+	if (errstr != NULL && errno == ERANGE)
+	    return EAI_SERVICE;
+	if (flags & AI_NUMERICSERV)
+	    return EAI_NONAME;
+	servent = getservbyname(servname, "tcp");
+	if (servent == NULL)
+	    return EAI_NONAME;
+	port = htons(servent->s_port);
+    }
+
+    /* Hard-code IPv4 localhost for fuzzing. */
     ai = calloc(1, sizeof(*ai) + sizeof(struct sockaddr_in));
     if (ai == NULL)
 	return EAI_MEMORY;
