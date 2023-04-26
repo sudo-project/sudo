@@ -104,7 +104,7 @@ sudo_getaddrinfo(
 	port = sudo_strtonum(servname, 0, USHRT_MAX, &errstr);
 	if (errstr != NULL && errno == ERANGE)
 	    return EAI_SERVICE;
-	if (flags & AI_NUMERICSERV)
+	if (hints != NULL && ISSET(hints->ai_flags, AI_NUMERICSERV))
 	    return EAI_NONAME;
 	servent = getservbyname(servname, "tcp");
 	if (servent == NULL)
@@ -128,6 +128,7 @@ sudo_getaddrinfo(
     inet_pton(AF_INET, "127.0.0.1", &addr);
     ((struct sockaddr_in *)ai->ai_addr)->sin_family = AF_INET;
     ((struct sockaddr_in *)ai->ai_addr)->sin_addr = addr;
+    ((struct sockaddr_in *)ai->ai_addr)->sin_port = htons(port);
     *res = ai;
     return 0;
 }
