@@ -34207,33 +34207,11 @@ else case e in #(
   e) cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-
+		    #include <stdio.h>
 int
 main (void)
 {
-char buf[4]; (void)sprintf(buf, "%s", "foo");
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"
-then :
-  sudo_cv_use_fortify_source=yes
-else case e in #(
-  e) sudo_cv_use_fortify_source=no
-		 ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
-
-	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main (void)
-{
+char buf[4]; sprintf(buf, "%s", "foo"); return buf[0];
 
   ;
   return 0;
