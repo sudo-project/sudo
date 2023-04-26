@@ -52,7 +52,7 @@ AC_DEFUN([SUDO_CHECK_LDAP], [
 #include <lber.h>])
 	AC_CACHE_CHECK([whether lber.h is needed when including ldap.h], [sudo_cv_header_lber_h], [
 	    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-#include <ldap.h>]], [[(void)ldap_init(0, 0)]])], [
+#include <ldap.h>]], [[return ldap_msgfree(NULL)]])], [
 		# No need to explicitly include lber.h when including ldap.h.
 		sudo_cv_header_lber_h=no
 	    ], [

@@ -31515,7 +31515,7 @@ else case e in #(
 int
 main (void)
 {
-(void)ldap_init(0, 0)
+return ldap_msgfree(NULL)
   ;
   return 0;
 }
