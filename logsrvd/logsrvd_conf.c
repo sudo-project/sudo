@@ -544,9 +544,6 @@ append_address(struct server_address_list *addresses, const char *str,
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
-#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
-    hints.ai_flags |= AI_NUMERICSERV;
-#endif
     error = getaddrinfo(host, port, &hints, &res0);
     if (error != 0) {
 	sudo_gai_warn(error, U_("%s:%s"), host ? host : "*", port);
