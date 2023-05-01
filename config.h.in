@@ -38,8 +38,8 @@
 /* Define to 1 if you want to require fully qualified hosts in sudoers. */
 #undef FQDN
 
-/* Define to the type of elements in the array set by 'getgroups'. Usually
-   this is either 'int' or 'gid_t'. */
+/* Define to the type of elements in the array argument to 'getgroups'.
+   Usually this is either 'int' or 'gid_t'. */
 #undef GETGROUPS_T
 
 /* Define to 1 if you want insults from the "Goon Show". */
@@ -1465,7 +1465,7 @@
 /* Define to empty if 'const' does not conform to ANSI C. */
 #undef const
 
-/* Define to 'int' if <sys/types.h> doesn't define. */
+/* Define as 'int' if <sys/types.h> doesn't define. */
 #undef gid_t
 
 /* Define to '__inline__' or '__inline' if that's what the C compiler
@@ -1497,10 +1497,7 @@
 /* Define to an OS-specific initialization function or 'os_init_common'. */
 #undef os_init
 
-/* Define to 'unsigned int' if <sys/types.h> does not define. */
-#undef size_t
-
-/* Define to 'int' if <sys/types.h> doesn't define. */
+/* Define as 'int' if <sys/types.h> doesn't define. */
 #undef uid_t
 
 /* Define to the type of an unsigned integer type of width exactly 16 bits if
