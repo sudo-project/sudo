@@ -274,7 +274,7 @@ main(int argc, char *argv[])
     }
 
     /* Initialize the parser and set sudoers filename to "sudoers". */
-    init_parser_ext("sudoers", NULL, true, 2);
+    init_parser("sudoers", NULL, true, 2);
 
     /*
      * Set runas passwd/group entries based on command line or sudoers.
