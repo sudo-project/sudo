@@ -335,6 +335,7 @@ void sudoersrestart(FILE *);
 extern FILE *sudoersin;
 extern const char *sudoers_file;
 extern char *sudoers;
+extern char *sudoers_search_path;
 extern mode_t sudoers_mode;
 extern uid_t sudoers_uid;
 extern gid_t sudoers_gid;

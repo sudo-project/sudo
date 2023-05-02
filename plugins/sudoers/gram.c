@@ -3965,7 +3965,7 @@ free_parse_tree(struct sudoers_parse_tree *parse_tree)
  * the current sudoers file to path.
  */
 bool
-init_parser_ext(const char *path, bool strict, int verbose)
+init_parser_ext(const char *file, const char *path, bool strict, int verbose)
 {
     bool ret = true;
     debug_decl(init_parser, SUDOERS_DEBUG_PARSER);
@@ -3975,13 +3975,23 @@ init_parser_ext(const char *path, bool strict, int verbose)
     init_lexer();
 
     sudo_rcstr_delref(sudoers);
-    if (path != NULL) {
-	if ((sudoers = sudo_rcstr_dup(path)) == NULL) {
+    if (file != NULL) {
+	if ((sudoers = sudo_rcstr_dup(file)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    ret = false;
 	}
     } else {
 	sudoers = NULL;
+    }
+
+    sudo_rcstr_delref(sudoers_search_path);
+    if (path != NULL) {
+	if ((sudoers_search_path = sudo_rcstr_dup(path)) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    ret = false;
+	}
+    } else {
+	sudoers_search_path = NULL;
     }
 
     parse_error = false;
@@ -3992,9 +4002,9 @@ init_parser_ext(const char *path, bool strict, int verbose)
 }
 
 bool
-init_parser(const char *path)
+init_parser(const char *file)
 {
-    return init_parser_ext(path, false, 1);
+    return init_parser_ext(file, NULL, false, 1);
 }
 
 /*

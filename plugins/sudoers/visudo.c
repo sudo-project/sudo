@@ -287,7 +287,7 @@ main(int argc, char *argv[])
      * Parse the existing sudoers file(s) to highlight any existing
      * errors and to pull in editor and env_editor conf values.
      */
-    init_parser_ext(NULL, true, quiet ? 0 : 2);
+    init_parser_ext(NULL, sudoers_file, true, quiet ? 0 : 2);
     if ((sudoersin = open_sudoers(sudoers_file, &sudoers, true, NULL)) == NULL)
 	exit(EXIT_FAILURE);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
@@ -650,7 +650,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	/* Clean slate for each parse */
 	if (!init_defaults())
 	    sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
-	init_parser_ext(sp->opath, true, quiet ? 0 : 2);
+	init_parser_ext(sp->opath, sudoers_file, true, quiet ? 0 : 2);
 	sp->errorline = -1;
 
 	/* Parse the sudoers temp file(s) */
@@ -1067,7 +1067,7 @@ check_syntax(const char *path, bool quiet, bool strict, bool check_owner,
 	    goto done;
 	}
     }
-    init_parser_ext(fname, true, quiet ? 0 : 2);
+    init_parser_ext(fname, path, true, quiet ? 0 : 2);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     if (sudoersparse() && !parse_error) {
 	if (!quiet)
@@ -1228,7 +1228,7 @@ open_sudoers(const char *path, char **outfile, bool doedit, bool *keepopen)
     /* Check for existing entry using the first file in path. */
     len = strcspn(path, ":");
     TAILQ_FOREACH(entry, &sudoerslist, entries) {
-	if (strncmp(path, entry->opath, len) == 0 && entry->opath[len] == '\0')
+	if (strncmp(path, entry->dpath, len) == 0 && entry->dpath[len] == '\0')
 	    break;
     }
     if (entry == NULL) {
