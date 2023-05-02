@@ -226,7 +226,7 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 		ldapssl_err2string(ret));
 	    if (ldap_conf.tls_certfile == NULL)
 		sudo_warnx(U_("you must set TLS_CERT in %s to use SSL"),
-		    path_ldap_conf);
+		    policy_path_ldap_conf());
 	    goto done;
 	}
 

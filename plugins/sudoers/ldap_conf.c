@@ -354,7 +354,7 @@ sudo_ldap_read_secret(const char *path)
     ssize_t len;
     debug_decl(sudo_ldap_read_secret, SUDOERS_DEBUG_LDAP);
 
-    if ((fp = fopen(path_ldap_secret, "r")) != NULL) {
+    if ((fp = fopen(policy_path_ldap_secret(), "r")) != NULL) {
 	len = getdelim(&line, &linesize, '\n', fp);
 	if (len != -1) {
 	    /* trim newline */
@@ -428,7 +428,7 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
 		    &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx(U_("%s: %s: %s: %s"),
-			path_ldap_conf, keyword, value, U_(errstr));
+			policy_path_ldap_conf(), keyword, value, U_(errstr));
 		}
 		break;
 	    case CONF_STR:
@@ -561,7 +561,7 @@ sudo_ldap_read_config(void)
 	debug_return_bool(false);
     }
 
-    if ((fp = fopen(path_ldap_conf, "r")) == NULL)
+    if ((fp = fopen(policy_path_ldap_conf(), "r")) == NULL)
 	debug_return_bool(false);
 
     while (sudo_parseln(&line, &linesize, NULL, fp, PARSELN_COMM_BOL|PARSELN_CONT_IGN) != -1) {
@@ -777,7 +777,7 @@ sudo_ldap_read_config(void)
 
     /* If rootbinddn set, read in /etc/ldap.secret if it exists. */
     if (ldap_conf.rootbinddn) {
-	sudo_ldap_read_secret(path_ldap_secret);
+	sudo_ldap_read_secret(policy_path_ldap_secret());
     } else if (ldap_conf.bindpw) {
 	cp = sudo_ldap_decode_secret(ldap_conf.bindpw);
 	if (cp != NULL) {

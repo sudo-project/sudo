@@ -451,8 +451,8 @@ void sudoers_debug_deregister(void);
 int sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults);
 bool sudoers_policy_store_result(bool accepted, char *argv[], char *envp[], mode_t cmnd_umask, char *iolog_path, void *v);
 const char *policy_path_sudoers(void);
-extern const char *path_ldap_conf;
-extern const char *path_ldap_secret;
+const char *policy_path_ldap_conf(void);
+const char *policy_path_ldap_secret(void);
 
 /* group_plugin.c */
 int group_plugin_load(const char *plugin_info);

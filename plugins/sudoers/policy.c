@@ -54,8 +54,8 @@ static const char *interfaces_string;
 sudo_conv_t sudo_conv;
 sudo_printf_t sudo_printf;
 struct sudo_plugin_event * (*plugin_event_alloc)(void);
-const char *path_ldap_conf = _PATH_LDAP_CONF;
-const char *path_ldap_secret = _PATH_LDAP_SECRET;
+static const char *path_ldap_conf = _PATH_LDAP_CONF;
+static const char *path_ldap_secret = _PATH_LDAP_SECRET;
 static const char *path_sudoers = _PATH_SUDOERS;
 static bool session_opened;
 int sudoedit_nfiles;
@@ -632,6 +632,20 @@ const char *
 policy_path_sudoers(void)
 {
     return path_sudoers;
+}
+
+/* Return the path to ldap.conf file, which may be set in the plugin args. */
+const char *
+policy_path_ldap_conf(void)
+{
+    return path_ldap_conf;
+}
+
+/* Return the path to ldap.secret file, which may be set in the plugin args. */
+const char *
+policy_path_ldap_secret(void)
+{
+    return path_ldap_secret;
 }
 
 /*
