@@ -72,8 +72,8 @@ TESTSUDOERS_LIBS = $(NET_LIBS)
 
 # C preprocessor defines
 CPPDEFS = -DLIBDIR=\"$(libdir)\" -DLOCALEDIR=\"$(localedir)\" \
-	  -D_PATH_SUDOERS=\"$(sysconfdir)/sudoers\" \
-	  -D_PATH_CVTSUDOERS_CONF=\"$(sysconfdir)/cvtsudoers.conf\" \
+	  -D_PATH_SUDOERS=\"@sudoers_path@\" \
+	  -D_PATH_CVTSUDOERS_CONF=\"@cvtsudoers_conf@\" \
 	  -DSUDOERS_UID=$(sudoers_uid) -DSUDOERS_GID=$(sudoers_gid) \
 	  -DSUDOERS_MODE=$(sudoers_mode)
 

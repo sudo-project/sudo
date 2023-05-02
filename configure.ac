@@ -123,7 +123,14 @@ AC_SUBST([PPFILES], ['$(srcdir)/etc/sudo.pp'])dnl
 AC_SUBST([FUZZ_ENGINE])dnl
 AC_SUBST([FUZZ_LD], ['$(CC)'])dnl
 AC_SUBST([INTERCEPT_EXP])dnl
-
+dnl
+dnl Config file paths
+dnl Either a single file or a colon-separated list of paths.
+dnl
+AC_SUBST([cvtsudoers_conf], ['$(sysconfdir)/cvtsudoers.conf'])dnl
+AC_SUBST([sudo_conf], ['$(sysconfdir)/sudo.conf'])dnl
+AC_SUBST([sudo_logsrvd_conf], ['$(sysconfdir)/sudo_logsrvd.conf'])dnl
+AC_SUBST([sudoers_path], ['$(sysconfdir)/sudoers'])dnl
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl

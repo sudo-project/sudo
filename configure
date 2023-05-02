@@ -771,6 +771,10 @@ relay_dir
 logpath
 log_dir
 iolog_dir
+sudoers_path
+sudo_logsrvd_conf
+sudo_conf
+cvtsudoers_conf
 INTERCEPT_EXP
 FUZZ_LD
 FUZZ_ENGINE
@@ -3626,7 +3630,10 @@ LOGSRVD_CONF='sudo_logsrvd.conf'
 LIBLOGSRV='$(top_builddir)/lib/logsrv/liblogsrv.la $(top_builddir)/lib/protobuf-c/libprotobuf-c.la'
 PPFILES='$(srcdir)/etc/sudo.pp'
 FUZZ_LD='$(CC)'
-
+cvtsudoers_conf='$(sysconfdir)/cvtsudoers.conf'
+sudo_conf='$(sysconfdir)/sudo.conf'
+sudo_logsrvd_conf='$(sysconfdir)/sudo_logsrvd.conf'
+sudoers_path='$(sysconfdir)/sudoers'
 
 
 

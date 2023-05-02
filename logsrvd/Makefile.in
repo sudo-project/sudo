@@ -52,7 +52,7 @@ LT_LIBS = $(top_builddir)/lib/iolog/libsudo_iolog.la \
 LIBS = $(LT_LIBS) @LIBTLS@
 
 # C preprocessor defines
-CPPDEFS = -D_PATH_SUDO_LOGSRVD_CONF=\"$(sysconfdir)/sudo_logsrvd.conf\" \
+CPPDEFS = -D_PATH_SUDO_LOGSRVD_CONF=\"@sudo_logsrvd_conf@\" \
 	  -DLOCALEDIR=\"$(localedir)\"
 
 # C preprocessor flags

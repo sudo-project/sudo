@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1851,25 +1851,39 @@ logsrvd_conf_apply(struct logsrvd_config *config)
 
 /*
  * Read .ini style logsrvd.conf file.
+ * If path is NULL, use _PATH_SUDO_LOGSRVD_CONF.
  * Note that we use '#' not ';' for the comment character.
  */
 bool
 logsrvd_conf_read(const char *path)
 {
     struct logsrvd_config *config;
+    char conf_file[PATH_MAX];
     bool ret = false;
     FILE *fp = NULL;
+    int fd = -1;
     debug_decl(logsrvd_conf_read, SUDO_DEBUG_UTIL);
 
     config = logsrvd_conf_alloc();
 
-    if ((fp = fopen(path, "r")) == NULL) {
-	if (errno != ENOENT) {
-	    sudo_warn("%s", path);
+    if (path != NULL) {
+       if (strlcpy(conf_file, path, sizeof(conf_file)) >= sizeof(conf_file))
+            errno = ENAMETOOLONG;
+	else
+	    fd = open(conf_file, O_RDONLY);
+    } else {
+	fd = sudo_open_conf_path(_PATH_SUDO_LOGSRVD_CONF, conf_file,
+	    sizeof(conf_file), NULL);
+    }
+    if (fd != -1)
+	fp = fdopen(fd, "r");
+    if (fp == NULL) {
+	if (path != NULL || errno != ENOENT) {
+	    sudo_warn("%s", conf_file);
 	    goto done;
 	}
     } else {
-	if (!logsrvd_conf_parse(config, fp, path))
+	if (!logsrvd_conf_parse(config, fp, conf_file))
 	    goto done;
     }
 

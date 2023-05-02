@@ -85,7 +85,7 @@ TAILQ_HEAD(connection_list, connection_closure);
 static struct connection_list connections = TAILQ_HEAD_INITIALIZER(connections);
 static struct listener_list listeners = TAILQ_HEAD_INITIALIZER(listeners);
 static const char server_id[] = "Sudo Audit Server " PACKAGE_VERSION;
-static const char *conf_file = _PATH_SUDO_LOGSRVD_CONF;
+static const char *conf_file = NULL;
 
 /* Event loop callbacks. */
 static void client_msg_cb(int fd, int what, void *v);
@@ -1671,7 +1671,8 @@ server_dump_stats(void)
     debug_decl(server_dump_stats, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s", server_id);
-    sudo_debug_printf(SUDO_DEBUG_INFO, "configuration file: %s", conf_file);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "configuration file: %s",
+	conf_file ? conf_file : _PATH_SUDO_LOGSRVD_CONF);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "listen addresses:");
     n = 0;

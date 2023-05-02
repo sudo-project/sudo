@@ -35,6 +35,7 @@
 #endif /* HAVE_STRINGS_H */
 #include <ctype.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <pwd.h>
 #include <unistd.h>
 #ifdef HAVE_GETOPT_LONG
@@ -112,7 +113,7 @@ main(int argc, char *argv[])
     enum sudoers_formats input_format = format_sudoers;
     const char *input_file = "-";
     const char *output_file = "-";
-    const char *conf_file = _PATH_CVTSUDOERS_CONF;
+    const char *conf_file = NULL;
     const char *grfile = NULL, *pwfile = NULL;
     const char *cp, *errstr;
     int ch, exitcode = EXIT_FAILURE;
@@ -548,36 +549,56 @@ cvtsudoers_parse_keyword(const char *conf_file, const char *keyword,
 }
 
 static struct cvtsudoers_config *
-cvtsudoers_conf_read(const char *conf_file)
+cvtsudoers_conf_read(const char *path)
 {
-    char *line = NULL;
+    char conf_file[PATH_MAX], *line = NULL;
     size_t linesize = 0;
-    FILE *fp;
+    FILE *fp = NULL;
+    int fd = -1;
     debug_decl(cvtsudoers_conf_read, SUDOERS_DEBUG_UTIL);
 
-    if ((fp = fopen(conf_file, "r")) == NULL)
+    if (path != NULL) {
+	/* Empty string means use the defaults. */
+	if (*path == '\0')
+	    debug_return_ptr(&cvtsudoers_config);
+	if (strlcpy(conf_file, path, sizeof(conf_file)) >= sizeof(conf_file))
+	    errno = ENAMETOOLONG;
+	else 
+	    fd = open(conf_file, O_RDONLY);
+    } else {
+	fd = sudo_open_conf_path(_PATH_CVTSUDOERS_CONF, conf_file,
+	    sizeof(conf_file), NULL);
+    }
+    if (fd != -1)
+	fp = fdopen(fd, "r");
+    if (fp == NULL) {
+	if (path != NULL || errno != ENOENT)
+	    sudo_warn("%s", conf_file);
 	debug_return_ptr(&cvtsudoers_config);
+    }
 
     while (sudo_parseln(&line, &linesize, NULL, fp, 0) != -1) {
-	char *cp, *keyword, *value;
+	char *keyword, *value;
+	size_t len;
 
 	if (*line == '\0')
 	    continue;		/* skip empty line */
 
 	/* Parse keyword = value */
 	keyword = line;
-	if ((cp = strchr(line, '=')) == NULL)
+	if ((value = strchr(line, '=')) == NULL || value == line)
 	    continue;
-	value = cp-- + 1;
+	len = value - line;
 
-	/* Trim whitespace after keyword. */
-	while (cp != line && isblank((unsigned char)cp[-1]))
-	    cp--;
-	*cp = '\0';
+	/* Trim whitespace after keyword and NUL-terminate. */
+	while (len > 0 && isblank((unsigned char)line[len - 1]))
+	    len--;
+	line[len] = '\0';
 
 	/* Trim whitespace before value. */
-	while (isblank((unsigned char)*value))
+	do {
 	    value++;
+	} while (isblank((unsigned char)*value));
 
 	/* Look up keyword in config tables */
 	if (!cvtsudoers_parse_keyword(conf_file, keyword, value, cvtsudoers_conf_vars))

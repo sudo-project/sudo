@@ -1257,91 +1257,100 @@ set_cmnd(void)
     debug_return_int(ret);
 }
 
+static int
+open_file(const char *path, int flags)
+{
+    int fd;
+    debug_decl(open_file, SUDOERS_DEBUG_PLUGIN);
+
+    if (!set_perms(PERM_SUDOERS))
+	debug_return_int(-1);
+
+    fd = open(path, flags);
+    if (fd == -1 && errno == EACCES && geteuid() != ROOT_UID) {
+	/*
+	 * If we tried to open sudoers as non-root but got EACCES,
+	 * try again as root.
+	 */
+	int serrno = errno;
+	if (restore_perms() && set_perms(PERM_ROOT))
+	    fd = open(path, flags);
+	errno = serrno;
+    }
+    if (!restore_perms()) {
+	/* unable to change back to root */
+	if (fd != -1) {
+	    close(fd);
+	    fd = -1;
+	}
+    }
+
+    debug_return_int(fd);
+}
+
 /*
  * Open sudoers file and check mode/owner/type.
  * Returns a handle to the sudoers file or NULL on error.
  */
 FILE *
-open_sudoers(const char *file, bool doedit, bool *keepopen)
+open_sudoers(const char *path, bool doedit, bool *keepopen)
 {
+    char fname[PATH_MAX];
     FILE *fp = NULL;
     struct stat sb;
     int error, fd;
     debug_decl(open_sudoers, SUDOERS_DEBUG_PLUGIN);
 
-    if (!set_perms(PERM_SUDOERS))
-	debug_return_ptr(NULL);
-
-again:
-    fd = sudo_secure_open_file(file, sudoers_uid, sudoers_gid, &sb, &error);
-    if (fd != -1) {
+    fd = sudo_open_conf_path(path, fname, sizeof(fname), open_file);
+    error = sudo_secure_fd(fd, S_IFREG, sudoers_uid, sudoers_gid, &sb);
+    switch (error) {
+    case SUDO_PATH_SECURE:
 	/*
 	 * Make sure we can read the file so we can present the
 	 * user with a reasonable error message (unlike the lexer).
 	 */
 	if ((fp = fdopen(fd, "r")) == NULL) {
-	    log_warning(SLOG_PARSE_ERROR, N_("unable to open %s"), file);
+	    log_warning(SLOG_PARSE_ERROR, N_("unable to open %s"), fname);
 	    close(fd);
 	} else {
 	    if (sb.st_size != 0 && fgetc(fp) == EOF) {
-		log_warning(SLOG_PARSE_ERROR, N_("unable to read %s"), file);
+		log_warning(SLOG_PARSE_ERROR, N_("unable to read %s"), fname);
 		fclose(fp);
 		fp = NULL;
+		fd = -1;
 	    } else {
 		/* Rewind fp and set close on exec flag. */
 		rewind(fp);
-		(void) fcntl(fileno(fp), F_SETFD, 1);
+		(void)fcntl(fileno(fp), F_SETFD, 1);
 	    }
 	}
-    } else {
-	switch (error) {
-	case SUDO_PATH_MISSING:
-	    /*
-	     * If we tried to open sudoers as non-root but got EACCES,
-	     * try again as root.
-	     */
-	    if (errno == EACCES && geteuid() != ROOT_UID) {
-		int serrno = errno;
-		if (restore_perms()) {
-		    if (!set_perms(PERM_ROOT))
-			debug_return_ptr(NULL);
-		    goto again;
-		}
-		errno = serrno;
-	    }
-	    log_warning(SLOG_PARSE_ERROR, N_("unable to open %s"), file);
-	    break;
-	case SUDO_PATH_BAD_TYPE:
-	    log_warningx(SLOG_PARSE_ERROR,
-		N_("%s is not a regular file"), file);
-	    break;
-	case SUDO_PATH_WRONG_OWNER:
-	    log_warningx(SLOG_PARSE_ERROR,
-		N_("%s is owned by uid %u, should be %u"), file,
-		(unsigned int) sb.st_uid, (unsigned int) sudoers_uid);
-	    break;
-	case SUDO_PATH_WORLD_WRITABLE:
-	    log_warningx(SLOG_PARSE_ERROR, N_("%s is world writable"), file);
-	    break;
-	case SUDO_PATH_GROUP_WRITABLE:
-	    log_warningx(SLOG_PARSE_ERROR,
-		N_("%s is owned by gid %u, should be %u"), file,
-		(unsigned int) sb.st_gid, (unsigned int) sudoers_gid);
-	    break;
-	default:
-	    sudo_warnx("%s: internal error, unexpected error %d",
-		__func__, error);
-	    break;
-	}
+	break;
+    case SUDO_PATH_MISSING:
+	log_warning(SLOG_PARSE_ERROR, N_("unable to open %s"), fname);
+	break;
+    case SUDO_PATH_BAD_TYPE:
+	log_warningx(SLOG_PARSE_ERROR, N_("%s is not a regular file"), fname);
+	break;
+    case SUDO_PATH_WRONG_OWNER:
+	log_warningx(SLOG_PARSE_ERROR,
+	    N_("%s is owned by uid %u, should be %u"), fname,
+	    (unsigned int)sb.st_uid, (unsigned int)sudoers_uid);
+	break;
+    case SUDO_PATH_WORLD_WRITABLE:
+	log_warningx(SLOG_PARSE_ERROR, N_("%s is world writable"), fname);
+	break;
+    case SUDO_PATH_GROUP_WRITABLE:
+	log_warningx(SLOG_PARSE_ERROR,
+	    N_("%s is owned by gid %u, should be %u"), fname,
+	    (unsigned int)sb.st_gid, (unsigned int)sudoers_gid);
+	break;
+    default:
+	sudo_warnx("%s: internal error, unexpected error %d", __func__, error);
+	break;
     }
 
-    if (!restore_perms()) {
-	/* unable to change back to root */
-	if (fp != NULL) {
-	    fclose(fp);
-	    fp = NULL;
-	}
-    }
+    if (fp == NULL && fd != -1)
+	close(fd);
 
     debug_return_ptr(fp);
 }

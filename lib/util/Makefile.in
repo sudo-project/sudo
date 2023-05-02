@@ -65,7 +65,7 @@ INSTALL_OWNER = -o $(install_uid) -g $(install_gid)
 INSTALL_BACKUP = @INSTALL_BACKUP@
 
 # C preprocessor defines
-CPPDEFS = -D_PATH_SUDO_CONF=\"$(sysconfdir)/sudo.conf\"
+CPPDEFS = -D_PATH_SUDO_CONF=\"@sudo_conf@\"
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) $(CPPDEFS) \
