@@ -2,7 +2,7 @@ dnl Local m4 macros for autoconf (used by sudo)
 dnl
 dnl SPDX-License-Identifier: ISC
 dnl
-dnl Copyright (c) 1994-1996, 1998-2005, 2007-2022
+dnl Copyright (c) 1994-1996, 1998-2005, 2007-2023
 dnl	Todd C. Miller <Todd.Miller@sudo.ws>
 dnl
 dnl Permission to use, copy, modify, and distribute this software for any
@@ -705,10 +705,21 @@ esac
 ])
 
 dnl
-dnl Expand Makefile-style variables in $1 and define as the string $2.
-dnl Used to define file paths in pathnames.h.
+dnl Expand Makefile-style variables in $1, a colon-separated list of paths,
+dnl and define the result as a string using the name $2.
 dnl
 AC_DEFUN([SUDO_DEFINE_PATH], [
-    SUDO_EXPAND_PATH([$1], [_sudo_define_path_exp])
-    SUDO_DEFINE_UNQUOTED($2, "$_sudo_define_path_exp")
+    as_save_IFS=$IFS
+    IFS=:
+    _sudo_define_path_res=
+    for as_dir in $1; do
+	SUDO_EXPAND_PATH([$as_dir], [_sudo_define_path_exp])
+	if test -z "${_sudo_define_path_res}"; then
+	    _sudo_define_path_res="${_sudo_define_path_exp}"
+	else
+	    _sudo_define_path_res="${_sudo_define_path_res}:${_sudo_define_path_exp}"
+	fi
+    done
+    IFS=$as_save_IFS
+    SUDO_DEFINE_UNQUOTED($2, "${_sudo_define_path_res}")
 ])

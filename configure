@@ -789,6 +789,7 @@ PYTHON_PLUGIN
 SIGNAME
 devsearch
 DIGEST
+adminconfdir
 exampledir
 TMPFILES_D
 COMPAT_EXP
@@ -1050,6 +1051,7 @@ enable_openssl_pkgconfig_template
 enable_wolfssl
 enable_gcrypt
 enable_python
+enable_adminconf
 enable_shared
 enable_static
 with_pic
@@ -1770,6 +1772,9 @@ Optional Features:
   --enable-wolfssl        Use wolfSSL's TLS and sha2 functions
   --enable-gcrypt         Use GNU crypt's sha2 functions
   --enable-python         Compile python plugin support
+  --enable-adminconf[=DIR]
+                          Use configuration files from adminconfdir in
+                          preference to sysconfdir
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
   --enable-fast-install[=PKGS]
@@ -3623,6 +3628,7 @@ PRELOAD_MODULE='-module'
 LDAP='#'
 SUDO_NLS=disabled
 exampledir='$(docdir)/examples'
+adminconfdir='$(prefix)/etc'
 PYTHON_PLUGIN='#'
 LOGSRV_SRC='lib/logsrv'
 LOGSRVD_SRC='logsrvd'
@@ -7203,6 +7209,23 @@ printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-python: $e
 	;;
   esac
 
+fi
+
+
+# Check whether --enable-adminconf was given.
+if test ${enable_adminconf+y}
+then :
+  enableval=$enable_adminconf;  case "$enableval" in
+    yes|no)
+	;;
+    *)	adminconfdir="$enableval"
+	enable_adminconf=yes
+	;;
+  esac
+
+else case e in #(
+  e) enable_adminconf=no ;;
+esac
 fi
 
 
@@ -35597,25 +35620,87 @@ SUDO_LIBS=${SUDO_LIBS# }
 SUDOERS_LIBS=${SUDOERS_LIBS# }
 
 if test X"$prefix" = X"NONE"; then
-    test "$mandir" = '${datarootdir}/man' && mandir='$(prefix)/man'
+    test X"$mandir" = X'${datarootdir}/man' && mandir='$(prefix)/man'
 else
-    test "$mandir" = '${datarootdir}/man' && mandir='$(datarootdir)/man'
+    test X"$mandir" = X'${datarootdir}/man' && mandir='$(datarootdir)/man'
 fi
-test "$bindir" = '${exec_prefix}/bin' && bindir='$(exec_prefix)/bin'
-test "$sbindir" = '${exec_prefix}/sbin' && sbindir='$(exec_prefix)/sbin'
-test "$libexecdir" = '${exec_prefix}/libexec' && libexecdir='$(exec_prefix)/libexec'
-test "$includedir" = '${prefix}/include' && includedir='$(prefix)/include'
-test "$datarootdir" = '${prefix}/share' && datarootdir='$(prefix)/share'
-test "$docdir" = '${datarootdir}/doc/${PACKAGE_TARNAME}' && docdir='$(datarootdir)/doc/$(PACKAGE_TARNAME)'
-test "$localedir" = '${datarootdir}/locale' && localedir='$(datarootdir)/locale'
-test "$localstatedir" = '${prefix}/var' && localstatedir='$(prefix)/var'
-test "$runstatedir" = '${localstatedir}/run' && runstatedir='$(localstatedir)/run'
-test "$sysconfdir" = '${prefix}/etc' && sysconfdir='/etc'
+test X"$bindir" = X'${exec_prefix}/bin' && bindir='$(exec_prefix)/bin'
+test X"$sbindir" = X'${exec_prefix}/sbin' && sbindir='$(exec_prefix)/sbin'
+test X"$libexecdir" = X'${exec_prefix}/libexec' && libexecdir='$(exec_prefix)/libexec'
+test X"$includedir" = X'${prefix}/include' && includedir='$(prefix)/include'
+test X"$datarootdir" = X'${prefix}/share' && datarootdir='$(prefix)/share'
+test X"$docdir" = X'${datarootdir}/doc/${PACKAGE_TARNAME}' && docdir='$(datarootdir)/doc/$(PACKAGE_TARNAME)'
+test X"$localedir" = X'${datarootdir}/locale' && localedir='$(datarootdir)/locale'
+test X"$localstatedir" = X'${prefix}/var' && localstatedir='$(prefix)/var'
+test X"$runstatedir" = X'${localstatedir}/run' && runstatedir='$(localstatedir)/run'
+test X"$adminconfdir" = X'${prefix}/etc' && adminconfdir='$(prefix)/etc'
+test X"$sysconfdir" = X'${prefix}/etc' && sysconfdir='/etc'
 
-# Expand config file paths for use in pathnames.h
+# The configuration file search path is to check adminconfdir first and
+# fall back to sysconfdir.  This can support systems with read-only
+# sysconfdir (/etc) that contains a set of default configuration files.
+
+    _sysconfdir="$sysconfdir"
+    while :; do
+	_sysconfdir="`echo \"$_sysconfdir\" | sed -e 's/(/{/g' -e 's/)/}/g'`"
+	case "$_sysconfdir" in
+	*\${[A-Za-z]*}*)
+	    eval _sysconfdir="$_sysconfdir"
+	    ;;
+	*)
+	    break
+	    ;;
+    esac
+done
+case "$_sysconfdir" in
+    NONE/*)
+        _sysconfdir="${ac_default_prefix}${_sysconfdir#NONE}"
+        ;;
+esac
 
 
-    _sudo_define_path_exp="$cvtsudoers_conf"
+    _adminconfdir="$adminconfdir"
+    while :; do
+	_adminconfdir="`echo \"$_adminconfdir\" | sed -e 's/(/{/g' -e 's/)/}/g'`"
+	case "$_adminconfdir" in
+	*\${[A-Za-z]*}*)
+	    eval _adminconfdir="$_adminconfdir"
+	    ;;
+	*)
+	    break
+	    ;;
+    esac
+done
+case "$_adminconfdir" in
+    NONE/*)
+        _adminconfdir="${ac_default_prefix}${_adminconfdir#NONE}"
+        ;;
+esac
+
+if test $enable_adminconf = yes
+then :
+
+    # Only use adminconfdir if different from sysconfdir
+    if test X"$_sysconfdir" != X"$_adminconfdir"
+then :
+
+	cvtsudoers_conf='$(adminconfdir)/cvtsudoers.conf:'$cvtsudoers_conf
+	sudo_conf='$(adminconfdir)/sudo.conf:'$sudo_conf
+	sudo_logsrvd_conf='$(adminconfdir)/sudo_logsrvd.conf:'$sudo_logsrvd_conf
+	sudoers_path='$(adminconfdir)/sudoers:'$sudoers_path
+
+fi
+
+fi
+
+# Expand config file paths for use in pathnames.h (after config dir override)
+
+    as_save_IFS=$IFS
+    IFS=:
+    _sudo_define_path_res=
+    for as_dir in $cvtsudoers_conf; do
+
+    _sudo_define_path_exp="$as_dir"
     while :; do
 	_sudo_define_path_exp="`echo \"$_sudo_define_path_exp\" | sed -e 's/(/{/g' -e 's/)/}/g'`"
 	case "$_sudo_define_path_exp" in
@@ -35633,14 +35718,25 @@ case "$_sudo_define_path_exp" in
         ;;
 esac
 
+	if test -z "${_sudo_define_path_res}"; then
+	    _sudo_define_path_res="${_sudo_define_path_exp}"
+	else
+	    _sudo_define_path_res="${_sudo_define_path_res}:${_sudo_define_path_exp}"
+	fi
+    done
+    IFS=$as_save_IFS
     cat >>confdefs.h <<EOF
-#define _PATH_CVTSUDOERS_CONF "$_sudo_define_path_exp"
+#define _PATH_CVTSUDOERS_CONF "${_sudo_define_path_res}"
 EOF
 
 
 
+    as_save_IFS=$IFS
+    IFS=:
+    _sudo_define_path_res=
+    for as_dir in $sudo_conf; do
 
-    _sudo_define_path_exp="$sudo_conf"
+    _sudo_define_path_exp="$as_dir"
     while :; do
 	_sudo_define_path_exp="`echo \"$_sudo_define_path_exp\" | sed -e 's/(/{/g' -e 's/)/}/g'`"
 	case "$_sudo_define_path_exp" in
@@ -35658,14 +35754,25 @@ case "$_sudo_define_path_exp" in
         ;;
 esac
 
+	if test -z "${_sudo_define_path_res}"; then
+	    _sudo_define_path_res="${_sudo_define_path_exp}"
+	else
+	    _sudo_define_path_res="${_sudo_define_path_res}:${_sudo_define_path_exp}"
+	fi
+    done
+    IFS=$as_save_IFS
     cat >>confdefs.h <<EOF
-#define _PATH_SUDO_CONF "$_sudo_define_path_exp"
+#define _PATH_SUDO_CONF "${_sudo_define_path_res}"
 EOF
 
 
 
+    as_save_IFS=$IFS
+    IFS=:
+    _sudo_define_path_res=
+    for as_dir in $sudo_logsrvd_conf; do
 
-    _sudo_define_path_exp="$sudo_logsrvd_conf"
+    _sudo_define_path_exp="$as_dir"
     while :; do
 	_sudo_define_path_exp="`echo \"$_sudo_define_path_exp\" | sed -e 's/(/{/g' -e 's/)/}/g'`"
 	case "$_sudo_define_path_exp" in
@@ -35683,14 +35790,25 @@ case "$_sudo_define_path_exp" in
         ;;
 esac
 
+	if test -z "${_sudo_define_path_res}"; then
+	    _sudo_define_path_res="${_sudo_define_path_exp}"
+	else
+	    _sudo_define_path_res="${_sudo_define_path_res}:${_sudo_define_path_exp}"
+	fi
+    done
+    IFS=$as_save_IFS
     cat >>confdefs.h <<EOF
-#define _PATH_SUDO_LOGSRVD_CONF "$_sudo_define_path_exp"
+#define _PATH_SUDO_LOGSRVD_CONF "${_sudo_define_path_res}"
 EOF
 
 
 
+    as_save_IFS=$IFS
+    IFS=:
+    _sudo_define_path_res=
+    for as_dir in $sudoers_path; do
 
-    _sudo_define_path_exp="$sudoers_path"
+    _sudo_define_path_exp="$as_dir"
     while :; do
 	_sudo_define_path_exp="`echo \"$_sudo_define_path_exp\" | sed -e 's/(/{/g' -e 's/)/}/g'`"
 	case "$_sudo_define_path_exp" in
@@ -35708,8 +35826,15 @@ case "$_sudo_define_path_exp" in
         ;;
 esac
 
+	if test -z "${_sudo_define_path_res}"; then
+	    _sudo_define_path_res="${_sudo_define_path_exp}"
+	else
+	    _sudo_define_path_res="${_sudo_define_path_res}:${_sudo_define_path_exp}"
+	fi
+    done
+    IFS=$as_save_IFS
     cat >>confdefs.h <<EOF
-#define _PATH_SUDOERS "$_sudo_define_path_exp"
+#define _PATH_SUDOERS "${_sudo_define_path_res}"
 EOF
 
 
@@ -37934,7 +38059,6 @@ fi
 echo "" >&6
 echo "Configured Sudo version $PACKAGE_VERSION" >&6
 echo " Compiler settings:" >&6
-echo "  prefix			: $prefix" >&6
 echo "  compiler			: $CC" >&6
 echo "  compiler options		: $CFLAGS" >&6
 echo "  preprocessor options		: $CPPFLAGS" >&6
@@ -38042,18 +38166,30 @@ echo "  mail if user not in sudoers	: ${mail_no_user}" >&6
 echo "  mail if user not on host	: ${mail_no_host}" >&6
 echo "  mail if command not allowed	: ${mail_no_perms}" >&6
 echo " Pathnames:" >&6
+echo "  prefix			: $prefix" >&6
+echo "  sysconfdir			: $_sysconfdir" >&6
+if test "${enable_adminconf-no}" != "no"; then
+    echo "  adminconfdir			: $_adminconfdir" >&6
+fi
 echo "  log directory			: ${log_dir}" >&6
+echo "  run directory			: ${rundir}" >&6
+echo "  var directory			: ${vardir}" >&6
+echo "  I/O log directory		: ${iolog_dir}" >&6
+echo "  sudo_logsrvd relay directory	: ${relay_dir}" >&6
+if test X"$with_exampledir" != X""; then
+    echo "  exampledir			: $exampledir" >&6
+fi
 echo "  plugin directory		: ${plugindir}" >&6
 echo "  sudoers plugin		: ${sudoers_plugin}" >&6
 if test "${enable_python-no}" != "no"; then
     echo "  python plugin			: ${python_plugin}" >&6
 fi
-echo "  run directory			: ${rundir}" >&6
-echo "  var directory			: ${vardir}" >&6
-echo "  I/O log directory		: ${iolog_dir}" >&6
-echo "  sudo_logsrvd relay directory	: ${relay_dir}" >&6
-echo "  time zone directory		: ${tzdir}" >&6
+echo "  sudoers file			: ${sudoers_path}" >&6
+echo "  cvtsudoers.conf file		: ${cvtsudoers_conf}" >&6
+echo "  sudo.conf file		: ${sudo_conf}" >&6
+echo "  sudo_logsrvd.conf file	: ${sudo_logsrvd_conf}" >&6
 echo "  path to sendmail		: ${with_sendmail}" >&6
+echo "  time zone directory		: ${tzdir}" >&6
 if test -n "$TMPFILES_D"; then
     echo "  systemd tempfiles dir	: ${TMPFILES_D}" >&6
 fi

@@ -110,7 +110,8 @@ Defaults are listed in brackets after the description.
         Install plugins and helper programs in DIR/sudo [PREFIX/libexec/sudo]
 
     --sysconfdir=DIR
-        Look for `sudo.conf` and `sudoers` files in DIR. [/etc]
+        Look for configuration files such as `sudo.conf` and `sudoers`
+        in DIR. [/etc]
 
     --includedir=DIR
         Install sudo_plugin.h include file in DIR [PREFIX/include]
@@ -357,6 +358,15 @@ Defaults are listed in brackets after the description.
         --with-aix-soname=svr4 option.
 
 ### Optional features:
+
+    --enable-adminconf=[DIR]
+        Search for configuration files in adminconfdir (PREFIX/etc
+        by default) in preference to configuration files in sysconfdir
+        (/etc by default).  This can be used on systems where
+        sysconfdir is located on a read-only filesystem.  When this
+        option is enabled, the visudo utility will store edited
+        sudoers files in adminconfdir if the original was located
+        in sysconfdir.
 
     --disable-root-mailer
         By default sudo will run the mailer as root when tattling

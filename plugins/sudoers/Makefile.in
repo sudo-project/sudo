@@ -120,6 +120,7 @@ exec_prefix = @exec_prefix@
 bindir = @bindir@
 sbindir = @sbindir@
 sysconfdir = @sysconfdir@
+adminconfdir = @adminconfdir@
 libexecdir = @libexecdir@
 datarootdir = @datarootdir@
 localedir = @localedir@

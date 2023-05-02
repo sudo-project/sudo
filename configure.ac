@@ -109,6 +109,7 @@ AC_SUBST([RC_LINK])dnl
 AC_SUBST([COMPAT_EXP])dnl
 AC_SUBST([TMPFILES_D])dnl
 AC_SUBST([exampledir], ['$(docdir)/examples'])dnl
+AC_SUBST([adminconfdir], ['$(prefix)/etc'])dnl
 AC_SUBST([DIGEST])dnl
 AC_SUBST([devsearch])dnl
 AC_SUBST([SIGNAME])dnl
@@ -1569,6 +1570,17 @@ AC_ARG_ENABLE(python,
 	;;
   esac
 ])
+
+AC_ARG_ENABLE(adminconf,
+[AS_HELP_STRING([--enable-adminconf[[=DIR]]], [Use configuration files from adminconfdir in preference to sysconfdir])],
+[ case "$enableval" in
+    yes|no)
+	;;
+    *)	adminconfdir="$enableval"
+	enable_adminconf=yes
+	;;
+  esac
+], [enable_adminconf=no])
 
 dnl
 dnl C compiler checks
@@ -4320,20 +4332,36 @@ dnl
 dnl Override default configure dirs for the Makefile
 dnl
 if test X"$prefix" = X"NONE"; then
-    test "$mandir" = '${datarootdir}/man' && mandir='$(prefix)/man'
+    test X"$mandir" = X'${datarootdir}/man' && mandir='$(prefix)/man'
 else
-    test "$mandir" = '${datarootdir}/man' && mandir='$(datarootdir)/man'
+    test X"$mandir" = X'${datarootdir}/man' && mandir='$(datarootdir)/man'
 fi
-test "$bindir" = '${exec_prefix}/bin' && bindir='$(exec_prefix)/bin'
-test "$sbindir" = '${exec_prefix}/sbin' && sbindir='$(exec_prefix)/sbin'
-test "$libexecdir" = '${exec_prefix}/libexec' && libexecdir='$(exec_prefix)/libexec'
-test "$includedir" = '${prefix}/include' && includedir='$(prefix)/include'
-test "$datarootdir" = '${prefix}/share' && datarootdir='$(prefix)/share'
-test "$docdir" = '${datarootdir}/doc/${PACKAGE_TARNAME}' && docdir='$(datarootdir)/doc/$(PACKAGE_TARNAME)'
-test "$localedir" = '${datarootdir}/locale' && localedir='$(datarootdir)/locale'
-test "$localstatedir" = '${prefix}/var' && localstatedir='$(prefix)/var'
-test "$runstatedir" = '${localstatedir}/run' && runstatedir='$(localstatedir)/run'
-test "$sysconfdir" = '${prefix}/etc' && sysconfdir='/etc'
+test X"$bindir" = X'${exec_prefix}/bin' && bindir='$(exec_prefix)/bin'
+test X"$sbindir" = X'${exec_prefix}/sbin' && sbindir='$(exec_prefix)/sbin'
+test X"$libexecdir" = X'${exec_prefix}/libexec' && libexecdir='$(exec_prefix)/libexec'
+test X"$includedir" = X'${prefix}/include' && includedir='$(prefix)/include'
+test X"$datarootdir" = X'${prefix}/share' && datarootdir='$(prefix)/share'
+test X"$docdir" = X'${datarootdir}/doc/${PACKAGE_TARNAME}' && docdir='$(datarootdir)/doc/$(PACKAGE_TARNAME)'
+test X"$localedir" = X'${datarootdir}/locale' && localedir='$(datarootdir)/locale'
+test X"$localstatedir" = X'${prefix}/var' && localstatedir='$(prefix)/var'
+test X"$runstatedir" = X'${localstatedir}/run' && runstatedir='$(localstatedir)/run'
+test X"$adminconfdir" = X'${prefix}/etc' && adminconfdir='$(prefix)/etc'
+test X"$sysconfdir" = X'${prefix}/etc' && sysconfdir='/etc'
+
+# The configuration file search path is to check adminconfdir first and
+# fall back to sysconfdir.  This can support systems with read-only
+# sysconfdir (/etc) that contains a set of default configuration files.
+SUDO_EXPAND_PATH([$sysconfdir], [_sysconfdir])
+SUDO_EXPAND_PATH([$adminconfdir], [_adminconfdir])
+AS_IF([test $enable_adminconf = yes], [
+    # Only use adminconfdir if different from sysconfdir
+    AS_IF([test X"$_sysconfdir" != X"$_adminconfdir"], [
+	cvtsudoers_conf='$(adminconfdir)/cvtsudoers.conf:'$cvtsudoers_conf
+	sudo_conf='$(adminconfdir)/sudo.conf:'$sudo_conf
+	sudo_logsrvd_conf='$(adminconfdir)/sudo_logsrvd.conf:'$sudo_logsrvd_conf
+	sudoers_path='$(adminconfdir)/sudoers:'$sudoers_path
+    ])
+])
 
 # Expand config file paths for use in pathnames.h (after config dir override)
 SUDO_DEFINE_PATH([$cvtsudoers_conf], [_PATH_CVTSUDOERS_CONF])
@@ -4367,7 +4395,6 @@ fi
 echo "" >&AS_MESSAGE_FD
 echo "Configured Sudo version $PACKAGE_VERSION" >&AS_MESSAGE_FD
 echo " Compiler settings:" >&AS_MESSAGE_FD
-echo "  prefix			: $prefix" >&AS_MESSAGE_FD
 echo "  compiler			: $CC" >&AS_MESSAGE_FD
 echo "  compiler options		: $CFLAGS" >&AS_MESSAGE_FD
 echo "  preprocessor options		: $CPPFLAGS" >&AS_MESSAGE_FD
@@ -4475,18 +4502,30 @@ echo "  mail if user not in sudoers	: ${mail_no_user}" >&AS_MESSAGE_FD
 echo "  mail if user not on host	: ${mail_no_host}" >&AS_MESSAGE_FD
 echo "  mail if command not allowed	: ${mail_no_perms}" >&AS_MESSAGE_FD
 echo " Pathnames:" >&AS_MESSAGE_FD
+echo "  prefix			: $prefix" >&AS_MESSAGE_FD
+echo "  sysconfdir			: $_sysconfdir" >&AS_MESSAGE_FD
+if test "${enable_adminconf-no}" != "no"; then
+    echo "  adminconfdir			: $_adminconfdir" >&AS_MESSAGE_FD
+fi
 echo "  log directory			: ${log_dir}" >&AS_MESSAGE_FD
+echo "  run directory			: ${rundir}" >&AS_MESSAGE_FD
+echo "  var directory			: ${vardir}" >&AS_MESSAGE_FD
+echo "  I/O log directory		: ${iolog_dir}" >&AS_MESSAGE_FD
+echo "  sudo_logsrvd relay directory	: ${relay_dir}" >&AS_MESSAGE_FD
+if test X"$with_exampledir" != X""; then
+    echo "  exampledir			: $exampledir" >&AS_MESSAGE_FD
+fi
 echo "  plugin directory		: ${plugindir}" >&AS_MESSAGE_FD
 echo "  sudoers plugin		: ${sudoers_plugin}" >&AS_MESSAGE_FD
 if test "${enable_python-no}" != "no"; then
     echo "  python plugin			: ${python_plugin}" >&AS_MESSAGE_FD
 fi
-echo "  run directory			: ${rundir}" >&AS_MESSAGE_FD
-echo "  var directory			: ${vardir}" >&AS_MESSAGE_FD
-echo "  I/O log directory		: ${iolog_dir}" >&AS_MESSAGE_FD
-echo "  sudo_logsrvd relay directory	: ${relay_dir}" >&AS_MESSAGE_FD
-echo "  time zone directory		: ${tzdir}" >&AS_MESSAGE_FD
+echo "  sudoers file			: ${sudoers_path}" >&AS_MESSAGE_FD
+echo "  cvtsudoers.conf file		: ${cvtsudoers_conf}" >&AS_MESSAGE_FD
+echo "  sudo.conf file		: ${sudo_conf}" >&AS_MESSAGE_FD
+echo "  sudo_logsrvd.conf file	: ${sudo_logsrvd_conf}" >&AS_MESSAGE_FD
 echo "  path to sendmail		: ${with_sendmail}" >&AS_MESSAGE_FD
+echo "  time zone directory		: ${tzdir}" >&AS_MESSAGE_FD
 if test -n "$TMPFILES_D"; then
     echo "  systemd tempfiles dir	: ${TMPFILES_D}" >&AS_MESSAGE_FD
 fi
