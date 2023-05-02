@@ -251,7 +251,7 @@ sudoers_init(void *info, sudoers_logger_t logger, char * const envp[])
     }
 
     /* Open and parse sudoers, set global defaults.  */
-    init_parser(sudoers_file);
+    init_parser(NULL);
     TAILQ_FOREACH_SAFE(nss, snl, entries, nss_next) {
 	if (nss->open(nss) == -1 || (nss->parse_tree = nss->parse(nss)) == NULL) {
 	    TAILQ_REMOVE(snl, nss, entries);
@@ -1293,7 +1293,7 @@ open_file(const char *path, int flags)
  * Returns a handle to the sudoers file or NULL on error.
  */
 FILE *
-open_sudoers(const char *path, bool doedit, bool *keepopen)
+open_sudoers(const char *path, char **outfile, bool doedit, bool *keepopen)
 {
     char fname[PATH_MAX];
     FILE *fp = NULL;
@@ -1311,22 +1311,30 @@ open_sudoers(const char *path, bool doedit, bool *keepopen)
 	 */
 	if ((fp = fdopen(fd, "r")) == NULL) {
 	    log_warning(SLOG_PARSE_ERROR, N_("unable to open %s"), fname);
-	    close(fd);
 	} else {
+	    fd = -1;
 	    if (sb.st_size != 0 && fgetc(fp) == EOF) {
 		log_warning(SLOG_PARSE_ERROR, N_("unable to read %s"), fname);
 		fclose(fp);
 		fp = NULL;
-		fd = -1;
 	    } else {
 		/* Rewind fp and set close on exec flag. */
 		rewind(fp);
 		(void)fcntl(fileno(fp), F_SETFD, 1);
+		if (outfile != NULL) {
+                    *outfile = sudo_rcstr_dup(fname);
+		    if (*outfile == NULL) {
+			sudo_warnx(U_("%s: %s"), __func__,
+			    U_("unable to allocate memory"));
+			fclose(fp);
+			fp = NULL;
+		    }
+		}
 	    }
 	}
 	break;
     case SUDO_PATH_MISSING:
-	log_warning(SLOG_PARSE_ERROR, N_("unable to open %s"), fname);
+	log_warning(SLOG_PARSE_ERROR, N_("unable to open %s"), path);
 	break;
     case SUDO_PATH_BAD_TYPE:
 	log_warningx(SLOG_PARSE_ERROR, N_("%s is not a regular file"), fname);

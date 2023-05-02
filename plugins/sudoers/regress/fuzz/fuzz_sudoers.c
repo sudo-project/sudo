@@ -56,7 +56,7 @@ sudo_printf_t sudo_printf = fuzz_printf;
 int sudo_mode;
 
 FILE *
-open_sudoers(const char *file, bool doedit, bool *keepopen)
+open_sudoers(const char *file, char **outfile, bool doedit, bool *keepopen)
 {
     /*
      * If we allow the fuzzer to choose include paths it will

@@ -59,6 +59,7 @@ sudo_file_open(struct sudo_nss *nss)
 {
     debug_decl(sudo_file_open, SUDOERS_DEBUG_NSS);
     struct sudo_file_handle *handle;
+    char *outfile = NULL;
 
     /* Note: relies on defaults being initialized early. */
     if (def_ignore_local_sudoers)
@@ -72,9 +73,14 @@ sudo_file_open(struct sudo_nss *nss)
 
     handle = malloc(sizeof(*handle));
     if (handle != NULL) {
-	handle->fp = open_sudoers(sudoers_file, false, NULL);
+	handle->fp = open_sudoers(sudoers_file, &outfile, false, NULL);
 	if (handle->fp != NULL) {
 	    init_parse_tree(&handle->parse_tree, NULL, NULL, nss);
+	    if (outfile != NULL) {
+		/* Update path to open sudoers file. */
+		sudo_rcstr_delref(sudoers);
+		sudoers = outfile;
+	    }
 	} else {
 	    free(handle);
 	    handle = NULL;

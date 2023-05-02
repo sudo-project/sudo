@@ -442,7 +442,7 @@ sudo_endspent(void)
 }
 
 FILE *
-open_sudoers(const char *file, bool doedit, bool *keepopen)
+open_sudoers(const char *file, char **outfile, bool doedit, bool *keepopen)
 {
     struct stat sb;
     FILE *fp = NULL;

@@ -1294,9 +1294,9 @@ push_include_int(const char *opath, bool isdir, int verbose)
 	    SLIST_REMOVE_HEAD(&istack[idepth].more, entries);
 	    path = pl->path;
 	    free(pl);
-	} while ((fp = open_sudoers(path, false, &keepopen)) == NULL);
+	} while ((fp = open_sudoers(path, NULL, false, &keepopen)) == NULL);
     } else {
-	if ((fp = open_sudoers(path, true, &keepopen)) == NULL) {
+	if ((fp = open_sudoers(path, NULL, true, &keepopen)) == NULL) {
 	    /* The error was already printed by open_sudoers() */
 	    sudoerserror(NULL);
 	    sudo_rcstr_delref(path);
@@ -1351,7 +1351,7 @@ pop_include(void)
     /* If we are in an include dir, move to the next file. */
     while ((pl = SLIST_FIRST(&istack[idepth - 1].more)) != NULL) {
 	SLIST_REMOVE_HEAD(&istack[idepth - 1].more, entries);
-	fp = open_sudoers(pl->path, false, &keepopen);
+	fp = open_sudoers(pl->path, NULL, false, &keepopen);
 	if (fp != NULL) {
 	    sudolinebuf.len = sudolinebuf.off = 0;
 	    sudolinebuf.toke_start = sudolinebuf.toke_end = 0;
