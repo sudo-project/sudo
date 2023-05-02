@@ -398,7 +398,7 @@ done:
     /* Cleanup. */
     fclose(fp);
     free_parse_tree(&parse_tree);
-    init_parser(NULL);
+    reset_parser();
     if (sudo_user.pw != NULL)
 	sudo_pw_delref(sudo_user.pw);
     if (runas_pw != NULL)

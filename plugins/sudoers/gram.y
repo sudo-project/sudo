@@ -1824,6 +1824,12 @@ init_parser(const char *file)
     return init_parser_ext(file, NULL, false, 1);
 }
 
+bool
+reset_parser(void)
+{
+    return init_parser_ext(NULL, NULL, false, 1);
+}
+
 /*
  * Initialize all options in a cmndspec.
  */

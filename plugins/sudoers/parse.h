@@ -374,6 +374,7 @@ extern struct sudoers_parse_tree parsed_policy;
 extern bool (*sudoers_error_hook)(const char *file, int line, int column, const char *fmt, va_list args);
 bool init_parser(const char *file);
 bool init_parser_ext(const char *file, const char *path, bool strict, int verbose);
+bool reset_parser(void);
 void free_member(struct member *m);
 void free_members(struct member_list *members);
 void free_cmndspec(struct cmndspec *cs, struct cmndspec_list *csl);
