@@ -59,8 +59,7 @@ char *sudoers_search_path;	/* colon-separated path of sudoers files. */
 const char *sudoers_errstr;	/* description of last error from lexer. */
 struct sudolinebuf sudolinebuf;	/* sudoers line being parsed. */
 
-/* Default sudoers path, mode and owner (may be set via sudo.conf) */
-const char *sudoers_file = _PATH_SUDOERS;
+/* Default sudoers mode and owner (may be set via sudo.conf) */
 mode_t sudoers_mode = SUDOERS_MODE;
 uid_t sudoers_uid = SUDOERS_UID;
 gid_t sudoers_gid = SUDOERS_GID;

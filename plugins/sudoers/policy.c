@@ -56,6 +56,7 @@ sudo_printf_t sudo_printf;
 struct sudo_plugin_event * (*plugin_event_alloc)(void);
 const char *path_ldap_conf = _PATH_LDAP_CONF;
 const char *path_ldap_secret = _PATH_LDAP_SECRET;
+static const char *path_sudoers = _PATH_SUDOERS;
 static bool session_opened;
 int sudoedit_nfiles;
 
@@ -126,7 +127,6 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
     }
 
     /* Parse sudo.conf plugin args. */
-    sudoers_file = _PATH_SUDOERS;
     sudoers_mode = SUDOERS_MODE;
     sudoers_uid = SUDOERS_UID;
     sudoers_gid = SUDOERS_GID;
@@ -143,7 +143,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	    }
 	    if (MATCHES(*cur, "sudoers_file=")) {
 		CHECK(*cur, "sudoers_file=");
-		sudoers_file = *cur + sizeof("sudoers_file=") - 1;
+		path_sudoers = *cur + sizeof("sudoers_file=") - 1;
 		continue;
 	    }
 	    if (MATCHES(*cur, "sudoers_uid=")) {
@@ -625,6 +625,13 @@ oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 bad:
     debug_return_int(MODE_ERROR);
+}
+
+/* Return the path to the sudoers file, which may be set in the plugin args. */
+const char *
+policy_path_sudoers(void)
+{
+    return path_sudoers;
 }
 
 /*
@@ -1279,7 +1286,7 @@ sudoers_policy_version(int verbose)
 	SUDOERS_GRAMMAR_VERSION);
 
     if (verbose) {
-	sudo_printf(SUDO_CONV_INFO_MSG, _("\nSudoers path: %s\n"), sudoers_file);
+	sudo_printf(SUDO_CONV_INFO_MSG, _("\nSudoers path: %s\n"), path_sudoers);
 #ifdef HAVE_LDAP
 # ifdef _PATH_NSSWITCH_CONF
 	sudo_printf(SUDO_CONV_INFO_MSG, _("nsswitch path: %s\n"), _PATH_NSSWITCH_CONF);

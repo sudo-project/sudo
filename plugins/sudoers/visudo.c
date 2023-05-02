@@ -109,6 +109,7 @@ extern void get_hostname(void);
  */
 struct sudo_user sudo_user;
 struct passwd *list_pw;
+static const char *path_sudoers = _PATH_SUDOERS;
 static struct sudoersfile_list sudoerslist = TAILQ_HEAD_INITIALIZER(sudoerslist);
 static bool checkonly;
 static bool edit_includes = true;
@@ -190,7 +191,7 @@ main(int argc, char *argv[])
 		checkonly = true;	/* check mode */
 		break;
 	    case 'f':
-		sudoers_file = optarg;	/* sudoers file path */
+		path_sudoers = optarg;
 		fflag = true;
 		break;
 	    case 'h':
@@ -228,7 +229,7 @@ main(int argc, char *argv[])
     case 1:
 	/* Only accept sudoers file if no -f was specified. */
 	if (!fflag) {
-	    sudoers_file = *argv;
+	    path_sudoers = *argv;
 	    fflag = true;
 	}
 	break;
@@ -252,7 +253,7 @@ main(int argc, char *argv[])
 
     if (export_path != NULL) {
 	/* Backward compatibility for the time being. */
-	export_sudoers(sudoers_file, export_path);
+	export_sudoers(path_sudoers, export_path);
     }
 
     /* Mock up a fake sudo_user struct. */
@@ -278,7 +279,7 @@ main(int argc, char *argv[])
 	sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
 
     if (checkonly) {
-	exitcode = check_syntax(sudoers_file, quiet, strict, use_owner,
+	exitcode = check_syntax(path_sudoers, quiet, strict, use_owner,
 	    use_perms) ? 0 : 1;
 	goto done;
     }
@@ -287,8 +288,8 @@ main(int argc, char *argv[])
      * Parse the existing sudoers file(s) to highlight any existing
      * errors and to pull in editor and env_editor conf values.
      */
-    init_parser_ext(NULL, sudoers_file, true, quiet ? 0 : 2);
-    if ((sudoersin = open_sudoers(sudoers_file, &sudoers, true, NULL)) == NULL)
+    init_parser_ext(NULL, path_sudoers, true, quiet ? 0 : 2);
+    if ((sudoersin = open_sudoers(path_sudoers, &sudoers, true, NULL)) == NULL)
 	exit(EXIT_FAILURE);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     (void) sudoersparse();
@@ -650,7 +651,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	/* Clean slate for each parse */
 	if (!init_defaults())
 	    sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
-	init_parser_ext(sp->opath, sudoers_file, true, quiet ? 0 : 2);
+	init_parser_ext(sp->opath, path_sudoers, true, quiet ? 0 : 2);
 	sp->errorline = -1;
 
 	/* Parse the sudoers temp file(s) */
@@ -1234,8 +1235,8 @@ open_sudoers(const char *path, char **outfile, bool doedit, bool *keepopen)
     if (entry == NULL) {
 	if (doedit && !edit_includes) {
 	    /* Only edit the main sudoers file. */
-	    if (strncmp(path, sudoers_file, len) != 0 ||
-		    (sudoers_file[len] != '\0' && sudoers_file[len] != ':'))
+	    if (strncmp(path, path_sudoers, len) != 0 ||
+		    (path_sudoers[len] != '\0' && path_sudoers[len] != ':'))
 		doedit = false;
 	}
 	if ((entry = new_sudoers(path, doedit)) == NULL)
@@ -1330,7 +1331,7 @@ parse_sudoers_options(void)
 		id_t id;
 
 		if (MATCHES(*cur, "sudoers_file=")) {
-		    sudoers_file = *cur + sizeof("sudoers_file=") - 1;
+		    path_sudoers = *cur + sizeof("sudoers_file=") - 1;
 		    continue;
 		}
 		if (MATCHES(*cur, "sudoers_uid=")) {

@@ -333,7 +333,6 @@ extern bool sudoers_strict;
 YY_DECL;
 void sudoersrestart(FILE *);
 extern FILE *sudoersin;
-extern const char *sudoers_file;
 extern char *sudoers;
 extern char *sudoers_search_path;
 extern mode_t sudoers_mode;
@@ -451,6 +450,7 @@ void sudoers_debug_deregister(void);
 /* policy.c */
 int sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults);
 bool sudoers_policy_store_result(bool accepted, char *argv[], char *envp[], mode_t cmnd_umask, char *iolog_path, void *v);
+const char *policy_path_sudoers(void);
 extern const char *path_ldap_conf;
 extern const char *path_ldap_secret;
 
