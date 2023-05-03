@@ -165,7 +165,7 @@ static char **
 json_array_to_strvec(struct eventlog_json_object *array)
 {
     struct json_item *item;
-    int len = 0;
+    size_t len = 0;
     char **ret;
     debug_decl(json_array_to_strvec, SUDO_DEBUG_UTIL);
 

@@ -259,7 +259,7 @@ sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
 	char buf[sizeof("CCYYMMDDHHMMSSZ")] = "";
 	struct tm gmt;
 	if (gmtime_r(&cs->notbefore, &gmt) != NULL) {
-	    int len = strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", &gmt);
+	    size_t len = strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", &gmt);
 	    if (len != 0 && buf[sizeof(buf) - 1] == '\0')
 		sudo_lbuf_append(lbuf, "NOTBEFORE=%s ", buf);
 	}
@@ -268,7 +268,7 @@ sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
 	char buf[sizeof("CCYYMMDDHHMMSSZ")] = "";
 	struct tm gmt;
 	if (gmtime_r(&cs->notafter, &gmt) != NULL) {
-	    int len = strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", &gmt);
+	    size_t len = strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", &gmt);
 	    if (len != 0 && buf[sizeof(buf) - 1] == '\0')
 		sudo_lbuf_append(lbuf, "NOTAFTER=%s ", buf);
 	}
