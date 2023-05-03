@@ -589,10 +589,10 @@ sudo_debug_exit_str_masked_v1(const char *func, const char *file, int line,
     int subsys, const char *ret)
 {
     static const char stars[] = "********************************************************************************";
-    size_t len = ret ? strlen(ret) : sizeof("(null)") - 1;
+    int len = ret ? strlen(ret) : sizeof("(null)") - 1;
 
     sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%zu := %.*s", func, file, line, len, ret ? stars : "(null)");
+	"<- %s @ %s:%d := %.*s", func, file, line, len, ret ? stars : "(null)");
 }
 
 void
