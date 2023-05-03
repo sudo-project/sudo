@@ -240,7 +240,7 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
     sa.sa_flags = SA_RESTART;
     sa.sa_handler = SIG_DFL;
     if (sudo_sigaction(SIGCONT, &sa, &saved_sigcont) != 0)
-	sudo_warn(U_("unable to set handler for SIGCONT"));
+	sudo_warn("%s", U_("unable to set handler for SIGCONT"));
 
     if (sig2str(signo, signame) == -1)
 	(void)snprintf(signame, sizeof(signame), "%d", signo);
@@ -342,7 +342,7 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
     }
 
     if (sudo_sigaction(SIGCONT, &saved_sigcont, NULL) != 0)
-	sudo_warn(U_("unable to restore handler for SIGCONT"));
+	sudo_warn("%s", U_("unable to restore handler for SIGCONT"));
 
     debug_return_int(ret);
 }
