@@ -37,6 +37,7 @@
 #include "sudoers.h"
 #include "sudoers_version.h"
 #include "interfaces.h"
+#include "auth/sudo_auth.h"
 
 static char **command_info;
 
@@ -61,10 +62,6 @@ static bool session_opened;
 int sudoedit_nfiles;
 
 extern sudo_dso_public struct policy_plugin sudoers_policy;
-
-#ifdef HAVE_BSD_AUTH_H
-char *login_style;
-#endif /* HAVE_BSD_AUTH_H */
 
 static int
 parse_bool(const char *line, int varlen, int *flags, int fval)
@@ -349,7 +346,8 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 #ifdef HAVE_BSD_AUTH_H
 	if (MATCHES(*cur, "bsdauth_type=")) {
 	    CHECK(*cur, "bsdauth_type=");
-	    login_style = *cur + sizeof("bsdauth_type=") - 1;
+	    p = *cur + sizeof("bsdauth_type=") - 1;
+	    bsdauth_set_style(p);
 	    continue;
 	}
 #endif /* HAVE_BSD_AUTH_H */

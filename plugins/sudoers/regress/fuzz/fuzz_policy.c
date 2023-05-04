@@ -42,6 +42,7 @@
 #include "sudo_iolog.h"
 #include "interfaces.h"
 #include "check.h"
+#include "auth/sudo_auth.h"
 
 extern char **environ;
 extern sudo_dso_public struct policy_plugin sudoers_policy;
@@ -889,3 +890,11 @@ cb_group_plugin(const char *file, int line, int column,
 {
     return true;
 }
+
+/* STUB */
+void
+bsdauth_set_style(const char *style)
+{
+    return;
+}
+
