@@ -429,10 +429,10 @@ int sudoers_check_cmnd(int argc, char *const argv[], char *env_add[], void *clos
 int sudoers_list(int argc, char *const argv[], const char *list_user, bool verbose);
 int sudoers_validate_user(void);
 void sudoers_cleanup(void);
+bool sudoers_override_umask(void);
 void sudo_user_free(void);
 extern struct sudo_user sudo_user;
 extern struct passwd *list_pw;
-extern bool force_umask;
 extern int sudo_mode;
 extern int sudoedit_nfiles;
 extern sudo_conv_t sudo_conv;

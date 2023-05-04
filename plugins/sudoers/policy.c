@@ -946,7 +946,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 	if (asprintf(&command_info[info_len++], "umask=0%o", (unsigned int)cmnd_umask) == -1)
 	    goto oom;
     }
-    if (force_umask) {
+    if (sudoers_override_umask()) {
 	if ((command_info[info_len++] = strdup("umask_override=true")) == NULL)
 	    goto oom;
     }

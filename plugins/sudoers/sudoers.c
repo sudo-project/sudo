@@ -83,13 +83,13 @@ static void set_callbacks(void);
  */
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-bool force_umask;
 int sudo_mode;
 
 static char *prev_user;
 static struct sudo_nss_list *snl;
 static bool unknown_runas_uid;
 static bool unknown_runas_gid;
+static bool override_umask;
 static int cmnd_status = -1;
 static struct defaults_list initial_defaults = TAILQ_HEAD_INITIALIZER(initial_defaults);
 
@@ -1670,8 +1670,8 @@ cb_umask(const char *file, int line, int column,
 {
     debug_decl(cb_umask, SUDOERS_DEBUG_PLUGIN);
 
-    /* Force umask if explicitly set in sudoers. */
-    force_umask = sd_un->mode != ACCESSPERMS;
+    /* Override umask if explicitly set in sudoers. */
+    override_umask = sd_un->mode != ACCESSPERMS;
 
     debug_return_bool(true);
 }
@@ -2048,6 +2048,12 @@ tty_present(void)
 	close(fd);
     }
     debug_return_bool(true);
+}
+
+bool
+sudoers_override_umask(void)
+{
+    return override_umask;
 }
 
 /*
