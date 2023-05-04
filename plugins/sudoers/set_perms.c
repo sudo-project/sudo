@@ -40,6 +40,7 @@
 #include <grp.h>
 
 #include "sudoers.h"
+#include "check.h"
 
 /*
  * Prototypes
@@ -341,7 +342,7 @@ set_perms(int perm)
 	state->egid = ostate->egid;
 	state->sgid = ostate->sgid;
 	state->ruid = ROOT_UID;
-	state->euid = timestamp_uid;
+	state->euid = timestamp_get_uid();
 	state->suid = ROOT_UID;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_TIMESTAMP: uid: "
 	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
@@ -674,7 +675,7 @@ set_perms(int perm)
 	state->egid = ostate->egid;
 	state->sgid = ostate->sgid;
 	state->ruid = ROOT_UID;
-	state->euid = timestamp_uid;
+	state->euid = timestamp_get_uid();
 	state->suid = ROOT_UID;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_TIMESTAMP: uid: "
 	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
@@ -689,10 +690,10 @@ set_perms(int perm)
 		    goto bad;
 		}
 	    }
-	    if (setuidx(ID_EFFECTIVE, timestamp_uid)) {
+	    if (setuidx(ID_EFFECTIVE, state->euid)) {
 		(void)snprintf(errbuf, sizeof(errbuf),
 		    "PERM_TIMESTAMP: setuidx(ID_EFFECTIVE, %d)",
-		    (int)timestamp_uid);
+		    (int)state->euid);
 		goto bad;
 	    }
 	}
@@ -1053,7 +1054,7 @@ set_perms(int perm)
 	state->rgid = ostate->rgid;
 	state->egid = ostate->egid;
 	state->ruid = ROOT_UID;
-	state->euid = timestamp_uid;
+	state->euid = timestamp_get_uid();
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_TIMESTAMP: uid: "
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
 	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
@@ -1361,13 +1362,13 @@ set_perms(int perm)
 	state->rgid = ostate->rgid;
 	state->egid = ostate->egid;
 	state->ruid = ROOT_UID;
-	state->euid = timestamp_uid;
+	state->euid = timestamp_get_uid();
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_TIMESTAMP: uid: "
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
 	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
-	if (seteuid(timestamp_uid)) {
+	if (seteuid(state->euid)) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_TIMESTAMP: seteuid(%d)", (int)timestamp_uid);
+		"PERM_TIMESTAMP: seteuid(%d)", (int)state->euid);
 	    goto bad;
 	}
 	break;

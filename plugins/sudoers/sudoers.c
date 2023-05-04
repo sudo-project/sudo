@@ -83,8 +83,6 @@ static void set_callbacks(void);
  */
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-uid_t timestamp_uid = ROOT_UID;
-gid_t timestamp_gid = ROOT_GID;
 bool force_umask;
 int sudo_mode;
 
@@ -1640,8 +1638,7 @@ cb_timestampowner(const char *file, int line, int column,
 	    column, user);
 	debug_return_bool(false);
     }
-    timestamp_uid = pw->pw_uid;
-    timestamp_gid = pw->pw_gid;
+    timestamp_set_owner(pw->pw_uid, pw->pw_gid);
     sudo_pw_delref(pw);
 
     debug_return_bool(true);

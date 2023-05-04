@@ -39,6 +39,7 @@
 #include <netdb.h>
 
 #include "sudoers.h"
+#include "check.h"
 #include "interfaces.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
@@ -90,6 +91,12 @@ bool
 rewind_perms(void)
 {
     return true;
+}
+
+void
+timestamp_set_owner(uid_t uid, gid_t gid)
+{
+    return;
 }
 
 bool

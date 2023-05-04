@@ -435,8 +435,6 @@ extern struct passwd *list_pw;
 extern bool force_umask;
 extern int sudo_mode;
 extern int sudoedit_nfiles;
-extern uid_t timestamp_uid;
-extern gid_t timestamp_gid;
 extern sudo_conv_t sudo_conv;
 extern sudo_printf_t sudo_printf;
 extern struct sudo_plugin_event * (*plugin_event_alloc)(void);
