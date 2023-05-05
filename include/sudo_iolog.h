@@ -119,7 +119,7 @@ bool iolog_mkpath(char *path);
 bool iolog_nextid(const char *iolog_dir, char sessid[7]);
 bool iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode);
 bool iolog_write_info_file(int dfd, struct eventlog *evlog);
-char *iolog_gets(struct iolog_file *iol, char *buf, size_t nbytes, const char **errsttr);
+char *iolog_gets(struct iolog_file *iol, char *buf, int bufsize, const char **errsttr);
 const char *iolog_fd_to_name(int iofd);
 int iolog_openat(int fdf, const char *path, int flags);
 off_t iolog_seek(struct iolog_file *iol, off_t offset, int whence);
