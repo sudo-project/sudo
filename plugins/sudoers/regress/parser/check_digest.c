@@ -86,7 +86,7 @@ main(int argc, char *argv[])
     unsigned char *digest;
     unsigned int i, j;
     size_t digest_len;
-    int digest_type;
+    unsigned int digest_type;
 
     initprogname(argc > 0 ? argv[0] : "check_digest");
 
