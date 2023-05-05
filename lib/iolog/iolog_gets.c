@@ -49,7 +49,7 @@ iolog_gets(struct iolog_file *iol, char *buf, size_t nbytes,
     char *str;
     debug_decl(iolog_gets, SUDO_DEBUG_UTIL);
 
-    if (nbytes > UINT_MAX) {
+    if (nbytes > INT_MAX) {
 	errno = EINVAL;
 	if (errstr != NULL)
 	    *errstr = strerror(errno);
