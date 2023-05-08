@@ -1860,7 +1860,6 @@ sudo_ldap_result_get(const struct sudo_nss *nss, struct passwd *pw)
 		DPRINTF1("result now has %d entries", lres->nentries);
 	    }
 	    free(filt);
-	    filt = NULL;
 	} else if (errno != ENOENT) {
 	    /* Out of memory? */
 	    goto oom;
