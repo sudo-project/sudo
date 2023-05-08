@@ -1315,7 +1315,8 @@ push_include_int(const char *opath, bool isdir, int verbose)
 
 	fd = sudo_open_conf_path(path, dname, sizeof(dname), NULL);
 	status = sudo_secure_fd(fd, S_IFDIR, sudoers_uid, sudoers_gid, &sb);
-	close(fd); /* XXX use in read_dir_files? */
+	if (fd != -1)
+	    close(fd); /* XXX use in read_dir_files? */
 	if (status != SUDO_PATH_SECURE) {
 	    if (verbose > 0) {
 		switch (status) {
