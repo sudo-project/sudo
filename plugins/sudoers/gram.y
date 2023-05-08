@@ -48,15 +48,15 @@
 /*
  * Globals
  */
-bool sudoers_recovery = true;
-bool sudoers_strict = false;
 bool parse_error = false;
+
+static struct sudoers_parser_config parser_conf =
+    SUDOERS_PARSER_CONFIG_INITIALIZER;
 
 /* Optional logging function for parse errors. */
 sudoers_logger_t sudoers_error_hook;
 
 static int alias_line, alias_column;
-static int sudoers_verbose = 1;
 
 #ifdef NO_LEAKS
 static struct parser_leak_list parser_leak_list =
@@ -216,17 +216,19 @@ entry		:	'\n' {
 			    yyerrok;
 			}
 		|	include {
-			    const bool success = push_include($1, sudoers_verbose);
+			    const bool success = push_include($1,
+				parser_conf.verbose);
 			    parser_leak_remove(LEAK_PTR, $1);
 			    free($1);
-			    if (!success && !sudoers_recovery)
+			    if (!success && !parser_conf.recovery)
 				YYERROR;
 			}
 		|	includedir {
-			    const bool success = push_includedir($1, sudoers_verbose);
+			    const bool success = push_includedir($1,
+				parser_conf.verbose);
 			    parser_leak_remove(LEAK_PTR, $1);
 			    free($1);
-			    if (!success && !sudoers_recovery)
+			    if (!success && !parser_conf.recovery)
 				YYERROR;
 			}
 		|	userlist privileges '\n' {
@@ -1216,7 +1218,7 @@ sudoerserrorf(const char *fmt, ...)
 	sudoers_error_hook(sudoers, this_lineno, column, fmt, ap);
 	va_end(ap);
     }
-    if (sudoers_verbose > 0 && fmt != NULL) {
+    if (parser_conf.verbose > 0 && fmt != NULL) {
 	LEXTRACE("<*> ");
 #ifndef TRACELEXER
 	if (trace_print == NULL || trace_print == sudoers_trace_print) {
@@ -1782,7 +1784,8 @@ free_parse_tree(struct sudoers_parse_tree *parse_tree)
  * the current sudoers file to path.
  */
 bool
-init_parser(const char *file, const char *path, bool strict, int verbose)
+init_parser(const char *file, const char *path,
+    const struct sudoers_parser_config *conf)
 {
     bool ret = true;
     debug_decl(init_parser, SUDOERS_DEBUG_PARSER);
@@ -1811,9 +1814,14 @@ init_parser(const char *file, const char *path, bool strict, int verbose)
 	sudoers_search_path = NULL;
     }
 
+    if (conf != NULL) {
+	parser_conf = *conf;
+    } else {
+	const struct sudoers_parser_config def_conf =
+	    SUDOERS_PARSER_CONFIG_INITIALIZER;
+	parser_conf = def_conf;
+    }
     parse_error = false;
-    sudoers_strict = strict;
-    sudoers_verbose = verbose;
 
     debug_return_bool(ret);
 }
@@ -1821,7 +1829,7 @@ init_parser(const char *file, const char *path, bool strict, int verbose)
 bool
 reset_parser(void)
 {
-    return init_parser(NULL, NULL, false, 1);
+    return init_parser(NULL, NULL, NULL);
 }
 
 /*
@@ -1846,6 +1854,36 @@ init_options(struct command_options *opts)
 #ifdef HAVE_APPARMOR
     opts->apparmor_profile = NULL;
 #endif
+}
+
+uid_t
+sudoers_file_uid(void)
+{
+    return parser_conf.sudoers_uid;
+}
+
+gid_t
+sudoers_file_gid(void)
+{
+    return parser_conf.sudoers_gid;
+}
+
+mode_t
+sudoers_file_mode(void)
+{
+    return parser_conf.sudoers_mode;
+}
+
+bool
+sudoers_error_recovery(void)
+{
+    return parser_conf.recovery;
+}
+
+bool
+sudoers_strict(void)
+{
+    return parser_conf.strict;
 }
 
 bool

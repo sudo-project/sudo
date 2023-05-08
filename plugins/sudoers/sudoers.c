@@ -249,7 +249,6 @@ sudoers_init(void *info, sudoers_logger_t logger, char * const envp[])
     }
 
     /* Open and parse sudoers, set global defaults.  */
-    reset_parser();
     TAILQ_FOREACH_SAFE(nss, snl, entries, nss_next) {
 	if (nss->open(nss) == -1 || (nss->parse_tree = nss->parse(nss)) == NULL) {
 	    TAILQ_REMOVE(snl, nss, entries);
@@ -1300,7 +1299,8 @@ open_sudoers(const char *path, char **outfile, bool doedit, bool *keepopen)
     debug_decl(open_sudoers, SUDOERS_DEBUG_PLUGIN);
 
     fd = sudo_open_conf_path(path, fname, sizeof(fname), open_file);
-    error = sudo_secure_fd(fd, S_IFREG, sudoers_uid, sudoers_gid, &sb);
+    error = sudo_secure_fd(fd, S_IFREG, sudoers_file_uid(), sudoers_file_gid(),
+	&sb);
     switch (error) {
     case SUDO_PATH_SECURE:
 	/*
@@ -1340,7 +1340,7 @@ open_sudoers(const char *path, char **outfile, bool doedit, bool *keepopen)
     case SUDO_PATH_WRONG_OWNER:
 	log_warningx(SLOG_PARSE_ERROR,
 	    N_("%s is owned by uid %u, should be %u"), fname,
-	    (unsigned int)sb.st_uid, (unsigned int)sudoers_uid);
+	    (unsigned int)sb.st_uid, (unsigned int)sudoers_file_uid());
 	break;
     case SUDO_PATH_WORLD_WRITABLE:
 	log_warningx(SLOG_PARSE_ERROR, N_("%s is world writable"), fname);
@@ -1348,7 +1348,7 @@ open_sudoers(const char *path, char **outfile, bool doedit, bool *keepopen)
     case SUDO_PATH_GROUP_WRITABLE:
 	log_warningx(SLOG_PARSE_ERROR,
 	    N_("%s is owned by gid %u, should be %u"), fname,
-	    (unsigned int)sb.st_gid, (unsigned int)sudoers_gid);
+	    (unsigned int)sb.st_gid, (unsigned int)sudoers_file_gid());
 	break;
     default:
 	sudo_warnx("%s: internal error, unexpected error %d", __func__, error);

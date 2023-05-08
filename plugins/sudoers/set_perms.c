@@ -295,7 +295,11 @@ set_perms(int perm)
 	}
 	break;
 
-    case PERM_SUDOERS:
+    case PERM_SUDOERS: {
+	const uid_t sudoers_uid = sudoers_file_uid();
+	const gid_t sudoers_gid = sudoers_file_gid();
+	const mode_t sudoers_mode = sudoers_file_mode();
+
 	state->gidlist = ostate->gidlist;
 	sudo_gidlist_addref(state->gidlist);
 
@@ -334,6 +338,7 @@ set_perms(int perm)
 	    goto bad;
 	}
 	break;
+    }
 
     case PERM_TIMESTAMP:
 	state->gidlist = ostate->gidlist;
@@ -619,7 +624,11 @@ set_perms(int perm)
 	}
 	break;
 
-    case PERM_SUDOERS:
+    case PERM_SUDOERS: {
+	const uid_t sudoers_uid = sudoers_file_uid();
+	const gid_t sudoers_gid = sudoers_file_gid();
+	const mode_t sudoers_mode = sudoers_file_mode();
+
 	state->gidlist = ostate->gidlist;
 	sudo_gidlist_addref(state->gidlist);
 
@@ -667,6 +676,7 @@ set_perms(int perm)
 	    }
 	}
 	break;
+    }
 
     case PERM_TIMESTAMP:
 	state->gidlist = ostate->gidlist;
@@ -1012,7 +1022,11 @@ set_perms(int perm)
 	}
 	break;
 
-    case PERM_SUDOERS:
+    case PERM_SUDOERS: {
+	const uid_t sudoers_uid = sudoers_file_uid();
+	const gid_t sudoers_gid = sudoers_file_gid();
+	const mode_t sudoers_mode = sudoers_file_mode();
+
 	state->gidlist = ostate->gidlist;
 	sudo_gidlist_addref(state->gidlist);
 
@@ -1047,6 +1061,7 @@ set_perms(int perm)
 	    goto bad;
 	}
 	break;
+    }
 
     case PERM_TIMESTAMP:
 	state->gidlist = ostate->gidlist;
@@ -1321,7 +1336,11 @@ set_perms(int perm)
 	}
 	break;
 
-    case PERM_SUDOERS:
+    case PERM_SUDOERS: {
+	const uid_t sudoers_uid = sudoers_file_uid();
+	const gid_t sudoers_gid = sudoers_file_gid();
+	const mode_t sudoers_mode = sudoers_file_mode();
+
 	state->gidlist = ostate->gidlist;
 	sudo_gidlist_addref(state->gidlist);
 
@@ -1355,6 +1374,7 @@ set_perms(int perm)
 	    goto bad;
 	}
 	break;
+    }
 
     case PERM_TIMESTAMP:
 	state->gidlist = ostate->gidlist;

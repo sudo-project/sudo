@@ -2,7 +2,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2022
+ * Copyright (c) 1996, 1998-2005, 2007-2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -58,11 +58,6 @@ char *sudoers;			/* sudoers file being parsed. */
 char *sudoers_search_path;	/* colon-separated path of sudoers files. */
 const char *sudoers_errstr;	/* description of last error from lexer. */
 struct sudolinebuf sudolinebuf;	/* sudoers line being parsed. */
-
-/* Default sudoers mode and owner (may be set via sudo.conf) */
-mode_t sudoers_mode = SUDOERS_MODE;
-uid_t sudoers_uid = SUDOERS_UID;
-gid_t sudoers_gid = SUDOERS_GID;
 
 static bool continued, sawspace;
 static int prev_state;
@@ -296,7 +291,7 @@ DEFVAR			[a-z_]+
 				yyterminate();
 			    BEGIN INITIAL;
 			    continued = false;
-			    if (sudoers_strict) {
+			    if (sudoers_strict()) {
 				if (!sudo_regex_compile(NULL, sudoerstext, &sudoers_errstr)) {
 				    LEXTRACE("ERROR ");
 				    return ERROR;
@@ -780,7 +775,7 @@ sudoedit		{
 			}			/* a pathname */
 
 {REGEX}			{
-			    if (sudoers_strict) {
+			    if (sudoers_strict()) {
 				if (!sudo_regex_compile(NULL, sudoerstext, &sudoers_errstr)) {
 				    LEXTRACE("ERROR ");
 				    return ERROR;
@@ -1314,7 +1309,8 @@ push_include_int(const char *opath, bool isdir, int verbose)
 	int count, fd, status;
 
 	fd = sudo_open_conf_path(path, dname, sizeof(dname), NULL);
-	status = sudo_secure_fd(fd, S_IFDIR, sudoers_uid, sudoers_gid, &sb);
+	status = sudo_secure_fd(fd, S_IFDIR, sudoers_file_uid(),
+	    sudoers_file_gid(), &sb);
 	if (fd != -1)
 	    close(fd); /* XXX use in read_dir_files? */
 	if (status != SUDO_PATH_SECURE) {
@@ -1327,7 +1323,7 @@ push_include_int(const char *opath, bool isdir, int verbose)
 		case SUDO_PATH_WRONG_OWNER:
 		    sudo_warnx(U_("%s is owned by uid %u, should be %u"),   
 			path, (unsigned int) sb.st_uid,
-			(unsigned int) sudoers_uid);
+			(unsigned int) sudoers_file_uid());
 		    break;
 		case SUDO_PATH_WORLD_WRITABLE:
 		    sudo_warnx(U_("%s is world writable"), path);
@@ -1335,7 +1331,7 @@ push_include_int(const char *opath, bool isdir, int verbose)
 		case SUDO_PATH_GROUP_WRITABLE:
 		    sudo_warnx(U_("%s is owned by gid %u, should be %u"),
 			path, (unsigned int) sb.st_gid,
-			(unsigned int) sudoers_gid);
+			(unsigned int) sudoers_file_gid());
 		    break;
 		default:
 		    break;

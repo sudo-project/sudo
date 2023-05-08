@@ -73,8 +73,10 @@ sudo_file_open(struct sudo_nss *nss)
 
     handle = malloc(sizeof(*handle));
     if (handle != NULL) {
-	handle->fp = open_sudoers(policy_path_sudoers(), &outfile, false, NULL);
+	const char *path_sudoers = policy_path_sudoers();
+	handle->fp = open_sudoers(path_sudoers, &outfile, false, NULL);
 	if (handle->fp != NULL) {
+	    init_parser(NULL, path_sudoers, policy_sudoers_conf());
 	    init_parse_tree(&handle->parse_tree, NULL, NULL, nss);
 	    if (outfile != NULL) {
 		/* Update path to open sudoers file. */
@@ -108,7 +110,7 @@ sudo_file_parse(const struct sudo_nss *nss)
 
     sudoersin = handle->fp;
     error = sudoersparse();
-    if (error || (parse_error && !sudoers_recovery)) {
+    if (error || (parse_error && !sudoers_error_recovery())) {
 	/* unrecoverable error */
 	debug_return_ptr(NULL);
     }

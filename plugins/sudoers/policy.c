@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -50,6 +50,7 @@ struct sudoers_exec_args {
     char ***info;
 };
 
+static struct sudoers_parser_config parser_conf = SUDOERS_PARSER_CONFIG_INITIALIZER;
 static unsigned int sudo_version;
 static const char *interfaces_string;
 sudo_conv_t sudo_conv;
@@ -95,12 +96,12 @@ parse_bool(const char *line, int varlen, int *flags, int fval)
 int
 sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 {
-    struct sudoers_open_info *info = v;
     const char *p, *errstr, *groups = NULL;
+    struct sudoers_open_info *info = v;
+    int flags = MODE_UPDATE_TICKET;
     const char *remhost = NULL;
     unsigned char uuid[16];
     char * const *cur;
-    int flags = MODE_UPDATE_TICKET;
     debug_decl(sudoers_policy_deserialize_info, SUDOERS_DEBUG_PLUGIN);
 
 #define MATCHES(s, v)	\
@@ -124,9 +125,6 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
     }
 
     /* Parse sudo.conf plugin args. */
-    sudoers_mode = SUDOERS_MODE;
-    sudoers_uid = SUDOERS_UID;
-    sudoers_gid = SUDOERS_GID;
     if (info->plugin_args != NULL) {
 	for (cur = info->plugin_args; *cur != NULL; cur++) {
 	    if (MATCHES(*cur, "error_recovery=")) {
@@ -134,7 +132,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 		if (val == -1) {
 		    INVALID("error_recovery=");	/* Not a fatal error. */
 		} else {
-		    sudoers_recovery = val;
+		    parser_conf.recovery = val;
 		}
 		continue;
 	    }
@@ -145,7 +143,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	    }
 	    if (MATCHES(*cur, "sudoers_uid=")) {
 		p = *cur + sizeof("sudoers_uid=") - 1;
-		sudoers_uid = (uid_t) sudo_strtoid(p, &errstr);
+		parser_conf.sudoers_uid = (uid_t)sudo_strtoid(p, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		    goto bad;
@@ -154,7 +152,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	    }
 	    if (MATCHES(*cur, "sudoers_gid=")) {
 		p = *cur + sizeof("sudoers_gid=") - 1;
-		sudoers_gid = (gid_t) sudo_strtoid(p, &errstr);
+		parser_conf.sudoers_gid = (gid_t)sudo_strtoid(p, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		    goto bad;
@@ -163,7 +161,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	    }
 	    if (MATCHES(*cur, "sudoers_mode=")) {
 		p = *cur + sizeof("sudoers_mode=") - 1;
-		sudoers_mode = sudo_strtomode(p, &errstr);
+		parser_conf.sudoers_mode = sudo_strtomode(p, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		    goto bad;
@@ -623,6 +621,13 @@ oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 bad:
     debug_return_int(MODE_ERROR);
+}
+
+/* Return the policy's struct sudoers_parser_config. */
+const struct sudoers_parser_config *
+policy_sudoers_conf(void)
+{
+    return &parser_conf;
 }
 
 /* Return the path to the sudoers file, which may be set in the plugin args. */

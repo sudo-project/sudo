@@ -111,6 +111,7 @@ struct sudo_user sudo_user;
 struct passwd *list_pw;
 static const char *path_sudoers = _PATH_SUDOERS;
 static struct sudoersfile_list sudoerslist = TAILQ_HEAD_INITIALIZER(sudoerslist);
+static struct sudoers_parser_config parser_conf = SUDOERS_PARSER_CONFIG_INITIALIZER;
 static bool checkonly;
 static bool edit_includes = true;
 static unsigned int errors;
@@ -240,11 +241,11 @@ main(int argc, char *argv[])
     if (fflag) {
 	/* Looser owner/permission checks for an uninstalled sudoers file. */
 	if (!use_owner) {
-	    sudoers_uid = -1;
-	    sudoers_gid = -1;
+	    parser_conf.sudoers_uid = (uid_t)-1;
+	    parser_conf.sudoers_gid = (gid_t)-1;
 	}
 	if (!use_perms)
-	    SET(sudoers_mode, S_IWUSR);
+	    parser_conf.sudoers_mode |= S_IWUSR;
     } else {
 	/* Check/set owner and mode for installed sudoers file. */
 	use_owner = true;
@@ -288,7 +289,9 @@ main(int argc, char *argv[])
      * Parse the existing sudoers file(s) to highlight any existing
      * errors and to pull in editor and env_editor conf values.
      */
-    init_parser(NULL, path_sudoers, true, quiet ? 0 : 2);
+    parser_conf.strict = true;
+    parser_conf.verbose = quiet ? 0 : 2;
+    init_parser(NULL, path_sudoers, &parser_conf);
     if ((sudoersin = open_sudoers(path_sudoers, &sudoers, true, NULL)) == NULL)
 	exit(EXIT_FAILURE);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
@@ -651,7 +654,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	/* Clean slate for each parse */
 	if (!init_defaults())
 	    sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
-	init_parser(sp->opath, path_sudoers, true, quiet ? 0 : 2);
+	init_parser(sp->opath, path_sudoers, &parser_conf);
 	sp->errorline = -1;
 
 	/* Parse the sudoers temp file(s) */
@@ -742,19 +745,19 @@ install_sudoers(struct sudoersfile *sp, bool set_owner, bool set_mode)
 	(void) unlink(sp->tpath);
 	if (fstat(sp->fd, &sb) == 0) {
 	    if (set_owner) {
-		if (sb.st_uid != sudoers_uid || sb.st_gid != sudoers_gid) {
-		    if (chown(sp->opath, sudoers_uid, sudoers_gid) != 0) {
+		if (sb.st_uid != sudoers_file_uid() || sb.st_gid != sudoers_file_gid()) {
+		    if (chown(sp->opath, sudoers_file_uid(), sudoers_file_gid()) != 0) {
 			sudo_warn(U_("unable to set (uid, gid) of %s to (%u, %u)"),
-			    sp->opath, (unsigned int)sudoers_uid,
-			    (unsigned int)sudoers_gid);
+			    sp->opath, (unsigned int)sudoers_file_uid(),
+			    (unsigned int)sudoers_file_gid());
 		    }
 		}
 	    }
 	    if (set_mode) {
-		if ((sb.st_mode & ACCESSPERMS) != sudoers_mode) {
-		    if (chmod(sp->opath, sudoers_mode) != 0) {
+		if ((sb.st_mode & ACCESSPERMS) != sudoers_file_mode()) {
+		    if (chmod(sp->opath, sudoers_file_mode()) != 0) {
 			sudo_warn(U_("unable to change mode of %s to 0%o"),
-			    sp->opath, (unsigned int)sudoers_mode);
+			    sp->opath, (unsigned int)sudoers_file_mode());
 		    }
 		}
 	    }
@@ -773,10 +776,10 @@ install_sudoers(struct sudoersfile *sp, bool set_owner, bool set_mode)
 	    sudo_fatal(U_("unable to stat %s"), sp->opath);
     }
     if (set_owner) {
-	if (chown(sp->tpath, sudoers_uid, sudoers_gid) != 0) {
+	if (chown(sp->tpath, sudoers_file_uid(), sudoers_file_gid()) != 0) {
 	    sudo_warn(U_("unable to set (uid, gid) of %s to (%u, %u)"),
-		sp->tpath, (unsigned int)sudoers_uid,
-		(unsigned int)sudoers_gid);
+		sp->tpath, (unsigned int)sudoers_file_uid(),
+		(unsigned int)sudoers_file_gid());
 	    goto done;
 	}
     } else {
@@ -786,9 +789,9 @@ install_sudoers(struct sudoersfile *sp, bool set_owner, bool set_mode)
 	}
     }
     if (set_mode) {
-	if (chmod(sp->tpath, sudoers_mode) != 0) {
+	if (chmod(sp->tpath, sudoers_file_mode()) != 0) {
 	    sudo_warn(U_("unable to change mode of %s to 0%o"), sp->tpath,
-		(unsigned int)sudoers_mode);
+		(unsigned int)sudoers_file_mode());
 	    goto done;
 	}
     } else {
@@ -1022,23 +1025,23 @@ check_file(const char *path, bool quiet, bool check_owner, bool check_mode)
 
     if (stat(path, &sb) == 0) {
 	if (check_owner) {
-	    if (sb.st_uid != sudoers_uid || sb.st_gid != sudoers_gid) {
+	    if (sb.st_uid != sudoers_file_uid() || sb.st_gid != sudoers_file_gid()) {
 		ok = false;
 		if (!quiet) {
 		    fprintf(stderr,
 			_("%s: wrong owner (uid, gid) should be (%u, %u)\n"),
-			path, (unsigned int)sudoers_uid,
-			(unsigned int)sudoers_gid);
+			path, (unsigned int)sudoers_file_uid(),
+			(unsigned int)sudoers_file_gid());
 		}
 	    }
 	}
 	if (check_mode) {
-	    if ((sb.st_mode & ALLPERMS) != sudoers_mode) {
+	    if ((sb.st_mode & ALLPERMS) != sudoers_file_mode()) {
 		ok = false;
 		if (!quiet) {
 		    fprintf(stderr,
 			_("%s: bad permissions, should be mode 0%o\n"),
-			path, (unsigned int)sudoers_mode);
+			path, (unsigned int)sudoers_file_mode());
 		}
 	    }
 	}
@@ -1068,7 +1071,7 @@ check_syntax(const char *path, bool quiet, bool strict, bool check_owner,
 	    goto done;
 	}
     }
-    init_parser(fname, path, true, quiet ? 0 : 2);
+    init_parser(fname, path, &parser_conf);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     if (sudoersparse() && !parse_error) {
 	if (!quiet)
@@ -1181,7 +1184,7 @@ new_sudoers(const char *path, bool doedit)
     if (fd == -1) {
 	if (!checkonly) {
 	    /* No sudoers file, create the destination file for editing. */
-	    fd = open(entry->dpath, O_RDWR|O_CREAT, sudoers_mode);
+	    fd = open(entry->dpath, O_RDWR|O_CREAT, sudoers_file_mode());
 	}
 	if (fd == -1) {
 	    sudo_warn("%s", entry->dpath);
@@ -1329,6 +1332,7 @@ parse_sudoers_options(void)
 	    for (cur = info->options; *cur != NULL; cur++) {
 		const char *errstr, *p;
 		id_t id;
+		mode_t mode;
 
 		if (MATCHES(*cur, "sudoers_file=")) {
 		    path_sudoers = *cur + sizeof("sudoers_file=") - 1;
@@ -1338,21 +1342,21 @@ parse_sudoers_options(void)
 		    p = *cur + sizeof("sudoers_uid=") - 1;
 		    id = sudo_strtoid(p, &errstr);
 		    if (errstr == NULL)
-			sudoers_uid = (uid_t) id;
+			parser_conf.sudoers_uid = (uid_t)id;
 		    continue;
 		}
 		if (MATCHES(*cur, "sudoers_gid=")) {
 		    p = *cur + sizeof("sudoers_gid=") - 1;
 		    id = sudo_strtoid(p, &errstr);
 		    if (errstr == NULL)
-			sudoers_gid = (gid_t) id;
+			parser_conf.sudoers_gid = (gid_t)id;
 		    continue;
 		}
 		if (MATCHES(*cur, "sudoers_mode=")) {
 		    p = *cur + sizeof("sudoers_mode=") - 1;
-		    id = (id_t) sudo_strtomode(p, &errstr);
+		    mode = sudo_strtomode(p, &errstr);
 		    if (errstr == NULL)
-			sudoers_mode = (mode_t) id;
+			parser_conf.sudoers_mode = mode;
 		    continue;
 		}
 	    }

@@ -323,6 +323,26 @@ struct cmnd_info {
 };
 
 /*
+ * Parse configuration settings, passed to init_parser().
+ */
+struct sudoers_parser_config {
+    bool strict;
+    bool recovery;
+    int verbose;
+    mode_t sudoers_mode;
+    uid_t sudoers_uid;
+    gid_t sudoers_gid;
+};
+#define SUDOERS_PARSER_CONFIG_INITIALIZER {				\
+    false,	/* strict */						\
+    true,	/* recovery */						\
+    1,		/* verbose level 1 */					\
+    SUDOERS_MODE,							\
+    SUDOERS_UID,							\
+    SUDOERS_GID								\
+}
+
+/*
  * The parser passes pointers to data structures that are not stored anywhere.
  * We add them to the leak list at allocation time and remove them from
  * the list when they are stored in another data structure.
@@ -372,7 +392,7 @@ int check_aliases(struct sudoers_parse_tree *parse_tree, bool strict, bool quiet
 /* gram.y */
 extern struct sudoers_parse_tree parsed_policy;
 extern bool (*sudoers_error_hook)(const char *file, int line, int column, const char *fmt, va_list args);
-bool init_parser(const char *file, const char *path, bool strict, int verbose);
+bool init_parser(const char *file, const char *path, const struct sudoers_parser_config *conf);
 bool reset_parser(void);
 void free_member(struct member *m);
 void free_members(struct member_list *members);

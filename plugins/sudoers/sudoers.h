@@ -324,9 +324,12 @@ int pam_prep_user(struct passwd *);
 
 /* gram.y */
 int sudoersparse(void);
+uid_t sudoers_file_uid(void);
+gid_t sudoers_file_gid(void);
+mode_t sudoers_file_mode(void);
+bool sudoers_error_recovery(void);
+bool sudoers_strict(void);
 extern bool parse_error;
-extern bool sudoers_recovery;
-extern bool sudoers_strict;
 
 /* toke.l */
 YY_DECL;
@@ -334,9 +337,6 @@ void sudoersrestart(FILE *);
 extern FILE *sudoersin;
 extern char *sudoers;
 extern char *sudoers_search_path;
-extern mode_t sudoers_mode;
-extern uid_t sudoers_uid;
-extern gid_t sudoers_gid;
 extern int sudolineno;
 
 /* defaults.c */
@@ -447,6 +447,7 @@ void sudoers_debug_deregister(void);
 /* policy.c */
 int sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults);
 bool sudoers_policy_store_result(bool accepted, char *argv[], char *envp[], mode_t cmnd_umask, char *iolog_path, void *v);
+const struct sudoers_parser_config *policy_sudoers_conf(void);
 const char *policy_path_sudoers(void);
 const char *policy_path_ldap_conf(void);
 const char *policy_path_ldap_secret(void);
