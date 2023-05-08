@@ -448,7 +448,6 @@ void sudoers_debug_deregister(void);
 int sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults);
 bool sudoers_policy_store_result(bool accepted, char *argv[], char *envp[], mode_t cmnd_umask, char *iolog_path, void *v);
 const struct sudoers_parser_config *policy_sudoers_conf(void);
-const char *policy_path_sudoers(void);
 const char *policy_path_ldap_conf(void);
 const char *policy_path_ldap_secret(void);
 

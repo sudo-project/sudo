@@ -326,6 +326,7 @@ struct cmnd_info {
  * Parse configuration settings, passed to init_parser().
  */
 struct sudoers_parser_config {
+    const char *sudoers_path;
     bool strict;
     bool recovery;
     int verbose;
@@ -334,6 +335,7 @@ struct sudoers_parser_config {
     gid_t sudoers_gid;
 };
 #define SUDOERS_PARSER_CONFIG_INITIALIZER {				\
+    NULL,	/* sudoers_path */					\
     false,	/* strict */						\
     true,	/* recovery */						\
     1,		/* verbose level 1 */					\
@@ -392,7 +394,7 @@ int check_aliases(struct sudoers_parse_tree *parse_tree, bool strict, bool quiet
 /* gram.y */
 extern struct sudoers_parse_tree parsed_policy;
 extern bool (*sudoers_error_hook)(const char *file, int line, int column, const char *fmt, va_list args);
-bool init_parser(const char *file, const char *path, const struct sudoers_parser_config *conf);
+bool init_parser(const char *file, const struct sudoers_parser_config *conf);
 bool reset_parser(void);
 void free_member(struct member *m);
 void free_members(struct member_list *members);

@@ -73,10 +73,10 @@ sudo_file_open(struct sudo_nss *nss)
 
     handle = malloc(sizeof(*handle));
     if (handle != NULL) {
-	const char *path_sudoers = policy_path_sudoers();
-	handle->fp = open_sudoers(path_sudoers, &outfile, false, NULL);
+	const struct sudoers_parser_config *conf = policy_sudoers_conf();
+	handle->fp = open_sudoers(conf->sudoers_path, &outfile, false, NULL);
 	if (handle->fp != NULL) {
-	    init_parser(NULL, path_sudoers, policy_sudoers_conf());
+	    init_parser(NULL, policy_sudoers_conf());
 	    init_parse_tree(&handle->parse_tree, NULL, NULL, nss);
 	    if (outfile != NULL) {
 		/* Update path to open sudoers file. */

@@ -770,7 +770,7 @@ parse_sudoers(const char *input_file, struct cvtsudoers_config *conf)
 	input_file = "stdin";
     } else if ((sudoersin = fopen(input_file, "r")) == NULL)
 	sudo_fatal(U_("unable to open %s"), input_file);
-    init_parser(input_file, NULL, NULL);
+    init_parser(input_file, NULL);
     if (sudoersparse() && !parse_error) {
 	sudo_warnx(U_("failed to parse %s file, unknown error"), input_file);
 	parse_error = true;

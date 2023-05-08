@@ -291,7 +291,8 @@ main(int argc, char *argv[])
      */
     parser_conf.strict = true;
     parser_conf.verbose = quiet ? 0 : 2;
-    init_parser(NULL, path_sudoers, &parser_conf);
+    parser_conf.sudoers_path = path_sudoers;
+    init_parser(NULL, &parser_conf);
     if ((sudoersin = open_sudoers(path_sudoers, &sudoers, true, NULL)) == NULL)
 	exit(EXIT_FAILURE);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
@@ -654,7 +655,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	/* Clean slate for each parse */
 	if (!init_defaults())
 	    sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
-	init_parser(sp->opath, path_sudoers, &parser_conf);
+	init_parser(sp->opath, &parser_conf);
 	sp->errorline = -1;
 
 	/* Parse the sudoers temp file(s) */
@@ -1071,7 +1072,7 @@ check_syntax(const char *path, bool quiet, bool strict, bool check_owner,
 	    goto done;
 	}
     }
-    init_parser(fname, path, &parser_conf);
+    init_parser(fname, &parser_conf);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     if (sudoersparse() && !parse_error) {
 	if (!quiet)

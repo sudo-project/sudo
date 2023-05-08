@@ -180,6 +180,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	    }
 	}
     }
+    parser_conf.sudoers_path = path_sudoers;
 
     /* Parse command line settings. */
     sudo_user.flags = 0;
@@ -628,13 +629,6 @@ const struct sudoers_parser_config *
 policy_sudoers_conf(void)
 {
     return &parser_conf;
-}
-
-/* Return the path to the sudoers file, which may be set in the plugin args. */
-const char *
-policy_path_sudoers(void)
-{
-    return path_sudoers;
 }
 
 /* Return the path to ldap.conf file, which may be set in the plugin args. */
