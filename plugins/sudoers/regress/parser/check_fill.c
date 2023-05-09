@@ -44,7 +44,6 @@ sudo_dso_public int main(int argc, char *argv[]);
  */
 
 YYSTYPE sudoerslval;
-bool sudoers_strict;
 
 struct fill_test {
     const char *input;
@@ -188,6 +187,13 @@ void
 sudoerserror(const char *s)
 {
     return;
+}
+
+/* STUB */
+bool
+sudoers_strict(void)
+{
+    return false;
 }
 
 /* STUB */
