@@ -50,7 +50,7 @@ struct sudoers_exec_args {
     char ***info;
 };
 
-static struct sudoers_parser_config parser_conf = SUDOERS_PARSER_CONFIG_INITIALIZER;
+static struct sudoers_parser_config sudoers_conf = SUDOERS_PARSER_CONFIG_INITIALIZER;
 static unsigned int sudo_version;
 static const char *interfaces_string;
 sudo_conv_t sudo_conv;
@@ -132,7 +132,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 		if (val == -1) {
 		    INVALID("error_recovery=");	/* Not a fatal error. */
 		} else {
-		    parser_conf.recovery = val;
+		    sudoers_conf.recovery = val;
 		}
 		continue;
 	    }
@@ -143,7 +143,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	    }
 	    if (MATCHES(*cur, "sudoers_uid=")) {
 		p = *cur + sizeof("sudoers_uid=") - 1;
-		parser_conf.sudoers_uid = (uid_t)sudo_strtoid(p, &errstr);
+		sudoers_conf.sudoers_uid = (uid_t)sudo_strtoid(p, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		    goto bad;
@@ -152,7 +152,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	    }
 	    if (MATCHES(*cur, "sudoers_gid=")) {
 		p = *cur + sizeof("sudoers_gid=") - 1;
-		parser_conf.sudoers_gid = (gid_t)sudo_strtoid(p, &errstr);
+		sudoers_conf.sudoers_gid = (gid_t)sudo_strtoid(p, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		    goto bad;
@@ -161,7 +161,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	    }
 	    if (MATCHES(*cur, "sudoers_mode=")) {
 		p = *cur + sizeof("sudoers_mode=") - 1;
-		parser_conf.sudoers_mode = sudo_strtomode(p, &errstr);
+		sudoers_conf.sudoers_mode = sudo_strtomode(p, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		    goto bad;
@@ -180,7 +180,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	    }
 	}
     }
-    parser_conf.sudoers_path = path_sudoers;
+    sudoers_conf.sudoers_path = path_sudoers;
 
     /* Parse command line settings. */
     sudo_user.flags = 0;
@@ -628,7 +628,7 @@ bad:
 const struct sudoers_parser_config *
 policy_sudoers_conf(void)
 {
-    return &parser_conf;
+    return &sudoers_conf;
 }
 
 /* Return the path to ldap.conf file, which may be set in the plugin args. */

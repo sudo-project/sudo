@@ -97,7 +97,7 @@ sudo_dso_public int main(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
-    struct sudoers_parser_config parser_conf = SUDOERS_PARSER_CONFIG_INITIALIZER;
+    struct sudoers_parser_config sudoers_conf = SUDOERS_PARSER_CONFIG_INITIALIZER;
     enum sudoers_formats input_format = format_sudoers;
     struct cmndspec *cs;
     struct privilege *priv;
@@ -145,7 +145,7 @@ main(int argc, char *argv[])
 		id = sudo_strtoid(optarg, &errstr);
 		if (errstr != NULL)
 		    sudo_fatalx("group-ID %s: %s", optarg, errstr);
-		parser_conf.sudoers_gid = (gid_t)id;
+		sudoers_conf.sudoers_gid = (gid_t)id;
 		break;
 	    case 'g':
 		runas_group = optarg;
@@ -177,7 +177,7 @@ main(int argc, char *argv[])
 		id = sudo_strtoid(optarg, &errstr);
 		if (errstr != NULL)
 		    sudo_fatalx("user-ID %s: %s", optarg, errstr);
-		parser_conf.sudoers_uid = (uid_t)id;
+		sudoers_conf.sudoers_uid = (uid_t)id;
 		break;
 	    case 'u':
 		runas_user = optarg;
@@ -278,9 +278,9 @@ main(int argc, char *argv[])
     }
 
     /* Initialize the parser and set sudoers filename to "sudoers". */
-    parser_conf.strict = true;
-    parser_conf.verbose = 2;
-    init_parser("sudoers", &parser_conf);
+    sudoers_conf.strict = true;
+    sudoers_conf.verbose = 2;
+    init_parser("sudoers", &sudoers_conf);
 
     /*
      * Set runas passwd/group entries based on command line or sudoers.
