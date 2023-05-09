@@ -1,7 +1,8 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2011-2013, 2015-2016, 2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2011-2013, 2015-2016, 2020-2023
+ *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -27,13 +28,17 @@ struct sudolinebuf {
     size_t toke_start;		/* starting column of current token */
     size_t toke_end;		/* ending column of current token */
 };
+
 extern const char *sudoers_errstr;
 extern struct sudolinebuf sudolinebuf;
+extern int sudolineno;
+extern char *sudoers_search_path;
 
 bool append(const char *, size_t);
 bool fill_args(const char *, size_t, int);
 bool fill_cmnd(const char *, size_t);
 bool fill(const char *, size_t);
+void init_lexer(void);
 bool ipv6_valid(const char *s);
 int sudoers_trace_print(const char *);
 void sudoerserrorf(const char *, ...) sudo_printf0like(1, 2);

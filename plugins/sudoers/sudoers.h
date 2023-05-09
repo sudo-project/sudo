@@ -287,8 +287,6 @@ struct timespec;
 /*
  * Function prototypes
  */
-#define YY_DECL int sudoerslex(void)
-
 /* goodpath.c */
 bool sudo_goodpath(const char *path, struct stat *sbp);
 
@@ -321,23 +319,6 @@ bool rewind_perms(void);
 bool set_perms(int);
 bool restore_perms(void);
 int pam_prep_user(struct passwd *);
-
-/* gram.y */
-int sudoersparse(void);
-uid_t sudoers_file_uid(void);
-gid_t sudoers_file_gid(void);
-mode_t sudoers_file_mode(void);
-bool sudoers_error_recovery(void);
-bool sudoers_strict(void);
-extern bool parse_error;
-
-/* toke.l */
-YY_DECL;
-void sudoersrestart(FILE *);
-extern FILE *sudoersin;
-extern char *sudoers;
-extern char *sudoers_search_path;
-extern int sudolineno;
 
 /* defaults.c */
 void dump_defaults(void);

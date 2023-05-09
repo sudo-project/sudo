@@ -375,6 +375,8 @@ struct parser_leak_entry {
 };
 SLIST_HEAD(parser_leak_list, parser_leak_entry);
 
+#define YY_DECL int sudoerslex(void)
+
 /* alias.c */
 struct rbtree *alloc_aliases(void);
 void free_aliases(struct rbtree *aliases);
@@ -392,9 +394,9 @@ void alias_put(struct alias *a);
 int check_aliases(struct sudoers_parse_tree *parse_tree, bool strict, bool quiet, int (*cb_unused)(struct sudoers_parse_tree *, struct alias *, void *));
 
 /* gram.y */
+extern bool parse_error;
 extern struct sudoers_parse_tree parsed_policy;
 extern bool (*sudoers_error_hook)(const char *file, int line, int column, const char *fmt, va_list args);
-bool init_parser(const char *file, const struct sudoers_parser_config *conf);
 bool reset_parser(void);
 void free_member(struct member *m);
 void free_members(struct member_list *members);
@@ -405,12 +407,19 @@ void free_userspec(struct userspec *us);
 void free_userspecs(struct userspec_list *usl);
 void free_default(struct defaults *def);
 void free_defaults(struct defaults_list *defs);
+bool init_parser(const char *file, const struct sudoers_parser_config *conf);
 void init_parse_tree(struct sudoers_parse_tree *parse_tree, char *lhost, char *shost, struct sudo_nss *nss);
 void free_parse_tree(struct sudoers_parse_tree *parse_tree);
-void reparent_parse_tree(struct sudoers_parse_tree *new_tree);
 bool parser_leak_add(enum parser_leak_types type, void *v);
 bool parser_leak_remove(enum parser_leak_types type, void *v);
 void parser_leak_init(void);
+void reparent_parse_tree(struct sudoers_parse_tree *new_tree);
+int sudoersparse(void);
+uid_t sudoers_file_uid(void);
+gid_t sudoers_file_gid(void);
+mode_t sudoers_file_mode(void);
+bool sudoers_error_recovery(void);
+bool sudoers_strict(void);
 
 /* match_addr.c */
 bool addr_matches(char *n);
@@ -440,8 +449,11 @@ int userlist_matches(const struct sudoers_parse_tree *parse_tree, const struct p
 const char *sudo_getdomainname(void);
 struct gid_list *runas_getgroups(void);
 
-/* toke.c */
-void init_lexer(void);
+/* toke.l */
+YY_DECL;
+void sudoersrestart(FILE *);
+extern FILE *sudoersin;
+extern char *sudoers;
 
 /* base64.c */
 size_t base64_decode(const char *str, unsigned char *dst, size_t dsize);
