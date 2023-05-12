@@ -312,7 +312,7 @@ main(int argc, char *argv[])
 	    continue;
 	if (sp != TAILQ_FIRST(&sudoerslist)) {
 	    printf(_("press return to edit %s: "), sp->opath);
-	    while ((ch = getchar()) != EOF && ch != '\n')
+	    while ((ch = getchar()) != EOF && ch != '\r' && ch != '\n')
 		    continue;
 	}
 	edit_sudoers(sp, editor, editor_argc, editor_argv, -1);
@@ -703,7 +703,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	    bool modified = false;
 	    do {
 		printf(_("press return to edit %s: "), sp->opath);
-		while ((ch = getchar()) != EOF && ch != '\n')
+		while ((ch = getchar()) != EOF && ch != '\r' && ch != '\n')
 			continue;
 		edit_sudoers(sp, editor, editor_argc, editor_argv, -1);
 		if (sp->modified)
@@ -854,7 +854,7 @@ whatnow(void)
     for (;;) {
 	(void) fputs(_("What now? "), stdout);
 	choice = getchar();
-	for (c = choice; c != '\n' && c != EOF;)
+	for (c = choice; c != '\r' && c != '\n' && c != EOF;)
 	    c = getchar();
 
 	switch (choice) {
