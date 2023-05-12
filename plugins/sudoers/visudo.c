@@ -983,12 +983,19 @@ run_command(const char *path, char *const *argv)
 		 * (suspending visudo itself if running in the background).
 		 */
 		if (ttyfd != -1) {
+		    retry:
 		    if (tcsetpgrp(ttyfd, pid) == 0) {
 			sudo_debug_printf(SUDO_DEBUG_DIAG, "%s: %d: continuing",
 			    __func__, (int)pid);
 			killpg(pid, SIGCONT);
 			break;
 		    } else {
+			/*
+			 * macOS suffers from a kernel bug where tcsetpgrp()
+			 * is not restarted so we have to do it manually.
+			 */
+			if (errno == EINTR && tcgetpgrp(ttyfd) == visudo_pgrp)
+			    goto retry;
 			sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 			    "%s: unable to set foreground pgrp to %d (visudo)",
 			    __func__, (int)visudo_pgrp);
