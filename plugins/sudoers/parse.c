@@ -637,7 +637,7 @@ display_priv_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 	    struct member *m;
 
 	    if (new_long_entry(cs, prev_cs)) {
-		int olen;
+		unsigned int olen;
 
 		if (priv->ldap_role != NULL) {
 		    sudo_lbuf_append(lbuf, _("\nLDAP Role: %s\n"),
@@ -717,7 +717,7 @@ display_priv_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 		if (cs->notbefore != UNSPEC) {
 		    char buf[sizeof("CCYYMMDDHHMMSSZ")] = "";
 		    struct tm gmt;
-		    int len;
+		    size_t len;
 		    if (gmtime_r(&cs->notbefore, &gmt) != NULL) {
 			len = strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", &gmt);
 			if (len != 0 && buf[sizeof(buf) - 1] == '\0')
@@ -727,7 +727,7 @@ display_priv_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 		if (cs->notafter != UNSPEC) {
 		    char buf[sizeof("CCYYMMDDHHMMSSZ")] = "";
 		    struct tm gmt;
-		    int len;
+		    size_t len;
 		    if (gmtime_r(&cs->notafter, &gmt) != NULL) {
 			len = strftime(buf, sizeof(buf), "%Y%m%d%H%M%SZ", &gmt);
 			if (len != 0 && buf[sizeof(buf) - 1] == '\0')

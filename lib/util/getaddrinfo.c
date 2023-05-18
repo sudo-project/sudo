@@ -282,7 +282,7 @@ gai_lookup(const char *nodename, int flags, int socktype, unsigned short port,
     struct in_addr addr;
     struct hostent *host;
     const char *canonical;
-    int i;
+    size_t i;
 
     if (inet_pton(AF_INET, nodename, &addr)) {
         canonical = (flags & AI_CANONNAME) ? nodename : NULL;

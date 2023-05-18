@@ -377,8 +377,8 @@ parse_plugin(const char *entry, const char *conf_file, unsigned int lineno)
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (options != NULL) {
-	while (nopts--)
-	    free(options[nopts]);
+	while (nopts)
+	    free(options[--nopts]);
 	free(options);
     }
     if (info != NULL) {
@@ -575,7 +575,7 @@ sudo_conf_init(int conf_types)
     struct sudo_conf_debug *debug_spec;
     struct sudo_debug_file *debug_file;
     struct plugin_info *plugin_info;
-    int i;
+    size_t i;
     debug_decl(sudo_conf_init, SUDO_DEBUG_UTIL);
 
     /* Free and reset paths. */
@@ -717,7 +717,7 @@ sudo_conf_read_v1(const char *path, int conf_types)
 
     while (sudo_parseln(&line, &linesize, &conf_lineno, fp, 0) != -1) {
 	struct sudo_conf_table *cur;
-	unsigned int i;
+	size_t i;
 	char *cp;
 
 	if (*(cp = line) == '\0')

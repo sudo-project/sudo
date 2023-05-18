@@ -92,7 +92,7 @@ struct dynamic_array {
 static void
 free_strvec(char **vec)
 {
-    int i;
+    size_t i;
 
     for (i = 0; vec[i] != NULL; i++)
 	free(vec[i]);

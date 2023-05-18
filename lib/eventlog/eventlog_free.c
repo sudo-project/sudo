@@ -41,7 +41,7 @@
 void
 eventlog_free(struct eventlog *evlog)
 {
-    int i;
+    size_t i;
     debug_decl(eventlog_free, SUDO_DEBUG_UTIL);
 
     if (evlog != NULL) {

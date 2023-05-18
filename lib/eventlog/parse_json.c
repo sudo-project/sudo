@@ -198,7 +198,7 @@ json_array_to_strvec(struct eventlog_json_object *array)
 static bool
 json_store_runargv(struct json_item *item, struct eventlog *evlog)
 {
-    int i;
+    size_t i;
     debug_decl(json_store_runargv, SUDO_DEBUG_UTIL);
 
     if (evlog->argv != NULL) {
@@ -214,7 +214,7 @@ json_store_runargv(struct json_item *item, struct eventlog *evlog)
 static bool
 json_store_runenv(struct json_item *item, struct eventlog *evlog)
 {
-    int i;
+    size_t i;
     debug_decl(json_store_runenv, SUDO_DEBUG_UTIL);
 
     if (evlog->envp != NULL) {
@@ -230,7 +230,7 @@ json_store_runenv(struct json_item *item, struct eventlog *evlog)
 static bool
 json_store_runenv_override(struct json_item *item, struct eventlog *evlog)
 {
-    int i;
+    size_t i;
     debug_decl(json_store_runenv_override, SUDO_DEBUG_UTIL);
 
     if (evlog->env_add != NULL) {

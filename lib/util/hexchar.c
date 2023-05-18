@@ -35,7 +35,7 @@ int
 sudo_hexchar_v1(const char *s)
 {
     unsigned char result[2];
-    int i;
+    unsigned int i;
     debug_decl(sudo_hexchar, SUDO_DEBUG_UTIL);
 
     for (i = 0; i < 2; i++) {

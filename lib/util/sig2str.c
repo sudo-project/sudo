@@ -87,7 +87,7 @@ sudo_sig2str(int signo, char *signame)
 	    strlcpy(signame, cp, SIG2STR_MAX);
 	    /* Make sure we always return an upper case signame. */
 	    if (islower((unsigned char)signame[0])) {
-		int i;
+		size_t i;
 		for (i = 0; signame[i] != '\0'; i++)
 		    signame[i] = toupper((unsigned char)signame[i]);
 	    }

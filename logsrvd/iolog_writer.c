@@ -106,8 +106,8 @@ strlist_copy(InfoMessage__StringList *strlist)
 
 bad:
     if (dst != NULL) {
-	while (i--)
-	    free(dst[i]);
+	while (i)
+	    free(dst[--i]);
 	free(dst);
     }
     debug_return_ptr(NULL);
@@ -603,14 +603,14 @@ void
 iolog_close_all(struct connection_closure *closure)
 {
     const char *errstr;
-    int i;
+    unsigned int i;
     debug_decl(iolog_close_all, SUDO_DEBUG_UTIL);
 
     for (i = 0; i < IOFD_MAX; i++) {
 	if (!closure->iolog_files[i].enabled)
 	    continue;
 	if (!iolog_close(&closure->iolog_files[i], &errstr)) {
-	    sudo_warnx(U_("error closing iofd %d: %s"), i, errstr);
+	    sudo_warnx(U_("error closing iofd %u: %s"), i, errstr);
 	}
     }
     if (closure->iolog_dir_fd != -1)
@@ -623,14 +623,15 @@ bool
 iolog_flush_all(struct connection_closure *closure)
 {
     const char *errstr;
-    int i, ret = true;
+    bool ret = true;
+    unsigned int i;
     debug_decl(iolog_flush_all, SUDO_DEBUG_UTIL);
 
     for (i = 0; i < IOFD_MAX; i++) {
 	if (!closure->iolog_files[i].enabled)
 	    continue;
 	if (!iolog_flush(&closure->iolog_files[i], &errstr)) {
-	    sudo_warnx(U_("error flushing iofd %d: %s"), i, errstr);
+	    sudo_warnx(U_("error flushing iofd %u: %s"), i, errstr);
 	    ret = false;
 	}
     }

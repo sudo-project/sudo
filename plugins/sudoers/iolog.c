@@ -851,7 +851,7 @@ done:
 static void
 sudoers_io_close_local(int exit_status, int error, const char **errstr)
 {
-    int i;
+    unsigned int i;
     debug_decl(sudoers_io_close_local, SUDOERS_DEBUG_PLUGIN);
 
     /* Close the files. */

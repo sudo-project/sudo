@@ -112,7 +112,7 @@ usage(bool fatal)
 	exit(EXIT_FAILURE);
 }
 
-static void
+sudo_noreturn static void
 help(void)
 {
     printf("%s - %s\n\n", getprogname(),
@@ -400,8 +400,8 @@ free_info_messages(InfoMessage **info_msgs, size_t n_info_msgs)
     debug_decl(free_info_messages, SUDO_DEBUG_UTIL);
 
     if (info_msgs != NULL) {
-	while (n_info_msgs-- > 0) {
-	    if (info_msgs[n_info_msgs]->value_case == INFO_MESSAGE__VALUE_STRLISTVAL) {
+	while (n_info_msgs) {
+	    if (info_msgs[--n_info_msgs]->value_case == INFO_MESSAGE__VALUE_STRLISTVAL) {
 		/* Only strlistval was dynamically allocated */
 		free(info_msgs[n_info_msgs]->u.strlistval->strings);
 		free(info_msgs[n_info_msgs]->u.strlistval);

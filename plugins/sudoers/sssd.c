@@ -388,8 +388,8 @@ sss_to_sudoers(struct sudo_sss_handle *handle,
      * The conversion to a sudoers parse tree requires that entries be
      * in *ascending* order so we we iterate from last to first.
      */
-    for (i = sss_result->num_rules; i-- > 0; ) {
-	struct sss_sudo_rule *rule = sss_result->rules + i;
+    for (i = sss_result->num_rules; i; ) {
+	struct sss_sudo_rule *rule = sss_result->rules + --i;
 	struct privilege *priv;
 	int rc;
 

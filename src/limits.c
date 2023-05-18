@@ -672,7 +672,7 @@ set_policy_rlimits(void)
 }
 
 int
-serialize_rlimits(char **info, size_t info_max)
+serialize_rlimits(char **info, unsigned int info_max)
 {
     char *str;
     unsigned int idx, nstored = 0;
@@ -708,7 +708,7 @@ serialize_rlimits(char **info, size_t info_max)
     }
     debug_return_int(nstored);
 oom:
-    while (nstored--)
-	free(info[nstored]);
+    while (nstored)
+	free(info[--nstored]);
     debug_return_int(-1);
 }

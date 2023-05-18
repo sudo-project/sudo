@@ -98,7 +98,7 @@ sudo_ev_activate_sigevents(struct sudo_event_base *base)
 {
     struct sudo_event *ev;
     sigset_t set, oset;
-    int i;
+    unsigned int i;
     debug_decl(sudo_ev_activate_sigevents, SUDO_DEBUG_EVENT);
 
     /*
@@ -168,7 +168,7 @@ signal_pipe_cb(int fd, int what, void *v)
 static int
 sudo_ev_base_init(struct sudo_event_base *base)
 {
-    int i;
+    unsigned int i;
     debug_decl(sudo_ev_base_init, SUDO_DEBUG_EVENT);
 
     TAILQ_INIT(&base->events);
@@ -218,7 +218,7 @@ void
 sudo_ev_base_free_v1(struct sudo_event_base *base)
 {
     struct sudo_event *ev, *next;
-    int i;
+    unsigned int i;
     debug_decl(sudo_ev_base_free, SUDO_DEBUG_EVENT);
 
     if (base == NULL)

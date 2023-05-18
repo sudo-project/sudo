@@ -72,7 +72,7 @@ do_cleanup(void)
     }
 }
 
-void
+sudo_noreturn void
 sudo_fatal_nodebug_v1(const char *fmt, ...)
 {
     va_list ap;
@@ -84,7 +84,7 @@ sudo_fatal_nodebug_v1(const char *fmt, ...)
     exit(EXIT_FAILURE);
 }
 
-void
+sudo_noreturn void
 sudo_fatalx_nodebug_v1(const char *fmt, ...)
 {
     va_list ap;
@@ -96,7 +96,7 @@ sudo_fatalx_nodebug_v1(const char *fmt, ...)
     exit(EXIT_FAILURE);
 }
 
-void
+sudo_noreturn void
 sudo_vfatal_nodebug_v1(const char *fmt, va_list ap)
 {
     warning(strerror(errno), fmt, ap);
@@ -104,7 +104,7 @@ sudo_vfatal_nodebug_v1(const char *fmt, va_list ap)
     exit(EXIT_FAILURE);
 }
 
-void
+sudo_noreturn void
 sudo_vfatalx_nodebug_v1(const char *fmt, va_list ap)
 {
     warning(NULL, fmt, ap);
@@ -143,7 +143,7 @@ sudo_vwarnx_nodebug_v1(const char *fmt, va_list ap)
     warning(NULL, fmt, ap);
 }
 
-void
+sudo_noreturn void
 sudo_gai_fatal_nodebug_v1(int errnum, const char *fmt, ...)
 {
     va_list ap;
@@ -155,7 +155,7 @@ sudo_gai_fatal_nodebug_v1(int errnum, const char *fmt, ...)
     exit(EXIT_FAILURE);
 }
 
-void
+sudo_noreturn void
 sudo_gai_vfatal_nodebug_v1(int errnum, const char *fmt, va_list ap)
 {
     warning(gai_strerror(errnum), fmt, ap);

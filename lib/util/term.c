@@ -252,7 +252,7 @@ sudo_term_copy_v1(int src, int dst)
     struct termios tt_src, tt_dst;
     struct winsize wsize;
     speed_t speed;
-    int i;
+    unsigned int i;
     debug_decl(sudo_term_copy, SUDO_DEBUG_UTIL);
 
     if (tcgetattr(src, &tt_src) != 0 || tcgetattr(dst, &tt_dst) != 0)

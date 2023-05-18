@@ -56,7 +56,7 @@ sudo_stat_multiarch_v1(const char *path, struct stat *sb)
     const char **lp, *lib, *slash;
     struct utsname unamebuf;
     char *newpath = NULL;
-    int len;
+    size_t len;
 
     if (uname(&unamebuf) == -1)
 	return NULL;
@@ -79,9 +79,8 @@ sudo_stat_multiarch_v1(const char *path, struct stat *sb)
 	}
 
 	/* Add machine-linux-gnu dir after /lib/ or /libexec/. */
-	len = asprintf(&newpath, "%.*s%s%s-linux-gnu%s",
-	    (int)(lib - path), path, newlib, unamebuf.machine, slash);
-	if (len == -1) {
+	if (asprintf(&newpath, "%.*s%s%s-linux-gnu%s",
+	    (int)(lib - path), path, newlib, unamebuf.machine, slash) == -1) {
 	    newpath = NULL;
 	    break;
 	}

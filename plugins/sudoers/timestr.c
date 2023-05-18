@@ -36,7 +36,7 @@ get_timestr(time_t tstamp, int log_year)
 {
     static char buf[128];
     struct tm tm;
-    int len;
+    size_t len;
 
     if (localtime_r(&tstamp, &tm) != NULL) {
 	/* strftime() does not guarantee to NUL-terminate so we must check. */

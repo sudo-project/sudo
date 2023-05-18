@@ -34,7 +34,7 @@ sudo_dso_public int main(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
-    unsigned int i;
+    size_t i;
 
 #include "mksigname.h"
 
@@ -43,10 +43,10 @@ main(int argc, char *argv[])
 	if (sudo_sys_signame[i] != NULL) {
 	    printf("    \"%s\",\n", sudo_sys_signame[i]);
 	} else {
-	    printf("    \"Signal %u\",\n", i);
+	    printf("    \"Signal %zu\",\n", i);
 	}
     }
     printf("};\n");
 
-    exit(EXIT_SUCCESS);
+    return EXIT_SUCCESS;
 }
