@@ -121,7 +121,7 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, char *name, size_t namelen)
     char *ret = NULL;
     struct dirent *dp;
     struct stat sb;
-    unsigned int i;
+    size_t i;
     DIR *d = NULL;
     debug_decl(sudo_ttyname_scan, SUDO_DEBUG_UTIL);
 

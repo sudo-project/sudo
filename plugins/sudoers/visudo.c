@@ -167,11 +167,11 @@ main(int argc, char *argv[])
 
     /* Read debug and plugin sections of sudo.conf. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG|SUDO_CONF_PLUGINS) == -1)
-	exit(EXIT_FAILURE);
+	return EXIT_FAILURE;
 
     /* Initialize the debug subsystem. */
     if (!sudoers_debug_register(getprogname(), sudo_conf_debug_files(getprogname())))
-	exit(EXIT_FAILURE);
+	return EXIT_FAILURE;
 
     /* Parse sudoers plugin options, if any. */
     parse_sudoers_options();
@@ -294,7 +294,7 @@ main(int argc, char *argv[])
     sudoers_conf.sudoers_path = path_sudoers;
     init_parser(NULL, &sudoers_conf);
     if ((sudoersin = open_sudoers(path_sudoers, &sudoers, true, NULL)) == NULL)
-	exit(EXIT_FAILURE);
+	return EXIT_FAILURE;
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     (void) sudoersparse();
     (void) update_defaults(&parsed_policy, NULL,

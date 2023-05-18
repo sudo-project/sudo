@@ -371,7 +371,7 @@ done:
     sudo_freepwcache();
     sudo_freegrcache();
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
-    exit(exitcode);
+    return exitcode;
 }
 
 static void

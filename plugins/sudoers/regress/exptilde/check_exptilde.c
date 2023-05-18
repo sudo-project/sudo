@@ -101,5 +101,5 @@ main(int argc, char *argv[])
 	    getprogname(), ntests, errors, (ntests - errors) * 100 / ntests);
     }
 
-    exit(errors);
+    return errors;
 }

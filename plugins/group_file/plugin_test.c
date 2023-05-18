@@ -200,7 +200,7 @@ main(int argc, char *argv[])
 
     if (group_plugin_load(plugin) != 1) {
 	fprintf(stderr, "unable to load plugin: %s\n", plugin);
-	exit(EXIT_FAILURE);
+	return EXIT_FAILURE;
     }
 
     for (i = 0; argv[i] != NULL; i++) {
@@ -215,6 +215,6 @@ main(int argc, char *argv[])
     }
     group_plugin_unload();
 
-    exit(EXIT_SUCCESS);
+    return EXIT_SUCCESS;
 }
 

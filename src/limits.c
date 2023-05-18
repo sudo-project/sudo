@@ -671,11 +671,11 @@ set_policy_rlimits(void)
     debug_return;
 }
 
-int
-serialize_rlimits(char **info, unsigned int info_max)
+size_t
+serialize_rlimits(char **info, size_t info_max)
 {
     char *str;
-    unsigned int idx, nstored = 0;
+    size_t idx, nstored = 0;
     debug_decl(serialize_rlimits, SUDO_DEBUG_UTIL);
 
     for (idx = 0; idx < nitems(saved_limits); idx++) {
@@ -706,9 +706,9 @@ serialize_rlimits(char **info, unsigned int info_max)
 	    goto oom;
 	info[nstored++] = str;
     }
-    debug_return_int(nstored);
+    debug_return_size_t(nstored);
 oom:
     while (nstored)
 	free(info[--nstored]);
-    debug_return_int(-1);
+    debug_return_size_t(-1);
 }

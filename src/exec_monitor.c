@@ -321,7 +321,7 @@ mon_backchannel_cb(int fd, int what, void *v)
      * Note that the backchannel is a *blocking* socket.
      */
     n = recv(fd, &cstmp, sizeof(cstmp), MSG_WAITALL);
-    if (n != sizeof(cstmp)) {
+    if (n != ssizeof(cstmp)) {
 	if (n == -1) {
 	    if (errno == EINTR || errno == EAGAIN)
 		debug_return;

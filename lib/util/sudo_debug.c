@@ -304,7 +304,8 @@ sudo_debug_register_v2(const char *program, const char *const subsystems[],
     }
 
     if (instance == NULL) {
-	unsigned int i, j, max_id = NUM_DEF_SUBSYSTEMS - 1;
+	size_t i;
+	unsigned int j, max_id = NUM_DEF_SUBSYSTEMS - 1;
 
 	/* Fill in subsystem name -> id mapping as needed. */
 	if (ids != NULL) {
@@ -348,7 +349,7 @@ sudo_debug_register_v2(const char *program, const char *const subsystems[],
     } else {
 	/* Check for matching instance but different ids[]. */
 	if (ids != NULL && instance->subsystem_ids != ids) {
-	    unsigned int i;
+	    size_t i;
 
 	    for (i = 0; subsystems[i] != NULL; i++)
 		ids[i] = instance->subsystem_ids[i];

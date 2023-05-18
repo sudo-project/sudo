@@ -38,7 +38,7 @@ main(int argc, char *argv[])
     if (argc > 1) {
 	if ((fp = fopen(argv[1], "r")) == NULL) {
 	    perror(argv[1]);
-	    exit(EXIT_FAILURE);
+	    return EXIT_FAILURE;
 	}
     }
 
@@ -72,5 +72,5 @@ main(int argc, char *argv[])
 	    getprogname(), tests, tests == 1 ? "" : "s", errors,
 	    (tests - errors) * 100 / tests);
     }
-    exit(errors);
+    return errors;
 }

@@ -500,11 +500,11 @@ static char **
 get_user_info(struct user_details *ud)
 {
     char *cp, **info, path[PATH_MAX];
-    unsigned int info_max = 32 + RLIM_NLIMITS;
-    unsigned int i = 0;
+    size_t info_max = 32 + RLIM_NLIMITS;
+    size_t i = 0, n;
     mode_t mask;
     struct passwd *pw;
-    int ttyfd, n;
+    int ttyfd;
     debug_decl(get_user_info, SUDO_DEBUG_UTIL);
 
     /*
@@ -629,7 +629,7 @@ get_user_info(struct user_details *ud)
 	goto oom;
 
     n = serialize_rlimits(&info[i + 1], info_max - (i + 1));
-    if (n == -1)
+    if (n == (size_t)-1)
 	goto oom;
     i += n;
 
