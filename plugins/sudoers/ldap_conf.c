@@ -452,7 +452,7 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
 
 		    if (len > 0) {
 			head = (struct ldap_config_str_list *)cur->valp;
-			if ((str = malloc(sizeof(*str) + len)) == NULL) {
+			if ((str = malloc(sizeof(*str) + len + 1)) == NULL) {
 			    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 			    debug_return_bool(false);
 			}

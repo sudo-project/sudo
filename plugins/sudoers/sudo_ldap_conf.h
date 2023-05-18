@@ -44,7 +44,7 @@ struct ldap_config_table {
 
 struct ldap_config_str {
     STAILQ_ENTRY(ldap_config_str) entries;
-    char val[1];
+    char val[];
 };
 STAILQ_HEAD(ldap_config_str_list, ldap_config_str);
 
