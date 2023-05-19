@@ -902,13 +902,14 @@ static int
 run_command(const char *path, char *const *argv)
 {
     pid_t pid, visudo_pgrp = getpgrp();
-    int status, ttyfd = -1;
-    int rv = -1;
+    int status, ttyfd;
+    int ret = -1;
     debug_decl(run_command, SUDOERS_DEBUG_UTIL);
 
     /* We may need access to /dev/tty to set the foreground process. */
     ttyfd = open(_PATH_TTY, O_RDWR);
-    (void)fcntl(ttyfd, F_SETFD, FD_CLOEXEC);
+    if (ttyfd != -1)
+	(void)fcntl(ttyfd, F_SETFD, FD_CLOEXEC);
 
     switch (pid = sudo_debug_fork()) {
 	case -1:
@@ -942,7 +943,7 @@ run_command(const char *path, char *const *argv)
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: unable to set pgrp to %d (editor)",
 	    __func__, (int)pid);
-    } else if (tcgetpgrp(ttyfd) == visudo_pgrp) {
+    } else if (ttyfd != -1 && tcgetpgrp(ttyfd) == visudo_pgrp) {
 	/*
 	 * This races with execve() in the child.  If we lose the race,
 	 * the child may be stopped by SIGTTOU or SIGTTIN when it tries
@@ -962,9 +963,9 @@ run_command(const char *path, char *const *argv)
 	    break;
 	}
 	if (WIFEXITED(status)) {
-	    rv = WEXITSTATUS(status);
+	    ret = WEXITSTATUS(status);
 	    sudo_debug_printf(SUDO_DEBUG_DIAG, "%s: %d: exited %d",
-		__func__, (int)pid, rv);
+		__func__, (int)pid, ret);
 	    break;
 	} else if (WIFSIGNALED(status)) {
 	    sudo_debug_printf(SUDO_DEBUG_DIAG, "%s: %d: killed by signal %d",
@@ -1043,7 +1044,7 @@ run_command(const char *path, char *const *argv)
 	close(ttyfd);
     }
 
-    debug_return_int(rv);
+    debug_return_int(ret);
 }
 
 static bool
