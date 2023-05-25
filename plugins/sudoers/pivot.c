@@ -68,7 +68,7 @@ unpivot_root(int fds[2])
     bool ret = true;
     debug_decl(unpivot_root, SUDOERS_DEBUG_UTIL);
 
-    /* Order is imporant: restore old root, *then* change cwd. */
+    /* Order is important: restore old root, *then* change cwd. */
     if (fds[OLD_ROOT] != -1) {
 	if (fchdir(fds[OLD_ROOT]) == -1 || chroot(".") == -1) {
 	    sudo_warn("%s", U_("unable to restore root directory"));

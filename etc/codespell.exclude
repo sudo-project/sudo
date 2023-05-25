@@ -32,3 +32,4 @@
  * If path doesn't end in /, return true iff cmnd & path name the same inode;
  *	Tim Fraser
 	    echo ".Nd sudo" >> conftest
+ * as per FIPS 180-4: Secure Hash Standard (SHS)

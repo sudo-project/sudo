@@ -922,7 +922,7 @@ run_command(const char *path, char *const *argv)
 	     * process.  There is a race between the parent's call to
 	     * tcsetpgrp() and the child's execve().  If the parent loses
 	     * the race, the child will be stopped with SIGTTOU or SIGTTIN
-	     * and be restarted immeditately.
+	     * and be restarted immediately.
 	     */
 	    if (setpgid(0, 0) == -1) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,

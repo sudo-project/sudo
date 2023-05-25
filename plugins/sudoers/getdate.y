@@ -442,7 +442,7 @@ static TABLE const TimezoneTable[] = {
 #endif
     { "zp6",	tZONE,     -HOUR(6) },	/* USSR Zone 5 */
 #if	0
-    /* For completeness.  NST is also Newfoundland Stanard, and SST is
+    /* For completeness.  NST is also Newfoundland Standard, and SST is
      * also Swedish Summer. */
     { "nst",	tZONE,     -HOUR(6.5) },/* North Sumatra */
     { "sst",	tZONE,     -HOUR(7) },	/* South Sumatra, USSR Zone 6 */
