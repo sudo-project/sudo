@@ -61,7 +61,7 @@ struct sudolinebuf sudolinebuf;	/* sudoers line being parsed. */
 
 static bool continued, sawspace;
 static int prev_state;
-static int digest_type = -1;
+static unsigned int digest_type = SUDO_DIGEST_INVALID;
 
 static bool pop_include(void);
 static yy_size_t sudoers_input(char *buf, yy_size_t max_size);
@@ -1107,7 +1107,7 @@ init_lexer(void)
     keepopen = false;
     sawspace = false;
     continued = false;
-    digest_type = -1;
+    digest_type = SUDO_DIGEST_INVALID;
     prev_state = INITIAL;
     BEGIN INITIAL;
 

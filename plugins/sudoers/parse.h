@@ -466,10 +466,10 @@ int parse_timeout(const char *timestr);
 time_t parse_gentime(const char *expstr);
 
 /* filedigest.c */
-unsigned char *sudo_filedigest(int fd, const char *file, int digest_type, size_t *digest_len);
+unsigned char *sudo_filedigest(int fd, const char *file, unsigned int digest_type, size_t *digest_len);
 
 /* digestname.c */
-const char *digest_type_to_name(int digest_type);
+const char *digest_type_to_name(unsigned int digest_type);
 
 /* parse.c */
 struct sudo_nss_list;

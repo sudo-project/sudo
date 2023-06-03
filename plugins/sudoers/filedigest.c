@@ -34,7 +34,8 @@
 #include "sudo_digest.h"
 
 unsigned char *
-sudo_filedigest(int fd, const char *file, int digest_type, size_t *digest_len)
+sudo_filedigest(int fd, const char *file, unsigned int digest_type,
+    size_t *digest_len)
 {
     unsigned char *file_digest = NULL;
     unsigned char buf[32 * 1024];
@@ -46,7 +47,7 @@ sudo_filedigest(int fd, const char *file, int digest_type, size_t *digest_len)
 
     *digest_len = sudo_digest_getlen(digest_type);
     if (*digest_len == (size_t)-1) {
-	sudo_warnx(U_("unsupported digest type %d for %s"), digest_type, file);
+	sudo_warnx(U_("unsupported digest type %u for %s"), digest_type, file);
 	goto bad;
     }
 

@@ -81,7 +81,7 @@ static bool add_userspec(struct member *, struct privilege *);
 static struct defaults *new_default(char *, char *, short);
 static struct member *new_member(char *, int);
 static struct sudo_command *new_command(char *, char *);
-static struct command_digest *new_digest(int, char *);
+static struct command_digest *new_digest(unsigned int, char *);
 static void alias_error(const char *name, int errnum);
 %}
 
@@ -1365,7 +1365,7 @@ new_command(char *cmnd, char *args)
 }
 
 static struct command_digest *
-new_digest(int digest_type, char *digest_str)
+new_digest(unsigned int digest_type, char *digest_str)
 {
     struct command_digest *digest;
     debug_decl(new_digest, SUDOERS_DEBUG_PARSER);

@@ -46,7 +46,8 @@ static const char *test_strings[NUM_TESTS] = {
 };
 
 static unsigned char *
-check_digest(int digest_type, const char *buf, size_t buflen, size_t *digest_len)
+check_digest(unsigned int digest_type, const char *buf, size_t buflen,
+    size_t *digest_len)
 {
     char tfile[] = "digest.XXXXXX";
     unsigned char *digest = NULL;
@@ -86,7 +87,7 @@ main(int argc, char *argv[])
     unsigned char *digest;
     unsigned int i, j;
     size_t digest_len;
-    int digest_type;
+    unsigned int digest_type;
 
     initprogname(argc > 0 ? argv[0] : "check_digest");
 
