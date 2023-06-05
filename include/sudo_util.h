@@ -316,10 +316,6 @@ sudo_dso_public int sudo_strtomode_v1(const char *cp, const char **errstr);
 /* sudo_printf.c */
 extern int (*sudo_printf)(int msg_type, const char *fmt, ...);
 
-/* suspend_parent.c */
-sudo_dso_public void sudo_suspend_parent_v1(int signo, pid_t my_pid, pid_t my_pgrp, pid_t cmnd_pid, void *closure, void (*callback)(void *, int));
-#define sudo_suspend_parent(_a, _b, _c, _d, _e, _f) sudo_suspend_parent_v1((_a), (_b), (_c), (_d), (_e), (_f))
-
 /* term.c */
 sudo_dso_public bool sudo_term_cbreak_v1(int fd);
 #define sudo_term_cbreak(_a) sudo_term_cbreak_v1((_a))

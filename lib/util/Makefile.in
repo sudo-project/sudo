@@ -151,7 +151,7 @@ LTOBJS = basename.lo @DIGEST@ event.lo fatal.lo key_val.lo gethostname.lo \
 	 multiarch.lo parseln.lo progname.lo rcstr.lo regex.lo roundup.lo \
 	 secure_path.lo setgroups.lo strsplit.lo strtobool.lo strtoid.lo \
 	 strtomode.lo strtonum.lo sudo_conf.lo sudo_debug.lo sudo_dso.lo \
-	 suspend_parent.lo term.lo ttyname_dev.lo ttysize.lo uuid.lo \
+	 term.lo ttyname_dev.lo ttysize.lo uuid.lo \
 	 @COMMON_OBJS@ @LTLIBOBJS@
 
 IOBJS = $(LTOBJS:.lo=.i)
@@ -1644,20 +1644,6 @@ sudo_dso.i: $(srcdir)/sudo_dso.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 sudo_dso.plog: sudo_dso.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sudo_dso.c --i-file $< --output-file $@
-suspend_parent.lo: $(srcdir)/suspend_parent.c $(incdir)/compat/stdbool.h \
-                   $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
-                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
-                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-                   $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/suspend_parent.c
-suspend_parent.i: $(srcdir)/suspend_parent.c $(incdir)/compat/stdbool.h \
-                   $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
-                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
-                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-                   $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
-suspend_parent.plog: suspend_parent.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/suspend_parent.c --i-file $< --output-file $@
 term.lo: $(srcdir)/term.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
          $(incdir)/sudo_debug.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
          $(top_builddir)/config.h

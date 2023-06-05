@@ -34,7 +34,7 @@
 #include "sudo_debug.h"
 #include "sudo_fatal.h"
 #include "sudo_gettext.h"
-#include "sudo_util.h"
+#include "sudo_exec.h"
 
 static volatile sig_atomic_t got_sigttou;
 
@@ -83,7 +83,7 @@ tcsetpgrp_nobg(int fd, pid_t pgrp_id)
  * being suspended.
  */
 void
-sudo_suspend_parent_v1(int signo, pid_t my_pid, pid_t my_pgrp, pid_t cmnd_pid,
+sudo_suspend_parent(int signo, pid_t my_pid, pid_t my_pgrp, pid_t cmnd_pid,
      void *closure, void (*callback)(void *, int))
 {
     struct sigaction sa, osa;

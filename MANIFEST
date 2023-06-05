@@ -375,7 +375,6 @@ lib/util/strtonum.c
 lib/util/sudo_conf.c
 lib/util/sudo_debug.c
 lib/util/sudo_dso.c
-lib/util/suspend_parent.c
 lib/util/sys_siglist.h
 lib/util/sys_signame.h
 lib/util/term.c
@@ -1295,6 +1294,7 @@ src/sudo_intercept_common.c
 src/sudo_noexec.c
 src/sudo_plugin_int.h
 src/sudo_usage.h.in
+src/suspend_parent.c
 src/tgetpass.c
 src/ttyname.c
 src/utmp.c
