@@ -1,3 +1,69 @@
+What's new in Sudo 1.9.14
+
+ * The sudoers plugin now canonicalizes command path names before
+   matching (where possible).  This fixes a bug where sudo could
+   execute the wrong path if there are multiple symbolic links with
+   the same target and the same base name in sudoers that a user is
+   allowed to run.  GitHub issue #228.
+
+ * Improved command matching when a chroot is specified in sudoers.
+   The sudoers plugin will now change the root directory id needed
+   before performing command matching.  Previously, the root directory
+   was simply prepended to the path that was being processed.
+ 
+ * When NETGROUP_BASE is set in the ldap.conf file, sudo will now
+   perform its own netgroup lookups of the host name instead of
+   using the system innetgr(3) function.  This guarantees that user
+   and host netgroup lookups are performed using  the same LDAP
+   server (or servers).
+
+ * Fixed a bug introduced in sudo 1.9.13 that resulted in a missing
+   " ; " separator between environment variables and the command
+   in log entries.
+   
+ * The visudo utility now displays a warning when it ignores a file
+   in an include dir such as /etc/sudoers.d.
+
+ * When running a command in a pseudo-terminal, sudo will initialize
+   the terminal settings even if it is the background process.
+   Previously, sudo only initialized the pseudo-terminal when running
+   in the foreground.  This fixes an issue where a program that
+   checks the window size would read the wrong value when sudo was
+   running in the background.
+
+ * Fixed a bug where only the first two digits of the TSID field
+   being was logged.  Bug #1046.
+
+ * The "log_pty" sudoers option is now enabled by default.  To
+   restore the historic behavior where a command is run in the
+   user's terminal, add "Defaults !use_pty" to the sudoers file.
+   GitHub issue #258.
+
+ * Sudo's "-b" option now works when the command is run in a
+   pseudo-terminal.
+
+ * When disabling core dumps, sudo now only modifies the soft limit
+   and leaves the hard limit as-is.  This avoids problems on Linux
+   when sudo does not have CAP_SYS_RESOURCE, which may be the case
+   when run inside a container.  GitHub issue #42.
+
+ * Sudo configuration file paths have been converted to colon-separated
+   lists of paths.  This makes it possible to have configuration
+   files on a read-only file system while still allowing for local
+   modifications in a different (writable) directory.  The new
+   --enable-adminconf configure option can be used to specify a
+   directory that is searched for configuration files in preference
+   to the sysconfdir (which is usually /etc).
+
+ * The "intercept_verify" sudoers option is now only applied when
+   the "intercept" option is set in sudoers.  Previously, it was
+   also applied when "log_subcmds" was enabled.
+
+ * The NETGROUP_QUERY ldap.conf parameter can now be disabled for
+   LDAP servers that do not support querying the nisNetgroup object
+   by its nisNetgroupTriple attribute, while still allowing sudo to
+   query the LDAP server directly to determine netgroup membership.
+
 What's new in Sudo 1.9.13p3
 
  * Fixed a bug introduced in sudo 1.9.13 that caused a syntax error
