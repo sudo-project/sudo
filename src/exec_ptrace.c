@@ -1936,7 +1936,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	    }
 	}
 	if (closure->state == POLICY_ACCEPT) {
-	    if (ISSET(closure->details->flags, CD_INTERCEPT_VERIFY)) {
+	    if (ISSET(closure->details->flags, CD_INTERCEPT|CD_INTERCEPT_VERIFY)) {
 		/* Verify execve(2) args post-exec. */
 		if (!ptrace_verify_post_exec(pid, &regs, closure)) {
 		    if (errno != ESRCH)
