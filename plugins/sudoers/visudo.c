@@ -901,36 +901,15 @@ setup_signals(void)
 static int
 run_command(const char *path, char *const *argv)
 {
-    pid_t pid, visudo_pgrp = getpgrp();
-    int status, ttyfd;
-    int ret = -1;
+    int status;
+    pid_t pid, rv;
     debug_decl(run_command, SUDOERS_DEBUG_UTIL);
-
-    /* We may need access to /dev/tty to set the foreground process. */
-    ttyfd = open(_PATH_TTY, O_RDWR);
-    if (ttyfd != -1)
-	(void)fcntl(ttyfd, F_SETFD, FD_CLOEXEC);
 
     switch (pid = sudo_debug_fork()) {
 	case -1:
 	    sudo_fatal(U_("unable to execute %s"), path);
 	    break;	/* NOTREACHED */
 	case 0:
-	    /*
-	     * Run command in its own process group.  If visudo is run
-	     * in the foreground, it will make the editor the foreground
-	     * process.  There is a race between the parent's call to
-	     * tcsetpgrp() and the child's execve().  If the parent loses
-	     * the race, the child will be stopped with SIGTTOU or SIGTTIN
-	     * and be restarted immediately.
-	     */
-	    if (setpgid(0, 0) == -1) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-		    "%s: unable to set pgrp to %d (editor)",
-		    __func__, (int)getpid());
-	    }
-	    sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: executing %s",
-		__func__, path);
 	    closefrom(STDERR_FILENO + 1);
 	    execv(path, argv);
 	    sudo_warn(U_("unable to run %s"), path);
@@ -938,113 +917,17 @@ run_command(const char *path, char *const *argv)
 	    break;	/* NOTREACHED */
     }
 
-    /* Set child process group in both parent and child to avoid a race. */
-    if (setpgid(pid, pid) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-	    "%s: unable to set pgrp to %d (editor)",
-	    __func__, (int)pid);
-    } else if (ttyfd != -1 && tcgetpgrp(ttyfd) == visudo_pgrp) {
-	/*
-	 * This races with execve() in the child.  If we lose the race,
-	 * the child may be stopped by SIGTTOU or SIGTTIN when it tries
-	 * to use the terminal.  That is handled by the waitpid() loop.
-	 */
-	if (tcsetpgrp(ttyfd, pid) == -1) {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-		"%s: unable to set foreground pgrp to %d (editor)",
-		__func__, (int)pid);
-	}
-    }
-
     for (;;) {
-	if (waitpid(pid, &status, WUNTRACED) == -1) {
-	    if (errno == EINTR)
-		continue;
+	rv = waitpid(pid, &status, 0);
+	if (rv == -1 && errno != EINTR)
 	    break;
-	}
-	if (WIFEXITED(status)) {
-	    ret = WEXITSTATUS(status);
-	    sudo_debug_printf(SUDO_DEBUG_DIAG, "%s: %d: exited %d",
-		__func__, (int)pid, ret);
+	if (rv != -1 && !WIFSTOPPED(status))
 	    break;
-	} else if (WIFSIGNALED(status)) {
-	    sudo_debug_printf(SUDO_DEBUG_DIAG, "%s: %d: killed by signal %d",
-		__func__, (int)pid, WTERMSIG(status));
-	    break;
-	} else if (WIFSTOPPED(status)) {
-	    const int signo = WSTOPSIG(status);
-	    sudo_debug_printf(SUDO_DEBUG_DIAG, "%s: %d: suspended by signal %d",
-		__func__, (int)pid, signo);
-	    switch (signo) {
-	    case SIGTTIN:
-	    case SIGTTOU:
-		/*
-		 * The editor stopped because it needs to be the foreground
-		 * process.  Try to make it the foreground process and continue
-		 * (suspending visudo itself if running in the background).
-		 */
-		if (ttyfd != -1) {
-		    retry:
-		    if (tcsetpgrp(ttyfd, pid) == 0) {
-			sudo_debug_printf(SUDO_DEBUG_DIAG, "%s: %d: continuing",
-			    __func__, (int)pid);
-			killpg(pid, SIGCONT);
-			break;
-		    } else {
-			/*
-			 * macOS suffers from a kernel bug where tcsetpgrp()
-			 * is not restarted so we have to do it manually.
-			 */
-			if (errno == EINTR && tcgetpgrp(ttyfd) == visudo_pgrp)
-			    goto retry;
-			sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-			    "%s: unable to set foreground pgrp to %d (visudo)",
-			    __func__, (int)visudo_pgrp);
-		    }
-		}
-		FALLTHROUGH;
-	    default:
-		killpg(visudo_pgrp, signo);
-		sudo_debug_printf(SUDO_DEBUG_DIAG, "%s: %d: continuing",
-		    __func__, (int)pid);
-		killpg(pid, SIGCONT);
-		break;
-	    }
-	} else {
-	    sudo_debug_printf(SUDO_DEBUG_ERROR,
-		"%d: unknown status 0x%x", (int)pid, status);
-	}
     }
 
-    if (ttyfd != -1) {
-	pid = tcgetpgrp(ttyfd);
-	if (pid != -1 && pid != visudo_pgrp) {
-	    /*
-	     * If the foreground process does not exist it is usually because
-	     * we made the editor the foreground process and it terminated.
-	     * Change it back to visudo so we can prompt the user as needed.
-	     */
-	    if (kill(pid, 0) == -1 && errno == ESRCH) {
-		sigset_t mask, omask;
-		sigemptyset(&mask);
-		sigaddset(&mask, SIGTTOU);
-		sigprocmask(SIG_BLOCK, &mask, &omask);
-		sudo_debug_printf(SUDO_DEBUG_DEBUG,
-		    "%s: changing foreground pgrp from %d to %d (visudo)",
-		    __func__, (int)pid, (int)visudo_pgrp);
-		if (tcsetpgrp(ttyfd, visudo_pgrp) == -1) {
-		    /* This should not fail since we block SIGTTOU. */
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-			"%s: unable to restore foreground pgrp to %d (visudo)",
-			__func__, (int)visudo_pgrp);
-		}
-		sigprocmask(SIG_SETMASK, &omask, NULL);
-	    }
-	}
-	close(ttyfd);
-    }
-
-    debug_return_int(ret);
+    if (rv != -1)
+	rv = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+    debug_return_int(rv);
 }
 
 static bool
