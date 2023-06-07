@@ -1,5 +1,11 @@
 What's new in Sudo 1.9.14
 
+ * Fixed a bug where if the "intercept" or "log_subcmds" sudoers
+   option was enabled and a sub-command was run where the first
+   entry of the argument vector didn't match the command being run.
+   This resulted in commands like "sudo su -" being killed due to
+   the mismatch.  Bug #1050.
+
  * The sudoers plugin now canonicalizes command path names before
    matching (where possible).  This fixes a bug where sudo could
    execute the wrong path if there are multiple symbolic links with
