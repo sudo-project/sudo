@@ -64,6 +64,7 @@ struct ldap_config {
     int ssl_mode;
     int timed;
     int deref;
+    int netgroup_query;
     char *host;
     struct ldap_config_str_list uri;
     char *binddn;

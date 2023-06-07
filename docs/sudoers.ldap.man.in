@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOERS.LDAP" "@mansectform@" "March 12, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "@mansectform@" "June 7, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -391,15 +391,17 @@ non-Unix groups and checks to see if the user belongs to any of them.
 .PP
 If timed entries are enabled with the
 \fBSUDOERS_TIMED\fR
-configuration directive, the LDAP queries include a sub-filter that
-limits retrieval to entries that satisfy the time constraints, if any.
+parameter, the LDAP queries include a sub-filter that limits retrieval
+to entries that satisfy the time constraints, if any.
 .PP
 If the
 \fBNETGROUP_BASE\fR
-configuration directive is present (see
+parameter is present and
+\fBNETGROUP_QUERY\fR
+has not been disabled (see
 \fIConfiguring ldap.conf\fR
-below), queries are performed to determine
-the list of netgroups the user belongs to before the sudoers query.
+below), queries are performed to determine the list of netgroups
+the user belongs to before the sudoers query.
 This makes it possible to include netgroups in the sudoers query
 string in the same manner as Unix groups.
 The third query mentioned above is not performed unless a group provider
@@ -437,7 +439,11 @@ For sites with a large number of netgroups, using
 \fBNETGROUP_BASE\fR
 can significantly speed up
 \fBsudo\fR's
-execution time.
+execution time as long as the LDAP server supports querying the
+\fInisNetgroup\fR
+object by its
+\fInisNetgroupTriple\fR
+attribute.
 .SS "Differences between LDAP and non-LDAP sudoers"
 One of the major differences between LDAP and file-based
 \fIsudoers\fR
@@ -810,21 +816,25 @@ instead of relying on the C library's
 \fBinnetgr\fR()
 function.
 .sp
-This option can also be used to query a user's netgroups directly
-via LDAP which is usually faster than fetching every
+Additionally, if the
+\fBNETGROUP_QUERY\fR
+parameter (which is enabled by default) has not been disabled, the
+user's netgroups will be queried directly via LDAP for use in the
+main sudoers query.
+This is usually faster than fetching every
 \fIsudoRole\fR
 object containing a
 \fIsudoUser\fR
 that begins with a
 \(oq+\(cq
-prefix.
+prefix and checking whether the user is a member of each one.
 The NIS schema used by some LDAP servers needs a modification to
 support querying the
 \fInisNetgroup\fR
 object by its
 \fInisNetgroupTriple\fR
-member.
-OpenLDAP's
+attribute.
+For example, OpenLDAP's
 \fBslapd\fR
 requires the following change to the
 \fInisNetgroupTriple\fR
@@ -864,6 +874,37 @@ data includes an object with the following
 nisNetgroupTriple: (,USER,)
 .RE
 .RE
+.TP 6n
+\fBNETGROUP_QUERY\fR \fIon/true/yes/off/false/no\fR
+The
+\fBNETGROUP_QUERY\fR
+parameter indicates whether or not the LDAP server supports querying
+\fInisNetgroup\fR
+objects by matching on
+\fInisNetgroupTriple\fR
+attributes.
+By default,
+\fBsudoers\fR
+expects to be able to perform queries that match on
+\fInisNetgroupTriple\fR
+attributes when
+\fBNETGROUP_BASE\fR
+is set, but not all LDAP servers support this.
+.sp
+If
+\fBNETGROUP_QUERY\fR
+is disabled,
+\fBsudoers\fR
+will not attempt to determine the list of netgroups the user belongs
+to, but will still use
+\fBNETGROUP_BASE\fR
+directly when matching netgroups.
+This can be used to support netgroups on systems that lack the
+\fBinnetgr\fR()
+C library function.
+See the description of the
+\fBNETGROUP_BASE\fR
+parameter for more information.
 .TP 6n
 \fBNETGROUP_SEARCH_FILTER\fR \fIldap_filter\fR
 An LDAP filter which is used to restrict the set of records returned

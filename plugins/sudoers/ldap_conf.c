@@ -134,6 +134,7 @@ static struct ldap_config_table ldap_conf_global[] = {
     { "sudoers_search_filter", CONF_STR, -1, &ldap_conf.search_filter },
     { "netgroup_base", CONF_LIST_STR, -1, &ldap_conf.netgroup_base },
     { "netgroup_search_filter", CONF_STR, -1, &ldap_conf.netgroup_search_filter },
+    { "netgroup_query", CONF_BOOL, -1, &ldap_conf.netgroup_query },
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
     { "use_sasl", CONF_BOOL, -1, &ldap_conf.use_sasl },
     { "sasl_mech", CONF_STR, -1, &ldap_conf.sasl_mech },
@@ -552,6 +553,7 @@ sudo_ldap_read_config(void)
     ldap_conf.deref = -1;
     ldap_conf.search_filter = strdup(DEFAULT_SEARCH_FILTER);
     ldap_conf.netgroup_search_filter = strdup(DEFAULT_NETGROUP_SEARCH_FILTER);
+    ldap_conf.netgroup_query = true;
     STAILQ_INIT(&ldap_conf.uri);
     STAILQ_INIT(&ldap_conf.base);
     STAILQ_INIT(&ldap_conf.netgroup_base);
@@ -594,6 +596,8 @@ sudo_ldap_read_config(void)
 	    debug_return_bool(false);
 	}
     }
+    if (!STAILQ_EMPTY(&ldap_conf.netgroup_base))
+	ldap_conf.netgroup_query = false;
 
     DPRINTF1("LDAP Config Summary");
     DPRINTF1("===================");
@@ -622,6 +626,8 @@ sudo_ldap_read_config(void)
 	STAILQ_FOREACH(conf_str, &ldap_conf.netgroup_base, entries) {
 	    DPRINTF1("netgroup_base    %s", conf_str->val);
 	}
+	DPRINTF1("netgroup_query   %s",
+	    ldap_conf.netgroup_query ? "(yes)" : "(no)");
     } else {
 	DPRINTF1("netgroup_base %s", "(NONE: will use nsswitch)");
     }

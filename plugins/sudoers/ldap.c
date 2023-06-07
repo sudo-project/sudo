@@ -857,7 +857,7 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
     }
 
     /* Add space for user netgroups if netgroup_base specified. */
-    if (!STAILQ_EMPTY(&ldap_conf.netgroup_base)) {
+    if (ldap_conf.netgroup_query) {
 	DPRINTF1("Looking up netgroups for %s", pw->pw_name);
 	if (sudo_netgroup_lookup(ld, pw, &netgroups)) {
 	    STAILQ_FOREACH(ng, &netgroups, entries) {
@@ -1026,9 +1026,17 @@ sudo_ldap_build_pass2(void)
     int len;
     debug_decl(sudo_ldap_build_pass2, SUDOERS_DEBUG_LDAP);
 
-    /* No need to query netgroups if using netgroup_base. */
-    if (!STAILQ_EMPTY(&ldap_conf.netgroup_base))
+    /*
+     * If we can query nisNetgroupTriple using netgroup_base, there is
+     * no need to match all netgroups in pass 2.  If netgroups are not
+     * natively supported, netgroup_base must be set.
+     */
+    if (ldap_conf.netgroup_query)
 	query_netgroups = false;
+#ifndef HAVE_INNETGR
+    else if (STAILQ_EMPTY(&ldap_conf.netgroup_base))
+	query_netgroups = false;
+#endif
 
     /* Short circuit if no netgroups and no non-Unix groups. */
     if (!query_netgroups && !def_group_plugin) {
