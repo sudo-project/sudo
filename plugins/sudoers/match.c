@@ -671,7 +671,7 @@ sudo_getdomainname(void)
  * in which case that argument is not checked...
  */
 bool
-netgr_matches(struct sudo_nss *nss, const char *netgr,
+netgr_matches(const struct sudo_nss *nss, const char *netgr,
     const char *lhost, const char *shost, const char *user)
 {
     const char *domain;

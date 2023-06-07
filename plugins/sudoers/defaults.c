@@ -539,9 +539,6 @@ init_defaults(void)
 #ifdef HAVE_SELINUX
     def_selinux = true;
 #endif
-#ifdef HAVE_INNETGR
-    def_use_netgroups = true;
-#endif
 #ifdef _PATH_SUDO_ADMIN_FLAG
     if ((def_admin_flag = strdup(_PATH_SUDO_ADMIN_FLAG)) == NULL)
 	goto oom;
@@ -550,6 +547,7 @@ init_defaults(void)
 	goto oom;
     def_intercept_type = dso;
     def_intercept_verify = true;
+    def_use_netgroups = true;
     def_netgroup_tuple = false;
     def_sudoedit_checkdir = true;
     def_iolog_mode = S_IRUSR|S_IWUSR;

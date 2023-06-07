@@ -297,8 +297,11 @@ sudo_ldap_get_values_len(LDAP *ld, LDAPMessage *entry, const char *attr, int *rc
  * A matching entry that is negated will always return false.
  */
 static int
-sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
+sudo_ldap_check_non_unix_group(const struct sudo_nss *nss, LDAPMessage *entry,
+    struct passwd *pw)
 {
+    struct sudo_ldap_handle *handle = nss->handle;
+    LDAP *ld = handle->ld;
     struct berval **bv, **p;
     bool ret = false;
     int rc;
@@ -325,8 +328,7 @@ sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
 	    negated = true;
 	}
 	if (*val == '+') {
-	    /* Custom innetgr() function not used here. */
-	    if (netgr_matches(NULL, val,
+	    if (netgr_matches(nss, val,
 		def_netgroup_tuple ? user_runhost : NULL,
 		def_netgroup_tuple ? user_srunhost : NULL, pw->pw_name))
 		ret = true;
@@ -1845,7 +1847,7 @@ sudo_ldap_result_get(const struct sudo_nss *nss, struct passwd *pw)
 		LDAP_FOREACH(entry, ld, result) {
 		    if (pass != 0) {
 			/* Check non-unix group in 2nd pass. */
-			switch (sudo_ldap_check_non_unix_group(ld, entry, pw)) {
+			switch (sudo_ldap_check_non_unix_group(nss, entry, pw)) {
 			case -1:
 			    goto oom;
 			case false:
