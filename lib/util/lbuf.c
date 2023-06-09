@@ -270,7 +270,7 @@ done:
 }
 
 /*
- * Parse the format and append strings, only %s and %% escapes are supported.
+ * Parse the format and append strings, only %s, %n$s and %% escapes are supported.
  */
 bool
 sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...)
@@ -287,6 +287,38 @@ sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...)
 
     va_start(ap, fmt);
     while (*fmt != '\0') {
+	if (fmt[0] == '%' && isdigit(fmt[1])) {
+	    const char *num_start = fmt + 1;
+	    const char *num_end;
+	    int arg_num;
+	    /* Find the end of the numeric part */
+	    for (num_end = num_start; isdigit(*num_end); num_end++)
+		;
+	    if (num_end[0] == '$' && num_end[1] == 's' && num_end > num_start) {
+		/* Convert the numeric part to an integer */
+		char num_str[num_end - num_start + 1];
+		memcpy(num_str, num_start, num_end - num_start);
+		num_str[num_end - num_start] = '\0';
+		arg_num = atoi(num_str);
+		if (arg_num > 0) {
+		    va_list arg_copy;
+		    va_copy(arg_copy, ap);
+		    for (int i = 1; i < arg_num; i++) {
+			(void)va_arg(arg_copy, char *);
+		    }
+		    if ((s = va_arg(arg_copy, char *)) == NULL)
+			s = "(NULL)";
+		    len = strlen(s);
+		    if (!sudo_lbuf_expand(lbuf, len))
+			goto done;
+		    memcpy(lbuf->buf + lbuf->len, s, len);
+		    lbuf->len += len;
+		    fmt = num_end + 2;
+		    va_end(arg_copy);
+		    continue;
+		}
+	    }
+	}
 	if (fmt[0] == '%' && fmt[1] == 's') {
 	    if ((s = va_arg(ap, char *)) == NULL)
 		s = "(NULL)";
