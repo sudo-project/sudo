@@ -374,5 +374,5 @@ alias_find_used(struct sudoers_parse_tree *parse_tree, struct rbtree *used_alias
 	}
     }
 
-    debug_return_int(errors ? false : true);
+    debug_return_bool(errors ? false : true);
 }
