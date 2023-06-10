@@ -279,7 +279,7 @@ sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...)
     bool ret = false;
     va_list ap;
     const char *s;
-    int len;
+    size_t len;
     debug_decl(sudo_lbuf_append, SUDO_DEBUG_UTIL);
 
     if (sudo_lbuf_error(lbuf))
@@ -287,19 +287,27 @@ sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...)
 
     va_start(ap, fmt);
     while (*fmt != '\0') {
-	if (fmt[0] == '%' && isdigit(fmt[1])) {
+	if (fmt[0] == '%' && isdigit((unsigned char)fmt[1])) {
 	    const char *num_start = fmt + 1;
-	    const char *num_end;
+	    const char *num_end = num_start;
 	    int arg_num;
 	    /* Find the end of the numeric part */
-	    for (num_end = num_start; isdigit(*num_end); num_end++)
-		;
+	    while (isdigit((unsigned char)*num_end))
+		num_end++;
 	    if (num_end[0] == '$' && num_end[1] == 's' && num_end > num_start) {
 		/* Convert the numeric part to an integer */
-		char num_str[num_end - num_start + 1];
-		memcpy(num_str, num_start, num_end - num_start);
-		num_str[num_end - num_start] = '\0';
-		arg_num = atoi(num_str);
+		char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
+		len = num_end - num_start;
+		if (len >= sizeof(numbuf)) {
+		    errno = EINVAL;
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"integer overflow parsing $n");
+		    lbuf->error = 1;
+		    goto done;
+		}
+		memcpy(numbuf, num_start, len);
+		numbuf[len] = '\0';
+		arg_num = atoi(numbuf);
 		if (arg_num > 0) {
 		    va_list arg_copy;
 		    va_copy(arg_copy, ap);
@@ -309,8 +317,10 @@ sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...)
 		    if ((s = va_arg(arg_copy, char *)) == NULL)
 			s = "(NULL)";
 		    len = strlen(s);
-		    if (!sudo_lbuf_expand(lbuf, len))
+		    if (!sudo_lbuf_expand(lbuf, len)) {
+			va_end(arg_copy);
 			goto done;
+		    }
 		    memcpy(lbuf->buf + lbuf->len, s, len);
 		    lbuf->len += len;
 		    fmt = num_end + 2;
