@@ -22,6 +22,9 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
+/* Python may be built with 32-bit time_t support on some platforms. */
+#undef SIZEOF_TIME_T
+
 #include <config.h>
 #include "sudo_compat.h"
 #include "sudo_plugin.h"
