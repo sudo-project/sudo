@@ -717,6 +717,7 @@ runasspec	:	/* empty */ {
 		;
 
 runaslist	:	/* empty */ {
+			    /* User may run command as themselves. */
 			    $$ = calloc(1, sizeof(struct runascontainer));
 			    if ($$ != NULL) {
 				$$->runasusers = new_member(NULL, MYSELF);
@@ -733,6 +734,7 @@ runaslist	:	/* empty */ {
 			    parser_leak_add(LEAK_RUNAS, $$);
 			}
 		|	userlist {
+			    /* User may run command as a user in userlist. */
 			    $$ = calloc(1, sizeof(struct runascontainer));
 			    if ($$ == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
@@ -744,6 +746,10 @@ runaslist	:	/* empty */ {
 			    /* $$->runasgroups = NULL; */
 			}
 		|	userlist ':' grouplist {
+			    /*
+			     * User may run command as a user in userlist
+			     * and optionally as a group in grouplist.
+			     */
 			    $$ = calloc(1, sizeof(struct runascontainer));
 			    if ($$ == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
@@ -756,17 +762,25 @@ runaslist	:	/* empty */ {
 			    $$->runasgroups = $3;
 			}
 		|	':' grouplist {
+			    /* User may run command as a group in grouplist. */
 			    $$ = calloc(1, sizeof(struct runascontainer));
+			    if ($$ != NULL) {
+				$$->runasusers = new_member(NULL, MYSELF);
+				if ($$->runasusers == NULL) {
+				    free($$);
+				    $$ = NULL;
+				}
+			    }
 			    if ($$ == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			    parser_leak_add(LEAK_RUNAS, $$);
 			    parser_leak_remove(LEAK_MEMBER, $2);
-			    /* $$->runasusers = NULL; */
 			    $$->runasgroups = $2;
 			}
 		|	':' {
+			    /* User may run command as themselves. */
 			    $$ = calloc(1, sizeof(struct runascontainer));
 			    if ($$ != NULL) {
 				$$->runasusers = new_member(NULL, MYSELF);

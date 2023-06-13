@@ -22,6 +22,7 @@ objectClass: sudoRole
 cn: millert
 sudoUser: millert
 sudoHost: ALL
+sudoRunAsUser:
 sudoRunAsGroup: wheel
 sudoCommand: ALL
 sudoOrder: 2
@@ -32,6 +33,7 @@ objectClass: sudoRole
 cn: %sudo
 sudoUser: %sudo
 sudoHost: ALL
+sudoRunAsUser:
 sudoRunAsGroup: ALL
 sudoCommand: ALL
 sudoOrder: 3
