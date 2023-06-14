@@ -70,6 +70,24 @@ What's new in Sudo 1.9.14
    by its nisNetgroupTriple attribute, while still allowing sudo to
    query the LDAP server directly to determine netgroup membership.
 
+ * Fixed a long-standing bug where a sudoers rule without an explicit
+   runas list allowed the user to run a command as root and any
+   group instead of just one of the groups that root is a member
+   of.  For example, a rule such as "myuser ALL = ALL" would permit
+   "sudo -u root -g othergroup" even if root did not belong to
+   "othergroup".
+
+ * Fixed a bug where a sudoers rule with an explicit runas list
+   allowed a user to run sudo commands as themselves.  For example,
+   a rule such as "myuser ALL = (root) ALL", "myuser" should only
+   allow commands to be run as root (optionally using one of root's
+   groups).  However, the rule also allowed the user to run
+   "sudo -u myuser -g myuser command".
+
+ * Fixed a bug that prevented the user from specifying a group on
+   the command line via "sudo -g" if the rule's Runas_Spec contained
+   a Runas_Alias.
+
 What's new in Sudo 1.9.13p3
 
  * Fixed a bug introduced in sudo 1.9.13 that caused a syntax error
