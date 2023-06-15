@@ -56,7 +56,7 @@ jobs:
   build_macos:
     description: Configure, build and package sudo (macOS)
     macos:
-      xcode: 13.2.1 # indicate our selected version of Xcode
+      xcode: 13.4.1 # indicate our selected version of Xcode
     steps:
       - checkout
       - run:
