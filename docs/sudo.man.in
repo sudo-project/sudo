@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDO" "@mansectsu@" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "June 18, 2023" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -990,6 +990,8 @@ process passes the
 \fIcommand\fR's
 exit status to the security policy's close function, as well as the
 close function of any configured audit plugin, and exits.
+This mode is the default for sudo versions 1.9.14 and above when using
+the sudoers policy.
 .PP
 If no pty is used,
 \fBsudo\fR
@@ -1031,6 +1033,8 @@ Both
 and
 \fIpam_setcred\fR
 are enabled by default on systems using PAM.
+This mode is the default for sudo versions prior to 1.9.14 when using
+the sudoers policy.
 .PP
 On systems that use PAM, the security policy's close function
 is responsible for closing the PAM session.
