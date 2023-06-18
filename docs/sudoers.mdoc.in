@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd April 6, 2023
+.Dd June 18, 2023
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -4005,7 +4005,9 @@ By running the command in a separate pseudo-terminal, this attack is
 no longer possible.
 This flag is
 .Em on
-by default.
+by default for
+.Nm sudo
+1.9.14 and above.
 .It user_command_timeouts
 If set, the user may specify a timeout on the command line.
 If the timeout expires before the command has exited, the

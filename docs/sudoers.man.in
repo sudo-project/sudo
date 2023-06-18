@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "April 6, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "June 18, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -4231,7 +4231,9 @@ By running the command in a separate pseudo-terminal, this attack is
 no longer possible.
 This flag is
 \fIon\fR
-by default.
+by default for
+\fBsudo\fR
+1.9.14 and above.
 .TP 18n
 user_command_timeouts
 If set, the user may specify a timeout on the command line.
