@@ -10,16 +10,16 @@ about the `configure` script itself.
 
 ## System requirements
 
-To build sudo from the source distribution you need a POSIX-compliant
-operating system (any modern version of BSD, Linux, or Unix should work),
-an ANSI/ISO C compiler that supports the "long long" type, variadic
-macros (a C99 feature) as well as the ar, make, and ranlib utilities.
+To build sudo from the source distribution you will need a
+POSIX-compliant operating system (any modern version of BSD, Linux,
+or Unix should work), a C compiler that conforms to ISO C99 or
+higher, and the ar, make, and ranlib utilities.
 
 If you wish to modify the parser then you will need flex version
-2.5.2 or later and either bison or byacc (sudo comes with a
-pre-generated parser).  You'll also have to run configure with the
---with-devel option or pass DEVEL=1 to make.  You can get flex from
-https://github.com/westes/flex/.  You can get GNU bison from
+2.5.2 or later and either bison or byacc (sudo comes with a parser
+generated with GNU bison).  You'll also have to run configure with
+the --with-devel option or pass DEVEL=1 to make.  You can get flex
+from https://github.com/westes/flex/.  You can get GNU bison from
 https://ftp.gnu.org/pub/gnu/bison/ or any GNU mirror.
 
 Some systems will also require that development library packages be
