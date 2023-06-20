@@ -34,7 +34,7 @@
 /* Trivial reference-counted strings. */
 struct rcstr {
     int refcnt;
-    char str[1];	/* actually bigger */
+    char str[];
 };
 
 /*
@@ -62,8 +62,7 @@ sudo_rcstr_alloc(size_t len)
     struct rcstr *rcs;
     debug_decl(sudo_rcstr_dup, SUDO_DEBUG_UTIL);
 
-    /* Note: sizeof(struct rcstr) includes space for the NUL */
-    rcs = malloc(sizeof(struct rcstr) + len);
+    rcs = malloc(sizeof(struct rcstr) + len + 1);
     if (rcs == NULL)
 	return NULL;
 

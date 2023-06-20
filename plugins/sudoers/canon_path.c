@@ -41,12 +41,12 @@ static struct rbtree *canon_cache;
  * resolved path.  The resolved path is directly embedded into the
  * struct so that we can find the start of the struct cache_item
  * given the value of resolved.  Storage for pathname is embedded
- * at the end, after resolved.
+ * at the end with resolved.
  */
 struct cache_item {
     unsigned int refcnt;
     char *pathname;
-    char resolved[1];	/* actually bigger */
+    char resolved[];
 };
 
 /*
@@ -150,7 +150,8 @@ canon_path(const char *inpath)
 	resolved = realpath(inpath, resbuf);
 
     inlen = strlen(inpath);
-    item_size = sizeof(*item) + inlen + 1;
+    /* one for NULL terminator of resolved, one for NULL terminator of pathname */
+    item_size = sizeof(*item) + inlen + 2;
     if (resolved != NULL) {
 	reslen = strlen(resolved);
 	item_size += reslen;
