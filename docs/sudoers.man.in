@@ -475,14 +475,33 @@ varies based on the operating system
 \fBsudo\fR
 is running on.
 .PP
-Other
+Other settings may influence the command environment:
+.TP 3n
+\fB\(bu\fR
 \fBsudoers\fR
-options may influence the command environment, such as
+options, such as
 \fIalways_set_home\fR,
 \fIsecure_path\fR,
 \fIset_logname\fR,
+\fIset_home\fR,
+\fIsetenv\fR.
+.TP 3n
+\fB\(bu\fR
+Command tags, such as
+\fISETENV\fR
 and
-\fIset_home\fR.
+\fINOSETENV\fR.
+Note that
+\fISETENV\fR
+is implied if the command matched is
+\fBALL\fR.
+.TP 3n
+\fB\(bu\fR
+\fBsudo\fR
+options, such as
+\fI-E\fR
+and
+\fI-i\fR.
 .PP
 On systems that support PAM where the
 \fBpam_env\fR
