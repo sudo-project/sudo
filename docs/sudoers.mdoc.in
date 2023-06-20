@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd June 18, 2023
+.Dd June 20, 2023
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -461,14 +461,33 @@ varies based on the operating system
 .Nm sudo
 is running on.
 .Pp
-Other
+Other settings may influence the command environment:
+.Bl -bullet -width 1n
+.It
 .Nm
-options may influence the command environment, such as
+options such as
 .Em always_set_home ,
 .Em secure_path ,
 .Em set_logname ,
+.Em set_home ,
 and
-.Em set_home .
+.Em setenv .
+.It
+Command tags, such as
+.Dv SETENV
+and
+.Dv NOSETENV .
+Note that
+.Dv SETENV
+is implied if the command matched is
+.Sy ALL .
+.It
+.Nm sudo
+options, such as
+.Fl E
+and
+.Fl i .
+.El
 .Pp
 On systems that support PAM where the
 .Sy pam_env
