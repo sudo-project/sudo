@@ -88,6 +88,9 @@ What's new in Sudo 1.9.14
    the command line via "sudo -g" if the rule's Runas_Spec contained
    a Runas_Alias.
 
+ * Sudo now requires a C compiler that conforms to ISO C99 or higher
+   to build.
+
 What's new in Sudo 1.9.13p3
 
  * Fixed a bug introduced in sudo 1.9.13 that caused a syntax error
