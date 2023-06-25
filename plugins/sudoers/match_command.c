@@ -163,7 +163,7 @@ is_script(int fd)
 	if (magic[0] == '#' && magic[1] == '!')
 	    ret = true;
     }
-    debug_return_int(ret);
+    debug_return_bool(ret);
 }
 
 /*
