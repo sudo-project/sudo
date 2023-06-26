@@ -1054,6 +1054,7 @@ bad:
     while (info_len--)
 	free(command_info[info_len]);
     free(command_info);
+    command_info = NULL;
     debug_return_bool(false);
 }
 
