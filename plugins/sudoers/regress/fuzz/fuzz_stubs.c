@@ -39,6 +39,7 @@
 #include <netdb.h>
 
 #include "sudoers.h"
+#include "check.h"
 #include "interfaces.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
@@ -54,6 +55,18 @@ void
 init_eventlog_config(void)
 {
     return;
+}
+
+bool
+pivot_root(const char *new_root, int fds[2])
+{
+    return true;
+}
+
+bool
+unpivot_root(int fds[2])
+{
+    return true;
 }
 
 int
@@ -80,8 +93,14 @@ rewind_perms(void)
     return true;
 }
 
+void
+timestamp_set_owner(uid_t uid, gid_t gid)
+{
+    return;
+}
+
 bool
-sudo_nss_can_continue(struct sudo_nss *nss, int match)
+sudo_nss_can_continue(const struct sudo_nss *nss, int match)
 {
     return true;
 }

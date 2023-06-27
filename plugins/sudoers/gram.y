@@ -2,7 +2,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2022
+ * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -48,10 +48,10 @@
 /*
  * Globals
  */
-bool sudoers_warnings = true;
-bool sudoers_recovery = true;
-bool sudoers_strict = false;
 bool parse_error = false;
+
+static struct sudoers_parser_config parser_conf =
+    SUDOERS_PARSER_CONFIG_INITIALIZER;
 
 /* Optional logging function for parse errors. */
 sudoers_logger_t sudoers_error_hook;
@@ -81,7 +81,7 @@ static bool add_userspec(struct member *, struct privilege *);
 static struct defaults *new_default(char *, char *, short);
 static struct member *new_member(char *, int);
 static struct sudo_command *new_command(char *, char *);
-static struct command_digest *new_digest(int, char *);
+static struct command_digest *new_digest(unsigned int, char *);
 static void alias_error(const char *name, int errnum);
 %}
 
@@ -216,17 +216,19 @@ entry		:	'\n' {
 			    yyerrok;
 			}
 		|	include {
-			    const bool success = push_include($1, false);
+			    const bool success = push_include($1,
+				parser_conf.verbose);
 			    parser_leak_remove(LEAK_PTR, $1);
 			    free($1);
-			    if (!success && !sudoers_recovery)
+			    if (!success && !parser_conf.recovery)
 				YYERROR;
 			}
 		|	includedir {
-			    const bool success = push_include($1, true);
+			    const bool success = push_includedir($1,
+				parser_conf.verbose);
 			    parser_leak_remove(LEAK_PTR, $1);
 			    free($1);
-			    if (!success && !sudoers_recovery)
+			    if (!success && !parser_conf.recovery)
 				YYERROR;
 			}
 		|	userlist privileges '\n' {
@@ -715,6 +717,7 @@ runasspec	:	/* empty */ {
 		;
 
 runaslist	:	/* empty */ {
+			    /* User may run command as themselves. */
 			    $$ = calloc(1, sizeof(struct runascontainer));
 			    if ($$ != NULL) {
 				$$->runasusers = new_member(NULL, MYSELF);
@@ -731,6 +734,7 @@ runaslist	:	/* empty */ {
 			    parser_leak_add(LEAK_RUNAS, $$);
 			}
 		|	userlist {
+			    /* User may run command as a user in userlist. */
 			    $$ = calloc(1, sizeof(struct runascontainer));
 			    if ($$ == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
@@ -742,6 +746,10 @@ runaslist	:	/* empty */ {
 			    /* $$->runasgroups = NULL; */
 			}
 		|	userlist ':' grouplist {
+			    /*
+			     * User may run command as a user in userlist
+			     * and optionally as a group in grouplist.
+			     */
 			    $$ = calloc(1, sizeof(struct runascontainer));
 			    if ($$ == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
@@ -754,17 +762,25 @@ runaslist	:	/* empty */ {
 			    $$->runasgroups = $3;
 			}
 		|	':' grouplist {
+			    /* User may run command as a group in grouplist. */
 			    $$ = calloc(1, sizeof(struct runascontainer));
+			    if ($$ != NULL) {
+				$$->runasusers = new_member(NULL, MYSELF);
+				if ($$->runasusers == NULL) {
+				    free($$);
+				    $$ = NULL;
+				}
+			    }
 			    if ($$ == NULL) {
 				sudoerserror(N_("unable to allocate memory"));
 				YYERROR;
 			    }
 			    parser_leak_add(LEAK_RUNAS, $$);
 			    parser_leak_remove(LEAK_MEMBER, $2);
-			    /* $$->runasusers = NULL; */
 			    $$->runasgroups = $2;
 			}
 		|	':' {
+			    /* User may run command as themselves. */
 			    $$ = calloc(1, sizeof(struct runascontainer));
 			    if ($$ != NULL) {
 				$$->runasusers = new_member(NULL, MYSELF);
@@ -1216,7 +1232,7 @@ sudoerserrorf(const char *fmt, ...)
 	sudoers_error_hook(sudoers, this_lineno, column, fmt, ap);
 	va_end(ap);
     }
-    if (sudoers_warnings && fmt != NULL) {
+    if (parser_conf.verbose > 0 && fmt != NULL) {
 	LEXTRACE("<*> ");
 #ifndef TRACELEXER
 	if (trace_print == NULL || trace_print == sudoers_trace_print) {
@@ -1363,7 +1379,7 @@ new_command(char *cmnd, char *args)
 }
 
 static struct command_digest *
-new_digest(int digest_type, char *digest_str)
+new_digest(unsigned int digest_type, char *digest_str)
 {
     struct command_digest *digest;
     debug_decl(new_digest, SUDOERS_DEBUG_PARSER);
@@ -1738,13 +1754,15 @@ free_userspec(struct userspec *us)
  * Takes ownership of lhost and shost.
  */
 void
-init_parse_tree(struct sudoers_parse_tree *parse_tree, char *lhost, char *shost)
+init_parse_tree(struct sudoers_parse_tree *parse_tree, char *lhost, char *shost,
+    struct sudo_nss *nss)
 {
     TAILQ_INIT(&parse_tree->userspecs);
     TAILQ_INIT(&parse_tree->defaults);
     parse_tree->aliases = NULL;
     parse_tree->shost = shost;
     parse_tree->lhost = lhost;
+    parse_tree->nss = nss;
 }
 
 /*
@@ -1780,7 +1798,7 @@ free_parse_tree(struct sudoers_parse_tree *parse_tree)
  * the current sudoers file to path.
  */
 bool
-init_parser(const char *path, bool quiet, bool strict)
+init_parser(const char *file, const struct sudoers_parser_config *conf)
 {
     bool ret = true;
     debug_decl(init_parser, SUDOERS_DEBUG_PARSER);
@@ -1788,10 +1806,19 @@ init_parser(const char *path, bool quiet, bool strict)
     free_parse_tree(&parsed_policy);
     parser_leak_init();
     init_lexer();
+    parse_error = false;
+
+    if (conf != NULL) {
+	parser_conf = *conf;
+    } else {
+	const struct sudoers_parser_config def_conf =
+	    SUDOERS_PARSER_CONFIG_INITIALIZER;
+	parser_conf = def_conf;
+    }
 
     sudo_rcstr_delref(sudoers);
-    if (path != NULL) {
-	if ((sudoers = sudo_rcstr_dup(path)) == NULL) {
+    if (file != NULL) {
+	if ((sudoers = sudo_rcstr_dup(file)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    ret = false;
 	}
@@ -1799,11 +1826,24 @@ init_parser(const char *path, bool quiet, bool strict)
 	sudoers = NULL;
     }
 
-    parse_error = false;
-    sudoers_warnings = !quiet;
-    sudoers_strict = strict;
+    sudo_rcstr_delref(sudoers_search_path);
+    if (parser_conf.sudoers_path != NULL) {
+	sudoers_search_path = sudo_rcstr_dup(parser_conf.sudoers_path);
+	if (sudoers_search_path == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    ret = false;
+	}
+    } else {
+	sudoers_search_path = NULL;
+    }
 
     debug_return_bool(ret);
+}
+
+bool
+reset_parser(void)
+{
+    return init_parser(NULL, NULL);
 }
 
 /*
@@ -1828,6 +1868,36 @@ init_options(struct command_options *opts)
 #ifdef HAVE_APPARMOR
     opts->apparmor_profile = NULL;
 #endif
+}
+
+uid_t
+sudoers_file_uid(void)
+{
+    return parser_conf.sudoers_uid;
+}
+
+gid_t
+sudoers_file_gid(void)
+{
+    return parser_conf.sudoers_gid;
+}
+
+mode_t
+sudoers_file_mode(void)
+{
+    return parser_conf.sudoers_mode;
+}
+
+bool
+sudoers_error_recovery(void)
+{
+    return parser_conf.recovery;
+}
+
+bool
+sudoers_strict(void)
+{
+    return parser_conf.strict;
 }
 
 bool

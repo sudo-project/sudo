@@ -248,7 +248,7 @@ sudo_read_nss(void)
 #endif /* HAVE_LDAP && _PATH_NSSWITCH_CONF */
 
 bool
-sudo_nss_can_continue(struct sudo_nss *nss, int match)
+sudo_nss_can_continue(const struct sudo_nss *nss, int match)
 {
     debug_decl(sudo_nss_should_continue, SUDOERS_DEBUG_NSS);
 

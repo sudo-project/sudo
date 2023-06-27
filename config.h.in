@@ -3,6 +3,9 @@
 #ifndef SUDO_CONFIG_H
 #define SUDO_CONFIG_H
 
+/* Configure script arguments used to build sudo. */
+#undef CONFIGURE_ARGS
+
 /* Define to 1 if you want the insults from the "classic" version sudo. */
 #undef CLASSIC_INSULTS
 
@@ -35,8 +38,8 @@
 /* Define to 1 if you want to require fully qualified hosts in sudoers. */
 #undef FQDN
 
-/* Define to the type of elements in the array set by 'getgroups'. Usually
-   this is either 'int' or 'gid_t'. */
+/* Define to the type of elements in the array argument to 'getgroups'.
+   Usually this is either 'int' or 'gid_t'. */
 #undef GETGROUPS_T
 
 /* Define to 1 if you want insults from the "Goon Show". */
@@ -207,6 +210,10 @@
    don't. */
 #undef HAVE_DECL_SSIZE_MAX
 
+/* Define to 1 if you have the declaration of 'SYMLOOP_MAX', and to 0 if you
+   don't. */
+#undef HAVE_DECL_SYMLOOP_MAX
+
 /* Define to 1 if you have the declaration of 'sys_sigabbrev', and to 0 if you
    don't. */
 #undef HAVE_DECL_SYS_SIGABBREV
@@ -242,6 +249,10 @@
 /* Define to 1 if you have the declaration of '_POSIX_PATH_MAX', and to 0 if
    you don't. */
 #undef HAVE_DECL__POSIX_PATH_MAX
+
+/* Define to 1 if you have the declaration of '_POSIX_SYMLOOP_MAX', and to 0
+   if you don't. */
+#undef HAVE_DECL__POSIX_SYMLOOP_MAX
 
 /* Define to 1 if you have the declaration of '_sys_siglist', and to 0 if you
    don't. */
@@ -462,18 +473,6 @@
 /* Define to 1 if you have the 'innetgr' function. */
 #undef HAVE_INNETGR
 
-/* Define to 1 if the system has the type 'int16_t'. */
-#undef HAVE_INT16_T
-
-/* Define to 1 if the system has the type 'int32_t'. */
-#undef HAVE_INT32_T
-
-/* Define to 1 if the system has the type 'int64_t'. */
-#undef HAVE_INT64_T
-
-/* Define to 1 if the system has the type 'int8_t'. */
-#undef HAVE_INT8_T
-
 /* Define to 1 if the system has the type 'intmax_t'. */
 #undef HAVE_INTMAX_T
 
@@ -601,6 +600,9 @@
 
 /* Define to 1 if you have the <login_cap.h> header file. */
 #undef HAVE_LOGIN_CAP_H
+
+/* Define to 1 if the system has the type 'long long int'. */
+#undef HAVE_LONG_LONG_INT
 
 /* Define to 1 if you have the <machine/endian.h> header file. */
 #undef HAVE_MACHINE_ENDIAN_H
@@ -757,6 +759,9 @@
 
 /* Define to 1 if you have the 'reallocarray' function. */
 #undef HAVE_REALLOCARRAY
+
+/* Define to 1 if you have the 'realpath' function. */
+#undef HAVE_REALPATH
 
 /* Define to 1 if you have the 'revoke' function. */
 #undef HAVE_REVOKE
@@ -1027,18 +1032,6 @@
 /* Define to 1 if you have the 'ttyslot' function. */
 #undef HAVE_TTYSLOT
 
-/* Define to 1 if the system has the type 'uint16_t'. */
-#undef HAVE_UINT16_T
-
-/* Define to 1 if the system has the type 'uint32_t'. */
-#undef HAVE_UINT32_T
-
-/* Define to 1 if the system has the type 'uint64_t'. */
-#undef HAVE_UINT64_T
-
-/* Define to 1 if the system has the type 'uint8_t'. */
-#undef HAVE_UINT8_T
-
 /* Define to 1 if the system has the type 'uintmax_t'. */
 #undef HAVE_UINTMAX_T
 
@@ -1050,6 +1043,9 @@
 
 /* Define to 1 if you have the 'unsetenv' function. */
 #undef HAVE_UNSETENV
+
+/* Define to 1 if the system has the type 'unsigned long long int'. */
+#undef HAVE_UNSIGNED_LONG_LONG_INT
 
 /* Define to 1 if you have the <util.h> header file. */
 #undef HAVE_UTIL_H
@@ -1228,9 +1224,6 @@
 
 /* The passwd prompt timeout (in minutes). */
 #undef PASSWORD_TIMEOUT
-
-/* Define to 1 to enable replacement getcwd if system getcwd is broken. */
-#undef PREFER_PORTABLE_GETCWD
 
 /* Enable replacement (v)snprintf if system (v)snprintf is broken. */
 #undef PREFER_PORTABLE_SNPRINTF
@@ -1447,6 +1440,21 @@
 /* Number of bits in time_t, on hosts where this is settable. */
 #undef _TIME_BITS
 
+/* Define for Solaris 2.5.1 so the uint32_t typedef from <sys/synch.h>,
+   <pthread.h>, or <semaphore.h> is not used. If the typedef were allowed, the
+   #define below would cause a syntax error. */
+#undef _UINT32_T
+
+/* Define for Solaris 2.5.1 so the uint64_t typedef from <sys/synch.h>,
+   <pthread.h>, or <semaphore.h> is not used. If the typedef were allowed, the
+   #define below would cause a syntax error. */
+#undef _UINT64_T
+
+/* Define for Solaris 2.5.1 so the uint8_t typedef from <sys/synch.h>,
+   <pthread.h>, or <semaphore.h> is not used. If the typedef were allowed, the
+   #define below would cause a syntax error. */
+#undef _UINT8_T
+
 /* Define to 1 on platforms where this makes time_t a 64-bit type. */
 #undef __MINGW_USE_VC2005_COMPAT
 
@@ -1457,7 +1465,7 @@
 /* Define to empty if 'const' does not conform to ANSI C. */
 #undef const
 
-/* Define to 'int' if <sys/types.h> doesn't define. */
+/* Define as 'int' if <sys/types.h> doesn't define. */
 #undef gid_t
 
 /* Define to '__inline__' or '__inline' if that's what the C compiler
@@ -1466,52 +1474,55 @@
 #undef inline
 #endif
 
+/* Define to the type of a signed integer type of width exactly 16 bits if
+   such a type exists and the standard includes do not define it. */
+#undef int16_t
+
+/* Define to the type of a signed integer type of width exactly 32 bits if
+   such a type exists and the standard includes do not define it. */
+#undef int32_t
+
+/* Define to the type of a signed integer type of width exactly 64 bits if
+   such a type exists and the standard includes do not define it. */
+#undef int64_t
+
+/* Define to the type of a signed integer type of width exactly 8 bits if such
+   a type exists and the standard includes do not define it. */
+#undef int8_t
+
+/* Define to the widest signed integer type if <stdint.h> and <inttypes.h> do
+   not define. */
+#undef intmax_t
+
 /* Define to an OS-specific initialization function or 'os_init_common'. */
 #undef os_init
 
-/* Define to 'unsigned int' if <sys/types.h> does not define. */
-#undef size_t
-
-/* Define to 'int' if <sys/types.h> doesn't define. */
+/* Define as 'int' if <sys/types.h> doesn't define. */
 #undef uid_t
+
+/* Define to the type of an unsigned integer type of width exactly 16 bits if
+   such a type exists and the standard includes do not define it. */
+#undef uint16_t
+
+/* Define to the type of an unsigned integer type of width exactly 32 bits if
+   such a type exists and the standard includes do not define it. */
+#undef uint32_t
+
+/* Define to the type of an unsigned integer type of width exactly 64 bits if
+   such a type exists and the standard includes do not define it. */
+#undef uint64_t
+
+/* Define to the type of an unsigned integer type of width exactly 8 bits if
+   such a type exists and the standard includes do not define it. */
+#undef uint8_t
+
+/* Define to the widest unsigned integer type if <stdint.h> and <inttypes.h>
+   do not define. */
+#undef uintmax_t
 
 /* Define to empty if the keyword 'volatile' does not work. Warning: valid
    code using 'volatile' can become incorrect without. Disable with care. */
 #undef volatile
-
-/* Define C99 types if stdint.h and inttypes.h are missing. */
-#if !defined(HAVE_STDINT_H) && !defined(HAVE_INTTYPES_H)
-# ifndef HAVE_INT8_T
-typedef char			int8_t;
-# endif
-# ifndef HAVE_UINT8_T
-typedef	unsigned char		uint8_t;
-# endif
-# ifndef HAVE_INT16_T
-typedef short			int16_t;
-# endif
-# ifndef HAVE_UINT16_T
-typedef unsigned short		uint16_t;
-# endif
-# ifndef HAVE_INT32_T
-typedef int			int32_t;
-# endif
-# ifndef HAVE_UINT32_T
-typedef unsigned int		uint32_t;
-# endif
-# ifndef HAVE_INT64_T
-typedef long long		int64_t;
-# endif
-# ifndef HAVE_UINT64_T
-typedef unsigned long long	uint64_t;
-# endif
-# ifndef HAVE_INTMAX_T
-typedef long long		intmax_t;
-# endif
-# ifndef HAVE_UINTMAX_T
-typedef unsigned long long	uintmax_t;
-# endif
-#endif /* !HAVE_STDINT_H && !HAVE_INTTYPES_H */
 
 #ifndef HAVE_SIG_ATOMIC_T
 typedef int			sig_atomic_t;

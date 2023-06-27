@@ -85,7 +85,7 @@ TAILQ_HEAD(connection_list, connection_closure);
 static struct connection_list connections = TAILQ_HEAD_INITIALIZER(connections);
 static struct listener_list listeners = TAILQ_HEAD_INITIALIZER(listeners);
 static const char server_id[] = "Sudo Audit Server " PACKAGE_VERSION;
-static const char *conf_file = _PATH_SUDO_LOGSRVD_CONF;
+static const char *conf_file = NULL;
 
 /* Event loop callbacks. */
 static void client_msg_cb(int fd, int what, void *v);
@@ -297,23 +297,31 @@ get_free_buf(size_t len, struct connection_closure *closure)
     if (buf != NULL) {
         TAILQ_REMOVE(&closure->free_bufs, buf, entries);
     } else {
-        if ((buf = calloc(1, sizeof(*buf))) == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    debug_return_ptr(NULL);
-	}
+        if ((buf = calloc(1, sizeof(*buf))) == NULL)
+	    goto oom;
     }
 
     if (len > buf->size) {
-	free(buf->data);
-	buf->size = sudo_pow2_roundup(len);
-	if ((buf->data = malloc(buf->size)) == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    free(buf);
-	    buf = NULL;
+	const unsigned int new_size = sudo_pow2_roundup(len);
+	if (new_size < len) {
+	    /* overflow */
+	    errno = ENOMEM;
+	    goto oom;
 	}
+	free(buf->data);
+	if ((buf->data = malloc(new_size)) == NULL)
+	    goto oom;
+	buf->size = new_size;
     }
 
     debug_return_ptr(buf);
+oom:
+    if (buf != NULL) {
+	free(buf->data);
+	free(buf);
+    }
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    debug_return_ptr(NULL);
 }
 
 static bool
@@ -1663,7 +1671,8 @@ server_dump_stats(void)
     debug_decl(server_dump_stats, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s", server_id);
-    sudo_debug_printf(SUDO_DEBUG_INFO, "configuration file: %s", conf_file);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "configuration file: %s",
+	conf_file ? conf_file : _PATH_SUDO_LOGSRVD_CONF);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "listen addresses:");
     n = 0;

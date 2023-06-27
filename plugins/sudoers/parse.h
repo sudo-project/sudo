@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2000, 2004, 2007-2022
+ * Copyright (c) 1996, 1998-2000, 2004, 2007-2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -302,12 +302,14 @@ struct defaults {
 /*
  * Parsed sudoers policy.
  */
+struct sudo_nss;
 struct sudoers_parse_tree {
     TAILQ_ENTRY(sudoers_parse_tree) entries;
     struct userspec_list userspecs;
     struct defaults_list defaults;
     struct rbtree *aliases;
     char *shost, *lhost;
+    struct sudo_nss *nss;
 };
 
 /*
@@ -319,6 +321,28 @@ struct cmnd_info {
     int status;
     bool intercepted;
 };
+
+/*
+ * Parse configuration settings, passed to init_parser().
+ */
+struct sudoers_parser_config {
+    const char *sudoers_path;
+    bool strict;
+    bool recovery;
+    int verbose;
+    mode_t sudoers_mode;
+    uid_t sudoers_uid;
+    gid_t sudoers_gid;
+};
+#define SUDOERS_PARSER_CONFIG_INITIALIZER {				\
+    NULL,	/* sudoers_path */					\
+    false,	/* strict */						\
+    true,	/* recovery */						\
+    1,		/* verbose level 1 */					\
+    SUDOERS_MODE,							\
+    SUDOERS_UID,							\
+    SUDOERS_GID								\
+}
 
 /*
  * The parser passes pointers to data structures that are not stored anywhere.
@@ -351,13 +375,15 @@ struct parser_leak_entry {
 };
 SLIST_HEAD(parser_leak_list, parser_leak_entry);
 
+#define YY_DECL int sudoerslex(void)
+
 /* alias.c */
 struct rbtree *alloc_aliases(void);
 void free_aliases(struct rbtree *aliases);
-bool no_aliases(struct sudoers_parse_tree *parse_tree);
+bool no_aliases(const struct sudoers_parse_tree *parse_tree);
 bool alias_add(struct sudoers_parse_tree *parse_tree, char *name, int type, char *file, int line, int column, struct member *members);
 const char *alias_type_to_string(int alias_type);
-struct alias *alias_get(struct sudoers_parse_tree *parse_tree, const char *name, int type);
+struct alias *alias_get(const struct sudoers_parse_tree *parse_tree, const char *name, int type);
 struct alias *alias_remove(struct sudoers_parse_tree *parse_tree, const char *name, int type);
 bool alias_find_used(struct sudoers_parse_tree *parse_tree, struct rbtree *used_aliases);
 void alias_apply(struct sudoers_parse_tree *parse_tree, int (*func)(struct sudoers_parse_tree *, struct alias *, void *), void *cookie);
@@ -368,9 +394,10 @@ void alias_put(struct alias *a);
 int check_aliases(struct sudoers_parse_tree *parse_tree, bool strict, bool quiet, int (*cb_unused)(struct sudoers_parse_tree *, struct alias *, void *));
 
 /* gram.y */
+extern bool parse_error;
 extern struct sudoers_parse_tree parsed_policy;
 extern bool (*sudoers_error_hook)(const char *file, int line, int column, const char *fmt, va_list args);
-bool init_parser(const char *path, bool quiet, bool strict);
+bool reset_parser(void);
 void free_member(struct member *m);
 void free_members(struct member_list *members);
 void free_cmndspec(struct cmndspec *cs, struct cmndspec_list *csl);
@@ -380,12 +407,19 @@ void free_userspec(struct userspec *us);
 void free_userspecs(struct userspec_list *usl);
 void free_default(struct defaults *def);
 void free_defaults(struct defaults_list *defs);
-void init_parse_tree(struct sudoers_parse_tree *parse_tree, char *lhost, char *shost);
+bool init_parser(const char *file, const struct sudoers_parser_config *conf);
+void init_parse_tree(struct sudoers_parse_tree *parse_tree, char *lhost, char *shost, struct sudo_nss *nss);
 void free_parse_tree(struct sudoers_parse_tree *parse_tree);
-void reparent_parse_tree(struct sudoers_parse_tree *new_tree);
 bool parser_leak_add(enum parser_leak_types type, void *v);
 bool parser_leak_remove(enum parser_leak_types type, void *v);
 void parser_leak_init(void);
+void reparent_parse_tree(struct sudoers_parse_tree *new_tree);
+int sudoersparse(void);
+uid_t sudoers_file_uid(void);
+gid_t sudoers_file_gid(void);
+mode_t sudoers_file_mode(void);
+bool sudoers_error_recovery(void);
+bool sudoers_strict(void);
 
 /* match_addr.c */
 bool addr_matches(char *n);
@@ -394,29 +428,32 @@ bool addr_matches(char *n);
 bool command_matches(const char *sudoers_cmnd, const char *sudoers_args, const char *runchroot, struct cmnd_info *info, const struct command_digest_list *digests);
 
 /* match_digest.c */
-bool digest_matches(int fd, const char *path, const char *runchroot, const struct command_digest_list *digests);
+bool digest_matches(int fd, const char *path, const struct command_digest_list *digests);
 
 /* match.c */
 struct group;
 struct passwd;
 bool group_matches(const char *sudoers_group, const struct group *gr);
 bool hostname_matches(const char *shost, const char *lhost, const char *pattern);
-bool netgr_matches(const char *netgr, const char *lhost, const char *shost, const char *user);
+bool netgr_matches(const struct sudo_nss *nss, const char *netgr, const char *lhost, const char *shost, const char *user);
 bool usergr_matches(const char *group, const char *user, const struct passwd *pw);
 bool userpw_matches(const char *sudoers_user, const char *user, const struct passwd *pw);
-int cmnd_matches(struct sudoers_parse_tree *parse_tree, const struct member *m, const char *runchroot, struct cmnd_info *info);
-int cmnd_matches_all(struct sudoers_parse_tree *parse_tree, const struct member *m, const char *runchroot, struct cmnd_info *info);
-int cmndlist_matches(struct sudoers_parse_tree *parse_tree, const struct member_list *list, const char *runchroot, struct cmnd_info *info);
-int host_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw, const char *host, const char *shost, const struct member *m);
-int hostlist_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw, const struct member_list *list);
-int runaslist_matches(struct sudoers_parse_tree *parse_tree, const struct member_list *user_list, const struct member_list *group_list, struct member **matching_user, struct member **matching_group);
-int user_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw, const struct member *m);
-int userlist_matches(struct sudoers_parse_tree *parse_tree, const struct passwd *pw, const struct member_list *list);
+int cmnd_matches(const struct sudoers_parse_tree *parse_tree, const struct member *m, const char *runchroot, struct cmnd_info *info);
+int cmnd_matches_all(const struct sudoers_parse_tree *parse_tree, const struct member *m, const char *runchroot, struct cmnd_info *info);
+int cmndlist_matches(const struct sudoers_parse_tree *parse_tree, const struct member_list *list, const char *runchroot, struct cmnd_info *info);
+int host_matches(const struct sudoers_parse_tree *parse_tree, const struct passwd *pw, const char *host, const char *shost, const struct member *m);
+int hostlist_matches(const struct sudoers_parse_tree *parse_tree, const struct passwd *pw, const struct member_list *list);
+int runaslist_matches(const struct sudoers_parse_tree *parse_tree, const struct member_list *user_list, const struct member_list *group_list, struct member **matching_user, struct member **matching_group);
+int user_matches(const struct sudoers_parse_tree *parse_tree, const struct passwd *pw, const struct member *m);
+int userlist_matches(const struct sudoers_parse_tree *parse_tree, const struct passwd *pw, const struct member_list *list);
 const char *sudo_getdomainname(void);
 struct gid_list *runas_getgroups(void);
 
-/* toke.c */
-void init_lexer(void);
+/* toke.l */
+YY_DECL;
+void sudoersrestart(FILE *);
+extern FILE *sudoersin;
+extern char *sudoers;
 
 /* base64.c */
 size_t base64_decode(const char *str, unsigned char *dst, size_t dsize);
@@ -429,10 +466,10 @@ int parse_timeout(const char *timestr);
 time_t parse_gentime(const char *expstr);
 
 /* filedigest.c */
-unsigned char *sudo_filedigest(int fd, const char *file, int digest_type, size_t *digest_len);
+unsigned char *sudo_filedigest(int fd, const char *file, unsigned int digest_type, size_t *digest_len);
 
 /* digestname.c */
-const char *digest_type_to_name(int digest_type);
+const char *digest_type_to_name(unsigned int digest_type);
 
 /* parse.c */
 struct sudo_nss_list;
@@ -445,14 +482,16 @@ bool sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree, FILE *fp, const c
 
 /* fmtsudoers.c */
 struct sudo_lbuf;
-bool sudoers_format_cmndspec(struct sudo_lbuf *lbuf, struct sudoers_parse_tree *parse_tree, struct cmndspec *cs, struct cmndspec *prev_cs, struct cmndtag tags, bool expand_aliases);
+bool sudoers_format_cmndspec(struct sudo_lbuf *lbuf, const struct sudoers_parse_tree *parse_tree, struct cmndspec *cs, struct cmndspec *prev_cs, struct cmndtag tags, bool expand_aliases);
 bool sudoers_format_default(struct sudo_lbuf *lbuf, struct defaults *d);
-bool sudoers_format_default_line(struct sudo_lbuf *lbuf, struct sudoers_parse_tree *parse_tree, struct defaults *d, struct defaults **next, bool expand_aliases);
-bool sudoers_format_member(struct sudo_lbuf *lbuf, struct sudoers_parse_tree *parse_tree, struct member *m, const char *separator, int alias_type);
-bool sudoers_format_privilege(struct sudo_lbuf *lbuf, struct sudoers_parse_tree *parse_tree, struct privilege *priv, bool expand_aliases);
-bool sudoers_format_userspec(struct sudo_lbuf *lbuf, struct sudoers_parse_tree *parse_tree, struct userspec *us, bool expand_aliases);
-bool sudoers_format_userspecs(struct sudo_lbuf *lbuf, struct sudoers_parse_tree *parse_tree, const char *separator, bool expand_aliases, bool flush);
+bool sudoers_format_member(struct sudo_lbuf *lbuf, const struct sudoers_parse_tree *parse_tree, struct member *m, const char *separator, int alias_type);
 bool sudoers_defaults_to_tags(const char *var, const char *val, int op, struct cmndtag *tags);
 bool sudoers_defaults_list_to_tags(struct defaults_list *defs, struct cmndtag *tags);
+
+/* fmtsudoers_cvt.c */
+bool sudoers_format_privilege(struct sudo_lbuf *lbuf, const struct sudoers_parse_tree *parse_tree, struct privilege *priv, bool expand_aliases);
+bool sudoers_format_userspec(struct sudo_lbuf *lbuf, const struct sudoers_parse_tree *parse_tree, struct userspec *us, bool expand_aliases);
+bool sudoers_format_userspecs(struct sudo_lbuf *lbuf, const struct sudoers_parse_tree *parse_tree, const char *separator, bool expand_aliases, bool flush);
+bool sudoers_format_default_line(struct sudo_lbuf *lbuf, const struct sudoers_parse_tree *parse_tree, struct defaults *d, struct defaults **next, bool expand_aliases);
 
 #endif /* SUDOERS_PARSE_H */

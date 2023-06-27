@@ -104,13 +104,6 @@ sudo_sigaction(int signo, struct sigaction *sa, struct sigaction *osa)
     return sigaction(signo, sa, osa);
 }
 
-/* STUB */
-void
-log_suspend(struct exec_closure *ec, int signo)
-{
-    return;
-}
-
 int
 main(int argc, char *argv[])
 {
@@ -217,25 +210,25 @@ main(int argc, char *argv[])
 
 	    if (WIFEXITED(status)) {
 		sudo_debug_printf(SUDO_DEBUG_DIAG, "%d: exited %d",
-		    pid, WEXITSTATUS(status));
+		    (int)pid, WEXITSTATUS(status));
 		if (pid == child)
 		    return WEXITSTATUS(status);
 	    } else if (WIFSIGNALED(status)) {
 		sudo_debug_printf(SUDO_DEBUG_DIAG, "%d: killed by signal %d",
-		    pid, WTERMSIG(status));
+		    (int)pid, WTERMSIG(status));
 		if (pid == child)
 		    return WTERMSIG(status) | 128;
 	    } else if (WIFSTOPPED(status)) {
 		if (exec_ptrace_stopped(pid, status, &closure)) {
 		    if (pid == child) {
-			suspend_sudo_nopty(NULL, WSTOPSIG(status), my_pid,
-			    my_pgrp, child);
+			sudo_suspend_parent(WSTOPSIG(status), my_pid,
+			    my_pgrp, child, NULL, NULL);
 			if (kill(child, SIGCONT) != 0)
 			    sudo_warn("kill(%d, SIGCONT)", (int)child);
 		    }
 		}
 	    } else {
-		sudo_fatalx("%d: unknown status 0x%x", pid, status);
+		sudo_fatalx("%d: unknown status 0x%x", (int)pid, status);
 	    }
 	}
     }

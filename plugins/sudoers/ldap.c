@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2003-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2003-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * This code is derived from software contributed by Aaron Spangler.
  *
@@ -67,14 +67,6 @@
 #include "sudo_ldap_conf.h"
 #include "sudo_dso.h"
 
-#ifndef LDAP_OPT_RESULT_CODE
-# define LDAP_OPT_RESULT_CODE LDAP_OPT_ERROR_NUMBER
-#endif
-
-#ifndef LDAP_OPT_SUCCESS
-# define LDAP_OPT_SUCCESS LDAP_SUCCESS
-#endif
-
 #if defined(HAVE_LDAP_SASL_INTERACTIVE_BIND_S) && !defined(LDAP_SASL_QUIET)
 # define LDAP_SASL_QUIET	0
 #endif
@@ -82,21 +74,6 @@
 #ifndef HAVE_LDAP_UNBIND_EXT_S
 #define ldap_unbind_ext_s(a, b, c)	ldap_unbind_s(a)
 #endif
-
-#ifndef HAVE_LDAP_SEARCH_EXT_S
-# ifdef HAVE_LDAP_SEARCH_ST
-#  define ldap_search_ext_s(a, b, c, d, e, f, g, h, i, j, k)		\
-	ldap_search_st(a, b, c, d, e, f, i, k)
-# else
-#  define ldap_search_ext_s(a, b, c, d, e, f, g, h, i, j, k)		\
-	ldap_search_s(a, b, c, d, e, f, k)
-# endif
-#endif
-
-#define LDAP_FOREACH(var, ld, res)					\
-    for ((var) = ldap_first_entry((ld), (res));				\
-	(var) != NULL;							\
-	(var) = ldap_next_entry((ld), (var)))
 
 /* The TIMEFILTER_LENGTH is the length of the filter when timed entries
    are used. The length is computed as follows:
@@ -249,7 +226,7 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 		ldapssl_err2string(ret));
 	    if (ldap_conf.tls_certfile == NULL)
 		sudo_warnx(U_("you must set TLS_CERT in %s to use SSL"),
-		    path_ldap_conf);
+		    policy_path_ldap_conf());
 	    goto done;
 	}
 
@@ -305,7 +282,7 @@ sudo_ldap_get_values_len(LDAP *ld, LDAPMessage *entry, const char *attr, int *rc
 
     bval = ldap_get_values_len(ld, entry, attr);
     if (bval == NULL) {
-	int optrc = ldap_get_option(ld, LDAP_OPT_RESULT_CODE, rc);
+	const int optrc = ldap_get_option(ld, LDAP_OPT_RESULT_CODE, rc);
 	if (optrc != LDAP_OPT_SUCCESS)
 	    *rc = optrc;
     } else {
@@ -320,8 +297,11 @@ sudo_ldap_get_values_len(LDAP *ld, LDAPMessage *entry, const char *attr, int *rc
  * A matching entry that is negated will always return false.
  */
 static int
-sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
+sudo_ldap_check_non_unix_group(const struct sudo_nss *nss, LDAPMessage *entry,
+    struct passwd *pw)
 {
+    struct sudo_ldap_handle *handle = nss->handle;
+    LDAP *ld = handle->ld;
     struct berval **bv, **p;
     bool ret = false;
     int rc;
@@ -341,14 +321,15 @@ sudo_ldap_check_non_unix_group(LDAP *ld, LDAPMessage *entry, struct passwd *pw)
     /* walk through values */
     for (p = bv; *p != NULL && !ret; p++) {
 	bool negated = false;
-	char *val = (*p)->bv_val;
+	const char *val = (*p)->bv_val;
 
 	if (*val == '!') {
 	    val++;
 	    negated = true;
 	}
 	if (*val == '+') {
-	    if (netgr_matches(val, def_netgroup_tuple ? user_runhost : NULL,
+	    if (netgr_matches(nss, val,
+		def_netgroup_tuple ? user_runhost : NULL,
 		def_netgroup_tuple ? user_srunhost : NULL, pw->pw_name))
 		ret = true;
 	    DPRINTF2("ldap sudoUser netgroup '%s%s' ... %s",
@@ -552,122 +533,6 @@ sudo_ldap_build_default_filter(void)
 	debug_return_str(NULL);
 
     debug_return_str(filt);
-}
-
-/*
- * Determine length of query value after escaping characters
- * as per RFC 4515.
- */
-static size_t
-sudo_ldap_value_len(const char *value)
-{
-    const char *s;
-    size_t len = 0;
-
-    for (s = value; *s != '\0'; s++) {
-	switch (*s) {
-	case '\\':
-	case '(':
-	case ')':
-	case '*':
-	    len += 2;
-	    break;
-	}
-    }
-    len += (size_t)(s - value);
-    return len;
-}
-
-/*
- * Like strlcat() but escapes characters as per RFC 4515.
- */
-static size_t
-sudo_ldap_value_cat(char *dst, const char *src, size_t size)
-{
-    char *d = dst;
-    const char *s = src;
-    size_t n = size;
-    size_t dlen;
-
-    /* Find the end of dst and adjust bytes left but don't go past end */
-    while (n-- != 0 && *d != '\0')
-	d++;
-    dlen = d - dst;
-    n = size - dlen;
-
-    if (n == 0)
-	return dlen + strlen(s);
-    while (*s != '\0') {
-	switch (*s) {
-	case '\\':
-	    if (n < 3)
-		goto done;
-	    *d++ = '\\';
-	    *d++ = '5';
-	    *d++ = 'c';
-	    n -= 3;
-	    break;
-	case '(':
-	    if (n < 3)
-		goto done;
-	    *d++ = '\\';
-	    *d++ = '2';
-	    *d++ = '8';
-	    n -= 3;
-	    break;
-	case ')':
-	    if (n < 3)
-		goto done;
-	    *d++ = '\\';
-	    *d++ = '2';
-	    *d++ = '9';
-	    n -= 3;
-	    break;
-	case '*':
-	    if (n < 3)
-		goto done;
-	    *d++ = '\\';
-	    *d++ = '2';
-	    *d++ = 'a';
-	    n -= 3;
-	    break;
-	default:
-	    if (n < 1)
-		goto done;
-	    *d++ = *s;
-	    n--;
-	    break;
-	}
-	s++;
-    }
-done:
-    *d = '\0';
-    while (*s != '\0')
-	s++;
-    return dlen + (s - src);	/* count does not include NUL */
-}
-
-/*
- * Like strdup() but escapes characters as per RFC 4515.
- */
-static char *
-sudo_ldap_value_dup(const char *src)
-{
-    char *dst;
-    size_t size;
-
-    size = sudo_ldap_value_len(src) + 1;
-    dst = malloc(size);
-    if (dst == NULL)
-	return NULL;
-
-    *dst = '\0';
-    if (sudo_ldap_value_cat(dst, src, size) >= size) {
-	/* Should not be possible... */
-	free(dst);
-	dst = NULL;
-    }
-    return dst;
 }
 
 /*
@@ -992,7 +857,7 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
     }
 
     /* Add space for user netgroups if netgroup_base specified. */
-    if (!STAILQ_EMPTY(&ldap_conf.netgroup_base)) {
+    if (ldap_conf.netgroup_query) {
 	DPRINTF1("Looking up netgroups for %s", pw->pw_name);
 	if (sudo_netgroup_lookup(ld, pw, &netgroups)) {
 	    STAILQ_FOREACH(ng, &netgroups, entries) {
@@ -1161,9 +1026,17 @@ sudo_ldap_build_pass2(void)
     int len;
     debug_decl(sudo_ldap_build_pass2, SUDOERS_DEBUG_LDAP);
 
-    /* No need to query netgroups if using netgroup_base. */
-    if (!STAILQ_EMPTY(&ldap_conf.netgroup_base))
+    /*
+     * If we can query nisNetgroupTriple using netgroup_base, there is
+     * no need to match all netgroups in pass 2.  If netgroups are not
+     * natively supported, netgroup_base must be set.
+     */
+    if (ldap_conf.netgroup_query)
 	query_netgroups = false;
+#ifndef HAVE_INNETGR
+    else if (STAILQ_EMPTY(&ldap_conf.netgroup_base))
+	query_netgroups = false;
+#endif
 
     /* Short circuit if no netgroups and no non-Unix groups. */
     if (!query_netgroups && !def_group_plugin) {
@@ -1766,7 +1639,7 @@ sudo_ldap_open(struct sudo_nss *nss)
     }
     handle->ld = ld;
     /* handle->pw = NULL; */
-    init_parse_tree(&handle->parse_tree, NULL, NULL);
+    init_parse_tree(&handle->parse_tree, NULL, NULL, nss);
     nss->handle = handle;
 
 done:
@@ -1774,7 +1647,7 @@ done:
 }
 
 static int
-sudo_ldap_getdefs(struct sudo_nss *nss)
+sudo_ldap_getdefs(const struct sudo_nss *nss)
 {
     struct sudo_ldap_handle *handle = nss->handle;
     struct timeval tv, *tvp = NULL;
@@ -1921,7 +1794,7 @@ sudo_ldap_result_add_entry(struct ldap_result *lres, LDAPMessage *entry)
  * freeing the result with sudo_ldap_result_free().
  */
 static struct ldap_result *
-sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
+sudo_ldap_result_get(const struct sudo_nss *nss, struct passwd *pw)
 {
     struct sudo_ldap_handle *handle = nss->handle;
     struct ldap_config_str *base;
@@ -1982,7 +1855,7 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
 		LDAP_FOREACH(entry, ld, result) {
 		    if (pass != 0) {
 			/* Check non-unix group in 2nd pass. */
-			switch (sudo_ldap_check_non_unix_group(ld, entry, pw)) {
+			switch (sudo_ldap_check_non_unix_group(nss, entry, pw)) {
 			case -1:
 			    goto oom;
 			case false:
@@ -1997,7 +1870,6 @@ sudo_ldap_result_get(struct sudo_nss *nss, struct passwd *pw)
 		DPRINTF1("result now has %d entries", lres->nentries);
 	    }
 	    free(filt);
-	    filt = NULL;
 	} else if (errno != ENOENT) {
 	    /* Out of memory? */
 	    goto oom;
@@ -2024,7 +1896,7 @@ oom:
  * parse tree.
  */
 static int
-sudo_ldap_query(struct sudo_nss *nss, struct passwd *pw)
+sudo_ldap_query(const struct sudo_nss *nss, struct passwd *pw)
 {
     struct sudo_ldap_handle *handle = nss->handle;
     struct ldap_result *lres = NULL;
@@ -2078,7 +1950,7 @@ done:
  * The contents will be populated by the getdefs() and query() functions.
  */
 static struct sudoers_parse_tree *
-sudo_ldap_parse(struct sudo_nss *nss)
+sudo_ldap_parse(const struct sudo_nss *nss)
 {
     struct sudo_ldap_handle *handle = nss->handle;
     debug_decl(sudo_ldap_parse, SUDOERS_DEBUG_LDAP);
@@ -2090,6 +1962,14 @@ sudo_ldap_parse(struct sudo_nss *nss)
     }
 
     debug_return_ptr(&handle->parse_tree);
+}
+
+static int
+sudo_ldap_innetgr(const struct sudo_nss *nss, const char *netgr,
+    const char *host, const char *user, const char *domain)
+{
+    const struct sudo_ldap_handle *handle = nss->handle;
+    return sudo_ldap_innetgr_int(handle->ld, netgr, host, user, domain);
 }
 
 #if 0
@@ -2150,5 +2030,6 @@ struct sudo_nss sudo_nss_ldap = {
     sudo_ldap_close,
     sudo_ldap_parse,
     sudo_ldap_query,
-    sudo_ldap_getdefs
+    sudo_ldap_getdefs,
+    sudo_ldap_innetgr
 };

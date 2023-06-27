@@ -39,24 +39,13 @@
  * Verify that path is a normal file and executable by root.
  */
 bool
-sudo_goodpath(const char *path, const char *runchroot, struct stat *sbp)
+sudo_goodpath(const char *path, struct stat *sbp)
 {
     bool ret = false;
+    struct stat sb;
     debug_decl(sudo_goodpath, SUDOERS_DEBUG_UTIL);
 
     if (path != NULL) {
-	char pathbuf[PATH_MAX];
-	struct stat sb;
-
-	if (runchroot != NULL) {
-	    const int len =
-		snprintf(pathbuf, sizeof(pathbuf), "%s%s", runchroot, path);
-	    if (len >= ssizeof(pathbuf)) {
-		errno = ENAMETOOLONG;
-		goto done;
-	    }
-	    path = pathbuf; // -V507
-	}
 	if (sbp == NULL)
 	    sbp = &sb;
 
@@ -68,6 +57,5 @@ sudo_goodpath(const char *path, const char *runchroot, struct stat *sbp)
 		errno = EACCES;
 	}
     }
-done:
     debug_return_bool(ret);
 }

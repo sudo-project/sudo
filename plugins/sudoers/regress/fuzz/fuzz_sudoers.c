@@ -56,7 +56,7 @@ sudo_printf_t sudo_printf = fuzz_printf;
 int sudo_mode;
 
 FILE *
-open_sudoers(const char *file, bool doedit, bool *keepopen)
+open_sudoers(const char *file, char **outfile, bool doedit, bool *keepopen)
 {
     /*
      * If we allow the fuzzer to choose include paths it will
@@ -131,7 +131,7 @@ log_warningx(int flags, const char *fmt, ...)
 }
 
 static int
-sudo_fuzz_query(struct sudo_nss *nss, struct passwd *pw)
+sudo_fuzz_query(const struct sudo_nss *nss, struct passwd *pw)
 {
     return 0;
 }
@@ -304,7 +304,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
 
     /* Only one sudoers source, the sudoers file itself. */
-    init_parse_tree(&parse_tree, NULL, NULL);
+    init_parse_tree(&parse_tree, NULL, NULL, NULL);
     memset(&sudo_nss_fuzz, 0, sizeof(sudo_nss_fuzz));
     sudo_nss_fuzz.parse_tree = &parse_tree;
     sudo_nss_fuzz.query = sudo_fuzz_query;
@@ -312,7 +312,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     /* Initialize defaults and parse sudoers. */
     init_defaults();
-    init_parser("sudoers", false, true);
+    init_parser("sudoers", NULL);
     sudoersrestart(fp);
     sudoersparse();
     reparent_parse_tree(&parse_tree);
@@ -398,7 +398,7 @@ done:
     /* Cleanup. */
     fclose(fp);
     free_parse_tree(&parse_tree);
-    init_parser(NULL, true, true);
+    reset_parser();
     if (sudo_user.pw != NULL)
 	sudo_pw_delref(sudo_user.pw);
     if (runas_pw != NULL)

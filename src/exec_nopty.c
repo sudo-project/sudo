@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -207,8 +207,9 @@ signal_cb_nopty(int signo, int what, void *v)
  * Allocates events for the signal pipe and error pipe.
  */
 static void
-fill_exec_closure(struct exec_closure *ec,
-    struct command_status *cstat, struct command_details *details, int errfd)
+fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
+    struct command_details *details, const struct user_details *user_details,
+    struct sudo_event_base *evbase, int errfd)
 {
     debug_decl(fill_exec_closure, SUDO_DEBUG_EXEC);
 
@@ -217,12 +218,11 @@ fill_exec_closure(struct exec_closure *ec,
     ec->ppgrp = getpgrp();
     ec->cstat = cstat;
     ec->details = details;
-    ec->rows = user_details.ts_rows;
-    ec->cols = user_details.ts_cols;
+    ec->rows = user_details->ts_rows;
+    ec->cols = user_details->ts_cols;
 
     /* Setup event base and events. */
-    ec->evbase = details->evbase;
-    details->evbase = NULL;
+    ec->evbase = evbase;
 
     /* Event for command status via errfd. */
     ec->backchannel_event = sudo_ev_alloc(errfd,
@@ -472,6 +472,7 @@ interpose_pipes(struct exec_closure *ec, int io_pipe[3][2])
     bool interpose[3] = { false, false, false };
     struct plugin_container *plugin;
     bool want_winch = false;
+    struct stat sb;
     debug_decl(interpose_pipes, SUDO_DEBUG_EXEC);
 
     /*
@@ -496,33 +497,33 @@ interpose_pipes(struct exec_closure *ec, int io_pipe[3][2])
      * use a pipe to interpose ourselves.
      */
     if (interpose[STDIN_FILENO]) {
-	if (!isatty(STDIN_FILENO)) {
+	if (!sudo_isatty(STDIN_FILENO, &sb)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdin not a tty, creating a pipe");
 	    if (pipe2(io_pipe[STDIN_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
-		log_stdin, read_callback, write_callback, ec, &iobufs);
+		log_stdin, read_callback, write_callback, ec);
 	}
     }
     if (interpose[STDOUT_FILENO]) {
-	if (!isatty(STDOUT_FILENO)) {
+	if (!sudo_isatty(STDOUT_FILENO, &sb)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdout not a tty, creating a pipe");
 	    if (pipe2(io_pipe[STDOUT_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
-		log_stdout, read_callback, write_callback, ec, &iobufs);
+		log_stdout, read_callback, write_callback, ec);
 	}
     }
     if (interpose[STDERR_FILENO]) {
-	if (!isatty(STDERR_FILENO)) {
+	if (!sudo_isatty(STDERR_FILENO, &sb)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stderr not a tty, creating a pipe");
 	    if (pipe2(io_pipe[STDERR_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
-		log_stderr, read_callback, write_callback, ec, &iobufs);
+		log_stderr, read_callback, write_callback, ec);
 	}
     }
     if (want_winch) {
@@ -535,7 +536,9 @@ interpose_pipes(struct exec_closure *ec, int io_pipe[3][2])
  * Execute a command and wait for it to finish.
  */
 void
-exec_nopty(struct command_details *details, struct command_status *cstat)
+exec_nopty(struct command_details *details,
+    const struct user_details *user_details,
+    struct sudo_event_base *evbase, struct command_status *cstat)
 {
     int io_pipe[3][2] = { { -1, -1 }, { -1, -1 }, { -1, -1 } };
     int errpipe[2], intercept_sv[2] = { -1, -1 };
@@ -658,7 +661,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
      * Fill in exec closure, allocate event base, signal events and
      * the error pipe event.
      */
-    fill_exec_closure(&ec, cstat, details, errpipe[0]);
+    fill_exec_closure(&ec, cstat, details, user_details, evbase, errpipe[0]);
 
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
 	int rc = 1;
@@ -680,7 +683,7 @@ exec_nopty(struct command_details *details, struct command_status *cstat)
     }
 
     /* Enable any I/O log events. */
-    add_io_events(ec.evbase);
+    add_io_events(&ec);
 
     /* Restore signal mask now that signal handlers are setup. */
     sigprocmask(SIG_SETMASK, &oset, NULL);
@@ -763,8 +766,8 @@ handle_sigchld_nopty(struct exec_closure *ec)
 
 	    /* If the main command is suspended, suspend sudo too. */
 	    if (pid == ec->cmnd_pid) {
-		suspend_sudo_nopty(ec, signo, ec->sudo_pid, ec->ppgrp,
-		    ec->cmnd_pid);
+		sudo_suspend_parent(signo, ec->sudo_pid, ec->ppgrp,
+		    ec->cmnd_pid, ec, log_suspend);
 	    }
 	} else {
 	    if (WIFSIGNALED(status)) {

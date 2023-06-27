@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010-2017, 2020-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010-2017, 2020-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -42,10 +42,7 @@
 # define USER_SIGNALED(_info) ((_info) != NULL && (_info)->si_code <= 0)
 #endif
 
-/* Values for ttymode. */
-#define TERM_COOKED     0
-#define TERM_RAW        1
-
+struct user_details;
 struct command_details;
 struct command_status;
 struct sudo_event_base;
@@ -73,6 +70,7 @@ struct exec_closure {
     struct sudo_event *siginfo_event;
     struct sudo_event *sigwinch_event;
     struct command_status *cstat;
+    char *ptyname;
     void *intercept;
     pid_t sudo_pid;
     pid_t monitor_pid;
@@ -80,6 +78,8 @@ struct exec_closure {
     pid_t ppgrp;
     short rows;
     short cols;
+    bool foreground;
+    bool term_raw;
 };
 
 /*
@@ -185,8 +185,8 @@ char **disable_execute(char *envp[], const char *dso);
 char **enable_monitor(char *envp[], const char *dso);
 
 /* exec_intercept.c */
-void *intercept_setup(int fd, struct sudo_event_base *evbase, struct command_details *details);
-void intercept_cleanup(void);
+void *intercept_setup(int fd, struct sudo_event_base *evbase, const struct command_details *details);
+void intercept_cleanup(struct exec_closure *ec);
 
 /* exec_iolog.c */
 bool log_ttyin(const char *buf, unsigned int n, struct io_buffer *iob);
@@ -194,25 +194,21 @@ bool log_stdin(const char *buf, unsigned int n, struct io_buffer *iob);
 bool log_ttyout(const char *buf, unsigned int n, struct io_buffer *iob);
 bool log_stdout(const char *buf, unsigned int n, struct io_buffer *iob);
 bool log_stderr(const char *buf, unsigned int n, struct io_buffer *iob);
-void log_suspend(struct exec_closure *ec, int signo);
+void log_suspend(void *v, int signo);
 void log_winchange(struct exec_closure *ec, unsigned int rows, unsigned int cols);
-void io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int, struct io_buffer *), void (*read_cb)(int fd, int what, void *v), void (*write_cb)(int fd, int what, void *v), struct exec_closure *ec, struct io_buffer_list *head);
+void io_buf_new(int rfd, int wfd, bool (*action)(const char *, unsigned int, struct io_buffer *), void (*read_cb)(int fd, int what, void *v), void (*write_cb)(int fd, int what, void *v), struct exec_closure *ec);
 int safe_close(int fd);
 void ev_free_by_fd(struct sudo_event_base *evbase, int fd);
 void free_io_bufs(void);
-void add_io_events(struct sudo_event_base *evbase);
+void add_io_events(struct exec_closure *ec);
 void del_io_events(bool nonblocking);
 void init_ttyblock(void);
-extern struct io_buffer_list iobufs;
-extern int ttymode;
 
 /* exec_nopty.c */
-void exec_nopty(struct command_details *details, struct command_status *cstat);
+void exec_nopty(struct command_details *details, const struct user_details *user_details, struct sudo_event_base *evbase, struct command_status *cstat);
 
 /* exec_pty.c */
-bool exec_pty(struct command_details *details, struct command_status *cstat);
-void pty_cleanup(void);
-int pty_make_controlling(void);
+bool exec_pty(struct command_details *details, const struct user_details *user_details, struct sudo_event_base *evbase, struct command_status *cstat);
 extern int io_fds[6];
 
 /* exec_monitor.c */
@@ -232,7 +228,7 @@ bool exec_ptrace_stopped(pid_t pid, int status, void *intercept);
 bool set_exec_filter(void);
 int exec_ptrace_seize(pid_t child);
 
-/* suspend_nopty.c */
-void suspend_sudo_nopty(struct exec_closure *ec, int signo, pid_t my_pid, pid_t my_pgrp, pid_t cmnd_pid);
+/* suspend_parent.c */
+void sudo_suspend_parent(int signo, pid_t my_pid, pid_t my_pgrp, pid_t cmnd_pid, void *closure, void (*callback)(void *, int));
 
 #endif /* SUDO_EXEC_H */

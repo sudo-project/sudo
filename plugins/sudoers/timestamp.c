@@ -66,6 +66,31 @@ struct ts_cookie {
     struct timestamp_entry key;
 };
 
+static uid_t timestamp_uid = ROOT_UID;
+static gid_t timestamp_gid = ROOT_GID;
+
+/*
+ * Set timestamp_uid and timestamp_gid.
+ */
+void
+timestamp_set_owner(uid_t uid, gid_t gid)
+{
+    debug_decl(timestamp_owner, SUDOERS_DEBUG_AUTH);
+
+    if (uid != (uid_t)-1)
+	timestamp_uid = uid;
+    if (gid != (gid_t)-1)
+	timestamp_gid = gid;
+
+    debug_return;
+}
+
+uid_t
+timestamp_get_uid(void)
+{
+    return timestamp_uid;
+}
+
 /*
  * Returns true if entry matches key, else false.
  * We don't match on the sid or actual time stamp.

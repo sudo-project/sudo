@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "@mansectsu@" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "@mansectsu@" "March 20, 2023" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -463,6 +463,33 @@ will ignore cycles when parsing
 the
 \fIsudoers\fR
 file.
+.TP 6n
+\fRignoring editor backup file\fR
+While processing a
+\fI@includedir\fR
+or
+\fI#includedir\fR,
+a file was found with a name that ends in
+\(oq~\(cq
+or
+\fI.bak\fR.
+Such files are skipped by
+\fBsudo\fR
+and
+\fBvisudo\fR.
+.TP 6n
+\fRignoring file name containing '.'\fR
+While processing a
+\fI@includedir\fR
+or
+\fI#includedir\fR,
+a file was found with a name that contains a
+\(oq.\&\(cq
+character.
+Such files are skipped by
+\fBsudo\fR
+and
+\fBvisudo\fR.
 .TP 6n
 \fRunknown defaults entry \&"name\&"\fR
 The

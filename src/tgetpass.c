@@ -290,7 +290,7 @@ static char *
 sudo_askpass(const char *askpass, const char *prompt)
 {
     static char buf[SUDO_CONV_REPL_MAX + 1], *pass;
-    struct sudo_cred *cred = &user_details.cred;
+    const struct sudo_cred *cred = sudo_askpass_cred(NULL);
     sigset_t chldmask;
     enum tgetpass_errval errval;
     int pfd[2], status;
@@ -453,4 +453,14 @@ static void
 tgetpass_handler(int s)
 {
     signo[s] = 1;
+}
+
+const struct sudo_cred *
+sudo_askpass_cred(const struct sudo_cred *cred)
+{
+    static const struct sudo_cred *saved_cred;
+
+    if (cred != NULL)
+	saved_cred = cred;
+    return saved_cred;
 }

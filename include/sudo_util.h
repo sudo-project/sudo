@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2013-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -49,46 +49,6 @@
 #endif
 
 /*
- * Macros for operating on struct timeval.
- */
-#define sudo_timevalclear(tv)	((tv)->tv_sec = (tv)->tv_usec = 0)
-
-#define sudo_timevalisset(tv)	((tv)->tv_sec || (tv)->tv_usec)
-
-#define sudo_timevalcmp(tv1, tv2, op)					       \
-    (((tv1)->tv_sec == (tv2)->tv_sec) ?					       \
-	((tv1)->tv_usec op (tv2)->tv_usec) :				       \
-	((tv1)->tv_sec op (tv2)->tv_sec))
-
-#define sudo_timevaladd(tv1, tv2, tv3)					       \
-    do {								       \
-	(tv3)->tv_sec = (tv1)->tv_sec + (tv2)->tv_sec;			       \
-	(tv3)->tv_usec = (tv1)->tv_usec + (tv2)->tv_usec;		       \
-	if ((tv3)->tv_usec >= 1000000) {				       \
-	    (tv3)->tv_sec++;						       \
-	    (tv3)->tv_usec -= 1000000;					       \
-	}								       \
-    } while (0)
-
-#define sudo_timevalsub(tv1, tv2, tv3)					       \
-    do {								       \
-	(tv3)->tv_sec = (tv1)->tv_sec - (tv2)->tv_sec;			       \
-	(tv3)->tv_usec = (tv1)->tv_usec - (tv2)->tv_usec;		       \
-	if ((tv3)->tv_usec < 0) {					       \
-	    (tv3)->tv_sec--;						       \
-	    (tv3)->tv_usec += 1000000;					       \
-	}								       \
-    } while (0)
-
-#ifndef TIMEVAL_TO_TIMESPEC
-# define TIMEVAL_TO_TIMESPEC(tv, ts)					       \
-    do {								       \
-	(ts)->tv_sec = (tv)->tv_sec;					       \
-	(ts)->tv_nsec = (tv)->tv_usec * 1000;				       \
-    } while (0)
-#endif
-
-/*
  * Macros for operating on struct timespec.
  */
 #define sudo_timespecclear(ts)	((ts)->tv_sec = (ts)->tv_nsec = 0)
@@ -119,6 +79,14 @@
 	    (ts3)->tv_nsec += 1000000000;				       \
 	}								       \
     } while (0)
+
+#ifndef TIMEVAL_TO_TIMESPEC
+# define TIMEVAL_TO_TIMESPEC(tv, ts)					       \
+    do {								       \
+	(ts)->tv_sec = (tv)->tv_sec;					       \
+	(ts)->tv_nsec = (tv)->tv_usec * 1000;				       \
+    } while (0)
+#endif
 
 #ifndef TIMESPEC_TO_TIMEVAL
 # define TIMESPEC_TO_TIMEVAL(tv, ts)					       \
@@ -305,12 +273,16 @@ sudo_dso_public unsigned int sudo_pow2_roundup_v1(unsigned int len);
 #define SUDO_PATH_GROUP_WRITABLE	-5
 sudo_dso_public int sudo_secure_dir_v1(const char *path, uid_t uid, gid_t gid, struct stat *sb);
 #define sudo_secure_dir(_a, _b, _c, _d) sudo_secure_dir_v1((_a), (_b), (_c), (_d))
+sudo_dso_public int sudo_secure_fd_v1(int fd, unsigned int type, uid_t uid, gid_t gid, struct stat *sb);
+#define sudo_secure_fd(_a, _b, _c, _d, _e) sudo_secure_fd_v1((_a), (_b), (_c), (_d), (_e))
 sudo_dso_public int sudo_secure_file_v1(const char *path, uid_t uid, gid_t gid, struct stat *sb);
 #define sudo_secure_file(_a, _b, _c, _d) sudo_secure_file_v1((_a), (_b), (_c), (_d))
 sudo_dso_public int sudo_secure_open_file_v1(const char *path, uid_t uid, gid_t gid, struct stat *sb, int *error);
 #define sudo_secure_open_file(_a, _b, _c, _d, _e) sudo_secure_open_file_v1((_a), (_b), (_c), (_d), (_e))
 sudo_dso_public int sudo_secure_open_dir_v1(const char *path, uid_t uid, gid_t gid, struct stat *sb, int *error);
 #define sudo_secure_open_dir(_a, _b, _c, _d, _e) sudo_secure_open_dir_v1((_a), (_b), (_c), (_d), (_e))
+sudo_dso_public int sudo_open_conf_path_v1(const char *path, char *name, size_t namesize, int (*fn)(const char *, int));
+#define sudo_open_conf_path(_a, _b, _c, _d) sudo_open_conf_path_v1((_a), (_b), (_c), (_d))
 
 /* setgroups.c */
 sudo_dso_public int sudo_setgroups_v1(int ngids, const GETGROUPS_T *gids);
@@ -364,7 +336,8 @@ sudo_dso_public char *sudo_ttyname_dev_v1(dev_t tdev, char *name, size_t namelen
 
 /* ttysize.c */
 sudo_dso_public void sudo_get_ttysize_v1(int *rowp, int *colp);
-#define sudo_get_ttysize(_a, _b) sudo_get_ttysize_v1((_a), (_b))
+sudo_dso_public void sudo_get_ttysize_v2(int fd, int *rowp, int *colp);
+#define sudo_get_ttysize(_a, _b, _c) sudo_get_ttysize_v2((_a), (_b), (_c))
 
 /* uuid.c */
 sudo_dso_public void sudo_uuid_create_v1(unsigned char uuid_out[16]);

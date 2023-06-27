@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010-2012, 2014-2015 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010-2012, 2014-2015, 2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -34,16 +34,17 @@
 #include "sudo_util.h"
 
 static int
-get_ttysize_ioctl(int *rowp, int *colp)
+get_ttysize_ioctl(int fd, int *rowp, int *colp)
 {
     struct winsize wsize;
     debug_decl(get_ttysize_ioctl, SUDO_DEBUG_UTIL);
 
-    if (ioctl(STDERR_FILENO, TIOCGWINSZ, &wsize) == 0 &&
-	wsize.ws_row != 0 && wsize.ws_col  != 0) {
-	*rowp = wsize.ws_row;
-	*colp = wsize.ws_col;
-	debug_return_int(0);
+    if (fd != -1 && isatty(fd) && ioctl(fd, TIOCGWINSZ, &wsize) == 0) {
+	if (wsize.ws_row != 0 && wsize.ws_col != 0) {
+	    *rowp = wsize.ws_row;
+	    *colp = wsize.ws_col;
+	    debug_return_int(0);
+	}
     }
     debug_return_int(-1);
 }
@@ -51,9 +52,15 @@ get_ttysize_ioctl(int *rowp, int *colp)
 void
 sudo_get_ttysize_v1(int *rowp, int *colp)
 {
+    sudo_get_ttysize_v2(STDERR_FILENO, rowp, colp);
+}
+
+void
+sudo_get_ttysize_v2(int fd, int *rowp, int *colp)
+{
     debug_decl(sudo_get_ttysize, SUDO_DEBUG_UTIL);
 
-    if (get_ttysize_ioctl(rowp, colp) == -1) {
+    if (get_ttysize_ioctl(fd, rowp, colp) == -1) {
 	char *p;
 
 	/* Fall back on $LINES and $COLUMNS. */

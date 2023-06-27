@@ -82,6 +82,8 @@ void  timestamp_close(void *vcookie);
 bool  timestamp_lock(void *vcookie, struct passwd *pw);
 bool  timestamp_update(void *vcookie, struct passwd *pw);
 int   timestamp_status(void *vcookie, struct passwd *pw);
+uid_t timestamp_get_uid(void);
+void  timestamp_set_owner(uid_t uid, gid_t gid);
 int   get_starttime(pid_t pid, struct timespec *starttime);
 bool  already_lectured(void);
 int   set_lectured(void);

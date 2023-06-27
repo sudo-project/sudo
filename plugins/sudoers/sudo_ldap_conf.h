@@ -19,51 +19,6 @@
 #ifndef SUDOERS_LDAP_CONF_H
 #define SUDOERS_LDAP_CONF_H
 
-/* Macros for checking strlcpy/strlcat/sudo_ldap_value_cat return value. */
-#define CHECK_STRLCPY(d, s, l) do {					       \
-	if (strlcpy((d), (s), (l)) >= (l)) {				       \
-	    goto overflow;						       \
-	}								       \
-} while (0)
-#define CHECK_STRLCAT(d, s, l) do {					       \
-	if (strlcat((d), (s), (l)) >= (l)) {				       \
-	    goto overflow;						       \
-	}								       \
-} while (0)
-#define CHECK_LDAP_VCAT(d, s, l) do {					       \
-	if (sudo_ldap_value_cat((d), (s), (l)) >= (l)) {		       \
-	    goto overflow;						       \
-	}								       \
-} while (0)
-
-#if defined(__GNUC__) && __GNUC__ == 2
-# define DPRINTF1(fmt...) do {						\
-    sudo_debug_printf(SUDO_DEBUG_DIAG, fmt);				\
-    if (ldap_conf.debug >= 1) {						\
-	sudo_warnx_nodebug(fmt);					\
-    }									\
-} while (0)
-# define DPRINTF2(fmt...) do {						\
-    sudo_debug_printf(SUDO_DEBUG_INFO, fmt);				\
-    if (ldap_conf.debug >= 2) {						\
-	sudo_warnx_nodebug(fmt);					\
-    }									\
-} while (0)
-#else
-# define DPRINTF1(...) do {						\
-    sudo_debug_printf(SUDO_DEBUG_DIAG, __VA_ARGS__);			\
-    if (ldap_conf.debug >= 1) {						\
-	sudo_warnx_nodebug(__VA_ARGS__);				\
-    }									\
-} while (0)
-# define DPRINTF2(...) do {						\
-    sudo_debug_printf(SUDO_DEBUG_INFO, __VA_ARGS__);			\
-    if (ldap_conf.debug >= 2) {						\
-	sudo_warnx_nodebug(__VA_ARGS__);				\
-    }									\
-} while (0)
-#endif
-
 /*
  * Configuration data types.
  * When adding a new data type, be sure to update sudo_ldap_parse_keyword()
@@ -89,7 +44,7 @@ struct ldap_config_table {
 
 struct ldap_config_str {
     STAILQ_ENTRY(ldap_config_str) entries;
-    char val[1];
+    char val[];
 };
 STAILQ_HEAD(ldap_config_str_list, ldap_config_str);
 
@@ -109,6 +64,7 @@ struct ldap_config {
     int ssl_mode;
     int timed;
     int deref;
+    int netgroup_query;
     char *host;
     struct ldap_config_str_list uri;
     char *binddn;

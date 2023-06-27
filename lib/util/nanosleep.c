@@ -1,7 +1,8 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2011, 2013, 2017-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2011, 2013, 2017-2018, 2023
+ *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -37,28 +38,36 @@
 #include "sudo_util.h"
 
 int
-sudo_nanosleep(const struct timespec *ts, struct timespec *rts)
+sudo_nanosleep(const struct timespec *timeout, struct timespec *remainder)
 {
-    struct timeval timeout, endtime, now;
+    struct timespec endtime, now;
+    struct timeval tv;
     int rval;
 
-    if (ts->tv_sec == 0 && ts->tv_nsec < 1000) {
-	timeout.tv_sec = 0;
-	timeout.tv_usec = 1;
+    if (timeout->tv_sec == 0 && timeout->tv_nsec < 1000) {
+	tv.tv_sec = 0;
+	tv.tv_usec = 1;
     } else {
-	TIMESPEC_TO_TIMEVAL(&timeout, ts);
+	TIMESPEC_TO_TIMEVAL(&tv, timeout);
     }
-    if (rts != NULL) {
-	if (gettimeofday(&endtime, NULL) == -1)
+    if (remainder != NULL) {
+	if (sudo_gettime_real(&endtime) == -1)
 	    return -1;
-	sudo_timevaladd(&endtime, &timeout, &endtime);
+	sudo_timespecadd(&endtime, timeout, &endtime);
     }
-    rval = select(0, NULL, NULL, NULL, &timeout);
-    if (rts != NULL && rval == -1 && errno == EINTR) {
-	if (gettimeofday(&now, NULL) == -1)
-	    return -1;
-	sudo_timevalsub(&endtime, &now, &endtime);
-	TIMEVAL_TO_TIMESPEC(&endtime, rts);
+    rval = select(0, NULL, NULL, NULL, &tv);
+    if (remainder != NULL) {
+	if (rval == 0) {
+	    /* Timeout expired, no remaining time. */
+	    sudo_timespecclear(remainder);
+	} else if (errno == EINTR) {
+	    /* Interrupted, compute remaining time. */
+	    if (sudo_gettime_real(&now) == -1)
+		return -1;
+	    sudo_timespecsub(&endtime, &now, remainder);
+	    if (remainder->tv_sec < 0 || remainder->tv_nsec < 0)
+		sudo_timespecclear(remainder);
+	}
     }
     return rval;
 }

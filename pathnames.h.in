@@ -58,36 +58,36 @@
 #endif /* _PATH_ENVIRONMENT */
 
 /*
+ * The following paths are controlled via the configure script.
+ */
+
+/*
  * NOTE: _PATH_SUDO_CONF is usually overridden by the Makefile.
  */
 #ifndef _PATH_SUDO_CONF
-# define _PATH_SUDO_CONF	"/etc/sudo.conf"
+# undef _PATH_SUDO_CONF
 #endif /* _PATH_SUDO_CONF */
 
 /*
  * NOTE: _PATH_SUDOERS is usually overridden by the Makefile.
  */
 #ifndef _PATH_SUDOERS
-# define _PATH_SUDOERS		"/etc/sudoers"
+# undef _PATH_SUDOERS
 #endif /* _PATH_SUDOERS */
 
 /*
  * NOTE: _PATH_CVTSUDOERS_CONF is usually overridden by the Makefile.
  */
 #ifndef _PATH_CVTSUDOERS_CONF
-# define _PATH_CVTSUDOERS_CONF		"/etc/cvtsudoers.conf"
+# undef _PATH_CVTSUDOERS_CONF
 #endif /* _PATH_CVTSUDOERS_CONF */
 
 /*
  * NOTE: _PATH_SUDO_LOGSRVD_CONF is usually overridden by the Makefile.
  */
 #ifndef _PATH_SUDO_LOGSRVD_CONF
-# define _PATH_SUDO_LOGSRVD_CONF	"/etc/sudo_logsrvd.conf"
+# undef _PATH_SUDO_LOGSRVD_CONF
 #endif /* _PATH_SUDO_LOGSRVD_CONF */
-
-/*
- * The following paths are controlled via the configure script.
- */
 
 /*
  * Where sudo_logsrvd stores its pid file files.  Defaults to

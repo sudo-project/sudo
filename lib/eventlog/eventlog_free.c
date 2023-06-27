@@ -52,6 +52,7 @@ eventlog_free(struct eventlog *evlog)
 	free(evlog->runcwd);
 	free(evlog->rungroup);
 	free(evlog->runuser);
+	free(evlog->peeraddr);
 	free(evlog->signal_name);
 	free(evlog->submithost);
 	free(evlog->submituser);
@@ -66,6 +67,11 @@ eventlog_free(struct eventlog *evlog)
 	    for (i = 0; evlog->envp[i] != NULL; i++)
 		free(evlog->envp[i]);
 	    free(evlog->envp);
+	}
+	if (evlog->env_add != NULL) {
+	    for (i = 0; evlog->env_add[i] != NULL; i++)
+		free(evlog->env_add[i]);
+	    free(evlog->env_add);
 	}
 	free(evlog);
     }

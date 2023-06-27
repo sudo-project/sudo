@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "June 20, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -475,14 +475,34 @@ varies based on the operating system
 \fBsudo\fR
 is running on.
 .PP
-Other
+Other settings may influence the command environment:
+.TP 3n
+\fB\(bu\fR
 \fBsudoers\fR
-options may influence the command environment, such as
+options such as
 \fIalways_set_home\fR,
 \fIsecure_path\fR,
 \fIset_logname\fR,
+\fIset_home\fR,
 and
-\fIset_home\fR.
+\fIsetenv\fR.
+.TP 3n
+\fB\(bu\fR
+Command tags, such as
+\fRSETENV\fR
+and
+\fRNOSETENV\fR.
+Note that
+\fRSETENV\fR
+is implied if the command matched is
+\fBALL\fR.
+.TP 3n
+\fB\(bu\fR
+\fBsudo\fR
+options, such as
+\fB\-E\fR
+and
+\fB\-i\fR.
 .PP
 On systems that support PAM where the
 \fBpam_env\fR
@@ -1219,21 +1239,45 @@ Certain configuration options may be changed from their default
 values at run-time via one or more
 \fIDefault_Entry\fR
 lines.
-These may affect all users on any host, all users on a specific host, a
-specific user, a specific command, or commands being run as a specific user.
+These may affect all users on any host
+(\(oqDefaults\(cq),
+all users on a specific host
+(\(oqDefaults@host\(cq),
+a specific user
+(\(oqDefaults:user\(cq),
+a specific command
+(\(oqDefaults!cmnd\(cq),
+or commands being run as a specific user
+(\(oqDefaults>runasuser\(cq).
+.PP
+White space is not permitted between
+\(oqDefaults\(cq
+and the
+\(oq@\(cq,
+\(oq\&:\(cq,
+\(oq\&!\(cq,
+or
+\(oq>\(cq
+characters.
+While a comma-separated list may be used in place of a single value after the
+\(oq@\(cq,
+\(oq\&:\(cq,
+\(oq\&!\(cq,
+or
+\(oq>\(cq
+character, using an alias instead of a list is often improve readability.
 Per-command entries may not include command line arguments.
 If you need to specify arguments, define a
 \fICmnd_Alias\fR
-and reference
-that instead.
+and reference that instead.
 .nf
 .sp
 .RS 0n
 Default_Type ::= 'Defaults' |
-                 'Defaults' '@' Host_List |
-                 'Defaults' ':' User_List |
-                 'Defaults' '!' Cmnd_List |
-                 'Defaults' '>' Runas_List
+                 'Defaults@' Host_List |
+                 'Defaults:' User_List |
+                 'Defaults!' Cmnd_List |
+                 'Defaults>' Runas_List
 
 Default_Entry ::= Default_Type Parameter_List
 
@@ -1379,7 +1423,7 @@ A fully-specified
 consists of two
 \fIRunas_List\fRs
 (as defined above) separated by a colon
-(\(oq:\&\(cq)
+(\(oq\&:\(cq)
 and enclosed in a set of parentheses.
 The first
 \fIRunas_List\fR
@@ -4190,8 +4234,7 @@ by default.
 use_pty
 If set, and
 \fBsudo\fR
-is running in a terminal, the command will be run in a pseudo-terminal
-(even if no I/O logging is being done).
+is running in a terminal, the command will be run in a new pseudo-terminal.
 If the
 \fBsudo\fR
 process is not attached to a terminal,
@@ -4207,8 +4250,10 @@ executing.
 By running the command in a separate pseudo-terminal, this attack is
 no longer possible.
 This flag is
-\fIoff\fR
-by default.
+\fIon\fR
+by default for
+\fBsudo\fR
+1.9.14 and above.
 .TP 18n
 user_command_timeouts
 If set, the user may specify a timeout on the command line.

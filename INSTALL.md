@@ -10,16 +10,16 @@ about the `configure` script itself.
 
 ## System requirements
 
-To build sudo from the source distribution you need a POSIX-compliant
-operating system (any modern version of BSD, Linux, or Unix should work),
-an ANSI/ISO C compiler that supports the "long long" type, variadic
-macros (a C99 feature) as well as the ar, make, and ranlib utilities.
+To build sudo from the source distribution you will need a
+POSIX-compliant operating system (any modern version of BSD, Linux,
+or Unix should work), a C compiler that conforms to ISO C99 or
+higher, and the ar, make, and ranlib utilities.
 
 If you wish to modify the parser then you will need flex version
-2.5.2 or later and either bison or byacc (sudo comes with a
-pre-generated parser).  You'll also have to run configure with the
---with-devel option or pass DEVEL=1 to make.  You can get flex from
-https://github.com/westes/flex/.  You can get GNU bison from
+2.5.2 or later and either bison or byacc (sudo comes with a parser
+generated with GNU bison).  You'll also have to run configure with
+the --with-devel option or pass DEVEL=1 to make.  You can get flex
+from https://github.com/westes/flex/.  You can get GNU bison from
 https://ftp.gnu.org/pub/gnu/bison/ or any GNU mirror.
 
 Some systems will also require that development library packages be
@@ -110,7 +110,8 @@ Defaults are listed in brackets after the description.
         Install plugins and helper programs in DIR/sudo [PREFIX/libexec/sudo]
 
     --sysconfdir=DIR
-        Look for `sudo.conf` and `sudoers` files in DIR. [/etc]
+        Look for configuration files such as `sudo.conf` and `sudoers`
+        in DIR. [/etc]
 
     --includedir=DIR
         Install sudo_plugin.h include file in DIR [PREFIX/include]
@@ -226,9 +227,11 @@ Defaults are listed in brackets after the description.
         -fstack-clash-protection, -fcf-protection and linking with
         -zrelro, -znow, and -znoexecstack where supported.
 
-    --disable-ssp
-        Disable use of the -fstack-protector compiler option.
-        This does not affect the other hardening options.
+    --disable-largefile
+        Disable support for large (64-bit) files on 32-bit systems
+        where the maximum file size is normally 4GB.  By default,
+        configure will enable support for 64-bit file sizes if
+        supported by the operating system.
 
     --disable-leaks
         Avoid leaking memory even when we are headed for exit,
@@ -278,6 +281,10 @@ Defaults are listed in brackets after the description.
         instead.  This option may only be used in conjunction with
         the --enable-static-sudoers option.
 
+    --disable-ssp
+        Disable use of the -fstack-protector compiler option.
+        This does not affect the other hardening options.
+
     --enable-static-sudoers
         By default, the sudoers plugin is built and installed as a
         dynamic shared object.  When the --enable-static-sudoers
@@ -293,6 +300,11 @@ Defaults are listed in brackets after the description.
         systemd.  If this option is not specified, configure will
         use the /usr/lib/tmpfiles.d directory if the file
         /usr/lib/tmpfiles.d/systemd.conf exists.
+
+    --disable-year2038
+	Disable support for dates after January 2038.  By default,
+        configure will enable support for 64-bit time_t values if
+	supported by the operating system.
 
     --enable-zlib[=location]
         Enable the use of the zlib compress library when storing
@@ -346,6 +358,15 @@ Defaults are listed in brackets after the description.
         --with-aix-soname=svr4 option.
 
 ### Optional features:
+
+    --enable-adminconf=[DIR]
+        Search for configuration files in adminconfdir (PREFIX/etc
+        by default) in preference to configuration files in sysconfdir
+        (/etc by default).  This can be used on systems where
+        sysconfdir is located on a read-only filesystem.  When this
+        option is enabled, the visudo utility will store edited
+        sudoers files in adminconfdir if the original was located
+        in sysconfdir.
 
     --disable-root-mailer
         By default sudo will run the mailer as root when tattling

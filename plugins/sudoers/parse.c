@@ -57,8 +57,7 @@ runas_matches_pw(struct sudoers_parse_tree *parse_tree,
  * list, verify and kill.
  */
 static int
-sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
-    int validated, int pwflag)
+sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw, int pwflag)
 {
     char *saved_runchroot;
     struct passwd *root_pw = NULL;
@@ -68,14 +67,13 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
     struct userspec *us;
     struct defaults *def;
     int cmnd_match, nopass, match = DENY;
+    int validated = 0;
     enum def_tuple pwcheck;
     debug_decl(sudoers_lookup_pseudo, SUDOERS_DEBUG_PARSER);
 
     pwcheck = (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
     nopass = (pwcheck == never || pwcheck == all) ? true : false;
 
-    CLR(validated, FLAG_NO_USER);
-    CLR(validated, FLAG_NO_HOST);
     if (list_pw != NULL) {
 	root_pw = sudo_getpwuid(ROOT_UID);
 	if (root_pw == NULL)
@@ -468,7 +466,7 @@ sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, int *cmnd_status,
      * Special case checking the "validate", "list" and "kill" pseudo-commands.
      */
     if (pwflag)
-	debug_return_int(sudoers_lookup_pseudo(snl, pw, validated, pwflag));
+	debug_return_int(sudoers_lookup_pseudo(snl, pw, pwflag));
 
     /* Need to be runas user while stat'ing things. */
     if (!set_perms(PERM_RUNAS))

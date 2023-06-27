@@ -203,7 +203,7 @@ sudo_sss_check_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 	switch (*val) {
 	case '+':
 	    /* Netgroup spec found, check membership. */
-	    if (netgr_matches(val, def_netgroup_tuple ? host : NULL,
+	    if (netgr_matches(NULL, val, def_netgroup_tuple ? host : NULL,
 		def_netgroup_tuple ? shost : NULL, handle->pw->pw_name)) {
 		ret = true;
 	    }
@@ -485,7 +485,7 @@ done:
 }
 
 static struct sss_sudo_result *
-sudo_sss_result_get(struct sudo_nss *nss, struct passwd *pw)
+sudo_sss_result_get(const struct sudo_nss *nss, struct passwd *pw)
 {
     struct sudo_sss_handle *handle = nss->handle;
     struct sss_sudo_result *sss_result = NULL;
@@ -638,7 +638,8 @@ sudo_sss_open(struct sudo_nss *nss)
     }
 
     /* The "parse tree" contains userspecs, defaults, aliases and hostnames. */
-    init_parse_tree(&handle->parse_tree, handle->ipa_host, handle->ipa_shost);
+    init_parse_tree(&handle->parse_tree, handle->ipa_host, handle->ipa_shost,
+	nss);
     nss->handle = handle;
 
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "handle=%p", handle);
@@ -650,7 +651,7 @@ sudo_sss_open(struct sudo_nss *nss)
  * Perform query for user and host and convert to sudoers parse tree.
  */
 static int
-sudo_sss_query(struct sudo_nss *nss, struct passwd *pw)
+sudo_sss_query(const struct sudo_nss *nss, struct passwd *pw)
 {
     struct sudo_sss_handle *handle = nss->handle;
     struct sss_sudo_result *sss_result = NULL;
@@ -714,7 +715,7 @@ done:
  * The contents will be populated by the getdefs() and query() functions.
  */
 static struct sudoers_parse_tree *
-sudo_sss_parse(struct sudo_nss *nss)
+sudo_sss_parse(const struct sudo_nss *nss)
 {
     struct sudo_sss_handle *handle = nss->handle;
     debug_decl(sudo_sss_parse, SUDOERS_DEBUG_SSSD);
@@ -729,7 +730,7 @@ sudo_sss_parse(struct sudo_nss *nss)
 }
 
 static int
-sudo_sss_getdefs(struct sudo_nss *nss)
+sudo_sss_getdefs(const struct sudo_nss *nss)
 {
     struct sudo_sss_handle *handle = nss->handle;
     struct sss_sudo_result *sss_result = NULL;

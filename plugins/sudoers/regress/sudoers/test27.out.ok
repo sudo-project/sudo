@@ -3,7 +3,7 @@ Parses OK
 Defaults always_query_group_plugin
 
 root ALL = (root : wheel) ALL
-millert ALL = ( : wheel) ALL
-%sudo ALL = ( : ALL) ALL
+millert ALL = (root : wheel) ALL
+%sudo ALL = (root : ALL) ALL
 operator ALL = (%wheel) ALL
 +netusers +nethosts = (+netrunas) ALL

@@ -116,11 +116,11 @@ sub mkdep {
     $makefile =~ s:\@DEV\@::g;
     $makefile =~ s:\@COMMON_OBJS\@:aix.lo event_poll.lo event_select.lo:;
     $makefile =~ s:\@SUDO_OBJS\@:intercept.pb-c.o openbsd.o preload.o apparmor.o selinux.o sesh.o solaris.o:;
-    $makefile =~ s:\@SUDOERS_OBJS\@:bsm_audit.lo linux_audit.lo ldap.lo ldap_util.lo ldap_conf.lo solaris_audit.lo sssd.lo:;
+    $makefile =~ s:\@SUDOERS_OBJS\@:bsm_audit.lo linux_audit.lo ldap.lo ldap_util.lo ldap_conf.lo ldap_innetgr.lo solaris_audit.lo sssd.lo:;
     # XXX - fill in AUTH_OBJS from contents of the auth dir instead
     $makefile =~ s:\@AUTH_OBJS\@:afs.lo aix_auth.lo bsdauth.lo dce.lo fwtk.lo getspwuid.lo kerb5.lo pam.lo passwd.lo rfc1938.lo secureware.lo securid5.lo sia.lo:;
     $makefile =~ s:\@DIGEST\@:digest.lo digest_openssl.lo digest_gcrypt.lo:;
-    $makefile =~ s:\@LTLIBOBJS\@:arc4random.lo arc4random_buf.lo arc4random_uniform.lo cfmakeraw.lo closefrom.lo dup3.lo explicit_bzero.lo fchmodat.lo fchownat.lo freezero.lo fstatat.lo fnmatch.lo getaddrinfo.lo getcwd.lo getentropy.lo getgrouplist.lo getdelim.lo getopt_long.lo getusershell.lo glob.lo gmtime_r.lo inet_ntop_lo inet_pton.lo isblank.lo localtime_r.lo memrchr.lo mkdirat.lo mksiglist.lo mksigname.lo mktemp.lo nanosleep.lo openat.lo pipe2.lo pread.lo pwrite.lo pw_dup.lo reallocarray.lo sha2.lo sig2str.lo siglist.lo signame.lo snprintf.lo str2sig.lo strlcat.lo strlcpy.lo strndup.lo strnlen.lo strsignal.lo timegm.lo unlinkat.lo utimens.lo:;
+    $makefile =~ s:\@LTLIBOBJS\@:arc4random.lo arc4random_buf.lo arc4random_uniform.lo cfmakeraw.lo closefrom.lo dup3.lo explicit_bzero.lo fchmodat.lo fchownat.lo freezero.lo fstatat.lo fnmatch.lo getaddrinfo.lo getentropy.lo getgrouplist.lo getdelim.lo getopt_long.lo getusershell.lo glob.lo gmtime_r.lo inet_ntop_lo inet_pton.lo isblank.lo localtime_r.lo memrchr.lo mkdirat.lo mksiglist.lo mksigname.lo mktemp.lo nanosleep.lo openat.lo pipe2.lo pread.lo pwrite.lo pw_dup.lo reallocarray.lo realpath.lo sha2.lo sig2str.lo siglist.lo signame.lo snprintf.lo str2sig.lo strlcat.lo strlcpy.lo strndup.lo strnlen.lo strsignal.lo timegm.lo unlinkat.lo utimens.lo:;
 
     # Parse OBJS lines
     my %objs;

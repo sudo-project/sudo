@@ -1,6 +1,30 @@
 Notes on upgrading from an older release
 ========================================
 
+ * Upgrading from a version prior to 1.9.14:
+
+   Sudo now runs commands in a new pseudo-terminal by default.  This
+   can prevent a malicious program run via sudo from accessing the
+   user's terminal device after the command completes.
+
+   When sudo runs a command in a new pseudo-terminal, an additional
+   process is created to monitor the command's status and pass
+   terminal control signals between the two terminals.  See the
+   "Process model" subsection in the sudo manual and the description
+   of the "use_pty" option in the sudoers manual for more information.
+
+   A side effect of running the command in a new pseudo-terminal
+   is that sudo must pass input from the user's terminal to the
+   pseudo-terminal, even if the command being run does not require
+   the input.  The "exec_background" option in sudoers can be used
+   to prevent this, but some screen-oriented commands may not operate
+   properly when run as a background process.
+
+   To restore the historic behavior where a command is run in the
+   user's terminal, add the following line to the sudoers file:
+
+       Defaults !use_pty
+
  * Upgrading from a version prior to 1.9.13:
    
    Sudo now builds AIX-style shared libraries and dynamic shared
@@ -166,7 +190,6 @@ Notes on upgrading from an older release
    those names, sudo, and visudo will report a syntax error with a
    message like "syntax error: unexpected TIMEOUT, expecting ALIAS".
 
-   Starting with version 1.9.3, sudoers rules must end in either
    Prior to version 1.8.20, when log_input, log_output, or use_pty
    were enabled, if any of the standard input, output, or error
    were not connected to a terminal, sudo would use a pipe.  The

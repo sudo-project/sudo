@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -37,6 +37,7 @@
 #include "sudoers.h"
 #include "sudoers_version.h"
 #include "interfaces.h"
+#include "auth/sudo_auth.h"
 
 static char **command_info;
 
@@ -49,21 +50,19 @@ struct sudoers_exec_args {
     char ***info;
 };
 
+static struct sudoers_parser_config sudoers_conf = SUDOERS_PARSER_CONFIG_INITIALIZER;
 static unsigned int sudo_version;
 static const char *interfaces_string;
 sudo_conv_t sudo_conv;
 sudo_printf_t sudo_printf;
 struct sudo_plugin_event * (*plugin_event_alloc)(void);
-const char *path_ldap_conf = _PATH_LDAP_CONF;
-const char *path_ldap_secret = _PATH_LDAP_SECRET;
+static const char *path_ldap_conf = _PATH_LDAP_CONF;
+static const char *path_ldap_secret = _PATH_LDAP_SECRET;
+static const char *path_sudoers = _PATH_SUDOERS;
 static bool session_opened;
 int sudoedit_nfiles;
 
 extern sudo_dso_public struct policy_plugin sudoers_policy;
-
-#ifdef HAVE_BSD_AUTH_H
-char *login_style;
-#endif /* HAVE_BSD_AUTH_H */
 
 static int
 parse_bool(const char *line, int varlen, int *flags, int fval)
@@ -97,12 +96,12 @@ parse_bool(const char *line, int varlen, int *flags, int fval)
 int
 sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 {
-    struct sudoers_open_info *info = v;
     const char *p, *errstr, *groups = NULL;
+    struct sudoers_open_info *info = v;
+    int flags = MODE_UPDATE_TICKET;
     const char *remhost = NULL;
     unsigned char uuid[16];
     char * const *cur;
-    int flags = MODE_UPDATE_TICKET;
     debug_decl(sudoers_policy_deserialize_info, SUDOERS_DEBUG_PLUGIN);
 
 #define MATCHES(s, v)	\
@@ -126,10 +125,6 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
     }
 
     /* Parse sudo.conf plugin args. */
-    sudoers_file = _PATH_SUDOERS;
-    sudoers_mode = SUDOERS_MODE;
-    sudoers_uid = SUDOERS_UID;
-    sudoers_gid = SUDOERS_GID;
     if (info->plugin_args != NULL) {
 	for (cur = info->plugin_args; *cur != NULL; cur++) {
 	    if (MATCHES(*cur, "error_recovery=")) {
@@ -137,18 +132,18 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 		if (val == -1) {
 		    INVALID("error_recovery=");	/* Not a fatal error. */
 		} else {
-		    sudoers_recovery = val;
+		    sudoers_conf.recovery = val;
 		}
 		continue;
 	    }
 	    if (MATCHES(*cur, "sudoers_file=")) {
 		CHECK(*cur, "sudoers_file=");
-		sudoers_file = *cur + sizeof("sudoers_file=") - 1;
+		path_sudoers = *cur + sizeof("sudoers_file=") - 1;
 		continue;
 	    }
 	    if (MATCHES(*cur, "sudoers_uid=")) {
 		p = *cur + sizeof("sudoers_uid=") - 1;
-		sudoers_uid = (uid_t) sudo_strtoid(p, &errstr);
+		sudoers_conf.sudoers_uid = (uid_t)sudo_strtoid(p, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		    goto bad;
@@ -157,7 +152,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	    }
 	    if (MATCHES(*cur, "sudoers_gid=")) {
 		p = *cur + sizeof("sudoers_gid=") - 1;
-		sudoers_gid = (gid_t) sudo_strtoid(p, &errstr);
+		sudoers_conf.sudoers_gid = (gid_t)sudo_strtoid(p, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		    goto bad;
@@ -166,7 +161,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	    }
 	    if (MATCHES(*cur, "sudoers_mode=")) {
 		p = *cur + sizeof("sudoers_mode=") - 1;
-		sudoers_mode = sudo_strtomode(p, &errstr);
+		sudoers_conf.sudoers_mode = sudo_strtomode(p, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		    goto bad;
@@ -185,6 +180,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	    }
 	}
     }
+    sudoers_conf.sudoers_path = path_sudoers;
 
     /* Parse command line settings. */
     sudo_user.flags = 0;
@@ -349,7 +345,8 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 #ifdef HAVE_BSD_AUTH_H
 	if (MATCHES(*cur, "bsdauth_type=")) {
 	    CHECK(*cur, "bsdauth_type=");
-	    login_style = *cur + sizeof("bsdauth_type=") - 1;
+	    p = *cur + sizeof("bsdauth_type=") - 1;
+	    bsdauth_set_style(p);
 	    continue;
 	}
 #endif /* HAVE_BSD_AUTH_H */
@@ -625,6 +622,27 @@ oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 bad:
     debug_return_int(MODE_ERROR);
+}
+
+/* Return the policy's struct sudoers_parser_config. */
+const struct sudoers_parser_config *
+policy_sudoers_conf(void)
+{
+    return &sudoers_conf;
+}
+
+/* Return the path to ldap.conf file, which may be set in the plugin args. */
+const char *
+policy_path_ldap_conf(void)
+{
+    return path_ldap_conf;
+}
+
+/* Return the path to ldap.secret file, which may be set in the plugin args. */
+const char *
+policy_path_ldap_secret(void)
+{
+    return path_ldap_secret;
 }
 
 /*
@@ -927,7 +945,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 	if (asprintf(&command_info[info_len++], "umask=0%o", (unsigned int)cmnd_umask) == -1)
 	    goto oom;
     }
-    if (force_umask) {
+    if (sudoers_override_umask()) {
 	if ((command_info[info_len++] = strdup("umask_override=true")) == NULL)
 	    goto oom;
     }
@@ -1036,6 +1054,7 @@ bad:
     while (info_len--)
 	free(command_info[info_len]);
     free(command_info);
+    command_info = NULL;
     debug_return_bool(false);
 }
 
@@ -1119,7 +1138,7 @@ sudoers_policy_close(int exit_status, int error_code)
     /* Free sudoers sources, sudo_user and passwd/group caches. */
     sudoers_cleanup();
 
-    /* command_info is freed by the g/c code. */
+    /* command_info was freed by the g/c code. */
     command_info = NULL;
 
     /* Free error message passed back to front-end, if any. */
@@ -1183,7 +1202,7 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     exec_args.envp = user_env_out;
     exec_args.info = command_infop;
 
-    ret = sudoers_policy_main(argc, argv, 0, env_add, false, &exec_args);
+    ret = sudoers_check_cmnd(argc, argv, env_add, &exec_args);
 #ifndef NO_LEAKS
     if (ret == true && sudo_version >= SUDO_API_MKVERSION(1, 3)) {
 	/* Unset close function if we don't need it to avoid extra process. */
@@ -1204,8 +1223,6 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 static int
 sudoers_policy_validate(const char **errstr)
 {
-    char *argv[] = { (char *)"validate", NULL };
-    const int argc = 1;
     int ret;
     debug_decl(sudoers_policy_validate, SUDOERS_DEBUG_PLUGIN);
 
@@ -1216,7 +1233,7 @@ sudoers_policy_validate(const char **errstr)
 	debug_return_int(-1);
     }
 
-    ret = sudoers_policy_main(argc, argv, I_VERIFYPW, NULL, false, NULL);
+    ret = sudoers_validate_user();
 
     /* The audit functions set audit_msg on failure. */
     if (ret != 1 && audit_msg != NULL) {
@@ -1246,17 +1263,13 @@ static int
 sudoers_policy_list(int argc, char * const argv[], int verbose,
     const char *list_user, const char **errstr)
 {
-    char *list_argv[] = { (char *)"list", NULL };
     int ret;
     debug_decl(sudoers_policy_list, SUDOERS_DEBUG_PLUGIN);
 
-    if (argc == 0) {
+    if (argc == 0)
 	SET(sudo_mode, MODE_LIST);
-	argc = 1;
-	argv = list_argv;
-    } else {
+    else
 	SET(sudo_mode, MODE_CHECK);
-    }
 
     if ((sudo_mode & LIST_VALID_FLAGS) != sudo_mode) {
 	sudo_warnx(U_("%s: invalid mode flags from sudo front end: 0x%x"),
@@ -1264,18 +1277,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
 	debug_return_int(-1);
     }
 
-    if (list_user) {
-	list_pw = sudo_getpwnam(list_user);
-	if (list_pw == NULL) {
-	    sudo_warnx(U_("unknown user %s"), list_user);
-	    debug_return_int(-1);
-	}
-    }
-    ret = sudoers_policy_main(argc, argv, I_LISTPW, NULL, verbose, NULL);
-    if (list_user) {
-	sudo_pw_delref(list_pw);
-	list_pw = NULL;
-    }
+    ret = sudoers_list(argc, argv, list_user, verbose);
 
     /* The audit functions set audit_msg on failure. */
     if (ret != 1 && audit_msg != NULL) {
@@ -1296,7 +1298,7 @@ sudoers_policy_version(int verbose)
 	SUDOERS_GRAMMAR_VERSION);
 
     if (verbose) {
-	sudo_printf(SUDO_CONV_INFO_MSG, _("\nSudoers path: %s\n"), sudoers_file);
+	sudo_printf(SUDO_CONV_INFO_MSG, _("\nSudoers path: %s\n"), path_sudoers);
 #ifdef HAVE_LDAP
 # ifdef _PATH_NSSWITCH_CONF
 	sudo_printf(SUDO_CONV_INFO_MSG, _("nsswitch path: %s\n"), _PATH_NSSWITCH_CONF);

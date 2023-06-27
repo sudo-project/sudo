@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -36,12 +36,11 @@
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
 
-sigset_t ttyblock;
-int ttymode = TERM_COOKED;
-
-struct io_buffer_list iobufs = SLIST_HEAD_INITIALIZER(&iobufs);
-
 int io_fds[6] = { -1, -1, -1, -1, -1, -1 };
+
+static struct io_buffer_list iobufs = SLIST_HEAD_INITIALIZER(&iobufs);
+
+static sigset_t ttyblock;
 
 /*
  * Remove and free any events associated with the specified
@@ -104,8 +103,7 @@ void
 io_buf_new(int rfd, int wfd,
     bool (*action)(const char *, unsigned int, struct io_buffer *),
     void (*read_cb)(int fd, int what, void *v),
-    void (*write_cb)(int fd, int what, void *v),
-    struct exec_closure *ec, struct io_buffer_list *head)
+    void (*write_cb)(int fd, int what, void *v), struct exec_closure *ec)
 {
     int n;
     struct io_buffer *iob;
@@ -133,7 +131,7 @@ io_buf_new(int rfd, int wfd,
     iob->buf[0] = '\0';
     if (iob->revent == NULL || iob->wevent == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    SLIST_INSERT_HEAD(head, iob, entries);
+    SLIST_INSERT_HEAD(&iobufs, iob, entries);
 
     debug_return;
 }
@@ -143,7 +141,7 @@ io_buf_new(int rfd, int wfd,
  * resuming from suspend.
  */
 void
-add_io_events(struct sudo_event_base *evbase)
+add_io_events(struct exec_closure *ec)
 {
     struct io_buffer *iob;
     debug_decl(add_io_events, SUDO_DEBUG_EXEC);
@@ -156,12 +154,12 @@ add_io_events(struct sudo_event_base *evbase)
     SLIST_FOREACH(iob, &iobufs, entries) {
 	/* Don't read from /dev/tty if we are not in the foreground. */
 	if (iob->revent != NULL &&
-	    (ttymode == TERM_RAW || !USERTTY_EVENT(iob->revent))) {
+	    (ec->term_raw || !USERTTY_EVENT(iob->revent))) {
 	    if (iob->len != sizeof(iob->buf)) {
 		sudo_debug_printf(SUDO_DEBUG_INFO,
 		    "added I/O revent %p, fd %d, events %d",
 		    iob->revent, iob->revent->fd, iob->revent->events);
-		if (sudo_ev_add(evbase, iob->revent, NULL, false) == -1)
+		if (sudo_ev_add(ec->evbase, iob->revent, NULL, false) == -1)
 		    sudo_fatal("%s", U_("unable to add event to queue"));
 	    }
 	}
@@ -171,7 +169,7 @@ add_io_events(struct sudo_event_base *evbase)
 		sudo_debug_printf(SUDO_DEBUG_INFO,
 		    "added I/O wevent %p, fd %d, events %d",
 		    iob->wevent, iob->wevent->fd, iob->wevent->events);
-		if (sudo_ev_add(evbase, iob->wevent, NULL, false) == -1)
+		if (sudo_ev_add(ec->evbase, iob->wevent, NULL, false) == -1)
 		    sudo_fatal("%s", U_("unable to add event to queue"));
 	    }
 	}
@@ -533,8 +531,9 @@ log_stderr(const char *buf, unsigned int n, struct io_buffer *iob)
 
 /* Call I/O plugin suspend log method. */
 void
-log_suspend(struct exec_closure *ec, int signo)
+log_suspend(void *v, int signo)
 {
+    struct exec_closure *ec = v;
     struct plugin_container *plugin;
     const char *errstr = NULL;
     sigset_t omask;

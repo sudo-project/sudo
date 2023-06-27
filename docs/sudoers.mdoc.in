@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd January 16, 2023
+.Dd June 20, 2023
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -461,14 +461,33 @@ varies based on the operating system
 .Nm sudo
 is running on.
 .Pp
-Other
+Other settings may influence the command environment:
+.Bl -bullet -width 1n
+.It
 .Nm
-options may influence the command environment, such as
+options such as
 .Em always_set_home ,
 .Em secure_path ,
 .Em set_logname ,
+.Em set_home ,
 and
-.Em set_home .
+.Em setenv .
+.It
+Command tags, such as
+.Dv SETENV
+and
+.Dv NOSETENV .
+Note that
+.Dv SETENV
+is implied if the command matched is
+.Sy ALL .
+.It
+.Nm sudo
+options, such as
+.Fl E
+and
+.Fl i .
+.El
 .Pp
 On systems that support PAM where the
 .Sy pam_env
@@ -1169,19 +1188,43 @@ Certain configuration options may be changed from their default
 values at run-time via one or more
 .Em Default_Entry
 lines.
-These may affect all users on any host, all users on a specific host, a
-specific user, a specific command, or commands being run as a specific user.
+These may affect all users on any host
+.Pq Sq Defaults ,
+all users on a specific host
+.Pq Sq Defaults@host ,
+a specific user
+.Pq Sq Defaults:user ,
+a specific command
+.Pq Sq Defaults!cmnd ,
+or commands being run as a specific user
+.Pq Sq Defaults>runasuser .
+.Pp
+White space is not permitted between
+.Sq Defaults
+and the
+.Ql @ ,
+.Ql \&: ,
+.Ql \&! ,
+or
+.Ql >
+characters.
+While a comma-separated list may be used in place of a single value after the
+.Ql @ ,
+.Ql \&: ,
+.Ql \&! ,
+or
+.Ql >
+character, using an alias instead of a list is often improve readability.
 Per-command entries may not include command line arguments.
 If you need to specify arguments, define a
 .Em Cmnd_Alias
-and reference
-that instead.
+and reference that instead.
 .Bd -literal
 Default_Type ::= 'Defaults' |
-                 'Defaults' '@' Host_List |
-                 'Defaults' ':' User_List |
-                 'Defaults' '!' Cmnd_List |
-                 'Defaults' '>' Runas_List
+                 'Defaults@' Host_List |
+                 'Defaults:' User_List |
+                 'Defaults!' Cmnd_List |
+                 'Defaults>' Runas_List
 
 Default_Entry ::= Default_Type Parameter_List
 
@@ -1332,7 +1375,7 @@ A fully-specified
 consists of two
 .Em Runas_List Ns s
 (as defined above) separated by a colon
-.Pq Ql :\&
+.Pq Ql \&:
 and enclosed in a set of parentheses.
 The first
 .Em Runas_List
@@ -3964,8 +4007,7 @@ by default.
 .It use_pty
 If set, and
 .Nm sudo
-is running in a terminal, the command will be run in a pseudo-terminal
-(even if no I/O logging is being done).
+is running in a terminal, the command will be run in a new pseudo-terminal.
 If the
 .Nm sudo
 process is not attached to a terminal,
@@ -3981,8 +4023,10 @@ executing.
 By running the command in a separate pseudo-terminal, this attack is
 no longer possible.
 This flag is
-.Em off
-by default.
+.Em on
+by default for
+.Nm sudo
+1.9.14 and above.
 .It user_command_timeouts
 If set, the user may specify a timeout on the command line.
 If the timeout expires before the command has exited, the

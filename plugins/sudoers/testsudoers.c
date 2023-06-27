@@ -97,6 +97,7 @@ sudo_dso_public int main(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
+    struct sudoers_parser_config sudoers_conf = SUDOERS_PARSER_CONFIG_INITIALIZER;
     enum sudoers_formats input_format = format_sudoers;
     struct cmndspec *cs;
     struct privilege *priv;
@@ -106,6 +107,7 @@ main(int argc, char *argv[])
     int match, host_match, runas_match, cmnd_match;
     int ch, dflag, exitcode = EXIT_FAILURE;
     struct sudo_lbuf lbuf;
+    id_t id;
     debug_decl(main, SUDOERS_DEBUG_MAIN);
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -140,9 +142,10 @@ main(int argc, char *argv[])
 		dflag = 1;
 		break;
 	    case 'G':
-		sudoers_gid = (gid_t)sudo_strtoid(optarg, &errstr);
+		id = sudo_strtoid(optarg, &errstr);
 		if (errstr != NULL)
 		    sudo_fatalx("group-ID %s: %s", optarg, errstr);
+		sudoers_conf.sudoers_gid = (gid_t)id;
 		break;
 	    case 'g':
 		runas_group = optarg;
@@ -171,9 +174,10 @@ main(int argc, char *argv[])
 		trace_print = testsudoers_error;
 		break;
 	    case 'U':
-		sudoers_uid = (uid_t)sudo_strtoid(optarg, &errstr);
+		id = sudo_strtoid(optarg, &errstr);
 		if (errstr != NULL)
 		    sudo_fatalx("user-ID %s: %s", optarg, errstr);
+		sudoers_conf.sudoers_uid = (uid_t)id;
 		break;
 	    case 'u':
 		runas_user = optarg;
@@ -273,8 +277,10 @@ main(int argc, char *argv[])
 	    sudo_fatal("%s", U_("unable to parse network address list"));
     }
 
-    /* Allocate space for data structures in the parser. */
-    init_parser("sudoers", false, true);
+    /* Initialize the parser and set sudoers filename to "sudoers". */
+    sudoers_conf.strict = true;
+    sudoers_conf.verbose = 2;
+    init_parser("sudoers", &sudoers_conf);
 
     /*
      * Set runas passwd/group entries based on command line or sudoers.
@@ -442,7 +448,7 @@ sudo_endspent(void)
 }
 
 FILE *
-open_sudoers(const char *file, bool doedit, bool *keepopen)
+open_sudoers(const char *file, char **outfile, bool doedit, bool *keepopen)
 {
     struct stat sb;
     FILE *fp = NULL;
@@ -452,7 +458,8 @@ open_sudoers(const char *file, bool doedit, bool *keepopen)
 
     /* Report errors using the basename for consistent test output. */
     base = sudo_basename(file);
-    fd = sudo_secure_open_file(file, sudoers_uid, sudoers_gid, &sb, &error);
+    fd = sudo_secure_open_file(file, sudoers_file_uid(), sudoers_file_gid(),
+	&sb, &error);
     if (fd != -1) {
 	if ((fp = fdopen(fd, "r")) == NULL) {
 	    sudo_warn("unable to open %s", base);
@@ -468,14 +475,14 @@ open_sudoers(const char *file, bool doedit, bool *keepopen)
 	    break;
 	case SUDO_PATH_WRONG_OWNER:
 	    sudo_warnx("%s should be owned by uid %u",
-		base, (unsigned int) sudoers_uid);
+		base, (unsigned int) sudoers_file_uid());
 	    break;
 	case SUDO_PATH_WORLD_WRITABLE:
 	    sudo_warnx("%s is world writable", base);
 	    break;
 	case SUDO_PATH_GROUP_WRITABLE:
 	    sudo_warnx("%s should be owned by gid %u",
-		base, (unsigned int) sudoers_gid);
+		base, (unsigned int) sudoers_file_gid());
 	    break;
 	default:
 	    sudo_warnx("%s: internal error, unexpected error %d",
@@ -509,6 +516,18 @@ void
 init_eventlog_config(void)
 {
     return;
+}
+
+bool
+pivot_root(const char *new_root, int fds[2])
+{
+    return true;
+}
+
+bool
+unpivot_root(int fds[2])
+{
+    return true;
 }
 
 int

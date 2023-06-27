@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 16, 2023
+.Dd June 7, 2023
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -371,15 +371,17 @@ non-Unix groups and checks to see if the user belongs to any of them.
 .Pp
 If timed entries are enabled with the
 .Sy SUDOERS_TIMED
-configuration directive, the LDAP queries include a sub-filter that
-limits retrieval to entries that satisfy the time constraints, if any.
+parameter, the LDAP queries include a sub-filter that limits retrieval
+to entries that satisfy the time constraints, if any.
 .Pp
 If the
 .Sy NETGROUP_BASE
-configuration directive is present (see
+parameter is present and
+.Sy NETGROUP_QUERY
+has not been disabled (see
 .Sx Configuring ldap.conf
-below), queries are performed to determine
-the list of netgroups the user belongs to before the sudoers query.
+below), queries are performed to determine the list of netgroups
+the user belongs to before the sudoers query.
 This makes it possible to include netgroups in the sudoers query
 string in the same manner as Unix groups.
 The third query mentioned above is not performed unless a group provider
@@ -417,7 +419,11 @@ For sites with a large number of netgroups, using
 .Sy NETGROUP_BASE
 can significantly speed up
 .Nm sudo Ns 's
-execution time.
+execution time as long as the LDAP server supports querying the
+.Em nisNetgroup
+object by its
+.Em nisNetgroupTriple
+attribute.
 .Ss Differences between LDAP and non-LDAP sudoers
 One of the major differences between LDAP and file-based
 .Em sudoers
@@ -753,21 +759,33 @@ Multiple
 .Sy NETGROUP_BASE
 lines may be specified, in which case they are queried in the order specified.
 .Pp
-This option can be used to query a user's netgroups directly via LDAP
-which is usually faster than fetching every
+When this option is enabled,
+.Nm sudo
+will query the LDAP server directly when matching netgroups present in a
+.Em sudoRole
+instead of relying on the C library's
+.Fn innetgr
+function.
+.Pp
+Additionally, if the
+.Sy NETGROUP_QUERY
+parameter (which is enabled by default) has not been disabled, the
+user's netgroups will be queried directly via LDAP for use in the
+main sudoers query.
+This is usually faster than fetching every
 .Em sudoRole
 object containing a
 .Em sudoUser
 that begins with a
 .Ql +
-prefix.
-The NIS schema used by some LDAP servers need a modification to
+prefix and checking whether the user is a member of each one.
+The NIS schema used by some LDAP servers needs a modification to
 support querying the
 .Em nisNetgroup
 object by its
 .Em nisNetgroupTriple
-member.
-OpenLDAP's
+attribute.
+For example, OpenLDAP's
 .Sy slapd
 requires the following change to the
 .Em nisNetgroupTriple
@@ -779,6 +797,54 @@ attributetype ( 1.3.6.1.1.1.1.14 NAME 'nisNetgroupTriple'
    SUBSTR caseIgnoreIA5SubstringsMatch
    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
 .Ed
+.Pp
+Before enabling
+.Sy NETGROUP_BASE ,
+you should verify that your LDAP server supports matching
+.Em nisNetgroupTriple .
+For example, using
+.Sy ldapsearch :
+.Bd -literal -offset 4n
+$ ldapsearch -b $NETGROUP_BASE \e
+  '(&(objectClass=nisNetgroup)(nisNetgroupTriple=\e28*,USER,\e29))'
+.Ed
+.Pp
+where your
+.Em nisNetgroup
+data includes an object with the following
+.Em nisNetgroupTriple :
+.Pp
+.Dl nisNetgroupTriple: (,USER,)
+.It Sy NETGROUP_QUERY Ar on/true/yes/off/false/no
+The
+.Sy NETGROUP_QUERY
+parameter indicates whether or not the LDAP server supports querying
+.Em nisNetgroup
+objects by matching on
+.Em nisNetgroupTriple
+attributes.
+By default,
+.Nm sudoers
+expects to be able to perform queries that match on
+.Em nisNetgroupTriple
+attributes when
+.Sy NETGROUP_BASE
+is set, but not all LDAP servers support this.
+.Pp
+If
+.Sy NETGROUP_QUERY
+is disabled,
+.Nm sudoers
+will not attempt to determine the list of netgroups the user belongs
+to, but will still use
+.Sy NETGROUP_BASE
+directly when matching netgroups.
+This can be used to support netgroups on systems that lack the
+.Fn innetgr
+C library function.
+See the description of the
+.Sy NETGROUP_BASE
+parameter for more information.
 .It Sy NETGROUP_SEARCH_FILTER Ar ldap_filter
 An LDAP filter which is used to restrict the set of records returned
 when performing an LDAP netgroup query.

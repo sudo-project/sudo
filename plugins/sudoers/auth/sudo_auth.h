@@ -63,6 +63,7 @@ int bsdauth_init(struct passwd *pw, sudo_auth *auth);
 int bsdauth_verify(struct passwd *pw, const char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback);
 int bsdauth_approval(struct passwd *pw, sudo_auth *auth, bool exempt);
 int bsdauth_cleanup(struct passwd *pw, sudo_auth *auth, bool force);
+void bsdauth_set_style(const char *style);
 int sudo_aix_init(struct passwd *pw, sudo_auth *auth);
 int sudo_aix_verify(struct passwd *pw, const char *pass, sudo_auth *auth, struct sudo_conv_callback *callback);
 int sudo_aix_cleanup(struct passwd *pw, sudo_auth *auth, bool force);

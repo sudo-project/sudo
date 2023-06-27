@@ -660,7 +660,7 @@ setup_terminal(struct eventlog *evlog, bool interactive, bool resize)
 
     if (!terminal_can_resize) {
 	/* either not xterm or not interactive */
-	sudo_get_ttysize(&terminal_lines, &terminal_cols);
+	sudo_get_ttysize(ttyfd, &terminal_lines, &terminal_cols);
     }
 
     if (evlog->lines == terminal_lines && evlog->columns == terminal_cols) {

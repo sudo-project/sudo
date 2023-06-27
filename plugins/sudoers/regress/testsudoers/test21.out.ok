@@ -1,0 +1,10 @@
+Parses OK
+
+Entries for user admin:
+
+ALL = (USERALIAS : GROUPALIAS) /bin/ls
+	host  matched
+	runas matched
+	cmnd  allowed
+
+Command allowed

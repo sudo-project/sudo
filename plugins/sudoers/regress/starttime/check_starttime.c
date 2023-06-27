@@ -32,6 +32,8 @@
 
 sudo_dso_public int main(int argc, char *argv[]);
 
+#if defined(sudo_kinfo_proc) || defined(__linux__) || defined(HAVE_STRUCT_PSINFO_PR_TTYDEV) || defined(HAVE_PSTAT_GETPROC) || defined(__gnu_hurd__)
+
 #ifdef __linux__
 static int
 get_now(struct timespec *now)
@@ -124,5 +126,16 @@ main(int argc, char *argv[])
 	    getprogname(), ntests, errors, (ntests - errors) * 100 / ntests);
     }
 
-    exit(errors);
+    return errors;
 }
+
+#else
+
+int
+main(int argc, char *argv[])
+{
+    /* get_starttime not supported */
+    return 0;
+}
+
+#endif

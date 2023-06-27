@@ -2,7 +2,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2022
+ * Copyright (c) 1996, 1998-2005, 2007-2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -55,18 +55,13 @@
 
 int sudolineno;			/* current sudoers line number. */
 char *sudoers;			/* sudoers file being parsed. */
+char *sudoers_search_path;	/* colon-separated path of sudoers files. */
 const char *sudoers_errstr;	/* description of last error from lexer. */
 struct sudolinebuf sudolinebuf;	/* sudoers line being parsed. */
 
-/* Default sudoers path, mode and owner (may be set via sudo.conf) */
-const char *sudoers_file = _PATH_SUDOERS;
-mode_t sudoers_mode = SUDOERS_MODE;
-uid_t sudoers_uid = SUDOERS_UID;
-gid_t sudoers_gid = SUDOERS_GID;
-
 static bool continued, sawspace;
 static int prev_state;
-static int digest_type = -1;
+static unsigned int digest_type = SUDO_DIGEST_INVALID;
 
 static bool pop_include(void);
 static yy_size_t sudoers_input(char *buf, yy_size_t max_size);
@@ -296,7 +291,7 @@ DEFVAR			[a-z_]+
 				yyterminate();
 			    BEGIN INITIAL;
 			    continued = false;
-			    if (sudoers_strict) {
+			    if (sudoers_strict()) {
 				if (!sudo_regex_compile(NULL, sudoerstext, &sudoers_errstr)) {
 				    LEXTRACE("ERROR ");
 				    return ERROR;
@@ -780,7 +775,7 @@ sudoedit		{
 			}			/* a pathname */
 
 {REGEX}			{
-			    if (sudoers_strict) {
+			    if (sudoers_strict()) {
 				if (!sudo_regex_compile(NULL, sudoerstext, &sudoers_errstr)) {
 				    LEXTRACE("ERROR ");
 				    return ERROR;
@@ -922,7 +917,8 @@ SLIST_HEAD(path_list_head, path_list);
 struct include_stack {
     struct sudolinebuf line;
     YY_BUFFER_STATE bs;
-    char *path;
+    char *path; /* search path */
+    char *file;
     struct path_list_head more; /* more files in case of includedir */
     int lineno;
     bool keepopen;
@@ -947,7 +943,7 @@ pl_compare(const void *v1, const void *v2)
  * If zero files are found, NULL is stored in pathsp.
  */
 static int
-read_dir_files(const char *dirpath, struct path_list ***pathsp)
+read_dir_files(const char *dirpath, struct path_list ***pathsp, int verbose)
 {
     DIR *dir;
     int i, count = 0;
@@ -957,6 +953,7 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
     const size_t dirlen = strlen(dirpath);
     debug_decl(read_dir_files, SUDOERS_DEBUG_PARSER);
 
+    /* XXX - fdopendir */
     dir = opendir(dirpath);
     if (dir == NULL) {
 	if (errno == ENOENT)
@@ -969,20 +966,32 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp)
 	goto oom;
     while ((dent = readdir(dir)) != NULL) {
 	const size_t namelen = NAMLEN(dent);
+	const char *name = dent->d_name;
 	struct path_list *pl;
 	struct stat sb;
 	size_t len;
 	char *path;
 
 	/* Ignore files that end in '~' or have a '.' in them. */
-	if (namelen == 0 || dent->d_name[namelen - 1] == '~'
-	    || strchr(dent->d_name, '.') != NULL) {
+	if (namelen == 0 || name[namelen - 1] == '~' || strchr(name, '.') != NULL) {
+	    /* Warn about ignored files not starting with '.' if verbose. */
+	    if (namelen > 0 && name[0] != '.' && verbose > 1) {
+		if (name[namelen - 1] == '~' ||
+			(namelen > 4 && strcmp(&name[namelen - 4], ".bak") == 0)) {
+		    fprintf(stderr, U_("%s/%s: %s"), dirpath, name,
+			U_("ignoring editor backup file"));
+		} else {
+		    fprintf(stderr, U_("%s/%s: %s"), dirpath, name,
+			U_("ignoring file name containing '.'"));
+		}
+		fputc('\n', stderr);
+	    }
 	    continue;
 	}
 	len = dirlen + 1 + namelen;
 	if ((path = sudo_rcstr_alloc(len)) == NULL)
 	    goto oom;
-	if ((size_t)snprintf(path, len + 1, "%s/%s", dirpath, dent->d_name) != len) {
+	if ((size_t)snprintf(path, len + 1, "%s/%s", dirpath, name) != len) {
 	    sudo_warnx(U_("internal error, %s overflow"), __func__);
 	    sudo_rcstr_delref(path);
 	    goto bad;
@@ -1037,13 +1046,13 @@ bad:
  * Returns the number of files or -1 on error.
  */
 static int
-switch_dir(struct include_stack *stack, char *dirpath)
+switch_dir(struct include_stack *stack, char *dirpath, int verbose)
 {
     struct path_list **paths = NULL;
     int count, i;
     debug_decl(switch_dir, SUDOERS_DEBUG_PARSER);
 
-    count = read_dir_files(dirpath, &paths);
+    count = read_dir_files(dirpath, &paths, verbose);
     if (count > 0) {
 	/* Sort the list as an array in reverse order. */
 	qsort(paths, count, sizeof(*paths), pl_compare);
@@ -1098,7 +1107,7 @@ init_lexer(void)
     keepopen = false;
     sawspace = false;
     continued = false;
-    digest_type = -1;
+    digest_type = SUDO_DIGEST_INVALID;
     prev_state = INITIAL;
     BEGIN INITIAL;
 
@@ -1106,88 +1115,149 @@ init_lexer(void)
 }
 
 /*
+ * Like strlcpy() but expand %h escapes to user_shost.
+ */
+static size_t
+strlcpy_expand_host(char *dst, const char *src, size_t size)
+{
+    size_t len = 0;
+    char ch;
+    debug_decl(strlcpy_expand_host, SUDOERS_DEBUG_PARSER);
+
+    while ((ch = *src++) != '\0') {
+	if (ch == '%' && *src == 'h') {
+	    size_t n = strlcpy(dst, user_shost, size);
+	    len += n;
+	    if (n >= size) {
+		/* truncated */
+		n = size ? size - 1 : 0;
+	    }
+	    dst += n;
+	    size -= n;
+	    src++;
+	    continue;
+	}
+	if (size > 1) {
+	    *dst++ = ch;
+	    size--;
+	    len++;
+	}
+    }
+    if (size > 0)
+	*dst = '\0';
+
+    debug_return_size_t(len);
+}
+
+/*
  * Expand any embedded %h (host) escapes in the given path and makes
  * a relative path fully-qualified based on the current sudoers file.
- * Returns a reference-counted string.
+ * Returns a reference-counted string on success or NULL on failure.
  */
 static char *
-expand_include(const char *opath)
+expand_include(const char *src)
 {
+    const char *path = sudoers_search_path ? sudoers_search_path : sudoers;
+    const char *path_end = path + strlen(path);
     const char *cp, *ep;
-    char *path, *pp;
-    size_t len, olen, dirlen = 0;
-    bool subst = false;
+    char *dst0, *dst;
+    size_t dst_size, src_len;
+    unsigned int nhost = 0;
     debug_decl(expand_include, SUDOERS_DEBUG_PARSER);
 
     /* Strip double quotes if present. */
-    olen = strlen(opath);
-    if (olen > 1 && opath[0] == '"' && opath[olen - 1] == '"') {
-	opath++;
-	olen -= 2;
+    src_len = strlen(src);
+    if (src_len > 1 && src[0] == '"' && src[src_len - 1] == '"') {
+	src++;
+	src_len -= 2;
     }
-    if (olen == 0)
+    if (src_len == 0)
 	debug_return_ptr(NULL);
 
-    /* Relative paths are located in the same dir as the sudoers file. */
-    if (*opath != '/') {
-	char *dirend = strrchr(sudoers, '/');
-	if (dirend != NULL)
-	    dirlen = (size_t)(dirend - sudoers) + 1;
-    }
-
-    cp = opath;
-    ep = opath + olen;
-    len = olen;
+    /* Check for %h escapes in src. */
+    cp = src;
+    ep = src + src_len;
     while (cp < ep) {
 	if (cp[0] == '%' && cp[1] == 'h') {
-	    subst = true;
-	    len += strlen(user_shost);
+	    nhost++;
 	    cp += 2;
 	    continue;
 	}
 	cp++;
     }
 
+    if (*src == '/') {
+	/* Fully-qualified path, make a copy and expand %h escapes. */
+	dst_size = src_len + (nhost * strlen(user_shost)) - (nhost * 2) + 1;
+	dst0 = sudo_rcstr_alloc(dst_size - 1);
+	if (dst0 == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    sudoerserror(NULL);
+	    debug_return_str(NULL);
+	}
+	if (strlcpy_expand_host(dst0, src, dst_size) >= dst_size)
+	    goto oflow;
+	debug_return_str(dst0);
+    }
+
+    /*
+     * Relative paths are located in the same dir as the sudoers file.
+     * If the current sudoers file was opened via a colon-separated path,
+     * use the same path when opening src.
+     */
+    dst_size = 0;
+    for (cp = sudo_strsplit(path, path_end, ":", &ep); cp != NULL;
+	    cp = sudo_strsplit(NULL, path_end, ":", &ep)) {
+	char *dirend = memrchr(cp, '/', ep - cp);
+	if (dirend != NULL) {
+	    dst_size += (size_t)(dirend - cp) + 1;
+	}
+	/* Includes space for ':' separator and NUL terminator. */
+	dst_size += src_len + (nhost * strlen(user_shost)) - (nhost * 2) + 1;
+    }
+
     /* Make a copy of the fully-qualified path and return it. */
-    path = pp = sudo_rcstr_alloc(dirlen + len);
-    if (path == NULL) {
+    dst = dst0 = sudo_rcstr_alloc(dst_size - 1);
+    if (dst0 == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	sudoerserror(NULL);
 	debug_return_str(NULL);
     }
-    if (dirlen) {
-	memcpy(path, sudoers, dirlen);
-	pp += dirlen;
-    }
-    if (subst) {
-	/* substitute for %h */
-	cp = opath;
-	while (cp < ep) {
-	    if (cp[0] == '%' && cp[1] == 'h') {
-		size_t n = strlcpy(pp, user_shost, len + 1);
-		if (n >= len + 1)
-		    goto oflow;
-		cp += 2;
-		pp += n;
-		len -= n;
-		continue;
-	    }
-	    if (len < 1)
-		goto oflow;
-	    *pp++ = *cp++;
-	    len--;
-	}
-	*pp = '\0';
-    } else {
-	memcpy(pp, opath, len);
-	pp[len] = '\0';
-    }
+    for (cp = sudo_strsplit(path, path_end, ":", &ep); cp != NULL;
+	    cp = sudo_strsplit(NULL, path_end, ":", &ep)) {
+	size_t len;
+	char *dirend;
 
-    debug_return_str(path);
+	if (cp != path) {
+	    if (dst_size < 2)
+		goto oflow;
+	    *dst++ = ':';
+	    dst_size--;
+	}
+
+	dirend = memrchr(cp, '/', ep - cp);
+	if (dirend != NULL) {
+	    len = (size_t)(dirend - cp) + 1;
+	    if (len >= dst_size)
+		goto oflow;
+	    memcpy(dst, cp, len);
+	    dst += len;
+	    dst_size -= len;
+	}
+
+	len = strlcpy_expand_host(dst, src, dst_size);
+	if (len >= dst_size)
+	    goto oflow;
+	dst += len;
+	dst_size -= len;
+    }
+    *dst = '\0';
+
+    debug_return_str(dst0);
 oflow:
     sudo_warnx(U_("internal error, %s overflow"), __func__);
     sudoerserror(NULL);
-    sudo_rcstr_delref(path);
+    free(dst0);
     debug_return_str(NULL);
 }
 
@@ -1197,11 +1267,11 @@ oflow:
  * A missing or insecure include dir is simply ignored.
  * Returns false on error, else true.
  */
-bool
-push_include(const char *opath, bool isdir)
+static bool
+push_include_int(const char *opath, bool isdir, int verbose)
 {
     struct path_list *pl;
-    char *path;
+    char *file = NULL, *path;
     FILE *fp;
     debug_decl(push_include, SUDOERS_DEBUG_PARSER);
 
@@ -1213,8 +1283,11 @@ push_include(const char *opath, bool isdir)
 	struct include_stack *new_istack;
 
 	if (idepth > MAX_SUDOERS_DEPTH) {
-	    if (sudoers_warnings)
-		sudo_warnx(U_("%s: %s"), path, U_("too many levels of includes"));
+	    if (verbose > 0) {
+		fprintf(stderr, U_("%s: %s"), path,
+		    U_("too many levels of includes"));
+		fputc('\n', stderr);
+	    }
 	    sudoerserror(NULL);
 	    sudo_rcstr_delref(path);
 	    debug_return_bool(false);
@@ -1232,11 +1305,16 @@ push_include(const char *opath, bool isdir)
     SLIST_INIT(&istack[idepth].more);
     if (isdir) {
 	struct stat sb;
-	int count, status;
+	char dname[PATH_MAX];
+	int count, fd, status;
 
-	status = sudo_secure_dir(path, sudoers_uid, sudoers_gid, &sb);
+	fd = sudo_open_conf_path(path, dname, sizeof(dname), NULL);
+	status = sudo_secure_fd(fd, S_IFDIR, sudoers_file_uid(),
+	    sudoers_file_gid(), &sb);
+	if (fd != -1)
+	    close(fd); /* XXX use in read_dir_files? */
 	if (status != SUDO_PATH_SECURE) {
-	    if (sudoers_warnings) {
+	    if (verbose > 0) {
 		switch (status) {
 		case SUDO_PATH_BAD_TYPE:
 		    errno = ENOTDIR;
@@ -1245,7 +1323,7 @@ push_include(const char *opath, bool isdir)
 		case SUDO_PATH_WRONG_OWNER:
 		    sudo_warnx(U_("%s is owned by uid %u, should be %u"),   
 			path, (unsigned int) sb.st_uid,
-			(unsigned int) sudoers_uid);
+			(unsigned int) sudoers_file_uid());
 		    break;
 		case SUDO_PATH_WORLD_WRITABLE:
 		    sudo_warnx(U_("%s is world writable"), path);
@@ -1253,7 +1331,7 @@ push_include(const char *opath, bool isdir)
 		case SUDO_PATH_GROUP_WRITABLE:
 		    sudo_warnx(U_("%s is owned by gid %u, should be %u"),
 			path, (unsigned int) sb.st_gid,
-			(unsigned int) sudoers_gid);
+			(unsigned int) sudoers_file_gid());
 		    break;
 		default:
 		    break;
@@ -1263,7 +1341,7 @@ push_include(const char *opath, bool isdir)
 	    sudo_rcstr_delref(path);
 	    debug_return_bool(true);
 	}
-	count = switch_dir(&istack[idepth], path);
+	count = switch_dir(&istack[idepth], dname, verbose);
 	if (count <= 0) {
 	    /* switch_dir() called sudoerserror() for us */
 	    sudo_rcstr_delref(path);
@@ -1272,6 +1350,7 @@ push_include(const char *opath, bool isdir)
 
 	/* Parse the first dir entry we can open, leave the rest for later. */
 	do {
+	    sudo_rcstr_delref(file);
 	    sudo_rcstr_delref(path);
 	    if ((pl = SLIST_FIRST(&istack[idepth].more)) == NULL) {
 		/* Unable to open any files in include dir, not an error. */
@@ -1280,28 +1359,48 @@ push_include(const char *opath, bool isdir)
 	    SLIST_REMOVE_HEAD(&istack[idepth].more, entries);
 	    path = pl->path;
 	    free(pl);
-	} while ((fp = open_sudoers(path, false, &keepopen)) == NULL);
+	    /* The file and path and the same for sudoers.d files. */
+	    file = path;
+	    sudo_rcstr_addref(file);
+	} while ((fp = open_sudoers(file, NULL, false, &keepopen)) == NULL);
     } else {
-	if ((fp = open_sudoers(path, true, &keepopen)) == NULL) {
+	if ((fp = open_sudoers(path, &file, true, &keepopen)) == NULL) {
 	    /* The error was already printed by open_sudoers() */
 	    sudoerserror(NULL);
 	    sudo_rcstr_delref(path);
 	    debug_return_bool(false);
 	}
     }
-    /* Push the old (current) file and open the new one. */
-    istack[idepth].path = sudoers; /* push old path (and its ref) */
+    /*
+     * Push the old (current) file and open the new one.
+     * We use the existing refs of sudoers and sudoers_search_path.
+     */
+    istack[idepth].file = sudoers;
+    istack[idepth].path = sudoers_search_path;
     istack[idepth].line = sudolinebuf;
     istack[idepth].bs = YY_CURRENT_BUFFER;
     istack[idepth].lineno = sudolineno;
     istack[idepth].keepopen = keepopen;
     idepth++;
     sudolineno = 1;
-    sudoers = path;
+    sudoers = file;
+    sudoers_search_path = path;
     sudoers_switch_to_buffer(sudoers_create_buffer(fp, YY_BUF_SIZE));
     memset(&sudolinebuf, 0, sizeof(sudolinebuf));
 
     debug_return_bool(true);
+}
+
+bool
+push_include(const char *opath, int verbose)
+{
+    return push_include_int(opath, false, verbose);
+}
+
+bool
+push_includedir(const char *opath, int verbose)
+{
+    return push_include_int(opath, true, verbose);
 }
 
 /*
@@ -1325,12 +1424,15 @@ pop_include(void)
     /* If we are in an include dir, move to the next file. */
     while ((pl = SLIST_FIRST(&istack[idepth - 1].more)) != NULL) {
 	SLIST_REMOVE_HEAD(&istack[idepth - 1].more, entries);
-	fp = open_sudoers(pl->path, false, &keepopen);
+	fp = open_sudoers(pl->path, NULL, false, &keepopen);
 	if (fp != NULL) {
 	    sudolinebuf.len = sudolinebuf.off = 0;
 	    sudolinebuf.toke_start = sudolinebuf.toke_end = 0;
 	    sudo_rcstr_delref(sudoers);
-	    sudoers = pl->path;
+	    sudo_rcstr_delref(sudoers_search_path);
+	    sudoers_search_path = pl->path;
+	    sudoers = sudoers_search_path;
+	    sudo_rcstr_addref(sudoers);
 	    sudolineno = 1;
 	    sudoers_switch_to_buffer(sudoers_create_buffer(fp, YY_BUF_SIZE));
 	    free(pl);
@@ -1347,7 +1449,9 @@ pop_include(void)
 	free(sudolinebuf.buf);
 	sudolinebuf = istack[idepth].line;
 	sudo_rcstr_delref(sudoers);
-	sudoers = istack[idepth].path;
+	sudoers = istack[idepth].file;
+	sudo_rcstr_delref(sudoers_search_path);
+	sudoers_search_path = istack[idepth].path;
 	sudolineno = istack[idepth].lineno;
 	keepopen = istack[idepth].keepopen;
     }

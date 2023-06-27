@@ -80,8 +80,7 @@ sudo_dso_public int main(int argc, char *argv[]);
 /* STUB */
 int
 find_path(const char *infile, char **outfile, struct stat *sbp,
-    const char *path, const char *runchroot, int ignore_dot,
-    char * const *allowlist)
+    const char *path, int ignore_dot, char * const *allowlist)
 {
     if (infile[0] == '/') {
 	*outfile = strdup(infile);

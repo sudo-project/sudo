@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2003-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2003-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * This code is derived from software contributed by Aaron Spangler.
  *
@@ -57,10 +57,6 @@ extern int ldapssl_set_strength(LDAP *ldap, int strength);
 
 #if !defined(LDAP_OPT_NETWORK_TIMEOUT) && defined(LDAP_OPT_CONNECT_TIMEOUT)
 # define LDAP_OPT_NETWORK_TIMEOUT LDAP_OPT_CONNECT_TIMEOUT
-#endif
-
-#ifndef LDAP_OPT_SUCCESS
-# define LDAP_OPT_SUCCESS LDAP_SUCCESS
 #endif
 
 #ifndef LDAPS_PORT
@@ -138,6 +134,7 @@ static struct ldap_config_table ldap_conf_global[] = {
     { "sudoers_search_filter", CONF_STR, -1, &ldap_conf.search_filter },
     { "netgroup_base", CONF_LIST_STR, -1, &ldap_conf.netgroup_base },
     { "netgroup_search_filter", CONF_STR, -1, &ldap_conf.netgroup_search_filter },
+    { "netgroup_query", CONF_BOOL, -1, &ldap_conf.netgroup_query },
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
     { "use_sasl", CONF_BOOL, -1, &ldap_conf.use_sasl },
     { "sasl_mech", CONF_STR, -1, &ldap_conf.sasl_mech },
@@ -358,7 +355,7 @@ sudo_ldap_read_secret(const char *path)
     ssize_t len;
     debug_decl(sudo_ldap_read_secret, SUDOERS_DEBUG_LDAP);
 
-    if ((fp = fopen(path_ldap_secret, "r")) != NULL) {
+    if ((fp = fopen(policy_path_ldap_secret(), "r")) != NULL) {
 	len = getdelim(&line, &linesize, '\n', fp);
 	if (len != -1) {
 	    /* trim newline */
@@ -432,7 +429,7 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
 		    &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx(U_("%s: %s: %s: %s"),
-			path_ldap_conf, keyword, value, U_(errstr));
+			policy_path_ldap_conf(), keyword, value, U_(errstr));
 		}
 		break;
 	    case CONF_STR:
@@ -455,7 +452,7 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
 
 		    if (len > 0) {
 			head = (struct ldap_config_str_list *)cur->valp;
-			if ((str = malloc(sizeof(*str) + len)) == NULL) {
+			if ((str = malloc(sizeof(*str) + len + 1)) == NULL) {
 			    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 			    debug_return_bool(false);
 			}
@@ -556,6 +553,7 @@ sudo_ldap_read_config(void)
     ldap_conf.deref = -1;
     ldap_conf.search_filter = strdup(DEFAULT_SEARCH_FILTER);
     ldap_conf.netgroup_search_filter = strdup(DEFAULT_NETGROUP_SEARCH_FILTER);
+    ldap_conf.netgroup_query = true;
     STAILQ_INIT(&ldap_conf.uri);
     STAILQ_INIT(&ldap_conf.base);
     STAILQ_INIT(&ldap_conf.netgroup_base);
@@ -565,7 +563,7 @@ sudo_ldap_read_config(void)
 	debug_return_bool(false);
     }
 
-    if ((fp = fopen(path_ldap_conf, "r")) == NULL)
+    if ((fp = fopen(policy_path_ldap_conf(), "r")) == NULL)
 	debug_return_bool(false);
 
     while (sudo_parseln(&line, &linesize, NULL, fp, PARSELN_COMM_BOL|PARSELN_CONT_IGN) != -1) {
@@ -598,6 +596,8 @@ sudo_ldap_read_config(void)
 	    debug_return_bool(false);
 	}
     }
+    if (!STAILQ_EMPTY(&ldap_conf.netgroup_base))
+	ldap_conf.netgroup_query = false;
 
     DPRINTF1("LDAP Config Summary");
     DPRINTF1("===================");
@@ -626,6 +626,8 @@ sudo_ldap_read_config(void)
 	STAILQ_FOREACH(conf_str, &ldap_conf.netgroup_base, entries) {
 	    DPRINTF1("netgroup_base    %s", conf_str->val);
 	}
+	DPRINTF1("netgroup_query   %s",
+	    ldap_conf.netgroup_query ? "(yes)" : "(no)");
     } else {
 	DPRINTF1("netgroup_base %s", "(NONE: will use nsswitch)");
     }
@@ -781,7 +783,7 @@ sudo_ldap_read_config(void)
 
     /* If rootbinddn set, read in /etc/ldap.secret if it exists. */
     if (ldap_conf.rootbinddn) {
-	sudo_ldap_read_secret(path_ldap_secret);
+	sudo_ldap_read_secret(policy_path_ldap_secret());
     } else if (ldap_conf.bindpw) {
 	cp = sudo_ldap_decode_secret(ldap_conf.bindpw);
 	if (cp != NULL) {

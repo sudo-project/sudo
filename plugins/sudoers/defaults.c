@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1999-2005, 2007-2022
+ * Copyright (c) 1999-2005, 2007-2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -539,9 +539,6 @@ init_defaults(void)
 #ifdef HAVE_SELINUX
     def_selinux = true;
 #endif
-#ifdef HAVE_INNETGR
-    def_use_netgroups = true;
-#endif
 #ifdef _PATH_SUDO_ADMIN_FLAG
     if ((def_admin_flag = strdup(_PATH_SUDO_ADMIN_FLAG)) == NULL)
 	goto oom;
@@ -550,6 +547,7 @@ init_defaults(void)
 	goto oom;
     def_intercept_type = dso;
     def_intercept_verify = true;
+    def_use_netgroups = true;
     def_netgroup_tuple = false;
     def_sudoedit_checkdir = true;
     def_iolog_mode = S_IRUSR|S_IWUSR;
@@ -559,6 +557,7 @@ init_defaults(void)
     def_log_format = sudo;
     def_runas_allow_unknown_id = false;
     def_noninteractive_auth = false;
+    def_use_pty = true;
 
     /* Syslog options need special care since they both strings and ints */
 #if (LOGGING & SLOG_SYSLOG)
@@ -800,7 +799,7 @@ update_defaults(struct sudoers_parse_tree *parse_tree,
  * Check all defaults entries without actually setting them.
  */
 bool
-check_defaults(struct sudoers_parse_tree *parse_tree, bool quiet)
+check_defaults(const struct sudoers_parse_tree *parse_tree, bool quiet)
 {
     struct defaults *d;
     bool ret = true;

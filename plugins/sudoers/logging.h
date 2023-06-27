@@ -56,6 +56,7 @@ struct log_details {
 #define SLOG_NO_STDERR		0x10	/* do not log via stderr */
 #define SLOG_NO_LOG		0x20	/* do not log via file or syslog */
 #define SLOG_AUDIT		0x40	/* send message to audit as well */
+#define SLOG_PARSE_ERROR	0x80	/* format as a parse error */
 
 typedef bool (*sudoers_logger_t)(const char *file, int line, int column, const char *fmt, va_list args);
 

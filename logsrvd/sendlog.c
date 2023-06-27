@@ -256,7 +256,7 @@ get_free_buf(size_t len, struct client_closure *closure)
     if (len > buf->size) {
 	free(buf->data);
 	buf->size = sudo_pow2_roundup(len);
-	if ((buf->data = malloc(buf->size)) == NULL) {
+	if (buf->size < len || (buf->data = malloc(buf->size)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    free(buf);
 	    buf = NULL;
@@ -285,13 +285,22 @@ read_io_buf(struct client_closure *closure)
 
     /* Expand buf as needed. */
     if (timing->u.nbytes > closure->bufsize) {
-	free(closure->buf);
-	closure->bufsize = sudo_pow2_roundup(timing->u.nbytes);
-	if ((closure->buf = malloc(closure->bufsize)) == NULL) {
+	const size_t new_size = sudo_pow2_roundup(timing->u.nbytes);
+	if (new_size < timing->u.nbytes) {
+	    /* overflow */
+	    errno = ENOMEM;
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    timing->u.nbytes = 0;
 	    debug_return_bool(false);
 	}
+	free(closure->buf);
+	if ((closure->buf = malloc(new_size)) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    closure->bufsize = 0;
+	    timing->u.nbytes = 0;
+	    debug_return_bool(false);
+	}
+	closure->bufsize = new_size;
     }
 
     nread = iolog_read(&closure->iolog_files[timing->event], closure->buf,

@@ -291,7 +291,7 @@ sudo_ev_set_v1(struct sudo_event *ev, int fd, short events,
     /* For SUDO_EV_SIGINFO we use a container to store closure + siginfo_t */
     if (ISSET(events, SUDO_EV_SIGINFO)) {
 	struct sudo_ev_siginfo_container *container =
-	    malloc(sizeof(*container) + sizeof(siginfo_t) - 1);
+	    malloc(sizeof(*container) + sizeof(siginfo_t));
 	if (container == NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"%s: unable to allocate siginfo container", __func__);

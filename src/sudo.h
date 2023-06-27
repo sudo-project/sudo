@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996, 1998-2005, 2007-2022
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -200,7 +200,8 @@ struct command_details {
     struct passwd *pw;
     const char *command;
     const char *runas_user;
-    const char *cwd;
+    const char *runcwd;
+    const char *submitcwd;
     const char *login_class;
     const char *chroot;
     const char *selinux_role;
@@ -210,7 +211,6 @@ struct command_details {
     const char *tty;
     char **argv;
     char **envp;
-    struct sudo_event_base *evbase;
 #ifdef HAVE_PRIV_SET
     priv_set_t *privs;
     priv_set_t *limitprivs;
@@ -225,7 +225,6 @@ struct command_status {
 #define CMD_WSTATUS	2
 #define CMD_SIGNO	3
 #define CMD_PID		4
-#define CMD_TTYWINCH	5
     int type;
     int val;
 };
@@ -243,21 +242,23 @@ void cleanup(int);
 /* tgetpass.c */
 char *tgetpass(const char *prompt, int timeout, int flags,
     struct sudo_conv_callback *callback);
+const struct sudo_cred *sudo_askpass_cred(const struct sudo_cred *cred);
 
 /* exec.c */
-int sudo_execute(struct command_details *details, struct command_status *cstat);
+int sudo_execute(struct command_details *details, const struct user_details *ud, struct sudo_event_base *evbase, struct command_status *cstat);
 
 /* parse_args.c */
-int parse_args(int argc, char **argv, int *old_optind, int *nargc,
-    char ***nargv, struct sudo_settings **settingsp, char ***env_addp);
+int parse_args(int argc, char **argv, const char *shell, int *old_optind,
+    int *nargc, char ***nargv, struct sudo_settings **settingsp,
+    char ***env_addp, const char **list_user);
 extern int tgetpass_flags;
 
 /* get_pty.c */
-bool get_pty(int *leader, int *follower, char *name, size_t namesz, uid_t uid);
+char *get_pty(int *leader, int *follower, uid_t uid);
 
 /* sudo.c */
 int policy_init_session(struct command_details *details);
-int run_command(struct command_details *details);
+int run_command(struct command_details *command_details, const struct user_details *user_details);
 int os_init_common(int argc, char *argv[], char *envp[]);
 bool gc_add(enum sudo_gc_types type, void *v);
 bool set_user_groups(struct command_details *details);
@@ -271,12 +272,10 @@ bool audit_error(const char *plugin_name, unsigned int plugin_type,
     const char *audit_msg, char * const command_info[]);
 bool approval_check(char * const command_info[], char * const run_argv[],
     char * const run_envp[]);
-extern const char *list_user;
-extern struct user_details user_details;
 extern int sudo_debug_instance;
 
 /* sudo_edit.c */
-int sudo_edit(struct command_details *details);
+int sudo_edit(struct command_details *command_details, const struct user_details *user_details);
 
 /* parse_args.c */
 sudo_noreturn void usage(void);
@@ -319,6 +318,7 @@ int get_net_ifs(char **addrinfo);
 
 /* ttyname.c */
 char *get_process_ttyname(char *name, size_t namelen);
+bool sudo_isatty(int fd, struct stat *sb);
 
 /* signal.c */
 struct sigaction;
@@ -335,9 +335,6 @@ void preload_static_symbols(void);
 int add_preserved_fd(struct preserved_fd_list *pfds, int fd);
 void closefrom_except(int startfd, struct preserved_fd_list *pfds);
 void parse_preserved_fds(struct preserved_fd_list *pfds, const char *fdstr);
-
-/* setpgrp_nobg.c */
-int tcsetpgrp_nobg(int fd, pid_t pgrp_id);
 
 /* limits.c */
 void disable_coredump(void);

@@ -97,7 +97,7 @@ sudo_dso_public int sudo_term_kill;
 static volatile sig_atomic_t got_sigttou;
 
 /*
- * SIGTTOU signal handler for term_restore that just sets a flag.
+ * SIGTTOU signal handler for tcsetattr_nobg() that just sets a flag.
  */
 static void
 sigttou(int signo)

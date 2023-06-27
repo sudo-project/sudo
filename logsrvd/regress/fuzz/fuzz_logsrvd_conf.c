@@ -19,11 +19,14 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+#include <limits.h>
+#include <netdb.h>
 #include <regex.h>
 #include <time.h>
 #include <unistd.h>
@@ -64,6 +67,89 @@ sudo_regex_compile_v1(void *v, const char *pattern, const char **errstr)
     memset(preg, 0, sizeof(*preg));
     return true;
 }
+
+/*
+ * The fuzzing environment may not have DNS available, this may result
+ * in long delays that cause a timeout when fuzzing.
+ * This getaddrinfo() resolves every name as "localhost" (127.0.0.1).
+ */
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+/* Avoid compilation errors if getaddrinfo() or freeaddrinfo() are macros. */
+# undef getaddrinfo
+# undef freeaddrinfo
+
+int
+# ifdef HAVE_GETADDRINFO
+getaddrinfo(
+# else
+sudo_getaddrinfo(
+# endif
+    const char *nodename, const char *servname,
+    const struct addrinfo *hints, struct addrinfo **res)
+{
+    struct addrinfo *ai;
+    struct in_addr addr;
+    unsigned short port = 0;
+
+    /* Stub getaddrinfo(3) to avoid a DNS timeout in CIfuzz. */
+    if (servname == NULL) {
+	/* Must have either nodename or servname. */
+	if (nodename == NULL)
+	    return EAI_NONAME;
+    } else {
+	struct servent *servent;
+	const char *errstr;
+
+	/* Parse servname as a port number or IPv4 TCP service name. */
+	port = sudo_strtonum(servname, 0, USHRT_MAX, &errstr);
+	if (errstr != NULL && errno == ERANGE)
+	    return EAI_SERVICE;
+	if (hints != NULL && ISSET(hints->ai_flags, AI_NUMERICSERV))
+	    return EAI_NONAME;
+	servent = getservbyname(servname, "tcp");
+	if (servent == NULL)
+	    return EAI_NONAME;
+	port = htons(servent->s_port);
+    }
+
+    /* Hard-code IPv4 localhost for fuzzing. */
+    ai = calloc(1, sizeof(*ai) + sizeof(struct sockaddr_in));
+    if (ai == NULL)
+	return EAI_MEMORY;
+    ai->ai_canonname = strdup("localhost");
+    if (ai == NULL) {
+	free(ai);
+	return EAI_MEMORY;
+    }
+    ai->ai_family = AF_INET;
+    ai->ai_protocol = IPPROTO_TCP;
+    ai->ai_addrlen = sizeof(struct sockaddr_in);
+    ai->ai_addr = (struct sockaddr *)(ai + 1);
+    inet_pton(AF_INET, "127.0.0.1", &addr);
+    ((struct sockaddr_in *)ai->ai_addr)->sin_family = AF_INET;
+    ((struct sockaddr_in *)ai->ai_addr)->sin_addr = addr;
+    ((struct sockaddr_in *)ai->ai_addr)->sin_port = htons(port);
+    *res = ai;
+    return 0;
+}
+
+void
+# ifdef HAVE_GETADDRINFO
+freeaddrinfo(struct addrinfo *ai)
+# else
+sudo_freeaddrinfo(struct addrinfo *ai)
+# endif
+{
+    struct addrinfo *next;
+
+    while (ai != NULL) {
+	next = ai->ai_next;
+	free(ai->ai_canonname);
+	free(ai);
+	ai = next;
+    }
+}
+#endif /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
 
 static int
 fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2018-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2018-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -126,7 +126,7 @@ print_attribute_ldif(FILE *fp, const char *name, const char *value)
  * Print sudoOptions from a defaults_list.
  */
 static bool
-print_options_ldif(FILE *fp, struct defaults_list *options)
+print_options_ldif(FILE *fp, const struct defaults_list *options)
 {
     struct defaults *opt;
     char *attr_val;
@@ -161,8 +161,8 @@ print_options_ldif(FILE *fp, struct defaults_list *options)
  * Print global Defaults in a single sudoRole object.
  */
 static bool
-print_global_defaults_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
-    const char *base)
+print_global_defaults_ldif(FILE *fp,
+    const struct sudoers_parse_tree *parse_tree, const char *base)
 {
     unsigned int count = 0;
     struct sudo_lbuf lbuf;
@@ -258,8 +258,8 @@ format_cmnd(struct sudo_command *c, bool negated)
  * See print_member_int() in parse.c.
  */
 static void
-print_member_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree, char *name,
-    int type, bool negated, int alias_type, const char *attr_name)
+print_member_ldif(FILE *fp, const struct sudoers_parse_tree *parse_tree,
+    char *name, int type, bool negated, int alias_type, const char *attr_name)
 {
     struct alias *a;
     struct member *m;
@@ -313,7 +313,7 @@ print_member_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree, char *name,
  * merge adjacent entries that are identical in all but the command.
  */
 static void
-print_cmndspec_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
+print_cmndspec_ldif(FILE *fp, const struct sudoers_parse_tree *parse_tree,
     struct cmndspec *cs, struct cmndspec **nextp, struct defaults_list *options)
 {
     char timebuf[sizeof("20120727121554Z")];
@@ -607,7 +607,7 @@ bad:
  * Print a single User_Spec.
  */
 static bool
-print_userspec_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
+print_userspec_ldif(FILE *fp, const struct sudoers_parse_tree *parse_tree,
     struct userspec *us, struct cvtsudoers_config *conf)
 {
     struct privilege *priv;
@@ -676,7 +676,7 @@ print_userspec_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
  * Print User_Specs.
  */
 static bool
-print_userspecs_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
+print_userspecs_ldif(FILE *fp, const struct sudoers_parse_tree *parse_tree,
     struct cvtsudoers_config *conf)
 {
     struct userspec *us;
@@ -693,7 +693,7 @@ print_userspecs_ldif(FILE *fp, struct sudoers_parse_tree *parse_tree,
  * Export the parsed sudoers file in LDIF format.
  */
 bool
-convert_sudoers_ldif(struct sudoers_parse_tree *parse_tree,
+convert_sudoers_ldif(const struct sudoers_parse_tree *parse_tree,
     const char *output_file, struct cvtsudoers_config *conf)
 {
     bool ret = true;

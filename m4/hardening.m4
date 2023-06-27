@@ -10,14 +10,9 @@ AC_DEFUN([SUDO_CHECK_HARDENING], [
 	    [sudo_cv_use_fortify_source],
 	    [AC_LINK_IFELSE([
 		    AC_LANG_PROGRAM(
-			[[]], [[char buf[4]; (void)sprintf(buf, "%s", "foo");]]
+			[[#include <stdio.h>]],
+			[[char buf[4]; sprintf(buf, "%s", "foo"); return buf[0];]]
 		    )],
-		    [sudo_cv_use_fortify_source=yes],
-		    [sudo_cv_use_fortify_source=no]
-		)
-	    ]
-	    [AC_LINK_IFELSE(
-		[AC_LANG_PROGRAM([[]], [[]])],
 		    [sudo_cv_use_fortify_source=yes],
 		    [sudo_cv_use_fortify_source=no]
 		)

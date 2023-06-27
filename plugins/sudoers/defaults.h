@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1999-2005, 2008-2022
+ * Copyright (c) 1999-2005, 2008-2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -145,7 +145,7 @@ void dump_default(void);
 bool init_defaults(void);
 bool set_default(const char *var, const char *val, int op, const char *file, int line, int column, bool quiet);
 bool update_defaults(struct sudoers_parse_tree *parse_tree, struct defaults_list *defs, int what, bool quiet);
-bool check_defaults(struct sudoers_parse_tree *parse_tree, bool quiet);
+bool check_defaults(const struct sudoers_parse_tree *parse_tree, bool quiet);
 bool append_default(const char *var, const char *val, int op, char *source, struct defaults_list *defs);
 bool cb_passprompt_regex(const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
 

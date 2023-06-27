@@ -83,7 +83,7 @@ The customized Plugin class should define a few plugin-specific methods.
 When the plugin loads,
 .Nm sudo
 will create an instance of this class and call the methods.
-The actual methods required depent on the type of the plugin,
+The actual methods required depend on the type of the plugin,
 but most return an
 .Vt int
 result code, as documented in

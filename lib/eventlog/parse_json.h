@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2020, 2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,15 +16,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IOLOG_JSON_H
-#define IOLOG_JSON_H
+#ifndef PARSE_JSON_H
+#define PARSE_JSON_H
 
 #include "sudo_json.h"
 #include "sudo_queue.h"
 
 TAILQ_HEAD(json_item_list, json_item);
 
-struct json_object {
+struct eventlog_json_object {
     struct json_item *parent;
     struct json_item_list items;
 };
@@ -35,7 +35,7 @@ struct json_item {
     unsigned int lineno;
     enum json_value_type type;
     union {
-	struct json_object child;
+	struct eventlog_json_object child;
 	char *string;
 	long long number;
 	id_t id;
@@ -43,8 +43,4 @@ struct json_item {
     } u;
 };
 
-void free_json_items(struct json_item_list *items);
-bool iolog_parse_json(FILE *fp, const char *filename, struct json_object *root);
-char **json_array_to_strvec(struct json_object *array);
-
-#endif /* IOLOG_JSON_H */
+#endif /* PARSE_JSON_H */

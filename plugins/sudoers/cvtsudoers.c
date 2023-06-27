@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2018-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2018-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -35,6 +35,7 @@
 #endif /* HAVE_STRINGS_H */
 #include <ctype.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <pwd.h>
 #include <unistd.h>
 #ifdef HAVE_GETOPT_LONG
@@ -112,7 +113,7 @@ main(int argc, char *argv[])
     enum sudoers_formats input_format = format_sudoers;
     const char *input_file = "-";
     const char *output_file = "-";
-    const char *conf_file = _PATH_CVTSUDOERS_CONF;
+    const char *conf_file = NULL;
     const char *grfile = NULL, *pwfile = NULL;
     const char *cp, *errstr;
     int ch, exitcode = EXIT_FAILURE;
@@ -134,7 +135,7 @@ main(int argc, char *argv[])
     textdomain("sudoers");
 
     /* Initialize early, before any "goto done". */
-    init_parse_tree(&merged_tree, NULL, NULL);
+    init_parse_tree(&merged_tree, NULL, NULL, NULL);
 
     /* Read debug and plugin sections of sudo.conf. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG|SUDO_CONF_PLUGINS) == -1)
@@ -390,7 +391,7 @@ main(int argc, char *argv[])
 	parse_tree = malloc(sizeof(*parse_tree));
 	if (parse_tree == NULL)
 	    sudo_fatalx("%s", U_("unable to allocate memory"));
-	init_parse_tree(parse_tree, lhost, shost);
+	init_parse_tree(parse_tree, lhost, shost, NULL);
 	TAILQ_INSERT_TAIL(&parse_trees, parse_tree, entries);
 
 	/* Setup defaults data structures. */
@@ -548,36 +549,56 @@ cvtsudoers_parse_keyword(const char *conf_file, const char *keyword,
 }
 
 static struct cvtsudoers_config *
-cvtsudoers_conf_read(const char *conf_file)
+cvtsudoers_conf_read(const char *path)
 {
-    char *line = NULL;
+    char conf_file[PATH_MAX], *line = NULL;
     size_t linesize = 0;
-    FILE *fp;
+    FILE *fp = NULL;
+    int fd = -1;
     debug_decl(cvtsudoers_conf_read, SUDOERS_DEBUG_UTIL);
 
-    if ((fp = fopen(conf_file, "r")) == NULL)
+    if (path != NULL) {
+	/* Empty string means use the defaults. */
+	if (*path == '\0')
+	    debug_return_ptr(&cvtsudoers_config);
+	if (strlcpy(conf_file, path, sizeof(conf_file)) >= sizeof(conf_file))
+	    errno = ENAMETOOLONG;
+	else 
+	    fd = open(conf_file, O_RDONLY);
+    } else {
+	fd = sudo_open_conf_path(_PATH_CVTSUDOERS_CONF, conf_file,
+	    sizeof(conf_file), NULL);
+    }
+    if (fd != -1)
+	fp = fdopen(fd, "r");
+    if (fp == NULL) {
+	if (path != NULL || errno != ENOENT)
+	    sudo_warn("%s", conf_file);
 	debug_return_ptr(&cvtsudoers_config);
+    }
 
     while (sudo_parseln(&line, &linesize, NULL, fp, 0) != -1) {
-	char *cp, *keyword, *value;
+	char *keyword, *value;
+	size_t len;
 
 	if (*line == '\0')
 	    continue;		/* skip empty line */
 
 	/* Parse keyword = value */
 	keyword = line;
-	if ((cp = strchr(line, '=')) == NULL)
+	if ((value = strchr(line, '=')) == NULL || value == line)
 	    continue;
-	value = cp-- + 1;
+	len = value - line;
 
-	/* Trim whitespace after keyword. */
-	while (cp != line && isblank((unsigned char)cp[-1]))
-	    cp--;
-	*cp = '\0';
+	/* Trim whitespace after keyword and NUL-terminate. */
+	while (len > 0 && isblank((unsigned char)line[len - 1]))
+	    len--;
+	line[len] = '\0';
 
 	/* Trim whitespace before value. */
-	while (isblank((unsigned char)*value))
+	do {
 	    value++;
+	} while (isblank((unsigned char)*value));
 
 	/* Look up keyword in config tables */
 	if (!cvtsudoers_parse_keyword(conf_file, keyword, value, cvtsudoers_conf_vars))
@@ -749,7 +770,7 @@ parse_sudoers(const char *input_file, struct cvtsudoers_config *conf)
 	input_file = "stdin";
     } else if ((sudoersin = fopen(input_file, "r")) == NULL)
 	sudo_fatal(U_("unable to open %s"), input_file);
-    init_parser(input_file, false, true);
+    init_parser(input_file, NULL);
     if (sudoersparse() && !parse_error) {
 	sudo_warnx(U_("failed to parse %s file, unknown error"), input_file);
 	parse_error = true;
@@ -758,7 +779,7 @@ parse_sudoers(const char *input_file, struct cvtsudoers_config *conf)
 }
 
 FILE *
-open_sudoers(const char *file, bool doedit, bool *keepopen)
+open_sudoers(const char *file, char **outfile, bool doedit, bool *keepopen)
 {
     return fopen(file, "r");
 }

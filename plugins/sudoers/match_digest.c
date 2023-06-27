@@ -39,7 +39,7 @@
 #include <gram.h>
 
 bool
-digest_matches(int fd, const char *path, const char *runchroot,
+digest_matches(int fd, const char *path,
     const struct command_digest_list *digests)
 {
     unsigned int digest_type = SUDO_DIGEST_INVALID;
@@ -47,7 +47,6 @@ digest_matches(int fd, const char *path, const char *runchroot,
     unsigned char *sudoers_digest = NULL;
     struct command_digest *digest;
     size_t digest_len = (size_t)-1;
-    char pathbuf[PATH_MAX];
     bool matched = false;
     debug_decl(digest_matches, SUDOERS_DEBUG_MATCH);
 
@@ -59,16 +58,6 @@ digest_matches(int fd, const char *path, const char *runchroot,
     if (fd == -1) {
 	/* No file, no match. */
 	goto done;
-    }
-
-    if (runchroot != NULL) {
-	const int len =
-	    snprintf(pathbuf, sizeof(pathbuf), "%s%s", runchroot, path);
-	if (len >= ssizeof(pathbuf)) {
-	    errno = ENAMETOOLONG;
-	    debug_return_bool(false);
-	}
-	path = pathbuf;
     }
 
     TAILQ_FOREACH(digest, digests, entries) {

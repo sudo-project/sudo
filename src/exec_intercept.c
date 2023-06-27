@@ -98,7 +98,7 @@ enable_write_event(int fd, sudo_ev_callback_t callback,
  */
 void *
 intercept_setup(int fd, struct sudo_event_base *evbase,
-    struct command_details *details)
+    const struct command_details *details)
 {
     struct intercept_closure *closure;
     debug_decl(intercept_setup, SUDO_DEBUG_EXEC);
@@ -199,13 +199,19 @@ intercept_connection_close(struct intercept_closure *closure)
 }
 
 void
-intercept_cleanup(void)
+intercept_cleanup(struct exec_closure *ec)
 {
     debug_decl(intercept_cleanup, SUDO_DEBUG_EXEC);
 
     if (accept_closure != NULL) {
+	/* DSO-based intercept. */
 	intercept_connection_close(accept_closure);
 	accept_closure = NULL;
+    } else if (ec->intercept != NULL) {
+	/* ptrace-based intercept. */
+	intercept_closure_reset(ec->intercept);
+	free(ec->intercept);
+	ec->intercept = NULL;
     }
 
     debug_return;
@@ -450,10 +456,11 @@ intercept_check_policy(const char *command, int argc, char **argv, int envc,
 	    goto oom;
 
 	/* Rebuild command_info[] with new command and runcwd. */
-	command_info = update_command_info(closure->details->info,
+	command_info_copy = update_command_info(closure->details->info,
 	    command, runcwd, NULL, closure);
-	if (command_info == NULL)
+	if (command_info_copy == NULL)
 	    goto oom;
+	command_info = command_info_copy;
 	closure->state = POLICY_ACCEPT;
 	run_argv = argv;
     }
@@ -1079,7 +1086,7 @@ bad:
 #else /* _PATH_SUDO_INTERCEPT */
 void *
 intercept_setup(int fd, struct sudo_event_base *evbase,
-    struct command_details *details)
+    const struct command_details *details)
 {
     debug_decl(intercept_setup, SUDO_DEBUG_EXEC);
 
@@ -1089,7 +1096,7 @@ intercept_setup(int fd, struct sudo_event_base *evbase,
 }
 
 void
-intercept_cleanup(void)
+intercept_cleanup(struct exec_closure *ec)
 {
     debug_decl(intercept_cleanup, SUDO_DEBUG_EXEC);
 

@@ -24,6 +24,7 @@
 #include <config.h>
 
 #include <sys/stat.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
@@ -95,6 +96,21 @@ sudo_secure_dir_v1(const char *path, uid_t uid, gid_t gid, struct stat *sb)
 }
 
 /*
+ * Verify that fd matches type and not writable by other users.
+ */
+int
+sudo_secure_fd_v1(int fd, unsigned int type, uid_t uid, gid_t gid,
+    struct stat *sb)
+{
+    int ret = SUDO_PATH_MISSING;
+    debug_decl(sudo_secure_fd, SUDO_DEBUG_UTIL);
+
+    if (fd != -1 && fstat(fd, sb) == 0)
+	ret = sudo_check_secure(sb, type, uid, gid);
+    debug_return_int(ret);
+}
+
+/*
  * Open path read-only as long as it is not writable by other users.
  * Returns an open file descriptor on success, else -1.
  * Sets error to SUDO_PATH_SECURE on success, and a value < 0 on failure.
@@ -142,4 +158,46 @@ sudo_secure_open_dir_v1(const char *path, uid_t uid, gid_t gid,
     struct stat *sb, int *error)
 {
     return sudo_secure_open(path, S_IFDIR, uid, gid, sb, error);
+}
+
+/*
+ * Open the first file found in a colon-separated list of paths.
+ * Subsequent files in the path are only attempted if the
+ * previous file does not exist.  Errors other than ENOENT are
+ * considered fatal and will stop processing the path.
+ * Sets name based on the last file it tried to open, even on error.
+ */
+int
+sudo_open_conf_path_v1(const char *path, char *name, size_t namesize,
+    int (*fn)(const char *, int))
+{
+    const char *cp, *ep, *path_end;
+    int fd = -1;
+    debug_decl(sudo_open_conf_path, SUDO_DEBUG_UTIL);
+
+    path_end = path + strlen(path);
+    for (cp = sudo_strsplit(path, path_end, ":", &ep);
+	cp != NULL; cp = sudo_strsplit(NULL, path_end, ":", &ep)) {
+
+	const size_t len = ep - cp;
+	if (len >= namesize) {
+	    /* We always set name, even on error. */
+	    memcpy(name, cp, namesize - 1);
+	    name[namesize - 1] = '\0';
+	    errno = ENAMETOOLONG;
+	    break;
+	}
+	memcpy(name, cp, len);
+	name[len] = '\0';
+
+	fd = fn ?
+	    fn(name, O_RDONLY|O_NONBLOCK) : open(name, O_RDONLY|O_NONBLOCK);
+	if (fd != -1) {
+	    (void)fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
+	    break;
+	}
+	if (errno != ENOENT)
+	    break;
+    }
+    debug_return_int(fd);
 }

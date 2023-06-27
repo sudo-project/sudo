@@ -37,7 +37,7 @@ struct passwd *list_pw;
 sudo_printf_t sudo_printf = fuzz_printf;
 
 FILE *
-open_sudoers(const char *file, bool doedit, bool *keepopen)
+open_sudoers(const char *file, char **outfile, bool doedit, bool *keepopen)
 {
     /*
      * If we allow the fuzzer to choose include paths it will
@@ -139,7 +139,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     /* Initialize defaults and parse LDIF-format sudoers. */
     init_defaults();
-    init_parse_tree(&parse_tree, NULL, NULL);
+    init_parse_tree(&parse_tree, NULL, NULL, NULL);
     sudoers_parse_ldif(&parse_tree, fp, "ou=SUDOers,dc=sudo,dc=ws", true);
 
     /* Cleanup. */

@@ -37,6 +37,7 @@ exec_prefix = @exec_prefix@
 bindir = @bindir@
 sbindir = @sbindir@
 sysconfdir = @sysconfdir@
+adminconfdir = @adminconfdir@
 libexecdir = @libexecdir@
 datarootdir = @datarootdir@
 localstatedir = @localstatedir@
@@ -65,7 +66,7 @@ INSTALL_OWNER = -o $(install_uid) -g $(install_gid)
 INSTALL_BACKUP = @INSTALL_BACKUP@
 
 # C preprocessor defines
-CPPDEFS = -D_PATH_SUDO_CONF=\"$(sysconfdir)/sudo.conf\"
+CPPDEFS = -D_PATH_SUDO_CONF=\"@sudo_conf@\"
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I. -I$(srcdir) $(CPPDEFS) \
@@ -111,11 +112,11 @@ PVS_IGNORE = 'V707,V011,V002,V536'
 PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
 
 # Regression tests
-TEST_PROGS = conf_test getgids getgrouplist_test hexchar_test hltq_test \
-	     json_test multiarch_test open_parent_dir_test parse_gids_test \
-	     parseln_test progname_test regex_test strsplit_test \
-	     strtobool_test strtoid_test strtomode_test strtonum_test \
-	     uuid_test @COMPAT_TEST_PROGS@
+TEST_PROGS = conf_test digest_test getgids getgrouplist_test hexchar_test \
+	     hltq_test json_test multiarch_test open_parent_dir_test \
+	     parse_gids_test parseln_test progname_test regex_test \
+	     strsplit_test strtobool_test strtoid_test strtomode_test \
+	     strtonum_test uuid_test @COMPAT_TEST_PROGS@
 
 TEST_LIBS = @LIBS@
 TEST_LDFLAGS = @LDFLAGS@
@@ -166,6 +167,8 @@ PROGNAME_TEST_OBJS = progname_test.lo progname.lo basename.lo
 CLOSEFROM_TEST_OBJS = closefrom_test.lo closefrom.lo
 
 CONF_TEST_OBJS = conf_test.lo sudo_conf.lo
+
+DIGEST_TEST_OBJS = digest_test.lo @DIGEST@
 
 FNM_TEST_OBJS = fnm_test.lo fnmatch.lo
 
@@ -242,9 +245,9 @@ $(shlib_opt): $(shlib_exp)
 libsudo_util.la: $(LTOBJS) @LT_LDDEP@
 	case "$(LT_LDFLAGS)" in \
 	*-no-install*) \
-	    $(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LDFLAGS) $(LT_LDFLAGS) $(LTOBJS) @LT_DEP_LIBS@ @LIBINTL@ @LIBMD@ @LIBCRYPTO@ @LIBPTHREAD@ @LIBDL@ @LIBRT@ @NET_LIBS@;; \
+	    $(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LDFLAGS) $(LT_LDFLAGS) $(LTOBJS) @LT_DEP_LIBS@ @LIBINTL@ @LIBCRYPTO@ @LIBPTHREAD@ @LIBDL@ @LIBRT@ @NET_LIBS@;; \
 	*) \
-	    $(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LDFLAGS) $(ASAN_LDFLAGS) $(HARDENING_LDFLAGS) $(LT_LDFLAGS) $(LTOBJS) -version-info $(SHLIB_VERSION) -rpath $(libexecdir)/sudo @LT_DEP_LIBS@ @LIBINTL@ @LIBMD@ @LIBCRYPTO@ @LIBPTHREAD@ @LIBDL@ @LIBRT@ @NET_LIBS@;; \
+	    $(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LDFLAGS) $(ASAN_LDFLAGS) $(HARDENING_LDFLAGS) $(LT_LDFLAGS) $(LTOBJS) -version-info $(SHLIB_VERSION) -rpath $(libexecdir)/sudo @LT_DEP_LIBS@ @LIBINTL@ @LIBCRYPTO@ @LIBPTHREAD@ @LIBDL@ @LIBRT@ @NET_LIBS@;; \
 	esac
 
 siglist.c: mksiglist
@@ -280,6 +283,9 @@ closefrom_test: $(CLOSEFROM_TEST_OBJS) libsudo_util.la
 
 conf_test: $(CONF_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CONF_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
+
+digest_test: $(DIGEST_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(DIGEST_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS) @LIBCRYPTO@
 
 fnm_test: $(FNM_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(FNM_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
@@ -407,7 +413,7 @@ install-fuzzer: $(FUZZ_PROGS) $(FUZZ_SEED_CORPUS)
 uninstall:
 	$(LIBTOOL) $(LTFLAGS) --mode=uninstall rm -f $(DESTDIR)$(libexecdir)/sudo/libsudo_util.la
 	-test -z "$(INSTALL_BACKUP)" || \
-	    rf -f $(DESTDIR)$(libexecdir)/sudo/libsudo_util.*~
+	    rm -f $(DESTDIR)$(libexecdir)/sudo/libsudo_util.*~
 
 splint:
 	splint $(SPLINT_OPTS) -I$(incdir) -I$(top_builddir) $(srcdir)/*.c
@@ -449,6 +455,7 @@ check: $(TEST_PROGS) check-fuzzer
 	    if test -f closefrom_test; then \
 		./closefrom_test || rval=`expr $$rval + $$?`; \
 	    fi; \
+	    ./digest_test || rval=`expr $$rval + $$?`; \
 	    if test -f fnm_test; then \
 		./fnm_test $(srcdir)/regress/fnmatch/fnm_test.in || rval=`expr $$rval + $$?`; \
 	    fi; \
@@ -471,9 +478,16 @@ check: $(TEST_PROGS) check-fuzzer
 		./strsig_test || rval=`expr $$rval + $$?`; \
 	    fi; \
 	    ./getgrouplist_test || rval=`expr $$rval + $$?`; \
+	    ./hexchar_test || rval=`expr $$rval + $$?`; \
+	    ./hltq_test || rval=`expr $$rval + $$?`; \
+	    ./json_test || rval=`expr $$rval + $$?`; \
 	    ./multiarch_test || rval=`expr $$rval + $$?`; \
 	    ./open_parent_dir_test || rval=`expr $$rval + $$?`; \
 	    ./parse_gids_test || rval=`expr $$rval + $$?`; \
+	    ./progname_test || rval=`expr $$rval + $$?`; \
+	    rm -f ./progname_test2; ln -s ./progname_test ./progname_test2; \
+	    ./progname_test2 || rval=`expr $$rval + $$?`; \
+	    rm -f ./progname_test2; \
 	    ./regex_test || rval=`expr $$rval + $$?`; \
 	    ./strsplit_test || rval=`expr $$rval + $$?`; \
 	    ./strtobool_test || rval=`expr $$rval + $$?`; \
@@ -481,13 +495,6 @@ check: $(TEST_PROGS) check-fuzzer
 	    ./strtomode_test || rval=`expr $$rval + $$?`; \
 	    ./strtonum_test || rval=`expr $$rval + $$?`; \
 	    ./uuid_test || rval=`expr $$rval + $$?`; \
-	    ./hltq_test || rval=`expr $$rval + $$?`; \
-	    ./hexchar_test || rval=`expr $$rval + $$?`; \
-	    ./json_test || rval=`expr $$rval + $$?`; \
-	    ./progname_test || rval=`expr $$rval + $$?`; \
-	    rm -f ./progname_test2; ln -s ./progname_test ./progname_test2; \
-	    ./progname_test2 || rval=`expr $$rval + $$?`; \
-	    rm -f ./progname_test2; \
 	    AWK=$(AWK) $(HARNESS) sudo_conf || rval=`expr $$rval + $$?`; \
 	    AWK=$(AWK) $(HARNESS) sudo_parseln || rval=`expr $$rval + $$?`; \
 	    exit $$rval; \
@@ -651,6 +658,20 @@ digest_openssl.i: $(srcdir)/digest_openssl.c $(incdir)/compat/stdbool.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 digest_openssl.plog: digest_openssl.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/digest_openssl.c --i-file $< --output-file $@
+digest_test.lo: $(srcdir)/regress/digest/digest_test.c \
+                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                $(incdir)/sudo_digest.h $(incdir)/sudo_fatal.h \
+                $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
+                $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/digest/digest_test.c
+digest_test.i: $(srcdir)/regress/digest/digest_test.c \
+                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                $(incdir)/sudo_digest.h $(incdir)/sudo_fatal.h \
+                $(incdir)/sudo_plugin.h $(incdir)/sudo_util.h \
+                $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+digest_test.plog: digest_test.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/digest/digest_test.c --i-file $< --output-file $@
 dup3.lo: $(srcdir)/dup3.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/dup3.c
 dup3.i: $(srcdir)/dup3.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
@@ -793,12 +814,6 @@ getaddrinfo.i: $(srcdir)/getaddrinfo.c $(incdir)/compat/getaddrinfo.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 getaddrinfo.plog: getaddrinfo.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/getaddrinfo.c --i-file $< --output-file $@
-getcwd.lo: $(srcdir)/getcwd.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/getcwd.c
-getcwd.i: $(srcdir)/getcwd.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
-getcwd.plog: getcwd.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/getcwd.c --i-file $< --output-file $@
 getdelim.lo: $(srcdir)/getdelim.c $(incdir)/sudo_compat.h \
              $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/getdelim.c
@@ -1041,11 +1056,11 @@ key_val.plog: key_val.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/key_val.c --i-file $< --output-file $@
 lbuf.lo: $(srcdir)/lbuf.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
          $(incdir)/sudo_debug.h $(incdir)/sudo_lbuf.h $(incdir)/sudo_queue.h \
-         $(top_builddir)/config.h
+         $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/lbuf.c
 lbuf.i: $(srcdir)/lbuf.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
          $(incdir)/sudo_debug.h $(incdir)/sudo_lbuf.h $(incdir)/sudo_queue.h \
-         $(top_builddir)/config.h
+         $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 lbuf.plog: lbuf.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/lbuf.c --i-file $< --output-file $@
@@ -1311,6 +1326,12 @@ reallocarray.i: $(srcdir)/reallocarray.c $(incdir)/sudo_compat.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 reallocarray.plog: reallocarray.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/reallocarray.c --i-file $< --output-file $@
+realpath.lo: $(srcdir)/realpath.c $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/realpath.c
+realpath.i: $(srcdir)/realpath.c $(top_builddir)/config.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+realpath.plog: realpath.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/realpath.c --i-file $< --output-file $@
 regex.lo: $(srcdir)/regex.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
           $(incdir)/sudo_debug.h $(incdir)/sudo_gettext.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(top_builddir)/config.h

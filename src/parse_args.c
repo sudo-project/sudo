@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996, 1998-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1993-1996, 1998-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -226,12 +226,14 @@ parse_env_list(struct environment *e, char *list)
  * for the command to be run (if we are running one).
  */
 int
-parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
-    struct sudo_settings **settingsp, char ***env_addp)
+parse_args(int argc, char **argv, const char *shell, int *old_optind,
+    int *nargc, char ***nargv, struct sudo_settings **settingsp,
+    char ***env_addp, const char **list_userp)
 {
     const char *progname, *short_opts = sudo_short_opts;
     struct option *long_opts = sudo_long_opts;
     struct environment extra_env;
+    const char *list_user = NULL;
     int mode = 0;		/* what mode is sudo to be run in? */
     int flags = 0;		/* mode flags */
     int valid_flags = DEFAULT_VALID_FLAGS;
@@ -646,7 +648,7 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
 	if (!gc_add(GC_PTR, av))
 	    exit(EXIT_FAILURE);
 
-	av[0] = (char *)user_details.shell; /* plugin may override shell */
+	av[0] = (char *)shell;	/* plugin may override shell */
 	if (cmnd != NULL) {
 	    av[1] = (char *)"-c";
 	    av[2] = cmnd;
@@ -689,19 +691,8 @@ parse_args(int argc, char **argv, int *old_optind, int *nargc, char ***nargv,
     *env_addp = extra_env.envp;
     *nargc = argc;
     *nargv = argv;
+    *list_userp = list_user;
     debug_return_int(mode | flags);
-}
-
-static int
-usage_err(const char *buf)
-{
-    return fputs(buf, stderr);
-}
-
-static int
-usage_out(const char *buf)
-{
-    return fputs(buf, stdout);
 }
 
 /*
@@ -709,40 +700,26 @@ usage_out(const char *buf)
  * The actual usage strings are in sudo_usage.h for configure substitution.
  */
 static void
-display_usage(int (*output)(const char *))
+display_usage(FILE *fp)
 {
-    struct sudo_lbuf lbuf;
-    const char *uvec[6];
-    int i, ulen;
+    const char * const **uvecs = sudo_usage;
+    const char * const *uvec;
+    int i, indent;
 
     /*
      * Use usage vectors appropriate to the progname.
      */
-    if (strcmp(getprogname(), "sudoedit") == 0) {
-	uvec[0] = SUDO_USAGE0;
-	uvec[1] = &SUDO_USAGE5[3];	/* skip the leading "-e " */
-	uvec[2] = NULL;
-    } else {
-	uvec[0] = SUDO_USAGE1;
-	uvec[1] = SUDO_USAGE2;
-	uvec[2] = SUDO_USAGE3;
-	uvec[3] = SUDO_USAGE4;
-	uvec[4] = SUDO_USAGE5;
-	uvec[5] = NULL;
-    }
+    if (strcmp(getprogname(), "sudoedit") == 0)
+	uvecs = sudoedit_usage;
 
-    /*
-     * Print usage and wrap lines as needed, depending on the
-     * tty width.
-     */
-    ulen = (int)strlen(getprogname()) + 8;
-    sudo_lbuf_init(&lbuf, output, ulen, NULL,
-	user_details.ts_cols);
-    for (i = 0; uvec[i] != NULL; i++) {
-	sudo_lbuf_append(&lbuf, "usage: %s%s", getprogname(), uvec[i]);
-	sudo_lbuf_print(&lbuf);
+    indent = strlen(getprogname()) + 8;
+    while ((uvec = *uvecs) != NULL) {
+	(void)fprintf(fp, "usage: %s %s\n", getprogname(), uvec[0]);
+	for (i = 1; uvec[i] != NULL; i++) {
+	    (void)fprintf(fp, "%*s%s\n", indent, "", uvec[i]);
+	}
+	uvecs++;
     }
-    sudo_lbuf_destroy(&lbuf);
 }
 
 /*
@@ -751,7 +728,7 @@ display_usage(int (*output)(const char *))
 void
 usage(void)
 {
-    display_usage(usage_err);
+    display_usage(stderr);
     exit(EXIT_FAILURE);
 }
 
@@ -781,6 +758,12 @@ usage_excl_ticket(void)
     usage();
 }
 
+static int
+help_out(const char *buf)
+{
+    return fputs(buf, stdout);
+}
+
 static void
 help(void)
 {
@@ -790,17 +773,15 @@ help(void)
     bool sudoedit = false;
     debug_decl(help, SUDO_DEBUG_ARGS);
 
-    sudo_lbuf_init(&lbuf, usage_out, indent, NULL, user_details.ts_cols);
     if (strcmp(pname, "sudoedit") == 0) {
 	sudoedit = true;
-	sudo_lbuf_append(&lbuf, _("%s - edit files as another user\n\n"), pname);
+	(void)printf(_("%s - edit files as another user\n\n"), pname);
     } else {
-	sudo_lbuf_append(&lbuf, _("%s - execute a command as another user\n\n"), pname);
+	(void)printf(_("%s - execute a command as another user\n\n"), pname);
     }
-    sudo_lbuf_print(&lbuf);
+    display_usage(stdout);
 
-    display_usage(usage_out);
-
+    sudo_lbuf_init(&lbuf, help_out, indent, NULL, 80);
     sudo_lbuf_append(&lbuf, "%s", _("\nOptions:\n"));
     sudo_lbuf_append(&lbuf, "  -A, --askpass                 %s\n",
 	_("use a helper program for password prompting"));

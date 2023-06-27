@@ -268,6 +268,11 @@ journal_seek(struct timespec *target, struct connection_closure *closure)
 
 	    if (msg_len > bufsize) {
 		bufsize = sudo_pow2_roundup(msg_len);
+		if (bufsize < msg_len) {
+		    /* overflow */
+		    closure->errstr = _("unable to allocate memory");
+		    break;
+		}
 		free(buf);
 		if ((buf = malloc(bufsize)) == NULL) {
 		    closure->errstr = _("unable to allocate memory");

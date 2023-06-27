@@ -34,8 +34,6 @@
 #include "sudo_plugin.h"
 #include "sudo_util.h"
 
-#include "iolog_json.h"
-
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
 static FILE *

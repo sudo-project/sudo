@@ -43,14 +43,14 @@
  * On failure, returns false.
  */
 static bool
-cmnd_allowed(char *cmnd, size_t cmnd_size, const char *runchroot,
-    struct stat *cmnd_sbp, char * const *allowlist)
+cmnd_allowed(char *cmnd, size_t cmnd_size, struct stat *cmnd_sbp,
+    char * const *allowlist)
 {
     const char *cmnd_base;
     char * const *al;
     debug_decl(cmnd_allowed, SUDOERS_DEBUG_UTIL);
 
-    if (!sudo_goodpath(cmnd, runchroot, cmnd_sbp))
+    if (!sudo_goodpath(cmnd, cmnd_sbp))
 	debug_return_bool(false);
 
     if (allowlist == NULL)
@@ -67,7 +67,7 @@ cmnd_allowed(char *cmnd, size_t cmnd_size, const char *runchroot,
 	if (strcmp(cmnd_base, base) != 0)
 	    continue;
 
-	if (sudo_goodpath(path, runchroot, &sb) &&
+	if (sudo_goodpath(path, &sb) &&
 	    sb.st_dev == cmnd_sbp->st_dev && sb.st_ino == cmnd_sbp->st_ino) {
 	    /* Overwrite cmnd with safe version from allowlist. */
 	    if (strlcpy(cmnd, path, cmnd_size) < cmnd_size)
@@ -87,8 +87,7 @@ cmnd_allowed(char *cmnd, size_t cmnd_size, const char *runchroot,
  */
 int
 find_path(const char *infile, char **outfile, struct stat *sbp,
-    const char *path, const char *runchroot, int ignore_dot,
-    char * const *allowlist)
+    const char *path, int ignore_dot, char * const *allowlist)
 {
     char command[PATH_MAX];
     const char *cp, *ep, *pathend;
@@ -109,8 +108,7 @@ find_path(const char *infile, char **outfile, struct stat *sbp,
 	    errno = ENAMETOOLONG;
 	    debug_return_int(NOT_FOUND_ERROR);
 	}
-	found = cmnd_allowed(command, sizeof(command), runchroot, sbp,
-	    allowlist);
+	found = cmnd_allowed(command, sizeof(command), sbp, allowlist);
 	goto done;
     }
 
@@ -139,8 +137,7 @@ find_path(const char *infile, char **outfile, struct stat *sbp,
 	    errno = ENAMETOOLONG;
 	    debug_return_int(NOT_FOUND_ERROR);
 	}
-	found = cmnd_allowed(command, sizeof(command), runchroot,
-	    sbp, allowlist);
+	found = cmnd_allowed(command, sizeof(command), sbp, allowlist);
 	if (found)
 	    break;
     }
@@ -154,8 +151,7 @@ find_path(const char *infile, char **outfile, struct stat *sbp,
 	    errno = ENAMETOOLONG;
 	    debug_return_int(NOT_FOUND_ERROR);
 	}
-	found = cmnd_allowed(command, sizeof(command), runchroot,
-	    sbp, allowlist);
+	found = cmnd_allowed(command, sizeof(command), sbp, allowlist);
 	if (found && ignore_dot)
 	    debug_return_int(NOT_FOUND_DOT);
     }

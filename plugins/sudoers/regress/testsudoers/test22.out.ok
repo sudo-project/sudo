@@ -1,0 +1,8 @@
+Parses OK
+
+Entries for user admin:
+
+ALL = /bin/ls
+	host  matched
+
+Command unmatched

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,17 +30,66 @@
 #include <fcntl.h>
 #include <signal.h>
 
-#include "sudo.h"
+#include "pathnames.h"
+#include "sudo_debug.h"
+#include "sudo_fatal.h"
+#include "sudo_gettext.h"
 #include "sudo_exec.h"
 
+static volatile sig_atomic_t got_sigttou;
+
+/*
+ * SIGTTOU signal handler for tcsetpgrp_nobg() that just sets a flag.
+ */
+static void
+sigttou(int signo)
+{
+    got_sigttou = 1;
+}
+
+/*
+ * Like tcsetpgrp() but restarts on EINTR _except_ for SIGTTOU.
+ * Returns 0 on success or -1 on failure, setting errno.
+ * Sets got_sigttou on failure if interrupted by SIGTTOU.
+ */
+static int
+tcsetpgrp_nobg(int fd, pid_t pgrp_id)
+{
+    struct sigaction sa, osa;
+    int rc;
+    debug_decl(tcsetpgrp_nobg, SUDO_DEBUG_UTIL);
+
+    /*
+     * If we receive SIGTTOU from tcsetpgrp() it means we are
+     * not in the foreground process group.
+     * This avoid a TOCTOU race compared to using tcgetpgrp().
+     */
+    memset(&sa, 0, sizeof(sa));
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0; /* do not restart syscalls */
+    sa.sa_handler = sigttou;
+    got_sigttou = 0;
+    (void)sigaction(SIGTTOU, &sa, &osa);
+    do {
+	rc = tcsetpgrp(fd, pgrp_id);
+    } while (rc != 0 && errno == EINTR && !got_sigttou);
+    (void)sigaction(SIGTTOU, &osa, NULL);
+
+    debug_return_int(rc);
+}
+
+/*
+ * Suspend the main process in response to an interactive child process
+ * being suspended.
+ */
 void
-suspend_sudo_nopty(struct exec_closure *ec, int signo, pid_t my_pid,
-    pid_t my_pgrp, pid_t cmnd_pid)
+sudo_suspend_parent(int signo, pid_t my_pid, pid_t my_pgrp, pid_t cmnd_pid,
+     void *closure, void (*callback)(void *, int))
 {
     struct sigaction sa, osa;
     pid_t saved_pgrp = -1;
     int fd;
-    debug_decl(suspend_sudo_nopty, SUDO_DEBUG_EXEC);
+    debug_decl(sudo_suspend_parent, SUDO_DEBUG_EXEC);
 
     /*
      * Save the controlling terminal's process group so we can restore
@@ -81,26 +130,28 @@ suspend_sudo_nopty(struct exec_closure *ec, int signo, pid_t my_pid,
 	}
     }
 
-    /* Log the suspend event. */
-    log_suspend(ec, signo);
+    /* Run callback before we suspend. */
+    if (callback != NULL)
+	callback(closure, signo);
 
     if (signo == SIGTSTP) {
 	memset(&sa, 0, sizeof(sa));
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = SIG_DFL;
-	if (sudo_sigaction(SIGTSTP, &sa, &osa) != 0)
+	if (sigaction(SIGTSTP, &sa, &osa) != 0)
 	    sudo_warn(U_("unable to set handler for signal %d"), SIGTSTP);
     }
     if (kill(my_pid, signo) != 0)
 	sudo_warn("kill(%d, %d)", (int)my_pid, signo);
     if (signo == SIGTSTP) {
-	if (sudo_sigaction(SIGTSTP, &osa, NULL) != 0)
+	if (sigaction(SIGTSTP, &osa, NULL) != 0)
 	    sudo_warn(U_("unable to restore handler for signal %d"), SIGTSTP);
     }
 
-    /* Log the resume event. */
-    log_suspend(ec, SIGCONT);
+    /* Run callback on resume. */
+    if (callback != NULL)
+	callback(closure, SIGCONT);
 
     if (saved_pgrp != -1) {
 	/*
