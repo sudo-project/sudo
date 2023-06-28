@@ -553,10 +553,6 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	if ((user_cwd = strdup("unknown")) == NULL)
 	    goto oom;
     }
-    if (user_runcwd == NULL) {
-	/* Unlike user_cwd, user_runcwd is not free()d. */
-	user_runcwd = user_cwd;
-    }
     if (user_tty == NULL) {
 	if ((user_tty = strdup("unknown")) == NULL)
 	    goto oom;
@@ -749,7 +745,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 	}
     }
     if (def_runcwd && strcmp(def_runcwd, "*") != 0) {
-	/* Set cwd to explicit value in sudoers. */
+	/* Set cwd to explicit value (sudoers or user-specified). */
 	if (!expand_tilde(&def_runcwd, runas_pw->pw_name)) {
 	    sudo_warnx(U_("invalid working directory: %s"), def_runcwd);
 	    goto bad;

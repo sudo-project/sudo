@@ -358,26 +358,40 @@ check_user_runchroot(void)
 static int
 check_user_runcwd(void)
 {
+    bool allowed = false;
     debug_decl(check_user_runcwd, SUDOERS_DEBUG_PLUGIN);
+
+    if (user_runcwd == NULL)
+	debug_return_bool(true);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"def_runcwd %s, user_runcwd %s, user_cwd %s",
 	def_runcwd ? def_runcwd : "none", user_runcwd ? user_runcwd : "none",
 	user_cwd ? user_cwd : "none");
 
-    if (strcmp(user_cwd, user_runcwd) != 0) {
-	if (def_runcwd == NULL || strcmp(def_runcwd, "*") != 0) {
-	    log_warningx(SLOG_NO_STDERR|SLOG_AUDIT,
-		N_("user not allowed to change directory to %s"), user_runcwd);
-	    sudo_warnx(U_("you are not permitted to use the -D option with %s"),
-		user_cmnd);
-	    debug_return_bool(false);
+    if (def_runcwd == NULL) {
+	/* No runcwd in sudoers, compare against user cwd or runas homedir. */
+	if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
+	    allowed = strcmp(user_runcwd, runas_pw->pw_dir) == 0;
+	} else {
+	    allowed = strcmp(user_runcwd, user_cwd) == 0;
 	}
-	free(def_runcwd);
-	if ((def_runcwd = strdup(user_runcwd)) == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    debug_return_int(-1);
-	}
+    } else {
+	/* runcwd is set in sudoers, it must match user_runcwd (or be '*'). */
+	allowed = strcmp(def_runcwd, "*") == 0 ||
+	    strcmp(def_runcwd, user_runcwd) == 0;
+    }
+    if (!allowed) {
+	log_warningx(SLOG_NO_STDERR|SLOG_AUDIT,
+	    N_("user not allowed to change directory to %s"), user_runcwd);
+	sudo_warnx(U_("you are not permitted to use the -D option with %s"),
+	    user_cmnd);
+	debug_return_bool(false);
+    }
+    free(def_runcwd);
+    if ((def_runcwd = strdup(user_runcwd)) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_int(-1);
     }
     debug_return_bool(true);
 }
