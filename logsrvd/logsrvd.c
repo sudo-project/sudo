@@ -2017,5 +2017,5 @@ main(int argc, char *argv[])
 	unlink(logsrvd_conf_pid_file());
     logsrvd_conf_cleanup();
 
-    debug_return_int(1);
+    debug_return_int(0);
 }
