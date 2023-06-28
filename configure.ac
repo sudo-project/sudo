@@ -2244,6 +2244,9 @@ case "$host" in
 		# We use proc_pidinfo() to emulate closefrom() on macOS.
 		AC_CHECK_HEADERS([libproc.h], [AC_CHECK_FUNCS([proc_pidinfo])])
 
+		# We cannot directly access environ from a shared object
+		AC_CHECK_HEADERS([crt_externs.h], [AC_CHECK_FUNCS([_NSGetEnviron])])
+
 		# We need to force a flat namespace to make libc
 		# symbol hooking work like it does on ELF.
 		AX_CHECK_LINK_FLAG([-Wl,-force_flat_namespace], [AX_APPEND_FLAG([-Wl,-force_flat_namespace], [SUDO_LDFLAGS])])

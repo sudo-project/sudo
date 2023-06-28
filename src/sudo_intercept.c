@@ -46,6 +46,9 @@
 #elif defined(HAVE_DLOPEN)
 # include <dlfcn.h>
 #endif
+#ifdef HAVE_CRT_EXTERNS_H
+# include <crt_externs.h>
+#endif
 
 #include "sudo_compat.h"
 #include "sudo_debug.h"
@@ -57,7 +60,12 @@
 #define SUDO_EXECLE	0x1
 #define SUDO_EXECLP	0x2
 
+#ifdef HAVE__NSGETENVIRON
+# define environ (*_NSGetEnviron())
+#else
 extern char **environ;
+#endif
+
 extern bool command_allowed(const char *cmnd, char * const argv[], char * const envp[], char **ncmnd, char ***nargv, char ***nenvp);
 
 typedef int (*sudo_fn_execve_t)(const char *, char *const *, char *const *);

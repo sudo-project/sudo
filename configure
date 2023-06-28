@@ -18635,6 +18635,24 @@ fi
 
 done
 
+		# We cannot directly access environ from a shared object
+		       for ac_header in crt_externs.h
+do :
+  ac_fn_c_check_header_compile "$LINENO" "crt_externs.h" "ac_cv_header_crt_externs_h" "$ac_includes_default"
+if test "x$ac_cv_header_crt_externs_h" = xyes
+then :
+  printf "%s\n" "#define HAVE_CRT_EXTERNS_H 1" >>confdefs.h
+ ac_fn_c_check_func "$LINENO" "_NSGetEnviron" "ac_cv_func__NSGetEnviron"
+if test "x$ac_cv_func__NSGetEnviron" = xyes
+then :
+  printf "%s\n" "#define HAVE__NSGETENVIRON 1" >>confdefs.h
+
+fi
+
+fi
+
+done
+
 		# We need to force a flat namespace to make libc
 		# symbol hooking work like it does on ELF.
 		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-force_flat_namespace" >&5

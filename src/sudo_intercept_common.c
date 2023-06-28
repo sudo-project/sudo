@@ -47,6 +47,9 @@
 #else
 # include "compat/stdbool.h"
 #endif /* HAVE_STDBOOL_H */
+#ifdef HAVE_CRT_EXTERNS_H
+# include <crt_externs.h>
+#endif
 
 #include "sudo_compat.h"
 #include "sudo_conf.h"
@@ -57,7 +60,11 @@
 #include "sudo_util.h"
 #include "intercept.pb-c.h"
 
+#ifdef HAVE__NSGETENVIRON
+# define environ (*_NSGetEnviron())
+#else
 extern char **environ;
+#endif
 
 static union sudo_token_un intercept_token;
 static in_port_t intercept_port;
