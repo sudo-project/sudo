@@ -76,7 +76,7 @@ inet_ntop4(const unsigned char *src, char *dst, socklen_t size)
 	int len;
 
 	len = snprintf(dst, size, fmt, src[0], src[1], src[2], src[3]);
-	if (len < 0 || (size_t)len >= size) {
+	if (len < 0 || (socklen_t)len >= size) {
 		errno = ENOSPC;
 		return (NULL);
 	}
@@ -113,7 +113,7 @@ inet_ntop6(const unsigned char *src, char *dst, socklen_t size)
 	 */
 	memset(words, 0, sizeof(words));
 	for (i = 0; i < NS_IN6ADDRSZ; i++)
-		words[i / 2] |= (src[i] << ((1 - (i % 2)) << 3));
+		words[i / 2] |= (src[i] << ((1 - (i & 1)) << 3));
 	best.base = -1;
 	best.len = 0;
 	cur.base = -1;

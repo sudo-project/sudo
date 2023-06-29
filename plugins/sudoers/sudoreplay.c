@@ -1681,14 +1681,14 @@ print_usage(FILE *fp)
 	getprogname());
 }
 
-static void
+sudo_noreturn static void
 usage(void)
 {
     print_usage(stderr);
     exit(EXIT_FAILURE);
 }
 
-static void
+sudo_noreturn static void
 help(void)
 {
     (void) printf(_("%s - replay sudo session logs\n\n"), getprogname());

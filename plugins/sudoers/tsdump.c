@@ -302,7 +302,7 @@ dump_entry(struct timestamp_entry *entry, off_t pos)
     debug_return;
 }
 
-static void
+sudo_noreturn static void
 usage(void)
 {
     fprintf(stderr, "usage: %s [-f timestamp_file] | [-u username]\n",

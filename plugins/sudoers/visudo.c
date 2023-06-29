@@ -339,7 +339,7 @@ main(int argc, char *argv[])
 
 done:
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
-    exit(exitcode);
+    return exitcode;
 }
 
 static bool
@@ -370,7 +370,7 @@ get_editor(int *editor_argc, char ***editor_argv)
     char *editor_path = NULL, **allowlist = NULL;
     const char *env_editor = NULL;
     static const char *files[] = { "+1", "sudoers" };
-    unsigned int allowlist_len = 0;
+    size_t allowlist_len = 0;
     debug_decl(get_editor, SUDOERS_DEBUG_UTIL);
 
     /* Build up editor allowlist from def_editor unless env_editor is set. */
@@ -412,8 +412,8 @@ get_editor(int *editor_argc, char ***editor_argv)
     }
 
     if (allowlist != NULL) {
-	while (allowlist_len--)
-	    free(allowlist[allowlist_len]);
+	while (allowlist_len)
+	    free(allowlist[--allowlist_len]);
 	free(allowlist);
     }
 
@@ -908,13 +908,11 @@ run_command(const char *path, char *const *argv)
     switch (pid = sudo_debug_fork()) {
 	case -1:
 	    sudo_fatal(U_("unable to execute %s"), path);
-	    break;	/* NOTREACHED */
 	case 0:
 	    closefrom(STDERR_FILENO + 1);
 	    execv(path, argv);
 	    sudo_warn(U_("unable to run %s"), path);
 	    _exit(127);
-	    break;	/* NOTREACHED */
     }
 
     for (;;) {
@@ -1319,14 +1317,14 @@ quit(int signo)
 
 #define VISUDO_USAGE	"usage: %s [-chqsV] [[-f] sudoers ]\n"
 
-static void
+sudo_noreturn static void
 usage(void)
 {
     (void) fprintf(stderr, VISUDO_USAGE, getprogname());
     exit(EXIT_FAILURE);
 }
 
-static void
+sudo_noreturn static void
 help(void)
 {
     (void) printf(_("%s - safely edit the sudoers file\n\n"), getprogname());

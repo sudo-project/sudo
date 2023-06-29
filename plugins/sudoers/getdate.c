@@ -2345,7 +2345,7 @@ difftm(struct tm *a, struct tm *b)
 {
   int ay = a->tm_year + (TM_YEAR_ORIGIN - 1);
   int by = b->tm_year + (TM_YEAR_ORIGIN - 1);
-  int days = (
+  long days = (
 	      /* difference in day of year */
 	      a->tm_yday - b->tm_yday
 	      /* + intervening leap days */
@@ -2451,7 +2451,6 @@ main(int argc, char *argv[])
 	(void)printf("\t> ");
 	(void)fflush(stdout);
     }
-    exit(0);
-    /* NOTREACHED */
+    return 0;
 }
 #endif	/* TEST */

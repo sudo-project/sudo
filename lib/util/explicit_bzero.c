@@ -70,7 +70,7 @@ sudo_explicit_bzero(void *v, size_t n)
 
     /* Updating through a volatile pointer should not be optimized away. */
     while (n--)
-	*s++ = '\0';
+	*s++ = 0;
 }
 # endif /* HAVE_BZERO */
 

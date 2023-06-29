@@ -403,7 +403,7 @@ cvtsudoers_make_grlist_item(const struct passwd *pw, char * const *unused1)
     struct cache_item_grlist *grlitem;
     struct sudoers_string *s;
     struct group_list *grlist;
-    int groupname_len;
+    size_t groupname_len;
     debug_decl(cvtsudoers_make_grlist_item, SUDOERS_DEBUG_NSS);
 
     /*
@@ -421,7 +421,7 @@ cvtsudoers_make_grlist_item(const struct passwd *pw, char * const *unused1)
     }
 
 #ifdef _SC_LOGIN_NAME_MAX
-    groupname_len = MAX((int)sysconf(_SC_LOGIN_NAME_MAX), 32);
+    groupname_len = MAX(sysconf(_SC_LOGIN_NAME_MAX), 32);
 #else
     groupname_len = MAX(LOGIN_NAME_MAX, 32);
 #endif

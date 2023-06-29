@@ -704,7 +704,8 @@ display_usage(FILE *fp)
 {
     const char * const **uvecs = sudo_usage;
     const char * const *uvec;
-    int i, indent;
+    size_t i;
+    int indent;
 
     /*
      * Use usage vectors appropriate to the progname.
@@ -725,7 +726,7 @@ display_usage(FILE *fp)
 /*
  * Display usage message and exit.
  */
-void
+sudo_noreturn void
 usage(void)
 {
     display_usage(stderr);
@@ -764,7 +765,7 @@ help_out(const char *buf)
     return fputs(buf, stdout);
 }
 
-static void
+sudo_noreturn static void
 help(void)
 {
     struct sudo_lbuf lbuf;

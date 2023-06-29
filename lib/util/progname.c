@@ -61,7 +61,7 @@ void
 initprogname2(const char *name, const char * const * allowed)
 {
     const char *progname;
-    int i;
+    size_t i;
 
     /* Fall back on "name" if getprogname() returns an empty string. */
     if ((progname = getprogname()) != NULL && *progname != '\0') {

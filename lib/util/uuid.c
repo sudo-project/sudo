@@ -75,7 +75,7 @@ sudo_uuid_to_string_v1(unsigned char uuid[16], char *dst, size_t dstsiz)
 {
     const char hex[] = "0123456789abcdef";
     char *cp = dst;
-    int i;
+    unsigned int i;
 
     if (dstsiz < sizeof("123e4567-e89b-12d3-a456-426655440000"))
 	return NULL;

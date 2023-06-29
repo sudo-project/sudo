@@ -342,7 +342,7 @@ add_timestamp(struct json_container *jsonc, struct timespec *ts)
     time_t secs = ts->tv_sec;
     char timebuf[1024];
     struct tm gmt;
-    int len;
+    size_t len;
     debug_decl(add_timestamp, SUDO_DEBUG_PLUGIN);
 
     if (gmtime_r(&secs, &gmt) == NULL)

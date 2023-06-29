@@ -656,7 +656,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     mode_t cmnd_umask, char *iolog_path, void *v)
 {
     struct sudoers_exec_args *exec_args = v;
-    int info_len = 0;
+    unsigned int info_len = 0;
     debug_decl(sudoers_policy_store_result, SUDOERS_DEBUG_PLUGIN);
 
     if (exec_args == NULL)
@@ -1051,8 +1051,8 @@ oom:
 bad:
     free(audit_msg);
     audit_msg = NULL;
-    while (info_len--)
-	free(command_info[info_len]);
+    while (info_len)
+	free(command_info[--info_len]);
     free(command_info);
     command_info = NULL;
     debug_return_bool(false);

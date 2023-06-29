@@ -413,9 +413,11 @@ static int
 getentropy_fallback(void *buf, size_t len)
 {
 	unsigned char *results = NULL;
-	int save_errno = errno, e, pgs = sysconf(_SC_PAGESIZE), faster = 0, repeat;
+	int save_errno = errno, e, faster = 0;
 	int ret = -1;
 	static int cnt;
+	unsigned int repeat;
+	long pgs;
 	struct timespec ts;
 	struct timeval tv;
 	struct rusage ru;
@@ -427,8 +429,12 @@ getentropy_fallback(void *buf, size_t len)
 	size_t i, ii, m, digest_len;
 	char *p;
 
+	if (len == 0)
+		return 0;
+	if ((pgs = sysconf(_SC_PAGESIZE)) == -1)
+		return -1;
 	if ((ctx = sudo_digest_alloc(SUDO_DIGEST_SHA512)) == NULL)
-		goto done;
+		return -1;
 	digest_len = sudo_digest_getlen(SUDO_DIGEST_SHA512);
 	if (digest_len == (size_t)-1 || (results = malloc(digest_len)) == NULL)
 		goto done;
@@ -442,8 +448,9 @@ getentropy_fallback(void *buf, size_t len)
 		lastpid = pid;
 		repeat = REPEAT;
 	}
-	for (i = 0; i < len; ) {
-		int j;
+	i = 0;
+	do {
+		unsigned int j;
 		for (j = 0; j < repeat; j++) {
 			HX((e = gettimeofday(&tv, NULL)) == -1, tv);
 			if (e != -1) {
@@ -625,7 +632,7 @@ getentropy_fallback(void *buf, size_t len)
 		sudo_digest_reset(ctx);
 		memcpy((char *)buf + i, results, min(digest_len, len - i));
 		i += min(digest_len, len - i);
-	}
+	} while (i < len);
 	if (gotdata(buf, len) == 0) {
 		errno = save_errno;
 		ret = 0;		/* satisfied */

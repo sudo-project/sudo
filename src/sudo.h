@@ -343,7 +343,7 @@ void restore_nproc(void);
 void set_policy_rlimits(void);
 void unlimit_nproc(void);
 void unlimit_sudo(void);
-int serialize_rlimits(char **info, size_t info_max);
+int serialize_rlimits(char **info, unsigned int info_max);
 bool parse_policy_rlimit(const char *str);
 
 /* exec_ptrace.c */

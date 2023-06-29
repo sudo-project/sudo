@@ -337,7 +337,7 @@ sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home,
     struct cache_item *item;
     struct passwd *pw;
     size_t len, name_len, home_len, shell_len;
-    int i;
+    unsigned int i;
     debug_decl(sudo_mkpwent, SUDOERS_DEBUG_NSS);
 
     if (pwcache_byuid == NULL)
@@ -648,7 +648,7 @@ sudo_mkgrent(const char *group, gid_t gid, ...)
     size_t nmem, nsize, total;
     char *cp, *mem;
     va_list ap;
-    int i;
+    unsigned int i;
     debug_decl(sudo_mkgrent, SUDOERS_DEBUG_NSS);
 
     if (grcache_bygid == NULL)

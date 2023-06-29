@@ -185,8 +185,9 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char * const *files,
     }
     if (nfiles != 0) {
 	nargv[nargc++] = (char *)"--";
-	while (nfiles--)
+	do
 	    nargv[nargc++] = *files++;
+	while (--nfiles > 0);
     }
     nargv[nargc] = NULL;
 
@@ -200,8 +201,8 @@ bad:
     free(editor);
     free(editor_path);
     if (nargv != NULL) {
-	while (nargc--) {
-	    sudoers_gc_remove(GC_PTR, nargv[nargc]);
+	while (nargc > 0) {
+	    sudoers_gc_remove(GC_PTR, nargv[--nargc]);
 	    free(nargv[nargc]);
 	}
 	sudoers_gc_remove(GC_PTR, nargv);

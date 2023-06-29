@@ -1899,7 +1899,7 @@ usage(bool fatal)
 	exit(EXIT_FAILURE);
 }
 
-static void
+sudo_noreturn static void
 help(void)
 {
     printf("%s - %s\n\n", getprogname(), _("sudo log server"));
@@ -1959,7 +1959,7 @@ main(int argc, char *argv[])
 
     /* Read sudo.conf and initialize the debug subsystem. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     logsrvd_debug_instance = sudo_debug_register(getprogname(), NULL, NULL,
         sudo_conf_debug_files(getprogname()), -1);
 
@@ -1993,7 +1993,7 @@ main(int argc, char *argv[])
 
     /* Read sudo_logsrvd.conf */
     if (!logsrvd_conf_read(conf_file))
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
 
     if ((evbase = sudo_ev_base_alloc()) == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));

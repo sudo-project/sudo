@@ -85,7 +85,7 @@ main(int argc, char *argv[])
     time_t timeoff = 0;
     pid_t pids[2];
     char *faketime;
-    int i;
+    unsigned int i;
 
     initprogname(argc > 0 ? argv[0] : "check_starttime");
 

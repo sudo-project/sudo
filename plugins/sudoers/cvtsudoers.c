@@ -1514,14 +1514,14 @@ print_usage(FILE *fp)
 	"[-P padding] [-s sections] [input_file]\n", getprogname());
 }
 
-static void
+sudo_noreturn static void
 usage(void)
 {
     print_usage(stderr);
     exit(EXIT_FAILURE);
 }
 
-static void
+sudo_noreturn static void
 help(void)
 {
     (void) printf(_("%s - convert between sudoers file formats\n\n"), getprogname());

@@ -86,7 +86,7 @@ new_logline(int event_type, int flags, struct eventlog_args *args,
     const char *tty, *tsid = NULL;
     char exit_str[(((sizeof(int) * 8) + 2) / 3) + 2];
     char sessid[7], offsetstr[64] = "";
-    int i;
+    size_t i;
     debug_decl(new_logline, SUDO_DEBUG_UTIL);
 
     if (ISSET(flags, EVLOG_RAW) || evlog == NULL) {
@@ -286,7 +286,7 @@ exec_mailer(int pipein)
     const struct eventlog_config *evl_conf = eventlog_getconf();
     char *last, *mflags, *p, *argv[MAX_MAILFLAGS + 1];
     const char *mpath = evl_conf->mailerpath;
-    int i;
+    size_t i;
     const char * const root_envp[] = {
 	"HOME=/",
 	"PATH=/usr/bin:/bin:/usr/sbin:/sbin",
@@ -317,10 +317,10 @@ exec_mailer(int pipein)
     argv[0] = sudo_basename(mpath);
 
     i = 1;
-    if ((p = strtok_r(mflags, " \t", &last))) {
-	do {
-	    argv[i] = p;
-	} while (++i < MAX_MAILFLAGS && (p = strtok_r(NULL, " \t", &last)));
+    for (p = strtok_r(mflags, " \t", &last); p != NULL;
+            p = strtok_r(NULL, " \t", &last)) {
+        if (i < MAX_MAILFLAGS)
+            argv[i++] = p;
     }
     argv[i] = NULL;
 
@@ -361,7 +361,8 @@ send_mail(const struct eventlog *evlog, const char *message)
     struct tm tm;
     time_t now;
     FILE *mail;
-    int fd, len, pfd[2], status;
+    int fd, pfd[2], status;
+    size_t len;
     pid_t pid, rv;
     struct stat sb;
 #if defined(HAVE_NL_LANGINFO) && defined(CODESET)
@@ -471,7 +472,7 @@ send_mail(const struct eventlog *evlog, const char *message)
 		"unable to fork");
 	    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 	    _exit(EXIT_FAILURE);
-	    break;
+		/* NOTREACHED */
 	case 0:
 	    /* Child. */
 	    exec_mailer(pfd[0]);
@@ -559,7 +560,7 @@ json_add_timestamp(struct json_container *jsonc, const char *name,
     const struct timespec *ts, bool format_timestamp)
 {
     struct json_value json_value;
-    int len;
+    size_t len;
     debug_decl(json_add_timestamp, SUDO_DEBUG_PLUGIN);
 
     if (!sudo_json_open_object(jsonc, name))

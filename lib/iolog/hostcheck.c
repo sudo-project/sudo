@@ -130,8 +130,8 @@ static HostnameValidationResult
 validate_name(const char *hostname, ASN1_STRING *certname_asn1)
 {
     char *certname_s = (char *) ASN1_STRING_get0_data(certname_asn1);
-    int certname_len = ASN1_STRING_length(certname_asn1);
-    int hostname_len = strlen(hostname);
+    size_t certname_len = ASN1_STRING_length(certname_asn1);
+    size_t hostname_len = strlen(hostname);
     debug_decl(validate_name, SUDO_DEBUG_UTIL);
 
 	/* remove last '.' from hostname if exists */
@@ -140,18 +140,16 @@ validate_name(const char *hostname, ASN1_STRING *certname_asn1)
     }
 
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "comparing %.*s to %.*s in cert", hostname_len, hostname,
-	    certname_len, certname_s);
+	    "comparing %.*s to %.*s in cert", (int)hostname_len, hostname,
+	    (int)certname_len, certname_s);
 
 	/* skip the first label if wildcard */
 	if (certname_len > 2 && certname_s[0] == '*' && certname_s[1] == '.') {
-		if (hostname_len != 0) {
-			do {
-				--hostname_len;
-				if (*hostname++ == '.') {
-					break;
-                }
-			} while (hostname_len != 0);
+		while (hostname_len != 0) {
+			--hostname_len;
+			if (*hostname++ == '.') {
+				break;
+            }
 		}
 		certname_s += 2;
 		certname_len -= 2;
@@ -297,7 +295,7 @@ matches_subject_alternative_name(const char *hostname, const char *ipaddr, const
                     break;
                 }
 
-                int dns_name_length = ASN1_STRING_length(current_name->d.dNSName);
+                size_t dns_name_length = ASN1_STRING_length(current_name->d.dNSName);
                 char *nullterm_dns_name = malloc(dns_name_length + 1);
 
                 if (nullterm_dns_name == NULL) {

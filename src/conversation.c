@@ -140,7 +140,7 @@ err:
 		continue;
 	    freezero(repl->reply, strlen(repl->reply));
 	    repl->reply = NULL;
-	} while (n--);
+	} while (n-- > 0);
     }
 
     sudo_debug_set_active_instance(conv_debug_instance);
@@ -179,12 +179,17 @@ sudo_conversation_printf(int msg_type, const char *fmt, ...)
 	FALLTHROUGH;
     case SUDO_CONV_INFO_MSG:
 	/* Convert nl -> cr nl in case tty is in raw mode. */
-	len = strlen(fmt);
 	if (sudo_term_is_raw(fileno(ttyfp ? ttyfp : fp))) {
-	    if (len < ssizeof(fmt2) && len > 0 && fmt[len - 1] == '\n') {
-		if (len == 1 || fmt[len - 2] != '\r') {
-		    memcpy(fmt2, fmt, len - 1);
-		    fmt2[len - 1] = '\0';
+		size_t fmtlen = strlen(fmt);
+	    if (fmtlen < sizeof(fmt2) && fmtlen && fmt[fmtlen - 1] == '\n') {
+		if (fmtlen == 1) {
+			fmt2[0] = '\0';
+			fmt = fmt2;
+		    crnl = "\r\n";
+		}
+		else if (fmt[fmtlen - 2] != '\r') {
+		    memcpy(fmt2, fmt, fmtlen - 1);
+		    fmt2[fmtlen - 1] = '\0';
 		    fmt = fmt2;
 		    crnl = "\r\n";
 		}
