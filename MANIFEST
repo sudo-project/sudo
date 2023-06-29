@@ -1088,6 +1088,8 @@ plugins/sudoers/regress/testsudoers/test22.out.ok
 plugins/sudoers/regress/testsudoers/test22.sh
 plugins/sudoers/regress/testsudoers/test23.out.ok
 plugins/sudoers/regress/testsudoers/test23.sh
+plugins/sudoers/regress/testsudoers/test24.out.ok
+plugins/sudoers/regress/testsudoers/test24.sh
 plugins/sudoers/regress/testsudoers/test3.out.ok
 plugins/sudoers/regress/testsudoers/test3.sh
 plugins/sudoers/regress/testsudoers/test4.out.ok

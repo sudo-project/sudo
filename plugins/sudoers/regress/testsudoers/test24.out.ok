@@ -1,0 +1,40 @@
+Parses OK
+
+Entries for user root:
+
+ALL = NOTBEFORE=20170214083000Z /bin/ls
+	host  matched
+	time  matched
+	runas matched
+	cmnd  allowed
+
+Command allowed
+Parses OK
+
+Entries for user root:
+
+ALL = NOTBEFORE=20170214083001Z /bin/ls
+	host  matched
+	time  unmatched
+
+Command unmatched
+Parses OK
+
+Entries for user root:
+
+ALL = NOTAFTER=20170214083000Z /bin/ls
+	host  matched
+	time  matched
+	runas matched
+	cmnd  allowed
+
+Command allowed
+Parses OK
+
+Entries for user root:
+
+ALL = NOTAFTER=20170214083000Z /bin/ls
+	host  matched
+	time  unmatched
+
+Command unmatched

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2022
+ * Copyright (c) 1996, 1998-2005, 2007-2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -107,6 +107,7 @@ main(int argc, char *argv[])
     int match, host_match, runas_match, cmnd_match;
     int ch, dflag, exitcode = EXIT_FAILURE;
     struct sudo_lbuf lbuf;
+    time_t now;
     id_t id;
     debug_decl(main, SUDOERS_DEBUG_MAIN);
 
@@ -124,6 +125,7 @@ main(int argc, char *argv[])
     sudo_warn_set_locale_func(sudoers_warn_setlocale);
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have own domain */
     textdomain("sudoers");
+    time(&now);
 
     /* No word wrap on output. */
     sudo_lbuf_init(&lbuf, testsudoers_output, 0, NULL, 0);
@@ -136,7 +138,7 @@ main(int argc, char *argv[])
 
     dflag = 0;
     grfile = pwfile = NULL;
-    while ((ch = getopt(argc, argv, "+dg:G:h:i:P:p:tu:U:")) != -1) {
+    while ((ch = getopt(argc, argv, "+dg:G:h:i:P:p:T:tu:U:")) != -1) {
 	switch (ch) {
 	    case 'd':
 		dflag = 1;
@@ -169,6 +171,11 @@ main(int argc, char *argv[])
 		break;
 	    case 'P':
 		grfile = optarg;
+		break;
+	    case 'T':
+		now = parse_gentime(optarg);
+		if (now == -1)
+		    sudo_fatalx("invalid time: %s", optarg);
 		break;
 	    case 't':
 		trace_print = testsudoers_error;
@@ -339,6 +346,20 @@ main(int argc, char *argv[])
 	    if (host_match == ALLOW) {
 		puts("\thost  matched");
 		TAILQ_FOREACH_REVERSE(cs, &priv->cmndlist, cmndspec_list, entries) {
+		    if (cs->notbefore != UNSPEC) {
+			if (now < cs->notbefore) {
+			    puts(U_("\ttime  unmatched"));
+			    continue;
+			}
+			puts(U_("\ttime  matched"));
+		    }
+		    if (cs->notafter != UNSPEC) {
+			if (now > cs->notafter) {
+			    puts(U_("\ttime  unmatched"));
+			    continue;
+			}
+			puts(U_("\ttime  matched"));
+		    }
 		    runas_match = runaslist_matches(&parsed_policy,
 			cs->runasuserlist, cs->runasgrouplist, NULL, NULL);
 		    if (runas_match == ALLOW) {
