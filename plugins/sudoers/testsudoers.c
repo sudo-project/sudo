@@ -67,6 +67,10 @@ static bool cb_runas_default(const char *file, int line, int column, const union
 static int testsudoers_error(const char *msg);
 static int testsudoers_output(const char *buf);
 sudo_noreturn static void usage(void);
+static void cb_userspec(struct userspec *us, int user_match);
+static void cb_privilege(struct privilege *priv, int host_match);
+static void cb_cmndspec(struct cmndspec *cs, int date_match, int runas_match, int cmnd_match);
+static int testsudoers_query(const struct sudo_nss *nss, struct passwd *pw);
 
 /* testsudoers_pwutil.c */
 extern struct cache_item *testsudoers_make_gritem(gid_t gid, const char *group);
@@ -84,6 +88,7 @@ struct sudo_user sudo_user;
 struct passwd *list_pw;
 static const char *orig_cmnd;
 static char *runas_group, *runas_user;
+int sudo_mode = MODE_RUN;
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
 extern char *malloc_options;
@@ -98,14 +103,15 @@ int
 main(int argc, char *argv[])
 {
     struct sudoers_parser_config sudoers_conf = SUDOERS_PARSER_CONFIG_INITIALIZER;
+    struct sudo_nss_list snl = TAILQ_HEAD_INITIALIZER(snl);
+    struct sudoers_lookup_callbacks callbacks =
+	{ cb_userspec, cb_privilege, cb_cmndspec };
     enum sudoers_formats input_format = format_sudoers;
-    struct cmndspec *cs;
-    struct privilege *priv;
-    struct userspec *us;
+    struct sudo_nss testsudoers_nss;
     char *p, *grfile, *pwfile;
     const char *errstr;
-    int match, host_match, runas_match, cmnd_match;
     int ch, dflag, exitcode = EXIT_FAILURE;
+    int validated, status = FOUND;
     struct sudo_lbuf lbuf;
     time_t now;
     id_t id;
@@ -331,53 +337,14 @@ main(int argc, char *argv[])
 	}
     }
 
-    /* This loop must match the one in sudo_file_lookup() */
+    /* Fake up a minimal sudo nss list with the parsed policy. */
+    TAILQ_INSERT_TAIL(&snl, &testsudoers_nss, entries);
+    testsudoers_nss.query = testsudoers_query;
+    testsudoers_nss.parse_tree = &parsed_policy;
+
     printf("\nEntries for user %s:\n", user_name);
-    match = UNSPEC;
-    TAILQ_FOREACH_REVERSE(us, &parsed_policy.userspecs, userspec_list, entries) {
-	if (userlist_matches(&parsed_policy, sudo_user.pw, &us->users) != ALLOW)
-	    continue;
-	TAILQ_FOREACH_REVERSE(priv, &us->privileges, privilege_list, entries) {
-	    sudo_lbuf_append(&lbuf, "\n");
-	    sudoers_format_privilege(&lbuf, &parsed_policy, priv, false);
-	    sudo_lbuf_print(&lbuf);
-	    host_match = hostlist_matches(&parsed_policy, sudo_user.pw,
-		&priv->hostlist);
-	    if (host_match == ALLOW) {
-		puts("\thost  matched");
-		TAILQ_FOREACH_REVERSE(cs, &priv->cmndlist, cmndspec_list, entries) {
-		    if (cs->notbefore != UNSPEC) {
-			if (now < cs->notbefore) {
-			    puts(U_("\ttime  unmatched"));
-			    continue;
-			}
-			puts(U_("\ttime  matched"));
-		    }
-		    if (cs->notafter != UNSPEC) {
-			if (now > cs->notafter) {
-			    puts(U_("\ttime  unmatched"));
-			    continue;
-			}
-			puts(U_("\ttime  matched"));
-		    }
-		    runas_match = runaslist_matches(&parsed_policy,
-			cs->runasuserlist, cs->runasgrouplist, NULL, NULL);
-		    if (runas_match == ALLOW) {
-			puts("\trunas matched");
-			cmnd_match = cmnd_matches(&parsed_policy, cs->cmnd,
-			    cs->runchroot, NULL);
-			if (cmnd_match != UNSPEC)
-			    match = cmnd_match;
-			printf("\tcmnd  %s\n", match == ALLOW ? "allowed" :
-			    match == DENY ? "denied" : "unmatched");
-		    }
-		}
-	    } else
-		puts(U_("\thost  unmatched"));
-	}
-    }
-    puts(match == ALLOW ? U_("\nCommand allowed") :
-	match == DENY ?  U_("\nCommand denied") :  U_("\nCommand unmatched"));
+    validated = sudoers_lookup(&snl, sudo_user.pw, now, &callbacks, &status,
+	false);
 
     /*
      * Exit codes:
@@ -386,7 +353,21 @@ main(int argc, char *argv[])
      *	2 - command not matched
      *	3 - command denied
      */
-    exitcode = parse_error ? 1 : (match == ALLOW ? 0 : match + 3);
+    if (ISSET(validated, VALIDATE_SUCCESS)) {
+	puts(U_("\nCommand allowed"));
+	exitcode = 0;
+    } else if (ISSET(validated, VALIDATE_FAILURE)) {
+	exitcode = 3;
+	puts(U_("\nCommand denied"));
+    } else {
+	/* XXX - print different message on error */
+	if (parse_error || ISSET(validated, VALIDATE_ERROR))
+	    exitcode = 1;
+	else
+	    exitcode = 2;
+	puts(U_("\nCommand unmatched"));
+    }
+
 done:
     sudo_lbuf_destroy(&lbuf);
     sudo_freepwcache();
@@ -443,6 +424,20 @@ set_runasgr(const char *group)
     debug_return;
 }
 
+bool
+cb_log_input(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
+{
+    return true;
+}
+
+bool
+cb_log_output(const char *file, int line, int column,
+    const union sudo_defs_val *sd_un, int op)
+{
+    return true;
+}
+
 /* 
  * Callback for runas_default sudoers setting.
  */
@@ -453,6 +448,12 @@ cb_runas_default(const char *file, int line, int column,
     /* Only reset runaspw if user didn't specify one. */
     if (!runas_user && !runas_group)
         set_runaspw(sd_un->str);
+    return true;
+}
+
+bool
+sudo_nss_can_continue(const struct sudo_nss *nss, int match)
+{
     return true;
 }
 
@@ -561,6 +562,68 @@ set_cmnd_path(const char *runchroot)
     free(user_cmnd);
     user_cmnd = new_cmnd;
     return FOUND;
+}
+
+static void
+cb_userspec(struct userspec *us, int user_match)
+{
+    return;
+}
+
+static void
+cb_privilege(struct privilege *priv, int host_match)
+{
+    struct sudo_lbuf lbuf;
+
+    sudo_lbuf_init(&lbuf, testsudoers_output, 0, NULL, 0);
+    sudo_lbuf_append(&lbuf, "\n");
+    sudoers_format_privilege(&lbuf, &parsed_policy, priv, false);
+    sudo_lbuf_print(&lbuf);
+    sudo_lbuf_destroy(&lbuf);
+
+    if (host_match)
+	puts("\thost  matched");
+    else
+	puts("\thost  unmatched");
+}
+
+static void
+cb_cmndspec(struct cmndspec *cs, int date_match, int runas_match, int cmnd_match)
+{
+    /* XXX - match historical (buggy) behavior for now */
+#ifdef notyet
+    if (date_match != UNSPEC) {
+	if (date_match == ALLOW)
+	    puts(U_("\tdate  matched"));
+	else
+	    puts(U_("\tdate  denied"));
+    }
+    printf("\trunas %s\n", runas_match == ALLOW ? "allowed" :
+	runas_match == DENY ? "denied" : "unmatched");
+    if (runas_match == ALLOW) {
+	printf("\tcmnd  %s\n", cmnd_match == ALLOW ? "allowed" :
+	    cmnd_match == DENY ? "denied" : "unmatched");
+    }
+#else
+    if (date_match != UNSPEC) {
+	if (date_match == ALLOW)
+	    puts(U_("\ttime  matched"));
+	else
+	    puts(U_("\ttime  unmatched"));
+    }
+    if (runas_match == ALLOW) {
+	puts("\trunas matched");
+	printf("\tcmnd  %s\n", cmnd_match == ALLOW ? "allowed" :
+	    cmnd_match == DENY ? "denied" : "unmatched");
+    }
+#endif
+}
+
+static int
+testsudoers_query(const struct sudo_nss *nss, struct passwd *pw)
+{
+    /* Nothing to do. */
+    return 0;
 }
 
 static bool

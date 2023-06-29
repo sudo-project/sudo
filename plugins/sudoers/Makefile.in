@@ -213,8 +213,8 @@ REPLAY_OBJS = getdate.o sudoreplay.o
 REPLAY_IOBJS = $(REPLAY_OBJS:.o=.i)
 
 TEST_OBJS = fmtsudoers.lo fmtsudoers_cvt.lo group_plugin.lo interfaces.lo \
-	    ldap_util.lo locale.lo net_ifs.o parse_ldif.o sudo_printf.o \
-	    testsudoers.o testsudoers_pwutil.o tsgetgrpw.o
+	    ldap_util.lo locale.lo lookup.lo net_ifs.o parse_ldif.o \
+	    sudo_printf.o testsudoers.o testsudoers_pwutil.o tsgetgrpw.o
 
 IOBJS = $(LIBPARSESUDOERS_IOBJS) $(SUDOERS_IOBJS) $(VISUDO_IOBJS) \
 	$(CVTSUDOERS_IOBJS) $(REPLAY_IOBJS)

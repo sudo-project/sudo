@@ -7,9 +7,4 @@ ALL = CHROOT=/ /bin/ls
 	runas matched
 	cmnd  allowed
 
-ALL = CWD=/ /bin/pwd
-	host  matched
-	runas matched
-	cmnd  allowed
-
 Command allowed
