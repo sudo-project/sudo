@@ -90,7 +90,7 @@ mktemp_internal(int dfd, char *path, int slen, int mode, int flags)
 		cp = start;
 		do {
 			unsigned short rbuf[16];
-			unsigned int i;
+			size_t i;
 
 			/*
 			 * Avoid lots of arc4random() calls by using

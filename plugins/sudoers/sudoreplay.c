@@ -225,7 +225,7 @@ main(int argc, char *argv[])
 
     /* Read sudo.conf and initialize the debug subsystem. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
-	exit(EXIT_FAILURE);
+	return EXIT_FAILURE;
     sudo_debug_register(getprogname(), NULL, NULL,
 	sudo_conf_debug_files(getprogname()), -1);
 
@@ -1479,7 +1479,7 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
     struct stat sb;
     struct sudo_lbuf lbuf;
     size_t sdlen, sessions_len = 0, sessions_size = 0;
-    unsigned int i;
+    size_t i;
     int len;
     char pathbuf[PATH_MAX], **sessions = NULL;
 #ifdef HAVE_STRUCT_DIRENT_D_TYPE

@@ -84,9 +84,9 @@ digest_matches(int fd, const char *path,
 	}
 	if (strlen(digest->digest_str) == digest_len * 2) {
 	    /* Convert ascii hex to binary. */
-	    unsigned int i;
+	    size_t i;
 	    for (i = 0; i < digest_len; i++) {
-		const int h = sudo_hexchar(&digest->digest_str[i + i]);
+		const int h = sudo_hexchar(&digest->digest_str[2 * i]);
 		if (h == -1)
 		    goto bad_format;
 		sudoers_digest[i] = (unsigned char)h;

@@ -71,7 +71,7 @@ set_tmpdir(const struct sudo_cred *user_cred)
 	_PATH_TMP
     };
     struct sudo_cred saved_cred;
-    unsigned int i;
+    size_t i;
     size_t len;
     int dfd;
     debug_decl(set_tmpdir, SUDO_DEBUG_EDIT);

@@ -48,18 +48,13 @@ sudo_filedigest(int fd, const char *file, unsigned int digest_type,
     *digest_len = sudo_digest_getlen(digest_type);
     if (*digest_len == (size_t)-1) {
 	sudo_warnx(U_("unsupported digest type %u for %s"), digest_type, file);
-	goto bad;
-    }
-
-    if ((dig = sudo_digest_alloc(digest_type)) == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	goto bad;
+	debug_return_ptr(NULL);
     }
 
     if ((fd2 = dup(fd)) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "unable to dup %s: %s",
 	    file, strerror(errno));
-	goto bad;
+	debug_return_ptr(NULL);
     }
     if ((fp = fdopen(fd2, "r")) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "unable to fdopen %s: %s",
@@ -71,7 +66,10 @@ sudo_filedigest(int fd, const char *file, unsigned int digest_type,
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto bad;
     }
-
+    if ((dig = sudo_digest_alloc(digest_type)) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto bad;
+    }
     while ((nread = fread(buf, 1, sizeof(buf), fp)) != 0) {
 	sudo_digest_update(dig, buf, nread);
     }

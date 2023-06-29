@@ -225,7 +225,7 @@ find_editor(int nfiles, char * const *files, int *argc_out, char ***argv_out,
 {
     char *editor_path = NULL;
     const char *ev[3];
-    unsigned int i;
+    size_t i;
     debug_decl(find_editor, SUDOERS_DEBUG_UTIL);
 
     /*
