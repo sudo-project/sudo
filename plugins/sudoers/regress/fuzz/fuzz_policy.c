@@ -792,8 +792,8 @@ audit_failure(char *const argv[], char const *const fmt, ...)
 
 /* STUB */
 int
-sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, int *cmnd_status,
-    int pwflag)
+sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, time_t now,
+    struct sudoers_lookup_callbacks *callbacks, int *cmnd_status, int pwflag)
 {
     return VALIDATE_SUCCESS;
 }

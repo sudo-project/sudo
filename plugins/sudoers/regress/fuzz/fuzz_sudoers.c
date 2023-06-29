@@ -205,6 +205,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     struct passwd *pw;
     struct group *gr;
     const char *gids[10];
+    time_t now;
     FILE *fp;
 
     /* Don't waste time fuzzing tiny inputs. */
@@ -291,6 +292,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	goto done;
     user_args = (char *)"-u";
     user_base = sudo_basename(user_cmnd);
+    time(&now);
 
     /* Add a fake network interfaces. */
     interfaces = get_interfaces();
@@ -369,10 +371,10 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
 	    update_defaults(&parse_tree, NULL, SETDEF_ALL, false);
 
-	    sudoers_lookup(&snl, sudo_user.pw, &cmnd_status, false);
+	    sudoers_lookup(&snl, sudo_user.pw, now, NULL, &cmnd_status, false);
 
 	    /* Match again as a pseudo-command (list, validate, etc). */
-	    sudoers_lookup(&snl, sudo_user.pw, &cmnd_status, true);
+	    sudoers_lookup(&snl, sudo_user.pw, now, NULL, &cmnd_status, true);
 
 	    /* Display privileges. */
 	    display_privs(&snl, sudo_user.pw, false);

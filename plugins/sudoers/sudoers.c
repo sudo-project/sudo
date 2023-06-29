@@ -398,6 +398,7 @@ static int
 sudoers_check_common(int pwflag)
 {
     int oldlocale, validated, ret = -1;
+    time_t now;
     debug_decl(sudoers_check_common, SUDOERS_DEBUG_PLUGIN);
 
     /* If given the -P option, set the "preserve_groups" flag. */
@@ -432,8 +433,10 @@ sudoers_check_common(int pwflag)
     /*
      * Check sudoers sources, using the locale specified in sudoers.
      */
+    time(&now);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
-    validated = sudoers_lookup(snl, sudo_user.pw, &cmnd_status, pwflag);
+    validated = sudoers_lookup(snl, sudo_user.pw, now, NULL, &cmnd_status,
+	pwflag);
     sudoers_setlocale(oldlocale, NULL);
     if (ISSET(validated, VALIDATE_ERROR)) {
 	/* The lookup function should have printed an error. */

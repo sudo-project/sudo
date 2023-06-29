@@ -74,7 +74,7 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw, int pwflag)
     if (list_pw != NULL) {
 	root_pw = sudo_getpwuid(ROOT_UID);
 	if (root_pw == NULL)
-	    log_warningx(SLOG_SEND_MAIL, N_("unknown uid %u"), ROOT_UID);
+	    sudo_warnx(U_("unknown uid %u"), ROOT_UID);
     } else {
 	SET(validated, FLAG_NO_CHECK);
     }
@@ -190,10 +190,10 @@ init_cmnd_info(struct cmnd_info *info)
 
 static int
 sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
-    int *validated, struct cmnd_info *info, struct cmndspec **matching_cs,
-    struct defaults_list **defs, time_t now)
+    int *validated, struct cmnd_info *info, time_t now,
+    struct sudoers_lookup_callbacks *callbacks, struct cmndspec **matching_cs,
+    struct defaults_list **defs)
 {
-    int host_match, runas_match, cmnd_match;
     struct cmndspec *cs;
     struct privilege *priv;
     struct userspec *us;
@@ -203,53 +203,65 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
     init_cmnd_info(info);
 
     TAILQ_FOREACH_REVERSE(us, &nss->parse_tree->userspecs, userspec_list, entries) {
-	if (userlist_matches(nss->parse_tree, pw, &us->users) != ALLOW)
+	int user_match = userlist_matches(nss->parse_tree, pw, &us->users);
+	if (callbacks != NULL)
+	    callbacks->cb_userspec(us, user_match);
+	if (user_match != ALLOW)
 	    continue;
 	CLR(*validated, FLAG_NO_USER);
 	TAILQ_FOREACH_REVERSE(priv, &us->privileges, privilege_list, entries) {
-	    host_match = hostlist_matches(nss->parse_tree, pw, &priv->hostlist);
+	    int host_match = hostlist_matches(nss->parse_tree, pw,
+		&priv->hostlist);
+	    if (callbacks != NULL)
+		callbacks->cb_privilege(priv, host_match);
 	    if (host_match == ALLOW)
 		CLR(*validated, FLAG_NO_HOST);
 	    else
 		continue;
 	    TAILQ_FOREACH_REVERSE(cs, &priv->cmndlist, cmndspec_list, entries) {
+		int cmnd_match = UNSPEC;
+		int date_match = UNSPEC;
+		int runas_match = UNSPEC;
+
 		if (cs->notbefore != UNSPEC) {
-		    if (now < cs->notbefore)
-			continue;
+		    date_match = now < cs->notbefore ? DENY : ALLOW;
 		}
 		if (cs->notafter != UNSPEC) {
-		    if (now > cs->notafter)
-			continue;
+		    date_match = now > cs->notafter ? DENY : ALLOW;
 		}
-		matching_user = NULL;
-		runas_match = runaslist_matches(nss->parse_tree,
-		    cs->runasuserlist, cs->runasgrouplist, &matching_user,
-		    NULL);
-		if (runas_match == ALLOW) {
-		    cmnd_match = cmnd_matches(nss->parse_tree, cs->cmnd,
-			cs->runchroot, info);
-		    if (cmnd_match != UNSPEC) {
-			/*
-			 * If user is running command as himself,
-			 * set runas_pw = sudo_user.pw.
-			 * XXX - hack, want more general solution
-			 */
-			if (matching_user && matching_user->type == MYSELF) {
-			    sudo_pw_delref(runas_pw);
-			    sudo_pw_addref(sudo_user.pw);
-			    runas_pw = sudo_user.pw;
-			}
-			*matching_cs = cs;
-			*defs = &priv->defaults;
-			sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-			    "userspec matched @ %s:%d:%d: %s",
-			    us->file ? us->file : "???", us->line, us->column,
-			    cmnd_match ? "allowed" : "denied");
-			debug_return_int(cmnd_match);
+		if (date_match != DENY) {
+		    matching_user = NULL;
+		    runas_match = runaslist_matches(nss->parse_tree,
+			cs->runasuserlist, cs->runasgrouplist, &matching_user,
+			NULL);
+		    if (runas_match == ALLOW) {
+			cmnd_match = cmnd_matches(nss->parse_tree, cs->cmnd,
+			    cs->runchroot, info);
 		    }
-		    free(info->cmnd_path);
-		    init_cmnd_info(info);
 		}
+		if (callbacks != NULL)
+		    callbacks->cb_cmndspec(cs, date_match, runas_match, cmnd_match);
+		if (cmnd_match != UNSPEC) {
+		    /*
+		     * If user is running command as themselves,
+		     * set runas_pw = sudo_user.pw.
+		     * XXX - hack, want more general solution
+		     */
+		    if (matching_user && matching_user->type == MYSELF) {
+			sudo_pw_delref(runas_pw);
+			sudo_pw_addref(sudo_user.pw);
+			runas_pw = sudo_user.pw;
+		    }
+		    *matching_cs = cs;
+		    *defs = &priv->defaults;
+		    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+			"userspec matched @ %s:%d:%d: %s",
+			us->file ? us->file : "???", us->line, us->column,
+			cmnd_match ? "allowed" : "denied");
+		    debug_return_int(cmnd_match);
+		}
+		free(info->cmnd_path);
+		init_cmnd_info(info);
 	    }
 	}
     }
@@ -446,8 +458,8 @@ apply_cmndspec(struct cmndspec *cs)
  * allowed to run the specified command on this host as the target user.
  */
 int
-sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, int *cmnd_status,
-    int pwflag)
+sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, time_t now,
+    struct sudoers_lookup_callbacks *callbacks, int *cmnd_status, int pwflag)
 {
     struct defaults_list *defs = NULL;
     struct sudoers_parse_tree *parse_tree = NULL;
@@ -456,7 +468,6 @@ sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, int *cmnd_status,
     struct cmnd_info info;
     int validated = FLAG_NO_USER | FLAG_NO_HOST;
     int m, match = UNSPEC;
-    time_t now;
     debug_decl(sudoers_lookup, SUDOERS_DEBUG_PARSER);
 
     /*
@@ -470,7 +481,6 @@ sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, int *cmnd_status,
 	debug_return_int(validated);
 
     /* Query each sudoers source and check the user. */
-    time(&now);
     TAILQ_FOREACH(nss, snl, entries) {
 	if (nss->query(nss, pw) == -1) {
 	    /* The query function should have printed an error message. */
@@ -478,7 +488,8 @@ sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, int *cmnd_status,
 	    break;
 	}
 
-	m = sudoers_lookup_check(nss, pw, &validated, &info, &cs, &defs, now);
+	m = sudoers_lookup_check(nss, pw, &validated, &info, now, callbacks,
+	    &cs, &defs);
 	if (m != UNSPEC) {
 	    match = m;
 	    parse_tree = nss->parse_tree;
