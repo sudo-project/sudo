@@ -672,12 +672,12 @@ plugins/sudoers/log_client.c
 plugins/sudoers/log_client.h
 plugins/sudoers/logging.c
 plugins/sudoers/logging.h
+plugins/sudoers/lookup.c
 plugins/sudoers/match.c
 plugins/sudoers/match_addr.c
 plugins/sudoers/match_command.c
 plugins/sudoers/match_digest.c
 plugins/sudoers/mkdefaults
-plugins/sudoers/parse.c
 plugins/sudoers/parse.h
 plugins/sudoers/parse_ldif.c
 plugins/sudoers/pivot.c
