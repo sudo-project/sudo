@@ -107,7 +107,7 @@ union arg {
 };
 
 static int __find_arguments(const char *fmt0, va_list ap, union arg **argtable);
-static int __grow_type_table(unsigned char **typetable, long *tablesize);
+static int __grow_type_table(unsigned char **typetable, int *tablesize);
 static int xxxprintf(char **, size_t, int, const char *, va_list);
 
 #ifdef PRINTF_WIDE_CHAR
@@ -1089,9 +1089,9 @@ __find_arguments(const char *fmt0, va_list ap, union arg **argtable)
 	int flags;		/* flags as above */
 	unsigned char *typetable; /* table of types */
 	unsigned char stattypetable[STATIC_ARG_TBL_SIZE];
-	long tablesize;		/* current size of type table */
-	long tablemax;		/* largest used index in table */
-	long nextarg;		/* 1-based argument index */
+	int tablesize;		/* current size of type table */
+	int tablemax;		/* largest used index in table */
+	int nextarg;		/* 1-based argument index */
 	int ret = 0;		/* return value */
 
 	/*
@@ -1421,14 +1421,10 @@ finish:
  * Increase the size of the type table.
  */
 static int
-__grow_type_table(unsigned char **typetable, long *tablesize)
+__grow_type_table(unsigned char **typetable, int *tablesize)
 {
 	unsigned char *oldtable = *typetable;
-	long newsize = *tablesize * 2;
-	long size = sysconf(_SC_PAGESIZE);
-
-	if (newsize < size)
-		newsize = size;
+	int newsize = *tablesize * 2;
 
 	if (*tablesize == STATIC_ARG_TBL_SIZE) {
 		*typetable = sudo_mmap_alloc(newsize);
