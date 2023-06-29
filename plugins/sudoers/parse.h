@@ -474,6 +474,8 @@ const char *digest_type_to_name(unsigned int digest_type);
 /* parse.c */
 struct sudo_nss_list;
 int sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, int *cmnd_status, int pwflag);
+
+/* display.c */
 int display_privs(struct sudo_nss_list *snl, struct passwd *pw, bool verbose);
 int display_cmnd(struct sudo_nss_list *snl, struct passwd *pw);
 

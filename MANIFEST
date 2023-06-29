@@ -631,6 +631,7 @@ plugins/sudoers/def_data.in
 plugins/sudoers/defaults.c
 plugins/sudoers/defaults.h
 plugins/sudoers/digestname.c
+plugins/sudoers/display.c
 plugins/sudoers/editor.c
 plugins/sudoers/env.c
 plugins/sudoers/env_pattern.c
