@@ -411,7 +411,7 @@ DEFVAR			[a-z_]+
 
 <INITIAL>^[[:blank:]]*Defaults([:@>\!][[:blank:]]*\!*\"?({ID}|{WORD}))? {
 			    char deftype;
-			    int n;
+			    size_t n;
 
 			    if (continued) {
 				sudoers_errstr = N_("invalid line continuation");
@@ -451,7 +451,7 @@ DEFVAR			[a-z_]+
 			}
 
 <INITIAL>^[[:blank:]]*(Host|Cmnd|Cmd|User|Runas)_Alias	{
-			    int n;
+			    size_t n;
 
 			    if (continued) {
 				sudoers_errstr = N_("invalid line continuation");
@@ -942,12 +942,12 @@ pl_compare(const void *v1, const void *v2)
  * Returns the number of files or -1 on error.
  * If zero files are found, NULL is stored in pathsp.
  */
-static int
+static size_t
 read_dir_files(const char *dirpath, struct path_list ***pathsp, int verbose)
 {
     DIR *dir;
-    int i, count = 0;
-    int max_paths = 32;
+    size_t i, count = 0;
+    size_t max_paths = 32;
     struct dirent *dent;
     struct path_list **paths = NULL;
     const size_t dirlen = strlen(dirpath);
@@ -1026,7 +1026,7 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp, int verbose)
     }
 done:
     *pathsp = paths;
-    debug_return_int(count);
+    debug_return_size_t(count);
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 bad:
@@ -1038,18 +1038,18 @@ bad:
 	free(paths[i]);
     }
     free(paths);
-    debug_return_int(-1);
+    debug_return_size_t(-1);
 }
 
 /*
  * Push a list of all files in dirpath onto stack.
  * Returns the number of files or -1 on error.
  */
-static int
+static size_t
 switch_dir(struct include_stack *stack, char *dirpath, int verbose)
 {
     struct path_list **paths = NULL;
-    int count, i;
+    size_t count, i;
     debug_decl(switch_dir, SUDOERS_DEBUG_PARSER);
 
     count = read_dir_files(dirpath, &paths, verbose);
@@ -1064,7 +1064,7 @@ switch_dir(struct include_stack *stack, char *dirpath, int verbose)
 	free(paths);
     }
 
-    debug_return_int(count);
+    debug_return_size_t(count);
 }
 
 #define MAX_SUDOERS_DEPTH	128
@@ -1162,7 +1162,7 @@ expand_include(const char *src)
     const char *cp, *ep;
     char *dst0, *dst;
     size_t dst_size, src_len;
-    unsigned int nhost = 0;
+    size_t nhost = 0;
     debug_decl(expand_include, SUDOERS_DEBUG_PARSER);
 
     /* Strip double quotes if present. */
@@ -1306,7 +1306,8 @@ push_include_int(const char *opath, bool isdir, int verbose)
     if (isdir) {
 	struct stat sb;
 	char dname[PATH_MAX];
-	int count, fd, status;
+	int fd, status;
+	size_t count;
 
 	fd = sudo_open_conf_path(path, dname, sizeof(dname), NULL);
 	status = sudo_secure_fd(fd, S_IFDIR, sudoers_file_uid(),
@@ -1342,10 +1343,16 @@ push_include_int(const char *opath, bool isdir, int verbose)
 	    debug_return_bool(true);
 	}
 	count = switch_dir(&istack[idepth], dname, verbose);
-	if (count <= 0) {
+	if (count == 0) {
 	    /* switch_dir() called sudoerserror() for us */
 	    sudo_rcstr_delref(path);
-	    debug_return_bool(count ? false : true);
+	    debug_return_bool(true);
+	}
+
+	if (count == (size_t)-1) {
+	    /* switch_dir() called sudoerserror() for us */
+	    sudo_rcstr_delref(path);
+	    debug_return_bool(false);
 	}
 
 	/* Parse the first dir entry we can open, leave the rest for later. */
