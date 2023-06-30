@@ -3,9 +3,9 @@ Parses OK
 Entries for user root:
 
 ALL = NOTBEFORE=20170214083000Z /bin/ls
-	host  matched
-	time  matched
-	runas matched
+	host  allowed
+	date  allowed
+	runas allowed
 	cmnd  allowed
 
 Command allowed
@@ -14,8 +14,8 @@ Parses OK
 Entries for user root:
 
 ALL = NOTBEFORE=20170214083001Z /bin/ls
-	host  matched
-	time  unmatched
+	host  allowed
+	date  denied
 
 Command unmatched
 Parses OK
@@ -23,9 +23,9 @@ Parses OK
 Entries for user root:
 
 ALL = NOTAFTER=20170214083000Z /bin/ls
-	host  matched
-	time  matched
-	runas matched
+	host  allowed
+	date  allowed
+	runas allowed
 	cmnd  allowed
 
 Command allowed
@@ -34,7 +34,7 @@ Parses OK
 Entries for user root:
 
 ALL = NOTAFTER=20170214083000Z /bin/ls
-	host  matched
-	time  unmatched
+	host  allowed
+	date  denied
 
 Command unmatched

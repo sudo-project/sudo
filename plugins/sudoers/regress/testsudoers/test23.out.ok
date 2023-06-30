@@ -3,6 +3,7 @@ Parses OK
 Entries for user admin:
 
 ALL = (root) /bin/ls
-	host  matched
+	host  allowed
+	runas unmatched
 
 Command unmatched

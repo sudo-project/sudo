@@ -3,6 +3,7 @@ Parses OK
 Entries for user root:
 
 ALL = ALL
-	host  matched
+	host  allowed
+	runas unmatched
 
 Command unmatched

@@ -3,8 +3,8 @@ Parses OK
 Entries for user admin:
 
 ALL = (USERALIAS : GROUPALIAS) /bin/ls
-	host  matched
-	runas matched
+	host  allowed
+	runas allowed
 	cmnd  allowed
 
 Command allowed

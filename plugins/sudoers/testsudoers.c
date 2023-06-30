@@ -581,42 +581,23 @@ cb_privilege(struct privilege *priv, int host_match)
     sudo_lbuf_print(&lbuf);
     sudo_lbuf_destroy(&lbuf);
 
-    if (host_match)
-	puts("\thost  matched");
-    else
-	puts("\thost  unmatched");
+    printf("\thost  %s\n", host_match == ALLOW ? "allowed" :
+	host_match == DENY ? "denied" : "unmatched");
 }
 
 static void
 cb_cmndspec(struct cmndspec *cs, int date_match, int runas_match, int cmnd_match)
 {
-    /* XXX - match historical (buggy) behavior for now */
-#ifdef notyet
-    if (date_match != UNSPEC) {
-	if (date_match == ALLOW)
-	    puts(U_("\tdate  matched"));
-	else
-	    puts(U_("\tdate  denied"));
+    if (date_match != UNSPEC)
+	printf("\tdate  %s\n", date_match == ALLOW ? "allowed" : "denied");
+    if (date_match != DENY) {
+	printf("\trunas %s\n", runas_match == ALLOW ? "allowed" :
+	    runas_match == DENY ? "denied" : "unmatched");
+	if (runas_match == ALLOW) {
+	    printf("\tcmnd  %s\n", cmnd_match == ALLOW ? "allowed" :
+		cmnd_match == DENY ? "denied" : "unmatched");
+	}
     }
-    printf("\trunas %s\n", runas_match == ALLOW ? "allowed" :
-	runas_match == DENY ? "denied" : "unmatched");
-    if (runas_match == ALLOW) {
-	printf("\tcmnd  %s\n", cmnd_match == ALLOW ? "allowed" :
-	    cmnd_match == DENY ? "denied" : "unmatched");
-    }
-#else
-    if (date_match != UNSPEC) {
-	if (date_match == ALLOW)
-	    puts(U_("\ttime  matched"));
-	else
-	    puts(U_("\ttime  unmatched"));
-    }
-    if (runas_match == ALLOW) {
-	puts("\trunas matched");
-	printf("\tcmnd  %s\n", cmnd_match == ALLOW ? "allowed" :
-	    cmnd_match == DENY ? "denied" : "unmatched");
-    }
-#endif
 }
 
 static int

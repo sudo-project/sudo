@@ -5,8 +5,8 @@ Parses OK
 Entries for user root:
 
 ALL = ALL
-	host  matched
-	runas matched
+	host  allowed
+	runas allowed
 	cmnd  allowed
 
 Command allowed
@@ -18,8 +18,8 @@ Parses OK
 Entries for user root:
 
 ALL = ALL
-	host  matched
-	runas matched
+	host  allowed
+	runas allowed
 	cmnd  allowed
 
 Command allowed
@@ -31,8 +31,8 @@ Parses OK
 Entries for user root:
 
 ALL = ALL
-	host  matched
-	runas matched
+	host  allowed
+	runas allowed
 	cmnd  allowed
 
 Command allowed
@@ -44,8 +44,8 @@ Parses OK
 Entries for user root:
 
 ALL = ALL
-	host  matched
-	runas matched
+	host  allowed
+	runas allowed
 	cmnd  allowed
 
 Command allowed

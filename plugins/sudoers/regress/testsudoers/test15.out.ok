@@ -5,13 +5,13 @@ Parses OK
 Entries for user root:
 
 ALL = /usr/bin/id
-	host  matched
-	runas matched
+	host  allowed
+	runas allowed
 	cmnd  unmatched
 
 ALL = ALL
-	host  matched
-	runas matched
+	host  allowed
+	runas allowed
 	cmnd  allowed
 
 Command allowed
