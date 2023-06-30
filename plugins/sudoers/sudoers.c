@@ -325,67 +325,6 @@ done:
     debug_return_str(iolog_path);
 }
 
-static int
-check_user_runchroot(void)
-{
-    debug_decl(check_user_runchroot, SUDOERS_DEBUG_PLUGIN);
-
-    if (user_runchroot == NULL)
-	debug_return_bool(true);
-
-    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	"def_runchroot %s, user_runchroot %s",
-	def_runchroot ? def_runchroot : "none",
-	user_runchroot ? user_runchroot : "none");
-
-    /* If runchroot set in sudoers, it must match user_runchroot (or be '*'). */
-    if (def_runchroot == NULL || (strcmp(def_runchroot, "*") != 0 &&
-	    strcmp(def_runchroot, user_runchroot) != 0)) {
-	log_warningx(SLOG_NO_STDERR|SLOG_AUDIT,
-	    N_("user not allowed to change root directory to %s"),
-	    user_runchroot);
-	sudo_warnx(U_("you are not permitted to use the -R option with %s"),
-	    user_cmnd);
-	debug_return_bool(false);
-    }
-    free(def_runchroot);
-    if ((def_runchroot = strdup(user_runchroot)) == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return_int(-1);
-    }
-    debug_return_bool(true);
-}
-
-static int
-check_user_runcwd(void)
-{
-    debug_decl(check_user_runcwd, SUDOERS_DEBUG_PLUGIN);
-
-    if (user_runcwd == NULL)
-	debug_return_bool(true);
-
-    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	"def_runcwd %s, user_runcwd %s",
-	def_runcwd ? def_runcwd : "none",
-	user_runcwd ? user_runcwd : "none");
-
-    /* If runcwd set in sudoers, it must match user_runcwd (or be '*'). */
-    if (def_runcwd == NULL || (strcmp(def_runcwd, "*") != 0 &&
-	    strcmp(def_runcwd, user_runcwd) != 0)) {
-	log_warningx(SLOG_NO_STDERR|SLOG_AUDIT,
-	    N_("user not allowed to change directory to %s"), user_runcwd);
-	sudo_warnx(U_("you are not permitted to use the -D option with %s"),
-	    user_cmnd);
-	debug_return_bool(false);
-    }
-    free(def_runcwd);
-    if ((def_runcwd = strdup(user_runcwd)) == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return_int(-1);
-    }
-    debug_return_bool(true);
-}
-
 /*
  * Find the command, perform a sudoers lookup, ask for a password as
  * needed, and perform post-lokup checks.  Logs success/failure.
@@ -522,6 +461,11 @@ sudoers_check_common(int pwflag)
     case true:
 	break;
     case false:
+	log_warningx(SLOG_NO_STDERR|SLOG_AUDIT,
+	    N_("user not allowed to change root directory to %s"),
+	    user_runchroot);
+	sudo_warnx(U_("you are not permitted to use the -R option with %s"),
+	    user_cmnd);
 	goto bad;
     default:
 	goto done;
@@ -532,6 +476,11 @@ sudoers_check_common(int pwflag)
     case true:
 	break;
     case false:
+	log_warningx(SLOG_NO_STDERR|SLOG_AUDIT,
+	    N_("user not allowed to change directory to %s"), user_runcwd);
+	sudo_warnx(U_("you are not permitted to use the -D option with %s"),
+	    user_cmnd);
+	debug_return_bool(false);
 	goto bad;
     default:
 	goto done;

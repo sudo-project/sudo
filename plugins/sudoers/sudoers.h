@@ -296,8 +296,12 @@ int find_path(const char *infile, char **outfile, struct stat *sbp,
 
 /* check.c */
 int check_user(int validate, int mode);
-bool check_user_shell(const struct passwd *pw);
 bool user_is_exempt(void);
+
+/* check_util.c */
+bool check_user_shell(const struct passwd *pw);
+int check_user_runchroot(void);
+int check_user_runcwd(void);
 
 /* prompt.c */
 char *expand_prompt(const char *old_prompt, const char *auth_user);

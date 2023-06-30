@@ -713,6 +713,20 @@ check_user(int validated, int mode)
 }
 
 /* STUB */
+int
+check_user_runchroot(void)
+{
+    return true;
+}
+
+/* STUB */
+int
+check_user_runcwd(void)
+{
+    return true;
+}
+
+/* STUB */
 bool
 check_user_shell(const struct passwd *pw)
 {

@@ -618,6 +618,7 @@ plugins/sudoers/canon_path.c
 plugins/sudoers/check.c
 plugins/sudoers/check.h
 plugins/sudoers/check_aliases.c
+plugins/sudoers/check_util.c
 plugins/sudoers/cvtsudoers.c
 plugins/sudoers/cvtsudoers.h
 plugins/sudoers/cvtsudoers_csv.c
