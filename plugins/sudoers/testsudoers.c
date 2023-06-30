@@ -112,6 +112,7 @@ main(int argc, char *argv[])
     const char *errstr;
     int ch, dflag, exitcode = EXIT_FAILURE;
     int validated, status = FOUND;
+    char cwdbuf[PATH_MAX];
     time_t now;
     id_t id;
     debug_decl(main, SUDOERS_DEBUG_MAIN);
@@ -140,8 +141,11 @@ main(int argc, char *argv[])
 
     dflag = 0;
     grfile = pwfile = NULL;
-    while ((ch = getopt(argc, argv, "+dg:G:h:i:P:p:T:tu:U:")) != -1) {
+    while ((ch = getopt(argc, argv, "+D:dg:G:h:i:P:p:R:T:tu:U:")) != -1) {
 	switch (ch) {
+	    case 'D':
+		user_runcwd = optarg;
+		break;
 	    case 'd':
 		dflag = 1;
 		break;
@@ -178,6 +182,9 @@ main(int argc, char *argv[])
 		now = parse_gentime(optarg);
 		if (now == -1)
 		    sudo_fatalx("invalid time: %s", optarg);
+		break;
+	    case 'R':
+		user_runchroot = optarg;
 		break;
 	    case 't':
 		trace_print = testsudoers_error;
@@ -228,6 +235,10 @@ main(int argc, char *argv[])
     if (user_cmnd == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     user_base = sudo_basename(user_cmnd);
+
+    if (getcwd(cwdbuf, sizeof(cwdbuf)) == NULL)
+	strlcpy(cwdbuf, "/", sizeof(cwdbuf));
+    user_cwd = cwdbuf;
 
     if ((sudo_user.pw = sudo_getpwnam(user_name)) == NULL)
 	sudo_fatalx(U_("unknown user %s"), user_name);
@@ -341,6 +352,22 @@ main(int argc, char *argv[])
     printf("\nEntries for user %s:\n", user_name);
     validated = sudoers_lookup(&snl, sudo_user.pw, now, &callbacks, &status,
 	false);
+
+    /* Validate user-specified chroot or cwd (if any). */
+    if (ISSET(validated, VALIDATE_SUCCESS)) {
+	if (check_user_runchroot() != true) {
+	    printf("\nUser %s is not allowed to change root directory to %s\n",
+		user_name, user_runchroot);
+	    CLR(validated, VALIDATE_SUCCESS);
+	    SET(validated, VALIDATE_FAILURE);
+	}
+	if (check_user_runcwd() != true) {
+	    printf("\nUser %s is not allowed to change directory to %s\n",
+		user_name, user_runcwd);
+	    CLR(validated, VALIDATE_SUCCESS);
+	    SET(validated, VALIDATE_FAILURE);
+	}
+    }
 
     /*
      * Exit codes:
