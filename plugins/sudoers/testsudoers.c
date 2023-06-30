@@ -60,7 +60,7 @@ enum sudoers_formats {
 /*
  * Function Prototypes
  */
-static void dump_sudoers(struct sudo_lbuf *lbuf);
+static void dump_sudoers(void);
 static void set_runaspw(const char *);
 static void set_runasgr(const char *);
 static bool cb_runas_default(const char *file, int line, int column, const union sudo_defs_val *, int);
@@ -112,7 +112,6 @@ main(int argc, char *argv[])
     const char *errstr;
     int ch, dflag, exitcode = EXIT_FAILURE;
     int validated, status = FOUND;
-    struct sudo_lbuf lbuf;
     time_t now;
     id_t id;
     debug_decl(main, SUDOERS_DEBUG_MAIN);
@@ -132,9 +131,6 @@ main(int argc, char *argv[])
     bindtextdomain("sudoers", LOCALEDIR); /* XXX - should have own domain */
     textdomain("sudoers");
     time(&now);
-
-    /* No word wrap on output. */
-    sudo_lbuf_init(&lbuf, testsudoers_output, 0, NULL, 0);
 
     /* Initialize the debug subsystem. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
@@ -330,7 +326,7 @@ main(int argc, char *argv[])
 
     if (dflag) {
 	(void) putchar('\n');
-	dump_sudoers(&lbuf);
+	dump_sudoers();
 	if (argc < 2) {
 	    exitcode = parse_error ? 1 : 0;
 	    goto done;
@@ -368,7 +364,6 @@ main(int argc, char *argv[])
     }
 
 done:
-    sudo_lbuf_destroy(&lbuf);
     sudo_freepwcache();
     sudo_freegrcache();
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
@@ -574,6 +569,7 @@ cb_privilege(struct privilege *priv, int host_match)
 {
     struct sudo_lbuf lbuf;
 
+    /* No word wrap on output. */
     sudo_lbuf_init(&lbuf, testsudoers_output, 0, NULL, 0);
     sudo_lbuf_append(&lbuf, "\n");
     sudoers_format_privilege(&lbuf, &parsed_policy, priv, false);
@@ -648,38 +644,43 @@ print_aliases(struct sudo_lbuf *lbuf)
 }
 
 static void
-dump_sudoers(struct sudo_lbuf *lbuf)
+dump_sudoers(void)
 {
+    struct sudo_lbuf lbuf;
     debug_decl(dump_sudoers, SUDOERS_DEBUG_UTIL);
 
+    /* No word wrap on output. */
+    sudo_lbuf_init(&lbuf, testsudoers_output, 0, NULL, 0);
+
     /* Print Defaults */
-    if (!print_defaults(lbuf))
+    if (!print_defaults(&lbuf))
 	goto done;
-    if (lbuf->len > 0) {
-	sudo_lbuf_print(lbuf);
-	sudo_lbuf_append(lbuf, "\n");
+    if (lbuf.len > 0) {
+	sudo_lbuf_print(&lbuf);
+	sudo_lbuf_append(&lbuf, "\n");
     }
 
     /* Print Aliases */
-    if (!print_aliases(lbuf))
+    if (!print_aliases(&lbuf))
 	goto done;
-    if (lbuf->len > 1) {
-	sudo_lbuf_print(lbuf);
-	sudo_lbuf_append(lbuf, "\n");
+    if (lbuf.len > 1) {
+	sudo_lbuf_print(&lbuf);
+	sudo_lbuf_append(&lbuf, "\n");
     }
 
     /* Print User_Specs */
-    if (!sudoers_format_userspecs(lbuf, &parsed_policy, NULL, false, true))
+    if (!sudoers_format_userspecs(&lbuf, &parsed_policy, NULL, false, true))
 	goto done;
-    if (lbuf->len > 1) {
-	sudo_lbuf_print(lbuf);
+    if (lbuf.len > 1) {
+	sudo_lbuf_print(&lbuf);
     }
 
 done:
-    if (sudo_lbuf_error(lbuf)) {
+    if (sudo_lbuf_error(&lbuf)) {
 	if (errno == ENOMEM)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
+    sudo_lbuf_destroy(&lbuf);
 
     debug_return;
 }
