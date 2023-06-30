@@ -353,19 +353,18 @@ main(int argc, char *argv[])
      *	2 - command not matched
      *	3 - command denied
      */
-    if (ISSET(validated, VALIDATE_SUCCESS)) {
+    if (parse_error || ISSET(validated, VALIDATE_ERROR)) {
+	puts(U_("\nParse error"));
+	exitcode = 1;
+    } else if (ISSET(validated, VALIDATE_SUCCESS)) {
 	puts(U_("\nCommand allowed"));
 	exitcode = 0;
     } else if (ISSET(validated, VALIDATE_FAILURE)) {
-	exitcode = 3;
 	puts(U_("\nCommand denied"));
+	exitcode = 3;
     } else {
-	/* XXX - print different message on error */
-	if (parse_error || ISSET(validated, VALIDATE_ERROR))
-	    exitcode = 1;
-	else
-	    exitcode = 2;
 	puts(U_("\nCommand unmatched"));
+	exitcode = 2;
     }
 
 done:
