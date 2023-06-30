@@ -353,8 +353,14 @@ main(int argc, char *argv[])
     validated = sudoers_lookup(&snl, sudo_user.pw, now, &callbacks, &status,
 	false);
 
-    /* Validate user-specified chroot or cwd (if any). */
+    /* Validate user-specified chroot or cwd (if any) and runas user shell. */
     if (ISSET(validated, VALIDATE_SUCCESS)) {
+	if (!check_user_shell(runas_pw)) {
+	    printf(U_("\nInvalid shell for user %s: %s\n"),
+		runas_pw->pw_name, runas_pw->pw_shell);
+	    CLR(validated, VALIDATE_SUCCESS);
+	    SET(validated, VALIDATE_FAILURE);
+	}
 	if (check_user_runchroot() != true) {
 	    printf("\nUser %s is not allowed to change root directory to %s\n",
 		user_name, user_runchroot);

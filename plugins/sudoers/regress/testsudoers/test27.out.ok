@@ -1,0 +1,12 @@
+Parses OK
+
+Entries for user admin:
+
+ALL = (ALL) /bin/ls
+	host  allowed
+	runas allowed
+	cmnd  allowed
+
+Invalid shell for user fakeshell: /shell/does/not/exist
+
+Command denied

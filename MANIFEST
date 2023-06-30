@@ -1095,6 +1095,8 @@ plugins/sudoers/regress/testsudoers/test25.out.ok
 plugins/sudoers/regress/testsudoers/test25.sh
 plugins/sudoers/regress/testsudoers/test26.out.ok
 plugins/sudoers/regress/testsudoers/test26.sh
+plugins/sudoers/regress/testsudoers/test27.out.ok
+plugins/sudoers/regress/testsudoers/test27.sh
 plugins/sudoers/regress/testsudoers/test3.out.ok
 plugins/sudoers/regress/testsudoers/test3.sh
 plugins/sudoers/regress/testsudoers/test4.out.ok
