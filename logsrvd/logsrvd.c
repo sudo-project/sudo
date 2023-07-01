@@ -1973,7 +1973,7 @@ main(int argc, char *argv[])
 	    break;
 	case 'h':
 	    help();
-	    break;
+	    /* NOTREACHED */
 	case 'n':
 	    nofork = true;
 	    break;

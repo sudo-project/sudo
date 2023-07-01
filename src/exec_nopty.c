@@ -633,6 +633,7 @@ exec_nopty(struct command_details *details,
 	}
 	sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 1);
 	_exit(EXIT_FAILURE);
+	/* NOTREACHED */
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d", details->command,
 	(int)ec.cmnd_pid);

@@ -1118,7 +1118,7 @@ format_plugin_settings(struct plugin_container *plugin)
 		goto bad;
 	}
     }
-    plugin_settings[i + 1] = NULL;
+    plugin_settings[++i] = NULL;
 
     /* Add to list of vectors to be garbage collected at exit. */
     if (!gc_add(GC_VECTOR, plugin_settings))
@@ -1167,12 +1167,10 @@ policy_open(void)
     sudo_debug_set_active_instance(sudo_debug_instance);
 
     if (ok != 1) {
-	if (ok == -2)
+	    if (ok == -2)
 	    usage();
-	else {
 	    /* XXX - audit */
 	    sudo_fatalx("%s", U_("unable to initialize policy plugin"));
-	}
     }
 
     debug_return;
@@ -1258,7 +1256,7 @@ policy_check(int argc, char * const argv[], char *env_add[],
 	    break;
 	case -2:
 	    usage();
-	    break;
+	    /* NOTREACHED */
 	}
 	debug_return_bool(false);
     }
@@ -1488,7 +1486,7 @@ iolog_open(char * const command_info[], int argc, char * const argv[],
 	    break;
 	case -2:
 	    usage();
-	    break;
+	    /* NOTREACHED */
 	default:
 	    sudo_warnx(U_("error initializing I/O plugin %s"),
 		plugin->name);
@@ -1639,7 +1637,7 @@ audit_open(void)
 	    break;
 	case -2:
 	    usage();
-	    break;
+	    /* NOTREACHED */
 	default:
 	    /* TODO: pass error message to other audit plugins */
 	    sudo_fatalx(U_("error initializing audit plugin %s"),
@@ -1852,7 +1850,7 @@ approval_open_int(struct plugin_container *plugin)
 	break;
     case -2:
 	usage();
-	break;
+	/* NOTREACHED */
     default:
 	/* XXX - audit */
 	sudo_fatalx(U_("error initializing approval plugin %s"),
@@ -1940,7 +1938,6 @@ approval_check(char * const command_info[], char * const run_argv[],
 	    break;
 	case -2:
 	    usage();
-	    break;
 	}
 
 	/* Close approval plugin now that errstr has been consumed. */

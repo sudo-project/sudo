@@ -121,7 +121,7 @@ done:
     return ret;
 }
 
-static void
+sudo_noreturn static void
 usage(void)
 {
     fprintf(stderr, "usage: %s [-cv] input_file ...\n",

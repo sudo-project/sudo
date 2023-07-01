@@ -44,7 +44,7 @@ static struct iolog_escape_data {
 
 sudo_dso_public int main(int argc, char *argv[]);
 
-static void
+sudo_noreturn static void
 usage(void)
 {
     fprintf(stderr, "usage: %s datafile\n", getprogname());

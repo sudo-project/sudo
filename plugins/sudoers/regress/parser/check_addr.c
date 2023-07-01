@@ -65,7 +65,7 @@ check_addr(char *input)
     return 0;
 }
 
-static void
+sudo_noreturn static void
 usage(void)
 {
     fprintf(stderr, "usage: %s datafile\n", getprogname());

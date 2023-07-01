@@ -1333,6 +1333,7 @@ exec_pty(struct command_details *details,
                 "%s: unable to send status to parent", __func__);
 	}
 	_exit(EXIT_FAILURE);
+	/* NOTREACHED */
     }
 
     /*

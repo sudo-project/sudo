@@ -1703,7 +1703,7 @@ main(int argc, char *argv[])
 
     /* Read sudo.conf and initialize the debug subsystem. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     sudo_debug_register(getprogname(), NULL, NULL,
         sudo_conf_debug_files(getprogname()), -1);
 
@@ -1746,7 +1746,7 @@ main(int argc, char *argv[])
 	    break;
 	case 1:
 	    help();
-	    break;
+	    /* NOTREACHED */
 #if defined(HAVE_OPENSSL)
 	case 'b':
 	    ca_bundle = optarg;
@@ -1767,6 +1767,7 @@ main(int argc, char *argv[])
 	    return 0;
 	default:
 	    usage(true);
+	    /* NOTREACHED */
 	}
     }
     argc -= optind;
