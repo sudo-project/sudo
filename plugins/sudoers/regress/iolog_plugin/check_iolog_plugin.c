@@ -44,7 +44,7 @@ struct sudo_plugin_event * (*plugin_event_alloc)(void);
 
 sudo_dso_public int main(int argc, char *argv[], char *envp[]);
 
-static void
+sudo_noreturn static void
 usage(void)
 {
     fprintf(stderr, "usage: %s pathname\n", getprogname());

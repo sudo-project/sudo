@@ -148,6 +148,7 @@ main(int argc, char *argv[], char *envp[])
 	    break;
 	default:
 	    usage();
+	    /* NOTREACHED */
 	}
     }
     argc -= optind;

@@ -195,7 +195,7 @@ main(int argc, char *argv[])
 	    break;
 	case 'h':
 	    help();
-	    break;
+	    /* NOTREACHED */
 	case 'i':
 	    free(conf->input_format);
 	    conf->input_format = strdup(optarg);
@@ -258,6 +258,7 @@ main(int argc, char *argv[])
 	    break;
 	default:
 	    usage();
+	    /* NOTREACHED */
 	}
     }
     argc -= optind;

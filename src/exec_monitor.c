@@ -614,6 +614,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 	if (write(errpipe[1], &errno, sizeof(int)) == -1)
 	    sudo_warn(U_("unable to execute %s"), details->command);
 	_exit(EXIT_FAILURE);
+	/* NOTREACHED */
     }
     close(errpipe[1]);
     if (intercept_fd != -1)
@@ -702,6 +703,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 #endif
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 1);
     _exit(EXIT_FAILURE);
+	/* NOTREACHED */
 
 bad:
     debug_return_int(-1);

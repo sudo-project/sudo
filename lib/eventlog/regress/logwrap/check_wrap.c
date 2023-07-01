@@ -34,7 +34,7 @@
 
 sudo_dso_public int main(int argc, char *argv[]);
 
-static void
+sudo_noreturn static void
 usage(void)
 {
     fprintf(stderr, "usage: %s [-v] inputfile\n", getprogname());
@@ -59,6 +59,7 @@ main(int argc, char *argv[])
 	    break;
 	default:
 	    usage();
+	    /* NOTREACHED */
 	}
     }
     argc -= optind;
@@ -110,7 +111,7 @@ main(int argc, char *argv[])
 		    if (len == 0)
 			printf("# word wrap disabled\n");
 		    else
-			printf("# word wrap at %d characters\n", (int)len);
+			printf("# word wrap at %zu characters\n", len);
 		    eventlog_writeln(stdout, lines[0], strlen(lines[0]), len);
 		    len++;
 		}
