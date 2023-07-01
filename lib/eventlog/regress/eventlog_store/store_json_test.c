@@ -100,7 +100,7 @@ main(int argc, char *argv[])
 		break;
 	    default:
 		usage();
-	    /* NOTREACHED */
+		/* NOTREACHED */
 	}
     }
     argc -= optind;

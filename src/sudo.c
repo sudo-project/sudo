@@ -1168,7 +1168,7 @@ policy_open(void)
 
     if (ok != 1) {
 	    if (ok == -2)
-	    usage();
+		usage();
 	    /* XXX - audit */
 	    sudo_fatalx("%s", U_("unable to initialize policy plugin"));
     }

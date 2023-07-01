@@ -197,7 +197,7 @@ main(int argc, char *argv[])
 		break;
 	    case 'h':
 		help();
-	    /* NOTREACHED */
+		/* NOTREACHED */
 	    case 'I':
 		edit_includes = false;
 		break;

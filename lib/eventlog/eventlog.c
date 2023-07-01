@@ -406,7 +406,7 @@ send_mail(const struct eventlog *evlog, const char *message)
 			strerror(errno));
 		    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 		    _exit(EXIT_FAILURE);
-	    	/* NOTREACHED */
+		    /* NOTREACHED */
 		case 0:
 		    /* Grandchild continues below. */
 		    sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys);
@@ -414,7 +414,7 @@ send_mail(const struct eventlog *evlog, const char *message)
 		default:
 		    /* Parent will wait for us. */
 		    _exit(EXIT_SUCCESS);
-	    	/* NOTREACHED */
+		    /* NOTREACHED */
 	    }
 	    break;
 	default:

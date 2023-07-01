@@ -703,7 +703,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 #endif
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 1);
     _exit(EXIT_FAILURE);
-	/* NOTREACHED */
+    /* NOTREACHED */
 
 bad:
     debug_return_int(-1);
