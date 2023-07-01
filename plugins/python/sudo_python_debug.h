@@ -25,7 +25,7 @@
  * Sudo python plugin debug subsystems.
  * Note that python_subsystem_ids[] is filled in at debug registration time.
  */
-extern int python_subsystem_ids[];
+extern unsigned int python_subsystem_ids[];
 #define PYTHON_DEBUG_PY_CALLS    (python_subsystem_ids[0])
 #define PYTHON_DEBUG_C_CALLS     (python_subsystem_ids[1])
 #define PYTHON_DEBUG_PLUGIN_LOAD (python_subsystem_ids[2])

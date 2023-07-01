@@ -51,7 +51,7 @@ static const char *const python_subsystem_names[] = {
 #define NUM_SUBSYSTEMS sizeof(python_subsystem_names) / sizeof(*python_subsystem_names) - 1
 
 /* Subsystem IDs assigned at registration time. */
-int python_subsystem_ids[NUM_SUBSYSTEMS];
+unsigned int python_subsystem_ids[NUM_SUBSYSTEMS];
 
 /*
  * Parse the "filename flags,..." debug_flags entry and insert a new
@@ -84,7 +84,7 @@ python_debug_register(const char *program,
     if (debug_files != NULL && !TAILQ_EMPTY(debug_files)) {
         if (program != NULL) {
             instance = sudo_debug_register(program, python_subsystem_names,
-                (unsigned int *)python_subsystem_ids, debug_files, -1);
+                python_subsystem_ids, debug_files, -1);
         }
         TAILQ_FOREACH_SAFE(debug_file, debug_files, entries, debug_next) {
             TAILQ_REMOVE(debug_files, debug_file, entries);

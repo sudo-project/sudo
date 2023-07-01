@@ -321,7 +321,7 @@ done:
 
 static void
 _py_debug_python_function(const char *class_name, const char *function_name, const char *message,
-                          PyObject *py_args, PyObject *py_kwargs, int subsystem_id)
+                          PyObject *py_args, PyObject *py_kwargs, unsigned int subsystem_id)
 {
     debug_decl_vars(_py_debug_python_function, subsystem_id);
 
@@ -373,7 +373,8 @@ _py_debug_python_function(const char *class_name, const char *function_name, con
 
 void
 py_debug_python_call(const char *class_name, const char *function_name,
-                     PyObject *py_args, PyObject *py_kwargs, int subsystem_id)
+                     PyObject *py_args, PyObject *py_kwargs,
+                     unsigned int subsystem_id)
 {
     debug_decl_vars(py_debug_python_call, subsystem_id);
 
@@ -397,7 +398,7 @@ py_debug_python_call(const char *class_name, const char *function_name,
 
 void
 py_debug_python_result(const char *class_name, const char *function_name,
-                       PyObject *py_result, int subsystem_id)
+                       PyObject *py_result, unsigned int subsystem_id)
 {
     if (py_result == NULL) {
         debug_decl_vars(py_debug_python_result, subsystem_id);

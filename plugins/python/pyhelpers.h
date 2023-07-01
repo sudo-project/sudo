@@ -94,9 +94,10 @@ void py_object_set_attr_string(PyObject *py_object, const char *attr_name, const
 PyObject *py_create_version(unsigned int version);
 
 void py_debug_python_call(const char *class_name, const char *function_name,
-                          PyObject *py_args, PyObject *py_kwargs, int subsystem_id);
+                          PyObject *py_args, PyObject *py_kwargs,
+                          unsigned int subsystem_id);
 void py_debug_python_result(const char *class_name, const char *function_name,
-                            PyObject *py_args, int subsystem_id);
+                            PyObject *py_args, unsigned int subsystem_id);
 
 void str_array_free(char ***array);
 
