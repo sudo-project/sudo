@@ -5,7 +5,7 @@
 
 #include <config.h>
 
-#line 2 "toke.c"
+#line 3 "toke.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -3346,10 +3346,10 @@ int (*trace_print)(const char *msg) = sudoers_trace_print;
 	yyless(n);						\
 } while (0);
 
-#line 3343 "toke.c"
+#line 3344 "toke.c"
 #define YY_NO_INPUT 1
 
-#line 3346 "toke.c"
+#line 3347 "toke.c"
 
 #define INITIAL 0
 #define GOTDEFS 1
@@ -3578,7 +3578,7 @@ YY_DECL
 	{
 #line 119 "toke.l"
 
-#line 3575 "toke.c"
+#line 3576 "toke.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -4715,7 +4715,7 @@ YY_RULE_SETUP
 #line 909 "toke.l"
 ECHO;
 	YY_BREAK
-#line 4712 "toke.c"
+#line 4713 "toke.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -5718,7 +5718,7 @@ pl_compare(const void *v1, const void *v2)
 /*
  * Open dirpath and fill in pathsp with an array of regular files
  * that do not end in '~' or contain a '.'.
- * Returns the number of files or -1 on error.
+ * Returns the number of files or SIZE_MAX (-1) on error.
  * If zero files are found, NULL is stored in pathsp.
  */
 static size_t
@@ -5817,7 +5817,7 @@ bad:
 	free(paths[i]);
     }
     free(paths);
-    debug_return_size_t(-1);
+    debug_return_size_t(SIZE_MAX);
 }
 
 /*
@@ -6122,16 +6122,12 @@ push_include_int(const char *opath, bool isdir, int verbose)
 	    debug_return_bool(true);
 	}
 	count = switch_dir(&istack[idepth], dname, verbose);
-	if (count == 0) {
+	switch (count) {
+	case SIZE_MAX:
+	case 0:
 	    /* switch_dir() called sudoerserror() for us */
 	    sudo_rcstr_delref(path);
-	    debug_return_bool(true);
-	}
-
-	if (count == (size_t)-1) {
-	    /* switch_dir() called sudoerserror() for us */
-	    sudo_rcstr_delref(path);
-	    debug_return_bool(false);
+	    debug_return_bool(count ? false : true);
 	}
 
 	/* Parse the first dir entry we can open, leave the rest for later. */

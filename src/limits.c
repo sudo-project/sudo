@@ -710,5 +710,5 @@ serialize_rlimits(char **info, size_t info_max)
 oom:
     while (nstored)
 	free(info[--nstored]);
-    debug_return_size_t(-1);
+    debug_return_size_t((size_t)-1);
 }

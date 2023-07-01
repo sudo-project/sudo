@@ -939,7 +939,7 @@ pl_compare(const void *v1, const void *v2)
 /*
  * Open dirpath and fill in pathsp with an array of regular files
  * that do not end in '~' or contain a '.'.
- * Returns the number of files or -1 on error.
+ * Returns the number of files or SIZE_MAX (-1) on error.
  * If zero files are found, NULL is stored in pathsp.
  */
 static size_t
@@ -1038,7 +1038,7 @@ bad:
 	free(paths[i]);
     }
     free(paths);
-    debug_return_size_t(-1);
+    debug_return_size_t(SIZE_MAX);
 }
 
 /*
@@ -1343,16 +1343,12 @@ push_include_int(const char *opath, bool isdir, int verbose)
 	    debug_return_bool(true);
 	}
 	count = switch_dir(&istack[idepth], dname, verbose);
-	if (count == 0) {
+	switch (count) {
+	case SIZE_MAX:
+	case 0:
 	    /* switch_dir() called sudoerserror() for us */
 	    sudo_rcstr_delref(path);
-	    debug_return_bool(true);
-	}
-
-	if (count == (size_t)-1) {
-	    /* switch_dir() called sudoerserror() for us */
-	    sudo_rcstr_delref(path);
-	    debug_return_bool(false);
+	    debug_return_bool(count ? false : true);
 	}
 
 	/* Parse the first dir entry we can open, leave the rest for later. */
