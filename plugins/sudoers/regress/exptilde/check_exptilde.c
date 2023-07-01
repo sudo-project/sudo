@@ -74,7 +74,6 @@ main(int argc, char *argv[])
 
     for (td = test_data; td->input != NULL; td++) {
 	ntests++;
-	free(path);
 	if ((path = strdup(td->input)) == NULL)
 	    sudo_fatal(NULL);
 	result = expand_tilde(&path, td->user);
@@ -86,14 +85,12 @@ main(int argc, char *argv[])
 	    } else {
 		sudo_warnx("unexpected failure: input %s", td->input);
 	    }
-	    continue;
-	}
-	if (td->result && strcmp(path, td->output) != 0) {
+	} else if (td->result && strcmp(path, td->output) != 0) {
 	    errors++;
 	    sudo_warnx("incorrect output for input %s: expected %s, got %s",
 		td->input, td->output, path);
-	    continue;
 	}
+	free(path);
     }
 
     if (ntests != 0) {

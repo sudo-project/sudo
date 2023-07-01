@@ -295,6 +295,7 @@ main(int argc, char *argv[])
     if (get_net_ifs(&p) > 0) {
 	if (!set_interfaces(p))
 	    sudo_fatal("%s", U_("unable to parse network address list"));
+	free(p);
     }
 
     /* Initialize the parser and set sudoers filename to "sudoers". */
