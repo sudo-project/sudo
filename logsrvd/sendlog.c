@@ -1423,7 +1423,7 @@ client_msg_cb(int fd, int what, void *v)
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
-    	"%s: sending %u bytes to server", __func__, buf->len - buf->off);
+    	"%s: sending %zu bytes to server", __func__, buf->len - buf->off);
 
 #if defined(HAVE_OPENSSL)
     if (cert != NULL) {
@@ -1473,7 +1473,7 @@ client_msg_cb(int fd, int what, void *v)
     if (buf->off == buf->len) {
 	/* sent entire message */
 	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "%s: finished sending %u bytes to server", __func__, buf->len);
+	    "%s: finished sending %zu bytes to server", __func__, buf->len);
 	buf->off = 0;
 	buf->len = 0;
 	TAILQ_REMOVE(&closure->write_bufs, buf, entries);
@@ -1551,7 +1551,7 @@ client_closure_free(struct client_closure *closure)
         free(closure->buf);
 	while ((buf = TAILQ_FIRST(&closure->write_bufs)) != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-		"discarding write buffer %p, len %u", buf, buf->len - buf->off);
+		"discarding write buffer %p, len %zu", buf, buf->len - buf->off);
 	    TAILQ_REMOVE(&closure->write_bufs, buf, entries);
 	    free(buf->data);
 	    free(buf);

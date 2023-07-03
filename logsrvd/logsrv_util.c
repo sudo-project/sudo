@@ -55,7 +55,7 @@
  * Expand buf as needed or just reset it.
  */
 bool
-expand_buf(struct connection_buffer *buf, unsigned int needed)
+expand_buf(struct connection_buffer *buf, size_t needed)
 {
     void *newdata;
     debug_decl(expand_buf, SUDO_DEBUG_UTIL);
@@ -64,7 +64,7 @@ expand_buf(struct connection_buffer *buf, unsigned int needed)
 	/* Expand buffer. */
 	const size_t newsize = sudo_pow2_roundup(needed);
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "expanding buffer from %u to %zu", buf->size, newsize);
+	    "expanding buffer from %zu to %zu", buf->size, newsize);
 	if (newsize < needed) {
 	    /* overflow */
 	    errno = ENOMEM;

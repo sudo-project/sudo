@@ -918,7 +918,7 @@ relay_client_msg_cb(int fd, int what, void *v)
         goto close_connection;
     }
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending %u bytes to server %s (%s)",
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending %zu bytes to server %s (%s)",
 	__func__, buf->len - buf->off, relay_closure->relay_name.name,
 	relay_closure->relay_name.ipaddr);
 
@@ -989,7 +989,7 @@ relay_client_msg_cb(int fd, int what, void *v)
     if (buf->off == buf->len) {
 	/* sent entire message, move buf to free list */
 	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "%s: finished sending %u bytes to server", __func__, buf->len);
+	    "%s: finished sending %zu bytes to server", __func__, buf->len);
 	buf->off = 0;
 	buf->len = 0;
 	TAILQ_REMOVE(&relay_closure->write_bufs, buf, entries);

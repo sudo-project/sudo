@@ -47,15 +47,15 @@ struct peer_info {
 struct connection_buffer {
     TAILQ_ENTRY(connection_buffer) entries;
     uint8_t *data;
-    unsigned int size;
-    unsigned int len;
-    unsigned int off;
+    size_t size;
+    size_t len;
+    size_t off;
 };
 TAILQ_HEAD(connection_buffer_list, connection_buffer);
 
 /* logsrv_util.c */
 struct iolog_file;
-bool expand_buf(struct connection_buffer *buf, unsigned int needed);
+bool expand_buf(struct connection_buffer *buf, size_t needed);
 bool iolog_open_all(int dfd, const char *iolog_dir, struct iolog_file *iolog_files, const char *mode);
 bool iolog_seekto(int iolog_dir_fd, const char *iolog_path, struct iolog_file *iolog_files, struct timespec *elapsed_time, const struct timespec *target);
 

@@ -141,7 +141,7 @@ connection_closure_free(struct connection_closure *closure)
 	free(closure->read_buf.data);
 	while ((buf = TAILQ_FIRST(&closure->write_bufs)) != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-		"discarding write buffer %p, len %u", buf, buf->len - buf->off);
+		"discarding write buffer %p, len %zu", buf, buf->len - buf->off);
 	    TAILQ_REMOVE(&closure->write_bufs, buf, entries);
 	    free(buf->data);
 	    free(buf);
@@ -933,7 +933,7 @@ server_msg_cb(int fd, int what, void *v)
         goto finished;
     }
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending %u bytes to client (%s)",
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending %zu bytes to client (%s)",
 	__func__, buf->len - buf->off, closure->ipaddr);
 
 #if defined(HAVE_OPENSSL)
@@ -983,7 +983,7 @@ server_msg_cb(int fd, int what, void *v)
     if (buf->off == buf->len) {
 	/* sent entire message, move buf to free list */
 	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "%s: finished sending %u bytes to client", __func__, buf->len);
+	    "%s: finished sending %zu bytes to client", __func__, buf->len);
 	buf->off = 0;
 	buf->len = 0;
 	TAILQ_REMOVE(&closure->write_bufs, buf, entries);
