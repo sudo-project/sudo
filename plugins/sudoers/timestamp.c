@@ -187,8 +187,8 @@ ts_find_record(int fd, struct timestamp_entry *key, struct timestamp_entry *entr
 		cur.size, sizeof(cur));
 	    if (lseek(fd, (off_t)cur.size - (off_t)sizeof(cur), SEEK_CUR) == -1) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-		    "unable to seek forward %d",
-		    (int)cur.size - (int)sizeof(cur));
+		    "unable to seek forward %zd",
+		    cur.size - ssizeof(cur));
 		break;
 	    }
 	    if (cur.size == 0)
