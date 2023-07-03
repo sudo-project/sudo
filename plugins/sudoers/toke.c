@@ -5,7 +5,7 @@
 
 #include <config.h>
 
-#line 3 "toke.c"
+#line 2 "toke.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -3346,10 +3346,10 @@ int (*trace_print)(const char *msg) = sudoers_trace_print;
 	yyless(n);						\
 } while (0);
 
-#line 3344 "toke.c"
+#line 3343 "toke.c"
 #define YY_NO_INPUT 1
 
-#line 3347 "toke.c"
+#line 3346 "toke.c"
 
 #define INITIAL 0
 #define GOTDEFS 1
@@ -3578,7 +3578,7 @@ YY_DECL
 	{
 #line 119 "toke.l"
 
-#line 3576 "toke.c"
+#line 3575 "toke.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -4715,7 +4715,7 @@ YY_RULE_SETUP
 #line 909 "toke.l"
 ECHO;
 	YY_BREAK
-#line 4713 "toke.c"
+#line 4712 "toke.c"
 
 	case YY_END_OF_BUFFER:
 		{

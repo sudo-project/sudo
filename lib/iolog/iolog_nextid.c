@@ -100,8 +100,8 @@ iolog_nextid(const char *iolog_dir, char sessid[7])
     }
     if (fchown(fd, iolog_uid, iolog_gid) != 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-	    "%s: unable to fchown %d:%d %s", __func__,
-	    (int)iolog_uid, (int)iolog_gid, pathbuf);
+	    "%s: unable to fchown %u:%u %s", __func__,
+	    (unsigned int)iolog_uid, (unsigned int)iolog_gid, pathbuf);
     }
 
     /* Read current seq number (base 36). */

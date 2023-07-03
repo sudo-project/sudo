@@ -536,7 +536,7 @@ sudo_debug_exit_id_t_v1(const char *func, const char *file, int line,
 	"<- %s @ %s:%d := %lld", func, file, line, (long long)ret);
 #else
     sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %d", func, file, line, (int)ret);
+	"<- %s @ %s:%d := %u", func, file, line, (unsigned int)ret);
 #endif
 }
 
@@ -565,7 +565,7 @@ sudo_debug_exit_time_t_v1(const char *func, const char *file, int line,
 	"<- %s @ %s:%d := %lld", func, file, line, (long long)ret);
 #else
     sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %d", func, file, line, (int)ret);
+	"<- %s @ %s:%d := %ld", func, file, line, (long)ret);
 #endif
 }
 

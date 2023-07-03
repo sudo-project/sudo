@@ -74,8 +74,8 @@ iolog_mkdirs(const char *path)
 	    if (sb.st_uid != iolog_uid || sb.st_gid != iolog_gid) {
 		if (fchown(dfd, iolog_uid, iolog_gid) != 0) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-			"%s: unable to chown %d:%d %s", __func__,
-			(int)iolog_uid, (int)iolog_gid, path);
+			"%s: unable to chown %u:%u %s", __func__,
+			(unsigned int)iolog_uid, (unsigned int)iolog_gid, path);
 		}
 	    }
 	    if ((sb.st_mode & ALLPERMS) != iolog_dirmode) {
@@ -87,7 +87,7 @@ iolog_mkdirs(const char *path)
 	    }
 	} else {
 	    sudo_warnx(U_("%s exists but is not a directory (0%o)"),
-		path, (unsigned int) sb.st_mode);
+		path, (int) sb.st_mode);
 	    ok = false;
 	}
 	goto done;
@@ -116,16 +116,17 @@ iolog_mkdirs(const char *path)
 	    if (errno == EACCES && !uid_changed) {
 		/* Try again as the I/O log owner (for NFS). */
 		uid_changed = iolog_swapids(false);
-		if (uid_changed)
+		if (uid_changed) {
 		    ok = mkdirat(dfd, base, iolog_dirmode) == 0 || errno == EEXIST;
+			if (!ok)
+				sudo_warn(U_("unable to mkdir %s"), path);
+		}
 	    }
-	    if (!ok)
-		sudo_warn(U_("unable to mkdir %s"), path);
 	} else {
 	    if (fchownat(dfd, base, iolog_uid, iolog_gid, AT_SYMLINK_NOFOLLOW) != 0) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-		    "%s: unable to chown %d:%d %s", __func__,
-		    (int)iolog_uid, (int)iolog_gid, path);
+		    "%s: unable to chown %u:%u %s", __func__,
+		    (unsigned int)iolog_uid, (unsigned int)iolog_gid, path);
 	    }
 	}
     }

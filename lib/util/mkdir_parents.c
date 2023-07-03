@@ -112,8 +112,8 @@ sudo_open_parent_dir_v1(const char *path, uid_t uid, gid_t gid, mode_t mode,
 	int dfd;
 
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	    "mkdir %.*s, mode 0%o, uid %d, gid %d", (int)(ep - path), path,
-	    (unsigned int)mode, (int)uid, (int)gid);
+	    "mkdir %.*s, mode 0%o, uid %u, gid %u", (int)(ep - path), path,
+	    (int)mode, (unsigned int)uid, (unsigned int)gid);
 	if (len >= sizeof(name)) {
 	    errno = ENAMETOOLONG;
 	    if (!quiet)
@@ -149,8 +149,8 @@ reopen:
 		if (uid != (uid_t)-1 && gid != (gid_t)-1) {
 		    if (fchown(dfd, uid, gid) != 0) {
 			sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-			    "%s: unable to chown %d:%d %.*s", __func__,
-			    (int)uid, (int)gid, (int)(ep - path), path);
+			    "%s: unable to chown %u:%u %.*s", __func__,
+			    (unsigned int)uid, (unsigned int)gid, (int)(ep - path), path);
 		    }
 		}
 	    } else {

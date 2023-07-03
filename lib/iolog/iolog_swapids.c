@@ -61,30 +61,30 @@ iolog_swapids(bool restore)
     if (restore) {
 	if (seteuid(user_euid) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-		"%s: unable to restore effective uid to %d", __func__,
-		(int)user_euid);
-	    sudo_warn("seteuid() %d -> %d", (int)iolog_uid, (int)user_euid);
+		"%s: unable to restore effective uid to %u", __func__,
+		(unsigned int)user_euid);
+	    sudo_warn("seteuid() %u -> %u", (unsigned int)iolog_uid, (unsigned int)user_euid);
 	    debug_return_bool(false);
 	}
 	if (setegid(user_egid) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-		"%s: unable to restore effective gid to %d", __func__,
-		(int)user_egid);
-	    sudo_warn("setegid() %d -> %d", (int)iolog_gid, (int)user_egid);
+		"%s: unable to restore effective gid to %u", __func__,
+		(unsigned int)user_egid);
+	    sudo_warn("setegid() %u -> %u", (unsigned int)iolog_gid, (unsigned int)user_egid);
 	    debug_return_bool(false);
 	}
     } else {
 	/* Fail silently if the user has insufficient privileges. */
 	if (setegid(iolog_gid) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-		"%s: unable to set effective gid to %d", __func__,
-		(int)iolog_gid);
+		"%s: unable to set effective gid to %u", __func__,
+		(unsigned int)iolog_gid);
 	    debug_return_bool(false);
 	}
 	if (seteuid(iolog_uid) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-		"%s: unable to set effective uid to %d", __func__,
-		(int)iolog_uid);
+		"%s: unable to set effective uid to %u", __func__,
+		(unsigned int)iolog_uid);
 	    debug_return_bool(false);
 	}
     }

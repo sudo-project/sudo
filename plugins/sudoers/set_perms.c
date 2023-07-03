@@ -156,9 +156,9 @@ set_perms(int perm)
 	state->gidlist = user_gid_list;
 	sudo_gidlist_addref(state->gidlist);
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_INITIAL: "
-	    "ruid: %d, euid: %d, suid: %d, rgid: %d, egid: %d, sgid: %d",
-	    __func__, (int)state->ruid, (int)state->euid, (int)state->suid,
-	    (int)state->rgid, (int)state->egid, (int)state->sgid);
+	    "ruid: %u, euid: %u, suid: %u, rgid: %u, egid: %u, sgid: %u",
+	    __func__, (unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid,
+	    (unsigned int)state->rgid, (unsigned int)state->egid, (unsigned int)state->sgid);
 	break;
 
     case PERM_ROOT:
@@ -166,22 +166,22 @@ set_perms(int perm)
 	state->euid = ROOT_UID;
 	state->suid = ROOT_UID;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_ROOT: uid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
-	    (int)state->ruid, (int)state->euid, (int)state->suid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->ruid, (unsigned int)ostate->euid, (unsigned int)ostate->suid,
+	    (unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid);
 	if (UID_CHANGED && setresuid(ID(ruid), ID(euid), ID(suid))) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_ROOT: setresuid(%d, %d, %d)",
-		(int)ID(ruid), (int)ID(euid), (int)ID(suid));
+		"PERM_ROOT: setresuid(%u, %u, %u)",
+		(unsigned int)ID(ruid), (unsigned int)ID(euid), (unsigned int)ID(suid));
 	    goto bad;
 	}
 	state->rgid = ostate->rgid;
 	state->egid = ROOT_GID;
 	state->sgid = ostate->sgid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_ROOT: gid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
-	    (int)state->rgid, (int)state->egid, (int)state->sgid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->rgid, (unsigned int)ostate->egid, (unsigned int)ostate->sgid,
+	    (unsigned int)state->rgid, (unsigned int)state->egid, (unsigned int)state->sgid);
 	if (GID_CHANGED && setresgid(ID(rgid), ID(egid), ID(sgid))) {
 	    errstr = N_("unable to change to root gid");
 	    goto bad;
@@ -195,13 +195,13 @@ set_perms(int perm)
 	state->egid = user_gid;
 	state->sgid = ostate->sgid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_USER: gid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
-	    (int)state->rgid, (int)state->egid, (int)state->sgid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->rgid, (unsigned int)ostate->egid, (unsigned int)ostate->sgid,
+	    (unsigned int)state->rgid, (unsigned int)state->egid, (unsigned int)state->sgid);
 	if (GID_CHANGED && setresgid(ID(rgid), ID(egid), ID(sgid))) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_USER: setresgid(%d, %d, %d)",
-		(int)ID(rgid), (int)ID(egid), (int)ID(sgid));
+		"PERM_USER: setresgid(%u, %u, %u)",
+		(unsigned int)ID(rgid), (unsigned int)ID(egid), (unsigned int)ID(sgid));
 	    goto bad;
 	}
 	state->gidlist = user_gid_list;
@@ -216,13 +216,13 @@ set_perms(int perm)
 	state->euid = user_uid;
 	state->suid = ROOT_UID;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_USER: uid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
-	    (int)state->ruid, (int)state->euid, (int)state->suid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->ruid, (unsigned int)ostate->euid, (unsigned int)ostate->suid,
+	    (unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid);
 	if (UID_CHANGED && setresuid(ID(ruid), ID(euid), ID(suid))) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_USER: setresuid(%d, %d, %d)",
-		(int)ID(ruid), (int)ID(euid), (int)ID(suid));
+		"PERM_USER: setresuid(%u, %u, %u)",
+		(unsigned int)ID(ruid), (unsigned int)ID(euid), (unsigned int)ID(suid));
 	    goto bad;
 	}
 	break;
@@ -233,13 +233,13 @@ set_perms(int perm)
 	state->egid = user_gid;
 	state->sgid = user_gid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_FULL_USER: gid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
-	    (int)state->rgid, (int)state->egid, (int)state->sgid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->rgid, (unsigned int)ostate->egid, (unsigned int)ostate->sgid,
+	    (unsigned int)state->rgid, (unsigned int)state->egid, (unsigned int)state->sgid);
 	if (GID_CHANGED && setresgid(ID(rgid), ID(egid), ID(sgid))) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_FULL_USER: setresgid(%d, %d, %d)",
-		(int)ID(rgid), (int)ID(egid), (int)ID(sgid));
+		"PERM_FULL_USER: setresgid(%u, %u, %u)",
+		(unsigned int)ID(rgid), (unsigned int)ID(egid), (unsigned int)ID(sgid));
 	    goto bad;
 	}
 	state->gidlist = user_gid_list;
@@ -254,13 +254,13 @@ set_perms(int perm)
 	state->euid = user_uid;
 	state->suid = user_uid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_FULL_USER: uid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
-	    (int)state->ruid, (int)state->euid, (int)state->suid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->ruid, (unsigned int)ostate->euid, (unsigned int)ostate->suid,
+	    (unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid);
 	if (UID_CHANGED && setresuid(ID(ruid), ID(euid), ID(suid))) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_FULL_USER: setresuid(%d, %d, %d)",
-		(int)ID(ruid), (int)ID(euid), (int)ID(suid));
+		"PERM_FULL_USER: setresuid(%u, %u, %u)",
+		(unsigned int)ID(ruid), (unsigned int)ID(euid), (unsigned int)ID(suid));
 	    goto bad;
 	}
 	break;
@@ -270,9 +270,9 @@ set_perms(int perm)
 	state->egid = runas_gr ? runas_gr->gr_gid : runas_pw->pw_gid;
 	state->sgid = ostate->sgid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_RUNAS: gid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
-	    (int)state->rgid, (int)state->egid, (int)state->sgid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->rgid, (unsigned int)ostate->egid, (unsigned int)ostate->sgid,
+	    (unsigned int)state->rgid, (unsigned int)state->egid, (unsigned int)state->sgid);
 	if (GID_CHANGED && setresgid(ID(rgid), ID(egid), ID(sgid))) {
 	    errstr = N_("unable to change to runas gid");
 	    goto bad;
@@ -286,9 +286,9 @@ set_perms(int perm)
 	state->euid = runas_pw ? runas_pw->pw_uid : user_uid;
 	state->suid = ostate->suid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_RUNAS: uid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
-	    (int)state->ruid, (int)state->euid, (int)state->suid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->ruid, (unsigned int)ostate->euid, (unsigned int)ostate->suid,
+	    (unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid);
 	if (UID_CHANGED && setresuid(ID(ruid), ID(euid), ID(suid))) {
 	    errstr = N_("unable to change to runas uid");
 	    goto bad;
@@ -308,9 +308,9 @@ set_perms(int perm)
 	state->egid = sudoers_gid;
 	state->sgid = ostate->sgid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_SUDOERS: gid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
-	    (int)state->rgid, (int)state->egid, (int)state->sgid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->rgid, (unsigned int)ostate->egid, (unsigned int)ostate->sgid,
+	    (unsigned int)state->rgid, (unsigned int)state->egid, (unsigned int)state->sgid);
 	if (GID_CHANGED && setresgid(ID(rgid), ID(egid), ID(sgid))) {
 	    errstr = N_("unable to change to sudoers gid");
 	    goto bad;
@@ -328,13 +328,13 @@ set_perms(int perm)
 	    state->euid = sudoers_uid;
 	state->suid = ROOT_UID;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_SUDOERS: uid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
-	    (int)state->ruid, (int)state->euid, (int)state->suid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->ruid, (unsigned int)ostate->euid, (unsigned int)ostate->suid,
+	    (unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid);
 	if (UID_CHANGED && setresuid(ID(ruid), ID(euid), ID(suid))) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_SUDOERS: setresuid(%d, %d, %d)",
-		(int)ID(ruid), (int)ID(euid), (int)ID(suid));
+		"PERM_SUDOERS: setresuid(%u, %u, %u)",
+		(unsigned int)ID(ruid), (unsigned int)ID(euid), (unsigned int)ID(suid));
 	    goto bad;
 	}
 	break;
@@ -350,13 +350,13 @@ set_perms(int perm)
 	state->euid = timestamp_get_uid();
 	state->suid = ROOT_UID;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_TIMESTAMP: uid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
-	    (int)state->ruid, (int)state->euid, (int)state->suid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->ruid, (unsigned int)ostate->euid, (unsigned int)ostate->suid,
+	    (unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid);
 	if (UID_CHANGED && setresuid(ID(ruid), ID(euid), ID(suid))) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_TIMESTAMP: setresuid(%d, %d, %d)",
-		(int)ID(ruid), (int)ID(euid), (int)ID(suid));
+		"PERM_TIMESTAMP: setresuid(%u, %u, %u)",
+		(unsigned int)ID(ruid), (unsigned int)ID(euid), (unsigned int)ID(suid));
 	    goto bad;
 	}
 	break;
@@ -387,26 +387,26 @@ restore_perms(void)
     ostate = &perm_stack[perm_stack_depth - 2];
     perm_stack_depth--;
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: uid: [%d, %d, %d] -> [%d, %d, %d]",
-	__func__, (int)state->ruid, (int)state->euid, (int)state->suid,
-	(int)ostate->ruid, (int)ostate->euid, (int)ostate->suid);
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: gid: [%d, %d, %d] -> [%d, %d, %d]",
-	__func__, (int)state->rgid, (int)state->egid, (int)state->sgid,
-	(int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: uid: [%u, %u, %u] -> [%u, %u, %u]",
+	__func__, (unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid,
+	(unsigned int)ostate->ruid, (unsigned int)ostate->euid, (unsigned int)ostate->suid);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: gid: [%u, %u, %u] -> [%u, %u, %u]",
+	__func__, (unsigned int)state->rgid, (unsigned int)state->egid, (unsigned int)state->sgid,
+	(unsigned int)ostate->rgid, (unsigned int)ostate->egid, (unsigned int)ostate->sgid);
 
     /* XXX - more cases here where euid != ruid */
     if (OID(euid) == ROOT_UID) {
 	if (setresuid(-1, ROOT_UID, -1)) {
-	    sudo_warn("setresuid() [%d, %d, %d] -> [%d, %d, %d]",
-		(int)state->ruid, (int)state->euid, (int)state->suid,
-		-1, ROOT_UID, -1);
+	    sudo_warn("setresuid() [%u, %u, %u] -> [-1, %u, -1]",
+		(unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid,
+		ROOT_UID);
 	    goto bad;
 	}
     }
     if (setresgid(OID(rgid), OID(egid), OID(sgid))) {
-	sudo_warn("setresgid() [%d, %d, %d] -> [%d, %d, %d]",
-	    (int)state->rgid, (int)state->egid, (int)state->sgid,
-	    (int)OID(rgid), (int)OID(egid), (int)OID(sgid));
+	sudo_warn("setresgid() [%u, %u, %u] -> [%u, %u, %u]",
+	    (unsigned int)state->rgid, (unsigned int)state->egid, (unsigned int)state->sgid,
+	    (unsigned int)OID(rgid), (unsigned int)OID(egid), (unsigned int)OID(sgid));
 	goto bad;
     }
     if (state->gidlist != ostate->gidlist) {
@@ -416,9 +416,9 @@ restore_perms(void)
 	}
     }
     if (setresuid(OID(ruid), OID(euid), OID(suid))) {
-	sudo_warn("setresuid() [%d, %d, %d] -> [%d, %d, %d]",
-	    (int)state->ruid, (int)state->euid, (int)state->suid,
-	    (int)OID(ruid), (int)OID(euid), (int)OID(suid));
+	sudo_warn("setresuid() [%u, %u, %u] -> [%u, %u, %u]",
+	    (unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid,
+	    (unsigned int)OID(ruid), (unsigned int)OID(euid), (unsigned int)OID(suid));
 	goto bad;
     }
     sudo_gidlist_delref(state->gidlist);
@@ -479,9 +479,9 @@ set_perms(int perm)
 	state->gidlist = user_gid_list;
 	sudo_gidlist_addref(state->gidlist);
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_INITIAL: "
-	    "ruid: %d, euid: %d, suid: %d, rgid: %d, egid: %d, sgid: %d",
-	    __func__, (int)state->ruid, (int)state->euid, (int)state->suid,
-	    (int)state->rgid, (int)state->egid, (int)state->sgid);
+	    "ruid: %u, euid: %u, suid: %u, rgid: %u, egid: %u, sgid: %u",
+	    __func__, (unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid,
+	    (unsigned int)state->rgid, (unsigned int)state->egid, (unsigned int)state->sgid);
 	break;
 
     case PERM_ROOT:
@@ -489,12 +489,12 @@ set_perms(int perm)
 	state->euid = ROOT_UID;
 	state->suid = ROOT_UID;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_ROOT: uid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
-	    (int)state->ruid, (int)state->euid, (int)state->suid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->ruid, (unsigned int)ostate->euid, (unsigned int)ostate->suid,
+	    (unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid);
 	if (UID_CHANGED && setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, ROOT_UID)) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_ROOT: setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %d)",
+		"PERM_ROOT: setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %u)",
 		ROOT_UID);
 	    goto bad;
 	}
@@ -502,9 +502,9 @@ set_perms(int perm)
 	state->egid = ROOT_GID;
 	state->sgid = ostate->sgid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_ROOT: gid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
-	    (int)state->rgid, (int)state->egid, (int)state->sgid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->rgid, (unsigned int)ostate->egid, (unsigned int)ostate->sgid,
+	    (unsigned int)state->rgid, (unsigned int)state->egid, (unsigned int)state->sgid);
 	if (GID_CHANGED && setgidx(ID_EFFECTIVE, ROOT_GID)) {
 	    errstr = N_("unable to change to root gid");
 	    goto bad;
@@ -518,12 +518,12 @@ set_perms(int perm)
 	state->egid = user_gid;
 	state->sgid = ostate->sgid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_USER: gid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
-	    (int)state->rgid, (int)state->egid, (int)state->sgid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->rgid, (unsigned int)ostate->egid, (unsigned int)ostate->sgid,
+	    (unsigned int)state->rgid, (unsigned int)state->egid, (unsigned int)state->sgid);
 	if (GID_CHANGED && setgidx(ID_EFFECTIVE, user_gid)) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_USER: setgidx(ID_EFFECTIVE, %d)", (int)user_gid);
+		"PERM_USER: setgidx(ID_EFFECTIVE, %u)", (unsigned int)user_gid);
 	    goto bad;
 	}
 	state->gidlist = user_gid_list;
@@ -538,20 +538,20 @@ set_perms(int perm)
 	state->euid = user_uid;
 	state->suid = ROOT_UID;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_USER: uid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
-	    (int)state->ruid, (int)state->euid, (int)state->suid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->ruid, (unsigned int)ostate->euid, (unsigned int)ostate->suid,
+	    (unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid);
 	if (ostate->euid != ROOT_UID || ostate->suid != ROOT_UID) {
 	    if (setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, ROOT_UID)) {
 		(void)snprintf(errbuf, sizeof(errbuf),
-		    "PERM_USER: setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %d)",
+		    "PERM_USER: setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %u)",
 		    ROOT_UID);
 		goto bad;
 	    }
 	}
 	if (setuidx(ID_EFFECTIVE|ID_REAL, user_uid)) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_USER: setuidx(ID_EFFECTIVE|ID_REAL, %d)", (int)user_uid);
+		"PERM_USER: setuidx(ID_EFFECTIVE|ID_REAL, %u)", (unsigned int)user_uid);
 	    goto bad;
 	}
 	break;
@@ -562,13 +562,13 @@ set_perms(int perm)
 	state->egid = user_gid;
 	state->sgid = user_gid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_FULL_USER: gid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
-	    (int)state->rgid, (int)state->egid, (int)state->sgid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->rgid, (unsigned int)ostate->egid, (unsigned int)ostate->sgid,
+	    (unsigned int)state->rgid, (unsigned int)state->egid, (unsigned int)state->sgid);
 	if (GID_CHANGED && setgidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, user_gid)) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_FULL_USER: setgidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %d)",
-		(int)user_gid);
+		"PERM_FULL_USER: setgidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %u)",
+		(unsigned int)user_gid);
 	    goto bad;
 	}
 	state->gidlist = user_gid_list;
@@ -583,13 +583,13 @@ set_perms(int perm)
 	state->euid = user_uid;
 	state->suid = user_uid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_FULL_USER: uid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
-	    (int)state->ruid, (int)state->euid, (int)state->suid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->ruid, (unsigned int)ostate->euid, (unsigned int)ostate->suid,
+	    (unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid);
 	if (UID_CHANGED && setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, user_uid)) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_FULL_USER: setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %d)",
-		(int)user_uid);
+		"PERM_FULL_USER: setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %u)",
+		(unsigned int)user_uid);
 	    goto bad;
 	}
 	break;
@@ -599,9 +599,9 @@ set_perms(int perm)
 	state->egid = runas_gr ? runas_gr->gr_gid : runas_pw->pw_gid;
 	state->sgid = ostate->sgid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_RUNAS: gid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
-	    (int)state->rgid, (int)state->egid, (int)state->sgid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->rgid, (unsigned int)ostate->egid, (unsigned int)ostate->sgid,
+	    (unsigned int)state->rgid, (unsigned int)state->egid, (unsigned int)state->sgid);
 	if (GID_CHANGED && setgidx(ID_EFFECTIVE, state->egid)) {
 	    errstr = N_("unable to change to runas gid");
 	    goto bad;
@@ -615,9 +615,9 @@ set_perms(int perm)
 	state->euid = runas_pw ? runas_pw->pw_uid : user_uid;
 	state->suid = ostate->suid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_RUNAS: uid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
-	    (int)state->ruid, (int)state->euid, (int)state->suid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->ruid, (unsigned int)ostate->euid, (unsigned int)ostate->suid,
+	    (unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid);
 	if (UID_CHANGED && setuidx(ID_EFFECTIVE, state->euid)) {
 	    errstr = N_("unable to change to runas uid");
 	    goto bad;
@@ -637,9 +637,9 @@ set_perms(int perm)
 	state->egid = sudoers_gid;
 	state->sgid = ostate->sgid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_SUDOERS: gid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid,
-	    (int)state->rgid, (int)state->egid, (int)state->sgid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->rgid, (unsigned int)ostate->egid, (unsigned int)ostate->sgid,
+	    (unsigned int)state->rgid, (unsigned int)state->egid, (unsigned int)state->sgid);
 	if (GID_CHANGED && setgidx(ID_EFFECTIVE, sudoers_gid)) {
 	    errstr = N_("unable to change to sudoers gid");
 	    goto bad;
@@ -657,21 +657,21 @@ set_perms(int perm)
 	    state->euid = sudoers_uid;
 	state->suid = ROOT_UID;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_SUDOERS: uid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
-	    (int)state->ruid, (int)state->euid, (int)state->suid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->ruid, (unsigned int)ostate->euid, (unsigned int)ostate->suid,
+	    (unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid);
 	if (UID_CHANGED) {
 	    if (ostate->ruid != ROOT_UID || ostate->suid != ROOT_UID) {
 		if (setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, ROOT_UID)) {
 		    (void)snprintf(errbuf, sizeof(errbuf),
-			"PERM_SUDOERS: setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %d)",
+			"PERM_SUDOERS: setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %u)",
 			ROOT_UID);
 		    goto bad;
 		}
 	    }
 	    if (setuidx(ID_EFFECTIVE, state->euid)) {
 		(void)snprintf(errbuf, sizeof(errbuf),
-		    "PERM_SUDOERS: setuidx(ID_EFFECTIVE, %d)", (int)sudoers_uid);
+		    "PERM_SUDOERS: setuidx(ID_EFFECTIVE, %u)", (unsigned int)sudoers_uid);
 		goto bad;
 	    }
 	}
@@ -688,22 +688,22 @@ set_perms(int perm)
 	state->euid = timestamp_get_uid();
 	state->suid = ROOT_UID;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_TIMESTAMP: uid: "
-	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
-	    (int)ostate->ruid, (int)ostate->euid, (int)ostate->suid,
-	    (int)state->ruid, (int)state->euid, (int)state->suid);
+	    "[%u, %u, %u] -> [%u, %u, %u]", __func__,
+	    (unsigned int)ostate->ruid, (unsigned int)ostate->euid, (unsigned int)ostate->suid,
+	    (unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid);
 	if (UID_CHANGED) {
 	    if (ostate->ruid != ROOT_UID || ostate->suid != ROOT_UID) {
 		if (setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, ROOT_UID)) {
 		    (void)snprintf(errbuf, sizeof(errbuf),
-			"PERM_TIMESTAMP: setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %d)",
+			"PERM_TIMESTAMP: setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %u)",
 			ROOT_UID);
 		    goto bad;
 		}
 	    }
 	    if (setuidx(ID_EFFECTIVE, state->euid)) {
 		(void)snprintf(errbuf, sizeof(errbuf),
-		    "PERM_TIMESTAMP: setuidx(ID_EFFECTIVE, %d)",
-		    (int)state->euid);
+		    "PERM_TIMESTAMP: setuidx(ID_EFFECTIVE, %u)",
+		    (unsigned int)state->euid);
 		goto bad;
 	    }
 	}
@@ -735,62 +735,62 @@ restore_perms(void)
     ostate = &perm_stack[perm_stack_depth - 2];
     perm_stack_depth--;
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: uid: [%d, %d, %d] -> [%d, %d, %d]",
-	__func__, (int)state->ruid, (int)state->euid, (int)state->suid,
-	(int)ostate->ruid, (int)ostate->euid, (int)ostate->suid);
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: gid: [%d, %d, %d] -> [%d, %d, %d]",
-	__func__, (int)state->rgid, (int)state->egid, (int)state->sgid,
-	(int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: uid: [%u, %u, %u] -> [%u, %u, %u]",
+	__func__, (unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid,
+	(unsigned int)ostate->ruid, (unsigned int)ostate->euid, (unsigned int)ostate->suid);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: gid: [%u, %u, %u] -> [%u, %u, %u]",
+	__func__, (unsigned int)state->rgid, (unsigned int)state->egid, (unsigned int)state->sgid,
+	(unsigned int)ostate->rgid, (unsigned int)ostate->egid, (unsigned int)ostate->sgid);
 
     if (OID(ruid) != (uid_t)-1 || OID(euid) != (uid_t)-1 || OID(suid) != (uid_t)-1) {
 	if (OID(euid) == ROOT_UID) {
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: setuidx(ID_EFFECTIVE, %d)",
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: setuidx(ID_EFFECTIVE, %u)",
 		__func__, ROOT_UID);
 	    if (setuidx(ID_EFFECTIVE, ROOT_UID)) {
-		sudo_warn("setuidx(ID_EFFECTIVE) [%d, %d, %d] -> [%d, %d, %d]",
-		    (int)state->ruid, (int)state->euid, (int)state->suid,
-		    -1, ROOT_UID, -1);
+		sudo_warn("setuidx(ID_EFFECTIVE) [%u, %u, %u] -> [-1, %u, -1]",
+		    (unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid,
+		    ROOT_UID);
 		goto bad;
 	    }
 	}
 	if (OID(ruid) == OID(euid) && OID(euid) == OID(suid)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"%s: setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %d)",
-		__func__, (int)OID(ruid));
+		"%s: setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %u)",
+		__func__, (unsigned int)OID(ruid));
 	    if (setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, OID(ruid))) {
-		sudo_warn("setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED) [%d, %d, %d] -> [%d, %d, %d]",
-		    (int)state->ruid, (int)state->euid, (int)state->suid,
-		    (int)OID(ruid), (int)OID(euid), (int)OID(suid));
+		sudo_warn("setuidx(ID_EFFECTIVE|ID_REAL|ID_SAVED) [%u, %u, %u] -> [%u, %u, %u]",
+		    (unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid,
+		    (unsigned int)OID(ruid), (unsigned int)OID(euid), (unsigned int)OID(suid));
 		goto bad;
 	    }
 	} else if (OID(ruid) == (uid_t)-1 && OID(suid) == (uid_t)-1) {
 	    /* May have already changed euid to ROOT_UID above. */
 	    if (OID(euid) != ROOT_UID) {
 		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "%s: setuidx(ID_EFFECTIVE, %d)", __func__, OID(euid));
+		    "%s: setuidx(ID_EFFECTIVE, %u)", __func__, (unsigned int)OID(euid));
 		if (setuidx(ID_EFFECTIVE, OID(euid))) {
-		    sudo_warn("setuidx(ID_EFFECTIVE) [%d, %d, %d] -> [%d, %d, %d]",
-			(int)state->ruid, (int)state->euid, (int)state->suid,
-			(int)OID(ruid), (int)OID(euid), (int)OID(suid));
+		    sudo_warn("setuidx(ID_EFFECTIVE) [%u, %u, %u] -> [%u, %u, %u]",
+			(unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid,
+			(unsigned int)OID(ruid), (unsigned int)OID(euid), (unsigned int)OID(suid));
 		    goto bad;
 		}
 	    }
 	} else if (OID(suid) == (uid_t)-1) {
 	    /* Cannot set the real uid alone. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"%s: setuidx(ID_REAL|ID_EFFECTIVE, %d)", __func__, OID(ruid));
+		"%s: setuidx(ID_REAL|ID_EFFECTIVE, %u)", __func__, (unsigned int)OID(ruid));
 	    if (setuidx(ID_REAL|ID_EFFECTIVE, OID(ruid))) {
-		sudo_warn("setuidx(ID_REAL|ID_EFFECTIVE) [%d, %d, %d] -> [%d, %d, %d]",
-		    (int)state->ruid, (int)state->euid, (int)state->suid,
-		    (int)OID(ruid), (int)OID(euid), (int)OID(suid));
+		sudo_warn("setuidx(ID_REAL|ID_EFFECTIVE) [%u, %u, %u] -> [%u, %u, %u]",
+		    (unsigned int)state->ruid, (unsigned int)state->euid, (unsigned int)state->suid,
+		    (unsigned int)OID(ruid), (unsigned int)OID(euid), (unsigned int)OID(suid));
 		goto bad;
 	    }
 	    /* Restore the effective euid if it doesn't match the ruid. */
 	    if (OID(euid) != OID(ruid)) {
 		sudo_debug_printf(SUDO_DEBUG_INFO,
-		    "%s: setuidx(ID_EFFECTIVE, %d)", __func__, ostate->euid);
+		    "%s: setuidx(ID_EFFECTIVE, %u)", __func__, (unsigned int)ostate->euid);
 		if (setuidx(ID_EFFECTIVE, ostate->euid)) {
-		    sudo_warn("setuidx(ID_EFFECTIVE, %d)", (int)ostate->euid);
+		    sudo_warn("setuidx(ID_EFFECTIVE, %u)", (unsigned int)ostate->euid);
 		    goto bad;
 		}
 	    }
@@ -799,30 +799,30 @@ restore_perms(void)
     if (OID(rgid) != (gid_t)-1 || OID(egid) != (gid_t)-1 || OID(sgid) != (gid_t)-1) {
 	if (OID(rgid) == OID(egid) && OID(egid) == OID(sgid)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"%s: setgidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %d)",
-		__func__, (int)OID(rgid));
+		"%s: setgidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %u)",
+		__func__, (unsigned int)OID(rgid));
 	    if (setgidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, OID(rgid))) {
-		sudo_warn("setgidx(ID_EFFECTIVE|ID_REAL|ID_SAVED) [%d, %d, %d] -> [%d, %d, %d]",
-		    (int)state->rgid, (int)state->egid, (int)state->sgid,
-		    (int)OID(rgid), (int)OID(egid), (int)OID(sgid));
+		sudo_warn("setgidx(ID_EFFECTIVE|ID_REAL|ID_SAVED) [%u, %u, %u] -> [%u, %u, %u]",
+		    (unsigned int)state->rgid, (unsigned int)state->egid, (unsigned int)state->sgid,
+		    (unsigned int)OID(rgid), (unsigned int)OID(egid), (unsigned int)OID(sgid));
 		goto bad;
 	    }
 	} else if (OID(rgid) == (gid_t)-1 && OID(sgid) == (gid_t)-1) {
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: setgidx(ID_EFFECTIVE, %d)",
-		__func__, (int)OID(egid));
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: setgidx(ID_EFFECTIVE, %u)",
+		__func__, (unsigned int)OID(egid));
 	    if (setgidx(ID_EFFECTIVE, OID(egid))) {
-		sudo_warn("setgidx(ID_EFFECTIVE) [%d, %d, %d] -> [%d, %d, %d]",
-		    (int)state->rgid, (int)state->egid, (int)state->sgid,
-		    (int)OID(rgid), (int)OID(egid), (int)OID(sgid));
+		sudo_warn("setgidx(ID_EFFECTIVE) [%u, %u, %u] -> [%u, %u, %u]",
+		    (unsigned int)state->rgid, (unsigned int)state->egid, (unsigned int)state->sgid,
+		    (unsigned int)OID(rgid), (unsigned int)OID(egid), (unsigned int)OID(sgid));
 		goto bad;
 	    }
 	} else if (OID(sgid) == (gid_t)-1) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"%s: setgidx(ID_EFFECTIVE|ID_REAL, %d)", __func__, OID(rgid));
+		"%s: setgidx(ID_EFFECTIVE|ID_REAL, %u)", __func__, OID(rgid));
 	    if (setgidx(ID_REAL|ID_EFFECTIVE, OID(rgid))) {
-		sudo_warn("setgidx(ID_REAL|ID_EFFECTIVE) [%d, %d, %d] -> [%d, %d, %d]",
-		    (int)state->rgid, (int)state->egid, (int)state->sgid,
-		    (int)OID(rgid), (int)OID(egid), (int)OID(sgid));
+		sudo_warn("setgidx(ID_REAL|ID_EFFECTIVE) [%u, %u, %u] -> [%u, %u, %u]",
+		    (unsigned int)state->rgid, (unsigned int)state->egid, (unsigned int)state->sgid,
+		    (unsigned int)OID(rgid), (unsigned int)OID(egid), (unsigned int)OID(sgid));
 		goto bad;
 	    }
 	}
@@ -889,42 +889,42 @@ set_perms(int perm)
 	state->gidlist = user_gid_list;
 	sudo_gidlist_addref(state->gidlist);
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_INITIAL: "
-	    "ruid: %d, euid: %d, rgid: %d, egid: %d", __func__,
-	    (int)state->ruid, (int)state->euid,
-	    (int)state->rgid, (int)state->egid);
+	    "ruid: %u, euid: %u, rgid: %u, egid: %u", __func__,
+	    (unsigned int)state->ruid, (unsigned int)state->euid,
+	    (unsigned int)state->rgid, (unsigned int)state->egid);
 	break;
 
     case PERM_ROOT:
 	state->ruid = ROOT_UID;
 	state->euid = ROOT_UID;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_ROOT: uid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
-	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->ruid,
+	    (unsigned int)ostate->euid, (unsigned int)state->ruid, (unsigned int)state->euid);
 	/*
 	 * setreuid(0, 0) may fail on some systems if euid is not already 0.
 	 */
 	if (ostate->euid != ROOT_UID) {
 	    if (setreuid(-1, ROOT_UID)) {
 		(void)snprintf(errbuf, sizeof(errbuf),
-		    "PERM_ROOT: setreuid(-1, %d)", ROOT_UID);
+		    "PERM_ROOT: setreuid(-1, %u)", ROOT_UID);
 		goto bad;
 	    }
 	}
 	if (ostate->ruid != ROOT_UID) {
 	    if (setreuid(ROOT_UID, -1)) {
 		(void)snprintf(errbuf, sizeof(errbuf),
-		    "PERM_ROOT: setreuid(%d, -1)", ROOT_UID);
+		    "PERM_ROOT: setreuid(%u, -1)", ROOT_UID);
 		goto bad;
 	    }
 	}
 	state->rgid = ostate->rgid;
 	state->egid = ROOT_GID;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_ROOT: gid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
-	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->rgid,
+	    (unsigned int)ostate->egid, (unsigned int)state->rgid, (unsigned int)state->egid);
 	if (GID_CHANGED && setregid(ID(rgid), ID(egid))) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_ROOT: setregid(%d, %d)", (int)ID(rgid), (int)ID(egid));
+		"PERM_ROOT: setregid(%u, %u)", (unsigned int)ID(rgid), (unsigned int)ID(egid));
 	    goto bad;
 	}
 	state->gidlist = ostate->gidlist;
@@ -935,11 +935,11 @@ set_perms(int perm)
 	state->rgid = ostate->rgid;
 	state->egid = user_gid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_USER: gid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
-	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->rgid,
+	    (unsigned int)ostate->egid, (unsigned int)state->rgid, (unsigned int)state->egid);
 	if (GID_CHANGED && setregid(ID(rgid), ID(egid))) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_USER: setregid(%d, %d)", (int)ID(rgid), (int)ID(egid));
+		"PERM_USER: setregid(%u, %u)", (unsigned int)ID(rgid), (unsigned int)ID(egid));
 	    goto bad;
 	}
 	state->gidlist = user_gid_list;
@@ -953,11 +953,11 @@ set_perms(int perm)
 	state->ruid = ROOT_UID;
 	state->euid = user_uid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_USER: uid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
-	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->ruid,
+	    (unsigned int)ostate->euid, (unsigned int)state->ruid, (unsigned int)state->euid);
 	if (UID_CHANGED && setreuid(ID(ruid), ID(euid))) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_USER: setreuid(%d, %d)", (int)ID(ruid), (int)ID(euid));
+		"PERM_USER: setreuid(%u, %u)", (unsigned int)ID(ruid), (unsigned int)ID(euid));
 	    goto bad;
 	}
 	break;
@@ -967,12 +967,12 @@ set_perms(int perm)
 	state->rgid = user_gid;
 	state->egid = user_gid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_FULL_USER: gid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
-	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->rgid,
+	    (unsigned int)ostate->egid, (unsigned int)state->rgid, (unsigned int)state->egid);
 	if (GID_CHANGED && setregid(ID(rgid), ID(egid))) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_FULL_USER: setregid(%d, %d)",
-		(int)ID(rgid), (int)ID(egid));
+		"PERM_FULL_USER: setregid(%u, %u)",
+		(unsigned int)ID(rgid), (unsigned int)ID(egid));
 	    goto bad;
 	}
 	state->gidlist = user_gid_list;
@@ -986,12 +986,12 @@ set_perms(int perm)
 	state->ruid = user_uid;
 	state->euid = user_uid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_FULL_USER: uid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
-	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->ruid,
+	    (unsigned int)ostate->euid, (unsigned int)state->ruid, (unsigned int)state->euid);
 	if (UID_CHANGED && setreuid(ID(ruid), ID(euid))) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_FULL_USER: setreuid(%d, %d)",
-		(int)ID(ruid), (int)ID(euid));
+		"PERM_FULL_USER: setreuid(%u, %u)",
+		(unsigned int)ID(ruid), (unsigned int)ID(euid));
 	    goto bad;
 	}
 	break;
@@ -1000,8 +1000,8 @@ set_perms(int perm)
 	state->rgid = ostate->rgid;
 	state->egid = runas_gr ? runas_gr->gr_gid : runas_pw->pw_gid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_RUNAS: gid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
-	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->rgid,
+	    (unsigned int)ostate->egid, (unsigned int)state->rgid, (unsigned int)state->egid);
 	if (GID_CHANGED && setregid(ID(rgid), ID(egid))) {
 	    errstr = N_("unable to change to runas gid");
 	    goto bad;
@@ -1014,8 +1014,8 @@ set_perms(int perm)
 	state->ruid = ROOT_UID;
 	state->euid = runas_pw ? runas_pw->pw_uid : user_uid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_RUNAS: uid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
-	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->ruid,
+	    (unsigned int)ostate->euid, (unsigned int)state->ruid, (unsigned int)state->euid);
 	if (UID_CHANGED && setreuid(ID(ruid), ID(euid))) {
 	    errstr = N_("unable to change to runas uid");
 	    goto bad;
@@ -1034,8 +1034,8 @@ set_perms(int perm)
 	state->rgid = ostate->rgid;
 	state->egid = sudoers_gid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_SUDOERS: gid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
-	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->rgid,
+	    (unsigned int)ostate->egid, (unsigned int)state->rgid, (unsigned int)state->egid);
 	if (GID_CHANGED && setregid(ID(rgid), ID(egid))) {
 	    errstr = N_("unable to change to sudoers gid");
 	    goto bad;
@@ -1052,12 +1052,12 @@ set_perms(int perm)
 	else
 	    state->euid = sudoers_uid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_SUDOERS: uid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
-	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->ruid,
+	    (unsigned int)ostate->euid, (unsigned int)state->ruid, (unsigned int)state->euid);
 	if (UID_CHANGED && setreuid(ID(ruid), ID(euid))) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_SUDOERS: setreuid(%d, %d)",
-		(int)ID(ruid), (int)ID(euid));
+		"PERM_SUDOERS: setreuid(%u, %u)",
+		(unsigned int)ID(ruid), (unsigned int)ID(euid));
 	    goto bad;
 	}
 	break;
@@ -1071,12 +1071,12 @@ set_perms(int perm)
 	state->ruid = ROOT_UID;
 	state->euid = timestamp_get_uid();
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_TIMESTAMP: uid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
-	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->ruid,
+	    (unsigned int)ostate->euid, (unsigned int)state->ruid, (unsigned int)state->euid);
 	if (UID_CHANGED && setreuid(ID(ruid), ID(euid))) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_TIMESTAMP: setreuid(%d, %d)",
-		(int)ID(ruid), (int)ID(euid));
+		"PERM_TIMESTAMP: setreuid(%u, %u)",
+		(unsigned int)ID(ruid), (unsigned int)ID(euid));
 	    goto bad;
 	}
 	break;
@@ -1107,12 +1107,12 @@ restore_perms(void)
     ostate = &perm_stack[perm_stack_depth - 2];
     perm_stack_depth--;
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: uid: [%d, %d] -> [%d, %d]",
-	__func__, (int)state->ruid, (int)state->euid,
-	(int)ostate->ruid, (int)ostate->euid);
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: gid: [%d, %d] -> [%d, %d]",
-	__func__, (int)state->rgid, (int)state->egid,
-	(int)ostate->rgid, (int)ostate->egid);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: uid: [%u, %u] -> [%u, %u]",
+	__func__, (unsigned int)state->ruid, (unsigned int)state->euid,
+	(unsigned int)ostate->ruid, (unsigned int)ostate->euid);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: gid: [%u, %u] -> [%u, %u]",
+	__func__, (unsigned int)state->rgid, (unsigned int)state->egid,
+	(unsigned int)ostate->rgid, (unsigned int)ostate->egid);
 
     /*
      * When changing euid to ROOT_UID, setreuid() may fail even if
@@ -1123,24 +1123,24 @@ restore_perms(void)
 	if (ID(euid) != ROOT_UID) {
 	    if (setreuid(-1, ROOT_UID) != 0) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-		    "setreuid() [%d, %d] -> [-1, %d)", (int)state->ruid,
-		    (int)state->euid, ROOT_UID);
+		    "setreuid() [%u, %u] -> [-1, %u)", (unsigned int)state->ruid,
+		    (unsigned int)state->euid, ROOT_UID);
 	    }
 	}
 	if (setuid(ROOT_UID)) {
-	    sudo_warn("setuid() [%d, %d] -> %d)", (int)state->ruid,
-		(int)state->euid, ROOT_UID);
+	    sudo_warn("setuid() [%u, %u] -> %u)", (unsigned int)state->ruid,
+		(unsigned int)state->euid, ROOT_UID);
 	    goto bad;
 	}
     }
     if (setreuid(OID(ruid), OID(euid))) {
-	sudo_warn("setreuid() [%d, %d] -> [%d, %d]", (int)state->ruid,
-	    (int)state->euid, (int)OID(ruid), (int)OID(euid));
+	sudo_warn("setreuid() [%u, %u] -> [%u, %u]", (unsigned int)state->ruid,
+	    (unsigned int)state->euid, (unsigned int)OID(ruid), (unsigned int)OID(euid));
 	goto bad;
     }
     if (setregid(OID(rgid), OID(egid))) {
-	sudo_warn("setregid() [%d, %d] -> [%d, %d]", (int)state->rgid,
-	    (int)state->egid, (int)OID(rgid), (int)OID(egid));
+	sudo_warn("setregid() [%u, %u] -> [%u, %u]", (unsigned int)state->rgid,
+	    (unsigned int)state->egid, (unsigned int)OID(rgid), (unsigned int)OID(egid));
 	goto bad;
     }
     if (state->gidlist != ostate->gidlist) {
@@ -1202,12 +1202,12 @@ set_perms(int perm)
     if (perm != PERM_INITIAL) {
 	if (ostate->euid != ROOT_UID && seteuid(ROOT_UID)) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"set_perms: seteuid(%d)", ROOT_UID);
+		"set_perms: seteuid(%u)", ROOT_UID);
 	    goto bad;
 	}
 	if (ostate->ruid != ROOT_UID && setuid(ROOT_UID)) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"set_perms: setuid(%d)", ROOT_UID);
+		"set_perms: setuid(%u)", ROOT_UID);
 	    goto bad;
 	}
     }
@@ -1222,23 +1222,23 @@ set_perms(int perm)
 	state->gidlist = user_gid_list;
 	sudo_gidlist_addref(state->gidlist);
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_INITIAL: "
-	    "ruid: %d, euid: %d, rgid: %d, egid: %d", __func__,
-	    (int)state->ruid, (int)state->euid,
-	    (int)state->rgid, (int)state->egid);
+	    "ruid: %u, euid: %u, rgid: %u, egid: %u", __func__,
+	    (unsigned int)state->ruid, (unsigned int)state->euid,
+	    (unsigned int)state->rgid, (unsigned int)state->egid);
 	break;
 
     case PERM_ROOT:
 	/* We already set ruid/euid above. */
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_ROOT: uid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
-	    (int)ostate->euid, ROOT_UID, ROOT_UID);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->ruid,
+	    (unsigned int)ostate->euid, ROOT_UID, ROOT_UID);
 	state->ruid = ROOT_UID;
 	state->euid = ROOT_UID;
 	state->rgid = ostate->rgid;
 	state->egid = ROOT_GID;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_ROOT: gid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
-	    (int)ostate->egid, ROOT_GID, ROOT_GID);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->rgid,
+	    (unsigned int)ostate->egid, ROOT_GID, ROOT_GID);
 	if (GID_CHANGED && setegid(ROOT_GID)) {
 	    errstr = N_("unable to change to root gid");
 	    goto bad;
@@ -1251,11 +1251,11 @@ set_perms(int perm)
 	state->egid = user_gid;
 	state->rgid = ostate->rgid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_USER: gid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
-	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->rgid,
+	    (unsigned int)ostate->egid, (unsigned int)state->rgid, (unsigned int)state->egid);
 	if (GID_CHANGED && setegid(user_gid)) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_USER: setegid(%d)", (int)user_gid);
+		"PERM_USER: setegid(%u)", (unsigned int)user_gid);
 	    goto bad;
 	}
 	state->gidlist = user_gid_list;
@@ -1269,11 +1269,11 @@ set_perms(int perm)
 	state->ruid = ROOT_UID;
 	state->euid = user_uid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_USER: uid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
-	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->ruid,
+	    (unsigned int)ostate->euid, (unsigned int)state->ruid, (unsigned int)state->euid);
 	if (seteuid(user_uid)) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_USER: seteuid(%d)", (int)user_uid);
+		"PERM_USER: seteuid(%u)", (unsigned int)user_uid);
 	    goto bad;
 	}
 	break;
@@ -1283,11 +1283,11 @@ set_perms(int perm)
 	state->rgid = user_gid;
 	state->egid = user_gid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_FULL_USER: gid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
-	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->rgid,
+	    (unsigned int)ostate->egid, (unsigned int)state->rgid, (unsigned int)state->egid);
 	if (GID_CHANGED && setgid(user_gid)) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_FULL_USER: setgid(%d)", (int)user_gid);
+		"PERM_FULL_USER: setgid(%u)", (unsigned int)user_gid);
 	    goto bad;
 	}
 	state->gidlist = user_gid_list;
@@ -1301,11 +1301,11 @@ set_perms(int perm)
 	state->ruid = user_uid;
 	state->euid = user_uid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_FULL_USER: uid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
-	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->ruid,
+	    (unsigned int)ostate->euid, (unsigned int)state->ruid, (unsigned int)state->euid);
 	if (setuid(user_uid)) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_FULL_USER: setuid(%d)", (int)user_uid);
+		"PERM_FULL_USER: setuid(%u)", (unsigned int)user_uid);
 	    goto bad;
 	}
 	break;
@@ -1314,8 +1314,8 @@ set_perms(int perm)
 	state->rgid = ostate->rgid;
 	state->egid = runas_gr ? runas_gr->gr_gid : runas_pw->pw_gid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_RUNAS: gid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
-	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->rgid,
+	    (unsigned int)ostate->egid, (unsigned int)state->rgid, (unsigned int)state->egid);
 	if (GID_CHANGED && setegid(state->egid)) {
 	    errstr = N_("unable to change to runas gid");
 	    goto bad;
@@ -1328,8 +1328,8 @@ set_perms(int perm)
 	state->ruid = ostate->ruid;
 	state->euid = runas_pw ? runas_pw->pw_uid : user_uid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_RUNAS: uid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
-	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->ruid,
+	    (unsigned int)ostate->euid, (unsigned int)state->ruid, (unsigned int)state->euid);
 	if (seteuid(state->euid)) {
 	    errstr = N_("unable to change to runas uid");
 	    goto bad;
@@ -1348,8 +1348,8 @@ set_perms(int perm)
 	state->rgid = ostate->rgid;
 	state->egid = sudoers_gid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_SUDOERS: gid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
-	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->rgid,
+	    (unsigned int)ostate->egid, (unsigned int)state->rgid, (unsigned int)state->egid);
 	if (GID_CHANGED && setegid(sudoers_gid)) {
 	    errstr = N_("unable to change to sudoers gid");
 	    goto bad;
@@ -1366,11 +1366,11 @@ set_perms(int perm)
 	else
 	    state->euid = sudoers_uid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_SUDOERS: uid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
-	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->ruid,
+	    (unsigned int)ostate->euid, (unsigned int)state->ruid, (unsigned int)state->euid);
 	if (seteuid(state->euid)) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_SUDOERS: seteuid(%d)", (int)state->euid);
+		"PERM_SUDOERS: seteuid(%u)", (unsigned int)state->euid);
 	    goto bad;
 	}
 	break;
@@ -1384,11 +1384,11 @@ set_perms(int perm)
 	state->ruid = ROOT_UID;
 	state->euid = timestamp_get_uid();
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_TIMESTAMP: uid: "
-	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
-	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
+	    "[%u, %u] -> [%u, %u]", __func__, (unsigned int)ostate->ruid,
+	    (unsigned int)ostate->euid, (unsigned int)state->ruid, (unsigned int)state->euid);
 	if (seteuid(state->euid)) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_TIMESTAMP: seteuid(%d)", (int)state->euid);
+		"PERM_TIMESTAMP: seteuid(%u)", (unsigned int)state->euid);
 	    goto bad;
 	}
 	break;
@@ -1419,12 +1419,12 @@ restore_perms(void)
     ostate = &perm_stack[perm_stack_depth - 2];
     perm_stack_depth--;
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: uid: [%d, %d] -> [%d, %d]",
-	__func__, (int)state->ruid, (int)state->euid,
-	(int)ostate->ruid, (int)ostate->euid);
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: gid: [%d, %d] -> [%d, %d]",
-	__func__, (int)state->rgid, (int)state->egid,
-	(int)ostate->rgid, (int)ostate->egid);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: uid: [%u, %u] -> [%u, %u]",
+	__func__, (unsigned int)state->ruid, (unsigned int)state->euid,
+	(unsigned int)ostate->ruid, (unsigned int)ostate->euid);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: gid: [%u, %u] -> [%u, %u]",
+	__func__, (unsigned int)state->rgid, (unsigned int)state->egid,
+	(unsigned int)ostate->rgid, (unsigned int)ostate->egid);
 
     /*
      * Since we only have setuid() and seteuid() and semantics
@@ -1432,17 +1432,17 @@ restore_perms(void)
      * real and effective uids to ROOT_UID initially to be safe.
      */
     if (seteuid(ROOT_UID)) {
-	sudo_warn("seteuid() [%d] -> [%d]", (int)state->euid, ROOT_UID);
+	sudo_warn("seteuid() [%u] -> [%u]", (unsigned int)state->euid, ROOT_UID);
 	goto bad;
     }
     if (setuid(ROOT_UID)) {
-	sudo_warn("setuid() [%d, %d] -> [%d, %d]", (int)state->ruid, ROOT_UID,
+	sudo_warn("setuid() [%u, %u] -> [%u, %u]", (unsigned int)state->ruid, ROOT_UID,
 	    ROOT_UID, ROOT_UID);
 	goto bad;
     }
 
     if (OID(egid) != (gid_t)-1 && setegid(ostate->egid)) {
-	sudo_warn("setegid(%d)", (int)ostate->egid);
+	sudo_warn("setegid(%u)", (unsigned int)ostate->egid);
 	goto bad;
     }
     if (state->gidlist != ostate->gidlist) {
@@ -1452,7 +1452,7 @@ restore_perms(void)
 	}
     }
     if (OID(euid) != (uid_t)-1 && seteuid(ostate->euid)) {
-	sudo_warn("seteuid(%d)", (int)ostate->euid);
+	sudo_warn("seteuid(%u)", (unsigned int)ostate->euid);
 	goto bad;
     }
     sudo_gidlist_delref(state->gidlist);
@@ -1505,7 +1505,7 @@ set_perms(int perm)
 	state->gidlist = user_gid_list;
 	sudo_gidlist_addref(state->gidlist);
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_INITIAL: "
-	    "ruid: %d, rgid: %d", __func__, (int)state->ruid, (int)state->rgid);
+	    "ruid: %u, rgid: %u", __func__, (unsigned int)state->ruid, (unsigned int)state->rgid);
 	break;
 
     case PERM_ROOT:
@@ -1514,14 +1514,14 @@ set_perms(int perm)
 	state->gidlist = ostate->gidlist;
 	sudo_gidlist_addref(state->gidlist);
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_ROOT: uid: "
-	    "[%d] -> [%d]", __func__, (int)ostate->ruid, (int)state->ruid);
+	    "[%u] -> [%u]", __func__, (unsigned int)ostate->ruid, (unsigned int)state->ruid);
 	if (setuid(ROOT_UID)) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_ROOT: setuid(%d)", ROOT_UID);
+		"PERM_ROOT: setuid(%u)", ROOT_UID);
 	    goto bad;
 	}
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_ROOT: gid: "
-	    "[%d] -> [%d]", __func__, (int)ostate->rgid, (int)state->rgid);
+	    "[%u] -> [%u]", __func__, (unsigned int)ostate->rgid, (unsigned int)state->rgid);
 	if (setgid(ROOT_GID)) {
 	    errstr = N_("unable to change to root gid");
 	    goto bad;
@@ -1531,7 +1531,7 @@ set_perms(int perm)
     case PERM_FULL_USER:
 	state->rgid = user_gid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_FULL_USER: gid: "
-	    "[%d] -> [%d]", __func__, (int)ostate->rgid, (int)state->rgid);
+	    "[%u] -> [%u]", __func__, (unsigned int)ostate->rgid, (unsigned int)state->rgid);
 	(void) setgid(user_gid);
 	state->gidlist = user_gid_list;
 	sudo_gidlist_addref(state->gidlist);
@@ -1543,10 +1543,10 @@ set_perms(int perm)
 	}
 	state->ruid = user_uid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_FULL_USER: uid: "
-	    "[%d] -> [%d]", __func__, (int)ostate->ruid, (int)state->ruid);
+	    "[%u] -> [%u]", __func__, (unsigned int)ostate->ruid, (unsigned int)state->ruid);
 	if (setuid(user_uid)) {
 	    (void)snprintf(errbuf, sizeof(errbuf),
-		"PERM_FULL_USER: setuid(%d)", (int)user_uid);
+		"PERM_FULL_USER: setuid(%u)", (unsigned int)user_uid);
 	    goto bad;
 	}
 	break;
@@ -1588,13 +1588,13 @@ restore_perms(void)
     ostate = &perm_stack[perm_stack_depth - 2];
     perm_stack_depth--;
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: uid: [%d] -> [%d]",
-	__func__, (int)state->ruid, (int)ostate->ruid);
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: gid: [%d] -> [%d]",
-	__func__, (int)state->rgid, (int)ostate->rgid);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: uid: [%u] -> [%u]",
+	__func__, (unsigned int)state->ruid, (unsigned int)ostate->ruid);
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: gid: [%u] -> [%u]",
+	__func__, (unsigned int)state->rgid, (unsigned int)ostate->rgid);
 
     if (OID(rgid) != (gid_t)-1 && setgid(ostate->rgid)) {
-	sudo_warn("setgid(%d)", (int)ostate->rgid);
+	sudo_warn("setgid(%u)", (unsigned int)ostate->rgid);
 	goto bad;
     }
     if (state->gidlist != ostate->gidlist) {
@@ -1605,7 +1605,7 @@ restore_perms(void)
     }
     sudo_gidlist_delref(state->gidlist);
     if (OID(ruid) != (uid_t)-1 && setuid(ostate->ruid)) {
-	sudo_warn("setuid(%d)", (int)ostate->ruid);
+	sudo_warn("setuid(%u)", (unsigned int)ostate->ruid);
 	goto bad;
     }
     debug_return_bool(true);

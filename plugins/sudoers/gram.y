@@ -76,10 +76,10 @@ struct sudoers_parse_tree parsed_policy = {
  * Local prototypes
  */
 static void init_options(struct command_options *opts);
-static bool add_defaults(int, struct member *, struct defaults *);
+static bool add_defaults(short, struct member *, struct defaults *);
 static bool add_userspec(struct member *, struct privilege *);
 static struct defaults *new_default(char *, char *, short);
-static struct member *new_member(char *, int);
+static struct member *new_member(char *, short);
 static struct sudo_command *new_command(char *, char *);
 static struct command_digest *new_digest(unsigned int, char *);
 static void alias_error(const char *name, int errnum);
@@ -1223,7 +1223,7 @@ group		:	ALIAS {
 void
 sudoerserrorf(const char *fmt, ...)
 {
-    const int column = sudolinebuf.toke_start + 1;
+    const int column = (int)(sudolinebuf.toke_start + 1);
     va_list ap;
     debug_decl(sudoerserrorf, SUDOERS_DEBUG_PARSER);
 
@@ -1255,8 +1255,8 @@ sudoerserrorf(const char *fmt, ...)
 		    tofree = NULL;
 		}
 	    }
-	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s:%d:%d: %s\n"), sudoers,
-		this_lineno, (int)sudolinebuf.toke_start + 1, s);
+	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s:%d:%zu: %s\n"), sudoers,
+		this_lineno, sudolinebuf.toke_start + 1, s);
 	    free(tofree);
 	    va_end(ap);
 	    sudoers_setlocale(oldlocale, NULL);
@@ -1332,7 +1332,7 @@ new_default(char *var, char *val, short op)
     d->op = op;
     /* d->binding = NULL; */
     d->line = this_lineno;
-    d->column = sudolinebuf.toke_start + 1;
+    d->column = (int)(sudolinebuf.toke_start + 1);
     d->file = sudo_rcstr_addref(sudoers);
     HLTQ_INIT(d, entries);
 
@@ -1340,7 +1340,7 @@ new_default(char *var, char *val, short op)
 }
 
 static struct member *
-new_member(char *name, int type)
+new_member(char *name, short type)
 {
     struct member *m;
     debug_decl(new_member, SUDOERS_DEBUG_PARSER);
@@ -1425,7 +1425,7 @@ free_defaults_binding(struct defaults_binding *binding)
  * or runas users the entries apply to (determined by the type).
  */
 static bool
-add_defaults(int type, struct member *bmem, struct defaults *defs)
+add_defaults(short type, struct member *bmem, struct defaults *defs)
 {
     struct defaults *d, *next;
     struct defaults_binding *binding;
@@ -1484,7 +1484,7 @@ add_userspec(struct member *members, struct privilege *privs)
     }
     /* We already parsed the newline so sudolineno is off by one. */
     u->line = sudolineno - 1;
-    u->column = sudolinebuf.toke_start + 1;
+    u->column = (int)(sudolinebuf.toke_start + 1);
     u->file = sudo_rcstr_addref(sudoers);
     parser_leak_remove(LEAK_MEMBER, members);
     HLTQ_TO_TAILQ(&u->users, members, entries);

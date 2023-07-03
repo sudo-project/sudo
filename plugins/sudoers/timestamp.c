@@ -127,7 +127,7 @@ ts_match_record(struct timestamp_entry *key, struct timestamp_entry *entry,
 	/* verify parent pid */
 	if (entry->u.ppid != key->u.ppid) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG,
-		"%s:%u record ppid mismatch (want %d, got %d)", __func__, recno,
+		"%s:%u record ppid mismatch (want %u, got %u)", __func__, recno,
 		(int)key->u.ppid, (int)entry->u.ppid);
 	    debug_return_bool(false);
 	}
@@ -187,8 +187,8 @@ ts_find_record(int fd, struct timestamp_entry *key, struct timestamp_entry *entr
 		cur.size, sizeof(cur));
 	    if (lseek(fd, (off_t)cur.size - (off_t)sizeof(cur), SEEK_CUR) == -1) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-		    "unable to seek forward %d",
-		    (int)cur.size - (int)sizeof(cur));
+		    "unable to seek forward %zd",
+		    cur.size - ssizeof(cur));
 		break;
 	    }
 	    if (cur.size == 0)
@@ -227,8 +227,8 @@ ts_mkdirs(const char *path, uid_t owner, gid_t group, mode_t mode,
     if (parentfd != -1) {
 	/* Create final path component. */
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	    "mkdir %s, mode 0%o, uid %d, gid %d", path, (unsigned int)mode,
-	    (int)owner, (int)group);
+	    "mkdir %s, mode 0%o, uid %u, gid %u", path, (int)mode,
+	    (unsigned int)owner, (unsigned int)group);
 	if (mkdirat(parentfd, base, mode) != 0 && errno != EEXIST) {
 	    if (!quiet)
 		sudo_warn(U_("unable to mkdir %s"), path);
@@ -239,8 +239,8 @@ ts_mkdirs(const char *path, uid_t owner, gid_t group, mode_t mode,
 		    "%s: unable to open %s", __func__, path);
 	    } else if (fchown(fd, owner, group) != 0) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-		    "%s: unable to chown %d:%d %s", __func__,
-		    (int)owner, (int)group, path);
+		    "%s: unable to chown %u:%u %s", __func__,
+		    (unsigned int)owner, (unsigned int)group, path);
 	    }
 	}
 	close(parentfd);

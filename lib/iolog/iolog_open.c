@@ -80,8 +80,8 @@ iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode)
 	    if (*mode == 'w') {
 		if (fchown(fd, iolog_uid, iolog_gid) != 0) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-			"%s: unable to fchown %d:%d %s", __func__,
-			(int)iolog_uid, (int)iolog_gid, file);
+			"%s: unable to fchown %u:%u %s", __func__,
+			(unsigned int)iolog_uid, (unsigned int)iolog_gid, file);
 		}
 		iol->compressed = iolog_get_compress();
 	    } else {

@@ -60,7 +60,7 @@ dump_gids(const char *prefix, int ngids, const GETGROUPS_T *gidlist)
 
     fprintf(stderr, "%s: %s: ", getprogname(), prefix);
     for (i = 0; i < ngids; i++) {
-	fprintf(stderr, "%s%d", i ? ", " : "", (int)gidlist[i]);
+	fprintf(stderr, "%s%u", i ? ", " : "", (unsigned int)gidlist[i]);
     }
     fputc('\n', stderr);
 }

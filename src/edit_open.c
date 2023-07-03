@@ -62,7 +62,7 @@ switch_user_int(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups,
     if (setegid(egid) != 0) {
 	if (nonfatal)
 	    goto done;
-	sudo_fatal("setegid(%d)", (int)egid);
+	sudo_fatal("setegid(%u)", (unsigned int)egid);
     }
     if (ngroups != -1) {
 	if (sudo_setgroups(ngroups, groups) != 0) {
