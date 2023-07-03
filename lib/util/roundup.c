@@ -30,10 +30,20 @@
 /*
  * Round 32-bit unsigned length to the next highest power of two.
  * Always returns at least 64.
- * Algorithm from bit twiddling hacks.
  */
 unsigned int
 sudo_pow2_roundup_v1(unsigned int len)
+{
+    return (unsigned int)sudo_pow2_roundup_v2((size_t)len);
+}
+
+/*
+ * Round a size_t length to the next highest power of two.
+ * Always returns at least 64.
+ * Algorithm from bit twiddling hacks.
+ */
+size_t
+sudo_pow2_roundup_v2(size_t len)
 {
     if (len < 64)
 	return 64;
@@ -43,6 +53,8 @@ sudo_pow2_roundup_v1(unsigned int len)
     len |= len >> 4;
     len |= len >> 8;
     len |= len >> 16;
-    len++;
-    return len;
+#ifdef __LP64__
+    len |= len >> 32;
+#endif
+    return ++len;
 }

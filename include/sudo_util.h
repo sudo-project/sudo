@@ -262,7 +262,8 @@ sudo_dso_public bool sudo_regex_compile_v1(void *v, const char *pattern, const c
 
 /* roundup.c */
 sudo_dso_public unsigned int sudo_pow2_roundup_v1(unsigned int len);
-#define sudo_pow2_roundup(_a) sudo_pow2_roundup_v1((_a))
+sudo_dso_public size_t sudo_pow2_roundup_v2(size_t len);
+#define sudo_pow2_roundup(_a) sudo_pow2_roundup_v2((_a))
 
 /* secure_path.c */
 #define SUDO_PATH_SECURE		0

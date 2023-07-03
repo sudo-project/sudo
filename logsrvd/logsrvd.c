@@ -302,7 +302,7 @@ get_free_buf(size_t len, struct connection_closure *closure)
     }
 
     if (len > buf->size) {
-	const unsigned int new_size = sudo_pow2_roundup(len);
+	const size_t new_size = sudo_pow2_roundup(len);
 	if (new_size < len) {
 	    /* overflow */
 	    errno = ENOMEM;

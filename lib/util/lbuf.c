@@ -79,7 +79,7 @@ sudo_lbuf_expand(struct sudo_lbuf *lbuf, unsigned int extra)
     }
 
     if (lbuf->len + extra + 1 > lbuf->size) {
-	unsigned int new_size = sudo_pow2_roundup(lbuf->len + extra + 1);
+	size_t new_size = sudo_pow2_roundup(lbuf->len + extra + 1);
 	char *new_buf;
 
 	if (new_size < lbuf->size) {

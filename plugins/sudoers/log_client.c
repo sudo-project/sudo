@@ -732,7 +732,7 @@ fmt_client_message(struct client_closure *closure, ClientMessage *msg)
 
     /* Resize buffer as needed. */
     if (len > buf->size) {
-	const unsigned int new_size = sudo_pow2_roundup(len);
+	const size_t new_size = sudo_pow2_roundup(len);
 	if (new_size < len) {
 	    /* overflow */
 	    errno = ENOMEM;
@@ -1639,7 +1639,7 @@ expand_buf(struct connection_buffer *buf, unsigned int needed)
 
     if (buf->size < needed) {
 	/* Expand buffer. */
-	const unsigned int newsize = sudo_pow2_roundup(needed);
+	const size_t newsize = sudo_pow2_roundup(needed);
 	if (newsize < needed) {
 	    /* overflow */
 	    errno = ENOMEM;

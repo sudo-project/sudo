@@ -62,9 +62,9 @@ expand_buf(struct connection_buffer *buf, unsigned int needed)
 
     if (buf->size < needed) {
 	/* Expand buffer. */
-	const unsigned int newsize = sudo_pow2_roundup(needed);
+	const size_t newsize = sudo_pow2_roundup(needed);
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "expanding buffer from %u to %u", buf->size, newsize);
+	    "expanding buffer from %u to %zu", buf->size, newsize);
 	if (newsize < needed) {
 	    /* overflow */
 	    errno = ENOMEM;
