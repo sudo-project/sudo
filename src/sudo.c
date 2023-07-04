@@ -437,7 +437,7 @@ get_user_groups(const char *user, struct sudo_cred *cred)
     cred->groups = NULL;
     group_source = sudo_conf_group_source();
     if (group_source != GROUP_SOURCE_DYNAMIC) {
-	int maxgroups = (int)sysconf(_SC_NGROUPS_MAX);
+	long maxgroups = sysconf(_SC_NGROUPS_MAX);
 	if (maxgroups < 0)
 	    maxgroups = NGROUPS_MAX;
 
