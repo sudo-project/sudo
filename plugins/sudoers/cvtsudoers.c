@@ -49,6 +49,7 @@
 #include "sudo_lbuf.h"
 #include "redblack.h"
 #include "cvtsudoers.h"
+#include "testsudoers_pwutil.h"
 #include "tsgetgrpw.h"
 #include <gram.h>
 

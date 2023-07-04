@@ -107,12 +107,6 @@ struct cache_item *cvtsudoers_make_gritem(gid_t gid, const char *name);
 struct cache_item *cvtsudoers_make_gidlist_item(const struct passwd *pw, char * const *unused1, unsigned int type);
 struct cache_item *cvtsudoers_make_grlist_item(const struct passwd *pw, char * const *unused1);
 
-/* testsudoers_pwutil.c */
-struct cache_item *testsudoers_make_gritem(gid_t gid, const char *group);
-struct cache_item *testsudoers_make_grlist_item(const struct passwd *pw, char * const *groups);
-struct cache_item *testsudoers_make_gidlist_item(const struct passwd *pw, char * const *gids, unsigned int type);
-struct cache_item *testsudoers_make_pwitem(uid_t uid, const char *user);
-
 /* stubs.c */
 void get_hostname(void);
 

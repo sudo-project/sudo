@@ -1281,8 +1281,8 @@ cvtsudoers.o: $(srcdir)/cvtsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(srcdir)/parse.h $(srcdir)/redblack.h $(srcdir)/strlist.h \
               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(srcdir)/sudoers_version.h \
-              $(srcdir)/tsgetgrpw.h $(top_builddir)/config.h \
-              $(top_builddir)/pathnames.h
+              $(srcdir)/testsudoers_pwutil.h $(srcdir)/tsgetgrpw.h \
+              $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/cvtsudoers.c
 cvtsudoers.i: $(srcdir)/cvtsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(incdir)/compat/getopt.h $(incdir)/compat/stdbool.h \
@@ -1295,8 +1295,8 @@ cvtsudoers.i: $(srcdir)/cvtsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(srcdir)/parse.h $(srcdir)/redblack.h $(srcdir)/strlist.h \
               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(srcdir)/sudoers_version.h \
-              $(srcdir)/tsgetgrpw.h $(top_builddir)/config.h \
-              $(top_builddir)/pathnames.h
+              $(srcdir)/testsudoers_pwutil.h $(srcdir)/tsgetgrpw.h \
+              $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 cvtsudoers.plog: cvtsudoers.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/cvtsudoers.c --i-file $< --output-file $@
@@ -3075,8 +3075,9 @@ testsudoers.o: $(srcdir)/testsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(incdir)/sudo_util.h $(srcdir)/defaults.h \
                $(srcdir)/interfaces.h $(srcdir)/logging.h $(srcdir)/parse.h \
                $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-               $(srcdir)/sudoers_debug.h $(srcdir)/tsgetgrpw.h \
-               $(top_builddir)/config.h $(top_builddir)/pathnames.h
+               $(srcdir)/sudoers_debug.h $(srcdir)/testsudoers_pwutil.h \
+               $(srcdir)/tsgetgrpw.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/testsudoers.c
 testsudoers.i: $(srcdir)/testsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -3087,8 +3088,9 @@ testsudoers.i: $(srcdir)/testsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(incdir)/sudo_util.h $(srcdir)/defaults.h \
                $(srcdir)/interfaces.h $(srcdir)/logging.h $(srcdir)/parse.h \
                $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-               $(srcdir)/sudoers_debug.h $(srcdir)/tsgetgrpw.h \
-               $(top_builddir)/config.h $(top_builddir)/pathnames.h
+               $(srcdir)/sudoers_debug.h $(srcdir)/testsudoers_pwutil.h \
+               $(srcdir)/tsgetgrpw.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 testsudoers.plog: testsudoers.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/testsudoers.c --i-file $< --output-file $@

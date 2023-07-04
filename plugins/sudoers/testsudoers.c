@@ -41,6 +41,7 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include "testsudoers_pwutil.h"
 #include "tsgetgrpw.h"
 #include "sudoers.h"
 #include "interfaces.h"
@@ -71,12 +72,6 @@ static void cb_userspec(struct userspec *us, int user_match);
 static void cb_privilege(struct privilege *priv, int host_match);
 static void cb_cmndspec(struct cmndspec *cs, int date_match, int runas_match, int cmnd_match);
 static int testsudoers_query(const struct sudo_nss *nss, struct passwd *pw);
-
-/* testsudoers_pwutil.c */
-extern struct cache_item *testsudoers_make_gritem(gid_t gid, const char *group);
-extern struct cache_item *testsudoers_make_grlist_item(const struct passwd *pw, char * const *groups);
-extern struct cache_item *testsudoers_make_gidlist_item(const struct passwd *pw, char * const *gids, unsigned int type);
-extern struct cache_item *testsudoers_make_pwitem(uid_t uid, const char *user);
 
 /* gram.y */
 extern int (*trace_print)(const char *msg);
