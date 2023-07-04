@@ -23,10 +23,11 @@
 
 #include <config.h>
 
+#include <ctype.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
@@ -91,9 +92,20 @@ sudo_parseln_v2(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp, i
 
 	if (*bufp == NULL || total + len >= *bufsizep) {
 	    void *newbuf;
-	    const size_t newsize = sudo_pow2_roundup(total + len + 1);
+		const size_t size = total + len + 1;
+		const size_t newsize = sudo_pow2_roundup(size);
 
-	    if (newsize == 0 || (newbuf = realloc(*bufp, newsize)) == NULL) {
+		if (newsize < size) {
+		/* overflow */
+		errno = ENOMEM;
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unable to allocate memory");
+		len = -1;
+		total = 0;
+		break;
+	    }
+		
+		if ((newbuf = realloc(*bufp, newsize)) == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "unable to allocate memory");
 		len = -1;
