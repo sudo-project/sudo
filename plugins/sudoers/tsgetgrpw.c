@@ -346,7 +346,7 @@ testsudoers_getgrgid(gid_t gid)
  * Copied from getgrouplist.c
  */
 int
-testsudoers_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
+testsudoers_getgrouplist2(const char *name, GETGROUPS_T basegid,
     GETGROUPS_T **groupsp, int *ngroupsp)
 {
     GETGROUPS_T *groups = *groupsp;

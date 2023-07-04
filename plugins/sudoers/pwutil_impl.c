@@ -49,6 +49,20 @@
 # endif
 #endif /* LOGIN_NAME_MAX */
 
+/*
+ * For testsudoers and cvtsudoers need to support building with a different
+ * function prefix and using custom getpwnam/getpwuid/getgrnam/getgrgid.
+ */
+#define EXPAND(p, f)	p ## _ ## f
+#define WRAP(p, f)	EXPAND(p, f)
+#ifdef PWUTIL_PREFIX
+# define CALL(x)	WRAP(PWUTIL_PREFIX, x)
+# define PREFIX(x)	WRAP(PWUTIL_PREFIX, x)
+#else
+# define CALL(x)	x
+# define PREFIX(x)	WRAP(sudo, x)
+#endif
+
 #define FIELD_SIZE(src, name, size)			\
 do {							\
 	if (src->name) {				\
@@ -76,7 +90,7 @@ do {							\
  * to ENOMEM or ENOENT respectively.
  */
 struct cache_item *
-sudo_make_pwitem(uid_t uid, const char *name)
+PREFIX(make_pwitem)(uid_t uid, const char *name)
 {
     char *cp;
     const char *pw_shell;
@@ -89,7 +103,7 @@ sudo_make_pwitem(uid_t uid, const char *name)
     debug_decl(sudo_make_pwitem, SUDOERS_DEBUG_NSS);
 
     /* Look up by name or uid. */
-    pw = name ? getpwnam(name) : getpwuid(uid);
+    pw = name ? CALL(getpwnam)(name) : CALL(getpwuid)(uid);
     if (pw == NULL) {
 	errno = ENOENT;
 	debug_return_ptr(NULL);
@@ -161,7 +175,7 @@ sudo_make_pwitem(uid_t uid, const char *name)
  * to ENOMEM or ENOENT respectively.
  */
 struct cache_item *
-sudo_make_gritem(gid_t gid, const char *name)
+PREFIX(make_gritem)(gid_t gid, const char *name)
 {
     char *cp;
     size_t nsize, psize, total, len, nmem = 0;
@@ -170,7 +184,7 @@ sudo_make_gritem(gid_t gid, const char *name)
     debug_decl(sudo_make_gritem, SUDOERS_DEBUG_NSS);
 
     /* Look up by name or gid. */
-    gr = name ? getgrnam(name) : getgrgid(gid);
+    gr = name ? CALL(getgrnam)(name) : CALL(getgrgid)(gid);
     if (gr == NULL) {
 	errno = ENOENT;
 	debug_return_ptr(NULL);
@@ -235,7 +249,7 @@ sudo_make_gritem(gid_t gid, const char *name)
  * elements.  Fills in datum from user_gids or from sudo_getgrouplist2(3).
  */
 struct cache_item *
-sudo_make_gidlist_item(const struct passwd *pw, char * const *gidstrs,
+PREFIX(make_gidlist_item)(const struct passwd *pw, char * const *gidstrs,
     unsigned int type)
 {
     char *cp;
@@ -294,11 +308,11 @@ sudo_make_gidlist_item(const struct passwd *pw, char * const *gidstrs,
 		debug_return_ptr(NULL);
 	    }
 	    /* Clamp to max_groups if insufficient space for all groups. */
-	    if (sudo_getgrouplist2(pw->pw_name, pw->pw_gid, &gids, &ngids) == -1)
+	    if (PREFIX(getgrouplist2)(pw->pw_name, pw->pw_gid, &gids, &ngids) == -1)
 		ngids = sudo_user.max_groups;
 	} else {
 	    gids = NULL;
-	    if (sudo_getgrouplist2(pw->pw_name, pw->pw_gid, &gids, &ngids) == -1) {
+	    if (PREFIX(getgrouplist2)(pw->pw_name, pw->pw_gid, &gids, &ngids) == -1) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "unable to allocate memory");
 		debug_return_ptr(NULL);
@@ -356,7 +370,7 @@ sudo_make_gidlist_item(const struct passwd *pw, char * const *gidstrs,
  * elements.  Fills in group names from a call to sudo_get_gidlist().
  */
 struct cache_item *
-sudo_make_grlist_item(const struct passwd *pw, char * const *unused1)
+PREFIX(make_grlist_item)(const struct passwd *pw, char * const *unused1)
 {
     char *cp;
     size_t groupname_len, len, ngroups, nsize, total;

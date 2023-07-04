@@ -3102,8 +3102,8 @@ testsudoers_pwutil.o: $(srcdir)/testsudoers_pwutil.c $(devdir)/def_data.h \
                       $(srcdir)/parse.h $(srcdir)/pwutil.h \
                       $(srcdir)/pwutil_impl.c $(srcdir)/sudo_nss.h \
                       $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-                      $(srcdir)/tsgetgrpw.h $(top_builddir)/config.h \
-                      $(top_builddir)/pathnames.h
+                      $(srcdir)/testsudoers_pwutil.h $(srcdir)/tsgetgrpw.h \
+                      $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/testsudoers_pwutil.c
 testsudoers_pwutil.i: $(srcdir)/testsudoers_pwutil.c $(devdir)/def_data.h \
                       $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -3115,8 +3115,8 @@ testsudoers_pwutil.i: $(srcdir)/testsudoers_pwutil.c $(devdir)/def_data.h \
                       $(srcdir)/parse.h $(srcdir)/pwutil.h \
                       $(srcdir)/pwutil_impl.c $(srcdir)/sudo_nss.h \
                       $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-                      $(srcdir)/tsgetgrpw.h $(top_builddir)/config.h \
-                      $(top_builddir)/pathnames.h
+                      $(srcdir)/testsudoers_pwutil.h $(srcdir)/tsgetgrpw.h \
+                      $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 testsudoers_pwutil.plog: testsudoers_pwutil.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/testsudoers_pwutil.c --i-file $< --output-file $@
