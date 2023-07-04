@@ -47,14 +47,10 @@ sudo_pow2_roundup_v2(size_t len)
 {
     if (len < 64)
 	return 64;
-    len--;
-    len |= len >> 1;
-    len |= len >> 2;
-    len |= len >> 4;
-    len |= len >> 8;
-    len |= len >> 16;
+
 #ifdef __LP64__
-    len |= len >> 32;
+    return 1 << (64 - __builtin_clzl(len - 1));
+#else
+    return 1 << (32 - __builtin_clz(len - 1));
 #endif
-    return ++len;
 }
