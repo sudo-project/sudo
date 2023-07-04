@@ -27,15 +27,6 @@
 #include "sudo_debug.h"
 #include "sudo_util.h"
 
-#if defined(__has_builtin)
-# if __has_builtin(__builtin_clz)
-#  define HAVE___BUILTIN_CLZ
-# endif
-# if __has_builtin(__builtin_clzl)
-#  define HAVE___BUILTIN_CLZL
-# endif
-#endif
-
 /*
  * Round 32-bit unsigned length to the next highest power of two.
  * Always returns at least 64.

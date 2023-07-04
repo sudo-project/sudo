@@ -1113,6 +1113,12 @@
 /* Define to 1 if you have the '_ttyname_dev' function. */
 #undef HAVE__TTYNAME_DEV
 
+/* Define to 1 if you have the '__builtin_clz' built-in function */
+#undef HAVE___BUILTIN_CLZ
+
+/* Define to 1 if you have the '__builtin_clzl' built-in function */
+#undef HAVE___BUILTIN_CLZL
+
 /* Define to 1 if the compiler supports the C99 __func__ variable. */
 #undef HAVE___FUNC__
 

@@ -452,6 +452,7 @@ m4/ax_check_compile_flag.m4
 m4/ax_check_link_flag.m4
 m4/ax_func_getaddrinfo.m4
 m4/ax_func_snprintf.m4
+m4/ax_gcc_builtin.m4
 m4/ax_prog_cc_for_build.m4
 m4/gettext.m4
 m4/hardening.m4

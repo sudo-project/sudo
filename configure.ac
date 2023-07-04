@@ -2725,6 +2725,8 @@ AC_CHECK_FUNCS([arc4random], [
 	AC_CHECK_FUNCS([pthread_atfork])
     ])
 ])
+AX_GCC_BUILTIN(__builtin_clz)
+AX_GCC_BUILTIN(__builtin_clzl)
 
 utmp_style=LEGACY
 AC_CHECK_FUNCS([getutsid getutxid getutid], [utmp_style=POSIX; break])
