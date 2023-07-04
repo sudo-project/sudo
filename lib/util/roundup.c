@@ -40,7 +40,6 @@ sudo_pow2_roundup_v1(unsigned int len)
 /*
  * Round a size_t length to the next highest power of two.
  * Always returns at least 64.
- * Algorithm from bit twiddling hacks.
  */
 size_t
 sudo_pow2_roundup_v2(size_t len)
