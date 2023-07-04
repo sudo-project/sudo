@@ -23,10 +23,11 @@
 
 #include <config.h>
 
-#include <stdlib.h>
-#include <string.h>
 #include <ctype.h>
 #include <errno.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "sudo_compat.h"
 #include "sudo_debug.h"
@@ -82,7 +83,7 @@ sudo_lbuf_expand(struct sudo_lbuf *lbuf, unsigned int extra)
 	size_t new_size = sudo_pow2_roundup(lbuf->len + extra + 1);
 	char *new_buf;
 
-	if (new_size < lbuf->size) {
+	if (new_size > UINT_MAX || new_size < lbuf->size) {
 	    errno = ENOMEM;
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"integer overflow updating lbuf->size");
