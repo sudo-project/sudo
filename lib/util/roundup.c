@@ -27,6 +27,15 @@
 #include "sudo_debug.h"
 #include "sudo_util.h"
 
+#if defined(__has_builtin)
+# if __has_builtin(__builtin_clz)
+#  define HAVE___BUILTIN_CLZ
+# endif
+# if __has_builtin(__builtin_clzl)
+#  define HAVE___BUILTIN_CLZL
+# endif
+#endif
+
 /*
  * Round 32-bit unsigned length to the next highest power of two.
  * Always returns at least 64.
@@ -37,7 +46,18 @@ sudo_pow2_roundup_v1(unsigned int len)
     if (len < 64)
 	return 64;
 
+#ifdef HAVE___BUILTIN_CLZ
     return 1U << (32 - __builtin_clz(len - 1));
+#else
+    len--;
+    len |= len >> 1;
+    len |= len >> 2;
+    len |= len >> 4;
+    len |= len >> 8;
+    len |= len >> 16;
+    len++;
+    return len;
+#endif
 }
 
 /*
@@ -50,9 +70,21 @@ sudo_pow2_roundup_v2(size_t len)
     if (len < 64)
 	return 64;
 
-#ifdef __LP64__
+#if defined(__LP64__) && defined(HAVE___BUILTIN_CLZL)
     return 1UL << (64 - __builtin_clzl(len - 1));
-#else
+#elif !defined(__LP64__) && defined(HAVE___BUILTIN_CLZ)
     return 1UL << (32 - __builtin_clz(len - 1));
+#else
+    len--;
+    len |= len >> 1;
+    len |= len >> 2;
+    len |= len >> 4;
+    len |= len >> 8;
+    len |= len >> 16;
+# ifdef __LP64__
+    len |= len >> 32;
+# endif
+    len++;
+    return len;
 #endif
 }
