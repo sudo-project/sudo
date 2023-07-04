@@ -35,9 +35,9 @@ unsigned int
 sudo_pow2_roundup_v1(unsigned int len)
 {
     if (len < 64)
-    return 64;
+	return 64;
 
-    return 1 << (32 - __builtin_clz(len - 1));
+    return 1U << (32 - __builtin_clz(len - 1));
 }
 
 /*
@@ -48,11 +48,11 @@ size_t
 sudo_pow2_roundup_v2(size_t len)
 {
     if (len < 64)
-    return 64;
+	return 64;
 
 #ifdef __LP64__
-    return 1 << (64 - __builtin_clzl(len - 1));
+    return 1UL << (64 - __builtin_clzl(len - 1));
 #else
-    return 1 << (32 - __builtin_clz(len - 1));
+    return 1UL << (32 - __builtin_clz(len - 1));
 #endif
 }
