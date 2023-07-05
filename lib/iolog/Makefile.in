@@ -338,8 +338,9 @@ clean:
 	-$(LIBTOOL) $(LTFLAGS) --mode=clean rm -f $(TEST_PROGS) $(FUZZ_PROGS) \
 	    *.lo *.o *.la
 	-rm -f *.i *.plog stamp-* core *.core core.* regress/*/*.out \
-	    regress/*/*.err regress/corpus/iolog_json \
-	    regress/corpus/iolog_legacy regress/corpus/iolog_timing
+	    regress/*/*.err
+	-rm -rf regress/corpus/iolog_json regress/corpus/iolog_legacy \
+	    regress/corpus/iolog_timing
 
 mostlyclean: clean
 
