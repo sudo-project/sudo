@@ -312,7 +312,8 @@ sudo_dso_public id_t sudo_strtoidx_v1(const char *str, const char *sep, char **e
 
 /* strtomode.c */
 sudo_dso_public int sudo_strtomode_v1(const char *cp, const char **errstr);
-#define sudo_strtomode(_a, _b) sudo_strtomode_v1((_a), (_b))
+sudo_dso_public mode_t sudo_strtomode_v2(const char *cp, const char **errstr);
+#define sudo_strtomode(_a, _b) sudo_strtomode_v2((_a), (_b))
 
 /* sudo_printf.c */
 extern int (*sudo_printf)(int msg_type, const char *fmt, ...);

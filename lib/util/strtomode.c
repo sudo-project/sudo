@@ -38,8 +38,8 @@
  * On success, returns the parsed mode and clears errstr.
  * On error, returns 0 and sets errstr.
  */
-int
-sudo_strtomode_v1(const char *cp, const char **errstr)
+mode_t
+sudo_strtomode_v2(const char *cp, const char **errstr)
 {
     char *ep;
     long lval;
@@ -51,15 +51,21 @@ sudo_strtomode_v1(const char *cp, const char **errstr)
 	if (errstr != NULL)
 	    *errstr = N_("invalid value");
 	errno = EINVAL;
-	debug_return_int(0);
+	debug_return_mode_t(0);
     }
     if (lval < 0 || lval > ACCESSPERMS) {
 	if (errstr != NULL)
 	    *errstr = lval < 0 ? N_("value too small") : N_("value too large");
 	errno = ERANGE;
-	debug_return_int(0);
+	debug_return_mode_t(0);
     }
     if (errstr != NULL)
 	*errstr = NULL;
-    debug_return_int((int)lval);
+    debug_return_mode_t((mode_t)lval);
+}
+
+int
+sudo_strtomode_v1(const char *cp, const char **errstr)
+{
+    return (int)sudo_strtomode_v2(cp, errstr);
 }

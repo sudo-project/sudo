@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2011-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2011-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -570,6 +570,14 @@ sudo_debug_exit_time_t_v1(const char *func, const char *file, int line,
 }
 
 void
+sudo_debug_exit_mode_t_v1(const char *func, const char *file, int line,
+    unsigned int subsys, mode_t ret)
+{
+    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
+	"<- %s @ %s:%d := %d", func, file, line, (int)ret);
+}
+
+void
 sudo_debug_exit_bool_v1(const char *func, const char *file, int line,
     unsigned int subsys, bool ret)
 {
@@ -1094,6 +1102,12 @@ sudo_debug_exit_ssize_t_v1(const char *func, const char *file, int line,
 void
 sudo_debug_exit_time_t_v1(const char *func, const char *file, int line,
     unsigned int subsys, time_t ret)
+{
+}
+
+void
+sudo_debug_exit_mode_t_v1(const char *func, const char *file, int line,
+    unsigned int subsys, mode_t ret)
 {
 }
 
