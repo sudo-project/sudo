@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1891,19 +1891,24 @@ daemonize(bool nofork)
 }
 
 static void
-usage(bool fatal)
+display_usage(FILE *fp)
 {
-    fprintf(stderr, "usage: %s [-n] [-f conf_file] [-R percentage]\n",
+    fprintf(fp, "usage: %s [-n] [-f conf_file] [-R percentage]\n",
 	getprogname());
-    if (fatal)
-	exit(EXIT_FAILURE);
+}
+
+sudo_noreturn static void
+usage(void)
+{
+    display_usage(stderr);
+    exit(EXIT_FAILURE);
 }
 
 sudo_noreturn static void
 help(void)
 {
     printf("%s - %s\n\n", getprogname(), _("sudo log server"));
-    usage(false);
+    display_usage(stdout);
     printf("\n%s\n", _("Options:"));
     printf("  -f, --file            %s\n",
 	_("path to configuration file"));
@@ -1987,7 +1992,7 @@ main(int argc, char *argv[])
 		PACKAGE_VERSION);
 	    return 0;
 	default:
-	    usage(true);
+	    usage();
 	}
     }
 

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -98,18 +98,23 @@ static void client_msg_cb(int fd, int what, void *v);
 static void server_msg_cb(int fd, int what, void *v);
 
 static void
-usage(bool fatal)
+display_usage(FILE *fp)
 {
 #if defined(HAVE_OPENSSL)
-    fprintf(stderr, "usage: %s [-AnV] [-b ca_bundle] [-c cert_file] [-h host] "
+    fprintf(fp, "usage: %s [-AnV] [-b ca_bundle] [-c cert_file] [-h host] "
 	"[-i iolog-id] [-k key_file] [-p port] "
 #else
-    fprintf(stderr, "usage: %s [-AnV] [-h host] [-i iolog-id] [-p port] "
+    fprintf(fp, "usage: %s [-AnV] [-h host] [-i iolog-id] [-p port] "
 #endif
 	"[-r restart-point] [-R reject-reason] [-s stop-point] [-t number] /path/to/iolog\n",
         getprogname());
-    if (fatal)
-	exit(EXIT_FAILURE);
+}
+
+sudo_noreturn static void
+usage(void)
+{
+    display_usage(stderr);
+    exit(EXIT_FAILURE);
 }
 
 sudo_noreturn static void
@@ -117,7 +122,7 @@ help(void)
 {
     printf("%s - %s\n\n", getprogname(),
 	_("send sudo I/O log to remote server"));
-    usage(false);
+    display_usage(stdout);
     printf("\n%s\n", _("Options:"));
     printf("      --help            %s\n",
 	_("display help message and exit"));
@@ -1766,7 +1771,7 @@ main(int argc, char *argv[])
 		PACKAGE_VERSION);
 	    return 0;
 	default:
-	    usage(true);
+	    usage();
 	    /* NOTREACHED */
 	}
     }
@@ -1787,16 +1792,16 @@ main(int argc, char *argv[])
 
     if (sudo_timespecisset(&restart) != (iolog_id != NULL)) {
 	sudo_warnx("%s", U_("both restart point and iolog ID must be specified"));
-	usage(true);
+	usage();
     }
     if (sudo_timespecisset(&restart) && (accept_only || reject_reason)) {
 	sudo_warnx("%s", U_("a restart point may not be set when no I/O is sent"));
-	usage(true);
+	usage();
     }
 
     /* Remaining arg should be to I/O log dir to send. */
     if (argc != 1)
-	usage(true);
+	usage();
     iolog_dir = argv[0];
     if ((iolog_dir_fd = open(iolog_dir, O_RDONLY)) == -1) {
 	sudo_warn("%s", iolog_dir);
