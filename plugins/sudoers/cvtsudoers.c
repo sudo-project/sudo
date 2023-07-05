@@ -1508,7 +1508,7 @@ done:
 }
 
 static void
-print_usage(FILE *fp)
+display_usage(FILE *fp)
 {
     (void) fprintf(fp, "usage: %s [-ehMpV] [-b dn] "
 	"[-c conf_file ] [-d deftypes] [-f output_format] [-i input_format] "
@@ -1519,7 +1519,7 @@ print_usage(FILE *fp)
 sudo_noreturn static void
 usage(void)
 {
-    print_usage(stderr);
+    display_usage(stderr);
     exit(EXIT_FAILURE);
 }
 
@@ -1527,7 +1527,7 @@ sudo_noreturn static void
 help(void)
 {
     (void) printf(_("%s - convert between sudoers file formats\n\n"), getprogname());
-    print_usage(stdout);
+    display_usage(stdout);
     (void) puts(_("\nOptions:\n"
 	"  -b, --base=dn              the base DN for sudo LDAP queries\n"
 	"  -c, --config=conf_file     the path to the configuration file\n"

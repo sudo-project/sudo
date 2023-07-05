@@ -1673,7 +1673,7 @@ read_keyboard(int fd, int what, void *v)
 }
 
 static void
-print_usage(FILE *fp)
+display_usage(FILE *fp)
 {
     fprintf(fp, _("usage: %s [-hnRS] [-d dir] [-m num] [-s num] ID\n"),
 	getprogname());
@@ -1684,7 +1684,7 @@ print_usage(FILE *fp)
 sudo_noreturn static void
 usage(void)
 {
-    print_usage(stderr);
+    display_usage(stderr);
     exit(EXIT_FAILURE);
 }
 
@@ -1692,7 +1692,7 @@ sudo_noreturn static void
 help(void)
 {
     (void) printf(_("%s - replay sudo session logs\n\n"), getprogname());
-    print_usage(stdout);
+    display_usage(stdout);
     (void) puts(_("\nOptions:\n"
 	"  -d, --directory=dir    specify directory for session logs\n"
 	"  -f, --filter=filter    specify which I/O type(s) to display\n"
