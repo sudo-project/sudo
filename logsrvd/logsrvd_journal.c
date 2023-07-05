@@ -276,7 +276,6 @@ journal_seek(struct timespec *target, struct connection_closure *closure)
 		}
 		free(buf);
 		if ((buf = malloc(bufsize)) == NULL) {
-		    errno = ENOMEM;
 		    closure->errstr = _("unable to allocate memory");
 		    break;
 		}

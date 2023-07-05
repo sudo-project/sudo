@@ -91,11 +91,11 @@ sudo_parseln_v2(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp, i
 	    len--;
 
 	if (*bufp == NULL || total + len >= *bufsizep) {
+	    const size_t size = total + len + 1;
+	    const size_t newsize = sudo_pow2_roundup(size);
 	    void *newbuf;
-		const size_t size = total + len + 1;
-		const size_t newsize = sudo_pow2_roundup(size);
 
-		if (newsize < size) {
+	    if (newsize < size) {
 		/* overflow */
 		errno = ENOMEM;
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -104,8 +104,7 @@ sudo_parseln_v2(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp, i
 		total = 0;
 		break;
 	    }
-		
-		if ((newbuf = realloc(*bufp, newsize)) == NULL) {
+	    if ((newbuf = realloc(*bufp, newsize)) == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "unable to allocate memory");
 		len = -1;
