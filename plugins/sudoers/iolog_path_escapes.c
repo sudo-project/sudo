@@ -77,9 +77,7 @@ fill_group(char *str, size_t strsize, void *unused)
 	len = strlcpy(str, grp->gr_name, strsize);
 	sudo_gr_delref(grp);
     } else {
-	len = strlen(str);
-	len = snprintf(str + len, strsize - len, "#%u",
-	    (unsigned int) user_gid);
+	len = snprintf(str, strsize, "#%u", (unsigned int)user_gid);
     }
     debug_return_size_t(len);
 }
@@ -105,9 +103,7 @@ fill_runas_group(char *str, size_t strsize, void *unused)
 	    len = strlcpy(str, grp->gr_name, strsize);
 	    sudo_gr_delref(grp);
 	} else {
-	    len = strlen(str);
-	    len = snprintf(str + len, strsize - len, "#%u",
-		(unsigned int) runas_pw->pw_gid);
+	    len = snprintf(str, strsize, "#%u", (unsigned int)runas_pw->pw_gid);
 	}
     }
     debug_return_size_t(len);
