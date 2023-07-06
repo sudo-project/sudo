@@ -41,7 +41,7 @@ struct sudo_digest {
 };
 
 static const EVP_MD *
-sudo_digest_type_to_md(int digest_type)
+sudo_digest_type_to_md(unsigned int digest_type)
 {
     const EVP_MD *md = NULL;
     debug_decl(sudo_digest_type_to_md, SUDO_DEBUG_UTIL);
@@ -67,7 +67,7 @@ sudo_digest_type_to_md(int digest_type)
 }
 
 struct sudo_digest *
-sudo_digest_alloc_v1(int digest_type)
+sudo_digest_alloc_v1(unsigned int digest_type)
 {
     struct sudo_digest *dig;
     EVP_MD_CTX *mdctx = NULL;
@@ -119,7 +119,7 @@ sudo_digest_reset_v1(struct sudo_digest *dig)
 }
 
 int
-sudo_digest_getlen_v1(int digest_type)
+sudo_digest_getlen_v1(unsigned int digest_type)
 {
     const EVP_MD *md;
     debug_decl(sudo_digest_getlen, SUDO_DEBUG_UTIL);

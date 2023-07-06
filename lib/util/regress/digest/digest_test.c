@@ -1104,7 +1104,7 @@ static struct test_vector sha512_vectors[] = {
 };
 
 static void
-run_tests(int digest_type, struct test_vector *test_vectors)
+run_tests(unsigned int digest_type, struct test_vector *test_vectors)
 {
     struct sudo_digest *ctx;
     unsigned char md[64];	/* SHA512_DIGEST_LENGTH */

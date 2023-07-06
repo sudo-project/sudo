@@ -48,7 +48,7 @@ struct sudo_digest {
 
 /* Map sudo digest type to gcrypt digest type. */
 static int
-sudo_digest_type_to_gcry(int digest_type)
+sudo_digest_type_to_gcry(unsigned int digest_type)
 {
     switch (digest_type) {
     case SUDO_DIGEST_SHA224:
@@ -65,7 +65,7 @@ sudo_digest_type_to_gcry(int digest_type)
 }
 
 struct sudo_digest *
-sudo_digest_alloc_v1(int digest_type)
+sudo_digest_alloc_v1(unsigned int digest_type)
 {
     debug_decl(sudo_digest_alloc, SUDO_DEBUG_UTIL);
     static bool initialized = false;
@@ -126,7 +126,7 @@ sudo_digest_reset_v1(struct sudo_digest *dig)
 }
 
 int
-sudo_digest_getlen_v1(int digest_type)
+sudo_digest_getlen_v1(unsigned int digest_type)
 {
     debug_decl(sudo_digest_getlen, SUDO_DEBUG_UTIL);
     int gcry_digest_type;

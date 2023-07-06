@@ -84,7 +84,7 @@ struct sudo_digest {
 };
 
 struct sudo_digest *
-sudo_digest_alloc_v1(int digest_type)
+sudo_digest_alloc_v1(unsigned int digest_type)
 {
     debug_decl(sudo_digest_alloc, SUDO_DEBUG_UTIL);
     struct digest_function *func = NULL;
@@ -131,7 +131,7 @@ sudo_digest_reset_v1(struct sudo_digest *dig)
 }
 
 int
-sudo_digest_getlen_v1(int digest_type)
+sudo_digest_getlen_v1(unsigned int digest_type)
 {
     debug_decl(sudo_digest_getlen, SUDO_DEBUG_UTIL);
     int i;
