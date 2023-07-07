@@ -52,7 +52,7 @@ check_addr(char *input)
     cp = input + len;
     while (isspace((unsigned char)*cp))
 	cp++;
-    expected = sudo_strtonum(cp, 0, 1, &errstr);
+    expected = (int)sudo_strtonum(cp, 0, 1, &errstr);
     if (errstr != NULL)
 	sudo_fatalx("expecting 0 or 1, got %s", cp);
     input[len] = '\0';

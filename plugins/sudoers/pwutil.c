@@ -902,7 +902,8 @@ done:
 }
 
 static void
-sudo_debug_group_list(const char *user, char * const *groups, int level)
+sudo_debug_group_list(const char *user, char * const *groups,
+    unsigned int level)
 {
     size_t i, len = 0;
     debug_decl(sudo_debug_group_list, SUDOERS_DEBUG_NSS);
@@ -918,7 +919,8 @@ sudo_debug_group_list(const char *user, char * const *groups, int level)
 	if (groupstr != NULL) {
 	    char *cp = groupstr;
 	    for (i = 0; groups[i] != NULL; i++) {
-		size_t n = snprintf(cp, len, "%s%s", i ? "," : "", groups[i]);
+		size_t n = (size_t)snprintf(cp, len, "%s%s", i ? "," : "",
+		    groups[i]);
 		if (n >= len)
 		    break;
 		cp += n;

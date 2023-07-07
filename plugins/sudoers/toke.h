@@ -34,10 +34,10 @@ extern struct sudolinebuf sudolinebuf;
 extern int sudolineno;
 extern char *sudoers_search_path;
 
-bool append(const char *, size_t);
-bool fill_args(const char *, size_t, int);
-bool fill_cmnd(const char *, size_t);
-bool fill(const char *, size_t);
+bool append(const char *, int);
+bool fill_args(const char *, int, bool);
+bool fill_cmnd(const char *, int);
+bool fill(const char *, int);
 void init_lexer(void);
 bool ipv6_valid(const char *s);
 int sudoers_trace_print(const char *);

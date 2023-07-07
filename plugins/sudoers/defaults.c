@@ -131,8 +131,8 @@ dump_defaults(void)
 		    break;
 		case T_TIMESPEC: {
 		    /* display timespec in minutes as a double */
-		    double d = cur->sd_un.tspec.tv_sec +
-			(cur->sd_un.tspec.tv_nsec / 1000000000.0);
+		    double d = (double)cur->sd_un.tspec.tv_sec +
+			((double)cur->sd_un.tspec.tv_nsec / 1000000000.0);
 		    sudo_printf(SUDO_CONV_INFO_MSG, desc, d / 60.0);
 		    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    break;
@@ -817,8 +817,7 @@ check_defaults(const struct sudoers_parse_tree *parse_tree, bool quiet)
 		continue;
 	    }
 	}
-	/* There was an error in the entry, flag it. */
-	d->error = true;
+	/* There was an error in the entry. */
 	ret = false;
     }
     debug_return_bool(ret);
@@ -834,7 +833,7 @@ store_int(const char *str, struct sudo_defs_types *def)
     if (str == NULL) {
 	def->sd_un.ival = 0;
     } else {
-	i = sudo_strtonum(str, INT_MIN, INT_MAX, &errstr);
+	i = (int)sudo_strtonum(str, INT_MIN, INT_MAX, &errstr);
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"%s: %s", str, errstr);
@@ -855,7 +854,7 @@ store_uint(const char *str, struct sudo_defs_types *def)
     if (str == NULL) {
 	def->sd_un.uival = 0;
     } else {
-	u = sudo_strtonum(str, 0, UINT_MAX, &errstr);
+	u = (unsigned int)sudo_strtonum(str, 0, UINT_MAX, &errstr);
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"%s: %s", str, errstr);
@@ -1043,7 +1042,7 @@ store_list(const char *str, struct sudo_defs_types *def, int op)
 	} else {
 	    for (cp = sudo_strsplit(str, end, " \t", &ep); cp != NULL;
 		cp = sudo_strsplit(NULL, end, " \t", &ep)) {
-		if (!list_op(cp, ep - cp, &def->sd_un.list, lop))
+		if (!list_op(cp, (size_t)(ep - cp), &def->sd_un.list, lop))
 		    debug_return_bool(false);
 	    }
 	}

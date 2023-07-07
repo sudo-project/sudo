@@ -67,7 +67,7 @@ alias_compare(const void *v1, const void *v2)
  */
 struct alias *
 alias_get(const struct sudoers_parse_tree *parse_tree, const char *name,
-    int type)
+    short type)
 {
     struct alias key;
     struct rbnode *node;
@@ -114,8 +114,9 @@ alias_put(struct alias *a)
  * Returns true on success and false on failure, setting errno.
  */
 bool
-alias_add(struct sudoers_parse_tree *parse_tree, char *name, int type,
-    char *file, int line, int column, struct member *members)
+alias_add(struct sudoers_parse_tree *parse_tree, char *name,
+    short type, char *file, int line, int column,
+    struct member *members)
 {
     struct alias *a;
     debug_decl(alias_add, SUDOERS_DEBUG_ALIAS);
@@ -228,7 +229,8 @@ alias_free(void *v)
  * Find the named alias, remove it from the tree and return it.
  */
 struct alias *
-alias_remove(struct sudoers_parse_tree *parse_tree, const char *name, int type)
+alias_remove(struct sudoers_parse_tree *parse_tree, const char *name,
+    short type)
 {
     struct rbnode *node;
     struct alias key;
@@ -262,7 +264,7 @@ free_aliases(struct rbtree *aliases)
 }
 
 const char *
-alias_type_to_string(int alias_type)
+alias_type_to_string(short alias_type)
 {
     return alias_type == HOSTALIAS ? "Host_Alias" :
 	alias_type == CMNDALIAS ? "Cmnd_Alias" :
@@ -277,7 +279,7 @@ alias_type_to_string(int alias_type)
  */
 static bool
 alias_remove_recursive(struct sudoers_parse_tree *parse_tree, char *name,
-    int type, struct rbtree *freelist)
+    short type, struct rbtree *freelist)
 {
     struct member *m;
     struct alias *a;
@@ -299,7 +301,7 @@ alias_remove_recursive(struct sudoers_parse_tree *parse_tree, char *name,
 
 static int
 alias_find_used_members(struct sudoers_parse_tree *parse_tree,
-    struct member_list *members, int atype, struct rbtree *used_aliases)
+    struct member_list *members, short atype, struct rbtree *used_aliases)
 {
     struct member *m;
     int errors = 0;

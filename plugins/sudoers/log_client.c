@@ -959,8 +959,8 @@ fmt_accept_message(struct client_closure *closure, struct eventlog *evlog)
 	sudo_warn("%s", U_("unable to get time of day"));
 	debug_return_bool(false);
     }
-    ts.tv_sec = now.tv_sec;
-    ts.tv_nsec = now.tv_nsec;
+    ts.tv_sec = (int64_t)now.tv_sec;
+    ts.tv_nsec = (int32_t)now.tv_nsec;
     accept_msg.submit_time = &ts;
 
     /* Client will send IoBuffer messages. */
@@ -1008,8 +1008,8 @@ fmt_reject_message(struct client_closure *closure, struct eventlog *evlog)
 	sudo_warn("%s", U_("unable to get time of day"));
 	debug_return_bool(false);
     }
-    ts.tv_sec = now.tv_sec;
-    ts.tv_nsec = now.tv_nsec;
+    ts.tv_sec = (int64_t)now.tv_sec;
+    ts.tv_nsec = (int32_t)now.tv_nsec;
     reject_msg.submit_time = &ts;
 
     /* Reason for rejecting the request. */
@@ -1057,8 +1057,8 @@ fmt_alert_message(struct client_closure *closure, struct eventlog *evlog)
 	sudo_warn("%s", U_("unable to get time of day"));
 	debug_return_bool(false);
     }
-    ts.tv_sec = now.tv_sec;
-    ts.tv_nsec = now.tv_nsec;
+    ts.tv_sec = (int64_t)now.tv_sec;
+    ts.tv_nsec = (int32_t)now.tv_nsec;
     alert_msg.alert_time = &ts;
 
     /* Reason for the alert. */
@@ -1184,8 +1184,8 @@ fmt_exit_message(struct client_closure *closure, int exit_status, int error)
     }
     sudo_timespecsub(&run_time, &closure->start_time, &run_time);
 
-    ts.tv_sec = run_time.tv_sec;
-    ts.tv_nsec = run_time.tv_nsec;
+    ts.tv_sec = (int64_t)run_time.tv_sec;
+    ts.tv_nsec = (int32_t)run_time.tv_nsec;
     exit_msg.run_time = &ts;
 
     if (error != 0) {
@@ -1256,8 +1256,8 @@ fmt_io_buf(struct client_closure *closure, int type, const char *buf,
     debug_decl(fmt_io_buf, SUDOERS_DEBUG_UTIL);
 
     /* Fill in IoBuffer. */
-    ts.tv_sec = delay->tv_sec;
-    ts.tv_nsec = delay->tv_nsec;
+    ts.tv_sec = (int64_t)delay->tv_sec;
+    ts.tv_nsec = (int32_t)delay->tv_nsec;
     iobuf_msg.delay = &ts;
     iobuf_msg.data.data = (void *)buf;
     iobuf_msg.data.len = len;
@@ -1294,11 +1294,11 @@ fmt_winsize(struct client_closure *closure, unsigned int lines,
     debug_decl(fmt_winsize, SUDOERS_DEBUG_UTIL);
 
     /* Fill in ChangeWindowSize message. */
-    ts.tv_sec = delay->tv_sec;
-    ts.tv_nsec = delay->tv_nsec;
+    ts.tv_sec = (int64_t)delay->tv_sec;
+    ts.tv_nsec = (int32_t)delay->tv_nsec;
     winsize_msg.delay = &ts;
-    winsize_msg.rows = lines;
-    winsize_msg.cols = cols;
+    winsize_msg.rows = (int32_t)lines;
+    winsize_msg.cols = (int32_t)cols;
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending ChangeWindowSize, %dx%d",
 	__func__, winsize_msg.rows, winsize_msg.cols);
@@ -1330,8 +1330,8 @@ fmt_suspend(struct client_closure *closure, const char *signame, struct timespec
     debug_decl(fmt_suspend, SUDOERS_DEBUG_UTIL);
 
     /* Fill in CommandSuspend message. */
-    ts.tv_sec = delay->tv_sec;
-    ts.tv_nsec = delay->tv_nsec;
+    ts.tv_sec = (int64_t)delay->tv_sec;
+    ts.tv_nsec = (int32_t)delay->tv_nsec;
     suspend_msg.delay = &ts;
     suspend_msg.signal = (char *)signame;
 
@@ -1779,7 +1779,7 @@ server_msg_cb(int fd, int what, void *v)
     default:
 	break;
     }
-    buf->len += nread;
+    buf->len += (size_t)nread;
 
     while (buf->len - buf->off >= sizeof(msg_len)) {
 	/* Read wire message size (uint32_t in network byte order). */
@@ -1905,7 +1905,7 @@ client_msg_cb(int fd, int what, void *v)
 	sudo_warn("send");
 	goto bad;
     }
-    buf->off += nwritten;
+    buf->off += (size_t)nwritten;
 
     if (buf->off == buf->len) {
 	/* sent entire message, move buf to free list */

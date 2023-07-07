@@ -127,7 +127,7 @@ addr_matches_if_netmask(const char *n, const char *m)
 		debug_return_bool(false);
 	    }
 	} else {
-	    i = sudo_strtonum(m, 1, 32, &errstr);
+	    i = (size_t)sudo_strtonum(m, 1, 32, &errstr);
 	    if (errstr != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "IPv4 netmask %s: %s", m, errstr);
@@ -140,7 +140,7 @@ addr_matches_if_netmask(const char *n, const char *m)
 #ifdef HAVE_STRUCT_IN6_ADDR
     else {
 	if (inet_pton(AF_INET6, m, &mask.ip6) != 1) {
-	    j = sudo_strtonum(m, 1, 128, &errstr);
+	    j = (size_t)sudo_strtonum(m, 1, 128, &errstr);
 	    if (errstr != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "IPv6 netmask %s: %s", m, errstr);

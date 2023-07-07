@@ -43,14 +43,14 @@ base64_encode(const unsigned char *in, size_t in_len, char *out, size_t out_len)
 	    rem -= 6;
 	    if (io >= out_len)
 		debug_return_size_t((size_t)-1); /* truncation is failure */
-	    out[io++] = base64enc_tab[(v >> rem) & 63];
+	    out[io++] = (char)base64enc_tab[(v >> rem) & 63];
 	}
     }
     if (rem != 0) {
 	v <<= (6 - rem);
 	if (io >= out_len)
 	    debug_return_size_t((size_t)-1); /* truncation is failure */
-	out[io++] = base64enc_tab[v&63];
+	out[io++] = (char)base64enc_tab[v&63];
     }
     while (io & 3) {
 	if (io >= out_len)

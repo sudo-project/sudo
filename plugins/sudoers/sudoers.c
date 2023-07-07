@@ -623,13 +623,13 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
 	sudoers_gc_remove(GC_PTR, NewArgv);
 	free(NewArgv);
     }
-    NewArgv = reallocarray(NULL, argc + 2, sizeof(char *));
+    NewArgv = reallocarray(NULL, (size_t)argc + 2, sizeof(char *));
     if (NewArgv == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto error;
     }
     sudoers_gc_add(GC_PTR, NewArgv);
-    memcpy(NewArgv, argv, argc * sizeof(char *));
+    memcpy(NewArgv, argv, (size_t)argc * sizeof(char *));
     NewArgc = argc;
     NewArgv[NewArgc] = NULL;
     if (ISSET(sudo_mode, MODE_LOGIN_SHELL) && runas_pw != NULL) {
@@ -691,7 +691,7 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
 	if (NewArgc > 1 && strcmp(NewArgv[0], "-bash") == 0 &&
 	    strcmp(NewArgv[1], "-c") == 0) {
 	    /* We allocated extra space for the --login above. */
-	    memmove(&NewArgv[2], &NewArgv[1], sizeof(char *) * NewArgc);
+	    memmove(&NewArgv[2], &NewArgv[1], (size_t)NewArgc * sizeof(char *));
 	    NewArgv[1] = (char *)"--login";
 	    NewArgc++;
 	}
@@ -896,7 +896,7 @@ sudoers_list(int argc, char * const argv[], const char *list_user, bool verbose)
 	}
     }
 
-    NewArgv = reallocarray(NULL, argc + 2, sizeof(char *));
+    NewArgv = reallocarray(NULL, (size_t)argc + 2, sizeof(char *));
     if (NewArgv == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
@@ -904,7 +904,7 @@ sudoers_list(int argc, char * const argv[], const char *list_user, bool verbose)
     sudoers_gc_add(GC_PTR, NewArgv);
     NewArgv[0] = (char *)"list";
     if (argc != 0)
-	memcpy(NewArgv + 1, argv, argc * sizeof(char *));
+	memcpy(NewArgv + 1, argv, (size_t)argc * sizeof(char *));
     NewArgc = argc + 1;
     NewArgv[NewArgc] = NULL;
 
@@ -1720,7 +1720,7 @@ cb_syslog_maxlen(const char *file, int line, int column,
 {
     debug_decl(cb_syslog_maxlen, SUDOERS_DEBUG_PLUGIN);
 
-    eventlog_set_syslog_maxlen(sd_un->ival);
+    eventlog_set_syslog_maxlen((size_t)sd_un->ival);
 
     debug_return_bool(true);
 }
@@ -1731,7 +1731,7 @@ cb_loglinelen(const char *file, int line, int column,
 {
     debug_decl(cb_loglinelen, SUDOERS_DEBUG_PLUGIN);
 
-    eventlog_set_file_maxlen(sd_un->ival);
+    eventlog_set_file_maxlen((size_t)sd_un->ival);
 
     debug_return_bool(true);
 }

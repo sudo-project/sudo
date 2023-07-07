@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2005, 2007-2018, 2021-2022
+ * Copyright (c) 2004-2005, 2007-2018, 2021-2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -109,7 +109,7 @@ alias_warnx(const char *file, int line, int column, bool strict, bool quiet,
 
 static int
 check_alias(struct sudoers_parse_tree *parse_tree,
-    struct alias_warned_list *warned, char *name, int type,
+    struct alias_warned_list *warned, char *name, short type,
     char *file, int line, int column, bool strict, bool quiet)
 {
     struct member *m;

@@ -64,7 +64,7 @@ static int prev_state;
 static unsigned int digest_type = SUDO_DIGEST_INVALID;
 
 static bool pop_include(void);
-static yy_size_t sudoers_input(char *buf, yy_size_t max_size);
+static int sudoers_input(char *buf, yy_size_t max_size);
 
 #ifndef TRACELEXER
 static struct sudo_lbuf trace_lbuf;
@@ -72,18 +72,18 @@ static struct sudo_lbuf trace_lbuf;
 
 int (*trace_print)(const char *msg) = sudoers_trace_print;
 
-#define ECHO	ignore_result(fwrite(sudoerstext, sudoersleng, 1, sudoersout))
+#define ECHO	ignore_result(fwrite(sudoerstext, (size_t)sudoersleng, 1, sudoersout))
 
-#define YY_INPUT(buf, result, max_size)	(result) = sudoers_input(buf, max_size)
+#define YY_INPUT(buf, result, max_size)	(result) = sudoers_input(buf, (yy_size_t)(max_size))
 
 #define YY_USER_ACTION do {					\
 	sudolinebuf.toke_start = sudolinebuf.toke_end;		\
-	sudolinebuf.toke_end += sudoersleng;			\
+	sudolinebuf.toke_end += (size_t)sudoersleng;		\
 } while (0);
 
 #define sudoersless(n) do {					\
-	sudolinebuf.toke_end = sudolinebuf.toke_start + (n);	\
-	yyless(n);						\
+	sudolinebuf.toke_end = sudolinebuf.toke_start + (size_t)(n);	\
+	yyless((int)n);						\
 } while (0);
 
 %}
@@ -318,9 +318,9 @@ DEFVAR			[a-z_]+
 
 <WANTDIGEST>[[:xdigit:]]+ {
 			    /* Only return DIGEST if the length is correct. */
-			    yy_size_t digest_len =
+			    int digest_len =
 				sudo_digest_getlen(digest_type);
-			    if ((yy_size_t)sudoersleng == digest_len * 2) {
+			    if (sudoersleng == digest_len * 2) {
 				if (!fill(sudoerstext, sudoersleng))
 				    yyterminate();
 				BEGIN INITIAL;
@@ -333,7 +333,7 @@ DEFVAR			[a-z_]+
 
 <WANTDIGEST>[A-Za-z0-9\+/=]+ {
 			    /* Only return DIGEST if the length is correct. */
-			    yy_size_t len, digest_len =
+			    int len, digest_len =
 				sudo_digest_getlen(digest_type);
 			    if (sudoerstext[sudoersleng - 1] == '=') {
 				/* use padding */
@@ -342,7 +342,7 @@ DEFVAR			[a-z_]+
 				/* no padding */
 				len = (4 * digest_len + 2) / 3;
 			    }
-			    if ((yy_size_t)sudoersleng == len) {
+			    if (sudoersleng == len) {
 				if (!fill(sudoerstext, sudoersleng))
 				    yyterminate();
 				BEGIN INITIAL;
@@ -1208,7 +1208,7 @@ expand_include(const char *src)
     dst_size = 0;
     for (cp = sudo_strsplit(path, path_end, ":", &ep); cp != NULL;
 	    cp = sudo_strsplit(NULL, path_end, ":", &ep)) {
-	char *dirend = memrchr(cp, '/', ep - cp);
+	char *dirend = memrchr(cp, '/', (size_t)(ep - cp));
 	if (dirend != NULL) {
 	    dst_size += (size_t)(dirend - cp) + 1;
 	}
@@ -1235,7 +1235,7 @@ expand_include(const char *src)
 	    dst_size--;
 	}
 
-	dirend = memrchr(cp, '/', ep - cp);
+	dirend = memrchr(cp, '/', (size_t)(ep - cp));
 	if (dirend != NULL) {
 	    len = (size_t)(dirend - cp) + 1;
 	    if (len >= dst_size)
@@ -1471,7 +1471,7 @@ sudoers_trace_print(const char *msg)
 int
 sudoers_trace_print(const char *msg)
 {
-    const int sudo_debug_subsys = SUDOERS_DEBUG_PARSER;
+    const unsigned int sudo_debug_subsys = SUDOERS_DEBUG_PARSER;
 
     if (sudo_debug_needed(SUDO_DEBUG_DEBUG)) {
 	sudo_lbuf_append(&trace_lbuf, "%s", msg);
@@ -1494,7 +1494,7 @@ sudoers_trace_print(const char *msg)
  * On success, buf is guaranteed to end in a newline and not contain
  * embedded NULs.  Calls YY_FATAL_ERROR on error.
  */
-static yy_size_t
+static int
 sudoers_input(char *buf, yy_size_t max_size)
 {
     char *cp;
@@ -1512,12 +1512,12 @@ sudoers_input(char *buf, yy_size_t max_size)
 	if (ch == EOF)
 	    goto sudoers_eof;
 	ungetc(ch, sudoersin);
-	avail = getdelim(&sudolinebuf.buf, &sudolinebuf.size, '\n', sudoersin);
+	avail = (size_t)getdelim(&sudolinebuf.buf, &sudolinebuf.size, '\n', sudoersin);
 	if (avail == (size_t)-1) {
 sudoers_eof:
 	    /* EOF or error. */
 	    if (feof(sudoersin))
-		return 0;
+		debug_return_int(0);
 	    YY_FATAL_ERROR("input in flex scanner failed");
 	}
 
@@ -1535,7 +1535,7 @@ sudoers_eof:
 		cp = realloc(sudolinebuf.buf, avail + 2);
 		if (cp == NULL) {
 		    YY_FATAL_ERROR("unable to allocate memory");
-		    return 0;
+		    debug_return_int(0);
 		}
 		sudolinebuf.buf = cp;
 		sudolinebuf.size = avail + 2;
@@ -1557,5 +1557,5 @@ sudoers_eof:
     memcpy(buf, sudolinebuf.buf + sudolinebuf.off, avail);
     sudolinebuf.off += avail;
 
-    debug_return_size_t(avail);
+    debug_return_int((int)avail);
 }

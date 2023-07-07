@@ -489,7 +489,8 @@ sudo_sss_result_get(const struct sudo_nss *nss, struct passwd *pw)
 {
     struct sudo_sss_handle *handle = nss->handle;
     struct sss_sudo_result *sss_result = NULL;
-    uint32_t sss_error = 0, rc;
+    uint32_t sss_error = 0;
+    int rc;
     debug_decl(sudo_sss_result_get, SUDOERS_DEBUG_SSSD);
 
     sudo_debug_printf(SUDO_DEBUG_DIAG, "  username=%s", pw->pw_name);

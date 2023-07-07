@@ -48,8 +48,8 @@ struct cvtsudoers_config {
     unsigned int order_increment;
     unsigned int order_padding;
     unsigned int order_max;
-    short defaults;
-    short suppress;
+    int defaults;
+    int suppress;
     bool store_options;
     bool expand_aliases;
     bool prune_matches;

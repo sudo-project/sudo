@@ -89,7 +89,7 @@ cb_maxseq(const char *file, int line, int column,
     unsigned int value;
     debug_decl(cb_maxseq, SUDOERS_DEBUG_UTIL);
 
-    value = sudo_strtonum(sd_un->str, 0, SESSID_MAX, &errstr);
+    value = (unsigned int)sudo_strtonum(sd_un->str, 0, SESSID_MAX, &errstr);
     if (errstr != NULL) {
         if (errno != ERANGE) {
             sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -234,7 +234,7 @@ deserialize_stringlist(const char *s)
 	    continue;
 	if ((str = malloc(sizeof(*str))) == NULL)
 	    goto bad;
-	if ((str->str = strndup(cp, (ep - cp))) == NULL) {
+	if ((str->str = strndup(cp, (size_t)(ep - cp))) == NULL) {
 	    free(str);
 	    goto bad;
 	}
@@ -317,8 +317,8 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
 	switch (**cur) {
 	case 'c':
 	    if (strncmp(*cur, "cols=", sizeof("cols=") - 1) == 0) {
-		int n = sudo_strtonum(*cur + sizeof("cols=") - 1, 1, INT_MAX,
-		    NULL);
+		int n = (int)sudo_strtonum(*cur + sizeof("cols=") - 1, 1,
+		    INT_MAX, NULL);
 		if (n > 0)
 		    evlog->columns = n;
 		continue;
@@ -342,8 +342,8 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
 	    break;
 	case 'l':
 	    if (strncmp(*cur, "lines=", sizeof("lines=") - 1) == 0) {
-		int n = sudo_strtonum(*cur + sizeof("lines=") - 1, 1, INT_MAX,
-		    NULL);
+		int n = (int)sudo_strtonum(*cur + sizeof("lines=") - 1, 1,
+		    INT_MAX, NULL);
 		if (n > 0)
 		    evlog->lines = n;
 		continue;
@@ -1132,7 +1132,7 @@ sudoers_io_change_winsize_local(unsigned int lines, unsigned int cols,
 	*errstr = strerror(EOVERFLOW);
 	goto done;
     }
-    if (iolog_write(&iolog_files[IOFD_TIMING], tbuf, len, errstr) == -1)
+    if (iolog_write(&iolog_files[IOFD_TIMING], tbuf, (size_t)len, errstr) == -1)
 	goto done;
 
     /* Success. */

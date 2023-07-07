@@ -1023,7 +1023,7 @@ hostaliases	:	hostalias
 
 hostalias	:	ALIAS {
 			    alias_line = this_lineno;
-			    alias_column = sudolinebuf.toke_start + 1;
+			    alias_column = (int)sudolinebuf.toke_start + 1;
 			} '=' hostlist {
 			    if (!alias_add(&parsed_policy, $1, HOSTALIAS,
 				sudoers, alias_line, alias_column, $4)) {
@@ -1050,7 +1050,7 @@ cmndaliases	:	cmndalias
 
 cmndalias	:	ALIAS {
 			    alias_line = this_lineno;
-			    alias_column = sudolinebuf.toke_start + 1;
+			    alias_column = (int)sudolinebuf.toke_start + 1;
 			} '=' cmndlist {
 			    if (!alias_add(&parsed_policy, $1, CMNDALIAS,
 				sudoers, alias_line, alias_column, $4)) {
@@ -1077,7 +1077,7 @@ runasaliases	:	runasalias
 
 runasalias	:	ALIAS {
 			    alias_line = this_lineno;
-			    alias_column = sudolinebuf.toke_start + 1;
+			    alias_column = (int)sudolinebuf.toke_start + 1;
 			} '=' userlist {
 			    if (!alias_add(&parsed_policy, $1, RUNASALIAS,
 				sudoers, alias_line, alias_column, $4)) {
@@ -1096,7 +1096,7 @@ useraliases	:	useralias
 
 useralias	:	ALIAS {
 			    alias_line = this_lineno;
-			    alias_column = sudolinebuf.toke_start + 1;
+			    alias_column = (int)sudolinebuf.toke_start + 1;
 			} '=' userlist {
 			    if (!alias_add(&parsed_policy, $1, USERALIAS,
 				sudoers, alias_line, alias_column, $4)) {

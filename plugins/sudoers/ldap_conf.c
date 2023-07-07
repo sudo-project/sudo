@@ -425,7 +425,7 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
 		*(int *)(cur->valp) = sudo_strtobool(value) == true;
 		break;
 	    case CONF_INT:
-		*(int *)(cur->valp) = sudo_strtonum(value, INT_MIN, INT_MAX,
+		*(int *)(cur->valp) = (int)sudo_strtonum(value, INT_MIN, INT_MAX,
 		    &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx(U_("%s: %s: %s: %s"),

@@ -41,7 +41,7 @@
 static bool
 sudoers_format_member_int(struct sudo_lbuf *lbuf,
     const struct sudoers_parse_tree *parse_tree, char *name, int type,
-    bool negated, const char *separator, int alias_type)
+    bool negated, const char *separator, short alias_type)
 {
     struct alias *a;
     struct member *m;
@@ -137,7 +137,7 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
 bool
 sudoers_format_member(struct sudo_lbuf *lbuf,
     const struct sudoers_parse_tree *parse_tree, struct member *m,
-    const char *separator, int alias_type)
+    const char *separator, short alias_type)
 {
     return sudoers_format_member_int(lbuf, parse_tree, m->name, m->type,
 	m->negated, separator, alias_type);

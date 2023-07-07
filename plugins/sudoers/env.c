@@ -391,7 +391,7 @@ sudo_putenv_nodebug(char *str, bool dupcheck, bool overwrite)
 		    ep--;
 		}
 	    }
-	    env.env_len = ep - env.envp;
+	    env.env_len = (size_t)(ep - env.envp);
 	}
     }
 
@@ -1174,9 +1174,10 @@ validate_env_vars(char * const env_vars[])
 	if (okvar == false) {
 	    /* Not allowed, append to error buffer if space remains. */
 	    if (errpos < &errbuf[sizeof(errbuf)]) {
-		size_t varlen = strcspn(*ep, "=");
-		int len = snprintf(errpos, sizeof(errbuf) - (errpos - errbuf),
-		    "%s%.*s", errpos != errbuf ? ", " : "", (int)varlen, *ep);
+		const size_t varlen = strcspn(*ep, "=");
+		const size_t errsize = sizeof(errbuf) - (size_t)(errpos - errbuf);
+		int len = snprintf(errpos, errsize, "%s%.*s",
+		    errpos != errbuf ? ", " : "", (int)varlen, *ep);
 		if (len >= ssizeof(errbuf) - (errpos - errbuf)) {
 		    memcpy(&errbuf[sizeof(errbuf) - 4], "...", 4);
 		    errpos = &errbuf[sizeof(errbuf)];

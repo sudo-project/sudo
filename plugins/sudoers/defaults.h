@@ -74,10 +74,10 @@ struct sudo_defs_types {
  * Defaults values to apply before others.
  */
 struct early_default {
-    short idx;
-    short run_callback;
-    short line;
-    short column;
+    int idx;
+    int run_callback;
+    int line;
+    int column;
     char *file;
 };
 

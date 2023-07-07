@@ -514,7 +514,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 
 	    (void) lseek(sp->fd, (off_t)0, SEEK_SET);
 	    while ((nread = read(sp->fd, buf, sizeof(buf))) > 0) {
-		if (write(tfd, buf, nread) != nread)
+		if (write(tfd, buf, (size_t)nread) == -1)
 		    sudo_fatal("%s", U_("write error"));
 		lastch = buf[nread - 1];
 	    }
@@ -522,7 +522,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 	    /* Add missing newline at EOF if needed. */
 	    if (lastch != '\n') {
 		lastch = '\n';
-		if (write(tfd, &lastch, 1) != 1)
+		if (write(tfd, &lastch, 1) == -1)
 		    sudo_fatal("%s", U_("write error"));
 	    }
 	}
@@ -1068,7 +1068,7 @@ new_sudoers(const char *path, bool doedit)
 	cp != NULL; cp = sudo_strsplit(NULL, path_end, ":", &ep)) {
 
 	char fname[PATH_MAX];
-	len = ep - cp;
+	len = (size_t)(ep - cp);
 	if (len >= sizeof(fname)) {
 	    errno = ENAMETOOLONG;
 	    break;

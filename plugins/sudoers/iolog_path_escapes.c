@@ -55,7 +55,7 @@ fill_seq(char *str, size_t strsize, void *v)
 	sessid[1], sessid[2], sessid[3], sessid[4], sessid[5]);
     if (len < 0)
 	debug_return_size_t(strsize); /* handle non-standard snprintf() */
-    debug_return_size_t(len);
+    debug_return_size_t((size_t)len);
 #endif /* SUDOERS_NO_SEQ */
 }
 
@@ -77,7 +77,7 @@ fill_group(char *str, size_t strsize, void *unused)
 	len = strlcpy(str, grp->gr_name, strsize);
 	sudo_gr_delref(grp);
     } else {
-	len = snprintf(str, strsize, "#%u", (unsigned int)user_gid);
+	len = (size_t)snprintf(str, strsize, "#%u", (unsigned int)user_gid);
     }
     debug_return_size_t(len);
 }
@@ -103,7 +103,8 @@ fill_runas_group(char *str, size_t strsize, void *unused)
 	    len = strlcpy(str, grp->gr_name, strsize);
 	    sudo_gr_delref(grp);
 	} else {
-	    len = snprintf(str, strsize, "#%u", (unsigned int)runas_pw->pw_gid);
+	    len = (size_t)snprintf(str, strsize, "#%u",
+		(unsigned int)runas_pw->pw_gid);
 	}
     }
     debug_return_size_t(len);

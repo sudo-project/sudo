@@ -67,7 +67,8 @@ seen_user_free(void *v)
 static bool
 safe_string(const char *str)
 {
-    unsigned int ch = *str++;
+    const unsigned char *ustr = (const unsigned char *)str;
+    unsigned char ch = *ustr++;
     debug_decl(safe_string, SUDOERS_DEBUG_UTIL);
 
     /* Initial char must be <= 127 and not LF, CR, SPACE, ':', '<' */
@@ -86,7 +87,7 @@ safe_string(const char *str)
     }
 
     /* Any value <= 127 decimal except NUL, LF, and CR is safe */
-    while ((ch = *str++) != '\0') {
+    while ((ch = *ustr++) != '\0') {
 	if (ch > 127 || ch == '\n' || ch == '\r')
 	    debug_return_bool(false);
     }
@@ -237,7 +238,7 @@ format_cmnd(struct sudo_command *c, bool negated)
 
     cp = buf;
     TAILQ_FOREACH(digest, &c->digests, entries) {
-	len = snprintf(cp, bufsiz - (cp - buf), "%s:%s%s ", 
+	len = snprintf(cp, bufsiz - (size_t)(cp - buf), "%s:%s%s ", 
 	    digest_type_to_name(digest->digest_type), digest->digest_str,
 	    TAILQ_NEXT(digest, entries) ? "," : "");
 	if (len < 0 || len >= (int)bufsiz - (cp - buf))
@@ -245,8 +246,8 @@ format_cmnd(struct sudo_command *c, bool negated)
 	cp += len;
     }
 
-    len = snprintf(cp, bufsiz - (cp - buf), "%s%s%s%s", negated ? "!" : "",
-	cmnd, c->args ? " " : "", c->args ? c->args : "");
+    len = snprintf(cp, bufsiz - (size_t)(cp - buf), "%s%s%s%s",
+	negated ? "!" : "", cmnd, c->args ? " " : "", c->args ? c->args : "");
     if (len < 0 || len >= (int)bufsiz - (cp - buf))
 	sudo_fatalx(U_("internal error, %s overflow"), __func__);
 
@@ -259,7 +260,8 @@ format_cmnd(struct sudo_command *c, bool negated)
  */
 static void
 print_member_ldif(FILE *fp, const struct sudoers_parse_tree *parse_tree,
-    char *name, int type, bool negated, int alias_type, const char *attr_name)
+    char *name, int type, bool negated, short alias_type,
+    const char *attr_name)
 {
     struct alias *a;
     struct member *m;
@@ -322,7 +324,7 @@ print_cmndspec_ldif(FILE *fp, const struct sudoers_parse_tree *parse_tree,
     struct tm gmt;
     char *attr_val;
     bool last_one;
-    int len;
+    size_t len;
     debug_decl(print_cmndspec_ldif, SUDOERS_DEBUG_UTIL);
 
     /* Print runasuserlist as sudoRunAsUser attributes */

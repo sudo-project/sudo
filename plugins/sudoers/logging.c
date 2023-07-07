@@ -394,7 +394,7 @@ fmt_authfail_message(unsigned int tries)
 	debug_return_ptr(ret);
     }
 
-    len = snprintf(numbuf, sizeof(numbuf), "%u", tries);
+    len = (size_t)snprintf(numbuf, sizeof(numbuf), "%u", tries);
     if (len >= sizeof(numbuf))
 	goto overflow;
 
@@ -436,7 +436,7 @@ fmt_authfail_message(unsigned int tries)
 		src++;
 		break;
 	    case 'd':
-		len = strlcpy(dst, numbuf, dst_end - dst);
+		len = strlcpy(dst, numbuf, (size_t)(dst_end - dst));
 		if (len >= (size_t)(dst_end - dst))
 		    goto overflow;
 		dst += len;

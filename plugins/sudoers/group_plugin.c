@@ -80,7 +80,7 @@ group_plugin_fallback(char *path, size_t pathsize)
     }
 
     /* If directory ends in /lib/, try again with /lib/64/ or /lib64/. */
-    dirlen = slash - path;
+    dirlen = (int)(slash - path);
     if (dirlen < 4 || strncmp(slash - 4, "/lib", 4) != 0) {
 	goto done;
     }
@@ -98,7 +98,7 @@ group_plugin_fallback(char *path, size_t pathsize)
     if (dot == NULL) {
 	goto done;
     }
-    plen = dot - path;
+    plen = (int)(dot - path);
 
     /* If basename(path) doesn't match libfoo64.so, try adding the 64. */
     if (plen >= 2 && strncmp(dot - 2, "64", 2) == 0) {
@@ -206,7 +206,7 @@ group_plugin_load(const char *plugin_info)
             }
         }
 	if (ac != 0) {
-	    argv = reallocarray(NULL, ac + 1, sizeof(char *));
+	    argv = reallocarray(NULL, (size_t)(ac + 1), sizeof(char *));
 	    if (argv == NULL) {
 		sudo_warnx(U_("%s: %s"), __func__,
 		    U_("unable to allocate memory"));

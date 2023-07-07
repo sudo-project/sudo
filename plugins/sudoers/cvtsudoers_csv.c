@@ -36,7 +36,7 @@
 #include "cvtsudoers.h"
 #include <gram.h>
 
-static void print_member_list_csv(FILE *fp, const struct sudoers_parse_tree *parse_tree, struct member_list *members, bool negated, int alias_type, bool expand_aliases);
+static void print_member_list_csv(FILE *fp, const struct sudoers_parse_tree *parse_tree, struct member_list *members, bool negated, short alias_type, bool expand_aliases);
 
 /*
  * Print sudoOptions from a defaults_list.
@@ -88,7 +88,7 @@ defaults_type_to_string(int defaults_type)
 /*
  * Map a Defaults type to an alias type.
  */
-static int
+static short
 defaults_to_alias_type(int defaults_type)
 {
     switch (defaults_type) {
@@ -185,7 +185,7 @@ format_cmnd(struct sudo_command *c, bool negated)
 
     cp = buf;
     TAILQ_FOREACH(digest, &c->digests, entries) {
-	len = snprintf(cp, bufsiz - (cp - buf), "%s:%s%s ", 
+	len = snprintf(cp, bufsiz - (size_t)(cp - buf), "%s:%s%s ", 
 	    digest_type_to_name(digest->digest_type), digest->digest_str,
 	    TAILQ_NEXT(digest, entries) ? "," : "");
 	if (len < 0 || len >= (int)bufsiz - (cp - buf))
@@ -193,8 +193,8 @@ format_cmnd(struct sudo_command *c, bool negated)
 	cp += len;
     }
 
-    len = snprintf(cp, bufsiz - (cp - buf), "%s%s%s%s", negated ? "!" : "",
-	cmnd, c->args ? " " : "", c->args ? c->args : "");
+    len = snprintf(cp, bufsiz - (size_t)(cp - buf), "%s%s%s%s",
+	negated ? "!" : "", cmnd, c->args ? " " : "", c->args ? c->args : "");
     if (len < 0 || len >= (int)bufsiz - (cp - buf))
 	sudo_fatalx(U_("internal error, %s overflow"), __func__);
 
@@ -207,7 +207,7 @@ format_cmnd(struct sudo_command *c, bool negated)
  */
 static void
 print_member_csv(FILE *fp, const struct sudoers_parse_tree *parse_tree,
-    char *name, int type, bool negated, bool quoted, int alias_type,
+    char *name, int type, bool negated, bool quoted, short alias_type,
     bool expand_aliases)
 {
     struct alias *a;
@@ -260,7 +260,7 @@ print_member_csv(FILE *fp, const struct sudoers_parse_tree *parse_tree,
  */
 static void
 print_member_list_csv(FILE *fp, const struct sudoers_parse_tree *parse_tree,
-    struct member_list *members, bool negated, int alias_type,
+    struct member_list *members, bool negated, short alias_type,
     bool expand_aliases)
 {
     struct member *m, *next;
@@ -292,7 +292,7 @@ print_defaults_binding_csv(FILE *fp,
     const struct sudoers_parse_tree *parse_tree,
      struct defaults_binding *binding, int type, bool expand_aliases)
 {
-    int alias_type;
+    short alias_type;
     debug_decl(print_defaults_binding_csv, SUDOERS_DEBUG_UTIL);
 
     if (type != DEFAULTS) {
@@ -432,7 +432,7 @@ print_cmndspec_csv(FILE *fp, const struct sudoers_parse_tree *parse_tree,
     struct member *m;
     struct tm gmt;
     bool last_one, quoted = false;
-    int len;
+    size_t len;
     debug_decl(print_cmndspec_csv, SUDOERS_DEBUG_UTIL);
 
     if (cs->runasuserlist != NULL) {

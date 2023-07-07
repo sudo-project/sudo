@@ -264,8 +264,8 @@ main(int argc, char *argv[])
 	if ((user_args = malloc(size)) == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	for (to = user_args, from = argv; *from; from++) {
-	    n = strlcpy(to, *from, size - (to - user_args));
-	    if (n >= size - (to - user_args))
+	    n = strlcpy(to, *from, size - (size_t)(to - user_args));
+	    if (n >= size - (size_t)(to - user_args))
 		sudo_fatalx(U_("internal error, %s overflow"), getprogname());
 	    to += n;
 	    *to++ = ' ';

@@ -390,8 +390,8 @@ ts_write(int fd, const char *fname, struct timestamp_entry *entry, off_t offset)
  * based on auth user pw.  Does not set the time stamp.
  */
 static void
-ts_init_key(struct timestamp_entry *entry, struct passwd *pw, int flags,
-    enum def_tuple ticket_type)
+ts_init_key(struct timestamp_entry *entry, struct passwd *pw,
+    unsigned short flags, enum def_tuple ticket_type)
 {
     struct stat sb;
     debug_decl(ts_init_key, SUDOERS_DEBUG_AUTH);
@@ -438,7 +438,8 @@ ts_init_key(struct timestamp_entry *entry, struct passwd *pw, int flags,
 }
 
 static void
-ts_init_key_nonglobal(struct timestamp_entry *entry, struct passwd *pw, int flags)
+ts_init_key_nonglobal(struct timestamp_entry *entry, struct passwd *pw,
+    unsigned short flags)
 {
     /*
      * Even if the timestamp type is global or kernel we still want to do
@@ -701,7 +702,7 @@ timestamp_lock(void *vcookie, struct passwd *pw)
 	    /* Old sudo record, convert it to TS_LOCKEXCL. */
 	    entry.type = TS_LOCKEXCL;
 	    memset((char *)&entry + offsetof(struct timestamp_entry, flags), 0,
-		nread - offsetof(struct timestamp_entry, flags));
+		(size_t)nread - offsetof(struct timestamp_entry, flags));
 	    if (ts_write(cookie->fd, cookie->fname, &entry, 0) == -1)
 		debug_return_bool(false);
 	} else {
@@ -977,7 +978,7 @@ timestamp_update(void *vcookie, struct passwd *pw)
     if (def_timestamp_type == kernel) {
 	int fd = open(_PATH_TTY, O_RDWR);
 	if (fd != -1) {
-	    int secs = def_timestamp_timeout.tv_sec;
+	    int secs = (int)def_timestamp_timeout.tv_sec;
 	    if (secs > 0) {
 		if (secs > 3600)
 		    secs = 3600;	/* OpenBSD limitation */

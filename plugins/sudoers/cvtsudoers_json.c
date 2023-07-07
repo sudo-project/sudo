@@ -42,7 +42,7 @@ struct json_alias_closure {
     struct json_container *jsonc;
     const char *title;
     unsigned int count;
-    int alias_type;
+    short alias_type;
 };
 
 /*
@@ -115,7 +115,7 @@ print_command_json(struct json_container *jsonc, const char *name, bool negated)
  * Map an alias type to enum word_type.
  */
 static enum word_type
-alias_to_word_type(int alias_type)
+alias_to_word_type(short alias_type)
 {
     switch (alias_type) {
     case CMNDALIAS:
@@ -162,7 +162,7 @@ print_member_json_int(struct json_container *jsonc,
     struct json_value value;
     const char *typestr = NULL;
     const char *errstr;
-    int alias_type = UNSPEC;
+    short alias_type = UNSPEC;
     id_t id;
     debug_decl(print_member_json_int, SUDOERS_DEBUG_UTIL);
 
@@ -535,7 +535,7 @@ print_defaults_json(struct json_container *jsonc,
  */
 static void
 print_aliases_by_type_json(struct json_container *jsonc,
-    const struct sudoers_parse_tree *parse_tree, int alias_type,
+    const struct sudoers_parse_tree *parse_tree, short alias_type,
     const char *title)
 {
     struct json_alias_closure closure;
@@ -608,7 +608,7 @@ print_cmndspec_json(struct json_container *jsonc,
     struct defaults *def;
     struct member *m;
     struct tm gmt;
-    int len;
+    size_t len;
     debug_decl(print_cmndspec_json, SUDOERS_DEBUG_UTIL);
 
     /* Open Cmnd_Spec object. */

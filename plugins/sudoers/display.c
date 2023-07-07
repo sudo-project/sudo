@@ -343,7 +343,8 @@ display_bound_defaults_by_type(struct sudoers_parse_tree *parse_tree,
     struct defaults_binding *binding = NULL;
     struct member *m;
     const char *dsep;
-    int atype, nfound = 0;
+    short atype;
+    int nfound = 0;
     debug_decl(display_bound_defaults_by_type, SUDOERS_DEBUG_PARSER);
 
     switch (deftype) {
@@ -425,7 +426,7 @@ output(const char *buf)
     memset(&repl, 0, sizeof(repl));
     if (sudo_conv(1, &msg, &repl, NULL) == -1)
 	debug_return_int(0);
-    debug_return_int(strlen(buf));
+    debug_return_int((int)strlen(buf));
 }
 
 /*
@@ -437,8 +438,9 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
 {
     struct sudo_nss *nss;
     struct sudo_lbuf def_buf, priv_buf;
+    int cols, count, n;
+    unsigned int olen;
     struct stat sb;
-    int cols, count, olen, n;
     debug_decl(display_privs, SUDOERS_DEBUG_PARSER);
 
     cols = sudo_user.cols;

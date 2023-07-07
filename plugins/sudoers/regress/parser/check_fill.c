@@ -48,8 +48,8 @@ YYSTYPE sudoerslval;
 struct fill_test {
     const char *input;
     const char *output;
-    int len;
-    int addspace;
+    size_t len;
+    bool addspace;
 };
 
 /*
@@ -82,16 +82,16 @@ static struct fill_test cmd_data[] = {
  * Arguments get appended.
  */
 static struct fill_test args_data[] = {
-    { "/", "/", 0, 0 },
-    { "-type", "/ -type", 0, 1 },
-    { "f", "/ -type f", 0, 1 },
-    { "-exec", "/ -type f -exec", 0, 1 },
-    { "ls", "/ -type f -exec ls", 0, 1 },
-    { "{}", "/ -type f -exec ls {}", 0, 1 }
+    { "/", "/", 0, false },
+    { "-type", "/ -type", 0, true },
+    { "f", "/ -type f", 0, true },
+    { "-exec", "/ -type f -exec", 0, true },
+    { "ls", "/ -type f -exec ls", 0, true },
+    { "{}", "/ -type f -exec ls {}", 0, true }
 };
 
 static int
-check_fill(const char *input, int len, int addspace, const char *expect, char **resultp)
+check_fill(const char *input, size_t len, bool addspace, const char *expect, char **resultp)
 {
     if (sudoerslval.string != NULL) {
 	free(sudoerslval.string);
@@ -104,7 +104,7 @@ check_fill(const char *input, int len, int addspace, const char *expect, char **
 }
 
 static int
-check_fill_cmnd(const char *input, int len, int addspace, const char *expect, char **resultp)
+check_fill_cmnd(const char *input, size_t len, bool addspace, const char *expect, char **resultp)
 {
     if (sudoerslval.command.cmnd != NULL) {
 	free(sudoerslval.command.cmnd);
@@ -117,7 +117,7 @@ check_fill_cmnd(const char *input, int len, int addspace, const char *expect, ch
 }
 
 static int
-check_fill_args(const char *input, int len, int addspace, const char *expect, char **resultp)
+check_fill_args(const char *input, size_t len, bool addspace, const char *expect, char **resultp)
 {
     /* Must not free old sudoerslval.command.args as gets appended to. */
     if (!fill_args(input, len, addspace))
@@ -127,11 +127,12 @@ check_fill_args(const char *input, int len, int addspace, const char *expect, ch
 }
 
 static int
-do_tests(int (*checker)(const char *, int, int, const char *, char **),
+do_tests(int (*checker)(const char *, size_t, bool, const char *, char **),
     struct fill_test *data, size_t ntests)
 {
-    int len, errors = 0;
+    int errors = 0;
     unsigned int i;
+    size_t len;
     char *result;
 
     for (i = 0; i < ntests; i++) {

@@ -50,7 +50,7 @@ parse_timeout(const char *timestr)
 
     do {
 	char *ep;
-	char ch;
+	int ch;
 	long l;
 
 	/* Parse number, must be present and positive. */
@@ -99,7 +99,7 @@ parse_timeout(const char *timestr)
 	}
 	cp = ep;
 
-	timeout += l;
+	timeout += (int)l;
     } while (*cp != '\0');
 
     debug_return_int(timeout);

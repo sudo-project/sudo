@@ -465,7 +465,7 @@ auth_getpass(const char *prompt, int type, struct sudo_conv_callback *callback)
     /* Call conversation function. */
     memset(&msg, 0, sizeof(msg));
     msg.msg_type = type;
-    msg.timeout = def_passwd_timeout.tv_sec;
+    msg.timeout = (int)def_passwd_timeout.tv_sec;
     msg.msg = prompt;
     memset(&repl, 0, sizeof(repl));
     sudo_conv(1, &msg, &repl, callback);

@@ -42,6 +42,10 @@
 #include "sudoers.h"
 #include "check.h"
 
+/* No change when passed to setresuid(), etc. */
+#define NO_UID	(uid_t)-1
+#define NO_GID	(gid_t)-1
+
 /*
  * Prototypes
  */
@@ -72,9 +76,9 @@ static struct perm_state perm_stack[PERM_STACK_MAX];
 static int perm_stack_depth = 0;
 
 #undef ID
-#define ID(x) (state->x == ostate->x ? (uid_t)-1 : state->x)
+#define ID(x) (state->x == ostate->x ? NO_UID : state->x)
 #undef OID
-#define OID(x) (ostate->x == state->x ? (uid_t)-1 : ostate->x)
+#define OID(x) (ostate->x == state->x ? NO_UID : ostate->x)
 
 bool
 rewind_perms(void)
@@ -396,7 +400,7 @@ restore_perms(void)
 
     /* XXX - more cases here where euid != ruid */
     if (OID(euid) == ROOT_UID) {
-	if (setresuid(-1, ROOT_UID, -1)) {
+	if (setresuid(NO_UID, ROOT_UID, NO_UID)) {
 	    sudo_warn("setresuid() [%d, %d, %d] -> [%d, %d, %d]",
 		(int)state->ruid, (int)state->euid, (int)state->suid,
 		-1, ROOT_UID, -1);
@@ -742,7 +746,7 @@ restore_perms(void)
 	__func__, (int)state->rgid, (int)state->egid, (int)state->sgid,
 	(int)ostate->rgid, (int)ostate->egid, (int)ostate->sgid);
 
-    if (OID(ruid) != (uid_t)-1 || OID(euid) != (uid_t)-1 || OID(suid) != (uid_t)-1) {
+    if (OID(ruid) != NO_UID || OID(euid) != NO_UID || OID(suid) != NO_UID) {
 	if (OID(euid) == ROOT_UID) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: setuidx(ID_EFFECTIVE, %d)",
 		__func__, ROOT_UID);
@@ -763,7 +767,7 @@ restore_perms(void)
 		    (int)OID(ruid), (int)OID(euid), (int)OID(suid));
 		goto bad;
 	    }
-	} else if (OID(ruid) == (uid_t)-1 && OID(suid) == (uid_t)-1) {
+	} else if (OID(ruid) == NO_UID && OID(suid) == NO_UID) {
 	    /* May have already changed euid to ROOT_UID above. */
 	    if (OID(euid) != ROOT_UID) {
 		sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -775,7 +779,7 @@ restore_perms(void)
 		    goto bad;
 		}
 	    }
-	} else if (OID(suid) == (uid_t)-1) {
+	} else if (OID(suid) == NO_UID) {
 	    /* Cannot set the real uid alone. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"%s: setuidx(ID_REAL|ID_EFFECTIVE, %d)", __func__, OID(ruid));
@@ -796,7 +800,7 @@ restore_perms(void)
 	    }
 	}
     }
-    if (OID(rgid) != (gid_t)-1 || OID(egid) != (gid_t)-1 || OID(sgid) != (gid_t)-1) {
+    if (OID(rgid) != NO_GID || OID(egid) != NO_GID || OID(sgid) != NO_GID) {
 	if (OID(rgid) == OID(egid) && OID(egid) == OID(sgid)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"%s: setgidx(ID_EFFECTIVE|ID_REAL|ID_SAVED, %d)",
@@ -807,7 +811,7 @@ restore_perms(void)
 		    (int)OID(rgid), (int)OID(egid), (int)OID(sgid));
 		goto bad;
 	    }
-	} else if (OID(rgid) == (gid_t)-1 && OID(sgid) == (gid_t)-1) {
+	} else if (OID(rgid) == NO_GID && OID(sgid) == NO_GID) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: setgidx(ID_EFFECTIVE, %d)",
 		__func__, (int)OID(egid));
 	    if (setgidx(ID_EFFECTIVE, OID(egid))) {
@@ -816,7 +820,7 @@ restore_perms(void)
 		    (int)OID(rgid), (int)OID(egid), (int)OID(sgid));
 		goto bad;
 	    }
-	} else if (OID(sgid) == (gid_t)-1) {
+	} else if (OID(sgid) == NO_GID) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"%s: setgidx(ID_EFFECTIVE|ID_REAL, %d)", __func__, OID(rgid));
 	    if (setgidx(ID_REAL|ID_EFFECTIVE, OID(rgid))) {
@@ -904,14 +908,14 @@ set_perms(int perm)
 	 * setreuid(0, 0) may fail on some systems if euid is not already 0.
 	 */
 	if (ostate->euid != ROOT_UID) {
-	    if (setreuid(-1, ROOT_UID)) {
+	    if (setreuid(NO_UID, ROOT_UID)) {
 		(void)snprintf(errbuf, sizeof(errbuf),
 		    "PERM_ROOT: setreuid(-1, %d)", ROOT_UID);
 		goto bad;
 	    }
 	}
 	if (ostate->ruid != ROOT_UID) {
-	    if (setreuid(ROOT_UID, -1)) {
+	    if (setreuid(ROOT_UID, NO_UID)) {
 		(void)snprintf(errbuf, sizeof(errbuf),
 		    "PERM_ROOT: setreuid(%d, -1)", ROOT_UID);
 		goto bad;
@@ -1121,7 +1125,7 @@ restore_perms(void)
     if (OID(euid) == ROOT_UID) {
 	/* setuid() may not set the saved ID unless the euid is ROOT_UID */
 	if (ID(euid) != ROOT_UID) {
-	    if (setreuid(-1, ROOT_UID) != 0) {
+	    if (setreuid(NO_UID, ROOT_UID) != 0) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 		    "setreuid() [%d, %d] -> [-1, %d)", (int)state->ruid,
 		    (int)state->euid, ROOT_UID);
@@ -1441,7 +1445,7 @@ restore_perms(void)
 	goto bad;
     }
 
-    if (OID(egid) != (gid_t)-1 && setegid(ostate->egid)) {
+    if (OID(egid) != NO_GID && setegid(ostate->egid)) {
 	sudo_warn("setegid(%d)", (int)ostate->egid);
 	goto bad;
     }
@@ -1451,7 +1455,7 @@ restore_perms(void)
 	    goto bad;
 	}
     }
-    if (OID(euid) != (uid_t)-1 && seteuid(ostate->euid)) {
+    if (OID(euid) != NO_UID && seteuid(ostate->euid)) {
 	sudo_warn("seteuid(%d)", (int)ostate->euid);
 	goto bad;
     }
@@ -1593,7 +1597,7 @@ restore_perms(void)
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: gid: [%d] -> [%d]",
 	__func__, (int)state->rgid, (int)ostate->rgid);
 
-    if (OID(rgid) != (gid_t)-1 && setgid(ostate->rgid)) {
+    if (OID(rgid) != NO_GID && setgid(ostate->rgid)) {
 	sudo_warn("setgid(%d)", (int)ostate->rgid);
 	goto bad;
     }
@@ -1604,7 +1608,7 @@ restore_perms(void)
 	}
     }
     sudo_gidlist_delref(state->gidlist);
-    if (OID(ruid) != (uid_t)-1 && setuid(ostate->ruid)) {
+    if (OID(ruid) != NO_UID && setuid(ostate->ruid)) {
 	sudo_warn("setuid(%d)", (int)ostate->ruid);
 	goto bad;
     }

@@ -163,7 +163,7 @@ sudo_ldap_join_uri(struct ldap_config_str_list *uri_list)
 	char *cp = buf;
 
 	STAILQ_FOREACH(uri, uri_list, entries) {
-	    cp += strlcpy(cp, uri->val, len - (cp - buf));
+	    cp += strlcpy(cp, uri->val, len - (size_t)(cp - buf));
 	    *cp++ = ' ';
 	}
 	cp[-1] = '\0';
@@ -484,7 +484,8 @@ sudo_ldap_timefilter(char *buffer, size_t buffersize)
     bool ret = false;
     struct tm gmt;
     time_t now;
-    int len;
+    size_t tblen;
+    int buflen;
     debug_decl(sudo_ldap_timefilter, SUDOERS_DEBUG_LDAP);
 
     /* Make sure we have a formatted timestamp for __now__. */
@@ -496,16 +497,16 @@ sudo_ldap_timefilter(char *buffer, size_t buffersize)
 
     /* Format the timestamp according to the RFC. */
     timebuffer[sizeof(timebuffer) - 1] = '\0';
-    len = strftime(timebuffer, sizeof(timebuffer), "%Y%m%d%H%M%S.0Z", &gmt);
-    if (len == 0 || timebuffer[sizeof(timebuffer) - 1] != '\0') {
+    tblen = strftime(timebuffer, sizeof(timebuffer), "%Y%m%d%H%M%S.0Z", &gmt);
+    if (tblen == 0 || timebuffer[sizeof(timebuffer) - 1] != '\0') {
 	sudo_warnx("%s", U_("unable to format timestamp"));
 	goto done;
     }
 
     /* Build filter. */
-    len = snprintf(buffer, buffersize, "(&(|(!(sudoNotAfter=*))(sudoNotAfter>=%s))(|(!(sudoNotBefore=*))(sudoNotBefore<=%s)))",
+    buflen = snprintf(buffer, buffersize, "(&(|(!(sudoNotAfter=*))(sudoNotAfter>=%s))(|(!(sudoNotBefore=*))(sudoNotBefore<=%s)))",
 	timebuffer, timebuffer);
-    if (len < 0 || (size_t)len >= buffersize) {
+    if (buflen < 0 || (size_t)buflen >= buffersize) {
 	sudo_warnx(U_("internal error, %s overflow"), __func__);
 	errno = EOVERFLOW;
 	goto done;
@@ -1236,7 +1237,7 @@ sudo_set_krb5_ccache_name(const char *name, const char **old_name)
      * gss_krb5_ccache_name().
      */
     if (sudo_gss_krb5_ccache_name != NULL) {
-	ret = sudo_gss_krb5_ccache_name(&junk, name, old_name);
+	ret = (int)sudo_gss_krb5_ccache_name(&junk, name, old_name);
     } else {
 	/* No gss_krb5_ccache_name(), fall back on KRB5CCNAME. */
 	if (old_name != NULL)
@@ -1286,7 +1287,8 @@ sudo_krb5_copy_cc_file(const char *old_ccname)
 		    while ((nread = read(ofd, buf, sizeof(buf))) > 0) {
 			ssize_t off = 0;
 			do {
-			    nwritten = write(nfd, buf + off, nread - off);
+			    nwritten = write(nfd, buf + off,
+				(size_t)(nread - off));
 			    if (nwritten == -1) {
 				sudo_warn("error writing to %s", new_ccname);
 				goto write_error;
@@ -1773,7 +1775,7 @@ sudo_ldap_result_add_entry(struct ldap_result *lres, LDAPMessage *entry)
      * of 100 entries to save on allocation time.
      */
     if (++lres->nentries > lres->allocated_entries) {
-	int allocated_entries = lres->allocated_entries + ALLOCATION_INCREMENT;
+	size_t allocated_entries = lres->allocated_entries + ALLOCATION_INCREMENT;
 	struct ldap_entry_wrapper *entries = reallocarray(lres->entries,
 	    allocated_entries, sizeof(lres->entries[0]));
 	if (entries == NULL)

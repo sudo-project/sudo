@@ -112,19 +112,19 @@ sudo_ldap_match_netgroup(const char *triple, const char *host,
     /* Parse host. */
     cp = triple + 1;
     ep = strchr(cp, ',');
-    if (ep == NULL || !sudo_ldap_netgroup_match_str(host, cp, ep - cp, true))
+    if (ep == NULL || !sudo_ldap_netgroup_match_str(host, cp, (size_t)(ep - cp), true))
 	debug_return_int(0);
 
     /* Parse user. */
     cp = ep + 1;
     ep = strchr(cp, ',');
-    if (ep == NULL || !sudo_ldap_netgroup_match_str(user, cp, ep - cp, def_case_insensitive_user))
+    if (ep == NULL || !sudo_ldap_netgroup_match_str(user, cp, (size_t)(ep - cp), def_case_insensitive_user))
 	debug_return_int(0);
 
     /* Parse domain. */
     cp = ep + 1;
     ep = strchr(cp, ')');
-    if (ep == NULL || !sudo_ldap_netgroup_match_str(domain, cp, ep - cp, true))
+    if (ep == NULL || !sudo_ldap_netgroup_match_str(domain, cp, (size_t)(ep - cp), true))
 	debug_return_int(0);
 
     debug_return_int(1);

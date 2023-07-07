@@ -275,7 +275,7 @@ struct sudoers_comment {
  */
 struct alias {
     char *name;				/* alias name */
-    unsigned short type;		/* {USER,HOST,RUNAS,CMND}ALIAS */
+    short type;				/* {USER,HOST,RUNAS,CMND}ALIAS */
     short used;				/* "used" flag for cycle detection */
     int line;				/* line number of alias entry */
     int column;				/* column number of alias entry */
@@ -292,9 +292,8 @@ struct defaults {
     char *val;				/* variable value */
     struct defaults_binding *binding;	/* user/host/runas binding */
     char *file;				/* file Defaults entry was in */
-    short type;				/* DEFAULTS{,_USER,_RUNAS,_HOST} */
-    char op;				/* true, false, '+', '-' */
-    char error;				/* parse error flag */
+    int type;				/* DEFAULTS{,_USER,_RUNAS,_HOST} */
+    int op;				/* true, false, '+', '-' */
     int line;				/* line number of Defaults entry */
     int column;				/* column number of Defaults entry */
 };
@@ -390,10 +389,10 @@ SLIST_HEAD(parser_leak_list, parser_leak_entry);
 struct rbtree *alloc_aliases(void);
 void free_aliases(struct rbtree *aliases);
 bool no_aliases(const struct sudoers_parse_tree *parse_tree);
-bool alias_add(struct sudoers_parse_tree *parse_tree, char *name, int type, char *file, int line, int column, struct member *members);
-const char *alias_type_to_string(int alias_type);
-struct alias *alias_get(const struct sudoers_parse_tree *parse_tree, const char *name, int type);
-struct alias *alias_remove(struct sudoers_parse_tree *parse_tree, const char *name, int type);
+bool alias_add(struct sudoers_parse_tree *parse_tree, char *name, short type, char *file, int line, int column, struct member *members);
+const char *alias_type_to_string(short alias_type);
+struct alias *alias_get(const struct sudoers_parse_tree *parse_tree, const char *name, short type);
+struct alias *alias_remove(struct sudoers_parse_tree *parse_tree, const char *name, short type);
 bool alias_find_used(struct sudoers_parse_tree *parse_tree, struct rbtree *used_aliases);
 void alias_apply(struct sudoers_parse_tree *parse_tree, int (*func)(struct sudoers_parse_tree *, struct alias *, void *), void *cookie);
 void alias_free(void *a);
@@ -495,7 +494,7 @@ bool sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree, FILE *fp, const c
 struct sudo_lbuf;
 bool sudoers_format_cmndspec(struct sudo_lbuf *lbuf, const struct sudoers_parse_tree *parse_tree, struct cmndspec *cs, struct cmndspec *prev_cs, struct cmndtag tags, bool expand_aliases);
 bool sudoers_format_default(struct sudo_lbuf *lbuf, struct defaults *d);
-bool sudoers_format_member(struct sudo_lbuf *lbuf, const struct sudoers_parse_tree *parse_tree, struct member *m, const char *separator, int alias_type);
+bool sudoers_format_member(struct sudo_lbuf *lbuf, const struct sudoers_parse_tree *parse_tree, struct member *m, const char *separator, short alias_type);
 bool sudoers_defaults_to_tags(const char *var, const char *val, int op, struct cmndtag *tags);
 bool sudoers_defaults_list_to_tags(struct defaults_list *defs, struct cmndtag *tags);
 

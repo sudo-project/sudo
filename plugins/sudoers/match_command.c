@@ -674,7 +674,7 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args,
 	const char *slash = strrchr(sudoers_cmnd, '/');
 	if (slash != NULL) {
 	    char sudoers_cmnd_dir[PATH_MAX], *resolved;
-	    const size_t len = slash - sudoers_cmnd;
+	    const size_t len = (size_t)(slash - sudoers_cmnd);
 	    if (len >= sizeof(sudoers_cmnd_dir))
 		goto bad;
 	    if (len != 0)

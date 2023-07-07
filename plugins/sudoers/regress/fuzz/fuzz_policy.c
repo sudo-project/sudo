@@ -435,11 +435,11 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		break;
 	    case PASS_CHECK_LOG_LOCAL: {
 		/* sudo command w/ local I/O logging (MODE_RUN) */
-		sudoers_policy.check_policy(argv.len, argv.entries,
+		sudoers_policy.check_policy((int)argv.len, argv.entries,
 		    env_add.entries, &command_info, &argv_out, &user_env_out,
 		    &errstr);
 		/* call check_policy() again to check for leaks. */
-		sudoers_policy.check_policy(argv.len, argv.entries,
+		sudoers_policy.check_policy((int)argv.len, argv.entries,
 		    env_add.entries, &command_info, &argv_out, &user_env_out,
 		    &errstr);
 		/* sudo_auth_begin_session() is stubbed out below. */
@@ -448,11 +448,11 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	    }
 	    case PASS_CHECK_LOG_REMOTE:
 		/* sudo command w/ remote I/O logging (MODE_RUN) */
-		sudoers_policy.check_policy(argv.len, argv.entries,
+		sudoers_policy.check_policy((int)argv.len, argv.entries,
 		    env_add.entries, &command_info, &argv_out, &user_env_out,
 		    &errstr);
 		/* call check_policy() again to check for leaks. */
-		sudoers_policy.check_policy(argv.len, argv.entries,
+		sudoers_policy.check_policy((int)argv.len, argv.entries,
 		    env_add.entries, &command_info, &argv_out, &user_env_out,
 		    &errstr);
 		/* sudo_auth_begin_session() is stubbed out below. */
@@ -460,7 +460,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		break;
 	    case PASS_CHECK_NOT_FOUND:
 		/* sudo command (not found) */
-		sudoers_policy.check_policy(argv.len, argv.entries,
+		sudoers_policy.check_policy((int)argv.len, argv.entries,
 		    env_add.entries, &command_info, &argv_out, &user_env_out,
 		    &errstr);
 		/* sudo_auth_begin_session() is stubbed out below. */
@@ -468,11 +468,11 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		break;
 	    case PASS_CHECK_NOT_FOUND_DOT:
 		/* sudo command (found but in cwd) */
-		sudoers_policy.check_policy(argv.len, argv.entries,
+		sudoers_policy.check_policy((int)argv.len, argv.entries,
 		    env_add.entries, &command_info, &argv_out, &user_env_out,
 		    &errstr);
 		/* call check_policy() again to check for leaks. */
-		sudoers_policy.check_policy(argv.len, argv.entries,
+		sudoers_policy.check_policy((int)argv.len, argv.entries,
 		    env_add.entries, &command_info, &argv_out, &user_env_out,
 		    &errstr);
 		/* sudo_auth_begin_session() is stubbed out below. */
@@ -492,10 +492,10 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		break;
 	    case PASS_LIST_CHECK:
 		/* sudo -l command (MODE_CHECK) */
-		sudoers_policy.list(argv.len, argv.entries, false, NULL,
+		sudoers_policy.list((int)argv.len, argv.entries, false, NULL,
 		    &errstr);
 		/* call list() again to check for leaks. */
-		sudoers_policy.list(argv.len, argv.entries, false, NULL,
+		sudoers_policy.list((int)argv.len, argv.entries, false, NULL,
 		    &errstr);
 		break;
 	    case PASS_VALIDATE:

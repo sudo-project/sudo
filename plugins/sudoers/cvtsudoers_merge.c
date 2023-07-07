@@ -37,7 +37,7 @@
 #include <gram.h>
 
 static struct member *
-new_member(const char *name, int type)
+new_member(const char *name, short type)
 {
     struct member *m;
     debug_decl(digest_list_equivalent, SUDOERS_DEBUG_PARSER);
@@ -324,7 +324,7 @@ simplify_host_list(struct member_list *hosts, const char *file, int line,
  * subsequent parse_trees or merged_tree.
  */
 static char *
-alias_make_unique(const char *old_name, int type,
+alias_make_unique(const char *old_name, short type,
     struct sudoers_parse_tree *parse_tree0,
     struct sudoers_parse_tree *merged_tree)
 {
@@ -407,7 +407,7 @@ alias_rename_members(struct sudoers_parse_tree *parse_tree, struct alias *a,
 
 static void
 alias_rename_defaults(const char *old_name, const char *new_name,
-    int alias_type, struct defaults_list *defaults)
+    short alias_type, struct defaults_list *defaults)
 {
     struct defaults *def, *def_next;
     struct member *m;
@@ -489,7 +489,7 @@ alias_rename_member_list(const char *old_name, const char *new_name,
 
 static bool
 alias_rename_userspecs(const char *old_name, const char *new_name,
-    int alias_type, struct userspec_list *userspecs)
+    short alias_type, struct userspec_list *userspecs)
 {
     struct privilege *priv;
     struct cmndspec *cs;
@@ -531,8 +531,8 @@ alias_rename_userspecs(const char *old_name, const char *new_name,
  * Rename an alias in parse_tree and all the places where it is used.
  */
 static bool
-alias_rename(const char *old_name, const char *new_name, int alias_type,
-    struct sudoers_parse_tree *parse_tree)
+alias_rename(const char *old_name, const char *new_name,
+    short alias_type, struct sudoers_parse_tree *parse_tree)
 {
     struct alias_rename_closure closure = { old_name, new_name, alias_type };
     struct alias *a;

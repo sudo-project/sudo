@@ -2932,7 +2932,7 @@ yyreduce:
 #line 1024 "gram.y"
                               {
 			    alias_line = this_lineno;
-			    alias_column = sudolinebuf.toke_start + 1;
+			    alias_column = (int)sudolinebuf.toke_start + 1;
 			}
 #line 2932 "gram.c"
     break;
@@ -2965,7 +2965,7 @@ yyreduce:
 #line 1051 "gram.y"
                               {
 			    alias_line = this_lineno;
-			    alias_column = sudolinebuf.toke_start + 1;
+			    alias_column = (int)sudolinebuf.toke_start + 1;
 			}
 #line 2965 "gram.c"
     break;
@@ -2998,7 +2998,7 @@ yyreduce:
 #line 1078 "gram.y"
                               {
 			    alias_line = this_lineno;
-			    alias_column = sudolinebuf.toke_start + 1;
+			    alias_column = (int)sudolinebuf.toke_start + 1;
 			}
 #line 2998 "gram.c"
     break;
@@ -3021,7 +3021,7 @@ yyreduce:
 #line 1097 "gram.y"
                               {
 			    alias_line = this_lineno;
-			    alias_column = sudolinebuf.toke_start + 1;
+			    alias_column = (int)sudolinebuf.toke_start + 1;
 			}
 #line 3021 "gram.c"
     break;

@@ -191,7 +191,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	if (MATCHES(*cur, "closefrom=")) {
 	    errno = 0;
 	    p = *cur + sizeof("closefrom=") - 1;
-	    user_closefrom = sudo_strtonum(p, 3, INT_MAX, &errstr);
+	    user_closefrom = (int)sudo_strtonum(p, 3, INT_MAX, &errstr);
 	    if (user_closefrom == 0) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
@@ -361,7 +361,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	if (MATCHES(*cur, "max_groups=")) {
 	    errno = 0;
 	    p = *cur + sizeof("max_groups=") - 1;
-	    sudo_user.max_groups = sudo_strtonum(p, 1, 1024, &errstr);
+	    sudo_user.max_groups = (int)sudo_strtonum(p, 1, 1024, &errstr);
 	    if (sudo_user.max_groups == 0) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
@@ -473,7 +473,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	if (MATCHES(*cur, "lines=")) {
 	    errno = 0;
 	    p = *cur + sizeof("lines=") - 1;
-	    sudo_user.lines = sudo_strtonum(p, 1, INT_MAX, &errstr);
+	    sudo_user.lines = (int)sudo_strtonum(p, 1, INT_MAX, &errstr);
 	    if (sudo_user.lines == 0) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
@@ -483,7 +483,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	if (MATCHES(*cur, "cols=")) {
 	    errno = 0;
 	    p = *cur + sizeof("cols=") - 1;
-	    sudo_user.cols = sudo_strtonum(p, 1, INT_MAX, &errstr);
+	    sudo_user.cols = (int)sudo_strtonum(p, 1, INT_MAX, &errstr);
 	    if (sudo_user.cols == 0) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
@@ -803,7 +803,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 
 	/* We reserve an extra spot in the list for the effective gid. */
 	glsize = sizeof("runas_groups=") - 1 +
-	    ((gidlist->ngids + 1) * (MAX_UID_T_LEN + 1));
+	    ((size_t)(gidlist->ngids + 1) * (MAX_UID_T_LEN + 1));
 	gid_list = malloc(glsize);
 	if (gid_list == NULL) {
 	    sudo_gidlist_delref(gidlist);
@@ -811,29 +811,32 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
 	}
 	memcpy(gid_list, "runas_groups=", sizeof("runas_groups=") - 1);
 	cp = gid_list + sizeof("runas_groups=") - 1;
+	glsize -= (size_t)(cp - gid_list);
 
 	/* On BSD systems the effective gid is the first group in the list. */
 	egid = runas_gr ? (unsigned int)runas_gr->gr_gid :
 	    (unsigned int)runas_pw->pw_gid;
-	len = snprintf(cp, glsize - (cp - gid_list), "%u", (unsigned int)egid);
-	if (len < 0 || (size_t)len >= glsize - (cp - gid_list)) {
+	len = snprintf(cp, glsize, "%u", (unsigned int)egid);
+	if (len < 0 || (size_t)len >= glsize) {
 	    sudo_warnx(U_("internal error, %s overflow"), __func__);
 	    free(gid_list);
 	    sudo_gidlist_delref(gidlist);
 	    goto bad;
 	}
 	cp += len;
+	glsize -= (size_t)len;
 	for (i = 0; i < gidlist->ngids; i++) {
 	    if (gidlist->gids[i] != egid) {
-		len = snprintf(cp, glsize - (cp - gid_list), ",%u",
-		     (unsigned int) gidlist->gids[i]);
-		if (len < 0 || (size_t)len >= glsize - (cp - gid_list)) {
+		len = snprintf(cp, glsize, ",%u",
+		     (unsigned int)gidlist->gids[i]);
+		if (len < 0 || (size_t)len >= glsize) {
 		    sudo_warnx(U_("internal error, %s overflow"), __func__);
 		    free(gid_list);
 		    sudo_gidlist_delref(gidlist);
 		    goto bad;
 		}
 		cp += len;
+		glsize -= (size_t)len;
 	    }
 	}
 	command_info[info_len++] = gid_list;

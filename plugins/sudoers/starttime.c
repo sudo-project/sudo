@@ -129,8 +129,8 @@ get_starttime(pid_t pid, struct timespec *starttime)
 	TIMEVAL_TO_TIMESPEC(&ki_proc->kp_proc.p_starttime, starttime);
 #else
 	/* NetBSD and OpenBSD */
-	starttime->tv_sec = ki_proc->p_ustart_sec;
-	starttime->tv_nsec = ki_proc->p_ustart_usec * 1000;
+	starttime->tv_sec = (time_t)ki_proc->p_ustart_sec;
+	starttime->tv_nsec = (long)(ki_proc->p_ustart_usec * 1000);
 #endif
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "%s: start time for %d: { %lld, %ld }", __func__,
@@ -201,7 +201,7 @@ get_starttime(pid_t pid, struct timespec *starttime)
     (void)snprintf(path, sizeof(path), "/proc/%u/stat", (unsigned int)pid);
     if ((fd = open(path, O_RDONLY | O_NOFOLLOW)) != -1) {
 	cp = buf;
-	while ((nread = read(fd, cp, buf + sizeof(buf) - cp)) != 0) {
+	while ((nread = read(fd, cp, sizeof(buf) - (size_t)(cp - buf))) != 0) {
 	    if (nread == -1) {
 		if (errno == EAGAIN || errno == EINTR)
 		    continue;
@@ -211,7 +211,7 @@ get_starttime(pid_t pid, struct timespec *starttime)
 	    if (cp >= buf + sizeof(buf))
 		break;
 	}
-	if (nread == 0 && memchr(buf, '\0', cp - buf) == NULL) {
+	if (nread == 0 && memchr(buf, '\0', (size_t)(cp - buf)) == NULL) {
 	    /*
 	     * Field 22 is the start time (%ull).
 	     * Since the process name at field 2 "(comm)" may include
@@ -245,9 +245,9 @@ get_starttime(pid_t pid, struct timespec *starttime)
 				goto done;
 
 			    /* Convert from ticks to timespec */
-			    starttime->tv_sec = ullval / tps;
+			    starttime->tv_sec = (time_t)(ullval / tps);
 			    starttime->tv_nsec =
-				(ullval % tps) * (1000000000 / tps);
+				(long)(ullval % tps) * (1000000000 / tps);
 			    ret = 0;
 
 			    sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -290,7 +290,7 @@ get_starttime(pid_t pid, struct timespec *starttime)
      */
     rc = pstat_getproc(&pst, sizeof(pst), 0, pid);
     if (rc != -1 || errno == EOVERFLOW) {
-	starttime->tv_sec = pst.pst_start;
+	starttime->tv_sec = (time_t)pst.pst_start;
 	starttime->tv_nsec = 0;
 
 	sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -319,8 +319,8 @@ get_starttime(pid_t pid, struct timespec *starttime)
 	count = sizeof(info) / sizeof(integer_t);
 	error = task_info(target, TASK_BASIC_INFO, (task_info_t)&info, &count);
 	if (error == KERN_SUCCESS) {
-	    starttime->tv_sec = info.creation_time.seconds;
-	    starttime->tv_nsec = info.creation_time.microseconds * 1000;
+	    starttime->tv_sec = (time_t)info.creation_time.seconds;
+	    starttime->tv_nsec = (long)(info.creation_time.microseconds * 1000);
 	    debug_return_int(0);
 	}
     }

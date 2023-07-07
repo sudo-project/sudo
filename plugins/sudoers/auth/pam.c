@@ -683,7 +683,8 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	"number of PAM messages: %d", num_msg);
 
-    if ((reply = calloc(num_msg, sizeof(struct pam_response))) == NULL) {
+    reply = calloc((size_t)num_msg, sizeof(struct pam_response));
+    if (reply == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(PAM_BUF_ERR);
     }

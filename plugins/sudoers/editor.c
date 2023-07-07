@@ -65,7 +65,7 @@ wordsplit(const char *str, const char *endstr, const char **last)
     if (*str == '"' || *str == '\'') {
 	const char *endquote;
 	for (cp = str + 1; cp < endstr; cp = endquote + 1) {
-	    endquote = memchr(cp, *str, endstr - cp);
+	    endquote = memchr(cp, *str, (size_t)(endstr - cp));
 	    if (endquote == NULL)
 		break;
 	    /* ignore escaped quotes */
@@ -142,7 +142,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char * const *files,
     cp = wordsplit(ed, edend, &ep);
     if (cp == NULL)
 	debug_return_str(NULL);
-    editor = copy_arg(cp, ep - cp);
+    editor = copy_arg(cp, (size_t)(ep - cp));
     if (editor == NULL)
 	goto oom;
 
@@ -158,7 +158,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char * const *files,
 	nargc++;
     if (nfiles != 0)
 	nargc += nfiles + 1;
-    nargv = reallocarray(NULL, nargc + 1, sizeof(char *));
+    nargv = reallocarray(NULL, (size_t)(nargc + 1), sizeof(char *));
     if (nargv == NULL)
 	goto oom;
     sudoers_gc_add(GC_PTR, nargv);
@@ -168,7 +168,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char * const *files,
     editor = NULL;
     for (nargc = 1; (cp = wordsplit(NULL, edend, &ep)) != NULL; nargc++) {
 	/* Copy string, collapsing chars escaped with a backslash. */
-	nargv[nargc] = copy_arg(cp, ep - cp);
+	nargv[nargc] = copy_arg(cp, (size_t)(ep - cp));
 	if (nargv[nargc] == NULL)
 	    goto oom;
 

@@ -2188,7 +2188,7 @@ LookupWord(char *buff)
     /* Make it lowercase. */
     for (p = buff; *p; p++) {
 	if (isupper((unsigned char)*p))
-	    *p = tolower((unsigned char)*p);
+	    *p = (char)tolower((unsigned char)*p);
     }
     if ((bufflen = (int)(p - buff)) == 0)
 	return '\0';

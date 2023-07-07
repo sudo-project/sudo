@@ -87,8 +87,9 @@ linux_audit_command(char *const argv[], int result)
 	goto done;
     }
     for (av = argv, cp = command; *av != NULL; av++) {
-	n = strlcpy(cp, *av, size - (cp - command));
-	if (n >= size - (cp - command)) {
+	const size_t rem = size - (size_t)(cp - command);
+	n = strlcpy(cp, *av, rem);
+	if (n >= rem) {
 	    sudo_warnx(U_("internal error, %s overflow"), __func__);
 	    goto done;
 	}

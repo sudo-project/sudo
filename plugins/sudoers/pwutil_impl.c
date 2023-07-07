@@ -270,7 +270,7 @@ PREFIX(make_gidlist_item)(const struct passwd *pw, char * const *gidstrs,
 	    ngids = 1;
 	    for (i = 0; gidstrs[i] != NULL; i++)
 		ngids++;
-	    gids = reallocarray(NULL, ngids, sizeof(GETGROUPS_T));
+	    gids = reallocarray(NULL, (size_t)ngids, sizeof(GETGROUPS_T));
 	    if (gids == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "unable to allocate memory");
@@ -301,7 +301,7 @@ PREFIX(make_gidlist_item)(const struct passwd *pw, char * const *gidstrs,
 	type = ENTRY_TYPE_QUERIED;
 	if (sudo_user.max_groups > 0) {
 	    ngids = sudo_user.max_groups;
-	    gids = reallocarray(NULL, ngids, sizeof(GETGROUPS_T));
+	    gids = reallocarray(NULL, (size_t)ngids, sizeof(GETGROUPS_T));
 	    if (gids == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "unable to allocate memory");
@@ -328,7 +328,7 @@ PREFIX(make_gidlist_item)(const struct passwd *pw, char * const *gidstrs,
     /* Allocate in one big chunk for easy freeing. */
     nsize = strlen(pw->pw_name) + 1;
     total = sizeof(*glitem) + nsize;
-    total += sizeof(gid_t *) * ngids;
+    total += sizeof(gid_t *) * (size_t)ngids;
 
     if ((glitem = calloc(1, total)) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -345,7 +345,7 @@ PREFIX(make_gidlist_item)(const struct passwd *pw, char * const *gidstrs,
     gidlist = &glitem->gidlist;
     cp = (char *)(glitem + 1);
     gidlist->gids = (gid_t *)cp;
-    cp += sizeof(gid_t) * ngids;
+    cp += sizeof(gid_t) * (size_t)ngids;
 
     /* Set key and datum. */
     memcpy(cp, pw->pw_name, nsize);
@@ -390,7 +390,7 @@ PREFIX(make_grlist_item)(const struct passwd *pw, char * const *unused1)
     }
 
 #ifdef _SC_LOGIN_NAME_MAX
-    groupname_len = MAX(sysconf(_SC_LOGIN_NAME_MAX), 32);
+    groupname_len = MAX((size_t)sysconf(_SC_LOGIN_NAME_MAX), 32);
 #else
     groupname_len = MAX(LOGIN_NAME_MAX, 32);
 #endif
@@ -398,8 +398,8 @@ PREFIX(make_grlist_item)(const struct passwd *pw, char * const *unused1)
     /* Allocate in one big chunk for easy freeing. */
     nsize = strlen(pw->pw_name) + 1;
     total = sizeof(*grlitem) + nsize;
-    total += sizeof(char *) * gidlist->ngids;
-    total += groupname_len * gidlist->ngids;
+    total += sizeof(char *) * (size_t)gidlist->ngids;
+    total += groupname_len * (size_t)gidlist->ngids;
 
 again:
     if ((grlitem = calloc(1, total)) == NULL) {
@@ -417,7 +417,7 @@ again:
     grlist = &grlitem->grlist;
     cp = (char *)(grlitem + 1);
     grlist->groups = (char **)cp;
-    cp += sizeof(char *) * gidlist->ngids;
+    cp += sizeof(char *) * (size_t)gidlist->ngids;
 
     /* Set key and datum. */
     memcpy(cp, pw->pw_name, nsize);
@@ -437,7 +437,7 @@ again:
     for (i = 0; i < gidlist->ngids; i++) {
 	if ((grp = sudo_getgrgid(gidlist->gids[i])) != NULL) {
 	    len = strlen(grp->gr_name) + 1;
-	    if (cp - (char *)grlitem + len > total) {
+	    if ((size_t)(cp - (char *)grlitem) + len > total) {
 		total += len + groupname_len;
 		free(grlitem);
 		sudo_gr_delref(grp);
@@ -449,7 +449,7 @@ again:
 	    sudo_gr_delref(grp);
 	}
     }
-    grlist->ngroups = ngroups;
+    grlist->ngroups = (int)ngroups;
     sudo_gidlist_delref(gidlist);
 
 #ifdef HAVE_SETAUTHDB

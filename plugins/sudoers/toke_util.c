@@ -37,8 +37,8 @@
 #include "toke.h"
 #include <gram.h>
 
-static unsigned int arg_len = 0;
-static unsigned int arg_size = 0;
+static size_t arg_len = 0;
+static size_t arg_size = 0;
 
 /*
  * Copy the string and collapse any escaped characters.
@@ -52,7 +52,7 @@ copy_string(char *dst, const char *src, size_t len)
     while (len--) {
 	if (*src == '\\' && len) {
 	    if (src[1] == 'x' && len >= 3 && (h = sudo_hexchar(src + 2)) != -1) {
-		*dst++ = h;
+		*dst++ = (char)h;
 		src += 4;
 		len -= 3;
 	    } else {
@@ -68,8 +68,9 @@ copy_string(char *dst, const char *src, size_t len)
 }
 
 bool
-fill(const char *src, size_t len)
+fill(const char *src, int ilen)
 {
+    const size_t len = (size_t)ilen;
     char *dst;
     debug_decl(fill, SUDOERS_DEBUG_PARSER);
 
@@ -87,8 +88,9 @@ fill(const char *src, size_t len)
 }
 
 bool
-append(const char *src, size_t len)
+append(const char *src, int ilen)
 {
+    const size_t len = (size_t)ilen;
     size_t olen = 0;
     char *dst;
     debug_decl(append, SUDOERS_DEBUG_PARSER);
@@ -118,8 +120,9 @@ append(const char *src, size_t len)
     ((c) == ',' || (c) == ':' || (c) == '=' || (c) == ' ' || (c) == '\t' || (c) == '#')
 
 bool
-fill_cmnd(const char *src, size_t len)
+fill_cmnd(const char *src, int ilen)
 {
+    const size_t len = (size_t)ilen;
     char *dst;
     size_t i;
     debug_decl(fill_cmnd, SUDOERS_DEBUG_PARSER);
@@ -170,9 +173,10 @@ fill_cmnd(const char *src, size_t len)
 }
 
 bool
-fill_args(const char *s, size_t len, int addspace)
+fill_args(const char *s, int ilen, bool addspace)
 {
-    unsigned int new_len;
+    size_t len = (size_t)ilen;
+    size_t new_len;
     char *p;
     debug_decl(fill_args, SUDOERS_DEBUG_PARSER);
 
@@ -192,7 +196,7 @@ fill_args(const char *s, size_t len, int addspace)
 
     if (new_len >= arg_size) {
 	/* Allocate in increments of 128 bytes to avoid excessive realloc(). */
-	arg_size = (new_len + 1 + 127) & ~127;
+	arg_size = (new_len + 1 + 127) & ~127U;
 
 	parser_leak_remove(LEAK_PTR, sudoerslval.command.args);
 	p = realloc(sudoerslval.command.args, arg_size);
@@ -208,7 +212,7 @@ fill_args(const char *s, size_t len, int addspace)
     p = sudoerslval.command.args + arg_len;
     if (addspace)
 	*p++ = ' ';
-    len = arg_size - (p - sudoerslval.command.args);
+    len = arg_size - (size_t)(p - sudoerslval.command.args);
     if (strlcpy(p, s, len) >= len) {
 	sudo_warnx(U_("internal error, %s overflow"), __func__);
 	parser_leak_remove(LEAK_PTR, sudoerslval.command.args);

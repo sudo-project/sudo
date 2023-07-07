@@ -168,7 +168,7 @@ sudoers_format_default_line(struct sudo_lbuf *lbuf,
     struct defaults **next, bool expand_aliases)
 {
     struct member *m;
-    int alias_type;
+    short alias_type;
     debug_decl(sudoers_format_default_line, SUDOERS_DEBUG_UTIL);
 
     /* Print Defaults type and binding (if present) */
