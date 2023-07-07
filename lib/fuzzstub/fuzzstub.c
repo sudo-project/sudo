@@ -90,7 +90,7 @@ main(int argc, char *argv[])
 	    continue;
 	}
 #endif
-	filesize = sb.st_size;
+	filesize = (size_t)sb.st_size;
 	if (bufsize < filesize) {
 	    void *tmp = realloc(buf, filesize);
 	    if (tmp == NULL) {
@@ -119,7 +119,7 @@ main(int argc, char *argv[])
 	    fprintf(stderr, "Running: %s\n", arg);
 	    sudo_gettime_mono(&start_time);
 	}
-	LLVMFuzzerTestOneInput(buf, nread);
+	LLVMFuzzerTestOneInput(buf, (size_t)nread);
 	if (verbose > 0) {
 	    sudo_gettime_mono(&stop_time);
 	    sudo_timespecsub(&stop_time, &start_time, &stop_time);
