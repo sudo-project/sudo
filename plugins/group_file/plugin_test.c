@@ -45,7 +45,7 @@ static void *group_handle;
 static struct sudoers_group_plugin *group_plugin;
 
 static int
-plugin_printf(int msg_type, const char *fmt, ...)
+plugin_printf(int msg_type, const char * restrict fmt, ...)
 {
     va_list ap;
     FILE *fp;

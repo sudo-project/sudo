@@ -40,7 +40,7 @@
  * If retval >= dsize, truncation occurred.
  */
 size_t
-sudo_strlcat(char *dst, const char *src, size_t dsize)
+sudo_strlcat(char * restrict dst, const char * restrict src, size_t dsize)
 {
 	const char *odst = dst;
 	const char *osrc = src;

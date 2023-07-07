@@ -421,7 +421,7 @@ fill_seq(char *str, size_t strsize, void *v)
 }
 
 static size_t
-fill_user(char *str, size_t strsize, void *v)
+fill_user(char * restrict str, size_t strsize, void * restrict v)
 {
     struct iolog_path_closure *closure = v;
     const struct eventlog *evlog = closure->evlog;
@@ -435,7 +435,7 @@ fill_user(char *str, size_t strsize, void *v)
 }
 
 static size_t
-fill_group(char *str, size_t strsize, void *v)
+fill_group(char * restrict str, size_t strsize, void * restrict v)
 {
     struct iolog_path_closure *closure = v;
     const struct eventlog *evlog = closure->evlog;
@@ -449,7 +449,7 @@ fill_group(char *str, size_t strsize, void *v)
 }
 
 static size_t
-fill_runas_user(char *str, size_t strsize, void *v)
+fill_runas_user(char * restrict str, size_t strsize, void * restrict v)
 {
     struct iolog_path_closure *closure = v;
     const struct eventlog *evlog = closure->evlog;
@@ -463,7 +463,7 @@ fill_runas_user(char *str, size_t strsize, void *v)
 }
 
 static size_t
-fill_runas_group(char *str, size_t strsize, void *v)
+fill_runas_group(char * restrict str, size_t strsize, void * restrict v)
 {
     struct iolog_path_closure *closure = v;
     const struct eventlog *evlog = closure->evlog;
@@ -478,7 +478,7 @@ fill_runas_group(char *str, size_t strsize, void *v)
 }
 
 static size_t
-fill_hostname(char *str, size_t strsize, void *v)
+fill_hostname(char * restrict str, size_t strsize, void * restrict v)
 {
     struct iolog_path_closure *closure = v;
     const struct eventlog *evlog = closure->evlog;
@@ -492,7 +492,7 @@ fill_hostname(char *str, size_t strsize, void *v)
 }
 
 static size_t
-fill_command(char *str, size_t strsize, void *v)
+fill_command(char * restrict str, size_t strsize, void * restrict v)
 {
     struct iolog_path_closure *closure = v;
     const struct eventlog *evlog = closure->evlog;

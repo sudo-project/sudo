@@ -50,7 +50,7 @@ sudo_allocarray(size_t nmemb, size_t size)
  * Currently only supports %%, %c, %d, and %s escapes.
  */
 static char *
-fmtstr(sudo_alloc_fn_t alloc_fn, sudo_free_fn_t free_fn, const char *ofmt, ...)
+fmtstr(sudo_alloc_fn_t alloc_fn, sudo_free_fn_t free_fn, const char * restrict ofmt, ...)
 {
     char *cp, *cur, *newstr = NULL;
     size_t len, size = 1;

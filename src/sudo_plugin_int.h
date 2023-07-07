@@ -126,7 +126,7 @@ int sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
     struct sudo_conv_reply replies[], struct sudo_conv_callback *callback);
 int sudo_conversation_1_7(int num_msgs, const struct sudo_conv_message msgs[],
     struct sudo_conv_reply replies[]);
-int sudo_conversation_printf(int msg_type, const char *fmt, ...);
+int sudo_conversation_printf(int msg_type, const char * restrict fmt, ...);
 
 bool sudo_load_plugins(void);
 

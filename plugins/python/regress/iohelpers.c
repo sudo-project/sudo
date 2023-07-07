@@ -96,7 +96,7 @@ cleanup:
 }
 
 int
-vsnprintf_append(char *output, size_t max_output_len, const char *fmt, va_list args)
+vsnprintf_append(char * restrict output, size_t max_output_len, const char * restrict fmt, va_list args)
 {
     va_list args2;
     va_copy(args2, args);
@@ -109,7 +109,7 @@ vsnprintf_append(char *output, size_t max_output_len, const char *fmt, va_list a
 }
 
 int
-snprintf_append(char *output, size_t max_output_len, const char *fmt, ...)
+snprintf_append(char * restrict output, size_t max_output_len, const char * restrict fmt, ...)
 {
     va_list args;
     va_start(args, fmt);

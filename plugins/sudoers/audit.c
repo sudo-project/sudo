@@ -103,7 +103,7 @@ audit_failure_int(char *const argv[], const char *message)
 }
 
 int
-vaudit_failure(char *const argv[], char const *const fmt, va_list ap)
+vaudit_failure(char *const argv[], char const * restrict const fmt, va_list ap)
 {
     int oldlocale, ret;
     char *message;
@@ -129,7 +129,7 @@ vaudit_failure(char *const argv[], char const *const fmt, va_list ap)
 }
 
 int
-audit_failure(char *const argv[], char const *const fmt, ...)
+audit_failure(char *const argv[], char const * restrict const fmt, ...)
 {
     va_list ap;
     int ret;

@@ -468,7 +468,7 @@ done:
 }
 
 void
-log_warnx(const char *fmt, ...)
+log_warnx(const char * restrict fmt, ...)
 {
     va_list ap;
 
@@ -1082,7 +1082,7 @@ print_aliases_sudoers(struct sudoers_parse_tree *parse_tree,
 static FILE *output_fp;		/* global for convert_sudoers_output */
 
 static int
-convert_sudoers_output(const char *buf)
+convert_sudoers_output(const char * restrict buf)
 {
     return fputs(buf, output_fp);
 }

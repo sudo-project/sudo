@@ -155,7 +155,7 @@ sudo_conversation_1_7(int num_msgs, const struct sudo_conv_message msgs[],
 }
 
 int
-sudo_conversation_printf(int msg_type, const char *fmt, ...)
+sudo_conversation_printf(int msg_type, const char * restrict fmt, ...)
 {
     const char *crnl = NULL;
     FILE *ttyfp = NULL;

@@ -145,7 +145,7 @@ escape(char ch, char *buf)
  * Any non-printable characters are escaped in octal as #0nn.
  */
 bool
-sudo_lbuf_append_esc_v1(struct sudo_lbuf *lbuf, int flags, const char *fmt, ...)
+sudo_lbuf_append_esc_v1(struct sudo_lbuf *lbuf, int flags, const char * restrict fmt, ...)
 {
     unsigned int saved_len = lbuf->len;
     bool ret = false;
@@ -220,7 +220,7 @@ done:
  * Any characters in set are quoted with a backslash.
  */
 bool
-sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char *fmt, ...)
+sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char * restrict fmt, ...)
 {
     unsigned int saved_len = lbuf->len;
     bool ret = false;
@@ -279,7 +279,7 @@ done:
  * Parse the format and append strings, only %s, %n$s and %% escapes are supported.
  */
 bool
-sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...)
+sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char * restrict fmt, ...)
 {
     unsigned int saved_len = lbuf->len;
     bool ret = false;

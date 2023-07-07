@@ -38,7 +38,7 @@
  * Returns strlen(src); if retval >= dsize, truncation occurred.
  */
 size_t
-sudo_strlcpy(char *dst, const char *src, size_t dsize)
+sudo_strlcpy(char * restrict dst, const char * restrict src, size_t dsize)
 {
 	const char *osrc = src;
 	size_t nleft = dsize;

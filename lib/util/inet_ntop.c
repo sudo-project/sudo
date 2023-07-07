@@ -70,7 +70,7 @@
  *	Paul Vixie, 1996.
  */
 static const char *
-inet_ntop4(const unsigned char *src, char *dst, socklen_t size)
+inet_ntop4(const unsigned char * restrict src, char * restrict dst, socklen_t size)
 {
 	const char fmt[] = "%u.%u.%u.%u";
 	int len;
@@ -91,7 +91,7 @@ inet_ntop4(const unsigned char *src, char *dst, socklen_t size)
  *	Paul Vixie, 1996.
  */
 static const char *
-inet_ntop6(const unsigned char *src, char *dst, socklen_t size)
+inet_ntop6(const unsigned char * restrict src, char * restrict dst, socklen_t size)
 {
 	/*
 	 * Note that int32_t and int16_t need only be "at least" large enough
@@ -210,7 +210,7 @@ inet_ntop6(const unsigned char *src, char *dst, socklen_t size)
  *	Paul Vixie, 1996.
  */
 const char *
-sudo_inet_ntop(int af, const void *src, char *dst, socklen_t size)
+sudo_inet_ntop(int af, const void * restrict src, char * restrict dst, socklen_t size)
 {
 	switch (af) {
 	case AF_INET:

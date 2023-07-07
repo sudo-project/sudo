@@ -741,7 +741,7 @@ out:
 
 void
 sudo_debug_vprintf2_v1(const char *func, const char *file, int lineno,
-    unsigned int level, const char *fmt, va_list ap)
+    unsigned int level, const char * restrict fmt, va_list ap)
 {
     int pri, saved_errno = errno;
     unsigned int subsys;
@@ -818,7 +818,7 @@ out:
 
 #ifdef NO_VARIADIC_MACROS
 void
-sudo_debug_printf_nvm_v1(int pri, const char *fmt, ...)
+sudo_debug_printf_nvm_v1(int pri, const char * restrict fmt, ...)
 {
     va_list ap;
 
@@ -830,7 +830,7 @@ sudo_debug_printf_nvm_v1(int pri, const char *fmt, ...)
 
 void
 sudo_debug_printf2_v1(const char *func, const char *file, int lineno,
-    unsigned int level, const char *fmt, ...)
+    unsigned int level, const char * restrict fmt, ...)
 {
     va_list ap;
 
@@ -1149,20 +1149,20 @@ sudo_debug_needed_v1(unsigned int level)
 
 void
 sudo_debug_vprintf2_v1(const char *func, const char *file, int lineno,
-    unsigned int level, const char *fmt, va_list ap)
+    unsigned int level, const char * restrict fmt, va_list ap)
 {
 }
 
 #ifdef NO_VARIADIC_MACROS
 void
-sudo_debug_printf_nvm_v1(int pri, const char *fmt, ...)
+sudo_debug_printf_nvm_v1(int pri, const char * restrict fmt, ...)
 {
 }
 #endif /* NO_VARIADIC_MACROS */
 
 void
 sudo_debug_printf2_v1(const char *func, const char *file, int lineno,
-    unsigned int level, const char *fmt, ...)
+    unsigned int level, const char * restrict fmt, ...)
 {
 }
 
