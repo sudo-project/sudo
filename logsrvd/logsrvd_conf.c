@@ -468,7 +468,7 @@ cb_iolog_maxseq(struct logsrvd_config *config, const char *str, size_t offset)
     unsigned int value;
     debug_decl(cb_iolog_maxseq, SUDO_DEBUG_UTIL);
 
-    value = sudo_strtonum(str, 0, SESSID_MAX, &errstr);
+    value = (unsigned int)sudo_strtonum(str, 0, SESSID_MAX, &errstr);
     if (errstr != NULL) {
         if (errno != ERANGE) {
 	    sudo_warnx(U_("invalid value for %s: %s"), "maxseq", errstr);
@@ -932,7 +932,7 @@ cb_syslog_maxlen(struct logsrvd_config *config, const char *str, size_t offset)
     const char *errstr;
     debug_decl(cb_syslog_maxlen, SUDO_DEBUG_UTIL);
 
-    maxlen = sudo_strtonum(str, 1, UINT_MAX, &errstr);
+    maxlen = (unsigned int)sudo_strtonum(str, 1, UINT_MAX, &errstr);
     if (errstr != NULL)
 	debug_return_bool(false);
 

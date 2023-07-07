@@ -170,7 +170,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 			errno = ERANGE;
 			sudo_warn(U_("%s: %s"), source, "columns");
 		    } else {
-			evlog->columns = info->u.numval;
+			evlog->columns = (int)info->u.numval;
 		    }
 		}
 		continue;
@@ -193,7 +193,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 			errno = ERANGE;
 			sudo_warn(U_("%s: %s"), source, "lines");
 		    } else {
-			evlog->lines = info->u.numval;
+			evlog->lines = (int)info->u.numval;
 		    }
 		}
 		continue;
@@ -242,7 +242,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 			errno = ERANGE;
 			sudo_warn(U_("%s: %s"), source, "rungid");
 		    } else {
-			evlog->rungid = info->u.numval;
+			evlog->rungid = (gid_t)info->u.numval;
 		    }
 		}
 		continue;
@@ -263,7 +263,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 			errno = ERANGE;
 			sudo_warn(U_("%s: %s"), source, "runuid");
 		    } else {
-			evlog->runuid = info->u.numval;
+			evlog->runuid = (uid_t)info->u.numval;
 		    }
 		}
 		continue;
@@ -417,7 +417,7 @@ fill_seq(char *str, size_t strsize, void *v)
 	sudo_warnx(U_("%s: unable to format session id"), __func__);
 	debug_return_size_t(strsize); /* handle non-standard snprintf() */
     }
-    debug_return_size_t(len);
+    debug_return_size_t((size_t)len);
 }
 
 static size_t
@@ -527,7 +527,7 @@ create_iolog_path(struct connection_closure *closure)
     struct eventlog *evlog = closure->evlog;
     struct iolog_path_closure path_closure;
     char expanded_dir[PATH_MAX], expanded_file[PATH_MAX], pathbuf[PATH_MAX];
-    size_t len;
+    int len;
     debug_decl(create_iolog_path, SUDO_DEBUG_UTIL);
 
     path_closure.evlog = evlog;
@@ -549,7 +549,7 @@ create_iolog_path(struct connection_closure *closure)
 
     len = snprintf(pathbuf, sizeof(pathbuf), "%s/%s", expanded_dir,
 	expanded_file);
-    if (len >= sizeof(pathbuf)) {
+    if (len < 0 || len >= ssizeof(pathbuf)) {
 	errno = ENAMETOOLONG;
 	sudo_warn("%s/%s", expanded_dir, expanded_file);
 	goto bad;
@@ -681,14 +681,14 @@ iolog_copy(struct iolog_file *src, struct iolog_file *dst, off_t remainder,
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"copying %lld bytes", (long long)remainder);
     while (remainder > 0) {
-	const ssize_t toread = MIN(remainder, ssizeof(buf));
+	const size_t toread = MIN((size_t)remainder, sizeof(buf));
 	nread = iolog_read(src, buf, toread, errstr);
 	if (nread == -1)
 	    debug_return_bool(false);
 	remainder -= nread;
 
 	do {
-	    ssize_t nwritten = iolog_write(dst, buf, nread, errstr);
+	    ssize_t nwritten = iolog_write(dst, buf, (size_t)nread, errstr);
 	    if (nwritten == -1)
 		debug_return_bool(false);
 	    nread -= nwritten;
@@ -753,7 +753,7 @@ iolog_rewrite(const struct timespec *target, struct connection_closure *closure)
 		    evlog->iolog_path, iolog_fd_to_name(timing.event));
 		goto done;
 	    }
-	    iolog_file_sizes[timing.event] += timing.u.nbytes;
+	    iolog_file_sizes[timing.event] += (off_t)timing.u.nbytes;
 	}
 
 	if (sudo_timespeccmp(&closure->elapsed_time, target, >=)) {

@@ -833,7 +833,7 @@ relay_server_msg_cb(int fd, int what, void *v)
     default:
 	break;
     }
-    buf->len += nread;
+    buf->len += (size_t)nread;
 
     while (buf->len - buf->off >= sizeof(msg_len)) {
 	/* Read wire message size (uint32_t in network byte order). */
@@ -984,7 +984,7 @@ relay_client_msg_cb(int fd, int what, void *v)
 	    goto send_error;
 	}
     }
-    buf->off += nwritten;
+    buf->off += (size_t)nwritten;
 
     if (buf->off == buf->len) {
 	/* sent entire message, move buf to free list */

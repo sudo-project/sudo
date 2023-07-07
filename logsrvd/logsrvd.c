@@ -978,7 +978,7 @@ server_msg_cb(int fd, int what, void *v)
 	sudo_warn("%s: write", closure->ipaddr);
 	goto finished;
     }
-    buf->off += nwritten;
+    buf->off += (size_t)nwritten;
 
     if (buf->off == buf->len) {
 	/* sent entire message, move buf to free list */
@@ -1102,7 +1102,7 @@ client_msg_cb(int fd, int what, void *v)
     default:
 	break;
     }
-    buf->len += nread;
+    buf->len += (size_t)nread;
 
     while (buf->len - buf->off >= sizeof(msg_len)) {
 	/* Read wire message size (uint32_t in network byte order). */
@@ -1207,7 +1207,7 @@ server_commit_cb(int unused, int what, void *v)
 	iolog_flush_all(closure);
 
     commit_point.tv_sec = closure->elapsed_time.tv_sec;
-    commit_point.tv_nsec = closure->elapsed_time.tv_nsec;
+    commit_point.tv_nsec = (int32_t)closure->elapsed_time.tv_nsec;
     if (!schedule_commit_point(&commit_point, closure))
 	connection_close(closure);
 

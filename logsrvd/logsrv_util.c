@@ -166,7 +166,7 @@ iolog_seekto(int iolog_dir_fd, const char *iolog_path,
 		    iolog_fd_to_name(timing.event));
 		goto bad;
 	    }
-	    pos = iolog_seek(&iolog_files[timing.event], timing.u.nbytes,
+	    pos = iolog_seek(&iolog_files[timing.event], (off_t)timing.u.nbytes,
 		SEEK_CUR);
 	    if (pos == -1) {
 		sudo_warn(U_("%s/%s: unable to seek forward %zu"), iolog_path,

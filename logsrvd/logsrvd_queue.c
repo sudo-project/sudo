@@ -225,7 +225,7 @@ logsrvd_queue_scan(struct sudo_event_base *evbase)
 	sudo_warn("%s/outgoing/%s", logsrvd_conf_relay_dir(), RELAY_TEMPLATE);
 	debug_return_bool(false);
     }
-    dirlen -= sizeof(RELAY_TEMPLATE) - 1;
+    dirlen -= (int)sizeof(RELAY_TEMPLATE) - 1;
     path[dirlen] = '\0';
 
     dirp = opendir(path);

@@ -430,6 +430,8 @@ store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len,
     }
 
     if (closure->log_io) {
+	mode_t mode;
+
 	/* Store the run time and exit status in log.json. */
 	if (!store_exit_info_json(closure->iolog_dir_fd, evlog)) {
 	    closure->errstr = _("error logging exit event");
@@ -437,7 +439,7 @@ store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len,
 	}
 
 	/* Clear write bits from I/O timing file to indicate completion. */
-	mode_t mode = logsrvd_conf_iolog_mode();
+	mode = logsrvd_conf_iolog_mode();
 	CLR(mode, S_IWUSR|S_IWGRP|S_IWOTH);
 	if (fchmodat(closure->iolog_dir_fd, "timing", mode, 0) == -1) {
 	    sudo_warn("chmod 0%o %s/%s", (unsigned int)mode, "timing",
@@ -603,7 +605,7 @@ store_iobuf_local(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t buflen,
 
     /* Write timing data. */
     if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
-	    len, &errstr)) {
+	    (size_t)len, &errstr)) {
 	sudo_warnx(U_("%s/%s: %s"), evlog->iolog_path,
 	    iolog_fd_to_name(IOFD_TIMING), errstr);
 	goto bad;
@@ -651,7 +653,7 @@ store_winsize_local(ChangeWindowSize *msg, uint8_t *buf, size_t buflen,
 
     /* Write timing data. */
     if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
-	    len, &errstr)) {
+	    (size_t)len, &errstr)) {
 	sudo_warnx(U_("%s/%s: %s"), closure->evlog->iolog_path,
 	    iolog_fd_to_name(IOFD_TIMING), errstr);
 	goto bad;
@@ -686,7 +688,7 @@ store_suspend_local(CommandSuspend *msg, uint8_t *buf, size_t buflen,
 
     /* Write timing data. */
     if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
-	    len, &errstr)) {
+	    (size_t)len, &errstr)) {
 	sudo_warnx(U_("%s/%s: %s"), closure->evlog->iolog_path,
 	    iolog_fd_to_name(IOFD_TIMING), errstr);
 	goto bad;

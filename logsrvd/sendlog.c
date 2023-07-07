@@ -279,7 +279,7 @@ read_io_buf(struct client_closure *closure)
 {
     struct timing_closure *timing = &closure->timing;
     const char *errstr = NULL;
-    size_t nread;
+    ssize_t nread;
     debug_decl(read_io_buf, SUDO_DEBUG_UTIL);
 
     if (!closure->iolog_files[timing->event].enabled) {
@@ -310,7 +310,7 @@ read_io_buf(struct client_closure *closure)
 
     nread = iolog_read(&closure->iolog_files[timing->event], closure->buf,
 	timing->u.nbytes, &errstr);
-    if (nread != timing->u.nbytes) {
+    if (nread == -1) {
 	sudo_warnx(U_("unable to read %s/%s: %s"), iolog_dir,
 	    iolog_fd_to_name(timing->event), errstr);
 	debug_return_bool(false);
@@ -665,8 +665,8 @@ fmt_reject_message(struct client_closure *closure)
     }
 
     /* Sudo I/O logs only store start time in seconds. */
-    tv.tv_sec = closure->evlog->submit_time.tv_sec;
-    tv.tv_nsec = closure->evlog->submit_time.tv_nsec;
+    tv.tv_sec = (int64_t)closure->evlog->submit_time.tv_sec;
+    tv.tv_nsec = (int32_t)closure->evlog->submit_time.tv_nsec;
     reject_msg.submit_time = &tv;
 
     /* Why the command was rejected. */
@@ -724,8 +724,8 @@ fmt_accept_message(struct client_closure *closure)
     }
 
     /* Sudo I/O logs only store start time in seconds. */
-    tv.tv_sec = closure->evlog->submit_time.tv_sec;
-    tv.tv_nsec = closure->evlog->submit_time.tv_nsec;
+    tv.tv_sec = (int64_t)closure->evlog->submit_time.tv_sec;
+    tv.tv_nsec = (int32_t)closure->evlog->submit_time.tv_nsec;
     accept_msg.submit_time = &tv;
 
     /* Client will send IoBuffer messages. */
@@ -776,8 +776,8 @@ fmt_restart_message(struct client_closure *closure)
 	"%s: sending RestartMessage, [%lld, %ld]", __func__,
 	(long long)closure->restart.tv_sec, closure->restart.tv_nsec);
 
-    tv.tv_sec = closure->restart.tv_sec;
-    tv.tv_nsec = closure->restart.tv_nsec;
+    tv.tv_sec = (int64_t)closure->restart.tv_sec;
+    tv.tv_nsec = (int32_t)closure->restart.tv_nsec;
     restart_msg.resume_point = &tv;
     restart_msg.log_id = (char *)closure->iolog_id;
 
@@ -811,8 +811,8 @@ fmt_exit_message(struct client_closure *closure)
     if (evlog->exit_value != -1)
 	exit_msg.exit_value = evlog->exit_value;
     if (sudo_timespecisset(&evlog->run_time)) {
-	run_time.tv_sec = evlog->run_time.tv_sec;
-	run_time.tv_nsec = evlog->run_time.tv_nsec;
+	run_time.tv_sec = (int64_t)evlog->run_time.tv_sec;
+	run_time.tv_nsec = (int32_t)evlog->run_time.tv_nsec;
 	exit_msg.run_time = &run_time;
     }
     if (evlog->signal_name != NULL) {
@@ -863,8 +863,8 @@ fmt_io_buf(int type, struct client_closure *closure)
 
     /* Fill in IoBuffer. */
     /* TODO: split buffer if it is too large */
-    delay.tv_sec = closure->timing.delay.tv_sec;
-    delay.tv_nsec = closure->timing.delay.tv_nsec;
+    delay.tv_sec = (int64_t)closure->timing.delay.tv_sec;
+    delay.tv_nsec = (int32_t)closure->timing.delay.tv_nsec;
     iobuf_msg.delay = &delay;
     iobuf_msg.data.data = (void *)closure->buf;
     iobuf_msg.data.len = closure->timing.u.nbytes;
@@ -901,8 +901,8 @@ fmt_winsize(struct client_closure *closure)
     debug_decl(fmt_winsize, SUDO_DEBUG_UTIL);
 
     /* Fill in ChangeWindowSize message. */
-    delay.tv_sec = timing->delay.tv_sec;
-    delay.tv_nsec = timing->delay.tv_nsec;
+    delay.tv_sec = (int64_t)timing->delay.tv_sec;
+    delay.tv_nsec = (int32_t)timing->delay.tv_nsec;
     winsize_msg.delay = &delay;
     winsize_msg.rows = timing->u.winsize.lines;
     winsize_msg.cols = timing->u.winsize.cols;
@@ -938,8 +938,8 @@ fmt_suspend(struct client_closure *closure)
     debug_decl(fmt_suspend, SUDO_DEBUG_UTIL);
 
     /* Fill in CommandSuspend message. */
-    delay.tv_sec = timing->delay.tv_sec;
-    delay.tv_nsec = timing->delay.tv_nsec;
+    delay.tv_sec = (int64_t)timing->delay.tv_sec;
+    delay.tv_nsec = (int32_t)timing->delay.tv_nsec;
     suspend_msg.delay = &delay;
     if (sig2str(timing->u.signo, closure->buf) == -1)
 	goto done;
@@ -1359,7 +1359,7 @@ server_msg_cb(int fd, int what, void *v)
     default:
 	break;
     }
-    buf->len += nread;
+    buf->len += (size_t)nread;
 
     while (buf->len - buf->off >= sizeof(msg_len)) {
 	/* Read wire message size (uint32_t in network byte order). */
@@ -1473,7 +1473,7 @@ client_msg_cb(int fd, int what, void *v)
 	sudo_warn("send");
 	goto bad;
     }
-    buf->off += nwritten;
+    buf->off += (size_t)nwritten;
 
     if (buf->off == buf->len) {
 	/* sent entire message */
@@ -1742,7 +1742,7 @@ main(int argc, char *argv[])
 		goto bad;
 	    break;
 	case 't':
-	    nr_of_conns = sudo_strtonum(optarg, 1, INT_MAX, &errstr);
+	    nr_of_conns = (int)sudo_strtonum(optarg, 1, INT_MAX, &errstr);
 	    if (errstr != NULL) {
 		sudo_warnx(U_("%s: %s"), optarg, U_(errstr));
 		goto bad;

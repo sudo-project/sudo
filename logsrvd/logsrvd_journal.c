@@ -90,7 +90,7 @@ journal_fdopen(int fd, const char *journal_path,
 }
 
 static int
-journal_mkstemp(const char *parent_dir, char *pathbuf, int pathlen)
+journal_mkstemp(const char *parent_dir, char *pathbuf, size_t pathsize)
 {
     int len, dfd = -1, fd = -1;
     mode_t dirmode, oldmask;
@@ -105,9 +105,9 @@ journal_mkstemp(const char *parent_dir, char *pathbuf, int pathlen)
         dirmode |= S_IXOTH;
     oldmask = umask(ACCESSPERMS & ~dirmode);
 
-    len = snprintf(pathbuf, pathlen, "%s/%s/%s",
+    len = snprintf(pathbuf, pathsize, "%s/%s/%s",
 	logsrvd_conf_relay_dir(), parent_dir, RELAY_TEMPLATE);
-    if (len >= pathlen) {
+    if ((size_t)len >= pathsize) {
 	errno = ENAMETOOLONG;
 	sudo_warn("%s/%s/%s", logsrvd_conf_relay_dir(), parent_dir,
 	    RELAY_TEMPLATE);
@@ -120,7 +120,7 @@ journal_mkstemp(const char *parent_dir, char *pathbuf, int pathlen)
 	    "unable to create parent dir for %s", pathbuf);
 	goto done;
     }
-    template = pathbuf + (len - strlen(RELAY_TEMPLATE));
+    template = &pathbuf[(size_t)len - (sizeof(RELAY_TEMPLATE) - 1)];
     if ((fd = mkostempsat(dfd, template, 0, 0)) == -1) {
 	sudo_warn(U_("%s: %s"), "mkstemp", pathbuf);
 	goto done;
