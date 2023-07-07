@@ -74,7 +74,7 @@ fill_seq(char *str, size_t strsize, void *unused)
 	escape_data.sessid[4], escape_data.sessid[5]);
     if (len < 0)
 	return strsize; /* handle non-standard snprintf() */
-    return len;
+    return (size_t)len;
 }
 
 static size_t

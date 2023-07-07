@@ -145,14 +145,14 @@ iolog_parse_loginfo_legacy(FILE *fp, const char *iolog_dir,
 	if ((ep = strchr(cp, ':')) != NULL) {
 	    *ep = '\0';
 	}
-	evlog->lines = sudo_strtonum(cp, 1, INT_MAX, &errstr);
+	evlog->lines = (int)sudo_strtonum(cp, 1, INT_MAX, &errstr);
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"%s: tty lines %s: %s", iolog_dir, cp, errstr);
 	}
 	if (ep != NULL) {
 	    cp = ep + 1;
-	    evlog->columns = sudo_strtonum(cp, 1, INT_MAX, &errstr);
+	    evlog->columns = (int)sudo_strtonum(cp, 1, INT_MAX, &errstr);
 	    if (errstr != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "%s: tty cols %s: %s", iolog_dir, cp, errstr);

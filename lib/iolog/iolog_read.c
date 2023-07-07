@@ -48,7 +48,7 @@ iolog_read(struct iolog_file *iol, void *buf, size_t nbytes,
     ssize_t nread;
     debug_decl(iolog_read, SUDO_DEBUG_UTIL);
 
-    if (nbytes > UINT_MAX) {
+    if (nbytes > UINT_MAX || nbytes > SSIZE_MAX) {
 	errno = EINVAL;
 	if (errstr != NULL)
 	    *errstr = strerror(errno);
@@ -57,7 +57,7 @@ iolog_read(struct iolog_file *iol, void *buf, size_t nbytes,
 
 #ifdef HAVE_ZLIB_H
     if (iol->compressed) {
-	if ((nread = gzread(iol->fd.g, buf, nbytes)) == -1) {
+	if ((nread = gzread(iol->fd.g, buf, (unsigned int)nbytes)) == -1) {
 	    if (errstr != NULL) {
 		int errnum;
 		*errstr = gzerror(iol->fd.g, &errnum);
@@ -69,7 +69,7 @@ iolog_read(struct iolog_file *iol, void *buf, size_t nbytes,
 #endif
     {
 	nread = (ssize_t)fread(buf, 1, nbytes, iol->fd.f);
-	if (nread == 0 && ferror(iol->fd.f)) {
+	if (nread <= 0 && ferror(iol->fd.f)) {
 	    nread = -1;
 	    if (errstr != NULL)
 		*errstr = strerror(errno);

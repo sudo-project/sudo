@@ -104,7 +104,8 @@ iolog_mkdirs(const char *path)
 	/* Try again as the I/O log owner (for NFS). */
 	uid_changed = iolog_swapids(false);
 	if (uid_changed)
-	    dfd = sudo_open_parent_dir(path, -1, -1, iolog_dirmode, false);
+	    dfd = sudo_open_parent_dir(path, (uid_t)-1, (gid_t)-1,
+		iolog_dirmode, false);
     }
     if (dfd != -1) {
 	/* Create final path component. */

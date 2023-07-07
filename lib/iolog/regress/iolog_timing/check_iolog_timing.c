@@ -84,7 +84,7 @@ test_parse_delay(int *ntests, int *nerrors)
 	    continue;
 	}
     }
-    (*ntests) += i;
+    (*ntests) += (int)i;
 }
 
 static struct adjust_delay_test {
@@ -124,7 +124,7 @@ test_adjust_delay(int *ntests, int *nerrors)
 	    (*nerrors)++;
 	}
     }
-    (*ntests) += i;
+    (*ntests) += (int)i;
 }
 
 int

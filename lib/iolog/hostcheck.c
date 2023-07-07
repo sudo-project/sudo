@@ -130,7 +130,7 @@ static HostnameValidationResult
 validate_name(const char *hostname, ASN1_STRING *certname_asn1)
 {
     char *certname_s = (char *) ASN1_STRING_get0_data(certname_asn1);
-    size_t certname_len = ASN1_STRING_length(certname_asn1);
+    size_t certname_len = (size_t)ASN1_STRING_length(certname_asn1);
     size_t hostname_len = strlen(hostname);
     debug_decl(validate_name, SUDO_DEBUG_UTIL);
 
@@ -207,20 +207,19 @@ matches_common_name(const char *hostname, const char *ipaddr, const X509 *cert, 
 		debug_return_int(Error);
 	}			
 	const unsigned char *common_name_str = ASN1_STRING_get0_data(common_name_asn1);
+	const size_t common_name_length = (size_t)ASN1_STRING_length(common_name_asn1);
 
 	/* Make sure there isn't an embedded NUL character in the CN */
-    if (memchr(common_name_str, '\0', ASN1_STRING_length(common_name_asn1)) != NULL) {
+	if (memchr(common_name_str, '\0', common_name_length) != NULL) {
 		debug_return_int(MalformedCertificate);
 	}
 
 	/* Compare expected hostname with the CN */
-    if (validate_name(hostname, common_name_asn1) == MatchFound) {
+	if (validate_name(hostname, common_name_asn1) == MatchFound) {
 		debug_return_int(MatchFound);
 	}
 
-    int common_name_length = ASN1_STRING_length(common_name_asn1);
     char *nullterm_common_name = malloc(common_name_length + 1);
-
     if (nullterm_common_name == NULL) {
 	debug_return_int(Error);
     }
@@ -283,9 +282,10 @@ matches_subject_alternative_name(const char *hostname, const char *ipaddr, const
 
         if (current_name->type == GEN_DNS) {
             const unsigned char *dns_name = ASN1_STRING_get0_data(current_name->d.dNSName);
+	    const size_t dns_name_length = (size_t)ASN1_STRING_length(current_name->d.dNSName);
 
             /* Make sure there isn't an embedded NUL character in the DNS name */
-            if (memchr(dns_name, '\0', ASN1_STRING_length(current_name->d.dNSName)) != NULL) {
+            if (memchr(dns_name, '\0', dns_name_length) != NULL) {
                 result = MalformedCertificate;
                 break;
             } else {
@@ -295,9 +295,7 @@ matches_subject_alternative_name(const char *hostname, const char *ipaddr, const
                     break;
                 }
 
-                size_t dns_name_length = ASN1_STRING_length(current_name->d.dNSName);
                 char *nullterm_dns_name = malloc(dns_name_length + 1);
-
                 if (nullterm_dns_name == NULL) {
                     debug_return_int(Error);
                 }

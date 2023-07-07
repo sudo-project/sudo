@@ -53,15 +53,15 @@ void
 iolog_adjust_delay(struct timespec *delay, struct timespec *max_delay,
      double scale_factor)
 {
-    double seconds;
     debug_decl(iolog_adjust_delay, SUDO_DEBUG_UTIL);
 
     if (scale_factor != 1.0) {
 	/* Order is important: we don't want to double the remainder. */
-        seconds = (double)delay->tv_sec / scale_factor;
+	const double seconds = (double)delay->tv_sec / scale_factor;
+	const double nseconds = (double)delay->tv_nsec / scale_factor;
         delay->tv_sec = (time_t)seconds;
-        delay->tv_nsec /= scale_factor;
-        delay->tv_nsec += (seconds - delay->tv_sec) * 1000000000;
+        delay->tv_nsec = (long)nseconds;
+        delay->tv_nsec += (long)((seconds - (double)delay->tv_sec) * 1000000000);
         while (delay->tv_nsec >= 1000000000) {
             delay->tv_sec++;
             delay->tv_nsec -= 1000000000;

@@ -177,7 +177,7 @@ iolog_pwfilt_remove(void *vhandle, const char *pattern)
  */
 bool
 iolog_pwfilt_run(void *vhandle, int event, const char *buf,
-    unsigned int len, char **newbuf)
+    size_t len, char **newbuf)
 {
     struct pwfilt_handle *handle = vhandle;
     struct pwfilt_regex *filt;
