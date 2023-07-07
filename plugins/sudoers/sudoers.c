@@ -480,7 +480,6 @@ sudoers_check_common(int pwflag)
 	    N_("user not allowed to change directory to %s"), user_runcwd);
 	sudo_warnx(U_("you are not permitted to use the -D option with %s"),
 	    user_cmnd);
-	debug_return_bool(false);
 	goto bad;
     default:
 	goto done;
