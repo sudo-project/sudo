@@ -946,8 +946,8 @@ fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
     ec->cmnd_pid = -1;
     ec->cstat = cstat;
     ec->details = details;
-    ec->rows = (short)user_details->ts_rows;
-    ec->cols = (short)user_details->ts_cols;
+    ec->rows = user_details->ts_rows;
+    ec->cols = user_details->ts_cols;
 
     /* Reset cstat for running the command. */
     cstat->type = CMD_INVALID;
@@ -1453,7 +1453,7 @@ sync_ttysize(struct exec_closure *ec)
 
     if (ioctl(io_fds[SFD_USERTTY], TIOCGWINSZ, &wsize) == 0) {
 	if (wsize.ws_row != ec->rows || wsize.ws_col != ec->cols) {
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %hd x %hd -> %hd x %hd",
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %d x %d -> %hd x %hd",
 		__func__, ec->rows, ec->cols, wsize.ws_row, wsize.ws_col);
 
 	    /* Log window change event. */
@@ -1464,8 +1464,8 @@ sync_ttysize(struct exec_closure *ec)
 	    killpg(ec->cmnd_pid, SIGWINCH);
 
 	    /* Update rows/cols. */
-	    ec->rows = (short)wsize.ws_row;
-	    ec->cols = (short)wsize.ws_col;
+	    ec->rows = wsize.ws_row;
+	    ec->cols = wsize.ws_col;
 	}
     }
 

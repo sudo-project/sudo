@@ -76,8 +76,8 @@ struct exec_closure {
     pid_t monitor_pid;
     pid_t cmnd_pid;
     pid_t ppgrp;
-    short rows;
-    short cols;
+    int rows;
+    int cols;
     bool foreground;
     bool term_raw;
 };

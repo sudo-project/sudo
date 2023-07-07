@@ -64,8 +64,8 @@ handle_sigwinch(struct exec_closure *ec, int fd)
             log_winchange(ec, wsize.ws_row, wsize.ws_col);
 
             /* Update rows/cols. */
-            ec->rows = (short)wsize.ws_row;
-            ec->cols = (short)wsize.ws_col;
+            ec->rows = wsize.ws_row;
+            ec->cols = wsize.ws_col;
         }
     }
 }
@@ -218,8 +218,8 @@ fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
     ec->ppgrp = getpgrp();
     ec->cstat = cstat;
     ec->details = details;
-    ec->rows = (short)user_details->ts_rows;
-    ec->cols = (short)user_details->ts_cols;
+    ec->rows = user_details->ts_rows;
+    ec->cols = user_details->ts_cols;
 
     /* Setup event base and events. */
     ec->evbase = evbase;
