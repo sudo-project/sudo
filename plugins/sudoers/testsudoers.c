@@ -34,6 +34,11 @@
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
 #include <string.h>
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
@@ -42,6 +47,7 @@
 #include <errno.h>
 
 #include "testsudoers_pwutil.h"
+#include "toke.h"
 #include "tsgetgrpw.h"
 #include "sudoers.h"
 #include "interfaces.h"
@@ -73,9 +79,6 @@ static void cb_privilege(struct privilege *priv, int host_match);
 static void cb_cmndspec(struct cmndspec *cs, int date_match, int runas_match, int cmnd_match);
 static int testsudoers_query(const struct sudo_nss *nss, struct passwd *pw);
 
-/* gram.y */
-extern int (*trace_print)(const char *msg);
-
 /*
  * Globals
  */
@@ -87,9 +90,6 @@ int sudo_mode = MODE_RUN;
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
 extern char *malloc_options;
-#endif
-#if YYDEBUG
-extern int sudoersdebug;
 #endif
 
 sudo_dso_public int main(int argc, char *argv[]);
