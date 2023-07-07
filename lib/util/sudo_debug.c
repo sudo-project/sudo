@@ -201,10 +201,10 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 	const int new_size = round_nfds(output->fd + 1) / NBBY;
 	unsigned char *new_fds;
 
-	new_fds = realloc(sudo_debug_fds, new_size);
+	new_fds = realloc(sudo_debug_fds, (size_t)new_size);
 	if (new_fds == NULL)
 	    goto oom;
-	memset(new_fds + old_size, 0, new_size - old_size);
+	memset(new_fds + old_size, 0, (size_t)(new_size - old_size));
 	sudo_debug_fds = new_fds;
 	sudo_debug_fds_size = new_size * NBBY;
     }

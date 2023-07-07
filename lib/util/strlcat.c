@@ -50,7 +50,7 @@ sudo_strlcat(char *dst, const char *src, size_t dsize)
 	/* Find the end of dst and adjust bytes left but don't go past end. */
 	while (n-- != 0 && *dst != '\0')
 		dst++;
-	dlen = dst - odst;
+	dlen = (size_t)(dst - odst);
 	n = dsize - dlen;
 
 	if (n-- == 0)
@@ -64,6 +64,6 @@ sudo_strlcat(char *dst, const char *src, size_t dsize)
 	}
 	*dst = '\0';
 
-	return(dlen + (src - osrc));	/* count does not include NUL */
+	return(dlen + (size_t)(src - osrc));	/* count does not include NUL */
 }
 #endif /* HAVE_STRLCAT */

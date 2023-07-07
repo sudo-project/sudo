@@ -73,7 +73,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     struct sudo_conf_debug *debug_spec;
     struct sudo_debug_file *debug_file;
     struct plugin_info *info;
-    size_t nwritten;
+    ssize_t nwritten;
     int fd;
 
     initprogname("fuzz_sudo_conf");
@@ -85,7 +85,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (fd == -1)
 	return 0;
     nwritten = write(fd, data, size);
-    if (nwritten != size) {
+    if (nwritten == -1) {
 	close(fd);
 	return 0;
     }

@@ -206,16 +206,16 @@ warning(const char *errstr, const char *fmt, va_list ap)
 		buflen = vsnprintf(static_buf, sizeof(static_buf), fmt, ap2);
 		va_end(ap2);
 		if (buflen >= ssizeof(static_buf)) {
-		    buf = malloc(++buflen);
-		    if (buf != NULL)
-			(void)vsnprintf(buf, buflen, fmt, ap);
-		    else
+		    /* Not enough room in static buf, allocate dynamically. */
+		    if (vasprintf(&buf, fmt, ap) == -1)
 			buf = static_buf;
 		}
-		msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
-		msgs[nmsgs++].msg = ": ";
-		msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
-		msgs[nmsgs++].msg = buf;
+		if (buflen > 0) {
+		    msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
+		    msgs[nmsgs++].msg = ": ";
+		    msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;
+		    msgs[nmsgs++].msg = buf;
+		}
         }
         if (errstr != NULL) {
 	    msgs[nmsgs].msg_type = SUDO_CONV_ERROR_MSG;

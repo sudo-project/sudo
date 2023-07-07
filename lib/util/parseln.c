@@ -48,8 +48,8 @@
 ssize_t
 sudo_parseln_v2(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp, int flags)
 {
-    size_t linesize = 0, total = 0;
-    ssize_t len;
+    ssize_t len, total = 0;
+    size_t bufsize, linesize = 0;
     char *cp, *line = NULL;
     bool continued, comment;
     debug_decl(sudo_parseln, SUDO_DEBUG_UTIL);
@@ -90,12 +90,12 @@ sudo_parseln_v2(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp, i
 	for (cp = line; isblank((unsigned char)*cp); cp++)
 	    len--;
 
-	if (*bufp == NULL || total + len >= *bufsizep) {
-	    const size_t size = total + len + 1;
-	    const size_t newsize = sudo_pow2_roundup(size);
+	bufsize = (size_t)(total + len + 1);
+	if (*bufp == NULL || bufsize > *bufsizep) {
+	    const size_t newsize = sudo_pow2_roundup(bufsize);
 	    void *newbuf;
 
-	    if (newsize < size) {
+	    if (newsize < bufsize) {
 		/* overflow */
 		errno = ENOMEM;
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -114,7 +114,7 @@ sudo_parseln_v2(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp, i
 	    *bufp = newbuf;
 	    *bufsizep = newsize;
 	}
-	memcpy(*bufp + total, cp, len + 1);
+	memcpy(*bufp + total, cp, (size_t)(len + 1));
 	total += len;
     } while (continued);
     free(line);

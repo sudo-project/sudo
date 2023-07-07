@@ -109,7 +109,7 @@ json_append_buf(struct json_container *jsonc, const char *str)
     }
 
     memcpy(jsonc->buf + jsonc->buflen, str, len);
-    jsonc->buflen += len;
+    jsonc->buflen += (unsigned int)len;
     jsonc->buf[jsonc->buflen] = '\0';
 
     debug_return_bool(true);
@@ -123,7 +123,7 @@ static bool
 json_append_string(struct json_container *jsonc, const char *str)
 {
     const char hex[] = "0123456789abcdef";
-    unsigned char ch;
+    char ch;
     debug_decl(json_append_string, SUDO_DEBUG_UTIL);
 
     if (!json_append_buf(jsonc, "\""))
@@ -157,7 +157,7 @@ json_append_string(struct json_container *jsonc, const char *str)
 	    ch = 't';
 	    break;
 	default:
-	    if (iscntrl(ch)) {
+	    if (iscntrl((unsigned char)ch)) {
 		/* Escape control characters like \u0000 */
 		*cp++ = '\\';
 		*cp++ = 'u';
@@ -180,8 +180,8 @@ json_append_string(struct json_container *jsonc, const char *str)
 }
 
 bool
-sudo_json_init_v2(struct json_container *jsonc, int indent, bool minimal,
-    bool memfatal, bool quiet)
+sudo_json_init_v2(struct json_container *jsonc, unsigned int indent,
+    bool minimal, bool memfatal, bool quiet)
 {
     debug_decl(sudo_json_init, SUDO_DEBUG_UTIL);
 
@@ -208,8 +208,8 @@ sudo_json_init_v2(struct json_container *jsonc, int indent, bool minimal,
 }
 
 bool
-sudo_json_init_v1(struct json_container *jsonc, int indent, bool minimal,
-    bool memfatal)
+sudo_json_init_v1(struct json_container *jsonc, unsigned int indent,
+    bool minimal, bool memfatal)
 {
     return sudo_json_init_v2(jsonc, indent, minimal, memfatal, false);
 }

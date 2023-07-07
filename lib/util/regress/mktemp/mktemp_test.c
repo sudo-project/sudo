@@ -52,7 +52,7 @@ sudo_dso_public int main(int argc, char *argv[]);
  */
 static int
 check(int fd, char const *kind, char const *path, char const *prefix,
-    size_t plen, char const *suffix, size_t slen, int tlen)
+    size_t plen, char const *suffix, size_t slen, size_t tlen)
 {
 	struct stat sb, fsb;
 	char const *p;
@@ -87,7 +87,7 @@ check(int fd, char const *kind, char const *path, char const *prefix,
 }
 
 static void
-try_mkdtemp(char *p, char const *prefix, int len)
+try_mkdtemp(char *p, char const *prefix, size_t len)
 {
 	size_t plen = strlen(prefix);
 	int fd, tries, ok;
@@ -106,7 +106,7 @@ try_mkdtemp(char *p, char const *prefix, int len)
 }
 
 static void
-try_mkstemps(char *p, char const *prefix, int len, char const *suffix)
+try_mkstemps(char *p, char const *prefix, size_t len, char const *suffix)
 {
 	size_t plen = strlen(prefix);
 	size_t slen = strlen(suffix);
@@ -116,7 +116,7 @@ try_mkstemps(char *p, char const *prefix, int len, char const *suffix)
 		memcpy(p, prefix, plen);
 		memset(p + plen, 'X', len);
 		memcpy(p + plen + len, suffix, slen + 1);
-		fd = mkstemps(p, slen);
+		fd = mkstemps(p, (int)slen);
 		ok = check(fd, "mkstemp", p, prefix, plen, suffix, slen, len);
 		close(fd);
 		unlink(p);
@@ -131,9 +131,9 @@ main(int argc, char *argv[])
 {
 	char cwd[PATH_MAX + 1];
 	char *p;
-	size_t clen;
-	long pg;
-	int ch, i;
+	size_t clen, i;
+	size_t pg;
+	int ch;
 
 	initprogname(argc > 0 ? argv[0] : "mktemp_test");
 
@@ -150,7 +150,7 @@ main(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	pg = sysconf(_SC_PAGESIZE);
+	pg = (size_t)sysconf(_SC_PAGESIZE);
 	if (getcwd(cwd, sizeof cwd - 1) == NULL)
 		sudo_fatal("getcwd");
 	clen = strlen(cwd);
@@ -159,10 +159,10 @@ main(int argc, char *argv[])
 #ifdef MAP_ANON
 	p = mmap(NULL, pg * 3, PROT_READ | PROT_WRITE, MAP_PRIVATE|MAP_ANON, -1, 0);
 #else
-	i = open("/dev/zero", O_RDWR);
-	if (i == -1)
+	ch = open("/dev/zero", O_RDWR);
+	if (ch == -1)
 		sudo_fatal("/dev/zero");
-	p = mmap(NULL, pg * 3, PROT_READ | PROT_WRITE, MAP_PRIVATE, i, 0);
+	p = mmap(NULL, pg * 3, PROT_READ | PROT_WRITE, MAP_PRIVATE, ch, 0);
 #endif
 	if (p == MAP_FAILED)
 		sudo_fatal("mmap");
@@ -170,8 +170,7 @@ main(int argc, char *argv[])
 		sudo_fatal("mprotect");
 	p += pg;
 
-	i = MAX_TEMPLATE_LEN + 1;
-	while (i-- > 0) {
+	for (i = MAX_TEMPLATE_LEN; i != 0; i--) {
 		/* try first at the start of a page, no prefix */
 		try_mkdtemp(p, "", i);
 		/* now at the end of the page, no prefix */

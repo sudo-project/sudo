@@ -111,7 +111,7 @@ sudo_closefrom(int lowfd)
     if (fcntl(lowfd, F_CLOSEM, 0) != -1)
 	return;
 #elif defined(HAVE_CLOSE_RANGE)
-    if (close_range(lowfd, ~0U, 0) != -1)
+    if (close_range((unsigned int)lowfd, ~0U, 0) != -1)
 	return;
 #elif defined(HAVE_PROC_PIDINFO)
     len = proc_pidinfo(pid, PROC_PIDLISTFDS, 0, NULL, 0);
@@ -166,7 +166,7 @@ sudo_closefrom(int lowfd)
 	struct dirent *dent;
 	while ((dent = readdir(dirp)) != NULL) {
 	    const char *errstr;
-	    int fd = sudo_strtonum(dent->d_name, lowfd, INT_MAX, &errstr);
+	    int fd = (int)sudo_strtonum(dent->d_name, lowfd, INT_MAX, &errstr);
 	    if (errstr == NULL && fd != dirfd(dirp)) {
 		(void)closefrom_close(fd);
 	    }

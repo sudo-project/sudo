@@ -116,7 +116,7 @@ sudo_secure_fd_v1(int fd, unsigned int type, uid_t uid, gid_t gid,
  * Sets error to SUDO_PATH_SECURE on success, and a value < 0 on failure.
  */
 static int
-sudo_secure_open(const char *path, int type, uid_t uid, gid_t gid,
+sudo_secure_open(const char *path, unsigned int type, uid_t uid, gid_t gid,
     struct stat *sb, int *error)
 {
     struct stat stat_buf;
@@ -179,7 +179,7 @@ sudo_open_conf_path_v1(const char *path, char *name, size_t namesize,
     for (cp = sudo_strsplit(path, path_end, ":", &ep);
 	cp != NULL; cp = sudo_strsplit(NULL, path_end, ":", &ep)) {
 
-	const size_t len = ep - cp;
+	const size_t len = (size_t)(ep - cp);
 	if (len >= namesize) {
 	    /* We always set name, even on error. */
 	    memcpy(name, cp, namesize - 1);

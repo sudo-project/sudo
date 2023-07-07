@@ -46,7 +46,7 @@ main(int argc, char *argv[])
 
     /* Build up test data. */
     ntests = 256 + 256 + 3;
-    test_data = calloc(sizeof(*test_data), ntests);
+    test_data = calloc(sizeof(*test_data), (size_t)ntests);
     for (i = 0; i < 256; i++) {
 	/* lower case */
 	test_data[i].value = i;

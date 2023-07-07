@@ -25,8 +25,9 @@
 
 #include <sys/resource.h>
 
-#include <stdlib.h>
+#include <limits.h>
 #include <poll.h>
+#include <stdlib.h>
 #include <time.h>
 
 #include "sudo_compat.h"
@@ -34,6 +35,12 @@
 #include "sudo_fatal.h"
 #include "sudo_debug.h"
 #include "sudo_event.h"
+
+#if defined(OPEN_MAX) && OPEN_MAX > 256
+# define SUDO_OPEN_MAX  OPEN_MAX
+#else
+# define SUDO_OPEN_MAX  256
+#endif
 
 int
 sudo_ev_base_alloc_impl(struct sudo_event_base *base)
@@ -43,7 +50,7 @@ sudo_ev_base_alloc_impl(struct sudo_event_base *base)
 
     base->pfd_high = -1;
     base->pfd_max = 32;
-    base->pfds = reallocarray(NULL, base->pfd_max, sizeof(struct pollfd));
+    base->pfds = reallocarray(NULL, (size_t)base->pfd_max, sizeof(struct pollfd));
     if (base->pfds == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "%s: unable to allocate %d pollfds", __func__, base->pfd_max);
@@ -75,7 +82,9 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
     if (nofile_max == -1) {
 	struct rlimit rlim;
 	if (getrlimit(RLIMIT_NOFILE, &rlim) == 0) {
-	    nofile_max = rlim.rlim_cur;
+	    nofile_max = (int)rlim.rlim_cur;
+	} else {
+	    nofile_max = SUDO_OPEN_MAX;
 	}
     }
 
@@ -95,7 +104,7 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
 	}
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "%s: pfd_max %d -> %d", __func__, base->pfd_max, new_max);
-	pfds = reallocarray(base->pfds, new_max, sizeof(struct pollfd));
+	pfds = reallocarray(base->pfds, (size_t)new_max, sizeof(struct pollfd));
 	if (pfds == NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"%s: unable to allocate %d pollfds", __func__, new_max);

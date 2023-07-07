@@ -432,7 +432,7 @@ set_var_max_groups(const char *strval, const char *conf_file,
     int max_groups;
     debug_decl(set_var_max_groups, SUDO_DEBUG_UTIL);
 
-    max_groups = sudo_strtonum(strval, 1, 1024, NULL);
+    max_groups = (int)sudo_strtonum(strval, 1, 1024, NULL);
     if (max_groups <= 0) {
 	sudo_warnx(U_("invalid max groups \"%s\" in %s, line %u"), strval,
 	    conf_file, lineno);
@@ -672,7 +672,7 @@ sudo_conf_read_v1(const char *path, int conf_types)
 	/* _PATH_SUDO_CONF is a colon-separated list of path. */
 	fd = sudo_open_conf_path(_PATH_SUDO_CONF, conf_file,
 	    sizeof(conf_file), NULL);
-	error = sudo_secure_fd(fd, S_IFREG, ROOT_UID, -1, &sb);
+	error = sudo_secure_fd(fd, S_IFREG, ROOT_UID, (gid_t)-1, &sb);
 	switch (error) {
 	case SUDO_PATH_SECURE:
 	    /* OK! */

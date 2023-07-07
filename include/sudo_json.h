@@ -66,8 +66,8 @@ struct json_container {
     bool quiet;
 };
 
-sudo_dso_public bool sudo_json_init_v1(struct json_container *jsonc, int indent, bool minimal, bool memfatal);
-sudo_dso_public bool sudo_json_init_v2(struct json_container *jsonc, int indent, bool minimal, bool memfatal, bool quiet);
+sudo_dso_public bool sudo_json_init_v1(struct json_container *jsonc, unsigned int indent, bool minimal, bool memfatal);
+sudo_dso_public bool sudo_json_init_v2(struct json_container *jsonc, unsigned int indent, bool minimal, bool memfatal, bool quiet);
 #define sudo_json_init(_a, _b, _c, _d, _e) sudo_json_init_v2((_a), (_b), (_c), (_d), (_e))
 
 sudo_dso_public void sudo_json_free_v1(struct json_container *jsonc);

@@ -43,7 +43,7 @@ static struct strtoidx_data {
     { "4294967295", 0, NULL, NULL, EINVAL },
     { "4294967296", 0, NULL, NULL, ERANGE },
     { "-2147483649", 0, NULL, NULL, ERANGE },
-    { "-2", -2, NULL, NULL, 0 },
+    { "-2", (id_t)-2, NULL, NULL, 0 },
 #if SIZEOF_ID_T != SIZEOF_LONG_LONG
     { "-2", (id_t)4294967294U, NULL, NULL, 0 },
 #endif

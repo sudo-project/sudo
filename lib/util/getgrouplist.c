@@ -73,7 +73,8 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
 #endif
     int ngroups;
 #ifndef HAVE_GETGROUPLIST_2
-    int grpsize, tries;
+    long grpsize;
+    int tries;
 #endif
     debug_decl(sudo_getgrouplist2, SUDO_DEBUG_UTIL);
 
@@ -87,8 +88,8 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
     *ngroupsp = ngroups;
     debug_return_int(0);
 #else
-    grpsize = (int)sysconf(_SC_NGROUPS_MAX);
-    if (grpsize < 0)
+    grpsize = sysconf(_SC_NGROUPS_MAX);
+    if (grpsize < 0 || grpsize > INT_MAX)
 	grpsize = NGROUPS_MAX;
     grpsize++;	/* include space for the primary gid */
     /*
@@ -97,10 +98,10 @@ sudo_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
      */
     for (tries = 0; tries < 10; tries++) {
 	free(groups);
-	groups = reallocarray(NULL, grpsize, sizeof(*groups));
+	groups = reallocarray(NULL, (size_t)grpsize, sizeof(*groups));
 	if (groups == NULL)
 	    debug_return_int(-1);
-	ngroups = grpsize;
+	ngroups = (int)grpsize;
 	if (getgrouplist(name, basegid, groups, &ngroups) != -1) {
 	    *groupsp = groups;
 	    *ngroupsp = ngroups;

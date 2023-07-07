@@ -89,7 +89,7 @@ sudo_sig2str(int signo, char *signame)
 	    if (islower((unsigned char)signame[0])) {
 		size_t i;
 		for (i = 0; signame[i] != '\0'; i++)
-		    signame[i] = toupper((unsigned char)signame[i]);
+		    signame[i] = (char)toupper((unsigned char)signame[i]);
 	    }
 	    return 0;
 	}

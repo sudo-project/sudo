@@ -65,11 +65,11 @@ sudo_get_ttysize_v2(int fd, int *rowp, int *colp)
 
 	/* Fall back on $LINES and $COLUMNS. */
 	if ((p = getenv("LINES")) == NULL ||
-	    (*rowp = sudo_strtonum(p, 1, INT_MAX, NULL)) <= 0) {
+	    (*rowp = (int)sudo_strtonum(p, 1, INT_MAX, NULL)) <= 0) {
 	    *rowp = 24;
 	}
 	if ((p = getenv("COLUMNS")) == NULL ||
-	    (*colp = sudo_strtonum(p, 1, INT_MAX, NULL)) <= 0) {
+	    (*colp = (int)sudo_strtonum(p, 1, INT_MAX, NULL)) <= 0) {
 	    *colp = 80;
 	}
     }

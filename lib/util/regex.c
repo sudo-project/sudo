@@ -46,15 +46,15 @@ static int
 parse_num(const char *str, char **endp)
 {
     debug_decl(check_pattern, SUDO_DEBUG_UTIL);
-    const unsigned int lastval = INT_MAX / 10;
-    const unsigned int remainder = INT_MAX % 10;
-    unsigned int result = 0;
-    unsigned char ch;
+    const int lastval = INT_MAX / 10;
+    const int remainder = INT_MAX % 10;
+    int result = 0;
+    char ch;
 
     while ((ch = *str++) != '\0') {
-	if (ch == '\\' && isdigit((unsigned int)str[0]))
+	if (ch == '\\' && isdigit((unsigned char)str[0]))
 	    ch = *str++;
-	else if (!isdigit(ch))
+	else if (!isdigit((unsigned char)ch))
 	    break;
 	ch -= '0';
 	if (result > lastval || (result == lastval && ch > remainder)) {

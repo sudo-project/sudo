@@ -146,7 +146,7 @@ sudo_getentropy(void *buf, size_t len)
 		return (ret);
 
 #ifdef HAVE_OPENSSL
-	if (RAND_bytes(buf, len) == 1)
+	if (RAND_bytes(buf, (int)len) == 1)
 		return (0);
 #endif
 

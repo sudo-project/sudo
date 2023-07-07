@@ -142,7 +142,7 @@ reopen:
 		    goto bad;
 		}
 		/* Make sure the path we created is still a directory. */
-		if (!is_dir(dfd, path, ep - path, quiet)) {
+		if (!is_dir(dfd, path, (int)(ep - path), quiet)) {
 		    close(dfd);
 		    goto bad;
 		}
@@ -164,7 +164,7 @@ reopen:
 	    }
 	} else {
 	    /* Already exists, make sure it is a directory. */
-	    if (!is_dir(dfd, path, ep - path, quiet)) {
+	    if (!is_dir(dfd, path, (int)(ep - path), quiet)) {
 		close(dfd);
 		goto bad;
 	    }

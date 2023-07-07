@@ -36,13 +36,17 @@
 int
 sudo_setgroups_v1(int ngids, const GETGROUPS_T *gids)
 {
-    int maxgids, ret;
+    long maxgids;
+    int ret;
     debug_decl(sudo_setgroups, SUDO_DEBUG_UTIL);
+
+    if (ngids < 0)
+	debug_return_int(-1);
 
     ret = setgroups(ngids, (GETGROUPS_T *)gids);
     if (ret == -1 && errno == EINVAL) {
 	/* Too many groups, try again with fewer. */
-	maxgids = (int)sysconf(_SC_NGROUPS_MAX);
+	maxgids = sysconf(_SC_NGROUPS_MAX);
 	if (maxgids == -1)
 	    maxgids = NGROUPS_MAX;
 	if (ngids > maxgids)

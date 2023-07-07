@@ -49,9 +49,8 @@ sudo_strtonumx(const char *str, long long minval, long long maxval, char **endp,
     enum strtonum_err errval = STN_INITIAL;
     long long lastval, result = 0;
     const char *cp = str;
-    unsigned char ch;
     int remainder;
-    char sign;
+    char ch, sign;
 
     if (minval > maxval) {
 	errval = STN_INVALID;
@@ -61,7 +60,7 @@ sudo_strtonumx(const char *str, long long minval, long long maxval, char **endp,
     /* Trim leading space and check sign, if any. */
     do {
 	ch = *cp++;
-    } while (isspace(ch));
+    } while (isspace((unsigned char)ch));
     switch (ch) {
     case '-':
 	sign = '-';
@@ -86,20 +85,20 @@ sudo_strtonumx(const char *str, long long minval, long long maxval, char **endp,
      */
     if (sign == '-') {
 	lastval = minval / 10;
-	remainder = -(minval % 10);
+	remainder = -(int)(minval % 10);
 	if (remainder < 0) {
 	    lastval += 1;
 	    remainder += 10;
 	}
 	for (;; ch = *cp++) {
-	    if (!isdigit(ch))
+	    if (!isdigit((unsigned char)ch))
 		break;
 	    ch -= '0';
 	    if (result < lastval || (result == lastval && ch > remainder)) {
 		/* Skip remaining digits. */
 		do {
 		    ch = *cp++;
-		} while (isdigit(ch));
+		} while (isdigit((unsigned char)ch));
 		errval = STN_TOOSMALL;
 		break;
 	    } else {
@@ -112,16 +111,16 @@ sudo_strtonumx(const char *str, long long minval, long long maxval, char **endp,
 	    errval = STN_TOOBIG;
     } else {
 	lastval = maxval / 10;
-	remainder = maxval % 10;
+	remainder = (int)(maxval % 10);
 	for (;; ch = *cp++) {
-	    if (!isdigit(ch))
+	    if (!isdigit((unsigned char)ch))
 		break;
 	    ch -= '0';
 	    if (result > lastval || (result == lastval && ch > remainder)) {
 		/* Skip remaining digits. */
 		do {
 		    ch = *cp++;
-		} while (isdigit(ch));
+		} while (isdigit((unsigned char)ch));
 		errval = STN_TOOBIG;
 		break;
 	    } else {
