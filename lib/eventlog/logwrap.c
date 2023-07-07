@@ -46,10 +46,10 @@ eventlog_writeln(FILE *fp, char *line, size_t linelen, size_t maxlen)
 	/* Maximum length too small, disable wrapping. */
 	outlen = fwrite(line, 1, linelen, fp);
 	if (outlen != linelen)
-	    debug_return_ssize_t(-1);
+	    debug_return_size_t((size_t)-1);
 	if (fputc('\n', fp) == EOF)
-	    debug_return_ssize_t(-1);
-	debug_return_int(outlen + 1);
+	    debug_return_size_t((size_t)-1);
+	debug_return_size_t(outlen + 1);
     }
 
     /*
@@ -67,11 +67,11 @@ eventlog_writeln(FILE *fp, char *line, size_t linelen, size_t maxlen)
 	}
 	len = fprintf(fp, "%s%.*s\n", indent, (int)(end - beg), beg);
 	if (len < 0)
-	    debug_return_ssize_t(-1);
-	outlen += len;
+	    debug_return_size_t((size_t)-1);
+	outlen += (size_t)len;
 	while (*end == ' ')
 	    end++;
-	linelen -= (end - beg);
+	linelen -= (size_t)(end - beg);
 	beg = end;
 	if (indent[0] == '\0') {
 	    indent = EVENTLOG_INDENT;
@@ -82,8 +82,8 @@ eventlog_writeln(FILE *fp, char *line, size_t linelen, size_t maxlen)
     if (linelen) {
 	len = fprintf(fp, "%s%s\n", indent, beg);
 	if (len < 0)
-	    debug_return_ssize_t(-1);
-	outlen += len;
+	    debug_return_size_t((size_t)-1);
+	outlen += (size_t)len;
     }
 
     debug_return_size_t(outlen);

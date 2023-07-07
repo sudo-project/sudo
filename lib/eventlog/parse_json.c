@@ -67,7 +67,7 @@ json_store_columns(struct json_item *item, struct eventlog *evlog)
 	debug_return_bool(false);
     }
 
-    evlog->columns = item->u.number;
+    evlog->columns = (int)item->u.number;
     debug_return_bool(true);
 }
 
@@ -107,7 +107,7 @@ json_store_exit_value(struct json_item *item, struct eventlog *evlog)
 	debug_return_bool(false);
     }
 
-    evlog->exit_value = item->u.number;
+    evlog->exit_value = (int)item->u.number;
     debug_return_bool(true);
 }
 
@@ -146,7 +146,7 @@ json_store_lines(struct json_item *item, struct eventlog *evlog)
 	debug_return_bool(false);
     }
 
-    evlog->lines = item->u.number;
+    evlog->lines = (int)item->u.number;
     debug_return_bool(true);
 }
 
@@ -503,7 +503,7 @@ json_parse_string(char **strp)
 	debug_return_str(NULL);
     }
     while (src < end) {
-	char ch = *src++;
+	int ch = *src++;
 	if (ch == '\\') {
 	    switch (*src) {
 	    case 'b':
@@ -541,7 +541,7 @@ json_parse_string(char **strp)
 	    }
 	    src++;
 	}
-	*dst++ = ch;
+	*dst++ = (char)ch;
     }
     *dst = '\0';
 
@@ -775,9 +775,9 @@ eventlog_json_read(FILE *fp, const char *filename)
     struct json_stack stack = JSON_STACK_INTIALIZER(stack);
     unsigned int lineno = 0;
     char *name = NULL;
-    char *cp, *buf = NULL;
-    size_t bufsize = 0;
-    ssize_t len;
+    char *cp, *line = NULL;
+    size_t len, linesize = 0;
+    ssize_t linelen;
     bool saw_comma = false;
     long long num;
     char ch;
@@ -791,9 +791,9 @@ eventlog_json_read(FILE *fp, const char *filename)
     TAILQ_INIT(&root->items);
 
     frame = root;
-    while ((len = getdelim(&buf, &bufsize, '\n', fp)) != -1) {
-	char *ep = buf + len - 1;
-	cp = buf;
+    while ((linelen = getdelim(&line, &linesize, '\n', fp)) != -1) {
+	char *ep = line + linelen - 1;
+	cp = line;
 
 	lineno++;
 
@@ -824,12 +824,12 @@ eventlog_json_read(FILE *fp, const char *filename)
 	    switch (*cp) {
 	    case '{':
 		if (name == NULL && frame->parent != NULL) {
-		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - line, 
 			U_("objects must consist of name:value pairs"));
 		    goto bad;
 		}
 		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
-		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - line, 
 			U_("missing separator between values"));
 		    goto bad;
 		}
@@ -844,7 +844,7 @@ eventlog_json_read(FILE *fp, const char *filename)
 	    case '}':
 		if (stack.depth == 0 || frame->parent == NULL ||
 			frame->parent->type != JSON_OBJECT) {
-		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - line, 
 			U_("unmatched close brace"));
 		    goto bad;
 		}
@@ -855,12 +855,12 @@ eventlog_json_read(FILE *fp, const char *filename)
 	    case '[':
 		if (frame->parent == NULL) {
 		    /* Must have an enclosing object. */
-		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - line, 
 			U_("unexpected array"));
 		    goto bad;
 		}
 		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
-		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - line, 
 			U_("missing separator between values"));
 		    goto bad;
 		}
@@ -875,7 +875,7 @@ eventlog_json_read(FILE *fp, const char *filename)
 	    case ']':
 		if (stack.depth == 0 || frame->parent == NULL ||
 			frame->parent->type != JSON_ARRAY) {
-		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - line, 
 			U_("unmatched close bracket"));
 		    goto bad;
 		}
@@ -886,7 +886,7 @@ eventlog_json_read(FILE *fp, const char *filename)
 	    case '"':
 		if (frame->parent == NULL) {
 		    /* Must have an enclosing object. */
-		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - line, 
 			U_("unexpected string"));
 		    goto bad;
 		}
@@ -897,14 +897,14 @@ eventlog_json_read(FILE *fp, const char *filename)
 			goto bad;
 		    /* TODO: allow colon on next line? */
 		    if (*cp != ':') {
-			sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+			sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - line, 
 			    U_("missing colon after name"));
 			goto bad;
 		    }
 		    cp++;
 		} else {
 		    if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
-			sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+			sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - line, 
 			    U_("missing separator between values"));
 			goto bad;
 		    }
@@ -918,7 +918,7 @@ eventlog_json_read(FILE *fp, const char *filename)
 		if (strncmp(cp, "true", sizeof("true") - 1) != 0)
 		    goto parse_error;
 		if (!expect_value) {
-		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - line, 
 			U_("unexpected boolean"));
 		    goto bad;
 		}
@@ -926,7 +926,7 @@ eventlog_json_read(FILE *fp, const char *filename)
 		if (*cp != ',' && !isspace((unsigned char)*cp) && *cp != '\0')
 		    goto parse_error;
 		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
-		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - line, 
 			U_("missing separator between values"));
 		    goto bad;
 		}
@@ -940,7 +940,7 @@ eventlog_json_read(FILE *fp, const char *filename)
 		if (strncmp(cp, "false", sizeof("false") - 1) != 0)
 		    goto parse_error;
 		if (!expect_value) {
-		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - line, 
 			U_("unexpected boolean"));
 		    goto bad;
 		}
@@ -948,7 +948,7 @@ eventlog_json_read(FILE *fp, const char *filename)
 		if (*cp != ',' && !isspace((unsigned char)*cp) && *cp != '\0')
 		    goto parse_error;
 		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
-		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - line, 
 			U_("missing separator between values"));
 		    goto bad;
 		}
@@ -962,7 +962,7 @@ eventlog_json_read(FILE *fp, const char *filename)
 		if (strncmp(cp, "null", sizeof("null") - 1) != 0)
 		    goto parse_error;
 		if (!expect_value) {
-		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - line, 
 			U_("unexpected null"));
 		    goto bad;
 		}
@@ -970,7 +970,7 @@ eventlog_json_read(FILE *fp, const char *filename)
 		if (*cp != ',' && !isspace((unsigned char)*cp) && *cp != '\0')
 		    goto parse_error;
 		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
-		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - line, 
 			U_("missing separator between values"));
 		    goto bad;
 		}
@@ -983,7 +983,7 @@ eventlog_json_read(FILE *fp, const char *filename)
 	    case '+': case '-': case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7': case '8': case '9':
 		if (!expect_value) {
-		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - line, 
 			U_("unexpected number"));
 		    goto bad;
 		}
@@ -992,14 +992,14 @@ eventlog_json_read(FILE *fp, const char *filename)
 		ch = cp[len];
 		cp[len] = '\0';
 		if (!saw_comma && !TAILQ_EMPTY(&frame->items)) {
-		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, 
+		    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - line, 
 			U_("missing separator between values"));
 		    goto bad;
 		}
 		saw_comma = false;
 		num = sudo_strtonum(cp, LLONG_MIN, LLONG_MAX, &errstr);
 		if (errstr != NULL) {
-		    sudo_warnx("%s:%u:%td: %s: %s", filename, lineno, cp - buf,
+		    sudo_warnx("%s:%u:%td: %s: %s", filename, lineno, cp - line,
 			cp, U_(errstr));
 		    goto bad;
 		}
@@ -1018,10 +1018,10 @@ eventlog_json_read(FILE *fp, const char *filename)
     if (stack.depth != 0) {
 	frame = stack.frames[stack.depth - 1];
 	if (frame->parent == NULL || frame->parent->type == JSON_OBJECT) {
-	    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf,
+	    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - line,
 		U_("unmatched close brace"));
 	} else {
-	    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf,
+	    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - line,
 		U_("unmatched close bracket"));
 	}
 	goto bad;
@@ -1030,12 +1030,12 @@ eventlog_json_read(FILE *fp, const char *filename)
     goto done;
 
 parse_error:
-    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - buf, U_("parse error"));
+    sudo_warnx("%s:%u:%td: %s", filename, lineno, cp - line, U_("parse error"));
 bad:
     eventlog_json_free(root);
     root = NULL;
 done:
-    free(buf);
+    free(line);
     free(name);
 
     debug_return_ptr(root);

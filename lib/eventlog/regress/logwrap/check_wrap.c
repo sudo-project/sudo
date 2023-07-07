@@ -98,11 +98,11 @@ main(int argc, char *argv[])
 		dash = strchr(cp, '-');
 		if (dash != NULL) {
 		    *dash = '\0';
-		    len = sudo_strtonum(cp, 0, INT_MAX, &errstr);
+		    len = (size_t)sudo_strtonum(cp, 0, INT_MAX, &errstr);
 		    if (errstr == NULL)
-			maxlen = sudo_strtonum(dash + 1, 0, INT_MAX, &errstr);
+			maxlen = (size_t)sudo_strtonum(dash + 1, 0, INT_MAX, &errstr);
 		} else {
-		    len = maxlen = sudo_strtonum(cp, 0, INT_MAX, &errstr);
+		    len = maxlen = (size_t)sudo_strtonum(cp, 0, INT_MAX, &errstr);
 		}
 		if (errstr != NULL) {
 		    sudo_fatalx("%s: invalid length on line %d", infile, lineno);

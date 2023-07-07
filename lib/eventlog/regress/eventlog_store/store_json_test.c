@@ -69,7 +69,7 @@ compare(FILE *fp, const char *infile, struct json_container *jsonc)
 	if (line[len - 1] == '\n')
 	    len--;
 
-	if (strncmp(line, cp, len) != 0) {
+	if (strncmp(line, cp, (size_t)len) != 0) {
 	    fprintf(stderr, "%s: mismatch on line %u\n", infile, lineno);
 	    fprintf(stderr, "expected: %s", line);
 	    fprintf(stderr, "got     : %.*s\n", (int)len, cp);

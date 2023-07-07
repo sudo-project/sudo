@@ -1136,7 +1136,7 @@ do_logfile_sudo(const char *logline, const struct eventlog *evlog,
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
     }
-    eventlog_writeln(fp, full_line, len, evl_conf->file_maxlen);
+    eventlog_writeln(fp, full_line, (size_t)len, evl_conf->file_maxlen);
     free(full_line);
     (void)fflush(fp);
     if (ferror(fp)) {

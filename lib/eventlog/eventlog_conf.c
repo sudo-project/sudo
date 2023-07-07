@@ -139,13 +139,13 @@ eventlog_set_syslog_alertpri(int pri)
 }
 
 void
-eventlog_set_syslog_maxlen(int len)
+eventlog_set_syslog_maxlen(size_t len)
 {
     evl_conf.syslog_maxlen = len;
 }
 
 void
-eventlog_set_file_maxlen(int len)
+eventlog_set_file_maxlen(size_t len)
 {
     evl_conf.file_maxlen = len;
 }
