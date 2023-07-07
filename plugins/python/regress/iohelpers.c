@@ -149,7 +149,7 @@ str_replaced(const char *source, size_t dest_len, const char *old, const char *n
         return NULL;
 
     while ((pos = strstr(source, old)) != NULL) {
-        size_t len = snprintf(dest, dest_len,
+        size_t len = (size_t)snprintf(dest, dest_len,
             "%.*s%s", (int)(pos - source), source, new);
         if (len >= dest_len)
             goto fail;

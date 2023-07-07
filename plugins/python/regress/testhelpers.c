@@ -42,7 +42,7 @@ remove_underline(char *output)
 	size_t len = strspn(cp, "^ \t");
 	if (len > 0 && cp[len] == '\n') {
 	    /* Prune out lines that are "underlining". */
-	    memmove(cp, cp + len + 1, ep - cp);
+	    memmove(cp, cp + len + 1, (size_t)(ep - cp));
 	    if (*cp == '\0')
 		break;
 	} else {
@@ -238,8 +238,10 @@ verify_log_lines(const char *reference_path)
         line_data += 2;
 
         char *line_end = strstr(line_data, " object at "); // this skips checking the pointer hex
-        if (line_end)
-            snprintf(line_end, sizeof(line) - (line_end - line), " object>\n");
+        if (line_end) {
+            snprintf(line_end, sizeof(line) - (size_t)(line_end - line),
+		" object>\n");
+	}
 
 	if (strncmp(line_data, "handle @ /", sizeof("handle @ /") - 1) == 0) {
             char *start = line_data + sizeof("handle @ ") - 1;
