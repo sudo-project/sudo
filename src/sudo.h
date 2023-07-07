@@ -191,7 +191,7 @@ struct command_details {
     mode_t umask;
     int argc;
     int priority;
-    int timeout;
+    unsigned int timeout;
     int closefrom;
     int flags;
     int execfd;

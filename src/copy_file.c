@@ -54,10 +54,10 @@ sudo_extend_file(int fd, const char *name, off_t new_size)
 	__func__, name, (long long)old_size, (long long)new_size);
 
     for (size = old_size; size < new_size; size += nwritten) {
-	size_t len = new_size - size;
-	if (len > sizeof(zeroes))
-	    len = sizeof(zeroes);
-	nwritten = write(fd, zeroes, len);
+	off_t len = new_size - size;
+	if (len > ssizeof(zeroes))
+	    len = ssizeof(zeroes);
+	nwritten = write(fd, zeroes, (size_t)len);
 	if (nwritten == -1) {
 	    int serrno = errno;
 	    if (ftruncate(fd, old_size) == -1) {
@@ -110,7 +110,7 @@ sudo_copy_file(const char *src, int src_fd, off_t src_len, const char *dst,
     while ((nread = read(src_fd, buf, sizeof(buf))) > 0) {
 	ssize_t off = 0;
 	do {
-	    nwritten = write(dst_fd, buf + off, nread - off);
+	    nwritten = write(dst_fd, buf + off, (size_t)(nread - off));
 	    if (nwritten == -1)
 		goto write_error;
 	    off += nwritten;

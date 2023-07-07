@@ -65,7 +65,7 @@ static sudo_conv_t sudo_conv;
 static sudo_printf_t sudo_log;
 static FILE *input, *output;
 static uid_t runas_uid = ROOT_UID;
-static gid_t runas_gid = -1;
+static gid_t runas_gid = (gid_t)-1;
 static int use_sudoedit = false;
 
 /*
@@ -286,7 +286,7 @@ find_editor(int nfiles, char * const files[], char **argv_out[])
     }
     if (editor_path != editor)
 	free(editor);
-    nargv = malloc((nargc + 1 + nfiles + 1) * sizeof(char *));
+    nargv = reallocarray(NULL, (size_t)(nargc + 1 + nfiles + 1), sizeof(char *));
     if (nargv == NULL) {
 	sudo_log(SUDO_CONV_ERROR_MSG, "unable to allocate memory\n");
 	free(editor_path);

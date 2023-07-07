@@ -95,8 +95,8 @@ struct io_buffer {
     struct sudo_event *revent;
     struct sudo_event *wevent;
     sudo_io_action_t action;
-    int len; /* buffer length (how much produced) */
-    int off; /* write position (how much already consumed) */
+    unsigned int len; /* buffer length (how much produced) */
+    unsigned int off; /* write position (how much already consumed) */
     char buf[64 * 1024];
 };
 SLIST_HEAD(io_buffer_list, io_buffer);

@@ -123,11 +123,11 @@ sudo_execve(int fd, const char *path, char *const argv[], char *envp[],
 
 	for (argc = 0; argv[argc] != NULL; argc++)
 	    continue;
-	nargv = reallocarray(NULL, argc + 2, sizeof(char *));
+	nargv = reallocarray(NULL, (size_t)argc + 2, sizeof(char *));
 	if (nargv != NULL) {
 	    nargv[0] = "sh";
 	    nargv[1] = path;
-	    memcpy(nargv + 2, argv + 1, argc * sizeof(char *));
+	    memcpy(nargv + 2, argv + 1, (size_t)argc * sizeof(char *));
 	    execve(_PATH_SUDO_BSHELL, (char **)nargv, envp);
 	    free(nargv);
 	}

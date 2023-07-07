@@ -133,7 +133,7 @@ exec_setup(struct command_details *details, int intercept_fd, int errfd)
 #endif
 #ifdef HAVE_LOGIN_CAP_H
 	if (details->login_class) {
-	    int flags;
+	    unsigned int flags;
 	    login_cap_t *lc;
 
 	    /*

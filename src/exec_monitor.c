@@ -145,7 +145,7 @@ send_status(int fd, struct command_status *cstat)
 	}
 	cstat->type = CMD_INVALID; /* prevent re-sending */
     }
-    debug_return_int(n);
+    debug_return_ssize_t(n);
 }
 
 /*

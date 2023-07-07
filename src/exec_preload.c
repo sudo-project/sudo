@@ -77,7 +77,8 @@ fmtstr(sudo_alloc_fn_t alloc_fn, sudo_free_fn_t free_fn, const char *ofmt, ...)
 		continue;
 	    case 'd': {
 		char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
-		len = snprintf(numbuf, sizeof(numbuf), "%d", va_arg(ap, int));
+		len = (size_t)snprintf(numbuf, sizeof(numbuf), "%d",
+		    va_arg(ap, int));
 		if (len >= sizeof(numbuf)) {
 		    goto oflow;
 		}
@@ -117,7 +118,7 @@ fmtstr(sudo_alloc_fn_t alloc_fn, sudo_free_fn_t free_fn, const char *ofmt, ...)
 		if (size < 2) {
 		    goto oflow;
 		}
-		*cur++ = va_arg(ap, int);
+		*cur++ = (char )va_arg(ap, int);
 		size--;
 		fmt += 2;
 		continue;
@@ -132,7 +133,7 @@ fmtstr(sudo_alloc_fn_t alloc_fn, sudo_free_fn_t free_fn, const char *ofmt, ...)
 		fmt += 2;
 		continue;
 	    case 'd':
-		len = snprintf(cur, size, "%d", va_arg(ap, int));
+		len = (size_t)snprintf(cur, size, "%d", va_arg(ap, int));
 		if (len >= size) {
 		    goto oflow;
 		}
@@ -267,7 +268,7 @@ sudo_preload_dso_alloc(char *const envp[], const char *dso_file,
 	    if (intercept_ptr != NULL)
 		continue;
 
-	    fd = sudo_strtonum(cp, 0, INT_MAX, &errstr);
+	    fd = (int)sudo_strtonum(cp, 0, INT_MAX, &errstr);
 	    if (fd == intercept_fd && errstr == NULL)
 		fd_present = true;
 

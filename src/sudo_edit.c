@@ -84,7 +84,7 @@ set_tmpdir(const struct sudo_cred *user_cred)
     saved_cred.ngroups = getgroups(0, NULL); // -V575
     if (saved_cred.ngroups > 0) {
 	saved_cred.groups =
-	    reallocarray(NULL, saved_cred.ngroups, sizeof(GETGROUPS_T));
+	    reallocarray(NULL, (size_t)saved_cred.ngroups, sizeof(GETGROUPS_T));
 	if (saved_cred.groups == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    debug_return_bool(false);
@@ -149,7 +149,7 @@ sudo_edit_mktemp(const char *ofile, char **tfile)
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(-1);
     }
-    tfd = mkstemps(*tfile, suff ? strlen(suff) : 0);
+    tfd = mkstemps(*tfile, suff ? (int)strlen(suff) : 0);
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"%s -> %s, fd %d", ofile, *tfile, tfd);
     debug_return_int(tfd);
@@ -687,7 +687,7 @@ sudo_edit(struct command_details *command_details,
     }
 
     /* Copy editor files to temporaries. */
-    tf = calloc(nfiles, sizeof(*tf));
+    tf = calloc((size_t)nfiles, sizeof(*tf));
     if (tf == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto cleanup;
@@ -707,7 +707,7 @@ sudo_edit(struct command_details *command_details,
      * to create a new argv.
      */
     nargc = editor_argc + nfiles;
-    nargv = reallocarray(NULL, nargc + 1, sizeof(char *));
+    nargv = reallocarray(NULL, (size_t)nargc + 1, sizeof(char *));
     if (nargv == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto cleanup;

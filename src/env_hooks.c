@@ -96,7 +96,7 @@ rpl_putenv(PUTENV_CONST char *string)
     }
 
     /* Look for existing entry. */
-    len = (equal - string) + 1;
+    len = (size_t)(equal - string) + 1;
     for (ep = environ; *ep != NULL; ep++) {
 	if (strncmp(string, *ep, len) == 0) {
 	    *ep = (char *)string;

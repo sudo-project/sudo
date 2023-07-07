@@ -642,7 +642,7 @@ parse_args(int argc, char **argv, const char *shell, int *old_optind,
 	    ac += 2; /* -c cmnd */
 	}
 
-	av = reallocarray(NULL, ac + 1, sizeof(char *));
+	av = reallocarray(NULL, (size_t)ac + 1, sizeof(char *));
 	if (av == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	if (!gc_add(GC_PTR, av))
@@ -667,7 +667,7 @@ parse_args(int argc, char **argv, const char *shell, int *old_optind,
 	char **av;
 	int ac;
 
-	av = reallocarray(NULL, argc + 2, sizeof(char *));
+	av = reallocarray(NULL, (size_t)argc + 2, sizeof(char *));
 	if (av == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	if (!gc_add(GC_PTR, av))
@@ -713,7 +713,7 @@ display_usage(FILE *fp)
     if (strcmp(getprogname(), "sudoedit") == 0)
 	uvecs = sudoedit_usage;
 
-    indent = strlen(getprogname()) + 8;
+    indent = (int)strlen(getprogname()) + 8;
     while ((uvec = *uvecs) != NULL) {
 	(void)fprintf(fp, "usage: %s %s\n", getprogname(), uvec[0]);
 	for (i = 1; uvec[i] != NULL; i++) {

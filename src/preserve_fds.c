@@ -126,7 +126,7 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
     }
 
     /* Create bitmap of preserved (relocated) fds.  */
-    fdbits = calloc((lastfd + NBBY) / NBBY, 1);
+    fdbits = calloc((size_t)(lastfd + NBBY) / NBBY, 1);
     if (fdbits == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     TAILQ_FOREACH(pfd, pfds, entries) {

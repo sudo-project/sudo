@@ -222,7 +222,7 @@ restart:
     }
 
     if (timeout > 0)
-	alarm(timeout);
+	alarm((unsigned int)timeout);
     pass = getln(input, buf, sizeof(buf), feedback, &errval);
     alarm(0);
     save_errno = errno;

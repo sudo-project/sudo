@@ -400,7 +400,8 @@ fill_group_list(const char *user, struct sudo_cred *cred)
      */
     cred->ngroups = sudo_conf_max_groups();
     if (cred->ngroups > 0) {
-	cred->groups = reallocarray(NULL, cred->ngroups, sizeof(GETGROUPS_T));
+	cred->groups =
+	    reallocarray(NULL, (size_t)cred->ngroups, sizeof(GETGROUPS_T));
 	if (cred->groups != NULL) {
 	    /* Clamp to max_groups if insufficient space for all groups. */
 	    if (sudo_getgrouplist2(user, cred->gid, &cred->groups,
@@ -446,7 +447,8 @@ get_user_groups(const char *user, struct sudo_cred *cred)
 	if (cred->ngroups > 0) {
 	    /* Use groups from kernel if not at limit or source is static. */
 	    if (cred->ngroups != maxgroups || group_source == GROUP_SOURCE_STATIC) {
-		cred->groups = reallocarray(NULL, cred->ngroups, sizeof(GETGROUPS_T));
+		cred->groups = reallocarray(NULL, (size_t)cred->ngroups,
+		    sizeof(GETGROUPS_T));
 		if (cred->groups == NULL)
 		    goto done;
 		cred->ngroups = getgroups(cred->ngroups, cred->groups);
@@ -476,17 +478,19 @@ get_user_groups(const char *user, struct sudo_cred *cred)
     /*
      * Format group list as a comma-separated string of gids.
      */
-    glsize = sizeof("groups=") - 1 + (cred->ngroups * (MAX_UID_T_LEN + 1));
+    glsize = sizeof("groups=") - 1 + ((size_t)cred->ngroups * (MAX_UID_T_LEN + 1));
     if ((gid_list = malloc(glsize)) == NULL)
 	goto done;
     memcpy(gid_list, "groups=", sizeof("groups=") - 1);
     cp = gid_list + sizeof("groups=") - 1;
+    glsize -= (size_t)(cp - gid_list);
     for (i = 0; i < cred->ngroups; i++) {
-	len = snprintf(cp, glsize - (cp - gid_list), "%s%u",
-	    i ? "," : "", (unsigned int)cred->groups[i]);
-	if (len < 0 || (size_t)len >= glsize - (cp - gid_list))
+	len = snprintf(cp, glsize, "%s%u", i ? "," : "",
+	    (unsigned int)cred->groups[i]);
+	if (len < 0 || (size_t)len >= glsize)
 	    sudo_fatalx(U_("internal error, %s overflow"), __func__);
 	cp += len;
+	glsize -= (size_t)len;
     }
 done:
     debug_return_str(gid_list);
@@ -704,7 +708,8 @@ command_info_to_details(char * const info[], struct command_details *details)
 		SET_FLAG("cwd_optional=", CD_CWD_OPTIONAL)
 		if (strncmp("closefrom=", info[i], sizeof("closefrom=") - 1) == 0) {
 		    cp = info[i] + sizeof("closefrom=") - 1;
-		    details->closefrom = sudo_strtonum(cp, 0, INT_MAX, &errstr);
+		    details->closefrom =
+			(int)sudo_strtonum(cp, 0, INT_MAX, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    break;
@@ -714,7 +719,8 @@ command_info_to_details(char * const info[], struct command_details *details)
 		SET_FLAG("exec_background=", CD_EXEC_BG)
 		if (strncmp("execfd=", info[i], sizeof("execfd=") - 1) == 0) {
 		    cp = info[i] + sizeof("execfd=") - 1;
-		    details->execfd = sudo_strtonum(cp, 0, INT_MAX, &errstr);
+		    details->execfd =
+			(int)sudo_strtonum(cp, 0, INT_MAX, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 #ifdef HAVE_FEXECVE
@@ -740,7 +746,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 	    case 'n':
 		if (strncmp("nice=", info[i], sizeof("nice=") - 1) == 0) {
 		    cp = info[i] + sizeof("nice=") - 1;
-		    details->priority = sudo_strtonum(cp, INT_MIN, INT_MAX,
+		    details->priority = (int)sudo_strtonum(cp, INT_MIN, INT_MAX,
 			&errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
@@ -840,7 +846,7 @@ command_info_to_details(char * const info[], struct command_details *details)
 		SET_FLAG("sudoedit_follow=", CD_SUDOEDIT_FOLLOW)
 		if (strncmp("sudoedit_nfiles=", info[i], sizeof("sudoedit_nfiles=") - 1) == 0) {
 		    cp = info[i] + sizeof("sudoedit_nfiles=") - 1;
-		    details->nfiles = sudo_strtonum(cp, 1, INT_MAX,
+		    details->nfiles = (int)sudo_strtonum(cp, 1, INT_MAX,
 			&errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
@@ -850,7 +856,8 @@ command_info_to_details(char * const info[], struct command_details *details)
 	    case 't':
 		if (strncmp("timeout=", info[i], sizeof("timeout=") - 1) == 0) {
 		    cp = info[i] + sizeof("timeout=") - 1;
-		    details->timeout = sudo_strtonum(cp, 0, INT_MAX, &errstr);
+		    details->timeout =
+			(unsigned int)sudo_strtonum(cp, 0, UINT_MAX, &errstr);
 		    if (errstr != NULL)
 			sudo_fatalx(U_("%s: %s"), info[i], U_(errstr));
 		    SET(details->flags, CD_SET_TIMEOUT);

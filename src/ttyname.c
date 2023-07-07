@@ -133,7 +133,7 @@ get_process_ttyname(char *name, size_t namelen)
     if (rc != -1) {
 	if ((dev_t)ki_proc->sudo_kp_tdev != (dev_t)-1) {
 	    errno = serrno;
-	    ret = sudo_ttyname_dev(ki_proc->sudo_kp_tdev, name, namelen);
+	    ret = sudo_ttyname_dev((dev_t)ki_proc->sudo_kp_tdev, name, namelen);
 	    if (ret == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 		    "unable to map device number %lu to name",
@@ -223,7 +223,7 @@ get_process_ttyname(char *name, size_t namelen)
      */
     if ((fd = open(path, O_RDONLY | O_NOFOLLOW)) != -1) {
 	cp = buf;
-	while ((nread = read(fd, cp, buf + sizeof(buf) - cp)) != 0) {
+	while ((nread = read(fd, cp, sizeof(buf) - (size_t)(cp - buf))) != 0) {
 	    if (nread == -1) {
 		if (errno == EAGAIN || errno == EINTR)
 		    continue;
@@ -233,7 +233,7 @@ get_process_ttyname(char *name, size_t namelen)
 	    if (cp >= buf + sizeof(buf))
 		break;
 	}
-	if (nread == 0 && memchr(buf, '\0', cp - buf) == NULL) {
+	if (nread == 0 && memchr(buf, '\0', (size_t)(cp - buf)) == NULL) {
 	    /*
 	     * Field 7 is the tty dev (0 if no tty).
 	     * Since the process name at field 2 "(comm)" may include
@@ -251,8 +251,8 @@ get_process_ttyname(char *name, size_t namelen)
 			*ep = '\0';
 			field++;
 			if (field == 7) {
-			    int tty_nr = sudo_strtonum(cp, INT_MIN, INT_MAX,
-				&errstr);
+			    int tty_nr = (int)sudo_strtonum(cp, INT_MIN,
+				INT_MAX, &errstr);
 			    if (errstr) {
 				sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 				    "%s: tty device %s: %s", path, cp, errstr);
@@ -272,7 +272,8 @@ get_process_ttyname(char *name, size_t namelen)
 			    break;
 			}
 			if (field == 3) {
-			    ppid = sudo_strtonum(cp, INT_MIN, INT_MAX, NULL);
+			    ppid =
+				(int)sudo_strtonum(cp, INT_MIN, INT_MAX, NULL);
 			}
 			cp = ep + 1;
 		    }

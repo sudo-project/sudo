@@ -64,8 +64,8 @@ handle_sigwinch(struct exec_closure *ec, int fd)
             log_winchange(ec, wsize.ws_row, wsize.ws_col);
 
             /* Update rows/cols. */
-            ec->rows = wsize.ws_row;
-            ec->cols = wsize.ws_col;
+            ec->rows = (short)wsize.ws_row;
+            ec->cols = (short)wsize.ws_col;
         }
     }
 }
@@ -218,8 +218,8 @@ fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
     ec->ppgrp = getpgrp();
     ec->cstat = cstat;
     ec->details = details;
-    ec->rows = user_details->ts_rows;
-    ec->cols = user_details->ts_cols;
+    ec->rows = (short)user_details->ts_rows;
+    ec->cols = (short)user_details->ts_cols;
 
     /* Setup event base and events. */
     ec->evbase = evbase;
@@ -373,11 +373,11 @@ read_callback(int fd, int what, void *v)
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"read %zd bytes from fd %d", n, fd);
-	    if (!iob->action(iob->buf + iob->len, n, iob)) {
+	    if (!iob->action(iob->buf + iob->len, (unsigned int)n, iob)) {
 		terminate_command(iob->ec->cmnd_pid, false);
 		iob->ec->cmnd_pid = -1;
 	    }
-	    iob->len += n;
+	    iob->len += (unsigned int)n;
 	    /* Disable reader if buffer is full. */
 	    if (iob->len == sizeof(iob->buf))
 		sudo_ev_del(evbase, iob->revent);
@@ -410,7 +410,7 @@ write_callback(int fd, int what, void *v)
 	case EBADF:
 	    /* other end of pipe closed */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"unable to write %d bytes to fd %d",
+		"unable to write %u bytes to fd %d",
 		iob->len - iob->off, fd);
 	    /* Close reader if there is one. */
 	    if (iob->revent != NULL) {
@@ -436,7 +436,7 @@ write_callback(int fd, int what, void *v)
     } else {
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "wrote %zd bytes to fd %d", n, fd);
-	iob->off += n;
+	iob->off += (unsigned int)n;
 	/* Disable writer and reset the buffer if fully consumed. */
 	if (iob->off == iob->len) {
 	    iob->off = iob->len = 0;

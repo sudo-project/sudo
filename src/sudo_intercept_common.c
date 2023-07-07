@@ -85,7 +85,7 @@ send_req(int sock, const void *buf, size_t len)
 		continue;
 	    debug_return_bool(false);
 	}
-	len -= nwritten;
+	len -= (size_t)nwritten;
 	cp += nwritten;
     } while (len > 0);
 
@@ -115,7 +115,7 @@ send_client_hello(int sock)
 	goto done;
     }
     /* Wire message size is used for length encoding, precedes message. */
-    msg_len = len;
+    msg_len = len & 0xffffffff;
     len += sizeof(msg_len);
 
     if ((buf = sudo_mmap_alloc(len)) == NULL) {
@@ -196,7 +196,7 @@ recv_intercept_response(int fd)
 		"error reading response");
 	    goto done;
 	default:
-	    rem -= nread;
+	    rem -= (uint32_t)nread;
 	    cp += nread;
 	    break;
 	}
@@ -248,7 +248,7 @@ sudo_interposer_init(void)
 
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO, "%s", *p);
 
-	    fd = sudo_strtonum(fdstr, 0, INT_MAX, &errstr);
+	    fd = (int)sudo_strtonum(fdstr, 0, INT_MAX, &errstr);
 	    if (errstr != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "invalid SUDO_INTERCEPT_FD: %s: %s", fdstr, errstr);
@@ -280,7 +280,7 @@ sudo_interposer_init(void)
 	if (res->type_case == INTERCEPT_RESPONSE__TYPE_HELLO_RESP) {
 	    intercept_token.u64[0] = res->u.hello_resp->token_lo;
 	    intercept_token.u64[1] = res->u.hello_resp->token_hi;
-	    intercept_port = res->u.hello_resp->portno;
+	    intercept_port = (in_port_t)res->u.hello_resp->portno;
 	    log_only = res->u.hello_resp->log_only;
 	} else {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -340,7 +340,7 @@ send_policy_check_req(int sock, const char *cmnd, char * const argv[],
 	goto done;
     }
     /* Wire message size is used for length encoding, precedes message. */
-    msg_len = len;
+    msg_len = len & 0xffffffff;
     len += sizeof(msg_len);
 
     if ((buf = sudo_mmap_alloc(len)) == NULL) {
