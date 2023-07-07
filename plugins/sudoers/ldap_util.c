@@ -740,11 +740,11 @@ sudo_ldap_value_dup(const char *src)
     if (dst == NULL)
 	return NULL;
 
-    *dst = '\0';
     if (sudo_ldap_value_cat(dst, src, size) >= size) {
 	/* Should not be possible... */
 	free(dst);
-	dst = NULL;
+	return NULL;
     }
+    *dst = '\0';
     return dst;
 }
