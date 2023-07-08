@@ -94,11 +94,11 @@ parse_timeout(const char *timestr)
 		l *= 60;
 		break;
 	    }
-	    if (l > INT_MAX - timeout)
-		goto overflow;
 	}
 	cp = ep;
 
+	if (l > INT_MAX - timeout)
+	    goto overflow;
 	timeout += (int)l;
     } while (*cp != '\0');
 
