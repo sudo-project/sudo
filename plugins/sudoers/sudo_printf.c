@@ -33,7 +33,7 @@
 #include "pathnames.h"
 
 static int
-sudo_printf_int(int msg_type, const char *fmt, ...)
+sudo_printf_int(int msg_type, const char * restrict fmt, ...)
 {
     FILE *fp = stdout;
     FILE *ttyfp = NULL;

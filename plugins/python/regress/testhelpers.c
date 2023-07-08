@@ -193,7 +193,7 @@ fake_conversation_with_suspend(int num_msgs, const struct sudo_conv_message msgs
 }
 
 int
-fake_printf(int msg_type, const char *fmt, ...)
+fake_printf(int msg_type, const char * restrict fmt, ...)
 {
     int rc = -1;
     va_list args;

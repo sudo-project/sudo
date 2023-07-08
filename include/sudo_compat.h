@@ -422,32 +422,32 @@ sudo_dso_public int sudo_futimens(int fd, const struct timespec *times);
 # define futimens(_a, _b) sudo_futimens((_a), (_b))
 #endif /* HAVE_FUTIMENS */
 #if !defined(HAVE_SNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-sudo_dso_public int sudo_snprintf(char *str, size_t n, char const *fmt, ...) sudo_printflike(3, 4);
+sudo_dso_public int sudo_snprintf(char * restrict str, size_t n, char const * restrict fmt, ...) sudo_printflike(3, 4);
 # undef snprintf
 # define snprintf sudo_snprintf
 #endif /* HAVE_SNPRINTF */
 #if !defined(HAVE_VSNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-sudo_dso_public int sudo_vsnprintf(char *str, size_t n, const char *fmt, va_list ap) sudo_printflike(3, 0);
+sudo_dso_public int sudo_vsnprintf(char * restrict str, size_t n, const char * restrict fmt, va_list ap) sudo_printflike(3, 0);
 # undef vsnprintf
 # define vsnprintf sudo_vsnprintf
 #endif /* HAVE_VSNPRINTF */
 #if !defined(HAVE_ASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-sudo_dso_public int sudo_asprintf(char **str, char const *fmt, ...) sudo_printflike(2, 3);
+sudo_dso_public int sudo_asprintf(char ** restrict str, char const * restrict fmt, ...) sudo_printflike(2, 3);
 # undef asprintf
 # define asprintf sudo_asprintf
 #endif /* HAVE_ASPRINTF */
 #if !defined(HAVE_VASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-sudo_dso_public int sudo_vasprintf(char **str, const char *fmt, va_list ap) sudo_printflike(2, 0);
+sudo_dso_public int sudo_vasprintf(char ** restrict str, const char * restrict fmt, va_list ap) sudo_printflike(2, 0);
 # undef vasprintf
 # define vasprintf sudo_vasprintf
 #endif /* HAVE_VASPRINTF */
 #ifndef HAVE_STRLCAT
-sudo_dso_public size_t sudo_strlcat(char *dst, const char *src, size_t siz);
+sudo_dso_public size_t sudo_strlcat(char * restrict dst, const char * restrict src, size_t siz);
 # undef strlcat
 # define strlcat(_a, _b, _c) sudo_strlcat((_a), (_b), (_c))
 #endif /* HAVE_STRLCAT */
 #ifndef HAVE_STRLCPY
-sudo_dso_public size_t sudo_strlcpy(char *dst, const char *src, size_t siz);
+sudo_dso_public size_t sudo_strlcpy(char * restrict dst, const char * restrict src, size_t siz);
 # undef strlcpy
 # define strlcpy(_a, _b, _c) sudo_strlcpy((_a), (_b), (_c))
 #endif /* HAVE_STRLCPY */

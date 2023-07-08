@@ -661,7 +661,7 @@ sudo_ldap_value_len(const char *value)
  * Like strlcat() but escapes characters as per RFC 4515.
  */
 size_t
-sudo_ldap_value_cat(char *dst, const char *src, size_t size)
+sudo_ldap_value_cat(char * restrict dst, const char * restrict src, size_t size)
 {
     char *d = dst;
     const char *s = src;

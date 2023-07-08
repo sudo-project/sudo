@@ -316,7 +316,7 @@ sudo_dso_public mode_t sudo_strtomode_v2(const char *cp, const char **errstr);
 #define sudo_strtomode(_a, _b) sudo_strtomode_v2((_a), (_b))
 
 /* sudo_printf.c */
-extern int (*sudo_printf)(int msg_type, const char *fmt, ...);
+extern int (*sudo_printf)(int msg_type, const char * restrict fmt, ...);
 
 /* term.c */
 sudo_dso_public bool sudo_term_cbreak_v1(int fd);

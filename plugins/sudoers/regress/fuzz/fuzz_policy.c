@@ -161,7 +161,7 @@ fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 }
 
 static int
-fuzz_printf(int msg_type, const char *fmt, ...)
+fuzz_printf(int msg_type, const char * restrict fmt, ...)
 {
     return 0;
 }
@@ -742,21 +742,21 @@ group_plugin_unload(void)
 
 /* STUB */
 bool
-log_warning(int flags, const char *fmt, ...)
+log_warning(int flags, const char * restrict fmt, ...)
 {
     return true;
 }
 
 /* STUB */
 bool
-log_warningx(int flags, const char *fmt, ...)
+log_warningx(int flags, const char * restrict fmt, ...)
 {
     return true;
 }
 
 /* STUB */
 bool
-gai_log_warning(int flags, int errnum, const char *fmt, ...)
+gai_log_warning(int flags, int errnum, const char * restrict fmt, ...)
 {
     return true;
 }
@@ -791,7 +791,7 @@ mail_parse_errors(void)
 
 /* STUB */
 bool
-log_parse_error(const char *file, int line, int column, const char *fmt,
+log_parse_error(const char *file, int line, int column, const char * restrict fmt,
     va_list args)
 {
     return true;
@@ -799,7 +799,7 @@ log_parse_error(const char *file, int line, int column, const char *fmt,
 
 /* STUB */
 int
-audit_failure(char *const argv[], char const *const fmt, ...)
+audit_failure(char *const argv[], char const * restrict const fmt, ...)
 {
     return 0;
 }

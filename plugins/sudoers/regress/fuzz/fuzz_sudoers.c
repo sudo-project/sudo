@@ -42,7 +42,7 @@
 #include "interfaces.h"
 
 static int fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[], struct sudo_conv_reply replies[], struct sudo_conv_callback *callback);
-static int fuzz_printf(int msg_type, const char *fmt, ...);
+static int fuzz_printf(int msg_type, const char * restrict fmt, ...);
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
 /* For set_cmnd_path() */
@@ -67,7 +67,7 @@ open_sudoers(const char *file, char **outfile, bool doedit, bool *keepopen)
 }
 
 static int
-fuzz_printf(int msg_type, const char *fmt, ...)
+fuzz_printf(int msg_type, const char * restrict fmt, ...)
 {
     return 0;
 }
@@ -125,7 +125,7 @@ mail_parse_errors(void)
 
 /* STUB */
 bool
-log_warningx(int flags, const char *fmt, ...)
+log_warningx(int flags, const char * restrict fmt, ...)
 {
     return true;
 }

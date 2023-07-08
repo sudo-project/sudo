@@ -1221,7 +1221,7 @@ group		:	ALIAS {
 %%
 /* Like yyerror() but takes a printf-style format string. */
 void
-sudoerserrorf(const char *fmt, ...)
+sudoerserrorf(const char * restrict fmt, ...)
 {
     const int column = (int)(sudolinebuf.toke_start + 1);
     va_list ap;

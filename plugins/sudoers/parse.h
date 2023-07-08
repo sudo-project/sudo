@@ -404,7 +404,7 @@ int check_aliases(struct sudoers_parse_tree *parse_tree, bool strict, bool quiet
 /* gram.y */
 extern bool parse_error;
 extern struct sudoers_parse_tree parsed_policy;
-extern bool (*sudoers_error_hook)(const char *file, int line, int column, const char *fmt, va_list args);
+extern bool (*sudoers_error_hook)(const char *file, int line, int column, const char * restrict fmt, va_list args);
 bool reset_parser(void);
 void free_member(struct member *m);
 void free_members(struct member_list *members);

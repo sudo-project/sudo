@@ -57,7 +57,7 @@ static sudo_conv_t sudo_warn_conversation;
 static sudo_warn_setlocale_t sudo_warn_setlocale;
 static sudo_warn_setlocale_t sudo_warn_setlocale_prev;
 
-static void warning(const char *errstr, const char *fmt, va_list ap);
+static void warning(const char * restrict errstr, const char * restrict fmt, va_list ap);
 
 static void
 do_cleanup(void)
@@ -73,7 +73,7 @@ do_cleanup(void)
 }
 
 sudo_noreturn void
-sudo_fatal_nodebug_v1(const char *fmt, ...)
+sudo_fatal_nodebug_v1(const char * restrict fmt, ...)
 {
     va_list ap;
 
@@ -85,7 +85,7 @@ sudo_fatal_nodebug_v1(const char *fmt, ...)
 }
 
 sudo_noreturn void
-sudo_fatalx_nodebug_v1(const char *fmt, ...)
+sudo_fatalx_nodebug_v1(const char * restrict fmt, ...)
 {
     va_list ap;
 
@@ -97,7 +97,7 @@ sudo_fatalx_nodebug_v1(const char *fmt, ...)
 }
 
 sudo_noreturn void
-sudo_vfatal_nodebug_v1(const char *fmt, va_list ap)
+sudo_vfatal_nodebug_v1(const char * restrict fmt, va_list ap)
 {
     warning(strerror(errno), fmt, ap);
     do_cleanup();
@@ -105,7 +105,7 @@ sudo_vfatal_nodebug_v1(const char *fmt, va_list ap)
 }
 
 sudo_noreturn void
-sudo_vfatalx_nodebug_v1(const char *fmt, va_list ap)
+sudo_vfatalx_nodebug_v1(const char * restrict fmt, va_list ap)
 {
     warning(NULL, fmt, ap);
     do_cleanup();
@@ -113,7 +113,7 @@ sudo_vfatalx_nodebug_v1(const char *fmt, va_list ap)
 }
 
 void
-sudo_warn_nodebug_v1(const char *fmt, ...)
+sudo_warn_nodebug_v1(const char * restrict fmt, ...)
 {
     va_list ap;
 
@@ -123,7 +123,7 @@ sudo_warn_nodebug_v1(const char *fmt, ...)
 }
 
 void
-sudo_warnx_nodebug_v1(const char *fmt, ...)
+sudo_warnx_nodebug_v1(const char * restrict fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -132,19 +132,19 @@ sudo_warnx_nodebug_v1(const char *fmt, ...)
 }
 
 void
-sudo_vwarn_nodebug_v1(const char *fmt, va_list ap)
+sudo_vwarn_nodebug_v1(const char * restrict fmt, va_list ap)
 {
     warning(strerror(errno), fmt, ap);
 }
 
 void
-sudo_vwarnx_nodebug_v1(const char *fmt, va_list ap)
+sudo_vwarnx_nodebug_v1(const char * restrict fmt, va_list ap)
 {
     warning(NULL, fmt, ap);
 }
 
 sudo_noreturn void
-sudo_gai_fatal_nodebug_v1(int errnum, const char *fmt, ...)
+sudo_gai_fatal_nodebug_v1(int errnum, const char * restrict fmt, ...)
 {
     va_list ap;
 
@@ -156,7 +156,7 @@ sudo_gai_fatal_nodebug_v1(int errnum, const char *fmt, ...)
 }
 
 sudo_noreturn void
-sudo_gai_vfatal_nodebug_v1(int errnum, const char *fmt, va_list ap)
+sudo_gai_vfatal_nodebug_v1(int errnum, const char * restrict fmt, va_list ap)
 {
     warning(gai_strerror(errnum), fmt, ap);
     do_cleanup();
@@ -164,7 +164,7 @@ sudo_gai_vfatal_nodebug_v1(int errnum, const char *fmt, va_list ap)
 }
 
 void
-sudo_gai_warn_nodebug_v1(int errnum, const char *fmt, ...)
+sudo_gai_warn_nodebug_v1(int errnum, const char * restrict fmt, ...)
 {
     va_list ap;
 
@@ -174,13 +174,13 @@ sudo_gai_warn_nodebug_v1(int errnum, const char *fmt, ...)
 }
 
 void
-sudo_gai_vwarn_nodebug_v1(int errnum, const char *fmt, va_list ap)
+sudo_gai_vwarn_nodebug_v1(int errnum, const char * restrict fmt, va_list ap)
 {
     warning(gai_strerror(errnum), fmt, ap);
 }
 
 static void
-warning(const char *errstr, const char *fmt, va_list ap)
+warning(const char * restrict errstr, const char * restrict fmt, va_list ap)
 {
     int cookie;
     const int saved_errno = errno;

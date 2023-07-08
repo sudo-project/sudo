@@ -52,7 +52,7 @@ usage(void)
 }
 
 static int
-sudo_printf_int(int msg_type, const char *fmt, ...)
+sudo_printf_int(int msg_type, const char * restrict fmt, ...)
 {
     va_list ap;
     int len;
@@ -408,7 +408,7 @@ restore_perms(void)
 }
 
 bool
-log_warning(int flags, const char *fmt, ...)
+log_warning(int flags, const char * restrict fmt, ...)
 {
     va_list ap;
 
@@ -420,7 +420,7 @@ log_warning(int flags, const char *fmt, ...)
 }
 
 bool
-log_warningx(int flags, const char *fmt, ...)
+log_warningx(int flags, const char * restrict fmt, ...)
 {
     va_list ap;
 

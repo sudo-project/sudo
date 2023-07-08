@@ -28,7 +28,7 @@
 
 #include "sudoers.h"
 
-static int fuzz_printf(int msg_type, const char *fmt, ...);
+static int fuzz_printf(int msg_type, const char * restrict fmt, ...);
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
 /* Required to link with parser. */
@@ -48,7 +48,7 @@ open_sudoers(const char *file, char **outfile, bool doedit, bool *keepopen)
 }
 
 static int
-fuzz_printf(int msg_type, const char *fmt, ...)
+fuzz_printf(int msg_type, const char * restrict fmt, ...)
 {
     return 0;
 }

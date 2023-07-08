@@ -87,7 +87,7 @@ struct cvtsudoers_filter {
 
 /* cvtsudoers.c */
 extern struct cvtsudoers_filter *filters;
-void log_warnx(const char *fmt, ...) sudo_printflike(1, 2);
+void log_warnx(const char * restrict fmt, ...) sudo_printflike(1, 2);
 
 /* cvtsudoers_csv.c */
 bool convert_sudoers_csv(const struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);

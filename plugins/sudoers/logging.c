@@ -659,7 +659,7 @@ journal_parse_error(char *message)
  * Perform logging for log_warning()/log_warningx().
  */
 static bool
-vlog_warning(int flags, int errnum, const char *fmt, va_list ap)
+vlog_warning(int flags, int errnum, const char * restrict fmt, va_list ap)
 {
     struct eventlog evlog;
     struct timespec now;
@@ -766,7 +766,7 @@ done:
 }
 
 bool
-log_warning(int flags, const char *fmt, ...)
+log_warning(int flags, const char * restrict fmt, ...)
 {
     va_list ap;
     bool ret;
@@ -781,7 +781,7 @@ log_warning(int flags, const char *fmt, ...)
 }
 
 bool
-log_warningx(int flags, const char *fmt, ...)
+log_warningx(int flags, const char * restrict fmt, ...)
 {
     va_list ap;
     bool ret;
@@ -796,7 +796,7 @@ log_warningx(int flags, const char *fmt, ...)
 }
 
 bool
-gai_log_warning(int flags, int errnum, const char *fmt, ...)
+gai_log_warning(int flags, int errnum, const char * restrict fmt, ...)
 {
     va_list ap;
     bool ret;
@@ -871,7 +871,7 @@ done:
  * Does not write the message to stderr.
  */
 bool
-log_parse_error(const char *file, int line, int column, const char *fmt,
+log_parse_error(const char *file, int line, int column, const char * restrict fmt,
     va_list args)
 {
     const int flags = SLOG_RAW_MSG|SLOG_NO_STDERR;

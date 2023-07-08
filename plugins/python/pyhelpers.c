@@ -28,7 +28,7 @@
 #include "pathnames.h"
 
 static int
-_sudo_printf_default(int msg_type, const char *fmt, ...)
+_sudo_printf_default(int msg_type, const char * restrict fmt, ...)
 {
     FILE *fp = stdout;
     FILE *ttyfp = NULL;

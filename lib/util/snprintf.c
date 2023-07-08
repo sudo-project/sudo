@@ -106,9 +106,9 @@ union arg {
 #endif
 };
 
-static int __find_arguments(const char *fmt0, va_list ap, union arg **argtable);
+static int __find_arguments(const char * restrict fmt0, va_list ap, union arg **argtable);
 static int __grow_type_table(unsigned char **typetable, int *tablesize);
-static int xxxprintf(char **, size_t, int, const char *, va_list);
+static int xxxprintf(char ** restrict, size_t, int, const char * restrict, va_list);
 
 #ifdef PRINTF_WIDE_CHAR
 /*
@@ -224,7 +224,7 @@ static int exponent(char *, int, int);
  * Actual printf innards.
   */
 static int
-xxxprintf(char **strp, size_t strsize, int alloc, const char *fmt0, va_list ap)
+xxxprintf(char ** restrict strp, size_t strsize, int alloc, const char * restrict fmt0, va_list ap)
 {
 	char *fmt;		/* format string */
 	int ch;			/* character from fmt */
@@ -1484,7 +1484,7 @@ exponent(char *p0, int exp, int fmtch)
 
 #if !defined(HAVE_VSNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
 int
-sudo_vsnprintf(char *str, size_t n, const char *fmt, va_list ap)
+sudo_vsnprintf(char * restrict str, size_t n, const char * restrict fmt, va_list ap)
 {
 	if (n > INT_MAX) {
 		errno = EOVERFLOW;
@@ -1497,7 +1497,7 @@ sudo_vsnprintf(char *str, size_t n, const char *fmt, va_list ap)
 
 #if !defined(HAVE_SNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
 int
-sudo_snprintf(char *str, size_t n, char const *fmt, ...)
+sudo_snprintf(char * restrict str, size_t n, char const * restrict fmt, ...)
 {
 	int ret;
 	va_list ap;
@@ -1516,7 +1516,7 @@ sudo_snprintf(char *str, size_t n, char const *fmt, ...)
 
 #if !defined(HAVE_VASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
 int
-sudo_vasprintf(char **str, const char *fmt, va_list ap)
+sudo_vasprintf(char ** restrict str, const char * restrict fmt, va_list ap)
 {
 	int ret;
 
@@ -1529,7 +1529,7 @@ sudo_vasprintf(char **str, const char *fmt, va_list ap)
 
 #if !defined(HAVE_ASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
 int
-sudo_asprintf(char **str, char const *fmt, ...)
+sudo_asprintf(char ** restrict str, char const * restrict fmt, ...)
 {
 	int ret;
 	va_list ap;
