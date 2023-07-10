@@ -1084,6 +1084,12 @@ sudo_debug_exit_int_v1(const char *func, const char *file, int line,
 }
 
 void
+sudo_debug_exit_uint_v1(const char *func, const char *file, int line,
+    unsigned int subsys, int ret)
+{
+}
+
+void
 sudo_debug_exit_long_v1(const char *func, const char *file, int line,
     unsigned int subsys, long ret)
 {
