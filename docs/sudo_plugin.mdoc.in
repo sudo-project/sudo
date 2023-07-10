@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 18, 2023
+.Dd July 10, 2023
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -4256,7 +4256,7 @@ typedef int (*sudo_conv_t)(int num_msgs,
     const struct sudo_conv_message msgs[],
     struct sudo_conv_reply replies[], struct sudo_conv_callback *callback);
 
-typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
+typedef int (*sudo_printf_t)(int msg_type, const char * restrict fmt, ...);
 .Ed
 .Pp
 To use the
