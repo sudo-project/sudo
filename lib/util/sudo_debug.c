@@ -1085,7 +1085,7 @@ sudo_debug_exit_int_v1(const char *func, const char *file, int line,
 
 void
 sudo_debug_exit_uint_v1(const char *func, const char *file, int line,
-    unsigned int subsys, int ret)
+    unsigned int subsys, unsigned int ret)
 {
 }
 
