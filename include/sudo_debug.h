@@ -120,6 +120,129 @@ struct sudo_conf_debug_file_list;
     sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys)
 
 /*
+ * Different flavors of sudo_debug_exit() macros.
+ */
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+# define sudo_debug_enter(_func, _file, _line, _sys)			       \
+    do {								       \
+	sudo_debug_printf2(NULL, NULL, 0, (_sys) | SUDO_DEBUG_TRACE,	       \
+	    "-> %s @ %s:%d", (_func), (_file), (_line));		       \
+    } while (0)
+
+# define sudo_debug_exit(_func, _file, _line, _sys)			       \
+    do {								       \
+	sudo_debug_printf2(NULL, NULL, 0, (_sys) | SUDO_DEBUG_TRACE,	       \
+	    "<- %s @ %s:%d", (_func), (_file), (_line));		       \
+    } while (0)
+
+# define sudo_debug_exit_int(_func, _file, _line, _sys, _ret)		       \
+    do {								       \
+	sudo_debug_printf2(NULL, NULL, 0, (_sys) | SUDO_DEBUG_TRACE,	       \
+	    "<- %s @ %s:%d := %d", (_func), (_file), (_line), (_ret));	       \
+    } while (0)
+
+# define sudo_debug_exit_uint(_func, _file, _line, _sys, _ret)		       \
+    do {								       \
+	sudo_debug_printf2(NULL, NULL, 0, (_sys) | SUDO_DEBUG_TRACE,	       \
+	    "<- %s @ %s:%d := %u", (_func), (_file), (_line), (_ret));	       \
+    } while (0)
+
+# define sudo_debug_exit_long(_func, _file, _line, _sys, _ret)		       \
+    do {								       \
+	sudo_debug_printf2(NULL, NULL, 0, (_sys) | SUDO_DEBUG_TRACE,	       \
+	    "<- %s @ %s:%d := %ld", (_func), (_file), (_line), (_ret));	       \
+    } while (0)
+
+# if SIZEOF_ID_T == 8
+#  define sudo_debug_exit_id_t(_func, _file, _line, _sys, _ret)		       \
+    do {								       \
+	sudo_debug_printf2(NULL, NULL, 0, (_sys) | SUDO_DEBUG_TRACE,	       \
+	    "<- %s @ %s:%d := %lld", (_func), (_file), (_line), (long long)(_ret));\
+    } while (0)
+# else
+#  define sudo_debug_exit_id_t(_func, _file, _line, _sys, _ret)		       \
+    do {								       \
+	sudo_debug_printf2(NULL, NULL, 0, (_sys) | SUDO_DEBUG_TRACE,	       \
+	    "<- %s @ %s:%d := %d", (_func), (_file), (_line), (int)(_ret));    \
+    } while (0)
+# endif
+
+# define sudo_debug_exit_size_t(_func, _file, _line, _sys, _ret)		       \
+    do {								       \
+	sudo_debug_printf2(NULL, NULL, 0, (_sys) | SUDO_DEBUG_TRACE,	       \
+	    "<- %s @ %s:%d := %zu", (_func), (_file), (_line), (_ret));	       \
+    } while (0)
+
+# define sudo_debug_exit_ssize_t(_func, _file, _line, _sys, _ret)		       \
+    do {								       \
+	sudo_debug_printf2(NULL, NULL, 0, (_sys) | SUDO_DEBUG_TRACE,	       \
+	    "<- %s @ %s:%d := %zd", (_func), (_file), (_line), (_ret));	       \
+    } while (0)
+
+# if SIZEOF_TIME_T == 8
+#  define sudo_debug_exit_time_t(_func, _file, _line, _sys, _ret)		       \
+    do {								       \
+	sudo_debug_printf2(NULL, NULL, 0, (_sys) | SUDO_DEBUG_TRACE,	       \
+	    "<- %s @ %s:%d := %lld", (_func), (_file), (_line), (long long)(_ret));\
+    } while (0)
+# else
+#  define sudo_debug_exit_time_t(_func, _file, _line, _sys, _ret)		       \
+    do {								       \
+	sudo_debug_printf2(NULL, NULL, 0, (_sys) | SUDO_DEBUG_TRACE,	       \
+	    "<- %s @ %s:%d := %d", (_func), (_file), (_line), (int)(_ret));    \
+    } while (0)
+# endif
+
+# define sudo_debug_exit_mode_t(_func, _file, _line, _sys, _ret)		       \
+    do {								       \
+	sudo_debug_printf2(NULL, NULL, 0, (_sys) | SUDO_DEBUG_TRACE,	       \
+	    "<- %s @ %s:%d := %d", (_func), (_file), (_line), (int)(_ret));    \
+    } while (0)
+
+# define sudo_debug_exit_bool(_func, _file, _line, _sys, _ret)		       \
+    do {								       \
+	sudo_debug_printf2(NULL, NULL, 0, (_sys) | SUDO_DEBUG_TRACE,	       \
+	    "<- %s @ %s:%d := %s", (_func), (_file), (_line), (_ret) ? "true": "false");\
+    } while (0)
+
+# define sudo_debug_exit_str(_func, _file, _line, _sys, _ret)		       \
+    do {								       \
+	sudo_debug_printf2(NULL, NULL, 0, (_sys) | SUDO_DEBUG_TRACE,	       \
+	    "<- %s @ %s:%d := %s", (_func), (_file), (_line), (_ret) ? (_ret) : "(null)");\
+    } while (0)
+
+# define sudo_debug_exit_str_masked(_func, _file, _line, _sys, _ret)		       \
+    do {								       \
+	const char _stars[] = "********************************************************************************"; \
+	const size_t _len = (_ret) ? strlen(_ret) : sizeof("(null)") - 1;      \
+	const char *_s = (_ret) ? _stars : "(null)";			       \
+	sudo_debug_printf2(NULL, NULL, 0, (_sys) | SUDO_DEBUG_TRACE,	       \
+	    "<- %s @ %s:%d := %.*s", (_func), (_file), (_line), (int)_len, _s);\
+    } while (0)
+
+# define sudo_debug_exit_ptr(_func, _file, _line, _sys, _ret)		       \
+    do {								       \
+	sudo_debug_printf2(NULL, NULL, 0, (_sys) | SUDO_DEBUG_TRACE,	       \
+	    "<- %s @ %s:%d := %p", (_func), (_file), (_line), (_ret));	       \
+    } while (0)
+#else /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
+# define sudo_debug_enter(_a, _b, _c, _d)
+# define sudo_debug_exit(_a, _b, _c, _d)
+# define sudo_debug_exit_int(_a, _b, _c, _d, _e)
+# define sudo_debug_exit_uint(_a, _b, _c, _d, _e)
+# define sudo_debug_exit_long(_a, _b, _c, _d, _e)
+# define sudo_debug_exit_id_t(_a, _b, _c, _d, _e)
+# define sudo_debug_exit_size_t(_a, _b, _c, _d, _e)
+# define sudo_debug_exit_ssize_t(_a, _b, _c, _d, _e)
+# define sudo_debug_exit_time_t(_a, _b, _c, _d, _e)
+# define sudo_debug_exit_mode_t(_a, _b, _c, _d, _e)
+# define sudo_debug_exit_bool(_a, _b, _c, _d, _e)
+# define sudo_debug_exit_str(_a, _b, _c, _d, _e)
+# define sudo_debug_exit_str_masked(_a, _b, _c, _d, _e)
+# define sudo_debug_exit_ptr(_a, _b, _c, _d, _e)
+#endif /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
+
+/*
  * Wrappers for sudo_debug_exit() and friends.
  */
 #define debug_return							       \
@@ -295,21 +418,7 @@ sudo_dso_public bool sudo_debug_needed_v1(unsigned int level);
 
 #define sudo_debug_needed(level) sudo_debug_needed_v1((level)|sudo_debug_subsys)
 #define sudo_debug_deregister(_a) sudo_debug_deregister_v1((_a))
-#define sudo_debug_enter(_a, _b, _c, _d) sudo_debug_enter_v1((_a), (_b), (_c), (_d))
 #define sudo_debug_execve2(_a, _b, _c, _d) sudo_debug_execve2_v1((_a), (_b), (_c), (_d))
-#define sudo_debug_exit(_a, _b, _c, _d) sudo_debug_exit_v1((_a), (_b), (_c), (_d))
-#define sudo_debug_exit_bool(_a, _b, _c, _d, _e) sudo_debug_exit_bool_v1((_a), (_b), (_c), (_d), (_e))
-#define sudo_debug_exit_int(_a, _b, _c, _d, _e) sudo_debug_exit_int_v1((_a), (_b), (_c), (_d), (_e))
-#define sudo_debug_exit_uint(_a, _b, _c, _d, _e) sudo_debug_exit_uint_v1((_a), (_b), (_c), (_d), (_e))
-#define sudo_debug_exit_long(_a, _b, _c, _d, _e) sudo_debug_exit_long_v1((_a), (_b), (_c), (_d), (_e))
-#define sudo_debug_exit_ptr(_a, _b, _c, _d, _e) sudo_debug_exit_ptr_v1((_a), (_b), (_c), (_d), (_e))
-#define sudo_debug_exit_id_t(_a, _b, _c, _d, _e) sudo_debug_exit_id_t_v1((_a), (_b), (_c), (_d), (_e))
-#define sudo_debug_exit_size_t(_a, _b, _c, _d, _e) sudo_debug_exit_size_t_v1((_a), (_b), (_c), (_d), (_e))
-#define sudo_debug_exit_ssize_t(_a, _b, _c, _d, _e) sudo_debug_exit_ssize_t_v1((_a), (_b), (_c), (_d), (_e))
-#define sudo_debug_exit_str(_a, _b, _c, _d, _e) sudo_debug_exit_str_v1((_a), (_b), (_c), (_d), (_e))
-#define sudo_debug_exit_str_masked(_a, _b, _c, _d, _e) sudo_debug_exit_str_masked_v1((_a), (_b), (_c), (_d), (_e))
-#define sudo_debug_exit_time_t(_a, _b, _c, _d, _e) sudo_debug_exit_time_t_v1((_a), (_b), (_c), (_d), (_e))
-#define sudo_debug_exit_mode_t(_a, _b, _c, _d, _e) sudo_debug_exit_mode_t_v1((_a), (_b), (_c), (_d), (_e))
 #define sudo_debug_fork() sudo_debug_fork_v1()
 #define sudo_debug_get_active_instance() sudo_debug_get_active_instance_v1()
 #define sudo_debug_get_fds(_a) sudo_debug_get_fds_v1((_a))
