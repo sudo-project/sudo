@@ -53,7 +53,7 @@ struct sudo_user sudo_user;
 struct passwd *list_pw;
 sudo_conv_t sudo_conv = fuzz_conversation;
 sudo_printf_t sudo_printf = fuzz_printf;
-int sudo_mode;
+unsigned int sudo_mode;
 
 FILE *
 open_sudoers(const char *file, char **outfile, bool doedit, bool *keepopen)
@@ -125,7 +125,7 @@ mail_parse_errors(void)
 
 /* STUB */
 bool
-log_warningx(int flags, const char * restrict fmt, ...)
+log_warningx(unsigned int flags, const char * restrict fmt, ...)
 {
     return true;
 }

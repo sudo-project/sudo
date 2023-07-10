@@ -129,7 +129,7 @@ struct sudo_user {
     int   closefrom;
     int   lines;
     int   cols;
-    int   flags;
+    unsigned int   flags;
     int   max_groups;
     int   timeout;
     mode_t umask;
@@ -150,25 +150,25 @@ struct sudo_user {
 /*
  * sudo_user flag values
  */
-#define RUNAS_USER_SPECIFIED	0x01
-#define RUNAS_GROUP_SPECIFIED	0x02
-#define CAN_INTERCEPT_SETID	0x04
-#define HAVE_INTERCEPT_PTRACE	0x08
-#define USER_INTERCEPT_SETID	0x10
+#define RUNAS_USER_SPECIFIED	0x01U
+#define RUNAS_GROUP_SPECIFIED	0x02U
+#define CAN_INTERCEPT_SETID	0x04U
+#define HAVE_INTERCEPT_PTRACE	0x08U
+#define USER_INTERCEPT_SETID	0x10U
 
 /*
  * Return values for sudoers_lookup(), also used as arguments for log_auth()
  * Note: cannot use '0' as a value here.
  */
-#define VALIDATE_ERROR		0x001
-#define VALIDATE_SUCCESS	0x002
-#define VALIDATE_FAILURE	0x004
-#define FLAG_CHECK_USER		0x010
-#define FLAG_NO_USER		0x020
-#define FLAG_NO_HOST		0x040
-#define FLAG_NO_CHECK		0x080
-#define FLAG_NO_USER_INPUT	0x100
-#define FLAG_BAD_PASSWORD	0x200
+#define VALIDATE_ERROR		0x001U
+#define VALIDATE_SUCCESS	0x002U
+#define VALIDATE_FAILURE	0x004U
+#define FLAG_CHECK_USER		0x010U
+#define FLAG_NO_USER		0x020U
+#define FLAG_NO_HOST		0x040U
+#define FLAG_NO_CHECK		0x080U
+#define FLAG_NO_USER_INPUT	0x100U
+#define FLAG_BAD_PASSWORD	0x200U
 
 /*
  * find_path()/set_cmnd() return values
@@ -182,30 +182,30 @@ struct sudo_user {
 /*
  * Various modes sudo can be in (based on arguments) in hex
  */
-#define MODE_RUN		0x00000001
-#define MODE_EDIT		0x00000002
-#define MODE_VALIDATE		0x00000004
-#define MODE_INVALIDATE		0x00000008
-#define MODE_KILL		0x00000010
-#define MODE_VERSION		0x00000020
-#define MODE_HELP		0x00000040
-#define MODE_LIST		0x00000080
-#define MODE_CHECK		0x00000100
-#define MODE_ERROR		0x00000200
-#define MODE_MASK		0x0000ffff
+#define MODE_RUN		0x00000001U
+#define MODE_EDIT		0x00000002U
+#define MODE_VALIDATE		0x00000004U
+#define MODE_INVALIDATE		0x00000008U
+#define MODE_KILL		0x00000010U
+#define MODE_VERSION		0x00000020U
+#define MODE_HELP		0x00000040U
+#define MODE_LIST		0x00000080U
+#define MODE_CHECK		0x00000100U
+#define MODE_ERROR		0x00000200U
+#define MODE_MASK		0x0000ffffU
 
 /* Mode flags */
-#define MODE_ASKPASS		0x00010000
-#define MODE_SHELL		0x00020000
-#define MODE_LOGIN_SHELL	0x00040000
-#define MODE_IMPLIED_SHELL	0x00080000
-#define MODE_RESET_HOME		0x00100000
-#define MODE_PRESERVE_GROUPS	0x00200000
-#define MODE_PRESERVE_ENV	0x00400000
-#define MODE_NONINTERACTIVE	0x00800000
-#define MODE_IGNORE_TICKET	0x01000000
-#define MODE_UPDATE_TICKET	0x02000000
-#define MODE_POLICY_INTERCEPTED	0x04000000
+#define MODE_ASKPASS		0x00010000U
+#define MODE_SHELL		0x00020000U
+#define MODE_LOGIN_SHELL	0x00040000U
+#define MODE_IMPLIED_SHELL	0x00080000U
+#define MODE_RESET_HOME		0x00100000U
+#define MODE_PRESERVE_GROUPS	0x00200000U
+#define MODE_PRESERVE_ENV	0x00400000U
+#define MODE_NONINTERACTIVE	0x00800000U
+#define MODE_IGNORE_TICKET	0x01000000U
+#define MODE_UPDATE_TICKET	0x02000000U
+#define MODE_POLICY_INTERCEPTED	0x04000000U
 
 /* Mode bits allowed for intercepted commands. */
 #define MODE_INTERCEPT_MASK	(MODE_RUN|MODE_NONINTERACTIVE|MODE_IGNORE_TICKET|MODE_POLICY_INTERCEPTED)
@@ -295,7 +295,7 @@ int find_path(const char *infile, char **outfile, struct stat *sbp,
     const char *path, int ignore_dot, char * const *allowlist);
 
 /* check.c */
-int check_user(int validate, int mode);
+int check_user(unsigned int validated, unsigned int mode);
 bool user_is_exempt(void);
 
 /* check_util.c */
@@ -311,11 +311,11 @@ int timestamp_remove(bool unlinkit);
 
 /* sudo_auth.c */
 bool sudo_auth_needs_end_session(void);
-int verify_user(struct passwd *pw, char *prompt, int validated, struct sudo_conv_callback *callback);
+int verify_user(struct passwd *pw, char *prompt, unsigned int validated, struct sudo_conv_callback *callback);
 int sudo_auth_begin_session(struct passwd *pw, char **user_env[]);
 int sudo_auth_end_session(struct passwd *pw);
-int sudo_auth_init(struct passwd *pw, int mode);
-int sudo_auth_approval(struct passwd *pw, int validated, bool exempt);
+int sudo_auth_init(struct passwd *pw, unsigned int mode);
+int sudo_auth_approval(struct passwd *pw, unsigned int validated, bool exempt);
 int sudo_auth_cleanup(struct passwd *pw, bool force);
 
 /* set_perms.c */
@@ -418,7 +418,7 @@ bool sudoers_override_umask(void);
 void sudo_user_free(void);
 extern struct sudo_user sudo_user;
 extern struct passwd *list_pw;
-extern int sudo_mode;
+extern unsigned int sudo_mode;
 extern int sudoedit_nfiles;
 extern sudo_conv_t sudo_conv;
 extern sudo_printf_t sudo_printf;
@@ -430,7 +430,7 @@ bool sudoers_debug_register(const char *plugin_path, struct sudo_conf_debug_file
 void sudoers_debug_deregister(void);
 
 /* policy.c */
-int sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults);
+unsigned int sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults);
 bool sudoers_policy_store_result(bool accepted, char *argv[], char *envp[], mode_t cmnd_umask, char *iolog_path, void *v);
 const struct sudoers_parser_config *policy_sudoers_conf(void);
 const char *policy_path_ldap_conf(void);

@@ -49,7 +49,7 @@ struct getpass_closure {
     struct passwd *auth_pw;
 };
 
-static struct passwd *get_authpw(int);
+static struct passwd *get_authpw(unsigned int);
 
 /*
  * Called when getpass is suspended so we can drop the lock.
@@ -85,7 +85,8 @@ getpass_resume(int signo, void *vclosure)
  * or -1 on fatal error.
  */
 static int
-check_user_interactive(int validated, int mode, struct getpass_closure *closure)
+check_user_interactive(unsigned int validated, unsigned int mode,
+    struct getpass_closure *closure)
 {
     struct sudo_conv_callback callback;
     int ret = -1;
@@ -157,7 +158,7 @@ done:
  * or -1 on error.
  */
 int
-check_user(int validated, int mode)
+check_user(unsigned int validated, unsigned int mode)
 {
     struct getpass_closure closure = { TS_ERROR };
     int ret = -1;
@@ -338,7 +339,7 @@ user_is_exempt(void)
  * case, this matches sudo_user.pw or runas_pw.
  */
 static struct passwd *
-get_authpw(int mode)
+get_authpw(unsigned int mode)
 {
     struct passwd *pw = NULL;
     debug_decl(get_authpw, SUDOERS_DEBUG_AUTH);

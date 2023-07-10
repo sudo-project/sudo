@@ -7,7 +7,7 @@ Purpose: to provide a simple API for authentication methods that
 The sudo_auth struct looks like this:
 
 typedef struct sudo_auth {
-    int flags;                  /* various flags, see below */
+    unsigned int flags;         /* various flags, see below */
     int status;                 /* status from verify routine */
     char *name;			/* name of the method in string form */
     void *data;                 /* method-specific data pointer */

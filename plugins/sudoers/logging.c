@@ -67,7 +67,7 @@ STAILQ_HEAD(parse_error_list, parse_error);
 static struct parse_error_list parse_error_list =
     STAILQ_HEAD_INITIALIZER(parse_error_list);
 
-static bool should_mail(int);
+static bool should_mail(unsigned int);
 static bool warned = false;
 
 #ifdef SUDOERS_LOG_CLIENT
@@ -275,7 +275,7 @@ log_reject(const char *message, bool logit, bool mailit)
  * Log, audit and mail the denial message, optionally informing the user.
  */
 bool
-log_denial(int status, bool inform_user)
+log_denial(unsigned int status, bool inform_user)
 {
     const char *message;
     int oldlocale;
@@ -342,14 +342,14 @@ log_denial(int status, bool inform_user)
  * Log and audit that user was not allowed to run the command.
  */
 bool
-log_failure(int status, int flags)
+log_failure(unsigned int status, int cmnd_status)
 {
     bool ret, inform_user = true;
     debug_decl(log_failure, SUDOERS_DEBUG_LOGGING);
 
     /* The user doesn't always get to see the log message (path info). */
     if (!ISSET(status, FLAG_NO_USER | FLAG_NO_HOST) && list_pw == NULL &&
-	    def_path_info && (flags == NOT_FOUND_DOT || flags == NOT_FOUND))
+	    def_path_info && (cmnd_status == NOT_FOUND_DOT || cmnd_status == NOT_FOUND))
 	inform_user = false;
     ret = log_denial(status, inform_user);
 
@@ -365,9 +365,9 @@ log_failure(int status, int flags)
 	 * is just "no foo in path" since the user can trivially set
 	 * their path to just contain a single dir.
 	 */
-	if (flags == NOT_FOUND)
+	if (cmnd_status == NOT_FOUND)
 	    sudo_warnx(U_("%s: command not found"), cmnd);
-	else if (flags == NOT_FOUND_DOT)
+	else if (cmnd_status == NOT_FOUND_DOT)
 	    sudo_warnx(U_("ignoring \"%s\" found in '.'\nUse \"sudo ./%s\" if this is the \"%s\" you wish to run."), cmnd, cmnd, cmnd);
     }
 
@@ -468,7 +468,7 @@ overflow:
  * Log and audit that user was not able to authenticate themselves.
  */
 bool
-log_auth_failure(int status, unsigned int tries)
+log_auth_failure(unsigned int status, unsigned int tries)
 {
     char *message = NULL;
     int oldlocale;
@@ -659,7 +659,8 @@ journal_parse_error(char *message)
  * Perform logging for log_warning()/log_warningx().
  */
 static bool
-vlog_warning(int flags, int errnum, const char * restrict fmt, va_list ap)
+vlog_warning(unsigned int flags, int errnum, const char * restrict fmt,
+    va_list ap)
 {
     struct eventlog evlog;
     struct timespec now;
@@ -766,7 +767,7 @@ done:
 }
 
 bool
-log_warning(int flags, const char * restrict fmt, ...)
+log_warning(unsigned int flags, const char * restrict fmt, ...)
 {
     va_list ap;
     bool ret;
@@ -781,7 +782,7 @@ log_warning(int flags, const char * restrict fmt, ...)
 }
 
 bool
-log_warningx(int flags, const char * restrict fmt, ...)
+log_warningx(unsigned int flags, const char * restrict fmt, ...)
 {
     va_list ap;
     bool ret;
@@ -796,7 +797,7 @@ log_warningx(int flags, const char * restrict fmt, ...)
 }
 
 bool
-gai_log_warning(int flags, int errnum, const char * restrict fmt, ...)
+gai_log_warning(unsigned int flags, int errnum, const char * restrict fmt, ...)
 {
     va_list ap;
     bool ret;
@@ -874,7 +875,7 @@ bool
 log_parse_error(const char *file, int line, int column, const char * restrict fmt,
     va_list args)
 {
-    const int flags = SLOG_RAW_MSG|SLOG_NO_STDERR;
+    const unsigned int flags = SLOG_RAW_MSG|SLOG_NO_STDERR;
     char *message, *tofree = NULL;
     const char *errstr;
     bool ret;
@@ -920,7 +921,7 @@ log_parse_error(const char *file, int line, int column, const char * restrict fm
  * Determine whether we should send mail based on "status" and defaults options.
  */
 static bool
-should_mail(int status)
+should_mail(unsigned int status)
 {
     debug_decl(should_mail, SUDOERS_DEBUG_LOGGING);
 

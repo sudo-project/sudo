@@ -99,7 +99,7 @@ static bool standalone;
  * Returns 0 on success and -1 on error.
  */
 int
-sudo_auth_init(struct passwd *pw, int mode)
+sudo_auth_init(struct passwd *pw, unsigned int mode)
 {
     sudo_auth *auth;
     int status = AUTH_SUCCESS;
@@ -172,7 +172,7 @@ sudo_auth_init(struct passwd *pw, int mode)
  * Returns true on success, false on failure and -1 on error.
  */
 int
-sudo_auth_approval(struct passwd *pw, int validated, bool exempt)
+sudo_auth_approval(struct passwd *pw, unsigned int validated, bool exempt)
 {
     sudo_auth *auth;
     debug_decl(sudo_auth_approval, SUDOERS_DEBUG_AUTH);
@@ -243,7 +243,7 @@ user_interrupted(void)
  * Returns true if verified, false if not or -1 on error.
  */
 int
-verify_user(struct passwd *pw, char *prompt, int validated,
+verify_user(struct passwd *pw, char *prompt, unsigned int validated,
     struct sudo_conv_callback *callback)
 {
     unsigned int ntries;

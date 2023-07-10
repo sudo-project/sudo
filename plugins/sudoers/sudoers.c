@@ -82,14 +82,14 @@ static void set_callbacks(void);
  */
 struct sudo_user sudo_user;
 struct passwd *list_pw;
-int sudo_mode;
+unsigned int sudo_mode;
 
 static char *prev_user;
 static struct sudo_nss_list *snl;
 static bool unknown_runas_uid;
 static bool unknown_runas_gid;
 static bool override_umask;
-static int cmnd_status = -1;
+static int cmnd_status = NOT_FOUND_ERROR;
 static struct defaults_list initial_defaults = TAILQ_HEAD_INITIALIZER(initial_defaults);
 
 #ifdef __linux__
@@ -336,7 +336,8 @@ done:
 static int
 sudoers_check_common(int pwflag)
 {
-    int oldlocale, validated, ret = -1;
+    int oldlocale, ret = -1;
+    unsigned int validated;
     time_t now;
     debug_decl(sudoers_check_common, SUDOERS_DEBUG_PLUGIN);
 
@@ -1319,7 +1320,7 @@ open_sudoers(const char *path, char **outfile, bool doedit, bool *keepopen)
 static bool
 set_loginclass(struct passwd *pw)
 {
-    const int errflags = SLOG_RAW_MSG;
+    const unsigned int errflags = SLOG_RAW_MSG;
     login_cap_t *lc;
     bool ret = true;
     debug_decl(set_loginclass, SUDOERS_DEBUG_PLUGIN);

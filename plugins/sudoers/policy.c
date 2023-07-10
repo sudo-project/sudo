@@ -65,7 +65,7 @@ int sudoedit_nfiles;
 extern sudo_dso_public struct policy_plugin sudoers_policy;
 
 static int
-parse_bool(const char *line, int varlen, int *flags, int fval)
+parse_bool(const char *line, int varlen, unsigned int *flags, unsigned int fval)
 {
     debug_decl(parse_bool, SUDOERS_DEBUG_PLUGIN);
 
@@ -93,12 +93,12 @@ parse_bool(const char *line, int varlen, int *flags, int fval)
  * Deserialize args, settings and user_info arrays.
  * Fills in struct sudo_user and other common sudoers state.
  */
-int
+unsigned int
 sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 {
     const char *p, *errstr, *groups = NULL;
     struct sudoers_open_info *info = v;
-    int flags = MODE_UPDATE_TICKET;
+    unsigned int flags = MODE_UPDATE_TICKET;
     const char *remhost = NULL;
     unsigned char uuid[16];
     char * const *cur;
@@ -612,12 +612,12 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 #undef MATCHES
 #undef INVALID
 #undef CHECK
-    debug_return_int(flags);
+    debug_return_uint(flags);
 
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 bad:
-    debug_return_int(MODE_ERROR);
+    debug_return_uint(MODE_ERROR);
 }
 
 /* Return the policy's struct sudoers_parser_config. */
@@ -1181,7 +1181,7 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     char **command_infop[], char **argv_out[], char **user_env_out[],
     const char **errstr)
 {
-    int valid_flags = RUN_VALID_FLAGS;
+    unsigned int valid_flags = RUN_VALID_FLAGS;
     struct sudoers_exec_args exec_args;
     int ret;
     debug_decl(sudoers_policy_check, SUDOERS_DEBUG_PLUGIN);

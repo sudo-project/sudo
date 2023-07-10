@@ -707,7 +707,7 @@ sudo_read_nss(void)
 
 /* STUB */
 int
-check_user(int validated, int mode)
+check_user(unsigned int validated, unsigned int mode)
 {
     return true;
 }
@@ -742,35 +742,35 @@ group_plugin_unload(void)
 
 /* STUB */
 bool
-log_warning(int flags, const char * restrict fmt, ...)
+log_warning(unsigned int flags, const char * restrict fmt, ...)
 {
     return true;
 }
 
 /* STUB */
 bool
-log_warningx(int flags, const char * restrict fmt, ...)
+log_warningx(unsigned int flags, const char * restrict fmt, ...)
 {
     return true;
 }
 
 /* STUB */
 bool
-gai_log_warning(int flags, int errnum, const char * restrict fmt, ...)
+gai_log_warning(unsigned int flags, int errnum, const char * restrict fmt, ...)
 {
     return true;
 }
 
 /* STUB */
 bool
-log_denial(int status, bool inform_user)
+log_denial(unsigned int status, bool inform_user)
 {
     return true;
 }
 
 /* STUB */
 bool
-log_failure(int status, int flags)
+log_failure(unsigned int status, int flags)
 {
     return true;
 }
@@ -805,7 +805,7 @@ audit_failure(char *const argv[], char const * restrict const fmt, ...)
 }
 
 /* STUB */
-int
+unsigned int
 sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, time_t now,
     struct sudoers_lookup_callbacks *callbacks, int *cmnd_status, int pwflag)
 {

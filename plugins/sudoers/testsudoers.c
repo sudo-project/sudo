@@ -86,7 +86,7 @@ struct sudo_user sudo_user;
 struct passwd *list_pw;
 static const char *orig_cmnd;
 static char *runas_group, *runas_user;
-int sudo_mode = MODE_RUN;
+unsigned int sudo_mode = MODE_RUN;
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
 extern char *malloc_options;
@@ -106,7 +106,8 @@ main(int argc, char *argv[])
     char *p, *grfile, *pwfile;
     const char *errstr;
     int ch, dflag, exitcode = EXIT_FAILURE;
-    int validated, status = FOUND;
+    unsigned int validated;
+    int status = FOUND;
     char cwdbuf[PATH_MAX];
     time_t now;
     id_t id;

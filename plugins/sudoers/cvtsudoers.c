@@ -95,8 +95,8 @@ static bool parse_ldif(struct sudoers_parse_tree *parse_tree, const char *input_
 static bool cvtsudoers_parse_filter(char *expression);
 static struct cvtsudoers_config *cvtsudoers_conf_read(const char *conf_file);
 static void cvtsudoers_conf_free(struct cvtsudoers_config *conf);
-static int cvtsudoers_parse_defaults(char *expression);
-static int cvtsudoers_parse_suppression(char *expression);
+static unsigned int cvtsudoers_parse_defaults(char *expression);
+static unsigned int cvtsudoers_parse_suppression(char *expression);
 static void filter_userspecs(struct sudoers_parse_tree *parse_tree, struct cvtsudoers_config *conf);
 static void filter_defaults(struct sudoers_parse_tree *parse_tree, struct cvtsudoers_config *conf);
 static void alias_remove_unused(struct sudoers_parse_tree *parse_tree);
@@ -309,12 +309,12 @@ main(int argc, char *argv[])
     }
     if (conf->defstr != NULL) {
 	conf->defaults = cvtsudoers_parse_defaults(conf->defstr);
-	if (conf->defaults == -1)
+	if (conf->defaults == (unsigned int)-1)
 	    usage();
     }
     if (conf->supstr != NULL) {
 	conf->suppress = cvtsudoers_parse_suppression(conf->supstr);
-	if (conf->suppress == -1)
+	if (conf->suppress == (unsigned int)-1)
 	    usage();
     }
 
@@ -632,11 +632,11 @@ cvtsudoers_conf_free(struct cvtsudoers_config *conf)
     debug_return;
 }
 
-static int
+static unsigned int
 cvtsudoers_parse_defaults(char *expression)
 {
     char *last, *cp = expression;
-    int flags = 0;
+    unsigned int flags = 0;
     debug_decl(cvtsudoers_parse_defaults, SUDOERS_DEBUG_UTIL);
 
     for ((cp = strtok_r(cp, ",", &last)); cp != NULL; (cp = strtok_r(NULL, ",", &last))) {
@@ -654,18 +654,18 @@ cvtsudoers_parse_defaults(char *expression)
 	    SET(flags, CVT_DEFAULTS_CMND);
 	} else {
 	    sudo_warnx(U_("invalid defaults type: %s"), cp);
-	    debug_return_int(-1);
+	    debug_return_uint((unsigned int)-1);
 	}
     }
 
-    debug_return_int(flags);
+    debug_return_uint(flags);
 }
 
-static int
+static unsigned int
 cvtsudoers_parse_suppression(char *expression)
 {
     char *last, *cp = expression;
-    int flags = 0;
+    unsigned int flags = 0;
     debug_decl(cvtsudoers_parse_suppression, SUDOERS_DEBUG_UTIL);
 
     for ((cp = strtok_r(cp, ",", &last)); cp != NULL; (cp = strtok_r(NULL, ",", &last))) {
@@ -677,11 +677,11 @@ cvtsudoers_parse_suppression(char *expression)
 	    SET(flags, SUPPRESS_PRIVS);
 	} else {
 	    sudo_warnx(U_("invalid suppression type: %s"), cp);
-	    debug_return_int(-1);
+	    debug_return_uint((unsigned int)-1);
 	}
     }
 
-    debug_return_int(flags);
+    debug_return_uint(flags);
 }
 
 static bool

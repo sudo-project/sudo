@@ -53,7 +53,7 @@ runas_matches_pw(struct sudoers_parse_tree *parse_tree,
  * Look up the user in the sudoers parse tree for pseudo-commands like
  * list, verify and kill.
  */
-static int
+static unsigned int
 sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw, int pwflag)
 {
     char *saved_runchroot;
@@ -64,7 +64,7 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw, int pwflag)
     struct userspec *us;
     struct defaults *def;
     int cmnd_match, nopass, match = DENY;
-    int validated = 0;
+    unsigned int validated = 0;
     enum def_tuple pwcheck;
     debug_decl(sudoers_lookup_pseudo, SUDOERS_DEBUG_PARSER);
 
@@ -177,7 +177,7 @@ done:
     /* Restore original def_runchroot. */
     def_runchroot = saved_runchroot;
 
-    debug_return_int(validated);
+    debug_return_uint(validated);
 }
 
 static void
@@ -190,7 +190,7 @@ init_cmnd_info(struct cmnd_info *info)
 
 static int
 sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
-    int *validated, struct cmnd_info *info, time_t now,
+    unsigned int *validated, struct cmnd_info *info, time_t now,
     struct sudoers_lookup_callbacks *callbacks, struct cmndspec **matching_cs,
     struct defaults_list **defs)
 {
@@ -457,16 +457,17 @@ apply_cmndspec(struct cmndspec *cs)
  * Look up the user in the sudoers parse tree and check to see if they are
  * allowed to run the specified command on this host as the target user.
  */
-int
+unsigned int
 sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, time_t now,
-    struct sudoers_lookup_callbacks *callbacks, int *cmnd_status, int pwflag)
+    struct sudoers_lookup_callbacks *callbacks, int *cmnd_status,
+    int pwflag)
 {
     struct defaults_list *defs = NULL;
     struct sudoers_parse_tree *parse_tree = NULL;
     struct cmndspec *cs = NULL;
     struct sudo_nss *nss;
     struct cmnd_info info;
-    int validated = FLAG_NO_USER | FLAG_NO_HOST;
+    unsigned int validated = FLAG_NO_USER | FLAG_NO_HOST;
     int m, match = UNSPEC;
     debug_decl(sudoers_lookup, SUDOERS_DEBUG_PARSER);
 
@@ -474,11 +475,11 @@ sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, time_t now,
      * Special case checking the "validate", "list" and "kill" pseudo-commands.
      */
     if (pwflag)
-	debug_return_int(sudoers_lookup_pseudo(snl, pw, pwflag));
+	debug_return_uint(sudoers_lookup_pseudo(snl, pw, pwflag));
 
     /* Need to be runas user while stat'ing things. */
     if (!set_perms(PERM_RUNAS))
-	debug_return_int(validated);
+	debug_return_uint(validated);
 
     /* Query each sudoers source and check the user. */
     TAILQ_FOREACH(nss, snl, entries) {
@@ -518,5 +519,5 @@ sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, time_t now,
     }
     if (!restore_perms())
 	SET(validated, VALIDATE_ERROR);
-    debug_return_int(validated);
+    debug_return_uint(validated);
 }

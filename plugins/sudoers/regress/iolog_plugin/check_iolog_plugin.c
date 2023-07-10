@@ -408,7 +408,7 @@ restore_perms(void)
 }
 
 bool
-log_warning(int flags, const char * restrict fmt, ...)
+log_warning(unsigned int flags, const char * restrict fmt, ...)
 {
     va_list ap;
 
@@ -420,7 +420,7 @@ log_warning(int flags, const char * restrict fmt, ...)
 }
 
 bool
-log_warningx(int flags, const char * restrict fmt, ...)
+log_warningx(unsigned int flags, const char * restrict fmt, ...)
 {
     va_list ap;
 

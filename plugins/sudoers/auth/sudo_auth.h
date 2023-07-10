@@ -27,7 +27,7 @@
 #define AUTH_NONINTERACTIVE	4
 
 typedef struct sudo_auth {
-    int flags;			/* various flags, see below */
+    unsigned int flags;		/* various flags, see below */
     int status;			/* status from verify routine */
     const char *name;		/* name of the method as a string */
     void *data;			/* method-specific data pointer */
@@ -41,10 +41,10 @@ typedef struct sudo_auth {
 } sudo_auth;
 
 /* Values for sudo_auth.flags.  */
-#define FLAG_DISABLED		0x02	/* method disabled */
-#define FLAG_STANDALONE		0x04	/* standalone auth method */
-#define FLAG_ONEANDONLY		0x08	/* one and only auth method */
-#define FLAG_NONINTERACTIVE	0x10	/* no user input allowed */
+#define FLAG_DISABLED		0x02U	/* method disabled */
+#define FLAG_STANDALONE		0x04U	/* standalone auth method */
+#define FLAG_ONEANDONLY		0x08U	/* one and only auth method */
+#define FLAG_NONINTERACTIVE	0x10U	/* no user input allowed */
 
 /* Shortcuts for using the flags above. */
 #define IS_DISABLED(x)		((x)->flags & FLAG_DISABLED)

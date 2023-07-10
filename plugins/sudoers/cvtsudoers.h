@@ -30,17 +30,17 @@ enum sudoers_formats {
 };
 
 /* Flags for cvtsudoers_config.defaults */
-#define CVT_DEFAULTS_GLOBAL	0x01
-#define CVT_DEFAULTS_USER	0x02
-#define CVT_DEFAULTS_RUNAS	0x04
-#define CVT_DEFAULTS_HOST	0x08
-#define CVT_DEFAULTS_CMND	0x10
-#define CVT_DEFAULTS_ALL	0xff
+#define CVT_DEFAULTS_GLOBAL	0x01U
+#define CVT_DEFAULTS_USER	0x02U
+#define CVT_DEFAULTS_RUNAS	0x04U
+#define CVT_DEFAULTS_HOST	0x08U
+#define CVT_DEFAULTS_CMND	0x10U
+#define CVT_DEFAULTS_ALL	0xffU
 
 /* Flags for cvtsudoers_config.suppress */
-#define SUPPRESS_DEFAULTS	0x01
-#define SUPPRESS_ALIASES	0x02
-#define SUPPRESS_PRIVS		0x04
+#define SUPPRESS_DEFAULTS	0x01U
+#define SUPPRESS_ALIASES	0x02U
+#define SUPPRESS_PRIVS		0x04U
 
 /* cvtsudoers.conf settings */
 struct cvtsudoers_config {
@@ -48,8 +48,8 @@ struct cvtsudoers_config {
     unsigned int order_increment;
     unsigned int order_padding;
     unsigned int order_max;
-    int defaults;
-    int suppress;
+    unsigned int defaults;
+    unsigned int suppress;
     bool store_options;
     bool expand_aliases;
     bool prune_matches;
