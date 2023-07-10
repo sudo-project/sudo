@@ -40,6 +40,7 @@
 #include <sys/stat.h>
 
 #include <errno.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -58,12 +59,18 @@ sudo_realpath(const char *path, char *resolved)
 	int idx = 0, nlnk = 0;
 	const char *q;
 	char *p, wbuf[2][PATH_MAX], *fres = NULL;
+	static long symloop_max;
 	size_t len;
 	ssize_t n;
 
 	if (path == NULL) {
 		errno = EINVAL;
 		return NULL;
+	}
+
+	if (symloop_max == 0) {
+	    if ((symloop_max = sysconf(_SC_SYMLOOP_MAX)) <= 0)
+		symloop_max = 8;	/* POSIX */
 	}
 
 	if (resolved == NULL) {
@@ -145,7 +152,7 @@ loop:
 		goto out;
 	}
 	p[0] = '/';
-	memcpy(&p[1], path, q - path);
+	memcpy(&p[1], path, (size_t)(q - path));
 	p[1 + q - path] = '\0';
 
 	/*
@@ -156,7 +163,7 @@ loop:
 		goto out;
 
 	if (S_ISLNK(sb.st_mode)) {
-		if (nlnk++ >= SYMLOOP_MAX) {
+		if (nlnk++ >= symloop_max) {
 			errno = ELOOP;
 			goto out;
 		}
@@ -169,7 +176,7 @@ loop:
 		}
 
 		/* Append unresolved path to link target and switch to it. */
-		if (n + (len = strlen(q)) + 1 > sizeof(wbuf[0])) {
+		if ((size_t)n + (len = strlen(q)) + 1 > sizeof(wbuf[0])) {
 			errno = ENAMETOOLONG;
 			goto out;
 		}

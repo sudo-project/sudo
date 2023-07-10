@@ -3323,7 +3323,7 @@ AC_INCLUDES_DEFAULT
 dnl
 dnl Check for incomplete limits.h and missing SIZE_MAX.
 dnl
-AC_CHECK_DECLS([LLONG_MAX, LLONG_MIN, ULLONG_MAX, PATH_MAX, SSIZE_MAX, SYMLOOP_MAX], [], [], [
+AC_CHECK_DECLS([LLONG_MAX, LLONG_MIN, ULLONG_MAX, PATH_MAX, SSIZE_MAX], [], [], [
 #include <sys/types.h>
 #include <limits.h>
 ])
@@ -3365,12 +3365,6 @@ AS_IF([test "$ac_cv_have_decl_SIZE_MAX" != "yes"], [
 ])
 AS_IF([test "$ac_cv_have_decl_PATH_MAX" != "yes"], [
     AC_CHECK_DECLS([_POSIX_PATH_MAX], [], [], [[
-#include <sys/types.h>
-#include <limits.h>
-    ]])
-])
-AS_IF([test "$ac_cv_have_decl_SYMLOOP_MAX" != "yes"], [
-    AC_CHECK_DECLS([_POSIX_SYMLOOP_MAX], [], [], [[
 #include <sys/types.h>
 #include <limits.h>
     ]])

@@ -103,14 +103,6 @@
 # endif
 #endif
 
-#if defined(HAVE_DECL_SYMLOOP_MAX) && !HAVE_DECL_SYMLOOP_MAX
-# if defined(HAVE_DECL__POSIX_SYMLOOP_MAX) && HAVE_DECL__POSIX_SYMLOOP_MAX
-#  define SYMLOOP_MAX		_POSIX_SYMLOOP_MAX
-# else
-#  define SYMLOOP_MAX		8
-# endif
-#endif
-
 /* ACCESSPERMS and ALLPERMS are handy BSDisms. */
 #ifndef ACCESSPERMS
 # define ACCESSPERMS	00777

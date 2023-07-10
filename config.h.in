@@ -213,10 +213,6 @@
    don't. */
 #undef HAVE_DECL_SSIZE_MAX
 
-/* Define to 1 if you have the declaration of 'SYMLOOP_MAX', and to 0 if you
-   don't. */
-#undef HAVE_DECL_SYMLOOP_MAX
-
 /* Define to 1 if you have the declaration of 'sys_sigabbrev', and to 0 if you
    don't. */
 #undef HAVE_DECL_SYS_SIGABBREV
@@ -252,10 +248,6 @@
 /* Define to 1 if you have the declaration of '_POSIX_PATH_MAX', and to 0 if
    you don't. */
 #undef HAVE_DECL__POSIX_PATH_MAX
-
-/* Define to 1 if you have the declaration of '_POSIX_SYMLOOP_MAX', and to 0
-   if you don't. */
-#undef HAVE_DECL__POSIX_SYMLOOP_MAX
 
 /* Define to 1 if you have the declaration of '_sys_siglist', and to 0 if you
    don't. */
