@@ -136,6 +136,14 @@ struct sudo_conf_debug_file_list;
 	return sudo_debug_ret;						       \
     } while (0)
 
+#define debug_return_uint(ret)						       \
+    do {								       \
+	unsigned int sudo_debug_ret = (ret);				       \
+	sudo_debug_exit_uint(__func__, __FILE__, __LINE__, sudo_debug_subsys,  \
+	    sudo_debug_ret);						       \
+	return sudo_debug_ret;						       \
+    } while (0)
+
 #define debug_return_id_t(ret)					       \
     do {								       \
 	id_t sudo_debug_ret = (ret);				       \
@@ -260,6 +268,7 @@ sudo_dso_public void sudo_debug_execve2_v1(unsigned int level, const char *path,
 sudo_dso_public void sudo_debug_exit_v1(const char *func, const char *file, int line, unsigned int subsys);
 sudo_dso_public void sudo_debug_exit_bool_v1(const char *func, const char *file, int line, unsigned int subsys, bool ret);
 sudo_dso_public void sudo_debug_exit_int_v1(const char *func, const char *file, int line, unsigned int subsys, int ret);
+sudo_dso_public void sudo_debug_exit_uint_v1(const char *func, const char *file, int line, unsigned int subsys, unsigned int ret);
 sudo_dso_public void sudo_debug_exit_long_v1(const char *func, const char *file, int line, unsigned int subsys, long ret);
 sudo_dso_public void sudo_debug_exit_ptr_v1(const char *func, const char *file, int line, unsigned int subsys, const void *ret);
 sudo_dso_public void sudo_debug_exit_id_t_v1(const char *func, const char *file, int line, unsigned int subsys, id_t ret);
@@ -291,6 +300,7 @@ sudo_dso_public bool sudo_debug_needed_v1(unsigned int level);
 #define sudo_debug_exit(_a, _b, _c, _d) sudo_debug_exit_v1((_a), (_b), (_c), (_d))
 #define sudo_debug_exit_bool(_a, _b, _c, _d, _e) sudo_debug_exit_bool_v1((_a), (_b), (_c), (_d), (_e))
 #define sudo_debug_exit_int(_a, _b, _c, _d, _e) sudo_debug_exit_int_v1((_a), (_b), (_c), (_d), (_e))
+#define sudo_debug_exit_uint(_a, _b, _c, _d, _e) sudo_debug_exit_uint_v1((_a), (_b), (_c), (_d), (_e))
 #define sudo_debug_exit_long(_a, _b, _c, _d, _e) sudo_debug_exit_long_v1((_a), (_b), (_c), (_d), (_e))
 #define sudo_debug_exit_ptr(_a, _b, _c, _d, _e) sudo_debug_exit_ptr_v1((_a), (_b), (_c), (_d), (_e))
 #define sudo_debug_exit_id_t(_a, _b, _c, _d, _e) sudo_debug_exit_id_t_v1((_a), (_b), (_c), (_d), (_e))

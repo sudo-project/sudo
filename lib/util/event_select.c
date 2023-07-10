@@ -185,7 +185,7 @@ sudo_ev_select(int nfds, fd_set *readfds, fd_set *writefds,
 #endif /* HAVE_PSELECT */
 
 int
-sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
+sudo_ev_scan_impl(struct sudo_event_base *base, unsigned int flags)
 {
     struct timespec now, ts, *timeout;
     struct sudo_event *ev;

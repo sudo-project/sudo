@@ -37,22 +37,22 @@ struct timeval;		/* for deprecated APIs */
 #define SUDO_EV_MASK		(SUDO_EV_READ|SUDO_EV_WRITE|SUDO_EV_PERSIST|SUDO_EV_SIGNAL|SUDO_EV_SIGINFO)
 
 /* Event flags (internal) */
-#define SUDO_EVQ_INSERTED	0x01	/* event is on the event queue */
-#define SUDO_EVQ_ACTIVE		0x02	/* event is on the active queue */
-#define SUDO_EVQ_TIMEOUTS	0x04	/* event is on the timeouts queue */
+#define SUDO_EVQ_INSERTED	0x01U	/* event is on the event queue */
+#define SUDO_EVQ_ACTIVE		0x02U	/* event is on the active queue */
+#define SUDO_EVQ_TIMEOUTS	0x04U	/* event is on the timeouts queue */
 
 /* Event loop flags */
-#define SUDO_EVLOOP_ONCE	0x01	/* Only run once through the loop */
-#define SUDO_EVLOOP_NONBLOCK	0x02	/* Do not block in event loop */
+#define SUDO_EVLOOP_ONCE	0x01U	/* Only run once through the loop */
+#define SUDO_EVLOOP_NONBLOCK	0x02U	/* Do not block in event loop */
 
 /* Event base flags (internal) */
 #define SUDO_EVBASE_LOOPONCE	SUDO_EVLOOP_ONCE
-#define SUDO_EVBASE_LOOPEXIT	0x02
-#define SUDO_EVBASE_LOOPBREAK	0x04
-#define SUDO_EVBASE_LOOPCONT	0x08
-#define SUDO_EVBASE_GOT_EXIT	0x10
-#define SUDO_EVBASE_GOT_BREAK	0x20
-#define SUDO_EVBASE_GOT_MASK	0xf0
+#define SUDO_EVBASE_LOOPEXIT	0x02U
+#define SUDO_EVBASE_LOOPBREAK	0x04U
+#define SUDO_EVBASE_LOOPCONT	0x08U
+#define SUDO_EVBASE_GOT_EXIT	0x10U
+#define SUDO_EVBASE_GOT_BREAK	0x20U
+#define SUDO_EVBASE_GOT_MASK	0xf0U
 
 /* Must match sudo_plugin_ev_callback_t in sudo_plugin.h */
 typedef void (*sudo_ev_callback_t)(int fd, int what, void *closure);
@@ -76,7 +76,7 @@ struct sudo_event {
     int fd;			/* fd/signal we are interested in */
     short events;		/* SUDO_EV_* flags (in) */
     short revents;		/* SUDO_EV_* flags (out) */
-    short flags;		/* internal event flags */
+    unsigned short flags;	/* internal event flags */
     short pfd_idx;		/* index into pfds array (XXX) */
     sudo_ev_callback_t callback;/* user-provided callback */
     struct timespec timeout;	/* for SUDO_EV_TIMEOUT */
@@ -150,7 +150,7 @@ sudo_dso_public int sudo_ev_dispatch_v1(struct sudo_event_base *head);
 #define sudo_ev_dispatch(_a) sudo_ev_dispatch_v1((_a))
 
 /* Main event loop, returns SUDO_CB_SUCCESS, SUDO_CB_BREAK or SUDO_CB_ERROR */
-sudo_dso_public int sudo_ev_loop_v1(struct sudo_event_base *head, int flags);
+sudo_dso_public int sudo_ev_loop_v1(struct sudo_event_base *head, unsigned int flags);
 #define sudo_ev_loop(_a, _b) sudo_ev_loop_v1((_a), (_b))
 
 /* Return pending event types, fills in ts if non-NULL and there is a timeout */
@@ -208,6 +208,6 @@ int sudo_ev_base_alloc_impl(struct sudo_event_base *base);
 void sudo_ev_base_free_impl(struct sudo_event_base *base);
 int sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev);
 int sudo_ev_del_impl(struct sudo_event_base *base, struct sudo_event *ev);
-int sudo_ev_scan_impl(struct sudo_event_base *base, int flags);
+int sudo_ev_scan_impl(struct sudo_event_base *base, unsigned int flags);
 
 #endif /* SUDO_EVENT_H */

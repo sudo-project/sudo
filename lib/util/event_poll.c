@@ -178,7 +178,7 @@ sudo_ev_poll(struct pollfd *fds, nfds_t nfds, const struct timespec *timo)
 #endif /* HAVE_PPOLL */
 
 int
-sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
+sudo_ev_scan_impl(struct sudo_event_base *base, unsigned int flags)
 {
     struct timespec now, ts, *timeout;
     struct sudo_event *ev;

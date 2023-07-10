@@ -627,7 +627,7 @@ sudo_ev_dispatch_v1(struct sudo_event_base *base)
  * Returns 0 on success, 1 if no events registered  and -1 on error 
  */
 int
-sudo_ev_loop_v1(struct sudo_event_base *base, int flags)
+sudo_ev_loop_v1(struct sudo_event_base *base, unsigned int flags)
 {
     struct timespec now;
     struct sudo_event *ev;

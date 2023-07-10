@@ -520,6 +520,14 @@ sudo_debug_exit_int_v1(const char *func, const char *file, int line,
 }
 
 void
+sudo_debug_exit_uint_v1(const char *func, const char *file, int line,
+    unsigned int subsys, unsigned int ret)
+{
+    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
+	"<- %s @ %s:%d := %u", func, file, line, ret);
+}
+
+void
 sudo_debug_exit_long_v1(const char *func, const char *file, int line,
     unsigned int subsys, long ret)
 {
