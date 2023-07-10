@@ -483,6 +483,9 @@ sudo_krb5_ccname_path(const char *old_ccname)
     const char *ccname = old_ccname;
     debug_decl(sudo_krb5_ccname_path, SUDOERS_DEBUG_LDAP);
 
+    if (ccname == NULL)
+	debug_return_const_str(NULL);
+
     /* Strip off leading FILE: or WRFILE: prefix. */
     switch (ccname[0]) {
 	case 'F':
