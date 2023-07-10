@@ -20,14 +20,6 @@ if [ $? -eq 0 ]; then
     retval=1
 fi
 
-printf "\nUser can run commands with cwd set to sudoers value:\n"
-$TESTSUDOERS -D /some/where/else root /bin/ls <<'EOF'
-root ALL = CWD=/some/where/else /bin/ls
-EOF
-if [ $? -ne 0 ]; then
-    retval=$?
-fi
-
 printf "\nUser cannot override the sudoers cwd:\n"
 $TESTSUDOERS -D / root /bin/ls <<'EOF'
 root ALL = CWD=/some/where/else /bin/ls

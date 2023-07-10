@@ -12,18 +12,6 @@ User root is not allowed to change directory to /
 
 Command denied
 
-User can run commands with cwd set to sudoers value:
-Parses OK
-
-Entries for user root:
-
-ALL = CWD=/some/where/else /bin/ls
-	host  allowed
-	runas allowed
-	cmnd  allowed
-
-Command allowed
-
 User cannot override the sudoers cwd:
 Parses OK
 

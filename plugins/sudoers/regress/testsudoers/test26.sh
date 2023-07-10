@@ -18,14 +18,6 @@ if [ $? -eq 0 ]; then
     retval=1
 fi
 
-printf "\nUser can run commands with chroot set to sudoers value:\n"
-$TESTSUDOERS -R /some/where/else root /bin/ls <<'EOF'
-root ALL = CHROOT=/some/where/else /bin/ls
-EOF
-if [ $? -ne 0 ]; then
-    retval=$?
-fi
-
 # Because command_matches() uses the per-rule CHROOT, this results in
 # an unmatched rule instead of a matched rule that is rejected later.
 # This is different from the CWD checking which is performed after

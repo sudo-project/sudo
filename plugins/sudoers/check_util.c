@@ -73,10 +73,10 @@ check_user_runchroot(void)
 	def_runchroot ? def_runchroot : "none",
 	user_runchroot ? user_runchroot : "none");
 
-    if (def_runchroot == NULL || (strcmp(def_runchroot, "*") != 0 &&
-	    strcmp(def_runchroot, user_runchroot) != 0)) {
+    /* User may only specify a root dir if runchroot is "*" */
+    if (def_runchroot == NULL || strcmp(def_runchroot, "*") != 0)
 	debug_return_bool(false);
-    }
+
     free(def_runchroot);
     if ((def_runchroot = strdup(user_runchroot)) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -102,10 +102,10 @@ check_user_runcwd(void)
         def_runcwd ? def_runcwd : "none",
         user_runcwd ? user_runcwd : "none");
 
-    if (def_runcwd == NULL || (strcmp(def_runcwd, "*") != 0 &&
-            strcmp(def_runcwd, user_runcwd) != 0)) {
+    /* User may only specify a cwd if runcwd is "*" */
+    if (def_runcwd == NULL || strcmp(def_runcwd, "*") != 0)
         debug_return_bool(false);
-    }
+
     free(def_runcwd);
     if ((def_runcwd = strdup(user_runcwd)) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));

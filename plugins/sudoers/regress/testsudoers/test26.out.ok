@@ -12,18 +12,6 @@ User root is not allowed to change root directory to /
 
 Command denied
 
-User can run commands with chroot set to sudoers value:
-Parses OK
-
-Entries for user root:
-
-ALL = CHROOT=/some/where/else /bin/ls
-	host  allowed
-	runas allowed
-	cmnd  allowed
-
-Command allowed
-
 User cannot override the sudoers chroot:
 Parses OK
 
