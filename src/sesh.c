@@ -95,7 +95,7 @@ main(int argc, char *argv[], char *envp[])
 {
     enum sesh_mode mode = SESH_RUN_COMMAND;
     const char *errstr, *rundir = NULL;
-    int flags = CD_SUDOEDIT_FOLLOW;
+    unsigned int flags = CD_SUDOEDIT_FOLLOW;
     char *edit_user = NULL;
     int ch, ret, fd = -1;
     debug_decl(main, SUDO_DEBUG_MAIN);

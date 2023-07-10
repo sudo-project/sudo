@@ -53,7 +53,7 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 
     for (n = 0; n < num_msgs; n++) {
 	const struct sudo_conv_message *msg = &msgs[n];
-	int flags = tgetpass_flags;
+	unsigned int flags = tgetpass_flags;
 	FILE *fp = stdout;
 
 	switch (msg->msg_type & 0xff) {

@@ -95,7 +95,7 @@ enable_intercept(char *envp[], const char *dso, int intercept_fd)
  */
 int
 sudo_execve(int fd, const char *path, char *const argv[], char *envp[],
-    int intercept_fd, int flags)
+    int intercept_fd, unsigned int flags)
 {
     debug_decl(sudo_execve, SUDO_DEBUG_UTIL);
 

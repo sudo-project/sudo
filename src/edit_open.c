@@ -406,7 +406,7 @@ sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode,
 
 #ifdef O_NOFOLLOW
 int
-sudo_edit_open(char *path, int oflags, mode_t mode, int sflags,
+sudo_edit_open(char *path, int oflags, mode_t mode, unsigned int sflags,
     const struct sudo_cred *user_cred, const struct sudo_cred *cur_cred)
 {
     int fd;
@@ -435,7 +435,7 @@ sudo_edit_open(char *path, int oflags, mode_t mode, int sflags,
 }
 #else
 int
-sudo_edit_open(char *path, int oflags, mode_t mode, int sflags,
+sudo_edit_open(char *path, int oflags, mode_t mode, unsigned int sflags,
     const struct sudo_cred *user_cred, const struct sudo_cred *cur_cred)
 {
     struct stat sb;
@@ -488,7 +488,7 @@ sudo_edit_open(char *path, int oflags, mode_t mode, int sflags,
  * Does not modify the value of errno.
  */
 bool
-sudo_edit_parent_valid(char *path, int sflags,
+sudo_edit_parent_valid(char *path, unsigned int sflags,
     const struct sudo_cred *user_cred, const struct sudo_cred *cur_cred)
 {
     const int serrno = errno;

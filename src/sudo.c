@@ -140,7 +140,8 @@ main(int argc, char *argv[], char *envp[])
 {
     struct command_details command_details;
     struct user_details user_details;
-    int nargc, sudo_mode, status = 0;
+    unsigned int sudo_mode;
+    int nargc, status = 0;
     char **nargv, **env_add;
     char **command_info = NULL, **argv_out = NULL, **run_envp = NULL;
     const char * const allowed_prognames[] = { "sudo", "sudoedit", NULL };

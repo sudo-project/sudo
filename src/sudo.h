@@ -52,28 +52,28 @@
 /*
  * Various modes sudo can be in (based on arguments) in hex
  */
-#define MODE_RUN		0x00000001
-#define MODE_EDIT		0x00000002
-#define MODE_VALIDATE		0x00000004
-#define MODE_INVALIDATE		0x00000008
-#define MODE_KILL		0x00000010
-#define MODE_VERSION		0x00000020
-#define MODE_HELP		0x00000040
-#define MODE_LIST		0x00000080
-#define MODE_CHECK		0x00000100
-#define MODE_MASK		0x0000ffff
+#define MODE_RUN		0x00000001U
+#define MODE_EDIT		0x00000002U
+#define MODE_VALIDATE		0x00000004U
+#define MODE_INVALIDATE		0x00000008U
+#define MODE_KILL		0x00000010U
+#define MODE_VERSION		0x00000020U
+#define MODE_HELP		0x00000040U
+#define MODE_LIST		0x00000080U
+#define MODE_CHECK		0x00000100U
+#define MODE_MASK		0x0000ffffU
 
 /* Mode flags */
 /* XXX - prune this */
-#define MODE_BACKGROUND		0x00010000
-#define MODE_SHELL		0x00020000
-#define MODE_LOGIN_SHELL	0x00040000
-#define MODE_IMPLIED_SHELL	0x00080000
-#define MODE_RESET_HOME		0x00100000
-#define MODE_PRESERVE_GROUPS	0x00200000
-#define MODE_PRESERVE_ENV	0x00400000
-#define MODE_NONINTERACTIVE	0x00800000
-#define MODE_LONG_LIST		0x01000000
+#define MODE_BACKGROUND		0x00010000U
+#define MODE_SHELL		0x00020000U
+#define MODE_LOGIN_SHELL	0x00040000U
+#define MODE_IMPLIED_SHELL	0x00080000U
+#define MODE_RESET_HOME		0x00100000U
+#define MODE_PRESERVE_GROUPS	0x00200000U
+#define MODE_PRESERVE_ENV	0x00400000U
+#define MODE_NONINTERACTIVE	0x00800000U
+#define MODE_LONG_LIST		0x01000000U
 
 /* Indexes into sudo_settings[] args, must match parse_args.c. */
 #define ARG_BSDAUTH_TYPE	 0
@@ -110,13 +110,13 @@
 /*
  * Flags for tgetpass()
  */
-#define TGP_NOECHO	0x00		/* turn echo off reading pw (default) */
-#define TGP_ECHO	0x01		/* leave echo on when reading passwd */
-#define TGP_STDIN	0x02		/* read from stdin, not /dev/tty */
-#define TGP_ASKPASS	0x04		/* read from askpass helper program */
-#define TGP_MASK	0x08		/* mask user input when reading */
-#define TGP_NOECHO_TRY	0x10		/* turn off echo if possible */
-#define TGP_BELL	0x20		/* bell on password prompt */
+#define TGP_NOECHO	0x00U		/* turn echo off reading pw (default) */
+#define TGP_ECHO	0x01U		/* leave echo on when reading passwd */
+#define TGP_STDIN	0x02U		/* read from stdin, not /dev/tty */
+#define TGP_ASKPASS	0x04U		/* read from askpass helper program */
+#define TGP_MASK	0x08U		/* mask user input when reading */
+#define TGP_NOECHO_TRY	0x10U		/* turn off echo if possible */
+#define TGP_BELL	0x20U		/* bell on password prompt */
 
 /* name/value pairs for command line settings. */
 struct sudo_settings {
@@ -150,33 +150,33 @@ struct user_details {
     int ts_cols;
 };
 
-#define CD_SET_UID		0x00000001
-#define CD_SET_EUID		0x00000002
-#define CD_SET_GID		0x00000004
-#define CD_SET_EGID		0x00000008
-#define CD_PRESERVE_GROUPS	0x00000010
-#define CD_INTERCEPT		0x00000020
-#define CD_NOEXEC		0x00000040
-#define CD_SET_PRIORITY		0x00000080
-#define CD_SET_UMASK		0x00000100
-#define CD_SET_TIMEOUT		0x00000200
-#define CD_SUDOEDIT		0x00000400
-#define CD_BACKGROUND		0x00000800
-#define CD_RBAC_ENABLED		0x00001000
-#define CD_USE_PTY		0x00002000
-#define CD_SET_UTMP		0x00004000
-#define CD_EXEC_BG		0x00008000
-#define CD_SUDOEDIT_FOLLOW	0x00010000
-#define CD_SUDOEDIT_CHECKDIR	0x00020000
-#define CD_SET_GROUPS		0x00040000
-#define CD_LOGIN_SHELL		0x00080000
-#define CD_OVERRIDE_UMASK	0x00100000
-#define CD_LOG_SUBCMDS		0x00200000
-#define CD_USE_PTRACE		0x00400000
-#define CD_FEXECVE		0x00800000
-#define CD_INTERCEPT_VERIFY	0x01000000
-#define CD_RBAC_SET_CWD		0x02000000
-#define CD_CWD_OPTIONAL		0x04000000
+#define CD_SET_UID		0x00000001U
+#define CD_SET_EUID		0x00000002U
+#define CD_SET_GID		0x00000004U
+#define CD_SET_EGID		0x00000008U
+#define CD_PRESERVE_GROUPS	0x00000010U
+#define CD_INTERCEPT		0x00000020U
+#define CD_NOEXEC		0x00000040U
+#define CD_SET_PRIORITY		0x00000080U
+#define CD_SET_UMASK		0x00000100U
+#define CD_SET_TIMEOUT		0x00000200U
+#define CD_SUDOEDIT		0x00000400U
+#define CD_BACKGROUND		0x00000800U
+#define CD_RBAC_ENABLED		0x00001000U
+#define CD_USE_PTY		0x00002000U
+#define CD_SET_UTMP		0x00004000U
+#define CD_EXEC_BG		0x00008000U
+#define CD_SUDOEDIT_FOLLOW	0x00010000U
+#define CD_SUDOEDIT_CHECKDIR	0x00020000U
+#define CD_SET_GROUPS		0x00040000U
+#define CD_LOGIN_SHELL		0x00080000U
+#define CD_OVERRIDE_UMASK	0x00100000U
+#define CD_LOG_SUBCMDS		0x00200000U
+#define CD_USE_PTRACE		0x00400000U
+#define CD_FEXECVE		0x00800000U
+#define CD_INTERCEPT_VERIFY	0x01000000U
+#define CD_RBAC_SET_CWD		0x02000000U
+#define CD_CWD_OPTIONAL		0x04000000U
 
 struct preserved_fd {
     TAILQ_ENTRY(preserved_fd) entries;
@@ -193,7 +193,7 @@ struct command_details {
     int priority;
     unsigned int timeout;
     int closefrom;
-    int flags;
+    unsigned int flags;
     int execfd;
     int nfiles;
     struct preserved_fd_list preserved_fds;
@@ -240,7 +240,7 @@ enum sudo_gc_types {
 void cleanup(int);
 
 /* tgetpass.c */
-char *tgetpass(const char *prompt, int timeout, int flags,
+char *tgetpass(const char *prompt, int timeout, unsigned int flags,
     struct sudo_conv_callback *callback);
 const struct sudo_cred *sudo_askpass_cred(const struct sudo_cred *cred);
 
@@ -248,10 +248,10 @@ const struct sudo_cred *sudo_askpass_cred(const struct sudo_cred *cred);
 int sudo_execute(struct command_details *details, const struct user_details *ud, struct sudo_event_base *evbase, struct command_status *cstat);
 
 /* parse_args.c */
-int parse_args(int argc, char **argv, const char *shell, int *old_optind,
-    int *nargc, char ***nargv, struct sudo_settings **settingsp,
-    char ***env_addp, const char **list_user);
-extern int tgetpass_flags;
+unsigned int parse_args(int argc, char **argv, const char *shell,
+    int *old_optind, int *nargc, char ***nargv,
+    struct sudo_settings **settingsp, char ***env_addp, const char **list_user);
+extern unsigned int tgetpass_flags;
 
 /* get_pty.c */
 char *get_pty(int *leader, int *follower, uid_t uid);
@@ -290,7 +290,7 @@ int selinux_relabel_tty(const char *ttyn, int ttyfd);
 int selinux_restore_tty(void);
 int selinux_setexeccon(void);
 void selinux_execve(int fd, const char *path, char *const argv[],
-    char *envp[], const char *rundir, int flags);
+    char *envp[], const char *rundir, unsigned int flags);
 
 /* apparmor.c */
 int apparmor_is_enabled(void);

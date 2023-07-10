@@ -180,7 +180,7 @@ bool sudo_terminated(struct command_status *cstat);
 void free_exec_closure(struct exec_closure *ec);
 
 /* exec_common.c */
-int sudo_execve(int fd, const char *path, char *const argv[], char *envp[], int intercept_fd, int flags);
+int sudo_execve(int fd, const char *path, char *const argv[], char *envp[], int intercept_fd, unsigned int flags);
 char **disable_execute(char *envp[], const char *dso);
 char **enable_monitor(char *envp[], const char *dso);
 
