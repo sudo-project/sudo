@@ -143,7 +143,10 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
     }
 
     /* Client/peer IP address. */
-    evlog->peeraddr = closure->ipaddr;
+    if ((evlog->peeraddr = strdup(closure->ipaddr)) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto bad;
+    }
 
     /* Submit time. */
     if (submit_time != NULL) {
