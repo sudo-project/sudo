@@ -1,3 +1,12 @@
+What's new in Sudo 1.9.14p1
+
+ * Fixed an invalid free bug in sudo_logsrvd that was introduced
+   in version 1.9.14 which could cause sudo_logsrvd to crash.
+
+ * The sudoers plugin no longer tries to send the terminal name
+   to the log server when no terminal is present.  This bug was
+   introduced in version 1.9.14.
+
 What's new in Sudo 1.9.14
 
  * Fixed a bug where if the "intercept" or "log_subcmds" sudoers
