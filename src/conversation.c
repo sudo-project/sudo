@@ -160,7 +160,6 @@ sudo_conversation_1_7(int num_msgs, const struct sudo_conv_message msgs[],
 int
 sudo_conversation_printf(int msg_type, const char * restrict fmt, ...)
 {
-    const char *crnl = NULL;
     FILE *ttyfp = NULL;
     FILE *fp = stdout;
     char fmt2[1024];
@@ -183,27 +182,28 @@ sudo_conversation_printf(int msg_type, const char * restrict fmt, ...)
     case SUDO_CONV_INFO_MSG:
 	/* Convert nl -> cr nl in case tty is in raw mode. */
 	if (sudo_term_is_raw(fileno(ttyfp ? ttyfp : fp))) {
-		size_t fmtlen = strlen(fmt);
-	    if (fmtlen < sizeof(fmt2) && fmtlen && fmt[fmtlen - 1] == '\n') {
+	    size_t fmtlen = strlen(fmt);
+	    if (fmtlen < sizeof(fmt2) - 1 && fmtlen && fmt[fmtlen - 1] == '\n') {
 		if (fmtlen == 1) {
-			fmt2[0] = '\0';
-			fmt = fmt2;
-		    crnl = "\r\n";
+		    /* Convert bare newline -> \r\n. */
+		    len = (int)fwrite("\r\n", 1, 2, ttyfp ? ttyfp : fp);
+		    if (len != 2)
+			len = -1;
+		    break;
 		}
-		else if (fmt[fmtlen - 2] != '\r') {
+		if (fmt[fmtlen - 2] != '\r') {
+		    /* Convert trailing \n -> \r\n. */
 		    memcpy(fmt2, fmt, fmtlen - 1);
-		    fmt2[fmtlen - 1] = '\0';
+		    fmt2[fmtlen - 1] = '\r';
+		    fmt2[fmtlen    ] = '\n';
+		    fmt2[fmtlen + 1] = '\0';
 		    fmt = fmt2;
-		    crnl = "\r\n";
 		}
 	    }
 	}
 	va_start(ap, fmt);
 	len = vfprintf(ttyfp ? ttyfp : fp, fmt, ap);
 	va_end(ap);
-	if (len >= 0 && crnl != NULL) {
-	    len += (int)fwrite(crnl, 1, 2, ttyfp ? ttyfp : fp);
-	}
 	break;
     default:
 	len = -1;
