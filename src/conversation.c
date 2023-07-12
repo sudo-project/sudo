@@ -45,9 +45,9 @@ int
 sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
     struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
 {
+    const int conv_debug_instance = sudo_debug_get_active_instance();
     char *pass;
     int n;
-    const int conv_debug_instance = sudo_debug_get_active_instance();
 
     sudo_debug_set_active_instance(sudo_debug_instance);
 
@@ -55,6 +55,9 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 	const struct sudo_conv_message *msg = &msgs[n];
 	unsigned int flags = tgetpass_flags;
 	FILE *fp = stdout;
+
+	if (replies != NULL)
+	    replies[n].reply = NULL;
 
 	switch (msg->msg_type & 0xff) {
 	    case SUDO_CONV_PROMPT_ECHO_ON:
