@@ -1072,7 +1072,7 @@ exec_pty(struct command_details *details,
     struct exec_closure ec = { 0 };
     struct plugin_container *plugin;
     int evloop_retries = -1;
-    bool pipeline = false;
+    bool cmnd_foreground;
     sigset_t set, oset;
     struct sigaction sa;
     struct stat sb;
@@ -1183,14 +1183,14 @@ exec_pty(struct command_details *details,
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdin not a tty, not logging");
 	    if (S_ISFIFO(sb.st_mode))
-		pipeline = true;
+		SET(details->flags, CD_EXEC_BG);
 	    io_fds[SFD_STDIN] = dup(STDIN_FILENO);
 	    if (io_fds[SFD_STDIN] == -1)
 		sudo_fatal("dup");
 	} else {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdin not a tty, creating a pipe");
-	    pipeline = true;
+	    SET(details->flags, CD_EXEC_BG);
 	    if (pipe2(io_pipe[STDIN_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
@@ -1217,7 +1217,7 @@ exec_pty(struct command_details *details,
 	     */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"terminal input not available, creating empty pipe");
-	    pipeline = true;
+	    SET(details->flags, CD_EXEC_BG);
 	    if (pipe2(io_pipe[STDIN_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
@@ -1230,14 +1230,14 @@ exec_pty(struct command_details *details,
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdout not a tty, not logging");
 	    if (S_ISFIFO(sb.st_mode))
-		pipeline = true;
+		SET(details->flags, CD_EXEC_BG);
 	    io_fds[SFD_STDOUT] = dup(STDOUT_FILENO);
 	    if (io_fds[SFD_STDOUT] == -1)
 		sudo_fatal("dup");
 	} else {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdout not a tty, creating a pipe");
-	    pipeline = true;
+	    SET(details->flags, CD_EXEC_BG);
 	    if (pipe2(io_pipe[STDOUT_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
@@ -1250,8 +1250,6 @@ exec_pty(struct command_details *details,
 	    /* Not logging stderr, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stderr not a tty, not logging");
-	    if (S_ISFIFO(sb.st_mode))
-		pipeline = true;
 	    io_fds[SFD_STDERR] = dup(STDERR_FILENO);
 	    if (io_fds[SFD_STDERR] == -1)
 		sudo_fatal("dup");
@@ -1275,13 +1273,11 @@ exec_pty(struct command_details *details,
 	    "%s: unable to copy terminal settings to pty", __func__);
 	ec.foreground = false;
     }
-
-    /* Start in raw mode unless part of a pipeline or backgrounded. */
-    if (ec.foreground) {
-	if (!pipeline && !ISSET(details->flags, CD_EXEC_BG)) {
-	    if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
-		ec.term_raw = true;
-	}
+    /* Start in raw mode unless the command will run in the background. */
+    cmnd_foreground = ec.foreground && !ISSET(details->flags, CD_EXEC_BG);
+    if (cmnd_foreground) {
+	if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
+	    ec.term_raw = true;
     }
 
     /*
@@ -1324,8 +1320,7 @@ exec_pty(struct command_details *details,
 	 * In this case, we rely on the command receiving SIGTTOU or SIGTTIN
 	 * when it needs access to the controlling tty.
 	 */                                                              
-	exec_monitor(details, &oset, ec.foreground && !pipeline, sv[1],
-	    intercept_sv[1]);
+	exec_monitor(details, &oset, cmnd_foreground, sv[1], intercept_sv[1]);
 	cstat->type = CMD_ERRNO;
 	cstat->val = errno;
 	if (send(sv[1], cstat, sizeof(*cstat), 0) == -1) {
