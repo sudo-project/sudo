@@ -178,22 +178,30 @@ sudo_term_noecho_v1(int fd)
 }
 
 /*
- * Set terminal to raw mode with optional terminal signals.
+ * Set terminal to raw mode as modified by flags.
  * Returns true on success or false on failure.
  */
 bool
-sudo_term_raw_v1(int fd, int isig)
+sudo_term_raw_v1(int fd, unsigned int flags)
 {
     struct termios term;
+    tcflag_t oflag;
     debug_decl(sudo_term_raw, SUDO_DEBUG_UTIL);
 
     if (!changed && tcgetattr(fd, &oterm) != 0)
 	debug_return_bool(false);
     (void) memcpy(&term, &oterm, sizeof(term));
-    /* Set terminal to raw mode but optionally enable terminal signals. */
+    /*
+     * Set terminal to raw mode but optionally enable terminal signals
+     * and/or preserve output flags.
+     */
+    if (ISSET(flags, SUDO_TERM_OFLAG))
+	oflag = term.c_oflag;
     cfmakeraw(&term);
-    if (isig)
+    if (ISSET(flags, SUDO_TERM_ISIG))
 	SET(term.c_lflag, ISIG);
+    if (ISSET(flags, SUDO_TERM_OFLAG))
+	term.c_oflag = oflag;
     if (tcsetattr_nobg(fd, TCSASOFT|TCSADRAIN, &term) == 0) {
 	changed = 1;
     	debug_return_bool(true);

@@ -317,13 +317,15 @@ sudo_dso_public int sudo_strtomode_v1(const char *cp, const char **errstr);
 extern int (*sudo_printf)(int msg_type, const char *fmt, ...);
 
 /* term.c */
+#define SUDO_TERM_ISIG	0x01U
+#define SUDO_TERM_OFLAG	0x02U
 sudo_dso_public bool sudo_term_cbreak_v1(int fd);
 #define sudo_term_cbreak(_a) sudo_term_cbreak_v1((_a))
 sudo_dso_public bool sudo_term_copy_v1(int src, int dst);
 #define sudo_term_copy(_a, _b) sudo_term_copy_v1((_a), (_b))
 sudo_dso_public bool sudo_term_noecho_v1(int fd);
 #define sudo_term_noecho(_a) sudo_term_noecho_v1((_a))
-sudo_dso_public bool sudo_term_raw_v1(int fd, int isig);
+sudo_dso_public bool sudo_term_raw_v1(int fd, unsigned int flags);
 #define sudo_term_raw(_a, _b) sudo_term_raw_v1((_a), (_b))
 sudo_dso_public bool sudo_term_restore_v1(int fd, bool flush);
 #define sudo_term_restore(_a, _b) sudo_term_restore_v1((_a), (_b))
