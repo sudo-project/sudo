@@ -56,6 +56,7 @@ struct monitor_message {
 TAILQ_HEAD(monitor_message_list, monitor_message);
 static struct monitor_message_list monitor_messages =
     TAILQ_HEAD_INITIALIZER(monitor_messages);
+static unsigned int term_raw_flags;
 
 static void sync_ttysize(struct exec_closure *ec);
 static void schedule_signal(struct exec_closure *ec, int signo);
@@ -161,8 +162,8 @@ pty_cleanup_hook(void)
 }
 
 /*
- * Check whether we are running in the foregroup.
- * Updates the foreground flag and updates the window size.
+ * Check whether sudo is running in the foreground.
+ * Updates the foreground flag in the closure.
  * Returns 0 if there is no tty, the foreground process group ID
  * on success, or -1 on failure (tty revoked).
  */
@@ -208,7 +209,7 @@ resume_terminal(struct exec_closure *ec)
 
     if (ec->foreground) {
 	/* Foreground process, set tty to raw mode. */
-	if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
+	if (sudo_term_raw(io_fds[SFD_USERTTY], term_raw_flags))
 	    ec->term_raw = true;
     } else {
 	/* Background process, no access to tty. */
@@ -263,7 +264,7 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 		"%s: command received SIG%s, parent running in the foregound",
 		__func__, signame);
 	    if (!ec->term_raw) {
-		if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
+		if (sudo_term_raw(io_fds[SFD_USERTTY], term_raw_flags))
 		    ec->term_raw = true;
 	    }
 	    ret = SIGCONT_FG; /* resume command in foreground */
@@ -1229,8 +1230,10 @@ exec_pty(struct command_details *details,
 	    /* Not logging stdout, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdout not a tty, not logging");
-	    if (S_ISFIFO(sb.st_mode))
+	    if (S_ISFIFO(sb.st_mode)) {
 		SET(details->flags, CD_EXEC_BG);
+		term_raw_flags = SUDO_TERM_OFLAG;
+	    }
 	    io_fds[SFD_STDOUT] = dup(STDOUT_FILENO);
 	    if (io_fds[SFD_STDOUT] == -1)
 		sudo_fatal("dup");
@@ -1238,6 +1241,7 @@ exec_pty(struct command_details *details,
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdout not a tty, creating a pipe");
 	    SET(details->flags, CD_EXEC_BG);
+	    term_raw_flags = SUDO_TERM_OFLAG;
 	    if (pipe2(io_pipe[STDOUT_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
