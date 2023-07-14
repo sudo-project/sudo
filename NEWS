@@ -1,3 +1,17 @@
+What's new in Sudo 1.9.14p2
+
+ * Fixed a crash on Linux systems introduced in version 1.9.14 when
+   running a command with a NULL argv[0] if "log_subcmds" or
+   "intercept" is enabled in sudoers.
+
+ * Fixed a problem with "stair-stepped" output when piping or
+   redirecting the output of a sudo command that takes user input.
+
+ * Fixed a bug introduced in sudo 1.9.14 that affects matching
+   sudoers rules containing a Runas_Spec with an empty Runas user.
+   These rules should only match when sudo's -g option is used but
+   were matching even without the -g option.  GitHub issue #290.
+
 What's new in Sudo 1.9.14p1
 
  * Fixed an invalid free bug in sudo_logsrvd that was introduced
