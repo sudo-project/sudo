@@ -373,7 +373,7 @@ exec_cmnd_pty(struct command_details *details, sigset_t *mask,
 	close(io_fds[SFD_STDERR]);
 
     /* Wait for parent to grant us the tty if we are foreground. */
-    if (foreground && !ISSET(details->flags, CD_EXEC_BG)) {
+    if (foreground) {
 	struct timespec ts = { 0, 1000 };  /* 1us */
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: waiting for controlling tty",
 	    __func__);
@@ -652,7 +652,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
     setpgid(mc.cmnd_pid, mc.cmnd_pgrp);
 
     /* Make the command the foreground process for the pty follower. */
-    if (foreground && !ISSET(details->flags, CD_EXEC_BG)) {
+    if (foreground) {
 	if (tcsetpgrp(io_fds[SFD_FOLLOWER], mc.cmnd_pgrp) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 		"%s: unable to set foreground pgrp to %d (command)",
