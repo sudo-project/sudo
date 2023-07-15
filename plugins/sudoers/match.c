@@ -188,8 +188,14 @@ runas_userlist_matches(const struct sudoers_parse_tree *parse_tree,
 		    user_matched = !m->negated;
 		break;
 	    case MYSELF:
-		if (!ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED) ||
-		    strcmp(user_name, runas_pw->pw_name) == 0)
+		/*
+		 * Only match a rule with an empty runas user if a group
+		 * was specified on the command line without a user _or_
+		 * the user specified their own name on the command line.
+		 */
+		if ((!ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED) &&
+			ISSET(sudo_user.flags, RUNAS_GROUP_SPECIFIED)) ||
+			strcmp(user_name, runas_pw->pw_name) == 0)
 		    user_matched = !m->negated;
 		break;
 	}
