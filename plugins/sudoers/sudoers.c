@@ -547,7 +547,7 @@ sudoers_check_common(int pwflag)
     }
 
     /* If user specified env vars make sure sudoers allows it. */
-    if (ISSET(sudo_mode, MODE_RUN|MODE_CHECK) && !def_setenv) {
+    if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
 	if (ISSET(sudo_mode, MODE_PRESERVE_ENV)) {
 	    log_warningx(SLOG_NO_STDERR|SLOG_AUDIT,
 		N_("user not allowed to preserve the environment"));
