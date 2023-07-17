@@ -195,8 +195,7 @@ sudo_term_raw_v1(int fd, unsigned int flags)
      * Set terminal to raw mode but optionally enable terminal signals
      * and/or preserve output flags.
      */
-    if (ISSET(flags, SUDO_TERM_OFLAG))
-	oflag = term.c_oflag;
+    oflag = term.c_oflag;
     cfmakeraw(&term);
     if (ISSET(flags, SUDO_TERM_ISIG))
 	SET(term.c_lflag, ISIG);
