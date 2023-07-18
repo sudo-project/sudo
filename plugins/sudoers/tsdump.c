@@ -297,7 +297,7 @@ dump_entry(struct timestamp_entry *entry, off_t pos)
     } else if (entry->type == TS_PPID) {
 	printf("parent pid: %d\n", (int)entry->u.ppid);
     }
-    printf("\n");
+    fputc('\n', stdout);
 
     debug_return;
 }

@@ -906,15 +906,14 @@ main(int argc, char *argv[])
     char	buff[128];
     time_t	d;
 
-    (void)printf("Enter date, or blank line to exit.\n\t> ");
+    (void)fputs("Enter date, or blank line to exit.\n\t> ", stdout);
     (void)fflush(stdout);
     while (fgets(buff, sizeof(buff), stdin) && buff[0]) {
 	d = get_date(buff);
 	if (d == -1)
-	    (void)printf("Bad format - couldn't convert.\n");
+	    (void)fputs("Bad format - couldn't convert.\n\t> ", stdout);
 	else
-	    (void)printf("%s", ctime(&d));
-	(void)printf("\t> ");
+	    (void)printf("%s\t> ", ctime(&d));
 	(void)fflush(stdout);
     }
     return 0;

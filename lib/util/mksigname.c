@@ -38,7 +38,7 @@ main(int argc, char *argv[])
 
 #include "mksigname.h"
 
-    printf("const char *const sudo_sys_signame[] = {\n");
+    puts("const char *const sudo_sys_signame[] = {");
     for (i = 0; i < nitems(sudo_sys_signame); i++) {
 	if (sudo_sys_signame[i] != NULL) {
 	    printf("    \"%s\",\n", sudo_sys_signame[i]);
@@ -46,7 +46,7 @@ main(int argc, char *argv[])
 	    printf("    \"Signal %zu\",\n", i);
 	}
     }
-    printf("};\n");
+    puts("};");
 
     return EXIT_SUCCESS;
 }

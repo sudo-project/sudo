@@ -1861,7 +1861,7 @@ main(int argc, char *argv[])
     }  
 
     if (testrun)
-        printf("sending logs...\n");
+        puts("sending logs...");
 
     struct timespec t_start, t_end, t_result;
     sudo_gettime_real(&t_start);

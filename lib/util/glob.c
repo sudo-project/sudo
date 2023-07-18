@@ -940,14 +940,14 @@ qprintf(const char *str, Char *s)
 
 	(void)printf("%s:\n", str);
 	for (p = s; *p; p++)
-		(void)printf("%c", CHAR(*p));
-	(void)printf("\n");
+		(void)fputc(CHAR(*p), stdout);
+	(void)fputc('\n', stdout);
 	for (p = s; *p; p++)
-		(void)printf("%c", *p & M_PROTECT ? '"' : ' ');
-	(void)printf("\n");
+		(void)fputc(*p & M_PROTECT ? '"' : ' ', stdout);
+	(void)fputc('\n', stdout);
 	for (p = s; *p; p++)
-		(void)printf("%c", ismeta(*p) ? '_' : ' ');
-	(void)printf("\n");
+		(void)fputc(ismeta(*p) ? '_' : ' ', stdout);
+	(void)fputc('\n', stdout);
 }
 #endif /* DEBUG */
 #endif /* HAVE_GLOB */

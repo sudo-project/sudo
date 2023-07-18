@@ -69,7 +69,8 @@ int
 main(int argc, char *argv[])
 {
     GETGROUPS_T *gidlist = NULL;
-    int i, j, errors = 0, ntests = 0;
+    size_t i;
+    int j, errors = 0, ntests = 0;
     int ch, ngids;
 
     initprogname(argc > 0 ? argv[0] : "parse_gids_test");
