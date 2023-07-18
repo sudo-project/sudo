@@ -63,7 +63,7 @@ What's new in Sudo 1.9.14
  * Fixed a bug where only the first two digits of the TSID field
    being was logged.  Bug #1046.
 
- * The "log_pty" sudoers option is now enabled by default.  To
+ * The "use_pty" sudoers option is now enabled by default.  To
    restore the historic behavior where a command is run in the
    user's terminal, add "Defaults !use_pty" to the sudoers file.
    GitHub issue #258.
