@@ -80,8 +80,7 @@ main(int argc, char **argv)
 		len = strlen(buf);
 		if (len > 0) {
 			if (buf[len - 1] != '\n') {
-				fprintf(stderr,
-				    "globtest: missing newline at EOF\n");
+				fputs("globtest: missing newline at EOF\n", stderr);
 				return EXIT_FAILURE;
 			}
 			buf[--len] = '\0';

@@ -109,7 +109,7 @@ main(int argc, char *argv[])
 		}
 		while (len <= maxlen) {
 		    if (len == 0)
-			printf("# word wrap disabled\n");
+			puts("# word wrap disabled");
 		    else
 			printf("# word wrap at %zu characters\n", len);
 		    eventlog_writeln(stdout, lines[0], strlen(lines[0]), len);

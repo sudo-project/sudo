@@ -682,7 +682,7 @@ setup_terminal(struct eventlog *evlog, bool interactive, bool resize)
     }
 
     if (evlog->lines > terminal_lines || evlog->columns > terminal_cols) {
-	fputs(_("Warning: your terminal is too small to properly replay the log.\n"), stdout);
+	puts(_("Warning: your terminal is too small to properly replay the log."));
 	printf(_("Log geometry is %d x %d, your terminal's geometry is %d x %d."), evlog->lines, evlog->columns, terminal_lines, terminal_cols);
     }
     debug_return;

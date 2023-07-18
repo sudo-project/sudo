@@ -109,7 +109,7 @@ group_plugin_load(char *plugin_info)
 
     if (SUDO_API_VERSION_GET_MAJOR(group_plugin->version) != GROUP_API_VERSION_MAJOR) {
 	fprintf(stderr,
-	    "%s: incompatible group plugin major version %u, expected %d\n",
+	    "%s: incompatible group plugin major version %u, expected %u\n",
 	    path, SUDO_API_VERSION_GET_MAJOR(group_plugin->version),
 	    GROUP_API_VERSION_MAJOR);
 	return -1;
@@ -171,15 +171,16 @@ group_plugin_query(const char *user, const char *group,
 static void
 usage(void)
 {
-    fprintf(stderr,
-	"usage: plugin_test [-p \"plugin.so plugin_args ...\"] user:group ...\n");
+    fputs("usage: plugin_test [-p \"plugin.so plugin_args ...\"] user:group ...\n",
+        stderr);
     exit(EXIT_FAILURE);
 }
 
 int
 main(int argc, char *argv[])
 {
-    int ch, i, found;
+    int ch, found;
+    size_t i;
     char *plugin = "group_file.so";
     char *user, *group;
     struct passwd *pwd;
