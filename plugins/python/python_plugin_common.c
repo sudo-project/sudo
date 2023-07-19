@@ -750,31 +750,17 @@ void
 python_plugin_unlink(void)
 {
     debug_decl(python_plugin_unlink, PYTHON_DEBUG_INTERNAL);
-    if (py_ctx.py_main_interpreter == NULL)
-        return;
 
     if (Py_IsInitialized()) {
-        sudo_debug_printf(SUDO_DEBUG_NOTICE, "Closing: deinit python %zu subinterpreters\n",
-                          py_ctx.interpreter_count);
-	while (py_ctx.interpreter_count != 0) {
-            PyThreadState *py_interpreter =
-		py_ctx.py_subinterpreters[--py_ctx.interpreter_count];
-            PyThreadState_Swap(py_interpreter);
-            Py_EndInterpreter(py_interpreter);
-        }
-
-        sudo_debug_printf(SUDO_DEBUG_NOTICE, "Closing: deinit main interpreter\n");
-
-        // we need to call finalize from the main interpreter
-        PyThreadState_Swap(py_ctx.py_main_interpreter);
-
+        sudo_debug_printf(SUDO_DEBUG_NOTICE, "Closing: deinit python interpreters\n");
         if (Py_FinalizeEx() != 0) {
-            sudo_debug_printf(SUDO_DEBUG_WARN, "Closing: failed to deinit python interpreter\n");
+            sudo_debug_printf(SUDO_DEBUG_WARN, "Closing: failed to deinit python interpreters\n");
         }
 
         // Restore inittab so "sudo" module does not remain there (as garbage)
         _restore_inittab();
     }
     py_ctx_reset();
+
     debug_return;
 }
