@@ -366,18 +366,32 @@ _python_plugin_register_plugin_in_py_ctx(void)
     debug_decl(_python_plugin_register_plugin_in_py_ctx, PYTHON_DEBUG_PLUGIN_LOAD);
 
     if (!Py_IsInitialized()) {
+        if (_save_inittab() != SUDO_RC_OK)
+            debug_return_int(SUDO_RC_ERROR);
+        PyImport_AppendInittab("sudo", sudo_module_init);
+
         // Disable environment variables effecting the python interpreter
         // This is important since we are running code here as root, the
         // user should not be able to alter what is running any how.
+#if (PY_MAJOR_VERSION > 3) || (PY_MINOR_VERSION >= 8)
+	PyStatus status;
+	PyConfig config;
+
+	PyConfig_InitPythonConfig(&config);
+	config.isolated = 1;
+	config.use_environment = 0;
+	config.user_site_directory = 0;
+	status = Py_InitializeFromConfig(&config);
+	PyConfig_Clear(&config);
+	if (PyStatus_Exception(status))
+            debug_return_int(SUDO_RC_ERROR);
+#else
         Py_IgnoreEnvironmentFlag = 1;
         Py_IsolatedFlag = 1;
         Py_NoUserSiteDirectory = 1;
 
-        if (_save_inittab() != SUDO_RC_OK)
-            debug_return_int(SUDO_RC_ERROR);
-
-        PyImport_AppendInittab("sudo", sudo_module_init);
         Py_InitializeEx(0);
+#endif
         py_ctx.py_main_interpreter = PyThreadState_Get();
 
         // This ensures we import "sudo" module in the main interpreter,
