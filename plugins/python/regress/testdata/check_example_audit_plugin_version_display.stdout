@@ -1,4 +1,4 @@
-(AUDIT)  -- Started by user root (0) -- 
+(AUDIT)  -- Started by user root (0) --
 Python Example Audit Plugin
 Python audit plugin (API 1.0): SudoAuditPlugin (loaded from 'SRC_DIR/example_audit_plugin.py')
 Python Example Audit Plugin (version=1.0)
