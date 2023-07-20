@@ -270,7 +270,15 @@ verify_log_lines(const char *reference_path)
 		// Convert ": REJECT" to ": 0" + rest of line
 		memcpy(cp, ": 0", 3);
 		memmove(cp + 3, cp + 8, strlen(cp + 8) + 1);
+	    } else {
+		// Python 3.12 may use <RC.REJECT: 0> instead of 0
+		cp = strstr(line_data, "<RC.REJECT: 0>");
+		if (cp != NULL) {
+		    *cp = '0';
+		    memmove(cp + 1, cp + 14, strlen(cp + 14) + 1);
+		}
 	    }
+
 	}
 
         VERIFY_TRUE(strlcat(stored_str, line_data, sizeof(stored_str)) < sizeof(stored_str));  // we have enough space in buffer
