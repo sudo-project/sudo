@@ -363,9 +363,9 @@ _py_debug_python_function(const char *class_name, const char *function_name, con
                 Py_DECREF(py_kwargs_sorted);
         }
 
-        sudo_debug_printf(SUDO_DEBUG_DIAG, "%s.%s %s: %s %s\n", class_name,
+        sudo_debug_printf(SUDO_DEBUG_DIAG, "%s.%s %s: %s%s%s\n", class_name,
                           function_name, message, args_str ? args_str : "()",
-                          kwargs_str ? kwargs_str : "");
+                          kwargs_str ? " " : "", kwargs_str ? kwargs_str : "");
         free(args_str);
         free(kwargs_str);
     }

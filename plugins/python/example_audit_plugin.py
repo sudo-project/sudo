@@ -16,7 +16,7 @@ class SudoAuditPlugin(sudo.Plugin):
         user_info_dict = sudo.options_as_dict(user_info)
         user = user_info_dict.get("user", "???")
         uid = user_info_dict.get("uid", "???")
-        self._log("-- Started by user {} ({}) -- ".format(user, uid))
+        self._log("-- Started by user {} ({}) --".format(user, uid))
 
     def __del__(self):
         self._log("-- Finished --")

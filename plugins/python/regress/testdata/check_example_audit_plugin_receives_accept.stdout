@@ -1,4 +1,4 @@
-(AUDIT)  -- Started by user testuser1 (123) -- 
+(AUDIT)  -- Started by user testuser1 (123) --
 (AUDIT)  Requested command: id --help
 (AUDIT)  Accepted command: /sbin/id --help
 (AUDIT)    By the plugin: accepter plugin name (type=POLICY)
