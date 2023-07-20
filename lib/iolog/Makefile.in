@@ -323,11 +323,11 @@ check: $(TEST_PROGS) check-fuzzer
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    rval=0; \
-	    ./check_iolog_filter $(srcdir)/regress/iolog_filter/test[1-9]* || rval=`expr $$rval + $$?`; \
-	    ./check_iolog_path $(srcdir)/regress/iolog_path/data || rval=`expr $$rval + $$?`; \
-	    ./check_iolog_mkpath || rval=`expr $$rval + $$?`; \
-	    ./check_iolog_timing || rval=`expr $$rval + $$?`; \
-	    ./host_port_test || rval=`expr $$rval + $$?`; \
+	    ./check_iolog_filter $(TEST_VERBOSE) $(srcdir)/regress/iolog_filter/test[1-9]* || rval=`expr $$rval + $$?`; \
+	    ./check_iolog_path $(TEST_VERBOSE) $(srcdir)/regress/iolog_path/data || rval=`expr $$rval + $$?`; \
+	    ./check_iolog_mkpath $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
+	    ./check_iolog_timing $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
+	    ./host_port_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
 	    exit $$rval; \
 	fi
 

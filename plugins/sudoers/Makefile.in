@@ -652,24 +652,24 @@ check: $(TEST_PROGS) visudo testsudoers cvtsudoers check-fuzzer
 	    umask 022; \
 	    rval=0; \
 	    mkdir -p regress/parser; \
-	    ./check_addr $(srcdir)/regress/parser/check_addr.in || rval=`expr $$rval + $$?`; \
-	    ./check_base64 || rval=`expr $$rval + $$?`; \
+	    ./check_addr $(TEST_VERBOSE) $(srcdir)/regress/parser/check_addr.in || rval=`expr $$rval + $$?`; \
+	    ./check_base64 $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
 	    if test -f check_digest; then \
-		./check_digest > regress/parser/check_digest.out; \
+		./check_digest $(TEST_VERBOSE) > regress/parser/check_digest.out; \
 		diff regress/parser/check_digest.out $(srcdir)/regress/parser/check_digest.out.ok || rval=`expr $$rval + $$?`; \
 	    fi; \
-	    ./check_editor || rval=`expr $$rval + $$?`; \
-	    ./check_env_pattern $(srcdir)/regress/env_match/data || rval=`expr $$rval + $$?`; \
-	    ./check_exptilde || rval=`expr $$rval + $$?`; \
-	    ./check_fill || rval=`expr $$rval + $$?`; \
-	    ./check_gentime || rval=`expr $$rval + $$?`; \
+	    ./check_editor $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
+	    ./check_env_pattern $(TEST_VERBOSE) $(srcdir)/regress/env_match/data || rval=`expr $$rval + $$?`; \
+	    ./check_exptilde $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
+	    ./check_fill $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
+	    ./check_gentime $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
 	    mkdir -p regress/iolog_plugin; \
-	    ./check_iolog_plugin regress/iolog_plugin/iolog || rval=`expr $$rval + $$?`; \
-	    ./check_serialize_list || rval=`expr $$rval + $$?`; \
-	    ./check_starttime || rval=`expr $$rval + $$?`; \
-	    ./check_unesc || rval=`expr $$rval + $$?`; \
+	    ./check_iolog_plugin $(TEST_VERBOSE) regress/iolog_plugin/iolog || rval=`expr $$rval + $$?`; \
+	    ./check_serialize_list $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
+	    ./check_starttime $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
+	    ./check_unesc $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
 	    if test -f check_symbols; then \
-		./check_symbols .libs/sudoers.so $(shlib_exp) || rval=`expr $$rval + $$?`; \
+		./check_symbols $(TEST_VERBOSE) .libs/sudoers.so $(shlib_exp) || rval=`expr $$rval + $$?`; \
 	    fi; \
 	    AWK=$(AWK) $(HARNESS) sudoers || rval=`expr $$rval + $$?`; \
 	    AWK=$(AWK) $(HARNESS) testsudoers || rval=`expr $$rval + $$?`; \

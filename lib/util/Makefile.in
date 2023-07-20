@@ -453,11 +453,11 @@ check: $(TEST_PROGS) check-fuzzer
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    rval=0; \
 	    if test -f closefrom_test; then \
-		./closefrom_test || rval=`expr $$rval + $$?`; \
+		./closefrom_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
 	    fi; \
-	    ./digest_test || rval=`expr $$rval + $$?`; \
+	    ./digest_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
 	    if test -f fnm_test; then \
-		./fnm_test $(srcdir)/regress/fnmatch/fnm_test.in || rval=`expr $$rval + $$?`; \
+		./fnm_test $(TEST_VERBOSE) $(srcdir)/regress/fnmatch/fnm_test.in || rval=`expr $$rval + $$?`; \
 	    fi; \
 	    if test -f globtest; then \
 		mkdir -p `$(SED) 's@/[^/]*$$@@' $(srcdir)/regress/glob/files | sort -u`; \
@@ -465,36 +465,36 @@ check: $(TEST_PROGS) check-fuzzer
 		chmod 0755 `$(EGREP) '/r[^/]*$$' $(srcdir)/regress/glob/files`; \
 		chmod 0444 `$(EGREP) '/s[^/]*$$' $(srcdir)/regress/glob/files`; \
 		chmod 0711 `$(EGREP) '/t[^/]*$$' $(srcdir)/regress/glob/files`; \
-		./globtest $(srcdir)/regress/glob/globtest.in || rval=`expr $$rval + $$?`; \
+		./globtest $(TEST_VERBOSE) $(srcdir)/regress/glob/globtest.in || rval=`expr $$rval + $$?`; \
 		rm -rf fake; \
 	    fi; \
 	    if test -f getdelim_test; then \
-		./getdelim_test || rval=`expr $$rval + $$?`; \
+		./getdelim_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
 	    fi; \
 	    if test -f mktemp_test; then \
-		./mktemp_test || rval=`expr $$rval + $$?`; \
+		./mktemp_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
 	    fi; \
 	    if test -f strsig_test; then \
-		./strsig_test || rval=`expr $$rval + $$?`; \
+		./strsig_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
 	    fi; \
-	    ./getgrouplist_test || rval=`expr $$rval + $$?`; \
-	    ./hexchar_test || rval=`expr $$rval + $$?`; \
-	    ./hltq_test || rval=`expr $$rval + $$?`; \
-	    ./json_test || rval=`expr $$rval + $$?`; \
-	    ./multiarch_test || rval=`expr $$rval + $$?`; \
-	    ./open_parent_dir_test || rval=`expr $$rval + $$?`; \
-	    ./parse_gids_test || rval=`expr $$rval + $$?`; \
-	    ./progname_test || rval=`expr $$rval + $$?`; \
-	    rm -f ./progname_test2; ln -s ./progname_test ./progname_test2; \
-	    ./progname_test2 || rval=`expr $$rval + $$?`; \
+	    ./getgrouplist_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
+	    ./hexchar_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
+	    ./hltq_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
+	    ./json_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
+	    ./multiarch_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
+	    ./open_parent_dir_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
+	    ./parse_gids_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
+	    ./progname_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
+	    rm -f ./progname_test2 $(TEST_VERBOSE); ln -s ./progname_test ./progname_test2; \
+	    ./progname_test2 $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
 	    rm -f ./progname_test2; \
-	    ./regex_test || rval=`expr $$rval + $$?`; \
-	    ./strsplit_test || rval=`expr $$rval + $$?`; \
-	    ./strtobool_test || rval=`expr $$rval + $$?`; \
-	    ./strtoid_test || rval=`expr $$rval + $$?`; \
-	    ./strtomode_test || rval=`expr $$rval + $$?`; \
-	    ./strtonum_test || rval=`expr $$rval + $$?`; \
-	    ./uuid_test || rval=`expr $$rval + $$?`; \
+	    ./regex_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
+	    ./strsplit_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
+	    ./strtobool_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
+	    ./strtoid_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
+	    ./strtomode_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
+	    ./strtonum_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
+	    ./uuid_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
 	    AWK=$(AWK) $(HARNESS) sudo_conf || rval=`expr $$rval + $$?`; \
 	    AWK=$(AWK) $(HARNESS) sudo_parseln || rval=`expr $$rval + $$?`; \
 	    exit $$rval; \
