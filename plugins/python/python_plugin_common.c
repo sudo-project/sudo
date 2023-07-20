@@ -137,6 +137,7 @@ _import_module(const char *path)
     debug_return_ptr(module);
 }
 
+// Create a new sub-interpreter and switch to it.
 static PyThreadState *
 _python_plugin_new_interpreter(void)
 {
@@ -473,7 +474,7 @@ cleanup:
 static PyObject *
 _python_plugin_get_class(const char *plugin_path, PyObject *py_module, const char *plugin_class)
 {
-    debug_decl(python_plugin_init, PYTHON_DEBUG_PLUGIN_LOAD);
+    debug_decl(_python_plugin_get_class, PYTHON_DEBUG_PLUGIN_LOAD);
     PyObject *py_plugin_list = NULL, *py_class = NULL;
 
     if (plugin_class == NULL) {
@@ -540,7 +541,6 @@ python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_options
     if (plugin_ctx->py_interpreter == NULL) {
         goto cleanup;
     }
-    PyThreadState_Swap(plugin_ctx->py_interpreter);
 
     if (sudo_module_set_default_loghandler() < 0)
         goto cleanup;
@@ -713,6 +713,7 @@ python_plugin_close(struct PluginContext *plugin_ctx, const char *callback_name,
     }
 
     python_plugin_deinit(plugin_ctx);
+    PyThreadState_Swap(py_ctx.py_main_interpreter);
 
     debug_return;
 }
