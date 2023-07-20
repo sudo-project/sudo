@@ -59,10 +59,23 @@ int
 main(int argc, char *argv[])
 {
     const int ntests = nitems(tests);
-    int i, errors = 0;
+    int ch, i, errors = 0;
     time_t result;
 
     initprogname(argc > 0 ? argv[0] : "check_gentime");
+
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignored */
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v]\n", getprogname());
+	    return EXIT_FAILURE;
+	}
+    }
+    argc -= optind;
+    argv += optind;
 
     /* Do local time tests in Eastern Standard Time. */
     putenv((char *)"TZ=EST5EST5");

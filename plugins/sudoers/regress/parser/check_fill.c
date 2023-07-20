@@ -166,9 +166,22 @@ do_tests(int (*checker)(const char *, size_t, bool, const char *, char **),
 int
 main(int argc, char *argv[])
 {
-    int ntests, errors = 0;
+    int ch, ntests, errors = 0;
 
     initprogname(argc > 0 ? argv[0] : "check_fill");
+
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignored */
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v]\n", getprogname());
+	    return EXIT_FAILURE;
+	}
+    }
+    argc -= optind;
+    argv += optind;
 
     errors += do_tests(check_fill, txt_data, nitems(txt_data));
     errors += do_tests(check_fill_cmnd, cmd_data, nitems(cmd_data));
@@ -180,7 +193,7 @@ main(int argc, char *argv[])
 	    getprogname(), ntests, errors, (ntests - errors) * 100 / ntests);
     }
 
-    exit(errors);
+    return errors;
 }
 
 /* STUB */

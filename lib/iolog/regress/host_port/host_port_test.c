@@ -78,11 +78,24 @@ static struct host_port_test test_data[] = {
 int
 main(int argc, char *argv[])
 {
-    int i, errors = 0, ntests = 0;
+    int ch, i, errors = 0, ntests = 0;
     char *host, *port, *copy = NULL;
     bool ret, tls;
 
     initprogname(argc > 0 ? argv[0] : "host_port_test");
+
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignore */
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v]\n", getprogname());
+	    return EXIT_FAILURE;
+	}
+    }
+    argc -= optind;
+    argv += optind;
 
     for (i = 0; test_data[i].str != NULL; i++) {
 	host = port = NULL;

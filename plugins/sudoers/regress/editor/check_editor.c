@@ -97,9 +97,22 @@ int
 main(int argc, char *argv[])
 {
     struct test_data *data;
-    int ntests = 0, errors = 0;
+    int ch, ntests = 0, errors = 0;
 
     initprogname(argc > 0 ? argv[0] : "check_editor");
+
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignored */
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v]\n", getprogname());
+	    return EXIT_FAILURE;
+	}
+    }
+    argc -= optind;
+    argv += optind;
 
     for (data = test_data; data->editor_var != NULL; data++) {
 	const char *env_editor = NULL;

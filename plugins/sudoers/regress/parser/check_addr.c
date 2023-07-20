@@ -68,26 +68,39 @@ check_addr(char *input)
 sudo_noreturn static void
 usage(void)
 {
-    fprintf(stderr, "usage: %s datafile\n", getprogname());
+    fprintf(stderr, "usage: %s [-v] datafile\n", getprogname());
     exit(EXIT_FAILURE);
 }
 
 int
 main(int argc, char *argv[])
 {
-    int ntests = 0, errors = 0;
+    int ch, ntests = 0, errors = 0;
     char *cp, line[2048];
     size_t len;
     FILE *fp;
 
     initprogname(argc > 0 ? argv[0] : "check_addr");
 
-    if (argc != 2)
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignored */
+	    break;
+	default:
+	    usage();
+	    /* NOTREACHED */
+	}
+    }
+    argc -= optind;
+    argv += optind;
+
+    if (argc != 1)
 	usage();
 
-    fp = fopen(argv[1], "r");
+    fp = fopen(argv[0], "r");
     if (fp == NULL)
-	sudo_fatalx("unable to open %s", argv[1]);
+	sudo_fatalx("unable to open %s", argv[0]);
 
     /*
      * Input is in the following format.  There are two types of

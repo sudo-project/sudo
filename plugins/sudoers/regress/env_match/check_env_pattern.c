@@ -26,18 +26,38 @@
 
 sudo_dso_public int main(int argc, char *argv[]);
 
+sudo_noreturn static void
+usage(void)
+{
+    fprintf(stderr, "usage: %s [-v] [inputfile]\n", getprogname());
+    exit(EXIT_FAILURE);
+}
+
 int
 main(int argc, char *argv[])
 {
     FILE *fp = stdin;
     char pattern[1024], string[1024];
-    int errors = 0, tests = 0, got, want;
+    int ch, errors = 0, tests = 0, got, want;
 
     initprogname(argc > 0 ? argv[0] : "check_env_pattern");
 
-    if (argc > 1) {
-	if ((fp = fopen(argv[1], "r")) == NULL) {
-	    perror(argv[1]);
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignored */
+	    break;
+	default:
+	    usage();
+	    /* NOTREACHED */
+	}
+    }
+    argc -= optind;
+    argv += optind;
+
+    if (argc > 0) {
+	if ((fp = fopen(argv[0], "r")) == NULL) {
+	    perror(argv[0]);
 	    return EXIT_FAILURE;
 	}
     }

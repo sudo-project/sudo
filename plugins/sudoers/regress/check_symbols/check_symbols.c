@@ -34,7 +34,7 @@ sudo_dso_public int main(int argc, char *argv[]);
 sudo_noreturn static void
 usage(void)
 {
-    fprintf(stderr, "usage: %s plugin.so symbols_file\n", getprogname());
+    fprintf(stderr, "usage: %s [-v] plugin.so symbols_file\n", getprogname());
     exit(EXIT_FAILURE);
 }
 
@@ -46,14 +46,27 @@ main(int argc, char *argv[])
     const char *symbols_file;
     char *cp, line[LINE_MAX];
     FILE *fp;
-    int ntests = 0, errors = 0;
+    int ch, ntests = 0, errors = 0;
 
     initprogname(argc > 0 ? argv[0] : "check_symbols");
 
-    if (argc != 3)
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignored */
+	    break;
+	default:
+	    usage();
+	    /* NOTREACHED */
+	}
+    }
+    argc -= optind;
+    argv += optind;
+
+    if (argc != 2)
 	usage();
-    plugin_path = argv[1];
-    symbols_file = argv[2];
+    plugin_path = argv[0];
+    symbols_file = argv[1];
 
     handle = sudo_dso_load(plugin_path, SUDO_DSO_LAZY|SUDO_DSO_GLOBAL);
     if (handle == NULL) {

@@ -87,9 +87,23 @@ main(int argc, char *argv[])
     unsigned char *digest;
     unsigned int i, j;
     size_t digest_len;
+    int ch;
     unsigned int digest_type;
 
     initprogname(argc > 0 ? argv[0] : "check_digest");
+
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignored */
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v]\n", getprogname());
+	    return EXIT_FAILURE;
+	}
+    }
+    argc -= optind;
+    argv += optind;
 
     for (digest_type = 0; digest_type < SUDO_DIGEST_INVALID; digest_type++) {
 	for (i = 0; i < NUM_TESTS; i++) {

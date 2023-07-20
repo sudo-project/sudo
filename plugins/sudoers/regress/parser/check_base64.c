@@ -68,12 +68,25 @@ struct base64_test {
 int
 main(int argc, char *argv[])
 {
-    int ntests = nitems(test_strings);
+    int ch, ntests = nitems(test_strings);
     int i, errors = 0;
     unsigned char buf[64];
     size_t len;
 
     initprogname(argc > 0 ? argv[0] : "check_base64");
+
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignored */
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v]\n", getprogname());
+	    return EXIT_FAILURE;
+	}
+    }
+    argc -= optind;
+    argv += optind;
 
     for (i = 0; i < ntests; i++) {
 	/* Test decode. */

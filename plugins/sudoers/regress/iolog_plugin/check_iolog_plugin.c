@@ -47,7 +47,7 @@ sudo_dso_public int main(int argc, char *argv[], char *envp[]);
 sudo_noreturn static void
 usage(void)
 {
-    fprintf(stderr, "usage: %s pathname\n", getprogname());
+    fprintf(stderr, "usage: %s [-v] pathname\n", getprogname());
     exit(EXIT_FAILURE);
 }
 
@@ -358,14 +358,27 @@ int
 main(int argc, char *argv[], char *envp[])
 {
     struct passwd *tpw;
-    int tests = 0, errors = 0;
+    int ch, tests = 0, errors = 0;
     const char *iolog_dir;
 
     initprogname(argc > 0 ? argv[0] : "check_iolog_plugin");
 
-    if (argc != 2)
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+        switch (ch) {
+        case 'v':
+            /* ignored */
+            break;
+        default:
+            usage();
+            /* NOTREACHED */
+        }
+    }
+    argc -= optind;
+    argv += optind;
+
+    if (argc != 1)
 	usage();
-    iolog_dir = argv[1];
+    iolog_dir = argv[0];
 
     /* Set runas user. */
     if ((tpw = getpwuid(0)) == NULL) {

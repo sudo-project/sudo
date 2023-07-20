@@ -80,7 +80,7 @@ get_now(struct timespec *now)
 int
 main(int argc, char *argv[])
 {
-    int ntests = 0, errors = 0;
+    int ch, ntests = 0, errors = 0;
     struct timespec now, then, delta;
     time_t timeoff = 0;
     pid_t pids[2];
@@ -88,6 +88,19 @@ main(int argc, char *argv[])
     unsigned int i;
 
     initprogname(argc > 0 ? argv[0] : "check_starttime");
+
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignored */
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v]\n", getprogname());
+	    return EXIT_FAILURE;
+	}
+    }
+    argc -= optind;
+    argv += optind;
 
     if (get_now(&now) == -1)
 	sudo_fatal_nodebug("unable to get current time");

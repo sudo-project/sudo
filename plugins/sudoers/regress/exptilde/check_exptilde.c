@@ -53,13 +53,26 @@ sudo_dso_public int main(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
-    int ntests = 0, errors = 0;
+    int ch, ntests = 0, errors = 0;
     struct test_data *td;
     struct passwd *pw;
     char *path = NULL;
     bool result;
 
     initprogname(argc > 0 ? argv[0] : "check_exptilde");
+
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignored */
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v]\n", getprogname());
+	    return EXIT_FAILURE;
+	}
+    }
+    argc -= optind;
+    argv += optind;
 
     /* Prime the passwd cache */
     pw = sudo_mkpwent("root", 0, 0, "/", "/bin/sh");
