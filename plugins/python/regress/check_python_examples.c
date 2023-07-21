@@ -1528,6 +1528,9 @@ main(int argc, char *argv[])
     }
     python_plugin_so_path = argv[0];
 
+    // Unbuffer stdout so we don't miss output during a crash.
+    setvbuf(stdout, NULL, _IONBF, 0);
+
     RUN_TEST(check_example_io_plugin_version_display(true));
     RUN_TEST(check_example_io_plugin_version_display(false));
     RUN_TEST(check_example_io_plugin_command_log());
