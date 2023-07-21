@@ -187,7 +187,11 @@ cleanup:
     Py_CLEAR(py_result);
     Py_CLEAR(py_logger);
     Py_CLEAR(py_logging_module);
+#if 0
+    // XXX - If we don't leak py_loghandler here we may get a crash in
+    //       Py_EndInterpreter() on Python 3.12.
     Py_CLEAR(py_loghandler);
+#endif
 
     debug_return_int(PyErr_Occurred() ? SUDO_RC_ERROR : SUDO_RC_OK);
 }
