@@ -29,9 +29,6 @@ extern PyObject *sudo_exc_PluginReject;  // a reject with message
 extern PyObject *sudo_exc_PluginError;   // an error with message
 
 extern PyTypeObject *sudo_type_Plugin;
-extern PyTypeObject *sudo_type_ConvMessage;
-
-extern PyObject *sudo_type_LogHandler;
 
 PyObject *sudo_module_create_class(const char *class_name, PyMethodDef *class_methods,
                                    PyObject *base_class);
