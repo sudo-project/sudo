@@ -23,6 +23,10 @@
 
 #include "sudo_python_module.h"
 
+#if PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION < 9
+# define PyObject_CallNoArgs(_o)	PyObject_CallObject((_o), NULL)
+#endif
+
 static PyObject *sudo_type_LogHandler;
 
 static void
@@ -165,7 +169,7 @@ sudo_module_set_default_loghandler(void)
     PyObject *py_loghandler = NULL, *py_logging_module = NULL,
              *py_logger = NULL, *py_result = NULL;
 
-    py_loghandler = PyObject_CallObject(sudo_type_LogHandler, NULL);
+    py_loghandler = PyObject_CallNoArgs(sudo_type_LogHandler);
     if (py_loghandler == NULL)
         goto cleanup;
 
