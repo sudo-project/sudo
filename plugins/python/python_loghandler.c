@@ -23,8 +23,7 @@
 
 #include "sudo_python_module.h"
 
-PyObject *sudo_type_LogHandler;
-
+static PyObject *sudo_type_LogHandler;
 
 static void
 _debug_plugin(unsigned int log_level, const char *log_message)
