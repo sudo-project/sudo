@@ -479,28 +479,26 @@ sudo_module_register_enum(PyObject *py_module, const char *enum_name, PyObject *
         return;
 
     PyObject *py_enum_class = NULL;
-    {
-        PyObject *py_enum_module = PyImport_ImportModule("enum");
-        if (py_enum_module == NULL) {
-            Py_CLEAR(py_constants_dict);
-            debug_return;
-        }
-
-        py_enum_class = PyObject_CallMethod(py_enum_module,
-                                            "IntEnum", "sO", enum_name,
-                                            py_constants_dict);
-
-        Py_CLEAR(py_constants_dict);
-        Py_CLEAR(py_enum_module);
+    PyObject *py_enum_module = PyImport_ImportModule("enum");
+    if (py_enum_module == NULL) {
+	Py_CLEAR(py_constants_dict);
+	debug_return;
     }
+
+    py_enum_class = PyObject_CallMethod(py_enum_module,
+					"IntEnum", "sO", enum_name,
+					py_constants_dict);
+
+    Py_CLEAR(py_constants_dict);
+    Py_CLEAR(py_enum_module);
 
     if (py_enum_class == NULL) {
         debug_return;
     }
 
+    // PyModule_AddObject steals the reference to py_enum_class on success
     if (PyModule_AddObject(py_module, enum_name, py_enum_class) < 0) {
         Py_CLEAR(py_enum_class);
-        debug_return;
     }
 
     debug_return;

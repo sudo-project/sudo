@@ -148,9 +148,12 @@ sudo_module_register_loghandler(PyObject *py_module)
     if (sudo_type_LogHandler == NULL)
         goto cleanup;
 
-    if (PyModule_AddObject(py_module, "LogHandler", sudo_type_LogHandler) < 0)
+    if (PyModule_AddObject(py_module, "LogHandler", sudo_type_LogHandler) < 0) {
+	Py_CLEAR(sudo_type_LogHandler);
         goto cleanup;
+    }
 
+    // PyModule_AddObject steals a reference to sudo_type_LogHandler on success
     Py_INCREF(sudo_type_LogHandler);
 
 cleanup:
