@@ -91,6 +91,7 @@ sudo_module_register_conv_message(PyObject *py_module)
         goto cleanup;
     }
 
+    // PyModule_AddObject steals the reference to py_class on success
     Py_INCREF(py_class);
     rc = SUDO_RC_OK;
 

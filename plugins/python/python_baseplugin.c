@@ -74,6 +74,7 @@ sudo_module_register_baseplugin(PyObject *py_module)
         goto cleanup;
     }
 
+    // PyModule_AddObject steals a reference to py_class on success
     Py_INCREF(py_class);
     rc = SUDO_RC_OK;
 
