@@ -344,8 +344,7 @@ _py_debug_python_function(const char *class_name, const char *function_name, con
 		/* Strip leading RC. to match python 3.10 behavior. */
 		memmove(args_str, args_str + 3, strlen(args_str + 3) + 1);
 	    }
-            if (py_args_sorted != NULL)
-                Py_DECREF(py_args_sorted);
+	    Py_XDECREF(py_args_sorted);
         }
         if (py_kwargs != NULL) {
             /* Sort by key for consistent output on Python < 3.6 */
@@ -359,8 +358,7 @@ _py_debug_python_function(const char *class_name, const char *function_name, con
 		}
 	    }
             kwargs_str = py_create_string_rep(py_kwargs);
-            if (py_kwargs_sorted != NULL)
-                Py_DECREF(py_kwargs_sorted);
+	    Py_XDECREF(py_kwargs_sorted);
         }
 
         sudo_debug_printf(SUDO_DEBUG_DIAG, "%s.%s %s: %s%s%s\n", class_name,
