@@ -79,7 +79,7 @@ static PyMethodDef _sudo_ConvMessage_class_methods[] =
 int
 sudo_module_register_conv_message(PyObject *py_module)
 {
-    debug_decl(_sudo_module_register_conv_message, PYTHON_DEBUG_INTERNAL);
+    debug_decl(sudo_module_register_conv_message, PYTHON_DEBUG_INTERNAL);
     int rc = SUDO_RC_ERROR;
     PyObject *py_class = NULL;
 
