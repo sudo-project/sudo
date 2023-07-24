@@ -532,8 +532,9 @@ python_plugin_init(struct PluginContext *plugin_ctx, char * const plugin_options
     }
     PyThreadState_Swap(plugin_ctx->py_interpreter);
 
-    if (sudo_module_set_default_loghandler() < 0)
+    if (sudo_module_set_default_loghandler() != SUDO_RC_OK) {
         goto cleanup;
+    }
 
     if (_python_plugin_set_path(plugin_ctx, _lookup_value(plugin_options, "ModulePath")) != SUDO_RC_OK) {
         goto cleanup;
