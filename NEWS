@@ -1,3 +1,10 @@
+What's new in Sudo 1.9.14p3
+
+ * Fixed a crash with Python 3.12 when the sudo Python python is
+   unloaded.  This only affects "make check" for the Python plugin.
+
+ * Adapted the sudo Python plugin test output to match Python 3.12.
+
 What's new in Sudo 1.9.14p2
 
  * Fixed a crash on Linux systems introduced in version 1.9.14 when
