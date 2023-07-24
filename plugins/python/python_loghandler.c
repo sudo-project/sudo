@@ -27,8 +27,6 @@
 # define PyObject_CallNoArgs(_o)	PyObject_CallObject((_o), NULL)
 #endif
 
-static PyObject *sudo_type_LogHandler;
-
 static void
 _debug_plugin(unsigned int log_level, const char *log_message)
 {
@@ -127,74 +125,58 @@ static PyMethodDef _sudo_LogHandler_class_methods[] =
     {NULL, NULL, 0, NULL}
 };
 
-// This function registers sudo.LogHandler class
+// This function creates the sudo.LogHandler class and adds it
+// to the root logger.
 int
-sudo_module_register_loghandler(PyObject *py_module)
+sudo_module_set_default_loghandler()
 {
     debug_decl(sudo_module_register_loghandler, PYTHON_DEBUG_INTERNAL);
 
-    PyObject *py_logging_module = NULL, *py_streamhandler = NULL;
+    PyObject *py_sudo, *py_logging_module = NULL, *py_logger = NULL,
+	     *py_streamhandler = NULL, *py_class = NULL,
+	     *py_loghandler = NULL, *py_result = NULL;
+
+    py_sudo = PyImport_ImportModule("sudo");
+    if (py_sudo == NULL)
+        goto cleanup;
 
     py_logging_module = PyImport_ImportModule("logging");
     if (py_logging_module == NULL)
+        goto cleanup;
+
+    // Get the root logger which all loggers descend from.
+    py_logger = PyObject_CallMethod(py_logging_module, "getLogger", NULL);
+    if (py_logger == NULL)
         goto cleanup;
 
     py_streamhandler = PyObject_GetAttrString(py_logging_module, "StreamHandler");
     if (py_streamhandler == NULL)
         goto cleanup;
 
-    sudo_type_LogHandler = sudo_module_create_class("sudo.LogHandler",
+    // Create our own handler that is a sub-class of StreamHandler
+    py_class = sudo_module_create_class("sudo.LogHandler",
         _sudo_LogHandler_class_methods, py_streamhandler);
-    if (sudo_type_LogHandler == NULL)
+    if (py_class == NULL)
         goto cleanup;
 
-    if (PyModule_AddObject(py_module, "LogHandler", sudo_type_LogHandler) < 0) {
-	Py_CLEAR(sudo_type_LogHandler);
+    // PyModule_AddObject steals a reference to py_class on success
+    if (PyModule_AddObject(py_sudo, "LogHandler", py_class) < 0)
         goto cleanup;
-    }
+    Py_INCREF(py_class);
 
-    // PyModule_AddObject steals a reference to sudo_type_LogHandler on success
-    Py_INCREF(sudo_type_LogHandler);
-
-cleanup:
-    Py_CLEAR(py_streamhandler);
-    Py_CLEAR(py_logging_module);
-    debug_return_int(PyErr_Occurred() ? SUDO_RC_ERROR : SUDO_RC_OK);
-}
-
-// This sets sudo.LogHandler as the default log handler:
-//   logging.getLogger().addHandler(sudo.LogHandler())
-int
-sudo_module_set_default_loghandler(void)
-{
-    debug_decl(sudo_module_set_default_loghandler, PYTHON_DEBUG_INTERNAL);
-
-    PyObject *py_loghandler = NULL, *py_logging_module = NULL,
-             *py_logger = NULL, *py_result = NULL;
-
-    py_loghandler = PyObject_CallNoArgs(sudo_type_LogHandler);
+    py_loghandler = PyObject_CallNoArgs(py_class);
     if (py_loghandler == NULL)
-        goto cleanup;
-
-    py_logging_module = PyImport_ImportModule("logging");
-    if (py_logging_module == NULL)
-        goto cleanup;
-
-    py_logger = PyObject_CallMethod(py_logging_module, "getLogger", NULL);
-    if (py_logger == NULL)
         goto cleanup;
 
     py_result = PyObject_CallMethod(py_logger, "addHandler", "O", py_loghandler);
 
 cleanup:
     Py_CLEAR(py_result);
+    Py_CLEAR(py_loghandler);
+    Py_CLEAR(py_class);
+    Py_CLEAR(py_streamhandler);
     Py_CLEAR(py_logger);
     Py_CLEAR(py_logging_module);
-#if 0
-    // XXX - If we don't leak py_loghandler here we may get a crash in
-    //       Py_EndInterpreter() on Python 3.12.
-    Py_CLEAR(py_loghandler);
-#endif
-
+    Py_CLEAR(py_sudo);
     debug_return_int(PyErr_Occurred() ? SUDO_RC_ERROR : SUDO_RC_OK);
 }

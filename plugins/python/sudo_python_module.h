@@ -46,9 +46,6 @@ CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 int sudo_module_register_baseplugin(PyObject *py_module);
 
 CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-int sudo_module_register_loghandler(PyObject *py_module);
-
-CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 int sudo_module_set_default_loghandler(void);
 
 PyObject *python_sudo_debug(PyObject *py_self, PyObject *py_args);
