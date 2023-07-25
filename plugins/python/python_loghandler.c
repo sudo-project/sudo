@@ -130,7 +130,7 @@ static PyMethodDef _sudo_LogHandler_class_methods[] =
 int
 sudo_module_set_default_loghandler()
 {
-    debug_decl(sudo_module_register_loghandler, PYTHON_DEBUG_INTERNAL);
+    debug_decl(sudo_module_set_default_loghandler, PYTHON_DEBUG_INTERNAL);
 
     PyObject *py_sudo, *py_logging_module = NULL, *py_logger = NULL,
 	     *py_streamhandler = NULL, *py_class = NULL,

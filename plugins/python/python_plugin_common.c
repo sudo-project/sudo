@@ -64,7 +64,7 @@ _append_python_path(const char *module_dir)
 {
     debug_decl(_append_python_path, PYTHON_DEBUG_PLUGIN_LOAD);
     int rc = -1;
-    PyObject *py_sys_path = PySys_GetObject("path");
+    PyObject *py_sys_path = PySys_GetObject("path"); // borrowed
     if (py_sys_path == NULL) {
         PyErr_Format(sudo_exc_SudoException, "Failed to get python 'path'");
         debug_return_int(rc);
@@ -77,7 +77,7 @@ _append_python_path(const char *module_dir)
         Py_XDECREF(py_module_dir);
         debug_return_int(rc);
     }
-    Py_XDECREF(py_module_dir);
+    Py_DECREF(py_module_dir);
 
     if (sudo_debug_needed(SUDO_DEBUG_INFO)) {
         char *path = py_join_str_list(py_sys_path, ":");

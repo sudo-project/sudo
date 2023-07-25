@@ -42,6 +42,9 @@ static PyObject *python_sudo_conversation(PyObject *py_self, PyObject *py_args, 
 static PyObject *python_sudo_options_as_dict(PyObject *py_self, PyObject *py_args);
 static PyObject *python_sudo_options_from_dict(PyObject *py_self, PyObject *py_args);
 
+// Called on module teardown.
+static void sudo_module_free(void *self);
+
 static PyMethodDef sudo_methods[] = {
     {"debug",  (PyCFunction)python_sudo_debug, METH_VARARGS, "Debug messages which can be saved to file in sudo.conf."},
     {"log_info",  (PyCFunction)python_sudo_log_info, METH_VARARGS | METH_KEYWORDS, "Display informational messages."},
@@ -62,7 +65,7 @@ static struct PyModuleDef sudo_module = {
     NULL, /* slots */
     NULL, /* traverse */
     NULL, /* clear */
-    NULL  /* free */
+    sudo_module_free
 };
 
 CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
@@ -600,8 +603,29 @@ cleanup:
         Py_CLEAR(py_module);
         Py_CLEAR(sudo_exc_SudoException);
         Py_CLEAR(sudo_exc_PluginError);
+        Py_CLEAR(sudo_exc_PluginReject);
         Py_CLEAR(sudo_exc_ConversationInterrupted);
     }
 
     debug_return_ptr(py_module);
+}
+
+static void
+sudo_module_free(void *self)
+{
+    debug_decl(sudo_module_free, PYTHON_DEBUG_C_CALLS);
+
+    // Free exceptions
+    Py_CLEAR(sudo_exc_SudoException);
+    Py_CLEAR(sudo_exc_PluginError);
+    Py_CLEAR(sudo_exc_PluginReject);
+    Py_CLEAR(sudo_exc_ConversationInterrupted);
+
+    // Free base plugin
+    Py_CLEAR(sudo_type_Plugin);
+
+    // Free conversation message type
+    Py_CLEAR(sudo_type_ConvMessage);
+
+    debug_return;
 }

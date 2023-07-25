@@ -23,7 +23,7 @@
 
 #include "sudo_python_module.h"
 
-static PyTypeObject *sudo_type_ConvMessage;
+PyTypeObject *sudo_type_ConvMessage;
 
 static PyObject *
 _sudo_ConvMessage__Init(PyObject *py_self, PyObject *py_args, PyObject *py_kwargs)
