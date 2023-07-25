@@ -54,7 +54,8 @@ runas_matches_pw(struct sudoers_parse_tree *parse_tree,
  * list, verify and kill.
  */
 static unsigned int
-sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw, int pwflag)
+sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
+    time_t now, struct sudoers_lookup_callbacks *callbacks, int pwflag)
 {
     char *saved_runchroot;
     struct passwd *root_pw = NULL;
@@ -63,7 +64,7 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw, int pwflag)
     struct privilege *priv;
     struct userspec *us;
     struct defaults *def;
-    int cmnd_match, nopass, match = DENY;
+    int nopass, match = DENY;
     unsigned int validated = 0;
     enum def_tuple pwcheck;
     debug_decl(sudoers_lookup_pseudo, SUDOERS_DEBUG_PARSER);
@@ -89,19 +90,36 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw, int pwflag)
 	    SET(validated, VALIDATE_ERROR);
 	    break;
 	}
+
+	/*
+	 * We have to traverse the policy forwards, not in reverse,
+	 * to support the "pwcheck == all" case.
+	 */
 	TAILQ_FOREACH(us, &nss->parse_tree->userspecs, entries) {
-	    if (userlist_matches(nss->parse_tree, pw, &us->users) != ALLOW)
+	    int user_match = userlist_matches(nss->parse_tree, pw, &us->users);
+	    if (callbacks != NULL)
+		callbacks->cb_userspec(us, user_match);
+	    if (user_match != ALLOW)
 		continue;
 	    TAILQ_FOREACH(priv, &us->privileges, entries) {
 		int priv_nopass = UNSPEC;
-
-		if (hostlist_matches(nss->parse_tree, pw, &priv->hostlist) != ALLOW)
+		int host_match = hostlist_matches(nss->parse_tree, pw,
+		    &priv->hostlist);
+		if (callbacks != NULL)
+		    callbacks->cb_privilege(priv, host_match);
+		if (host_match != ALLOW)
 		    continue;
 		TAILQ_FOREACH(def, &priv->defaults, entries) {
-		    if (strcmp(def->var, "authenticate") == 0)
+		    if (strcmp(def->var, "authenticate") == 0) {
 			priv_nopass = !def->op;
+			break;
+		    }
 		}
 		TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
+		    int cmnd_match = UNSPEC;
+		    int date_match = UNSPEC;
+		    int runas_match = UNSPEC;
+
 		    if (pwcheck == any) {
 			if (cs->tags.nopasswd == true || priv_nopass == true)
 			    nopass = true;
@@ -109,59 +127,72 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw, int pwflag)
 			if (cs->tags.nopasswd != true && priv_nopass != true)
 			    nopass = false;
 		    }
-		    if (match == ALLOW)
-			continue;
 
+		    if (cs->notbefore != UNSPEC) {
+			date_match = now < cs->notbefore ? DENY : ALLOW;
+		    }
+		    if (cs->notafter != UNSPEC) {
+			date_match = now > cs->notafter ? DENY : ALLOW;
+		    }
 		    /*
 		     * Root can list any user's privileges.
 		     * A user may always list their own privileges.
 		     */
 		    if (user_uid == 0 || list_pw == NULL ||
 			    user_uid == list_pw->pw_uid) {
-			match = ALLOW;
-			continue;
-		    }
-
-		    /*
-		     * To list another user's prilileges, the runas
-		     * user must match the list user or root.
-		     */
-		    switch (runas_matches_pw(nss->parse_tree, cs, list_pw)) {
-		    case DENY:
-			break;
-		    case ALLOW:
+			cmnd_match = ALLOW;
+			runas_match = ALLOW;
+		    } else if (date_match != DENY) {
 			/*
-			 * RunAs user matches list user.
-			 * Match on command "list" or ALL.
+			 * To list another user's prilileges, the runas
+			 * user must match the list user or root.
 			 */
-			cmnd_match = cmnd_matches(nss->parse_tree,
-			    cs->cmnd, cs->runchroot, NULL);
-			if (cmnd_match != UNSPEC) {
-			    match = cmnd_match;
-			    goto done;
-			}
-			break;
-		    default:
-			/*
-			 * RunAs user doesn't match list user.  Only allow
-			 * listing if the user has "sudo ALL" for root.
-			 */
-			if (root_pw != NULL && runas_matches_pw(nss->parse_tree,
-				cs, root_pw) == ALLOW) {
-			    cmnd_match = cmnd_matches_all(nss->parse_tree,
+			runas_match = runas_matches_pw(nss->parse_tree, cs,
+			    list_pw);
+			switch (runas_match) {
+			case DENY:
+			    break;
+			case ALLOW:
+			    /*
+			     * RunAs user matches list user.
+			     * Match on command "list" or ALL.
+			     */
+			    cmnd_match = cmnd_matches(nss->parse_tree,
 				cs->cmnd, cs->runchroot, NULL);
-			    if (cmnd_match != UNSPEC) {
-				match = cmnd_match;
-				goto done;
+			    break;
+			default:
+			    /*
+			     * RunAs user doesn't match list user.
+			     * Only allow listing if the user has
+			     * "sudo ALL" for root.
+			     */
+			    if (root_pw != NULL &&
+				    runas_matches_pw(nss->parse_tree, cs,
+				    root_pw) == ALLOW) {
+				runas_match = ALLOW;
+				cmnd_match = cmnd_matches_all(nss->parse_tree,
+				    cs->cmnd, cs->runchroot, NULL);
 			    }
+			    break;
 			}
-			break;
+		    }
+		    if (callbacks != NULL) {
+			callbacks->cb_cmndspec(cs, date_match, runas_match,
+			    cmnd_match);
+		    }
+		    if (cmnd_match != UNSPEC) {
+			/*
+			 * We take the last match but must process
+			 * the entire policy for pwcheck == all.
+			 */
+			match = cmnd_match;
 		    }
 		}
 	    }
 	}
+	if (!sudo_nss_can_continue(nss, match))
+	    break;
     }
-done:
     if (root_pw != NULL)
 	sudo_pw_delref(root_pw);
     if (match == ALLOW || user_uid == 0) {
@@ -475,7 +506,7 @@ sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, time_t now,
      * Special case checking the "validate", "list" and "kill" pseudo-commands.
      */
     if (pwflag)
-	debug_return_uint(sudoers_lookup_pseudo(snl, pw, pwflag));
+	debug_return_uint(sudoers_lookup_pseudo(snl, pw, now, callbacks, pwflag));
 
     /* Need to be runas user while stat'ing things. */
     if (!set_perms(PERM_RUNAS))
