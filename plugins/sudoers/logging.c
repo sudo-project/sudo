@@ -321,9 +321,17 @@ log_denial(unsigned int status, bool inform_user)
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("Sorry, user %s may not run "
 		"sudo on %s.\n"), user_name, user_srunhost);
 	} else {
+	    const char *cmnd1 = user_cmnd;
+	    const char *cmnd2 = "";
+
+	    if (ISSET(sudo_mode, MODE_CHECK)) {
+		/* For "sudo -l command" the command run is in NewArgv[1]. */
+		cmnd1 = "list ";
+		cmnd2 = NewArgv[1];
+	    }
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("Sorry, user %s is not allowed "
 		"to execute '%s%s%s%s' as %s%s%s on %s.\n"),
-		user_name, user_cmnd, list_cmnd ? list_cmnd : "",
+		user_name, cmnd1, cmnd2,
 		user_args ? " " : "", user_args ? user_args : "",
 		list_pw ? list_pw->pw_name : runas_pw ?
 		runas_pw->pw_name : user_name, runas_gr ? ":" : "",
