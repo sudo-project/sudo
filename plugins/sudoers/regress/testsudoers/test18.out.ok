@@ -7,6 +7,8 @@ ALL = ^/bin/ls$ ^-[lAt]$
 	runas allowed
 	cmnd  allowed
 
+Password required
+
 Command allowed
 Parses OK
 
@@ -16,6 +18,8 @@ ALL = ^/bin/cat$ /var/log/*
 	host  allowed
 	runas allowed
 	cmnd  allowed
+
+Password required
 
 Command allowed
 Parses OK
@@ -27,6 +31,8 @@ ALL = /bin/cat ^/var/log/[^/]+$
 	runas allowed
 	cmnd  allowed
 
+Password required
+
 Command allowed
 Parses OK
 
@@ -36,6 +42,8 @@ ALL = /bin/*at ^/var/log/[^/]+$
 	host  allowed
 	runas allowed
 	cmnd  allowed
+
+Password required
 
 Command allowed
 Parses OK
@@ -47,6 +55,8 @@ ALL = /usr/bin/grep \^foo$
 	runas allowed
 	cmnd  allowed
 
+Password required
+
 Command allowed
 Parses OK
 
@@ -56,5 +66,7 @@ ALL = sudoedit ^/etc/(motd|issue|hosts)$
 	host  allowed
 	runas allowed
 	cmnd  allowed
+
+Password required
 
 Command allowed

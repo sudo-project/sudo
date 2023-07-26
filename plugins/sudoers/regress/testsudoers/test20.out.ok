@@ -7,4 +7,6 @@ ALL = CHROOT=/ /bin/ls
 	runas allowed
 	cmnd  allowed
 
+Password required
+
 Command allowed

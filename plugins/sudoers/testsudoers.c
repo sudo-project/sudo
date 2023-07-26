@@ -409,6 +409,9 @@ main(int argc, char *argv[])
 	    SET(validated, VALIDATE_FAILURE);
 	}
     }
+    if (def_authenticate) {
+	puts(U_("\nPassword required"));
+    }
 
     /*
      * Exit codes:

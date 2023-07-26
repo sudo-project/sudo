@@ -10,6 +10,8 @@ ALL = /bin/ls
 
 User root is not allowed to change directory to /
 
+Password required
+
 Command denied
 
 User cannot override the sudoers cwd:
@@ -24,6 +26,8 @@ ALL = CWD=/some/where/else /bin/ls
 
 User root is not allowed to change directory to /
 
+Password required
+
 Command denied
 
 User can set cwd if sudoers rule sets cwd to '*':
@@ -36,6 +40,8 @@ ALL = CWD=* /bin/ls
 	runas allowed
 	cmnd  allowed
 
+Password required
+
 Command allowed
 
 User can set cwd runcwd Defaults is '*':
@@ -47,5 +53,7 @@ ALL = /bin/ls
 	host  allowed
 	runas allowed
 	cmnd  allowed
+
+Password required
 
 Command allowed

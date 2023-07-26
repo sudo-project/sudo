@@ -14,4 +14,6 @@ ALL = ALL
 	runas allowed
 	cmnd  allowed
 
+Password required
+
 Command allowed

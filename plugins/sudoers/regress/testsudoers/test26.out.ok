@@ -10,6 +10,8 @@ ALL = /bin/ls
 
 User root is not allowed to change root directory to /
 
+Password required
+
 Command denied
 
 User cannot override the sudoers chroot:
@@ -21,6 +23,8 @@ ALL = CHROOT=/some/where/else /bin/ls
 	host  allowed
 	runas allowed
 	cmnd  unmatched
+
+Password required
 
 Command unmatched
 
@@ -34,6 +38,8 @@ ALL = CHROOT=* /bin/ls
 	runas allowed
 	cmnd  allowed
 
+Password required
+
 Command allowed
 
 User can chroot if runchroot Defaults is '*':
@@ -45,5 +51,7 @@ ALL = /bin/ls
 	host  allowed
 	runas allowed
 	cmnd  allowed
+
+Password required
 
 Command allowed

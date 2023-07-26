@@ -9,4 +9,6 @@ ALL = (ALL) /bin/ls
 
 Invalid shell for user fakeshell: /shell/does/not/exist
 
+Password required
+
 Command denied

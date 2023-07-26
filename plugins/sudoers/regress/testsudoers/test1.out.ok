@@ -6,4 +6,6 @@ ALL = ALL
 	host  allowed
 	runas unmatched
 
+Password required
+
 Command unmatched

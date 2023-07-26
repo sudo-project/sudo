@@ -9,6 +9,8 @@ ALL = ALL
 	runas allowed
 	cmnd  allowed
 
+Password required
+
 Command allowed
 
 Testing @include of a double-quoted path with white space
@@ -21,6 +23,8 @@ ALL = ALL
 	host  allowed
 	runas allowed
 	cmnd  allowed
+
+Password required
 
 Command allowed
 
@@ -35,6 +39,8 @@ ALL = ALL
 	runas allowed
 	cmnd  allowed
 
+Password required
+
 Command allowed
 
 Testing #include of a double-quoted path with white space
@@ -47,5 +53,7 @@ ALL = ALL
 	host  allowed
 	runas allowed
 	cmnd  allowed
+
+Password required
 
 Command allowed

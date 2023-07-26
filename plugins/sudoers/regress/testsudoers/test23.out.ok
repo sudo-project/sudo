@@ -6,4 +6,6 @@ ALL = (root) /bin/ls
 	host  allowed
 	runas unmatched
 
+Password required
+
 Command unmatched
