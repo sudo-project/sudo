@@ -108,6 +108,7 @@ main(int argc, char *argv[])
     int ch, dflag, exitcode = EXIT_FAILURE;
     unsigned int validated;
     int status = FOUND;
+    int pwflag = 0;
     char cwdbuf[PATH_MAX];
     time_t now;
     id_t id;
@@ -137,7 +138,7 @@ main(int argc, char *argv[])
 
     dflag = 0;
     grfile = pwfile = NULL;
-    while ((ch = getopt(argc, argv, "+D:dg:G:h:i:P:p:R:T:tu:U:")) != -1) {
+    while ((ch = getopt(argc, argv, "+D:dg:G:h:i:L:lP:p:R:T:tu:U:v")) != -1) {
 	switch (ch) {
 	    case 'D':
 		user_runcwd = optarg;
@@ -168,6 +169,23 @@ main(int argc, char *argv[])
 		    usage();
 		}
 		break;
+	    case 'L':
+		list_pw = sudo_getpwnam(optarg);
+		if (list_pw == NULL) {
+		    sudo_warnx(U_("unknown user %s"), optarg);
+		    usage();
+		}
+		FALLTHROUGH;
+	    case 'l':
+		if (sudo_mode != MODE_RUN) {
+		    sudo_warnx(
+			"only one of the -l or -v flags may be specified");
+		    usage();
+		}
+		sudo_mode = MODE_LIST;
+		pwflag = I_LISTPW;
+		orig_cmnd = "list";
+		break;
 	    case 'p':
 		pwfile = optarg;
 		break;
@@ -195,6 +213,16 @@ main(int argc, char *argv[])
 		runas_user = optarg;
 		SET(sudo_user.flags, RUNAS_USER_SPECIFIED);
 		break;
+	    case 'v':
+		if (sudo_mode != MODE_RUN) {
+		    sudo_warnx(
+			"only one of the -l or -v flags may be specified");
+		    usage();
+		}
+		sudo_mode = MODE_VALIDATE;
+		pwflag = I_VERIFYPW;
+		orig_cmnd = "validate";
+		break;
 	    default:
 		usage();
 		/* NOTREACHED */
@@ -217,15 +245,23 @@ main(int argc, char *argv[])
     }
 
     if (argc < 2) {
-	if (!dflag)
+	/* No command or user specified. */
+	if (dflag) {
+	    orig_cmnd = "true";
+	} else if (pwflag == 0) {
 	    usage();
+	}
 	user_name = argc ? *argv++ : (char *)"root";
-	orig_cmnd = "true";
 	argc = 0;
     } else {
+	if (argc > 2 && sudo_mode == MODE_LIST)
+	    sudo_mode = MODE_CHECK;
 	user_name = *argv++;
-	orig_cmnd = *argv++;
-	argc -= 2;
+	argc--;
+	if (orig_cmnd == NULL) {
+	    orig_cmnd = *argv++;
+	    argc--;
+	}
     }
     user_cmnd = strdup(orig_cmnd);
     if (user_cmnd == NULL)
@@ -238,6 +274,8 @@ main(int argc, char *argv[])
 
     if ((sudo_user.pw = sudo_getpwnam(user_name)) == NULL)
 	sudo_fatalx(U_("unknown user %s"), user_name);
+    user_uid = sudo_user.pw->pw_uid;
+    user_gid = sudo_user.pw->pw_gid;
 
     if (user_host == NULL) {
 	if ((user_host = sudo_gethostname()) == NULL)
@@ -348,7 +386,7 @@ main(int argc, char *argv[])
 
     printf("\nEntries for user %s:\n", user_name);
     validated = sudoers_lookup(&snl, sudo_user.pw, now, &callbacks, &status,
-	false);
+	pwflag);
 
     /* Validate user-specified chroot or cwd (if any) and runas user shell. */
     if (ISSET(validated, VALIDATE_SUCCESS)) {
@@ -730,6 +768,6 @@ testsudoers_error(const char *restrict buf)
 sudo_noreturn static void
 usage(void)
 {
-    (void) fprintf(stderr, "usage: %s [-dt] [-G sudoers_gid] [-g group] [-h host] [-i input_format] [-P grfile] [-p pwfile] [-U sudoers_uid] [-u user] <user> <command> [args]\n", getprogname());
+    (void) fprintf(stderr, "usage: %s [-dltv] [-G sudoers_gid] [-g group] [-h host] [-i input_format] [-L list_user] [-P grfile] [-p pwfile] [-U sudoers_uid] [-u user] <user> <command> [args]\n", getprogname());
     exit(EXIT_FAILURE);
 }
