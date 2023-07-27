@@ -1069,6 +1069,7 @@ exec_pty(struct command_details *details,
 {
     int io_pipe[3][2] = { { -1, -1 }, { -1, -1 }, { -1, -1 } };
     bool interpose[3] = { false, false, false };
+    struct stat sb, tty_sbuf, *tty_sb = NULL;
     int sv[2], intercept_sv[2] = { -1, -1 };
     struct exec_closure ec = { 0 };
     struct plugin_container *plugin;
@@ -1076,7 +1077,6 @@ exec_pty(struct command_details *details,
     bool cmnd_foreground;
     sigset_t set, oset;
     struct sigaction sa;
-    struct stat sb;
     pid_t ppgrp, sudo_pid;
     debug_decl(exec_pty, SUDO_DEBUG_EXEC);
 
@@ -1174,15 +1174,18 @@ exec_pty(struct command_details *details,
     }
 
     /*
-     * If stdin, stdout or stderr is not a tty and logging is enabled,
-     * use a pipe to interpose ourselves instead of using the pty fd.
-     * We always use a pipe for stdin when in background mode.
+     * If stdin, stdout or stderr is not the user's tty and logging is
+     * enabled, use a pipe to interpose ourselves instead of using the
+     * pty fd.  We always use a pipe for stdin when in background mode.
      */
-    if (!sudo_isatty(STDIN_FILENO, &sb)) {
+    if (user_details->tty != NULL && stat(user_details->tty, &tty_sbuf) != -1)
+	tty_sb = &tty_sbuf;
+
+    if (!fd_matches_tty(STDIN_FILENO, tty_sb, &sb)) {
 	if (!interpose[STDIN_FILENO]) {
 	    /* Not logging stdin, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stdin not a tty, not logging");
+		"stdin not user's tty, not logging");
 	    if (S_ISFIFO(sb.st_mode))
 		SET(details->flags, CD_EXEC_BG);
 	    io_fds[SFD_STDIN] = dup(STDIN_FILENO);
@@ -1190,7 +1193,7 @@ exec_pty(struct command_details *details,
 		sudo_fatal("dup");
 	} else {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stdin not a tty, creating a pipe");
+		"stdin not user's tty, creating a pipe");
 	    SET(details->flags, CD_EXEC_BG);
 	    if (pipe2(io_pipe[STDIN_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
@@ -1225,11 +1228,11 @@ exec_pty(struct command_details *details,
 	    close(io_pipe[STDIN_FILENO][1]);
 	    io_pipe[STDIN_FILENO][1] = -1;
     }
-    if (!sudo_isatty(STDOUT_FILENO, &sb)) {
+    if (!fd_matches_tty(STDOUT_FILENO, tty_sb, &sb)) {
 	if (!interpose[STDOUT_FILENO]) {
 	    /* Not logging stdout, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stdout not a tty, not logging");
+		"stdout not user's tty, not logging");
 	    if (S_ISFIFO(sb.st_mode)) {
 		SET(details->flags, CD_EXEC_BG);
 		term_raw_flags = SUDO_TERM_OFLAG;
@@ -1239,7 +1242,7 @@ exec_pty(struct command_details *details,
 		sudo_fatal("dup");
 	} else {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stdout not a tty, creating a pipe");
+		"stdout not user's tty, creating a pipe");
 	    SET(details->flags, CD_EXEC_BG);
 	    term_raw_flags = SUDO_TERM_OFLAG;
 	    if (pipe2(io_pipe[STDOUT_FILENO], O_CLOEXEC) != 0)
@@ -1249,17 +1252,17 @@ exec_pty(struct command_details *details,
 	    io_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
 	}
     }
-    if (!sudo_isatty(STDERR_FILENO, &sb)) {
+    if (!fd_matches_tty(STDERR_FILENO, tty_sb, &sb)) {
 	if (!interpose[STDERR_FILENO]) {
 	    /* Not logging stderr, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stderr not a tty, not logging");
+		"stderr not user's tty, not logging");
 	    io_fds[SFD_STDERR] = dup(STDERR_FILENO);
 	    if (io_fds[SFD_STDERR] == -1)
 		sudo_fatal("dup");
 	} else {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stderr not a tty, creating a pipe");
+		"stderr /dev/tty, creating a pipe");
 	    if (pipe2(io_pipe[STDERR_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
@@ -1319,10 +1322,10 @@ exec_pty(struct command_details *details,
 	sudo_fatal_callback_deregister(pty_cleanup_hook);
 
 	/*                      
-	 * If stdin/stdout is not a tty, start command in the background
-	 * since it might be part of a pipeline that reads from /dev/tty.
-	 * In this case, we rely on the command receiving SIGTTOU or SIGTTIN
-	 * when it needs access to the controlling tty.
+	 * If stdin/stdout is not the user's tty, start the command in
+	 * the background since it might be part of a pipeline that reads
+	 * from /dev/tty.  In this case, we rely on the command receiving
+	 * SIGTTOU or SIGTTIN when it needs access to the controlling tty.
 	 */                                                              
 	exec_monitor(details, &oset, cmnd_foreground, sv[1], intercept_sv[1]);
 	cstat->type = CMD_ERRNO;

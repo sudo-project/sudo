@@ -467,12 +467,12 @@ write_callback(int fd, int what, void *v)
  * ourselves using a pipe.  Fills in io_pipe[][].
  */
 static void
-interpose_pipes(struct exec_closure *ec, int io_pipe[3][2])
+interpose_pipes(struct exec_closure *ec, const char *tty, int io_pipe[3][2])
 {
     bool interpose[3] = { false, false, false };
+    struct stat sb, tty_sbuf, *tty_sb = NULL;
     struct plugin_container *plugin;
     bool want_winch = false;
-    struct stat sb;
     debug_decl(interpose_pipes, SUDO_DEBUG_EXEC);
 
     /*
@@ -493,13 +493,16 @@ interpose_pipes(struct exec_closure *ec, int io_pipe[3][2])
     }
 
     /*
-     * If stdin, stdout or stderr is not a tty and logging is enabled,
-     * use a pipe to interpose ourselves.
+     * If stdin, stdout or stderr is not the user's tty and logging is
+     * enabled, use a pipe to interpose ourselves.
      */
+    if (tty != NULL && stat(tty, &tty_sbuf) != -1)
+	tty_sb = &tty_sbuf;
+
     if (interpose[STDIN_FILENO]) {
-	if (!sudo_isatty(STDIN_FILENO, &sb)) {
+	if (!fd_matches_tty(STDIN_FILENO, tty_sb, &sb)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stdin not a tty, creating a pipe");
+		"stdin not user's tty, creating a pipe");
 	    if (pipe2(io_pipe[STDIN_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
@@ -507,9 +510,9 @@ interpose_pipes(struct exec_closure *ec, int io_pipe[3][2])
 	}
     }
     if (interpose[STDOUT_FILENO]) {
-	if (!sudo_isatty(STDOUT_FILENO, &sb)) {
+	if (!fd_matches_tty(STDOUT_FILENO, tty_sb, &sb)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stdout not a tty, creating a pipe");
+		"stdout not user's tty, creating a pipe");
 	    if (pipe2(io_pipe[STDOUT_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
@@ -517,9 +520,9 @@ interpose_pipes(struct exec_closure *ec, int io_pipe[3][2])
 	}
     }
     if (interpose[STDERR_FILENO]) {
-	if (!sudo_isatty(STDERR_FILENO, &sb)) {
+	if (!fd_matches_tty(STDERR_FILENO, tty_sb, &sb)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stderr not a tty, creating a pipe");
+		"stderr not user's tty, creating a pipe");
 	    if (pipe2(io_pipe[STDERR_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
@@ -571,7 +574,7 @@ exec_nopty(struct command_details *details,
     }
 
     /* Interpose std{in,out,err} with pipes if logging I/O. */
-    interpose_pipes(&ec, io_pipe);
+    interpose_pipes(&ec, user_details->tty, io_pipe);
 
     /*
      * Block signals until we have our handlers setup in the parent so

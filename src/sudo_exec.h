@@ -174,10 +174,12 @@ union sudo_token_un {
 #endif /* _PATH_SUDO_INTERCEPT && __linux__ */
 
 /* exec.c */
+struct stat;
 void exec_cmnd(struct command_details *details, sigset_t *mask, int intercept_fd, int errfd);
 void terminate_command(pid_t pid, bool use_pgrp);
 bool sudo_terminated(struct command_status *cstat);
 void free_exec_closure(struct exec_closure *ec);
+bool fd_matches_tty(int fd, struct stat *tty_sb, struct stat *fd_sb);
 
 /* exec_common.c */
 int sudo_execve(int fd, const char *path, char *const argv[], char *envp[], int intercept_fd, unsigned int flags);

@@ -377,6 +377,28 @@ sudo_needs_pty(const struct command_details *details)
 }
 
 /*
+ * Check whether the specified fd matches the device file that
+ * corresponds to tty_sb.  If tty_sb is NULL, just check whether
+ * fd is a tty.  Always fills in fd_sb (zeroed on error).
+ * Returns true on match, else false.
+ */
+bool
+fd_matches_tty(int fd, struct stat *tty_sb, struct stat *fd_sb)
+{
+    bool ret;
+    debug_decl(fd_is_user_tty, SUDO_DEBUG_EXEC);
+
+    if (fstat(fd, fd_sb) == -1 || !S_ISCHR(fd_sb->st_mode)) {
+	 /* Always initialize fd_sb. */
+	memset(fd_sb, 0, sizeof(*fd_sb));
+	debug_return_bool(false);
+    }
+
+    /* Compare with tty_sb if available, else just check that fd is a tty. */
+    debug_return_bool(tty_sb ? tty_sb->st_rdev == fd_sb->st_rdev : isatty(fd));
+}
+
+/*
  * If we are not running the command in a pty, we were not invoked as
  * sudoedit, there is no command timeout and there is no close function,
  * sudo can exec the command directly (and not wait).
