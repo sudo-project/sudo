@@ -75,6 +75,7 @@ struct sudoersfile {
     char *opath;	/* original path we opened */
     char *dpath;	/* destination path to write to */
     char *tpath;	/* editor temporary file path */
+    bool created;	/* true if visudo created a new sudoers file */
     bool modified;	/* true if the user modified the file */
     bool doedit;	/* true when editing (not just checking) sudoers */
     int fd;		/* fd of the original file (if it exists) */
@@ -601,10 +602,21 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
     /*
      * If modified in this edit session, mark as modified.
      */
-    if (modified)
+    if (modified) {
 	sp->modified = modified;
-    else
+    } else {
+	/*
+	 * If visudo created a new, zero-length file that the user did
+	 * not modify, remove it as long as it is the main sudoers file.
+	 * We must retain new files created via a @include directive
+	 * to avoid a parse error, even if they are empty.
+	 */
+	if (sp->created && orig_size == 0) {
+	    if (sp == TAILQ_FIRST(&sudoerslist))
+		unlink(sp->dpath);
+	}
 	sudo_warnx(U_("%s unchanged"), sp->tpath);
+    }
 
     ret = true;
 done:
@@ -1097,6 +1109,7 @@ new_sudoers(const char *path, bool doedit)
 	if (!checkonly) {
 	    /* No sudoers file, create the destination file for editing. */
 	    fd = open(entry->dpath, O_RDWR|O_CREAT, sudoers_file_mode());
+	    entry->created = true;
 	}
 	if (fd == -1) {
 	    sudo_warn("%s", entry->dpath);
