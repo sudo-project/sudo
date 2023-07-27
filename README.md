@@ -79,23 +79,27 @@ fairly low traffic lists so the digest versions are not a significant win.
 Mailing list archives are also available.  See the mailing list web sites
 for the appropriate links.
 
-## Web page
+## Sudo web page
 
-There is a sudo web page at https://www.sudo.ws/ that contains an overview
-of sudo, documentation, downloads, a bug tracker, the sudo blog, information
-about beta versions and other useful info.
+There is a sudo web page at https://www.sudo.ws/ that contains
+documentation, downloads, a bug tracker, the source repo, the sudo
+blog, information about beta versions and other useful info.
 
-## Bug reports
+## Filing bug reports/issues
 
-If you have found what you believe to be a bug, you can file a bug
-report in the sudo bug database, at https://bugzilla.sudo.ws/.
-Alternately, you can file a GitHub issue if that is easier for you
-at https://github.com/sudo-project/sudo/issues/.
+If you believe you have found a bug, you can either file a bug
+report in the sudo bug database, https://bugzilla.sudo.ws/, or open
+a [GitHub issue](https://github.com/sudo-project/sudo/issues),
+whichever you find easier.  If you would prefer to use email,
+messages may be sent to the [sudo-workers@sudo.ws mailing
+list](https://www.sudo.ws/mailman/listinfo/sudo-workers) (public)
+or to sudo@sudo.ws (private).
 
-See [docs/SECURITY.md](docs/SECURITY.md) for our security policy
-and how to report security issues.
+For sudo's security policy and how to report security issues, see
+[docs/SECURITY.md](docs/SECURITY.md).
 
-Check [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) *before*
-submitting a bug report.  When reporting bugs, be sure to include
-the version of sudo you are using as well as the platform you are
-running it on.
+Please check [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
+*before* submitting a bug report.  When reporting bugs, be sure to
+include the version of sudo you are using, the operating system
+and/or distro that is affected, and, if possible, step-by-step
+instructions to reproduce the problem.
