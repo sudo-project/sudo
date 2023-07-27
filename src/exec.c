@@ -385,7 +385,6 @@ sudo_needs_pty(const struct command_details *details)
 bool
 fd_matches_tty(int fd, struct stat *tty_sb, struct stat *fd_sb)
 {
-    bool ret;
     debug_decl(fd_is_user_tty, SUDO_DEBUG_EXEC);
 
     if (fstat(fd, fd_sb) == -1 || !S_ISCHR(fd_sb->st_mode)) {
