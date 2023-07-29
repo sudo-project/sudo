@@ -230,8 +230,8 @@ sudo_interposer_init(void)
 	debug_return;
     initialized = true;
 
-    /* Read debug section of sudo.conf and init debugging. */
-    if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) != -1) {
+    /* Read debug and path section of sudo.conf and init debugging. */
+    if (sudo_conf_read(NULL, SUDO_CONF_DEBUG|SUDO_CONF_PATHS) != -1) {
 	sudo_debug_register("sudo_intercept.so", NULL, NULL,
 	    sudo_conf_debug_files("sudo_intercept.so"), INTERCEPT_FD_MIN);
     }
