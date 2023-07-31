@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.Dd January 16, 2023
+.Dd July 29, 2023
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -192,7 +192,7 @@ versions, if
 .Nm sudoers
 is configured as the security policy, it will be used as an audit
 plugin as well.
-This guarantees that the logging behavior will be consistnet with that of
+This guarantees that the logging behavior will be consistent with that of
 .Nm sudo
 versions 1.9.0 and below.
 .Pp
@@ -264,7 +264,7 @@ functions, for example
 .Bx ,
 macOS and Solaris.
 .It intercept
-The fully-qualified path to a shared library containing a wrappers for the
+The path to a shared library containing a wrappers for the
 .Xr execve 2 ,
 .Xr execl 3 ,
 .Xr execle 3 ,
@@ -278,14 +278,28 @@ library functions that intercepts attempts to run further commands and
 performs a policy check before allowing them to be executed.
 This is used to implement the
 .Em intercept
+and
+.Em log_subcmds
 functionality on systems that support
 .Ev LD_PRELOAD
-or its equivalent.
+or the equivalent.
+.Pp
+The
+.Em intercept
+path may be set to either a single fully-qualified path, or, for systems
+that support separate
+.Dv LD_PRELOAD
+environment variables for 32-bit and 64-bit executables, it may optionally
+be set to two fully-qualified paths separated by a colon
+.Pq Ql :\& .
+The first path should be the 32-bit version and the second the
+64-bit version.
+This two-path form is currently only supported on AIX and Solaris
+systems.
 The default value is
 .Pa @intercept_file@ .
 .It noexec
-The fully-qualified path to a shared library containing wrappers
-for the
+The path to a shared library containing wrappers for the
 .Xr execve 2 ,
 .Xr execl 3 ,
 .Xr execle 3 ,
@@ -308,7 +322,20 @@ This is used to implement the
 .Em noexec
 functionality on systems that support
 .Ev LD_PRELOAD
-or its equivalent.
+or the equivalent.
+.Pp
+The
+.Em noexec
+path may be set to either a single fully-qualified path, or, for systems
+that support separate
+.Dv LD_PRELOAD
+environment variables for 32-bit and 64-bit executables, it may optionally
+be set to two fully-qualified paths separated by a colon
+.Pq Ql :\& .
+The first path should be the 32-bit version and the second the
+64-bit version.
+This two-path form is currently only supported on AIX and Solaris
+systems.
 The default value is
 .Pa @noexec_file@ .
 .It plugin_dir

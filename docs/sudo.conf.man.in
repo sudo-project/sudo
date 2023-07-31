@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "July 29, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -210,7 +210,7 @@ versions, if
 \fBsudoers\fR
 is configured as the security policy, it will be used as an audit
 plugin as well.
-This guarantees that the logging behavior will be consistnet with that of
+This guarantees that the logging behavior will be consistent with that of
 \fBsudo\fR
 versions 1.9.0 and below.
 .PP
@@ -287,7 +287,7 @@ BSD,
 macOS and Solaris.
 .TP 6n
 intercept
-The fully-qualified path to a shared library containing a wrappers for the
+The path to a shared library containing a wrappers for the
 execve(2),
 execl(3),
 execle(3),
@@ -301,15 +301,29 @@ library functions that intercepts attempts to run further commands and
 performs a policy check before allowing them to be executed.
 This is used to implement the
 \fIintercept\fR
+and
+\fIlog_subcmds\fR
 functionality on systems that support
 \fRLD_PRELOAD\fR
-or its equivalent.
+or the equivalent.
+.sp
+The
+\fIintercept\fR
+path may be set to either a single fully-qualified path, or, for systems
+that support separate
+\fRLD_PRELOAD\fR
+environment variables for 32-bit and 64-bit executables, it may optionally
+be set to two fully-qualified paths separated by a colon
+(\(oq:\&\(cq).
+The first path should be the 32-bit version and the second the
+64-bit version.
+This two-path form is currently only supported on AIX and Solaris
+systems.
 The default value is
 \fI@intercept_file@\fR.
 .TP 6n
 noexec
-The fully-qualified path to a shared library containing wrappers
-for the
+The path to a shared library containing wrappers for the
 execve(2),
 execl(3),
 execle(3),
@@ -332,7 +346,20 @@ This is used to implement the
 \fInoexec\fR
 functionality on systems that support
 \fRLD_PRELOAD\fR
-or its equivalent.
+or the equivalent.
+.sp
+The
+\fInoexec\fR
+path may be set to either a single fully-qualified path, or, for systems
+that support separate
+\fRLD_PRELOAD\fR
+environment variables for 32-bit and 64-bit executables, it may optionally
+be set to two fully-qualified paths separated by a colon
+(\(oq:\&\(cq).
+The first path should be the 32-bit version and the second the
+64-bit version.
+This two-path form is currently only supported on AIX and Solaris
+systems.
 The default value is
 \fI@noexec_file@\fR.
 .TP 6n

@@ -173,9 +173,11 @@ oflow:
  * Add a DSO file to LD_PRELOAD or the system equivalent.
  */
 static char **
-sudo_preload_dso_alloc(char *const envp[], const char *dso_file,
-    int intercept_fd, sudo_alloc_fn_t alloc_fn, sudo_free_fn_t free_fn)
+sudo_preload_dso_alloc(char *const envp[], const char *preload_var,
+    const char *dso_file, int intercept_fd,
+    sudo_alloc_fn_t alloc_fn, sudo_free_fn_t free_fn)
 {
+    const size_t preload_var_len = strlen(preload_var);
     char *preload = NULL;
     char **nep, **nenvp = NULL;
     char *const *ep;
@@ -232,12 +234,13 @@ sudo_preload_dso_alloc(char *const envp[], const char *dso_file,
 	goto oom;
 
     /*
-     * Shallow copy envp, with special handling for RTLD_PRELOAD_VAR,
+     * Shallow copy envp, with special handling for preload_var,
      * RTLD_PRELOAD_ENABLE_VAR and SUDO_INTERCEPT_FD.
      */
     for (ep = envp, nep = nenvp; *ep != NULL; ep++) {
-	if (strncmp(*ep, RTLD_PRELOAD_VAR "=", sizeof(RTLD_PRELOAD_VAR)) == 0) {
-	    const char *cp = *ep + sizeof(RTLD_PRELOAD_VAR);
+	if (strncmp(*ep, preload_var, preload_var_len) == 0 &&
+		(*ep)[preload_var_len] == '=') {
+	    const char *cp = *ep + preload_var_len + 1;
 	    const size_t dso_len = strlen(dso_file);
 
 	    /* Skip duplicates. */
@@ -291,13 +294,13 @@ copy:
     if (!dso_present) {
 	if (preload_ptr == NULL) {
 # ifdef RTLD_PRELOAD_DEFAULT
-	    preload = fmtstr(alloc_fn, free_fn, "%s=%s%c%s", RTLD_PRELOAD_VAR,
+	    preload = fmtstr(alloc_fn, free_fn, "%s=%s%c%s", preload_var,
 		dso_file, RTLD_PRELOAD_DELIM, RTLD_PRELOAD_DEFAULT);
 	    if (preload == NULL) {
 		goto oom;
 	    }
 # else
-	    preload = fmtstr(alloc_fn, free_fn, "%s=%s", RTLD_PRELOAD_VAR,
+	    preload = fmtstr(alloc_fn, free_fn, "%s=%s", preload_var,
 		dso_file);
 	    if (preload == NULL) {
 		goto oom;
@@ -305,8 +308,8 @@ copy:
 # endif
 	    *nep++ = preload;
 	} else {
-	    const char *old_val = *preload_ptr + sizeof(RTLD_PRELOAD_VAR);
-	    preload = fmtstr(alloc_fn, free_fn, "%s=%s%c%s", RTLD_PRELOAD_VAR,
+	    const char *old_val = *preload_ptr + preload_var_len + 1;
+	    preload = fmtstr(alloc_fn, free_fn, "%s=%s%c%s", preload_var,
 		dso_file, RTLD_PRELOAD_DELIM, old_val);
 	    if (preload == NULL) {
 		goto oom;
@@ -350,11 +353,59 @@ oom:
     debug_return_ptr(NULL);
 }
 
+static char **
+sudo_preload_dso_path(char *const envp[], const char *dso_file,
+    int intercept_fd, sudo_alloc_fn_t alloc_fn, sudo_free_fn_t free_fn)
+{
+    char **ret = NULL;
+    const char *ep;
+    debug_decl(sudo_preload_dso_path, SUDO_DEBUG_UTIL);
+
+    ep = strchr(dso_file, ':');
+    if (ep == NULL) {
+	/* Use default LD_PRELOAD */
+	return sudo_preload_dso_alloc(envp, RTLD_PRELOAD_VAR, dso_file,
+	    intercept_fd, alloc_fn, free_fn);
+    }
+
+    /* Add 32-bit LD_PRELOAD if present. */
+    if (ep != dso_file) {
+#ifdef RTLD_PRELOAD_VAR_32
+	const size_t len = (size_t)(ep - dso_file);
+	char name[PATH_MAX];
+
+	if (len >= sizeof(name)) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"%.*s: path too long", (int)len, dso_file);
+	} else {
+	    memcpy(name, dso_file, len);
+	    name[len] = '\0';
+	    ret = sudo_preload_dso_alloc(envp, RTLD_PRELOAD_VAR_32, name,
+		intercept_fd, alloc_fn, free_fn);
+	    envp = ret;
+	}
+#endif /* RTLD_PRELOAD_VAR_32 */
+	dso_file = ep + 1;
+    }
+
+#ifdef RTLD_PRELOAD_VAR_64
+    /* Add 64-bit LD_PRELOAD if present. */
+    if (*dso_file != '\0') {
+	char **new_envp = sudo_preload_dso_alloc(envp, RTLD_PRELOAD_VAR_64,
+	    dso_file, intercept_fd, alloc_fn, free_fn);
+	free_fn(ret);
+	ret = new_envp;
+    }
+#endif /* RTLD_PRELOAD_VAR_64 */
+
+    debug_return_ptr(ret);
+}
+
 char **
 sudo_preload_dso_mmap(char *const envp[], const char *dso_file,
     int intercept_fd)
 {
-    return sudo_preload_dso_alloc(envp, dso_file, intercept_fd,
+    return sudo_preload_dso_path(envp, dso_file, intercept_fd,
 	sudo_mmap_allocarray_v1, sudo_mmap_free_v1);
 }
 
@@ -362,7 +413,7 @@ char **
 sudo_preload_dso(char *const envp[], const char *dso_file,
     int intercept_fd)
 {
-    return sudo_preload_dso_alloc(envp, dso_file, intercept_fd,
+    return sudo_preload_dso_path(envp, dso_file, intercept_fd,
 	sudo_allocarray, free);
 }
 #endif /* RTLD_PRELOAD_VAR */

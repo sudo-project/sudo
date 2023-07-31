@@ -1257,6 +1257,14 @@
 /* The environment variable that controls preloading of dynamic objects. */
 #undef RTLD_PRELOAD_VAR
 
+/* The environment variable that controls preloading of 32-bit dynamic
+   objects. */
+#undef RTLD_PRELOAD_VAR_32
+
+/* The environment variable that controls preloading of 64-bit dynamic
+   objects. */
+#undef RTLD_PRELOAD_VAR_64
+
 /* The user sudo should run commands as by default. */
 #undef RUNAS_DEFAULT
 
@@ -1285,6 +1293,9 @@
 
 /* The size of 'id_t', as computed by sizeof. */
 #undef SIZEOF_ID_T
+
+/* The size of 'long', as computed by sizeof. */
+#undef SIZEOF_LONG
 
 /* The size of 'long long', as computed by sizeof. */
 #undef SIZEOF_LONG_LONG

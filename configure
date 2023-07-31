@@ -3749,11 +3749,6 @@ shadow_funcs=
 shadow_libs=
 OS_INIT=os_init_common
 
-RTLD_PRELOAD_VAR="LD_PRELOAD"
-RTLD_PRELOAD_ENABLE_VAR=
-RTLD_PRELOAD_DELIM=":"
-RTLD_PRELOAD_DEFAULT=
-
 
 
 
@@ -17314,7 +17309,7 @@ esac
 fi
 
 INTERCEPTFILE="sudo_intercept.so"
-INTERCEPTDIR="`echo $intercept_file|sed -e 's:^${\([^}]*\)}:$(\1):' -e 's:^\(.*\)/[^/]*:\1:'`"
+INTERCEPTDIR="`echo $intercept_file|sed -e 's:^${\([^}]*\)}:$(\1):' -e 's:^\([^:]*\)/[^/].*$:\1:'`"
 
 
 # Check whether --with-noexec was given.
@@ -17332,7 +17327,7 @@ esac
 fi
 
 NOEXECFILE="sudo_noexec.so"
-NOEXECDIR="`echo $noexec_file|sed -e 's:^${\([^}]*\)}:$(\1):' -e 's:^\(.*\)/[^/]*:\1:'`"
+NOEXECDIR="`echo $noexec_file|sed -e 's:^${\([^}]*\)}:$(\1):' -e 's:^\([^:]*\)/[^/].*$:\1:'`"
 
 # Extract the first word of "sha1sum", so it can be a program name with args.
 set dummy sha1sum; ac_word=$2
@@ -17590,9 +17585,6 @@ case "$host" in
 		printf "%s\n" "#define PAM_SUN_CODEBASE 1" >>confdefs.h
 
 
-		# LD_PRELOAD is space-delimited
-		RTLD_PRELOAD_DELIM=" "
-
 		# illumos has a broken fmemopen(3)
 		if test X"`uname -o 2>/dev/null`" = X"illumos"; then
 		    : ${ac_cv_func_fmemopen='no'}
@@ -17662,13 +17654,6 @@ then :
 		    with_netsvc="/etc/netsvc.conf"
 
 fi
-
-		# LDR_PRELOAD is only supported in AIX 5.3 and later
-		case "$OSREV" in
-		    [1-4].*)	with_noexec=no;;
-		    5.[1-2]*)	with_noexec=no;;
-		    *)		RTLD_PRELOAD_VAR="LDR_PRELOAD";;
-		esac
 
 		# cfmakeraw is broken on AIX (and is not documented)
 		: ${ac_cv_func_cfmakeraw='no'}
@@ -17917,9 +17902,6 @@ fi
 		shadow_funcs="getprpwnam dispcrypt"
 		shadow_libs="-lsecurity"
 
-		# ":DEFAULT" must be appended to _RLD_LIST
-		RTLD_PRELOAD_VAR="_RLD_LIST"
-		RTLD_PRELOAD_DEFAULT="DEFAULT"
 		: ${mansectsu='8'}
 		: ${mansectform='4'}
 		: ${mansectmisc='5'}
@@ -18176,9 +18158,7 @@ printf "%s\n" "yes, fixing locally" >&6; }
 esac
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-		# ":DEFAULT" must be appended to _RLD_LIST
-		RTLD_PRELOAD_VAR="_RLD_LIST"
-		RTLD_PRELOAD_DEFAULT="DEFAULT"
+
 		: ${mansectsu='8'}
 		: ${mansectform='4'}
 		: ${mansectmisc='5'}
@@ -18256,9 +18236,7 @@ fi
 
 
 fi
-		# ":DEFAULT" must be appended to _RLD_LIST
-		RTLD_PRELOAD_VAR="_RLD_LIST"
-		RTLD_PRELOAD_DEFAULT="DEFAULT"
+
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		: ${mansectmisc='5'}
@@ -18566,21 +18544,6 @@ fi
 		: ${with_logincap='yes'}
 		# Darwin has a broken poll(), Apple radar 3710161
 		: ${enable_poll='no'}
-		# Darwin 8 and above can interpose library symbols cleanly
-		if test $OSMAJOR -ge 8
-then :
-
-		    printf "%s\n" "#define HAVE___INTERPOSE 1" >>confdefs.h
-
-		    dlyld_interpose=yes
-
-else case e in #(
-  e)
-		    RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
-		 ;;
-esac
-fi
-		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
 
 		# Build sudo_noexec.so as a shared library, not a module.
 		# On Darwin, modules and shared libraries are incompatible.
@@ -18742,8 +18705,6 @@ fi
     *-*-nextstep*)
 		# lockf() is broken on the NeXT
 		ac_cv_func_lockf=no
-		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
-		RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
 		;;
     *-*-*sysv4*)
 		: ${mansectsu='1m'}
@@ -18778,50 +18739,6 @@ fi
 		: ${mansectmisc='5'}
 		;;
 esac
-
-if test X"$enable_intercept" = X"no"
-then :
-
-    intercept_file=disabled
-
-fi
-if test X"$with_noexec" = X"no"
-then :
-
-    noexec_file=disabled
-
-fi
-if test X"${intercept_file} ${noexec_file}" != X"disabled disabled"
-then :
-
-    cat >>confdefs.h <<EOF
-#define RTLD_PRELOAD_VAR "$RTLD_PRELOAD_VAR"
-EOF
-
-    cat >>confdefs.h <<EOF
-#define RTLD_PRELOAD_DELIM '$RTLD_PRELOAD_DELIM'
-EOF
-
-    if test -n "$RTLD_PRELOAD_DEFAULT"
-then :
-
-	cat >>confdefs.h <<EOF
-#define RTLD_PRELOAD_DEFAULT "$RTLD_PRELOAD_DEFAULT"
-EOF
-
-
-fi
-    if test -n "$RTLD_PRELOAD_ENABLE_VAR"
-then :
-
-	cat >>confdefs.h <<EOF
-#define RTLD_PRELOAD_ENABLE_VAR "$RTLD_PRELOAD_ENABLE_VAR"
-EOF
-
-
-fi
-
-fi
 
 AUTH_REG=${AUTH_REG# }
 AUTH_EXCL=${AUTH_EXCL# }
@@ -21013,35 +20930,35 @@ fi
 # version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
 # declarations like 'int a3[[(sizeof (unsigned char)) >= 0]];'.
 # This bug is HP SR number 8606223364.
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking size of id_t" >&5
-printf %s "checking size of id_t... " >&6; }
-if test ${ac_cv_sizeof_id_t+y}
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking size of long" >&5
+printf %s "checking size of long... " >&6; }
+if test ${ac_cv_sizeof_long+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
-  e) if ac_fn_c_compute_int "$LINENO" "(long int) (sizeof (id_t))" "ac_cv_sizeof_id_t"        "$ac_includes_default"
+  e) if ac_fn_c_compute_int "$LINENO" "(long int) (sizeof (long))" "ac_cv_sizeof_long"        "$ac_includes_default"
 then :
 
 else case e in #(
-  e) if test "$ac_cv_type_id_t" = yes; then
+  e) if test "$ac_cv_type_long" = yes; then
      { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: error: in '$ac_pwd':" >&5
 printf "%s\n" "$as_me: error: in '$ac_pwd':" >&2;}
-as_fn_error 77 "cannot compute sizeof (id_t)
+as_fn_error 77 "cannot compute sizeof (long)
 See 'config.log' for more details" "$LINENO" 5; }
    else
-     ac_cv_sizeof_id_t=0
+     ac_cv_sizeof_long=0
    fi ;;
 esac
 fi
  ;;
 esac
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sizeof_id_t" >&5
-printf "%s\n" "$ac_cv_sizeof_id_t" >&6; }
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sizeof_long" >&5
+printf "%s\n" "$ac_cv_sizeof_long" >&6; }
 
 
 
-printf "%s\n" "#define SIZEOF_ID_T $ac_cv_sizeof_id_t" >>confdefs.h
+printf "%s\n" "#define SIZEOF_LONG $ac_cv_sizeof_long" >>confdefs.h
 
 
 # The cast to long int works around a bug in the HP C Compiler
@@ -21077,6 +20994,41 @@ printf "%s\n" "$ac_cv_sizeof_long_long" >&6; }
 
 
 printf "%s\n" "#define SIZEOF_LONG_LONG $ac_cv_sizeof_long_long" >>confdefs.h
+
+
+# The cast to long int works around a bug in the HP C Compiler
+# version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
+# declarations like 'int a3[[(sizeof (unsigned char)) >= 0]];'.
+# This bug is HP SR number 8606223364.
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking size of id_t" >&5
+printf %s "checking size of id_t... " >&6; }
+if test ${ac_cv_sizeof_id_t+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) if ac_fn_c_compute_int "$LINENO" "(long int) (sizeof (id_t))" "ac_cv_sizeof_id_t"        "$ac_includes_default"
+then :
+
+else case e in #(
+  e) if test "$ac_cv_type_id_t" = yes; then
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: error: in '$ac_pwd':" >&5
+printf "%s\n" "$as_me: error: in '$ac_pwd':" >&2;}
+as_fn_error 77 "cannot compute sizeof (id_t)
+See 'config.log' for more details" "$LINENO" 5; }
+   else
+     ac_cv_sizeof_id_t=0
+   fi ;;
+esac
+fi
+ ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sizeof_id_t" >&5
+printf "%s\n" "$ac_cv_sizeof_id_t" >&6; }
+
+
+
+printf "%s\n" "#define SIZEOF_ID_T $ac_cv_sizeof_id_t" >>confdefs.h
 
 
 # The cast to long int works around a bug in the HP C Compiler
@@ -21459,6 +21411,131 @@ fi
 
  ;;
 esac
+fi
+
+RTLD_PRELOAD_VAR="LD_PRELOAD"
+if test $ac_cv_sizeof_long -eq 4; then
+    RTLD_PRELOAD_VAR_32="LD_PRELOAD"
+else
+    RTLD_PRELOAD_VAR_64="LD_PRELOAD"
+fi
+RTLD_PRELOAD_ENABLE_VAR=
+RTLD_PRELOAD_DELIM=":"
+RTLD_PRELOAD_DEFAULT=
+
+case "$host" in
+    *-*-solaris2*)
+		# LD_PRELOAD is space-delimited
+		RTLD_PRELOAD_DELIM=" "
+		RTLD_PRELOAD_VAR_32="LD_PRELOAD_32"
+		RTLD_PRELOAD_VAR_64="LD_PRELOAD_64"
+		;;
+    *-*-aix*)
+		# LDR_PRELOAD and LDR_PRELOAD64 are only supported on
+		# AIX 5.3 and above.
+		case "$OSREV" in
+		    [1-4].*|5.[1-2]*)
+			with_noexec=no
+			;;
+		    *)
+			# AIX uses LDR_PRELOAD for 32-bit executables
+			# and LDR_PRELOAD64 for 64-bit executable.
+			RTLD_PRELOAD_VAR_32="LDR_PRELOAD"
+			RTLD_PRELOAD_VAR_64="LDR_PRELOAD64"
+			if test $ac_cv_sizeof_long -eq 4; then
+			    RTLD_PRELOAD_VAR="LDR_PRELOAD"
+			else
+			    RTLD_PRELOAD_VAR="LDR_PRELOAD64"
+			fi
+			;;
+		esac
+		;;
+    *-dec-osf*|*-*-hiuxmpp*|*-*-irix*)
+		# ":DEFAULT" must be appended to _RLD_LIST
+		RTLD_PRELOAD_VAR="_RLD_LIST"
+		RTLD_PRELOAD_DEFAULT="DEFAULT"
+		;;
+    *-*-darwin*)
+		# Darwin 8 and above can interpose library symbols cleanly
+		if test $OSMAJOR -ge 8
+then :
+
+		    printf "%s\n" "#define HAVE___INTERPOSE 1" >>confdefs.h
+
+		    dlyld_interpose=yes
+
+else case e in #(
+  e)
+		    RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
+		 ;;
+esac
+fi
+		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
+
+		# Build sudo_noexec.so as a shared library, not a module.
+		# On Darwin, modules and shared libraries are incompatible.
+		PRELOAD_MODULE=
+		;;
+    *-*-nextstep*)
+		RTLD_PRELOAD_VAR="DYLD_INSERT_LIBRARIES"
+		RTLD_PRELOAD_ENABLE_VAR="DYLD_FORCE_FLAT_NAMESPACE"
+		;;
+esac
+
+if test X"$enable_intercept" = X"no"
+then :
+
+    intercept_file=disabled
+
+fi
+if test X"$with_noexec" = X"no"
+then :
+
+    noexec_file=disabled
+
+fi
+if test X"${intercept_file} ${noexec_file}" != X"disabled disabled"
+then :
+
+    cat >>confdefs.h <<EOF
+#define RTLD_PRELOAD_VAR "$RTLD_PRELOAD_VAR"
+EOF
+
+    if test -n "$RTLD_PRELOAD_VAR_32"; then
+	cat >>confdefs.h <<EOF
+#define RTLD_PRELOAD_VAR_32 "$RTLD_PRELOAD_VAR_32"
+EOF
+
+    fi
+    if test -n "$RTLD_PRELOAD_VAR_64"; then
+	cat >>confdefs.h <<EOF
+#define RTLD_PRELOAD_VAR_64 "$RTLD_PRELOAD_VAR_64"
+EOF
+
+    fi
+    cat >>confdefs.h <<EOF
+#define RTLD_PRELOAD_DELIM '$RTLD_PRELOAD_DELIM'
+EOF
+
+    if test -n "$RTLD_PRELOAD_DEFAULT"
+then :
+
+	cat >>confdefs.h <<EOF
+#define RTLD_PRELOAD_DEFAULT "$RTLD_PRELOAD_DEFAULT"
+EOF
+
+
+fi
+    if test -n "$RTLD_PRELOAD_ENABLE_VAR"
+then :
+
+	cat >>confdefs.h <<EOF
+#define RTLD_PRELOAD_ENABLE_VAR "$RTLD_PRELOAD_ENABLE_VAR"
+EOF
+
+
+fi
+
 fi
 
 if test ${enable_python-'no'} = "yes"
@@ -38409,6 +38486,8 @@ printf "%s\n" "$as_me: warning: the $rundir/ts directory must be cleared at boot
 printf "%s\n" "$as_me:          You may need to create a startup item to do this." >&6;}
 
 fi
+
+
 
 
 
