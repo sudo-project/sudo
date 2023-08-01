@@ -709,6 +709,11 @@ Defaults are listed in brackets after the description.
         enables extra checks to make sure the environment does not
         become corrupted.
 
+    --enable-postinstall=PATH
+        Enable the use of a postinstall script that is run after
+        the "install" target but before packages as built as part
+        of the "package" target.
+
     --enable-warnings
         Enable compiler warnings when building sudo with gcc or clang.
 

@@ -848,6 +848,7 @@ SUDOERS_UID
 SUDOERS_MODE
 SHLIB_MODE
 SHLIB_ENABLE
+POSTINSTALL
 MANCOMPRESSEXT
 MANCOMPRESS
 MANDIRTYPE
@@ -1016,6 +1017,7 @@ enable_noargs_shell
 enable_shell_sets_home
 enable_path_info
 enable_env_debug
+enable_postinstall
 enable_zlib
 enable_env_reset
 enable_warnings
@@ -1726,6 +1728,7 @@ Optional Features:
                           Set $HOME to target user in shell mode
   --disable-path-info     Print 'command not allowed' not 'command not found'
   --enable-env-debug      Whether to enable environment debugging.
+  --enable-postinstall    Script to run after the install phase
   --enable-zlib[=PATH]    Whether to enable or disable zlib
   --enable-env-reset      Whether to enable environment resetting by default.
   --enable-warnings       Whether to enable compiler warnings
@@ -6609,6 +6612,21 @@ then :
     no)		;;
     *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --enable-env-debug: $enableval" >&5
 printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-env-debug: $enableval" >&2;}
+		;;
+  esac
+
+fi
+
+
+# Check whether --enable-postinstall was given.
+if test ${enable_postinstall+y}
+then :
+  enableval=$enable_postinstall;  case "$enableval" in
+    yes)	as_fn_error $? "must give --enable-postinstall an argument." "$LINENO" 5
+		;;
+    no)		as_fn_error $? "--enable-postinstall not supported." "$LINENO" 5
+		;;
+    *)		POSTINSTALL="$enableval"
 		;;
   esac
 

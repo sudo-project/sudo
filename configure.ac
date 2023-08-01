@@ -51,6 +51,7 @@ AC_SUBST([MANTYPE])dnl
 AC_SUBST([MANDIRTYPE])dnl
 AC_SUBST([MANCOMPRESS])dnl
 AC_SUBST([MANCOMPRESSEXT])dnl
+AC_SUBST([POSTINSTALL])dnl
 AC_SUBST([SHLIB_ENABLE])dnl
 AC_SUBST([SHLIB_MODE])dnl
 AC_SUBST([SUDOERS_MODE])dnl
@@ -1263,6 +1264,18 @@ AC_ARG_ENABLE(env_debug,
 		;;
     no)		;;
     *)		AC_MSG_WARN([ignoring unknown argument to --enable-env-debug: $enableval])
+		;;
+  esac
+])
+
+AC_ARG_ENABLE(postinstall,
+[AS_HELP_STRING([--enable-postinstall], [Script to run after the install phase])],
+[ case "$enableval" in
+    yes)	AC_MSG_ERROR([must give --enable-postinstall an argument.])
+		;;
+    no)		AC_MSG_ERROR([--enable-postinstall not supported.])
+		;;
+    *)		POSTINSTALL="$enableval"
 		;;
   esac
 ])

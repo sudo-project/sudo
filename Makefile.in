@@ -193,6 +193,9 @@ install: config.status ChangeLog pre-install install-nls
 	    exit $$?; \
 	done
 
+postinstall:
+	@POSTINSTALL@
+
 uninstall: uninstall-nls
 	for d in $(SUBDIRS); do \
 	    (cd $$d && exec $(MAKE) $@) && continue; \
@@ -394,6 +397,7 @@ force-dist: ChangeLog $(srcdir)/MANIFEST
 package: @PPFILES@
 	DESTDIR=$(abs_top_builddir)/destdir; rm -rf $$DESTDIR; \
 	$(MAKE) install INSTALL_OWNER= DESTDIR=$$DESTDIR && \
+	$(MAKE) postinstall INSTALL_OWNER= DESTDIR=$$DESTDIR && \
 	for p in @PPFILES@; do \
 	    $(SHELL) $(scriptdir)/pp $(PPFLAGS) --destdir=$$DESTDIR $$p \
 		srcdir=$(top_srcdir) \
