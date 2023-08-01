@@ -484,8 +484,15 @@ case "$osversion" in
 
 		if [ $osrelease -ge 11 ]; then
 		    # Build 64-bit binaries on Solaris 11 and above.
-		    CFLAGS="${CFLAGS:--O2 -g} -m64"; export CFLAGS
-		    LDFLAGS="-m64${LDFLAGS:+ }${LDFLAGS}"; export LDFLAGS
+		    case "${CC}${CFLAGS}" in
+		      *-m32*|*-m64*)
+			# User specified memory model flags
+			;;
+		      *) 
+			CFLAGS="${CFLAGS:--O2 -g} -m64"; export CFLAGS
+			LDFLAGS="-m64${LDFLAGS:+ }${LDFLAGS}"; export LDFLAGS
+			;;
+		    esac
 		    # Solaris audit is not supported by Illumos
 		    if [ X"`uname -o 2>/dev/null`" = X"illumos" ]; then
 			configure_opts="${configure_opts}${configure_opts+$tab}--with-bsm-audit"
@@ -541,9 +548,12 @@ case "$osversion" in
 	;;
 esac
 
-# Don't enable OpenSSL if user disabled it.
+# Don't enable OpenSSL or python if disabled by the user.
 case "$configure_opts" in
     *--disable-openssl*) with_openssl=false;;
+esac
+case "$configure_opts" in
+    *--disable-python*) with_python=false;;
 esac
 if [ X"$with_openssl" = X"true" ]; then
     configure_opts="${configure_opts}${configure_opts+$tab}--enable-openssl"
