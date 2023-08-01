@@ -11,8 +11,8 @@ This makes it possible to have all sudo I/O logs on a central server."
 	# Convert to 4 part version for AIX, including patch level
 	pp_aix_version=`echo $version|sed -e 's/^\([0-9]*\.[0-9]*\.[0-9]*\)p\([0-9]*\)$/\1.\2/' -e 's/^\([0-9]*\.[0-9]*\.[0-9]*\)[^0-9\.].*$/\1/' -e 's/^\([0-9]*\.[0-9]*\.[0-9]*\)$/\1.0/'`
 
-	# Don't allow sudo to prompt for a password
-	pp_aix_sudo="sudo -n"
+	# Don't use sudo to list the package.
+	pp_aix_sudo=
 %endif
 
 %if [sd]
