@@ -169,7 +169,6 @@ static const char *initial_badenv_table[] = {
     "TERMINFO_DIRS",		/* terminfo, path(s) to terminfo files */
     "TERMPATH",			/* termcap, path(s) to termcap files */
     "TERMCAP",			/* XXX - only if it starts with '/' */
-    "ENV",			/* ksh, file to source before script runs */
     "BASH_ENV",			/* bash, file to source before script runs */
     "PS4",			/* bash, prefix for lines in xtrace mode */
     "GLOBIGNORE",		/* bash, globbing patterns to ignore */
@@ -885,7 +884,7 @@ rebuild_env(void)
     /* Reset HOME based on target user if configured to. */
     if (ISSET(sudo_mode, MODE_RUN)) {
 	if (def_always_set_home ||
-	    ISSET(sudo_mode, MODE_RESET_HOME | MODE_LOGIN_SHELL) || 
+	    ISSET(sudo_mode, MODE_RESET_HOME | MODE_LOGIN_SHELL) ||
 	    (ISSET(sudo_mode, MODE_SHELL) && def_set_home))
 	    reset_home = true;
     }
