@@ -1676,11 +1676,11 @@ server_msg_cb(int fd, int what, void *v)
 {
     struct client_closure *closure = v;
     struct connection_buffer *buf = &closure->read_buf;
-    ssize_t nread;
+    size_t nread;
     uint32_t msg_len;
     debug_decl(server_msg_cb, SUDOERS_DEBUG_UTIL);
 
-    /* For TLS we may need to read as part of SSL_write(). */
+    /* For TLS we may need to read as part of SSL_write_ex(). */
     if (closure->write_instead_of_read) {
 	closure->write_instead_of_read = false;
         client_msg_cb(fd, what, v);
@@ -1696,10 +1696,10 @@ server_msg_cb(int fd, int what, void *v)
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: reading ServerMessage", __func__);
 #if defined(HAVE_OPENSSL)
     if (closure->ssl != NULL) {
-        nread = SSL_read(closure->ssl, buf->data + buf->len, buf->size - buf->len);
-        if (nread <= 0) {
+        int err = SSL_read_ex(closure->ssl, buf->data + buf->len,
+	    buf->size - buf->len, &nread);
+        if (err) {
 	    const char *errstr;
-            int err;
 
             switch (SSL_get_error(closure->ssl, nread)) {
 		case SSL_ERROR_ZERO_RETURN:
@@ -1711,12 +1711,12 @@ server_msg_cb(int fd, int what, void *v)
                 case SSL_ERROR_WANT_READ:
 		    /* ssl wants to read more, read event is always active */
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
-			"SSL_read returns SSL_ERROR_WANT_READ");
+			"SSL_read_ex returns SSL_ERROR_WANT_READ");
                     debug_return;
                 case SSL_ERROR_WANT_WRITE:
                     /* ssl wants to write, so schedule the write handler */
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
-			"SSL_read returns SSL_ERROR_WANT_WRITE");
+			"SSL_read_ex returns SSL_ERROR_WANT_WRITE");
 		    if (!closure->write_ev->pending(closure->write_ev,
 			    SUDO_PLUGIN_EV_WRITE, NULL)) {
 			/* Enable a temporary write event. */
@@ -1726,7 +1726,7 @@ server_msg_cb(int fd, int what, void *v)
 			}
 			closure->temporary_write_event = true;
 		    }
-		    /* Redirect write event to finish SSL_read() */
+		    /* Redirect write event to finish SSL_read_ex() */
 		    closure->read_instead_of_write = true;
                     debug_return;
                 case SSL_ERROR_SSL:
@@ -1752,26 +1752,27 @@ server_msg_cb(int fd, int what, void *v)
 		    if (nread == 0)
 			sudo_warnx("%s", U_("lost connection to log server"));
 		    else
-			sudo_warn("recv");
+			sudo_warn("SSL_read_ex");
                     goto bad;
                 default:
                     errstr = ERR_reason_error_string(ERR_get_error());
-                    sudo_warnx("recv: %s", errstr ? errstr : strerror(errno));
+                    sudo_warnx("SSL_read_ex: %s",
+			errstr ? errstr : strerror(errno));
                     goto bad;
             }
         }
     } else
 #endif /* HAVE_OPENSSL */
     {
-        nread = recv(fd, buf->data + buf->len, buf->size - buf->len, 0);
+        nread = (size_t)read(fd, buf->data + buf->len, buf->size - buf->len);
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received %zd bytes from server",
 	__func__, nread);
     switch (nread) {
-    case -1:
+    case (size_t)-1:
 	if (errno == EAGAIN)
 	    debug_return;
-	sudo_warn("recv");
+	sudo_warn("read");
 	goto bad;
     case 0:
 	sudo_warnx("%s", U_("lost connection to log server"));
@@ -1779,7 +1780,7 @@ server_msg_cb(int fd, int what, void *v)
     default:
 	break;
     }
-    buf->len += (size_t)nread;
+    buf->len += nread;
 
     while (buf->len - buf->off >= sizeof(msg_len)) {
 	/* Read wire message size (uint32_t in network byte order). */
@@ -1829,13 +1830,13 @@ client_msg_cb(int fd, int what, void *v)
 {
     struct client_closure *closure = v;
     struct connection_buffer *buf;
-    ssize_t nwritten;
+    size_t nwritten;
     debug_decl(client_msg_cb, SUDOERS_DEBUG_UTIL);
 
-    /* For TLS we may need to write as part of SSL_read(). */
+    /* For TLS we may need to write as part of SSL_read_ex(). */
     if (closure->read_instead_of_write) {
 	closure->read_instead_of_write = false;
-	/* Delete write event if it was only due to SSL_read(). */
+	/* Delete write event if it was only due to SSL_read_ex(). */
 	if (closure->temporary_write_event) {
             closure->temporary_write_event = false;
 	    closure->write_ev->del(closure->write_ev);
@@ -1860,11 +1861,12 @@ client_msg_cb(int fd, int what, void *v)
 
 #if defined(HAVE_OPENSSL)
     if (closure->ssl != NULL) {
-        nwritten = SSL_write(closure->ssl, buf->data + buf->off, buf->len - buf->off);
-        if (nwritten <= 0) {
+        int err = SSL_write_ex(closure->ssl, buf->data + buf->off,
+	    buf->len - buf->off, &nwritten);
+        if (err) {
 	    const char *errstr;
 
-            switch (SSL_get_error(closure->ssl, nwritten)) {
+            switch (SSL_get_error(closure->ssl, err)) {
 		case SSL_ERROR_ZERO_RETURN:
 		    /* TLS connection shutdown cleanly */
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
@@ -1873,39 +1875,40 @@ client_msg_cb(int fd, int what, void *v)
                 case SSL_ERROR_WANT_READ:
 		    /* ssl wants to read, read event always active */
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
-			"SSL_write returns SSL_ERROR_WANT_READ");
-		    /* Redirect read event to finish SSL_write() */
+			"SSL_write_ex returns SSL_ERROR_WANT_READ");
+		    /* Redirect read event to finish SSL_write_ex() */
 		    closure->write_instead_of_read = true;
                     debug_return;
                 case SSL_ERROR_WANT_WRITE:
 		    /* ssl wants to write more, write event remains active */
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
-			"SSL_write returns SSL_ERROR_WANT_WRITE");
+			"SSL_write_ex returns SSL_ERROR_WANT_WRITE");
                     debug_return;
                 case SSL_ERROR_SSL:
                     errstr = ERR_reason_error_string(ERR_get_error());
                     sudo_warnx("%s", errstr ? errstr : strerror(errno));
                     goto bad;
                 case SSL_ERROR_SYSCALL:
-                    sudo_warn("send");
+                    sudo_warn("SSL_write_ex");
                     goto bad;
                 default:
                     errstr = ERR_reason_error_string(ERR_get_error());
-                    sudo_warnx("send: %s", errstr ? errstr : strerror(errno));
+                    sudo_warnx("SSL_write_ex: %s",
+			errstr ? errstr : strerror(errno));
                     goto bad;
             }
         }
     } else
 #endif /* HAVE_OPENSSL */
     {
-        nwritten = send(fd, buf->data + buf->off, buf->len - buf->off, 0);
+        nwritten = (size_t)write(fd, buf->data + buf->off, buf->len - buf->off);
     }
 
-    if (nwritten == -1) {
+    if (nwritten == (size_t)-1) {
 	sudo_warn("send");
 	goto bad;
     }
-    buf->off += (size_t)nwritten;
+    buf->off += nwritten;
 
     if (buf->off == buf->len) {
 	/* sent entire message, move buf to free list */

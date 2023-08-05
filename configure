@@ -25970,6 +25970,12 @@ then :
   printf "%s\n" "#define HAVE_TLS_METHOD 1" >>confdefs.h
 
 fi
+ac_fn_c_check_func "$LINENO" "SSL_read_ex" "ac_cv_func_SSL_read_ex"
+if test "x$ac_cv_func_SSL_read_ex" = xyes
+then :
+  printf "%s\n" "#define HAVE_SSL_READ_EX 1" >>confdefs.h
+
+fi
 
 	# SSL_CTX_set_min_proto_version may be a macro
 	ac_fn_check_decl "$LINENO" "SSL_CTX_set_min_proto_version" "ac_cv_have_decl_SSL_CTX_set_min_proto_version" "

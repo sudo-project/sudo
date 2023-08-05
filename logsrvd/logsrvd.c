@@ -908,13 +908,13 @@ server_msg_cb(int fd, int what, void *v)
 {
     struct connection_closure *closure = v;
     struct connection_buffer *buf;
-    ssize_t nwritten;
+    size_t nwritten;
     debug_decl(server_msg_cb, SUDO_DEBUG_UTIL);
 
-    /* For TLS we may need to write as part of SSL_read(). */
+    /* For TLS we may need to write as part of SSL_read_ex(). */
     if (closure->read_instead_of_write) {
 	closure->read_instead_of_write = false;
-	/* Delete write event if it was only due to SSL_read(). */
+	/* Delete write event if it was only due to SSL_read_ex(). */
 	if (closure->temporary_write_event) {
 	    closure->temporary_write_event = false;
 	    sudo_ev_del(closure->evbase, closure->write_ev);
@@ -938,30 +938,29 @@ server_msg_cb(int fd, int what, void *v)
 
 #if defined(HAVE_OPENSSL)
     if (closure->ssl != NULL) {
-        nwritten = SSL_write(closure->ssl, buf->data + buf->off,
-	    buf->len - buf->off);
-        if (nwritten <= 0) {
+	int err = SSL_write_ex(closure->ssl, buf->data + buf->off,
+	    buf->len - buf->off, &nwritten);
+	if (err) {
 	    const char *errstr;
-            int err = SSL_get_error(closure->ssl, nwritten);
-            switch (err) {
+            switch (SSL_get_error(closure->ssl, err)) {
                 case SSL_ERROR_WANT_READ:
 		    /* ssl wants to read, read event always active */
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
-			"SSL_write returns SSL_ERROR_WANT_READ");
-		    /* Redirect persistent read event to finish SSL_write() */
+			"SSL_write_ex returns SSL_ERROR_WANT_READ");
+		    /* Redirect persistent read event to finish SSL_write_ex() */
 		    closure->write_instead_of_read = true;
                     debug_return;
                 case SSL_ERROR_WANT_WRITE:
 		    /* ssl wants to write more, write event remains active */
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
-			"SSL_write returns SSL_ERROR_WANT_WRITE");
+			"SSL_write_ex returns SSL_ERROR_WANT_WRITE");
                     debug_return;
 		case SSL_ERROR_SYSCALL:
-		    sudo_warn("%s: SSL_write", closure->ipaddr);
+		    sudo_warn("%s: SSL_write_ex", closure->ipaddr);
 		    goto finished;
                 default:
 		    errstr = ERR_reason_error_string(ERR_get_error());
-		    sudo_warnx("%s: SSL_write: %s", closure->ipaddr,
+		    sudo_warnx("%s: SSL_write_ex: %s", closure->ipaddr,
 			errstr ? errstr : strerror(errno));
                     goto finished;
             }
@@ -969,16 +968,16 @@ server_msg_cb(int fd, int what, void *v)
     } else
 #endif
     {
-	nwritten = write(fd, buf->data + buf->off, buf->len - buf->off);
+	nwritten = (size_t)write(fd, buf->data + buf->off, buf->len - buf->off);
     }
 
-    if (nwritten == -1) {
+    if (nwritten == (size_t)-1) {
 	if (errno == EAGAIN || errno == EINTR)
 	    debug_return;
 	sudo_warn("%s: write", closure->ipaddr);
 	goto finished;
     }
-    buf->off += (size_t)nwritten;
+    buf->off += nwritten;
 
     if (buf->off == buf->len) {
 	/* sent entire message, move buf to free list */
@@ -1014,10 +1013,10 @@ client_msg_cb(int fd, int what, void *v)
     const char *source = closure->journal_path ? closure->journal_path :
         closure->ipaddr;
     uint32_t msg_len;
-    ssize_t nread;
+    size_t nread;
     debug_decl(client_msg_cb, SUDO_DEBUG_UTIL);
 
-    /* For TLS we may need to read as part of SSL_write(). */
+    /* For TLS we may need to read as part of SSL_write_ex(). */
     if (closure->write_instead_of_read) {
 	closure->write_instead_of_read = false;
 	server_msg_cb(fd, what, v);
@@ -1031,11 +1030,11 @@ client_msg_cb(int fd, int what, void *v)
 
 #if defined(HAVE_OPENSSL)
     if (closure->ssl != NULL) {
-       nread = SSL_read(closure->ssl, buf->data + buf->len, buf->size);
-        if (nread <= 0) {
+	int err = SSL_read_ex(closure->ssl, buf->data + buf->len, buf->size,
+	    &nread);
+        if (err) {
 	    const char *errstr;
-            int err = SSL_get_error(closure->ssl, nread);
-            switch (err) {
+            switch (SSL_get_error(closure->ssl, err)) {
 		case SSL_ERROR_ZERO_RETURN:
 		    /* ssl connection shutdown cleanly */
 		    nread = 0;
@@ -1043,13 +1042,13 @@ client_msg_cb(int fd, int what, void *v)
                 case SSL_ERROR_WANT_READ:
 		    /* ssl wants to read more, read event is always active */
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
-			"SSL_read returns SSL_ERROR_WANT_READ");
+			"SSL_read_ex returns SSL_ERROR_WANT_READ");
 		    /* Read event is always active. */
                     debug_return;
                 case SSL_ERROR_WANT_WRITE:
 		    /* ssl wants to write, schedule a write if not pending */
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
-			"SSL_read returns SSL_ERROR_WANT_WRITE");
+			"SSL_read_ex returns SSL_ERROR_WANT_WRITE");
 		    if (!sudo_ev_pending(closure->write_ev, SUDO_EV_WRITE, NULL)) {
 			/* Enable a temporary write event. */
 			if (sudo_ev_add(closure->evbase, closure->write_ev,
@@ -1060,7 +1059,7 @@ client_msg_cb(int fd, int what, void *v)
 			}
 			closure->temporary_write_event = true;
 		    }
-		    /* Redirect write event to finish SSL_read() */
+		    /* Redirect write event to finish SSL_read_ex() */
 		    closure->read_instead_of_write = true;
                     debug_return;
 		case SSL_ERROR_SYSCALL:
@@ -1070,11 +1069,11 @@ client_msg_cb(int fd, int what, void *v)
 			    closure->ipaddr);
 			break;
 		    }
-		    sudo_warn("%s: SSL_read", closure->ipaddr);
+		    sudo_warn("%s: SSL_read_ex", closure->ipaddr);
                     goto close_connection;
                 default:
 		    errstr = ERR_reason_error_string(ERR_get_error());
-		    sudo_warnx("%s: SSL_read: %s", closure->ipaddr,
+		    sudo_warnx("%s: SSL_read_ex: %s", closure->ipaddr,
 			errstr ? errstr : strerror(errno));
 		    goto close_connection;
             }
@@ -1082,13 +1081,13 @@ client_msg_cb(int fd, int what, void *v)
     } else
 #endif
     {
-        nread = read(fd, buf->data + buf->len, buf->size - buf->len);
+        nread = (size_t)read(fd, buf->data + buf->len, buf->size - buf->len);
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received %zd bytes from client %s",
 	__func__, nread, closure->ipaddr);
     switch (nread) {
-    case -1:
+    case (size_t)-1:
 	if (errno == EAGAIN || errno == EINTR)
 	    debug_return;
 	sudo_warn("%s: read", closure->ipaddr);
@@ -1102,7 +1101,7 @@ client_msg_cb(int fd, int what, void *v)
     default:
 	break;
     }
-    buf->len += (size_t)nread;
+    buf->len += nread;
 
     while (buf->len - buf->off >= sizeof(msg_len)) {
 	/* Read wire message size (uint32_t in network byte order). */

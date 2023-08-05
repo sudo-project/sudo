@@ -860,6 +860,9 @@
    macro. */
 #undef HAVE_SSL_CTX_SET_MIN_PROTO_VERSION
 
+/* Define to 1 if you have the 'SSL_read_ex' function. */
+#undef HAVE_SSL_READ_EX
+
 /* Define to 1 to enable SSSD support. */
 #undef HAVE_SSSD
 
