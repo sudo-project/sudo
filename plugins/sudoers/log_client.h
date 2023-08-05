@@ -25,6 +25,7 @@
 #  include <wolfssl/options.h>
 # endif /* HAVE_WOLFSSL */
 # include <openssl/ssl.h>
+# include "sudo_ssl_compat.h"
 #endif /* HAVE_OPENSSL */
 
 #include "log_server.pb-c.h"

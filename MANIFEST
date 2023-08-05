@@ -110,6 +110,7 @@ include/sudo_lbuf.h
 include/sudo_plugin.h
 include/sudo_queue.h
 include/sudo_rand.h
+include/sudo_ssl_compat.h
 include/sudo_util.h
 lib/eventlog/Makefile.in
 lib/eventlog/eventlog.c
@@ -227,6 +228,8 @@ lib/logsrv/log_server.pb-c.c
 lib/logsrv/log_server.proto
 lib/protobuf-c/Makefile.in
 lib/protobuf-c/protobuf-c.c
+lib/ssl_compat/Makefile.in
+lib/ssl_compat/ssl_compat.c
 lib/util/Makefile.in
 lib/util/aix.c
 lib/util/arc4random.c

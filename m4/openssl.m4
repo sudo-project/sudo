@@ -156,11 +156,14 @@ AC_DEFUN([SUDO_CHECK_OPENSSL], [
     if test "${enable_openssl-no}" != no; then
 	OLIBS="$LIBS"
 	LIBS="$LIBS $LIBTLS"
-	AC_CHECK_FUNCS([X509_STORE_CTX_get0_cert ASN1_STRING_get0_data SSL_CTX_get0_certificate SSL_CTX_set0_tmp_dh_pkey TLS_method SSL_read_ex])
+	AC_CHECK_FUNCS([X509_STORE_CTX_get0_cert ASN1_STRING_get0_data SSL_CTX_get0_certificate SSL_CTX_set0_tmp_dh_pkey TLS_method])
 	# SSL_CTX_set_min_proto_version may be a macro
 	AC_CHECK_DECL([SSL_CTX_set_min_proto_version], [AC_DEFINE(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION)], [], [
 	    AC_INCLUDES_DEFAULT
 	    #include <openssl/ssl.h>
+	])
+	AC_CHECK_FUNCS([SSL_read_ex], [], [
+	    SSL_COMPAT_SRC=lib/ssl_compat
 	])
 	# LibreSSL TLS 1.3 support may not be enabled, check for declaration too.
 	AC_CHECK_FUNC([SSL_CTX_set_ciphersuites], [
@@ -292,5 +295,15 @@ AC_DEFUN([SUDO_CHECK_OPENSSL], [
 	    #include <wolfssl/options.h>
 	    #include <wolfssl/openssl/ssl.h>
 	])
+	AC_CHECK_DECL([SSL_read_ex], [AC_DEFINE(HAVE_SSL_READ_EX)], [
+	    SSL_COMPAT_SRC=lib/ssl_compat
+	], [
+	    AC_INCLUDES_DEFAULT
+	    #include <wolfssl/options.h>
+	    #include <wolfssl/openssl/ssl.h>
+	])
+    fi
+    if test -n "$SSL_COMPAT_SRC"; then
+	LIBTLS='$(top_builddir)/lib/ssl_compat/libssl_compat.la '"${LIBTLS}"
     fi
 ])
