@@ -21,6 +21,21 @@
 
 # ifdef HAVE_OPENSSL
 
+/*
+ * Compatibility defines for OpenSSL 1.0.2 (not needed for 1.1.x)
+ */
+#  ifndef HAVE_WOLFSSL
+#   ifndef HAVE_X509_STORE_CTX_GET0_CERT
+#    define X509_STORE_CTX_get0_cert(x)   ((x)->cert)
+#   endif
+#   ifndef HAVE_TLS_METHOD
+#    define TLS_method()                  SSLv23_method()
+#   endif
+#  endif /* !HAVE_WOLFSSL */
+
+/*
+ * SSL_read_ex() and SSL_write_ex() were added in OpenSSL 1.1.1.
+ */
 #  ifndef HAVE_SSL_READ_EX
 int SSL_read_ex(SSL *, void *, size_t, size_t *);
 int SSL_write_ex(SSL *, const void *, size_t, size_t *);

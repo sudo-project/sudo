@@ -306,21 +306,6 @@ int getdomainname(char *, size_t);
 #endif
 
 /*
- * Compatibility defines for OpenSSL 1.0.2 (not needed for 1.1.x)
- */
-#if defined(HAVE_OPENSSL) && !defined(HAVE_WOLFSSL)
-# ifndef HAVE_X509_STORE_CTX_GET0_CERT
-#  define X509_STORE_CTX_get0_cert(x)   ((x)->cert)
-# endif
-# ifndef HAVE_ASN1_STRING_GET0_DATA
-#  define ASN1_STRING_get0_data(x)      ASN1_STRING_data(x)
-# endif
-# ifndef HAVE_TLS_METHOD
-#  define TLS_method()                  SSLv23_method()
-# endif
-#endif /* HAVE_OPENSSL && !HAVE_WOLFSSL */
-
-/*
  * Functions "missing" from libc.
  * All libc replacements are prefixed with "sudo_" to avoid namespace issues.
  */
