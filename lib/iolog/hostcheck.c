@@ -47,6 +47,10 @@
 # define INET6_ADDRSTRLEN 46
 #endif
 
+#if !defined(HAVE_ASN1_STRING_GET0_DATA) && !defined(HAVE_WOLFSSL)
+# define ASN1_STRING_get0_data(x)	ASN1_STRING_data(x)
+#endif /* !HAVE_ASN1_STRING_GET0_DATA && !HAVE_WOLFSSL */
+
 /**
  * @brief Checks if given hostname resolves to the given IP address.
  *
@@ -129,7 +133,7 @@ exit:
 static HostnameValidationResult
 validate_name(const char *hostname, ASN1_STRING *certname_asn1)
 {
-    char *certname_s = (char *) ASN1_STRING_get0_data(certname_asn1);
+    char *certname_s = (char *)ASN1_STRING_get0_data(certname_asn1);
     size_t certname_len = (size_t)ASN1_STRING_length(certname_asn1);
     size_t hostname_len = strlen(hostname);
     debug_decl(validate_name, SUDO_DEBUG_UTIL);

@@ -21,13 +21,6 @@
 
 # include <openssl/x509v3.h>
 
-/*
- * Compatibility defines for OpenSSL 1.0.2 (not needed for 1.1.x)
- */
-# if !defined(HAVE_ASN1_STRING_GET0_DATA) && !defined(HAVE_WOLFSSL)
-#  define ASN1_STRING_get0_data(x)	ASN1_STRING_data(x)
-# endif /* !HAVE_ASN1_STRING_GET0_DATA && !HAVE_WOLFSSL */
-
 typedef enum {
     MatchFound,
     MatchNotFound,
