@@ -724,6 +724,7 @@ relay_server_msg_cb(int fd, int what, void *v)
         err = SSL_read_ex(ssl, buf->data + buf->len, buf->size - buf->len,
 	    &nread);
         if (err) {
+	    unsigned long errcode;
 	    const char *errstr;
 
             switch (SSL_get_error(ssl, err)) {
@@ -759,16 +760,16 @@ relay_server_msg_cb(int fd, int what, void *v)
                      * alert when we read ServerHello.  Convert to a more useful
                      * message and hope that no actual internal error occurs.
                      */
-                    err = ERR_get_error();
+                    errcode = ERR_get_error();
 #if !defined(HAVE_WOLFSSL)
                     if (closure->state == INITIAL &&
-                        ERR_GET_REASON(err) == SSL_R_TLSV1_ALERT_INTERNAL_ERROR) {
+                        ERR_GET_REASON(errcode) == SSL_R_TLSV1_ALERT_INTERNAL_ERROR) {
                         errstr = _("relay host name does not match certificate");
 			closure->errstr = errstr;
                     } else
 #endif
 		    {
-                        errstr = ERR_reason_error_string(err);
+                        errstr = ERR_reason_error_string(errcode);
 			closure->errstr = _("error reading from relay");
                     }
 		    sudo_warnx("%s: SSL_read_ex: %s",

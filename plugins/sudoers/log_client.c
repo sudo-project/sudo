@@ -1699,6 +1699,7 @@ server_msg_cb(int fd, int what, void *v)
         int err = SSL_read_ex(closure->ssl, buf->data + buf->len,
 	    buf->size - buf->len, &nread);
         if (err) {
+	    unsigned long errcode;
 	    const char *errstr;
 
             switch (SSL_get_error(closure->ssl, err)) {
@@ -1736,15 +1737,15 @@ server_msg_cb(int fd, int what, void *v)
                      * alert when we read ServerHello.  Convert to a more useful
                      * message and hope that no actual internal error occurs.
                      */
-                    err = ERR_get_error();
+                    errcode = ERR_get_error();
 #if !defined(HAVE_WOLFSSL)
                     if (closure->state == RECV_HELLO &&
-                        ERR_GET_REASON(err) == SSL_R_TLSV1_ALERT_INTERNAL_ERROR) {
+                        ERR_GET_REASON(errcode) == SSL_R_TLSV1_ALERT_INTERNAL_ERROR) {
                         errstr = U_("host name does not match certificate");
                     } else
 #endif
 		    {
-                        errstr = ERR_reason_error_string(err);
+                        errstr = ERR_reason_error_string(errcode);
                     }
                     sudo_warnx("%s", errstr ? errstr : strerror(errno));
                     goto bad;

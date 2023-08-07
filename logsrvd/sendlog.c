@@ -308,8 +308,8 @@ read_io_buf(struct client_closure *closure)
 	closure->bufsize = new_size;
     }
 
-    nread = iolog_read(&closure->iolog_files[timing->event], closure->buf,
-	timing->u.nbytes, &errstr);
+    nread = (size_t)iolog_read(&closure->iolog_files[timing->event],
+	closure->buf, timing->u.nbytes, &errstr);
     if (nread == (size_t)-1) {
 	sudo_warnx(U_("unable to read %s/%s: %s"), iolog_dir,
 	    iolog_fd_to_name(timing->event), errstr);
@@ -1284,6 +1284,7 @@ server_msg_cb(int fd, int what, void *v)
         err = SSL_read_ex(ssl, buf->data + buf->len, buf->size - buf->len,
 	    &nread);
         if (err) {
+	    unsigned long errcode;
 	    const char *errstr;
 
             switch (SSL_get_error(ssl, err)) {
@@ -1318,15 +1319,15 @@ server_msg_cb(int fd, int what, void *v)
                      * alert when we read ServerHello.  Convert to a more useful
                      * message and hope that no actual internal error occurs.
                      */
-                    err = ERR_get_error();
+                    errcode = ERR_get_error();
 #if !defined(HAVE_WOLFSSL)
                     if (closure->state == RECV_HELLO &&
-                        ERR_GET_REASON(err) == SSL_R_TLSV1_ALERT_INTERNAL_ERROR) {
+                        ERR_GET_REASON(errcode) == SSL_R_TLSV1_ALERT_INTERNAL_ERROR) {
                         errstr = U_("host name does not match certificate");
                     } else
 #endif
 		    {
-                        errstr = ERR_reason_error_string(err);
+                        errstr = ERR_reason_error_string(errcode);
                     }
                     sudo_warnx("%s", errstr ? errstr : strerror(errno));
                     goto bad;
