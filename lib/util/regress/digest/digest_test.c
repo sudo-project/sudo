@@ -1134,7 +1134,7 @@ run_tests(unsigned int digest_type, struct test_vector *test_vectors)
 	mdhex[j * 2] = '\0';
 
 	if (strcmp(test_vectors[i].md, mdhex) != 0) {
-	    sudo_warnx("test %d:%d: expected %s, got %s", digest_type, i,
+	    sudo_warnx("test %u:%zu: expected %s, got %s", digest_type, i,
 		mdhex, test_vectors[i].md);
 	    errors++;
 	}
