@@ -3906,9 +3906,9 @@ YY_RULE_SETUP
 #line 319 "toke.l"
 {
 			    /* Only return DIGEST if the length is correct. */
-			    int digest_len =
+			    size_t digest_len =
 				sudo_digest_getlen(digest_type);
-			    if (sudoersleng == digest_len * 2) {
+			    if ((size_t)sudoersleng == digest_len * 2) {
 				if (!fill(sudoerstext, sudoersleng))
 				    yyterminate();
 				BEGIN INITIAL;
@@ -3924,7 +3924,7 @@ YY_RULE_SETUP
 #line 334 "toke.l"
 {
 			    /* Only return DIGEST if the length is correct. */
-			    int len, digest_len =
+			    size_t len, digest_len =
 				sudo_digest_getlen(digest_type);
 			    if (sudoerstext[sudoersleng - 1] == '=') {
 				/* use padding */
@@ -3933,7 +3933,7 @@ YY_RULE_SETUP
 				/* no padding */
 				len = (4 * digest_len + 2) / 3;
 			    }
-			    if (sudoersleng == len) {
+			    if ((size_t)sudoersleng == len) {
 				if (!fill(sudoerstext, sudoersleng))
 				    yyterminate();
 				BEGIN INITIAL;

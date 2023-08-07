@@ -1109,10 +1109,10 @@ run_tests(unsigned int digest_type, struct test_vector *test_vectors)
     struct sudo_digest *ctx;
     unsigned char md[64];	/* SHA512_DIGEST_LENGTH */
     char mdhex[128 + 1];	/* SHA512_DIGEST_LENGTH * 2 + 1 */
-    int i, j, digest_len;
+    size_t i, j, digest_len;
 
     digest_len = sudo_digest_getlen(digest_type);
-    if (digest_len == -1)
+    if (digest_len == 0)
 	sudo_fatalx("unable to get digest length for type %d", digest_type);
     if (digest_len > ssizeof(md))
 	sudo_fatalx("digest length too big for type %d", digest_type);

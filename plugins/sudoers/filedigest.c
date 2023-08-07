@@ -45,8 +45,8 @@ sudo_filedigest(int fd, const char *file, unsigned int digest_type,
     int fd2;
     debug_decl(sudo_filedigest, SUDOERS_DEBUG_UTIL);
 
-    *digest_len = (size_t)sudo_digest_getlen(digest_type);
-    if (*digest_len == (size_t)-1) {
+    *digest_len = sudo_digest_getlen(digest_type);
+    if (*digest_len == 0) {
 	sudo_warnx(U_("unsupported digest type %u for %s"), digest_type, file);
 	debug_return_ptr(NULL);
     }

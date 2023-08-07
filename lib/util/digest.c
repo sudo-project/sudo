@@ -43,7 +43,7 @@
 #endif
 
 static struct digest_function {
-    const unsigned int digest_len;
+    const size_t digest_len;
     void (*init)(SHA2_CTX *);
 #ifdef SHA2_VOID_PTR
     void (*update)(SHA2_CTX *, const void *, size_t);
@@ -130,18 +130,25 @@ sudo_digest_reset_v1(struct sudo_digest *dig)
     debug_return;
 }
 
-int
-sudo_digest_getlen_v1(unsigned int digest_type)
+size_t
+sudo_digest_getlen_v2(unsigned int digest_type)
 {
     debug_decl(sudo_digest_getlen, SUDO_DEBUG_UTIL);
     unsigned int i;
 
     for (i = 0; digest_functions[i].digest_len != 0; i++) {
 	if (digest_type == i)
-	    debug_return_int(digest_functions[i].digest_len);
+	    debug_return_size_t(digest_functions[i].digest_len);
     }
 
-    debug_return_int(-1);
+    debug_return_size_t(0);
+}
+
+int
+sudo_digest_getlen_v1(unsigned int digest_type)
+{
+    size_t len = sudo_digest_getlen_v2(digest_type);
+    return len ? (int)len : -1;
 }
 
 void

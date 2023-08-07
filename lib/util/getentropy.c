@@ -436,7 +436,7 @@ getentropy_fallback(void *buf, size_t len)
 	if ((ctx = sudo_digest_alloc(SUDO_DIGEST_SHA512)) == NULL)
 		return -1;
 	digest_len = sudo_digest_getlen(SUDO_DIGEST_SHA512);
-	if (digest_len == (size_t)-1 || (results = malloc(digest_len)) == NULL)
+	if (digest_len == 0 || (results = malloc(digest_len)) == NULL)
 		goto done;
 
 	pid = getpid();

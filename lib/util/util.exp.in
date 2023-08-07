@@ -50,6 +50,7 @@ sudo_digest_alloc_v1
 sudo_digest_final_v1
 sudo_digest_free_v1
 sudo_digest_getlen_v1
+sudo_digest_getlen_v2
 sudo_digest_reset_v1
 sudo_digest_update_v1
 sudo_dso_findsym_v1

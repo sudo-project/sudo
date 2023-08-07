@@ -118,17 +118,24 @@ sudo_digest_reset_v1(struct sudo_digest *dig)
     debug_return;
 }
 
-int
-sudo_digest_getlen_v1(unsigned int digest_type)
+size_t
+sudo_digest_getlen_v2(unsigned int digest_type)
 {
     const EVP_MD *md;
     debug_decl(sudo_digest_getlen, SUDO_DEBUG_UTIL);
 
     md = sudo_digest_type_to_md(digest_type);
     if (md == NULL)
-	debug_return_int(-1);
+	debug_return_size_t(0);
 
-    debug_return_int(EVP_MD_size(md));
+    debug_return_size_t((size_t)EVP_MD_size(md));
+}
+
+int
+sudo_digest_getlen_v1(unsigned int digest_type)
+{
+    size_t len = sudo_digest_getlen_v2(digest_type);
+    return len ? (int)len : -1;
 }
 
 void
