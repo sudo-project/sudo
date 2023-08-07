@@ -1701,7 +1701,7 @@ server_msg_cb(int fd, int what, void *v)
         if (err) {
 	    const char *errstr;
 
-            switch (SSL_get_error(closure->ssl, nread)) {
+            switch (SSL_get_error(closure->ssl, err)) {
 		case SSL_ERROR_ZERO_RETURN:
 		    /* TLS connection shutdown cleanly */
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
