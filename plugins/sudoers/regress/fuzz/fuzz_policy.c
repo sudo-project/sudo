@@ -807,7 +807,8 @@ audit_failure(char *const argv[], char const * restrict const fmt, ...)
 /* STUB */
 unsigned int
 sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, time_t now,
-    struct sudoers_lookup_callbacks *callbacks, int *cmnd_status, int pwflag)
+    sudoers_lookup_callback_fn_t callback, void *cb_data, int *cmnd_status,
+    int pwflag)
 {
     return VALIDATE_SUCCESS;
 }

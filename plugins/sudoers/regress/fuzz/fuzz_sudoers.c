@@ -371,10 +371,12 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
 	    update_defaults(&parse_tree, NULL, SETDEF_ALL, false);
 
-	    sudoers_lookup(&snl, sudo_user.pw, now, NULL, &cmnd_status, false);
+	    sudoers_lookup(&snl, sudo_user.pw, now, NULL, NULL, &cmnd_status,
+		false);
 
 	    /* Match again as a pseudo-command (list, validate, etc). */
-	    sudoers_lookup(&snl, sudo_user.pw, now, NULL, &cmnd_status, true);
+	    sudoers_lookup(&snl, sudo_user.pw, now, NULL, NULL, &cmnd_status,
+		true);
 
 	    /* Display privileges. */
 	    display_privs(&snl, sudo_user.pw, false);

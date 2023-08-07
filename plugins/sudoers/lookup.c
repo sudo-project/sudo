@@ -54,8 +54,8 @@ runas_matches_pw(struct sudoers_parse_tree *parse_tree,
  * list, verify and kill.
  */
 static unsigned int
-sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
-    time_t now, struct sudoers_lookup_callbacks *callbacks, int pwflag)
+sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw, time_t now,
+    sudoers_lookup_callback_fn_t callback, void *cb_data, int pwflag)
 {
     char *saved_runchroot;
     struct passwd *root_pw = NULL;
@@ -97,18 +97,24 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
 	 */
 	TAILQ_FOREACH(us, &nss->parse_tree->userspecs, entries) {
 	    int user_match = userlist_matches(nss->parse_tree, pw, &us->users);
-	    if (callbacks != NULL)
-		callbacks->cb_userspec(us, user_match);
-	    if (user_match != ALLOW)
+	    if (user_match != ALLOW) {
+		if (callback != NULL && user_match != UNSPEC) {
+		    callback(us, user_match, NULL, UNSPEC, NULL, UNSPEC,
+			UNSPEC, UNSPEC, cb_data);
+		}
 		continue;
+	    }
 	    TAILQ_FOREACH(priv, &us->privileges, entries) {
 		int priv_nopass = UNSPEC;
 		int host_match = hostlist_matches(nss->parse_tree, pw,
 		    &priv->hostlist);
-		if (callbacks != NULL)
-		    callbacks->cb_privilege(priv, host_match);
-		if (host_match != ALLOW)
+		if (host_match != ALLOW) {
+		    if (callback != NULL) {
+			callback(us, user_match, priv, host_match, NULL, UNSPEC,
+			    UNSPEC, UNSPEC, cb_data);
+		    }
 		    continue;
+		}
 		TAILQ_FOREACH(def, &priv->defaults, entries) {
 		    if (strcmp(def->var, "authenticate") == 0) {
 			priv_nopass = !def->op;
@@ -176,9 +182,9 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw,
 			    break;
 			}
 		    }
-		    if (callbacks != NULL) {
-			callbacks->cb_cmndspec(cs, date_match, runas_match,
-			    cmnd_match);
+		    if (callback != NULL) {
+			callback(us, user_match, priv, host_match, cs,
+			    date_match, runas_match, cmnd_match, cb_data);
 		    }
 		    if (cmnd_match != UNSPEC) {
 			/*
@@ -222,8 +228,8 @@ init_cmnd_info(struct cmnd_info *info)
 static int
 sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
     unsigned int *validated, struct cmnd_info *info, time_t now,
-    struct sudoers_lookup_callbacks *callbacks, struct cmndspec **matching_cs,
-    struct defaults_list **defs)
+    sudoers_lookup_callback_fn_t callback, void *cb_data,
+    struct cmndspec **matching_cs, struct defaults_list **defs)
 {
     struct cmndspec *cs;
     struct privilege *priv;
@@ -235,20 +241,26 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
 
     TAILQ_FOREACH_REVERSE(us, &nss->parse_tree->userspecs, userspec_list, entries) {
 	int user_match = userlist_matches(nss->parse_tree, pw, &us->users);
-	if (callbacks != NULL)
-	    callbacks->cb_userspec(us, user_match);
-	if (user_match != ALLOW)
+	if (user_match != ALLOW) {
+	    if (callback != NULL && user_match != UNSPEC) {
+		callback(us, user_match, NULL, UNSPEC, NULL, UNSPEC,
+		    UNSPEC, UNSPEC, cb_data);
+	    }
 	    continue;
+	}
 	CLR(*validated, FLAG_NO_USER);
 	TAILQ_FOREACH_REVERSE(priv, &us->privileges, privilege_list, entries) {
 	    int host_match = hostlist_matches(nss->parse_tree, pw,
 		&priv->hostlist);
-	    if (callbacks != NULL)
-		callbacks->cb_privilege(priv, host_match);
-	    if (host_match == ALLOW)
+	    if (host_match == ALLOW) {
 		CLR(*validated, FLAG_NO_HOST);
-	    else
+	    } else {
+		if (callback != NULL) {
+		    callback(us, user_match, priv, host_match, NULL, UNSPEC,
+			UNSPEC, UNSPEC, cb_data);
+		}
 		continue;
+	    }
 	    TAILQ_FOREACH_REVERSE(cs, &priv->cmndlist, cmndspec_list, entries) {
 		int cmnd_match = UNSPEC;
 		int date_match = UNSPEC;
@@ -270,8 +282,11 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
 			    cs->runchroot, info);
 		    }
 		}
-		if (callbacks != NULL)
-		    callbacks->cb_cmndspec(cs, date_match, runas_match, cmnd_match);
+		if (callback != NULL) {
+		    callback(us, user_match, priv, host_match, cs, date_match,
+			runas_match, cmnd_match, cb_data);
+		}
+
 		if (cmnd_match != UNSPEC) {
 		    /*
 		     * If user is running command as themselves,
@@ -490,7 +505,7 @@ apply_cmndspec(struct cmndspec *cs)
  */
 unsigned int
 sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, time_t now,
-    struct sudoers_lookup_callbacks *callbacks, int *cmnd_status,
+    sudoers_lookup_callback_fn_t callback, void *cb_data, int *cmnd_status,
     int pwflag)
 {
     struct defaults_list *defs = NULL;
@@ -505,8 +520,10 @@ sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, time_t now,
     /*
      * Special case checking the "validate", "list" and "kill" pseudo-commands.
      */
-    if (pwflag)
-	debug_return_uint(sudoers_lookup_pseudo(snl, pw, now, callbacks, pwflag));
+    if (pwflag) {
+	debug_return_uint(sudoers_lookup_pseudo(snl, pw, now, callback,
+	    cb_data, pwflag));
+    }
 
     /* Need to be runas user while stat'ing things. */
     if (!set_perms(PERM_RUNAS))
@@ -520,8 +537,8 @@ sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, time_t now,
 	    break;
 	}
 
-	m = sudoers_lookup_check(nss, pw, &validated, &info, now, callbacks,
-	    &cs, &defs);
+	m = sudoers_lookup_check(nss, pw, &validated, &info, now, callback,
+	    cb_data, &cs, &defs);
 	if (m != UNSPEC) {
 	    match = m;
 	    parse_tree = nss->parse_tree;

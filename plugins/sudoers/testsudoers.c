@@ -74,9 +74,7 @@ static bool cb_runas_default(const char *file, int line, int column, const union
 static int testsudoers_error(const char * restrict buf);
 static int testsudoers_output(const char * restrict buf);
 sudo_noreturn static void usage(void);
-static void cb_userspec(struct userspec *us, int user_match);
-static void cb_privilege(struct privilege *priv, int host_match);
-static void cb_cmndspec(struct cmndspec *cs, int date_match, int runas_match, int cmnd_match);
+static void cb_lookup(struct userspec *us, int user_match, struct privilege *priv, int host_match, struct cmndspec *cs, int date_match, int runas_match, int cmnd_match, void *closure);
 static int testsudoers_query(const struct sudo_nss *nss, struct passwd *pw);
 
 /*
@@ -99,8 +97,6 @@ main(int argc, char *argv[])
 {
     struct sudoers_parser_config sudoers_conf = SUDOERS_PARSER_CONFIG_INITIALIZER;
     struct sudo_nss_list snl = TAILQ_HEAD_INITIALIZER(snl);
-    struct sudoers_lookup_callbacks callbacks =
-	{ cb_userspec, cb_privilege, cb_cmndspec };
     enum sudoers_formats input_format = format_sudoers;
     struct sudo_nss testsudoers_nss;
     char *p, *grfile, *pwfile;
@@ -385,8 +381,8 @@ main(int argc, char *argv[])
     testsudoers_nss.parse_tree = &parsed_policy;
 
     printf("\nEntries for user %s:\n", user_name);
-    validated = sudoers_lookup(&snl, sudo_user.pw, now, &callbacks, &status,
-	pwflag);
+    validated = sudoers_lookup(&snl, sudo_user.pw, now, cb_lookup, NULL,
+	&status, pwflag);
 
     /* Validate user-specified chroot or cwd (if any) and runas user shell. */
     if (ISSET(validated, VALIDATE_SUCCESS)) {
@@ -630,40 +626,45 @@ set_cmnd_path(const char *runchroot)
 }
 
 static void
-cb_userspec(struct userspec *us, int user_match)
+cb_lookup(struct userspec *us, int user_match, struct privilege *priv,
+    int host_match, struct cmndspec *cs, int date_match, int runas_match,
+    int cmnd_match, void *closure)
 {
-    return;
-}
-
-static void
-cb_privilege(struct privilege *priv, int host_match)
-{
+    static struct privilege *prev_priv;
     struct sudo_lbuf lbuf;
 
-    /* No word wrap on output. */
-    sudo_lbuf_init(&lbuf, testsudoers_output, 0, NULL, 0);
-    sudo_lbuf_append(&lbuf, "\n");
-    sudoers_format_privilege(&lbuf, &parsed_policy, priv, false);
-    sudo_lbuf_print(&lbuf);
-    sudo_lbuf_destroy(&lbuf);
+    /* Only output info for the selected user. */
+    if (user_match != ALLOW) {
+	prev_priv = NULL;
+	return;
+    }
 
-    printf("\thost  %s\n", host_match == ALLOW ? "allowed" :
-	host_match == DENY ? "denied" : "unmatched");
-}
+    if (priv != prev_priv) {
+	/* No word wrap on output. */
+	sudo_lbuf_init(&lbuf, testsudoers_output, 0, NULL, 0);
+	sudo_lbuf_append(&lbuf, "\n");
+	sudoers_format_privilege(&lbuf, &parsed_policy, priv, false);
+	sudo_lbuf_print(&lbuf);
+	sudo_lbuf_destroy(&lbuf);
 
-static void
-cb_cmndspec(struct cmndspec *cs, int date_match, int runas_match, int cmnd_match)
-{
-    if (date_match != UNSPEC)
-	printf("\tdate  %s\n", date_match == ALLOW ? "allowed" : "denied");
-    if (date_match != DENY) {
-	printf("\trunas %s\n", runas_match == ALLOW ? "allowed" :
-	    runas_match == DENY ? "denied" : "unmatched");
-	if (runas_match == ALLOW) {
-	    printf("\tcmnd  %s\n", cmnd_match == ALLOW ? "allowed" :
-		cmnd_match == DENY ? "denied" : "unmatched");
+	printf("\thost  %s\n", host_match == ALLOW ? "allowed" :
+	    host_match == DENY ? "denied" : "unmatched");
+    }
+
+    if (host_match == ALLOW) {
+	if (date_match != UNSPEC)
+	    printf("\tdate  %s\n", date_match == ALLOW ? "allowed" : "denied");
+	if (date_match != DENY) {
+	    printf("\trunas %s\n", runas_match == ALLOW ? "allowed" :
+		runas_match == DENY ? "denied" : "unmatched");
+	    if (runas_match == ALLOW) {
+		printf("\tcmnd  %s\n", cmnd_match == ALLOW ? "allowed" :
+		    cmnd_match == DENY ? "denied" : "unmatched");
+	    }
 	}
     }
+
+    prev_priv = priv;
 }
 
 static int

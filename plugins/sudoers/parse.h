@@ -322,13 +322,9 @@ struct cmnd_info {
 };
 
 /*
- * Optional callbacks for sudoers_lookup().
+ * Optional callback for sudoers_lookup().
  */
-struct sudoers_lookup_callbacks {
-    void (*cb_userspec)(struct userspec *us, int user_match);
-    void (*cb_privilege)(struct privilege *priv, int host_match);
-    void (*cb_cmndspec)(struct cmndspec *cs, int date_match, int runas_match, int cmnd_match);
-};
+typedef void (*sudoers_lookup_callback_fn_t)(struct userspec *us, int user_match, struct privilege *priv, int host_match, struct cmndspec *cs, int date_match, int runas_match, int cmnd_match, void *closure);
 
 /*
  * Parse configuration settings, passed to init_parser().
@@ -481,7 +477,7 @@ const char *digest_type_to_name(unsigned int digest_type);
 
 /* parse.c */
 struct sudo_nss_list;
-unsigned int sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, time_t now, struct sudoers_lookup_callbacks *callbacks, int *cmnd_status, int pwflag);
+unsigned int sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, time_t now, sudoers_lookup_callback_fn_t callback, void *cb_data, int *cmnd_status, int pwflag);
 
 /* display.c */
 int display_privs(struct sudo_nss_list *snl, struct passwd *pw, bool verbose);
