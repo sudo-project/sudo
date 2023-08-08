@@ -974,6 +974,7 @@ sudoers_to_eventlog(struct eventlog *evlog, const char *cmnd,
 	evlog->runcwd = user_cwd;
     }
     evlog->rungroup = runas_gr ? runas_gr->gr_name : sudo_user.runas_group;
+    evlog->source = sudo_user.source;
     evlog->submithost = user_host;
     evlog->submituser = user_name;
     if (grp != NULL)

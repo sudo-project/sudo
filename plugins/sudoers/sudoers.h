@@ -108,6 +108,7 @@ struct sudo_user {
     char *cmnd_saved;
     char *class_name;
     char *krb5_ccname;
+    char *source;
     struct gid_list *gid_list;
     char * const * env_vars;
 #ifdef HAVE_SELINUX

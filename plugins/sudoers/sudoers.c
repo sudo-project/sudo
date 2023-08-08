@@ -325,6 +325,26 @@ done:
     debug_return_str(iolog_path);
 }
 
+struct sudoers_match_info {
+    struct privilege *priv;		/* matching privilege */
+    struct userspec *us;		/* matching userspec */
+    struct cmndspec *cs;		/* matching cmndspec */
+};
+
+static void
+cb_lookup(struct userspec *us, int user_match, struct privilege *priv,
+    int host_match, struct cmndspec *cs, int date_match, int runas_match,
+    int cmnd_match, void *closure)
+{
+    struct sudoers_match_info *info = closure;
+
+    if (cmnd_match != UNSPEC) {
+	info->us = us;
+	info->priv = priv;
+	info->cs = cs;
+    }
+}
+
 /*
  * Find the command, perform a sudoers lookup, ask for a password as
  * needed, and perform post-lokup checks.  Logs success/failure.
@@ -336,6 +356,7 @@ done:
 static int
 sudoers_check_common(int pwflag)
 {
+    struct sudoers_match_info match_info = { NULL };
     int oldlocale, ret = -1;
     unsigned int validated;
     time_t now;
@@ -375,12 +396,27 @@ sudoers_check_common(int pwflag)
      */
     time(&now);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
-    validated = sudoers_lookup(snl, sudo_user.pw, now, NULL, NULL,
+    validated = sudoers_lookup(snl, sudo_user.pw, now, cb_lookup, &match_info,
 	&cmnd_status, pwflag);
     sudoers_setlocale(oldlocale, NULL);
     if (ISSET(validated, VALIDATE_ERROR)) {
 	/* The lookup function should have printed an error. */
 	goto done;
+    }
+
+    if (match_info.us != NULL && match_info.us->file != NULL) {
+	free(sudo_user.source);
+	if (match_info.us->line != 0) {
+	    if (asprintf(&sudo_user.source, "%s:%d:%d", match_info.us->file,
+		    match_info.us->line, match_info.us->column) == -1)
+		sudo_user.source = NULL;
+	} else {
+	    sudo_user.source = strdup(match_info.us->file);
+	}
+	if (sudo_user.source == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
     }
 
     if (safe_cmnd == NULL) {
@@ -2049,6 +2085,7 @@ sudo_user_free(void)
     free(list_cmnd);
     free(safe_cmnd);
     free(saved_cmnd);
+    free(sudo_user.source);
     free(user_stat);
 #ifdef HAVE_SELINUX
     free(user_role);

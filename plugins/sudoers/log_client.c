@@ -906,6 +906,9 @@ fmt_info_messages(struct client_closure *closure, struct eventlog *evlog,
     /* TODO - rungroups */
     fill_num("runuid", evlog->runuid);
     fill_str("runuser", evlog->runuser);
+    if (evlog->source != NULL) {
+	fill_str("source", evlog->source);
+    }
     if (evlog->cwd != NULL) {
 	fill_str("submitcwd", evlog->cwd);
     }

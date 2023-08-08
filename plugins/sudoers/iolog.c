@@ -589,6 +589,14 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
 		continue;
 	    }
 	    break;
+	case 's':
+	    if (strncmp(*cur, "source=", sizeof("source=") - 1) == 0) {
+		free(evlog->source);
+		evlog->source = strdup(*cur + sizeof("source=") - 1);
+		if (evlog->source == NULL)
+		    goto oom;
+		continue;
+	    }
 	}
     }
 

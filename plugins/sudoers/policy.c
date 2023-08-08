@@ -668,7 +668,7 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     }
 
     /* Increase the length of command_info as needed, it is *not* checked. */
-    command_info = calloc(73, sizeof(char *));
+    command_info = calloc(74, sizeof(char *));
     if (command_info == NULL)
 	goto oom;
 
@@ -1001,6 +1001,11 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
     if (def_rlimit_stack != NULL) {
         if ((command_info[info_len++] = sudo_new_key_val("rlimit_stack", def_rlimit_stack)) == NULL)
             goto oom;
+    }
+    if (sudo_user.source != NULL) {
+	command_info[info_len] = sudo_new_key_val("source", sudo_user.source);
+	if (command_info[info_len++] == NULL)
+	    goto oom;
     }
 #ifdef HAVE_LOGIN_CAP_H
     if (def_use_loginclass) {
