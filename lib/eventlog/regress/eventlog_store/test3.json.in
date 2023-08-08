@@ -38,6 +38,7 @@
     ],
     "runuid": 0,
     "runuser": "root",
+    "source": "/etc/sudoers:89:24",
     "submitcwd": "/home/millert/sudo/oss-fuzz",
     "submithost": "linux-build",
     "submituser": "millert",

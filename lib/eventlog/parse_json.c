@@ -317,6 +317,17 @@ json_store_signal(struct json_item *item, struct eventlog *evlog)
 }
 
 static bool
+json_store_source(struct json_item *item, struct eventlog *evlog)
+{
+    debug_decl(json_store_source, SUDO_DEBUG_UTIL);
+
+    free(evlog->source);
+    evlog->source = item->u.string;
+    item->u.string = NULL;
+    debug_return_bool(true);
+}
+
+static bool
 json_store_submitcwd(struct json_item *item, struct eventlog *evlog)
 {
     debug_decl(json_store_submitcwd, SUDO_DEBUG_UTIL);
@@ -450,6 +461,7 @@ static struct evlog_json_key {
     { "runuser", JSON_STRING, json_store_runuser },
     { "runchroot", JSON_STRING, json_store_runchroot },
     { "runcwd", JSON_STRING, json_store_runcwd },
+    { "source", JSON_STRING, json_store_source },
     { "signal", JSON_STRING, json_store_signal },
     { "submitcwd", JSON_STRING, json_store_submitcwd },
     { "submithost", JSON_STRING, json_store_submithost },

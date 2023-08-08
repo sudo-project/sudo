@@ -610,6 +610,7 @@ fmt_info_messages(const struct eventlog *evlog, char *hostname,
 	fill_num("runuid", evlog->runuid);
     }
     fill_str("runuser", evlog->runuser);
+    fill_str("source", evlog->source);
     fill_str("submitcwd", evlog->cwd);
     fill_str("submithost", hostname);
     fill_str("submituser", evlog->submituser);

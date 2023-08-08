@@ -54,6 +54,7 @@ eventlog_free(struct eventlog *evlog)
 	free(evlog->runuser);
 	free(evlog->peeraddr);
 	free(evlog->signal_name);
+	free(evlog->source);
 	free(evlog->submithost);
 	free(evlog->submituser);
 	free(evlog->submitgroup);

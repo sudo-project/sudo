@@ -2,6 +2,7 @@
     "submituser": "millert",
     "command": "/usr/bin/find",
     "runuser": "root",
+    "source": "/etc/sudoers:89:24",
     "ttyname": "/dev/pts/1",
     "submithost": "linux-build",
     "submitcwd": "/home/millert/sudo/oss-fuzz",

@@ -39,6 +39,7 @@
     ],
     "runuid": 0,
     "runuser": "root",
+    "source": "/etc/sudoers:89:24",
     "submitcwd": "/etc/mail",
     "submithost": "xerxes.sudo.ws",
     "submituser": "millert",

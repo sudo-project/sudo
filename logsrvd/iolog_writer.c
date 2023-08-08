@@ -283,6 +283,16 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	    }
 	    break;
 	case 's':
+	    if (strcmp(key, "source") == 0) {
+		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    if ((evlog->source = strdup(info->u.strval)) == NULL) {
+			sudo_warnx(U_("%s: %s"), __func__,
+			    U_("unable to allocate memory"));
+			goto bad;
+		    }
+		}
+		continue;
+	    }
 	    if (strcmp(key, "submitcwd") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
 		    if ((evlog->cwd = strdup(info->u.strval)) == NULL) {

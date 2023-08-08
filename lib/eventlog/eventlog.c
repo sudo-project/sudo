@@ -681,6 +681,13 @@ eventlog_store_json(struct json_container *jsonc, const struct eventlog *evlog)
 	    goto oom;
     }
 
+    if (evlog->source != NULL) {
+	json_value.type = JSON_STRING;
+	json_value.u.string = evlog->source;
+	if (!sudo_json_add_value(jsonc, "source", &json_value))
+	    goto oom;
+    }
+
     if (evlog->ttyname != NULL) {
 	json_value.type = JSON_STRING;
 	json_value.u.string = evlog->ttyname;

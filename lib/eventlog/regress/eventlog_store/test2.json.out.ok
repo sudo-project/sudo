@@ -2,6 +2,7 @@
     "submituser": "millert",
     "command": "/usr/bin/id",
     "runuser": "root",
+    "source": "sudoRole %wheel",
     "ttyname": "/dev/ttyp0",
     "submithost": "xerxes.sudo.ws",
     "submitcwd": "/usr/src/local/millert/sudo/trunk",

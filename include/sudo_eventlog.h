@@ -105,6 +105,7 @@ struct eventlog {
     char *runuser;
     char *peeraddr;
     char *signal_name;
+    char *source;
     char *submithost;
     char *submituser;
     char *submitgroup;
