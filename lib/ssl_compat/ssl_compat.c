@@ -34,6 +34,10 @@
 # include "sudo_compat.h"
 # include "sudo_ssl_compat.h"
 
+/*
+ * Emulate SSL_read_ex() using SSL_read().
+ * Unlike the real SSL_read_ex(), this can return -1 on error.
+ */
 int
 SSL_read_ex(SSL *ssl, void *buf, size_t num, size_t *readbytes)
 {
@@ -44,6 +48,10 @@ SSL_read_ex(SSL *ssl, void *buf, size_t num, size_t *readbytes)
     return 1;
 }
 
+/*
+ * Emulate SSL_write_ex() using SSL_write().
+ * Unlike the real SSL_write_ex(), this can return -1 on error.
+ */
 int
 SSL_write_ex(SSL *ssl, const void *buf, size_t num, size_t *written)
 {

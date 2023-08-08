@@ -1696,13 +1696,13 @@ server_msg_cb(int fd, int what, void *v)
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: reading ServerMessage", __func__);
 #if defined(HAVE_OPENSSL)
     if (closure->ssl != NULL) {
-        int err = SSL_read_ex(closure->ssl, buf->data + buf->len,
+        const int result = SSL_read_ex(closure->ssl, buf->data + buf->len,
 	    buf->size - buf->len, &nread);
-        if (err) {
+        if (result <= 0) {
 	    unsigned long errcode;
 	    const char *errstr;
 
-            switch (SSL_get_error(closure->ssl, err)) {
+            switch (SSL_get_error(closure->ssl, result)) {
 		case SSL_ERROR_ZERO_RETURN:
 		    /* TLS connection shutdown cleanly */
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
@@ -1862,12 +1862,12 @@ client_msg_cb(int fd, int what, void *v)
 
 #if defined(HAVE_OPENSSL)
     if (closure->ssl != NULL) {
-        int err = SSL_write_ex(closure->ssl, buf->data + buf->off,
+        const int result = SSL_write_ex(closure->ssl, buf->data + buf->off,
 	    buf->len - buf->off, &nwritten);
-        if (err) {
+        if (result <= 0) {
 	    const char *errstr;
 
-            switch (SSL_get_error(closure->ssl, err)) {
+            switch (SSL_get_error(closure->ssl, result)) {
 		case SSL_ERROR_ZERO_RETURN:
 		    /* TLS connection shutdown cleanly */
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,

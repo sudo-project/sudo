@@ -716,18 +716,18 @@ relay_server_msg_cb(int fd, int what, void *v)
 #if defined(HAVE_OPENSSL)
     if (relay_closure->tls_client.ssl != NULL) {
 	SSL *ssl = relay_closure->tls_client.ssl;
-	int err;
+	int result;
 
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "%s: ServerMessage from relay %s (%s) [TLS]", __func__,
 	    relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
-        err = SSL_read_ex(ssl, buf->data + buf->len, buf->size - buf->len,
+        result = SSL_read_ex(ssl, buf->data + buf->len, buf->size - buf->len,
 	    &nread);
-        if (err) {
+        if (result <= 0) {
 	    unsigned long errcode;
 	    const char *errstr;
 
-            switch (SSL_get_error(ssl, err)) {
+            switch (SSL_get_error(ssl, result)) {
 		case SSL_ERROR_ZERO_RETURN:
 		    /* ssl connection shutdown cleanly */
 		    nread = 0;
@@ -928,12 +928,12 @@ relay_client_msg_cb(int fd, int what, void *v)
 #if defined(HAVE_OPENSSL)
     if (relay_closure->tls_client.ssl != NULL) {
 	SSL *ssl = relay_closure->tls_client.ssl;
-        int err = SSL_write_ex(ssl, buf->data + buf->off, buf->len - buf->off,
-	    &nwritten);
-        if (err) {
+        const int result = SSL_write_ex(ssl, buf->data + buf->off,
+	    buf->len - buf->off, &nwritten);
+        if (result <= 0) {
 	    const char *errstr;
 
-            switch (SSL_get_error(ssl, err)) {
+            switch (SSL_get_error(ssl, result)) {
 		case SSL_ERROR_ZERO_RETURN:
 		    /* ssl connection shutdown cleanly */
 		    shutdown(relay_closure->sock, SHUT_RDWR);

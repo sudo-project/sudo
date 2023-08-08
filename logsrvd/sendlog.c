@@ -1279,15 +1279,15 @@ server_msg_cb(int fd, int what, void *v)
 #if defined(HAVE_OPENSSL)
     if (cert != NULL) {
 	SSL *ssl = closure->tls_client.ssl;
-	int err;
+	int result;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: reading ServerMessage (TLS)", __func__);
-        err = SSL_read_ex(ssl, buf->data + buf->len, buf->size - buf->len,
+        result = SSL_read_ex(ssl, buf->data + buf->len, buf->size - buf->len,
 	    &nread);
-        if (err) {
+        if (result <= 0) {
 	    unsigned long errcode;
 	    const char *errstr;
 
-            switch (SSL_get_error(ssl, err)) {
+            switch (SSL_get_error(ssl, result)) {
 		case SSL_ERROR_ZERO_RETURN:
 		    /* ssl connection shutdown cleanly */
 		    nread = 0;
@@ -1436,12 +1436,12 @@ client_msg_cb(int fd, int what, void *v)
 #if defined(HAVE_OPENSSL)
     if (cert != NULL) {
 	SSL *ssl = closure->tls_client.ssl;
-        int err = SSL_write_ex(ssl, buf->data + buf->off, buf->len - buf->off,
-	    &nwritten);
-        if (err) {
+        const int result = SSL_write_ex(ssl, buf->data + buf->off,
+	    buf->len - buf->off, &nwritten);
+        if (result <= 0) {
 	    const char *errstr;
 
-            switch (SSL_get_error(ssl, err)) {
+            switch (SSL_get_error(ssl, result)) {
 		case SSL_ERROR_ZERO_RETURN:
 		    /* ssl connection shutdown */
 		    goto bad;
