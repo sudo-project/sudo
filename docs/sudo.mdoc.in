@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd June 18, 2023
+.Dd August 9, 2023
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -560,11 +560,21 @@ and the security policy supports a verbose output format.
 .Pp
 If a
 .Ar command
-is specified and is permitted by the security policy, the fully-qualified
-path to the
+is specified and is permitted by the security policy for the invoking
+user (or the,
+.Ar user
+specified by the
+.Fl U
+option) on the current host,
+the fully-qualified path to the
 .Ar command
 is displayed along with any
 .Ar arg Ns s.
+If
+.Fl l
+is specified more than once (and the security policy supports it),
+the matching rule is displayed in a verbose format along with the
+.Ar command .
 If a
 .Ar command
 is specified but not allowed by the policy,
@@ -578,7 +588,9 @@ Unlike the
 flag, existing cached credentials are used if they are valid.
 To detect when the user's cached credentials are valid (or when no
 authentication is required), the following can be used:
-.Dl sudo -Nnv
+.Bd -literal -offset 4n
+sudo -Nnv
+.Ed
 .Pp
 Not all security policies support credential caching.
 .It Fl n , -non-interactive
