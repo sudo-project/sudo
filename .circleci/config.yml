@@ -70,7 +70,7 @@ jobs:
   test_macos:
     description: run sudo tests in a pre-built workspace (macOS)
     macos:
-      xcode: 13.2.1 # indicate our selected version of Xcode
+      xcode: 13.4.1 # indicate our selected version of Xcode
     steps:
       # Reuse the workspace from the build job
       - attach_workspace:
