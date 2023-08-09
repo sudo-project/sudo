@@ -815,14 +815,14 @@ sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, time_t now,
 
 /* STUB */
 int
-display_cmnd(struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
+display_cmnd(const struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
 {
     return true;
 }
 
 /* STUB */
 int
-display_privs(struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
+display_privs(const struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
 {
     return true;
 }

@@ -37,12 +37,12 @@
  */
 bool
 sudoers_format_privilege(struct sudo_lbuf *lbuf,
-    const struct sudoers_parse_tree *parse_tree, struct privilege *priv,
+    const struct sudoers_parse_tree *parse_tree, const struct privilege *priv,
     bool expand_aliases)
 {
-    struct cmndspec *cs, *prev_cs;
+    const struct cmndspec *cs, *prev_cs;
+    const struct member *m;
     struct cmndtag tags;
-    struct member *m;
     debug_decl(sudoers_format_privilege, SUDOERS_DEBUG_UTIL);
 
     /* Convert per-privilege defaults to tags. */
@@ -101,11 +101,11 @@ sudoers_format_privilege(struct sudo_lbuf *lbuf,
 bool
 sudoers_format_userspec(struct sudo_lbuf *lbuf,
     const struct sudoers_parse_tree *parse_tree,
-    struct userspec *us, bool expand_aliases)
+    const struct userspec *us, bool expand_aliases)
 {
-    struct privilege *priv;
-    struct sudoers_comment *comment;
-    struct member *m;
+    const struct sudoers_comment *comment;
+    const struct privilege *priv;
+    const struct member *m;
     debug_decl(sudoers_format_userspec, SUDOERS_DEBUG_UTIL);
 
     /* Print comments (if any). */
@@ -142,7 +142,7 @@ sudoers_format_userspecs(struct sudo_lbuf *lbuf,
     const struct sudoers_parse_tree *parse_tree, const char *separator,
     bool expand_aliases, bool flush)
 {
-    struct userspec *us;
+    const struct userspec *us;
     debug_decl(sudoers_format_userspecs, SUDOERS_DEBUG_UTIL);
 
     TAILQ_FOREACH(us, &parse_tree->userspecs, entries) {
@@ -164,10 +164,10 @@ sudoers_format_userspecs(struct sudo_lbuf *lbuf,
  */
 bool
 sudoers_format_default_line(struct sudo_lbuf *lbuf,
-    const struct sudoers_parse_tree *parse_tree, struct defaults *d,
+    const struct sudoers_parse_tree *parse_tree, const struct defaults *d,
     struct defaults **next, bool expand_aliases)
 {
-    struct member *m;
+    const struct member *m;
     short alias_type;
     debug_decl(sudoers_format_default_line, SUDOERS_DEBUG_UTIL);
 

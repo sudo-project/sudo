@@ -326,9 +326,10 @@ done:
 }
 
 static void
-cb_lookup(struct sudoers_parse_tree *parse_tree, struct userspec *us,
-    int user_match, struct privilege *priv, int host_match, struct cmndspec *cs,
-    int date_match, int runas_match, int cmnd_match, void *closure)
+cb_lookup(const struct sudoers_parse_tree *parse_tree,
+    const struct userspec *us, int user_match, const struct privilege *priv,
+    int host_match, const struct cmndspec *cs, int date_match, int runas_match,
+    int cmnd_match, void *closure)
 {
     struct sudoers_match_info *info = closure;
 

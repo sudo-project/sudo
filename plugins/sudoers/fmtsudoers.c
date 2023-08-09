@@ -40,13 +40,13 @@
  */
 static bool
 sudoers_format_member_int(struct sudo_lbuf *lbuf,
-    const struct sudoers_parse_tree *parse_tree, char *name, int type,
+    const struct sudoers_parse_tree *parse_tree, const char *name, int type,
     bool negated, const char *separator, short alias_type)
 {
     struct alias *a;
-    struct member *m;
-    struct sudo_command *c;
-    struct command_digest *digest;
+    const struct member *m;
+    const struct sudo_command *c;
+    const struct command_digest *digest;
     debug_decl(sudoers_format_member_int, SUDOERS_DEBUG_UTIL);
 
     switch (type) {
@@ -136,7 +136,7 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
 
 bool
 sudoers_format_member(struct sudo_lbuf *lbuf,
-    const struct sudoers_parse_tree *parse_tree, struct member *m,
+    const struct sudoers_parse_tree *parse_tree, const struct member *m,
     const char *separator, short alias_type)
 {
     return sudoers_format_member_int(lbuf, parse_tree, m->name, m->type,
@@ -185,10 +185,11 @@ sudoers_defaults_to_tags(const char *var, const char *val, int op,
  * Convert a defaults list to command tags.
  */
 bool
-sudoers_defaults_list_to_tags(struct defaults_list *defs, struct cmndtag *tags)
+sudoers_defaults_list_to_tags(const struct defaults_list *defs,
+    struct cmndtag *tags)
 {
+    const struct defaults *d;
     bool ret = true;
-    struct defaults *d;
     debug_decl(sudoers_defaults_list_to_tags, SUDOERS_DEBUG_UTIL);
 
     TAGS_INIT(tags);
@@ -222,8 +223,8 @@ sudoers_defaults_list_to_tags(struct defaults_list *defs, struct cmndtag *tags)
  */
 bool
 sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
-    const struct sudoers_parse_tree *parse_tree, struct cmndspec *cs,
-    struct cmndspec *prev_cs, struct cmndtag tags, bool expand_aliases)
+    const struct sudoers_parse_tree *parse_tree, const struct cmndspec *cs,
+    const struct cmndspec *prev_cs, struct cmndtag tags, bool expand_aliases)
 {
     debug_decl(sudoers_format_cmndspec, SUDOERS_DEBUG_UTIL);
 
@@ -298,7 +299,7 @@ sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
  * Format and append a defaults entry to the specified lbuf.
  */
 bool
-sudoers_format_default(struct sudo_lbuf *lbuf, struct defaults *d)
+sudoers_format_default(struct sudo_lbuf *lbuf, const struct defaults *d)
 {
     debug_decl(sudoers_format_default, SUDOERS_DEBUG_UTIL);
 

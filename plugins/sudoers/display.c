@@ -36,8 +36,8 @@
 #include <gram.h>
 
 static int
-display_priv_short(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
-    struct userspec *us, struct sudo_lbuf *lbuf)
+display_priv_short(const struct sudoers_parse_tree *parse_tree,
+    const struct passwd *pw, const struct userspec *us, struct sudo_lbuf *lbuf)
 {
     struct privilege *priv;
     int nfound = 0;
@@ -103,7 +103,7 @@ display_priv_short(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
  * Returns true if we should start a new long entry, else false.
  */
 static bool
-new_long_entry(struct cmndspec *cs, struct cmndspec *prev_cs)
+new_long_entry(const struct cmndspec *cs, const struct cmndspec *prev_cs)
 {
     debug_decl(new_long_entry, SUDOERS_DEBUG_PARSER);
 
@@ -141,12 +141,13 @@ new_long_entry(struct cmndspec *cs, struct cmndspec *prev_cs)
 }
 
 static void
-display_cmndspec_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
-    struct userspec *us, struct privilege *priv, struct cmndspec *cs,
-    struct cmndspec *prev_cs, struct sudo_lbuf *lbuf)
+display_cmndspec_long(const struct sudoers_parse_tree *parse_tree,
+    const struct passwd *pw, const struct userspec *us,
+    const struct privilege *priv, const struct cmndspec *cs,
+    const struct cmndspec *prev_cs, struct sudo_lbuf *lbuf)
 {
-    struct defaults *d;
-    struct member *m;
+    const struct defaults *d;
+    const struct member *m;
     debug_decl(display_cmndspec_long, SUDOERS_DEBUG_PARSER);
 
     if (new_long_entry(cs, prev_cs)) {
@@ -261,15 +262,15 @@ display_cmndspec_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 }
 
 static int
-display_priv_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
-    struct userspec *us, struct sudo_lbuf *lbuf)
+display_priv_long(const struct sudoers_parse_tree *parse_tree,
+    const struct passwd *pw, const struct userspec *us, struct sudo_lbuf *lbuf)
 {
-    struct privilege *priv;
+    const struct privilege *priv;
     int nfound = 0;
     debug_decl(display_priv_long, SUDOERS_DEBUG_PARSER);
 
     TAILQ_FOREACH(priv, &us->privileges, entries) {
-	struct cmndspec *cs, *prev_cs;
+	const struct cmndspec *cs, *prev_cs;
 
 	if (hostlist_matches(parse_tree, pw, &priv->hostlist) != ALLOW)
 	    continue;
@@ -285,10 +286,10 @@ display_priv_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 }
 
 static int
-sudo_display_userspecs(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
-    struct sudo_lbuf *lbuf, bool verbose)
+sudo_display_userspecs(struct sudoers_parse_tree *parse_tree,
+    const struct passwd *pw, struct sudo_lbuf *lbuf, bool verbose)
 {
-    struct userspec *us;
+    const struct userspec *us;
     int nfound = 0;
     debug_decl(sudo_display_userspecs, SUDOERS_DEBUG_PARSER);
 
@@ -310,10 +311,10 @@ sudo_display_userspecs(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
  * Display matching Defaults entries for the given user on this host.
  */
 static int
-display_defaults(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
-    struct sudo_lbuf *lbuf)
+display_defaults(const struct sudoers_parse_tree *parse_tree,
+    const struct passwd *pw, struct sudo_lbuf *lbuf)
 {
-    struct defaults *d;
+    const struct defaults *d;
     const char *prefix;
     int nfound = 0;
     debug_decl(display_defaults, SUDOERS_DEBUG_PARSER);
@@ -351,12 +352,12 @@ display_defaults(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
  * Display Defaults entries of the given type.
  */
 static int
-display_bound_defaults_by_type(struct sudoers_parse_tree *parse_tree,
+display_bound_defaults_by_type(const struct sudoers_parse_tree *parse_tree,
     int deftype, struct sudo_lbuf *lbuf)
 {
-    struct defaults *d;
-    struct defaults_binding *binding = NULL;
-    struct member *m;
+    const struct defaults *d;
+    const struct defaults_binding *binding = NULL;
+    const struct member *m;
     const char *dsep;
     short atype;
     int nfound = 0;
@@ -412,8 +413,8 @@ display_bound_defaults_by_type(struct sudoers_parse_tree *parse_tree,
  * Display Defaults entries that are per-runas or per-command
  */
 static int
-display_bound_defaults(struct sudoers_parse_tree *parse_tree,
-    struct passwd *pw, struct sudo_lbuf *lbuf)
+display_bound_defaults(const struct sudoers_parse_tree *parse_tree,
+    const struct passwd *pw, struct sudo_lbuf *lbuf)
 {
     int nfound = 0;
     debug_decl(display_bound_defaults, SUDOERS_DEBUG_PARSER);
@@ -449,9 +450,9 @@ output(const char *buf)
  * Returns true on success or -1 on error.
  */
 int
-display_privs(struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
+display_privs(const struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
 {
-    struct sudo_nss *nss;
+    const struct sudo_nss *nss;
     struct sudo_lbuf def_buf, priv_buf;
     int cols, count, n;
     unsigned int olen;
@@ -536,14 +537,14 @@ bad:
 }
 
 static int
-display_cmnd_check(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
-    time_t now, struct sudoers_match_info *match_info)
+display_cmnd_check(const struct sudoers_parse_tree *parse_tree,
+    const struct passwd *pw, time_t now, struct sudoers_match_info *match_info)
 {
     int host_match, runas_match, cmnd_match = UNSPEC;
     char *saved_user_cmnd, *saved_user_base;
-    struct cmndspec *cs;
-    struct privilege *priv;
-    struct userspec *us;
+    const struct privilege *priv;
+    const struct userspec *us;
+    const struct cmndspec *cs;
     debug_decl(display_cmnd_check, SUDOERS_DEBUG_PARSER);
 
     /*
@@ -599,7 +600,7 @@ done:
  * Returns true if the command is allowed, false if not or -1 on error.
  */
 int
-display_cmnd(struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
+display_cmnd(const struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
 {
     struct sudoers_match_info match_info = { NULL };
     struct sudo_lbuf lbuf;
