@@ -61,6 +61,7 @@ sudo_dso_unload_v1
 sudo_ev_add_v1
 sudo_ev_add_v2
 sudo_ev_alloc_v1
+sudo_ev_alloc_v2
 sudo_ev_base_alloc_v1
 sudo_ev_base_free_v1
 sudo_ev_base_setdef_v1
@@ -76,7 +77,9 @@ sudo_ev_loopbreak_v1
 sudo_ev_loopcontinue_v1
 sudo_ev_loopexit_v1
 sudo_ev_pending_v1
+sudo_ev_pending_v2
 sudo_ev_set_v1
+sudo_ev_set_v2
 sudo_fatal_callback_deregister_v1
 sudo_fatal_callback_register_v1
 sudo_fatal_nodebug_v1

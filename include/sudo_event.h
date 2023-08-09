@@ -126,7 +126,8 @@ sudo_dso_public void sudo_ev_base_setdef_v1(struct sudo_event_base *base);
 
 /* Allocate a new event. */
 sudo_dso_public struct sudo_event *sudo_ev_alloc_v1(int fd, short events, sudo_ev_callback_t callback, void *closure);
-#define sudo_ev_alloc(_a, _b, _c, _d) sudo_ev_alloc_v1((_a), (_b), (_c), (_d))
+sudo_dso_public struct sudo_event *sudo_ev_alloc_v2(int fd, int events, sudo_ev_callback_t callback, void *closure);
+#define sudo_ev_alloc(_a, _b, _c, _d) sudo_ev_alloc_v2((_a), (_b), (_c), (_d))
 
 /* Free an event. */
 sudo_dso_public void sudo_ev_free_v1(struct sudo_event *ev);
@@ -134,7 +135,8 @@ sudo_dso_public void sudo_ev_free_v1(struct sudo_event *ev);
 
 /* Set an event struct that was pre-allocated. */
 sudo_dso_public int sudo_ev_set_v1(struct sudo_event *ev, int fd, short events, sudo_ev_callback_t callback, void *closure);
-#define sudo_ev_set(_a, _b, _c, _d, _e) sudo_ev_set_v1((_a), (_b), (_c), (_d), (_e))
+sudo_dso_public int sudo_ev_set_v2(struct sudo_event *ev, int fd, int events, sudo_ev_callback_t callback, void *closure);
+#define sudo_ev_set(_a, _b, _c, _d, _e) sudo_ev_set_v2((_a), (_b), (_c), (_d), (_e))
 
 /* Add an event, returns 0 on success, -1 on error */
 sudo_dso_public int sudo_ev_add_v1(struct sudo_event_base *head, struct sudo_event *ev, const struct timeval *timo, bool tohead);
@@ -155,7 +157,8 @@ sudo_dso_public int sudo_ev_loop_v1(struct sudo_event_base *head, unsigned int f
 
 /* Return pending event types, fills in ts if non-NULL and there is a timeout */
 sudo_dso_public int sudo_ev_pending_v1(struct sudo_event *ev, short events, struct timespec *ts);
-#define sudo_ev_pending(_a, _b, _c) sudo_ev_pending_v1((_a), (_b), (_c))
+sudo_dso_public int sudo_ev_pending_v2(struct sudo_event *ev, int events, struct timespec *ts);
+#define sudo_ev_pending(_a, _b, _c) sudo_ev_pending_v2((_a), (_b), (_c))
 
 /* Return the remaining timeout associated with an event (deprecated). */
 sudo_dso_public int sudo_ev_get_timeleft_v1(struct sudo_event *ev, struct timeval *tv);

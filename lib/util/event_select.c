@@ -82,14 +82,14 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
     if (ev->fd > base->maxfd) {
 	const int o = (base->maxfd + 1) / NFDBITS;
 	const int n = howmany(ev->fd + 1, NFDBITS);
-	const size_t used_bytes = o * sizeof(fd_mask);
-	const size_t new_bytes = (n - o) * sizeof(fd_mask);
+	const size_t used_bytes = (size_t)o * sizeof(fd_mask);
+	const size_t new_bytes = (size_t)(n - o) * sizeof(fd_mask);
 	fd_set *rfds_in, *wfds_in, *rfds_out, *wfds_out;
 
-	rfds_in = reallocarray(base->readfds_in, n, sizeof(fd_mask));
-	wfds_in = reallocarray(base->writefds_in, n, sizeof(fd_mask));
-	rfds_out = reallocarray(base->readfds_out, n, sizeof(fd_mask));
-	wfds_out = reallocarray(base->writefds_out, n, sizeof(fd_mask));
+	rfds_in = reallocarray(base->readfds_in, (size_t)n, sizeof(fd_mask));
+	wfds_in = reallocarray(base->writefds_in, (size_t)n, sizeof(fd_mask));
+	rfds_out = reallocarray(base->readfds_out, (size_t)n, sizeof(fd_mask));
+	wfds_out = reallocarray(base->writefds_out, (size_t)n, sizeof(fd_mask));
 	if (rfds_in == NULL || wfds_in == NULL ||
 	    rfds_out == NULL || wfds_out == NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -209,7 +209,7 @@ sudo_ev_scan_impl(struct sudo_event_base *base, unsigned int flags)
     }
 
     /* select() overwrites readfds/writefds so make a copy. */
-    setsize = howmany(base->highfd + 1, NFDBITS) * sizeof(fd_mask);
+    setsize = (size_t)howmany(base->highfd + 1, NFDBITS) * sizeof(fd_mask);
     memcpy(base->readfds_out, base->readfds_in, setsize);
     memcpy(base->writefds_out, base->writefds_in, setsize);
 
@@ -229,7 +229,7 @@ sudo_ev_scan_impl(struct sudo_event_base *base, unsigned int flags)
 	/* Activate each I/O event that fired. */
 	TAILQ_FOREACH(ev, &base->events, entries) {
 	    if (ev->fd >= 0) {
-		int what = 0;
+		short what = 0;
 		if (FD_ISSET(ev->fd, (fd_set *)base->readfds_out))
 		    what |= (ev->events & SUDO_EV_READ);
 		if (FD_ISSET(ev->fd, (fd_set *)base->writefds_out))
@@ -237,7 +237,7 @@ sudo_ev_scan_impl(struct sudo_event_base *base, unsigned int flags)
 		if (what != 0) {
 		    /* Make event active. */
 		    sudo_debug_printf(SUDO_DEBUG_DEBUG,
-			"%s: selected fd %d, events %d, activating %p",
+			"%s: selected fd %d, events %hd, activating %p",
 			__func__, ev->fd, what, ev);
 		    ev->revents = what;
 		    sudo_ev_activate(base, ev);

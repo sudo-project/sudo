@@ -44,7 +44,7 @@
 #include "sudo_event.h"
 #include "sudo_util.h"
 
-static void sudo_ev_init(struct sudo_event *ev, int fd, short events,
+static void sudo_ev_init(struct sudo_event *ev, int fd, int events,
     sudo_ev_callback_t callback, void *closure);
 
 /* Default event base when none is specified. */
@@ -263,7 +263,7 @@ sudo_ev_base_setdef_v1(struct sudo_event_base *base)
  * Clear and fill in a struct sudo_event.
  */
 static void
-sudo_ev_init(struct sudo_event *ev, int fd, short events,
+sudo_ev_init(struct sudo_event *ev, int fd, int events,
     sudo_ev_callback_t callback, void *closure)
 {
     debug_decl(sudo_ev_init, SUDO_DEBUG_EVENT);
@@ -283,7 +283,7 @@ sudo_ev_init(struct sudo_event *ev, int fd, short events,
  * Allocates space for siginfo_t for SUDO_EV_SIGINFO as needed.
  */
 int
-sudo_ev_set_v1(struct sudo_event *ev, int fd, short events,
+sudo_ev_set_v2(struct sudo_event *ev, int fd, int events,
     sudo_ev_callback_t callback, void *closure)
 {
     debug_decl(sudo_ev_set, SUDO_DEBUG_EVENT);
@@ -305,8 +305,15 @@ sudo_ev_set_v1(struct sudo_event *ev, int fd, short events,
     debug_return_int(0);
 }
 
+int
+sudo_ev_set_v1(struct sudo_event *ev, int fd, short events,
+    sudo_ev_callback_t callback, void *closure)
+{
+    return sudo_ev_set_v2(ev, fd, events, callback, closure);
+}
+
 struct sudo_event *
-sudo_ev_alloc_v1(int fd, short events, sudo_ev_callback_t callback, void *closure)
+sudo_ev_alloc_v2(int fd, int events, sudo_ev_callback_t callback, void *closure)
 {
     struct sudo_event *ev;
     debug_decl(sudo_ev_alloc, SUDO_DEBUG_EVENT);
@@ -322,6 +329,12 @@ sudo_ev_alloc_v1(int fd, short events, sudo_ev_callback_t callback, void *closur
 	debug_return_ptr(NULL);
     }
     debug_return_ptr(ev);
+}
+
+struct sudo_event *
+sudo_ev_alloc_v1(int fd, short events, sudo_ev_callback_t callback, void *closure)
+{
+    return sudo_ev_alloc_v2(fd, events, callback, closure);
 }
 
 void
@@ -833,7 +846,7 @@ sudo_ev_get_timeleft_v2(struct sudo_event *ev, struct timespec *ts)
 }
 
 int
-sudo_ev_pending_v1(struct sudo_event *ev, short events, struct timespec *ts)
+sudo_ev_pending_v2(struct sudo_event *ev, int events, struct timespec *ts)
 {
     int ret;
     debug_decl(sudo_ev_pending, SUDO_DEBUG_EVENT);
@@ -859,4 +872,10 @@ sudo_ev_pending_v1(struct sudo_event *ev, short events, struct timespec *ts)
     }
 
     debug_return_int(ret);
+}
+
+int
+sudo_ev_pending_v1(struct sudo_event *ev, short events, struct timespec *ts)
+{
+    return sudo_ev_pending_v2(ev, events, ts);
 }
