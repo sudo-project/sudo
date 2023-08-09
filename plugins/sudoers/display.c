@@ -165,7 +165,8 @@ display_priv_long(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 		    sudo_lbuf_append(lbuf, _("\nLDAP Role: %s\n"),
 			priv->ldap_role);
 		} else {
-		    sudo_lbuf_append(lbuf, "%s", _("\nSudoers entry:\n"));
+		    sudo_lbuf_append(lbuf, _("\nSudoers entry: %s\n"),
+			us->file);
 		}
 		sudo_lbuf_append(lbuf, "%s", _("    RunAsUsers: "));
 		if (cs->runasuserlist != NULL) {
