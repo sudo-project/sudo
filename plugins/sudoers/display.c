@@ -537,7 +537,7 @@ bad:
 
 static int
 display_cmnd_check(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
-    time_t now)
+    time_t now, struct sudoers_match_info *match_info)
 {
     int host_match, runas_match, cmnd_match = UNSPEC;
     char *saved_user_cmnd, *saved_user_base;
@@ -576,8 +576,13 @@ display_cmnd_check(struct sudoers_parse_tree *parse_tree, struct passwd *pw,
 		if (runas_match == ALLOW) {
 		    cmnd_match = cmnd_matches(parse_tree, cs->cmnd,
 			cs->runchroot, NULL);
-		    if (cmnd_match != UNSPEC)
+		    if (cmnd_match != UNSPEC) {
+			match_info->parse_tree = parse_tree;
+			match_info->us = us;
+			match_info->priv = priv;
+			match_info->cs = cs;
 			goto done;
+		    }
 		}
 	    }
 	}
@@ -594,8 +599,10 @@ done:
  * Returns true if the command is allowed, false if not or -1 on error.
  */
 int
-display_cmnd(struct sudo_nss_list *snl, struct passwd *pw)
+display_cmnd(struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
 {
+    struct sudoers_match_info match_info = { NULL };
+    struct sudo_lbuf lbuf;
     struct sudo_nss *nss;
     int m, match = UNSPEC;
     int ret = false;
@@ -604,13 +611,14 @@ display_cmnd(struct sudo_nss_list *snl, struct passwd *pw)
 
     /* Iterate over each source, checking for the command. */
     time(&now);
+    sudo_lbuf_init(&lbuf, output, 0, NULL, 0);
     TAILQ_FOREACH(nss, snl, entries) {
 	if (nss->query(nss, pw) == -1) {
 	    /* The query function should have printed an error message. */
 	    debug_return_int(-1);
 	}
 
-	m = display_cmnd_check(nss->parse_tree, pw, now);
+	m = display_cmnd_check(nss->parse_tree, pw, now, &match_info);
 	if (m != UNSPEC)
 	    match = m;
 
@@ -618,9 +626,17 @@ display_cmnd(struct sudo_nss_list *snl, struct passwd *pw)
 	    break;
     }
     if (match == ALLOW) {
-	const int len = sudo_printf(SUDO_CONV_INFO_MSG, "%s%s%s\n",
+	if (verbose) {
+	    /* Append matching sudoers rule (long form). */
+	    display_cmndspec_long(match_info.parse_tree, pw, match_info.us,
+		match_info.priv, match_info.cs, NULL, &lbuf);
+	    sudo_lbuf_append(&lbuf, "    Matched: ");
+	}
+	sudo_lbuf_append(&lbuf, "%s%s%s\n",
 	    list_cmnd, user_args ? " " : "", user_args ? user_args : "");
-	ret = len < 0 ? -1 : true;
+	sudo_lbuf_print(&lbuf);
+	ret = sudo_lbuf_error(&lbuf) ? -1 : true;
+	sudo_lbuf_destroy(&lbuf);
     }
     debug_return_int(ret);
 }

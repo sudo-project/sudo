@@ -325,16 +325,10 @@ done:
     debug_return_str(iolog_path);
 }
 
-struct sudoers_match_info {
-    struct privilege *priv;		/* matching privilege */
-    struct userspec *us;		/* matching userspec */
-    struct cmndspec *cs;		/* matching cmndspec */
-};
-
 static void
-cb_lookup(struct userspec *us, int user_match, struct privilege *priv,
-    int host_match, struct cmndspec *cs, int date_match, int runas_match,
-    int cmnd_match, void *closure)
+cb_lookup(struct sudoers_parse_tree *parse_tree, struct userspec *us,
+    int user_match, struct privilege *priv, int host_match, struct cmndspec *cs,
+    int date_match, int runas_match, int cmnd_match, void *closure)
 {
     struct sudoers_match_info *info = closure;
 
@@ -950,7 +944,7 @@ sudoers_list(int argc, char * const argv[], const char *list_user, bool verbose)
 	goto done;
 
     if (ISSET(sudo_mode, MODE_CHECK))
-	ret = display_cmnd(snl, list_pw ? list_pw : sudo_user.pw);
+	ret = display_cmnd(snl, list_pw ? list_pw : sudo_user.pw, verbose);
     else
 	ret = display_privs(snl, list_pw ? list_pw : sudo_user.pw, verbose);
 

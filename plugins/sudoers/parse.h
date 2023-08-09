@@ -298,6 +298,13 @@ struct defaults {
     int column;				/* column number of Defaults entry */
 };
 
+struct sudoers_match_info {
+    struct sudoers_parse_tree *parse_tree;
+    struct userspec *us;		/* matching userspec */
+    struct privilege *priv;		/* matching privilege */
+    struct cmndspec *cs;		/* matching cmndspec */
+};
+
 /*
  * Parsed sudoers policy.
  */
@@ -324,7 +331,7 @@ struct cmnd_info {
 /*
  * Optional callback for sudoers_lookup().
  */
-typedef void (*sudoers_lookup_callback_fn_t)(struct userspec *us, int user_match, struct privilege *priv, int host_match, struct cmndspec *cs, int date_match, int runas_match, int cmnd_match, void *closure);
+typedef void (*sudoers_lookup_callback_fn_t)(struct sudoers_parse_tree *parse_tree, struct userspec *us, int user_match, struct privilege *priv, int host_match, struct cmndspec *cs, int date_match, int runas_match, int cmnd_match, void *closure);
 
 /*
  * Parse configuration settings, passed to init_parser().
@@ -481,7 +488,7 @@ unsigned int sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, time_t
 
 /* display.c */
 int display_privs(struct sudo_nss_list *snl, struct passwd *pw, bool verbose);
-int display_cmnd(struct sudo_nss_list *snl, struct passwd *pw);
+int display_cmnd(struct sudo_nss_list *snl, struct passwd *pw, bool verbose);
 
 /* parse_ldif.c */
 bool sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree, FILE *fp, const char *sudoers_base, bool store_options);

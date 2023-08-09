@@ -99,8 +99,8 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw, time_t now,
 	    int user_match = userlist_matches(nss->parse_tree, pw, &us->users);
 	    if (user_match != ALLOW) {
 		if (callback != NULL && user_match != UNSPEC) {
-		    callback(us, user_match, NULL, UNSPEC, NULL, UNSPEC,
-			UNSPEC, UNSPEC, cb_data);
+		    callback(nss->parse_tree, us, user_match, NULL, UNSPEC,
+			NULL, UNSPEC, UNSPEC, UNSPEC, cb_data);
 		}
 		continue;
 	    }
@@ -110,8 +110,8 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw, time_t now,
 		    &priv->hostlist);
 		if (host_match != ALLOW) {
 		    if (callback != NULL) {
-			callback(us, user_match, priv, host_match, NULL, UNSPEC,
-			    UNSPEC, UNSPEC, cb_data);
+			callback(nss->parse_tree, us, user_match, priv,
+			    host_match, NULL, UNSPEC, UNSPEC, UNSPEC, cb_data);
 		    }
 		    continue;
 		}
@@ -183,8 +183,9 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw, time_t now,
 			}
 		    }
 		    if (callback != NULL) {
-			callback(us, user_match, priv, host_match, cs,
-			    date_match, runas_match, cmnd_match, cb_data);
+			callback(nss->parse_tree, us, user_match, priv,
+			    host_match, cs, date_match, runas_match,
+			    cmnd_match, cb_data);
 		    }
 		    if (cmnd_match != UNSPEC) {
 			/*
@@ -243,8 +244,8 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
 	int user_match = userlist_matches(nss->parse_tree, pw, &us->users);
 	if (user_match != ALLOW) {
 	    if (callback != NULL && user_match != UNSPEC) {
-		callback(us, user_match, NULL, UNSPEC, NULL, UNSPEC,
-		    UNSPEC, UNSPEC, cb_data);
+		callback(nss->parse_tree, us, user_match, NULL, UNSPEC, NULL,
+		    UNSPEC, UNSPEC, UNSPEC, cb_data);
 	    }
 	    continue;
 	}
@@ -256,8 +257,8 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
 		CLR(*validated, FLAG_NO_HOST);
 	    } else {
 		if (callback != NULL) {
-		    callback(us, user_match, priv, host_match, NULL, UNSPEC,
-			UNSPEC, UNSPEC, cb_data);
+		    callback(nss->parse_tree, us, user_match, priv, host_match,
+			NULL, UNSPEC, UNSPEC, UNSPEC, cb_data);
 		}
 		continue;
 	    }
@@ -283,8 +284,8 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
 		    }
 		}
 		if (callback != NULL) {
-		    callback(us, user_match, priv, host_match, cs, date_match,
-			runas_match, cmnd_match, cb_data);
+		    callback(nss->parse_tree, us, user_match, priv, host_match,
+			cs, date_match, runas_match, cmnd_match, cb_data);
 		}
 
 		if (cmnd_match != UNSPEC) {

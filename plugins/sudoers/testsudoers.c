@@ -74,7 +74,7 @@ static bool cb_runas_default(const char *file, int line, int column, const union
 static int testsudoers_error(const char * restrict buf);
 static int testsudoers_output(const char * restrict buf);
 sudo_noreturn static void usage(void);
-static void cb_lookup(struct userspec *us, int user_match, struct privilege *priv, int host_match, struct cmndspec *cs, int date_match, int runas_match, int cmnd_match, void *closure);
+static void cb_lookup(struct sudoers_parse_tree *parse_tree, struct userspec *us, int user_match, struct privilege *priv, int host_match, struct cmndspec *cs, int date_match, int runas_match, int cmnd_match, void *closure);
 static int testsudoers_query(const struct sudo_nss *nss, struct passwd *pw);
 
 /*
@@ -626,9 +626,9 @@ set_cmnd_path(const char *runchroot)
 }
 
 static void
-cb_lookup(struct userspec *us, int user_match, struct privilege *priv,
-    int host_match, struct cmndspec *cs, int date_match, int runas_match,
-    int cmnd_match, void *closure)
+cb_lookup(struct sudoers_parse_tree *parse_tree, struct userspec *us,
+    int user_match, struct privilege *priv, int host_match, struct cmndspec *cs,
+    int date_match, int runas_match, int cmnd_match, void *closure)
 {
     static struct privilege *prev_priv;
     struct sudo_lbuf lbuf;

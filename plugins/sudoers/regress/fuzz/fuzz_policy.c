@@ -815,7 +815,7 @@ sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, time_t now,
 
 /* STUB */
 int
-display_cmnd(struct sudo_nss_list *snl, struct passwd *pw)
+display_cmnd(struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
 {
     return true;
 }
