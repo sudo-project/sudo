@@ -405,11 +405,16 @@ void register_env_file(void * (*ef_open)(const char *), void (*ef_close)(void *)
 /* env_pattern.c */
 bool matches_env_pattern(const char *pattern, const char *var, bool *full_match);
 
-/* sudoers.c */
-FILE *open_sudoers(const char *, char **, bool, bool *);
+/* callbacks.c */
+void set_callbacks(void);
 bool cb_log_input(const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
 bool cb_log_output(const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
+
+/* sudoers.c */
+FILE *open_sudoers(const char *, char **, bool, bool *);
+bool cb_runas_default(const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
 int set_cmnd_path(const char *runchroot);
+void set_cmnd_status(const char *runchroot);
 int sudoers_init(void *info, sudoers_logger_t logger, char * const envp[]);
 int sudoers_check_cmnd(int argc, char *const argv[], char *env_add[], void *closure);
 int sudoers_list(int argc, char *const argv[], const char *list_user, bool verbose);

@@ -70,7 +70,6 @@ enum sudoers_formats {
 static void dump_sudoers(void);
 static void set_runaspw(const char *);
 static void set_runasgr(const char *);
-static bool cb_runas_default(const char *file, int line, int column, const union sudo_defs_val *, int);
 static int testsudoers_error(const char * restrict buf);
 static int testsudoers_output(const char * restrict buf);
 sudo_noreturn static void usage(void);
@@ -502,7 +501,7 @@ cb_log_output(const char *file, int line, int column,
 /* 
  * Callback for runas_default sudoers setting.
  */
-static bool
+bool
 cb_runas_default(const char *file, int line, int column,
     const union sudo_defs_val *sd_un, int op)
 {

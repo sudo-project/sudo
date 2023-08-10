@@ -72,10 +72,9 @@
 static int set_cmnd(void);
 static bool init_vars(char * const *);
 static bool set_loginclass(struct passwd *);
-static bool set_runasgr(const char *, bool);
 static bool set_runaspw(const char *, bool);
+static bool set_runasgr(const char *, bool);
 static bool tty_present(void);
-static void set_callbacks(void);
 
 /*
  * Globals
@@ -88,7 +87,6 @@ static char *prev_user;
 static struct sudo_nss_list *snl;
 static bool unknown_runas_uid;
 static bool unknown_runas_gid;
-static bool override_umask;
 static int cmnd_status = NOT_FOUND_ERROR;
 static struct defaults_list initial_defaults = TAILQ_HEAD_INITIALIZER(initial_defaults);
 
@@ -1144,6 +1142,16 @@ error:
 }
 
 /*
+ * Fill in user_cmnd, user_stat and cmnd_status variables.
+ * Does not fill in user_base.
+ */
+void
+set_cmnd_status(const char *runchroot)
+{
+    cmnd_status = set_cmnd_path(runchroot);
+}
+
+/*
  * Fill in user_cmnd, user_args, user_base and user_stat variables
  * and apply any command-specific defaults entries.
  */
@@ -1397,124 +1405,6 @@ set_loginclass(struct passwd *pw)
 }
 #endif /* HAVE_LOGIN_CAP_H */
 
-#ifndef AI_FQDN
-# define AI_FQDN AI_CANONNAME
-#endif
-
-/*
- * Look up the fully qualified domain name of host.
- * Use AI_FQDN if available since "canonical" is not always the same as fqdn.
- * Returns 0 on success, setting longp and shortp.
- * Returns non-zero on failure, longp and shortp are unchanged.
- * See gai_strerror() for the list of error return codes.
- */
-static int
-resolve_host(const char *host, char **longp, char **shortp)
-{
-    struct addrinfo *res0, hint;
-    char *cp, *lname, *sname;
-    int ret;
-    debug_decl(resolve_host, SUDOERS_DEBUG_PLUGIN);
-
-    memset(&hint, 0, sizeof(hint));
-    hint.ai_family = PF_UNSPEC;
-    hint.ai_flags = AI_FQDN;
-
-    if ((ret = getaddrinfo(host, NULL, &hint, &res0)) != 0)
-	debug_return_int(ret);
-    if ((lname = strdup(res0->ai_canonname)) == NULL) {
-	freeaddrinfo(res0);
-	debug_return_int(EAI_MEMORY);
-    }
-    if ((cp = strchr(lname, '.')) != NULL) {
-	sname = strndup(lname, (size_t)(cp - lname));
-	if (sname == NULL) {
-	    free(lname);
-	    freeaddrinfo(res0);
-	    debug_return_int(EAI_MEMORY);
-	}
-    } else {
-	sname = lname;
-    }
-    freeaddrinfo(res0);
-    *longp = lname;
-    *shortp = sname;
-
-    debug_return_int(0);
-}
-
-/*
- * Look up the fully qualified domain name of user_host and user_runhost.
- * Sets user_host, user_shost, user_runhost and user_srunhost.
- */
-static bool
-cb_fqdn(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    bool remote;
-    int rc;
-    char *lhost, *shost;
-    debug_decl(cb_fqdn, SUDOERS_DEBUG_PLUGIN);
-
-    /* Nothing to do if fqdn flag is disabled. */
-    if (sd_un != NULL && !sd_un->flag)
-	debug_return_bool(true);
-
-    /* If the -h flag was given we need to resolve both host and runhost. */
-    remote = strcmp(user_runhost, user_host) != 0;
-
-    /* First resolve user_host, setting user_host and user_shost. */
-    if (resolve_host(user_host, &lhost, &shost) != 0) {
-	if ((rc = resolve_host(user_runhost, &lhost, &shost)) != 0) {
-	    gai_log_warning(SLOG_PARSE_ERROR|SLOG_RAW_MSG, rc,
-		N_("unable to resolve host %s"), user_host);
-	    debug_return_bool(false);
-	}
-    }
-    if (user_shost != user_host)
-	free(user_shost);
-    free(user_host);
-    user_host = lhost;
-    user_shost = shost;
-
-    /* Next resolve user_runhost, setting user_runhost and user_srunhost. */
-    lhost = shost = NULL;
-    if (remote) {
-	if ((rc = resolve_host(user_runhost, &lhost, &shost)) != 0) {
-	    gai_log_warning(SLOG_NO_LOG|SLOG_RAW_MSG, rc,
-		N_("unable to resolve host %s"), user_runhost);
-	    debug_return_bool(false);
-	}
-    } else {
-	/* Not remote, just use user_host. */
-	if ((lhost = strdup(user_host)) != NULL) {
-	    if (user_shost != user_host)
-		shost = strdup(user_shost);
-	    else
-		shost = lhost;
-	}
-	if (lhost == NULL || shost == NULL) {
-	    free(lhost);
-	    if (lhost != shost)
-		free(shost);
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    debug_return_bool(false);
-	}
-    }
-    if (lhost != NULL && shost != NULL) {
-	if (user_srunhost != user_runhost)
-	    free(user_srunhost);
-	free(user_runhost);
-	user_runhost = lhost;
-	user_srunhost = shost;
-    }
-
-    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	"host %s, shost %s, runhost %s, srunhost %s",
-	user_host, user_shost, user_runhost, user_srunhost);
-    debug_return_bool(true);
-}
-
 /*
  * Get passwd entry for the user we are going to run commands as
  * and store it in runas_pw.  By default, commands run as "root".
@@ -1586,7 +1476,7 @@ set_runasgr(const char *group, bool quiet)
 /*
  * Callback for runas_default sudoers setting.
  */
-static bool
+bool
 cb_runas_default(const char *file, int line, int column,
     const union sudo_defs_val *sd_un, int op)
 {
@@ -1596,381 +1486,6 @@ cb_runas_default(const char *file, int line, int column,
     if (sudo_user.runas_user == NULL && sudo_user.runas_group == NULL)
 	debug_return_bool(set_runaspw(sd_un->str, true));
     debug_return_bool(true);
-}
-
-
-/*
- * Callback for timestampowner sudoers setting.
- */
-static bool
-cb_timestampowner(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    struct passwd *pw = NULL;
-    const char *user = sd_un->str;
-    debug_decl(cb_timestampowner, SUDOERS_DEBUG_PLUGIN);
-
-    if (*user == '#') {
-	const char *errstr;
-	uid_t uid = sudo_strtoid(user + 1, &errstr);
-	if (errstr == NULL)
-	    pw = sudo_getpwuid(uid);
-    }
-    if (pw == NULL)
-	pw = sudo_getpwnam(user);
-    if (pw == NULL) {
-	log_warningx(SLOG_AUDIT|SLOG_PARSE_ERROR,
-	    N_("%s:%d:%d timestampowner: unknown user %s"), file, line,
-	    column, user);
-	debug_return_bool(false);
-    }
-    timestamp_set_owner(pw->pw_uid, pw->pw_gid);
-    sudo_pw_delref(pw);
-
-    debug_return_bool(true);
-}
-
-/*
- * Callback for tty_tickets sudoers setting.
- */
-static bool
-cb_tty_tickets(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    debug_decl(cb_tty_tickets, SUDOERS_DEBUG_PLUGIN);
-
-    /* Convert tty_tickets -> timestamp_type */
-    if (sd_un->flag)
-	def_timestamp_type = tty;
-    else
-	def_timestamp_type = global;
-    debug_return_bool(true);
-}
-
-/*
- * Callback for umask sudoers setting.
- */
-static bool
-cb_umask(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    debug_decl(cb_umask, SUDOERS_DEBUG_PLUGIN);
-
-    /* Override umask if explicitly set in sudoers. */
-    override_umask = sd_un->mode != ACCESSPERMS;
-
-    debug_return_bool(true);
-}
-
-/*
- * Callback for runchroot sudoers setting.
- */
-static bool
-cb_runchroot(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    debug_decl(cb_runchroot, SUDOERS_DEBUG_PLUGIN);
-
-    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	"def_runchroot now %s", sd_un->str);
-    if (user_cmnd != NULL) {
-	/* Update user_cmnd based on the new chroot. */
-	cmnd_status = set_cmnd_path(sd_un->str);
-	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "user_cmnd now %s", user_cmnd);
-    }
-
-    debug_return_bool(true);
-}
-
-static bool
-cb_logfile(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    int logtype = def_syslog ? EVLOG_SYSLOG : EVLOG_NONE;
-    debug_decl(cb_logfile, SUDOERS_DEBUG_PLUGIN);
-
-    if (sd_un->str != NULL)
-	SET(logtype, EVLOG_FILE);
-    eventlog_set_type(logtype);
-    eventlog_set_logpath(sd_un->str);
-
-    debug_return_bool(true);
-}
-
-static bool
-cb_log_format(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    debug_decl(cb_log_format, SUDOERS_DEBUG_PLUGIN);
-
-    eventlog_set_format(sd_un->tuple == sudo ? EVLOG_SUDO : EVLOG_JSON);
-
-    debug_return_bool(true);
-}
-
-static bool
-cb_syslog(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    int logtype = def_logfile ? EVLOG_FILE : EVLOG_NONE;
-    debug_decl(cb_syslog, SUDOERS_DEBUG_PLUGIN);
-
-    if (sd_un->str != NULL)
-	SET(logtype, EVLOG_SYSLOG);
-    eventlog_set_type(logtype);
-
-    debug_return_bool(true);
-}
-
-static bool
-cb_syslog_goodpri(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    debug_decl(cb_syslog_goodpri, SUDOERS_DEBUG_PLUGIN);
-
-    eventlog_set_syslog_acceptpri(sd_un->ival);
-
-    debug_return_bool(true);
-}
-
-static bool
-cb_syslog_badpri(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    debug_decl(cb_syslog_badpri, SUDOERS_DEBUG_PLUGIN);
-
-    eventlog_set_syslog_rejectpri(sd_un->ival);
-    eventlog_set_syslog_alertpri(sd_un->ival);
-
-    debug_return_bool(true);
-}
-
-static bool
-cb_syslog_maxlen(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    debug_decl(cb_syslog_maxlen, SUDOERS_DEBUG_PLUGIN);
-
-    eventlog_set_syslog_maxlen((size_t)sd_un->ival);
-
-    debug_return_bool(true);
-}
-
-static bool
-cb_loglinelen(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    debug_decl(cb_loglinelen, SUDOERS_DEBUG_PLUGIN);
-
-    eventlog_set_file_maxlen((size_t)sd_un->ival);
-
-    debug_return_bool(true);
-}
-
-static bool
-cb_log_year(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    debug_decl(cb_syslog_maxlen, SUDOERS_DEBUG_PLUGIN);
-
-    eventlog_set_time_fmt(sd_un->flag ? "%h %e %T %Y" : "%h %e %T");
-
-    debug_return_bool(true);
-}
-
-static bool
-cb_log_host(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    debug_decl(cb_syslog_maxlen, SUDOERS_DEBUG_PLUGIN);
-
-    eventlog_set_omit_hostname(!sd_un->flag);
-
-    debug_return_bool(true);
-}
-
-static bool
-cb_mailerpath(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    debug_decl(cb_mailerpath, SUDOERS_DEBUG_PLUGIN);
-
-    eventlog_set_mailerpath(sd_un->str);
-
-    debug_return_bool(true);
-}
-
-static bool
-cb_mailerflags(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    debug_decl(cb_mailerflags, SUDOERS_DEBUG_PLUGIN);
-
-    eventlog_set_mailerflags(sd_un->str);
-
-    debug_return_bool(true);
-}
-
-static bool
-cb_mailfrom(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    debug_decl(cb_mailfrom, SUDOERS_DEBUG_PLUGIN);
-
-    eventlog_set_mailfrom(sd_un->str);
-
-    debug_return_bool(true);
-}
-
-static bool
-cb_mailto(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    debug_decl(cb_mailto, SUDOERS_DEBUG_PLUGIN);
-
-    eventlog_set_mailto(sd_un->str);
-
-    debug_return_bool(true);
-}
-
-static bool
-cb_mailsub(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    debug_decl(cb_mailsub, SUDOERS_DEBUG_PLUGIN);
-
-    eventlog_set_mailsub(sd_un->str);
-
-    debug_return_bool(true);
-}
-
-static bool
-cb_intercept_type(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    debug_decl(cb_intercept_type, SUDOERS_DEBUG_PLUGIN);
-
-    if (op != -1) {
-	/* Set explicitly in sudoers. */
-	if (sd_un->tuple == dso) {
-	    /* Reset intercept_allow_setid default value. */
-	    if (!ISSET(sudo_user.flags, USER_INTERCEPT_SETID))
-		def_intercept_allow_setid = false;
-	}
-    }
-
-    debug_return_bool(true);
-}
-
-static bool
-cb_intercept_allow_setid(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    debug_decl(cb_intercept_allow_setid, SUDOERS_DEBUG_PLUGIN);
-
-    /* Operator will be -1 if set by front-end. */
-    if (op != -1) {
-	/* Set explicitly in sudoers. */
-	SET(sudo_user.flags, USER_INTERCEPT_SETID);
-    }
-
-    debug_return_bool(true);
-}
-
-bool
-cb_log_input(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    debug_decl(cb_log_input, SUDOERS_DEBUG_PLUGIN);
-
-    def_log_stdin = op;
-    def_log_ttyin = op;
-
-    debug_return_bool(true);
-}
-
-bool
-cb_log_output(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
-{
-    debug_decl(cb_log_output, SUDOERS_DEBUG_PLUGIN);
-
-    def_log_stdout = op;
-    def_log_stderr = op;
-    def_log_ttyout = op;
-
-    debug_return_bool(true);
-}
-
-/*
- * Set parse Defaults callbacks.
- * We do this here instead in def_data.in so we don't have to
- * stub out the callbacks for visudo and testsudoers.
- */
-static void
-set_callbacks(void)
-{
-    debug_decl(set_callbacks, SUDOERS_DEBUG_PLUGIN);
-
-    /* Set fqdn callback. */
-    sudo_defs_table[I_FQDN].callback = cb_fqdn;
-
-    /* Set group_plugin callback. */
-    sudo_defs_table[I_GROUP_PLUGIN].callback = cb_group_plugin;
-
-    /* Set runas callback. */
-    sudo_defs_table[I_RUNAS_DEFAULT].callback = cb_runas_default;
-
-    /* Set locale callback. */
-    sudo_defs_table[I_SUDOERS_LOCALE].callback = sudoers_locale_callback;
-
-    /* Set maxseq callback. */
-    sudo_defs_table[I_MAXSEQ].callback = cb_maxseq;
-
-    /* Set iolog_user callback. */
-    sudo_defs_table[I_IOLOG_USER].callback = cb_iolog_user;
-
-    /* Set iolog_group callback. */
-    sudo_defs_table[I_IOLOG_GROUP].callback = cb_iolog_group;
-
-    /* Set iolog_mode callback. */
-    sudo_defs_table[I_IOLOG_MODE].callback = cb_iolog_mode;
-
-    /* Set timestampowner callback. */
-    sudo_defs_table[I_TIMESTAMPOWNER].callback = cb_timestampowner;
-
-    /* Set tty_tickets callback. */
-    sudo_defs_table[I_TTY_TICKETS].callback = cb_tty_tickets;
-
-    /* Set umask callback. */
-    sudo_defs_table[I_UMASK].callback = cb_umask;
-
-    /* Set runchroot callback. */
-    sudo_defs_table[I_RUNCHROOT].callback = cb_runchroot;
-
-    /* eventlog callbacks */
-    sudo_defs_table[I_SYSLOG].callback = cb_syslog;
-    sudo_defs_table[I_SYSLOG_GOODPRI].callback = cb_syslog_goodpri;
-    sudo_defs_table[I_SYSLOG_BADPRI].callback = cb_syslog_badpri;
-    sudo_defs_table[I_SYSLOG_MAXLEN].callback = cb_syslog_maxlen;
-    sudo_defs_table[I_LOGLINELEN].callback = cb_loglinelen;
-    sudo_defs_table[I_LOG_HOST].callback = cb_log_host;
-    sudo_defs_table[I_LOGFILE].callback = cb_logfile;
-    sudo_defs_table[I_LOG_FORMAT].callback = cb_log_format;
-    sudo_defs_table[I_LOG_YEAR].callback = cb_log_year;
-    sudo_defs_table[I_MAILERPATH].callback = cb_mailerpath;
-    sudo_defs_table[I_MAILERFLAGS].callback = cb_mailerflags;
-    sudo_defs_table[I_MAILFROM].callback = cb_mailfrom;
-    sudo_defs_table[I_MAILTO].callback = cb_mailto;
-    sudo_defs_table[I_MAILSUB].callback = cb_mailsub;
-    sudo_defs_table[I_PASSPROMPT_REGEX].callback = cb_passprompt_regex;
-    sudo_defs_table[I_INTERCEPT_TYPE].callback = cb_intercept_type;
-    sudo_defs_table[I_INTERCEPT_ALLOW_SETID].callback = cb_intercept_allow_setid;
-    sudo_defs_table[I_LOG_INPUT].callback = cb_log_input;
-    sudo_defs_table[I_LOG_OUTPUT].callback = cb_log_output;
-
-    debug_return;
 }
 
 /*
@@ -2034,12 +1549,6 @@ tty_present(void)
 	close(fd);
     }
     debug_return_bool(true);
-}
-
-bool
-sudoers_override_umask(void)
-{
-    return override_umask;
 }
 
 /*
