@@ -86,7 +86,7 @@ static size_t
 fill_runas_user(char *str, size_t strsize, void *unused)
 {
     debug_decl(fill_runas_user, SUDOERS_DEBUG_UTIL);
-    debug_return_size_t(strlcpy(str, user_ctx.runas_pw->pw_name, strsize));
+    debug_return_size_t(strlcpy(str, runas_ctx.pw->pw_name, strsize));
 }
 
 static size_t
@@ -96,15 +96,15 @@ fill_runas_group(char *str, size_t strsize, void *unused)
     size_t len;
     debug_decl(fill_runas_group, SUDOERS_DEBUG_UTIL);
 
-    if (user_ctx.runas_gr != NULL) {
-	len = strlcpy(str, user_ctx.runas_gr->gr_name, strsize);
+    if (runas_ctx.gr != NULL) {
+	len = strlcpy(str, runas_ctx.gr->gr_name, strsize);
     } else {
-	if ((grp = sudo_getgrgid(user_ctx.runas_pw->pw_gid)) != NULL) {
+	if ((grp = sudo_getgrgid(runas_ctx.pw->pw_gid)) != NULL) {
 	    len = strlcpy(str, grp->gr_name, strsize);
 	    sudo_gr_delref(grp);
 	} else {
 	    len = (size_t)snprintf(str, strsize, "#%u",
-		(unsigned int)user_ctx.runas_pw->pw_gid);
+		(unsigned int)runas_ctx.pw->pw_gid);
 	}
     }
     debug_return_size_t(len);

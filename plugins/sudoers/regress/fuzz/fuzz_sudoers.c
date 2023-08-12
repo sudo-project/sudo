@@ -50,6 +50,7 @@ static const char *orig_cmnd;
 
 /* Required to link with parser. */
 struct sudoers_user_context user_ctx;
+struct sudoers_runas_context runas_ctx;
 struct passwd *list_pw;
 sudo_conv_t sudo_conv = fuzz_conversation;
 sudo_printf_t sudo_printf = fuzz_printf;
@@ -285,7 +286,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     sudo_pw_delref(pw);
 
     /* The minimum needed to perform matching (cmnd must be dynamic). */
-    user_ctx.host = user_ctx.shost = user_ctx.runhost = user_ctx.srunhost =
+    user_ctx.host = user_ctx.shost = runas_ctx.host = runas_ctx.shost =
 	(char *)"localhost";
     orig_cmnd = (char *)"/usr/bin/id";
     user_ctx.cmnd = strdup(orig_cmnd);
@@ -336,38 +337,38 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	    }
 
 	    /* Run user. */
-	    if (user_ctx.runas_pw != NULL)
-		sudo_pw_delref(user_ctx.runas_pw);
+	    if (runas_ctx.pw != NULL)
+		sudo_pw_delref(runas_ctx.pw);
 	    if (ud->runuser != NULL) {
-		user_ctx.runas_user = (char *)ud->runuser;
+		runas_ctx.user = (char *)ud->runuser;
 		SET(user_ctx.flags, RUNAS_USER_SPECIFIED);
-		user_ctx.runas_pw = sudo_getpwnam(user_ctx.runas_user);
+		runas_ctx.pw = sudo_getpwnam(runas_ctx.user);
 	    } else {
-		user_ctx.runas_user = NULL;
+		runas_ctx.user = NULL;
 		CLR(user_ctx.flags, RUNAS_USER_SPECIFIED);
-		user_ctx.runas_pw = sudo_getpwnam("root");
+		runas_ctx.pw = sudo_getpwnam("root");
 	    }
-	    if (user_ctx.runas_pw == NULL) {
-		sudo_warnx_nodebug("unknown run user %s", user_ctx.runas_user);
+	    if (runas_ctx.pw == NULL) {
+		sudo_warnx_nodebug("unknown run user %s", runas_ctx.user);
 		continue;
 	    }
 
 	    /* Run group. */
-	    if (user_ctx.runas_gr != NULL)
-		sudo_gr_delref(user_ctx.runas_gr);
+	    if (runas_ctx.gr != NULL)
+		sudo_gr_delref(runas_ctx.gr);
 	    if (ud->rungroup != NULL) {
-		user_ctx.runas_group = (char *)ud->rungroup;
+		runas_ctx.group = (char *)ud->rungroup;
 		SET(user_ctx.flags, RUNAS_GROUP_SPECIFIED);
-		user_ctx.runas_gr = sudo_getgrnam(user_ctx.runas_group);
-		if (user_ctx.runas_gr == NULL) {
+		runas_ctx.gr = sudo_getgrnam(runas_ctx.group);
+		if (runas_ctx.gr == NULL) {
 		    sudo_warnx_nodebug("unknown run group %s",
-			user_ctx.runas_group);
+			runas_ctx.group);
 		    continue;
 		}
 	    } else {
-		user_ctx.runas_group = NULL;
+		runas_ctx.group = NULL;
 		CLR(user_ctx.flags, RUNAS_GROUP_SPECIFIED);
-		user_ctx.runas_gr = NULL;
+		runas_ctx.gr = NULL;
 	    }
 
 	    update_defaults(&parse_tree, NULL, SETDEF_ALL, false);
@@ -385,12 +386,12 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	}
 
 	/* Expand tildes in runcwd and runchroot. */
-	if (user_ctx.runas_pw != NULL) {
+	if (runas_ctx.pw != NULL) {
 	    if (def_runcwd != NULL && strcmp(def_runcwd, "*") != 0) {
-		expand_tilde(&def_runcwd, user_ctx.runas_pw->pw_name);
+		expand_tilde(&def_runcwd, runas_ctx.pw->pw_name);
 	    }
 	    if (def_runchroot != NULL && strcmp(def_runchroot, "*") != 0) {
-		expand_tilde(&def_runchroot, user_ctx.runas_pw->pw_name);
+		expand_tilde(&def_runchroot, runas_ctx.pw->pw_name);
 	    }
 	}
 
@@ -406,16 +407,17 @@ done:
     reset_parser();
     if (user_ctx.pw != NULL)
 	sudo_pw_delref(user_ctx.pw);
-    if (user_ctx.runas_pw != NULL)
-	sudo_pw_delref(user_ctx.runas_pw);
-    if (user_ctx.runas_gr != NULL)
-	sudo_gr_delref(user_ctx.runas_gr);
+    if (runas_ctx.pw != NULL)
+	sudo_pw_delref(runas_ctx.pw);
+    if (runas_ctx.gr != NULL)
+	sudo_gr_delref(runas_ctx.gr);
     sudo_freepwcache();
     sudo_freegrcache();
     free(user_ctx.cmnd);
-    free(user_ctx.cmnd_safe);
+    free(runas_ctx.cmnd);
     free(user_ctx.cmnd_list);
     memset(&user_ctx, 0, sizeof(user_ctx));
+    memset(&runas_ctx, 0, sizeof(runas_ctx));
     sudoers_setlocale(SUDOERS_LOCALE_USER, NULL);
     sudoers_debug_deregister();
     fflush(stdout);

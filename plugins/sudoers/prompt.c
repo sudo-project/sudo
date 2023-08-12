@@ -75,7 +75,7 @@ expand_prompt(const char *old_prompt, const char *auth_user)
 		    break;
 		case 'U':
 		    p++;
-		    len += strlen(user_ctx.runas_pw->pw_name) - 2;
+		    len += strlen(runas_ctx.pw->pw_name) - 2;
 		    subst = 1;
 		    break;
 		case '%':
@@ -132,7 +132,7 @@ expand_prompt(const char *old_prompt, const char *auth_user)
 			continue;
 		    case 'U':
 			p++;
-			n = strlcpy(np,  user_ctx.runas_pw->pw_name, len);
+			n = strlcpy(np,  runas_ctx.pw->pw_name, len);
 			if (n >= len)
 			    goto oflow;
 			np += n;

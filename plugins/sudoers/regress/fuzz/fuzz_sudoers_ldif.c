@@ -33,6 +33,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
 /* Required to link with parser. */
 struct sudoers_user_context user_ctx;
+struct sudoers_runas_context runas_ctx;
 struct passwd *list_pw;
 sudo_printf_t sudo_printf = fuzz_printf;
 

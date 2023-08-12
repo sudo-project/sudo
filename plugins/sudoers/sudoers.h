@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996, 1998-2005, 2007-2022
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -82,50 +82,28 @@ struct group_list {
 struct sudoers_user_context {
     struct timespec submit_time;
     struct passwd *pw;
-    struct passwd *runas_pw;
-    struct group *runas_gr;
     struct stat *cmnd_stat;
     char *cwd;
     char *name;
-    char *runas_user;
-    char *runas_group;
     char *path;
     char *tty;
     char *ttypath;
     char *host;
     char *shost;
-    char *runhost;
-    char *srunhost;
-    char *runchroot;
-    char *runcwd;
     char *prompt;
     char *cmnd;
     char *cmnd_args;
     char *cmnd_base;
     char *cmnd_dir;
     char *cmnd_list;
-    char *cmnd_safe;
     char *cmnd_saved;
-    char *class;
     char *ccname;
     char *source;
     struct gid_list *gid_list;
     char * const * env_vars;
-#ifdef HAVE_SELINUX
-    char *role;
-    char *type;
-#endif
-#ifdef HAVE_APPARMOR
-    char *apparmor_profile;
-#endif
-#ifdef HAVE_PRIV_SET
-    char *privs;
-    char *limitprivs;
-#endif
     char *iolog_file;
     char *iolog_path;
     GETGROUPS_T *gids;
-    int   execfd;
     int   ngids;
     int   closefrom;
     int   lines;
@@ -139,6 +117,31 @@ struct sudoers_user_context {
     pid_t sid;
     pid_t tcpgid;
     char uuid_str[37];
+};
+
+struct sudoers_runas_context {
+    struct passwd *pw;
+    struct group *gr;
+    char *chroot;
+    char *class;
+    char *cmnd;
+    char *cwd;
+    char *group;
+    char *host;
+    char *shost;
+    char *user;
+#ifdef HAVE_SELINUX
+    char *role;
+    char *type;
+#endif
+#ifdef HAVE_APPARMOR
+    char *apparmor_profile;
+#endif
+#ifdef HAVE_PRIV_SET
+    char *privs;
+    char *limitprivs;
+#endif
+    int execfd;
 };
 
 /*
@@ -376,6 +379,7 @@ int sudoers_validate_user(void);
 void sudoers_cleanup(void);
 bool sudoers_override_umask(void);
 extern struct sudoers_user_context user_ctx;
+extern struct sudoers_runas_context runas_ctx;
 extern struct passwd *list_pw;
 extern unsigned int sudo_mode;
 extern int sudoedit_nfiles;

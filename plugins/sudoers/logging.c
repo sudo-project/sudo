@@ -263,7 +263,7 @@ log_reject(const char *message, bool logit, bool mailit)
 	if (!logit)
 	    SET(evl_flags, EVLOG_MAIL_ONLY);
     }
-    sudoers_to_eventlog(&evlog, user_ctx.cmnd_safe, NewArgv, env_get(), uuid_str);
+    sudoers_to_eventlog(&evlog, runas_ctx.cmnd, NewArgv, env_get(), uuid_str);
     ret = eventlog_reject(&evlog, evl_flags, message, NULL, NULL);
     if (!log_server_reject(&evlog, message))
 	ret = false;
@@ -316,12 +316,12 @@ log_denial(unsigned int status, bool inform_user)
 		"file.\n"), user_ctx.name);
 	} else if (ISSET(status, FLAG_NO_HOST)) {
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s is not allowed to run sudo "
-		"on %s.\n"), user_ctx.name, user_ctx.srunhost);
+		"on %s.\n"), user_ctx.name, runas_ctx.shost);
 	} else if (ISSET(status, FLAG_NO_CHECK)) {
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("Sorry, user %s may not run "
-		"sudo on %s.\n"), user_ctx.name, user_ctx.srunhost);
+		"sudo on %s.\n"), user_ctx.name, runas_ctx.shost);
 	} else {
-	    const struct passwd *runas_pw = list_pw ? list_pw : user_ctx.runas_pw;
+	    const struct passwd *runas_pw = list_pw ? list_pw : runas_ctx.pw;
 	    const char *cmnd1 = user_ctx.cmnd;
 	    const char *cmnd2 = "";
 
@@ -335,8 +335,8 @@ log_denial(unsigned int status, bool inform_user)
 		user_ctx.name, cmnd1, cmnd2, user_ctx.cmnd_args ? " " : "",
 		user_ctx.cmnd_args ? user_ctx.cmnd_args : "",
 		runas_pw ? runas_pw->pw_name : user_ctx.name,
-		user_ctx.runas_gr ? ":" : "",
-		user_ctx.runas_gr ? user_ctx.runas_gr->gr_name : "",
+		runas_ctx.gr ? ":" : "",
+		runas_ctx.gr ? runas_ctx.gr->gr_name : "",
 		user_ctx.host);
 	}
 	if (mailit) {
@@ -729,7 +729,7 @@ vlog_warning(unsigned int flags, int errnum, const char * restrict fmt,
 	    if (ISSET(flags, SLOG_NO_LOG))
 		SET(evl_flags, EVLOG_MAIL_ONLY);
 	}
-	sudoers_to_eventlog(&evlog, user_ctx.cmnd_safe, NewArgv, env_get(),
+	sudoers_to_eventlog(&evlog, runas_ctx.cmnd, NewArgv, env_get(),
 	    user_ctx.uuid_str);
 	if (!eventlog_alert(&evlog, evl_flags, &now, message, errstr))
 	    ret = false;
@@ -844,7 +844,7 @@ mail_parse_errors(void)
 	sudo_warn("%s", U_("unable to get time of day"));
 	goto done;
     }
-    sudoers_to_eventlog(&evlog, user_ctx.cmnd_safe, NewArgv, env_get(),
+    sudoers_to_eventlog(&evlog, runas_ctx.cmnd, NewArgv, env_get(),
 	user_ctx.uuid_str);
 
     /* Convert parse_error_list to a string vector. */
@@ -970,12 +970,12 @@ sudoers_to_eventlog(struct eventlog *evlog, const char *cmnd,
     }
     if (def_runcwd && strcmp(def_runcwd, "*") != 0) {
 	evlog->runcwd = def_runcwd;
-    } else if (ISSET(sudo_mode, MODE_LOGIN_SHELL) && user_ctx.runas_pw != NULL) {
-	evlog->runcwd = user_ctx.runas_pw->pw_dir;
+    } else if (ISSET(sudo_mode, MODE_LOGIN_SHELL) && runas_ctx.pw != NULL) {
+	evlog->runcwd = runas_ctx.pw->pw_dir;
     } else {
 	evlog->runcwd = user_ctx.cwd;
     }
-    evlog->rungroup = user_ctx.runas_gr ? user_ctx.runas_gr->gr_name : user_ctx.runas_group;
+    evlog->rungroup = runas_ctx.gr ? runas_ctx.gr->gr_name : runas_ctx.group;
     evlog->source = user_ctx.source;
     evlog->submithost = user_ctx.host;
     evlog->submituser = user_ctx.name;
@@ -988,14 +988,14 @@ sudoers_to_eventlog(struct eventlog *evlog, const char *cmnd,
     evlog->submit_time = user_ctx.submit_time;
     evlog->lines = user_ctx.lines;
     evlog->columns = user_ctx.cols;
-    if (user_ctx.runas_pw != NULL) {
-	evlog->rungid = user_ctx.runas_pw->pw_gid;
-	evlog->runuid = user_ctx.runas_pw->pw_uid;
-	evlog->runuser = user_ctx.runas_pw->pw_name;
+    if (runas_ctx.pw != NULL) {
+	evlog->rungid = runas_ctx.pw->pw_gid;
+	evlog->runuid = runas_ctx.pw->pw_uid;
+	evlog->runuser = runas_ctx.pw->pw_name;
     } else {
 	evlog->rungid = (gid_t)-1;
 	evlog->runuid = (uid_t)-1;
-	evlog->runuser = user_ctx.runas_user;
+	evlog->runuser = runas_ctx.user;
     }
     if (uuid_str == NULL) {
 	unsigned char uuid[16];

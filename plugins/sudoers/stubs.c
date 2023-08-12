@@ -133,8 +133,8 @@ get_hostname(void)
 	if (user_ctx.host == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
-    user_ctx.runhost = user_ctx.host;
-    user_ctx.srunhost = user_ctx.shost;
+    runas_ctx.host = user_ctx.host;
+    runas_ctx.shost = user_ctx.shost;
 
     debug_return;
 }

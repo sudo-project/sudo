@@ -32,6 +32,7 @@
 #include <def_data.c>
 
 struct sudoers_user_context user_ctx;
+struct sudoers_runas_context runas_ctx;
 
 struct test_data {
     const char *input;

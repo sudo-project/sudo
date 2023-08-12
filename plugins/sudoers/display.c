@@ -466,7 +466,7 @@ display_privs(const struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
     sudo_lbuf_init(&priv_buf, output, 8, NULL, cols);
 
     sudo_lbuf_append(&def_buf, _("Matching Defaults entries for %s on %s:\n"),
-	pw->pw_name, user_ctx.srunhost);
+	pw->pw_name, runas_ctx.shost);
     count = 0;
     TAILQ_FOREACH(nss, snl, entries) {
 	n = display_defaults(nss->parse_tree, pw, &def_buf);
@@ -502,7 +502,7 @@ display_privs(const struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
     /* Display privileges from all sources. */
     sudo_lbuf_append(&priv_buf,
 	_("User %s may run the following commands on %s:\n"),
-	pw->pw_name, user_ctx.srunhost);
+	pw->pw_name, runas_ctx.shost);
     count = 0;
     TAILQ_FOREACH(nss, snl, entries) {
 	if (nss->query(nss, pw) != -1) {
@@ -517,7 +517,7 @@ display_privs(const struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
 	priv_buf.len = 0;
 	sudo_lbuf_append(&priv_buf,
 	    _("User %s is not allowed to run sudo on %s.\n"),
-	    pw->pw_name, user_ctx.srunhost);
+	    pw->pw_name, runas_ctx.shost);
     }
     if (sudo_lbuf_error(&def_buf) || sudo_lbuf_error(&priv_buf))
 	goto bad;

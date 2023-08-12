@@ -271,7 +271,7 @@ set_perms(int perm)
 
     case PERM_RUNAS:
 	state->rgid = ostate->rgid;
-	state->egid = user_ctx.runas_gr ? user_ctx.runas_gr->gr_gid : user_ctx.runas_pw->pw_gid;
+	state->egid = runas_ctx.gr ? runas_ctx.gr->gr_gid : runas_ctx.pw->pw_gid;
 	state->sgid = ostate->sgid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_RUNAS: gid: "
 	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
@@ -287,7 +287,7 @@ set_perms(int perm)
 	    goto bad;
 	}
 	state->ruid = ostate->ruid;
-	state->euid = user_ctx.runas_pw ? user_ctx.runas_pw->pw_uid : user_ctx.uid;
+	state->euid = runas_ctx.pw ? runas_ctx.pw->pw_uid : user_ctx.uid;
 	state->suid = ostate->suid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_RUNAS: uid: "
 	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
@@ -600,7 +600,7 @@ set_perms(int perm)
 
     case PERM_RUNAS:
 	state->rgid = ostate->rgid;
-	state->egid = user_ctx.runas_gr ? user_ctx.runas_gr->gr_gid : user_ctx.runas_pw->pw_gid;
+	state->egid = runas_ctx.gr ? runas_ctx.gr->gr_gid : runas_ctx.pw->pw_gid;
 	state->sgid = ostate->sgid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_RUNAS: gid: "
 	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
@@ -616,7 +616,7 @@ set_perms(int perm)
 	    goto bad;
 	}
 	state->ruid = ostate->ruid;
-	state->euid = user_ctx.runas_pw ? user_ctx.runas_pw->pw_uid : user_ctx.uid;
+	state->euid = runas_ctx.pw ? runas_ctx.pw->pw_uid : user_ctx.uid;
 	state->suid = ostate->suid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_RUNAS: uid: "
 	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
@@ -1002,7 +1002,7 @@ set_perms(int perm)
 
     case PERM_RUNAS:
 	state->rgid = ostate->rgid;
-	state->egid = user_ctx.runas_gr ? user_ctx.runas_gr->gr_gid : user_ctx.runas_pw->pw_gid;
+	state->egid = runas_ctx.gr ? runas_ctx.gr->gr_gid : runas_ctx.pw->pw_gid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_RUNAS: gid: "
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
 	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
@@ -1016,7 +1016,7 @@ set_perms(int perm)
 	    goto bad;
 	}
 	state->ruid = ROOT_UID;
-	state->euid = user_ctx.runas_pw ? user_ctx.runas_pw->pw_uid : user_ctx.uid;
+	state->euid = runas_ctx.pw ? runas_ctx.pw->pw_uid : user_ctx.uid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_RUNAS: uid: "
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
 	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
@@ -1316,7 +1316,7 @@ set_perms(int perm)
 
     case PERM_RUNAS:
 	state->rgid = ostate->rgid;
-	state->egid = user_ctx.runas_gr ? user_ctx.runas_gr->gr_gid : user_ctx.runas_pw->pw_gid;
+	state->egid = runas_ctx.gr ? runas_ctx.gr->gr_gid : runas_ctx.pw->pw_gid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_RUNAS: gid: "
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
 	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
@@ -1330,7 +1330,7 @@ set_perms(int perm)
 	    goto bad;
 	}
 	state->ruid = ostate->ruid;
-	state->euid = user_ctx.runas_pw ? user_ctx.runas_pw->pw_uid : user_ctx.uid;
+	state->euid = runas_ctx.pw ? runas_ctx.pw->pw_uid : user_ctx.uid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_RUNAS: uid: "
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
 	    (int)ostate->euid, (int)state->ruid, (int)state->euid);

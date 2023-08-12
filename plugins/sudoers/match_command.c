@@ -202,8 +202,8 @@ set_cmnd_fd(int fd, int rootfd)
 {
     debug_decl(set_cmnd_fd, SUDOERS_DEBUG_MATCH);
 
-    if (user_ctx.execfd != -1)
-	close(user_ctx.execfd);
+    if (runas_ctx.execfd != -1)
+	close(runas_ctx.execfd);
 
     if (fd != -1) {
 	if (def_fdexec == never) {
@@ -240,7 +240,7 @@ set_cmnd_fd(int fd, int rootfd)
 	}
     }
 
-    user_ctx.execfd = fd;
+    runas_ctx.execfd = fd;
 
     debug_return;
 }
@@ -289,8 +289,8 @@ command_matches_dir(const char *sudoers_dir, size_t dlen, int rootfd,
 	user_ctx.cmnd_stat->st_ino == sudoers_stat.st_ino)) {
 	if (!digest_matches(fd, path, digests))
 	    goto done;
-	free(user_ctx.cmnd_safe);
-	if ((user_ctx.cmnd_safe = strdup(path)) == NULL) {
+	free(runas_ctx.cmnd);
+	if ((runas_ctx.cmnd = strdup(path)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__,
 		U_("unable to allocate memory"));
 	}
@@ -371,7 +371,7 @@ command_matches_all(int rootfd, bool intercepted,
 	goto bad;
     set_cmnd_fd(fd, rootfd);
 
-    /* No need to set user_ctx.cmnd_safe for ALL. */
+    /* No need to set runas_ctx.cmnd for ALL. */
     debug_return_bool(true);
 bad:
     if (fd != -1)
@@ -427,7 +427,7 @@ command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args,
 	    goto bad;
 	set_cmnd_fd(fd, rootfd);
 
-	/* No need to set user_ctx.cmnd_safe since cmnd matches sudoers_cmnd */
+	/* No need to set runas_ctx.cmnd since cmnd matches sudoers_cmnd */
 	debug_return_bool(true);
 bad:
 	if (fd != -1)
@@ -485,7 +485,7 @@ command_matches_regex(const char *sudoers_cmnd, const char *sudoers_args,
 	    goto bad;
 	set_cmnd_fd(fd, rootfd);
 
-	/* No need to set user_ctx.cmnd_safe since cmnd matches sudoers_cmnd */
+	/* No need to set runas_ctx.cmnd since cmnd matches sudoers_cmnd */
 	debug_return_bool(true);
 bad:
 	if (fd != -1)
@@ -557,8 +557,8 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
 		    bad_digest = true;
 		    continue;
 		}
-		free(user_ctx.cmnd_safe);
-		if ((user_ctx.cmnd_safe = strdup(cp)) == NULL) {
+		free(runas_ctx.cmnd);
+		if ((runas_ctx.cmnd = strdup(cp)) == NULL) {
 		    sudo_warnx(U_("%s: %s"), __func__,
 			U_("unable to allocate memory"));
 		    cp = NULL;		/* fail closed */
@@ -623,8 +623,8 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
 		user_ctx.cmnd_stat->st_ino == sudoers_stat.st_ino)) {
 		if (!digest_matches(fd, cp, digests))
 		    continue;
-		free(user_ctx.cmnd_safe);
-		if ((user_ctx.cmnd_safe = strdup(cp)) == NULL) {
+		free(runas_ctx.cmnd);
+		if ((runas_ctx.cmnd = strdup(cp)) == NULL) {
 		    sudo_warnx(U_("%s: %s"), __func__,
 			U_("unable to allocate memory"));
 		    cp = NULL;		/* fail closed */
@@ -637,7 +637,7 @@ done:
     globfree(&gl);
     if (cp != NULL) {
 	if (command_args_match(sudoers_cmnd, sudoers_args)) {
-	    /* user_ctx.cmnd_safe was set above. */
+	    /* runas_ctx.cmnd was set above. */
 	    set_cmnd_fd(fd, rootfd);
 	    debug_return_bool(true);
 	}
@@ -719,8 +719,8 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args,
 	/* XXX - log functions not available but we should log very loudly */
 	goto bad;
     }
-    free(user_ctx.cmnd_safe);
-    if ((user_ctx.cmnd_safe = strdup(sudoers_cmnd)) == NULL) {
+    free(runas_ctx.cmnd);
+    if ((runas_ctx.cmnd = strdup(sudoers_cmnd)) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto bad;
     }
@@ -764,8 +764,8 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args,
 		goto bad;
 
 	    /* Successful match. */
-	    free(user_ctx.cmnd_safe);
-	    if ((user_ctx.cmnd_safe = strdup(sudoers_cmnd)) == NULL) {
+	    free(runas_ctx.cmnd);
+	    if ((runas_ctx.cmnd = strdup(sudoers_cmnd)) == NULL) {
 		sudo_warnx(U_("%s: %s"), __func__,
 		    U_("unable to allocate memory"));
 		goto bad;
@@ -798,14 +798,14 @@ command_matches(const char *sudoers_cmnd, const char *sudoers_args,
     bool rc = false;
     debug_decl(command_matches, SUDOERS_DEBUG_MATCH);
 
-    if (user_ctx.runchroot != NULL) {
+    if (runas_ctx.chroot != NULL) {
 	if (runchroot != NULL && strcmp(runchroot, "*") != 0 &&
-		strcmp(runchroot, user_ctx.runchroot) != 0) {
+		strcmp(runchroot, runas_ctx.chroot) != 0) {
 	    /* CHROOT mismatch */
 	    goto done;
 	}
 	/* User-specified runchroot (cmnd_stat already set appropriately). */
-	runchroot = user_ctx.runchroot;
+	runchroot = runas_ctx.chroot;
     } else if (runchroot == NULL) {
 	/* No rule-specific runchroot, use global (cmnd_stat already set). */
 	if (def_runchroot != NULL && strcmp(def_runchroot, "*") != '\0')
@@ -864,7 +864,7 @@ command_matches(const char *sudoers_cmnd, const char *sudoers_args,
 		strcmp(sudoers_cmnd, "sudoedit") == 0) {
 	    if (strcmp(user_ctx.cmnd, sudoers_cmnd) == 0 &&
 		    command_args_match(sudoers_cmnd, sudoers_args)) {
-		/* No need to set cmnd_safe since cmnd == sudoers_cmnd */
+		/* No need to set user_ctx.cmnd since cmnd == sudoers_cmnd */
 		rc = true;
 	    }
 	}

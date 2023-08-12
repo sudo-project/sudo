@@ -291,13 +291,13 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
 		if (cmnd_match != UNSPEC) {
 		    /*
 		     * If user is running command as themselves,
-		     * set user_ctx.runas_pw = user_ctx.pw.
+		     * set runas_ctx.pw = user_ctx.pw.
 		     * XXX - hack, want more general solution
 		     */
 		    if (matching_user && matching_user->type == MYSELF) {
-			sudo_pw_delref(user_ctx.runas_pw);
+			sudo_pw_delref(runas_ctx.pw);
 			sudo_pw_addref(user_ctx.pw);
-			user_ctx.runas_pw = user_ctx.pw;
+			runas_ctx.pw = user_ctx.pw;
 		    }
 		    *matching_cs = cs;
 		    *defs = &priv->defaults;
@@ -327,93 +327,93 @@ apply_cmndspec(struct cmndspec *cs)
     if (cs != NULL) {
 #ifdef HAVE_SELINUX
 	/* Set role and type if not specified on command line. */
-	if (user_ctx.role == NULL) {
+	if (runas_ctx.role == NULL) {
 	    if (cs->role != NULL) {
-		user_ctx.role = strdup(cs->role);
-		if (user_ctx.role == NULL) {
+		runas_ctx.role = strdup(cs->role);
+		if (runas_ctx.role == NULL) {
 		    sudo_warnx(U_("%s: %s"), __func__,
 			U_("unable to allocate memory"));
 		    debug_return_bool(false);
 		}
 	    } else {
-		user_ctx.role = def_role;
+		runas_ctx.role = def_role;
 		def_role = NULL;
 	    }
-	    if (user_ctx.role != NULL) {
+	    if (runas_ctx.role != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		    "user_ctx.role -> %s", user_ctx.role);
+		    "runas_ctx.role -> %s", runas_ctx.role);
 	    }
 	}
-	if (user_ctx.type == NULL) {
+	if (runas_ctx.type == NULL) {
 	    if (cs->type != NULL) {
-		user_ctx.type = strdup(cs->type);
-		if (user_ctx.type == NULL) {
+		runas_ctx.type = strdup(cs->type);
+		if (runas_ctx.type == NULL) {
 		    sudo_warnx(U_("%s: %s"), __func__,
 			U_("unable to allocate memory"));
 		    debug_return_bool(false);
 		}
 	    } else {
-		user_ctx.type = def_type;
+		runas_ctx.type = def_type;
 		def_type = NULL;
 	    }
-	    if (user_ctx.type != NULL) {
+	    if (runas_ctx.type != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		    "user_ctx.type -> %s", user_ctx.type);
+		    "runas_ctx.type -> %s", runas_ctx.type);
 	    }
 	}
 #endif /* HAVE_SELINUX */
 #ifdef HAVE_APPARMOR
 	/* Set AppArmor profile, if specified */
 	if (cs->apparmor_profile != NULL) {
-	    user_ctx.apparmor_profile = strdup(cs->apparmor_profile);
-	    if (user_ctx.apparmor_profile == NULL) {
+	    runas_ctx.apparmor_profile = strdup(cs->apparmor_profile);
+	    if (runas_ctx.apparmor_profile == NULL) {
 		sudo_warnx(U_("%s: %s"), __func__,
 		    U_("unable to allocate memory"));
 		debug_return_bool(false);
 	    }
 	} else {
-	    user_ctx.apparmor_profile = def_apparmor_profile;
+	    runas_ctx.apparmor_profile = def_apparmor_profile;
 	    def_apparmor_profile = NULL;
 	}
-	if (user_ctx.apparmor_profile != NULL) {
+	if (runas_ctx.apparmor_profile != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		"user_ctx.apparmor_profile -> %s", user_ctx.apparmor_profile);
+		"runas_ctx.apparmor_profile -> %s", runas_ctx.apparmor_profile);
 	}
 #endif
 #ifdef HAVE_PRIV_SET
 	/* Set Solaris privilege sets */
-	if (user_ctx.privs == NULL) {
+	if (runas_ctx.privs == NULL) {
 	    if (cs->privs != NULL) {
-		user_ctx.privs = strdup(cs->privs);
-		if (user_ctx.privs == NULL) {
+		runas_ctx.privs = strdup(cs->privs);
+		if (runas_ctx.privs == NULL) {
 		    sudo_warnx(U_("%s: %s"), __func__,
 			U_("unable to allocate memory"));
 		    debug_return_bool(false);
 		}
 	    } else {
-		user_ctx.privs = def_privs;
+		runas_ctx.privs = def_privs;
 		def_privs = NULL;
 	    }
-	    if (user_ctx.privs != NULL) {
+	    if (runas_ctx.privs != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		    "user_ctx.privs -> %s", user_ctx.privs);
+		    "runas_ctx.privs -> %s", runas_ctx.privs);
 	    }
 	}
-	if (user_ctx.limitprivs == NULL) {
+	if (runas_ctx.limitprivs == NULL) {
 	    if (cs->limitprivs != NULL) {
-		user_ctx.limitprivs = strdup(cs->limitprivs);
-		if (user_ctx.limitprivs == NULL) {
+		runas_ctx.limitprivs = strdup(cs->limitprivs);
+		if (runas_ctx.limitprivs == NULL) {
 		    sudo_warnx(U_("%s: %s"), __func__,
 			U_("unable to allocate memory"));
 		    debug_return_bool(false);
 		}
 	    } else {
-		user_ctx.limitprivs = def_limitprivs;
+		runas_ctx.limitprivs = def_limitprivs;
 		def_limitprivs = NULL;
 	    }
-	    if (user_ctx.limitprivs != NULL) {
+	    if (runas_ctx.limitprivs != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		    "user_ctx.limitprivs -> %s", user_ctx.limitprivs);
+		    "runas_ctx.limitprivs -> %s", runas_ctx.limitprivs);
 	    }
 	}
 #endif /* HAVE_PRIV_SET */

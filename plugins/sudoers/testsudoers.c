@@ -80,6 +80,7 @@ static int testsudoers_query(const struct sudo_nss *nss, struct passwd *pw);
  * Globals
  */
 struct sudoers_user_context user_ctx;
+struct sudoers_runas_context runas_ctx;
 struct passwd *list_pw;
 static const char *orig_cmnd;
 static char *runas_group, *runas_user;
@@ -136,7 +137,7 @@ main(int argc, char *argv[])
     while ((ch = getopt(argc, argv, "+D:dg:G:h:i:L:lP:p:R:T:tu:U:v")) != -1) {
 	switch (ch) {
 	    case 'D':
-		user_ctx.runcwd = optarg;
+		runas_ctx.cwd = optarg;
 		break;
 	    case 'd':
 		dflag = 1;
@@ -193,7 +194,7 @@ main(int argc, char *argv[])
 		    sudo_fatalx("invalid time: %s", optarg);
 		break;
 	    case 'R':
-		user_ctx.runchroot = optarg;
+		runas_ctx.chroot = optarg;
 		break;
 	    case 't':
 		trace_print = testsudoers_error;
@@ -284,8 +285,8 @@ main(int argc, char *argv[])
     } else {
 	user_ctx.shost = user_ctx.host;
     }
-    user_ctx.runhost = user_ctx.host;
-    user_ctx.srunhost = user_ctx.shost;
+    runas_ctx.host = user_ctx.host;
+    runas_ctx.shost = user_ctx.shost;
 
     /* Fill in user_ctx.cmnd_args from argv. */
     if (argc > 0) {
@@ -385,21 +386,21 @@ main(int argc, char *argv[])
 
     /* Validate user-specified chroot or cwd (if any) and runas user shell. */
     if (ISSET(validated, VALIDATE_SUCCESS)) {
-	if (!check_user_shell(user_ctx.runas_pw)) {
+	if (!check_user_shell(runas_ctx.pw)) {
 	    printf(U_("\nInvalid shell for user %s: %s\n"),
-		user_ctx.runas_pw->pw_name, user_ctx.runas_pw->pw_shell);
+		runas_ctx.pw->pw_name, runas_ctx.pw->pw_shell);
 	    CLR(validated, VALIDATE_SUCCESS);
 	    SET(validated, VALIDATE_FAILURE);
 	}
 	if (check_user_runchroot() != true) {
 	    printf("\nUser %s is not allowed to change root directory to %s\n",
-		user_ctx.name, user_ctx.runchroot);
+		user_ctx.name, runas_ctx.chroot);
 	    CLR(validated, VALIDATE_SUCCESS);
 	    SET(validated, VALIDATE_FAILURE);
 	}
 	if (check_user_runcwd() != true) {
 	    printf("\nUser %s is not allowed to change directory to %s\n",
-		user_ctx.name, user_ctx.runcwd);
+		user_ctx.name, runas_ctx.cwd);
 	    CLR(validated, VALIDATE_SUCCESS);
 	    SET(validated, VALIDATE_FAILURE);
 	}
@@ -454,9 +455,9 @@ set_runaspw(const char *user)
 	if ((pw = sudo_getpwnam(user)) == NULL)
 	    sudo_fatalx(U_("unknown user %s"), user);
     }
-    if (user_ctx.runas_pw != NULL)
-	sudo_pw_delref(user_ctx.runas_pw);
-    user_ctx.runas_pw = pw;
+    if (runas_ctx.pw != NULL)
+	sudo_pw_delref(runas_ctx.pw);
+    runas_ctx.pw = pw;
     debug_return;
 }
 
@@ -478,9 +479,9 @@ set_runasgr(const char *group)
 	if ((gr = sudo_getgrnam(group)) == NULL)
 	    sudo_fatalx(U_("unknown group %s"), group);
     }
-    if (user_ctx.runas_gr != NULL)
-	sudo_gr_delref(user_ctx.runas_gr);
-    user_ctx.runas_gr = gr;
+    if (runas_ctx.gr != NULL)
+	sudo_gr_delref(runas_ctx.gr);
+    runas_ctx.gr = gr;
     debug_return;
 }
 

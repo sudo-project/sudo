@@ -94,8 +94,8 @@ resolve_host(const char *host, char **longp, char **shortp)
 }
 
 /*
- * Look up the fully qualified domain name of host and runhost in user_ctx.
- * Sets user_ctx.host, user_ctx.shost, user_ctx.runhost and user_ctx.srunhost.
+ * Look up the fully qualified domain name of user and runas hosts.
+ * Sets user_ctx.host, user_ctx.shost, runas_ctx.host and runas_ctx.shost.
  */
 static bool
 cb_fqdn(const char *file, int line, int column,
@@ -110,12 +110,12 @@ cb_fqdn(const char *file, int line, int column,
     if (sd_un != NULL && !sd_un->flag)
 	debug_return_bool(true);
 
-    /* If the -h flag was given we need to resolve both host and runhost. */
-    remote = strcmp(user_ctx.runhost, user_ctx.host) != 0;
+    /* If the -h flag was given we need to resolve both host names. */
+    remote = strcmp(runas_ctx.host, user_ctx.host) != 0;
 
     /* First resolve user_ctx.host, setting host and shost. */
     if (resolve_host(user_ctx.host, &lhost, &shost) != 0) {
-	if ((rc = resolve_host(user_ctx.runhost, &lhost, &shost)) != 0) {
+	if ((rc = resolve_host(runas_ctx.host, &lhost, &shost)) != 0) {
 	    gai_log_warning(SLOG_PARSE_ERROR|SLOG_RAW_MSG, rc,
 		N_("unable to resolve host %s"), user_ctx.host);
 	    debug_return_bool(false);
@@ -127,12 +127,12 @@ cb_fqdn(const char *file, int line, int column,
     user_ctx.host = lhost;
     user_ctx.shost = shost;
 
-    /* Next resolve user_ctx.runhost, setting runhost and srunhost. */
+    /* Next resolve runas_ctx.host, setting host and shost in runas_ctx. */
     lhost = shost = NULL;
     if (remote) {
-	if ((rc = resolve_host(user_ctx.runhost, &lhost, &shost)) != 0) {
+	if ((rc = resolve_host(runas_ctx.host, &lhost, &shost)) != 0) {
 	    gai_log_warning(SLOG_NO_LOG|SLOG_RAW_MSG, rc,
-		N_("unable to resolve host %s"), user_ctx.runhost);
+		N_("unable to resolve host %s"), runas_ctx.host);
 	    debug_return_bool(false);
 	}
     } else {
@@ -152,16 +152,16 @@ cb_fqdn(const char *file, int line, int column,
 	}
     }
     if (lhost != NULL && shost != NULL) {
-	if (user_ctx.srunhost != user_ctx.runhost)
-	    free(user_ctx.srunhost);
-	free(user_ctx.runhost);
-	user_ctx.runhost = lhost;
-	user_ctx.srunhost = shost;
+	if (runas_ctx.shost != runas_ctx.host)
+	    free(runas_ctx.shost);
+	free(runas_ctx.host);
+	runas_ctx.host = lhost;
+	runas_ctx.shost = shost;
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	"host %s, shost %s, runhost %s, srunhost %s",
-	user_ctx.host, user_ctx.shost, user_ctx.runhost, user_ctx.srunhost);
+	"host %s, shost %s, runas host %s, runas shost %s",
+	user_ctx.host, user_ctx.shost, runas_ctx.host, runas_ctx.shost);
     debug_return_bool(true);
 }
 

@@ -165,8 +165,8 @@ get_ipa_hostname(char **shostp, char **lhostp)
 static bool
 sudo_sss_check_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
-    const char *host = handle->ipa_host ? handle->ipa_host : user_ctx.runhost;
-    const char *shost = handle->ipa_shost ? handle->ipa_shost : user_ctx.srunhost;
+    const char *host = handle->ipa_host ? handle->ipa_host : runas_ctx.host;
+    const char *shost = handle->ipa_shost ? handle->ipa_shost : runas_ctx.shost;
     char **val_array;
     int i, rc, ret = false;
     debug_decl(sudo_sss_check_user, SUDOERS_DEBUG_SSSD);
@@ -628,10 +628,10 @@ sudo_sss_open(struct sudo_nss *nss)
     }
 
     /*
-     * If runhost is the same as the local host, check for ipa_hostname
-     * in sssd.conf and use it in preference to user_ctx.runhost.
+     * If the runas host matches the local host, check for ipa_hostname
+     * in sssd.conf and use it in preference to runas_ctx.host.
      */
-    if (strcasecmp(user_ctx.runhost, user_ctx.host) == 0) {
+    if (strcasecmp(runas_ctx.host, user_ctx.host) == 0) {
 	if (get_ipa_hostname(&handle->ipa_shost, &handle->ipa_host) == -1) {
 	    free(handle);
 	    debug_return_int(ENOMEM);
@@ -681,7 +681,7 @@ sudo_sss_query(const struct sudo_nss *nss, struct passwd *pw)
 
     sudo_debug_printf(SUDO_DEBUG_DIAG,
 	"searching SSSD/LDAP for sudoers entries for user %s, host %s",
-	 pw->pw_name, user_ctx.runhost);
+	 pw->pw_name, runas_ctx.host);
 
     /* Stash a ref to the passwd struct in the handle. */
     sudo_pw_addref(pw);
