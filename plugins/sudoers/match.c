@@ -135,7 +135,7 @@ runas_getgroups(void)
     }
 
     /* Only use results from a group db query, not the front end. */
-    pw = runas_pw ? runas_pw : sudo_user.pw;
+    pw = runas_pw ? runas_pw : user_ctx.pw;
     debug_return_ptr(sudo_get_gidlist(pw, ENTRY_TYPE_QUERIED));
 }
 
@@ -193,8 +193,8 @@ runas_userlist_matches(const struct sudoers_parse_tree *parse_tree,
 		 * was specified on the command line without a user _or_
 		 * the user specified their own name on the command line.
 		 */
-		if ((!ISSET(sudo_user.flags, RUNAS_USER_SPECIFIED) &&
-			ISSET(sudo_user.flags, RUNAS_GROUP_SPECIFIED)) ||
+		if ((!ISSET(user_ctx.flags, RUNAS_USER_SPECIFIED) &&
+			ISSET(user_ctx.flags, RUNAS_GROUP_SPECIFIED)) ||
 			strcmp(user_name, runas_pw->pw_name) == 0)
 		    user_matched = !m->negated;
 		break;
@@ -303,7 +303,7 @@ runaslist_matches(const struct sudoers_parse_tree *parse_tree,
     }
 
     user_matched = runas_userlist_matches(parse_tree, user_list, matching_user);
-    if (ISSET(sudo_user.flags, RUNAS_GROUP_SPECIFIED)) {
+    if (ISSET(user_ctx.flags, RUNAS_GROUP_SPECIFIED)) {
 	group_matched = runas_grouplist_matches(parse_tree, group_list,
 	    matching_group);
     }

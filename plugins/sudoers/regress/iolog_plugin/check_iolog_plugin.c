@@ -36,7 +36,7 @@
 
 extern struct io_plugin sudoers_io;
 
-struct sudo_user sudo_user;
+struct sudoers_user_context user_ctx;
 struct passwd *list_pw;
 sudo_printf_t sudo_printf;
 sudo_conv_t sudo_conv;
@@ -385,15 +385,15 @@ main(int argc, char *argv[], char *envp[])
 	if ((tpw = getpwnam("root")) == NULL)
 	    sudo_fatalx("unable to look up uid 0 or root");
     }
-    sudo_user._runas_pw = pw_dup(tpw);
+    user_ctx._runas_pw = pw_dup(tpw);
 
     /* Set invoking user. */
     if ((tpw = getpwuid(geteuid())) == NULL)
 	sudo_fatalx("unable to look up invoking user's uid");
-    sudo_user.pw = pw_dup(tpw);
+    user_ctx.pw = pw_dup(tpw);
 
     /* Set iolog uid/gid to invoking user. */
-    iolog_set_owner(sudo_user.pw->pw_uid, sudo_user.pw->pw_gid);
+    iolog_set_owner(user_ctx.pw->pw_uid, user_ctx.pw->pw_gid);
 
     test_endpoints(&tests, &errors, iolog_dir, envp);
 

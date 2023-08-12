@@ -156,7 +156,7 @@ log_server_reject(struct eventlog *evlog, const char *message)
 	    debug_return_bool(false);
 
 	/* Open connection to log server, send hello and reject messages. */
-	client_closure = log_server_open(&details, &sudo_user.submit_time,
+	client_closure = log_server_open(&details, &user_ctx.submit_time,
 	    false, SEND_REJECT, message);
 	if (client_closure != NULL) {
 	    client_closure_free(client_closure);
@@ -256,7 +256,7 @@ log_reject(const char *message, bool logit, bool mailit)
     debug_decl(log_reject, SUDOERS_DEBUG_LOGGING);
 
     if (!ISSET(sudo_mode, MODE_POLICY_INTERCEPTED))
-	uuid_str = sudo_user.uuid_str;
+	uuid_str = user_ctx.uuid_str;
 
     if (mailit) {
 	SET(evl_flags, EVLOG_MAIL);
@@ -604,7 +604,7 @@ log_exit_status(int status)
 	    ret = false;
 	    goto done;
 	}
-	sudo_timespecsub(&run_time, &sudo_user.submit_time, &run_time);
+	sudo_timespecsub(&run_time, &user_ctx.submit_time, &run_time);
 
         if (WIFEXITED(status)) {
 	    exit_value = WEXITSTATUS(status);
@@ -625,7 +625,7 @@ log_exit_status(int status)
 	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
 	sudoers_to_eventlog(&evlog, saved_cmnd, saved_argv, env_get(),
-	    sudo_user.uuid_str);
+	    user_ctx.uuid_str);
 	if (def_mail_always) {
 	    SET(evl_flags, EVLOG_MAIL);
 	    if (!def_log_exit_status)
@@ -728,7 +728,7 @@ vlog_warning(unsigned int flags, int errnum, const char * restrict fmt,
 		SET(evl_flags, EVLOG_MAIL_ONLY);
 	}
 	sudoers_to_eventlog(&evlog, safe_cmnd, NewArgv, env_get(),
-	    sudo_user.uuid_str);
+	    user_ctx.uuid_str);
 	if (!eventlog_alert(&evlog, evl_flags, &now, message, errstr))
 	    ret = false;
 	if (!log_server_alert(&evlog, &now, message, errstr))
@@ -843,7 +843,7 @@ mail_parse_errors(void)
 	goto done;
     }
     sudoers_to_eventlog(&evlog, safe_cmnd, NewArgv, env_get(),
-	sudo_user.uuid_str);
+	user_ctx.uuid_str);
 
     /* Convert parse_error_list to a string vector. */
     n = 0;
@@ -955,12 +955,12 @@ sudoers_to_eventlog(struct eventlog *evlog, const char *cmnd,
     debug_decl(sudoers_to_eventlog, SUDOERS_DEBUG_LOGGING);
 
     /* We rely on the reference held by the group cache. */
-    if ((grp = sudo_getgrgid(sudo_user.pw->pw_gid)) != NULL)
+    if ((grp = sudo_getgrgid(user_ctx.pw->pw_gid)) != NULL)
 	sudo_gr_delref(grp);
 
     memset(evlog, 0, sizeof(*evlog));
-    evlog->iolog_file = sudo_user.iolog_file;
-    evlog->iolog_path = sudo_user.iolog_path;
+    evlog->iolog_file = user_ctx.iolog_file;
+    evlog->iolog_path = user_ctx.iolog_path;
     evlog->command = cmnd ? (char *)cmnd : (argv ? argv[0] : NULL);
     evlog->cwd = user_cwd;
     if (def_runchroot != NULL && strcmp(def_runchroot, "*") != 0) {
@@ -973,19 +973,19 @@ sudoers_to_eventlog(struct eventlog *evlog, const char *cmnd,
     } else {
 	evlog->runcwd = user_cwd;
     }
-    evlog->rungroup = runas_gr ? runas_gr->gr_name : sudo_user.runas_group;
-    evlog->source = sudo_user.source;
+    evlog->rungroup = runas_gr ? runas_gr->gr_name : user_ctx.runas_group;
+    evlog->source = user_ctx.source;
     evlog->submithost = user_host;
     evlog->submituser = user_name;
     if (grp != NULL)
 	evlog->submitgroup = grp->gr_name;
     evlog->ttyname = user_ttypath;
     evlog->argv = (char **)argv;
-    evlog->env_add = (char **)sudo_user.env_vars;
+    evlog->env_add = (char **)user_ctx.env_vars;
     evlog->envp = (char **)envp;
-    evlog->submit_time = sudo_user.submit_time;
-    evlog->lines = sudo_user.lines;
-    evlog->columns = sudo_user.cols;
+    evlog->submit_time = user_ctx.submit_time;
+    evlog->lines = user_ctx.lines;
+    evlog->columns = user_ctx.cols;
     if (runas_pw != NULL) {
 	evlog->rungid = runas_pw->pw_gid;
 	evlog->runuid = runas_pw->pw_uid;
@@ -993,7 +993,7 @@ sudoers_to_eventlog(struct eventlog *evlog, const char *cmnd,
     } else {
 	evlog->rungid = (gid_t)-1;
 	evlog->runuid = (uid_t)-1;
-	evlog->runuser = sudo_user.runas_user;
+	evlog->runuser = user_ctx.runas_user;
     }
     if (uuid_str == NULL) {
 	unsigned char uuid[16];
@@ -1009,7 +1009,7 @@ sudoers_to_eventlog(struct eventlog *evlog, const char *cmnd,
 	if (sudo_gettime_real(&now) == -1) {
 	    sudo_warn("%s", U_("unable to get time of day"));
 	} else {
-	    sudo_timespecsub(&now, &sudo_user.submit_time, &evlog->iolog_offset);
+	    sudo_timespecsub(&now, &user_ctx.submit_time, &evlog->iolog_offset);
 	}
     }
 

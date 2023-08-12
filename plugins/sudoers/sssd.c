@@ -754,8 +754,8 @@ sudo_sss_getdefs(const struct sudo_nss *nss)
     sudo_debug_printf(SUDO_DEBUG_DIAG, "Looking for cn=defaults");
 
     /* NOTE: these are global defaults, user-ID and name are not used. */
-    rc = handle->fn_send_recv_defaults(sudo_user.pw->pw_uid,
-	sudo_user.pw->pw_name, &sss_error, &handle->domainname, &sss_result);
+    rc = handle->fn_send_recv_defaults(user_ctx.pw->pw_uid,
+	user_ctx.pw->pw_name, &sss_error, &handle->domainname, &sss_result);
     switch (rc) {
     case 0:
 	break;

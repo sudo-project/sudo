@@ -409,7 +409,7 @@ cb_intercept_type(const char *file, int line, int column,
 	/* Set explicitly in sudoers. */
 	if (sd_un->tuple == dso) {
 	    /* Reset intercept_allow_setid default value. */
-	    if (!ISSET(sudo_user.flags, USER_INTERCEPT_SETID))
+	    if (!ISSET(user_ctx.flags, USER_INTERCEPT_SETID))
 		def_intercept_allow_setid = false;
 	}
     }
@@ -426,7 +426,7 @@ cb_intercept_allow_setid(const char *file, int line, int column,
     /* Operator will be -1 if set by front-end. */
     if (op != -1) {
 	/* Set explicitly in sudoers. */
-	SET(sudo_user.flags, USER_INTERCEPT_SETID);
+	SET(user_ctx.flags, USER_INTERCEPT_SETID);
     }
 
     debug_return_bool(true);

@@ -79,7 +79,7 @@ static int testsudoers_query(const struct sudo_nss *nss, struct passwd *pw);
 /*
  * Globals
  */
-struct sudo_user sudo_user;
+struct sudoers_user_context user_ctx;
 struct passwd *list_pw;
 static const char *orig_cmnd;
 static char *runas_group, *runas_user;
@@ -149,7 +149,7 @@ main(int argc, char *argv[])
 		break;
 	    case 'g':
 		runas_group = optarg;
-		SET(sudo_user.flags, RUNAS_GROUP_SPECIFIED);
+		SET(user_ctx.flags, RUNAS_GROUP_SPECIFIED);
 		break;
 	    case 'h':
 		user_host = optarg;
@@ -206,7 +206,7 @@ main(int argc, char *argv[])
 		break;
 	    case 'u':
 		runas_user = optarg;
-		SET(sudo_user.flags, RUNAS_USER_SPECIFIED);
+		SET(user_ctx.flags, RUNAS_USER_SPECIFIED);
 		break;
 	    case 'v':
 		if (sudo_mode != MODE_RUN) {
@@ -267,10 +267,10 @@ main(int argc, char *argv[])
 	strlcpy(cwdbuf, "/", sizeof(cwdbuf));
     user_cwd = cwdbuf;
 
-    if ((sudo_user.pw = sudo_getpwnam(user_name)) == NULL)
+    if ((user_ctx.pw = sudo_getpwnam(user_name)) == NULL)
 	sudo_fatalx(U_("unknown user %s"), user_name);
-    user_uid = sudo_user.pw->pw_uid;
-    user_gid = sudo_user.pw->pw_gid;
+    user_uid = user_ctx.pw->pw_uid;
+    user_gid = user_ctx.pw->pw_gid;
 
     if (user_host == NULL) {
 	if ((user_host = sudo_gethostname()) == NULL)
@@ -380,7 +380,7 @@ main(int argc, char *argv[])
     testsudoers_nss.parse_tree = &parsed_policy;
 
     printf("\nEntries for user %s:\n", user_name);
-    validated = sudoers_lookup(&snl, sudo_user.pw, now, cb_lookup, NULL,
+    validated = sudoers_lookup(&snl, user_ctx.pw, now, cb_lookup, NULL,
 	&status, pwflag);
 
     /* Validate user-specified chroot or cwd (if any) and runas user shell. */

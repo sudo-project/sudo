@@ -291,13 +291,13 @@ sudoers_lookup_check(struct sudo_nss *nss, struct passwd *pw,
 		if (cmnd_match != UNSPEC) {
 		    /*
 		     * If user is running command as themselves,
-		     * set runas_pw = sudo_user.pw.
+		     * set runas_pw = user_ctx.pw.
 		     * XXX - hack, want more general solution
 		     */
 		    if (matching_user && matching_user->type == MYSELF) {
 			sudo_pw_delref(runas_pw);
-			sudo_pw_addref(sudo_user.pw);
-			runas_pw = sudo_user.pw;
+			sudo_pw_addref(user_ctx.pw);
+			runas_pw = user_ctx.pw;
 		    }
 		    *matching_cs = cs;
 		    *defs = &priv->defaults;

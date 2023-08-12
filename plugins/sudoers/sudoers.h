@@ -79,7 +79,7 @@ struct group_list {
  * Info pertaining to the invoking user.
  * XXX - can we embed struct eventlog here or use it instead?
  */
-struct sudo_user {
+struct sudoers_user_context {
     struct timespec submit_time;
     struct passwd *pw;
     struct passwd *_runas_pw;
@@ -149,7 +149,7 @@ struct sudo_user {
 #define ENTRY_TYPE_FRONTEND	0x02
 
 /*
- * sudo_user flag values
+ * user_ctx.flag values
  */
 #define RUNAS_USER_SPECIFIED	0x01U
 #define RUNAS_GROUP_SPECIFIED	0x02U
@@ -224,50 +224,50 @@ struct sudo_user {
 #define PERM_IOLOG		0x07
 
 /*
- * Shortcuts for sudo_user contents.
+ * Shortcuts for user_ctx contents.
  */
-#define user_name		(sudo_user.name)
-#define user_uid		(sudo_user.uid)
-#define user_gid		(sudo_user.gid)
-#define user_sid		(sudo_user.sid)
-#define user_tcpgid		(sudo_user.tcpgid)
-#define user_umask		(sudo_user.umask)
-#define user_passwd		(sudo_user.pw->pw_passwd)
-#define user_dir		(sudo_user.pw->pw_dir)
-#define user_gids		(sudo_user.gids)
-#define user_ngids		(sudo_user.ngids)
-#define user_gid_list		(sudo_user.gid_list)
-#define user_tty		(sudo_user.tty)
-#define user_ttypath		(sudo_user.ttypath)
-#define user_cwd		(sudo_user.cwd)
-#define user_cmnd		(sudo_user.cmnd)
-#define user_cmnd_dir		(sudo_user.cmnd_dir)
-#define user_args		(sudo_user.cmnd_args)
-#define user_base		(sudo_user.cmnd_base)
-#define user_stat		(sudo_user.cmnd_stat)
-#define user_path		(sudo_user.path)
-#define user_prompt		(sudo_user.prompt)
-#define user_host		(sudo_user.host)
-#define user_shost		(sudo_user.shost)
-#define user_runhost		(sudo_user.runhost)
-#define user_srunhost		(sudo_user.srunhost)
-#define user_ccname		(sudo_user.krb5_ccname)
-#define list_cmnd		(sudo_user.cmnd_list)
-#define safe_cmnd		(sudo_user.cmnd_safe)
-#define saved_cmnd		(sudo_user.cmnd_saved)
-#define cmnd_fd			(sudo_user.execfd)
-#define login_class		(sudo_user.class_name)
-#define runas_pw		(sudo_user._runas_pw)
-#define runas_gr		(sudo_user._runas_gr)
-#define user_role		(sudo_user.role)
-#define user_type		(sudo_user.type)
-#define user_apparmor_profile		(sudo_user.apparmor_profile)
-#define user_closefrom		(sudo_user.closefrom)
-#define	runas_privs		(sudo_user.privs)
-#define	runas_limitprivs	(sudo_user.limitprivs)
-#define user_timeout		(sudo_user.timeout)
-#define user_runchroot		(sudo_user.runchroot)
-#define user_runcwd		(sudo_user.runcwd)
+#define user_name		(user_ctx.name)
+#define user_uid		(user_ctx.uid)
+#define user_gid		(user_ctx.gid)
+#define user_sid		(user_ctx.sid)
+#define user_tcpgid		(user_ctx.tcpgid)
+#define user_umask		(user_ctx.umask)
+#define user_passwd		(user_ctx.pw->pw_passwd)
+#define user_dir		(user_ctx.pw->pw_dir)
+#define user_gids		(user_ctx.gids)
+#define user_ngids		(user_ctx.ngids)
+#define user_gid_list		(user_ctx.gid_list)
+#define user_tty		(user_ctx.tty)
+#define user_ttypath		(user_ctx.ttypath)
+#define user_cwd		(user_ctx.cwd)
+#define user_cmnd		(user_ctx.cmnd)
+#define user_cmnd_dir		(user_ctx.cmnd_dir)
+#define user_args		(user_ctx.cmnd_args)
+#define user_base		(user_ctx.cmnd_base)
+#define user_stat		(user_ctx.cmnd_stat)
+#define user_path		(user_ctx.path)
+#define user_prompt		(user_ctx.prompt)
+#define user_host		(user_ctx.host)
+#define user_shost		(user_ctx.shost)
+#define user_runhost		(user_ctx.runhost)
+#define user_srunhost		(user_ctx.srunhost)
+#define user_ccname		(user_ctx.krb5_ccname)
+#define list_cmnd		(user_ctx.cmnd_list)
+#define safe_cmnd		(user_ctx.cmnd_safe)
+#define saved_cmnd		(user_ctx.cmnd_saved)
+#define cmnd_fd			(user_ctx.execfd)
+#define login_class		(user_ctx.class_name)
+#define runas_pw		(user_ctx._runas_pw)
+#define runas_gr		(user_ctx._runas_gr)
+#define user_role		(user_ctx.role)
+#define user_type		(user_ctx.type)
+#define user_apparmor_profile	(user_ctx.apparmor_profile)
+#define user_closefrom		(user_ctx.closefrom)
+#define	runas_privs		(user_ctx.privs)
+#define	runas_limitprivs	(user_ctx.limitprivs)
+#define user_timeout		(user_ctx.timeout)
+#define user_runchroot		(user_ctx.runchroot)
+#define user_runcwd		(user_ctx.runcwd)
 
 /* Default sudoers uid/gid/mode if not set by the Makefile. */
 #ifndef SUDOERS_UID
@@ -421,8 +421,8 @@ int sudoers_list(int argc, char *const argv[], const char *list_user, bool verbo
 int sudoers_validate_user(void);
 void sudoers_cleanup(void);
 bool sudoers_override_umask(void);
-void sudo_user_free(void);
-extern struct sudo_user sudo_user;
+void sudoers_user_ctx_free(void);
+extern struct sudoers_user_context user_ctx;
 extern struct passwd *list_pw;
 extern unsigned int sudo_mode;
 extern int sudoedit_nfiles;

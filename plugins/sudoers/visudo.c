@@ -108,7 +108,7 @@ extern void get_hostname(void);
 /*
  * Globals
  */
-struct sudo_user sudo_user;
+struct sudoers_user_context user_ctx;
 struct passwd *list_pw;
 static const char *path_sudoers = _PATH_SUDOERS;
 static struct sudoersfile_list sudoerslist = TAILQ_HEAD_INITIALIZER(sudoerslist);
@@ -258,17 +258,17 @@ main(int argc, char *argv[])
 	export_sudoers(path_sudoers, export_path);
     }
 
-    /* Mock up a fake sudo_user struct. */
+    /* Mock up a fake struct sudoers_user_context. */
     user_cmnd = user_base = strdup("true");
     if (user_cmnd == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (geteuid() == 0) {
 	const char *user = getenv("SUDO_USER");
 	if (user != NULL && *user != '\0')
-	    sudo_user.pw = sudo_getpwnam(user);
+	    user_ctx.pw = sudo_getpwnam(user);
     }
-    if (sudo_user.pw == NULL) {
-	if ((sudo_user.pw = sudo_getpwuid(getuid())) == NULL)
+    if (user_ctx.pw == NULL) {
+	if ((user_ctx.pw = sudo_getpwuid(getuid())) == NULL)
 	    sudo_fatalx(U_("you do not exist in the %s database"), "passwd");
     }
     get_hostname();

@@ -706,7 +706,7 @@ default_binding_matches(struct sudoers_parse_tree *parse_tree,
     case DEFAULTS:
 	debug_return_bool(true);
     case DEFAULTS_USER:
-	if (userlist_matches(parse_tree, sudo_user.pw, &d->binding->members) == ALLOW)
+	if (userlist_matches(parse_tree, user_ctx.pw, &d->binding->members) == ALLOW)
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_RUNAS:
@@ -714,7 +714,7 @@ default_binding_matches(struct sudoers_parse_tree *parse_tree,
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_HOST:
-	if (hostlist_matches(parse_tree, sudo_user.pw, &d->binding->members) == ALLOW)
+	if (hostlist_matches(parse_tree, user_ctx.pw, &d->binding->members) == ALLOW)
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_CMND:

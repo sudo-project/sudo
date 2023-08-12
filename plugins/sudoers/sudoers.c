@@ -79,7 +79,7 @@ static bool tty_present(void);
 /*
  * Globals
  */
-struct sudo_user sudo_user;
+struct sudoers_user_context user_ctx;
 struct passwd *list_pw;
 unsigned int sudo_mode;
 
@@ -268,7 +268,7 @@ sudoers_init(void *info, sudoers_logger_t logger, char * const envp[])
     }
 
     /* Set login class if applicable (after sudoers is parsed). */
-    if (set_loginclass(runas_pw ? runas_pw : sudo_user.pw))
+    if (set_loginclass(runas_pw ? runas_pw : user_ctx.pw))
 	ret = true;
 
 cleanup:
@@ -287,7 +287,7 @@ cleanup:
 /*
  * Expand I/O log dir and file into a full path.
  * Returns the full I/O log path prefixed with "iolog_path=".
- * Sets sudo_user.iolog_file as a side effect.
+ * Sets user_ctx.iolog_file as a side effect.
  */
 static char *
 format_iolog_path(void)
@@ -316,8 +316,8 @@ format_iolog_path(void)
     }
 
     /* Stash pointer to the I/O log for the event log. */
-    sudo_user.iolog_path = iolog_path + sizeof("iolog_path=") - 1;
-    sudo_user.iolog_file = sudo_user.iolog_path + 1 + strlen(dir);
+    user_ctx.iolog_path = iolog_path + sizeof("iolog_path=") - 1;
+    user_ctx.iolog_file = user_ctx.iolog_path + 1 + strlen(dir);
 
 done:
     debug_return_str(iolog_path);
@@ -389,7 +389,7 @@ sudoers_check_common(int pwflag)
      */
     time(&now);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
-    validated = sudoers_lookup(snl, sudo_user.pw, now, cb_lookup, &match_info,
+    validated = sudoers_lookup(snl, user_ctx.pw, now, cb_lookup, &match_info,
 	&cmnd_status, pwflag);
     sudoers_setlocale(oldlocale, NULL);
     if (ISSET(validated, VALIDATE_ERROR)) {
@@ -398,15 +398,15 @@ sudoers_check_common(int pwflag)
     }
 
     if (match_info.us != NULL && match_info.us->file != NULL) {
-	free(sudo_user.source);
+	free(user_ctx.source);
 	if (match_info.us->line != 0) {
-	    if (asprintf(&sudo_user.source, "%s:%d:%d", match_info.us->file,
+	    if (asprintf(&user_ctx.source, "%s:%d:%d", match_info.us->file,
 		    match_info.us->line, match_info.us->column) == -1)
-		sudo_user.source = NULL;
+		user_ctx.source = NULL;
 	} else {
-	    sudo_user.source = strdup(match_info.us->file);
+	    user_ctx.source = strdup(match_info.us->file);
 	}
-	if (sudo_user.source == NULL) {
+	if (user_ctx.source == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
@@ -515,16 +515,16 @@ sudoers_check_common(int pwflag)
 	goto done;
     }
 
-    /* If run as root with SUDO_USER set, set sudo_user.pw to that user. */
+    /* If run as root with SUDO_USER set, set user_ctx.pw to that user. */
     /* XXX - causes confusion when root is not listed in sudoers */
     if (ISSET(sudo_mode, MODE_RUN|MODE_EDIT) && prev_user != NULL) {
 	if (user_uid == 0 && strcmp(prev_user, "root") != 0) {
 	    struct passwd *pw;
 
 	    if ((pw = sudo_getpwnam(prev_user)) != NULL) {
-		    if (sudo_user.pw != NULL)
-			sudo_pw_delref(sudo_user.pw);
-		    sudo_user.pw = pw;
+		    if (user_ctx.pw != NULL)
+			sudo_pw_delref(user_ctx.pw);
+		    user_ctx.pw = pw;
 	    }
 	}
     }
@@ -584,7 +584,7 @@ sudoers_check_common(int pwflag)
 		U_("sorry, you are not allowed to preserve the environment"));
 	    goto bad;
 	} else {
-	    if (!validate_env_vars(sudo_user.env_vars))
+	    if (!validate_env_vars(user_ctx.env_vars))
 		goto bad;
 	}
     }
@@ -643,7 +643,7 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
 
     /* Environment variables specified on the command line. */
     if (env_add != NULL && env_add[0] != NULL)
-	sudo_user.env_vars = env_add;
+	user_ctx.env_vars = env_add;
 
     /*
      * Make a local copy of argc/argv, with special handling for the
@@ -754,7 +754,7 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
     }
 
     /* Insert user-specified environment variables. */
-    if (!insert_env_vars(sudo_user.env_vars)) {
+    if (!insert_env_vars(user_ctx.env_vars)) {
 	sudo_warnx("%s",
 	    U_("error setting user-specified environment variables"));
 	goto error;
@@ -943,9 +943,9 @@ sudoers_list(int argc, char * const argv[], const char *list_user, bool verbose)
 	goto done;
 
     if (ISSET(sudo_mode, MODE_CHECK))
-	ret = display_cmnd(snl, list_pw ? list_pw : sudo_user.pw, verbose);
+	ret = display_cmnd(snl, list_pw ? list_pw : user_ctx.pw, verbose);
     else
-	ret = display_privs(snl, list_pw ? list_pw : sudo_user.pw, verbose);
+	ret = display_privs(snl, list_pw ? list_pw : user_ctx.pw, verbose);
 
 done:
     mail_parse_errors();
@@ -970,7 +970,7 @@ done:
 }
 
 /*
- * Initialize timezone and fill in sudo_user struct.
+ * Initialize timezone and fill in user_ctx.
  */
 static bool
 init_vars(char * const envp[])
@@ -1015,8 +1015,8 @@ init_vars(char * const envp[])
      * Get a local copy of the user's passwd struct and group list if we
      * don't already have them.
      */
-    if (sudo_user.pw == NULL) {
-	if ((sudo_user.pw = sudo_getpwnam(user_name)) == NULL) {
+    if (user_ctx.pw == NULL) {
+	if ((user_ctx.pw = sudo_getpwnam(user_name)) == NULL) {
 	    /*
 	     * It is not unusual for users to place "sudo -k" in a .logout
 	     * file which can cause sudo to be run during reboot after the
@@ -1028,12 +1028,12 @@ init_vars(char * const envp[])
 	    }
 
 	    /* Need to make a fake struct passwd for the call to log_warningx(). */
-	    sudo_user.pw = sudo_mkpwent(user_name, user_uid, user_gid, NULL, NULL);
+	    user_ctx.pw = sudo_mkpwent(user_name, user_uid, user_gid, NULL, NULL);
 	    unknown_user = true;
 	}
     }
     if (user_gid_list == NULL)
-	user_gid_list = sudo_get_gidlist(sudo_user.pw, ENTRY_TYPE_ANY);
+	user_gid_list = sudo_get_gidlist(user_ctx.pw, ENTRY_TYPE_ANY);
 
     /* Store initialize permissions so we can restore them later. */
     if (!set_perms(PERM_INITIAL))
@@ -1053,15 +1053,15 @@ init_vars(char * const envp[])
      * Note that if runas_group was specified without runas_user we
      * run the command as the invoking user.
      */
-    if (sudo_user.runas_group != NULL) {
-	if (!set_runasgr(sudo_user.runas_group, false))
+    if (user_ctx.runas_group != NULL) {
+	if (!set_runasgr(user_ctx.runas_group, false))
 	    debug_return_bool(false);
-	if (!set_runaspw(sudo_user.runas_user ?
-		sudo_user.runas_user : user_name, false))
+	if (!set_runaspw(user_ctx.runas_user ?
+		user_ctx.runas_user : user_name, false))
 	    debug_return_bool(false);
     } else {
-	if (!set_runaspw(sudo_user.runas_user ?
-		sudo_user.runas_user : def_runas_default, false))
+	if (!set_runaspw(user_ctx.runas_user ?
+		user_ctx.runas_user : def_runas_default, false))
 	    debug_return_bool(false);
     }
 
@@ -1483,7 +1483,7 @@ cb_runas_default(const char *file, int line, int column,
     debug_decl(cb_runas_default, SUDOERS_DEBUG_PLUGIN);
 
     /* Only reset runaspw if user didn't specify one. */
-    if (sudo_user.runas_user == NULL && sudo_user.runas_group == NULL)
+    if (user_ctx.runas_user == NULL && user_ctx.runas_group == NULL)
 	debug_return_bool(set_runaspw(sd_un->str, true));
     debug_return_bool(true);
 }
@@ -1515,7 +1515,7 @@ sudoers_cleanup(void)
     need_reinit = false;
     if (def_group_plugin)
 	group_plugin_unload();
-    sudo_user_free();
+    sudoers_user_ctx_free();
     sudo_freepwcache();
     sudo_freegrcache();
     canon_path_free_cache();
@@ -1552,16 +1552,16 @@ tty_present(void)
 }
 
 /*
- * Free memory allocated for struct sudo_user.
+ * Free memory allocated for struct sudoers_user_context.
  */
 void
-sudo_user_free(void)
+sudoers_user_ctx_free(void)
 {
-    debug_decl(sudo_user_free, SUDOERS_DEBUG_PLUGIN);
+    debug_decl(sudoers_user_ctx_free, SUDOERS_DEBUG_PLUGIN);
 
     /* Free remaining references to password and group entries. */
-    if (sudo_user.pw != NULL)
-	sudo_pw_delref(sudo_user.pw);
+    if (user_ctx.pw != NULL)
+	sudo_pw_delref(user_ctx.pw);
     if (runas_pw != NULL)
 	sudo_pw_delref(runas_pw);
     if (runas_gr != NULL)
@@ -1569,7 +1569,7 @@ sudo_user_free(void)
     if (user_gid_list != NULL)
 	sudo_gidlist_delref(user_gid_list);
 
-    /* Free dynamic contents of sudo_user. */
+    /* Free dynamic contents of user_ctx. */
     free(user_cwd);
     free(user_name);
     free(user_gids);
@@ -1589,7 +1589,7 @@ sudo_user_free(void)
     free(list_cmnd);
     free(safe_cmnd);
     free(saved_cmnd);
-    free(sudo_user.source);
+    free(user_ctx.source);
     free(user_stat);
 #ifdef HAVE_SELINUX
     free(user_role);
@@ -1602,7 +1602,7 @@ sudo_user_free(void)
     free(runas_privs);
     free(runas_limitprivs);
 #endif
-    memset(&sudo_user, 0, sizeof(sudo_user));
+    memset(&user_ctx, 0, sizeof(user_ctx));
 
     debug_return;
 }

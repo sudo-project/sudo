@@ -459,7 +459,7 @@ display_privs(const struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
     struct stat sb;
     debug_decl(display_privs, SUDOERS_DEBUG_PARSER);
 
-    cols = sudo_user.cols;
+    cols = user_ctx.cols;
     if (fstat(STDOUT_FILENO, &sb) == 0 && S_ISFIFO(sb.st_mode))
 	cols = 0;
     sudo_lbuf_init(&def_buf, output, 4, NULL, cols);

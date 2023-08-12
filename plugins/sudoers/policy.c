@@ -91,7 +91,7 @@ parse_bool(const char *line, int varlen, unsigned int *flags, unsigned int fval)
 
 /*
  * Deserialize args, settings and user_info arrays.
- * Fills in struct sudo_user and other common sudoers state.
+ * Fills in struct sudoers_user_context and other common sudoers state.
  */
 unsigned int
 sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
@@ -119,7 +119,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
     } \
 } while (0)
 
-    if (sudo_gettime_real(&sudo_user.submit_time) == -1) {
+    if (sudo_gettime_real(&user_ctx.submit_time) == -1) {
 	sudo_warn("%s", U_("unable to get time of day"));
 	goto bad;
     }
@@ -183,7 +183,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
     sudoers_conf.sudoers_path = path_sudoers;
 
     /* Parse command line settings. */
-    sudo_user.flags = 0;
+    user_ctx.flags = 0;
     user_closefrom = -1;
     sudoedit_nfiles = 0;
     sudo_mode = 0;
@@ -218,14 +218,14 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	}
 	if (MATCHES(*cur, "runas_user=")) {
 	    CHECK(*cur, "runas_user=");
-	    sudo_user.runas_user = *cur + sizeof("runas_user=") - 1;
-	    SET(sudo_user.flags, RUNAS_USER_SPECIFIED);
+	    user_ctx.runas_user = *cur + sizeof("runas_user=") - 1;
+	    SET(user_ctx.flags, RUNAS_USER_SPECIFIED);
 	    continue;
 	}
 	if (MATCHES(*cur, "runas_group=")) {
 	    CHECK(*cur, "runas_group=");
-	    sudo_user.runas_group = *cur + sizeof("runas_group=") - 1;
-	    SET(sudo_user.flags, RUNAS_GROUP_SPECIFIED);
+	    user_ctx.runas_group = *cur + sizeof("runas_group=") - 1;
+	    SET(user_ctx.flags, RUNAS_GROUP_SPECIFIED);
 	    continue;
 	}
 	if (MATCHES(*cur, "prompt=")) {
@@ -303,13 +303,13 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	    continue;
 	}
 	if (MATCHES(*cur, "intercept_ptrace=")) {
-	    if (parse_bool(*cur, sizeof("intercept_ptrace") - 1, &sudo_user.flags,
+	    if (parse_bool(*cur, sizeof("intercept_ptrace") - 1, &user_ctx.flags,
 		    HAVE_INTERCEPT_PTRACE) == -1)
 		goto bad;
 	    continue;
 	}
 	if (MATCHES(*cur, "intercept_setid=")) {
-	    if (parse_bool(*cur, sizeof("intercept_setid") - 1, &sudo_user.flags,
+	    if (parse_bool(*cur, sizeof("intercept_setid") - 1, &user_ctx.flags,
 		    CAN_INTERCEPT_SETID) == -1)
 		goto bad;
 	    continue;
@@ -361,8 +361,8 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	if (MATCHES(*cur, "max_groups=")) {
 	    errno = 0;
 	    p = *cur + sizeof("max_groups=") - 1;
-	    sudo_user.max_groups = (int)sudo_strtonum(p, 1, 1024, &errstr);
-	    if (sudo_user.max_groups == 0) {
+	    user_ctx.max_groups = (int)sudo_strtonum(p, 1, 1024, &errstr);
+	    if (user_ctx.max_groups == 0) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
 	    }
@@ -473,8 +473,8 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	if (MATCHES(*cur, "lines=")) {
 	    errno = 0;
 	    p = *cur + sizeof("lines=") - 1;
-	    sudo_user.lines = (int)sudo_strtonum(p, 1, INT_MAX, &errstr);
-	    if (sudo_user.lines == 0) {
+	    user_ctx.lines = (int)sudo_strtonum(p, 1, INT_MAX, &errstr);
+	    if (user_ctx.lines == 0) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
 	    }
@@ -483,8 +483,8 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	if (MATCHES(*cur, "cols=")) {
 	    errno = 0;
 	    p = *cur + sizeof("cols=") - 1;
-	    sudo_user.cols = (int)sudo_strtonum(p, 1, INT_MAX, &errstr);
-	    if (sudo_user.cols == 0) {
+	    user_ctx.cols = (int)sudo_strtonum(p, 1, INT_MAX, &errstr);
+	    if (user_ctx.cols == 0) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
 	    }
@@ -510,7 +510,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	}
 	if (MATCHES(*cur, "umask=")) {
 	    p = *cur + sizeof("umask=") - 1;
-	    sudo_user.umask = sudo_strtomode(p, &errstr);
+	    user_ctx.umask = sudo_strtomode(p, &errstr);
 	    if (errstr != NULL) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
@@ -581,7 +581,7 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 
     /* Create a UUID to store in the event log. */
     sudo_uuid_create(uuid);
-    if (sudo_uuid_to_string(uuid, sudo_user.uuid_str, sizeof(sudo_user.uuid_str)) == NULL) {
+    if (sudo_uuid_to_string(uuid, user_ctx.uuid_str, sizeof(user_ctx.uuid_str)) == NULL) {
 	sudo_warnx("%s", U_("unable to generate UUID"));
 	goto bad;
     }
@@ -590,11 +590,11 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
      * Set intercept defaults based on flags set above.
      * We pass -1 as the operator to indicate it is set by the front end.
      */
-    if (ISSET(sudo_user.flags, HAVE_INTERCEPT_PTRACE)) {
+    if (ISSET(user_ctx.flags, HAVE_INTERCEPT_PTRACE)) {
 	if (!append_default("intercept_type", "trace", -1, NULL, defaults))
 	    goto oom;
     }
-    if (ISSET(sudo_user.flags, CAN_INTERCEPT_SETID)) {
+    if (ISSET(user_ctx.flags, CAN_INTERCEPT_SETID)) {
 	if (!append_default("intercept_allow_setid", NULL, -1, NULL, defaults))
 	    goto oom;
     }
@@ -1002,8 +1002,8 @@ sudoers_policy_store_result(bool accepted, char *argv[], char *envp[],
         if ((command_info[info_len++] = sudo_new_key_val("rlimit_stack", def_rlimit_stack)) == NULL)
             goto oom;
     }
-    if (sudo_user.source != NULL) {
-	command_info[info_len] = sudo_new_key_val("source", sudo_user.source);
+    if (user_ctx.source != NULL) {
+	command_info[info_len] = sudo_new_key_val("source", user_ctx.source);
 	if (command_info[info_len++] == NULL)
 	    goto oom;
     }
@@ -1139,7 +1139,7 @@ sudoers_policy_close(int exit_status, int error_code)
     /* Free stashed copy of the environment. */
     (void)env_init(NULL);
 
-    /* Free sudoers sources, sudo_user and passwd/group caches. */
+    /* Free sudoers sources, user_ctx and passwd/group caches. */
     sudoers_cleanup();
 
     /* command_info was freed by the g/c code. */

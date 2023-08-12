@@ -61,7 +61,7 @@
  * Globals
  */
 struct cvtsudoers_filter *filters;
-struct sudo_user sudo_user;
+struct sudoers_user_context user_ctx;
 struct passwd *list_pw;
 static FILE *logfp;
 static const char short_opts[] =  "b:c:d:ef:hi:I:l:m:Mo:O:pP:s:V";

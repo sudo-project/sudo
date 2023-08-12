@@ -355,7 +355,7 @@ sudoers_audit_accept(const char *plugin_name, unsigned int plugin_type,
 	ret = false;
 
     if (!ISSET(sudo_mode, MODE_POLICY_INTERCEPTED))
-	uuid_str = sudo_user.uuid_str;
+	uuid_str = user_ctx.uuid_str;
 
     audit_to_eventlog(&evlog, command_info, run_argv, run_envp, uuid_str);
     if (!log_allowed(&evlog) && !def_ignore_logfile_errors)

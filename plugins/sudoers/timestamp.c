@@ -1163,8 +1163,8 @@ create_admin_success_flag(void)
 	debug_return_int(true);
 
     /* Check whether the user is in the sudo or admin group. */
-    if (!user_in_group(sudo_user.pw, "sudo") &&
-	!user_in_group(sudo_user.pw, "admin"))
+    if (!user_in_group(user_ctx.pw, "sudo") &&
+	!user_in_group(user_ctx.pw, "admin"))
 	debug_return_int(true);
 
     /* Build path to flag file. */

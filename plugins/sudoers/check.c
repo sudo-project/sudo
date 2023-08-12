@@ -197,7 +197,7 @@ check_user(unsigned int validated, unsigned int mode)
 	goto done;
     }
     if (user_uid == 0 || (user_uid == runas_pw->pw_uid &&
-	(!runas_gr || user_in_group(sudo_user.pw, runas_gr->gr_name)))) {
+	(!runas_gr || user_in_group(user_ctx.pw, runas_gr->gr_name)))) {
 #ifdef HAVE_SELINUX
 	if (user_role == NULL && user_type == NULL)
 #endif
@@ -327,7 +327,7 @@ user_is_exempt(void)
     debug_decl(user_is_exempt, SUDOERS_DEBUG_AUTH);
 
     if (def_exempt_group) {
-	if (user_in_group(sudo_user.pw, def_exempt_group))
+	if (user_in_group(user_ctx.pw, def_exempt_group))
 	    ret = true;
     }
     debug_return_bool(ret);
@@ -336,7 +336,7 @@ user_is_exempt(void)
 /*
  * Get passwd entry for the user we are going to authenticate as.
  * By default, this is the user invoking sudo.  In the most common
- * case, this matches sudo_user.pw or runas_pw.
+ * case, this matches user_ctx.pw or runas_pw.
  */
 static struct passwd *
 get_authpw(unsigned int mode)
@@ -346,8 +346,8 @@ get_authpw(unsigned int mode)
 
     if (ISSET(mode, (MODE_CHECK|MODE_LIST))) {
 	/* In list mode we always prompt for the user's password. */
-	sudo_pw_addref(sudo_user.pw);
-	pw = sudo_user.pw;
+	sudo_pw_addref(user_ctx.pw);
+	pw = user_ctx.pw;
     } else {
 	if (def_rootpw) {
 	    if ((pw = sudo_getpwuid(ROOT_UID)) == NULL) {
@@ -368,8 +368,8 @@ get_authpw(unsigned int mode)
 		pw = runas_pw;
 	    }
 	} else {
-	    sudo_pw_addref(sudo_user.pw);
-	    pw = sudo_user.pw;
+	    sudo_pw_addref(user_ctx.pw);
+	    pw = user_ctx.pw;
 	}
     }
 
