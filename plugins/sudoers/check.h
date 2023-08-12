@@ -88,6 +88,6 @@ int   get_starttime(pid_t pid, struct timespec *starttime);
 bool  already_lectured(void);
 int   set_lectured(void);
 void display_lecture(struct sudo_conv_callback *callback);
-int   create_admin_success_flag(void);
+int   create_admin_success_flag(struct passwd *pw);
 
 #endif /* SUDOERS_CHECK_H */

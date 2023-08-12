@@ -538,7 +538,7 @@ sudoers_check_common(int pwflag)
     }
 
     /* Create Ubuntu-style dot file to indicate sudo was successful. */
-    if (create_admin_success_flag() == -1)
+    if (create_admin_success_flag(user_ctx.pw) == -1)
 	goto done;
 
     /* Finally tell the user if the command did not exist. */

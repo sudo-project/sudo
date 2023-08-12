@@ -593,7 +593,7 @@ timestamp_remove(bool unlink_it)
 
 /* STUB */
 int
-create_admin_success_flag(void)
+create_admin_success_flag(struct passwd *pw)
 {
     return true;
 }

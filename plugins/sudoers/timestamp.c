@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2014-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2014-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1152,7 +1152,7 @@ done:
 
 #ifdef _PATH_SUDO_ADMIN_FLAG
 int
-create_admin_success_flag(void)
+create_admin_success_flag(struct passwd *pw)
 {
     char *flagfile;
     int ret = -1;
@@ -1163,8 +1163,7 @@ create_admin_success_flag(void)
 	debug_return_int(true);
 
     /* Check whether the user is in the sudo or admin group. */
-    if (!user_in_group(user_ctx.pw, "sudo") &&
-	!user_in_group(user_ctx.pw, "admin"))
+    if (!user_in_group(pw, "sudo") && !user_in_group(pw, "admin"))
 	debug_return_int(true);
 
     /* Build path to flag file. */
@@ -1191,7 +1190,7 @@ create_admin_success_flag(void)
 }
 #else /* !_PATH_SUDO_ADMIN_FLAG */
 int
-create_admin_success_flag(void)
+create_admin_success_flag(struct passwd *pw)
 {
     /* STUB */
     return true;
