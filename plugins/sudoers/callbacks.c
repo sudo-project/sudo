@@ -94,8 +94,8 @@ resolve_host(const char *host, char **longp, char **shortp)
 }
 
 /*
- * Look up the fully qualified domain name of user_host and user_runhost.
- * Sets user_host, user_shost, user_runhost and user_srunhost.
+ * Look up the fully qualified domain name of host and runhost in user_ctx.
+ * Sets user_ctx.host, user_ctx.shost, user_ctx.runhost and user_ctx.srunhost.
  */
 static bool
 cb_fqdn(const char *file, int line, int column,
@@ -111,35 +111,35 @@ cb_fqdn(const char *file, int line, int column,
 	debug_return_bool(true);
 
     /* If the -h flag was given we need to resolve both host and runhost. */
-    remote = strcmp(user_runhost, user_host) != 0;
+    remote = strcmp(user_ctx.runhost, user_ctx.host) != 0;
 
-    /* First resolve user_host, setting user_host and user_shost. */
-    if (resolve_host(user_host, &lhost, &shost) != 0) {
-	if ((rc = resolve_host(user_runhost, &lhost, &shost)) != 0) {
+    /* First resolve user_ctx.host, setting host and shost. */
+    if (resolve_host(user_ctx.host, &lhost, &shost) != 0) {
+	if ((rc = resolve_host(user_ctx.runhost, &lhost, &shost)) != 0) {
 	    gai_log_warning(SLOG_PARSE_ERROR|SLOG_RAW_MSG, rc,
-		N_("unable to resolve host %s"), user_host);
+		N_("unable to resolve host %s"), user_ctx.host);
 	    debug_return_bool(false);
 	}
     }
-    if (user_shost != user_host)
-	free(user_shost);
-    free(user_host);
-    user_host = lhost;
-    user_shost = shost;
+    if (user_ctx.shost != user_ctx.host)
+	free(user_ctx.shost);
+    free(user_ctx.host);
+    user_ctx.host = lhost;
+    user_ctx.shost = shost;
 
-    /* Next resolve user_runhost, setting user_runhost and user_srunhost. */
+    /* Next resolve user_ctx.runhost, setting runhost and srunhost. */
     lhost = shost = NULL;
     if (remote) {
-	if ((rc = resolve_host(user_runhost, &lhost, &shost)) != 0) {
+	if ((rc = resolve_host(user_ctx.runhost, &lhost, &shost)) != 0) {
 	    gai_log_warning(SLOG_NO_LOG|SLOG_RAW_MSG, rc,
-		N_("unable to resolve host %s"), user_runhost);
+		N_("unable to resolve host %s"), user_ctx.runhost);
 	    debug_return_bool(false);
 	}
     } else {
-	/* Not remote, just use user_host. */
-	if ((lhost = strdup(user_host)) != NULL) {
-	    if (user_shost != user_host)
-		shost = strdup(user_shost);
+	/* Not remote, just use user_ctx.host. */
+	if ((lhost = strdup(user_ctx.host)) != NULL) {
+	    if (user_ctx.shost != user_ctx.host)
+		shost = strdup(user_ctx.shost);
 	    else
 		shost = lhost;
 	}
@@ -152,16 +152,16 @@ cb_fqdn(const char *file, int line, int column,
 	}
     }
     if (lhost != NULL && shost != NULL) {
-	if (user_srunhost != user_runhost)
-	    free(user_srunhost);
-	free(user_runhost);
-	user_runhost = lhost;
-	user_srunhost = shost;
+	if (user_ctx.srunhost != user_ctx.runhost)
+	    free(user_ctx.srunhost);
+	free(user_ctx.runhost);
+	user_ctx.runhost = lhost;
+	user_ctx.srunhost = shost;
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"host %s, shost %s, runhost %s, srunhost %s",
-	user_host, user_shost, user_runhost, user_srunhost);
+	user_ctx.host, user_ctx.shost, user_ctx.runhost, user_ctx.srunhost);
     debug_return_bool(true);
 }
 
@@ -227,11 +227,11 @@ cb_runchroot(const char *file, int line, int column,
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"def_runchroot now %s", sd_un->str);
-    if (user_cmnd != NULL) {
-	/* Update user_cmnd and cmnd_status based on the new chroot. */
+    if (user_ctx.cmnd != NULL) {
+	/* Update user_ctx.cmnd and cmnd_status based on the new chroot. */
 	set_cmnd_status(sd_un->str);
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "user_cmnd now %s", user_cmnd);
+	    "user_ctx.cmnd now %s", user_ctx.cmnd);
     }
 
     debug_return_bool(true);

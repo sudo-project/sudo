@@ -65,7 +65,7 @@ sudo_sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
     sudo_argv[sudo_argc] = NULL;
 
     /* We don't let SIA prompt the user for input. */
-    if (sia_ses_init(&siah, sudo_argc, sudo_argv, NULL, pw->pw_name, user_ttypath, 0, NULL) != SIASUCCESS) {
+    if (sia_ses_init(&siah, sudo_argc, sudo_argv, NULL, pw->pw_name, user_ctx.ttypath, 0, NULL) != SIASUCCESS) {
 	log_warning(0, N_("unable to initialize SIA session"));
 	debug_return_int(AUTH_FATAL);
     }
@@ -122,7 +122,7 @@ sudo_sia_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
     debug_decl(sudo_sia_begin_session, SUDOERS_DEBUG_AUTH);
 
     /* Re-init sia for the target user's session. */
-    if (sia_ses_init(&siah, NewArgc, NewArgv, NULL, pw->pw_name, user_ttypath, 0, NULL) != SIASUCCESS) {
+    if (sia_ses_init(&siah, NewArgc, NewArgv, NULL, pw->pw_name, user_ctx.ttypath, 0, NULL) != SIASUCCESS) {
 	log_warning(0, N_("unable to initialize SIA session"));
 	goto done;
     }

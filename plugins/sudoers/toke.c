@@ -5894,7 +5894,7 @@ init_lexer(void)
 }
 
 /*
- * Like strlcpy() but expand %h escapes to user_shost.
+ * Like strlcpy() but expand %h escapes to user_ctx.shost.
  */
 static size_t
 strlcpy_expand_host(char *dst, const char *src, size_t size)
@@ -5905,7 +5905,7 @@ strlcpy_expand_host(char *dst, const char *src, size_t size)
 
     while ((ch = *src++) != '\0') {
 	if (ch == '%' && *src == 'h') {
-	    size_t n = strlcpy(dst, user_shost, size);
+	    size_t n = strlcpy(dst, user_ctx.shost, size);
 	    len += n;
 	    if (n >= size) {
 		/* truncated */
@@ -5967,7 +5967,7 @@ expand_include(const char *src)
 
     if (*src == '/') {
 	/* Fully-qualified path, make a copy and expand %h escapes. */
-	dst_size = src_len + (nhost * strlen(user_shost)) - (nhost * 2) + 1;
+	dst_size = src_len + (nhost * strlen(user_ctx.shost)) - (nhost * 2) + 1;
 	dst0 = sudo_rcstr_alloc(dst_size - 1);
 	if (dst0 == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -5992,7 +5992,7 @@ expand_include(const char *src)
 	    dst_size += (size_t)(dirend - cp) + 1;
 	}
 	/* Includes space for ':' separator and NUL terminator. */
-	dst_size += src_len + (nhost * strlen(user_shost)) - (nhost * 2) + 1;
+	dst_size += src_len + (nhost * strlen(user_ctx.shost)) - (nhost * 2) + 1;
     }
 
     /* Make a copy of the fully-qualified path and return it. */

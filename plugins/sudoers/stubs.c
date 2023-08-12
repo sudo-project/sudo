@@ -85,7 +85,7 @@ get_interfaces(void)
 int
 set_cmnd_path(const char *runchroot)
 {
-    /* Cannot return FOUND without also setting user_cmnd to a new value. */
+    /* Cannot return FOUND without also setting user_ctx.cmnd to a new value. */
     return NOT_FOUND;
 }
 
@@ -111,7 +111,7 @@ unpivot_root(int fds[2])
 }
 
 /*
- * Look up the hostname and set user_host and user_shost.
+ * Look up the hostname and set user_ctx.host and user_ctx.shost.
  */
 void
 get_hostname(void)
@@ -119,22 +119,22 @@ get_hostname(void)
     char *cp;
     debug_decl(get_hostname, SUDOERS_DEBUG_UTIL);
 
-    if ((user_host = sudo_gethostname()) != NULL) {
-	if ((cp = strchr(user_host, '.'))) {
+    if ((user_ctx.host = sudo_gethostname()) != NULL) {
+	if ((cp = strchr(user_ctx.host, '.'))) {
 	    *cp = '\0';
-	    if ((user_shost = strdup(user_host)) == NULL)
+	    if ((user_ctx.shost = strdup(user_ctx.host)) == NULL)
 		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    *cp = '.';
 	} else {
-	    user_shost = user_host;
+	    user_ctx.shost = user_ctx.host;
 	}
     } else {
-	user_host = user_shost = strdup("localhost");
-	if (user_host == NULL)
+	user_ctx.host = user_ctx.shost = strdup("localhost");
+	if (user_ctx.host == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
-    user_runhost = user_host;
-    user_srunhost = user_shost;
+    user_ctx.runhost = user_ctx.host;
+    user_ctx.srunhost = user_ctx.shost;
 
     debug_return;
 }

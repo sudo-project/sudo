@@ -63,7 +63,7 @@ static size_t
 fill_user(char *str, size_t strsize, void *unused)
 {
     debug_decl(fill_user, SUDOERS_DEBUG_UTIL);
-    debug_return_size_t(strlcpy(str, user_name, strsize));
+    debug_return_size_t(strlcpy(str, user_ctx.name, strsize));
 }
 
 static size_t
@@ -73,11 +73,11 @@ fill_group(char *str, size_t strsize, void *unused)
     size_t len;
     debug_decl(fill_group, SUDOERS_DEBUG_UTIL);
 
-    if ((grp = sudo_getgrgid(user_gid)) != NULL) {
+    if ((grp = sudo_getgrgid(user_ctx.gid)) != NULL) {
 	len = strlcpy(str, grp->gr_name, strsize);
 	sudo_gr_delref(grp);
     } else {
-	len = (size_t)snprintf(str, strsize, "#%u", (unsigned int)user_gid);
+	len = (size_t)snprintf(str, strsize, "#%u", (unsigned int)user_ctx.gid);
     }
     debug_return_size_t(len);
 }
@@ -86,7 +86,7 @@ static size_t
 fill_runas_user(char *str, size_t strsize, void *unused)
 {
     debug_decl(fill_runas_user, SUDOERS_DEBUG_UTIL);
-    debug_return_size_t(strlcpy(str, runas_pw->pw_name, strsize));
+    debug_return_size_t(strlcpy(str, user_ctx.runas_pw->pw_name, strsize));
 }
 
 static size_t
@@ -96,15 +96,15 @@ fill_runas_group(char *str, size_t strsize, void *unused)
     size_t len;
     debug_decl(fill_runas_group, SUDOERS_DEBUG_UTIL);
 
-    if (runas_gr != NULL) {
-	len = strlcpy(str, runas_gr->gr_name, strsize);
+    if (user_ctx.runas_gr != NULL) {
+	len = strlcpy(str, user_ctx.runas_gr->gr_name, strsize);
     } else {
-	if ((grp = sudo_getgrgid(runas_pw->pw_gid)) != NULL) {
+	if ((grp = sudo_getgrgid(user_ctx.runas_pw->pw_gid)) != NULL) {
 	    len = strlcpy(str, grp->gr_name, strsize);
 	    sudo_gr_delref(grp);
 	} else {
 	    len = (size_t)snprintf(str, strsize, "#%u",
-		(unsigned int)runas_pw->pw_gid);
+		(unsigned int)user_ctx.runas_pw->pw_gid);
 	}
     }
     debug_return_size_t(len);
@@ -114,14 +114,14 @@ static size_t
 fill_hostname(char *str, size_t strsize, void *unused)
 {
     debug_decl(fill_hostname, SUDOERS_DEBUG_UTIL);
-    debug_return_size_t(strlcpy(str, user_shost, strsize));
+    debug_return_size_t(strlcpy(str, user_ctx.shost, strsize));
 }
 
 static size_t
 fill_command(char *str, size_t strsize, void *unused)
 {
     debug_decl(fill_command, SUDOERS_DEBUG_UTIL);
-    debug_return_size_t(strlcpy(str, user_base, strsize));
+    debug_return_size_t(strlcpy(str, user_ctx.cmnd_base, strsize));
 }
 
 /* Note: "seq" must be first in the list. */

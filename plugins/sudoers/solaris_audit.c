@@ -62,12 +62,12 @@ adt_sudo_common(char *const argv[])
 	}
 
 	/* get the real executable name */
-	if (user_cmnd != NULL) {
-		if (strlcpy(cmdpath, (const char *)user_cmnd,
+	if (user_ctx.cmnd != NULL) {
+		if (strlcpy(cmdpath, (const char *)user_ctx.cmnd,
 		    sizeof(cmdpath)) >= sizeof(cmdpath)) {
 			log_warningx(SLOG_NO_STDERR,
-			    _("truncated audit path user_cmnd: %s"),
-			    user_cmnd);
+			    _("truncated audit path user_ctx.cmnd: %s"),
+			    user_ctx.cmnd);
 		}
 	} else {
 		if (strlcpy(cmdpath, argv[0],

@@ -62,7 +62,7 @@ init_envtables(void)
 int
 set_cmnd_path(const char *runchroot)
 {
-    /* Cannot return FOUND without also setting user_cmnd to a new value. */
+    /* Cannot return FOUND without also setting user_ctx.cmnd to a new value. */
     return NOT_FOUND;
 }
 

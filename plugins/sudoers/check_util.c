@@ -57,7 +57,7 @@ check_user_shell(const struct passwd *pw)
 }
 
 /*
- * Check whether user_runchroot matches def_runchroot.
+ * Check whether user_ctx.runchroot matches def_runchroot.
  * Returns true if matched, false if not matched and -1 on error.
  */
 int
@@ -65,20 +65,20 @@ check_user_runchroot(void)
 {
     debug_decl(check_user_runchroot, SUDOERS_DEBUG_AUTH);
 
-    if (user_runchroot == NULL)
+    if (user_ctx.runchroot == NULL)
 	debug_return_bool(true);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	"def_runchroot %s, user_runchroot %s",
+	"def_runchroot %s, user_ctx.runchroot %s",
 	def_runchroot ? def_runchroot : "none",
-	user_runchroot ? user_runchroot : "none");
+	user_ctx.runchroot ? user_ctx.runchroot : "none");
 
     /* User may only specify a root dir if runchroot is "*" */
     if (def_runchroot == NULL || strcmp(def_runchroot, "*") != 0)
 	debug_return_bool(false);
 
     free(def_runchroot);
-    if ((def_runchroot = strdup(user_runchroot)) == NULL) {
+    if ((def_runchroot = strdup(user_ctx.runchroot)) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(-1);
     }
@@ -86,7 +86,7 @@ check_user_runchroot(void)
 }
 
 /*
- * Check whether user_runcwd matches def_runcwd.
+ * Check whether user_ctx.runcwd matches def_runcwd.
  * Returns true if matched, false if not matched and -1 on error.
  */
 int
@@ -94,20 +94,20 @@ check_user_runcwd(void)
 {
     debug_decl(check_user_runcwd, SUDOERS_DEBUG_AUTH);
 
-    if (user_runcwd == NULL)
+    if (user_ctx.runcwd == NULL)
 	debug_return_bool(true);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-        "def_runcwd %s, user_runcwd %s",
+        "def_runcwd %s, user_ctx.runcwd %s",
         def_runcwd ? def_runcwd : "none",
-        user_runcwd ? user_runcwd : "none");
+        user_ctx.runcwd ? user_ctx.runcwd : "none");
 
     /* User may only specify a cwd if runcwd is "*" */
     if (def_runcwd == NULL || strcmp(def_runcwd, "*") != 0)
         debug_return_bool(false);
 
     free(def_runcwd);
-    if ((def_runcwd = strdup(user_runcwd)) == NULL) {
+    if ((def_runcwd = strdup(user_ctx.runcwd)) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	debug_return_int(-1);
     }

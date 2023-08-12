@@ -191,7 +191,7 @@ static int
 sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
 {
     static int pam_status = PAM_SUCCESS;
-    const char *ttypath = user_ttypath;
+    const char *ttypath = user_ctx.ttypath;
     const char *errstr, *pam_service;
     int rc;
     debug_decl(sudo_pam_init, SUDOERS_DEBUG_AUTH);
@@ -234,19 +234,19 @@ sudo_pam_init2(struct passwd *pw, sudo_auth *auth, bool quiet)
      * Note: PAM_RHOST may cause a DNS lookup on Linux in libaudit.
      */
     if (def_pam_ruser) {
-	rc = pam_set_item(pamh, PAM_RUSER, user_name);
+	rc = pam_set_item(pamh, PAM_RUSER, user_ctx.name);
 	if (rc != PAM_SUCCESS) {
 	    errstr = sudo_pam_strerror(pamh, rc);
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"pam_set_item(pamh, PAM_RUSER, %s): %s", user_name, errstr);
+		"pam_set_item(pamh, PAM_RUSER, %s): %s", user_ctx.name, errstr);
 	}
     }
     if (def_pam_rhost) {
-	rc = pam_set_item(pamh, PAM_RHOST, user_host);
+	rc = pam_set_item(pamh, PAM_RHOST, user_ctx.host);
 	if (rc != PAM_SUCCESS) {
 	    errstr = sudo_pam_strerror(pamh, rc);
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		"pam_set_item(pamh, PAM_RHOST, %s): %s", user_host, errstr);
+		"pam_set_item(pamh, PAM_RHOST, %s): %s", user_ctx.host, errstr);
 	}
     }
     if (ttypath != NULL) {
@@ -285,7 +285,7 @@ sudo_pam_init_quiet(struct passwd *pw, sudo_auth *auth)
 int
 sudo_pam_verify(struct passwd *pw, const char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
-	const char *envccname;
+    const char *envccname;
     const char *s;
     int *pam_status = (int *) auth->data;
     debug_decl(sudo_pam_verify, SUDOERS_DEBUG_AUTH);
@@ -297,8 +297,8 @@ sudo_pam_verify(struct passwd *pw, const char *prompt, sudo_auth *auth, struct s
 	/* Set KRB5CCNAME from the user environment if not set to propagate this
 	 * information to PAM modules that may use it to authentication. */
 	envccname = sudo_getenv("KRB5CCNAME");
-	if (envccname == NULL && user_ccname != NULL) {
-		if (sudo_setenv("KRB5CCNAME", user_ccname, true) != 0) {
+	if (envccname == NULL && user_ctx.ccname != NULL) {
+		if (sudo_setenv("KRB5CCNAME", user_ctx.ccname, true) != 0) {
 			sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
 			"unable to set KRB5CCNAME");
 			debug_return_int(AUTH_FAILURE);
@@ -631,8 +631,8 @@ use_pam_prompt(const char *pam_prompt)
      * Some PAM modules use "^username's Password: ?$" instead of
      * "^Password: ?" so check for that too.
      */
-    user_len = strlen(user_name);
-    if (strncmp(pam_prompt, user_name, user_len) == 0) {
+    user_len = strlen(user_ctx.name);
+    if (strncmp(pam_prompt, user_ctx.name, user_len) == 0) {
 	const char *cp = pam_prompt + user_len;
 	if (strncmp(cp, "'s Password:", 12) == 0 &&
 	    (cp[12] == '\0' || (cp[12] == ' ' && cp[13] == '\0')))

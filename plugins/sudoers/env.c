@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2000-2005, 2007-2019
+ * Copyright (c) 2000-2005, 2007-2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -856,6 +856,7 @@ rebuild_env(void)
     char idbuf[MAX_UID_T_LEN + 1];
     unsigned int didvar;
     bool reset_home = false;
+    int len;
     debug_decl(rebuild_env, SUDOERS_DEBUG_ENV);
 
     /*
@@ -900,11 +901,11 @@ rebuild_env(void)
 	if (!ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 #ifdef HAVE_LOGIN_CAP_H
 	    /* Insert login class environment variables. */
-	    if (login_class) {
-		login_cap_t *lc = login_getclass(login_class);
+	    if (user_ctx.class) {
+		login_cap_t *lc = login_getclass(user_ctx.class);
 		if (lc != NULL) {
-		    setusercontext(lc, runas_pw, runas_pw->pw_uid,
-			LOGIN_SETPATH|LOGIN_SETENV);
+		    setusercontext(lc, user_ctx.runas_pw,
+			user_ctx.runas_pw->pw_uid, LOGIN_SETPATH|LOGIN_SETENV);
 		    login_close(lc);
 		}
 	    }
@@ -950,27 +951,27 @@ rebuild_env(void)
 	 * on sudoers options).
 	 */
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
-	    CHECK_SETENV2("SHELL", runas_pw->pw_shell,
+	    CHECK_SETENV2("SHELL", user_ctx.runas_pw->pw_shell,
 		ISSET(didvar, DID_SHELL), true);
 #ifdef _AIX
-	    CHECK_SETENV2("LOGIN", runas_pw->pw_name,
+	    CHECK_SETENV2("LOGIN", user_ctx.runas_pw->pw_name,
 		ISSET(didvar, DID_LOGIN), true);
 #endif
-	    CHECK_SETENV2("LOGNAME", runas_pw->pw_name,
+	    CHECK_SETENV2("LOGNAME", user_ctx.runas_pw->pw_name,
 		ISSET(didvar, DID_LOGNAME), true);
-	    CHECK_SETENV2("USER", runas_pw->pw_name,
+	    CHECK_SETENV2("USER", user_ctx.runas_pw->pw_name,
 		ISSET(didvar, DID_USER), true);
 	} else {
 	    /* We will set LOGNAME later in the def_set_logname case. */
 	    if (!def_set_logname) {
 #ifdef _AIX
 		if (!ISSET(didvar, DID_LOGIN))
-		    CHECK_SETENV2("LOGIN", user_name, false, true);
+		    CHECK_SETENV2("LOGIN", user_ctx.name, false, true);
 #endif
 		if (!ISSET(didvar, DID_LOGNAME))
-		    CHECK_SETENV2("LOGNAME", user_name, false, true);
+		    CHECK_SETENV2("LOGNAME", user_ctx.name, false, true);
 		if (!ISSET(didvar, DID_USER))
-		    CHECK_SETENV2("USER", user_name, false, true);
+		    CHECK_SETENV2("USER", user_ctx.name, false, true);
 	    }
 	}
 
@@ -984,12 +985,14 @@ rebuild_env(void)
 	 */
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL) || !ISSET(didvar, KEPT_MAIL)) {
 	    if (_PATH_MAILDIR[sizeof(_PATH_MAILDIR) - 2] == '/') {
-		if (asprintf(&cp, "MAIL=%s%s", _PATH_MAILDIR, runas_pw->pw_name) == -1)
-		    goto bad;
+		len = asprintf(&cp, "MAIL=%s%s", _PATH_MAILDIR,
+		    user_ctx.runas_pw->pw_name);
 	    } else {
-		if (asprintf(&cp, "MAIL=%s/%s", _PATH_MAILDIR, runas_pw->pw_name) == -1)
-		    goto bad;
+		len = asprintf(&cp, "MAIL=%s/%s", _PATH_MAILDIR,
+		    user_ctx.runas_pw->pw_name);
 	    }
+	    if (len == -1)
+		    goto bad;
 	    if (sudo_putenv(cp, ISSET(didvar, DID_MAIL), true) == -1) {
 		free(cp);
 		goto bad;
@@ -1033,10 +1036,10 @@ rebuild_env(void)
 	if ((didvar & KEPT_USER_VARIABLES) == 0) {
 	    /* Nothing preserved, set them all. */
 #ifdef _AIX
-	    CHECK_SETENV2("LOGIN", runas_pw->pw_name, true, true);
+	    CHECK_SETENV2("LOGIN", user_ctx.runas_pw->pw_name, true, true);
 #endif
-	    CHECK_SETENV2("LOGNAME", runas_pw->pw_name, true, true);
-	    CHECK_SETENV2("USER", runas_pw->pw_name, true, true);
+	    CHECK_SETENV2("LOGNAME", user_ctx.runas_pw->pw_name, true, true);
+	    CHECK_SETENV2("USER", user_ctx.runas_pw->pw_name, true, true);
 	} else if ((didvar & KEPT_USER_VARIABLES) != KEPT_USER_VARIABLES) {
 	    /*
 	     * Preserved some of LOGIN, LOGNAME, USER but not all.
@@ -1068,11 +1071,11 @@ rebuild_env(void)
 
     /* Set $HOME to target user if not preserving user's value. */
     if (reset_home)
-	CHECK_SETENV2("HOME", runas_pw->pw_dir, true, true);
+	CHECK_SETENV2("HOME", user_ctx.runas_pw->pw_dir, true, true);
 
     /* Provide default values for $SHELL, $TERM and $PATH if not set. */
     if (!ISSET(didvar, DID_SHELL))
-	CHECK_SETENV2("SHELL", runas_pw->pw_shell, false, false);
+	CHECK_SETENV2("SHELL", user_ctx.runas_pw->pw_shell, false, false);
     if (!ISSET(didvar, DID_TERM))
 	CHECK_PUTENV("TERM=unknown", false, false);
     if (!ISSET(didvar, DID_PATH))
@@ -1083,13 +1086,15 @@ rebuild_env(void)
 	CHECK_PUTENV(ps1, true, true);
 
     /* Add the SUDO_COMMAND envariable (cmnd + args). */
-    if (user_args) {
+    if (user_ctx.cmnd_args) {
 	/*
-	 * We limit user_args to 4096 bytes to avoid an execve() failure
-	 * for very long argument vectors.  The command's environment also
-	 * counts against the ARG_MAX limit.
+	 * We limit user_ctx.cmnd_args to 4096 bytes to avoid an execve(2)
+	 * failure for very long argument vectors.  The command's environment
+	 * also counts against the ARG_MAX limit.
 	 */
-	if (asprintf(&cp, "SUDO_COMMAND=%s %.*s", user_cmnd, 4096, user_args) == -1)
+	len = asprintf(&cp, "SUDO_COMMAND=%s %.*s", user_ctx.cmnd, 4096,
+	    user_ctx.cmnd_args);
+	if (len == -1)
 	    goto bad;
 	if (sudo_putenv(cp, true, true) == -1) {
 	    free(cp);
@@ -1097,14 +1102,14 @@ rebuild_env(void)
 	}
 	sudoers_gc_add(GC_PTR, cp);
     } else {
-	CHECK_SETENV2("SUDO_COMMAND", user_cmnd, true, true);
+	CHECK_SETENV2("SUDO_COMMAND", user_ctx.cmnd, true, true);
     }
 
     /* Add the SUDO_USER, SUDO_UID, SUDO_GID environment variables. */
-    CHECK_SETENV2("SUDO_USER", user_name, true, true);
-    (void)snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int) user_uid);
+    CHECK_SETENV2("SUDO_USER", user_ctx.name, true, true);
+    (void)snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int) user_ctx.uid);
     CHECK_SETENV2("SUDO_UID", idbuf, true, true);
-    (void)snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int) user_gid);
+    (void)snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int) user_ctx.gid);
     CHECK_SETENV2("SUDO_GID", idbuf, true, true);
 
     debug_return_bool(true);

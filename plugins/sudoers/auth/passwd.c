@@ -50,7 +50,7 @@ sudo_passwd_init(struct passwd *pw, sudo_auth *auth)
 	debug_return_int(AUTH_SUCCESS);
 
 #ifdef HAVE_SKEYACCESS
-    if (skeyaccess(pw, user_tty, NULL, NULL) == 0)
+    if (skeyaccess(pw, user_ctx.tty, NULL, NULL) == 0)
 	debug_return_int(AUTH_FAILURE);
 #endif
     sudo_setspent();

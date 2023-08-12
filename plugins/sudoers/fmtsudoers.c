@@ -52,7 +52,7 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
     switch (type) {
 	case MYSELF:
 	    sudo_lbuf_append(lbuf, "%s%s", negated ? "!" : "",
-		list_pw ? list_pw->pw_name : (user_name ? user_name : ""));
+		list_pw ? list_pw->pw_name : (user_ctx.name ? user_ctx.name : ""));
 	    break;
 	case ALL:
 	    if (name == NULL) {

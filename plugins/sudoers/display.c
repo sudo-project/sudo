@@ -466,7 +466,7 @@ display_privs(const struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
     sudo_lbuf_init(&priv_buf, output, 8, NULL, cols);
 
     sudo_lbuf_append(&def_buf, _("Matching Defaults entries for %s on %s:\n"),
-	pw->pw_name, user_srunhost);
+	pw->pw_name, user_ctx.srunhost);
     count = 0;
     TAILQ_FOREACH(nss, snl, entries) {
 	n = display_defaults(nss->parse_tree, pw, &def_buf);
@@ -502,7 +502,7 @@ display_privs(const struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
     /* Display privileges from all sources. */
     sudo_lbuf_append(&priv_buf,
 	_("User %s may run the following commands on %s:\n"),
-	pw->pw_name, user_srunhost);
+	pw->pw_name, user_ctx.srunhost);
     count = 0;
     TAILQ_FOREACH(nss, snl, entries) {
 	if (nss->query(nss, pw) != -1) {
@@ -517,7 +517,7 @@ display_privs(const struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
 	priv_buf.len = 0;
 	sudo_lbuf_append(&priv_buf,
 	    _("User %s is not allowed to run sudo on %s.\n"),
-	    pw->pw_name, user_srunhost);
+	    pw->pw_name, user_ctx.srunhost);
     }
     if (sudo_lbuf_error(&def_buf) || sudo_lbuf_error(&priv_buf))
 	goto bad;
@@ -548,13 +548,13 @@ display_cmnd_check(const struct sudoers_parse_tree *parse_tree,
     debug_decl(display_cmnd_check, SUDOERS_DEBUG_PARSER);
 
     /*
-     * For "sudo -l command", user_cmnd is "list" and the actual
-     * command we are checking is in list_cmnd.
+     * For "sudo -l command", user_ctx.cmnd is "list" and the actual
+     * command we are checking is in user_ctx.cmnd_list.
      */
-    saved_user_cmnd = user_cmnd;
-    saved_user_base = user_base;
-    user_cmnd = list_cmnd;
-    user_base = sudo_basename(user_cmnd);
+    saved_user_cmnd = user_ctx.cmnd;
+    saved_user_base = user_ctx.cmnd_base;
+    user_ctx.cmnd = user_ctx.cmnd_list;
+    user_ctx.cmnd_base = sudo_basename(user_ctx.cmnd);
 
     TAILQ_FOREACH_REVERSE(us, &parse_tree->userspecs, userspec_list, entries) {
 	if (userlist_matches(parse_tree, pw, &us->users) != ALLOW)
@@ -589,13 +589,13 @@ display_cmnd_check(const struct sudoers_parse_tree *parse_tree,
 	}
     }
 done:
-    user_cmnd = saved_user_cmnd;
-    user_base = saved_user_base;
+    user_ctx.cmnd = saved_user_cmnd;
+    user_ctx.cmnd_base = saved_user_base;
     debug_return_int(cmnd_match);
 }
 
 /*
- * Check user_cmnd against sudoers and print the matching entry if the
+ * Check user_ctx.cmnd against sudoers and print the matching entry if the
  * command is allowed.
  * Returns true if the command is allowed, false if not or -1 on error.
  */
@@ -633,8 +633,9 @@ display_cmnd(const struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
 		match_info.priv, match_info.cs, NULL, &lbuf);
 	    sudo_lbuf_append(&lbuf, "    Matched: ");
 	}
-	sudo_lbuf_append(&lbuf, "%s%s%s\n",
-	    list_cmnd, user_args ? " " : "", user_args ? user_args : "");
+	sudo_lbuf_append(&lbuf, "%s%s%s\n", user_ctx.cmnd_list,
+	    user_ctx.cmnd_args ? " " : "",
+	    user_ctx.cmnd_args ? user_ctx.cmnd_args : "");
 	sudo_lbuf_print(&lbuf);
 	ret = sudo_lbuf_error(&lbuf) ? -1 : true;
 	sudo_lbuf_destroy(&lbuf);

@@ -329,8 +329,8 @@ sudo_ldap_check_non_unix_group(const struct sudo_nss *nss, LDAPMessage *entry,
 	}
 	if (*val == '+') {
 	    if (netgr_matches(nss, val,
-		def_netgroup_tuple ? user_runhost : NULL,
-		def_netgroup_tuple ? user_srunhost : NULL, pw->pw_name))
+		def_netgroup_tuple ? user_ctx.runhost : NULL,
+		def_netgroup_tuple ? user_ctx.srunhost : NULL, pw->pw_name))
 		ret = true;
 	    DPRINTF2("ldap sudoUser netgroup '%s%s' ... %s",
 		negated ? "!" : "", val, ret ? "MATCH!" : "not");
@@ -666,11 +666,11 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
     if ((escaped_user = sudo_ldap_value_dup(pw->pw_name)) == NULL)
 	    goto oom;
     if (def_netgroup_tuple) {
-	escaped_host = sudo_ldap_value_dup(user_runhost);
-	if (user_runhost == user_srunhost)
+	escaped_host = sudo_ldap_value_dup(user_ctx.runhost);
+	if (user_ctx.runhost == user_ctx.srunhost)
 	    escaped_shost = escaped_host;
 	else
-	    escaped_shost = sudo_ldap_value_dup(user_srunhost);
+	    escaped_shost = sudo_ldap_value_dup(user_ctx.srunhost);
 	if (escaped_host == NULL || escaped_shost == NULL)
 	    goto oom;
     }
@@ -1441,12 +1441,12 @@ sudo_ldap_bind_s(LDAP *ld)
 	int rc;
 
 	/* Make temp copy of the user's credential cache as needed. */
-	if (ldap_conf.krb5_ccname == NULL && user_ccname != NULL) {
-	    new_ccname = tmp_ccname = sudo_krb5_copy_cc_file(user_ccname);
+	if (ldap_conf.krb5_ccname == NULL && user_ctx.ccname != NULL) {
+	    new_ccname = tmp_ccname = sudo_krb5_copy_cc_file(user_ctx.ccname);
 	    if (tmp_ccname == NULL) {
 		/* XXX - fatal error */
 		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		    "unable to copy user ccache %s", user_ccname);
+		    "unable to copy user ccache %s", user_ctx.ccname);
 	    }
 	}
 
@@ -1925,7 +1925,7 @@ sudo_ldap_query(const struct sudo_nss *nss, struct passwd *pw)
     free_userspecs(&handle->parse_tree.userspecs);
 
     DPRINTF1("%s: ldap search user %s, host %s", __func__, pw->pw_name,
-	user_runhost);
+	user_ctx.runhost);
     if ((lres = sudo_ldap_result_get(nss, pw)) == NULL)
 	goto done;
 

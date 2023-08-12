@@ -966,15 +966,15 @@ cmnd_matches_filter(struct sudoers_parse_tree *parse_tree,
 	}
 
 	/* Only need one command in the filter to match. */
-	user_cmnd = s->str;
-	user_base = sudo_basename(user_cmnd);
+	user_ctx.cmnd = s->str;
+	user_ctx.cmnd_base = sudo_basename(user_ctx.cmnd);
 	if (cmnd_matches(parse_tree, m, NULL, NULL) == true) {
 	    matched = true;
 	    break;
 	}
     }
-    user_base = NULL;
-    user_cmnd = NULL;
+    user_ctx.cmnd_base = NULL;
+    user_ctx.cmnd = NULL;
 
     debug_return_bool(matched);
 }

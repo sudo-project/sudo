@@ -82,8 +82,8 @@ struct group_list {
 struct sudoers_user_context {
     struct timespec submit_time;
     struct passwd *pw;
-    struct passwd *_runas_pw;
-    struct group *_runas_gr;
+    struct passwd *runas_pw;
+    struct group *runas_gr;
     struct stat *cmnd_stat;
     char *cwd;
     char *name;
@@ -106,8 +106,8 @@ struct sudoers_user_context {
     char *cmnd_list;
     char *cmnd_safe;
     char *cmnd_saved;
-    char *class_name;
-    char *krb5_ccname;
+    char *class;
+    char *ccname;
     char *source;
     struct gid_list *gid_list;
     char * const * env_vars;
@@ -222,52 +222,6 @@ struct sudoers_user_context {
 #define PERM_RUNAS		0x05
 #define PERM_TIMESTAMP		0x06
 #define PERM_IOLOG		0x07
-
-/*
- * Shortcuts for user_ctx contents.
- */
-#define user_name		(user_ctx.name)
-#define user_uid		(user_ctx.uid)
-#define user_gid		(user_ctx.gid)
-#define user_sid		(user_ctx.sid)
-#define user_tcpgid		(user_ctx.tcpgid)
-#define user_umask		(user_ctx.umask)
-#define user_passwd		(user_ctx.pw->pw_passwd)
-#define user_dir		(user_ctx.pw->pw_dir)
-#define user_gids		(user_ctx.gids)
-#define user_ngids		(user_ctx.ngids)
-#define user_gid_list		(user_ctx.gid_list)
-#define user_tty		(user_ctx.tty)
-#define user_ttypath		(user_ctx.ttypath)
-#define user_cwd		(user_ctx.cwd)
-#define user_cmnd		(user_ctx.cmnd)
-#define user_cmnd_dir		(user_ctx.cmnd_dir)
-#define user_args		(user_ctx.cmnd_args)
-#define user_base		(user_ctx.cmnd_base)
-#define user_stat		(user_ctx.cmnd_stat)
-#define user_path		(user_ctx.path)
-#define user_prompt		(user_ctx.prompt)
-#define user_host		(user_ctx.host)
-#define user_shost		(user_ctx.shost)
-#define user_runhost		(user_ctx.runhost)
-#define user_srunhost		(user_ctx.srunhost)
-#define user_ccname		(user_ctx.krb5_ccname)
-#define list_cmnd		(user_ctx.cmnd_list)
-#define safe_cmnd		(user_ctx.cmnd_safe)
-#define saved_cmnd		(user_ctx.cmnd_saved)
-#define cmnd_fd			(user_ctx.execfd)
-#define login_class		(user_ctx.class_name)
-#define runas_pw		(user_ctx._runas_pw)
-#define runas_gr		(user_ctx._runas_gr)
-#define user_role		(user_ctx.role)
-#define user_type		(user_ctx.type)
-#define user_apparmor_profile	(user_ctx.apparmor_profile)
-#define user_closefrom		(user_ctx.closefrom)
-#define	runas_privs		(user_ctx.privs)
-#define	runas_limitprivs	(user_ctx.limitprivs)
-#define user_timeout		(user_ctx.timeout)
-#define user_runchroot		(user_ctx.runchroot)
-#define user_runcwd		(user_ctx.runcwd)
 
 /* Default sudoers uid/gid/mode if not set by the Makefile. */
 #ifndef SUDOERS_UID
