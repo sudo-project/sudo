@@ -1489,6 +1489,62 @@ cb_runas_default(const char *file, int line, int column,
 }
 
 /*
+ * Free memory allocated for struct sudoers_user_context.
+ */
+static void
+sudoers_user_ctx_free(void)
+{
+    debug_decl(sudoers_user_ctx_free, SUDOERS_DEBUG_PLUGIN);
+
+    /* Free remaining references to password and group entries. */
+    if (user_ctx.pw != NULL)
+	sudo_pw_delref(user_ctx.pw);
+    if (runas_pw != NULL)
+	sudo_pw_delref(runas_pw);
+    if (runas_gr != NULL)
+	sudo_gr_delref(runas_gr);
+    if (user_gid_list != NULL)
+	sudo_gidlist_delref(user_gid_list);
+
+    /* Free dynamic contents of user_ctx. */
+    free(user_cwd);
+    free(user_name);
+    free(user_gids);
+    if (user_ttypath != NULL)
+	free(user_ttypath);
+    else
+	free(user_tty);
+    if (user_shost != user_host)
+	    free(user_shost);
+    free(user_host);
+    if (user_srunhost != user_runhost)
+	    free(user_srunhost);
+    free(user_runhost);
+    free(user_cmnd);
+    canon_path_free(user_cmnd_dir);
+    free(user_args);
+    free(list_cmnd);
+    free(safe_cmnd);
+    free(saved_cmnd);
+    free(user_ctx.source);
+    free(user_stat);
+#ifdef HAVE_SELINUX
+    free(user_role);
+    free(user_type);
+#endif
+#ifdef HAVE_APPARMOR
+    free(user_apparmor_profile);
+#endif
+#ifdef HAVE_PRIV_SET
+    free(runas_privs);
+    free(runas_limitprivs);
+#endif
+    memset(&user_ctx, 0, sizeof(user_ctx));
+
+    debug_return;
+}
+
+/*
  * Cleanup hook for sudo_fatal()/sudo_fatalx()
  * Also called at policy close time.
  */
@@ -1549,60 +1605,4 @@ tty_present(void)
 	close(fd);
     }
     debug_return_bool(true);
-}
-
-/*
- * Free memory allocated for struct sudoers_user_context.
- */
-void
-sudoers_user_ctx_free(void)
-{
-    debug_decl(sudoers_user_ctx_free, SUDOERS_DEBUG_PLUGIN);
-
-    /* Free remaining references to password and group entries. */
-    if (user_ctx.pw != NULL)
-	sudo_pw_delref(user_ctx.pw);
-    if (runas_pw != NULL)
-	sudo_pw_delref(runas_pw);
-    if (runas_gr != NULL)
-	sudo_gr_delref(runas_gr);
-    if (user_gid_list != NULL)
-	sudo_gidlist_delref(user_gid_list);
-
-    /* Free dynamic contents of user_ctx. */
-    free(user_cwd);
-    free(user_name);
-    free(user_gids);
-    if (user_ttypath != NULL)
-	free(user_ttypath);
-    else
-	free(user_tty);
-    if (user_shost != user_host)
-	    free(user_shost);
-    free(user_host);
-    if (user_srunhost != user_runhost)
-	    free(user_srunhost);
-    free(user_runhost);
-    free(user_cmnd);
-    canon_path_free(user_cmnd_dir);
-    free(user_args);
-    free(list_cmnd);
-    free(safe_cmnd);
-    free(saved_cmnd);
-    free(user_ctx.source);
-    free(user_stat);
-#ifdef HAVE_SELINUX
-    free(user_role);
-    free(user_type);
-#endif
-#ifdef HAVE_APPARMOR
-    free(user_apparmor_profile);
-#endif
-#ifdef HAVE_PRIV_SET
-    free(runas_privs);
-    free(runas_limitprivs);
-#endif
-    memset(&user_ctx, 0, sizeof(user_ctx));
-
-    debug_return;
 }

@@ -421,7 +421,6 @@ int sudoers_list(int argc, char *const argv[], const char *list_user, bool verbo
 int sudoers_validate_user(void);
 void sudoers_cleanup(void);
 bool sudoers_override_umask(void);
-void sudoers_user_ctx_free(void);
 extern struct sudoers_user_context user_ctx;
 extern struct passwd *list_pw;
 extern unsigned int sudo_mode;
