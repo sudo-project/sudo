@@ -81,7 +81,6 @@ static bool tty_present(void);
  */
 struct sudoers_user_context user_ctx;
 struct sudoers_runas_context runas_ctx;
-struct passwd *list_pw;
 unsigned int sudo_mode;
 
 static char *prev_user;
@@ -911,6 +910,7 @@ done:
 int
 sudoers_list(int argc, char * const argv[], const char *list_user, bool verbose)
 {
+    struct passwd *pw;
     int ret = -1;
     debug_decl(sudoers_list, SUDOERS_DEBUG_PLUGIN);
 
@@ -922,8 +922,10 @@ sudoers_list(int argc, char * const argv[], const char *list_user, bool verbose)
 	goto done;
 
     if (list_user) {
-	list_pw = sudo_getpwnam(list_user);
-	if (list_pw == NULL) {
+	if (runas_ctx.list_pw != NULL)
+	    sudo_pw_delref(runas_ctx.list_pw);
+	runas_ctx.list_pw = sudo_getpwnam(list_user);
+	if (runas_ctx.list_pw == NULL) {
 	    sudo_warnx(U_("unknown user %s"), list_user);
 	    goto done;
 	}
@@ -945,18 +947,15 @@ sudoers_list(int argc, char * const argv[], const char *list_user, bool verbose)
     if (ret != true)
 	goto done;
 
+    pw = runas_ctx.list_pw ? runas_ctx.list_pw : user_ctx.pw;
     if (ISSET(sudo_mode, MODE_CHECK))
-	ret = display_cmnd(snl, list_pw ? list_pw : user_ctx.pw, verbose);
+	ret = display_cmnd(snl, pw, verbose);
     else
-	ret = display_privs(snl, list_pw ? list_pw : user_ctx.pw, verbose);
+	ret = display_privs(snl, pw, verbose);
 
 done:
     mail_parse_errors();
 
-    if (list_pw != NULL) {
-	sudo_pw_delref(list_pw);
-	list_pw = NULL;
-    }
     if (def_group_plugin)
 	group_plugin_unload();
     reset_parser();
@@ -1543,6 +1542,8 @@ sudoers_runas_ctx_free(void)
 	sudo_pw_delref(runas_ctx.pw);
     if (runas_ctx.gr != NULL)
 	sudo_gr_delref(runas_ctx.gr);
+    if (runas_ctx.list_pw != NULL)
+	sudo_pw_delref(runas_ctx.list_pw);
 
     /* Free dynamic contents of runas_ctx. */
     free(runas_ctx.cmnd);
@@ -1605,7 +1606,6 @@ sudoers_cleanup(void)
     sudoers_gc_run();
 
     /* Clear globals */
-    list_pw = NULL;
     saved_argv = NULL;
     NewArgv = NULL;
     NewArgc = 0;

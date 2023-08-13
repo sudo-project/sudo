@@ -81,7 +81,6 @@ static int testsudoers_query(const struct sudo_nss *nss, struct passwd *pw);
  */
 struct sudoers_user_context user_ctx;
 struct sudoers_runas_context runas_ctx;
-struct passwd *list_pw;
 static const char *orig_cmnd;
 static char *runas_group, *runas_user;
 unsigned int sudo_mode = MODE_RUN;
@@ -166,8 +165,8 @@ main(int argc, char *argv[])
 		}
 		break;
 	    case 'L':
-		list_pw = sudo_getpwnam(optarg);
-		if (list_pw == NULL) {
+		runas_ctx.list_pw = sudo_getpwnam(optarg);
+		if (runas_ctx.list_pw == NULL) {
 		    sudo_warnx(U_("unknown user %s"), optarg);
 		    usage();
 		}

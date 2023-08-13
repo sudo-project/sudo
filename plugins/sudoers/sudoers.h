@@ -122,6 +122,7 @@ struct sudoers_user_context {
 struct sudoers_runas_context {
     struct passwd *pw;
     struct group *gr;
+    struct passwd *list_pw;
     char *chroot;
     char *class;
     char *cmnd;
@@ -380,7 +381,6 @@ void sudoers_cleanup(void);
 bool sudoers_override_umask(void);
 extern struct sudoers_user_context user_ctx;
 extern struct sudoers_runas_context runas_ctx;
-extern struct passwd *list_pw;
 extern unsigned int sudo_mode;
 extern int sudoedit_nfiles;
 extern sudo_conv_t sudo_conv;

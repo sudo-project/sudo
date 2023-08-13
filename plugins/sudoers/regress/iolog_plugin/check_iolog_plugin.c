@@ -38,7 +38,6 @@ extern struct io_plugin sudoers_io;
 
 struct sudoers_user_context user_ctx;
 struct sudoers_runas_context runas_ctx;
-struct passwd *list_pw;
 sudo_printf_t sudo_printf;
 sudo_conv_t sudo_conv;
 struct sudo_plugin_event * (*plugin_event_alloc)(void);

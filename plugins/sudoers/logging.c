@@ -321,7 +321,8 @@ log_denial(unsigned int status, bool inform_user)
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("Sorry, user %s may not run "
 		"sudo on %s.\n"), user_ctx.name, runas_ctx.shost);
 	} else {
-	    const struct passwd *runas_pw = list_pw ? list_pw : runas_ctx.pw;
+	    const struct passwd *runas_pw =
+		runas_ctx.list_pw ? runas_ctx.list_pw : runas_ctx.pw;
 	    const char *cmnd1 = user_ctx.cmnd;
 	    const char *cmnd2 = "";
 
@@ -358,8 +359,9 @@ log_failure(unsigned int status, int cmnd_status)
     debug_decl(log_failure, SUDOERS_DEBUG_LOGGING);
 
     /* The user doesn't always get to see the log message (path info). */
-    if (!ISSET(status, FLAG_NO_USER | FLAG_NO_HOST) && list_pw == NULL &&
-	    def_path_info && (cmnd_status == NOT_FOUND_DOT || cmnd_status == NOT_FOUND))
+    if (!ISSET(status, FLAG_NO_USER | FLAG_NO_HOST) &&
+	    runas_ctx.list_pw == NULL && def_path_info &&
+	    (cmnd_status == NOT_FOUND_DOT || cmnd_status == NOT_FOUND))
 	inform_user = false;
     ret = log_denial(status, inform_user);
 

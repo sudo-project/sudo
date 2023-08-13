@@ -63,7 +63,6 @@
 struct cvtsudoers_filter *filters;
 struct sudoers_user_context user_ctx;
 struct sudoers_runas_context runas_ctx;
-struct passwd *list_pw;
 static FILE *logfp;
 static const char short_opts[] =  "b:c:d:ef:hi:I:l:m:Mo:O:pP:s:V";
 static struct option long_opts[] = {

@@ -72,7 +72,7 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw, time_t now,
     pwcheck = (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
     nopass = (pwcheck == never || pwcheck == all) ? true : false;
 
-    if (list_pw != NULL) {
+    if (runas_ctx.list_pw != NULL) {
 	root_pw = sudo_getpwuid(ROOT_UID);
 	if (root_pw == NULL)
 	    sudo_warnx(U_("unknown uid %u"), ROOT_UID);
@@ -144,8 +144,8 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw, time_t now,
 		     * Root can list any user's privileges.
 		     * A user may always list their own privileges.
 		     */
-		    if (user_ctx.uid == 0 || list_pw == NULL ||
-			    user_ctx.uid == list_pw->pw_uid) {
+		    if (user_ctx.uid == 0 || runas_ctx.list_pw == NULL ||
+			    user_ctx.uid == runas_ctx.list_pw->pw_uid) {
 			cmnd_match = ALLOW;
 			runas_match = ALLOW;
 		    } else if (date_match != DENY) {
@@ -154,7 +154,7 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct passwd *pw, time_t now,
 			 * user must match the list user or root.
 			 */
 			runas_match = runas_matches_pw(nss->parse_tree, cs,
-			    list_pw);
+			    runas_ctx.list_pw);
 			switch (runas_match) {
 			case DENY:
 			    break;

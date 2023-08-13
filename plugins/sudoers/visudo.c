@@ -110,7 +110,6 @@ extern void get_hostname(void);
  */
 struct sudoers_user_context user_ctx;
 struct sudoers_runas_context runas_ctx;
-struct passwd *list_pw;
 static const char *path_sudoers = _PATH_SUDOERS;
 static struct sudoersfile_list sudoerslist = TAILQ_HEAD_INITIALIZER(sudoerslist);
 static struct sudoers_parser_config sudoers_conf = SUDOERS_PARSER_CONFIG_INITIALIZER;

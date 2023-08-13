@@ -51,7 +51,6 @@ static const char *orig_cmnd;
 /* Required to link with parser. */
 struct sudoers_user_context user_ctx;
 struct sudoers_runas_context runas_ctx;
-struct passwd *list_pw;
 sudo_conv_t sudo_conv = fuzz_conversation;
 sudo_printf_t sudo_printf = fuzz_printf;
 unsigned int sudo_mode;
