@@ -398,14 +398,13 @@ bool sudoers_policy_store_result(bool accepted, char *argv[], char *envp[], mode
 const struct sudoers_parser_config *policy_sudoers_conf(void);
 const char *policy_path_ldap_conf(void);
 const char *policy_path_ldap_secret(void);
+const char *policy_path_plugin_dir(void);
 
 /* group_plugin.c */
-int group_plugin_load(const char *plugin_info);
 void group_plugin_unload(void);
 int group_plugin_query(const char *user, const char *group,
     const struct passwd *pwd);
 bool cb_group_plugin(const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
-extern const char *path_plugin_dir;
 
 /* editor.c */
 char *find_editor(int nfiles, char * const *files, int *argc_out,

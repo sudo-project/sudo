@@ -38,7 +38,6 @@
 
 static void *group_handle;
 static struct sudoers_group_plugin *group_plugin;
-const char *path_plugin_dir = _PATH_SUDO_PLUGIN_DIR;
 
 /*
  * Check for a fallback path when the original group plugin is not loadable.
@@ -130,9 +129,10 @@ done:
  * Returns -1 if unable to open the plugin, else it returns
  * the value from the plugin's init function.
  */
-int
+static int
 group_plugin_load(const char *plugin_info)
 {
+    const char *plugin_dir = policy_path_plugin_dir();
     char *args, path[PATH_MAX];
     char **argv = NULL;
     int len, rc = -1;
@@ -144,17 +144,17 @@ group_plugin_load(const char *plugin_info)
      */
     if ((args = strpbrk(plugin_info, " \t")) != NULL) {
 	len = snprintf(path, sizeof(path), "%s%.*s",
-	    (*plugin_info != '/') ? path_plugin_dir : "",
+	    (*plugin_info != '/') ? plugin_dir : "",
 	    (int)(args - plugin_info), plugin_info);
 	args++;
     } else {
 	len = snprintf(path, sizeof(path), "%s%s",
-	    (*plugin_info != '/') ? path_plugin_dir : "", plugin_info);
+	    (*plugin_info != '/') ? plugin_dir : "", plugin_info);
     }
     if (len < 0 || len >= ssizeof(path)) {
 	errno = ENAMETOOLONG;
 	sudo_warn("%s%s",
-	    (*plugin_info != '/') ? path_plugin_dir : "", plugin_info);
+	    (*plugin_info != '/') ? plugin_dir : "", plugin_info);
 	goto done;
     }
 
@@ -271,7 +271,7 @@ group_plugin_query(const char *user, const char *group,
  * No loadable shared object support.
  */
 
-int
+static int
 group_plugin_load(const char *plugin_info)
 {
     debug_decl(group_plugin_load, SUDOERS_DEBUG_UTIL);

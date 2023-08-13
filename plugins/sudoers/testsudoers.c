@@ -757,6 +757,12 @@ done:
     debug_return;
 }
 
+const char *
+policy_path_plugin_dir(void)
+{
+    return _PATH_SUDO_PLUGIN_DIR;
+}
+
 static int
 testsudoers_output(const char * restrict buf)
 {

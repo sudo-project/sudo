@@ -58,6 +58,7 @@ sudo_printf_t sudo_printf;
 struct sudo_plugin_event * (*plugin_event_alloc)(void);
 static const char *path_ldap_conf = _PATH_LDAP_CONF;
 static const char *path_ldap_secret = _PATH_LDAP_SECRET;
+static const char *path_plugin_dir = _PATH_SUDO_PLUGIN_DIR;
 static const char *path_sudoers = _PATH_SUDOERS;
 static bool session_opened;
 int sudoedit_nfiles;
@@ -625,6 +626,13 @@ const struct sudoers_parser_config *
 policy_sudoers_conf(void)
 {
     return &sudoers_conf;
+}
+
+/* Return the path to the sudo plugin directory. */
+const char *
+policy_path_plugin_dir(void)
+{
+    return path_plugin_dir;
 }
 
 /* Return the path to ldap.conf file, which may be set in the plugin args. */

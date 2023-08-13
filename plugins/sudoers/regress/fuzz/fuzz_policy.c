@@ -47,7 +47,6 @@
 extern char **environ;
 extern sudo_dso_public struct policy_plugin sudoers_policy;
 
-const char *path_plugin_dir = _PATH_SUDO_PLUGIN_DIR;
 char *audit_msg;
 
 static int pass;
@@ -912,4 +911,3 @@ bsdauth_set_style(const char *style)
 {
     return;
 }
-
