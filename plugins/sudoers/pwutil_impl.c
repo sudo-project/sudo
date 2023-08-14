@@ -299,17 +299,16 @@ PREFIX(make_gidlist_item)(const struct passwd *pw, char * const *gidstrs,
 	type = ENTRY_TYPE_FRONTEND;
     } else {
 	type = ENTRY_TYPE_QUERIED;
-	if (user_ctx.max_groups > 0) {
-	    ngids = user_ctx.max_groups;
+	ngids = sudo_pwutil_get_max_groups();
+	if (ngids > 0) {
 	    gids = reallocarray(NULL, (size_t)ngids, sizeof(GETGROUPS_T));
 	    if (gids == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "unable to allocate memory");
 		debug_return_ptr(NULL);
 	    }
-	    /* Clamp to max_groups if insufficient space for all groups. */
-	    if (PREFIX(getgrouplist2)(pw->pw_name, pw->pw_gid, &gids, &ngids) == -1)
-		ngids = user_ctx.max_groups;
+	    /* getgrouplist2() returns failure if it can't store all groups. */
+	    (void)PREFIX(getgrouplist2)(pw->pw_name, pw->pw_gid, &gids, &ngids);
 	} else {
 	    gids = NULL;
 	    if (PREFIX(getgrouplist2)(pw->pw_name, pw->pw_gid, &gids, &ngids) == -1) {

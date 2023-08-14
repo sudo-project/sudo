@@ -58,6 +58,8 @@ static int  cmp_pwuid(const void *, const void *);
 static int  cmp_pwnam(const void *, const void *);
 static int  cmp_grgid(const void *, const void *);
 
+static int max_groups;
+
 /*
  * Default functions for building cache items.
  */
@@ -100,6 +102,20 @@ sudo_pwutil_set_backend(sudo_make_pwitem_t pwitem, sudo_make_gritem_t gritem,
 	make_grlist_item = grlist_item;
 
     debug_return;
+}
+
+/* Get the max number of user groups if set, or 0 if not set. */
+int
+sudo_pwutil_get_max_groups(void)
+{
+    return max_groups;
+}
+
+/* Set the max number of user groups (negative values ignored). */
+void
+sudo_pwutil_set_max_groups(int n)
+{
+    max_groups = n > 0 ? n : 0;
 }
 
 /*

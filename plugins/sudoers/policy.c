@@ -360,13 +360,15 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	    continue;
 	}
 	if (MATCHES(*cur, "max_groups=")) {
+	    int max_groups;
 	    errno = 0;
 	    p = *cur + sizeof("max_groups=") - 1;
-	    user_ctx.max_groups = (int)sudo_strtonum(p, 1, 1024, &errstr);
-	    if (user_ctx.max_groups == 0) {
+	    max_groups = (int)sudo_strtonum(p, 1, 1024, &errstr);
+	    if (max_groups == 0) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
 	    }
+	    sudo_pwutil_set_max_groups(max_groups);
 	    continue;
 	}
 	if (MATCHES(*cur, "remote_host=")) {

@@ -109,7 +109,6 @@ struct sudoers_user_context {
     int   closefrom;
     int   lines;
     int   cols;
-    int   max_groups;
     int   timeout;
     mode_t umask;
     uid_t uid;
@@ -324,6 +323,8 @@ void sudo_pw_addref(struct passwd *);
 void sudo_pw_delref(struct passwd *);
 int  sudo_set_gidlist(struct passwd *pw, char * const *gids, unsigned int type);
 int  sudo_set_grlist(struct passwd *pw, char * const *groups);
+int  sudo_pwutil_get_max_groups(void);
+void sudo_pwutil_set_max_groups(int);
 void sudo_pwutil_set_backend(sudo_make_pwitem_t, sudo_make_gritem_t, sudo_make_gidlist_item_t, sudo_make_grlist_item_t);
 void sudo_setspent(void);
 
