@@ -220,13 +220,13 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	if (MATCHES(*cur, "runas_user=")) {
 	    CHECK(*cur, "runas_user=");
 	    runas_ctx.user = *cur + sizeof("runas_user=") - 1;
-	    SET(user_ctx.flags, RUNAS_USER_SPECIFIED);
+	    SET(runas_ctx.flags, RUNAS_USER_SPECIFIED);
 	    continue;
 	}
 	if (MATCHES(*cur, "runas_group=")) {
 	    CHECK(*cur, "runas_group=");
 	    runas_ctx.group = *cur + sizeof("runas_group=") - 1;
-	    SET(user_ctx.flags, RUNAS_GROUP_SPECIFIED);
+	    SET(runas_ctx.flags, RUNAS_GROUP_SPECIFIED);
 	    continue;
 	}
 	if (MATCHES(*cur, "prompt=")) {

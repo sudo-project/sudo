@@ -104,11 +104,11 @@ struct sudoers_user_context {
     char *iolog_file;
     char *iolog_path;
     GETGROUPS_T *gids;
+    unsigned int flags;
     int   ngids;
     int   closefrom;
     int   lines;
     int   cols;
-    unsigned int   flags;
     int   max_groups;
     int   timeout;
     mode_t umask;
@@ -120,6 +120,8 @@ struct sudoers_user_context {
 };
 
 struct sudoers_runas_context {
+    unsigned int flags;
+    int execfd;
     struct passwd *pw;
     struct group *gr;
     struct passwd *list_pw;
@@ -142,7 +144,6 @@ struct sudoers_runas_context {
     char *privs;
     char *limitprivs;
 #endif
-    int execfd;
 };
 
 /*
@@ -155,11 +156,15 @@ struct sudoers_runas_context {
 /*
  * user_ctx.flag values
  */
+#define CAN_INTERCEPT_SETID	0x01U
+#define HAVE_INTERCEPT_PTRACE	0x02U
+#define USER_INTERCEPT_SETID	0x04U
+
+/*
+ * runas_ctx.flag values
+ */
 #define RUNAS_USER_SPECIFIED	0x01U
 #define RUNAS_GROUP_SPECIFIED	0x02U
-#define CAN_INTERCEPT_SETID	0x04U
-#define HAVE_INTERCEPT_PTRACE	0x08U
-#define USER_INTERCEPT_SETID	0x10U
 
 /*
  * Return values for sudoers_lookup(), also used as arguments for log_auth()

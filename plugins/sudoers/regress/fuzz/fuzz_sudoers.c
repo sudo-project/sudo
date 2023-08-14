@@ -340,11 +340,11 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		sudo_pw_delref(runas_ctx.pw);
 	    if (ud->runuser != NULL) {
 		runas_ctx.user = (char *)ud->runuser;
-		SET(user_ctx.flags, RUNAS_USER_SPECIFIED);
+		SET(runas_ctx.flags, RUNAS_USER_SPECIFIED);
 		runas_ctx.pw = sudo_getpwnam(runas_ctx.user);
 	    } else {
 		runas_ctx.user = NULL;
-		CLR(user_ctx.flags, RUNAS_USER_SPECIFIED);
+		CLR(runas_ctx.flags, RUNAS_USER_SPECIFIED);
 		runas_ctx.pw = sudo_getpwnam("root");
 	    }
 	    if (runas_ctx.pw == NULL) {
@@ -357,7 +357,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		sudo_gr_delref(runas_ctx.gr);
 	    if (ud->rungroup != NULL) {
 		runas_ctx.group = (char *)ud->rungroup;
-		SET(user_ctx.flags, RUNAS_GROUP_SPECIFIED);
+		SET(runas_ctx.flags, RUNAS_GROUP_SPECIFIED);
 		runas_ctx.gr = sudo_getgrnam(runas_ctx.group);
 		if (runas_ctx.gr == NULL) {
 		    sudo_warnx_nodebug("unknown run group %s",
@@ -366,7 +366,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		}
 	    } else {
 		runas_ctx.group = NULL;
-		CLR(user_ctx.flags, RUNAS_GROUP_SPECIFIED);
+		CLR(runas_ctx.flags, RUNAS_GROUP_SPECIFIED);
 		runas_ctx.gr = NULL;
 	    }
 

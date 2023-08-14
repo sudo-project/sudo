@@ -149,7 +149,7 @@ main(int argc, char *argv[])
 		break;
 	    case 'g':
 		runas_group = optarg;
-		SET(user_ctx.flags, RUNAS_GROUP_SPECIFIED);
+		SET(runas_ctx.flags, RUNAS_GROUP_SPECIFIED);
 		break;
 	    case 'h':
 		user_ctx.host = optarg;
@@ -206,7 +206,7 @@ main(int argc, char *argv[])
 		break;
 	    case 'u':
 		runas_user = optarg;
-		SET(user_ctx.flags, RUNAS_USER_SPECIFIED);
+		SET(runas_ctx.flags, RUNAS_USER_SPECIFIED);
 		break;
 	    case 'v':
 		if (sudo_mode != MODE_RUN) {
