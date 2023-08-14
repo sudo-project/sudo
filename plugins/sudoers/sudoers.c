@@ -488,7 +488,7 @@ sudoers_check_common(int pwflag)
     }
 
     /* Check whether runas_ctx.chroot is permitted (if specified). */
-    switch (check_user_runchroot()) {
+    switch (check_user_runchroot(runas_ctx.chroot)) {
     case true:
 	break;
     case false:
@@ -503,7 +503,7 @@ sudoers_check_common(int pwflag)
     }
 
     /* Check whether runas_ctx.cwd is permitted (if specified). */
-    switch (check_user_runcwd()) {
+    switch (check_user_runcwd(runas_ctx.cwd)) {
     case true:
 	break;
     case false:

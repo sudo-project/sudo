@@ -391,13 +391,13 @@ main(int argc, char *argv[])
 	    CLR(validated, VALIDATE_SUCCESS);
 	    SET(validated, VALIDATE_FAILURE);
 	}
-	if (check_user_runchroot() != true) {
+	if (check_user_runchroot(runas_ctx.chroot) != true) {
 	    printf("\nUser %s is not allowed to change root directory to %s\n",
 		user_ctx.name, runas_ctx.chroot);
 	    CLR(validated, VALIDATE_SUCCESS);
 	    SET(validated, VALIDATE_FAILURE);
 	}
-	if (check_user_runcwd() != true) {
+	if (check_user_runcwd(runas_ctx.cwd) != true) {
 	    printf("\nUser %s is not allowed to change directory to %s\n",
 		user_ctx.name, runas_ctx.cwd);
 	    CLR(validated, VALIDATE_SUCCESS);

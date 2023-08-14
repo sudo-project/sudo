@@ -264,8 +264,8 @@ bool user_is_exempt(void);
 
 /* check_util.c */
 bool check_user_shell(const struct passwd *pw);
-int check_user_runchroot(void);
-int check_user_runcwd(void);
+int check_user_runchroot(const char *runchroot);
+int check_user_runcwd(const char *runcwd);
 
 /* prompt.c */
 char *expand_prompt(const char *old_prompt, const char *auth_user);

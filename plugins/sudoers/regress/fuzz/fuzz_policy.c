@@ -713,14 +713,14 @@ check_user(unsigned int validated, unsigned int mode)
 
 /* STUB */
 int
-check_user_runchroot(void)
+check_user_runchroot(const char *runchroot)
 {
     return true;
 }
 
 /* STUB */
 int
-check_user_runcwd(void)
+check_user_runcwd(const char *runcwd)
 {
     return true;
 }
