@@ -190,7 +190,6 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
     sudo_mode = 0;
     for (cur = info->settings; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "closefrom=")) {
-	    errno = 0;
 	    p = *cur + sizeof("closefrom=") - 1;
 	    user_ctx.closefrom = (int)sudo_strtonum(p, 3, INT_MAX, &errstr);
 	    if (user_ctx.closefrom == 0) {
@@ -361,7 +360,6 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	}
 	if (MATCHES(*cur, "max_groups=")) {
 	    int max_groups;
-	    errno = 0;
 	    p = *cur + sizeof("max_groups=") - 1;
 	    max_groups = (int)sudo_strtonum(p, 1, 1024, &errstr);
 	    if (max_groups == 0) {
@@ -474,7 +472,6 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	    continue;
 	}
 	if (MATCHES(*cur, "lines=")) {
-	    errno = 0;
 	    p = *cur + sizeof("lines=") - 1;
 	    user_ctx.lines = (int)sudo_strtonum(p, 1, INT_MAX, &errstr);
 	    if (user_ctx.lines == 0) {
@@ -484,7 +481,6 @@ sudoers_policy_deserialize_info(void *v, struct defaults_list *defaults)
 	    continue;
 	}
 	if (MATCHES(*cur, "cols=")) {
-	    errno = 0;
 	    p = *cur + sizeof("cols=") - 1;
 	    user_ctx.cols = (int)sudo_strtonum(p, 1, INT_MAX, &errstr);
 	    if (user_ctx.cols == 0) {
