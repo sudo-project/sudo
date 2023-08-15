@@ -307,8 +307,9 @@ PREFIX(make_gidlist_item)(const struct passwd *pw, char * const *gidstrs,
 		    "unable to allocate memory");
 		debug_return_ptr(NULL);
 	    }
-	    /* getgrouplist2() returns failure if it can't store all groups. */
-	    (void)PREFIX(getgrouplist2)(pw->pw_name, pw->pw_gid, &gids, &ngids);
+	    /* Clamp to max_groups if insufficient space for all groups. */
+	    if (PREFIX(getgrouplist2)(pw->pw_name, pw->pw_gid, &gids, &ngids) == -1)
+		ngids = sudo_pwutil_get_max_groups();
 	} else {
 	    gids = NULL;
 	    if (PREFIX(getgrouplist2)(pw->pw_name, pw->pw_gid, &gids, &ngids) == -1) {
