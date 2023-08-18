@@ -3974,6 +3974,7 @@ free_parse_tree(struct sudoers_parse_tree *parse_tree)
     if (parse_tree->shost != parse_tree->lhost)
 	free(parse_tree->shost);
     parse_tree->lhost = parse_tree->shost = NULL;
+    parse_tree->nss = NULL;
 }
 
 /*
