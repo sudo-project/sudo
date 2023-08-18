@@ -582,9 +582,6 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
     int errors = 0;
     debug_decl(sudoers_parse_ldif, SUDOERS_DEBUG_UTIL);
 
-    /* Free old contents of the parse tree (if any). */
-    free_parse_tree(parse_tree);
-
     /*
      * We cache user, group and host lists to make it eay to detect when there
      * are identical lists (simple pointer compare).  This makes it possible
