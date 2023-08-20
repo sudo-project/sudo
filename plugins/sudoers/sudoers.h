@@ -77,7 +77,6 @@ struct group_list {
 
 /*
  * Info pertaining to the invoking user.
- * XXX - can we embed struct eventlog here or use it instead?
  */
 struct sudoers_user_context {
     struct timespec submit_time;
@@ -104,7 +103,6 @@ struct sudoers_user_context {
     char *iolog_file;
     char *iolog_path;
     GETGROUPS_T *gids;
-    unsigned int flags;
     int   ngids;
     int   closefrom;
     int   lines;
@@ -118,8 +116,10 @@ struct sudoers_user_context {
     char uuid_str[37];
 };
 
+/*
+ * Info pertaining to the runas user.
+ */
 struct sudoers_runas_context {
-    unsigned int flags;
     int execfd;
     struct passwd *pw;
     struct group *gr;
@@ -146,6 +146,26 @@ struct sudoers_runas_context {
 };
 
 /*
+ * Settings passed in from the sudo front-end.
+ */
+struct sudoers_plugin_settings {
+    unsigned int flags;
+    int max_groups;
+    const char *plugin_dir;
+    const char *ldap_conf;
+    const char *ldap_secret;
+};
+
+/*
+ * Global configuration for the sudoers module.
+ */
+struct sudoers_context {
+    struct sudoers_user_context user;
+    struct sudoers_runas_context runas;
+    struct sudoers_plugin_settings settings;
+};
+
+/*
  * sudo_get_gidlist() type values
  */
 #define ENTRY_TYPE_ANY		0x00
@@ -153,17 +173,13 @@ struct sudoers_runas_context {
 #define ENTRY_TYPE_FRONTEND	0x02
 
 /*
- * user_ctx.flag values
- */
-#define CAN_INTERCEPT_SETID	0x01U
-#define HAVE_INTERCEPT_PTRACE	0x02U
-#define USER_INTERCEPT_SETID	0x04U
-
-/*
- * runas_ctx.flag values
+ * sudoers_plugin_settings.flag values
  */
 #define RUNAS_USER_SPECIFIED	0x01U
 #define RUNAS_GROUP_SPECIFIED	0x02U
+#define CAN_INTERCEPT_SETID	0x04U
+#define HAVE_INTERCEPT_PTRACE	0x08U
+#define USER_INTERCEPT_SETID	0x10U
 
 /*
  * Return values for sudoers_lookup(), also used as arguments for log_auth()
@@ -385,8 +401,7 @@ int sudoers_list(int argc, char *const argv[], const char *list_user, bool verbo
 int sudoers_validate_user(void);
 void sudoers_cleanup(void);
 bool sudoers_override_umask(void);
-extern struct sudoers_user_context user_ctx;
-extern struct sudoers_runas_context runas_ctx;
+extern struct sudoers_context ctx;
 extern unsigned int sudo_mode;
 extern int sudoedit_nfiles;
 extern sudo_conv_t sudo_conv;

@@ -92,7 +92,7 @@ bsdauth_init(struct passwd *pw, sudo_auth *auth)
 
     if (auth_setitem(state.as, AUTHV_STYLE, login_style) < 0 ||
 	auth_setitem(state.as, AUTHV_NAME, pw->pw_name) < 0 ||
-	auth_setitem(state.as, AUTHV_CLASS, runas_ctx.class) < 0) {
+	auth_setitem(state.as, AUTHV_CLASS, ctx.runas.class) < 0) {
 	log_warningx(0, N_("unable to initialize BSD authentication"));
 	goto bad;
     }

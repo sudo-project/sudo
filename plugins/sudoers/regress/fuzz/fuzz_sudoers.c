@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2021-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -49,8 +49,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 static const char *orig_cmnd;
 
 /* Required to link with parser. */
-struct sudoers_user_context user_ctx;
-struct sudoers_runas_context runas_ctx;
+struct sudoers_context ctx;
 sudo_conv_t sudo_conv = fuzz_conversation;
 sudo_printf_t sudo_printf = fuzz_printf;
 unsigned int sudo_mode;
@@ -107,12 +106,12 @@ init_envtables(void)
 int
 set_cmnd_path(const char *runchroot)
 {
-    /* Reallocate user_ctx.cmnd to catch bugs in command_matches(). */
+    /* Reallocate ctx.user.cmnd to catch bugs in command_matches(). */
     char *new_cmnd = strdup(orig_cmnd);
     if (new_cmnd == NULL)
         return NOT_FOUND_ERROR;
-    free(user_ctx.cmnd);
-    user_ctx.cmnd = new_cmnd;
+    free(ctx.user.cmnd);
+    ctx.user.cmnd = new_cmnd;
     return FOUND;
 }
 
@@ -285,14 +284,14 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     sudo_pw_delref(pw);
 
     /* The minimum needed to perform matching (cmnd must be dynamic). */
-    user_ctx.host = user_ctx.shost = runas_ctx.host = runas_ctx.shost =
+    ctx.user.host = ctx.user.shost = ctx.runas.host = ctx.runas.shost =
 	(char *)"localhost";
     orig_cmnd = (char *)"/usr/bin/id";
-    user_ctx.cmnd = strdup(orig_cmnd);
-    if (user_ctx.cmnd == NULL)
+    ctx.user.cmnd = strdup(orig_cmnd);
+    if (ctx.user.cmnd == NULL)
 	goto done;
-    user_ctx.cmnd_args = (char *)"-u";
-    user_ctx.cmnd_base = sudo_basename(user_ctx.cmnd);
+    ctx.user.cmnd_args = (char *)"-u";
+    ctx.user.cmnd_base = sudo_basename(ctx.user.cmnd);
     time(&now);
 
     /* Add a fake network interfaces. */
@@ -326,71 +325,71 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	    int cmnd_status;
 
 	    /* Invoking user. */
-	    user_ctx.name = (char *)ud->user;
-	    if (user_ctx.pw != NULL)
-		sudo_pw_delref(user_ctx.pw);
-	    user_ctx.pw = sudo_getpwnam(user_ctx.name);
-	    if (user_ctx.pw == NULL) {
-		sudo_warnx_nodebug("unknown user %s", user_ctx.name);
+	    ctx.user.name = (char *)ud->user;
+	    if (ctx.user.pw != NULL)
+		sudo_pw_delref(ctx.user.pw);
+	    ctx.user.pw = sudo_getpwnam(ctx.user.name);
+	    if (ctx.user.pw == NULL) {
+		sudo_warnx_nodebug("unknown user %s", ctx.user.name);
 		continue;
 	    }
 
 	    /* Run user. */
-	    if (runas_ctx.pw != NULL)
-		sudo_pw_delref(runas_ctx.pw);
+	    if (ctx.runas.pw != NULL)
+		sudo_pw_delref(ctx.runas.pw);
 	    if (ud->runuser != NULL) {
-		runas_ctx.user = (char *)ud->runuser;
-		SET(runas_ctx.flags, RUNAS_USER_SPECIFIED);
-		runas_ctx.pw = sudo_getpwnam(runas_ctx.user);
+		ctx.runas.user = (char *)ud->runuser;
+		SET(ctx.settings.flags, RUNAS_USER_SPECIFIED);
+		ctx.runas.pw = sudo_getpwnam(ctx.runas.user);
 	    } else {
-		runas_ctx.user = NULL;
-		CLR(runas_ctx.flags, RUNAS_USER_SPECIFIED);
-		runas_ctx.pw = sudo_getpwnam("root");
+		ctx.runas.user = NULL;
+		CLR(ctx.settings.flags, RUNAS_USER_SPECIFIED);
+		ctx.runas.pw = sudo_getpwnam("root");
 	    }
-	    if (runas_ctx.pw == NULL) {
-		sudo_warnx_nodebug("unknown run user %s", runas_ctx.user);
+	    if (ctx.runas.pw == NULL) {
+		sudo_warnx_nodebug("unknown run user %s", ctx.runas.user);
 		continue;
 	    }
 
 	    /* Run group. */
-	    if (runas_ctx.gr != NULL)
-		sudo_gr_delref(runas_ctx.gr);
+	    if (ctx.runas.gr != NULL)
+		sudo_gr_delref(ctx.runas.gr);
 	    if (ud->rungroup != NULL) {
-		runas_ctx.group = (char *)ud->rungroup;
-		SET(runas_ctx.flags, RUNAS_GROUP_SPECIFIED);
-		runas_ctx.gr = sudo_getgrnam(runas_ctx.group);
-		if (runas_ctx.gr == NULL) {
+		ctx.runas.group = (char *)ud->rungroup;
+		SET(ctx.settings.flags, RUNAS_GROUP_SPECIFIED);
+		ctx.runas.gr = sudo_getgrnam(ctx.runas.group);
+		if (ctx.runas.gr == NULL) {
 		    sudo_warnx_nodebug("unknown run group %s",
-			runas_ctx.group);
+			ctx.runas.group);
 		    continue;
 		}
 	    } else {
-		runas_ctx.group = NULL;
-		CLR(runas_ctx.flags, RUNAS_GROUP_SPECIFIED);
-		runas_ctx.gr = NULL;
+		ctx.runas.group = NULL;
+		CLR(ctx.settings.flags, RUNAS_GROUP_SPECIFIED);
+		ctx.runas.gr = NULL;
 	    }
 
 	    update_defaults(&parse_tree, NULL, SETDEF_ALL, false);
 
-	    sudoers_lookup(&snl, user_ctx.pw, now, NULL, NULL, &cmnd_status,
+	    sudoers_lookup(&snl, ctx.user.pw, now, NULL, NULL, &cmnd_status,
 		false);
 
 	    /* Match again as a pseudo-command (list, validate, etc). */
-	    sudoers_lookup(&snl, user_ctx.pw, now, NULL, NULL, &cmnd_status,
+	    sudoers_lookup(&snl, ctx.user.pw, now, NULL, NULL, &cmnd_status,
 		true);
 
 	    /* Display privileges. */
-	    display_privs(&snl, user_ctx.pw, false);
-	    display_privs(&snl, user_ctx.pw, true);
+	    display_privs(&snl, ctx.user.pw, false);
+	    display_privs(&snl, ctx.user.pw, true);
 	}
 
 	/* Expand tildes in runcwd and runchroot. */
-	if (runas_ctx.pw != NULL) {
+	if (ctx.runas.pw != NULL) {
 	    if (def_runcwd != NULL && strcmp(def_runcwd, "*") != 0) {
-		expand_tilde(&def_runcwd, runas_ctx.pw->pw_name);
+		expand_tilde(&def_runcwd, ctx.runas.pw->pw_name);
 	    }
 	    if (def_runchroot != NULL && strcmp(def_runchroot, "*") != 0) {
-		expand_tilde(&def_runchroot, runas_ctx.pw->pw_name);
+		expand_tilde(&def_runchroot, ctx.runas.pw->pw_name);
 	    }
 	}
 
@@ -404,19 +403,19 @@ done:
     fclose(fp);
     free_parse_tree(&parse_tree);
     reset_parser();
-    if (user_ctx.pw != NULL)
-	sudo_pw_delref(user_ctx.pw);
-    if (runas_ctx.pw != NULL)
-	sudo_pw_delref(runas_ctx.pw);
-    if (runas_ctx.gr != NULL)
-	sudo_gr_delref(runas_ctx.gr);
+    if (ctx.user.pw != NULL)
+	sudo_pw_delref(ctx.user.pw);
+    if (ctx.runas.pw != NULL)
+	sudo_pw_delref(ctx.runas.pw);
+    if (ctx.runas.gr != NULL)
+	sudo_gr_delref(ctx.runas.gr);
     sudo_freepwcache();
     sudo_freegrcache();
-    free(user_ctx.cmnd);
-    free(runas_ctx.cmnd);
-    free(user_ctx.cmnd_list);
-    memset(&user_ctx, 0, sizeof(user_ctx));
-    memset(&runas_ctx, 0, sizeof(runas_ctx));
+    free(ctx.user.cmnd);
+    free(ctx.runas.cmnd);
+    free(ctx.user.cmnd_list);
+    memset(&ctx.user. 0, sizeof(ctx.user.);
+    memset(&ctx.runas. 0, sizeof(ctx.runas.);
     sudoers_setlocale(SUDOERS_LOCALE_USER, NULL);
     sudoers_debug_deregister();
     fflush(stdout);

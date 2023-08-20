@@ -79,8 +79,7 @@ static int testsudoers_query(const struct sudo_nss *nss, struct passwd *pw);
 /*
  * Globals
  */
-struct sudoers_user_context user_ctx;
-struct sudoers_runas_context runas_ctx;
+struct sudoers_context ctx;
 static const char *orig_cmnd;
 static char *runas_group, *runas_user;
 unsigned int sudo_mode = MODE_RUN;
@@ -136,7 +135,7 @@ main(int argc, char *argv[])
     while ((ch = getopt(argc, argv, "+D:dg:G:h:i:L:lP:p:R:T:tu:U:v")) != -1) {
 	switch (ch) {
 	    case 'D':
-		runas_ctx.cwd = optarg;
+		ctx.runas.cwd = optarg;
 		break;
 	    case 'd':
 		dflag = 1;
@@ -149,10 +148,10 @@ main(int argc, char *argv[])
 		break;
 	    case 'g':
 		runas_group = optarg;
-		SET(runas_ctx.flags, RUNAS_GROUP_SPECIFIED);
+		SET(ctx.settings.flags, RUNAS_GROUP_SPECIFIED);
 		break;
 	    case 'h':
-		user_ctx.host = optarg;
+		ctx.user.host = optarg;
 		break;
 	    case 'i':
 		if (strcasecmp(optarg, "ldif") == 0) {
@@ -165,8 +164,8 @@ main(int argc, char *argv[])
 		}
 		break;
 	    case 'L':
-		runas_ctx.list_pw = sudo_getpwnam(optarg);
-		if (runas_ctx.list_pw == NULL) {
+		ctx.runas.list_pw = sudo_getpwnam(optarg);
+		if (ctx.runas.list_pw == NULL) {
 		    sudo_warnx(U_("unknown user %s"), optarg);
 		    usage();
 		}
@@ -193,7 +192,7 @@ main(int argc, char *argv[])
 		    sudo_fatalx("invalid time: %s", optarg);
 		break;
 	    case 'R':
-		runas_ctx.chroot = optarg;
+		ctx.runas.chroot = optarg;
 		break;
 	    case 't':
 		trace_print = testsudoers_error;
@@ -206,7 +205,7 @@ main(int argc, char *argv[])
 		break;
 	    case 'u':
 		runas_user = optarg;
-		SET(runas_ctx.flags, RUNAS_USER_SPECIFIED);
+		SET(ctx.settings.flags, RUNAS_USER_SPECIFIED);
 		break;
 	    case 'v':
 		if (sudo_mode != MODE_RUN) {
@@ -246,48 +245,48 @@ main(int argc, char *argv[])
 	} else if (pwflag == 0) {
 	    usage();
 	}
-	user_ctx.name = argc ? *argv++ : (char *)"root";
+	ctx.user.name = argc ? *argv++ : (char *)"root";
 	argc = 0;
     } else {
 	if (argc > 2 && sudo_mode == MODE_LIST)
 	    sudo_mode = MODE_CHECK;
-	user_ctx.name = *argv++;
+	ctx.user.name = *argv++;
 	argc--;
 	if (orig_cmnd == NULL) {
 	    orig_cmnd = *argv++;
 	    argc--;
 	}
     }
-    user_ctx.cmnd = strdup(orig_cmnd);
-    if (user_ctx.cmnd == NULL)
+    ctx.user.cmnd = strdup(orig_cmnd);
+    if (ctx.user.cmnd == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    user_ctx.cmnd_base = sudo_basename(user_ctx.cmnd);
+    ctx.user.cmnd_base = sudo_basename(ctx.user.cmnd);
 
     if (getcwd(cwdbuf, sizeof(cwdbuf)) == NULL)
 	strlcpy(cwdbuf, "/", sizeof(cwdbuf));
-    user_ctx.cwd = cwdbuf;
+    ctx.user.cwd = cwdbuf;
 
-    if ((user_ctx.pw = sudo_getpwnam(user_ctx.name)) == NULL)
-	sudo_fatalx(U_("unknown user %s"), user_ctx.name);
-    user_ctx.uid = user_ctx.pw->pw_uid;
-    user_ctx.gid = user_ctx.pw->pw_gid;
+    if ((ctx.user.pw = sudo_getpwnam(ctx.user.name)) == NULL)
+	sudo_fatalx(U_("unknown user %s"), ctx.user.name);
+    ctx.user.uid = ctx.user.pw->pw_uid;
+    ctx.user.gid = ctx.user.pw->pw_gid;
 
-    if (user_ctx.host == NULL) {
-	if ((user_ctx.host = sudo_gethostname()) == NULL)
+    if (ctx.user.host == NULL) {
+	if ((ctx.user.host = sudo_gethostname()) == NULL)
 	    sudo_fatal("gethostname");
     }
-    if ((p = strchr(user_ctx.host, '.'))) {
+    if ((p = strchr(ctx.user.host, '.'))) {
 	*p = '\0';
-	if ((user_ctx.shost = strdup(user_ctx.host)) == NULL)
+	if ((ctx.user.shost = strdup(ctx.user.host)) == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	*p = '.';
     } else {
-	user_ctx.shost = user_ctx.host;
+	ctx.user.shost = ctx.user.host;
     }
-    runas_ctx.host = user_ctx.host;
-    runas_ctx.shost = user_ctx.shost;
+    ctx.runas.host = ctx.user.host;
+    ctx.runas.shost = ctx.user.shost;
 
-    /* Fill in user_ctx.cmnd_args from argv. */
+    /* Fill in ctx.user.cmnd_args from argv. */
     if (argc > 0) {
 	char *to, **from;
 	size_t size, n;
@@ -295,11 +294,11 @@ main(int argc, char *argv[])
 	for (size = 0, from = argv; *from; from++)
 	    size += strlen(*from) + 1;
 
-	if ((user_ctx.cmnd_args = malloc(size)) == NULL)
+	if ((ctx.user.cmnd_args = malloc(size)) == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	for (to = user_ctx.cmnd_args, from = argv; *from; from++) {
-	    n = strlcpy(to, *from, size - (size_t)(to - user_ctx.cmnd_args));
-	    if (n >= size - (size_t)(to - user_ctx.cmnd_args))
+	for (to = ctx.user.cmnd_args, from = argv; *from; from++) {
+	    n = strlcpy(to, *from, size - (size_t)(to - ctx.user.cmnd_args));
+	    if (n >= size - (size_t)(to - ctx.user.cmnd_args))
 		sudo_fatalx(U_("internal error, %s overflow"), getprogname());
 	    to += n;
 	    *to++ = ' ';
@@ -339,7 +338,7 @@ main(int argc, char *argv[])
      */
     if (runas_group != NULL) {
         set_runasgr(runas_group);
-        set_runaspw(runas_user ? runas_user : user_ctx.name);
+        set_runaspw(runas_user ? runas_user : ctx.user.name);
     } else
         set_runaspw(runas_user ? runas_user : def_runas_default);
 
@@ -379,27 +378,27 @@ main(int argc, char *argv[])
     testsudoers_nss.query = testsudoers_query;
     testsudoers_nss.parse_tree = &parsed_policy;
 
-    printf("\nEntries for user %s:\n", user_ctx.name);
-    validated = sudoers_lookup(&snl, user_ctx.pw, now, cb_lookup, NULL,
+    printf("\nEntries for user %s:\n", ctx.user.name);
+    validated = sudoers_lookup(&snl, ctx.user.pw, now, cb_lookup, NULL,
 	&status, pwflag);
 
     /* Validate user-specified chroot or cwd (if any) and runas user shell. */
     if (ISSET(validated, VALIDATE_SUCCESS)) {
-	if (!check_user_shell(runas_ctx.pw)) {
+	if (!check_user_shell(ctx.runas.pw)) {
 	    printf(U_("\nInvalid shell for user %s: %s\n"),
-		runas_ctx.pw->pw_name, runas_ctx.pw->pw_shell);
+		ctx.runas.pw->pw_name, ctx.runas.pw->pw_shell);
 	    CLR(validated, VALIDATE_SUCCESS);
 	    SET(validated, VALIDATE_FAILURE);
 	}
-	if (check_user_runchroot(runas_ctx.chroot) != true) {
+	if (check_user_runchroot(ctx.runas.chroot) != true) {
 	    printf("\nUser %s is not allowed to change root directory to %s\n",
-		user_ctx.name, runas_ctx.chroot);
+		ctx.user.name, ctx.runas.chroot);
 	    CLR(validated, VALIDATE_SUCCESS);
 	    SET(validated, VALIDATE_FAILURE);
 	}
-	if (check_user_runcwd(runas_ctx.cwd) != true) {
+	if (check_user_runcwd(ctx.runas.cwd) != true) {
 	    printf("\nUser %s is not allowed to change directory to %s\n",
-		user_ctx.name, runas_ctx.cwd);
+		ctx.user.name, ctx.runas.cwd);
 	    CLR(validated, VALIDATE_SUCCESS);
 	    SET(validated, VALIDATE_FAILURE);
 	}
@@ -447,16 +446,16 @@ set_runaspw(const char *user)
 	uid_t uid = sudo_strtoid(user + 1, &errstr);
 	if (errstr == NULL) {
 	    if ((pw = sudo_getpwuid(uid)) == NULL)
-		pw = sudo_fakepwnam(user, user_ctx.gid);
+		pw = sudo_fakepwnam(user, ctx.user.gid);
 	}
     }
     if (pw == NULL) {
 	if ((pw = sudo_getpwnam(user)) == NULL)
 	    sudo_fatalx(U_("unknown user %s"), user);
     }
-    if (runas_ctx.pw != NULL)
-	sudo_pw_delref(runas_ctx.pw);
-    runas_ctx.pw = pw;
+    if (ctx.runas.pw != NULL)
+	sudo_pw_delref(ctx.runas.pw);
+    ctx.runas.pw = pw;
     debug_return;
 }
 
@@ -478,9 +477,9 @@ set_runasgr(const char *group)
 	if ((gr = sudo_getgrnam(group)) == NULL)
 	    sudo_fatalx(U_("unknown group %s"), group);
     }
-    if (runas_ctx.gr != NULL)
-	sudo_gr_delref(runas_ctx.gr);
-    runas_ctx.gr = gr;
+    if (ctx.runas.gr != NULL)
+	sudo_gr_delref(ctx.runas.gr);
+    ctx.runas.gr = gr;
     debug_return;
 }
 
@@ -615,12 +614,12 @@ unpivot_root(int fds[2])
 int
 set_cmnd_path(const char *runchroot)
 {
-    /* Reallocate user_ctx.cmnd to catch bugs in command_matches(). */
+    /* Reallocate ctx.user.cmnd to catch bugs in command_matches(). */
     char *new_cmnd = strdup(orig_cmnd);
     if (new_cmnd == NULL)
 	return NOT_FOUND_ERROR;
-    free(user_ctx.cmnd);
-    user_ctx.cmnd = new_cmnd;
+    free(ctx.user.cmnd);
+    ctx.user.cmnd = new_cmnd;
     return FOUND;
 }
 

@@ -32,8 +32,7 @@ static int fuzz_printf(int msg_type, const char * restrict fmt, ...);
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
 /* Required to link with parser. */
-struct sudoers_user_context user_ctx;
-struct sudoers_runas_context runas_ctx;
+struct sudoers_context ctx;
 sudo_printf_t sudo_printf = fuzz_printf;
 
 FILE *
@@ -62,7 +61,7 @@ init_envtables(void)
 int
 set_cmnd_path(const char *runchroot)
 {
-    /* Cannot return FOUND without also setting user_ctx.cmnd to a new value. */
+    /* Cannot return FOUND without also setting ctx.user.cmnd to a new value. */
     return NOT_FOUND;
 }
 

@@ -61,8 +61,7 @@
  * Globals
  */
 struct cvtsudoers_filter *filters;
-struct sudoers_user_context user_ctx;
-struct sudoers_runas_context runas_ctx;
+struct sudoers_context ctx;
 static FILE *logfp;
 static const char short_opts[] =  "b:c:d:ef:hi:I:l:m:Mo:O:pP:s:V";
 static struct option long_opts[] = {
@@ -966,15 +965,15 @@ cmnd_matches_filter(struct sudoers_parse_tree *parse_tree,
 	}
 
 	/* Only need one command in the filter to match. */
-	user_ctx.cmnd = s->str;
-	user_ctx.cmnd_base = sudo_basename(user_ctx.cmnd);
+	ctx.user.cmnd = s->str;
+	ctx.user.cmnd_base = sudo_basename(ctx.user.cmnd);
 	if (cmnd_matches(parse_tree, m, NULL, NULL) == true) {
 	    matched = true;
 	    break;
 	}
     }
-    user_ctx.cmnd_base = NULL;
-    user_ctx.cmnd = NULL;
+    ctx.user.cmnd_base = NULL;
+    ctx.user.cmnd = NULL;
 
     debug_return_bool(matched);
 }

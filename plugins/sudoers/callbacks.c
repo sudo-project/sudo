@@ -95,7 +95,7 @@ resolve_host(const char *host, char **longp, char **shortp)
 
 /*
  * Look up the fully qualified domain name of user and runas hosts.
- * Sets user_ctx.host, user_ctx.shost, runas_ctx.host and runas_ctx.shost.
+ * Sets ctx.user.host, ctx.user.shost, ctx.runas.host and ctx.runas.shost.
  */
 static bool
 cb_fqdn(const char *file, int line, int column,
@@ -111,35 +111,35 @@ cb_fqdn(const char *file, int line, int column,
 	debug_return_bool(true);
 
     /* If the -h flag was given we need to resolve both host names. */
-    remote = strcmp(runas_ctx.host, user_ctx.host) != 0;
+    remote = strcmp(ctx.runas.host, ctx.user.host) != 0;
 
-    /* First resolve user_ctx.host, setting host and shost. */
-    if (resolve_host(user_ctx.host, &lhost, &shost) != 0) {
-	if ((rc = resolve_host(runas_ctx.host, &lhost, &shost)) != 0) {
+    /* First resolve ctx.user.host, setting host and shost. */
+    if (resolve_host(ctx.user.host, &lhost, &shost) != 0) {
+	if ((rc = resolve_host(ctx.runas.host, &lhost, &shost)) != 0) {
 	    gai_log_warning(SLOG_PARSE_ERROR|SLOG_RAW_MSG, rc,
-		N_("unable to resolve host %s"), user_ctx.host);
+		N_("unable to resolve host %s"), ctx.user.host);
 	    debug_return_bool(false);
 	}
     }
-    if (user_ctx.shost != user_ctx.host)
-	free(user_ctx.shost);
-    free(user_ctx.host);
-    user_ctx.host = lhost;
-    user_ctx.shost = shost;
+    if (ctx.user.shost != ctx.user.host)
+	free(ctx.user.shost);
+    free(ctx.user.host);
+    ctx.user.host = lhost;
+    ctx.user.shost = shost;
 
-    /* Next resolve runas_ctx.host, setting host and shost in runas_ctx. */
+    /* Next resolve ctx.runas.host, setting host and shost in ctx.runas. */
     lhost = shost = NULL;
     if (remote) {
-	if ((rc = resolve_host(runas_ctx.host, &lhost, &shost)) != 0) {
+	if ((rc = resolve_host(ctx.runas.host, &lhost, &shost)) != 0) {
 	    gai_log_warning(SLOG_NO_LOG|SLOG_RAW_MSG, rc,
-		N_("unable to resolve host %s"), runas_ctx.host);
+		N_("unable to resolve host %s"), ctx.runas.host);
 	    debug_return_bool(false);
 	}
     } else {
-	/* Not remote, just use user_ctx.host. */
-	if ((lhost = strdup(user_ctx.host)) != NULL) {
-	    if (user_ctx.shost != user_ctx.host)
-		shost = strdup(user_ctx.shost);
+	/* Not remote, just use ctx.user.host. */
+	if ((lhost = strdup(ctx.user.host)) != NULL) {
+	    if (ctx.user.shost != ctx.user.host)
+		shost = strdup(ctx.user.shost);
 	    else
 		shost = lhost;
 	}
@@ -152,16 +152,16 @@ cb_fqdn(const char *file, int line, int column,
 	}
     }
     if (lhost != NULL && shost != NULL) {
-	if (runas_ctx.shost != runas_ctx.host)
-	    free(runas_ctx.shost);
-	free(runas_ctx.host);
-	runas_ctx.host = lhost;
-	runas_ctx.shost = shost;
+	if (ctx.runas.shost != ctx.runas.host)
+	    free(ctx.runas.shost);
+	free(ctx.runas.host);
+	ctx.runas.host = lhost;
+	ctx.runas.shost = shost;
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"host %s, shost %s, runas host %s, runas shost %s",
-	user_ctx.host, user_ctx.shost, runas_ctx.host, runas_ctx.shost);
+	ctx.user.host, ctx.user.shost, ctx.runas.host, ctx.runas.shost);
     debug_return_bool(true);
 }
 
@@ -227,11 +227,11 @@ cb_runchroot(const char *file, int line, int column,
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"def_runchroot now %s", sd_un->str);
-    if (user_ctx.cmnd != NULL) {
-	/* Update user_ctx.cmnd and cmnd_status based on the new chroot. */
+    if (ctx.user.cmnd != NULL) {
+	/* Update ctx.user.cmnd and cmnd_status based on the new chroot. */
 	set_cmnd_status(sd_un->str);
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "user_ctx.cmnd now %s", user_ctx.cmnd);
+	    "ctx.user.cmnd now %s", ctx.user.cmnd);
     }
 
     debug_return_bool(true);
@@ -409,7 +409,7 @@ cb_intercept_type(const char *file, int line, int column,
 	/* Set explicitly in sudoers. */
 	if (sd_un->tuple == dso) {
 	    /* Reset intercept_allow_setid default value. */
-	    if (!ISSET(user_ctx.flags, USER_INTERCEPT_SETID))
+	    if (!ISSET(ctx.settings.flags, USER_INTERCEPT_SETID))
 		def_intercept_allow_setid = false;
 	}
     }
@@ -426,7 +426,7 @@ cb_intercept_allow_setid(const char *file, int line, int column,
     /* Operator will be -1 if set by front-end. */
     if (op != -1) {
 	/* Set explicitly in sudoers. */
-	SET(user_ctx.flags, USER_INTERCEPT_SETID);
+	SET(ctx.settings.flags, USER_INTERCEPT_SETID);
     }
 
     debug_return_bool(true);

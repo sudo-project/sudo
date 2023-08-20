@@ -72,7 +72,7 @@ getpass_resume(int signo, void *vclosure)
 {
     struct getpass_closure *closure = vclosure;
 
-    closure->cookie = timestamp_open(user_ctx.name, user_ctx.sid);
+    closure->cookie = timestamp_open(ctx.user.name, ctx.user.sid);
     if (closure->cookie == NULL)
 	return -1;
     if (!timestamp_lock(closure->cookie, closure->auth_pw))
@@ -103,7 +103,7 @@ check_user_interactive(unsigned int validated, unsigned int mode,
     /* Open, lock and read time stamp file if we are using it. */
     if (!ISSET(mode, MODE_IGNORE_TICKET)) {
 	/* Open time stamp file and check its status. */
-	closure->cookie = timestamp_open(user_ctx.name, user_ctx.sid);
+	closure->cookie = timestamp_open(ctx.user.name, ctx.user.sid);
 	if (closure->cookie != NULL) {
 	    if (timestamp_lock(closure->cookie, closure->auth_pw)) {
 		closure->tstat = timestamp_status(closure->cookie,
@@ -138,7 +138,7 @@ check_user_interactive(unsigned int validated, unsigned int mode,
 
 	/* Expand any escapes in the prompt. */
 	prompt = expand_prompt(
-	    user_ctx.prompt ? user_ctx.prompt : def_passprompt,
+	    ctx.user.prompt ? ctx.user.prompt : def_passprompt,
 	    closure->auth_pw->pw_name);
 	if (prompt == NULL)
 	    goto done;
@@ -197,17 +197,17 @@ check_user(unsigned int validated, unsigned int mode)
 	ret = true;
 	goto done;
     }
-    if (user_ctx.uid == 0 || (user_ctx.uid == runas_ctx.pw->pw_uid &&
-	(runas_ctx.gr == NULL ||
-	user_in_group(user_ctx.pw, runas_ctx.gr->gr_name)))) {
+    if (ctx.user.uid == 0 || (ctx.user.uid == ctx.runas.pw->pw_uid &&
+	(ctx.runas.gr == NULL ||
+	user_in_group(ctx.user.pw, ctx.runas.gr->gr_name)))) {
 #ifdef HAVE_SELINUX
-	if (runas_ctx.role == NULL && runas_ctx.type == NULL)
+	if (ctx.runas.role == NULL && ctx.runas.type == NULL)
 #endif
 #ifdef HAVE_APPARMOR
-	if (runas_ctx.apparmor_profile == NULL)
+	if (ctx.runas.apparmor_profile == NULL)
 #endif
 #ifdef HAVE_PRIV_SET
-	if (runas_ctx.privs == NULL && runas_ctx.limitprivs == NULL)
+	if (ctx.runas.privs == NULL && ctx.runas.limitprivs == NULL)
 #endif
 	{
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -329,7 +329,7 @@ user_is_exempt(void)
     debug_decl(user_is_exempt, SUDOERS_DEBUG_AUTH);
 
     if (def_exempt_group) {
-	if (user_in_group(user_ctx.pw, def_exempt_group))
+	if (user_in_group(ctx.user.pw, def_exempt_group))
 	    ret = true;
     }
     debug_return_bool(ret);
@@ -338,7 +338,7 @@ user_is_exempt(void)
 /*
  * Get passwd entry for the user we are going to authenticate as.
  * By default, this is the user invoking sudo.  In the most common
- * case, this matches user_ctx.pw or runas_ctx.pw.
+ * case, this matches ctx.user.pw or ctx.runas.pw.
  */
 static struct passwd *
 get_authpw(unsigned int mode)
@@ -348,8 +348,8 @@ get_authpw(unsigned int mode)
 
     if (ISSET(mode, (MODE_CHECK|MODE_LIST))) {
 	/* In list mode we always prompt for the user's password. */
-	sudo_pw_addref(user_ctx.pw);
-	pw = user_ctx.pw;
+	sudo_pw_addref(ctx.user.pw);
+	pw = ctx.user.pw;
     } else {
 	if (def_rootpw) {
 	    if ((pw = sudo_getpwuid(ROOT_UID)) == NULL) {
@@ -361,17 +361,17 @@ get_authpw(unsigned int mode)
 		    N_("unknown user %s"), def_runas_default);
 	    }
 	} else if (def_targetpw) {
-	    if (runas_ctx.pw->pw_name == NULL) {
+	    if (ctx.runas.pw->pw_name == NULL) {
 		/* This should never be NULL as we fake up the passwd struct */
 		log_warningx(SLOG_RAW_MSG, N_("unknown uid %u"),
-		    (unsigned int) runas_ctx.pw->pw_uid);
+		    (unsigned int) ctx.runas.pw->pw_uid);
 	    } else {
-		sudo_pw_addref(runas_ctx.pw);
-		pw = runas_ctx.pw;
+		sudo_pw_addref(ctx.runas.pw);
+		pw = ctx.runas.pw;
 	    }
 	} else {
-	    sudo_pw_addref(user_ctx.pw);
-	    pw = user_ctx.pw;
+	    sudo_pw_addref(ctx.user.pw);
+	    pw = ctx.user.pw;
 	}
     }
 

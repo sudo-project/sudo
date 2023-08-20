@@ -136,7 +136,7 @@ get_ipa_hostname(char **shostp, char **lhostp)
 		}
 		if (shost != NULL && lhost != NULL) {
 		    sudo_debug_printf(SUDO_DEBUG_INFO,
-			"ipa_hostname %s overrides %s", lhost, user_ctx.host);
+			"ipa_hostname %s overrides %s", lhost, ctx.user.host);
 		    *shostp = shost;
 		    *lhostp = lhost;
 		    ret = true;
@@ -165,8 +165,8 @@ get_ipa_hostname(char **shostp, char **lhostp)
 static bool
 sudo_sss_check_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
 {
-    const char *host = handle->ipa_host ? handle->ipa_host : runas_ctx.host;
-    const char *shost = handle->ipa_shost ? handle->ipa_shost : runas_ctx.shost;
+    const char *host = handle->ipa_host ? handle->ipa_host : ctx.runas.host;
+    const char *shost = handle->ipa_shost ? handle->ipa_shost : ctx.runas.shost;
     char **val_array;
     int i, rc, ret = false;
     debug_decl(sudo_sss_check_user, SUDOERS_DEBUG_SSSD);
@@ -629,9 +629,9 @@ sudo_sss_open(struct sudo_nss *nss)
 
     /*
      * If the runas host matches the local host, check for ipa_hostname
-     * in sssd.conf and use it in preference to runas_ctx.host.
+     * in sssd.conf and use it in preference to ctx.runas.host.
      */
-    if (strcasecmp(runas_ctx.host, user_ctx.host) == 0) {
+    if (strcasecmp(ctx.runas.host, ctx.user.host) == 0) {
 	if (get_ipa_hostname(&handle->ipa_shost, &handle->ipa_host) == -1) {
 	    free(handle);
 	    debug_return_int(ENOMEM);
@@ -681,7 +681,7 @@ sudo_sss_query(const struct sudo_nss *nss, struct passwd *pw)
 
     sudo_debug_printf(SUDO_DEBUG_DIAG,
 	"searching SSSD/LDAP for sudoers entries for user %s, host %s",
-	 pw->pw_name, runas_ctx.host);
+	 pw->pw_name, ctx.runas.host);
 
     /* Stash a ref to the passwd struct in the handle. */
     sudo_pw_addref(pw);
@@ -754,8 +754,8 @@ sudo_sss_getdefs(const struct sudo_nss *nss)
     sudo_debug_printf(SUDO_DEBUG_DIAG, "Looking for cn=defaults");
 
     /* NOTE: these are global defaults, user-ID and name are not used. */
-    rc = handle->fn_send_recv_defaults(user_ctx.pw->pw_uid,
-	user_ctx.pw->pw_name, &sss_error, &handle->domainname, &sss_result);
+    rc = handle->fn_send_recv_defaults(ctx.user.pw->pw_uid,
+	ctx.user.pw->pw_name, &sss_error, &handle->domainname, &sss_result);
     switch (rc) {
     case 0:
 	break;

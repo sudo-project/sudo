@@ -81,7 +81,7 @@ regex_matches(const char *pattern, const char *str)
 static bool
 command_args_match(const char *sudoers_cmnd, const char *sudoers_args)
 {
-    const char *args = user_ctx.cmnd_args ? user_ctx.cmnd_args : "";
+    const char *args = ctx.user.cmnd_args ? ctx.user.cmnd_args : "";
     int flags = 0;
     debug_decl(command_args_match, SUDOERS_DEBUG_MATCH);
 
@@ -92,7 +92,7 @@ command_args_match(const char *sudoers_cmnd, const char *sudoers_args)
     if (sudoers_args == NULL)
 	debug_return_bool(true);
     if (strcmp("\"\"", sudoers_args) == 0)
-	debug_return_bool(user_ctx.cmnd_args ? false : true);
+	debug_return_bool(ctx.user.cmnd_args ? false : true);
 
     /*
      * If args are specified in sudoers, they must match the user args.
@@ -202,8 +202,8 @@ set_cmnd_fd(int fd, int rootfd)
 {
     debug_decl(set_cmnd_fd, SUDOERS_DEBUG_MATCH);
 
-    if (runas_ctx.execfd != -1)
-	close(runas_ctx.execfd);
+    if (ctx.runas.execfd != -1)
+	close(ctx.runas.execfd);
 
     if (fd != -1) {
 	if (def_fdexec == never) {
@@ -240,14 +240,14 @@ set_cmnd_fd(int fd, int rootfd)
 	}
     }
 
-    runas_ctx.execfd = fd;
+    ctx.runas.execfd = fd;
 
     debug_return;
 }
 
 #ifndef SUDOERS_NAME_MATCH
 /*
- * Return true if user_ctx.cmnd names one of the inodes in dir, else false.
+ * Return true if ctx.user.cmnd names one of the inodes in dir, else false.
  */
 static bool
 command_matches_dir(const char *sudoers_dir, size_t dlen, int rootfd,
@@ -260,10 +260,10 @@ command_matches_dir(const char *sudoers_dir, size_t dlen, int rootfd,
     debug_decl(command_matches_dir, SUDOERS_DEBUG_MATCH);
 
     /* Compare the canonicalized directories, if possible. */
-    if (user_ctx.cmnd_dir != NULL) {
+    if (ctx.user.cmnd_dir != NULL) {
 	char *resolved = canon_path(sudoers_dir);
 	if (resolved != NULL) {
-	    if (strcmp(resolved, user_ctx.cmnd_dir) != 0) {
+	    if (strcmp(resolved, ctx.user.cmnd_dir) != 0) {
 		canon_path_free(resolved);
 		goto done;
 	    }
@@ -272,7 +272,7 @@ command_matches_dir(const char *sudoers_dir, size_t dlen, int rootfd,
     }
 
     /* Check for command in sudoers_dir. */
-    len = snprintf(path, sizeof(path), "%s/%s", sudoers_dir, user_ctx.cmnd_base);
+    len = snprintf(path, sizeof(path), "%s/%s", sudoers_dir, ctx.user.cmnd_base);
     if (len < 0 || len >= ssizeof(path))
 	goto done;
 
@@ -284,13 +284,13 @@ command_matches_dir(const char *sudoers_dir, size_t dlen, int rootfd,
     if (!intercept_ok(path, intercepted, &sudoers_stat))
 	goto done;
 
-    if (user_ctx.cmnd_stat == NULL ||
-	(user_ctx.cmnd_stat->st_dev == sudoers_stat.st_dev &&
-	user_ctx.cmnd_stat->st_ino == sudoers_stat.st_ino)) {
+    if (ctx.user.cmnd_stat == NULL ||
+	(ctx.user.cmnd_stat->st_dev == sudoers_stat.st_dev &&
+	ctx.user.cmnd_stat->st_ino == sudoers_stat.st_ino)) {
 	if (!digest_matches(fd, path, digests))
 	    goto done;
-	free(runas_ctx.cmnd);
-	if ((runas_ctx.cmnd = strdup(path)) == NULL) {
+	free(ctx.runas.cmnd);
+	if ((ctx.runas.cmnd = strdup(path)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__,
 		U_("unable to allocate memory"));
 	}
@@ -304,7 +304,7 @@ done:
 }
 #else /* SUDOERS_NAME_MATCH */
 /*
- * Return true if user_ctx.cmnd names one of the inodes in dir, else false.
+ * Return true if ctx.user.cmnd names one of the inodes in dir, else false.
  */
 static bool
 command_matches_dir(const char *sudoers_dir, size_t dlen, int rootfd,
@@ -313,18 +313,18 @@ command_matches_dir(const char *sudoers_dir, size_t dlen, int rootfd,
     int fd = -1;
     debug_decl(command_matches_dir, SUDOERS_DEBUG_MATCH);
 
-    /* Match user_ctx.cmnd against sudoers_dir. */
-    if (strncmp(user_ctx.cmnd, sudoers_dir, dlen) != 0 || user_ctx.cmnd[dlen] != '/')
+    /* Match ctx.user.cmnd against sudoers_dir. */
+    if (strncmp(ctx.user.cmnd, sudoers_dir, dlen) != 0 || ctx.user.cmnd[dlen] != '/')
 	goto bad;
 
-    /* Make sure user_ctx.cmnd is not in a subdir of sudoers_dir. */
-    if (strchr(user_ctx.cmnd + dlen + 1, '\0') != NULL)
+    /* Make sure ctx.user.cmnd is not in a subdir of sudoers_dir. */
+    if (strchr(ctx.user.cmnd + dlen + 1, '\0') != NULL)
 	goto bad;
 
     /* Open the file for fdexec or for digest matching. */
-    if (!open_cmnd(user_ctx.cmnd, digests, &fd))
+    if (!open_cmnd(ctx.user.cmnd, digests, &fd))
 	goto bad;
-    if (!digest_matches(fd, user_ctx.cmnd, digests))
+    if (!digest_matches(fd, ctx.user.cmnd, digests))
 	goto bad;
     set_cmnd_fd(fd, rootfd);
 
@@ -346,32 +346,32 @@ command_matches_all(int rootfd, bool intercepted,
     int fd = -1;
     debug_decl(command_matches_all, SUDOERS_DEBUG_MATCH);
 
-    if (strchr(user_ctx.cmnd, '/') != NULL) {
+    if (strchr(ctx.user.cmnd, '/') != NULL) {
 #ifndef SUDOERS_NAME_MATCH
 	/* Open the file for fdexec or for digest matching. */
-	bool open_error = !open_cmnd(user_ctx.cmnd, digests, &fd);
+	bool open_error = !open_cmnd(ctx.user.cmnd, digests, &fd);
 
 	/* A non-existent file is not an error for "sudo ALL". */
-	if (do_stat(fd, user_ctx.cmnd, &sb)) {
+	if (do_stat(fd, ctx.user.cmnd, &sb)) {
 	    if (open_error) {
 		/* File exists but we couldn't open it above? */
 		goto bad;
 	    }
-	    if (!intercept_ok(user_ctx.cmnd, intercepted, &sb))
+	    if (!intercept_ok(ctx.user.cmnd, intercepted, &sb))
 		goto bad;
 	}
 #else
 	/* Open the file for fdexec or for digest matching. */
-	(void)open_cmnd(user_ctx.cmnd, digests, &fd);
+	(void)open_cmnd(ctx.user.cmnd, digests, &fd);
 #endif
     }
 
-    /* Check digest of user_ctx.cmnd since we have no sudoers_cmnd for ALL. */
-    if (!digest_matches(fd, user_ctx.cmnd, digests))
+    /* Check digest of ctx.user.cmnd since we have no sudoers_cmnd for ALL. */
+    if (!digest_matches(fd, ctx.user.cmnd, digests))
 	goto bad;
     set_cmnd_fd(fd, rootfd);
 
-    /* No need to set runas_ctx.cmnd for ALL. */
+    /* No need to set ctx.runas.cmnd for ALL. */
     debug_return_bool(true);
 bad:
     if (fd != -1)
@@ -383,7 +383,7 @@ static bool
 command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args,
     int rootfd, bool intercepted, const struct command_digest_list *digests)
 {
-    const char *cmnd = user_ctx.cmnd;
+    const char *cmnd = ctx.user.cmnd;
     char buf[PATH_MAX];
     int len, fd = -1;
 #ifndef SUDOERS_NAME_MATCH
@@ -391,12 +391,12 @@ command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args,
 #endif
     debug_decl(command_matches_fnmatch, SUDOERS_DEBUG_MATCH);
 
-    /* A relative user_ctx.cmnd will not match, try canonicalized version. */
-    if (user_ctx.cmnd[0] != '/') {
-	if (user_ctx.cmnd_dir == NULL)
+    /* A relative ctx.user.cmnd will not match, try canonicalized version. */
+    if (ctx.user.cmnd[0] != '/') {
+	if (ctx.user.cmnd_dir == NULL)
 	    debug_return_bool(false);
-	len = snprintf(buf, sizeof(buf), "%s/%s", user_ctx.cmnd_dir,
-	    user_ctx.cmnd_base);
+	len = snprintf(buf, sizeof(buf), "%s/%s", ctx.user.cmnd_dir,
+	    ctx.user.cmnd_base);
 	if (len < 0 || len >= ssizeof(buf))
 	    debug_return_bool(false);
 	cmnd = buf;
@@ -427,7 +427,7 @@ command_matches_fnmatch(const char *sudoers_cmnd, const char *sudoers_args,
 	    goto bad;
 	set_cmnd_fd(fd, rootfd);
 
-	/* No need to set runas_ctx.cmnd since cmnd matches sudoers_cmnd */
+	/* No need to set ctx.runas.cmnd since cmnd matches sudoers_cmnd */
 	debug_return_bool(true);
 bad:
 	if (fd != -1)
@@ -441,7 +441,7 @@ static bool
 command_matches_regex(const char *sudoers_cmnd, const char *sudoers_args,
     int rootfd, bool intercepted, const struct command_digest_list *digests)
 {
-    const char *cmnd = user_ctx.cmnd;
+    const char *cmnd = ctx.user.cmnd;
     char buf[PATH_MAX];
     int len, fd = -1;
 #ifndef SUDOERS_NAME_MATCH
@@ -449,12 +449,12 @@ command_matches_regex(const char *sudoers_cmnd, const char *sudoers_args,
 #endif
     debug_decl(command_matches_regex, SUDOERS_DEBUG_MATCH);
 
-    /* A relative user_ctx.cmnd will not match, try canonicalized version. */
-    if (user_ctx.cmnd[0] != '/') {
-	if (user_ctx.cmnd_dir == NULL)
+    /* A relative ctx.user.cmnd will not match, try canonicalized version. */
+    if (ctx.user.cmnd[0] != '/') {
+	if (ctx.user.cmnd_dir == NULL)
 	    debug_return_bool(false);
-	len = snprintf(buf, sizeof(buf), "%s/%s", user_ctx.cmnd_dir,
-	    user_ctx.cmnd_base);
+	len = snprintf(buf, sizeof(buf), "%s/%s", ctx.user.cmnd_dir,
+	    ctx.user.cmnd_base);
 	if (len < 0 || len >= ssizeof(buf))
 	    debug_return_bool(false);
 	cmnd = buf;
@@ -485,7 +485,7 @@ command_matches_regex(const char *sudoers_cmnd, const char *sudoers_args,
 	    goto bad;
 	set_cmnd_fd(fd, rootfd);
 
-	/* No need to set runas_ctx.cmnd since cmnd matches sudoers_cmnd */
+	/* No need to set ctx.runas.cmnd since cmnd matches sudoers_cmnd */
 	debug_return_bool(true);
 bad:
 	if (fd != -1)
@@ -511,12 +511,12 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
     /*
      * First check to see if we can avoid the call to glob(3).
      * Short circuit if there are no meta chars in the command itself
-     * and user_ctx.cmnd_base and basename(sudoers_cmnd) don't match.
+     * and ctx.user.cmnd_base and basename(sudoers_cmnd) don't match.
      */
     dlen = strlen(sudoers_cmnd);
     if (sudoers_cmnd[dlen - 1] != '/') {
 	base = sudo_basename(sudoers_cmnd);
-	if (!has_meta(base) && strcmp(user_ctx.cmnd_base, base) != 0)
+	if (!has_meta(base) && strcmp(ctx.user.cmnd_base, base) != 0)
 	    debug_return_bool(false);
     }
 
@@ -532,15 +532,15 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
 	debug_return_bool(false);
     }
 
-    /* If user_ctx.cmnd is fully-qualified, check for an exact match. */
-    if (user_ctx.cmnd[0] == '/') {
+    /* If ctx.user.cmnd is fully-qualified, check for an exact match. */
+    if (ctx.user.cmnd[0] == '/') {
 	for (ap = gl.gl_pathv; (cp = *ap) != NULL; ap++) {
 	    if (fd != -1) {
 		close(fd);
 		fd = -1;
 	    }
 
-	    if (strcmp(cp, user_ctx.cmnd) != 0)
+	    if (strcmp(cp, ctx.user.cmnd) != 0)
 		continue;
 	    /* Open the file for fdexec or for digest matching. */
 	    if (!open_cmnd(cp, digests, &fd))
@@ -549,16 +549,16 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
 		continue;
 	    if (!intercept_ok(cp, intercepted, &sudoers_stat))
 		continue;
-	    if (user_ctx.cmnd_stat == NULL ||
-		(user_ctx.cmnd_stat->st_dev == sudoers_stat.st_dev &&
-		user_ctx.cmnd_stat->st_ino == sudoers_stat.st_ino)) {
+	    if (ctx.user.cmnd_stat == NULL ||
+		(ctx.user.cmnd_stat->st_dev == sudoers_stat.st_dev &&
+		ctx.user.cmnd_stat->st_ino == sudoers_stat.st_ino)) {
 		/* There could be multiple matches, check digest early. */
 		if (!digest_matches(fd, cp, digests)) {
 		    bad_digest = true;
 		    continue;
 		}
-		free(runas_ctx.cmnd);
-		if ((runas_ctx.cmnd = strdup(cp)) == NULL) {
+		free(ctx.runas.cmnd);
+		if ((ctx.runas.cmnd = strdup(cp)) == NULL) {
 		    sudo_warnx(U_("%s: %s"), __func__,
 			U_("unable to allocate memory"));
 		    cp = NULL;		/* fail closed */
@@ -588,13 +588,13 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
 		continue;
 	    }
 
-	    /* Only proceed if user_ctx.cmnd_base and basename(cp) match */
+	    /* Only proceed if ctx.user.cmnd_base and basename(cp) match */
 	    base = sudo_basename(cp);
-	    if (strcmp(user_ctx.cmnd_base, base) != 0)
+	    if (strcmp(ctx.user.cmnd_base, base) != 0)
 		continue;
 
 	    /* Compare the canonicalized parent directories, if possible. */
-	    if (user_ctx.cmnd_dir != NULL) {
+	    if (ctx.user.cmnd_dir != NULL) {
 		char *slash = strchr(cp, '/');
 		if (slash != NULL) {
 		    char *resolved;
@@ -603,7 +603,7 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
 		    *slash = '/';
 		    if (resolved != NULL) {
 			/* Canonicalized directories must match. */
-			int result = strcmp(resolved, user_ctx.cmnd_dir);
+			int result = strcmp(resolved, ctx.user.cmnd_dir);
 			canon_path_free(resolved);
 			if (result != 0)
 			    continue;
@@ -618,13 +618,13 @@ command_matches_glob(const char *sudoers_cmnd, const char *sudoers_args,
 		continue;
 	    if (!intercept_ok(cp, intercepted, &sudoers_stat))
 		continue;
-	    if (user_ctx.cmnd_stat == NULL ||
-		(user_ctx.cmnd_stat->st_dev == sudoers_stat.st_dev &&
-		user_ctx.cmnd_stat->st_ino == sudoers_stat.st_ino)) {
+	    if (ctx.user.cmnd_stat == NULL ||
+		(ctx.user.cmnd_stat->st_dev == sudoers_stat.st_dev &&
+		ctx.user.cmnd_stat->st_ino == sudoers_stat.st_ino)) {
 		if (!digest_matches(fd, cp, digests))
 		    continue;
-		free(runas_ctx.cmnd);
-		if ((runas_ctx.cmnd = strdup(cp)) == NULL) {
+		free(ctx.runas.cmnd);
+		if ((ctx.runas.cmnd = strdup(cp)) == NULL) {
 		    sudo_warnx(U_("%s: %s"), __func__,
 			U_("unable to allocate memory"));
 		    cp = NULL;		/* fail closed */
@@ -637,7 +637,7 @@ done:
     globfree(&gl);
     if (cp != NULL) {
 	if (command_args_match(sudoers_cmnd, sudoers_args)) {
-	    /* runas_ctx.cmnd was set above. */
+	    /* ctx.runas.cmnd was set above. */
 	    set_cmnd_fd(fd, rootfd);
 	    debug_return_bool(true);
 	}
@@ -664,13 +664,13 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args,
 	    intercepted, digests));
     }
 
-    /* Only proceed if user_ctx.cmnd_base and basename(sudoers_cmnd) match */
+    /* Only proceed if ctx.user.cmnd_base and basename(sudoers_cmnd) match */
     base = sudo_basename(sudoers_cmnd);
-    if (strcmp(user_ctx.cmnd_base, base) != 0)
+    if (strcmp(ctx.user.cmnd_base, base) != 0)
 	debug_return_bool(false);
 
     /* Compare the canonicalized parent directories, if possible. */
-    if (user_ctx.cmnd_dir != NULL) {
+    if (ctx.user.cmnd_dir != NULL) {
 	const char *slash = strrchr(sudoers_cmnd, '/');
 	if (slash != NULL) {
 	    char sudoers_cmnd_dir[PATH_MAX], *resolved;
@@ -682,7 +682,7 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args,
 	    sudoers_cmnd_dir[len] = '\0';
 	    resolved = canon_path(sudoers_cmnd_dir);
 	    if (resolved != NULL) {
-		if (strcmp(resolved, user_ctx.cmnd_dir) != 0) {
+		if (strcmp(resolved, ctx.user.cmnd_dir) != 0) {
 		    canon_path_free(resolved);
 		    goto bad;
 		}
@@ -702,15 +702,15 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args,
      *  c) there are args in sudoers and on command line and they match
      *  d) there is a digest and it matches
      */
-    if (user_ctx.cmnd_stat != NULL && do_stat(fd, sudoers_cmnd, &sudoers_stat)) {
+    if (ctx.user.cmnd_stat != NULL && do_stat(fd, sudoers_cmnd, &sudoers_stat)) {
 	if (!intercept_ok(sudoers_cmnd, intercepted, &sudoers_stat))
 	    goto bad;
-	if (user_ctx.cmnd_stat->st_dev != sudoers_stat.st_dev ||
-	    user_ctx.cmnd_stat->st_ino != sudoers_stat.st_ino)
+	if (ctx.user.cmnd_stat->st_dev != sudoers_stat.st_dev ||
+	    ctx.user.cmnd_stat->st_ino != sudoers_stat.st_ino)
 	    goto bad;
     } else {
 	/* Either user or sudoers command does not exist, match by name. */
-	if (strcmp(user_ctx.cmnd, sudoers_cmnd) != 0)
+	if (strcmp(ctx.user.cmnd, sudoers_cmnd) != 0)
 	    goto bad;
     }
     if (!command_args_match(sudoers_cmnd, sudoers_args))
@@ -719,8 +719,8 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args,
 	/* XXX - log functions not available but we should log very loudly */
 	goto bad;
     }
-    free(runas_ctx.cmnd);
-    if ((runas_ctx.cmnd = strdup(sudoers_cmnd)) == NULL) {
+    free(ctx.runas.cmnd);
+    if ((ctx.runas.cmnd = strdup(sudoers_cmnd)) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto bad;
     }
@@ -755,17 +755,17 @@ command_matches_normal(const char *sudoers_cmnd, const char *sudoers_args,
 	    intercepted, digests));
     }
 
-    if (strcmp(user_ctx.cmnd, sudoers_cmnd) == 0) {
+    if (strcmp(ctx.user.cmnd, sudoers_cmnd) == 0) {
 	if (command_args_match(sudoers_cmnd, sudoers_args)) {
 	    /* Open the file for fdexec or for digest matching. */
-	    if (!open_cmnd(user_ctx.cmnd, digests, &fd))
+	    if (!open_cmnd(ctx.user.cmnd, digests, &fd))
 		goto bad;
-	    if (!digest_matches(fd, user_ctx.cmnd, digests))
+	    if (!digest_matches(fd, ctx.user.cmnd, digests))
 		goto bad;
 
 	    /* Successful match. */
-	    free(runas_ctx.cmnd);
-	    if ((runas_ctx.cmnd = strdup(sudoers_cmnd)) == NULL) {
+	    free(ctx.runas.cmnd);
+	    if ((ctx.runas.cmnd = strdup(sudoers_cmnd)) == NULL) {
 		sudo_warnx(U_("%s: %s"), __func__,
 		    U_("unable to allocate memory"));
 		goto bad;
@@ -783,7 +783,7 @@ bad:
 
 /*
  * If path doesn't end in /, return true iff cmnd & path name the same inode;
- * otherwise, return true if user_ctx.cmnd names one of the inodes in path.
+ * otherwise, return true if ctx.user.cmnd names one of the inodes in path.
  */
 bool
 command_matches(const char *sudoers_cmnd, const char *sudoers_args,
@@ -798,14 +798,14 @@ command_matches(const char *sudoers_cmnd, const char *sudoers_args,
     bool rc = false;
     debug_decl(command_matches, SUDOERS_DEBUG_MATCH);
 
-    if (runas_ctx.chroot != NULL) {
+    if (ctx.runas.chroot != NULL) {
 	if (runchroot != NULL && strcmp(runchroot, "*") != 0 &&
-		strcmp(runchroot, runas_ctx.chroot) != 0) {
+		strcmp(runchroot, ctx.runas.chroot) != 0) {
 	    /* CHROOT mismatch */
 	    goto done;
 	}
 	/* User-specified runchroot (cmnd_stat already set appropriately). */
-	runchroot = runas_ctx.chroot;
+	runchroot = ctx.runas.chroot;
     } else if (runchroot == NULL) {
 	/* No rule-specific runchroot, use global (cmnd_stat already set). */
 	if (def_runchroot != NULL && strcmp(def_runchroot, "*") != '\0')
@@ -825,14 +825,14 @@ command_matches(const char *sudoers_cmnd, const char *sudoers_args,
 	/* Rule-specific runchroot, set cmnd and cmnd_stat after pivot. */
 	int status;
 
-	/* Save old user_ctx.cmnd first, set_cmnd_path() will free it. */
-	saved_user_cmnd = user_ctx.cmnd;
-	user_ctx.cmnd = NULL;
-	if (user_ctx.cmnd_stat != NULL)
-	    saved_user_stat = *user_ctx.cmnd_stat;
+	/* Save old ctx.user.cmnd first, set_cmnd_path() will free it. */
+	saved_user_cmnd = ctx.user.cmnd;
+	ctx.user.cmnd = NULL;
+	if (ctx.user.cmnd_stat != NULL)
+	    saved_user_stat = *ctx.user.cmnd_stat;
 	status = set_cmnd_path(NULL);
 	if (status != FOUND) {
-	    user_ctx.cmnd = saved_user_cmnd;
+	    ctx.user.cmnd = saved_user_cmnd;
 	    saved_user_cmnd = NULL;
 	}
 	if (info != NULL)
@@ -862,9 +862,9 @@ command_matches(const char *sudoers_cmnd, const char *sudoers_args,
 	 */
 	if (strcmp(sudoers_cmnd, "list") == 0 ||
 		strcmp(sudoers_cmnd, "sudoedit") == 0) {
-	    if (strcmp(user_ctx.cmnd, sudoers_cmnd) == 0 &&
+	    if (strcmp(ctx.user.cmnd, sudoers_cmnd) == 0 &&
 		    command_args_match(sudoers_cmnd, sudoers_args)) {
-		/* No need to set user_ctx.cmnd since cmnd == sudoers_cmnd */
+		/* No need to set ctx.user.cmnd since cmnd == sudoers_cmnd */
 		rc = true;
 	    }
 	}
@@ -892,24 +892,24 @@ done:
     if (runchroot != NULL)
 	(void)unpivot_root(pivot_fds);
 
-    /* Restore user_ctx.cmnd and user_ctx.cmnd_stat. */
+    /* Restore ctx.user.cmnd and ctx.user.cmnd_stat. */
     if (saved_user_cmnd != NULL) {
 	if (info != NULL) {
 	    free(info->cmnd_path);
-	    info->cmnd_path = user_ctx.cmnd;
-	    if (user_ctx.cmnd_stat != NULL)
-		info->cmnd_stat = *user_ctx.cmnd_stat;
+	    info->cmnd_path = ctx.user.cmnd;
+	    if (ctx.user.cmnd_stat != NULL)
+		info->cmnd_stat = *ctx.user.cmnd_stat;
 	} else {
-	    free(user_ctx.cmnd);
+	    free(ctx.user.cmnd);
 	}
-	user_ctx.cmnd = saved_user_cmnd;
-	if (user_ctx.cmnd_stat != NULL)
-	    *user_ctx.cmnd_stat = saved_user_stat;
+	ctx.user.cmnd = saved_user_cmnd;
+	if (ctx.user.cmnd_stat != NULL)
+	    *ctx.user.cmnd_stat = saved_user_stat;
     }
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	"user command \"%s%s%s\" matches sudoers command \"%s%s%s\"%s%s: %s",
-	user_ctx.cmnd, user_ctx.cmnd_args ? " " : "",
-	user_ctx.cmnd_args ? user_ctx.cmnd_args : "", sudoers_cmnd,
+	ctx.user.cmnd, ctx.user.cmnd_args ? " " : "",
+	ctx.user.cmnd_args ? ctx.user.cmnd_args : "", sudoers_cmnd,
 	sudoers_args ? " " : "", sudoers_args ? sudoers_args : "",
 	runchroot ? ", chroot " : "", runchroot ? runchroot : "",
 	rc ? "true" : "false");

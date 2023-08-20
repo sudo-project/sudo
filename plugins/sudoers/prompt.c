@@ -55,12 +55,12 @@ expand_prompt(const char *old_prompt, const char *auth_user)
 	    switch (p[1]) {
 		case 'h':
 		    p++;
-		    len += strlen(user_ctx.shost) - 2;
+		    len += strlen(ctx.user.shost) - 2;
 		    subst = 1;
 		    break;
 		case 'H':
 		    p++;
-		    len += strlen(user_ctx.host) - 2;
+		    len += strlen(ctx.user.host) - 2;
 		    subst = 1;
 		    break;
 		case 'p':
@@ -70,12 +70,12 @@ expand_prompt(const char *old_prompt, const char *auth_user)
 		    break;
 		case 'u':
 		    p++;
-		    len += strlen(user_ctx.name) - 2;
+		    len += strlen(ctx.user.name) - 2;
 		    subst = 1;
 		    break;
 		case 'U':
 		    p++;
-		    len += strlen(runas_ctx.pw->pw_name) - 2;
+		    len += strlen(ctx.runas.pw->pw_name) - 2;
 		    subst = 1;
 		    break;
 		case '%':
@@ -100,7 +100,7 @@ expand_prompt(const char *old_prompt, const char *auth_user)
 		switch (p[1]) {
 		    case 'h':
 			p++;
-			n = strlcpy(np, user_ctx.shost, len);
+			n = strlcpy(np, ctx.user.shost, len);
 			if (n >= len)
 			    goto oflow;
 			np += n;
@@ -108,7 +108,7 @@ expand_prompt(const char *old_prompt, const char *auth_user)
 			continue;
 		    case 'H':
 			p++;
-			n = strlcpy(np, user_ctx.host, len);
+			n = strlcpy(np, ctx.user.host, len);
 			if (n >= len)
 			    goto oflow;
 			np += n;
@@ -124,7 +124,7 @@ expand_prompt(const char *old_prompt, const char *auth_user)
 			continue;
 		    case 'u':
 			p++;
-			n = strlcpy(np, user_ctx.name, len);
+			n = strlcpy(np, ctx.user.name, len);
 			if (n >= len)
 			    goto oflow;
 			np += n;
@@ -132,7 +132,7 @@ expand_prompt(const char *old_prompt, const char *auth_user)
 			continue;
 		    case 'U':
 			p++;
-			n = strlcpy(np,  runas_ctx.pw->pw_name, len);
+			n = strlcpy(np,  ctx.runas.pw->pw_name, len);
 			if (n >= len)
 			    goto oflow;
 			np += n;

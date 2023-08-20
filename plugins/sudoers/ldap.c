@@ -329,8 +329,8 @@ sudo_ldap_check_non_unix_group(const struct sudo_nss *nss, LDAPMessage *entry,
 	}
 	if (*val == '+') {
 	    if (netgr_matches(nss, val,
-		def_netgroup_tuple ? runas_ctx.host : NULL,
-		def_netgroup_tuple ? runas_ctx.shost : NULL, pw->pw_name))
+		def_netgroup_tuple ? ctx.runas.host : NULL,
+		def_netgroup_tuple ? ctx.runas.shost : NULL, pw->pw_name))
 		ret = true;
 	    DPRINTF2("ldap sudoUser netgroup '%s%s' ... %s",
 		negated ? "!" : "", val, ret ? "MATCH!" : "not");
@@ -666,11 +666,11 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
     if ((escaped_user = sudo_ldap_value_dup(pw->pw_name)) == NULL)
 	    goto oom;
     if (def_netgroup_tuple) {
-	escaped_host = sudo_ldap_value_dup(runas_ctx.host);
-	if (runas_ctx.host == runas_ctx.shost)
+	escaped_host = sudo_ldap_value_dup(ctx.runas.host);
+	if (ctx.runas.host == ctx.runas.shost)
 	    escaped_shost = escaped_host;
 	else
-	    escaped_shost = sudo_ldap_value_dup(runas_ctx.shost);
+	    escaped_shost = sudo_ldap_value_dup(ctx.runas.shost);
 	if (escaped_host == NULL || escaped_shost == NULL)
 	    goto oom;
     }
@@ -1441,12 +1441,12 @@ sudo_ldap_bind_s(LDAP *ld)
 	int rc;
 
 	/* Make temp copy of the user's credential cache as needed. */
-	if (ldap_conf.krb5_ccname == NULL && user_ctx.ccname != NULL) {
-	    new_ccname = tmp_ccname = sudo_krb5_copy_cc_file(user_ctx.ccname);
+	if (ldap_conf.krb5_ccname == NULL && ctx.user.ccname != NULL) {
+	    new_ccname = tmp_ccname = sudo_krb5_copy_cc_file(ctx.user.ccname);
 	    if (tmp_ccname == NULL) {
 		/* XXX - fatal error */
 		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		    "unable to copy user ccache %s", user_ctx.ccname);
+		    "unable to copy user ccache %s", ctx.user.ccname);
 	    }
 	}
 
@@ -1925,7 +1925,7 @@ sudo_ldap_query(const struct sudo_nss *nss, struct passwd *pw)
     free_userspecs(&handle->parse_tree.userspecs);
 
     DPRINTF1("%s: ldap search user %s, host %s", __func__, pw->pw_name,
-	runas_ctx.host);
+	ctx.runas.host);
     if ((lres = sudo_ldap_result_get(nss, pw)) == NULL)
 	goto done;
 

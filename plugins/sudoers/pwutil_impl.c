@@ -246,7 +246,7 @@ PREFIX(make_gritem)(gid_t gid, const char *name)
 
 /*
  * Dynamically allocate space for a struct item plus the key and data
- * elements.  Fills in datum from user_ctx.gids or from sudo_getgrouplist2(3).
+ * elements.  Fills in datum from ctx.user.gids or from sudo_getgrouplist2(3).
  */
 struct cache_item *
 PREFIX(make_gidlist_item)(const struct passwd *pw, char * const *gidstrs,
@@ -264,7 +264,7 @@ PREFIX(make_gidlist_item)(const struct passwd *pw, char * const *gidstrs,
      * Ignore supplied gids if the entry type says we must query the group db.
      */
     if (type != ENTRY_TYPE_QUERIED && (gidstrs != NULL ||
-	    (pw == user_ctx.pw && user_ctx.gids != NULL))) {
+	    (pw == ctx.user.pw && ctx.user.gids != NULL))) {
 	if (gidstrs != NULL) {
 	    /* Use supplied gids list (string format). */
 	    ngids = 1;
@@ -290,11 +290,11 @@ PREFIX(make_gidlist_item)(const struct passwd *pw, char * const *gidstrs,
 		    gids[ngids++] = gid;
 	    }
 	} else {
-	    /* Adopt user_ctx.gids. */
-	    gids = user_ctx.gids;
-	    ngids = user_ctx.ngids;
-	    user_ctx.gids = NULL;
-	    user_ctx.ngids = 0;
+	    /* Adopt ctx.user.gids. */
+	    gids = ctx.user.gids;
+	    ngids = ctx.user.ngids;
+	    ctx.user.gids = NULL;
+	    ctx.user.ngids = 0;
 	}
 	type = ENTRY_TYPE_FRONTEND;
     } else {
