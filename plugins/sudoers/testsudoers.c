@@ -309,22 +309,23 @@ main(int argc, char *argv[])
 
     /* Fill in test_ctx.user.cmnd_args from argv. */
     if (argc > 0) {
-	char *to, **from;
-	size_t size, n;
+	size_t n, size = 0;
+	char *cp;
+	int i;
 
-	for (size = 0, from = argv; *from; from++)
-	    size += strlen(*from) + 1;
+	for (i = 0; i < argc; i++)
+	    size += strlen(argv[i]) + 1;
 
 	if ((test_ctx.user.cmnd_args = malloc(size)) == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	for (to = test_ctx.user.cmnd_args, from = argv; *from; from++) {
-	    n = strlcpy(to, *from, size - (size_t)(to - test_ctx.user.cmnd_args));
-	    if (n >= size - (size_t)(to - test_ctx.user.cmnd_args))
+	for (cp = test_ctx.user.cmnd_args, i = 0; i < argc; i++) {
+	    n = strlcpy(cp, argv[i], size - (size_t)(cp - test_ctx.user.cmnd_args));
+	    if (n >= size - (size_t)(cp - test_ctx.user.cmnd_args))
 		sudo_fatalx(U_("internal error, %s overflow"), getprogname());
-	    to += n;
-	    *to++ = ' ';
+	    cp += n;
+	    *cp++ = ' ';
 	}
-	*--to = '\0';
+	*--cp = '\0';
     }
 
     /* Initialize default values. */
