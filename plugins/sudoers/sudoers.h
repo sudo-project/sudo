@@ -76,6 +76,39 @@ struct group_list {
 };
 
 /*
+ * Parse configuration settings.
+ */
+struct sudoers_parser_config {
+    const char *sudoers_path;
+    bool strict;
+    bool recovery;
+    int verbose;
+    mode_t sudoers_mode;
+    uid_t sudoers_uid;
+    gid_t sudoers_gid;
+};
+#define SUDOERS_PARSER_CONFIG_INITIALIZER {				\
+    NULL,	/* sudoers_path */					\
+    false,	/* strict */						\
+    true,	/* recovery */						\
+    1,		/* verbose level 1 */					\
+    SUDOERS_MODE,							\
+    SUDOERS_UID,							\
+    SUDOERS_GID								\
+}
+
+/*
+ * Settings passed in from the sudo front-end.
+ */
+struct sudoers_plugin_settings {
+    const char *plugin_dir;
+    const char *ldap_conf;
+    const char *ldap_secret;
+    unsigned int flags;
+    int max_groups;
+};
+
+/*
  * Info pertaining to the invoking user.
  */
 struct sudoers_user_context {
@@ -144,21 +177,16 @@ struct sudoers_runas_context {
 #endif
 };
 
-/*
- * Settings passed in from the sudo front-end.
- */
-struct sudoers_plugin_settings {
-    const char *plugin_dir;
-    const char *ldap_conf;
-    const char *ldap_secret;
-    unsigned int flags;
-    int max_groups;
-};
+#define SUDOERS_CONTEXT_INITIALIZER {					\
+    SUDOERS_PARSER_CONFIG_INITIALIZER,					\
+    { _PATH_LDAP_CONF, _PATH_LDAP_SECRET, _PATH_SUDO_PLUGIN_DIR }	\
+}
 
 /*
  * Global configuration for the sudoers module.
  */
 struct sudoers_context {
+    struct sudoers_parser_config parser_conf;
     struct sudoers_plugin_settings settings;
     struct sudoers_user_context user;
     struct sudoers_runas_context runas;
@@ -418,7 +446,6 @@ void sudoers_debug_deregister(void);
 /* policy.c */
 unsigned int sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v, struct defaults_list *defaults);
 bool sudoers_policy_store_result(struct sudoers_context *ctx, bool accepted, char *argv[], char *envp[], mode_t cmnd_umask, char *iolog_path, void *v);
-const struct sudoers_parser_config *policy_sudoers_conf(void);
 
 /* group_plugin.c */
 void group_plugin_unload(void);

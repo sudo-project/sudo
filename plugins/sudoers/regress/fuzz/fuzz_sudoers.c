@@ -317,7 +317,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     /* Initialize defaults and parse sudoers. */
     init_defaults();
-    init_parser(&ctx, "sudoers", NULL);
+    init_parser(&ctx, "sudoers");
     sudoersrestart(fp);
     sudoersparse();
     reparent_parse_tree(&parse_tree);

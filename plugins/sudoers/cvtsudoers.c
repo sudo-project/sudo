@@ -106,7 +106,7 @@ int
 main(int argc, char *argv[])
 {
     struct sudoers_parse_tree_list parse_trees = TAILQ_HEAD_INITIALIZER(parse_trees);
-    struct sudoers_context ctx = { { NULL } };
+    struct sudoers_context ctx = SUDOERS_CONTEXT_INITIALIZER;
     struct sudoers_parse_tree merged_tree, *parse_tree = NULL;
     struct cvtsudoers_config *conf = NULL;
     enum sudoers_formats output_format = format_ldif;
@@ -776,7 +776,7 @@ parse_sudoers(struct sudoers_context *ctx, const char *input_file,
 	input_file = "stdin";
     } else if ((sudoersin = fopen(input_file, "r")) == NULL)
 	sudo_fatal(U_("unable to open %s"), input_file);
-    init_parser(ctx, input_file, NULL);
+    init_parser(ctx, input_file);
     if (sudoersparse() && !parse_error) {
 	sudo_warnx(U_("failed to parse %s file, unknown error"), input_file);
 	parse_error = true;

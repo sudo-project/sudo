@@ -335,28 +335,6 @@ struct cmnd_info {
 typedef void (*sudoers_lookup_callback_fn_t)(const struct sudoers_parse_tree *parse_tree, const struct userspec *us, int user_match, const struct privilege *priv, int host_match, const struct cmndspec *cs, int date_match, int runas_match, int cmnd_match, void *closure);
 
 /*
- * Parse configuration settings, passed to init_parser().
- */
-struct sudoers_parser_config {
-    const char *sudoers_path;
-    bool strict;
-    bool recovery;
-    int verbose;
-    mode_t sudoers_mode;
-    uid_t sudoers_uid;
-    gid_t sudoers_gid;
-};
-#define SUDOERS_PARSER_CONFIG_INITIALIZER {				\
-    NULL,	/* sudoers_path */					\
-    false,	/* strict */						\
-    true,	/* recovery */						\
-    1,		/* verbose level 1 */					\
-    SUDOERS_MODE,							\
-    SUDOERS_UID,							\
-    SUDOERS_GID								\
-}
-
-/*
  * The parser passes pointers to data structures that are not stored anywhere.
  * We add them to the leak list at allocation time and remove them from
  * the list when they are stored in another data structure.
@@ -419,7 +397,7 @@ void free_userspec(struct userspec *us);
 void free_userspecs(struct userspec_list *usl);
 void free_default(struct defaults *def);
 void free_defaults(struct defaults_list *defs);
-bool init_parser(struct sudoers_context *ctx, const char *file, const struct sudoers_parser_config *conf);
+bool init_parser(struct sudoers_context *ctx, const char *file);
 void init_parse_tree(struct sudoers_parse_tree *parse_tree, char *lhost, char *shost, struct sudoers_context *ctx, struct sudo_nss *nss);
 void free_parse_tree(struct sudoers_parse_tree *parse_tree);
 bool parser_leak_add(enum parser_leak_types type, void *v);

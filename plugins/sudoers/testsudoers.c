@@ -92,8 +92,7 @@ sudo_dso_public int main(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
-    struct sudoers_parser_config sudoers_conf = SUDOERS_PARSER_CONFIG_INITIALIZER;
-    struct sudoers_context test_ctx = { { _PATH_SUDO_PLUGIN_DIR } };
+    struct sudoers_context test_ctx = SUDOERS_CONTEXT_INITIALIZER;
     struct sudo_nss_list snl = TAILQ_HEAD_INITIALIZER(snl);
     enum sudoers_formats input_format = format_sudoers;
     struct sudo_nss testsudoers_nss;
@@ -144,7 +143,7 @@ main(int argc, char *argv[])
 		id = sudo_strtoid(optarg, &errstr);
 		if (errstr != NULL)
 		    sudo_fatalx("group-ID %s: %s", optarg, errstr);
-		sudoers_conf.sudoers_gid = (gid_t)id;
+		test_ctx.parser_conf.sudoers_gid = (gid_t)id;
 		break;
 	    case 'g':
 		runas_group = optarg;
@@ -205,7 +204,7 @@ main(int argc, char *argv[])
 		id = sudo_strtoid(optarg, &errstr);
 		if (errstr != NULL)
 		    sudo_fatalx("user-ID %s: %s", optarg, errstr);
-		sudoers_conf.sudoers_uid = (uid_t)id;
+		test_ctx.parser_conf.sudoers_uid = (uid_t)id;
 		break;
 	    case 'u':
 		runas_user = optarg;
@@ -349,9 +348,9 @@ main(int argc, char *argv[])
     }
 
     /* Initialize the parser and set sudoers filename to "sudoers". */
-    sudoers_conf.strict = true;
-    sudoers_conf.verbose = 2;
-    init_parser(&test_ctx, "sudoers", &sudoers_conf);
+    test_ctx.parser_conf.strict = true;
+    test_ctx.parser_conf.verbose = 2;
+    init_parser(&test_ctx, "sudoers");
 
     /*
      * Set runas passwd/group entries based on command line or sudoers.

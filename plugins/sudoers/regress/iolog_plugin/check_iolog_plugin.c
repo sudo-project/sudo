@@ -40,7 +40,7 @@ sudo_printf_t sudo_printf;
 sudo_conv_t sudo_conv;
 struct sudo_plugin_event * (*plugin_event_alloc)(void);
 
-static struct sudoers_context io_ctx;
+static struct sudoers_context io_ctx = SUDOERS_CONTEXT_INITIALIZER;
 
 sudo_dso_public int main(int argc, char *argv[], char *envp[]);
 

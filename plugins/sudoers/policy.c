@@ -50,7 +50,6 @@ struct sudoers_exec_args {
     char ***info;
 };
 
-static struct sudoers_parser_config sudoers_conf = SUDOERS_PARSER_CONFIG_INITIALIZER;
 static unsigned int sudo_version;
 static const char *interfaces_string;
 sudo_conv_t sudo_conv;
@@ -131,7 +130,7 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 		if (val == -1) {
 		    INVALID("error_recovery=");	/* Not a fatal error. */
 		} else {
-		    sudoers_conf.recovery = val;
+		    ctx->parser_conf.recovery = val;
 		}
 		continue;
 	    }
@@ -142,7 +141,7 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 	    }
 	    if (MATCHES(*cur, "sudoers_uid=")) {
 		p = *cur + sizeof("sudoers_uid=") - 1;
-		sudoers_conf.sudoers_uid = (uid_t)sudo_strtoid(p, &errstr);
+		ctx->parser_conf.sudoers_uid = (uid_t)sudo_strtoid(p, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		    goto bad;
@@ -151,7 +150,7 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 	    }
 	    if (MATCHES(*cur, "sudoers_gid=")) {
 		p = *cur + sizeof("sudoers_gid=") - 1;
-		sudoers_conf.sudoers_gid = (gid_t)sudo_strtoid(p, &errstr);
+		ctx->parser_conf.sudoers_gid = (gid_t)sudo_strtoid(p, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		    goto bad;
@@ -160,7 +159,7 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 	    }
 	    if (MATCHES(*cur, "sudoers_mode=")) {
 		p = *cur + sizeof("sudoers_mode=") - 1;
-		sudoers_conf.sudoers_mode = sudo_strtomode(p, &errstr);
+		ctx->parser_conf.sudoers_mode = sudo_strtomode(p, &errstr);
 		if (errstr != NULL) {
 		    sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		    goto bad;
@@ -179,7 +178,7 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 	    }
 	}
     }
-    sudoers_conf.sudoers_path = path_sudoers;
+    ctx->parser_conf.sudoers_path = path_sudoers;
 
     /* Parse command line settings. */
     ctx->settings.flags = 0;
@@ -634,13 +633,6 @@ oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 bad:
     debug_return_uint(MODE_ERROR);
-}
-
-/* Return the policy's struct sudoers_parser_config. */
-const struct sudoers_parser_config *
-policy_sudoers_conf(void)
-{
-    return &sudoers_conf;
 }
 
 /*

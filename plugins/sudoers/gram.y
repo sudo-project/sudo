@@ -1806,8 +1806,7 @@ free_parse_tree(struct sudoers_parse_tree *parse_tree)
  * the current sudoers file to path.
  */
 bool
-init_parser(struct sudoers_context *ctx, const char *file,
-    const struct sudoers_parser_config *conf)
+init_parser(struct sudoers_context *ctx, const char *file)
 {
     bool ret = true;
     debug_decl(init_parser, SUDOERS_DEBUG_PARSER);
@@ -1818,8 +1817,8 @@ init_parser(struct sudoers_context *ctx, const char *file,
     init_lexer();
     parse_error = false;
 
-    if (conf != NULL) {
-	parser_conf = *conf;
+    if (ctx != NULL) {
+	parser_conf = ctx->parser_conf;
     } else {
 	const struct sudoers_parser_config def_conf =
 	    SUDOERS_PARSER_CONFIG_INITIALIZER;
@@ -1853,7 +1852,7 @@ init_parser(struct sudoers_context *ctx, const char *file,
 bool
 reset_parser(void)
 {
-    return init_parser(NULL, NULL, NULL);
+    return init_parser(NULL, NULL);
 }
 
 /*
