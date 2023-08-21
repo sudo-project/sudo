@@ -325,7 +325,7 @@ log_server_exit(int status_type, int status)
 }
 #else
 static bool
-log_server_accept(struct sudoers_context *ctx, struct eventlog *evlog)
+log_server_accept(const struct sudoers_context *ctx, struct eventlog *evlog)
 {
     return true;
 }
