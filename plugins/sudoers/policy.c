@@ -555,18 +555,7 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
     }
 
     ctx->user.pw = sudo_getpwnam(ctx->user.name);
-    if (ctx->user.pw == NULL) {
-	/*
-	 * It is not unusual for users to place "sudo -k" in a .logout
-	 * file which can cause sudo to be run during reboot after the
-	 * YP/NIS/NIS+/LDAP/etc daemon has died.
-	 * For all others we will log a proper error later on.
-	 */
-	if (ctx->mode == MODE_INVALIDATE) {
-	    sudo_warnx(U_("unknown user %s"), ctx->user.name);
-	    goto bad;
-	}
-    } else if (groups != NULL) {
+    if (ctx->user.pw != NULL && groups != NULL) {
 	/* sudo_parse_gids() will print a warning on error. */
 	GETGROUPS_T *gids;
 	int ngids = sudo_parse_gids(groups, &ctx->user.gid, &gids);
