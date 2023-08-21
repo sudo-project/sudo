@@ -68,18 +68,17 @@ enum sudoers_formats {
  * Function Prototypes
  */
 static void dump_sudoers(void);
-static void set_runaspw(const char *);
-static void set_runasgr(const char *);
+static void set_runaspw(struct sudoers_context *ctx, const char *);
+static void set_runasgr(struct sudoers_context *ctx, const char *);
 static int testsudoers_error(const char * restrict buf);
 static int testsudoers_output(const char * restrict buf);
 sudo_noreturn static void usage(void);
 static void cb_lookup(const struct sudoers_parse_tree *parse_tree, const struct userspec *us, int user_match, const struct privilege *priv, int host_match, const struct cmndspec *cs, int date_match, int runas_match, int cmnd_match, void *closure);
-static int testsudoers_query(const struct sudo_nss *nss, struct passwd *pw);
+static int testsudoers_query(struct sudoers_context *ctx, const struct sudo_nss *nss, struct passwd *pw);
 
 /*
  * Globals
  */
-struct sudoers_context ctx;
 static const char *orig_cmnd;
 static char *runas_group, *runas_user;
 unsigned int sudo_mode = MODE_RUN;
@@ -94,6 +93,7 @@ int
 main(int argc, char *argv[])
 {
     struct sudoers_parser_config sudoers_conf = SUDOERS_PARSER_CONFIG_INITIALIZER;
+    struct sudoers_context test_ctx = { { 0 } };
     struct sudo_nss_list snl = TAILQ_HEAD_INITIALIZER(snl);
     enum sudoers_formats input_format = format_sudoers;
     struct sudo_nss testsudoers_nss;
@@ -135,7 +135,7 @@ main(int argc, char *argv[])
     while ((ch = getopt(argc, argv, "+D:dg:G:h:i:L:lP:p:R:T:tu:U:v")) != -1) {
 	switch (ch) {
 	    case 'D':
-		ctx.runas.cwd = optarg;
+		test_ctx.runas.cwd = optarg;
 		break;
 	    case 'd':
 		dflag = 1;
@@ -148,10 +148,10 @@ main(int argc, char *argv[])
 		break;
 	    case 'g':
 		runas_group = optarg;
-		SET(ctx.settings.flags, RUNAS_GROUP_SPECIFIED);
+		SET(test_ctx.settings.flags, RUNAS_GROUP_SPECIFIED);
 		break;
 	    case 'h':
-		ctx.user.host = optarg;
+		test_ctx.user.host = optarg;
 		break;
 	    case 'i':
 		if (strcasecmp(optarg, "ldif") == 0) {
@@ -164,8 +164,8 @@ main(int argc, char *argv[])
 		}
 		break;
 	    case 'L':
-		ctx.runas.list_pw = sudo_getpwnam(optarg);
-		if (ctx.runas.list_pw == NULL) {
+		test_ctx.runas.list_pw = sudo_getpwnam(optarg);
+		if (test_ctx.runas.list_pw == NULL) {
 		    sudo_warnx(U_("unknown user %s"), optarg);
 		    usage();
 		}
@@ -192,7 +192,7 @@ main(int argc, char *argv[])
 		    sudo_fatalx("invalid time: %s", optarg);
 		break;
 	    case 'R':
-		ctx.runas.chroot = optarg;
+		test_ctx.runas.chroot = optarg;
 		break;
 	    case 't':
 		trace_print = testsudoers_error;
@@ -205,7 +205,7 @@ main(int argc, char *argv[])
 		break;
 	    case 'u':
 		runas_user = optarg;
-		SET(ctx.settings.flags, RUNAS_USER_SPECIFIED);
+		SET(test_ctx.settings.flags, RUNAS_USER_SPECIFIED);
 		break;
 	    case 'v':
 		if (sudo_mode != MODE_RUN) {
@@ -245,48 +245,48 @@ main(int argc, char *argv[])
 	} else if (pwflag == 0) {
 	    usage();
 	}
-	ctx.user.name = argc ? *argv++ : (char *)"root";
+	test_ctx.user.name = argc ? *argv++ : (char *)"root";
 	argc = 0;
     } else {
 	if (argc > 2 && sudo_mode == MODE_LIST)
 	    sudo_mode = MODE_CHECK;
-	ctx.user.name = *argv++;
+	test_ctx.user.name = *argv++;
 	argc--;
 	if (orig_cmnd == NULL) {
 	    orig_cmnd = *argv++;
 	    argc--;
 	}
     }
-    ctx.user.cmnd = strdup(orig_cmnd);
-    if (ctx.user.cmnd == NULL)
+    test_ctx.user.cmnd = strdup(orig_cmnd);
+    if (test_ctx.user.cmnd == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    ctx.user.cmnd_base = sudo_basename(ctx.user.cmnd);
+    test_ctx.user.cmnd_base = sudo_basename(test_ctx.user.cmnd);
 
     if (getcwd(cwdbuf, sizeof(cwdbuf)) == NULL)
 	strlcpy(cwdbuf, "/", sizeof(cwdbuf));
-    ctx.user.cwd = cwdbuf;
+    test_ctx.user.cwd = cwdbuf;
 
-    if ((ctx.user.pw = sudo_getpwnam(ctx.user.name)) == NULL)
-	sudo_fatalx(U_("unknown user %s"), ctx.user.name);
-    ctx.user.uid = ctx.user.pw->pw_uid;
-    ctx.user.gid = ctx.user.pw->pw_gid;
+    if ((test_ctx.user.pw = sudo_getpwnam(test_ctx.user.name)) == NULL)
+	sudo_fatalx(U_("unknown user %s"), test_ctx.user.name);
+    test_ctx.user.uid = test_ctx.user.pw->pw_uid;
+    test_ctx.user.gid = test_ctx.user.pw->pw_gid;
 
-    if (ctx.user.host == NULL) {
-	if ((ctx.user.host = sudo_gethostname()) == NULL)
+    if (test_ctx.user.host == NULL) {
+	if ((test_ctx.user.host = sudo_gethostname()) == NULL)
 	    sudo_fatal("gethostname");
     }
-    if ((p = strchr(ctx.user.host, '.'))) {
+    if ((p = strchr(test_ctx.user.host, '.'))) {
 	*p = '\0';
-	if ((ctx.user.shost = strdup(ctx.user.host)) == NULL)
+	if ((test_ctx.user.shost = strdup(test_ctx.user.host)) == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	*p = '.';
     } else {
-	ctx.user.shost = ctx.user.host;
+	test_ctx.user.shost = test_ctx.user.host;
     }
-    ctx.runas.host = ctx.user.host;
-    ctx.runas.shost = ctx.user.shost;
+    test_ctx.runas.host = test_ctx.user.host;
+    test_ctx.runas.shost = test_ctx.user.shost;
 
-    /* Fill in ctx.user.cmnd_args from argv. */
+    /* Fill in test_ctx.user.cmnd_args from argv. */
     if (argc > 0) {
 	char *to, **from;
 	size_t size, n;
@@ -294,11 +294,11 @@ main(int argc, char *argv[])
 	for (size = 0, from = argv; *from; from++)
 	    size += strlen(*from) + 1;
 
-	if ((ctx.user.cmnd_args = malloc(size)) == NULL)
+	if ((test_ctx.user.cmnd_args = malloc(size)) == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	for (to = ctx.user.cmnd_args, from = argv; *from; from++) {
-	    n = strlcpy(to, *from, size - (size_t)(to - ctx.user.cmnd_args));
-	    if (n >= size - (size_t)(to - ctx.user.cmnd_args))
+	for (to = test_ctx.user.cmnd_args, from = argv; *from; from++) {
+	    n = strlcpy(to, *from, size - (size_t)(to - test_ctx.user.cmnd_args));
+	    if (n >= size - (size_t)(to - test_ctx.user.cmnd_args))
 		sudo_fatalx(U_("internal error, %s overflow"), getprogname());
 	    to += n;
 	    *to++ = ' ';
@@ -329,7 +329,7 @@ main(int argc, char *argv[])
     /* Initialize the parser and set sudoers filename to "sudoers". */
     sudoers_conf.strict = true;
     sudoers_conf.verbose = 2;
-    init_parser("sudoers", &sudoers_conf);
+    init_parser(&test_ctx, "sudoers", &sudoers_conf);
 
     /*
      * Set runas passwd/group entries based on command line or sudoers.
@@ -337,10 +337,10 @@ main(int argc, char *argv[])
      * run the command as the invoking user.
      */
     if (runas_group != NULL) {
-        set_runasgr(runas_group);
-        set_runaspw(runas_user ? runas_user : ctx.user.name);
+        set_runasgr(&test_ctx, runas_group);
+        set_runaspw(&test_ctx, runas_user ? runas_user : test_ctx.user.name);
     } else
-        set_runaspw(runas_user ? runas_user : def_runas_default);
+        set_runaspw(&test_ctx, runas_user ? runas_user : def_runas_default);
 
     /* Parse the policy file. */
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, NULL);
@@ -358,7 +358,7 @@ main(int argc, char *argv[])
     default:
         sudo_fatalx("error: unhandled input %d", input_format);
     }
-    if (!update_defaults(&parsed_policy, NULL, SETDEF_ALL, false))
+    if (!update_defaults(&test_ctx, &parsed_policy, NULL, SETDEF_ALL, false))
 	parse_error = true;
 
     if (!parse_error)
@@ -378,27 +378,27 @@ main(int argc, char *argv[])
     testsudoers_nss.query = testsudoers_query;
     testsudoers_nss.parse_tree = &parsed_policy;
 
-    printf("\nEntries for user %s:\n", ctx.user.name);
-    validated = sudoers_lookup(&snl, ctx.user.pw, now, cb_lookup, NULL,
+    printf("\nEntries for user %s:\n", test_ctx.user.name);
+    validated = sudoers_lookup(&snl, &test_ctx, now, cb_lookup, NULL,
 	&status, pwflag);
 
     /* Validate user-specified chroot or cwd (if any) and runas user shell. */
     if (ISSET(validated, VALIDATE_SUCCESS)) {
-	if (!check_user_shell(ctx.runas.pw)) {
+	if (!check_user_shell(test_ctx.runas.pw)) {
 	    printf(U_("\nInvalid shell for user %s: %s\n"),
-		ctx.runas.pw->pw_name, ctx.runas.pw->pw_shell);
+		test_ctx.runas.pw->pw_name, test_ctx.runas.pw->pw_shell);
 	    CLR(validated, VALIDATE_SUCCESS);
 	    SET(validated, VALIDATE_FAILURE);
 	}
-	if (check_user_runchroot(ctx.runas.chroot) != true) {
+	if (check_user_runchroot(test_ctx.runas.chroot) != true) {
 	    printf("\nUser %s is not allowed to change root directory to %s\n",
-		ctx.user.name, ctx.runas.chroot);
+		test_ctx.user.name, test_ctx.runas.chroot);
 	    CLR(validated, VALIDATE_SUCCESS);
 	    SET(validated, VALIDATE_FAILURE);
 	}
-	if (check_user_runcwd(ctx.runas.cwd) != true) {
+	if (check_user_runcwd(test_ctx.runas.cwd) != true) {
 	    printf("\nUser %s is not allowed to change directory to %s\n",
-		ctx.user.name, ctx.runas.cwd);
+		test_ctx.user.name, test_ctx.runas.cwd);
 	    CLR(validated, VALIDATE_SUCCESS);
 	    SET(validated, VALIDATE_FAILURE);
 	}
@@ -436,7 +436,7 @@ done:
 }
 
 static void
-set_runaspw(const char *user)
+set_runaspw(struct sudoers_context *ctx, const char *user)
 {
     struct passwd *pw = NULL;
     debug_decl(set_runaspw, SUDOERS_DEBUG_UTIL);
@@ -446,21 +446,21 @@ set_runaspw(const char *user)
 	uid_t uid = sudo_strtoid(user + 1, &errstr);
 	if (errstr == NULL) {
 	    if ((pw = sudo_getpwuid(uid)) == NULL)
-		pw = sudo_fakepwnam(user, ctx.user.gid);
+		pw = sudo_fakepwnam(user, ctx->user.gid);
 	}
     }
     if (pw == NULL) {
 	if ((pw = sudo_getpwnam(user)) == NULL)
 	    sudo_fatalx(U_("unknown user %s"), user);
     }
-    if (ctx.runas.pw != NULL)
-	sudo_pw_delref(ctx.runas.pw);
-    ctx.runas.pw = pw;
+    if (ctx->runas.pw != NULL)
+	sudo_pw_delref(ctx->runas.pw);
+    ctx->runas.pw = pw;
     debug_return;
 }
 
 static void
-set_runasgr(const char *group)
+set_runasgr(struct sudoers_context *ctx, const char *group)
 {
     struct group *gr = NULL;
     debug_decl(set_runasgr, SUDOERS_DEBUG_UTIL);
@@ -477,22 +477,22 @@ set_runasgr(const char *group)
 	if ((gr = sudo_getgrnam(group)) == NULL)
 	    sudo_fatalx(U_("unknown group %s"), group);
     }
-    if (ctx.runas.gr != NULL)
-	sudo_gr_delref(ctx.runas.gr);
-    ctx.runas.gr = gr;
+    if (ctx->runas.gr != NULL)
+	sudo_gr_delref(ctx->runas.gr);
+    ctx->runas.gr = gr;
     debug_return;
 }
 
 bool
-cb_log_input(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
+cb_log_input(struct sudoers_context *ctx, const char *file,
+    int line, int column, const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }
 
 bool
-cb_log_output(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
+cb_log_output(struct sudoers_context *ctx, const char *file,
+    int line, int column, const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }
@@ -501,12 +501,12 @@ cb_log_output(const char *file, int line, int column,
  * Callback for runas_default sudoers setting.
  */
 bool
-cb_runas_default(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
+cb_runas_default(struct sudoers_context *ctx, const char *file,
+    int line, int column, const union sudo_defs_val *sd_un, int op)
 {
     /* Only reset runaspw if user didn't specify one. */
     if (!runas_user && !runas_group)
-        set_runaspw(sd_un->str);
+        set_runaspw(ctx, sd_un->str);
     return true;
 }
 
@@ -582,7 +582,7 @@ init_envtables(void)
 }
 
 bool
-set_perms(int perm)
+set_perms(const struct sudoers_context *ctx, int perm)
 {
     return true;
 }
@@ -612,14 +612,14 @@ unpivot_root(int fds[2])
 }
 
 int
-set_cmnd_path(const char *runchroot)
+set_cmnd_path(struct sudoers_context *ctx, const char *runchroot)
 {
-    /* Reallocate ctx.user.cmnd to catch bugs in command_matches(). */
+    /* Reallocate test_ctx.user.cmnd to catch bugs in command_matches(). */
     char *new_cmnd = strdup(orig_cmnd);
     if (new_cmnd == NULL)
 	return NOT_FOUND_ERROR;
-    free(ctx.user.cmnd);
-    ctx.user.cmnd = new_cmnd;
+    free(ctx->user.cmnd);
+    ctx->user.cmnd = new_cmnd;
     return FOUND;
 }
 
@@ -667,7 +667,8 @@ cb_lookup(const struct sudoers_parse_tree *parse_tree,
 }
 
 static int
-testsudoers_query(const struct sudo_nss *nss, struct passwd *pw)
+testsudoers_query(struct sudoers_context *ctx, const struct sudo_nss *nss,
+    struct passwd *pw)
 {
     /* Nothing to do. */
     return 0;

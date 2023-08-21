@@ -69,7 +69,9 @@ struct sudoers_parse_tree parsed_policy = {
     TAILQ_HEAD_INITIALIZER(parsed_policy.defaults),
     NULL, /* aliases */
     NULL, /* lhost */
-    NULL /* shost */
+    NULL, /* shost */
+    NULL, /* nss */
+    NULL  /* ctx */
 };
 
 /*
@@ -217,6 +219,7 @@ entry		:	'\n' {
 			}
 		|	include {
 			    const bool success = push_include($1,
+				parsed_policy.ctx->user.shost,
 				parser_conf.verbose);
 			    parser_leak_remove(LEAK_PTR, $1);
 			    free($1);
@@ -225,6 +228,7 @@ entry		:	'\n' {
 			}
 		|	includedir {
 			    const bool success = push_includedir($1,
+				parsed_policy.ctx->user.shost,
 				parser_conf.verbose);
 			    parser_leak_remove(LEAK_PTR, $1);
 			    free($1);
@@ -1229,7 +1233,8 @@ sudoerserrorf(const char * restrict fmt, ...)
 
     if (sudoers_error_hook != NULL) {
 	va_start(ap, fmt);
-	sudoers_error_hook(sudoers, this_lineno, column, fmt, ap);
+	sudoers_error_hook(parsed_policy.ctx, sudoers, this_lineno, column,
+	    fmt, ap);
 	va_end(ap);
     }
     if (parser_conf.verbose > 0 && fmt != NULL) {
@@ -1755,13 +1760,14 @@ free_userspec(struct userspec *us)
  */
 void
 init_parse_tree(struct sudoers_parse_tree *parse_tree, char *lhost, char *shost,
-    struct sudo_nss *nss)
+    struct sudoers_context *ctx, struct sudo_nss *nss)
 {
     TAILQ_INIT(&parse_tree->userspecs);
     TAILQ_INIT(&parse_tree->defaults);
     parse_tree->aliases = NULL;
     parse_tree->shost = shost;
     parse_tree->lhost = lhost;
+    parse_tree->ctx = ctx;
     parse_tree->nss = nss;
 }
 
@@ -1792,6 +1798,7 @@ free_parse_tree(struct sudoers_parse_tree *parse_tree)
 	free(parse_tree->shost);
     parse_tree->lhost = parse_tree->shost = NULL;
     parse_tree->nss = NULL;
+    parse_tree->ctx = NULL;
 }
 
 /*
@@ -1799,12 +1806,14 @@ free_parse_tree(struct sudoers_parse_tree *parse_tree)
  * the current sudoers file to path.
  */
 bool
-init_parser(const char *file, const struct sudoers_parser_config *conf)
+init_parser(struct sudoers_context *ctx, const char *file,
+    const struct sudoers_parser_config *conf)
 {
     bool ret = true;
     debug_decl(init_parser, SUDOERS_DEBUG_PARSER);
 
     free_parse_tree(&parsed_policy);
+    parsed_policy.ctx = ctx;
     parser_leak_init();
     init_lexer();
     parse_error = false;
@@ -1844,7 +1853,7 @@ init_parser(const char *file, const struct sudoers_parser_config *conf)
 bool
 reset_parser(void)
 {
-    return init_parser(NULL, NULL);
+    return init_parser(NULL, NULL, NULL);
 }
 
 /*

@@ -104,10 +104,10 @@ struct sudoers_parse_tree *merge_sudoers(struct sudoers_parse_tree_list *parse_t
 /* cvtsudoers_pwutil.c */
 struct cache_item *cvtsudoers_make_pwitem(uid_t uid, const char *name);
 struct cache_item *cvtsudoers_make_gritem(gid_t gid, const char *name);
-struct cache_item *cvtsudoers_make_gidlist_item(const struct passwd *pw, char * const *unused1, unsigned int type);
+struct cache_item *cvtsudoers_make_gidlist_item(const struct passwd *pw, int unusued1,  GETGROUPS_T *unused2, char * const *unused3, unsigned int type);
 struct cache_item *cvtsudoers_make_grlist_item(const struct passwd *pw, char * const *unused1);
 
 /* stubs.c */
-void get_hostname(void);
+void get_hostname(struct sudoers_context *ctx);
 
 #endif /* SUDOERS_CVTSUDOERS_H */

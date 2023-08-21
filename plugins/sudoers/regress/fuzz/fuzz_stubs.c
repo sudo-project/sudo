@@ -76,7 +76,7 @@ group_plugin_query(const char *user, const char *group, const struct passwd *pw)
 }
 
 bool
-set_perms(int perm)
+set_perms(const struct sudoers_context *ctx, int perm)
 {
     return true;
 }

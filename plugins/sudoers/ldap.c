@@ -297,8 +297,8 @@ sudo_ldap_get_values_len(LDAP *ld, LDAPMessage *entry, const char *attr, int *rc
  * A matching entry that is negated will always return false.
  */
 static int
-sudo_ldap_check_non_unix_group(const struct sudo_nss *nss, LDAPMessage *entry,
-    struct passwd *pw)
+sudo_ldap_check_non_unix_group(struct sudoers_context *ctx,
+    const struct sudo_nss *nss, LDAPMessage *entry, struct passwd *pw)
 {
     struct sudo_ldap_handle *handle = nss->handle;
     LDAP *ld = handle->ld;
@@ -329,8 +329,8 @@ sudo_ldap_check_non_unix_group(const struct sudo_nss *nss, LDAPMessage *entry,
 	}
 	if (*val == '+') {
 	    if (netgr_matches(nss, val,
-		def_netgroup_tuple ? ctx.runas.host : NULL,
-		def_netgroup_tuple ? ctx.runas.shost : NULL, pw->pw_name))
+		def_netgroup_tuple ? ctx->runas.host : NULL,
+		def_netgroup_tuple ? ctx->runas.shost : NULL, pw->pw_name))
 		ret = true;
 	    DPRINTF2("ldap sudoUser netgroup '%s%s' ... %s",
 		negated ? "!" : "", val, ret ? "MATCH!" : "not");
@@ -543,8 +543,9 @@ sudo_ldap_build_default_filter(void)
  * Return true on success or false if there was an internal overflow.
  */
 static bool
-sudo_netgroup_lookup_nested(LDAP *ld, char *base, struct timeval *timeout,
-    struct ldap_netgroup_list *netgroups, struct ldap_netgroup *start)
+sudo_netgroup_lookup_nested(struct sudoers_context *ctx, LDAP *ld, char *base,
+    struct timeval *timeout, struct ldap_netgroup_list *netgroups,
+    struct ldap_netgroup *start)
 {
     LDAPMessage *entry, *result;
     size_t filt_len;
@@ -635,7 +636,7 @@ overflow:
  * Return true on success or false if there was an internal overflow.
  */
 static bool
-sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
+sudo_netgroup_lookup(struct sudoers_context *ctx, LDAP *ld, struct passwd *pw,
     struct ldap_netgroup_list *netgroups)
 {
     struct ldap_config_str *base;
@@ -666,11 +667,11 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
     if ((escaped_user = sudo_ldap_value_dup(pw->pw_name)) == NULL)
 	    goto oom;
     if (def_netgroup_tuple) {
-	escaped_host = sudo_ldap_value_dup(ctx.runas.host);
-	if (ctx.runas.host == ctx.runas.shost)
+	escaped_host = sudo_ldap_value_dup(ctx->runas.host);
+	if (ctx->runas.host == ctx->runas.shost)
 	    escaped_shost = escaped_host;
 	else
-	    escaped_shost = sudo_ldap_value_dup(ctx.runas.shost);
+	    escaped_shost = sudo_ldap_value_dup(ctx->runas.shost);
 	if (escaped_host == NULL || escaped_shost == NULL)
 	    goto oom;
     }
@@ -776,7 +777,7 @@ sudo_netgroup_lookup(LDAP *ld, struct passwd *pw,
 	/* Check for nested netgroups in what we added. */
 	ng = old_tail ? STAILQ_NEXT(old_tail, entries) : STAILQ_FIRST(netgroups);
 	if (ng != NULL) {
-	    if (!sudo_netgroup_lookup_nested(ld, base->val, tvp, netgroups, ng))
+	    if (!sudo_netgroup_lookup_nested(ctx, ld, base->val, tvp, netgroups, ng))
 		goto done;
 	}
     }
@@ -800,7 +801,7 @@ done:
  * Builds up a filter to check against LDAP.
  */
 static char *
-sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
+sudo_ldap_build_pass1(struct sudoers_context *ctx, LDAP *ld, struct passwd *pw)
 {
     char timebuffer[TIMEFILTER_LENGTH + 1], idbuf[MAX_UID_T_LEN + 1];
     char *buf, *notbuf;
@@ -860,7 +861,7 @@ sudo_ldap_build_pass1(LDAP *ld, struct passwd *pw)
     /* Add space for user netgroups if netgroup_base specified. */
     if (ldap_conf.netgroup_query) {
 	DPRINTF1("Looking up netgroups for %s", pw->pw_name);
-	if (sudo_netgroup_lookup(ld, pw, &netgroups)) {
+	if (sudo_netgroup_lookup(ctx, ld, pw, &netgroups)) {
 	    STAILQ_FOREACH(ng, &netgroups, entries) {
 		sz += ((sizeof("(sudoUser=+)") - 1 + strlen(ng->name)) * 2) + 1;
 	    }
@@ -1260,18 +1261,19 @@ sudo_set_krb5_ccache_name(const char *name, const char **old_name)
  * is root-owned and will be removed after authenticating via SASL.
  */
 static char *
-sudo_krb5_copy_cc_file(const char *old_ccname)
+sudo_krb5_copy_cc_file(struct sudoers_context *ctx)
 {
-    int nfd, ofd = -1;
-    ssize_t nread, nwritten = -1;
     static char new_ccname[] = _PATH_TMP "sudocc_XXXXXXXX";
+    const char *old_ccname = ctx->user.ccname;
+    ssize_t nread, nwritten = -1;
     char buf[10240], *ret = NULL;
+    int nfd, ofd = -1;
     debug_decl(sudo_krb5_copy_cc_file, SUDOERS_DEBUG_LDAP);
 
     old_ccname = sudo_krb5_ccname_path(old_ccname);
     if (old_ccname != NULL) {
 	/* Open credential cache as user to prevent stolen creds. */
-	if (!set_perms(PERM_USER))
+	if (!set_perms(ctx, PERM_USER))
 	    goto done;
 	ofd = open(old_ccname, O_RDONLY|O_NONBLOCK);
 	if (!restore_perms())
@@ -1425,7 +1427,7 @@ sudo_ldap_result_add_search(struct ldap_result *lres, LDAP *ldap,
  * Returns LDAP_SUCCESS on success, else non-zero.
  */
 static int
-sudo_ldap_bind_s(LDAP *ld)
+sudo_ldap_bind_s(struct sudoers_context *ctx, LDAP *ld)
 {
     int ret;
     debug_decl(sudo_ldap_bind_s, SUDOERS_DEBUG_LDAP);
@@ -1441,12 +1443,12 @@ sudo_ldap_bind_s(LDAP *ld)
 	int rc;
 
 	/* Make temp copy of the user's credential cache as needed. */
-	if (ldap_conf.krb5_ccname == NULL && ctx.user.ccname != NULL) {
-	    new_ccname = tmp_ccname = sudo_krb5_copy_cc_file(ctx.user.ccname);
+	if (ldap_conf.krb5_ccname == NULL && ctx->user.ccname != NULL) {
+	    new_ccname = tmp_ccname = sudo_krb5_copy_cc_file(ctx);
 	    if (tmp_ccname == NULL) {
 		/* XXX - fatal error */
 		sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-		    "unable to copy user ccache %s", ctx.user.ccname);
+		    "unable to copy user ccache %s", ctx->user.ccname);
 	    }
 	}
 
@@ -1519,7 +1521,7 @@ done:
  * Shut down the LDAP connection.
  */
 static int
-sudo_ldap_close(struct sudo_nss *nss)
+sudo_ldap_close(struct sudoers_context *ctx, struct sudo_nss *nss)
 {
     struct sudo_ldap_handle *handle = nss->handle;
     debug_decl(sudo_ldap_close, SUDOERS_DEBUG_LDAP);
@@ -1546,7 +1548,7 @@ sudo_ldap_close(struct sudo_nss *nss)
  * Returns 0 on success and non-zero on failure.
  */
 static int
-sudo_ldap_open(struct sudo_nss *nss)
+sudo_ldap_open(struct sudoers_context *ctx, struct sudo_nss *nss)
 {
     LDAP *ld;
     int rc = -1;
@@ -1557,7 +1559,7 @@ sudo_ldap_open(struct sudo_nss *nss)
     if (nss->handle != NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR,
 	    "%s: called with non-NULL handle %p", __func__, nss->handle);
-	sudo_ldap_close(nss);
+	sudo_ldap_close(ctx, nss);
     }
 
     if (!sudo_ldap_read_config())
@@ -1628,7 +1630,7 @@ sudo_ldap_open(struct sudo_nss *nss)
     }
 
     /* Actually connect */
-    rc = sudo_ldap_bind_s(ld);
+    rc = sudo_ldap_bind_s(ctx, ld);
     if (rc != LDAP_SUCCESS)
 	goto done;
 
@@ -1641,7 +1643,7 @@ sudo_ldap_open(struct sudo_nss *nss)
     }
     handle->ld = ld;
     /* handle->pw = NULL; */
-    init_parse_tree(&handle->parse_tree, NULL, NULL, nss);
+    init_parse_tree(&handle->parse_tree, NULL, NULL, ctx, nss);
     nss->handle = handle;
 
 done:
@@ -1649,7 +1651,7 @@ done:
 }
 
 static int
-sudo_ldap_getdefs(const struct sudo_nss *nss)
+sudo_ldap_getdefs(struct sudoers_context *ctx, const struct sudo_nss *nss)
 {
     struct sudo_ldap_handle *handle = nss->handle;
     struct timeval tv, *tvp = NULL;
@@ -1796,7 +1798,8 @@ sudo_ldap_result_add_entry(struct ldap_result *lres, LDAPMessage *entry)
  * freeing the result with sudo_ldap_result_free().
  */
 static struct ldap_result *
-sudo_ldap_result_get(const struct sudo_nss *nss, struct passwd *pw)
+sudo_ldap_result_get(struct sudoers_context *ctx, const struct sudo_nss *nss,
+    struct passwd *pw)
 {
     struct sudo_ldap_handle *handle = nss->handle;
     struct ldap_config_str *base;
@@ -1830,7 +1833,7 @@ sudo_ldap_result_get(const struct sudo_nss *nss, struct passwd *pw)
     if (lres == NULL)
 	goto oom;
     for (pass = 0; pass < 2; pass++) {
-	filt = pass ? sudo_ldap_build_pass2() : sudo_ldap_build_pass1(ld, pw);
+	filt = pass ? sudo_ldap_build_pass2() : sudo_ldap_build_pass1(ctx, ld, pw);
 	if (filt != NULL) {
 	    DPRINTF1("ldap search '%s'", filt);
 	    STAILQ_FOREACH(base, &ldap_conf.base, entries) {
@@ -1857,7 +1860,8 @@ sudo_ldap_result_get(const struct sudo_nss *nss, struct passwd *pw)
 		LDAP_FOREACH(entry, ld, result) {
 		    if (pass != 0) {
 			/* Check non-unix group in 2nd pass. */
-			switch (sudo_ldap_check_non_unix_group(nss, entry, pw)) {
+			switch (sudo_ldap_check_non_unix_group(ctx, nss, entry,
+			    pw)) {
 			case -1:
 			    goto oom;
 			case false:
@@ -1898,7 +1902,8 @@ oom:
  * parse tree.
  */
 static int
-sudo_ldap_query(const struct sudo_nss *nss, struct passwd *pw)
+sudo_ldap_query(struct sudoers_context *ctx, const struct sudo_nss *nss,
+    struct passwd *pw)
 {
     struct sudo_ldap_handle *handle = nss->handle;
     struct ldap_result *lres = NULL;
@@ -1925,8 +1930,8 @@ sudo_ldap_query(const struct sudo_nss *nss, struct passwd *pw)
     free_userspecs(&handle->parse_tree.userspecs);
 
     DPRINTF1("%s: ldap search user %s, host %s", __func__, pw->pw_name,
-	ctx.runas.host);
-    if ((lres = sudo_ldap_result_get(nss, pw)) == NULL)
+	ctx->runas.host);
+    if ((lres = sudo_ldap_result_get(ctx, nss, pw)) == NULL)
 	goto done;
 
     /* Convert to sudoers parse tree. */
@@ -1952,7 +1957,7 @@ done:
  * The contents will be populated by the getdefs() and query() functions.
  */
 static struct sudoers_parse_tree *
-sudo_ldap_parse(const struct sudo_nss *nss)
+sudo_ldap_parse(struct sudoers_context *ctx, const struct sudo_nss *nss)
 {
     struct sudo_ldap_handle *handle = nss->handle;
     debug_decl(sudo_ldap_parse, SUDOERS_DEBUG_LDAP);

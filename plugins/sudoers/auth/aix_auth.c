@@ -129,14 +129,15 @@ sudo_aix_authtype(void)
 #endif /* HAVE_PAM */
 
 int
-sudo_aix_init(struct passwd *pw, sudo_auth *auth)
+sudo_aix_init(const struct sudoers_context *ctx, struct passwd *pw,
+    sudo_auth *auth)
 {
     debug_decl(sudo_aix_init, SUDOERS_DEBUG_AUTH);
 
 #ifdef HAVE_PAM
     /* Check auth_type in /etc/security/login.cfg. */
     if (sudo_aix_authtype() == AIX_AUTH_PAM) {
-	if (sudo_pam_init_quiet(pw, auth) == AUTH_SUCCESS) {
+	if (sudo_pam_init_quiet(ctx, pw, auth) == AUTH_SUCCESS) {
 	    /* Fail AIX authentication so we can use PAM instead. */
 	    debug_return_int(AUTH_FAILURE);
 	}
@@ -176,7 +177,7 @@ sudo_aix_valid_message(const char *message)
  * change the password and then clear the flag in the future.
  */
 static bool
-sudo_aix_change_password(const char *user)
+sudo_aix_change_password(const struct sudoers_context *ctx, const char *user)
 {
     struct sigaction sa, savechld;
     pid_t child, pid;
@@ -203,7 +204,7 @@ sudo_aix_change_password(const char *user)
 	sigaddset(&mask, SIGINT);
 	sigaddset(&mask, SIGQUIT);
 	(void) sigprocmask(SIG_UNBLOCK, &mask, NULL);
-	set_perms(PERM_USER);
+	set_perms(ctx, PERM_USER);
 	execl("/usr/bin/passwd", "passwd", user, (char *)NULL);
 	sudo_warn("passwd");
 	_exit(127);
@@ -229,7 +230,8 @@ sudo_aix_change_password(const char *user)
 }
 
 int
-sudo_aix_verify(struct passwd *pw, const char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
+sudo_aix_verify(const struct sudoers_context *ctx, struct passwd *pw,
+    const char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     char *pass, *message = NULL;
     int result = 1, reenter = 0;
@@ -276,7 +278,7 @@ sudo_aix_verify(struct passwd *pw, const char *prompt, sudo_auth *auth, struct s
 	    break;
 	case 1:
 	    /* password expired, user must change it */
-	    if (!sudo_aix_change_password(pw->pw_name)) {
+	    if (!sudo_aix_change_password(ctx, pw->pw_name)) {
 		sudo_warnx(U_("unable to change password for %s"), pw->pw_name);
 		ret = AUTH_FATAL;
 	    }
@@ -297,7 +299,8 @@ sudo_aix_verify(struct passwd *pw, const char *prompt, sudo_auth *auth, struct s
 }
 
 int
-sudo_aix_cleanup(struct passwd *pw, sudo_auth *auth, bool force)
+sudo_aix_cleanup(const struct sudoers_context *ctx, struct passwd *pw,
+    sudo_auth *auth, bool force)
 {
     debug_decl(sudo_aix_cleanup, SUDOERS_DEBUG_AUTH);
 

@@ -71,7 +71,7 @@ struct cache_item_gidlist {
 
 struct cache_item *sudo_make_gritem(gid_t gid, const char *group);
 struct cache_item *sudo_make_grlist_item(const struct passwd *pw, char * const *groups);
-struct cache_item *sudo_make_gidlist_item(const struct passwd *pw, char * const *gids, unsigned int type);
+struct cache_item *sudo_make_gidlist_item(const struct passwd *pw, int ngids, GETGROUPS_T *gids, char * const *gidstrs, unsigned int type);
 struct cache_item *sudo_make_pwitem(uid_t uid, const char *user);
 
 #endif /* SUDOERS_PWUTIL_H */

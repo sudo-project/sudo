@@ -42,11 +42,13 @@
 #include "sudoers.h"
 #include "sudo_auth.h"
 
-static char **sudo_argv;
 static int sudo_argc;
+static char **sudo_argv;
+static char *sudo_tty;
 
 int
-sudo_sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
+sudo_sia_setup(const struct sudoers_context *ctx, struct passwd *pw,
+    char **promptp, sudo_auth *auth)
 {
     SIAENTITY *siah;
     int i;
@@ -56,7 +58,7 @@ sudo_sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
     sudo_argc = NewArgc + 1;
     sudo_argv = reallocarray(NULL, sudo_argc + 1, sizeof(char *));
     if (sudo_argv == NULL) {
-	log_warningx(0, N_("unable to allocate memory"));
+	log_warningx(ctx, 0, N_("unable to allocate memory"));
 	debug_return_int(AUTH_FATAL);
     }
     sudo_argv[0] = "sudo";
@@ -65,8 +67,9 @@ sudo_sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
     sudo_argv[sudo_argc] = NULL;
 
     /* We don't let SIA prompt the user for input. */
-    if (sia_ses_init(&siah, sudo_argc, sudo_argv, NULL, pw->pw_name, ctx.user.ttypath, 0, NULL) != SIASUCCESS) {
-	log_warning(0, N_("unable to initialize SIA session"));
+    sudo_tty = ctx->user.ttypath;
+    if (sia_ses_init(&siah, sudo_argc, sudo_argv, NULL, pw->pw_name, sudo_tty, 0, NULL) != SIASUCCESS) {
+	log_warning(ctx, 0, N_("unable to initialize SIA session"));
 	debug_return_int(AUTH_FATAL);
     }
 
@@ -75,8 +78,8 @@ sudo_sia_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 }
 
 int
-sudo_sia_verify(struct passwd *pw, const char *prompt, sudo_auth *auth,
-    struct sudo_conv_callback *callback)
+sudo_sia_verify(const struct sudoers_context *ctx, struct passwd *pw,
+    const char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     SIAENTITY *siah = auth->data;
     char *pass;
@@ -103,7 +106,8 @@ sudo_sia_verify(struct passwd *pw, const char *prompt, sudo_auth *auth,
 }
 
 int
-sudo_sia_cleanup(struct passwd *pw, sudo_auth *auth, bool force)
+sudo_sia_cleanup(const struct sudoers_context *ctx, struct passwd *pw,
+    sudo_auth *auth, bool force)
 {
     SIAENTITY *siah = auth->data;
     debug_decl(sudo_sia_cleanup, SUDOERS_DEBUG_AUTH);
@@ -122,8 +126,8 @@ sudo_sia_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
     debug_decl(sudo_sia_begin_session, SUDOERS_DEBUG_AUTH);
 
     /* Re-init sia for the target user's session. */
-    if (sia_ses_init(&siah, NewArgc, NewArgv, NULL, pw->pw_name, ctx.user.ttypath, 0, NULL) != SIASUCCESS) {
-	log_warning(0, N_("unable to initialize SIA session"));
+    if (sia_ses_init(&siah, NewArgc, NewArgv, NULL, pw->pw_name, sudo_tty, 0, NULL) != SIASUCCESS) {
+	log_warning(ctx, 0, N_("unable to initialize SIA session"));
 	goto done;
     }
 

@@ -66,8 +66,9 @@ int
 user_matches(const struct sudoers_parse_tree *parse_tree,
     const struct passwd *pw, const struct member *m)
 {
-    const char *lhost = parse_tree->lhost ? parse_tree->lhost : ctx.runas.host;
-    const char *shost = parse_tree->shost ? parse_tree->shost : ctx.runas.shost;
+    const struct sudoers_context *ctx = parse_tree->ctx;
+    const char *lhost = parse_tree->lhost ? parse_tree->lhost : ctx->runas.host;
+    const char *shost = parse_tree->shost ? parse_tree->shost : ctx->runas.shost;
     int matched = UNSPEC;
     struct alias *a;
     debug_decl(user_matches, SUDOERS_DEBUG_MATCH);
@@ -124,18 +125,18 @@ userlist_matches(const struct sudoers_parse_tree *parse_tree,
 }
 
 struct gid_list *
-runas_getgroups(void)
+runas_getgroups(const struct sudoers_context *ctx)
 {
     const struct passwd *pw;
     debug_decl(runas_getgroups, SUDOERS_DEBUG_MATCH);
 
     if (def_preserve_groups) {
-	sudo_gidlist_addref(ctx.user.gid_list);
-	debug_return_ptr(ctx.user.gid_list);
+	sudo_gidlist_addref(ctx->user.gid_list);
+	debug_return_ptr(ctx->user.gid_list);
     }
 
     /* Only use results from a group db query, not the front end. */
-    pw = ctx.runas.pw ? ctx.runas.pw : ctx.user.pw;
+    pw = ctx->runas.pw ? ctx->runas.pw : ctx->user.pw;
     debug_return_ptr(sudo_get_gidlist(pw, ENTRY_TYPE_QUERIED));
 }
 
@@ -149,8 +150,9 @@ static int
 runas_userlist_matches(const struct sudoers_parse_tree *parse_tree,
     const struct member_list *user_list, struct member **matching_user)
 {
-    const char *lhost = parse_tree->lhost ? parse_tree->lhost : ctx.runas.host;
-    const char *shost = parse_tree->shost ? parse_tree->shost : ctx.runas.shost;
+    const struct sudoers_context *ctx = parse_tree->ctx;
+    const char *lhost = parse_tree->lhost ? parse_tree->lhost : ctx->runas.host;
+    const char *shost = parse_tree->shost ? parse_tree->shost : ctx->runas.shost;
     int user_matched = UNSPEC;
     struct member *m;
     struct alias *a;
@@ -165,11 +167,11 @@ runas_userlist_matches(const struct sudoers_parse_tree *parse_tree,
 		if (netgr_matches(parse_tree->nss, m->name,
 		    def_netgroup_tuple ? lhost : NULL,
 		    def_netgroup_tuple ? shost : NULL,
-		    ctx.runas.pw->pw_name))
+		    ctx->runas.pw->pw_name))
 		    user_matched = !m->negated;
 		break;
 	    case USERGROUP:
-		if (usergr_matches(m->name, ctx.runas.pw->pw_name, ctx.runas.pw))
+		if (usergr_matches(m->name, ctx->runas.pw->pw_name, ctx->runas.pw))
 		    user_matched = !m->negated;
 		break;
 	    case ALIAS:
@@ -184,7 +186,7 @@ runas_userlist_matches(const struct sudoers_parse_tree *parse_tree,
 		}
 		FALLTHROUGH;
 	    case WORD:
-		if (userpw_matches(m->name, ctx.runas.pw->pw_name, ctx.runas.pw))
+		if (userpw_matches(m->name, ctx->runas.pw->pw_name, ctx->runas.pw))
 		    user_matched = !m->negated;
 		break;
 	    case MYSELF:
@@ -193,9 +195,9 @@ runas_userlist_matches(const struct sudoers_parse_tree *parse_tree,
 		 * was specified on the command line without a user _or_
 		 * the user specified their own name on the command line.
 		 */
-		if ((!ISSET(ctx.settings.flags, RUNAS_USER_SPECIFIED) &&
-			ISSET(ctx.settings.flags, RUNAS_GROUP_SPECIFIED)) ||
-			strcmp(ctx.user.name, ctx.runas.pw->pw_name) == 0)
+		if ((!ISSET(ctx->settings.flags, RUNAS_USER_SPECIFIED) &&
+			ISSET(ctx->settings.flags, RUNAS_GROUP_SPECIFIED)) ||
+			strcmp(ctx->user.name, ctx->runas.pw->pw_name) == 0)
 		    user_matched = !m->negated;
 		break;
 	}
@@ -217,6 +219,7 @@ static int
 runas_grouplist_matches(const struct sudoers_parse_tree *parse_tree,
     const struct member_list *group_list, struct member **matching_group)
 {
+    const struct sudoers_context *ctx = parse_tree->ctx;
     int group_matched = UNSPEC;
     struct member *m;
     struct alias *a;
@@ -240,7 +243,7 @@ runas_grouplist_matches(const struct sudoers_parse_tree *parse_tree,
 		    }
 		    FALLTHROUGH;
 		case WORD:
-		    if (group_matches(m->name, ctx.runas.gr))
+		    if (group_matches(m->name, ctx->runas.gr))
 			group_matched = !m->negated;
 		    break;
 	    }
@@ -257,13 +260,13 @@ runas_grouplist_matches(const struct sudoers_parse_tree *parse_tree,
 	 * The runas group was not explicitly allowed by sudoers.
 	 * Check whether it is one of the target user's groups.
 	 */
-	if (ctx.runas.pw->pw_gid == ctx.runas.gr->gr_gid) {
+	if (ctx->runas.pw->pw_gid == ctx->runas.gr->gr_gid) {
 	    group_matched = ALLOW;	/* runas group matches passwd db */
-	} else if ((runas_groups = runas_getgroups()) != NULL) {
+	} else if ((runas_groups = runas_getgroups(ctx)) != NULL) {
 	    int i;
 
 	    for (i = 0; i < runas_groups->ngids; i++) {
-		if (runas_groups->gids[i] == ctx.runas.gr->gr_gid) {
+		if (runas_groups->gids[i] == ctx->runas.gr->gr_gid) {
 		    group_matched = ALLOW;	/* matched aux group vector */
 		    break;
 		}
@@ -287,6 +290,7 @@ runaslist_matches(const struct sudoers_parse_tree *parse_tree,
     const struct member_list *user_list, const struct member_list *group_list,
     struct member **matching_user, struct member **matching_group)
 {
+    const struct sudoers_context *ctx = parse_tree->ctx;
     struct member_list _user_list = TAILQ_HEAD_INITIALIZER(_user_list);
     int user_matched, group_matched = UNSPEC;
     struct member m_user;
@@ -303,14 +307,14 @@ runaslist_matches(const struct sudoers_parse_tree *parse_tree,
     }
 
     user_matched = runas_userlist_matches(parse_tree, user_list, matching_user);
-    if (ISSET(ctx.settings.flags, RUNAS_GROUP_SPECIFIED)) {
+    if (ISSET(ctx->settings.flags, RUNAS_GROUP_SPECIFIED)) {
 	group_matched = runas_grouplist_matches(parse_tree, group_list,
 	    matching_group);
     }
 
     if (user_matched == DENY || group_matched == DENY)
 	debug_return_int(DENY);
-    if (user_matched == group_matched || ctx.runas.gr == NULL)
+    if (user_matched == group_matched || ctx->runas.gr == NULL)
 	debug_return_int(user_matched);
     debug_return_int(UNSPEC);
 }
@@ -337,15 +341,16 @@ hostlist_matches_int(const struct sudoers_parse_tree *parse_tree,
 }
 
 /*
- * Check for ctx.runas.host and ctx.runas.shost in a list of members.
+ * Check for ctx->runas.host and ctx->runas.shost in a list of members.
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
 hostlist_matches(const struct sudoers_parse_tree *parse_tree,
     const struct passwd *pw, const struct member_list *list)
 {
-    const char *lhost = parse_tree->lhost ? parse_tree->lhost : ctx.runas.host;
-    const char *shost = parse_tree->shost ? parse_tree->shost : ctx.runas.shost;
+    const struct sudoers_context *ctx = parse_tree->ctx;
+    const char *lhost = parse_tree->lhost ? parse_tree->lhost : ctx->runas.host;
+    const char *shost = parse_tree->shost ? parse_tree->shost : ctx->runas.shost;
 
     return hostlist_matches_int(parse_tree, pw, lhost, shost, list);
 }
@@ -438,7 +443,8 @@ cmnd_matches(const struct sudoers_parse_tree *parse_tree,
 	case ALL:
 	case COMMAND:
 	    c = (struct sudo_command *)m->name;
-	    if (command_matches(c->cmnd, c->args, runchroot, info, &c->digests))
+	    if (command_matches(parse_tree->ctx, c->cmnd, c->args, runchroot,
+		    info, &c->digests))
 		matched = !m->negated;
 	    break;
 	case ALIAS:
@@ -471,7 +477,8 @@ cmnd_matches_all(const struct sudoers_parse_tree *parse_tree,
     switch (m->type) {
 	case ALL:
 	    c = (struct sudo_command *)m->name;
-	    if (command_matches(c->cmnd, c->args, runchroot, info, &c->digests))
+	    if (command_matches(parse_tree->ctx, c->cmnd, c->args, runchroot,
+		    info, &c->digests))
 		matched = !negated;
 	    break;
 	case ALIAS:

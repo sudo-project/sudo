@@ -40,13 +40,13 @@ fill_seq(char *str, size_t strsize, void *v)
     debug_decl(fill_seq, SUDOERS_DEBUG_UTIL);
     debug_return_size_t(strlcpy(str, "%{seq}", strsize));
 #else
-    char *logdir = v;
+    struct sudoers_context *ctx = v;
     static char sessid[7];
     int len;
     debug_decl(fill_seq, SUDOERS_DEBUG_UTIL);
 
     if (sessid[0] == '\0') {
-	if (!iolog_nextid(logdir, sessid))
+	if (!iolog_nextid(ctx->user.iolog_dir, sessid))
 	    debug_return_size_t((size_t)-1);
     }
 
@@ -60,68 +60,74 @@ fill_seq(char *str, size_t strsize, void *v)
 }
 
 static size_t
-fill_user(char *str, size_t strsize, void *unused)
+fill_user(char *str, size_t strsize, void *v)
 {
+    struct sudoers_context *ctx = v;
     debug_decl(fill_user, SUDOERS_DEBUG_UTIL);
-    debug_return_size_t(strlcpy(str, ctx.user.name, strsize));
+    debug_return_size_t(strlcpy(str, ctx->user.name, strsize));
 }
 
 static size_t
-fill_group(char *str, size_t strsize, void *unused)
+fill_group(char *str, size_t strsize, void *v)
 {
+    struct sudoers_context *ctx = v;
     struct group *grp;
     size_t len;
     debug_decl(fill_group, SUDOERS_DEBUG_UTIL);
 
-    if ((grp = sudo_getgrgid(ctx.user.gid)) != NULL) {
+    if ((grp = sudo_getgrgid(ctx->user.gid)) != NULL) {
 	len = strlcpy(str, grp->gr_name, strsize);
 	sudo_gr_delref(grp);
     } else {
-	len = (size_t)snprintf(str, strsize, "#%u", (unsigned int)ctx.user.gid);
+	len = (size_t)snprintf(str, strsize, "#%u", (unsigned int)ctx->user.gid);
     }
     debug_return_size_t(len);
 }
 
 static size_t
-fill_runas_user(char *str, size_t strsize, void *unused)
+fill_runas_user(char *str, size_t strsize, void *v)
 {
+    struct sudoers_context *ctx = v;
     debug_decl(fill_runas_user, SUDOERS_DEBUG_UTIL);
-    debug_return_size_t(strlcpy(str, ctx.runas.pw->pw_name, strsize));
+    debug_return_size_t(strlcpy(str, ctx->runas.pw->pw_name, strsize));
 }
 
 static size_t
-fill_runas_group(char *str, size_t strsize, void *unused)
+fill_runas_group(char *str, size_t strsize, void *v)
 {
+    struct sudoers_context *ctx = v;
     struct group *grp;
     size_t len;
     debug_decl(fill_runas_group, SUDOERS_DEBUG_UTIL);
 
-    if (ctx.runas.gr != NULL) {
-	len = strlcpy(str, ctx.runas.gr->gr_name, strsize);
+    if (ctx->runas.gr != NULL) {
+	len = strlcpy(str, ctx->runas.gr->gr_name, strsize);
     } else {
-	if ((grp = sudo_getgrgid(ctx.runas.pw->pw_gid)) != NULL) {
+	if ((grp = sudo_getgrgid(ctx->runas.pw->pw_gid)) != NULL) {
 	    len = strlcpy(str, grp->gr_name, strsize);
 	    sudo_gr_delref(grp);
 	} else {
 	    len = (size_t)snprintf(str, strsize, "#%u",
-		(unsigned int)ctx.runas.pw->pw_gid);
+		(unsigned int)ctx->runas.pw->pw_gid);
 	}
     }
     debug_return_size_t(len);
 }
 
 static size_t
-fill_hostname(char *str, size_t strsize, void *unused)
+fill_hostname(char *str, size_t strsize, void *v)
 {
+    struct sudoers_context *ctx = v;
     debug_decl(fill_hostname, SUDOERS_DEBUG_UTIL);
-    debug_return_size_t(strlcpy(str, ctx.user.shost, strsize));
+    debug_return_size_t(strlcpy(str, ctx->user.shost, strsize));
 }
 
 static size_t
-fill_command(char *str, size_t strsize, void *unused)
+fill_command(char *str, size_t strsize, void *v)
 {
+    struct sudoers_context *ctx = v;
     debug_decl(fill_command, SUDOERS_DEBUG_UTIL);
-    debug_return_size_t(strlcpy(str, ctx.user.cmnd_base, strsize));
+    debug_return_size_t(strlcpy(str, ctx->user.cmnd_base, strsize));
 }
 
 /* Note: "seq" must be first in the list. */

@@ -1023,7 +1023,7 @@ sudo_get_gidlist(const struct passwd *pw, unsigned int type)
     /*
      * Cache group db entry if it exists or a negative response if not.
      */
-    item = make_gidlist_item(pw, NULL, type);
+    item = make_gidlist_item(pw, -1, NULL, NULL, type);
     if (item == NULL) {
 	/* Out of memory? */
 	debug_return_ptr(NULL);
@@ -1057,12 +1057,14 @@ done:
 }
 
 int
-sudo_set_gidlist(struct passwd *pw, char * const *gids, unsigned int type)
+sudo_set_gidlist(struct passwd *pw, int ngids, GETGROUPS_T *gids,
+    char * const *gidstrs, unsigned int type)
 {
     struct cache_item key, *item;
     debug_decl(sudo_set_gidlist, SUDOERS_DEBUG_NSS);
 
-    sudo_debug_group_list(pw->pw_name, gids, SUDO_DEBUG_DEBUG);
+    /* XXX - ngids/gids too */
+    sudo_debug_group_list(pw->pw_name, gidstrs, SUDO_DEBUG_DEBUG);
 
     if (gidlist_cache == NULL) {
 	gidlist_cache = rbcreate(cmp_gidlist);
@@ -1079,7 +1081,7 @@ sudo_set_gidlist(struct passwd *pw, char * const *gids, unsigned int type)
     key.type = type;
     getauthregistry(NULL, key.registry);
     if (rbfind(gidlist_cache, &key) == NULL) {
-	if ((item = make_gidlist_item(pw, gids, type)) == NULL) {
+	if ((item = make_gidlist_item(pw, ngids, gids, gidstrs, type)) == NULL) {
 	    sudo_warnx(U_("unable to parse gids for %s"), pw->pw_name);
 	    debug_return_int(-1);
 	}

@@ -19,7 +19,8 @@
 #ifndef SUDOERS_SOLARIS_AUDIT_H
 #define	SUDOERS_SOLARIS_AUDIT_H
 
-int	solaris_audit_success(char *const argv[]);
-int	solaris_audit_failure(char *const argv[], const char *errmsg);
+struct sudoers_context;
+int	solaris_audit_success(const struct sudoers_context *ctx, char *const argv[]);
+int	solaris_audit_failure(const struct sudoers_context *ctx, char *const argv[], const char *errmsg);
 
 #endif /* SUDOERS_SOLARIS_AUDIT_H */

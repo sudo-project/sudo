@@ -41,7 +41,8 @@
 #define HAS_AGEINFO(p, l)	(l == 18 && p[DESLEN] == ',')
 
 int
-sudo_passwd_init(struct passwd *pw, sudo_auth *auth)
+sudo_passwd_init(const struct sudoers_context *ctx, struct passwd *pw,
+    sudo_auth *auth)
 {
     debug_decl(sudo_passwd_init, SUDOERS_DEBUG_AUTH);
 
@@ -50,7 +51,7 @@ sudo_passwd_init(struct passwd *pw, sudo_auth *auth)
 	debug_return_int(AUTH_SUCCESS);
 
 #ifdef HAVE_SKEYACCESS
-    if (skeyaccess(pw, ctx.user.tty, NULL, NULL) == 0)
+    if (skeyaccess(pw, ctx->user.tty, NULL, NULL) == 0)
 	debug_return_int(AUTH_FAILURE);
 #endif
     sudo_setspent();
@@ -61,7 +62,8 @@ sudo_passwd_init(struct passwd *pw, sudo_auth *auth)
 
 #ifdef HAVE_CRYPT
 int
-sudo_passwd_verify(struct passwd *pw, const char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
+sudo_passwd_verify(const struct sudoers_context *ctx, struct passwd *pw,
+    const char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     char des_pass[9], *epass;
     char *pw_epasswd = auth->data;
@@ -101,7 +103,8 @@ sudo_passwd_verify(struct passwd *pw, const char *pass, sudo_auth *auth, struct 
 }
 #else
 int
-sudo_passwd_verify(struct passwd *pw, const char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
+sudo_passwd_verify(const struct sudoers_context *ctx, struct passwd *pw,
+    const char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     char *pw_passwd = auth->data;
     int matched;
@@ -115,7 +118,8 @@ sudo_passwd_verify(struct passwd *pw, const char *pass, sudo_auth *auth, struct 
 #endif
 
 int
-sudo_passwd_cleanup(struct passwd *pw, sudo_auth *auth, bool force)
+sudo_passwd_cleanup(const struct sudoers_context *ctx, struct passwd *pw,
+    sudo_auth *auth, bool force)
 {
     debug_decl(sudo_passwd_cleanup, SUDOERS_DEBUG_AUTH);
 

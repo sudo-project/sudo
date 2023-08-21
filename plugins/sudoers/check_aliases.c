@@ -38,7 +38,7 @@ struct alias_warned {
 };
 SLIST_HEAD(alias_warned_list, alias_warned);
 
-static bool alias_warnx(const char *file, int line, int column, bool strict, bool quiet, const char * restrict fmt, ...) sudo_printflike(6, 7);
+static bool alias_warnx(const struct sudoers_context *ctx, const char *file, int line, int column, bool strict, bool quiet, const char * restrict fmt, ...) sudo_printflike(7, 8);
 
 static bool
 alias_warned(struct alias_warned_list *warned, char *name)
@@ -70,8 +70,8 @@ alias_warned_add(struct alias_warned_list *warned, char *name)
 }
 
 static bool
-alias_warnx(const char *file, int line, int column, bool strict, bool quiet,
-    const char * restrict fmt, ...)
+alias_warnx(const struct sudoers_context *ctx, const char *file, int line,
+    int column, bool strict, bool quiet, const char * restrict fmt, ...)
 {
     bool ret = true;
     va_list ap;
@@ -79,7 +79,7 @@ alias_warnx(const char *file, int line, int column, bool strict, bool quiet,
 
     if (strict && sudoers_error_hook != NULL) {
 	va_start(ap, fmt);
-	ret = sudoers_error_hook(file, line, column, fmt, ap);
+	ret = sudoers_error_hook(ctx, file, line, column, fmt, ap);
 	va_end(ap);
     }
 
@@ -129,10 +129,10 @@ check_alias(struct sudoers_parse_tree *parse_tree,
     } else {
 	if (!alias_warned(warned, name)) {
 	    if (errno == ELOOP) {
-		alias_warnx(file, line, column, strict, quiet,
+		alias_warnx(parse_tree->ctx, file, line, column, strict, quiet,
 		    N_("cycle in %s \"%s\""), alias_type_to_string(type), name);
 	    } else {
-		alias_warnx(file, line, column, strict, quiet,
+		alias_warnx(parse_tree->ctx, file, line, column, strict, quiet,
 		    N_("%s \"%s\" referenced but not defined"),
 		    alias_type_to_string(type), name);
 	    }

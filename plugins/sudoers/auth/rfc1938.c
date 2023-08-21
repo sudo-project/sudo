@@ -57,7 +57,8 @@
 #include "sudo_auth.h"
 
 int
-sudo_rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
+sudo_rfc1938_setup(const struct sudoers_context *ctx, struct passwd *pw,
+    char **promptp, sudo_auth *auth)
 {
     char challenge[256];
     size_t challenge_len;
@@ -126,7 +127,8 @@ sudo_rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 }
 
 int
-sudo_rfc1938_verify(struct passwd *pw, const char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
+sudo_rfc1938_verify(const struct sudoers_context *ctx, struct passwd *pw,
+    const char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     debug_decl(sudo_rfc1938_verify, SUDOERS_DEBUG_AUTH);
 

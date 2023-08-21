@@ -5894,10 +5894,10 @@ init_lexer(void)
 }
 
 /*
- * Like strlcpy() but expand %h escapes to ctx.user.shost.
+ * Like strlcpy() but expand %h escapes.
  */
 static size_t
-strlcpy_expand_host(char *dst, const char *src, size_t size)
+strlcpy_expand_host(char *dst, const char *src, const char *host, size_t size)
 {
     size_t len = 0;
     char ch;
@@ -5905,7 +5905,7 @@ strlcpy_expand_host(char *dst, const char *src, size_t size)
 
     while ((ch = *src++) != '\0') {
 	if (ch == '%' && *src == 'h') {
-	    size_t n = strlcpy(dst, ctx.user.shost, size);
+	    size_t n = strlcpy(dst, host, size);
 	    len += n;
 	    if (n >= size) {
 		/* truncated */
@@ -5934,7 +5934,7 @@ strlcpy_expand_host(char *dst, const char *src, size_t size)
  * Returns a reference-counted string on success or NULL on failure.
  */
 static char *
-expand_include(const char *src)
+expand_include(const char *src, const char *host)
 {
     const char *path = sudoers_search_path ? sudoers_search_path : sudoers;
     const char *path_end = path + strlen(path);
@@ -5967,14 +5967,14 @@ expand_include(const char *src)
 
     if (*src == '/') {
 	/* Fully-qualified path, make a copy and expand %h escapes. */
-	dst_size = src_len + (nhost * strlen(ctx.user.shost)) - (nhost * 2) + 1;
+	dst_size = src_len + (nhost * strlen(host)) - (nhost * 2) + 1;
 	dst0 = sudo_rcstr_alloc(dst_size - 1);
 	if (dst0 == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    sudoerserror(NULL);
 	    debug_return_str(NULL);
 	}
-	if (strlcpy_expand_host(dst0, src, dst_size) >= dst_size)
+	if (strlcpy_expand_host(dst0, src, host, dst_size) >= dst_size)
 	    goto oflow;
 	debug_return_str(dst0);
     }
@@ -5992,7 +5992,7 @@ expand_include(const char *src)
 	    dst_size += (size_t)(dirend - cp) + 1;
 	}
 	/* Includes space for ':' separator and NUL terminator. */
-	dst_size += src_len + (nhost * strlen(ctx.user.shost)) - (nhost * 2) + 1;
+	dst_size += src_len + (nhost * strlen(host)) - (nhost * 2) + 1;
     }
 
     /* Make a copy of the fully-qualified path and return it. */
@@ -6024,7 +6024,7 @@ expand_include(const char *src)
 	    dst_size -= len;
 	}
 
-	len = strlcpy_expand_host(dst, src, dst_size);
+	len = strlcpy_expand_host(dst, src, host, dst_size);
 	if (len >= dst_size)
 	    goto oflow;
 	dst += len;
@@ -6047,14 +6047,14 @@ oflow:
  * Returns false on error, else true.
  */
 static bool
-push_include_int(const char *opath, bool isdir, int verbose)
+push_include_int(const char *opath, const char *host, bool isdir, int verbose)
 {
     struct path_list *pl;
     char *file = NULL, *path;
     FILE *fp;
     debug_decl(push_include, SUDOERS_DEBUG_PARSER);
 
-    if ((path = expand_include(opath)) == NULL)
+    if ((path = expand_include(opath, host)) == NULL)
 	debug_return_bool(false);
 
     /* push current state onto stack */
@@ -6174,15 +6174,15 @@ push_include_int(const char *opath, bool isdir, int verbose)
 }
 
 bool
-push_include(const char *opath, int verbose)
+push_include(const char *opath, const char *host, int verbose)
 {
-    return push_include_int(opath, false, verbose);
+    return push_include_int(opath, host, false, verbose);
 }
 
 bool
-push_includedir(const char *opath, int verbose)
+push_includedir(const char *opath, const char *host, int verbose)
 {
-    return push_include_int(opath, true, verbose);
+    return push_include_int(opath, host, true, verbose);
 }
 
 /*

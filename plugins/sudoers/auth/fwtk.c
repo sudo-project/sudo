@@ -44,7 +44,8 @@
 #include "sudo_auth.h"
 
 int
-sudo_fwtk_init(struct passwd *pw, sudo_auth *auth)
+sudo_fwtk_init(const struct sudoers_context *ctx, struct passwd *pw,
+    sudo_auth *auth)
 {
     static Cfg *confp;			/* Configuration entry struct */
     char resp[128];			/* Response from the server */
@@ -82,7 +83,8 @@ sudo_fwtk_init(struct passwd *pw, sudo_auth *auth)
 }
 
 int
-sudo_fwtk_verify(struct passwd *pw, const char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
+sudo_fwtk_verify(const struct sudoers_context *ctx, struct passwd *pw,
+    const char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     char *pass;				/* Password from the user */
     char buf[SUDO_CONV_REPL_MAX + 12];	/* General prupose buffer */
@@ -147,7 +149,8 @@ done:
 }
 
 int
-sudo_fwtk_cleanup(struct passwd *pw, sudo_auth *auth, bool force)
+sudo_fwtk_cleanup(const struct sudoers_context *ctx, struct passwd *pw,
+    sudo_auth *auth, bool force)
 {
     debug_decl(sudo_fwtk_cleanup, SUDOERS_DEBUG_AUTH);
 

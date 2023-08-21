@@ -83,12 +83,13 @@ display_priv_short(const struct sudoers_parse_tree *parse_tree,
 		    }
 		}
 		sudo_lbuf_append(lbuf, ") ");
-		sudoers_format_cmndspec(lbuf, parse_tree, cs, NULL, tags, true);
+		sudoers_format_cmndspec(lbuf, parse_tree, cs, NULL,
+		    tags, true);
 	    } else {
 		/* Continue existing line. */
 		sudo_lbuf_append(lbuf, ", ");
-		sudoers_format_cmndspec(lbuf, parse_tree, cs, prev_cs, tags,
-		    true);
+		sudoers_format_cmndspec(lbuf, parse_tree, cs, prev_cs,
+		    tags, true);
 	    }
 	    nfound++;
 	}
@@ -277,7 +278,8 @@ display_priv_long(const struct sudoers_parse_tree *parse_tree,
 	prev_cs = NULL;
 	sudo_lbuf_append(lbuf, "\n");
 	TAILQ_FOREACH(cs, &priv->cmndlist, entries) {
-	    display_cmndspec_long(parse_tree, pw, us, priv, cs, prev_cs, lbuf);
+	    display_cmndspec_long(parse_tree, pw, us, priv, cs, prev_cs,
+		lbuf);
 	    prev_cs = cs;
 	    nfound++;
 	}
@@ -420,8 +422,10 @@ display_bound_defaults(const struct sudoers_parse_tree *parse_tree,
     debug_decl(display_bound_defaults, SUDOERS_DEBUG_PARSER);
 
     /* XXX - should only print ones that match what the user can do. */
-    nfound += display_bound_defaults_by_type(parse_tree, DEFAULTS_RUNAS, lbuf);
-    nfound += display_bound_defaults_by_type(parse_tree, DEFAULTS_CMND, lbuf);
+    nfound += display_bound_defaults_by_type(parse_tree, DEFAULTS_RUNAS,
+	lbuf);
+    nfound += display_bound_defaults_by_type(parse_tree, DEFAULTS_CMND,
+	lbuf);
 
     if (sudo_lbuf_error(lbuf))
 	debug_return_int(-1);
@@ -450,7 +454,8 @@ output(const char *buf)
  * Returns true on success or -1 on error.
  */
 int
-display_privs(const struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
+display_privs(struct sudoers_context *ctx, const struct sudo_nss_list *snl,
+    struct passwd *pw, bool verbose)
 {
     const struct sudo_nss *nss;
     struct sudo_lbuf def_buf, priv_buf;
@@ -459,14 +464,14 @@ display_privs(const struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
     struct stat sb;
     debug_decl(display_privs, SUDOERS_DEBUG_PARSER);
 
-    cols = ctx.user.cols;
+    cols = ctx->user.cols;
     if (fstat(STDOUT_FILENO, &sb) == 0 && S_ISFIFO(sb.st_mode))
 	cols = 0;
     sudo_lbuf_init(&def_buf, output, 4, NULL, cols);
     sudo_lbuf_init(&priv_buf, output, 8, NULL, cols);
 
     sudo_lbuf_append(&def_buf, _("Matching Defaults entries for %s on %s:\n"),
-	pw->pw_name, ctx.runas.shost);
+	pw->pw_name, ctx->runas.shost);
     count = 0;
     TAILQ_FOREACH(nss, snl, entries) {
 	n = display_defaults(nss->parse_tree, pw, &def_buf);
@@ -502,11 +507,12 @@ display_privs(const struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
     /* Display privileges from all sources. */
     sudo_lbuf_append(&priv_buf,
 	_("User %s may run the following commands on %s:\n"),
-	pw->pw_name, ctx.runas.shost);
+	pw->pw_name, ctx->runas.shost);
     count = 0;
     TAILQ_FOREACH(nss, snl, entries) {
-	if (nss->query(nss, pw) != -1) {
-	    n = sudo_display_userspecs(nss->parse_tree, pw, &priv_buf, verbose);
+	if (nss->query(ctx, nss, pw) != -1) {
+	    n = sudo_display_userspecs(nss->parse_tree, pw, &priv_buf,
+		verbose);
 	    if (n == -1)
 		goto bad;
 	    count += n;
@@ -517,7 +523,7 @@ display_privs(const struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
 	priv_buf.len = 0;
 	sudo_lbuf_append(&priv_buf,
 	    _("User %s is not allowed to run sudo on %s.\n"),
-	    pw->pw_name, ctx.runas.shost);
+	    pw->pw_name, ctx->runas.shost);
     }
     if (sudo_lbuf_error(&def_buf) || sudo_lbuf_error(&priv_buf))
 	goto bad;
@@ -537,8 +543,9 @@ bad:
 }
 
 static int
-display_cmnd_check(const struct sudoers_parse_tree *parse_tree,
-    const struct passwd *pw, time_t now, struct sudoers_match_info *match_info)
+display_cmnd_check(struct sudoers_context *ctx,
+    const struct sudoers_parse_tree *parse_tree, const struct passwd *pw,
+    time_t now, struct sudoers_match_info *match_info)
 {
     int host_match, runas_match, cmnd_match = UNSPEC;
     char *saved_user_cmnd, *saved_user_base;
@@ -548,13 +555,13 @@ display_cmnd_check(const struct sudoers_parse_tree *parse_tree,
     debug_decl(display_cmnd_check, SUDOERS_DEBUG_PARSER);
 
     /*
-     * For "sudo -l command", ctx.user.cmnd is "list" and the actual
-     * command we are checking is in ctx.user.cmnd_list.
+     * For "sudo -l command", ctx->user.cmnd is "list" and the actual
+     * command we are checking is in ctx->user.cmnd_list.
      */
-    saved_user_cmnd = ctx.user.cmnd;
-    saved_user_base = ctx.user.cmnd_base;
-    ctx.user.cmnd = ctx.user.cmnd_list;
-    ctx.user.cmnd_base = sudo_basename(ctx.user.cmnd);
+    saved_user_cmnd = ctx->user.cmnd;
+    saved_user_base = ctx->user.cmnd_base;
+    ctx->user.cmnd = ctx->user.cmnd_list;
+    ctx->user.cmnd_base = sudo_basename(ctx->user.cmnd);
 
     TAILQ_FOREACH_REVERSE(us, &parse_tree->userspecs, userspec_list, entries) {
 	if (userlist_matches(parse_tree, pw, &us->users) != ALLOW)
@@ -589,18 +596,19 @@ display_cmnd_check(const struct sudoers_parse_tree *parse_tree,
 	}
     }
 done:
-    ctx.user.cmnd = saved_user_cmnd;
-    ctx.user.cmnd_base = saved_user_base;
+    ctx->user.cmnd = saved_user_cmnd;
+    ctx->user.cmnd_base = saved_user_base;
     debug_return_int(cmnd_match);
 }
 
 /*
- * Check ctx.user.cmnd against sudoers and print the matching entry if the
+ * Check ctx->user.cmnd against sudoers and print the matching entry if the
  * command is allowed.
  * Returns true if the command is allowed, false if not or -1 on error.
  */
 int
-display_cmnd(const struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
+display_cmnd(struct sudoers_context *ctx, const struct sudo_nss_list *snl,
+    struct passwd *pw, bool verbose)
 {
     struct sudoers_match_info match_info = { NULL };
     struct sudo_lbuf lbuf;
@@ -614,12 +622,12 @@ display_cmnd(const struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
     time(&now);
     sudo_lbuf_init(&lbuf, output, 0, NULL, 0);
     TAILQ_FOREACH(nss, snl, entries) {
-	if (nss->query(nss, pw) == -1) {
+	if (nss->query(ctx, nss, pw) == -1) {
 	    /* The query function should have printed an error message. */
 	    debug_return_int(-1);
 	}
 
-	m = display_cmnd_check(nss->parse_tree, pw, now, &match_info);
+	m = display_cmnd_check(ctx, nss->parse_tree, pw, now, &match_info);
 	if (m != UNSPEC)
 	    match = m;
 
@@ -633,9 +641,9 @@ display_cmnd(const struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
 		match_info.priv, match_info.cs, NULL, &lbuf);
 	    sudo_lbuf_append(&lbuf, "    Matched: ");
 	}
-	sudo_lbuf_append(&lbuf, "%s%s%s\n", ctx.user.cmnd_list,
-	    ctx.user.cmnd_args ? " " : "",
-	    ctx.user.cmnd_args ? ctx.user.cmnd_args : "");
+	sudo_lbuf_append(&lbuf, "%s%s%s\n", ctx->user.cmnd_list,
+	    ctx->user.cmnd_args ? " " : "",
+	    ctx->user.cmnd_args ? ctx->user.cmnd_args : "");
 	sudo_lbuf_print(&lbuf);
 	ret = sudo_lbuf_error(&lbuf) ? -1 : true;
 	sudo_lbuf_destroy(&lbuf);

@@ -57,7 +57,8 @@ struct bsdauth_state {
 static char *login_style;	/* user may set style via -a option */
 
 int
-bsdauth_init(struct passwd *pw, sudo_auth *auth)
+bsdauth_init(const struct sudoers_context *ctx, struct passwd *pw,
+    sudo_auth *auth)
 {
     static struct bsdauth_state state;
     debug_decl(bsdauth_init, SUDOERS_DEBUG_AUTH);
@@ -74,26 +75,26 @@ bsdauth_init(struct passwd *pw, sudo_auth *auth)
 	    pw->pw_uid ? (char *)LOGIN_DEFCLASS : (char *)LOGIN_DEFROOTCLASS);
     }
     if (state.lc == NULL) {
-	log_warning(0, N_("unable to get login class for user %s"),
+	log_warning(ctx, 0, N_("unable to get login class for user %s"),
 	    pw->pw_name);
 	goto bad;
     }
 
     login_style = login_getstyle(state.lc, login_style, (char *)"auth-sudo");
     if (login_style == NULL) {
-	log_warningx(0, N_("invalid authentication type"));
+	log_warningx(ctx, 0, N_("invalid authentication type"));
 	goto bad;
     }
 
     if ((state.as = auth_open()) == NULL) {
-	log_warning(0, N_("unable to begin BSD authentication"));
+	log_warning(ctx, 0, N_("unable to begin BSD authentication"));
 	goto bad;
     }
 
     if (auth_setitem(state.as, AUTHV_STYLE, login_style) < 0 ||
 	auth_setitem(state.as, AUTHV_NAME, pw->pw_name) < 0 ||
-	auth_setitem(state.as, AUTHV_CLASS, ctx.runas.class) < 0) {
-	log_warningx(0, N_("unable to initialize BSD authentication"));
+	auth_setitem(state.as, AUTHV_CLASS, ctx->runas.class) < 0) {
+	log_warningx(ctx, 0, N_("unable to initialize BSD authentication"));
 	goto bad;
     }
 
@@ -106,7 +107,8 @@ bad:
 }
 
 int
-bsdauth_verify(struct passwd *pw, const char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
+bsdauth_verify(const struct sudoers_context *ctx, struct passwd *pw,
+    const char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     char *pass;
     char *s;
@@ -149,7 +151,7 @@ bsdauth_verify(struct passwd *pw, const char *prompt, sudo_auth *auth, struct su
 	    while (len > 0 && (isspace((unsigned char)prompt[len - 1]) || prompt[len - 1] == ':'))
 		len--;
 	    if (asprintf(&s, "%.*s [echo on]: ", (int)len, prompt) == -1) {
-		log_warningx(0, N_("unable to allocate memory"));
+		log_warningx(ctx, 0, N_("unable to allocate memory"));
 		debug_return_int(AUTH_FATAL);
 	    }
 	    free(pass);
@@ -173,28 +175,30 @@ bsdauth_verify(struct passwd *pw, const char *prompt, sudo_auth *auth, struct su
 	debug_return_int(AUTH_INTR);
 
     if ((s = auth_getvalue(as, (char *)"errormsg")) != NULL)
-	log_warningx(0, "%s", s);
+	log_warningx(ctx, 0, "%s", s);
     debug_return_int(AUTH_FAILURE);
 }
 
 int
-bsdauth_approval(struct passwd *pw, sudo_auth *auth, bool exempt)
+bsdauth_approval(const struct sudoers_context *ctx, struct passwd *pw,
+    sudo_auth *auth, bool exempt)
 {
     struct bsdauth_state *state = auth->data;
     debug_decl(bsdauth_approval, SUDOERS_DEBUG_AUTH);
 
     if (auth_approval(state->as, state->lc, pw->pw_name, (char *)"auth-sudo") == 0) {
 	if (auth_getstate(state->as) & AUTH_EXPIRED)
-	    log_warningx(0, "%s", N_("your account has expired"));
+	    log_warningx(ctx, 0, "%s", N_("your account has expired"));
 	else
-	    log_warningx(0, "%s", N_("approval failed"));
+	    log_warningx(ctx, 0, "%s", N_("approval failed"));
 	debug_return_int(AUTH_FAILURE);
     }
     debug_return_int(AUTH_SUCCESS);
 }
 
 int
-bsdauth_cleanup(struct passwd *pw, sudo_auth *auth, bool force)
+bsdauth_cleanup(const struct sudoers_context *ctx, struct passwd *pw,
+    sudo_auth *auth, bool force)
 {
     struct bsdauth_state *state = auth->data;
     debug_decl(bsdauth_cleanup, SUDOERS_DEBUG_AUTH);

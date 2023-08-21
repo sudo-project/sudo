@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2018-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -47,7 +47,7 @@ init_envtables(void)
 
 /* STUB */
 bool
-user_is_exempt(void)
+user_is_exempt(const struct sudoers_context *ctx)
 {
     return false;
 }
@@ -83,9 +83,9 @@ get_interfaces(void)
 
 /* STUB */
 int
-set_cmnd_path(const char *runchroot)
+set_cmnd_path(struct sudoers_context *ctx, const char *runchroot)
 {
-    /* Cannot return FOUND without also setting ctx.user.cmnd to a new value. */
+    /* Cannot return FOUND without also setting ctx->user.cmnd to a new value. */
     return NOT_FOUND;
 }
 
@@ -111,30 +111,30 @@ unpivot_root(int fds[2])
 }
 
 /*
- * Look up the hostname and set ctx.user.host and ctx.user.shost.
+ * Look up the hostname and set ctx->user.host and ctx->user.shost.
  */
 void
-get_hostname(void)
+get_hostname(struct sudoers_context *ctx)
 {
     char *cp;
     debug_decl(get_hostname, SUDOERS_DEBUG_UTIL);
 
-    if ((ctx.user.host = sudo_gethostname()) != NULL) {
-	if ((cp = strchr(ctx.user.host, '.'))) {
+    if ((ctx->user.host = sudo_gethostname()) != NULL) {
+	if ((cp = strchr(ctx->user.host, '.'))) {
 	    *cp = '\0';
-	    if ((ctx.user.shost = strdup(ctx.user.host)) == NULL)
+	    if ((ctx->user.shost = strdup(ctx->user.host)) == NULL)
 		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    *cp = '.';
 	} else {
-	    ctx.user.shost = ctx.user.host;
+	    ctx->user.shost = ctx->user.host;
 	}
     } else {
-	ctx.user.host = ctx.user.shost = strdup("localhost");
-	if (ctx.user.host == NULL)
+	ctx->user.host = ctx->user.shost = strdup("localhost");
+	if (ctx->user.host == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
-    ctx.runas.host = ctx.user.host;
-    ctx.runas.shost = ctx.user.shost;
+    ctx->runas.host = ctx->user.host;
+    ctx->runas.shost = ctx->user.shost;
 
     debug_return;
 }

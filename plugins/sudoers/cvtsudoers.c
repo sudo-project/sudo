@@ -61,7 +61,6 @@
  * Globals
  */
 struct cvtsudoers_filter *filters;
-struct sudoers_context ctx;
 static FILE *logfp;
 static const char short_opts[] =  "b:c:d:ef:hi:I:l:m:Mo:O:pP:s:V";
 static struct option long_opts[] = {
@@ -89,7 +88,7 @@ static struct option long_opts[] = {
 
 sudo_dso_public int main(int argc, char *argv[]);
 static bool convert_sudoers_sudoers(struct sudoers_parse_tree *parse_tree, const char *output_file, struct cvtsudoers_config *conf);
-static bool parse_sudoers(const char *input_file, struct cvtsudoers_config *conf);
+static bool parse_sudoers(struct sudoers_context *ctx, const char *input_file, struct cvtsudoers_config *conf);
 static bool parse_ldif(struct sudoers_parse_tree *parse_tree, const char *input_file, struct cvtsudoers_config *conf);
 static bool cvtsudoers_parse_filter(char *expression);
 static struct cvtsudoers_config *cvtsudoers_conf_read(const char *conf_file);
@@ -107,6 +106,7 @@ int
 main(int argc, char *argv[])
 {
     struct sudoers_parse_tree_list parse_trees = TAILQ_HEAD_INITIALIZER(parse_trees);
+    struct sudoers_context ctx = { { 0 } };
     struct sudoers_parse_tree merged_tree, *parse_tree = NULL;
     struct cvtsudoers_config *conf = NULL;
     enum sudoers_formats output_format = format_ldif;
@@ -135,7 +135,7 @@ main(int argc, char *argv[])
     textdomain("sudoers");
 
     /* Initialize early, before any "goto done". */
-    init_parse_tree(&merged_tree, NULL, NULL, NULL);
+    init_parse_tree(&merged_tree, NULL, NULL, &ctx, NULL);
 
     /* Read debug and plugin sections of sudo.conf. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG|SUDO_CONF_PLUGINS) == -1)
@@ -357,7 +357,7 @@ main(int argc, char *argv[])
     }
 
     /* We may need the hostname to resolve %h escapes in include files. */
-    get_hostname();
+    get_hostname(&ctx);
 
     do {
 	char *lhost = NULL, *shost = NULL;
@@ -395,7 +395,7 @@ main(int argc, char *argv[])
 	parse_tree = malloc(sizeof(*parse_tree));
 	if (parse_tree == NULL)
 	    sudo_fatalx("%s", U_("unable to allocate memory"));
-	init_parse_tree(parse_tree, lhost, shost, NULL);
+	init_parse_tree(parse_tree, lhost, shost, &ctx, NULL);
 	TAILQ_INSERT_TAIL(&parse_trees, parse_tree, entries);
 
 	/* Setup defaults data structures. */
@@ -410,7 +410,7 @@ main(int argc, char *argv[])
 		goto done;
 	    break;
 	case format_sudoers:
-	    if (!parse_sudoers(input_file, conf))
+	    if (!parse_sudoers(&ctx, input_file, conf))
 		goto done;
 	    reparent_parse_tree(parse_tree);
 	    break;
@@ -764,7 +764,8 @@ parse_ldif(struct sudoers_parse_tree *parse_tree, const char *input_file,
 }
 
 static bool
-parse_sudoers(const char *input_file, struct cvtsudoers_config *conf)
+parse_sudoers(struct sudoers_context *ctx, const char *input_file,
+    struct cvtsudoers_config *conf)
 {
     debug_decl(parse_sudoers, SUDOERS_DEBUG_UTIL);
 
@@ -774,7 +775,7 @@ parse_sudoers(const char *input_file, struct cvtsudoers_config *conf)
 	input_file = "stdin";
     } else if ((sudoersin = fopen(input_file, "r")) == NULL)
 	sudo_fatal(U_("unable to open %s"), input_file);
-    init_parser(input_file, NULL);
+    init_parser(ctx, input_file, NULL);
     if (sudoersparse() && !parse_error) {
 	sudo_warnx(U_("failed to parse %s file, unknown error"), input_file);
 	parse_error = true;
@@ -949,6 +950,7 @@ static bool
 cmnd_matches_filter(struct sudoers_parse_tree *parse_tree,
     struct member *m, struct cvtsudoers_config *conf)
 {
+    struct sudoers_context *ctx = parse_tree->ctx;
     struct sudoers_string *s;
     bool matched = false;
     debug_decl(cmnd_matches_filter, SUDOERS_DEBUG_UTIL);
@@ -965,15 +967,15 @@ cmnd_matches_filter(struct sudoers_parse_tree *parse_tree,
 	}
 
 	/* Only need one command in the filter to match. */
-	ctx.user.cmnd = s->str;
-	ctx.user.cmnd_base = sudo_basename(ctx.user.cmnd);
+	ctx->user.cmnd = s->str;
+	ctx->user.cmnd_base = sudo_basename(ctx->user.cmnd);
 	if (cmnd_matches(parse_tree, m, NULL, NULL) == true) {
 	    matched = true;
 	    break;
 	}
     }
-    ctx.user.cmnd_base = NULL;
-    ctx.user.cmnd = NULL;
+    ctx->user.cmnd_base = NULL;
+    ctx->user.cmnd = NULL;
 
     debug_return_bool(matched);
 }

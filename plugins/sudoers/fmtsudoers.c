@@ -43,6 +43,7 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
     const struct sudoers_parse_tree *parse_tree, const char *name, int type,
     bool negated, const char *separator, short alias_type)
 {
+    const struct sudoers_context *ctx = parse_tree->ctx;
     struct alias *a;
     const struct member *m;
     const struct sudo_command *c;
@@ -52,8 +53,8 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
     switch (type) {
 	case MYSELF:
 	    sudo_lbuf_append(lbuf, "%s%s", negated ? "!" : "",
-		ctx.runas.list_pw ? ctx.runas.list_pw->pw_name :
-		(ctx.user.name ? ctx.user.name : ""));
+		ctx->runas.list_pw ? ctx->runas.list_pw->pw_name :
+		(ctx->user.name ? ctx->user.name : ""));
 	    break;
 	case ALL:
 	    if (name == NULL) {
@@ -105,8 +106,9 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
 		    TAILQ_FOREACH(m, &a->members, entries) {
 			if (m != TAILQ_FIRST(&a->members))
 			    sudo_lbuf_append(lbuf, "%s", separator);
-			sudoers_format_member_int(lbuf, parse_tree, m->name,
-			    m->type, negated ? !m->negated : m->negated,
+			sudoers_format_member_int(lbuf, parse_tree,
+			    m->name, m->type,
+			    negated ? !m->negated : m->negated,
 			    separator, alias_type);
 		    }
 		    alias_put(a);

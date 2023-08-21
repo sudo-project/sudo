@@ -89,12 +89,12 @@ TAILQ_HEAD(sudoersfile_list, sudoersfile);
 static void quit(int);
 static int whatnow(void);
 static char *get_editor(int *editor_argc, char ***editor_argv);
-static bool check_syntax(const char *, bool, bool, bool, bool);
+static bool check_syntax(struct sudoers_context *ctx, const char *, bool, bool, bool, bool);
 static bool edit_sudoers(struct sudoersfile *, char *, int, char **, int);
 static bool install_sudoers(struct sudoersfile *, bool, bool);
-static bool visudo_track_error(const char *file, int line, int column, const char * restrict fmt, va_list args) sudo_printf0like(4, 0);
+static bool visudo_track_error(const struct sudoers_context *ctx, const char *file, int line, int column, const char * restrict fmt, va_list args);
 static int print_unused(struct sudoers_parse_tree *, struct alias *, void *);
-static bool reparse_sudoers(char *, int, char **, bool, bool);
+static bool reparse_sudoers(struct sudoers_context *ctx, char *, int, char **, bool, bool);
 static int run_command(const char *, char *const *);
 static void parse_sudoers_options(void);
 static void setup_signals(void);
@@ -103,12 +103,11 @@ sudo_noreturn static void export_sudoers(const char *infile, const char *outfile
 sudo_noreturn static void help(void);
 sudo_noreturn static void usage(void);
 
-extern void get_hostname(void);
+extern void get_hostname(struct sudoers_context *ctx);
 
 /*
  * Globals
  */
-struct sudoers_context ctx;
 static const char *path_sudoers = _PATH_SUDOERS;
 static struct sudoersfile_list sudoerslist = TAILQ_HEAD_INITIALIZER(sudoerslist);
 static struct sudoers_parser_config sudoers_conf = SUDOERS_PARSER_CONFIG_INITIALIZER;
@@ -135,6 +134,7 @@ sudo_dso_public int main(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
+    struct sudoers_context ctx = { { 0 } };
     struct sudoersfile *sp;
     char *editor, **editor_argv;
     const char *export_path = NULL;
@@ -270,7 +270,7 @@ main(int argc, char *argv[])
 	if ((ctx.user.pw = sudo_getpwuid(getuid())) == NULL)
 	    sudo_fatalx(U_("you do not exist in the %s database"), "passwd");
     }
-    get_hostname();
+    get_hostname(&ctx);
 
     /* Hook the sudoers parser to track files with parse errors. */
     sudoers_error_hook = visudo_track_error;
@@ -280,8 +280,8 @@ main(int argc, char *argv[])
 	sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
 
     if (checkonly) {
-	exitcode = check_syntax(path_sudoers, quiet, strict, use_owner,
-	    use_perms) ? 0 : 1;
+	exitcode = check_syntax(&ctx, path_sudoers, quiet, strict,
+	    use_owner, use_perms) ? 0 : 1;
 	goto done;
     }
 
@@ -292,12 +292,12 @@ main(int argc, char *argv[])
     sudoers_conf.strict = true;
     sudoers_conf.verbose = quiet ? 0 : 2;
     sudoers_conf.sudoers_path = path_sudoers;
-    init_parser(NULL, &sudoers_conf);
+    init_parser(&ctx, NULL, &sudoers_conf);
     if ((sudoersin = open_sudoers(path_sudoers, &sudoers, true, NULL)) == NULL)
 	return EXIT_FAILURE;
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     (void) sudoersparse();
-    (void) update_defaults(&parsed_policy, NULL,
+    (void) update_defaults(&ctx, &parsed_policy, NULL,
 	SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, quiet);
     sudoers_setlocale(oldlocale, NULL);
 
@@ -322,7 +322,7 @@ main(int argc, char *argv[])
      * Check edited files for a parse error, re-edit any that fail
      * and install the edited files as needed.
      */
-    if (reparse_sudoers(editor, editor_argc, editor_argv, strict, quiet)) {
+    if (reparse_sudoers(&ctx, editor, editor_argc, editor_argv, strict, quiet)) {
 	TAILQ_FOREACH(sp, &sudoerslist, entries) {
 	    if (!install_sudoers(sp, use_owner, use_perms)) {
 		if (sp->tpath != NULL) {
@@ -343,8 +343,8 @@ done:
 }
 
 static bool
-visudo_track_error(const char *file, int line, int column, const char * restrict fmt,
-     va_list args)
+visudo_track_error(const struct sudoers_context *ctx, const char *file,
+    int line, int column, const char * restrict fmt, va_list args)
 {
     struct sudoersfile *sp;
     debug_decl(visudo_track_error, SUDOERS_DEBUG_UTIL);
@@ -644,8 +644,8 @@ check_defaults_and_aliases(bool strict, bool quiet)
  * Parse sudoers after editing and re-edit any ones that caused a parse error.
  */
 static bool
-reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
-    bool strict, bool quiet)
+reparse_sudoers(struct sudoers_context *ctx, char *editor, int editor_argc,
+    char **editor_argv, bool strict, bool quiet)
 {
     struct sudoersfile *sp, *last;
     FILE *fp;
@@ -666,7 +666,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	/* Clean slate for each parse */
 	if (!init_defaults())
 	    sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
-	init_parser(sp->opath, &sudoers_conf);
+	init_parser(ctx, sp->opath, &sudoers_conf);
 	sp->errorline = -1;
 
 	/* Parse the sudoers temp file(s) */
@@ -679,7 +679,7 @@ reparse_sudoers(char *editor, int editor_argc, char **editor_argv,
 	}
 	fclose(sudoersin);
 	if (!parse_error) {
-	    parse_error = !update_defaults(&parsed_policy, NULL,
+	    parse_error = !update_defaults(ctx, &parsed_policy, NULL,
 		SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, true);
 	    check_defaults_and_aliases(strict, quiet);
 	}
@@ -973,8 +973,8 @@ check_file(const char *path, bool quiet, bool check_owner, bool check_mode)
 }
 
 static bool
-check_syntax(const char *path, bool quiet, bool strict, bool check_owner,
-    bool check_mode)
+check_syntax(struct sudoers_context *ctx, const char *path, bool quiet,
+    bool strict, bool check_owner, bool check_mode)
 {
     bool ok = false;
     int fd, oldlocale;
@@ -994,7 +994,7 @@ check_syntax(const char *path, bool quiet, bool strict, bool check_owner,
 	    goto done;
 	}
     }
-    init_parser(fname, &sudoers_conf);
+    init_parser(ctx, fname, &sudoers_conf);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     if (sudoersparse() && !parse_error) {
 	if (!quiet)
@@ -1002,7 +1002,7 @@ check_syntax(const char *path, bool quiet, bool strict, bool check_owner,
 	parse_error = true;
     }
     if (!parse_error) {
-	parse_error = !update_defaults(&parsed_policy, NULL,
+	parse_error = !update_defaults(ctx, &parsed_policy, NULL,
 	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, true);
 	check_defaults_and_aliases(strict, quiet);
     }

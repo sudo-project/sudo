@@ -58,7 +58,8 @@
  *                   success.
  */
 int
-sudo_securid_init(struct passwd *pw, sudo_auth *auth)
+sudo_securid_init(const struct sudoers_context *ctx, struct passwd *pw,
+    sudo_auth *auth)
 {
     static SDI_HANDLE sd_dat;			/* SecurID handle */
     debug_decl(sudo_securid_init, SUDOERS_DEBUG_AUTH);
@@ -95,7 +96,8 @@ sudo_securid_init(struct passwd *pw, sudo_auth *auth)
  *                   otherwise
  */
 int
-sudo_securid_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
+sudo_securid_setup(const struct sudoers_context *ctx, struct passwd *pw,
+    char **promptp, sudo_auth *auth)
 {
     SDI_HANDLE *sd = (SDI_HANDLE *) auth->data;
     int retval;
@@ -146,7 +148,8 @@ sudo_securid_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
  *                   incorrect authentication, fatal on errors
  */
 int
-sudo_securid_verify(struct passwd *pw, const char *promp, sudo_auth *auth, struct sudo_conv_callback *callback)
+sudo_securid_verify(const struct sudoers_context *ctx, struct passwd *pw,
+    const char *promp, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     SDI_HANDLE *sd = (SDI_HANDLE *) auth->data;
     char *pass;

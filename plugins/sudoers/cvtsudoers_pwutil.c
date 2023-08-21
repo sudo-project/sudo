@@ -297,8 +297,8 @@ static struct cache_item_gidlist *gidlist_item;
  * elements.  Fills in datum from the groups filter.
  */
 struct cache_item *
-cvtsudoers_make_gidlist_item(const struct passwd *pw, char * const *unused1,
-    unsigned int type)
+cvtsudoers_make_gidlist_item(const struct passwd *pw, int unused1,
+    GETGROUPS_T *unused2, char * const *unused3, unsigned int type)
 {
     char *cp;
     size_t nsize, total;

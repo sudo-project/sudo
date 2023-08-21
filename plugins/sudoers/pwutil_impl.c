@@ -245,28 +245,25 @@ PREFIX(make_gritem)(gid_t gid, const char *name)
 }
 
 /*
- * Dynamically allocate space for a struct item plus the key and data
- * elements.  Fills in datum from ctx.user.gids or from sudo_getgrouplist2(3).
+ * Dynamically allocate space for a struct item plus the key and data elements.
  */
 struct cache_item *
-PREFIX(make_gidlist_item)(const struct passwd *pw, char * const *gidstrs,
-    unsigned int type)
+PREFIX(make_gidlist_item)(const struct passwd *pw, int ngids, GETGROUPS_T *gids,
+    char * const *gidstrs, unsigned int type)
 {
     char *cp;
     size_t nsize, total;
     struct cache_item_gidlist *glitem;
     struct gid_list *gidlist;
-    GETGROUPS_T *gids;
-    int i, ngids;
+    int i;
     debug_decl(sudo_make_gidlist_item, SUDOERS_DEBUG_NSS);
 
     /*
      * Ignore supplied gids if the entry type says we must query the group db.
      */
-    if (type != ENTRY_TYPE_QUERIED && (gidstrs != NULL ||
-	    (pw == ctx.user.pw && ctx.user.gids != NULL))) {
-	if (gidstrs != NULL) {
-	    /* Use supplied gids list (string format). */
+    if (type != ENTRY_TYPE_QUERIED && (gids != NULL || gidstrs != NULL)) {
+	if (gids == NULL) {
+	    /* Convert the supplied gids list from string format to gid_t. */
 	    ngids = 1;
 	    for (i = 0; gidstrs[i] != NULL; i++)
 		ngids++;
@@ -289,12 +286,6 @@ PREFIX(make_gidlist_item)(const struct passwd *pw, char * const *gidstrs,
 		if (gid != gids[0])
 		    gids[ngids++] = gid;
 	    }
-	} else {
-	    /* Adopt ctx.user.gids. */
-	    gids = ctx.user.gids;
-	    ngids = ctx.user.ngids;
-	    ctx.user.gids = NULL;
-	    ctx.user.ngids = 0;
 	}
 	type = ENTRY_TYPE_FRONTEND;
     } else {

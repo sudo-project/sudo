@@ -850,7 +850,7 @@ env_update_didvar(const char *ep, unsigned int *didvar)
  * Returns true on success or false on failure.
  */
 bool
-rebuild_env(void)
+rebuild_env(const struct sudoers_context *ctx)
 {
     char **ep, *cp, *ps1;
     char idbuf[MAX_UID_T_LEN + 1];
@@ -901,11 +901,11 @@ rebuild_env(void)
 	if (!ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 #ifdef HAVE_LOGIN_CAP_H
 	    /* Insert login class environment variables. */
-	    if (ctx.runas.class) {
-		login_cap_t *lc = login_getclass(ctx.runas.class);
+	    if (ctx->runas.class) {
+		login_cap_t *lc = login_getclass(ctx->runas.class);
 		if (lc != NULL) {
-		    setusercontext(lc, ctx.runas.pw,
-			ctx.runas.pw->pw_uid, LOGIN_SETPATH|LOGIN_SETENV);
+		    setusercontext(lc, ctx->runas.pw,
+			ctx->runas.pw->pw_uid, LOGIN_SETPATH|LOGIN_SETENV);
 		    login_close(lc);
 		}
 	    }
@@ -951,27 +951,27 @@ rebuild_env(void)
 	 * on sudoers options).
 	 */
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
-	    CHECK_SETENV2("SHELL", ctx.runas.pw->pw_shell,
+	    CHECK_SETENV2("SHELL", ctx->runas.pw->pw_shell,
 		ISSET(didvar, DID_SHELL), true);
 #ifdef _AIX
-	    CHECK_SETENV2("LOGIN", ctx.runas.pw->pw_name,
+	    CHECK_SETENV2("LOGIN", ctx->runas.pw->pw_name,
 		ISSET(didvar, DID_LOGIN), true);
 #endif
-	    CHECK_SETENV2("LOGNAME", ctx.runas.pw->pw_name,
+	    CHECK_SETENV2("LOGNAME", ctx->runas.pw->pw_name,
 		ISSET(didvar, DID_LOGNAME), true);
-	    CHECK_SETENV2("USER", ctx.runas.pw->pw_name,
+	    CHECK_SETENV2("USER", ctx->runas.pw->pw_name,
 		ISSET(didvar, DID_USER), true);
 	} else {
 	    /* We will set LOGNAME later in the def_set_logname case. */
 	    if (!def_set_logname) {
 #ifdef _AIX
 		if (!ISSET(didvar, DID_LOGIN))
-		    CHECK_SETENV2("LOGIN", ctx.user.name, false, true);
+		    CHECK_SETENV2("LOGIN", ctx->user.name, false, true);
 #endif
 		if (!ISSET(didvar, DID_LOGNAME))
-		    CHECK_SETENV2("LOGNAME", ctx.user.name, false, true);
+		    CHECK_SETENV2("LOGNAME", ctx->user.name, false, true);
 		if (!ISSET(didvar, DID_USER))
-		    CHECK_SETENV2("USER", ctx.user.name, false, true);
+		    CHECK_SETENV2("USER", ctx->user.name, false, true);
 	    }
 	}
 
@@ -986,10 +986,10 @@ rebuild_env(void)
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL) || !ISSET(didvar, KEPT_MAIL)) {
 	    if (_PATH_MAILDIR[sizeof(_PATH_MAILDIR) - 2] == '/') {
 		len = asprintf(&cp, "MAIL=%s%s", _PATH_MAILDIR,
-		    ctx.runas.pw->pw_name);
+		    ctx->runas.pw->pw_name);
 	    } else {
 		len = asprintf(&cp, "MAIL=%s/%s", _PATH_MAILDIR,
-		    ctx.runas.pw->pw_name);
+		    ctx->runas.pw->pw_name);
 	    }
 	    if (len == -1)
 		    goto bad;
@@ -1022,7 +1022,7 @@ rebuild_env(void)
 	}
     }
     /* Replace the PATH envariable with a secure one? */
-    if (def_secure_path && !user_is_exempt()) {
+    if (def_secure_path && !user_is_exempt(ctx)) {
 	CHECK_SETENV2("PATH", def_secure_path, true, true);
 	SET(didvar, DID_PATH);
     }
@@ -1036,10 +1036,10 @@ rebuild_env(void)
 	if ((didvar & KEPT_USER_VARIABLES) == 0) {
 	    /* Nothing preserved, set them all. */
 #ifdef _AIX
-	    CHECK_SETENV2("LOGIN", ctx.runas.pw->pw_name, true, true);
+	    CHECK_SETENV2("LOGIN", ctx->runas.pw->pw_name, true, true);
 #endif
-	    CHECK_SETENV2("LOGNAME", ctx.runas.pw->pw_name, true, true);
-	    CHECK_SETENV2("USER", ctx.runas.pw->pw_name, true, true);
+	    CHECK_SETENV2("LOGNAME", ctx->runas.pw->pw_name, true, true);
+	    CHECK_SETENV2("USER", ctx->runas.pw->pw_name, true, true);
 	} else if ((didvar & KEPT_USER_VARIABLES) != KEPT_USER_VARIABLES) {
 	    /*
 	     * Preserved some of LOGIN, LOGNAME, USER but not all.
@@ -1071,11 +1071,11 @@ rebuild_env(void)
 
     /* Set $HOME to target user if not preserving user's value. */
     if (reset_home)
-	CHECK_SETENV2("HOME", ctx.runas.pw->pw_dir, true, true);
+	CHECK_SETENV2("HOME", ctx->runas.pw->pw_dir, true, true);
 
     /* Provide default values for $SHELL, $TERM and $PATH if not set. */
     if (!ISSET(didvar, DID_SHELL))
-	CHECK_SETENV2("SHELL", ctx.runas.pw->pw_shell, false, false);
+	CHECK_SETENV2("SHELL", ctx->runas.pw->pw_shell, false, false);
     if (!ISSET(didvar, DID_TERM))
 	CHECK_PUTENV("TERM=unknown", false, false);
     if (!ISSET(didvar, DID_PATH))
@@ -1086,14 +1086,14 @@ rebuild_env(void)
 	CHECK_PUTENV(ps1, true, true);
 
     /* Add the SUDO_COMMAND envariable (cmnd + args). */
-    if (ctx.user.cmnd_args) {
+    if (ctx->user.cmnd_args) {
 	/*
-	 * We limit ctx.user.cmnd_args to 4096 bytes to avoid an execve(2)
+	 * We limit ctx->user.cmnd_args to 4096 bytes to avoid an execve(2)
 	 * failure for very long argument vectors.  The command's environment
 	 * also counts against the ARG_MAX limit.
 	 */
-	len = asprintf(&cp, "SUDO_COMMAND=%s %.*s", ctx.user.cmnd, 4096,
-	    ctx.user.cmnd_args);
+	len = asprintf(&cp, "SUDO_COMMAND=%s %.*s", ctx->user.cmnd, 4096,
+	    ctx->user.cmnd_args);
 	if (len == -1)
 	    goto bad;
 	if (sudo_putenv(cp, true, true) == -1) {
@@ -1102,14 +1102,14 @@ rebuild_env(void)
 	}
 	sudoers_gc_add(GC_PTR, cp);
     } else {
-	CHECK_SETENV2("SUDO_COMMAND", ctx.user.cmnd, true, true);
+	CHECK_SETENV2("SUDO_COMMAND", ctx->user.cmnd, true, true);
     }
 
     /* Add the SUDO_USER, SUDO_UID, SUDO_GID environment variables. */
-    CHECK_SETENV2("SUDO_USER", ctx.user.name, true, true);
-    (void)snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int) ctx.user.uid);
+    CHECK_SETENV2("SUDO_USER", ctx->user.name, true, true);
+    (void)snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int) ctx->user.uid);
     CHECK_SETENV2("SUDO_UID", idbuf, true, true);
-    (void)snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int) ctx.user.gid);
+    (void)snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int) ctx->user.gid);
     CHECK_SETENV2("SUDO_GID", idbuf, true, true);
 
     debug_return_bool(true);
@@ -1151,7 +1151,7 @@ insert_env_vars(char * const envp[])
  * Returns true if allowed, else false.
  */
 bool
-validate_env_vars(char * const env_vars[])
+validate_env_vars(const struct sudoers_context *ctx, char * const env_vars[])
 {
     char * const *ep;
     char errbuf[4096];
@@ -1168,7 +1168,7 @@ validate_env_vars(char * const env_vars[])
 	if (eq == NULL || eq == *ep) {
 	    /* Must be in the form var=val. */
 	    okvar = false;
-	} else if (def_secure_path && !user_is_exempt() &&
+	} else if (def_secure_path && !user_is_exempt(ctx) &&
 	    strncmp(*ep, "PATH=", 5) == 0) {
 	    okvar = false;
 	} else if (def_env_reset) {
@@ -1194,7 +1194,7 @@ validate_env_vars(char * const env_vars[])
     }
     if (errpos != errbuf) {
 	/* XXX - audit? */
-	log_warningx(0,
+	log_warningx(ctx, 0,
 	    N_("sorry, you are not allowed to set the following environment variables: %s"), errbuf);
 	ret = false;
     }

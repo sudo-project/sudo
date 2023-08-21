@@ -51,7 +51,8 @@ extern int crypt_type;
 #endif
 
 int
-sudo_secureware_init(struct passwd *pw, sudo_auth *auth)
+sudo_secureware_init(const struct sudoers_context *ctx, struct passwd *pw,
+    sudo_auth *auth)
 {
     debug_decl(sudo_secureware_init, SUDOERS_DEBUG_AUTH);
 
@@ -71,7 +72,8 @@ sudo_secureware_init(struct passwd *pw, sudo_auth *auth)
 }
 
 int
-sudo_secureware_verify(struct passwd *pw, const char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
+sudo_secureware_verify(const struct sudoers_context *ctx, struct passwd *pw,
+    const char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     char *pw_epasswd = auth->data;
     char *epass = NULL;
@@ -100,7 +102,8 @@ sudo_secureware_verify(struct passwd *pw, const char *pass, sudo_auth *auth, str
 }
 
 int
-sudo_secureware_cleanup(struct passwd *pw, sudo_auth *auth, bool force)
+sudo_secureware_cleanup(const struct sudoers_context *ctx, struct passwd *pw,
+    sudo_auth *auth, bool force)
 {
     char *pw_epasswd = auth->data;
     debug_decl(sudo_secureware_cleanup, SUDOERS_DEBUG_AUTH);

@@ -90,7 +90,7 @@ struct sudo_sss_handle {
 };
 
 static int
-get_ipa_hostname(char **shostp, char **lhostp)
+get_ipa_hostname(const struct sudoers_context *ctx, char **shostp, char **lhostp)
 {
     size_t linesize = 0;
     char *lhost = NULL;
@@ -136,7 +136,7 @@ get_ipa_hostname(char **shostp, char **lhostp)
 		}
 		if (shost != NULL && lhost != NULL) {
 		    sudo_debug_printf(SUDO_DEBUG_INFO,
-			"ipa_hostname %s overrides %s", lhost, ctx.user.host);
+			"ipa_hostname %s overrides %s", lhost, ctx->user.host);
 		    *shostp = shost;
 		    *lhostp = lhost;
 		    ret = true;
@@ -163,10 +163,11 @@ get_ipa_hostname(char **shostp, char **lhostp)
  * Otherwise, a netgroup non-match could override a user/group match.
  */
 static bool
-sudo_sss_check_user(struct sudo_sss_handle *handle, struct sss_sudo_rule *rule)
+sudo_sss_check_user(struct sudoers_context *ctx, struct sudo_sss_handle *handle,
+    struct sss_sudo_rule *rule)
 {
-    const char *host = handle->ipa_host ? handle->ipa_host : ctx.runas.host;
-    const char *shost = handle->ipa_shost ? handle->ipa_shost : ctx.runas.shost;
+    const char *host = handle->ipa_host ? handle->ipa_host : ctx->runas.host;
+    const char *shost = handle->ipa_shost ? handle->ipa_shost : ctx->runas.shost;
     char **val_array;
     int i, rc, ret = false;
     debug_decl(sudo_sss_check_user, SUDOERS_DEBUG_SSSD);
@@ -359,7 +360,7 @@ cleanup:
 }
 
 static bool
-sss_to_sudoers(struct sudo_sss_handle *handle,
+sss_to_sudoers(struct sudoers_context *ctx, struct sudo_sss_handle *handle,
     struct sss_sudo_result *sss_result)
 {
     struct userspec *us;
@@ -397,7 +398,7 @@ sss_to_sudoers(struct sudo_sss_handle *handle,
 	 * We don't know whether a rule was included due to a user/group
 	 * match or because it contained a netgroup.
 	 */
-	if (!sudo_sss_check_user(handle, rule))
+	if (!sudo_sss_check_user(ctx, handle, rule))
 	    continue;
 
 	if ((priv = sss_rule_to_priv(handle, rule, &rc)) == NULL) {
@@ -534,7 +535,7 @@ sudo_sss_result_get(const struct sudo_nss *nss, struct passwd *pw)
 
 /* sudo_nss implementation */
 static int
-sudo_sss_close(struct sudo_nss *nss)
+sudo_sss_close(struct sudoers_context *ctx, struct sudo_nss *nss)
 {
     struct sudo_sss_handle *handle = nss->handle;
     debug_decl(sudo_sss_close, SUDOERS_DEBUG_SSSD);
@@ -551,7 +552,7 @@ sudo_sss_close(struct sudo_nss *nss)
 }
 
 static int
-sudo_sss_open(struct sudo_nss *nss)
+sudo_sss_open(struct sudoers_context *ctx, struct sudo_nss *nss)
 {
     struct sudo_sss_handle *handle;
     static const char path[] = _PATH_SSSD_LIB"/libsss_sudo.so";
@@ -560,7 +561,7 @@ sudo_sss_open(struct sudo_nss *nss)
     if (nss->handle != NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR,
 	    "%s: called with non-NULL handle %p", __func__, nss->handle);
-	sudo_sss_close(nss);
+	sudo_sss_close(ctx, nss);
     }
 
     /* Create a handle container. */
@@ -629,10 +630,10 @@ sudo_sss_open(struct sudo_nss *nss)
 
     /*
      * If the runas host matches the local host, check for ipa_hostname
-     * in sssd.conf and use it in preference to ctx.runas.host.
+     * in sssd.conf and use it in preference to ctx->runas.host.
      */
-    if (strcasecmp(ctx.runas.host, ctx.user.host) == 0) {
-	if (get_ipa_hostname(&handle->ipa_shost, &handle->ipa_host) == -1) {
+    if (strcasecmp(ctx->runas.host, ctx->user.host) == 0) {
+	if (get_ipa_hostname(ctx, &handle->ipa_shost, &handle->ipa_host) == -1) {
 	    free(handle);
 	    debug_return_int(ENOMEM);
 	}
@@ -640,7 +641,7 @@ sudo_sss_open(struct sudo_nss *nss)
 
     /* The "parse tree" contains userspecs, defaults, aliases and hostnames. */
     init_parse_tree(&handle->parse_tree, handle->ipa_host, handle->ipa_shost,
-	nss);
+	ctx, nss);
     nss->handle = handle;
 
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "handle=%p", handle);
@@ -652,7 +653,8 @@ sudo_sss_open(struct sudo_nss *nss)
  * Perform query for user and host and convert to sudoers parse tree.
  */
 static int
-sudo_sss_query(const struct sudo_nss *nss, struct passwd *pw)
+sudo_sss_query(struct sudoers_context *ctx, const struct sudo_nss *nss,
+    struct passwd *pw)
 {
     struct sudo_sss_handle *handle = nss->handle;
     struct sss_sudo_result *sss_result = NULL;
@@ -681,7 +683,7 @@ sudo_sss_query(const struct sudo_nss *nss, struct passwd *pw)
 
     sudo_debug_printf(SUDO_DEBUG_DIAG,
 	"searching SSSD/LDAP for sudoers entries for user %s, host %s",
-	 pw->pw_name, ctx.runas.host);
+	 pw->pw_name, ctx->runas.host);
 
     /* Stash a ref to the passwd struct in the handle. */
     sudo_pw_addref(pw);
@@ -689,7 +691,7 @@ sudo_sss_query(const struct sudo_nss *nss, struct passwd *pw)
 
     /* Convert to sudoers parse tree if the user was found. */
     if (sss_result != NULL) {
-	if (!sss_to_sudoers(handle, sss_result)) {
+	if (!sss_to_sudoers(ctx, handle, sss_result)) {
 	    ret = -1;
 	    goto done;
 	}
@@ -716,7 +718,7 @@ done:
  * The contents will be populated by the getdefs() and query() functions.
  */
 static struct sudoers_parse_tree *
-sudo_sss_parse(const struct sudo_nss *nss)
+sudo_sss_parse(struct sudoers_context *ctx, const struct sudo_nss *nss)
 {
     struct sudo_sss_handle *handle = nss->handle;
     debug_decl(sudo_sss_parse, SUDOERS_DEBUG_SSSD);
@@ -731,7 +733,7 @@ sudo_sss_parse(const struct sudo_nss *nss)
 }
 
 static int
-sudo_sss_getdefs(const struct sudo_nss *nss)
+sudo_sss_getdefs(struct sudoers_context *ctx, const struct sudo_nss *nss)
 {
     struct sudo_sss_handle *handle = nss->handle;
     struct sss_sudo_result *sss_result = NULL;
@@ -754,8 +756,8 @@ sudo_sss_getdefs(const struct sudo_nss *nss)
     sudo_debug_printf(SUDO_DEBUG_DIAG, "Looking for cn=defaults");
 
     /* NOTE: these are global defaults, user-ID and name are not used. */
-    rc = handle->fn_send_recv_defaults(ctx.user.pw->pw_uid,
-	ctx.user.pw->pw_name, &sss_error, &handle->domainname, &sss_result);
+    rc = handle->fn_send_recv_defaults(ctx->user.pw->pw_uid,
+	ctx->user.pw->pw_name, &sss_error, &handle->domainname, &sss_result);
     switch (rc) {
     case 0:
 	break;

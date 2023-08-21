@@ -47,9 +47,10 @@ struct getpass_closure {
     int lectured;
     void *cookie;
     struct passwd *auth_pw;
+    const struct sudoers_context *ctx;
 };
 
-static struct passwd *get_authpw(unsigned int);
+static struct passwd *get_authpw(struct sudoers_context *ctx, unsigned int);
 
 /*
  * Called when getpass is suspended so we can drop the lock.
@@ -72,7 +73,7 @@ getpass_resume(int signo, void *vclosure)
 {
     struct getpass_closure *closure = vclosure;
 
-    closure->cookie = timestamp_open(ctx.user.name, ctx.user.sid);
+    closure->cookie = timestamp_open(closure->ctx);
     if (closure->cookie == NULL)
 	return -1;
     if (!timestamp_lock(closure->cookie, closure->auth_pw))
@@ -88,6 +89,7 @@ static int
 check_user_interactive(unsigned int validated, unsigned int mode,
     struct getpass_closure *closure)
 {
+    const struct sudoers_context *ctx = closure->ctx;
     struct sudo_conv_callback callback;
     int ret = -1;
     char *prompt;
@@ -103,7 +105,7 @@ check_user_interactive(unsigned int validated, unsigned int mode,
     /* Open, lock and read time stamp file if we are using it. */
     if (!ISSET(mode, MODE_IGNORE_TICKET)) {
 	/* Open time stamp file and check its status. */
-	closure->cookie = timestamp_open(ctx.user.name, ctx.user.sid);
+	closure->cookie = timestamp_open(ctx);
 	if (closure->cookie != NULL) {
 	    if (timestamp_lock(closure->cookie, closure->auth_pw)) {
 		closure->tstat = timestamp_status(closure->cookie,
@@ -132,20 +134,20 @@ check_user_interactive(unsigned int validated, unsigned int mode,
     default:
 	if (ISSET(mode, MODE_NONINTERACTIVE) && !def_noninteractive_auth) {
 	    validated |= FLAG_NO_USER_INPUT;
-	    log_auth_failure(validated, 0);
+	    log_auth_failure(ctx, validated, 0);
 	    goto done;
 	}
 
 	/* Expand any escapes in the prompt. */
-	prompt = expand_prompt(
-	    ctx.user.prompt ? ctx.user.prompt : def_passprompt,
+	prompt = expand_prompt(ctx,
+	    ctx->user.prompt ? ctx->user.prompt : def_passprompt,
 	    closure->auth_pw->pw_name);
 	if (prompt == NULL)
 	    goto done;
 
-	ret = verify_user(closure->auth_pw, prompt, validated, &callback);
+	ret = verify_user(ctx, closure->auth_pw, prompt, validated, &callback);
 	if (ret == true && closure->lectured)
-	    (void)set_lectured();	/* lecture error not fatal */
+	    (void)set_lectured(ctx->user.name);	/* lecture error not fatal */
 	free(prompt);
 	break;
     }
@@ -159,7 +161,8 @@ done:
  * or -1 on error.
  */
 int
-check_user(unsigned int validated, unsigned int mode)
+check_user(struct sudoers_context *ctx, unsigned int validated,
+    unsigned int mode)
 {
     struct getpass_closure closure = { TS_ERROR };
     int ret = -1;
@@ -180,16 +183,17 @@ check_user(unsigned int validated, unsigned int mode)
      * Init authentication system regardless of whether we need a password.
      * Required for proper PAM session support.
      */
-    if ((closure.auth_pw = get_authpw(mode)) == NULL)
+    if ((closure.auth_pw = get_authpw(ctx, mode)) == NULL)
 	goto done;
-    if (sudo_auth_init(closure.auth_pw, mode) == -1)
+    if (sudo_auth_init(ctx, closure.auth_pw, mode) == -1)
 	goto done;
+    closure.ctx = ctx;
 
     /*
      * Don't prompt for the root passwd or if the user is exempt.
      * If the user is not changing uid/gid, no need for a password.
      */
-    if (!def_authenticate || user_is_exempt()) {
+    if (!def_authenticate || user_is_exempt(ctx)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %s", __func__,
 	    !def_authenticate ? "authentication disabled" :
 	    "user exempt from authentication");
@@ -197,17 +201,17 @@ check_user(unsigned int validated, unsigned int mode)
 	ret = true;
 	goto done;
     }
-    if (ctx.user.uid == 0 || (ctx.user.uid == ctx.runas.pw->pw_uid &&
-	(ctx.runas.gr == NULL ||
-	user_in_group(ctx.user.pw, ctx.runas.gr->gr_name)))) {
+    if (ctx->user.uid == 0 || (ctx->user.uid == ctx->runas.pw->pw_uid &&
+	(ctx->runas.gr == NULL ||
+	user_in_group(ctx->user.pw, ctx->runas.gr->gr_name)))) {
 #ifdef HAVE_SELINUX
-	if (ctx.runas.role == NULL && ctx.runas.type == NULL)
+	if (ctx->runas.role == NULL && ctx->runas.type == NULL)
 #endif
 #ifdef HAVE_APPARMOR
-	if (ctx.runas.apparmor_profile == NULL)
+	if (ctx->runas.apparmor_profile == NULL)
 #endif
 #ifdef HAVE_PRIV_SET
-	if (ctx.runas.privs == NULL && ctx.runas.limitprivs == NULL)
+	if (ctx->runas.privs == NULL && ctx->runas.limitprivs == NULL)
 #endif
 	{
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -222,7 +226,7 @@ check_user(unsigned int validated, unsigned int mode)
 done:
     if (ret == true) {
 	/* The approval function may disallow a user post-authentication. */
-	ret = sudo_auth_approval(closure.auth_pw, validated, exempt);
+	ret = sudo_auth_approval(ctx, closure.auth_pw, validated, exempt);
 
 	/*
 	 * Only update time stamp if user validated and was approved.
@@ -234,7 +238,7 @@ done:
 	}
     }
     timestamp_close(closure.cookie);
-    sudo_auth_cleanup(closure.auth_pw, !ISSET(validated, VALIDATE_SUCCESS));
+    sudo_auth_cleanup(ctx, closure.auth_pw, !ISSET(validated, VALIDATE_SUCCESS));
     if (closure.auth_pw != NULL)
 	sudo_pw_delref(closure.auth_pw);
 
@@ -263,7 +267,8 @@ display_lecture(struct sudo_conv_callback *callback)
     if (closure->lectured)
 	debug_return;
 
-    if (def_lecture == never || (def_lecture == once && already_lectured()))
+    if (def_lecture == never ||
+	    (def_lecture == once && already_lectured(closure->ctx->user.name)))
 	debug_return;
 
     memset(&msg, 0, sizeof(msg));
@@ -284,16 +289,16 @@ display_lecture(struct sudo_conv_callback *callback)
 		    close(fd);
 		    goto done;
 		}
-		log_warning(SLOG_RAW_MSG,
+		log_warning(closure->ctx, SLOG_RAW_MSG,
 		    N_("error reading lecture file %s"), def_lecture_file);
 	    } else {
-		log_warningx(SLOG_RAW_MSG,
+		log_warningx(closure->ctx, SLOG_RAW_MSG,
 		    N_("ignoring lecture file %s: not a regular file"),
 		    def_lecture_file);
 	    }
 	} else {
-	    log_warning(SLOG_RAW_MSG|SLOG_NO_STDERR, N_("unable to open %s"),
-		def_lecture_file);
+	    log_warning(closure->ctx, SLOG_RAW_MSG|SLOG_NO_STDERR,
+		N_("unable to open %s"), def_lecture_file);
 	}
 	if (fd != -1)
 	    close(fd);
@@ -323,13 +328,13 @@ done:
  * Checks if the user is exempt from supplying a password.
  */
 bool
-user_is_exempt(void)
+user_is_exempt(const struct sudoers_context *ctx)
 {
     bool ret = false;
     debug_decl(user_is_exempt, SUDOERS_DEBUG_AUTH);
 
     if (def_exempt_group) {
-	if (user_in_group(ctx.user.pw, def_exempt_group))
+	if (user_in_group(ctx->user.pw, def_exempt_group))
 	    ret = true;
     }
     debug_return_bool(ret);
@@ -338,40 +343,41 @@ user_is_exempt(void)
 /*
  * Get passwd entry for the user we are going to authenticate as.
  * By default, this is the user invoking sudo.  In the most common
- * case, this matches ctx.user.pw or ctx.runas.pw.
+ * case, this matches ctx->user.pw or ctx->runas.pw.
  */
 static struct passwd *
-get_authpw(unsigned int mode)
+get_authpw(struct sudoers_context *ctx, unsigned int mode)
 {
     struct passwd *pw = NULL;
     debug_decl(get_authpw, SUDOERS_DEBUG_AUTH);
 
     if (ISSET(mode, (MODE_CHECK|MODE_LIST))) {
 	/* In list mode we always prompt for the user's password. */
-	sudo_pw_addref(ctx.user.pw);
-	pw = ctx.user.pw;
+	sudo_pw_addref(ctx->user.pw);
+	pw = ctx->user.pw;
     } else {
 	if (def_rootpw) {
 	    if ((pw = sudo_getpwuid(ROOT_UID)) == NULL) {
-		log_warningx(SLOG_SEND_MAIL, N_("unknown uid %u"), ROOT_UID);
+		log_warningx(ctx, SLOG_SEND_MAIL, N_("unknown uid %u"),
+		    ROOT_UID);
 	    }
 	} else if (def_runaspw) {
 	    if ((pw = sudo_getpwnam(def_runas_default)) == NULL) {
-		log_warningx(SLOG_SEND_MAIL,
+		log_warningx(ctx, SLOG_SEND_MAIL,
 		    N_("unknown user %s"), def_runas_default);
 	    }
 	} else if (def_targetpw) {
-	    if (ctx.runas.pw->pw_name == NULL) {
+	    if (ctx->runas.pw->pw_name == NULL) {
 		/* This should never be NULL as we fake up the passwd struct */
-		log_warningx(SLOG_RAW_MSG, N_("unknown uid %u"),
-		    (unsigned int) ctx.runas.pw->pw_uid);
+		log_warningx(ctx, SLOG_RAW_MSG, N_("unknown uid %u"),
+		    (unsigned int) ctx->runas.pw->pw_uid);
 	    } else {
-		sudo_pw_addref(ctx.runas.pw);
-		pw = ctx.runas.pw;
+		sudo_pw_addref(ctx->runas.pw);
+		pw = ctx->runas.pw;
 	    }
 	} else {
-	    sudo_pw_addref(ctx.user.pw);
-	    pw = ctx.user.pw;
+	    sudo_pw_addref(ctx->user.pw);
+	    pw = ctx->user.pw;
 	}
     }
 

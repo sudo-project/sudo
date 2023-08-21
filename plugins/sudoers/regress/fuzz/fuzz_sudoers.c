@@ -49,7 +49,6 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 static const char *orig_cmnd;
 
 /* Required to link with parser. */
-struct sudoers_context ctx;
 sudo_conv_t sudo_conv = fuzz_conversation;
 sudo_printf_t sudo_printf = fuzz_printf;
 unsigned int sudo_mode;
@@ -104,33 +103,35 @@ init_envtables(void)
 }
 
 int
-set_cmnd_path(const char *runchroot)
+set_cmnd_path(struct sudoers_context *ctx, const char *runchroot)
 {
-    /* Reallocate ctx.user.cmnd to catch bugs in command_matches(). */
+    /* Reallocate ctx->user.cmnd to catch bugs in command_matches(). */
     char *new_cmnd = strdup(orig_cmnd);
     if (new_cmnd == NULL)
         return NOT_FOUND_ERROR;
-    free(ctx.user.cmnd);
-    ctx.user.cmnd = new_cmnd;
+    free(ctx->user.cmnd);
+    ctx->user.cmnd = new_cmnd;
     return FOUND;
 }
 
 /* STUB */
 bool
-mail_parse_errors(void)
+mail_parse_errors(const struct sudoers_context *ctx)
 {
     return true;
 }
 
 /* STUB */
 bool
-log_warningx(unsigned int flags, const char * restrict fmt, ...)
+log_warningx(const struct sudoers_context *ctx, unsigned int flags,
+    const char * restrict fmt, ...)
 {
     return true;
 }
 
 static int
-sudo_fuzz_query(const struct sudo_nss *nss, struct passwd *pw)
+sudo_fuzz_query(struct sudoers_context *ctx, const struct sudo_nss *nss,
+    struct passwd *pw)
 {
     return 0;
 }
@@ -142,15 +143,15 @@ cb_unused(struct sudoers_parse_tree *parse_tree, struct alias *a, void *v)
 }
 
 bool
-cb_log_input(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
+cb_log_input(struct sudoers_context *ctx, const char *file,
+    int line, int column, const union sudo_defs_val *sd_un, int op)
 {
     return 0;
 }
 
 bool
-cb_log_output(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
+cb_log_output(struct sudoers_context *ctx, const char *file,
+    int line, int column, const union sudo_defs_val *sd_un, int op)
 {
     return 0;
 }
@@ -196,6 +197,7 @@ static struct user_data {
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+    struct sudoers_context ctx = { 0 };
     struct user_data *ud;
     struct sudo_nss sudo_nss_fuzz;
     struct sudo_nss_list snl = TAILQ_HEAD_INITIALIZER(snl);
@@ -258,7 +260,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     gids[1] = "20";
     gids[2] = "5";
     gids[3] = NULL;
-    if (sudo_set_gidlist(pw, (char **)gids, ENTRY_TYPE_FRONTEND) == -1)
+    if (sudo_set_gidlist(pw, -1, NULL, (char **)gids, ENTRY_TYPE_FRONTEND) == -1)
 	goto done;
     sudo_pw_delref(pw);
 
@@ -267,7 +269,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	goto done;
     gids[0] = "5";
     gids[1] = NULL;
-    if (sudo_set_gidlist(pw, (char **)gids, ENTRY_TYPE_FRONTEND) == -1)
+    if (sudo_set_gidlist(pw, -1, NULL, (char **)gids, ENTRY_TYPE_FRONTEND) == -1)
 	goto done;
     sudo_pw_delref(pw);
 
@@ -279,7 +281,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     gids[2] = "5";
     gids[3] = "100";
     gids[4] = NULL;
-    if (sudo_set_gidlist(pw, (char **)gids, ENTRY_TYPE_FRONTEND) == -1)
+    if (sudo_set_gidlist(pw, -1, NULL, (char **)gids, ENTRY_TYPE_FRONTEND) == -1)
 	goto done;
     sudo_pw_delref(pw);
 
@@ -306,7 +308,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
 
     /* Only one sudoers source, the sudoers file itself. */
-    init_parse_tree(&parse_tree, NULL, NULL, NULL);
+    init_parse_tree(&parse_tree, NULL, NULL, &ctx, NULL);
     memset(&sudo_nss_fuzz, 0, sizeof(sudo_nss_fuzz));
     sudo_nss_fuzz.parse_tree = &parse_tree;
     sudo_nss_fuzz.query = sudo_fuzz_query;
@@ -314,7 +316,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     /* Initialize defaults and parse sudoers. */
     init_defaults();
-    init_parser("sudoers", NULL);
+    init_parser(&ctx, "sudoers", NULL);
     sudoersrestart(fp);
     sudoersparse();
     reparent_parse_tree(&parse_tree);
@@ -369,18 +371,18 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		ctx.runas.gr = NULL;
 	    }
 
-	    update_defaults(&parse_tree, NULL, SETDEF_ALL, false);
+	    update_defaults(&ctx, &parse_tree, NULL, SETDEF_ALL, false);
 
-	    sudoers_lookup(&snl, ctx.user.pw, now, NULL, NULL, &cmnd_status,
+	    sudoers_lookup(&snl, &ctx, now, NULL, NULL, &cmnd_status,
 		false);
 
 	    /* Match again as a pseudo-command (list, validate, etc). */
-	    sudoers_lookup(&snl, ctx.user.pw, now, NULL, NULL, &cmnd_status,
+	    sudoers_lookup(&snl, &ctx, now, NULL, NULL, &cmnd_status,
 		true);
 
 	    /* Display privileges. */
-	    display_privs(&snl, ctx.user.pw, false);
-	    display_privs(&snl, ctx.user.pw, true);
+	    display_privs(&ctx, &snl, ctx.user.pw, false);
+	    display_privs(&ctx, &snl, ctx.user.pw, true);
 	}
 
 	/* Expand tildes in runcwd and runchroot. */
@@ -409,13 +411,12 @@ done:
 	sudo_pw_delref(ctx.runas.pw);
     if (ctx.runas.gr != NULL)
 	sudo_gr_delref(ctx.runas.gr);
-    sudo_freepwcache();
-    sudo_freegrcache();
     free(ctx.user.cmnd);
     free(ctx.runas.cmnd);
     free(ctx.user.cmnd_list);
-    memset(&ctx.user. 0, sizeof(ctx.user.);
-    memset(&ctx.runas. 0, sizeof(ctx.runas.);
+    memset(&ctx, 0, sizeof(ctx));
+    sudo_freepwcache();
+    sudo_freegrcache();
     sudoers_setlocale(SUDOERS_LOCALE_USER, NULL);
     sudoers_debug_deregister();
     fflush(stdout);
