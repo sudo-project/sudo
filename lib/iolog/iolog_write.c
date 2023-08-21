@@ -48,7 +48,7 @@ iolog_write(struct iolog_file *iol, const void *buf, size_t len,
     ssize_t ret;
     debug_decl(iolog_write, SUDO_DEBUG_UTIL);
 
-    if (len > UINT_MAX || len > SSIZE_MAX) {
+    if (len > UINT_MAX || len > SSIZE_MAX) { // -V590
 	errno = EINVAL;
 	if (errstr != NULL)
 	    *errstr = strerror(errno);

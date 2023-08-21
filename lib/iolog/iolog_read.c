@@ -48,7 +48,7 @@ iolog_read(struct iolog_file *iol, void *buf, size_t nbytes,
     ssize_t nread;
     debug_decl(iolog_read, SUDO_DEBUG_UTIL);
 
-    if (nbytes > UINT_MAX || nbytes > SSIZE_MAX) {
+    if (nbytes > UINT_MAX || nbytes > SSIZE_MAX) { // -V590
 	errno = EINVAL;
 	if (errstr != NULL)
 	    *errstr = strerror(errno);

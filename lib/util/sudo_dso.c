@@ -294,7 +294,7 @@ sudo_dso_load_v1(const char *path, int mode)
 # endif /* RTLD_MEMBER */
     /* On failure, try again with a multi-arch path where possible. */
     if (ret == NULL)
-	ret = dlopen_multi_arch(path, flags);
+	ret = dlopen_multi_arch(path, flags); // -V1048
 
     return ret;
 }
