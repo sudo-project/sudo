@@ -259,7 +259,7 @@ log_reject(const struct sudoers_context *ctx, const char *message,
     debug_decl(log_reject, SUDOERS_DEBUG_LOGGING);
 
     if (!ISSET(ctx->mode, MODE_POLICY_INTERCEPTED))
-	uuid_str = ctx->user.uuid_str;
+	uuid_str = ctx->uuid_str;
 
     if (mailit) {
 	SET(evl_flags, EVLOG_MAIL);
@@ -615,7 +615,7 @@ log_exit_status(const struct sudoers_context *ctx, int status)
 	    ret = false;
 	    goto done;
 	}
-	sudo_timespecsub(&run_time, &ctx->user.submit_time, &run_time);
+	sudo_timespecsub(&run_time, &ctx->submit_time, &run_time);
 
         if (WIFEXITED(status)) {
 	    exit_value = WEXITSTATUS(status);
@@ -636,7 +636,7 @@ log_exit_status(const struct sudoers_context *ctx, int status)
 	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
 	sudoers_to_eventlog(ctx, &evlog, ctx->runas.cmnd_saved,
-	    ctx->runas.argv_saved, env_get(), ctx->user.uuid_str);
+	    ctx->runas.argv_saved, env_get(), ctx->uuid_str);
 	if (def_mail_always) {
 	    SET(evl_flags, EVLOG_MAIL);
 	    if (!def_log_exit_status)
@@ -740,7 +740,7 @@ vlog_warning(const struct sudoers_context *ctx, unsigned int flags,
 		SET(evl_flags, EVLOG_MAIL_ONLY);
 	}
 	sudoers_to_eventlog(ctx, &evlog, ctx->runas.cmnd, ctx->runas.argv,
-	    env_get(), ctx->user.uuid_str);
+	    env_get(), ctx->uuid_str);
 	if (!eventlog_alert(&evlog, evl_flags, &now, message, errstr))
 	    ret = false;
 	if (!log_server_alert(ctx, &evlog, &now, message, errstr))
@@ -860,7 +860,7 @@ mail_parse_errors(const struct sudoers_context *ctx)
 	goto done;
     }
     sudoers_to_eventlog(ctx, &evlog, ctx->runas.cmnd, ctx->runas.argv,
-	env_get(), ctx->user.uuid_str);
+	env_get(), ctx->uuid_str);
 
     /* Convert parse_error_list to a string vector. */
     n = 0;
@@ -980,8 +980,8 @@ sudoers_to_eventlog(const struct sudoers_context *ctx, struct eventlog *evlog,
 	sudo_gr_delref(grp);
 
     memset(evlog, 0, sizeof(*evlog));
-    evlog->iolog_file = ctx->user.iolog_file;
-    evlog->iolog_path = ctx->user.iolog_path;
+    evlog->iolog_file = ctx->iolog_file;
+    evlog->iolog_path = ctx->iolog_path;
     evlog->command = cmnd ? (char *)cmnd : (argv ? argv[0] : NULL);
     evlog->cwd = ctx->user.cwd;
     if (def_runchroot != NULL && strcmp(def_runchroot, "*") != 0) {
@@ -995,7 +995,7 @@ sudoers_to_eventlog(const struct sudoers_context *ctx, struct eventlog *evlog,
 	evlog->runcwd = ctx->user.cwd;
     }
     evlog->rungroup = ctx->runas.gr ? ctx->runas.gr->gr_name : ctx->runas.group;
-    evlog->source = ctx->user.source;
+    evlog->source = ctx->source;
     evlog->submithost = ctx->user.host;
     evlog->submituser = ctx->user.name;
     if (grp != NULL)
@@ -1004,7 +1004,7 @@ sudoers_to_eventlog(const struct sudoers_context *ctx, struct eventlog *evlog,
     evlog->argv = (char **)argv;
     evlog->env_add = (char **)ctx->user.env_vars;
     evlog->envp = (char **)envp;
-    evlog->submit_time = ctx->user.submit_time;
+    evlog->submit_time = ctx->submit_time;
     evlog->lines = ctx->user.lines;
     evlog->columns = ctx->user.cols;
     if (ctx->runas.pw != NULL) {
@@ -1030,7 +1030,7 @@ sudoers_to_eventlog(const struct sudoers_context *ctx, struct eventlog *evlog,
 	if (sudo_gettime_real(&now) == -1) {
 	    sudo_warn("%s", U_("unable to get time of day"));
 	} else {
-	    sudo_timespecsub(&now, &ctx->user.submit_time, &evlog->iolog_offset);
+	    sudo_timespecsub(&now, &ctx->submit_time, &evlog->iolog_offset);
 	}
     }
 

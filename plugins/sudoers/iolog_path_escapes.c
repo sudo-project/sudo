@@ -46,7 +46,7 @@ fill_seq(char *str, size_t strsize, void *v)
     debug_decl(fill_seq, SUDOERS_DEBUG_UTIL);
 
     if (sessid[0] == '\0') {
-	if (!iolog_nextid(ctx->user.iolog_dir, sessid))
+	if (!iolog_nextid(ctx->iolog_dir, sessid))
 	    debug_return_size_t((size_t)-1);
     }
 

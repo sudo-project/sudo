@@ -112,7 +112,6 @@ struct sudoers_plugin_settings {
  * Info pertaining to the invoking user.
  */
 struct sudoers_user_context {
-    struct timespec submit_time;
     struct passwd *pw;
     struct stat *cmnd_stat;
     char *cwd;
@@ -129,12 +128,8 @@ struct sudoers_user_context {
     char *cmnd_dir;
     char *cmnd_list;
     char *ccname;
-    char *source;
     struct gid_list *gid_list;
     char * const * env_vars;
-    char *iolog_file;
-    char *iolog_dir;
-    char *iolog_path;
     int   closefrom;
     int   lines;
     int   cols;
@@ -144,7 +139,6 @@ struct sudoers_user_context {
     uid_t gid;
     pid_t sid;
     pid_t tcpgid;
-    char uuid_str[37];
 };
 
 /*
@@ -193,8 +187,14 @@ struct sudoers_context {
     struct sudoers_plugin_settings settings;
     struct sudoers_user_context user;
     struct sudoers_runas_context runas;
+    struct timespec submit_time;
+    char *source;
+    char *iolog_file;
+    char *iolog_dir;
+    char *iolog_path;
     int sudoedit_nfiles;
     unsigned int mode;
+    char uuid_str[37];
 };
 
 /*

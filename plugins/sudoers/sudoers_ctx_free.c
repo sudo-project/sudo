@@ -57,7 +57,6 @@ sudoers_ctx_free(struct sudoers_context *ctx)
     canon_path_free(ctx->user.cmnd_dir);
     free(ctx->user.cmnd_args);
     free(ctx->user.cmnd_list);
-    free(ctx->user.source);
     free(ctx->user.cmnd_stat);
 
     /* Free remaining references to password and group entries. */
@@ -85,6 +84,9 @@ sudoers_ctx_free(struct sudoers_context *ctx)
     free(ctx->runas.privs);
     free(ctx->runas.limitprivs);
 #endif
+
+    /* Free dynamic contents of ctx. */
+    free(ctx->source);
 
     memset(ctx, 0, sizeof(*ctx));
 

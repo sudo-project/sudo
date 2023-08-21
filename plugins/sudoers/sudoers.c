@@ -280,7 +280,7 @@ cleanup:
 /*
  * Expand I/O log dir and file into a full path.
  * Returns the full I/O log path prefixed with "iolog_path=".
- * Sets ctx->user.iolog_file as a side effect.
+ * Sets ctx->iolog_file and ctx->iolog_path as a side effect.
  */
 static char *
 format_iolog_path(struct sudoers_context *ctx)
@@ -296,10 +296,10 @@ format_iolog_path(struct sudoers_context *ctx)
     ok = expand_iolog_path(def_iolog_dir, dir, sizeof(dir),
 	&sudoers_iolog_path_escapes[1], ctx);
     if (ok) {
-	ctx->user.iolog_dir = dir;
+	ctx->iolog_dir = dir;
 	ok = expand_iolog_path(def_iolog_file, file, sizeof(file),
 	    &sudoers_iolog_path_escapes[0], ctx);
-	ctx->user.iolog_dir = NULL;
+	ctx->iolog_dir = NULL;
     }
     sudoers_setlocale(oldlocale, NULL);
     if (!ok)
@@ -311,8 +311,8 @@ format_iolog_path(struct sudoers_context *ctx)
     }
 
     /* Stash pointer to the I/O log for the event log. */
-    ctx->user.iolog_path = iolog_path + sizeof("iolog_path=") - 1;
-    ctx->user.iolog_file = ctx->user.iolog_path + 1 + strlen(dir);
+    ctx->iolog_path = iolog_path + sizeof("iolog_path=") - 1;
+    ctx->iolog_file = ctx->iolog_path + 1 + strlen(dir);
 
 done:
     debug_return_str(iolog_path);
@@ -393,15 +393,15 @@ sudoers_check_common(struct sudoers_context *ctx, int pwflag)
     }
 
     if (match_info.us != NULL && match_info.us->file != NULL) {
-	free(ctx->user.source);
+	free(ctx->source);
 	if (match_info.us->line != 0) {
-	    if (asprintf(&ctx->user.source, "%s:%d:%d", match_info.us->file,
+	    if (asprintf(&ctx->source, "%s:%d:%d", match_info.us->file,
 		    match_info.us->line, match_info.us->column) == -1)
-		ctx->user.source = NULL;
+		ctx->source = NULL;
 	} else {
-	    ctx->user.source = strdup(match_info.us->file);
+	    ctx->source = strdup(match_info.us->file);
 	}
-	if (ctx->user.source == NULL) {
+	if (ctx->source == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}

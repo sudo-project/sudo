@@ -116,7 +116,7 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
     } \
 } while (0)
 
-    if (sudo_gettime_real(&ctx->user.submit_time) == -1) {
+    if (sudo_gettime_real(&ctx->submit_time) == -1) {
 	sudo_warn("%s", U_("unable to get time of day"));
 	goto bad;
     }
@@ -584,7 +584,7 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 
     /* Create a UUID to store in the event log. */
     sudo_uuid_create(uuid);
-    if (sudo_uuid_to_string(uuid, ctx->user.uuid_str, sizeof(ctx->user.uuid_str)) == NULL) {
+    if (sudo_uuid_to_string(uuid, ctx->uuid_str, sizeof(ctx->uuid_str)) == NULL) {
 	sudo_warnx("%s", U_("unable to generate UUID"));
 	goto bad;
     }
@@ -984,8 +984,8 @@ sudoers_policy_store_result(struct sudoers_context *ctx, bool accepted,
         if ((command_info[info_len++] = sudo_new_key_val("rlimit_stack", def_rlimit_stack)) == NULL)
             goto oom;
     }
-    if (ctx->user.source != NULL) {
-	command_info[info_len] = sudo_new_key_val("source", ctx->user.source);
+    if (ctx->source != NULL) {
+	command_info[info_len] = sudo_new_key_val("source", ctx->source);
 	if (command_info[info_len++] == NULL)
 	    goto oom;
     }
