@@ -659,6 +659,7 @@ done:
 /*
  * Add message to the parse error journal, which takes ownership of it.
  * The message will be freed once the journal is processed.
+ * Returns true if message was journaled (and consumed), else false.
  */
 static bool
 journal_parse_error(char *message)
@@ -671,7 +672,7 @@ journal_parse_error(char *message)
 	debug_return_bool(false);
     pe->errstr = message;
     STAILQ_INSERT_TAIL(&parse_error_list, pe, entries);
-    debug_return_bool(false);
+    debug_return_bool(true);
 }
 
 /*
@@ -757,9 +758,11 @@ vlog_warning(const struct sudoers_context *ctx, unsigned int flags,
 	    copy = strdup(message);
 	}
 	if (copy != NULL) {
-	    /* journal_parse_error() takes ownership of copy. */
-	    if (!journal_parse_error(copy))
+	    /* journal_parse_error() takes ownership of copy on success. */
+	    if (!journal_parse_error(copy)) {
+		free(copy);
 		ret = false;
+	    }
 	}
     }
 
@@ -929,7 +932,10 @@ log_parse_error(const struct sudoers_context *ctx, const char *file,
 	len = asprintf(&message, _("%s: %s"), file, errstr);
     }
     if (len != -1) {
-	journal_parse_error(message);
+	if (!journal_parse_error(message)) {
+	    free(message);
+	    ret = false;
+	}
     } else {
 	ret = false;
     }
