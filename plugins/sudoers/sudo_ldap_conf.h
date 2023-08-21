@@ -91,8 +91,9 @@ struct ldap_config {
 
 extern struct ldap_config ldap_conf;
 
+struct sudoers_context;
 const char *sudo_krb5_ccname_path(const char *old_ccname);
-bool sudo_ldap_read_config(void);
+bool sudo_ldap_read_config(const struct sudoers_context *ctx);
 int sudo_ldap_set_options_global(void);
 int sudo_ldap_set_options_conn(LDAP *ld);
 

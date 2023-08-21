@@ -148,11 +148,11 @@ struct sudoers_runas_context {
  * Settings passed in from the sudo front-end.
  */
 struct sudoers_plugin_settings {
-    unsigned int flags;
-    int max_groups;
     const char *plugin_dir;
     const char *ldap_conf;
     const char *ldap_secret;
+    unsigned int flags;
+    int max_groups;
 };
 
 /*
@@ -419,9 +419,6 @@ void sudoers_debug_deregister(void);
 unsigned int sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v, struct defaults_list *defaults);
 bool sudoers_policy_store_result(struct sudoers_context *ctx, bool accepted, char *argv[], char *envp[], mode_t cmnd_umask, char *iolog_path, void *v);
 const struct sudoers_parser_config *policy_sudoers_conf(void);
-const char *policy_path_ldap_conf(void);
-const char *policy_path_ldap_secret(void);
-const char *policy_path_plugin_dir(void);
 
 /* group_plugin.c */
 void group_plugin_unload(void);

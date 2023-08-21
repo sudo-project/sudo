@@ -134,7 +134,7 @@ sudo_dso_public int main(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
-    struct sudoers_context ctx = { { 0 } };
+    struct sudoers_context ctx = { { NULL } };
     struct sudoersfile *sp;
     char *editor, **editor_argv;
     const char *export_path = NULL;

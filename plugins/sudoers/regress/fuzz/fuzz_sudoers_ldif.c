@@ -119,7 +119,7 @@ fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    struct sudoers_context ctx = { 0 };
+    struct sudoers_context ctx = { { NULL } };
     struct sudoers_parse_tree parse_tree;
     FILE *fp;
 

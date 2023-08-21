@@ -56,9 +56,6 @@ static const char *interfaces_string;
 sudo_conv_t sudo_conv;
 sudo_printf_t sudo_printf;
 struct sudo_plugin_event * (*plugin_event_alloc)(void);
-static const char *path_ldap_conf = _PATH_LDAP_CONF;
-static const char *path_ldap_secret = _PATH_LDAP_SECRET;
-static const char *path_plugin_dir = _PATH_SUDO_PLUGIN_DIR;
 static const char *path_sudoers = _PATH_SUDOERS;
 static bool session_opened;
 int sudoedit_nfiles;
@@ -172,12 +169,12 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 	    }
 	    if (MATCHES(*cur, "ldap_conf=")) {
 		CHECK(*cur, "ldap_conf=");
-		path_ldap_conf = *cur + sizeof("ldap_conf=") - 1;
+		ctx->settings.ldap_conf = *cur + sizeof("ldap_conf=") - 1;
 		continue;
 	    }
 	    if (MATCHES(*cur, "ldap_secret=")) {
 		CHECK(*cur, "ldap_secret=");
-		path_ldap_secret = *cur + sizeof("ldap_secret=") - 1;
+		ctx->settings.ldap_secret = *cur + sizeof("ldap_secret=") - 1;
 		continue;
 	    }
 	}
@@ -396,7 +393,7 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 #ifdef ENABLE_SUDO_PLUGIN_API
 	if (MATCHES(*cur, "plugin_dir=")) {
 	    CHECK(*cur, "plugin_dir=");
-	    path_plugin_dir = *cur + sizeof("plugin_dir=") - 1;
+	    ctx->settings.plugin_dir = *cur + sizeof("plugin_dir=") - 1;
 	    continue;
 	}
 #endif
@@ -644,30 +641,6 @@ const struct sudoers_parser_config *
 policy_sudoers_conf(void)
 {
     return &sudoers_conf;
-}
-
-/* Return the path to the sudo plugin directory. */
-/* XXX */
-const char *
-policy_path_plugin_dir(void)
-{
-    return path_plugin_dir;
-}
-
-/* Return the path to ldap.conf file, which may be set in the plugin args. */
-/* XXX */
-const char *
-policy_path_ldap_conf(void)
-{
-    return path_ldap_conf;
-}
-
-/* Return the path to ldap.secret file, which may be set in the plugin args. */
-/* XXX */
-const char *
-policy_path_ldap_secret(void)
-{
-    return path_ldap_secret;
 }
 
 /*
@@ -1325,6 +1298,9 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
 static int
 sudoers_policy_version(int verbose)
 {
+#ifdef HAVE_LDAP
+    const struct sudoers_context *ctx = sudoers_get_context();
+#endif
     debug_decl(sudoers_policy_version, SUDOERS_DEBUG_PLUGIN);
 
     sudo_printf(SUDO_CONV_INFO_MSG, _("Sudoers policy plugin version %s\n"),
@@ -1338,8 +1314,10 @@ sudoers_policy_version(int verbose)
 # ifdef _PATH_NSSWITCH_CONF
 	sudo_printf(SUDO_CONV_INFO_MSG, _("nsswitch path: %s\n"), _PATH_NSSWITCH_CONF);
 # endif
-	sudo_printf(SUDO_CONV_INFO_MSG, _("ldap.conf path: %s\n"), path_ldap_conf);
-	sudo_printf(SUDO_CONV_INFO_MSG, _("ldap.secret path: %s\n"), path_ldap_secret);
+	if (ctx->settings.ldap_conf != NULL)
+	    sudo_printf(SUDO_CONV_INFO_MSG, _("ldap.conf path: %s\n"), ctx->settings.ldap_conf);
+	if (ctx->settings.ldap_secret != NULL)
+	    sudo_printf(SUDO_CONV_INFO_MSG, _("ldap.secret path: %s\n"), ctx->settings.ldap_secret);
 #endif
 	dump_auth_methods();
 	dump_defaults();

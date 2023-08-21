@@ -93,7 +93,7 @@ int
 main(int argc, char *argv[])
 {
     struct sudoers_parser_config sudoers_conf = SUDOERS_PARSER_CONFIG_INITIALIZER;
-    struct sudoers_context test_ctx = { { 0 } };
+    struct sudoers_context test_ctx = { { _PATH_SUDO_PLUGIN_DIR } };
     struct sudo_nss_list snl = TAILQ_HEAD_INITIALIZER(snl);
     enum sudoers_formats input_format = format_sudoers;
     struct sudo_nss testsudoers_nss;
@@ -778,12 +778,6 @@ done:
     sudo_lbuf_destroy(&lbuf);
 
     debug_return;
-}
-
-const char *
-policy_path_plugin_dir(void)
-{
-    return _PATH_SUDO_PLUGIN_DIR;
 }
 
 static int

@@ -82,7 +82,9 @@ static bool tty_present(struct sudoers_context *ctx);
 unsigned int sudo_mode;
 
 static char *prev_user;
-static struct sudoers_context sudoers_ctx;
+static struct sudoers_context sudoers_ctx = {
+    { _PATH_LDAP_CONF, _PATH_LDAP_SECRET, _PATH_SUDO_PLUGIN_DIR }
+};
 static struct sudo_nss_list *snl;
 static bool unknown_runas_uid;
 static bool unknown_runas_gid;

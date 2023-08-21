@@ -106,7 +106,7 @@ int
 main(int argc, char *argv[])
 {
     struct sudoers_parse_tree_list parse_trees = TAILQ_HEAD_INITIALIZER(parse_trees);
-    struct sudoers_context ctx = { { 0 } };
+    struct sudoers_context ctx = { { NULL } };
     struct sudoers_parse_tree merged_tree, *parse_tree = NULL;
     struct cvtsudoers_config *conf = NULL;
     enum sudoers_formats output_format = format_ldif;

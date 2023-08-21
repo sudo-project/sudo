@@ -197,7 +197,7 @@ static struct user_data {
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    struct sudoers_context ctx = { 0 };
+    struct sudoers_context ctx = { { NULL } };
     struct user_data *ud;
     struct sudo_nss sudo_nss_fuzz;
     struct sudo_nss_list snl = TAILQ_HEAD_INITIALIZER(snl);

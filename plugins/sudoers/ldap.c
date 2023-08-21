@@ -178,7 +178,8 @@ sudo_ldap_join_uri(struct ldap_config_str_list *uri_list)
  * Returns LDAP_SUCCESS on success, else non-zero.
  */
 static int
-sudo_ldap_init(LDAP **ldp, const char *host, int port)
+sudo_ldap_init(const struct sudoers_context *ctx, LDAP **ldp, const char *host,
+    int port)
 {
     LDAP *ld;
     int ret;
@@ -226,7 +227,7 @@ sudo_ldap_init(LDAP **ldp, const char *host, int port)
 		ldapssl_err2string(ret));
 	    if (ldap_conf.tls_certfile == NULL)
 		sudo_warnx(U_("you must set TLS_CERT in %s to use SSL"),
-		    policy_path_ldap_conf());
+		    ctx->settings.ldap_conf);
 	    goto done;
 	}
 
@@ -1562,7 +1563,7 @@ sudo_ldap_open(struct sudoers_context *ctx, struct sudo_nss *nss)
 	sudo_ldap_close(ctx, nss);
     }
 
-    if (!sudo_ldap_read_config())
+    if (!sudo_ldap_read_config(ctx))
 	goto done;
 
     /* Prevent reading of user ldaprc and system defaults. */
@@ -1586,7 +1587,7 @@ sudo_ldap_open(struct sudoers_context *ctx, struct sudo_nss *nss)
 	free(buf);
     } else
 #endif
-	rc = sudo_ldap_init(&ld, ldap_conf.host, ldap_conf.port);
+	rc = sudo_ldap_init(ctx, &ld, ldap_conf.host, ldap_conf.port);
     if (rc != LDAP_SUCCESS) {
 	sudo_warnx(U_("unable to initialize LDAP: %s"), ldap_err2string(rc));
 	goto done;
