@@ -766,9 +766,9 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
 	char **edit_argv;
 	int edit_argc;
 
-	sudoedit_nfiles = sudoers_ctx.runas.argc - 1;
+	sudoers_ctx.sudoedit_nfiles = sudoers_ctx.runas.argc - 1;
 	free(sudoers_ctx.runas.cmnd);
-	sudoers_ctx.runas.cmnd = find_editor(sudoedit_nfiles,
+	sudoers_ctx.runas.cmnd = find_editor(sudoers_ctx.sudoedit_nfiles,
 	    sudoers_ctx.runas.argv + 1, &edit_argc, &edit_argv, NULL, &env_editor);
 	if (sudoers_ctx.runas.cmnd == NULL) {
 	    switch (errno) {

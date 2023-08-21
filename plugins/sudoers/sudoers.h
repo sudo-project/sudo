@@ -193,6 +193,7 @@ struct sudoers_context {
     struct sudoers_plugin_settings settings;
     struct sudoers_user_context user;
     struct sudoers_runas_context runas;
+    int sudoedit_nfiles;
     unsigned int mode;
 };
 
@@ -434,7 +435,6 @@ void sudoers_cleanup(void);
 bool sudoers_override_umask(void);
 const struct sudoers_context *sudoers_get_context(void);
 bool sudoers_set_mode(unsigned int flags, unsigned int mask);
-extern int sudoedit_nfiles;
 extern sudo_conv_t sudo_conv;
 extern sudo_printf_t sudo_printf;
 extern struct sudo_plugin_event * (*plugin_event_alloc)(void);

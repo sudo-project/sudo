@@ -57,7 +57,6 @@ sudo_printf_t sudo_printf;
 struct sudo_plugin_event * (*plugin_event_alloc)(void);
 static const char *path_sudoers = _PATH_SUDOERS;
 static bool session_opened;
-int sudoedit_nfiles;
 
 extern sudo_dso_public struct policy_plugin sudoers_policy;
 
@@ -183,7 +182,7 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
     /* Parse command line settings. */
     ctx->settings.flags = 0;
     ctx->user.closefrom = -1;
-    sudoedit_nfiles = 0;
+    ctx->sudoedit_nfiles = 0;
     ctx->mode = 0;
     for (cur = info->settings; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "closefrom=")) {
@@ -724,9 +723,9 @@ sudoers_policy_store_result(struct sudoers_context *ctx, bool accepted,
     if (ISSET(ctx->mode, MODE_EDIT)) {
 	if ((command_info[info_len++] = strdup("sudoedit=true")) == NULL)
 	    goto oom;
-	if (sudoedit_nfiles > 0) {
+	if (ctx->sudoedit_nfiles > 0) {
 	    if (asprintf(&command_info[info_len++], "sudoedit_nfiles=%d",
-		sudoedit_nfiles) == -1)
+		ctx->sudoedit_nfiles) == -1)
 		goto oom;
 	}
 	if (!def_sudoedit_checkdir) {
