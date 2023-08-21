@@ -57,6 +57,7 @@ TAILQ_HEAD(monitor_message_list, monitor_message);
 static struct monitor_message_list monitor_messages =
     TAILQ_HEAD_INITIALIZER(monitor_messages);
 static unsigned int term_raw_flags;
+static struct exec_closure pty_ec;
 
 static void sync_ttysize(struct exec_closure *ec);
 static void schedule_signal(struct exec_closure *ec, int signo);
@@ -103,23 +104,9 @@ pty_setup(struct command_details *details)
  * Restore user's terminal settings and update utmp, as needed.
  */
 static void
-pty_cleanup_int(struct exec_closure *ec, int wstatus, bool init_only)
+pty_cleanup(struct exec_closure *ec, int wstatus)
 {
-    static struct exec_closure *saved_ec;
     debug_decl(pty_cleanup, SUDO_DEBUG_EXEC);
-
-    /* If initializing, just store a pointer to the closure and return. */
-    if (init_only) {
-	saved_ec = ec;
-	debug_return;
-    }
-
-    /* Use the stored closure if one is not specified. */
-    if (ec == NULL) {
-	if (saved_ec == NULL)
-	    debug_return;
-	ec = saved_ec;
-    }
 
     /* Restore terminal settings. */
     if (ec->term_raw) {
@@ -140,25 +127,13 @@ pty_cleanup_int(struct exec_closure *ec, int wstatus, bool init_only)
     debug_return;
 }
 
-static inline void
-pty_cleanup(struct exec_closure *ec, int wstatus)
-{
-    pty_cleanup_int(ec, wstatus, false);
-}
-
-static inline void
-pty_cleanup_init(struct exec_closure *ec)
-{
-    pty_cleanup_int(ec, 0, true);
-}
-
 /*
  * Cleanup hook for sudo_fatal()/sudo_fatalx()
  */
 static void
 pty_cleanup_hook(void)
 {
-    pty_cleanup_int(NULL, 0, false);
+    pty_cleanup(&pty_ec, 0);
 }
 
 /*
@@ -1071,7 +1046,7 @@ exec_pty(struct command_details *details,
     bool interpose[3] = { false, false, false };
     struct stat sb, tty_sbuf, *tty_sb = NULL;
     int sv[2], intercept_sv[2] = { -1, -1 };
-    struct exec_closure ec = { 0 };
+    struct exec_closure *ec = &pty_ec;
     struct plugin_container *plugin;
     int evloop_retries = -1;
     bool cmnd_foreground;
@@ -1083,12 +1058,11 @@ exec_pty(struct command_details *details,
     /*
      * Allocate a pty if sudo is running in a terminal.
      */
-    ec.ptyname = pty_setup(details);
-    if (ec.ptyname == NULL)
+    ec->ptyname = pty_setup(details);
+    if (ec->ptyname == NULL)
 	debug_return_bool(false);
 
     /* Register cleanup function */
-    pty_cleanup_init(&ec);
     sudo_fatal_callback_register(pty_cleanup_hook);
 
     /*
@@ -1160,17 +1134,17 @@ exec_pty(struct command_details *details,
 	/* Read from /dev/tty, write to pty leader */
 	if (!ISSET(details->flags, CD_BACKGROUND)) {
 	    io_buf_new(io_fds[SFD_USERTTY], io_fds[SFD_LEADER],
-		log_ttyin, read_callback, write_callback, &ec);
+		log_ttyin, read_callback, write_callback, ec);
 	}
 
 	/* Read from pty leader, write to /dev/tty */
 	io_buf_new(io_fds[SFD_LEADER], io_fds[SFD_USERTTY],
-	    log_ttyout, read_callback, write_callback, &ec);
+	    log_ttyout, read_callback, write_callback, ec);
 
 	/* Are we the foreground process? */
-	ec.foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ppgrp;
+	ec->foreground = tcgetpgrp(io_fds[SFD_USERTTY]) == ppgrp;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "sudo is running in the %s",
-	    ec.foreground ? "foreground" : "background");
+	    ec->foreground ? "foreground" : "background");
     }
 
     /*
@@ -1198,11 +1172,11 @@ exec_pty(struct command_details *details,
 	    if (pipe2(io_pipe[STDIN_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
-		log_stdin, read_callback, write_callback, &ec);
+		log_stdin, read_callback, write_callback, ec);
 	    io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
 	}
 
-	if (ec.foreground && ppgrp != sudo_pid) {
+	if (ec->foreground && ppgrp != sudo_pid) {
 	    /*
 	     * If sudo is not the process group leader and stdin is not
 	     * a tty we may be running as a background job via a shell
@@ -1248,7 +1222,7 @@ exec_pty(struct command_details *details,
 	    if (pipe2(io_pipe[STDOUT_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
-		log_stdout, read_callback, write_callback, &ec);
+		log_stdout, read_callback, write_callback, ec);
 	    io_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
 	}
     }
@@ -1266,7 +1240,7 @@ exec_pty(struct command_details *details,
 	    if (pipe2(io_pipe[STDERR_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
-		log_stderr, read_callback, write_callback, &ec);
+		log_stderr, read_callback, write_callback, ec);
 	    io_fds[SFD_STDERR] = io_pipe[STDERR_FILENO][1];
 	}
     }
@@ -1278,13 +1252,13 @@ exec_pty(struct command_details *details,
     if (!sudo_term_copy(io_fds[SFD_USERTTY], io_fds[SFD_LEADER])) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: unable to copy terminal settings to pty", __func__);
-	ec.foreground = false;
+	ec->foreground = false;
     }
     /* Start in raw mode unless the command will run in the background. */
-    cmnd_foreground = ec.foreground && !ISSET(details->flags, CD_EXEC_BG);
+    cmnd_foreground = ec->foreground && !ISSET(details->flags, CD_EXEC_BG);
     if (cmnd_foreground) {
 	if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
-	    ec.term_raw = true;
+	    ec->term_raw = true;
     }
 
     /*
@@ -1300,8 +1274,8 @@ exec_pty(struct command_details *details,
 	debug_return_bool(true);
     }
 
-    ec.monitor_pid = sudo_debug_fork();
-    switch (ec.monitor_pid) {
+    ec->monitor_pid = sudo_debug_fork();
+    switch (ec->monitor_pid) {
     case -1:
 	sudo_fatal("%s", U_("unable to fork"));
 	break;
@@ -1379,14 +1353,14 @@ exec_pty(struct command_details *details,
      * Fill in exec closure, allocate event base, signal events and
      * the backchannel event.
      */
-    fill_exec_closure(&ec, cstat, details, user_details, evbase,
+    fill_exec_closure(ec, cstat, details, user_details, evbase,
 	sudo_pid, ppgrp, sv[0]);
 
     /* Create event and closure for intercept mode. */
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
-	ec.intercept = intercept_setup(intercept_sv[0], ec.evbase, details);
-	if (ec.intercept == NULL)
-	    terminate_command(ec.cmnd_pid, true);
+	ec->intercept = intercept_setup(intercept_sv[0], ec->evbase, details);
+	if (ec->intercept == NULL)
+	    terminate_command(ec->cmnd_pid, true);
     }
 
     /* Restore signal mask now that signal handlers are setup. */
@@ -1403,30 +1377,30 @@ exec_pty(struct command_details *details,
      * and pass output from leader to stdout and IO plugin.
      * Try to recover on ENXIO, it means the tty was revoked.
      */
-    add_io_events(&ec);
+    add_io_events(ec);
     do {
-	if (sudo_ev_dispatch(ec.evbase) == -1)
+	if (sudo_ev_dispatch(ec->evbase) == -1)
 	    sudo_warn("%s", U_("error in event loop"));
-	if (sudo_ev_got_break(ec.evbase)) {
+	if (sudo_ev_got_break(ec->evbase)) {
 	    /* error from callback or monitor died */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR, "event loop exited prematurely");
 	    /* XXX: no good way to know if we should terminate the command. */
-	    if (cstat->val == CMD_INVALID && ec.cmnd_pid != -1) {
+	    if (cstat->val == CMD_INVALID && ec->cmnd_pid != -1) {
 		/* no status message, kill command */
-		terminate_command(ec.cmnd_pid, true);
-		ec.cmnd_pid = -1;
+		terminate_command(ec->cmnd_pid, true);
+		ec->cmnd_pid = -1;
 		/* TODO: need way to pass an error to the sudo front end */
 		cstat->type = CMD_WSTATUS;
 		cstat->val = W_EXITCODE(1, SIGKILL);
 	    }
-	} else if (!sudo_ev_got_exit(ec.evbase)) {
+	} else if (!sudo_ev_got_exit(ec->evbase)) {
 	    switch (errno) {
 	    case ENXIO:
 	    case EIO:
 	    case EBADF:
 		/* /dev/tty was revoked, remove tty events and retry (once) */
 		if (evloop_retries == -1 && io_fds[SFD_USERTTY] != -1) {
-		    ev_free_by_fd(ec.evbase, io_fds[SFD_USERTTY]);
+		    ev_free_by_fd(ec->evbase, io_fds[SFD_USERTTY]);
 		    evloop_retries = 1;
 		}
 		break;
@@ -1434,11 +1408,14 @@ exec_pty(struct command_details *details,
 	}
     } while (evloop_retries-- > 0);
 
+    /* De-register cleanup hook, the pty is going away. */
+    sudo_fatal_callback_deregister(pty_cleanup_hook);
+
     /* Flush any remaining output, free I/O bufs and events, do logout. */
-    pty_finish(&ec, cstat);
+    pty_finish(ec, cstat);
 
     /* Free things up. */
-    free_exec_closure(&ec);
+    free_exec_closure(ec);
 
     debug_return_bool(true);
 }
