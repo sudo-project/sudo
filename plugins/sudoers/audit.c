@@ -249,7 +249,7 @@ audit_to_eventlog(const struct sudoers_context *ctx, struct eventlog *evlog,
 
 #ifdef SUDOERS_LOG_CLIENT
 static bool
-log_server_accept(struct eventlog *evlog)
+log_server_accept(const struct sudoers_context *ctx, struct eventlog *evlog)
 {
     struct timespec now;
     bool ret = false;
@@ -258,7 +258,7 @@ log_server_accept(struct eventlog *evlog)
     if (SLIST_EMPTY(&def_log_servers))
 	debug_return_bool(true);
 
-    if (client_closure != NULL && ISSET(sudo_mode, MODE_POLICY_INTERCEPTED)) {
+    if (client_closure != NULL && ISSET(ctx->mode, MODE_POLICY_INTERCEPTED)) {
 	/* Older servers don't support multiple commands per session. */
 	if (!client_closure->subcommands)
 	    debug_return_bool(true);
@@ -325,7 +325,7 @@ log_server_exit(int status_type, int status)
 }
 #else
 static bool
-log_server_accept(struct eventlog *evlog)
+log_server_accept(struct sudoers_context *ctx, struct eventlog *evlog)
 {
     return true;
 }
@@ -359,22 +359,26 @@ sudoers_audit_accept(const char *plugin_name, unsigned int plugin_type,
     if (audit_success(ctx, run_argv) != 0 && !def_ignore_audit_errors)
 	ret = false;
 
-    if (!ISSET(sudo_mode, MODE_POLICY_INTERCEPTED))
+    if (!ISSET(ctx->mode, MODE_POLICY_INTERCEPTED))
 	uuid_str = ctx->user.uuid_str;
 
     audit_to_eventlog(ctx, &evlog, command_info, run_argv, run_envp, uuid_str);
-    if (!log_allowed(&evlog) && !def_ignore_logfile_errors)
+    if (!log_allowed(ctx, &evlog) && !def_ignore_logfile_errors)
 	ret = false;
 
-    if (!log_server_accept(&evlog)) {
+    if (!log_server_accept(ctx, &evlog)) {
 	if (!def_ignore_logfile_errors)
 	    ret = false;
     }
 
     if (first) {
 	/* log_subcmds doesn't go through sudo_policy_main again to set this. */
-	if (def_log_subcmds)
-	    SET(sudo_mode, MODE_POLICY_INTERCEPTED);
+	if (def_log_subcmds) {
+	    if (!sudoers_set_mode(MODE_POLICY_INTERCEPTED, UINT_MAX)) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unable to set 0x%x in ctx->mode", MODE_POLICY_INTERCEPTED);
+	    }
+	}
 	first = false;
     }
 
@@ -407,7 +411,7 @@ sudoers_audit_reject(const char *plugin_name, unsigned int plugin_type,
     if (!eventlog_reject(&evlog, 0, message, NULL, NULL))
 	ret = false;
 
-    if (!log_server_reject(&evlog, message))
+    if (!log_server_reject(ctx, &evlog, message))
 	ret = false;
 
     debug_return_int(ret);
@@ -442,7 +446,7 @@ sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
     if (!eventlog_alert(&evlog, 0, &now, message, NULL))
 	ret = false;
 
-    if (!log_server_alert(&evlog, &now, message, NULL))
+    if (!log_server_alert(ctx, &evlog, &now, message, NULL))
 	ret = false;
 
     debug_return_int(ret);

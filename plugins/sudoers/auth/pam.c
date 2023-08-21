@@ -102,7 +102,7 @@ static pam_handle_t *pamh;
 static struct conv_filter *conv_filter;
 
 static void
-conv_filter_init(void)
+conv_filter_init(const struct sudoers_context *ctx)
 {
     debug_decl(conv_filter_init, SUDOERS_DEBUG_AUTH);
 
@@ -112,7 +112,7 @@ conv_filter_init(void)
      * management (in trusted mode) or session management (regular mode).
      * Filter those out in the conversation function unless running a shell.
      */
-    if (!ISSET(sudo_mode, MODE_SHELL|MODE_LOGIN_SHELL)) {
+    if (!ISSET(ctx->mode, MODE_SHELL|MODE_LOGIN_SHELL)) {
 	int i, nfilt = 0, maxfilters = 0;
 	struct conv_filter *newfilt;
 	nl_catd catd;
@@ -217,10 +217,10 @@ sudo_pam_init2(const struct sudoers_context *ctx, struct passwd *pw,
     pam_closure.ctx = ctx;
 
     /* Initialize PAM. */
-    if (ISSET(sudo_mode, MODE_ASKPASS) && def_pam_askpass_service != NULL) {
+    if (ISSET(ctx->mode, MODE_ASKPASS) && def_pam_askpass_service != NULL) {
 	pam_service = def_pam_askpass_service;
     } else {
-	pam_service = ISSET(sudo_mode, MODE_LOGIN_SHELL) ?
+	pam_service = ISSET(ctx->mode, MODE_LOGIN_SHELL) ?
 	    def_pam_login_service : def_pam_service;
     }
     pam_status = pam_start(pam_service, pw->pw_name, &pam_conv, &pamh);
@@ -235,7 +235,7 @@ sudo_pam_init2(const struct sudoers_context *ctx, struct passwd *pw,
     }
 
     /* Initialize conversation function message filter. */
-    conv_filter_init();
+    conv_filter_init(ctx);
 
     /*
      * Set PAM_RUSER to the invoking user (the "from" user).
@@ -498,7 +498,7 @@ sudo_pam_begin_session(const struct sudoers_context *ctx, struct passwd *pw,
 	 * We use PAM_SILENT to prevent pam_lastlog from printing last login
 	 * information except when explicitly running a shell.
 	 */
-	const bool silent = !ISSET(sudo_mode, MODE_SHELL|MODE_LOGIN_SHELL);
+	const bool silent = !ISSET(ctx->mode, MODE_SHELL|MODE_LOGIN_SHELL);
 	rc = pam_open_session(pamh, silent ? PAM_SILENT : 0);
 	switch (rc) {
 	case PAM_SUCCESS:
@@ -538,7 +538,7 @@ sudo_pam_begin_session(const struct sudoers_context *ctx, struct passwd *pw,
 	char **pam_envp = pam_getenvlist(pamh);
 	if (pam_envp != NULL) {
 	    /* Merge pam env with user env. */
-	    if (!env_init(*user_envp) || !env_merge(pam_envp))
+	    if (!env_init(*user_envp) || !env_merge(ctx, pam_envp))
 		status = AUTH_FATAL;
 	    *user_envp = env_get();
 	    free(pam_envp);

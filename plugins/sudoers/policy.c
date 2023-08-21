@@ -184,7 +184,7 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
     ctx->settings.flags = 0;
     ctx->user.closefrom = -1;
     sudoedit_nfiles = 0;
-    sudo_mode = 0;
+    ctx->mode = 0;
     for (cur = info->settings; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "closefrom=")) {
 	    p = *cur + sizeof("closefrom=") - 1;
@@ -563,7 +563,7 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 	 * YP/NIS/NIS+/LDAP/etc daemon has died.
 	 * For all others we will log a proper error later on.
 	 */
-	if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE) {
+	if (ctx->mode == MODE_KILL || ctx->mode == MODE_INVALIDATE) {
 	    sudo_warnx(U_("unknown user %s"), ctx->user.name);
 	    goto bad;
 	}
@@ -721,7 +721,7 @@ sudoers_policy_store_result(struct sudoers_context *ctx, bool accepted,
 		goto oom;
 	}
     }
-    if (ISSET(sudo_mode, MODE_EDIT)) {
+    if (ISSET(ctx->mode, MODE_EDIT)) {
 	if ((command_info[info_len++] = strdup("sudoedit=true")) == NULL)
 	    goto oom;
 	if (sudoedit_nfiles > 0) {
@@ -746,7 +746,7 @@ sudoers_policy_store_result(struct sudoers_context *ctx, bool accepted,
 	}
 	if ((command_info[info_len++] = sudo_new_key_val("cwd", def_runcwd)) == NULL)
 	    goto oom;
-    } else if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
+    } else if (ISSET(ctx->mode, MODE_LOGIN_SHELL)) {
 	/* Set cwd to run user's homedir. */
 	if ((command_info[info_len++] = sudo_new_key_val("cwd", ctx->runas.pw->pw_dir)) == NULL)
 	    goto oom;
@@ -1182,19 +1182,20 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     char **command_infop[], char **argv_out[], char **user_env_out[],
     const char **errstr)
 {
+    const struct sudoers_context *ctx = sudoers_get_context();
     unsigned int valid_flags = RUN_VALID_FLAGS;
+    unsigned int flags = MODE_RUN;
     struct sudoers_exec_args exec_args;
     int ret;
     debug_decl(sudoers_policy_check, SUDOERS_DEBUG_PLUGIN);
 
-    if (ISSET(sudo_mode, MODE_EDIT))
+    if (ISSET(ctx->mode, MODE_EDIT)) {
 	valid_flags = EDIT_VALID_FLAGS;
-    else
-	SET(sudo_mode, MODE_RUN);
-
-    if ((sudo_mode & valid_flags) != sudo_mode) {
+	flags = 0;
+    }
+    if (!sudoers_set_mode(flags, valid_flags)) {
 	sudo_warnx(U_("%s: invalid mode flags from sudo front end: 0x%x"),
-	    __func__, sudo_mode);
+	    __func__, ctx->mode);
 	debug_return_int(-1);
     }
 
@@ -1223,13 +1224,13 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 static int
 sudoers_policy_validate(const char **errstr)
 {
+    const struct sudoers_context *ctx = sudoers_get_context();
     int ret;
     debug_decl(sudoers_policy_validate, SUDOERS_DEBUG_PLUGIN);
 
-    SET(sudo_mode, MODE_VALIDATE);
-    if ((sudo_mode & VALIDATE_VALID_FLAGS) != sudo_mode) {
+    if (!sudoers_set_mode(MODE_VALIDATE, VALIDATE_VALID_FLAGS)) {
 	sudo_warnx(U_("%s: invalid mode flags from sudo front end: 0x%x"),
-	    __func__, sudo_mode);
+	    __func__, ctx->mode);
 	debug_return_int(-1);
     }
 
@@ -1246,14 +1247,14 @@ sudoers_policy_validate(const char **errstr)
 static void
 sudoers_policy_invalidate(int unlinkit)
 {
+    const struct sudoers_context *ctx = sudoers_get_context();
     debug_decl(sudoers_policy_invalidate, SUDOERS_DEBUG_PLUGIN);
 
-    SET(sudo_mode, MODE_INVALIDATE);
-    if ((sudo_mode & INVALIDATE_VALID_FLAGS) != sudo_mode) {
+    if (!sudoers_set_mode(MODE_INVALIDATE, INVALIDATE_VALID_FLAGS)) {
 	sudo_warnx(U_("%s: invalid mode flags from sudo front end: 0x%x"),
-	    __func__, sudo_mode);
+	    __func__, ctx->mode);
     } else {
-	timestamp_remove(sudoers_get_context(), unlinkit);
+	timestamp_remove(ctx, unlinkit);
     }
 
     debug_return;
@@ -1263,17 +1264,13 @@ static int
 sudoers_policy_list(int argc, char * const argv[], int verbose,
     const char *list_user, const char **errstr)
 {
+    const struct sudoers_context *ctx = sudoers_get_context();
     int ret;
     debug_decl(sudoers_policy_list, SUDOERS_DEBUG_PLUGIN);
 
-    if (argc == 0)
-	SET(sudo_mode, MODE_LIST);
-    else
-	SET(sudo_mode, MODE_CHECK);
-
-    if ((sudo_mode & LIST_VALID_FLAGS) != sudo_mode) {
+    if (!sudoers_set_mode(argc ? MODE_CHECK : MODE_LIST, LIST_VALID_FLAGS)) {
 	sudo_warnx(U_("%s: invalid mode flags from sudo front end: 0x%x"),
-	    __func__, sudo_mode);
+	    __func__, ctx->mode);
 	debug_return_int(-1);
     }
 

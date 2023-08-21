@@ -51,7 +51,6 @@ static const char *orig_cmnd;
 /* Required to link with parser. */
 sudo_conv_t sudo_conv = fuzz_conversation;
 sudo_printf_t sudo_printf = fuzz_printf;
-unsigned int sudo_mode;
 
 FILE *
 open_sudoers(const char *file, char **outfile, bool doedit, bool *keepopen)

@@ -193,6 +193,7 @@ struct sudoers_context {
     struct sudoers_plugin_settings settings;
     struct sudoers_user_context user;
     struct sudoers_runas_context runas;
+    unsigned int mode;
 };
 
 /*
@@ -392,12 +393,12 @@ extern const struct iolog_path_escape *sudoers_iolog_path_escapes;
 
 /* env.c */
 char **env_get(void);
-bool env_merge(char * const envp[]);
+bool env_merge(const struct sudoers_context *ctx, char * const envp[]);
 bool env_swap_old(void);
 bool env_init(char * const envp[]);
 bool init_envtables(void);
 bool insert_env_vars(char * const envp[]);
-bool read_env_file(const char *path, bool overwrite, bool restricted);
+bool read_env_file(const struct sudoers_context *ctx, const char *path, bool overwrite, bool restricted);
 bool rebuild_env(const struct sudoers_context *ctx);
 bool validate_env_vars(const struct sudoers_context *ctx, char * const envp[]);
 int sudo_setenv(const char *var, const char *val, int overwrite);
@@ -432,7 +433,7 @@ int sudoers_validate_user(void);
 void sudoers_cleanup(void);
 bool sudoers_override_umask(void);
 const struct sudoers_context *sudoers_get_context(void);
-extern unsigned int sudo_mode;
+bool sudoers_set_mode(unsigned int flags, unsigned int mask);
 extern int sudoedit_nfiles;
 extern sudo_conv_t sudo_conv;
 extern sudo_printf_t sudo_printf;

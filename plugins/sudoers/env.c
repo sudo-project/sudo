@@ -703,13 +703,14 @@ matches_env_check(const char *var, bool *full_match)
  * Returns true if the variable is allowed else false.
  */
 static bool
-matches_env_keep(const char *var, bool *full_match)
+matches_env_keep(const struct sudoers_context *ctx, const char *var,
+    bool *full_match)
 {
     bool keepit = false;
     debug_decl(matches_env_keep, SUDOERS_DEBUG_ENV);
 
     /* Preserve SHELL variable for "sudo -s". */
-    if (ISSET(sudo_mode, MODE_SHELL) && strncmp(var, "SHELL=", 6) == 0) {
+    if (ISSET(ctx->mode, MODE_SHELL) && strncmp(var, "SHELL=", 6) == 0) {
 	keepit = true;
     } else if (matches_env_list(var, &def_env_keep, full_match)) {
 	keepit = true;
@@ -742,7 +743,7 @@ env_should_delete(const char *var)
  * Returns true if the variable is allowed else false.
  */
 static bool
-env_should_keep(const char *var)
+env_should_keep(const struct sudoers_context *ctx, const char *var)
 {
     int keepit;
     bool full_match = false;
@@ -751,7 +752,7 @@ env_should_keep(const char *var)
 
     keepit = matches_env_check(var, &full_match);
     if (keepit == -1)
-	keepit = matches_env_keep(var, &full_match);
+	keepit = matches_env_keep(ctx, var, &full_match);
 
     /* Skip bash functions unless we matched on the value as well as name. */
     if (keepit && !full_match) {
@@ -773,7 +774,7 @@ env_should_keep(const char *var)
  * Returns true on success or false on failure.
  */
 bool
-env_merge(char * const envp[])
+env_merge(const struct sudoers_context *ctx, char * const envp[])
 {
     char * const *ep;
     bool ret = true;
@@ -781,7 +782,7 @@ env_merge(char * const envp[])
 
     for (ep = envp; *ep != NULL; ep++) {
 	/* XXX - avoid checking value here, should only check name */
-	bool overwrite = def_env_reset ? !env_should_keep(*ep) : env_should_delete(*ep);
+	bool overwrite = def_env_reset ? !env_should_keep(ctx, *ep) : env_should_delete(*ep);
 	if (sudo_putenv(*ep, true, overwrite) == -1) {
 	    /* XXX cannot undo on failure */
 	    ret = false;
@@ -884,21 +885,21 @@ rebuild_env(const struct sudoers_context *ctx)
 #endif
 
     /* Reset HOME based on target user if configured to. */
-    if (ISSET(sudo_mode, MODE_RUN)) {
+    if (ISSET(ctx->mode, MODE_RUN)) {
 	if (def_always_set_home ||
-	    ISSET(sudo_mode, MODE_RESET_HOME | MODE_LOGIN_SHELL) || 
-	    (ISSET(sudo_mode, MODE_SHELL) && def_set_home))
+	    ISSET(ctx->mode, MODE_RESET_HOME | MODE_LOGIN_SHELL) || 
+	    (ISSET(ctx->mode, MODE_SHELL) && def_set_home))
 	    reset_home = true;
     }
 
-    if (def_env_reset || ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
+    if (def_env_reset || ISSET(ctx->mode, MODE_LOGIN_SHELL)) {
 	/*
 	 * If starting with a fresh environment, initialize it based on
 	 * /etc/environment or login.conf.  For "sudo -i" we want those
 	 * variables to override the invoking user's environment, so we
 	 * defer reading them until later.
 	 */
-	if (!ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
+	if (!ISSET(ctx->mode, MODE_LOGIN_SHELL)) {
 #ifdef HAVE_LOGIN_CAP_H
 	    /* Insert login class environment variables. */
 	    if (ctx->runas.class) {
@@ -912,7 +913,7 @@ rebuild_env(const struct sudoers_context *ctx)
 #endif /* HAVE_LOGIN_CAP_H */
 #if defined(_AIX) || (defined(__linux__) && !defined(HAVE_PAM))
 	    /* Insert system-wide environment variables. */
-	    if (!read_env_file(_PATH_ENVIRONMENT, true, false))
+	    if (!read_env_file(ctx, _PATH_ENVIRONMENT, true, false))
 		sudo_warn("%s", _PATH_ENVIRONMENT);
 #endif
 	    for (ep = env.envp; *ep; ep++)
@@ -927,7 +928,7 @@ rebuild_env(const struct sudoers_context *ctx)
 		/*
 		 * Look up the variable in the env_check and env_keep lists.
 		 */
-		keepit = env_should_keep(*ep);
+		keepit = env_should_keep(ctx, *ep);
 
 		/*
 		 * Do SUDO_PS1 -> PS1 conversion.
@@ -950,7 +951,7 @@ rebuild_env(const struct sudoers_context *ctx)
 	 * otherwise they may be from the user's environment (depends
 	 * on sudoers options).
 	 */
-	if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
+	if (ISSET(ctx->mode, MODE_LOGIN_SHELL)) {
 	    CHECK_SETENV2("SHELL", ctx->runas.pw->pw_shell,
 		ISSET(didvar, DID_SHELL), true);
 #ifdef _AIX
@@ -983,7 +984,7 @@ rebuild_env(const struct sudoers_context *ctx)
 	 * Set MAIL to target user in -i mode or if MAIL is not preserved
 	 * from user's environment.
 	 */
-	if (ISSET(sudo_mode, MODE_LOGIN_SHELL) || !ISSET(didvar, KEPT_MAIL)) {
+	if (ISSET(ctx->mode, MODE_LOGIN_SHELL) || !ISSET(didvar, KEPT_MAIL)) {
 	    if (_PATH_MAILDIR[sizeof(_PATH_MAILDIR) - 2] == '/') {
 		len = asprintf(&cp, "MAIL=%s%s", _PATH_MAILDIR,
 		    ctx->runas.pw->pw_name);
@@ -1032,7 +1033,7 @@ rebuild_env(const struct sudoers_context *ctx)
      * disabled.  We skip this if we are running a login shell (because
      * they have already been set).
      */
-    if (def_set_logname && !ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
+    if (def_set_logname && !ISSET(ctx->mode, MODE_LOGIN_SHELL)) {
 	if ((didvar & KEPT_USER_VARIABLES) == 0) {
 	    /* Nothing preserved, set them all. */
 #ifdef _AIX
@@ -1172,7 +1173,7 @@ validate_env_vars(const struct sudoers_context *ctx, char * const env_vars[])
 	    strncmp(*ep, "PATH=", 5) == 0) {
 	    okvar = false;
 	} else if (def_env_reset) {
-	    okvar = env_should_keep(*ep);
+	    okvar = env_should_keep(ctx, *ep);
 	} else {
 	    okvar = !env_should_delete(*ep);
 	}
@@ -1328,7 +1329,8 @@ register_env_file(void * (*ef_open)(const char *), void (*ef_close)(void *),
 }
 
 bool
-read_env_file(const char *path, bool overwrite, bool restricted)
+read_env_file(const struct sudoers_context *ctx, const char *path,
+    bool overwrite, bool restricted)
 {
     struct sudoers_env_file *ef;
     bool ret = true;
@@ -1363,7 +1365,7 @@ read_env_file(const char *path, bool overwrite, bool restricted)
 	 * when env_reset is set or env_delete when it is not.
 	 */
 	if (restricted) {
-	    if (def_env_reset ? !env_should_keep(envstr) : env_should_delete(envstr)) {
+	    if (def_env_reset ? !env_should_keep(ctx, envstr) : env_should_delete(envstr)) {
 		free(envstr);
 		continue;
 	    }

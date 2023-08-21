@@ -81,7 +81,6 @@ static int testsudoers_query(struct sudoers_context *ctx, const struct sudo_nss 
  */
 static const char *orig_cmnd;
 static char *runas_group, *runas_user;
-unsigned int sudo_mode = MODE_RUN;
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
 extern char *malloc_options;
@@ -131,6 +130,7 @@ main(int argc, char *argv[])
 
     dflag = 0;
     grfile = pwfile = NULL;
+    test_ctx.mode = MODE_RUN;
     while ((ch = getopt(argc, argv, "+D:dg:G:h:i:L:lP:p:R:T:tu:U:v")) != -1) {
 	switch (ch) {
 	    case 'D':
@@ -174,12 +174,12 @@ main(int argc, char *argv[])
 		}
 		FALLTHROUGH;
 	    case 'l':
-		if (sudo_mode != MODE_RUN) {
+		if (test_ctx.mode != MODE_RUN) {
 		    sudo_warnx(
 			"only one of the -l or -v flags may be specified");
 		    usage();
 		}
-		sudo_mode = MODE_LIST;
+		test_ctx.mode = MODE_LIST;
 		pwflag = I_LISTPW;
 		orig_cmnd = "list";
 		break;
@@ -211,12 +211,12 @@ main(int argc, char *argv[])
 		SET(test_ctx.settings.flags, RUNAS_USER_SPECIFIED);
 		break;
 	    case 'v':
-		if (sudo_mode != MODE_RUN) {
+		if (test_ctx.mode != MODE_RUN) {
 		    sudo_warnx(
 			"only one of the -l or -v flags may be specified");
 		    usage();
 		}
-		sudo_mode = MODE_VALIDATE;
+		test_ctx.mode = MODE_VALIDATE;
 		pwflag = I_VERIFYPW;
 		orig_cmnd = "validate";
 		break;
@@ -255,8 +255,8 @@ main(int argc, char *argv[])
 	}
 	argc = 0;
     } else {
-	if (argc > 2 && sudo_mode == MODE_LIST)
-	    sudo_mode = MODE_CHECK;
+	if (argc > 2 && test_ctx.mode == MODE_LIST)
+	    test_ctx.mode = MODE_CHECK;
 	test_ctx.user.name = strdup(*argv++);
 	if (test_ctx.user.name == NULL) {
 	    sudo_fatalx(U_("%s: %s"), __func__,

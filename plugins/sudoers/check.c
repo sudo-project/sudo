@@ -173,7 +173,7 @@ check_user(struct sudoers_context *ctx, unsigned int validated,
      * In intercept mode, only check the user if configured to do so.
      * We already have a session so no need to init the auth subsystem.
      */
-    if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED)) {
+    if (ISSET(ctx->mode, MODE_POLICY_INTERCEPTED)) {
 	if (!def_intercept_authenticate) {
 	    debug_return_int(true);
 	}

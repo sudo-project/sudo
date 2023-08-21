@@ -79,8 +79,6 @@ static bool tty_present(struct sudoers_context *ctx);
 /*
  * Globals
  */
-unsigned int sudo_mode;
-
 static char *prev_user;
 static struct sudoers_context sudoers_ctx = SUDOERS_CONTEXT_INITIALIZER;
 static struct sudo_nss_list *snl;
@@ -176,7 +174,7 @@ sudoers_reinit_defaults(struct sudoers_context *ctx)
     sudoers_error_hook = logger;
 
     /* No need to check the admin flag file multiple times. */
-    if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED)) {
+    if (ISSET(ctx->mode, MODE_POLICY_INTERCEPTED)) {
 	free(def_admin_flag);
 	def_admin_flag = NULL;
     }
@@ -215,9 +213,9 @@ sudoers_init(void *info, sudoers_logger_t logger, char * const envp[])
     }
 
     /* Parse info from front-end. */
-    sudo_mode = sudoers_policy_deserialize_info(&sudoers_ctx, info,
+    sudoers_ctx.mode = sudoers_policy_deserialize_info(&sudoers_ctx, info,
 	&initial_defaults);
-    if (ISSET(sudo_mode, MODE_ERROR))
+    if (ISSET(sudoers_ctx.mode, MODE_ERROR))
 	debug_return_int(-1);
 
     if (!init_vars(&sudoers_ctx, envp))
@@ -353,7 +351,7 @@ sudoers_check_common(struct sudoers_context *ctx, int pwflag)
     debug_decl(sudoers_check_common, SUDOERS_DEBUG_PLUGIN);
 
     /* If given the -P option, set the "preserve_groups" flag. */
-    if (ISSET(sudo_mode, MODE_PRESERVE_GROUPS))
+    if (ISSET(ctx->mode, MODE_PRESERVE_GROUPS))
 	def_preserve_groups = true;
 
     /* Find command in path and apply per-command Defaults. */
@@ -431,7 +429,7 @@ sudoers_check_common(struct sudoers_context *ctx, int pwflag)
     }
 
     /* If no command line args and "shell_noargs" is not set, error out. */
-    if (ISSET(sudo_mode, MODE_IMPLIED_SHELL) && !def_shell_noargs) {
+    if (ISSET(ctx->mode, MODE_IMPLIED_SHELL) && !def_shell_noargs) {
 	/* Not an audit event. */
 	ret = -2; /* usage error */
 	goto done;
@@ -445,7 +443,7 @@ sudoers_check_common(struct sudoers_context *ctx, int pwflag)
     }
 
     /* Check runas user's shell if running (or checking) a command. */
-    if (ISSET(sudo_mode, MODE_RUN|MODE_CHECK)) {
+    if (ISSET(ctx->mode, MODE_RUN|MODE_CHECK)) {
 	if (!check_user_shell(ctx->runas.pw)) {
 	    log_warningx(ctx, SLOG_RAW_MSG|SLOG_AUDIT,
 		N_("invalid shell for user %s: %s"),
@@ -458,8 +456,8 @@ sudoers_check_common(struct sudoers_context *ctx, int pwflag)
      * We don't reset the environment for sudoedit or if the user
      * specified the -E command line flag and they have setenv privs.
      */
-    if (ISSET(sudo_mode, MODE_EDIT) ||
-	(ISSET(sudo_mode, MODE_PRESERVE_ENV) && def_setenv))
+    if (ISSET(ctx->mode, MODE_EDIT) ||
+	(ISSET(ctx->mode, MODE_PRESERVE_ENV) && def_setenv))
 	def_env_reset = false;
 
     /* Build a new environment that avoids any nasty bits. */
@@ -467,7 +465,7 @@ sudoers_check_common(struct sudoers_context *ctx, int pwflag)
 	goto bad;
 
     /* Require a password if sudoers says so.  */
-    switch (check_user(ctx, validated, sudo_mode)) {
+    switch (check_user(ctx, validated, ctx->mode)) {
     case true:
 	/* user authenticated successfully. */
 	break;
@@ -515,7 +513,7 @@ sudoers_check_common(struct sudoers_context *ctx, int pwflag)
 
     /* If run as root with SUDO_USER set, set ctx->user.pw to that user. */
     /* XXX - causes confusion when root is not listed in sudoers */
-    if (ISSET(sudo_mode, MODE_RUN|MODE_EDIT) && prev_user != NULL) {
+    if (ISSET(ctx->mode, MODE_RUN|MODE_EDIT) && prev_user != NULL) {
 	if (ctx->user.uid == 0 && strcmp(prev_user, "root") != 0) {
 	    struct passwd *pw;
 
@@ -545,7 +543,7 @@ sudoers_check_common(struct sudoers_context *ctx, int pwflag)
 	sudo_warnx(U_("ignoring \"%s\" found in '.'\nUse \"sudo ./%s\" if this is the \"%s\" you wish to run."), ctx->user.cmnd, ctx->user.cmnd, ctx->user.cmnd);
 	goto bad;
     } else if (cmnd_status == NOT_FOUND) {
-	if (ISSET(sudo_mode, MODE_CHECK)) {
+	if (ISSET(ctx->mode, MODE_CHECK)) {
 	    audit_failure(ctx, ctx->runas.argv, N_("%s: command not found"),
 		ctx->runas.argv[1]);
 	    sudo_warnx(U_("%s: command not found"), ctx->runas.argv[1]);
@@ -576,8 +574,8 @@ sudoers_check_common(struct sudoers_context *ctx, int pwflag)
     }
 
     /* If user specified env vars make sure sudoers allows it. */
-    if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
-	if (ISSET(sudo_mode, MODE_PRESERVE_ENV)) {
+    if (ISSET(ctx->mode, MODE_RUN) && !def_setenv) {
+	if (ISSET(ctx->mode, MODE_PRESERVE_ENV)) {
 	    log_warningx(ctx, SLOG_NO_STDERR|SLOG_AUDIT,
 		N_("user not allowed to preserve the environment"));
 	    sudo_warnx("%s",
@@ -623,12 +621,12 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
 
     if (need_reinit) {
 	/* Was previous command intercepted? */
-	if (ISSET(sudo_mode, MODE_RUN) && def_intercept)
-	    SET(sudo_mode, MODE_POLICY_INTERCEPTED);
+	if (ISSET(sudoers_ctx.mode, MODE_RUN) && def_intercept)
+	    SET(sudoers_ctx.mode, MODE_POLICY_INTERCEPTED);
 
 	/* Only certain mode flags are legal for intercepted commands. */
-	if (ISSET(sudo_mode, MODE_POLICY_INTERCEPTED))
-	    sudo_mode &= MODE_INTERCEPT_MASK;
+	if (ISSET(sudoers_ctx.mode, MODE_POLICY_INTERCEPTED))
+	    sudoers_ctx.mode &= MODE_INTERCEPT_MASK;
 
 	/* Re-initialize defaults if we are called multiple times. */
 	if (!sudoers_reinit_defaults(&sudoers_ctx))
@@ -662,7 +660,7 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
     memcpy(sudoers_ctx.runas.argv, argv, (size_t)argc * sizeof(char *));
     sudoers_ctx.runas.argc = argc;
     sudoers_ctx.runas.argv[sudoers_ctx.runas.argc] = NULL;
-    if (ISSET(sudo_mode, MODE_LOGIN_SHELL) && sudoers_ctx.runas.pw != NULL) {
+    if (ISSET(sudoers_ctx.mode, MODE_LOGIN_SHELL) && sudoers_ctx.runas.pw != NULL) {
 	sudoers_ctx.runas.argv[0] = strdup(sudoers_ctx.runas.pw->pw_shell);
 	if (sudoers_ctx.runas.argv[0] == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -703,7 +701,7 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
 	    cmnd_umask |= sudoers_ctx.user.umask;
     }
 
-    if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
+    if (ISSET(sudoers_ctx.mode, MODE_LOGIN_SHELL)) {
 	char *p;
 
 	/* Convert /bin/sh -> -sh so shell knows it is a login shell */
@@ -729,7 +727,7 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
 
 #if defined(_AIX) || (defined(__linux__) && !defined(HAVE_PAM))
 	/* Insert system-wide environment variables. */
-	if (!read_env_file(_PATH_ENVIRONMENT, true, false))
+	if (!read_env_file(&sudoers_ctx, _PATH_ENVIRONMENT, true, false))
 	    sudo_warn("%s", _PATH_ENVIRONMENT);
 #endif
 #ifdef HAVE_LOGIN_CAP_H
@@ -747,11 +745,11 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
 
     /* Insert system-wide environment variables. */
     if (def_restricted_env_file) {
-	if (!read_env_file(def_restricted_env_file, false, true))
+	if (!read_env_file(&sudoers_ctx, def_restricted_env_file, false, true))
 	    sudo_warn("%s", def_restricted_env_file);
     }
     if (def_env_file) {
-	if (!read_env_file(def_env_file, false, false))
+	if (!read_env_file(&sudoers_ctx, def_env_file, false, false))
 	    sudo_warn("%s", def_env_file);
     }
 
@@ -763,7 +761,7 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
     }
 
     /* Note: must call audit before uid change. */
-    if (ISSET(sudo_mode, MODE_EDIT)) {
+    if (ISSET(sudoers_ctx.mode, MODE_EDIT)) {
 	const char *env_editor = NULL;
 	char **edit_argv;
 	int edit_argc;
@@ -950,7 +948,7 @@ sudoers_list(int argc, char * const argv[], const char *list_user, bool verbose)
 	goto done;
 
     pw = sudoers_ctx.runas.list_pw ? sudoers_ctx.runas.list_pw : sudoers_ctx.user.pw;
-    if (ISSET(sudo_mode, MODE_CHECK))
+    if (ISSET(sudoers_ctx.mode, MODE_CHECK))
 	ret = display_cmnd(&sudoers_ctx, snl, pw, verbose);
     else
 	ret = display_privs(&sudoers_ctx, snl, pw, verbose);
@@ -1070,7 +1068,7 @@ set_cmnd_path(struct sudoers_context *ctx, const char *runchroot)
     int ret, pivot_fds[2];
     debug_decl(set_cmnd_path, SUDOERS_DEBUG_PLUGIN);
 
-    cmnd_in = ISSET(sudo_mode, MODE_CHECK) ?
+    cmnd_in = ISSET(ctx->mode, MODE_CHECK) ?
 	ctx->runas.argv[1] : ctx->runas.argv[0];
 
     free(ctx->user.cmnd_list);
@@ -1115,7 +1113,7 @@ set_cmnd_path(struct sudoers_context *ctx, const char *runchroot)
 	}
     }
 
-    if (ISSET(sudo_mode, MODE_CHECK))
+    if (ISSET(ctx->mode, MODE_CHECK))
 	ctx->user.cmnd_list = cmnd_out;
     else
 	ctx->user.cmnd = cmnd_out;
@@ -1165,8 +1163,8 @@ set_cmnd(struct sudoers_context *ctx)
     free(ctx->runas.cmnd);
     ctx->runas.cmnd = NULL;
 
-    if (ISSET(sudo_mode, MODE_RUN|MODE_EDIT|MODE_CHECK)) {
-	if (!ISSET(sudo_mode, MODE_EDIT)) {
+    if (ISSET(ctx->mode, MODE_RUN|MODE_EDIT|MODE_CHECK)) {
+	if (!ISSET(ctx->mode, MODE_EDIT)) {
 	    const char *runchroot = ctx->runas.chroot;
 	    if (runchroot == NULL && def_runchroot != NULL &&
 		    strcmp(def_runchroot, "*") != 0)
@@ -1185,7 +1183,7 @@ set_cmnd(struct sudoers_context *ctx)
 	/* set ctx->user.cmnd_args */
 	free(ctx->user.cmnd_args);
 	ctx->user.cmnd_args = NULL;
-	if (ISSET(sudo_mode, MODE_CHECK)) {
+	if (ISSET(ctx->mode, MODE_CHECK)) {
 	    if (ctx->runas.argc > 2) {
 		/* Skip the command being listed in ctx->runas.argv[1]. */
 		ctx->user.cmnd_args = strvec_join(ctx->runas.argv + 2, ' ', NULL);
@@ -1193,8 +1191,8 @@ set_cmnd(struct sudoers_context *ctx)
 		    debug_return_int(NOT_FOUND_ERROR);
 	    }
 	} else if (ctx->runas.argc > 1) {
-	    if (ISSET(sudo_mode, MODE_SHELL|MODE_LOGIN_SHELL) &&
-		    ISSET(sudo_mode, MODE_RUN)) {
+	    if (ISSET(ctx->mode, MODE_SHELL|MODE_LOGIN_SHELL) &&
+		    ISSET(ctx->mode, MODE_RUN)) {
 		/*
 		 * When running a command via a shell, the sudo front-end
 		 * escapes potential meta chars.  We unescape non-spaces
@@ -1219,11 +1217,11 @@ set_cmnd(struct sudoers_context *ctx)
     ctx->user.cmnd_base = sudo_basename(ctx->user.cmnd);
 
     /* Convert "sudo sudoedit" -> "sudoedit" */
-    if (ISSET(sudo_mode, MODE_RUN) && strcmp(ctx->user.cmnd_base, "sudoedit") == 0) {
+    if (ISSET(ctx->mode, MODE_RUN) && strcmp(ctx->user.cmnd_base, "sudoedit") == 0) {
 	char *new_cmnd;
 
-	CLR(sudo_mode, MODE_RUN);
-	SET(sudo_mode, MODE_EDIT);
+	CLR(ctx->mode, MODE_RUN);
+	SET(ctx->mode, MODE_EDIT);
 	sudo_warnx("%s", U_("sudoedit doesn't need to be run via sudo"));
 	if ((new_cmnd = strdup("sudoedit")) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -1545,6 +1543,13 @@ tty_present(struct sudoers_context *ctx)
 	close(fd);
     }
     debug_return_bool(true);
+}
+
+bool
+sudoers_set_mode(unsigned int flags, unsigned int mask)
+{
+    SET(sudoers_ctx.mode, flags);
+    return ((sudoers_ctx.mode & mask) == sudoers_ctx.mode);
 }
 
 const struct sudoers_context *
