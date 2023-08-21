@@ -1002,7 +1002,7 @@ set_perms(const struct sudoers_context *ctx, int perm)
 
     case PERM_RUNAS:
 	state->rgid = ostate->rgid;
-	state->egid = ctx->runas.gr ? ctx->runas.gr->gr_gid : ctx->runas.pw->pw_gid;
+	state->egid = ctx->runas.gr ? ctx->runas.gr->gr_gid : ctx->runas.pw->pw_gid; // -V595
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_RUNAS: gid: "
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->rgid,
 	    (int)ostate->egid, (int)state->rgid, (int)state->egid);
@@ -1016,7 +1016,7 @@ set_perms(const struct sudoers_context *ctx, int perm)
 	    goto bad;
 	}
 	state->ruid = ROOT_UID;
-	state->euid = ctx->runas.pw ? ctx->runas.pw->pw_uid : ctx->user.uid;
+	state->euid = ctx->runas.pw ? ctx->runas.pw->pw_uid : ctx->user.uid; // -V595
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_RUNAS: uid: "
 	    "[%d, %d] -> [%d, %d]", __func__, (int)ostate->ruid,
 	    (int)ostate->euid, (int)state->ruid, (int)state->euid);
