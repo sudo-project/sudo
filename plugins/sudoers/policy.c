@@ -562,7 +562,7 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 	 * YP/NIS/NIS+/LDAP/etc daemon has died.
 	 * For all others we will log a proper error later on.
 	 */
-	if (ctx->mode == MODE_KILL || ctx->mode == MODE_INVALIDATE) {
+	if (ctx->mode == MODE_INVALIDATE) {
 	    sudo_warnx(U_("unknown user %s"), ctx->user.name);
 	    goto bad;
 	}
