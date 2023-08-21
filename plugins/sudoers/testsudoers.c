@@ -151,7 +151,11 @@ main(int argc, char *argv[])
 		SET(test_ctx.settings.flags, RUNAS_GROUP_SPECIFIED);
 		break;
 	    case 'h':
-		test_ctx.user.host = optarg;
+		test_ctx.user.host = strdup(optarg);
+		if (test_ctx.user.host == NULL) {
+		    sudo_fatalx(U_("%s: %s"), __func__,
+			U_("unable to allocate memory"));
+		}
 		break;
 	    case 'i':
 		if (strcasecmp(optarg, "ldif") == 0) {
@@ -245,12 +249,20 @@ main(int argc, char *argv[])
 	} else if (pwflag == 0) {
 	    usage();
 	}
-	test_ctx.user.name = argc ? *argv++ : (char *)"root";
+	test_ctx.user.name = strdup(argc ? *argv++ : "root");
+	if (test_ctx.user.name == NULL) {
+	    sudo_fatalx(U_("%s: %s"), __func__,
+		U_("unable to allocate memory"));
+	}
 	argc = 0;
     } else {
 	if (argc > 2 && sudo_mode == MODE_LIST)
 	    sudo_mode = MODE_CHECK;
-	test_ctx.user.name = *argv++;
+	test_ctx.user.name = strdup(*argv++);
+	if (test_ctx.user.name == NULL) {
+	    sudo_fatalx(U_("%s: %s"), __func__,
+		U_("unable to allocate memory"));
+	}
 	argc--;
 	if (orig_cmnd == NULL) {
 	    orig_cmnd = *argv++;
@@ -264,7 +276,9 @@ main(int argc, char *argv[])
 
     if (getcwd(cwdbuf, sizeof(cwdbuf)) == NULL)
 	strlcpy(cwdbuf, "/", sizeof(cwdbuf));
-    test_ctx.user.cwd = cwdbuf;
+    test_ctx.user.cwd = strdup(cwdbuf);
+    if (test_ctx.user.cwd == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     if ((test_ctx.user.pw = sudo_getpwnam(test_ctx.user.name)) == NULL)
 	sudo_fatalx(U_("unknown user %s"), test_ctx.user.name);
@@ -283,8 +297,16 @@ main(int argc, char *argv[])
     } else {
 	test_ctx.user.shost = test_ctx.user.host;
     }
-    test_ctx.runas.host = test_ctx.user.host;
-    test_ctx.runas.shost = test_ctx.user.shost;
+    if ((test_ctx.runas.host = strdup(test_ctx.user.host)) == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    if ((p = strchr(test_ctx.runas.host, '.'))) {
+	*p = '\0';
+	if ((test_ctx.runas.shost = strdup(test_ctx.runas.host)) == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	*p = '.';
+    } else {
+	test_ctx.runas.shost = test_ctx.runas.host;
+    }
 
     /* Fill in test_ctx.user.cmnd_args from argv. */
     if (argc > 0) {
@@ -429,6 +451,7 @@ main(int argc, char *argv[])
     }
 
 done:
+    sudoers_ctx_free(&test_ctx);
     sudo_freepwcache();
     sudo_freegrcache();
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);

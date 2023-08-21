@@ -285,14 +285,15 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	goto done;
     sudo_pw_delref(pw);
 
-    /* The minimum needed to perform matching (cmnd must be dynamic). */
-    ctx.user.host = ctx.user.shost = ctx.runas.host = ctx.runas.shost =
-	(char *)"localhost";
+    /* The minimum needed to perform matching. */
+    ctx.user.host = ctx.user.shost = strdup("localhost");
+    ctx.runas.host = ctx.runas.shost = strdup("localhost");
     orig_cmnd = (char *)"/usr/bin/id";
     ctx.user.cmnd = strdup(orig_cmnd);
-    if (ctx.user.cmnd == NULL)
+    ctx.user.cmnd_args = strdup("-u");
+    if (ctx.user.host == NULL || ctx.runas.host == NULL ||
+	    ctx.user.cmnd == NULL || ctx.user.cmnd_args == NULL)
 	goto done;
-    ctx.user.cmnd_args = (char *)"-u";
     ctx.user.cmnd_base = sudo_basename(ctx.user.cmnd);
     time(&now);
 
@@ -327,7 +328,10 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	    int cmnd_status;
 
 	    /* Invoking user. */
-	    ctx.user.name = (char *)ud->user;
+	    free(ctx.user.name);
+	    ctx.user.name = strdup(ud->user);
+	    if (ctx.user.name == NULL)
+		goto done;
 	    if (ctx.user.pw != NULL)
 		sudo_pw_delref(ctx.user.pw);
 	    ctx.user.pw = sudo_getpwnam(ctx.user.name);
@@ -405,16 +409,7 @@ done:
     fclose(fp);
     free_parse_tree(&parse_tree);
     reset_parser();
-    if (ctx.user.pw != NULL)
-	sudo_pw_delref(ctx.user.pw);
-    if (ctx.runas.pw != NULL)
-	sudo_pw_delref(ctx.runas.pw);
-    if (ctx.runas.gr != NULL)
-	sudo_gr_delref(ctx.runas.gr);
-    free(ctx.user.cmnd);
-    free(ctx.runas.cmnd);
-    free(ctx.user.cmnd_list);
-    memset(&ctx, 0, sizeof(ctx));
+    sudoers_ctx_free(&ctx);
     sudo_freepwcache();
     sudo_freegrcache();
     sudoers_setlocale(SUDOERS_LOCALE_USER, NULL);

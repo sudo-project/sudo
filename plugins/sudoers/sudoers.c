@@ -1488,77 +1488,6 @@ cb_runas_default(struct sudoers_context *ctx, const char *file, int line,
 }
 
 /*
- * Free memory allocated for struct sudoers_user_context.
- */
-static void
-sudoers_user_ctx_free(struct sudoers_user_context *user_ctx)
-{
-    debug_decl(sudoers_user_ctx_free, SUDOERS_DEBUG_PLUGIN);
-
-    /* Free remaining references to password and group entries. */
-    if (user_ctx->pw != NULL)
-	sudo_pw_delref(user_ctx->pw);
-    if (user_ctx->gid_list != NULL)
-	sudo_gidlist_delref(user_ctx->gid_list);
-
-    /* Free dynamic contents of user_ctx. */
-    free(user_ctx->cwd);
-    free(user_ctx->name);
-    if (user_ctx->ttypath != NULL)
-	free(user_ctx->ttypath);
-    else
-	free(user_ctx->tty);
-    if (user_ctx->shost != user_ctx->host)
-	free(user_ctx->shost);
-    free(user_ctx->host);
-    free(user_ctx->cmnd);
-    canon_path_free(user_ctx->cmnd_dir);
-    free(user_ctx->cmnd_args);
-    free(user_ctx->cmnd_list);
-    free(user_ctx->cmnd_saved);
-    free(user_ctx->source);
-    free(user_ctx->cmnd_stat);
-
-    debug_return;
-}
-
-/*
- * Free memory allocated for struct sudoers_runas_context.
- */
-static void
-sudoers_runas_ctx_free(struct sudoers_runas_context *runas_ctx)
-{
-    debug_decl(sudoers_runas_ctx_free, SUDOERS_DEBUG_PLUGIN);
-
-    /* Free remaining references to password and group entries. */
-    if (runas_ctx->pw != NULL)
-	sudo_pw_delref(runas_ctx->pw);
-    if (runas_ctx->gr != NULL)
-	sudo_gr_delref(runas_ctx->gr);
-    if (runas_ctx->list_pw != NULL)
-	sudo_pw_delref(runas_ctx->list_pw);
-
-    /* Free dynamic contents of runas_ctx-> */
-    free(runas_ctx->cmnd);
-    if (runas_ctx->shost != runas_ctx->host)
-	    free(runas_ctx->shost);
-    free(runas_ctx->host);
-#ifdef HAVE_SELINUX
-    free(runas_ctx->role);
-    free(runas_ctx->type);
-#endif
-#ifdef HAVE_APPARMOR
-    free(runas_ctx->apparmor_profile);
-#endif
-#ifdef HAVE_PRIV_SET
-    free(runas_ctx->privs);
-    free(runas_ctx->limitprivs);
-#endif
-
-    debug_return;
-}
-
-/*
  * Cleanup hook for sudo_fatal()/sudo_fatalx()
  * Also called at policy close time.
  */
@@ -1585,8 +1514,7 @@ sudoers_cleanup(void)
     need_reinit = false;
     if (def_group_plugin)
 	group_plugin_unload();
-    sudoers_user_ctx_free(&sudoers_ctx.user);
-    sudoers_runas_ctx_free(&sudoers_ctx.runas);
+    sudoers_ctx_free(&sudoers_ctx);
     sudo_freepwcache();
     sudo_freegrcache();
     canon_path_free_cache();
@@ -1602,7 +1530,6 @@ sudoers_cleanup(void)
     NewArgv = NULL;
     NewArgc = 0;
     prev_user = NULL;
-    memset(&sudoers_ctx, 0, sizeof(sudoers_ctx));
 
     debug_return;
 }

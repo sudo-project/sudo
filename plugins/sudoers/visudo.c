@@ -338,6 +338,7 @@ main(int argc, char *argv[])
     free(editor);
 
 done:
+    sudoers_ctx_free(&ctx);
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
     return exitcode;
 }

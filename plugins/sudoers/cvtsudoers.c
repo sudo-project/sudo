@@ -455,6 +455,7 @@ main(int argc, char *argv[])
     }
 
 done:
+    sudoers_ctx_free(&ctx);
     free_parse_tree(&merged_tree);
     while ((parse_tree = TAILQ_FIRST(&parse_trees)) != NULL) {
 	TAILQ_REMOVE(&parse_trees, parse_tree, entries);

@@ -133,8 +133,18 @@ get_hostname(struct sudoers_context *ctx)
 	if (ctx->user.host == NULL)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
-    ctx->runas.host = ctx->user.host;
-    ctx->runas.shost = ctx->user.shost;
+
+    ctx->runas.host = strdup(ctx->user.host);
+    if (ctx->runas.host == NULL)
+	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    if ((cp = strchr(ctx->runas.host, '.'))) {
+	*cp = '\0';
+	if ((ctx->runas.shost = strdup(ctx->runas.host)) == NULL)
+	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	*cp = '.';
+    } else {
+	ctx->runas.shost = ctx->runas.host;
+    }
 
     debug_return;
 }
