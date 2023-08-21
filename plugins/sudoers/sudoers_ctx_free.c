@@ -57,7 +57,6 @@ sudoers_ctx_free(struct sudoers_context *ctx)
     canon_path_free(ctx->user.cmnd_dir);
     free(ctx->user.cmnd_args);
     free(ctx->user.cmnd_list);
-    free(ctx->user.cmnd_saved);
     free(ctx->user.source);
     free(ctx->user.cmnd_stat);
 
@@ -71,6 +70,7 @@ sudoers_ctx_free(struct sudoers_context *ctx)
 
     /* Free dynamic contents of ctx->runas. */
     free(ctx->runas.cmnd);
+    free(ctx->runas.cmnd_saved);
     if (ctx->runas.shost != ctx->runas.host)
 	free(ctx->runas.shost);
     free(ctx->runas.host);

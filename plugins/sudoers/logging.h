@@ -62,9 +62,6 @@ struct sudoers_context;
 typedef bool (*sudoers_logger_t)(const struct sudoers_context *ctx, const char *file, int line, int column, const char * restrict fmt, va_list args);
 
 /* XXX - needed for auditing */
-extern int NewArgc;
-extern char **NewArgv;
-extern char **saved_argv;
 extern char *audit_msg;
 
 union sudo_defs_val;

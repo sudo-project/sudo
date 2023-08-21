@@ -264,8 +264,8 @@ log_reject(const struct sudoers_context *ctx, const char *message,
 	if (!logit)
 	    SET(evl_flags, EVLOG_MAIL_ONLY);
     }
-    sudoers_to_eventlog(ctx, &evlog, ctx->runas.cmnd, NewArgv, env_get(),
-	uuid_str);
+    sudoers_to_eventlog(ctx, &evlog, ctx->runas.cmnd, ctx->runas.argv,
+	env_get(), uuid_str);
     ret = eventlog_reject(&evlog, evl_flags, message, NULL, NULL);
     if (!log_server_reject(&evlog, message))
 	ret = false;
@@ -297,7 +297,7 @@ log_denial(const struct sudoers_context *ctx, unsigned int status,
 	message = N_("command not allowed");
 
     /* Do auditing first (audit_failure() handles the locale itself). */
-    audit_failure(ctx, NewArgv, "%s", message);
+    audit_failure(ctx, ctx->runas.argv, "%s", message);
 
     if (def_log_denied || mailit) {
 	/* Log and mail messages should be in the sudoers locale. */
@@ -330,9 +330,9 @@ log_denial(const struct sudoers_context *ctx, unsigned int status,
 	    const char *cmnd2 = "";
 
 	    if (ISSET(sudo_mode, MODE_CHECK)) {
-		/* For "sudo -l command" the command run is in NewArgv[1]. */
+		/* For "sudo -l command" the command run is in runas.argv[1]. */
 		cmnd1 = "list ";
-		cmnd2 = NewArgv[1];
+		cmnd2 = ctx->runas.argv[1];
 	    }
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("Sorry, user %s is not allowed "
 		"to execute '%s%s%s%s' as %s%s%s on %s.\n"),
@@ -372,7 +372,7 @@ log_failure(const struct sudoers_context *ctx, unsigned int status,
     if (!inform_user) {
 	const char *cmnd = ctx->user.cmnd;
 	if (ISSET(sudo_mode, MODE_CHECK))
-	    cmnd = ctx->user.cmnd_list ? ctx->user.cmnd_list : NewArgv[1];
+	    cmnd = ctx->user.cmnd_list ? ctx->user.cmnd_list : ctx->runas.argv[1];
 
 	/*
 	 * We'd like to not leak path info at all here, but that can
@@ -495,7 +495,7 @@ log_auth_failure(const struct sudoers_context *ctx, unsigned int status,
     debug_decl(log_auth_failure, SUDOERS_DEBUG_LOGGING);
 
     /* Do auditing first (audit_failure() handles the locale itself). */
-    audit_failure(ctx, NewArgv, "%s", N_("authentication failure"));
+    audit_failure(ctx, ctx->runas.argv, "%s", N_("authentication failure"));
 
     /* If sudoers denied the command we'll log that separately. */
     if (!ISSET(status, FLAG_BAD_PASSWORD|FLAG_NO_USER_INPUT))
@@ -633,8 +633,8 @@ log_exit_status(const struct sudoers_context *ctx, int status)
 	/* Log and mail messages should be in the sudoers locale. */
 	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
-	sudoers_to_eventlog(ctx, &evlog, ctx->user.cmnd_saved, saved_argv,
-	    env_get(), ctx->user.uuid_str);
+	sudoers_to_eventlog(ctx, &evlog, ctx->runas.cmnd_saved,
+	    ctx->runas.argv_saved, env_get(), ctx->user.uuid_str);
 	if (def_mail_always) {
 	    SET(evl_flags, EVLOG_MAIL);
 	    if (!def_log_exit_status)
@@ -692,7 +692,7 @@ vlog_warning(const struct sudoers_context *ctx, unsigned int flags,
     /* Do auditing first (audit_failure() handles the locale itself). */
     if (ISSET(flags, SLOG_AUDIT)) {
 	va_copy(ap2, ap);
-	vaudit_failure(ctx, NewArgv, fmt, ap2);
+	vaudit_failure(ctx, ctx->runas.argv, fmt, ap2);
 	va_end(ap2);
     }
 
@@ -736,7 +736,7 @@ vlog_warning(const struct sudoers_context *ctx, unsigned int flags,
 	    if (ISSET(flags, SLOG_NO_LOG))
 		SET(evl_flags, EVLOG_MAIL_ONLY);
 	}
-	sudoers_to_eventlog(ctx, &evlog, ctx->runas.cmnd, NewArgv,
+	sudoers_to_eventlog(ctx, &evlog, ctx->runas.cmnd, ctx->runas.argv,
 	    env_get(), ctx->user.uuid_str);
 	if (!eventlog_alert(&evlog, evl_flags, &now, message, errstr))
 	    ret = false;
@@ -854,8 +854,8 @@ mail_parse_errors(const struct sudoers_context *ctx)
 	sudo_warn("%s", U_("unable to get time of day"));
 	goto done;
     }
-    sudoers_to_eventlog(ctx, &evlog, ctx->runas.cmnd, NewArgv, env_get(),
-	ctx->user.uuid_str);
+    sudoers_to_eventlog(ctx, &evlog, ctx->runas.cmnd, ctx->runas.argv,
+	env_get(), ctx->user.uuid_str);
 
     /* Convert parse_error_list to a string vector. */
     n = 0;

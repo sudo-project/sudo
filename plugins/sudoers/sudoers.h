@@ -128,7 +128,6 @@ struct sudoers_user_context {
     char *cmnd_base;
     char *cmnd_dir;
     char *cmnd_list;
-    char *cmnd_saved;
     char *ccname;
     char *source;
     struct gid_list *gid_list;
@@ -153,12 +152,16 @@ struct sudoers_user_context {
  */
 struct sudoers_runas_context {
     int execfd;
+    int argc;
+    char **argv;
+    char **argv_saved;
     struct passwd *pw;
     struct group *gr;
     struct passwd *list_pw;
     char *chroot;
     char *class;
     char *cmnd;
+    char *cmnd_saved;
     char *cwd;
     char *group;
     char *host;

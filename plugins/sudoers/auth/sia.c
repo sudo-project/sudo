@@ -55,15 +55,15 @@ sudo_sia_setup(const struct sudoers_context *ctx, struct passwd *pw,
     debug_decl(sudo_sia_setup, SUDOERS_DEBUG_AUTH);
 
     /* Rebuild argv for sia_ses_init() */
-    sudo_argc = NewArgc + 1;
+    sudo_argc = ctx->runas.argc + 1;
     sudo_argv = reallocarray(NULL, sudo_argc + 1, sizeof(char *));
     if (sudo_argv == NULL) {
 	log_warningx(ctx, 0, N_("unable to allocate memory"));
 	debug_return_int(AUTH_FATAL);
     }
     sudo_argv[0] = "sudo";
-    for (i = 0; i < NewArgc; i++)
-	sudo_argv[i + 1] = NewArgv[i];
+    for (i = 0; i < ctx->runas.argc; i++)
+	sudo_argv[i + 1] = ctx->runas.argv[i];
     sudo_argv[sudo_argc] = NULL;
 
     /* We don't let SIA prompt the user for input. */
@@ -126,7 +126,7 @@ sudo_sia_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
     debug_decl(sudo_sia_begin_session, SUDOERS_DEBUG_AUTH);
 
     /* Re-init sia for the target user's session. */
-    if (sia_ses_init(&siah, NewArgc, NewArgv, NULL, pw->pw_name, sudo_tty, 0, NULL) != SIASUCCESS) {
+    if (sia_ses_init(&siah, sudo_argc - 1, sudo_argv + 1, NULL, pw->pw_name, sudo_tty, 0, NULL) != SIASUCCESS) {
 	log_warning(ctx, 0, N_("unable to initialize SIA session"));
 	goto done;
     }

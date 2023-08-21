@@ -93,11 +93,6 @@ static struct defaults_list initial_defaults = TAILQ_HEAD_INITIALIZER(initial_de
 static struct rlimit nproclimit;
 #endif
 
-/* XXX - must be extern for audit bits of sudo_auth.c */
-int NewArgc;
-char **NewArgv;
-char **saved_argv;
-
 #ifdef SUDOERS_LOG_CLIENT
 # define remote_iologs	(!SLIST_EMPTY(&def_log_servers))
 #else
@@ -546,15 +541,17 @@ sudoers_check_common(struct sudoers_context *ctx, int pwflag)
 
     /* Finally tell the user if the command did not exist. */
     if (cmnd_status == NOT_FOUND_DOT) {
-	audit_failure(ctx, NewArgv, N_("command in current directory"));
+	audit_failure(ctx, ctx->runas.argv, N_("command in current directory"));
 	sudo_warnx(U_("ignoring \"%s\" found in '.'\nUse \"sudo ./%s\" if this is the \"%s\" you wish to run."), ctx->user.cmnd, ctx->user.cmnd, ctx->user.cmnd);
 	goto bad;
     } else if (cmnd_status == NOT_FOUND) {
 	if (ISSET(sudo_mode, MODE_CHECK)) {
-	    audit_failure(ctx, NewArgv, N_("%s: command not found"), NewArgv[1]);
-	    sudo_warnx(U_("%s: command not found"), NewArgv[1]);
+	    audit_failure(ctx, ctx->runas.argv, N_("%s: command not found"),
+		ctx->runas.argv[1]);
+	    sudo_warnx(U_("%s: command not found"), ctx->runas.argv[1]);
 	} else {
-	    audit_failure(ctx, NewArgv, N_("%s: command not found"), ctx->user.cmnd);
+	    audit_failure(ctx, ctx->runas.argv, N_("%s: command not found"),
+		ctx->user.cmnd);
 	    sudo_warnx(U_("%s: command not found"), ctx->user.cmnd);
 	    if (strncmp(ctx->user.cmnd, "cd", 2) == 0 && (ctx->user.cmnd[2] == '\0' ||
 		    isblank((unsigned char)ctx->user.cmnd[2]))) {
@@ -652,26 +649,26 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
      * Make a local copy of argc/argv, with special handling for the
      * '-i' option.  We also allocate an extra slot for bash's --login.
      */
-    if (NewArgv != NULL && NewArgv != saved_argv) {
-	sudoers_gc_remove(GC_PTR, NewArgv);
-	free(NewArgv);
+    if (sudoers_ctx.runas.argv != NULL && sudoers_ctx.runas.argv != sudoers_ctx.runas.argv_saved) {
+	sudoers_gc_remove(GC_PTR, sudoers_ctx.runas.argv);
+	free(sudoers_ctx.runas.argv);
     }
-    NewArgv = reallocarray(NULL, (size_t)argc + 2, sizeof(char *));
-    if (NewArgv == NULL) {
+    sudoers_ctx.runas.argv = reallocarray(NULL, (size_t)argc + 2, sizeof(char *));
+    if (sudoers_ctx.runas.argv == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto error;
     }
-    sudoers_gc_add(GC_PTR, NewArgv);
-    memcpy(NewArgv, argv, (size_t)argc * sizeof(char *));
-    NewArgc = argc;
-    NewArgv[NewArgc] = NULL;
+    sudoers_gc_add(GC_PTR, sudoers_ctx.runas.argv);
+    memcpy(sudoers_ctx.runas.argv, argv, (size_t)argc * sizeof(char *));
+    sudoers_ctx.runas.argc = argc;
+    sudoers_ctx.runas.argv[sudoers_ctx.runas.argc] = NULL;
     if (ISSET(sudo_mode, MODE_LOGIN_SHELL) && sudoers_ctx.runas.pw != NULL) {
-	NewArgv[0] = strdup(sudoers_ctx.runas.pw->pw_shell);
-	if (NewArgv[0] == NULL) {
+	sudoers_ctx.runas.argv[0] = strdup(sudoers_ctx.runas.pw->pw_shell);
+	if (sudoers_ctx.runas.argv[0] == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto error;
 	}
-	sudoers_gc_add(GC_PTR, NewArgv[0]);
+	sudoers_gc_add(GC_PTR, sudoers_ctx.runas.argv[0]);
     }
 
     ret = sudoers_check_common(&sudoers_ctx, 0);
@@ -710,10 +707,10 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
 	char *p;
 
 	/* Convert /bin/sh -> -sh so shell knows it is a login shell */
-	if ((p = strrchr(NewArgv[0], '/')) == NULL)
-	    p = NewArgv[0];
+	if ((p = strrchr(sudoers_ctx.runas.argv[0], '/')) == NULL)
+	    p = sudoers_ctx.runas.argv[0];
 	*p = '-';
-	NewArgv[0] = p;
+	sudoers_ctx.runas.argv[0] = p;
 
 	/*
 	 * Newer versions of bash require the --login option to be used
@@ -721,12 +718,13 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
 	 * with a '-'.  Unfortunately, bash 1.x uses -login, not --login
 	 * so this will cause an error for that.
 	 */
-	if (NewArgc > 1 && strcmp(NewArgv[0], "-bash") == 0 &&
-	    strcmp(NewArgv[1], "-c") == 0) {
+	if (sudoers_ctx.runas.argc > 1 && strcmp(sudoers_ctx.runas.argv[0], "-bash") == 0 &&
+	    strcmp(sudoers_ctx.runas.argv[1], "-c") == 0) {
 	    /* We allocated extra space for the --login above. */
-	    memmove(&NewArgv[2], &NewArgv[1], (size_t)NewArgc * sizeof(char *));
-	    NewArgv[1] = (char *)"--login";
-	    NewArgc++;
+	    memmove(&sudoers_ctx.runas.argv[2], &sudoers_ctx.runas.argv[1],
+		(size_t)sudoers_ctx.runas.argc * sizeof(char *));
+	    sudoers_ctx.runas.argv[1] = (char *)"--login";
+	    sudoers_ctx.runas.argc++;
 	}
 
 #if defined(_AIX) || (defined(__linux__) && !defined(HAVE_PAM))
@@ -770,14 +768,14 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
 	char **edit_argv;
 	int edit_argc;
 
-	sudoedit_nfiles = NewArgc - 1;
+	sudoedit_nfiles = sudoers_ctx.runas.argc - 1;
 	free(sudoers_ctx.runas.cmnd);
-	sudoers_ctx.runas.cmnd = find_editor(sudoedit_nfiles, NewArgv + 1,
-	    &edit_argc, &edit_argv, NULL, &env_editor);
+	sudoers_ctx.runas.cmnd = find_editor(sudoedit_nfiles,
+	    sudoers_ctx.runas.argv + 1, &edit_argc, &edit_argv, NULL, &env_editor);
 	if (sudoers_ctx.runas.cmnd == NULL) {
 	    switch (errno) {
 	    case ENOENT:
-		audit_failure(&sudoers_ctx, NewArgv,
+		audit_failure(&sudoers_ctx, sudoers_ctx.runas.argv,
 		    N_("%s: command not found"),
 		    env_editor ? env_editor : def_editor);
 		sudo_warnx(U_("%s: command not found"),
@@ -797,25 +795,25 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
 	    }
 	}
 	/* find_editor() already g/c'd edit_argv[] */
-	if (NewArgv != saved_argv) {
-	    sudoers_gc_remove(GC_PTR, NewArgv);
-	    free(NewArgv);
+	if (sudoers_ctx.runas.argv != sudoers_ctx.runas.argv_saved) {
+	    sudoers_gc_remove(GC_PTR, sudoers_ctx.runas.argv);
+	    free(sudoers_ctx.runas.argv);
 	}
-	NewArgv = edit_argv;
-	NewArgc = edit_argc;
+	sudoers_ctx.runas.argv = edit_argv;
+	sudoers_ctx.runas.argc = edit_argc;
 
 	/* We want to run the editor with the unmodified environment. */
 	env_swap_old();
     }
 
     /* Save the initial command and argv so we have it for exit logging. */
-    if (sudoers_ctx.user.cmnd_saved == NULL) {
-	sudoers_ctx.user.cmnd_saved = strdup(sudoers_ctx.runas.cmnd);
-	if (sudoers_ctx.user.cmnd_saved == NULL) {
+    if (sudoers_ctx.runas.cmnd_saved == NULL) {
+	sudoers_ctx.runas.cmnd_saved = strdup(sudoers_ctx.runas.cmnd);
+	if (sudoers_ctx.runas.cmnd_saved == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto error;
 	}
-	saved_argv = NewArgv;
+	sudoers_ctx.runas.argv_saved = sudoers_ctx.runas.argv;
     }
 
     ret = true;
@@ -843,8 +841,8 @@ done:
 	free(iolog_path);
     } else {
 	/* Store settings to pass back to front-end. */
-	if (!sudoers_policy_store_result(&sudoers_ctx, ret, NewArgv, env_get(),
-		cmnd_umask, iolog_path, closure))
+	if (!sudoers_policy_store_result(&sudoers_ctx, ret,
+	    sudoers_ctx.runas.argv, env_get(), cmnd_umask, iolog_path, closure))
 	    ret = -1;
     }
 
@@ -876,15 +874,15 @@ sudoers_validate_user(void)
     if (!set_perms(&sudoers_ctx, PERM_INITIAL))
 	goto done;
 
-    NewArgv = reallocarray(NULL, 2, sizeof(char *));
-    if (NewArgv == NULL) {
+    sudoers_ctx.runas.argv = reallocarray(NULL, 2, sizeof(char *));
+    if (sudoers_ctx.runas.argv == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
     }
-    sudoers_gc_add(GC_PTR, NewArgv);
-    NewArgv[0] = (char *)"validate";
-    NewArgv[1] = NULL;
-    NewArgc = 2;
+    sudoers_gc_add(GC_PTR, sudoers_ctx.runas.argv);
+    sudoers_ctx.runas.argv[0] = (char *)"validate";
+    sudoers_ctx.runas.argv[1] = NULL;
+    sudoers_ctx.runas.argc = 2;
 
     ret = sudoers_check_common(&sudoers_ctx, I_VERIFYPW);
 
@@ -935,17 +933,17 @@ sudoers_list(int argc, char * const argv[], const char *list_user, bool verbose)
 	}
     }
 
-    NewArgv = reallocarray(NULL, (size_t)argc + 2, sizeof(char *));
-    if (NewArgv == NULL) {
+    sudoers_ctx.runas.argv = reallocarray(NULL, (size_t)argc + 2, sizeof(char *));
+    if (sudoers_ctx.runas.argv == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
     }
-    sudoers_gc_add(GC_PTR, NewArgv);
-    NewArgv[0] = (char *)"list";
+    sudoers_gc_add(GC_PTR, sudoers_ctx.runas.argv);
+    sudoers_ctx.runas.argv[0] = (char *)"list";
     if (argc != 0)
-	memcpy(NewArgv + 1, argv, (size_t)argc * sizeof(char *));
-    NewArgc = argc + 1;
-    NewArgv[NewArgc] = NULL;
+	memcpy(sudoers_ctx.runas.argv + 1, argv, (size_t)argc * sizeof(char *));
+    sudoers_ctx.runas.argc = argc + 1;
+    sudoers_ctx.runas.argv[sudoers_ctx.runas.argc] = NULL;
 
     ret = sudoers_check_common(&sudoers_ctx, I_LISTPW);
     if (ret != true)
@@ -1072,7 +1070,8 @@ set_cmnd_path(struct sudoers_context *ctx, const char *runchroot)
     int ret, pivot_fds[2];
     debug_decl(set_cmnd_path, SUDOERS_DEBUG_PLUGIN);
 
-    cmnd_in = ISSET(sudo_mode, MODE_CHECK) ? NewArgv[1] : NewArgv[0];
+    cmnd_in = ISSET(sudo_mode, MODE_CHECK) ?
+	ctx->runas.argv[1] : ctx->runas.argv[0];
 
     free(ctx->user.cmnd_list);
     ctx->user.cmnd_list = NULL;
@@ -1176,9 +1175,9 @@ set_cmnd(struct sudoers_context *ctx)
 	    ret = set_cmnd_path(ctx, runchroot);
 	    if (ret == NOT_FOUND_ERROR) {
 		if (errno == ENAMETOOLONG) {
-		    audit_failure(ctx, NewArgv, N_("command too long"));
+		    audit_failure(ctx, ctx->runas.argv, N_("command too long"));
 		}
-		log_warning(ctx, 0, "%s", NewArgv[0]);
+		log_warning(ctx, 0, "%s", ctx->runas.argv[0]);
 		debug_return_int(ret);
 	    }
 	}
@@ -1187,13 +1186,13 @@ set_cmnd(struct sudoers_context *ctx)
 	free(ctx->user.cmnd_args);
 	ctx->user.cmnd_args = NULL;
 	if (ISSET(sudo_mode, MODE_CHECK)) {
-	    if (NewArgc > 2) {
-		/* Skip the command being listed in NewArgv[1]. */
-		ctx->user.cmnd_args = strvec_join(NewArgv + 2, ' ', NULL);
+	    if (ctx->runas.argc > 2) {
+		/* Skip the command being listed in ctx->runas.argv[1]. */
+		ctx->user.cmnd_args = strvec_join(ctx->runas.argv + 2, ' ', NULL);
 		if (ctx->user.cmnd_args == NULL)
 		    debug_return_int(NOT_FOUND_ERROR);
 	    }
-	} else if (NewArgc > 1) {
+	} else if (ctx->runas.argc > 1) {
 	    if (ISSET(sudo_mode, MODE_SHELL|MODE_LOGIN_SHELL) &&
 		    ISSET(sudo_mode, MODE_RUN)) {
 		/*
@@ -1202,16 +1201,18 @@ set_cmnd(struct sudoers_context *ctx)
 		 * for sudoers matching and logging purposes.
 		 * TODO: move escaping to the policy plugin instead
 		 */
-		ctx->user.cmnd_args = strvec_join(NewArgv + 1, ' ', strlcpy_unescape);
+		ctx->user.cmnd_args = strvec_join(ctx->runas.argv + 1, ' ',
+		    strlcpy_unescape);
 	    } else {
-		ctx->user.cmnd_args = strvec_join(NewArgv + 1, ' ', NULL);
+		ctx->user.cmnd_args = strvec_join(ctx->runas.argv + 1, ' ',
+		    NULL);
 	    }
 	    if (ctx->user.cmnd_args == NULL)
 		debug_return_int(NOT_FOUND_ERROR);
 	}
     }
     if (ctx->user.cmnd == NULL) {
-	ctx->user.cmnd = strdup(NewArgv[0]);
+	ctx->user.cmnd = strdup(ctx->runas.argv[0]);
 	if (ctx->user.cmnd == NULL)
 	    debug_return_int(NOT_FOUND_ERROR);
     }
@@ -1526,9 +1527,6 @@ sudoers_cleanup(void)
     sudoers_gc_run();
 
     /* Clear globals */
-    saved_argv = NULL;
-    NewArgv = NULL;
-    NewArgc = 0;
     prev_user = NULL;
 
     debug_return;

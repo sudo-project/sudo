@@ -397,12 +397,13 @@ sudoers_audit_reject(const char *plugin_name, unsigned int plugin_type,
     if (!def_log_denied)
 	debug_return_int(true);
 
-    if (audit_failure_int(ctx, NewArgv, message) != 0) {
+    if (audit_failure_int(ctx, ctx->runas.argv, message) != 0) {
 	if (!def_ignore_audit_errors)
 	    ret = false;
     }
 
-    audit_to_eventlog(ctx, &evlog, command_info, NewArgv, env_get(), NULL);
+    audit_to_eventlog(ctx, &evlog, command_info, ctx->runas.argv, env_get(),
+	NULL);
     if (!eventlog_reject(&evlog, 0, message, NULL, NULL))
 	ret = false;
 
@@ -426,7 +427,7 @@ sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
     if (strncmp(plugin_name, "sudoers_", 8) == 0)
 	debug_return_int(true);
 
-    if (audit_failure_int(ctx, NewArgv, message) != 0) {
+    if (audit_failure_int(ctx, ctx->runas.argv, message) != 0) {
 	if (!def_ignore_audit_errors)
 	    ret = false;
     }
@@ -436,7 +437,8 @@ sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
 	debug_return_bool(false);
     }
 
-    audit_to_eventlog(ctx, &evlog, command_info, NewArgv, env_get(), NULL);
+    audit_to_eventlog(ctx, &evlog, command_info, ctx->runas.argv, env_get(),
+	NULL);
     if (!eventlog_alert(&evlog, 0, &now, message, NULL))
 	ret = false;
 
