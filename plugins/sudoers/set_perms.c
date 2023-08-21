@@ -105,6 +105,7 @@ rewind_perms(void)
  * Set real and effective and saved uids and gids based on perm.
  * We always retain a saved uid of 0 unless we are headed for an exec().
  * We only flip the effective gid since it only changes for PERM_SUDOERS.
+ * The ctx argument may be NULL for PERM_ROOT, PERM_SUDOERS and PERM_TIMESTAMP.
  * This version of set_perms() works fine with the "stay_setuid" option.
  */
 bool
@@ -441,6 +442,7 @@ bad:
  * Set real and effective and saved uids and gids based on perm.
  * We always retain a saved uid of 0 unless we are headed for an exec().
  * We only flip the effective gid since it only changes for PERM_SUDOERS.
+ * The ctx argument may be NULL for PERM_ROOT, PERM_SUDOERS and PERM_TIMESTAMP.
  * This version of set_perms() works fine with the "stay_setuid" option.
  */
 bool
@@ -853,6 +855,7 @@ bad:
  * Set real and effective and saved uids and gids based on perm.
  * We always retain a saved uid of 0 unless we are headed for an exec().
  * We only flip the effective gid since it only changes for PERM_SUDOERS.
+ * The ctx argument may be NULL for PERM_ROOT, PERM_SUDOERS and PERM_TIMESTAMP.
  * This version of set_perms() works fine with the "stay_setuid" option.
  */
 bool
@@ -1168,6 +1171,7 @@ bad:
  * Set real and effective uids and gids based on perm.
  * We always retain a real or effective uid of ROOT_UID unless
  * we are headed for an exec().
+ * The ctx argument may be NULL for PERM_ROOT, PERM_SUDOERS and PERM_TIMESTAMP.
  * This version of set_perms() works fine with the "stay_setuid" option.
  */
 bool
@@ -1470,6 +1474,7 @@ bad:
 
 /*
  * Set uids and gids based on perm via setuid() and setgid().
+ * The ctx argument may be NULL for PERM_ROOT, PERM_SUDOERS and PERM_TIMESTAMP.
  * NOTE: does not support the "stay_setuid" or timestampowner options.
  *       Also, sudoers_uid and sudoers_gid are not used.
  */
