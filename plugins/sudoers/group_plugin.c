@@ -206,7 +206,7 @@ group_plugin_load(const struct sudoers_context *ctx, const char *plugin_info)
             }
         }
 	if (ac != 0) {
-	    argv = reallocarray(NULL, (size_t)(ac + 1), sizeof(char *));
+	    argv = reallocarray(NULL, (size_t)ac + 1, sizeof(char *));
 	    if (argv == NULL) {
 		sudo_warnx(U_("%s: %s"), __func__,
 		    U_("unable to allocate memory"));

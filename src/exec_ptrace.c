@@ -1884,7 +1884,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	     */
 	    if (argv_mismatch) {
 		/* argv pointers */
-		space += (size_t)(argc + 1 + regs.compat) * regs.wordsize;
+		space += ((size_t)argc + 1 + regs.compat) * regs.wordsize;
 
 		/* argv strings */
 		for (argc = 0; closure->run_argv[argc] != NULL; argc++) {
@@ -1905,7 +1905,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 		set_sc_arg2(&regs, sp);
 
 		/* Skip over argv pointers (plus NULL) for string table. */
-		strtab += (size_t)(argc + 1 + regs.compat) * regs.wordsize;
+		strtab += ((size_t)argc + 1 + regs.compat) * regs.wordsize;
 
 		nwritten = ptrace_write_vec(pid, &regs, closure->run_argv,
 		    sp, strtab);

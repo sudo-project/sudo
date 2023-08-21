@@ -1551,11 +1551,11 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
 
 	    /* Check for dir with a log file. */
 	    if (lstat(pathbuf, &sb) == 0 && S_ISREG(sb.st_mode)) {
-		pathbuf[sdlen + (size_t)(len - 4)] = '\0';
+		pathbuf[sdlen + (size_t)len - 4] = '\0';
 		list_session(&lbuf, pathbuf, re, user, tty);
 	    } else {
 		/* Strip off "/log" and recurse if a non-log dir. */
-		pathbuf[sdlen + (size_t)(len - 4)] = '\0';
+		pathbuf[sdlen + (size_t)len - 4] = '\0';
 		if (checked_type ||
 		    (lstat(pathbuf, &sb) == 0 && S_ISDIR(sb.st_mode)))
 		    find_sessions(pathbuf, re, user, tty);

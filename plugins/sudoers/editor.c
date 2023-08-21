@@ -158,7 +158,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char * const *files,
 	nargc++;
     if (nfiles != 0)
 	nargc += nfiles + 1;
-    nargv = reallocarray(NULL, (size_t)(nargc + 1), sizeof(char *));
+    nargv = reallocarray(NULL, (size_t)nargc + 1, sizeof(char *));
     if (nargv == NULL)
 	goto oom;
     sudoers_gc_add(GC_PTR, nargv);
