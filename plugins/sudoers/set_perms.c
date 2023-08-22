@@ -272,7 +272,7 @@ set_perms(const struct sudoers_context *ctx, int perm)
 
     case PERM_RUNAS:
 	state->rgid = ostate->rgid;
-	state->egid = ctx->runas.gr ? ctx->runas.gr->gr_gid : ctx->runas.pw->pw_gid;
+	state->egid = ctx->runas.gr ? ctx->runas.gr->gr_gid : ctx->runas.pw->pw_gid; // -V595
 	state->sgid = ostate->sgid;
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: PERM_RUNAS: gid: "
 	    "[%d, %d, %d] -> [%d, %d, %d]", __func__,
