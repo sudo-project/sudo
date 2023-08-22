@@ -93,12 +93,6 @@ rewind_perms(void)
     return true;
 }
 
-void
-timestamp_set_owner(uid_t uid, gid_t gid)
-{
-    return;
-}
-
 bool
 sudo_nss_can_continue(const struct sudo_nss *nss, int match)
 {

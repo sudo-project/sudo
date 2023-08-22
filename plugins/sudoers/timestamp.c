@@ -69,22 +69,6 @@ struct ts_cookie {
 static uid_t timestamp_uid = ROOT_UID;
 static gid_t timestamp_gid = ROOT_GID;
 
-/*
- * Set timestamp_uid and timestamp_gid.
- */
-void
-timestamp_set_owner(uid_t uid, gid_t gid)
-{
-    debug_decl(timestamp_owner, SUDOERS_DEBUG_AUTH);
-
-    if (uid != (uid_t)-1)
-	timestamp_uid = uid;
-    if (gid != (gid_t)-1)
-	timestamp_gid = gid;
-
-    debug_return;
-}
-
 uid_t
 timestamp_get_uid(void)
 {
@@ -1094,6 +1078,35 @@ done:
 	close(fd);
     free(fname);
     debug_return_int(ret);
+}
+
+bool
+cb_timestampowner(struct sudoers_context *ctx, const char *file,
+    int line, int column, const union sudo_defs_val *sd_un, int op)
+{
+    struct passwd *pw = NULL;
+    const char *user = sd_un->str;
+    debug_decl(cb_timestampowner, SUDOERS_DEBUG_AUTH);
+
+    if (*user == '#') {
+	const char *errstr;
+	uid_t uid = sudo_strtoid(user + 1, &errstr);
+	if (errstr == NULL)
+	    pw = sudo_getpwuid(uid);
+    }
+    if (pw == NULL)
+	pw = sudo_getpwnam(user);
+    if (pw == NULL) {
+	log_warningx(ctx, SLOG_AUDIT|SLOG_PARSE_ERROR,
+	    N_("%s:%d:%d timestampowner: unknown user %s"), file, line,
+	    column, user);
+	debug_return_bool(false);
+    }
+    timestamp_uid = pw->pw_uid;
+    timestamp_gid = pw->pw_gid;
+    sudo_pw_delref(pw);
+
+    debug_return_bool(true);
 }
 
 /*

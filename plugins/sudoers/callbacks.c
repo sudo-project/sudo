@@ -166,34 +166,6 @@ cb_fqdn(struct sudoers_context *ctx, const char *file,
 }
 
 static bool
-cb_timestampowner(struct sudoers_context *ctx, const char *file,
-    int line, int column, const union sudo_defs_val *sd_un, int op)
-{
-    struct passwd *pw = NULL;
-    const char *user = sd_un->str;
-    debug_decl(cb_timestampowner, SUDOERS_DEBUG_PLUGIN);
-
-    if (*user == '#') {
-	const char *errstr;
-	uid_t uid = sudo_strtoid(user + 1, &errstr);
-	if (errstr == NULL)
-	    pw = sudo_getpwuid(uid);
-    }
-    if (pw == NULL)
-	pw = sudo_getpwnam(user);
-    if (pw == NULL) {
-	log_warningx(ctx, SLOG_AUDIT|SLOG_PARSE_ERROR,
-	    N_("%s:%d:%d timestampowner: unknown user %s"), file, line,
-	    column, user);
-	debug_return_bool(false);
-    }
-    timestamp_set_owner(pw->pw_uid, pw->pw_gid);
-    sudo_pw_delref(pw);
-
-    debug_return_bool(true);
-}
-
-static bool
 cb_tty_tickets(struct sudoers_context *ctx, const char *file,
     int line, int column, const union sudo_defs_val *sd_un, int op)
 {

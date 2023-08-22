@@ -318,6 +318,7 @@ char *expand_prompt(const struct sudoers_context *ctx, const char *old_prompt, c
 
 /* timestamp.c */
 int timestamp_remove(const struct sudoers_context *ctx, bool unlinkit);
+bool cb_timestampowner(struct sudoers_context *ctx, const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
 
 /* sudo_auth.c */
 bool sudo_auth_needs_end_session(void);

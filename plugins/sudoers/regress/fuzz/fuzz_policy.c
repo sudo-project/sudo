@@ -916,6 +916,14 @@ cb_group_plugin(struct sudoers_context *ctx, const char *file,
 }
 
 /* STUB */
+bool
+cb_timestampowner(struct sudoers_context *ctx, const char *file,
+    int line, int column, const union sudo_defs_val *sd_un, int op)
+{
+    return true;
+}
+
+/* STUB */
 void
 bsdauth_set_style(const char *style)
 {
