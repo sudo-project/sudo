@@ -63,7 +63,6 @@
 
 #include "sudoers.h"
 #include "check.h"
-#include "auth/sudo_auth.h"
 #include "sudo_iolog.h"
 
 /*
