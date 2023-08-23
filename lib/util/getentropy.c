@@ -249,9 +249,9 @@ start:
 	}
 	for (i = 0; i < len; ) {
 		size_t wanted = len - i;
-		ssize_t ret = read(fd, (char *)buf + i, wanted);
+		size_t ret = (size_t)read(fd, (char *)buf + i, wanted);
 
-		if (ret == -1) {
+		if (ret == (size_t)-1) {
 			if (errno == EAGAIN || errno == EINTR)
 				continue;
 			close(fd);
@@ -343,7 +343,7 @@ static int
 getentropy_getrandom(void *buf, size_t len)
 {
 	int pre_errno = errno;
-	int ret;
+	long ret;
 
         /*
          * Try descriptor-less getrandom(), in non-blocking mode.
@@ -415,9 +415,9 @@ getentropy_fallback(void *buf, size_t len)
 	unsigned char *results = NULL;
 	int save_errno = errno, e, faster = 0;
 	int ret = -1;
-	static int cnt;
+	static size_t cnt;
 	unsigned int repeat;
-	long pgs;
+	size_t pgs;
 	struct timespec ts;
 	struct timeval tv;
 	struct rusage ru;
@@ -431,7 +431,8 @@ getentropy_fallback(void *buf, size_t len)
 
 	if (len == 0)
 		return 0;
-	if ((pgs = sysconf(_SC_PAGESIZE)) == -1)
+	pgs = (size_t)sysconf(_SC_PAGESIZE);
+	if (pgs == (size_t)-1)
 		return -1;
 	if ((ctx = sudo_digest_alloc(SUDO_DIGEST_SHA512)) == NULL)
 		return -1;
@@ -454,8 +455,8 @@ getentropy_fallback(void *buf, size_t len)
 		for (j = 0; j < repeat; j++) {
 			HX((e = gettimeofday(&tv, NULL)) == -1, tv);
 			if (e != -1) {
-				cnt += (int)tv.tv_sec;
-				cnt += (int)tv.tv_usec;
+				cnt += (size_t)tv.tv_sec;
+				cnt += (size_t)tv.tv_usec;
 			}
 #ifdef HAVE_DL_ITERATE_PHDR
 			dl_iterate_phdr(getentropy_phdr, ctx);
@@ -525,8 +526,7 @@ getentropy_fallback(void *buf, size_t len)
 						mo = cnt %
 						    (mm[m].npg * pgs - 1);
 						p[mo] = 1;
-						cnt += (int)((long)(mm[m].p)
-						    / pgs);
+						cnt += (size_t)mm[m].p / pgs;
 					}
 
 #ifdef HAVE_CLOCK_GETTIME
@@ -536,15 +536,15 @@ getentropy_fallback(void *buf, size_t len)
 						HX((e = clock_gettime(cl[ii],
 						    &ts)) == -1, ts);
 						if (e != -1)
-							cnt += (int)ts.tv_nsec;
+							cnt += (size_t)ts.tv_nsec;
 					}
 #endif /* HAVE_CLOCK_GETTIME */
 
 					HX((e = getrusage(RUSAGE_SELF,
 					    &ru)) == -1, ru);
 					if (e != -1) {
-						cnt += (int)ru.ru_utime.tv_sec;
-						cnt += (int)ru.ru_utime.tv_usec;
+						cnt += (size_t)ru.ru_utime.tv_sec;
+						cnt += (size_t)ru.ru_utime.tv_usec;
 					}
 				}
 
@@ -592,8 +592,8 @@ getentropy_fallback(void *buf, size_t len)
 				HX((e = getrusage(RUSAGE_CHILDREN,
 				    &ru)) == -1, ru);
 				if (e != -1) {
-					cnt += (int)ru.ru_utime.tv_sec;
-					cnt += (int)ru.ru_utime.tv_usec;
+					cnt += (size_t)ru.ru_utime.tv_sec;
+					cnt += (size_t)ru.ru_utime.tv_usec;
 				}
 			} else {
 				/* Subsequent hashes absorb previous result */
@@ -602,8 +602,8 @@ getentropy_fallback(void *buf, size_t len)
 
 			HX((e = gettimeofday(&tv, NULL)) == -1, tv);
 			if (e != -1) {
-				cnt += (int)tv.tv_sec;
-				cnt += (int)tv.tv_usec;
+				cnt += (size_t)tv.tv_sec;
+				cnt += (size_t)tv.tv_usec;
 			}
 
 			HD(cnt);

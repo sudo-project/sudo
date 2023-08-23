@@ -1347,7 +1347,7 @@ sudo_ldap_sasl_interact(LDAP *ld, unsigned int flags, void *_auth_id,
 	else
 	    interact->result = "";
 
-	interact->len = strlen(interact->result);
+	interact->len = (unsigned int)strlen(interact->result);
 #if SASL_VERSION_MAJOR < 2
 	interact->result = strdup(interact->result);
 	if (interact->result == NULL) {
@@ -1778,7 +1778,8 @@ sudo_ldap_result_add_entry(struct ldap_result *lres, LDAPMessage *entry)
      * of 100 entries to save on allocation time.
      */
     if (++lres->nentries > lres->allocated_entries) {
-	size_t allocated_entries = lres->allocated_entries + ALLOCATION_INCREMENT;
+	unsigned int allocated_entries =
+	    lres->allocated_entries + ALLOCATION_INCREMENT;
 	struct ldap_entry_wrapper *entries = reallocarray(lres->entries,
 	    allocated_entries, sizeof(lres->entries[0]));
 	if (entries == NULL)

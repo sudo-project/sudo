@@ -200,7 +200,7 @@ sudo_ev_scan_impl(struct sudo_event_base *base, unsigned int flags)
 	}
     }
 
-    nready = sudo_ev_poll(base->pfds, base->pfd_high + 1, timeout);
+    nready = sudo_ev_poll(base->pfds, (nfds_t)base->pfd_high + 1, timeout);
     switch (nready) {
     case -1:
 	/* Error: EINTR (signal) or EINVAL (nfds > RLIMIT_NOFILE) */
