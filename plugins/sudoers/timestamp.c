@@ -959,7 +959,7 @@ bool
 timestamp_update(void *vcookie, struct passwd *pw)
 {
     struct ts_cookie *cookie = vcookie;
-    bool ret = false;
+    int ret = false;
     debug_decl(timestamp_update, SUDOERS_DEBUG_AUTH);
 
     /* Zero timeout means don't use time stamp files. */
@@ -1006,7 +1006,7 @@ timestamp_update(void *vcookie, struct passwd *pw)
 	ret = true;
 
 done:
-    debug_return_int(ret);
+    debug_return_bool(ret);
 }
 
 /*
