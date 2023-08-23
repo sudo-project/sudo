@@ -639,6 +639,11 @@ AC_DEFUN([SUDO_PVS_STUDIO_CFG], [
 		analysis-mode = 4
 		language = C
 	EOF
+
+	# Check for a license file in the default location
+	if test -f "$HOME/.config/PVS-Studio/PVS-Studio.lic"; then
+	    echo "lic-file = $HOME/.config/PVS-Studio/PVS-Studio.lic" >> PVS-Studio.cfg
+	fi
     fi
 ])
 
