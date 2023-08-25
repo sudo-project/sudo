@@ -451,6 +451,7 @@ set_callbacks(void)
     /* Set locale callback. */
     sudo_defs_table[I_SUDOERS_LOCALE].callback = sudoers_locale_callback;
 
+#ifdef SESSID_MAX
     /* Set maxseq callback. */
     sudo_defs_table[I_MAXSEQ].callback = cb_maxseq;
 
@@ -462,6 +463,7 @@ set_callbacks(void)
 
     /* Set iolog_mode callback. */
     sudo_defs_table[I_IOLOG_MODE].callback = cb_iolog_mode;
+#endif /* SESSID_MAX */
 
     /* Set timestampowner callback. */
     sudo_defs_table[I_TIMESTAMPOWNER].callback = cb_timestampowner;
