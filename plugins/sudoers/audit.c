@@ -353,18 +353,29 @@ sudoers_audit_accept(const char *plugin_name, unsigned int plugin_type,
     if (plugin_type != SUDO_FRONT_END)
 	debug_return_int(true);
 
-    if (!def_log_allowed)
-	debug_return_int(true);
-
-    if (audit_success(ctx, run_argv) != 0 && !def_ignore_audit_errors)
-	ret = false;
-
+    /* Log sub-commands with the uuid of the original command. */
     if (!ISSET(ctx->mode, MODE_POLICY_INTERCEPTED))
 	uuid_str = ctx->uuid_str;
 
+    /*
+     * We must always call log_allowed() even if def_log_allowed is disabled
+     * since it will send mail if def_mail_always or def_mail_all_cmnds are
+     * set (it has its own checks for def_log_allowed).
+     */
     audit_to_eventlog(ctx, &evlog, command_info, run_argv, run_envp, uuid_str);
     if (!log_allowed(ctx, &evlog) && !def_ignore_logfile_errors)
 	ret = false;
+
+    /*
+     * Skip auditing and log server logging if "log_allowed" is disabled.
+     */
+    if (!def_log_allowed)
+	goto done;
+
+    if (audit_success(ctx, run_argv) != 0) {
+	if (!def_ignore_logfile_errors)
+	    ret = false;
+    }
 
     if (!log_server_accept(ctx, &evlog)) {
 	if (!def_ignore_logfile_errors)
@@ -382,6 +393,7 @@ sudoers_audit_accept(const char *plugin_name, unsigned int plugin_type,
 	first = false;
     }
 
+done:
     debug_return_int(ret);
 }
 
