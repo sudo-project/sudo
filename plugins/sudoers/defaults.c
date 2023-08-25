@@ -586,13 +586,15 @@ init_defaults(void)
 #ifdef HAVE_ZLIB_H
     def_compress_io = true;
 #endif
-    def_log_passwords = true;
-    def_log_server_timeout = 30;
-    def_log_server_verify = true;
-    def_log_server_keepalive = true;
     def_ignore_audit_errors = true;
     def_ignore_iolog_errors = false;
     def_ignore_logfile_errors = true;
+    def_log_passwords = true;
+#ifdef SUDOERS_LOG_CLIENT
+    def_log_server_timeout = 30;
+    def_log_server_verify = true;
+    def_log_server_keepalive = true;
+#endif
 
     /* Now do the strings */
     if ((def_mailto = strdup(MAILTO)) == NULL)
@@ -601,10 +603,14 @@ init_defaults(void)
 	goto oom;
     if ((def_badpass_message = strdup(_(INCORRECT_PASSWORD))) == NULL)
 	goto oom;
+#ifdef _PATH_SUDO_LECTURE_DIR
     if ((def_lecture_status_dir = strdup(_PATH_SUDO_LECTURE_DIR)) == NULL)
 	goto oom;
+#endif
+#ifdef _PATH_SUDO_TIMEDIR
     if ((def_timestampdir = strdup(_PATH_SUDO_TIMEDIR)) == NULL)
 	goto oom;
+#endif
     if ((def_passprompt = strdup(_(PASSPROMPT))) == NULL)
 	goto oom;
     if ((def_runas_default = strdup(RUNAS_DEFAULT)) == NULL)
