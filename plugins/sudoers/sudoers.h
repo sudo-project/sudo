@@ -450,6 +450,7 @@ void sudoers_debug_deregister(void);
 /* policy.c */
 unsigned int sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v, struct defaults_list *defaults);
 bool sudoers_policy_store_result(struct sudoers_context *ctx, bool accepted, char *argv[], char *envp[], mode_t cmnd_umask, char *iolog_path, void *v);
+bool sudoers_tty_present(struct sudoers_context *ctx);
 
 /* group_plugin.c */
 void group_plugin_unload(void);

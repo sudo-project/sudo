@@ -31,6 +31,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <grp.h>
 #include <pwd.h>
 
@@ -1042,6 +1043,21 @@ bad:
     free(command_info);
     command_info = NULL;
     debug_return_bool(false);
+}
+
+bool
+sudoers_tty_present(struct sudoers_context *ctx)
+{
+    debug_decl(sudoers_tty_present, SUDOERS_DEBUG_PLUGIN);
+    
+    if (ctx->user.tcpgid == 0 && ctx->user.ttypath == NULL) {
+	/* No job control or terminal, check /dev/tty. */
+	int fd = open(_PATH_TTY, O_RDWR);
+	if (fd == -1)
+	    debug_return_bool(false);
+	close(fd);
+    }
+    debug_return_bool(true);
 }
 
 static int

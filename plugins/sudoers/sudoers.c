@@ -73,7 +73,6 @@ static bool init_vars(struct sudoers_context *ctx, char * const *);
 static bool set_loginclass(struct sudoers_context *);
 static bool set_runaspw(struct sudoers_context *ctx, const char *, bool);
 static bool set_runasgr(struct sudoers_context *ctx, const char *, bool);
-static bool tty_present(struct sudoers_context *ctx);
 
 /*
  * Globals
@@ -435,7 +434,7 @@ sudoers_check_common(struct sudoers_context *ctx, int pwflag)
     }
 
     /* Bail if a tty is required and we don't have one. */
-    if (def_requiretty && !tty_present(ctx)) {
+    if (def_requiretty && !sudoers_tty_present(ctx)) {
 	log_warningx(ctx, SLOG_NO_STDERR|SLOG_AUDIT, N_("no tty"));
 	sudo_warnx("%s", U_("sorry, you must have a tty to run sudo"));
 	goto bad;
@@ -1527,21 +1526,6 @@ sudoers_cleanup(void)
     prev_user = NULL;
 
     debug_return;
-}
-
-static bool
-tty_present(struct sudoers_context *ctx)
-{
-    debug_decl(tty_present, SUDOERS_DEBUG_PLUGIN);
-    
-    if (ctx->user.tcpgid == 0 && ctx->user.ttypath == NULL) {
-	/* No job control or terminal, check /dev/tty. */
-	int fd = open(_PATH_TTY, O_RDWR);
-	if (fd == -1)
-	    debug_return_bool(false);
-	close(fd);
-    }
-    debug_return_bool(true);
 }
 
 bool
