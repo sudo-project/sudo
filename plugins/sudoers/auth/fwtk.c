@@ -121,8 +121,8 @@ restart:
 	sudo_warnx("%s", resp);
 	debug_return_int(AUTH_FATAL);
     }
-    if (!pass) {			/* ^C or error */
-	debug_return_int(AUTH_INTR);
+    if (pass == NULL) {		/* ^C or error */
+	debug_return_int(AUTH_FAILURE);
     }
 
     /* Send the user's response to the server */
