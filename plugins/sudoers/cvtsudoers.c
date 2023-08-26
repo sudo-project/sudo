@@ -818,7 +818,7 @@ userlist_matches_filter(struct sudoers_parse_tree *parse_tree,
 	    pw.pw_uid = (uid_t)-1;
 	    pw.pw_gid = (gid_t)-1;
 
-	    if (user_matches(parse_tree, &pw, m) == true)
+	    if (user_matches(parse_tree, &pw, m) == ALLOW)
 		matched = true;
 	} else {
 	    STAILQ_FOREACH(s, &filters->users, entries) {
@@ -844,7 +844,7 @@ userlist_matches_filter(struct sudoers_parse_tree *parse_tree,
 		if (pw == NULL)
 		    continue;
 
-		if (user_matches(parse_tree, pw, m) == true)
+		if (user_matches(parse_tree, pw, m) == ALLOW)
 		    matched = true;
 		sudo_pw_delref(pw);
 
@@ -920,7 +920,7 @@ hostlist_matches_filter(struct sudoers_parse_tree *parse_tree,
 
 	    /* Only need one host in the filter to match. */
 	    /* XXX - can't use netgroup_tuple with NULL pw */
-	    if (host_matches(parse_tree, NULL, lhost, shost, m) == true) {
+	    if (host_matches(parse_tree, NULL, lhost, shost, m) == ALLOW) {
 		matched = true;
 		break;
 	    }
@@ -970,7 +970,7 @@ cmnd_matches_filter(struct sudoers_parse_tree *parse_tree,
 	/* Only need one command in the filter to match. */
 	ctx->user.cmnd = s->str;
 	ctx->user.cmnd_base = sudo_basename(ctx->user.cmnd);
-	if (cmnd_matches(parse_tree, m, NULL, NULL) == true) {
+	if (cmnd_matches(parse_tree, m, NULL, NULL) == ALLOW) {
 	    matched = true;
 	    break;
 	}
