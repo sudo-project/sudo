@@ -98,7 +98,7 @@ sudo_rfc1938_setup(const struct sudoers_context *ctx, struct passwd *pw,
     if (rfc1938challenge(&rfc1938, pw->pw_name, challenge, sizeof(challenge))) {
 	if (IS_ONEANDONLY(auth)) {
 	    sudo_warnx(U_("you do not exist in the %s database"), auth->name);
-	    debug_return_int(AUTH_FATAL);
+	    debug_return_int(AUTH_ERROR);
 	} else {
 	    debug_return_int(AUTH_FAILURE);
 	}
@@ -110,7 +110,7 @@ sudo_rfc1938_setup(const struct sudoers_context *ctx, struct passwd *pw,
 	char *p = realloc(new_prompt, op_len + challenge_len + 7);
 	if (p == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    debug_return_int(AUTH_FATAL);
+	    debug_return_int(AUTH_ERROR);
 	}
 	np_size = op_len + challenge_len + 7;
 	new_prompt = p;

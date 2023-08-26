@@ -68,7 +68,7 @@ sudo_secureware_init(const struct sudoers_context *ctx, struct passwd *pw,
     sudo_setspent();
     auth->data = sudo_getepw(pw);
     sudo_endspent();
-    debug_return_int(auth->data ? AUTH_SUCCESS : AUTH_FATAL);
+    debug_return_int(auth->data ? AUTH_SUCCESS : AUTH_ERROR);
 }
 
 int

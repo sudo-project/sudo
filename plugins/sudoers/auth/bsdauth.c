@@ -103,7 +103,7 @@ bsdauth_init(const struct sudoers_context *ctx, struct passwd *pw,
 bad:
     auth_close(state.as);
     login_close(state.lc);
-    debug_return_int(AUTH_FATAL);
+    debug_return_int(AUTH_ERROR);
 }
 
 int
@@ -152,7 +152,7 @@ bsdauth_verify(const struct sudoers_context *ctx, struct passwd *pw,
 		len--;
 	    if (asprintf(&s, "%.*s [echo on]: ", (int)len, prompt) == -1) {
 		log_warningx(ctx, 0, N_("unable to allocate memory"));
-		debug_return_int(AUTH_FATAL);
+		debug_return_int(AUTH_ERROR);
 	    }
 	    free(pass);
 	    pass = auth_getpass(s, SUDO_CONV_PROMPT_ECHO_ON, callback);

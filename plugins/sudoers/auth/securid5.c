@@ -74,7 +74,7 @@ sudo_securid_init(const struct sudoers_context *ctx, struct passwd *pw,
     /* Start communications */
     if (AceInitialize() == SD_FALSE) {
 	sudo_warnx("%s", U_("failed to initialise the ACE API library"));
-	debug_return_int(AUTH_FATAL);
+	debug_return_int(AUTH_ERROR);
     }
 
     auth->data = (void *) &sd_dat;		/* For method-specific data */
@@ -106,7 +106,7 @@ sudo_securid_setup(const struct sudoers_context *ctx, struct passwd *pw,
     /* Re-initialize SecurID every time. */
     if (SD_Init(sd) != ACM_OK) {
 	sudo_warnx("%s", U_("unable to contact the SecurID server"));
-	debug_return_int(AUTH_FATAL);
+	debug_return_int(AUTH_ERROR);
     }
 
     /* Lock new PIN code */
@@ -119,19 +119,19 @@ sudo_securid_setup(const struct sudoers_context *ctx, struct passwd *pw,
 
         case ACE_UNDEFINED_USERNAME:
 		sudo_warnx("%s", U_("invalid username length for SecurID"));
-		debug_return_int(AUTH_FATAL);
+		debug_return_int(AUTH_ERROR);
 
 	case ACE_ERR_INVALID_HANDLE:
 		sudo_warnx("%s", U_("invalid Authentication Handle for SecurID"));
-		debug_return_int(AUTH_FATAL);
+		debug_return_int(AUTH_ERROR);
 
 	case ACM_ACCESS_DENIED:
 		sudo_warnx("%s", U_("SecurID communication failed"));
-		debug_return_int(AUTH_FATAL);
+		debug_return_int(AUTH_ERROR);
 
 	default:
 		sudo_warnx("%s", U_("unknown SecurID error"));
-		debug_return_int(AUTH_FATAL);
+		debug_return_int(AUTH_ERROR);
 	}
 }
 
@@ -167,17 +167,17 @@ sudo_securid_verify(const struct sudoers_context *ctx, struct passwd *pw,
 
 	case ACE_UNDEFINED_PASSCODE:
 		sudo_warnx("%s", U_("invalid passcode length for SecurID"));
-		ret = AUTH_FATAL;
+		ret = AUTH_ERROR;
 		break;
 
 	case ACE_UNDEFINED_USERNAME:
 		sudo_warnx("%s", U_("invalid username length for SecurID"));
-		ret = AUTH_FATAL;
+		ret = AUTH_ERROR;
 		break;
 
 	case ACE_ERR_INVALID_HANDLE:
 		sudo_warnx("%s", U_("invalid Authentication Handle for SecurID"));
-		ret = AUTH_FATAL;
+		ret = AUTH_ERROR;
 		break;
 
 	case ACM_ACCESS_DENIED:
@@ -215,12 +215,12 @@ then enter the new token code.\n", \
 		    "Your SecurID access has not yet been set up.\n");
 		sudo_printf(SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY, 
 		    "Please set up a PIN before you try to authenticate.\n");
-		ret = AUTH_FATAL;
+		ret = AUTH_ERROR;
 		break;
 
 	default:
 		sudo_warnx("%s", U_("unknown SecurID error"));
-		ret = AUTH_FATAL;
+		ret = AUTH_ERROR;
 		break;
     }
 

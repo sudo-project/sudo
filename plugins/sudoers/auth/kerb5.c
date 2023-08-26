@@ -121,7 +121,7 @@ sudo_krb5_setup(const struct sudoers_context *ctx, struct passwd *pw,
 	if (asprintf(&krb5_prompt, "Password for %s: ", pname) == -1) {
 	    log_warningx(ctx, 0, N_("unable to allocate memory"));
 	    free(pname);
-	    debug_return_int(AUTH_FATAL);
+	    debug_return_int(AUTH_ERROR);
 	}
 	free(pname);
     }
@@ -148,7 +148,7 @@ sudo_krb5_init(const struct sudoers_context *ctx, struct passwd *pw,
 	    sudo_krb5_instance[0] != '/' ? "/" : "", sudo_krb5_instance);
 	if (len == -1) {
 	    log_warningx(ctx, 0, N_("unable to allocate memory"));
-	    debug_return_int(AUTH_FATAL);
+	    debug_return_int(AUTH_ERROR);
 	}
     }
 

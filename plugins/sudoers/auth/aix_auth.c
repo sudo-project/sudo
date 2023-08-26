@@ -280,17 +280,17 @@ sudo_aix_verify(const struct sudoers_context *ctx, struct passwd *pw,
 	    /* password expired, user must change it */
 	    if (!sudo_aix_change_password(ctx, pw->pw_name)) {
 		sudo_warnx(U_("unable to change password for %s"), pw->pw_name);
-		ret = AUTH_FATAL;
+		ret = AUTH_ERROR;
 	    }
 	    break;
 	case 2:
 	    /* password expired, only admin can change it */
-	    ret = AUTH_FATAL;
+	    ret = AUTH_ERROR;
 	    break;
 	default:
 	    /* error (-1) */
 	    sudo_warn("passwdexpired");
-	    ret = AUTH_FATAL;
+	    ret = AUTH_ERROR;
 	    break;
 	}
     }

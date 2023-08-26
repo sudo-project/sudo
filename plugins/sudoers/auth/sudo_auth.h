@@ -22,7 +22,7 @@
 /* Auth function return values.  */
 #define AUTH_SUCCESS		0
 #define AUTH_FAILURE		1
-#define AUTH_FATAL		2
+#define AUTH_ERROR		2
 #define AUTH_NONINTERACTIVE	3
 
 typedef struct sudo_auth {

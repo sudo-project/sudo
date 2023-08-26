@@ -59,7 +59,7 @@ sudo_sia_setup(const struct sudoers_context *ctx, struct passwd *pw,
     sudo_argv = reallocarray(NULL, sudo_argc + 1, sizeof(char *));
     if (sudo_argv == NULL) {
 	log_warningx(ctx, 0, N_("unable to allocate memory"));
-	debug_return_int(AUTH_FATAL);
+	debug_return_int(AUTH_ERROR);
     }
     sudo_argv[0] = "sudo";
     for (i = 0; i < ctx->runas.argc; i++)
@@ -70,7 +70,7 @@ sudo_sia_setup(const struct sudoers_context *ctx, struct passwd *pw,
     sudo_tty = ctx->user.ttypath;
     if (sia_ses_init(&siah, sudo_argc, sudo_argv, NULL, pw->pw_name, sudo_tty, 0, NULL) != SIASUCCESS) {
 	log_warning(ctx, 0, N_("unable to initialize SIA session"));
-	debug_return_int(AUTH_FATAL);
+	debug_return_int(AUTH_ERROR);
     }
 
     auth->data = siah;
@@ -101,7 +101,7 @@ sudo_sia_verify(const struct sudoers_context *ctx, struct passwd *pw,
     if (rc == SIASUCCESS)
 	debug_return_int(AUTH_SUCCESS);
     if (ISSET(rc, SIASTOP))
-	debug_return_int(AUTH_FATAL);
+	debug_return_int(AUTH_ERROR);
     debug_return_int(AUTH_FAILURE);
 }
 
@@ -122,7 +122,7 @@ int
 sudo_sia_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
 {
     SIAENTITY *siah;
-    int status = AUTH_FATAL;
+    int status = AUTH_ERROR;
     debug_decl(sudo_sia_begin_session, SUDOERS_DEBUG_AUTH);
 
     /* Re-init sia for the target user's session. */

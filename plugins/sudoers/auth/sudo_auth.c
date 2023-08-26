@@ -118,7 +118,7 @@ sudo_auth_init(const struct sudoers_context *ctx, struct passwd *pw,
 	    status = (auth->init)(ctx, pw, auth);
 	    if (status == AUTH_FAILURE)
 		SET(auth->flags, FLAG_DISABLED);
-	    else if (status == AUTH_FATAL)
+	    else if (status == AUTH_ERROR)
 		break;		/* assume error msg already printed */
 	}
     }
@@ -166,7 +166,7 @@ sudo_auth_init(const struct sudoers_context *ctx, struct passwd *pw,
 	}
     }
 
-    debug_return_int(status == AUTH_FATAL ? -1 : 0);
+    debug_return_int(status == AUTH_ERROR ? -1 : 0);
 }
 
 /*
@@ -209,7 +209,7 @@ sudo_auth_cleanup(const struct sudoers_context *ctx, struct passwd *pw,
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->cleanup && !IS_DISABLED(auth)) {
 	    int status = (auth->cleanup)(ctx, pw, auth, force);
-	    if (status == AUTH_FATAL) {
+	    if (status == AUTH_ERROR) {
 		/* Assume error msg already printed. */
 		debug_return_int(-1);
 	    }
@@ -306,7 +306,7 @@ verify_user(const struct sudoers_context *ctx, struct passwd *pw, char *prompt,
 		    SET(auth->flags, FLAG_DISABLED);
 		else if (status == AUTH_NONINTERACTIVE)
 		    goto done;
-		else if (status == AUTH_FATAL || user_interrupted())
+		else if (status == AUTH_ERROR || user_interrupted())
 		    goto done;		/* assume error msg already printed */
 	    }
 	}
@@ -364,7 +364,7 @@ done:
 	case AUTH_NONINTERACTIVE:
 	    SET(validated, FLAG_NO_USER_INPUT);
 	    FALLTHROUGH;
-	case AUTH_FATAL:
+	case AUTH_ERROR:
 	default:
 	    log_auth_failure(ctx, validated, 0);
 	    ret = -1;
@@ -427,7 +427,7 @@ sudo_auth_end_session(void)
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->end_session && !IS_DISABLED(auth)) {
 	    status = (auth->end_session)(auth);
-	    if (status == AUTH_FATAL) {
+	    if (status == AUTH_ERROR) {
 		/* Assume error msg already printed. */
 		debug_return_int(-1);
 	    }

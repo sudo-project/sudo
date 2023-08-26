@@ -231,7 +231,7 @@ sudo_pam_init2(const struct sudoers_context *ctx, struct passwd *pw,
 	    &pam_conv, &pamh, errstr);
 	if (!quiet)
 	    log_warningx(ctx, 0, N_("unable to initialize PAM: %s"), errstr);
-	debug_return_int(AUTH_FATAL);
+	debug_return_int(AUTH_ERROR);
     }
 
     /* Initialize conversation function message filter. */
@@ -347,7 +347,7 @@ sudo_pam_verify(const struct sudoers_context *ctx, struct passwd *pw,
 	default:
 	    s = sudo_pam_strerror(pamh, *pam_status);
 	    log_warningx(ctx, 0, N_("PAM authentication error: %s"), s);
-	    debug_return_int(AUTH_FATAL);
+	    debug_return_int(AUTH_ERROR);
     }
 }
 
@@ -368,7 +368,7 @@ sudo_pam_approval(const struct sudoers_context *ctx, struct passwd *pw,
 	    case PAM_AUTH_ERR:
 		log_warningx(ctx, 0, N_("account validation failure, "
 		    "is your account locked?"));
-		status = AUTH_FATAL;
+		status = AUTH_ERROR;
 		break;
 	    case PAM_NEW_AUTHTOK_REQD:
 		/* Ignore if user is exempt from password restrictions. */
@@ -396,13 +396,13 @@ sudo_pam_approval(const struct sudoers_context *ctx, struct passwd *pw,
 		/* Password expired, cannot be updated by user. */
 		log_warningx(ctx, 0,
 		    N_("Password expired, contact your system administrator"));
-		status = AUTH_FATAL;
+		status = AUTH_ERROR;
 		break;
 	    case PAM_ACCT_EXPIRED:
 		log_warningx(ctx, 0,
 		    N_("Account expired or PAM config lacks an \"account\" "
 		    "section for sudo, contact your system administrator"));
-		status = AUTH_FATAL;
+		status = AUTH_ERROR;
 		break;
 	    case PAM_AUTHINFO_UNAVAIL:
 	    case PAM_MAXTRIES:
@@ -414,7 +414,7 @@ sudo_pam_approval(const struct sudoers_context *ctx, struct passwd *pw,
 	    default:
 		s = sudo_pam_strerror(pamh, rc);
 		log_warningx(ctx, 0, N_("PAM account management error: %s"), s);
-		status = AUTH_FATAL;
+		status = AUTH_ERROR;
 		break;
 	}
 	*pam_status = rc;
@@ -523,7 +523,7 @@ sudo_pam_begin_session(const struct sudoers_context *ctx, struct passwd *pw,
 		    "pam_end: %s", errstr);
 	    }
 	    pamh = NULL;
-	    status = AUTH_FATAL;
+	    status = AUTH_ERROR;
 	    goto done;
 	}
     }
@@ -539,7 +539,7 @@ sudo_pam_begin_session(const struct sudoers_context *ctx, struct passwd *pw,
 	if (pam_envp != NULL) {
 	    /* Merge pam env with user env. */
 	    if (!env_init(*user_envp) || !env_merge(ctx, pam_envp))
-		status = AUTH_FATAL;
+		status = AUTH_ERROR;
 	    *user_envp = env_get();
 	    free(pam_envp);
 	    /* XXX - we leak any duplicates that were in pam_envp */
@@ -580,7 +580,7 @@ sudo_pam_end_session(sudo_auth *auth)
 	    errstr = sudo_pam_strerror(pamh, rc);
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"pam_end: %s", errstr);
-	    status = AUTH_FATAL;
+	    status = AUTH_ERROR;
 	}
 	pamh = NULL;
     }
