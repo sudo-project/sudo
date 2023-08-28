@@ -511,6 +511,12 @@ init_defaults(void)
 #ifdef UMASK_OVERRIDE
     def_umask_override = true;
 #endif
+#ifdef SUDOERS_NAME_MATCH
+    def_fast_glob = true;
+    def_fdexec = never;
+#else
+    def_fdexec = digest_only;
+#endif
     def_timestamp_type = TIMESTAMP_TYPE;
     if ((def_iolog_file = strdup("%{seq}")) == NULL)
 	goto oom;
@@ -554,7 +560,6 @@ init_defaults(void)
     def_netgroup_tuple = false;
     def_sudoedit_checkdir = true;
     def_iolog_mode = S_IRUSR|S_IWUSR;
-    def_fdexec = digest_only;
     def_log_allowed = true;
     def_log_denied = true;
     def_log_format = sudo;
