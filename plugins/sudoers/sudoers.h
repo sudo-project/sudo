@@ -82,6 +82,7 @@ struct sudoers_parser_config {
     const char *sudoers_path;
     bool strict;
     bool recovery;
+    bool ignore_perms;
     int verbose;
     mode_t sudoers_mode;
     uid_t sudoers_uid;
@@ -91,6 +92,7 @@ struct sudoers_parser_config {
     NULL,	/* sudoers_path */					\
     false,	/* strict */						\
     true,	/* recovery */						\
+    false,	/* ignore_perms */					\
     1,		/* verbose level 1 */					\
     SUDOERS_MODE,							\
     SUDOERS_UID,							\

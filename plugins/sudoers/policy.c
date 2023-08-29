@@ -134,6 +134,15 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 		}
 		continue;
 	    }
+	    if (MATCHES(*cur, "ignore_perms=")) {
+		int val = sudo_strtobool(*cur + sizeof("ignore_perms=") - 1);
+		if (val == -1) {
+		    INVALID("ignore_perms=");	/* Not a fatal error. */
+		} else {
+		    ctx->parser_conf.ignore_perms = val;
+		}
+		continue;
+	    }
 	    if (MATCHES(*cur, "sudoers_file=")) {
 		CHECK(*cur, "sudoers_file=");
 		path_sudoers = *cur + sizeof("sudoers_file=") - 1;

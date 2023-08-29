@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd June 20, 2023
+.Dd August 28, 2023
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -123,6 +123,17 @@ A value of
 .Em false
 will disable error recovery.
 Prior to version 1.9.3, no error recovery was performed.
+.It ignore_perms=bool
+The
+.Em ignore_perms
+argument can be used to disable security checks when loading the
+.Em sudoers
+file.
+If enabled, the
+.Em sudoers
+file will be loaded regardless of the owner or file mode.
+This argument is intended to be used for testing purposes and
+should not be enabled on production systems.
 .It ldap_conf=pathname
 The
 .Em ldap_conf

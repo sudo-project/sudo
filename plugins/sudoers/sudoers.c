@@ -1282,8 +1282,16 @@ open_sudoers(const char *path, char **outfile, bool doedit, bool *keepopen)
     debug_decl(open_sudoers, SUDOERS_DEBUG_PLUGIN);
 
     fd = sudo_open_conf_path(path, fname, sizeof(fname), open_file);
-    error = sudo_secure_fd(fd, S_IFREG, sudoers_file_uid(), sudoers_file_gid(),
-	&sb);
+    if (sudoers_ctx.parser_conf.ignore_perms) {
+	/* Skip sudoers security checks when ignore_perms is set. */
+	if (fd == -1 || fstat(fd, &sb) == -1)
+	    error = SUDO_PATH_MISSING;
+	else
+	    error = SUDO_PATH_SECURE;
+    } else {
+	error = sudo_secure_fd(fd, S_IFREG, sudoers_file_uid(),
+	    sudoers_file_gid(), &sb);
+    }
     switch (error) {
     case SUDO_PATH_SECURE:
 	/*
