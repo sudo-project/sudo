@@ -89,10 +89,10 @@ sudo_sia_verify(const struct sudoers_context *ctx, struct passwd *pw,
     if (IS_NONINTERACTIVE(auth))
         debug_return_int(AUTH_NONINTERACTIVE);
 
-    /* Get password, return AUTH_FAILURE if we got ^C */
+    /* Get password, return AUTH_INTR if we got ^C */
     pass = auth_getpass(prompt, SUDO_CONV_PROMPT_ECHO_OFF, callback);
     if (pass == NULL)
-	debug_return_int(AUTH_FAILURE);
+	debug_return_int(AUTH_INTR);
 
     /* Check password and zero out plaintext copy. */
     rc = sia_ses_authent(NULL, pass, siah);

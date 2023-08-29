@@ -257,7 +257,7 @@ sudo_aix_verify(const struct sudoers_context *ctx, struct passwd *pw,
 	if (sudo_aix_valid_message(message))
 	    sudo_printf(SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY,
 		"%s", message);
-	ret = AUTH_FAILURE;
+	ret = pass ? AUTH_FAILURE : AUTH_INTR;
     }
     free(message);
     message = NULL;

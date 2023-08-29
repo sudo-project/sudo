@@ -355,6 +355,7 @@ done:
 	case AUTH_SUCCESS:
 	    ret = true;
 	    break;
+	case AUTH_INTR:
 	case AUTH_FAILURE:
 	    if (ntries != 0)
 		SET(validated, FLAG_BAD_PASSWORD);

@@ -171,10 +171,11 @@ bsdauth_verify(const struct sudoers_context *ctx, struct passwd *pw,
     if (authok)
 	debug_return_int(AUTH_SUCCESS);
 
-    if (pass != NULL) {
-	if ((s = auth_getvalue(as, (char *)"errormsg")) != NULL)
-	    log_warningx(ctx, 0, "%s", s);
-    }
+    if (pass == NULL)
+	debug_return_int(AUTH_INTR);
+
+    if ((s = auth_getvalue(as, (char *)"errormsg")) != NULL)
+	log_warningx(ctx, 0, "%s", s);
     debug_return_int(AUTH_FAILURE);
 }
 

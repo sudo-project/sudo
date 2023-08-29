@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1999-2005, 2007-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1999-2005, 2007-2020 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -332,7 +332,7 @@ sudo_pam_verify(const struct sudoers_context *ctx, struct passwd *pw,
 
     if (getpass_error) {
 	/* error or ^C from tgetpass() or running non-interactive */
-	debug_return_int(noninteractive ? AUTH_NONINTERACTIVE : AUTH_FAILURE);
+	debug_return_int(noninteractive ? AUTH_NONINTERACTIVE : AUTH_INTR);
     }
     switch (*pam_status) {
 	case PAM_SUCCESS:

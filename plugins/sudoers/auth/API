@@ -63,6 +63,10 @@ The member functions can return the following values:
 			receives AUTH_ERROR from an auth function it stops
 			authenticating and returns an error.
 
+    AUTH_INTR		An attempt to read the password read was interrupted.
+			Usually this means the user entered ^C at the
+			password prompt.
+
     AUTH_NONINTERACTIVE	Function failed because user interaction was
 			required but sudo was run in non-interactive
 			mode.
