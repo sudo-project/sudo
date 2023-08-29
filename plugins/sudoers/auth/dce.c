@@ -54,7 +54,7 @@
 
 #include "sudoers.h"
 #include "sudo_auth.h"
-#include "check.h"
+#include "timestamp.h"
 
 static int check_dce_status(error_status_t, char *);
 

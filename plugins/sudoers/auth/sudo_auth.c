@@ -44,7 +44,7 @@
 #include "sudoers.h"
 #include "sudo_auth.h"
 #include "insults.h"
-#include "check.h"
+#include "timestamp.h"
 
 static sudo_auth auth_switch[] = {
 /* Standalone entries first */

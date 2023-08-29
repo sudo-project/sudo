@@ -42,7 +42,7 @@
 #include <signal.h>
 
 #include "sudoers.h"
-#include "check.h"
+#include "timestamp.h"
 
 #define TIMESTAMP_OPEN_ERROR	-1
 #define TIMESTAMP_PERM_ERROR	-2

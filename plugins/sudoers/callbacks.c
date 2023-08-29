@@ -42,7 +42,7 @@
 #endif
 
 #include "sudoers.h"
-#include "check.h"
+#include "timestamp.h"
 #include "sudo_iolog.h"
 
 #ifndef AI_FQDN

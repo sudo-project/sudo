@@ -39,7 +39,7 @@
 #include <netdb.h>
 
 #include "sudoers.h"
-#include "check.h"
+#include "timestamp.h"
 #include "interfaces.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);

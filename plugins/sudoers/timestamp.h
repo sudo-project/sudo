@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996, 1998-2005, 2007-2015, 2017-2018, 2021-2022
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2015, 2017-2018, 2021-2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -21,8 +21,8 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#ifndef SUDOERS_CHECK_H
-#define SUDOERS_CHECK_H
+#ifndef SUDOERS_TIMESTAMP_H
+#define SUDOERS_TIMESTAMP_H
 
 /* Status codes for timestamp_status() */
 #define TS_CURRENT		0
@@ -78,16 +78,19 @@ struct timestamp_entry {
 };
 
 struct sudoers_context;
+union sudo_defs_val;
 void *timestamp_open(const struct sudoers_context *ctx);
 void  timestamp_close(void *vcookie);
 bool  timestamp_lock(void *vcookie, struct passwd *pw);
 bool  timestamp_update(void *vcookie, struct passwd *pw);
+int   timestamp_remove(const struct sudoers_context *ctx, bool unlinkit);
 int   timestamp_status(void *vcookie, struct passwd *pw);
 uid_t timestamp_get_uid(void);
+bool  cb_timestampowner(struct sudoers_context *ctx, const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
 int   get_starttime(pid_t pid, struct timespec *starttime);
 bool  already_lectured(const char *user);
 int   set_lectured(const char *user);
-void display_lecture(struct sudo_conv_callback *callback);
+void  display_lecture(struct sudo_conv_callback *callback);
 int   create_admin_success_flag(const struct sudoers_context *ctx);
 
-#endif /* SUDOERS_CHECK_H */
+#endif /* SUDOERS_TIMESTAMP_H */

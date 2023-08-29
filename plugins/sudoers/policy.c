@@ -37,6 +37,7 @@
 
 #include "sudoers.h"
 #include "sudoers_version.h"
+#include "timestamp.h"
 #include "interfaces.h"
 #include "auth/sudo_auth.h"
 

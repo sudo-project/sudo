@@ -42,7 +42,7 @@
 
 #include "sudoers.h"
 #include "sudo_auth.h"
-#include "check.h"
+#include "timestamp.h"
 
 int
 sudo_afs_verify(const struct sudoers_context *ctx, struct passwd *pw,

@@ -40,7 +40,7 @@
 #include <grp.h>
 
 #include "sudoers.h"
-#include "check.h"
+#include "timestamp.h"
 
 struct getpass_closure {
     int tstat;

@@ -40,7 +40,7 @@
 #include <grp.h>
 
 #include "sudoers.h"
-#include "check.h"
+#include "timestamp.h"
 
 /* No change when passed to setresuid(), etc. */
 #define NO_UID	(uid_t)-1

@@ -28,7 +28,7 @@
 #include "sudo_compat.h"
 #include "sudo_util.h"
 #include "sudo_fatal.h"
-#include "check.h"
+#include "timestamp.h"
 
 sudo_dso_public int main(int argc, char *argv[]);
 

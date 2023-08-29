@@ -41,7 +41,7 @@
 #include "sudoers.h"
 #include "sudo_iolog.h"
 #include "interfaces.h"
-#include "check.h"
+#include "timestamp.h"
 #include "auth/sudo_auth.h"
 
 extern char **environ;

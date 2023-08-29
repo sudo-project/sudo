@@ -33,7 +33,7 @@
 #include <unistd.h>
 
 #include "sudoers.h"
-#include "check.h"
+#include "timestamp.h"
 
 struct timestamp_entry_common {
     unsigned short version;	/* version number */
