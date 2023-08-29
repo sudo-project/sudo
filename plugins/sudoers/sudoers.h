@@ -433,9 +433,6 @@ void sudoers_cleanup(void);
 bool sudoers_override_umask(void);
 const struct sudoers_context *sudoers_get_context(void);
 bool sudoers_set_mode(unsigned int flags, unsigned int mask);
-extern sudo_conv_t sudo_conv;
-extern sudo_printf_t sudo_printf;
-extern struct sudo_plugin_event * (*plugin_event_alloc)(void);
 
 /* sudoers_ctx_free.c */
 void sudoers_ctx_free(struct sudoers_context *ctx);
@@ -449,6 +446,9 @@ void sudoers_debug_deregister(void);
 unsigned int sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v, struct defaults_list *defaults);
 bool sudoers_policy_store_result(struct sudoers_context *ctx, bool accepted, char *argv[], char *envp[], mode_t cmnd_umask, char *iolog_path, void *v);
 bool sudoers_tty_present(struct sudoers_context *ctx);
+extern sudo_conv_t sudo_conv;
+extern sudo_printf_t sudo_printf;
+extern struct sudo_plugin_event * (*plugin_event_alloc)(void);
 
 /* group_plugin.c */
 void group_plugin_unload(void);
