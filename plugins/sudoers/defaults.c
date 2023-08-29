@@ -518,7 +518,7 @@ init_defaults(void)
     def_fdexec = digest_only;
 #endif
     def_timestamp_type = TIMESTAMP_TYPE;
-    if ((def_iolog_file = strdup("%{seq}")) == NULL)
+    if ((def_iolog_file = strdup(IOLOG_FILE)) == NULL)
 	goto oom;
     if ((def_iolog_dir = strdup(_PATH_SUDO_IO_LOGDIR)) == NULL)
 	goto oom;

@@ -28,6 +28,9 @@
 /* Default maximum session ID */
 #define SESSID_MAX	2176782336U
 
+/* Default value for "iolog_file" */
+#define IOLOG_FILE	"%{seq}"
+
 /*
  * I/O log event types as stored as the first field in the timing file.
  * Changing existing values will result in incompatible I/O log files.
