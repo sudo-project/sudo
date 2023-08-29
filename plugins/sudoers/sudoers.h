@@ -437,11 +437,6 @@ bool sudoers_set_mode(unsigned int flags, unsigned int mask);
 /* sudoers_ctx_free.c */
 void sudoers_ctx_free(struct sudoers_context *ctx);
 
-/* sudoers_debug.c */
-bool sudoers_debug_parse_flags(struct sudo_conf_debug_file_list *debug_files, const char *entry);
-bool sudoers_debug_register(const char *plugin_path, struct sudo_conf_debug_file_list *debug_files);
-void sudoers_debug_deregister(void);
-
 /* policy.c */
 unsigned int sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v, struct defaults_list *defaults);
 bool sudoers_policy_store_result(struct sudoers_context *ctx, bool accepted, char *argv[], char *envp[], mode_t cmnd_umask, char *iolog_path, void *v);

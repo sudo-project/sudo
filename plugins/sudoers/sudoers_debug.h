@@ -45,4 +45,8 @@ extern unsigned int sudoers_subsystem_ids[];
 #define SUDOERS_DEBUG_SSSD	(sudoers_subsystem_ids[16]) /* sudoers SSSD */
 #define SUDOERS_DEBUG_UTIL	(sudoers_subsystem_ids[17]) /* utility functions */
 
+bool sudoers_debug_parse_flags(struct sudo_conf_debug_file_list *debug_files, const char *entry);
+bool sudoers_debug_register(const char *plugin_path, struct sudo_conf_debug_file_list *debug_files);
+void sudoers_debug_deregister(void);
+
 #endif /* SUDOERS_DEBUG_H */
