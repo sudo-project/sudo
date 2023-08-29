@@ -23318,38 +23318,28 @@ if test ${sudo_cv_func_unsetenv_void+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
-  e) if test "$cross_compiling" = yes
-then :
-  sudo_cv_func_unsetenv_void=no
-else case e in #(
   e) cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 $ac_includes_default
-        int unsetenv();
-
 int
 main (void)
 {
 
-        return unsetenv("FOO") != 0;
+        return unsetenv("FOO");
 
   ;
   return 0;
 }
 
 _ACEOF
-if ac_fn_c_try_run "$LINENO"
+if ac_fn_c_try_compile "$LINENO"
 then :
   sudo_cv_func_unsetenv_void=no
 else case e in #(
   e) sudo_cv_func_unsetenv_void=yes ;;
 esac
 fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext ;;
-esac
-fi
- ;;
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext ;;
 esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_func_unsetenv_void" >&5
@@ -23372,7 +23362,8 @@ else case e in #(
   e) cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 $ac_includes_default
-int putenv(const char *string) {return 0;}
+      int putenv(const char *string) {return 0;}
+
 int
 main (void)
 {

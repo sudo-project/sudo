@@ -342,16 +342,12 @@ dnl check unsetenv() return value
 dnl
 AC_DEFUN([SUDO_FUNC_UNSETENV_VOID],
   [AC_CACHE_CHECK([whether unsetenv returns void], [sudo_cv_func_unsetenv_void],
-    [AC_RUN_IFELSE([AC_LANG_PROGRAM(
-      [AC_INCLUDES_DEFAULT
-        int unsetenv();
-      ], [
-        [return unsetenv("FOO") != 0;]
+    [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT], [
+        [return unsetenv("FOO");]
       ])
     ],
     [sudo_cv_func_unsetenv_void=no],
-    [sudo_cv_func_unsetenv_void=yes],
-    [sudo_cv_func_unsetenv_void=no])])
+    [sudo_cv_func_unsetenv_void=yes])])
     if test $sudo_cv_func_unsetenv_void = yes; then
       AC_DEFINE(UNSETENV_VOID, 1,
         [Define to 1 if the 'unsetenv' function returns void instead of 'int'.])
@@ -362,10 +358,10 @@ dnl
 dnl check putenv() argument for const
 dnl
 AC_DEFUN([SUDO_FUNC_PUTENV_CONST],
-[AC_CACHE_CHECK([whether putenv takes a const argument],
-sudo_cv_func_putenv_const,
-[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
-int putenv(const char *string) {return 0;}], [])],
+  [AC_CACHE_CHECK([whether putenv takes a const argument], [sudo_cv_func_putenv_const],
+    [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
+      int putenv(const char *string) {return 0;}
+    ], [])],
     [sudo_cv_func_putenv_const=yes],
     [sudo_cv_func_putenv_const=no])
   ])
