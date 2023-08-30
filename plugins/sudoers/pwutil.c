@@ -1177,17 +1177,9 @@ user_in_group(const struct passwd *pw, const char *group)
 	else
 	    compare = strcmp;
 
-	/* Check the supplementary group vector. */
+	/* Check the user's group vector, which includes the primary group. */
 	for (i = 0; i < grlist->ngroups; i++) {
 	    if (compare(group, grlist->groups[i]) == 0) {
-		matched = true;
-		goto done;
-	    }
-	}
-
-	/* Check against user's primary (passwd file) group. */
-	if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
-	    if (compare(group, grp->gr_name) == 0) {
 		matched = true;
 		goto done;
 	    }
