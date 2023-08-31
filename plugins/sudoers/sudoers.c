@@ -254,7 +254,9 @@ sudoers_init(void *info, sudoers_logger_t logger, char * const envp[])
 	}
     }
     if (sources == 0) {
-	sudo_warnx("%s", U_("no valid sudoers sources found, quitting"));
+	/* Display an extra warning if there are multiple sudoers sources. */
+	if (TAILQ_FIRST(snl) != TAILQ_LAST(snl, sudo_nss_list))
+	    sudo_warnx("%s", U_("no valid sudoers sources found, quitting"));
 	goto cleanup;
     }
 
