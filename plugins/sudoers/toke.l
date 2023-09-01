@@ -1471,7 +1471,7 @@ sudoers_trace_print(const char *msg)
 int
 sudoers_trace_print(const char *msg)
 {
-    const unsigned int sudo_debug_subsys = SUDOERS_DEBUG_PARSER;
+    debug_decl_vars(sudoers_trace_print, SUDOERS_DEBUG_PARSER);
 
     if (sudo_debug_needed(SUDO_DEBUG_DEBUG)) {
 	sudo_lbuf_append(&trace_lbuf, "%s", msg);
