@@ -533,7 +533,7 @@ sudo_dso_public void *sudo_reallocarray(void *ptr, size_t nmemb, size_t size);
 # define reallocarray(_a, _b, _c) sudo_reallocarray((_a), (_b), (_c))
 #endif /* HAVE_REALLOCARRAY */
 #ifndef HAVE_REALPATH
-sudo_dso_public void *sudo_realpath(const char *path, char *resolved);
+sudo_dso_public char *sudo_realpath(const char *path, char *resolved);
 # undef realpath
 # define realpath(_a, _b) sudo_realpath((_a), (_b))
 #endif /* HAVE_REALPATH */
