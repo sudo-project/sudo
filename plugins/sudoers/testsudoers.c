@@ -96,6 +96,7 @@ main(int argc, char *argv[])
     enum sudoers_formats input_format = format_sudoers;
     struct sudo_nss testsudoers_nss;
     char *p, *grfile, *pwfile;
+    const char *host = NULL;
     const char *errstr;
     int ch, dflag, exitcode = EXIT_FAILURE;
     unsigned int validated;
@@ -150,11 +151,7 @@ main(int argc, char *argv[])
 		SET(test_ctx.settings.flags, RUNAS_GROUP_SPECIFIED);
 		break;
 	    case 'h':
-		test_ctx.user.host = strdup(optarg);
-		if (test_ctx.user.host == NULL) {
-		    sudo_fatalx(U_("%s: %s"), __func__,
-			U_("unable to allocate memory"));
-		}
+		host = optarg;
 		break;
 	    case 'i':
 		if (strcasecmp(optarg, "ldif") == 0) {
@@ -284,28 +281,8 @@ main(int argc, char *argv[])
     test_ctx.user.uid = test_ctx.user.pw->pw_uid;
     test_ctx.user.gid = test_ctx.user.pw->pw_gid;
 
-    if (test_ctx.user.host == NULL) {
-	if ((test_ctx.user.host = sudo_gethostname()) == NULL)
-	    sudo_fatal("gethostname");
-    }
-    if ((p = strchr(test_ctx.user.host, '.'))) {
-	*p = '\0';
-	if ((test_ctx.user.shost = strdup(test_ctx.user.host)) == NULL)
-	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	*p = '.';
-    } else {
-	test_ctx.user.shost = test_ctx.user.host;
-    }
-    if ((test_ctx.runas.host = strdup(test_ctx.user.host)) == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    if ((p = strchr(test_ctx.runas.host, '.'))) {
-	*p = '\0';
-	if ((test_ctx.runas.shost = strdup(test_ctx.runas.host)) == NULL)
-	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	*p = '.';
-    } else {
-	test_ctx.runas.shost = test_ctx.runas.host;
-    }
+    if (!sudoers_sethost(&test_ctx, host, NULL))
+	goto done;
 
     /* Fill in test_ctx.user.cmnd_args from argv. */
     if (argc > 0) {

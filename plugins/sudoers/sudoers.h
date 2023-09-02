@@ -490,4 +490,7 @@ char *serialize_list(const char *varname, struct list_members *members);
 bool pivot_root(const char *new_root, int fds[2]);
 bool unpivot_root(int fds[2]);
 
+/* sethost.c */
+bool sudoers_sethost(struct sudoers_context *ctx, const char *host, const char *remhost);
+
 #endif /* SUDOERS_SUDOERS_H */

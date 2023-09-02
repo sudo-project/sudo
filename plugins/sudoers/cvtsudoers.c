@@ -357,7 +357,8 @@ main(int argc, char *argv[])
     }
 
     /* We may need the hostname to resolve %h escapes in include files. */
-    get_hostname(&ctx);
+    if (!sudoers_sethost(&ctx, NULL, NULL))
+	goto done;
 
     do {
 	char *lhost = NULL, *shost = NULL;

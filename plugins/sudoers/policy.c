@@ -98,6 +98,7 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
     const char *p, *errstr, *groups = NULL;
     struct sudoers_open_info *info = v;
     unsigned int flags = MODE_UPDATE_TICKET;
+    const char *host = NULL;
     const char *remhost = NULL;
     unsigned char uuid[16];
     char * const *cur;
@@ -464,18 +465,7 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 	}
 	if (MATCHES(*cur, "host=")) {
 	    CHECK(*cur, "host=");
-	    if (ctx->user.shost != ctx->user.host)
-		free(ctx->user.shost);
-	    free(ctx->user.host);
-	    if ((ctx->user.host = strdup(*cur + sizeof("host=") - 1)) == NULL)
-		goto oom;
-	    if ((p = strchr(ctx->user.host, '.')) != NULL) {
-		ctx->user.shost = strndup(ctx->user.host, (size_t)(p - ctx->user.host));
-		if (ctx->user.shost == NULL)
-		    goto oom;
-	    } else {
-		ctx->user.shost = ctx->user.host;
-	    }
+	    host = *cur + sizeof("host=") - 1;
 	    continue;
 	}
 	if (MATCHES(*cur, "lines=")) {
@@ -538,26 +528,14 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 	sudo_warnx("%s", U_("group-ID not set by sudo front-end"));
 	goto bad;
     }
-    if (ctx->user.host == NULL) {
+    if (host == NULL) {
 	sudo_warnx("%s", U_("host name not set by sudo front-end"));
 	goto bad;
     }
 
-    if (ctx->runas.shost != ctx->runas.host)
-	free(ctx->runas.shost);
-    free(ctx->runas.host);
-    if ((ctx->runas.host = strdup(remhost ? remhost : ctx->user.host)) == NULL)
-	goto oom;
-    if ((p = strchr(ctx->runas.host, '.')) != NULL) {
-	ctx->runas.shost = strndup(ctx->runas.host, (size_t)(p - ctx->runas.host));
-	if (ctx->runas.shost == NULL)
-	    goto oom;
-    } else {
-	ctx->runas.shost = ctx->runas.host;
-    }
-    if (ctx->user.cwd == NULL) {
-	if ((ctx->user.cwd = strdup("unknown")) == NULL)
-	    goto oom;
+    if (!sudoers_sethost(ctx, host, remhost)) {
+	/* sudoers_sethost() will print a warning on error. */
+	goto bad;
     }
     if (ctx->user.tty == NULL) {
 	if ((ctx->user.tty = strdup("unknown")) == NULL)

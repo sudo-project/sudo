@@ -103,8 +103,6 @@ sudo_noreturn static void export_sudoers(const char *infile, const char *outfile
 sudo_noreturn static void help(void);
 sudo_noreturn static void usage(void);
 
-extern void get_hostname(struct sudoers_context *ctx);
-
 /*
  * Globals
  */
@@ -269,7 +267,8 @@ main(int argc, char *argv[])
 	if ((ctx.user.pw = sudo_getpwuid(getuid())) == NULL)
 	    sudo_fatalx(U_("you do not exist in the %s database"), "passwd");
     }
-    get_hostname(&ctx);
+    if (!sudoers_sethost(&ctx, NULL, NULL))
+	return EXIT_FAILURE;
 
     /* Hook the sudoers parser to track files with parse errors. */
     sudoers_error_hook = visudo_track_error;
