@@ -111,8 +111,6 @@ check_user_interactive(unsigned int validated, unsigned int mode,
 		closure->tstat = timestamp_status(closure->cookie,
 		    closure->auth_pw);
 	    }
-	    callback.on_suspend = getpass_suspend;
-	    callback.on_resume = getpass_resume;
 	}
     }
 
