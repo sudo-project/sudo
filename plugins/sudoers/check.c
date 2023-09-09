@@ -42,116 +42,48 @@
 #include "sudoers.h"
 #include "timestamp.h"
 
-struct getpass_closure {
-    int tstat;
-    int lectured;
-    void *cookie;
-    struct passwd *auth_pw;
-    const struct sudoers_context *ctx;
-};
-
-static struct passwd *get_authpw(struct sudoers_context *ctx, unsigned int);
-
 /*
- * Called when getpass is suspended so we can drop the lock.
+ * Get passwd entry for the user we are going to authenticate as.
+ * By default, this is the user invoking sudo.  In the most common
+ * case, this matches ctx->user.pw or ctx->runas.pw.
  */
-static int
-getpass_suspend(int signo, void *vclosure)
+static struct passwd *
+get_authpw(struct sudoers_context *ctx, unsigned int mode)
 {
-    struct getpass_closure *closure = vclosure;
+    struct passwd *pw = NULL;
+    debug_decl(get_authpw, SUDOERS_DEBUG_AUTH);
 
-    timestamp_close(closure->cookie);
-    closure->cookie = NULL;
-    return 0;
-}
-
-/*
- * Called when getpass is resumed so we can reacquire the lock.
- */
-static int
-getpass_resume(int signo, void *vclosure)
-{
-    struct getpass_closure *closure = vclosure;
-
-    closure->cookie = timestamp_open(closure->ctx);
-    if (closure->cookie == NULL)
-	return -1;
-    if (!timestamp_lock(closure->cookie, closure->auth_pw))
-	return -1;
-    return 0;
-}
-
-/*
- * Returns AUTH_SUCCESS if the user successfully authenticates, AUTH_FAILURE
- * if not or AUTH_ERROR on fatal error.
- */
-static int
-check_user_interactive(unsigned int validated, unsigned int mode,
-    struct getpass_closure *closure)
-{
-    const struct sudoers_context *ctx = closure->ctx;
-    struct sudo_conv_callback callback;
-    int ret = AUTH_ERROR;
-    char *prompt;
-    debug_decl(check_user_interactive, SUDOERS_DEBUG_AUTH);
-
-    /* Construct callback for getpass function. */
-    memset(&callback, 0, sizeof(callback));
-    callback.version = SUDO_CONV_CALLBACK_VERSION;
-    callback.closure = closure;
-    callback.on_suspend = getpass_suspend;
-    callback.on_resume = getpass_resume;
-
-    /* Open, lock and read time stamp file if we are using it. */
-    if (!ISSET(mode, MODE_IGNORE_TICKET)) {
-	/* Open time stamp file and check its status. */
-	closure->cookie = timestamp_open(ctx);
-	if (closure->cookie != NULL) {
-	    if (timestamp_lock(closure->cookie, closure->auth_pw)) {
-		closure->tstat = timestamp_status(closure->cookie,
-		    closure->auth_pw);
+    if (ISSET(mode, (MODE_CHECK|MODE_LIST))) {
+	/* In list mode we always prompt for the user's password. */
+	sudo_pw_addref(ctx->user.pw);
+	pw = ctx->user.pw;
+    } else {
+	if (def_rootpw) {
+	    if ((pw = sudo_getpwuid(ROOT_UID)) == NULL) {
+		log_warningx(ctx, SLOG_SEND_MAIL, N_("unknown uid %u"),
+		    ROOT_UID);
 	    }
+	} else if (def_runaspw) {
+	    if ((pw = sudo_getpwnam(def_runas_default)) == NULL) {
+		log_warningx(ctx, SLOG_SEND_MAIL,
+		    N_("unknown user %s"), def_runas_default);
+	    }
+	} else if (def_targetpw) {
+	    if (ctx->runas.pw->pw_name == NULL) {
+		/* This should never be NULL as we fake up the passwd struct */
+		log_warningx(ctx, SLOG_RAW_MSG, N_("unknown uid %u"),
+		    (unsigned int) ctx->runas.pw->pw_uid);
+	    } else {
+		sudo_pw_addref(ctx->runas.pw);
+		pw = ctx->runas.pw;
+	    }
+	} else {
+	    sudo_pw_addref(ctx->user.pw);
+	    pw = ctx->user.pw;
 	}
     }
 
-    switch (closure->tstat) {
-    case TS_FATAL:
-	/* Fatal error (usually setuid failure), unsafe to proceed. */
-	goto done;
-
-    case TS_CURRENT:
-	/* Time stamp file is valid and current. */
-	if (!ISSET(validated, FLAG_CHECK_USER)) {
-	    ret = AUTH_SUCCESS;
-	    break;
-	}
-	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "%s: check user flag overrides time stamp", __func__);
-	FALLTHROUGH;
-
-    default:
-	if (ISSET(mode, MODE_NONINTERACTIVE) && !def_noninteractive_auth) {
-	    validated |= FLAG_NO_USER_INPUT;
-	    log_auth_failure(ctx, validated, 0);
-	    goto done;
-	}
-
-	/* Expand any escapes in the prompt. */
-	prompt = expand_prompt(ctx,
-	    ctx->user.prompt ? ctx->user.prompt : def_passprompt,
-	    closure->auth_pw->pw_name);
-	if (prompt == NULL)
-	    goto done;
-
-	ret = verify_user(ctx, closure->auth_pw, prompt, validated, &callback);
-	if (ret == AUTH_SUCCESS && closure->lectured)
-	    (void)set_lectured(ctx->user.name);	/* lecture error not fatal */
-	free(prompt);
-	break;
-    }
-
-done:
-    debug_return_int(ret);
+    debug_return_ptr(pw);
 }
 
 /*
@@ -162,9 +94,12 @@ int
 check_user(struct sudoers_context *ctx, unsigned int validated,
     unsigned int mode)
 {
-    struct getpass_closure closure = { TS_ERROR };
+    struct getpass_closure closure = { 0 };
+    struct sudo_conv_callback callback;
+    int status = TS_ERROR;
     int ret = AUTH_ERROR;
     bool exempt = false;
+    char *prompt;
     debug_decl(check_user, SUDOERS_DEBUG_AUTH);
 
     /*
@@ -219,7 +154,57 @@ check_user(struct sudoers_context *ctx, unsigned int validated,
 	}
     }
 
-    ret = check_user_interactive(validated, mode, &closure);
+    /* Construct callback for getpass function. */
+    memset(&callback, 0, sizeof(callback));
+    callback.version = SUDO_CONV_CALLBACK_VERSION;
+    callback.closure = &closure;
+
+    /* Open, lock and read time stamp file if we are using it. */
+    if (!ISSET(mode, MODE_IGNORE_TICKET)) {
+	/* Open time stamp file and check its status. */
+	closure.cookie = timestamp_open(ctx);
+	if (closure.cookie != NULL) {
+	    if (timestamp_lock(closure.cookie, closure.auth_pw)) {
+		status = timestamp_status(closure.cookie, closure.auth_pw);
+	    }
+	}
+    }
+
+    switch (status) {
+    case TS_FATAL:
+	/* Fatal error (usually setuid failure), unsafe to proceed. */
+	goto done;
+
+    case TS_CURRENT:
+	/* Time stamp file is valid and current. */
+	if (!ISSET(validated, FLAG_CHECK_USER)) {
+	    ret = AUTH_SUCCESS;
+	    break;
+	}
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: check user flag overrides time stamp", __func__);
+	FALLTHROUGH;
+
+    default:
+	if (ISSET(mode, MODE_NONINTERACTIVE) && !def_noninteractive_auth) {
+	    validated |= FLAG_NO_USER_INPUT;
+	    log_auth_failure(ctx, validated, 0);
+	    goto done;
+	}
+
+	/* Expand any escapes in the prompt. */
+	prompt = expand_prompt(ctx,
+	    ctx->user.prompt ? ctx->user.prompt : def_passprompt,
+	    closure.auth_pw->pw_name);
+	if (prompt == NULL)
+	    goto done;
+
+	ret = verify_user(ctx, closure.auth_pw, prompt, validated, &callback);
+	if (ret == AUTH_SUCCESS && closure.lectured)
+	    (void)set_lectured(ctx->user.name);	/* lecture error not fatal */
+	free(prompt);
+	break;
+    }
 
 done:
     if (ret == AUTH_SUCCESS) {
@@ -231,7 +216,7 @@ done:
 	 * Failure to update the time stamp is not a fatal error.
 	 */
 	if (ret == AUTH_SUCCESS && ISSET(validated, VALIDATE_SUCCESS)) {
-	    if (ISSET(mode, MODE_UPDATE_TICKET) && closure.tstat != TS_ERROR)
+	    if (ISSET(mode, MODE_UPDATE_TICKET) && status != TS_ERROR)
 		(void)timestamp_update(closure.cookie, closure.auth_pw);
 	}
     }
@@ -240,6 +225,7 @@ done:
     if (closure.auth_pw != NULL)
 	sudo_pw_delref(closure.auth_pw);
 
+    /* TODO: return AUTH_* directly */
     switch (ret) {
     case AUTH_SUCCESS:
 	debug_return_int(true);
@@ -343,48 +329,4 @@ user_is_exempt(const struct sudoers_context *ctx)
 	    ret = true;
     }
     debug_return_bool(ret);
-}
-
-/*
- * Get passwd entry for the user we are going to authenticate as.
- * By default, this is the user invoking sudo.  In the most common
- * case, this matches ctx->user.pw or ctx->runas.pw.
- */
-static struct passwd *
-get_authpw(struct sudoers_context *ctx, unsigned int mode)
-{
-    struct passwd *pw = NULL;
-    debug_decl(get_authpw, SUDOERS_DEBUG_AUTH);
-
-    if (ISSET(mode, (MODE_CHECK|MODE_LIST))) {
-	/* In list mode we always prompt for the user's password. */
-	sudo_pw_addref(ctx->user.pw);
-	pw = ctx->user.pw;
-    } else {
-	if (def_rootpw) {
-	    if ((pw = sudo_getpwuid(ROOT_UID)) == NULL) {
-		log_warningx(ctx, SLOG_SEND_MAIL, N_("unknown uid %u"),
-		    ROOT_UID);
-	    }
-	} else if (def_runaspw) {
-	    if ((pw = sudo_getpwnam(def_runas_default)) == NULL) {
-		log_warningx(ctx, SLOG_SEND_MAIL,
-		    N_("unknown user %s"), def_runas_default);
-	    }
-	} else if (def_targetpw) {
-	    if (ctx->runas.pw->pw_name == NULL) {
-		/* This should never be NULL as we fake up the passwd struct */
-		log_warningx(ctx, SLOG_RAW_MSG, N_("unknown uid %u"),
-		    (unsigned int) ctx->runas.pw->pw_uid);
-	    } else {
-		sudo_pw_addref(ctx->runas.pw);
-		pw = ctx->runas.pw;
-	    }
-	} else {
-	    sudo_pw_addref(ctx->user.pw);
-	    pw = ctx->user.pw;
-	}
-    }
-
-    debug_return_ptr(pw);
 }

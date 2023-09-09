@@ -248,6 +248,35 @@ user_interrupted(void)
 }
 
 /*
+ * Called when getpass is suspended so we can drop the lock.
+ */
+static int
+getpass_suspend(int signo, void *vclosure)
+{
+    struct getpass_closure *closure = vclosure;
+
+    timestamp_close(closure->cookie);
+    closure->cookie = NULL;
+    return 0;
+}
+
+/*
+ * Called when getpass is resumed so we can reacquire the lock.
+ */
+static int
+getpass_resume(int signo, void *vclosure)
+{
+    struct getpass_closure *closure = vclosure;
+
+    closure->cookie = timestamp_open(closure->ctx);
+    if (closure->cookie == NULL)
+	return -1;
+    if (!timestamp_lock(closure->cookie, closure->auth_pw))
+	return -1;
+    return 0;
+}
+
+/*
  * Verify the specified user.
  * Returns AUTH_SUCCESS, AUTH_FAILURE or AUTH_ERROR.
  */
@@ -273,6 +302,8 @@ verify_user(const struct sudoers_context *ctx, struct passwd *pw, char *prompt,
     }
 
     /* Enable suspend during password entry. */
+    callback->on_suspend = getpass_suspend;
+    callback->on_resume = getpass_resume;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
     sa.sa_handler = SIG_DFL;
