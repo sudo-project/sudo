@@ -24,6 +24,8 @@
 #ifndef SUDOERS_TIMESTAMP_H
 #define SUDOERS_TIMESTAMP_H
 
+#include "auth/sudo_auth.h"
+
 /* Status codes for timestamp_status() */
 #define TS_CURRENT		0
 #define TS_OLD			1

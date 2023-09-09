@@ -82,8 +82,8 @@ getpass_resume(int signo, void *vclosure)
 }
 
 /*
- * Returns true if the user successfully authenticates, false if not
- * or -1 on fatal error.
+ * Returns AUTH_SUCCESS if the user successfully authenticates, AUTH_FAILURE
+ * if not or AUTH_ERROR on fatal error.
  */
 static int
 check_user_interactive(unsigned int validated, unsigned int mode,
@@ -91,7 +91,7 @@ check_user_interactive(unsigned int validated, unsigned int mode,
 {
     const struct sudoers_context *ctx = closure->ctx;
     struct sudo_conv_callback callback;
-    int ret = -1;
+    int ret = AUTH_ERROR;
     char *prompt;
     debug_decl(check_user_interactive, SUDOERS_DEBUG_AUTH);
 
@@ -122,7 +122,7 @@ check_user_interactive(unsigned int validated, unsigned int mode,
     case TS_CURRENT:
 	/* Time stamp file is valid and current. */
 	if (!ISSET(validated, FLAG_CHECK_USER)) {
-	    ret = true;
+	    ret = AUTH_SUCCESS;
 	    break;
 	}
 	sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -144,7 +144,7 @@ check_user_interactive(unsigned int validated, unsigned int mode,
 	    goto done;
 
 	ret = verify_user(ctx, closure->auth_pw, prompt, validated, &callback);
-	if (ret == true && closure->lectured)
+	if (ret == AUTH_SUCCESS && closure->lectured)
 	    (void)set_lectured(ctx->user.name);	/* lecture error not fatal */
 	free(prompt);
 	break;
@@ -163,7 +163,7 @@ check_user(struct sudoers_context *ctx, unsigned int validated,
     unsigned int mode)
 {
     struct getpass_closure closure = { TS_ERROR };
-    int ret = -1;
+    int ret = AUTH_ERROR;
     bool exempt = false;
     debug_decl(check_user, SUDOERS_DEBUG_AUTH);
 
@@ -183,7 +183,7 @@ check_user(struct sudoers_context *ctx, unsigned int validated,
      */
     if ((closure.auth_pw = get_authpw(ctx, mode)) == NULL)
 	goto done;
-    if (sudo_auth_init(ctx, closure.auth_pw, mode) == -1)
+    if (sudo_auth_init(ctx, closure.auth_pw, mode) != AUTH_SUCCESS)
 	goto done;
     closure.ctx = ctx;
 
@@ -196,7 +196,7 @@ check_user(struct sudoers_context *ctx, unsigned int validated,
 	    !def_authenticate ? "authentication disabled" :
 	    "user exempt from authentication");
 	exempt = true;
-	ret = true;
+	ret = AUTH_SUCCESS;
 	goto done;
     }
     if (ctx->user.uid == 0 || (ctx->user.uid == ctx->runas.pw->pw_uid &&
@@ -214,7 +214,7 @@ check_user(struct sudoers_context *ctx, unsigned int validated,
 	{
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"%s: user running command as self", __func__);
-	    ret = true;
+	    ret = AUTH_SUCCESS;
 	    goto done;
 	}
     }
@@ -222,7 +222,7 @@ check_user(struct sudoers_context *ctx, unsigned int validated,
     ret = check_user_interactive(validated, mode, &closure);
 
 done:
-    if (ret == true) {
+    if (ret == AUTH_SUCCESS) {
 	/* The approval function may disallow a user post-authentication. */
 	ret = sudo_auth_approval(ctx, closure.auth_pw, validated, exempt);
 
@@ -230,7 +230,7 @@ done:
 	 * Only update time stamp if user validated and was approved.
 	 * Failure to update the time stamp is not a fatal error.
 	 */
-	if (ret == true && ISSET(validated, VALIDATE_SUCCESS)) {
+	if (ret == AUTH_SUCCESS && ISSET(validated, VALIDATE_SUCCESS)) {
 	    if (ISSET(mode, MODE_UPDATE_TICKET) && closure.tstat != TS_ERROR)
 		(void)timestamp_update(closure.cookie, closure.auth_pw);
 	}
@@ -240,7 +240,14 @@ done:
     if (closure.auth_pw != NULL)
 	sudo_pw_delref(closure.auth_pw);
 
-    debug_return_int(ret);
+    switch (ret) {
+    case AUTH_SUCCESS:
+	debug_return_int(true);
+    case AUTH_FAILURE:
+	debug_return_int(false);
+    default:
+	debug_return_int(-1);
+    }
 }
 
 /*

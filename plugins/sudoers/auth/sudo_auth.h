@@ -26,6 +26,7 @@
 #define AUTH_ERROR		0x1629e037	/* 0010110001010011110000000110111 */
 #define AUTH_NONINTERACTIVE	0x1fc8d3ac	/* 11111110010001101001110101100 */
 
+struct sudoers_context;
 typedef struct sudo_auth {
     unsigned int flags;		/* various flags, see below */
     int status;			/* status from verify routine */
