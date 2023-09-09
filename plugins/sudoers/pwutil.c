@@ -67,6 +67,7 @@ static sudo_make_pwitem_t make_pwitem = sudo_make_pwitem;
 static sudo_make_gritem_t make_gritem = sudo_make_gritem;
 static sudo_make_gidlist_item_t make_gidlist_item = sudo_make_gidlist_item;
 static sudo_make_grlist_item_t make_grlist_item = sudo_make_grlist_item;
+static sudo_valid_shell_t valid_shell = sudo_valid_shell;
 
 #define cmp_grnam	cmp_pwnam
 
@@ -88,7 +89,8 @@ static sudo_make_grlist_item_t make_grlist_item = sudo_make_grlist_item;
  */
 void
 sudo_pwutil_set_backend(sudo_make_pwitem_t pwitem, sudo_make_gritem_t gritem,
-    sudo_make_gidlist_item_t gidlist_item, sudo_make_grlist_item_t grlist_item)
+    sudo_make_gidlist_item_t gidlist_item, sudo_make_grlist_item_t grlist_item,
+    sudo_valid_shell_t check_shell)
 {
     debug_decl(sudo_pwutil_set_backend, SUDOERS_DEBUG_NSS);
 
@@ -100,6 +102,8 @@ sudo_pwutil_set_backend(sudo_make_pwitem_t pwitem, sudo_make_gritem_t gritem,
 	make_gidlist_item = gidlist_item;
     if (grlist_item != NULL)
 	make_grlist_item = grlist_item;
+    if (check_shell != NULL)
+	valid_shell = check_shell;
 
     debug_return;
 }

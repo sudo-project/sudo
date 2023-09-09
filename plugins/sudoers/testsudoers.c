@@ -235,7 +235,7 @@ main(int argc, char *argv[])
 	/* Use custom passwd/group backend. */
 	sudo_pwutil_set_backend(testsudoers_make_pwitem,
 	    testsudoers_make_gritem, testsudoers_make_gidlist_item,
-	    testsudoers_make_grlist_item);
+	    testsudoers_make_grlist_item, testsudoers_valid_shell);
     }
 
     if (argc < 2) {

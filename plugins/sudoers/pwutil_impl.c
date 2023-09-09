@@ -454,7 +454,7 @@ again:
  * Returns true if the specified shell is allowed by /etc/shells, else false.
  */
 bool
-valid_shell(const char *shell)
+PREFIX(valid_shell)(const char *shell)
 {
     const char *entry;
     debug_decl(valid_shell, SUDOERS_DEBUG_NSS);
@@ -471,4 +471,3 @@ valid_shell(const char *shell)
 
     debug_return_bool(false);
 }
-

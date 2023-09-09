@@ -21,6 +21,11 @@
 
 #include <config.h>
 
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# include "compat/stdbool.h"
+#endif /* HAVE_STDBOOL_H */
 #include <grp.h>
 #include <pwd.h>
 
@@ -28,5 +33,6 @@ struct cache_item *testsudoers_make_gritem(gid_t gid, const char *group);
 struct cache_item *testsudoers_make_grlist_item(const struct passwd *pw, char * const *groups);
 struct cache_item *testsudoers_make_gidlist_item(const struct passwd *pw, int ngids, GETGROUPS_T *gids, char * const *gidstrs, unsigned int type);
 struct cache_item *testsudoers_make_pwitem(uid_t uid, const char *user);
+bool testsudoers_valid_shell(const char *shell);
 
 #endif /* TESTSUDOERS_PWUTIL_H */

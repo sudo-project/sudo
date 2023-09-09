@@ -344,6 +344,7 @@ typedef struct cache_item * (*sudo_make_pwitem_t)(uid_t uid, const char *user);
 typedef struct cache_item * (*sudo_make_gritem_t)(gid_t gid, const char *group);
 typedef struct cache_item * (*sudo_make_gidlist_item_t)(const struct passwd *pw, int ngids, GETGROUPS_T *gids, char * const *gidstrs, unsigned int type);
 typedef struct cache_item * (*sudo_make_grlist_item_t)(const struct passwd *pw, char * const *groups);
+typedef bool (*sudo_valid_shell_t)(const char *shell);
 sudo_dso_public struct group *sudo_getgrgid(gid_t);
 sudo_dso_public struct group *sudo_getgrnam(const char *);
 sudo_dso_public void sudo_gr_addref(struct group *);
@@ -370,7 +371,7 @@ int  sudo_set_gidlist(struct passwd *pw, int ngids, GETGROUPS_T *gids, char * co
 int  sudo_set_grlist(struct passwd *pw, char * const *groups);
 int  sudo_pwutil_get_max_groups(void);
 void sudo_pwutil_set_max_groups(int);
-void sudo_pwutil_set_backend(sudo_make_pwitem_t, sudo_make_gritem_t, sudo_make_gidlist_item_t, sudo_make_grlist_item_t);
+void sudo_pwutil_set_backend(sudo_make_pwitem_t, sudo_make_gritem_t, sudo_make_gidlist_item_t, sudo_make_grlist_item_t, sudo_valid_shell_t);
 void sudo_setspent(void);
 bool user_shell_valid(const struct passwd *pw);
 

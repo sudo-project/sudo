@@ -343,7 +343,7 @@ main(int argc, char *argv[])
     /* Set pwutil backend to use the filter data. */
     if (conf->filter != NULL && !match_local) {
 	sudo_pwutil_set_backend(cvtsudoers_make_pwitem, cvtsudoers_make_gritem,
-	    cvtsudoers_make_gidlist_item, cvtsudoers_make_grlist_item);
+	    cvtsudoers_make_gidlist_item, cvtsudoers_make_grlist_item, NULL);
     } else {
 	if (grfile != NULL)
 	    testsudoers_setgrfile(grfile);
@@ -353,7 +353,8 @@ main(int argc, char *argv[])
 	    pwfile ? testsudoers_make_pwitem : NULL,
 	    grfile ? testsudoers_make_gritem : NULL,
 	    grfile ? testsudoers_make_gidlist_item : NULL,
-	    grfile ? testsudoers_make_grlist_item : NULL);
+	    grfile ? testsudoers_make_grlist_item : NULL,
+	    NULL);
     }
 
     /* We may need the hostname to resolve %h escapes in include files. */
