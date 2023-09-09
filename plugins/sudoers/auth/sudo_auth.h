@@ -19,12 +19,9 @@
 #ifndef SUDO_AUTH_H
 #define SUDO_AUTH_H
 
-/* Auth function return values (rowhammer resistent).  */
-#define AUTH_SUCCESS		0x52a2925	/* 0101001010100010100100100101 */
-#define AUTH_FAILURE		0xad5d6da	/* 1010110101011101011011011010 */
+/* Private auth function return values (rowhammer resistent).  */
 #define AUTH_INTR		0x69d61fc8	/* 1101001110101100001111111001000 */
-#define AUTH_ERROR		0x1629e037	/* 0010110001010011110000000110111 */
-#define AUTH_NONINTERACTIVE	0x1fc8d3ac	/* 11111110010001101001110101100 */
+#define AUTH_NONINTERACTIVE	0x1629e037	/* 0010110001010011110000000110111 */
 
 struct sudoers_context;
 typedef struct sudo_auth {

@@ -711,7 +711,7 @@ int
 check_user(struct sudoers_context *ctx, unsigned int validated,
     unsigned int mode)
 {
-    return true;
+    return AUTH_SUCCESS;
 }
 
 /* STUB */

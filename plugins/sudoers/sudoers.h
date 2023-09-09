@@ -230,6 +230,13 @@ struct sudoers_context {
 #define FLAG_BAD_PASSWORD	0x200U
 
 /*
+ * Return values for check_user() (rowhammer resistent).
+ */
+#define AUTH_SUCCESS		0x52a2925	/* 0101001010100010100100100101 */
+#define AUTH_FAILURE		0xad5d6da	/* 1010110101011101011011011010 */
+#define AUTH_ERROR		0x1fc8d3ac	/* 11111110010001101001110101100 */
+
+/*
  * find_path()/set_cmnd() return values
  */
 #define FOUND			0

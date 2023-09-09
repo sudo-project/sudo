@@ -24,8 +24,6 @@
 #ifndef SUDOERS_TIMESTAMP_H
 #define SUDOERS_TIMESTAMP_H
 
-#include "auth/sudo_auth.h"
-
 struct passwd;
 struct sudoers_context;
 struct getpass_closure {

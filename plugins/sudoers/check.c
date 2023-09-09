@@ -87,8 +87,8 @@ get_authpw(struct sudoers_context *ctx, unsigned int mode)
 }
 
 /*
- * Returns true if the user successfully authenticates, false if not
- * or -1 on error.
+ * Returns AUTH_SUCCESS if the user successfully authenticates,
+ * AUTH_FAILURE if not or AUTH_ERROR on error.
  */
 int
 check_user(struct sudoers_context *ctx, unsigned int validated,
@@ -225,15 +225,7 @@ done:
     if (closure.auth_pw != NULL)
 	sudo_pw_delref(closure.auth_pw);
 
-    /* TODO: return AUTH_* directly */
-    switch (ret) {
-    case AUTH_SUCCESS:
-	debug_return_int(true);
-    case AUTH_FAILURE:
-	debug_return_int(false);
-    default:
-	debug_return_int(-1);
-    }
+    debug_return_int(ret);
 }
 
 /*

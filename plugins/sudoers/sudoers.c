@@ -466,10 +466,10 @@ sudoers_check_common(struct sudoers_context *ctx, int pwflag)
 
     /* Require a password if sudoers says so.  */
     switch (check_user(ctx, validated, ctx->mode)) {
-    case true:
+    case AUTH_SUCCESS:
 	/* user authenticated successfully. */
 	break;
-    case false:
+    case AUTH_FAILURE:
 	/* Note: log_denial() calls audit for us. */
 	if (!ISSET(validated, VALIDATE_SUCCESS)) {
 	    /* Only display a denial message if no password was read. */
