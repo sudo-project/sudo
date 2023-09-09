@@ -68,7 +68,7 @@ sudo_passwd_verify(const struct sudoers_context *ctx, struct passwd *pw,
     char des_pass[9], *epass;
     char *pw_epasswd = auth->data;
     size_t pw_len;
-    int matched = 0;
+    int ret;
     debug_decl(sudo_passwd_verify, SUDOERS_DEBUG_AUTH);
 
     /* An empty plain-text password must match an empty encrypted password. */
@@ -80,7 +80,7 @@ sudo_passwd_verify(const struct sudoers_context *ctx, struct passwd *pw,
      */
     pw_len = strlen(pw_epasswd);
     if (pw_len == DESLEN || HAS_AGEINFO(pw_epasswd, pw_len)) {
-	strlcpy(des_pass, pass, sizeof(des_pass));
+	(void)strlcpy(des_pass, pass, sizeof(des_pass));
 	pass = des_pass;
     }
 
@@ -90,16 +90,20 @@ sudo_passwd_verify(const struct sudoers_context *ctx, struct passwd *pw,
      * only compare the first DESLEN characters in that case.
      */
     epass = (char *) crypt(pass, pw_epasswd);
+    ret = AUTH_FAILURE;
     if (epass != NULL) {
-	if (HAS_AGEINFO(pw_epasswd, pw_len) && strlen(epass) == DESLEN)
-	    matched = !strncmp(pw_epasswd, epass, DESLEN);
-	else
-	    matched = !strcmp(pw_epasswd, epass);
+	if (HAS_AGEINFO(pw_epasswd, pw_len) && strlen(epass) == DESLEN) {
+	    if (strncmp(pw_epasswd, epass, DESLEN) == 0)
+		ret = AUTH_SUCCESS;
+	} else {
+	    if (strcmp(pw_epasswd, epass) == 0)
+		ret = AUTH_SUCCESS;
+	}
     }
 
     explicit_bzero(des_pass, sizeof(des_pass));
 
-    debug_return_int(matched ? AUTH_SUCCESS : AUTH_FAILURE);
+    debug_return_int(ret);
 }
 #else
 int
@@ -107,13 +111,16 @@ sudo_passwd_verify(const struct sudoers_context *ctx, struct passwd *pw,
     const char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     char *pw_passwd = auth->data;
-    int matched;
+    int ret;
     debug_decl(sudo_passwd_verify, SUDOERS_DEBUG_AUTH);
 
     /* Simple string compare for systems without crypt(). */
-    matched = !strcmp(pass, pw_passwd);
+    if (strcmp(pass, pw_passwd) == 0)
+	ret = AUTH_SUCCESS;
+    else
+	ret = AUTH_FAILURE;
 
-    debug_return_int(matched ? AUTH_SUCCESS : AUTH_FAILURE);
+    debug_return_int(ret);
 }
 #endif
 

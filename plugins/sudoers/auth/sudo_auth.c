@@ -116,10 +116,16 @@ sudo_auth_init(const struct sudoers_context *ctx, struct passwd *pw,
 	if (auth->init && !IS_DISABLED(auth)) {
 	    /* Disable if it failed to init unless there was a fatal error. */
 	    status = (auth->init)(ctx, pw, auth);
-	    if (status == AUTH_FAILURE)
+	    switch (status) {
+	    case AUTH_SUCCESS:
+		break;
+	    case AUTH_FAILURE:
 		SET(auth->flags, FLAG_DISABLED);
-	    else if (status == AUTH_ERROR)
-		break;		/* assume error msg already printed */
+		break;
+	    default:
+		/* Assume error msg already printed. */
+		debug_return_int(-1);
+	    }
 	}
     }
 
@@ -166,7 +172,7 @@ sudo_auth_init(const struct sudoers_context *ctx, struct passwd *pw,
 	}
     }
 
-    debug_return_int(status == AUTH_ERROR ? -1 : 0);
+    debug_return_int(0);
 }
 
 /*
@@ -209,7 +215,7 @@ sudo_auth_cleanup(const struct sudoers_context *ctx, struct passwd *pw,
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->cleanup && !IS_DISABLED(auth)) {
 	    int status = (auth->cleanup)(ctx, pw, auth, force);
-	    if (status == AUTH_ERROR) {
+	    if (status != AUTH_SUCCESS) {
 		/* Assume error msg already printed. */
 		debug_return_int(-1);
 	    }
@@ -306,7 +312,7 @@ verify_user(const struct sudoers_context *ctx, struct passwd *pw, char *prompt,
 		    SET(auth->flags, FLAG_DISABLED);
 		else if (status == AUTH_NONINTERACTIVE)
 		    goto done;
-		else if (status == AUTH_ERROR || user_interrupted())
+		else if (status != AUTH_SUCCESS || user_interrupted())
 		    goto done;		/* assume error msg already printed */
 	    }
 	}
@@ -365,7 +371,6 @@ done:
 	case AUTH_NONINTERACTIVE:
 	    SET(validated, FLAG_NO_USER_INPUT);
 	    FALLTHROUGH;
-	case AUTH_ERROR:
 	default:
 	    log_auth_failure(ctx, validated, 0);
 	    ret = -1;
@@ -377,25 +382,33 @@ done:
 
 /*
  * Call authentication method begin session hooks.
- * Returns 1 on success and -1 on error.
+ * Returns true on success, false on failure and -1 on error.
  */
 int
 sudo_auth_begin_session(const struct sudoers_context *ctx, struct passwd *pw,
     char **user_env[])
 {
     sudo_auth *auth;
+    int ret = true;
     debug_decl(sudo_auth_begin_session, SUDOERS_DEBUG_AUTH);
 
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->begin_session && !IS_DISABLED(auth)) {
 	    int status = (auth->begin_session)(ctx, pw, user_env, auth);
-	    if (status != AUTH_SUCCESS) {
+	    switch (status) {
+	    case AUTH_SUCCESS:
+		break;
+	    case AUTH_FAILURE:
+		ret = false;
+		break;
+	    default:
 		/* Assume error msg already printed. */
-		debug_return_int(-1);
+		ret = -1;
+		break;
 	    }
 	}
     }
-    debug_return_int(1);
+    debug_return_int(ret);
 }
 
 bool
@@ -416,25 +429,33 @@ sudo_auth_needs_end_session(void)
 
 /*
  * Call authentication method end session hooks.
- * Returns 1 on success and -1 on error.
+ * Returns true on success, false on failure and -1 on error.
  */
 int
 sudo_auth_end_session(void)
 {
     sudo_auth *auth;
+    int ret = true;
     int status;
     debug_decl(sudo_auth_end_session, SUDOERS_DEBUG_AUTH);
 
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->end_session && !IS_DISABLED(auth)) {
 	    status = (auth->end_session)(auth);
-	    if (status == AUTH_ERROR) {
+	    switch (status) {
+	    case AUTH_SUCCESS:
+		break;
+	    case AUTH_FAILURE:
+		ret = false;
+		break;
+	    default:
 		/* Assume error msg already printed. */
-		debug_return_int(-1);
+		ret = -1;
+		break;
 	    }
 	}
     }
-    debug_return_int(1);
+    debug_return_int(ret);
 }
 
 /*

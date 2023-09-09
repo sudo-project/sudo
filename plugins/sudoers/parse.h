@@ -36,14 +36,27 @@
 # define SUDOERS_NAME_MATCH
 #endif
 
+/* Allowed by policy (rowhammer resistent). */
+#undef ALLOW
+#define ALLOW	 0x52a2925	/* 0101001010100010100100100101 */
+
+/* Denied by policy (rowhammer resistent). */
+#undef DENY
+#define DENY	 0xad5d6da	/* 1010110101011101011011011010 */
+
+/* Neither allowed, nor denied. */
 #undef UNSPEC
 #define UNSPEC	-1
-#undef DENY
-#define DENY	 0
-#undef ALLOW
-#define ALLOW	 1
+
+/* Tag implied by root access (SETENV only). */
 #undef IMPLIED
 #define IMPLIED	 2
+
+/*
+ * We must explicitly check against ALLOW and DENY instead testing
+ * that the value is not UNSPEC to avoid potential ROWHAMMER issues.
+ */
+#define SPECIFIED(_v)	((_v) == ALLOW || (_v) == DENY)
 
 /*
  * Initialize all tags to UNSPEC.
@@ -94,7 +107,7 @@
  * Returns true if the specified tag is not UNSPEC or IMPLIED, else false.
  */
 #define TAG_SET(tt) \
-    ((tt) != UNSPEC && (tt) != IMPLIED)
+    ((tt) == true || (tt) == false)
 
 /*
  * Returns true if any tags set in nt differ between ot and nt, else false.
