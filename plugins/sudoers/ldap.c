@@ -331,7 +331,7 @@ sudo_ldap_check_non_unix_group(struct sudoers_context *ctx,
 	if (*val == '+') {
 	    if (netgr_matches(nss, val,
 		def_netgroup_tuple ? ctx->runas.host : NULL,
-		def_netgroup_tuple ? ctx->runas.shost : NULL, pw->pw_name))
+		def_netgroup_tuple ? ctx->runas.shost : NULL, pw->pw_name) == ALLOW)
 		ret = true;
 	    DPRINTF2("ldap sudoUser netgroup '%s%s' ... %s",
 		negated ? "!" : "", val, ret ? "MATCH!" : "not");

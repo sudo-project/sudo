@@ -80,11 +80,11 @@ user_matches(const struct sudoers_parse_tree *parse_tree,
 	case NETGROUP:
 	    if (netgr_matches(parse_tree->nss, m->name,
 		def_netgroup_tuple ? lhost : NULL,
-		def_netgroup_tuple ? shost : NULL, pw->pw_name))
+		def_netgroup_tuple ? shost : NULL, pw->pw_name) == ALLOW)
 		matched = m->negated ? DENY : ALLOW;
 	    break;
 	case USERGROUP:
-	    if (usergr_matches(m->name, pw->pw_name, pw))
+	    if (usergr_matches(m->name, pw->pw_name, pw) == ALLOW)
 		matched = m->negated ? DENY : ALLOW;
 	    break;
 	case ALIAS:
@@ -103,7 +103,7 @@ user_matches(const struct sudoers_parse_tree *parse_tree,
 	    }
 	    FALLTHROUGH;
 	case WORD:
-	    if (userpw_matches(m->name, pw->pw_name, pw))
+	    if (userpw_matches(m->name, pw->pw_name, pw) == ALLOW)
 		matched = m->negated ? DENY : ALLOW;
 	    break;
     }
@@ -173,11 +173,11 @@ runas_userlist_matches(const struct sudoers_parse_tree *parse_tree,
 		if (netgr_matches(parse_tree->nss, m->name,
 		    def_netgroup_tuple ? lhost : NULL,
 		    def_netgroup_tuple ? shost : NULL,
-		    ctx->runas.pw->pw_name))
+		    ctx->runas.pw->pw_name) == ALLOW)
 		    user_matched = m->negated ? DENY : ALLOW;
 		break;
 	    case USERGROUP:
-		if (usergr_matches(m->name, ctx->runas.pw->pw_name, ctx->runas.pw))
+		if (usergr_matches(m->name, ctx->runas.pw->pw_name, ctx->runas.pw) == ALLOW)
 		    user_matched = m->negated ? DENY : ALLOW;
 		break;
 	    case ALIAS:
@@ -197,7 +197,7 @@ runas_userlist_matches(const struct sudoers_parse_tree *parse_tree,
 		}
 		FALLTHROUGH;
 	    case WORD:
-		if (userpw_matches(m->name, ctx->runas.pw->pw_name, ctx->runas.pw))
+		if (userpw_matches(m->name, ctx->runas.pw->pw_name, ctx->runas.pw) == ALLOW)
 		    user_matched = m->negated ? DENY : ALLOW;
 		break;
 	    case MYSELF:
@@ -259,7 +259,7 @@ runas_grouplist_matches(const struct sudoers_parse_tree *parse_tree,
 		    }
 		    FALLTHROUGH;
 		case WORD:
-		    if (group_matches(m->name, ctx->runas.gr))
+		    if (group_matches(m->name, ctx->runas.gr) == ALLOW)
 			group_matched = m->negated ? DENY : ALLOW;
 		    break;
 	    }
@@ -381,21 +381,21 @@ host_matches(const struct sudoers_parse_tree *parse_tree,
     const struct member *m)
 {
     struct alias *a;
-    int matched = UNSPEC;
+    int ret = UNSPEC;
     debug_decl(host_matches, SUDOERS_DEBUG_MATCH);
 
     switch (m->type) {
 	case ALL:
-	    matched = m->negated ? DENY : ALLOW;
+	    ret = m->negated ? DENY : ALLOW;
 	    break;
 	case NETGROUP:
 	    if (netgr_matches(parse_tree->nss, m->name, lhost, shost,
-		def_netgroup_tuple ? pw->pw_name : NULL))
-		matched = m->negated ? DENY : ALLOW;
+		def_netgroup_tuple ? pw->pw_name : NULL) == ALLOW)
+		ret = m->negated ? DENY : ALLOW;
 	    break;
 	case NTWKADDR:
-	    if (addr_matches(m->name))
-		matched = m->negated ? DENY : ALLOW;
+	    if (addr_matches(m->name) == ALLOW)
+		ret = m->negated ? DENY : ALLOW;
 	    break;
 	case ALIAS:
 	    a = alias_get(parse_tree, m->name, HOSTALIAS);
@@ -405,9 +405,9 @@ host_matches(const struct sudoers_parse_tree *parse_tree,
 		    shost, &a->members);
 		if (SPECIFIED(rc)) {
 		    if (m->negated) {
-			matched = rc == ALLOW ? DENY : ALLOW;
+			ret = rc == ALLOW ? DENY : ALLOW;
 		    } else {
-			matched = rc;
+			ret = rc;
 		    }
 		}
 		alias_put(a);
@@ -415,15 +415,15 @@ host_matches(const struct sudoers_parse_tree *parse_tree,
 	    }
 	    FALLTHROUGH;
 	case WORD:
-	    if (hostname_matches(shost, lhost, m->name))
-		matched = m->negated ? DENY : ALLOW;
+	    if (hostname_matches(shost, lhost, m->name) == ALLOW)
+		ret = m->negated ? DENY : ALLOW;
 	    break;
     }
     sudo_debug_printf(SUDO_DEBUG_DEBUG,
 	"host %s (%s) matches sudoers host %s%s: %s", lhost, shost,
 	m->negated ? "!" : "", m->name ? m->name : "ALL",
-	matched == true ? "true" : "false");
-    debug_return_int(matched);
+	ret == ALLOW ? "ALLOW" : "DENY");
+    debug_return_int(ret);
 }
 
 /*
@@ -436,15 +436,15 @@ cmndlist_matches(const struct sudoers_parse_tree *parse_tree,
     struct cmnd_info *info)
 {
     struct member *m;
-    int matched = UNSPEC;
+    int matched;
     debug_decl(cmndlist_matches, SUDOERS_DEBUG_MATCH);
 
     TAILQ_FOREACH_REVERSE(m, list, member_list, entries) {
 	matched = cmnd_matches(parse_tree, m, runchroot, info);
 	if (SPECIFIED(matched))
-	    break;
+	    debug_return_int(matched);
     }
-    debug_return_int(matched);
+    debug_return_int(UNSPEC);
 }
 
 /*
@@ -465,7 +465,7 @@ cmnd_matches(const struct sudoers_parse_tree *parse_tree,
 	case COMMAND:
 	    c = (struct sudo_command *)m->name;
 	    if (command_matches(parse_tree->ctx, c->cmnd, c->args, runchroot,
-		    info, &c->digests))
+		    info, &c->digests) == ALLOW)
 		matched = m->negated ? DENY : ALLOW;
 	    break;
 	case ALIAS:
@@ -504,7 +504,7 @@ cmnd_matches_all(const struct sudoers_parse_tree *parse_tree,
 	case ALL:
 	    c = (struct sudo_command *)m->name;
 	    if (command_matches(parse_tree->ctx, c->cmnd, c->args, runchroot,
-		    info, &c->digests))
+		    info, &c->digests) == ALLOW)
 		matched = negated ? DENY : ALLOW;
 	    break;
 	case ALIAS:
@@ -526,93 +526,102 @@ cmnd_matches_all(const struct sudoers_parse_tree *parse_tree,
 }
 
 /*
- * Returns true if the hostname matches the pattern, else false
+ * Returns ALLOW if the hostname matches the pattern, else DENY
  */
-bool
+int
 hostname_matches(const char *shost, const char *lhost, const char *pattern)
 {
     const char *host;
-    bool rc;
+    int ret;
     debug_decl(hostname_matches, SUDOERS_DEBUG_MATCH);
 
     host = strchr(pattern, '.') != NULL ? lhost : shost;
+    ret = DENY;
     if (has_meta(pattern)) {
-	rc = !fnmatch(pattern, host, FNM_CASEFOLD);
+	if (fnmatch(pattern, host, FNM_CASEFOLD) == 0)
+	    ret = ALLOW;
     } else {
-	rc = !strcasecmp(host, pattern);
+	if (strcasecmp(host, pattern) == 0)
+	    ret = ALLOW;
     }
-    debug_return_bool(rc);
+    debug_return_int(ret);
 }
 
 /*
- * Returns true if the user/uid from sudoers matches the specified user/uid,
- * else returns false.
+ * Returns ALLOW if the user/uid from sudoers matches the specified user/uid,
+ * else returns DENY.
  */
-bool
+int
 userpw_matches(const char *sudoers_user, const char *user, const struct passwd *pw)
 {
     const char *errstr;
+    int ret = DENY;
     uid_t uid;
-    bool rc;
     debug_decl(userpw_matches, SUDOERS_DEBUG_MATCH);
 
     if (pw != NULL && *sudoers_user == '#') {
 	uid = (uid_t) sudo_strtoid(sudoers_user + 1, &errstr);
 	if (errstr == NULL && uid == pw->pw_uid) {
-	    rc = true;
+	    ret = ALLOW;
 	    goto done;
 	}
     }
-    if (def_case_insensitive_user)
-	rc = strcasecmp(sudoers_user, user) == 0;
-    else
-	rc = strcmp(sudoers_user, user) == 0;
+    if (def_case_insensitive_user) {
+	if (strcasecmp(sudoers_user, user) == 0)
+	    ret = ALLOW;
+    } else {
+	if (strcmp(sudoers_user, user) == 0)
+	    ret = ALLOW;
+    }
 done:
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	"user %s matches sudoers user %s: %s",
-	user, sudoers_user, rc ? "true" : "false");
-    debug_return_bool(rc);
+	user, sudoers_user, ret == ALLOW ? "ALLOW" : "DENY");
+    debug_return_int(ret);
 }
 
 /*
- * Returns true if the group/gid from sudoers matches the specified group/gid,
- * else returns false.
+ * Returns ALLOW if the group/gid from sudoers matches the specified group/gid,
+ * else returns DENY.
  */
-bool
+int
 group_matches(const char *sudoers_group, const struct group *gr)
 {
     const char *errstr;
+    int ret = DENY;
     gid_t gid;
-    bool rc;
     debug_decl(group_matches, SUDOERS_DEBUG_MATCH);
 
     if (*sudoers_group == '#') {
 	gid = (gid_t) sudo_strtoid(sudoers_group + 1, &errstr);
 	if (errstr == NULL && gid == gr->gr_gid) {
-	    rc = true;
+	    ret = ALLOW;
 	    goto done;
 	}
     }
-    if (def_case_insensitive_group)
-	rc = strcasecmp(sudoers_group, gr->gr_name) == 0;
-    else
-	rc = strcmp(sudoers_group, gr->gr_name) == 0;
+    if (def_case_insensitive_group) {
+	if (strcasecmp(sudoers_group, gr->gr_name) == 0)
+	    ret = ALLOW;
+    } else {
+	if (strcmp(sudoers_group, gr->gr_name) == 0)
+	    ret = ALLOW;
+    }
 done:
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	"group %s matches sudoers group %s: %s",
-	gr->gr_name, sudoers_group, rc ? "true" : "false");
-    debug_return_bool(rc);
+	gr->gr_name, sudoers_group, ret == ALLOW ? "ALLOW" : "DENY");
+    debug_return_int(ret);
 }
 
 /*
  * Returns true if the given user belongs to the named group,
  * else returns false.
  */
-bool
+int
 usergr_matches(const char *group, const char *user, const struct passwd *pw)
 {
-    bool matched = false;
     struct passwd *pw0 = NULL;
+    int ret = DENY;
     debug_decl(usergr_matches, SUDOERS_DEBUG_MATCH);
 
     /* Make sure we have a valid usergroup, sudo style */
@@ -625,7 +634,7 @@ usergr_matches(const char *group, const char *user, const struct passwd *pw)
     /* Query group plugin for %:name groups. */
     if (*group == ':' && def_group_plugin) {
 	if (group_plugin_query(user, group + 1, pw) == true)
-	    matched = true;
+	    ret = ALLOW;
 	goto done;
     }
 
@@ -640,14 +649,14 @@ usergr_matches(const char *group, const char *user, const struct passwd *pw)
     }
 
     if (user_in_group(pw, group)) {
-	matched = true;
+	ret = ALLOW;
 	goto done;
     }
 
     /* Query the group plugin for Unix groups too? */
     if (def_group_plugin && def_always_query_group_plugin) {
 	if (group_plugin_query(user, group, pw) == true) {
-	    matched = true;
+	    ret = ALLOW;
 	    goto done;
 	}
     }
@@ -657,8 +666,9 @@ done:
 	sudo_pw_delref(pw0);
 
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-	"user %s matches group %s: %s", user, group, matched ? "true" : "false");
-    debug_return_bool(matched);
+	"user %s matches group %s: %s", user, group,
+	ret == ALLOW ? "ALLOW" : "DENY");
+    debug_return_int(ret);
 }
 
 #if defined(HAVE_GETDOMAINNAME) || defined(SI_SRPC_DOMAIN)
@@ -734,28 +744,28 @@ sudo_getdomainname(void)
 #endif /* HAVE_GETDOMAINNAME || SI_SRPC_DOMAIN */
 
 /*
- * Returns true if "host" and "user" belong to the netgroup "netgr",
- * else return false.  Either of "lhost", "shost" or "user" may be NULL
+ * Returns ALLOW if "host" and "user" belong to the netgroup "netgr",
+ * else return DENY.  Either of "lhost", "shost" or "user" may be NULL
  * in which case that argument is not checked...
  */
-bool
+int
 netgr_matches(const struct sudo_nss *nss, const char *netgr,
     const char *lhost, const char *shost, const char *user)
 {
     const char *domain;
-    bool rc = false;
+    int ret = DENY;
     debug_decl(netgr_matches, SUDOERS_DEBUG_MATCH);
 
     if (!def_use_netgroups) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "netgroups are disabled");
-	debug_return_bool(false);
+	debug_return_int(DENY);
     }
 
     /* make sure we have a valid netgroup, sudo style */
     if (*netgr++ != '+') {
 	sudo_debug_printf(SUDO_DEBUG_DIAG, "netgroup %s has no leading '+'",
 	    netgr);
-	debug_return_bool(false);
+	debug_return_int(DENY);
     }
 
     /* get the domain name (if any) */
@@ -767,11 +777,11 @@ netgr_matches(const struct sudo_nss *nss, const char *netgr,
 	case 0:
 	    if (lhost != shost) {
 		if (nss->innetgr(nss, netgr, shost, user, domain) == 1)
-		    rc = true;
+		    ret = ALLOW;
 	    }
 	    goto done;
 	case 1:
-	    rc = true;
+	    ret = ALLOW;
 	    goto done;
 	default:
 	    /* Not supported, use system innetgr(3). */
@@ -782,10 +792,10 @@ netgr_matches(const struct sudo_nss *nss, const char *netgr,
 #ifdef HAVE_INNETGR
     /* Use system innetgr() function. */
     if (innetgr(netgr, lhost, user, domain) == 1) {
-	rc = true;
+	ret = ALLOW;
     } else if (lhost != shost) {
 	if (innetgr(netgr, shost, user, domain) == 1)
-	    rc = true;
+	    ret = ALLOW;
     }
 #else
     sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
@@ -796,7 +806,7 @@ done:
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	"netgroup %s matches (%s|%s, %s, %s): %s", netgr, lhost ? lhost : "",
 	shost ? shost : "", user ? user : "", domain ? domain : "",
-	rc ? "true" : "false");
+	ret == ALLOW ? "ALLOW" : "DENY");
 
-    debug_return_bool(rc);
+    debug_return_int(ret);
 }

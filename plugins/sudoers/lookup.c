@@ -43,7 +43,7 @@ runas_matches_pw(struct sudoers_parse_tree *parse_tree,
 
     if (cs->runasgrouplist == NULL) {
 	/* No explicit runas user or group, use default. */
-	if (userpw_matches(def_runas_default, pw->pw_name, pw))
+	if (userpw_matches(def_runas_default, pw->pw_name, pw) == ALLOW)
 	    debug_return_int(ALLOW);
     }
     debug_return_int(UNSPEC);
@@ -97,8 +97,8 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct sudoers_context *ctx,
 	 * to support the "pwcheck == all" case.
 	 */
 	TAILQ_FOREACH(us, &nss->parse_tree->userspecs, entries) {
-	    int user_match = userlist_matches(nss->parse_tree, ctx->user.pw,
-		&us->users);
+	    const int user_match = userlist_matches(nss->parse_tree,
+		ctx->user.pw, &us->users);
 	    if (user_match != ALLOW) {
 		if (callback != NULL && user_match == DENY) {
 		    callback(nss->parse_tree, us, user_match, NULL, UNSPEC,
@@ -108,8 +108,8 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct sudoers_context *ctx,
 	    }
 	    TAILQ_FOREACH(priv, &us->privileges, entries) {
 		int priv_nopass = UNSPEC;
-		int host_match = hostlist_matches(nss->parse_tree, ctx->user.pw,
-		    &priv->hostlist);
+		const int host_match = hostlist_matches(nss->parse_tree,
+		    ctx->user.pw, &priv->hostlist);
 		if (host_match != ALLOW) {
 		    if (callback != NULL) {
 			callback(nss->parse_tree, us, user_match, priv,
@@ -243,7 +243,8 @@ sudoers_lookup_check(struct sudo_nss *nss, struct sudoers_context *ctx,
     init_cmnd_info(ctx, info);
 
     TAILQ_FOREACH_REVERSE(us, &nss->parse_tree->userspecs, userspec_list, entries) {
-	int user_match = userlist_matches(nss->parse_tree, ctx->user.pw, &us->users);
+	const int user_match = userlist_matches(nss->parse_tree, ctx->user.pw,
+	    &us->users);
 	if (user_match != ALLOW) {
 	    if (callback != NULL && user_match == DENY) {
 		callback(nss->parse_tree, us, user_match, NULL, UNSPEC, NULL,
@@ -253,8 +254,8 @@ sudoers_lookup_check(struct sudo_nss *nss, struct sudoers_context *ctx,
 	}
 	CLR(*validated, FLAG_NO_USER);
 	TAILQ_FOREACH_REVERSE(priv, &us->privileges, privilege_list, entries) {
-	    int host_match = hostlist_matches(nss->parse_tree, ctx->user.pw,
-		&priv->hostlist);
+	    const int host_match = hostlist_matches(nss->parse_tree,
+		ctx->user.pw, &priv->hostlist);
 	    if (host_match == ALLOW) {
 		CLR(*validated, FLAG_NO_HOST);
 	    } else {

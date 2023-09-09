@@ -425,22 +425,22 @@ bool sudoers_error_recovery(void);
 bool sudoers_strict(void);
 
 /* match_addr.c */
-bool addr_matches(char *n);
+int addr_matches(char *n);
 
 /* match_command.c */
-bool command_matches(struct sudoers_context *ctx, const char *sudoers_cmnd, const char *sudoers_args, const char *runchroot, struct cmnd_info *info, const struct command_digest_list *digests);
+int command_matches(struct sudoers_context *ctx, const char *sudoers_cmnd, const char *sudoers_args, const char *runchroot, struct cmnd_info *info, const struct command_digest_list *digests);
 
 /* match_digest.c */
-bool digest_matches(int fd, const char *path, const struct command_digest_list *digests);
+int digest_matches(int fd, const char *path, const struct command_digest_list *digests);
 
 /* match.c */
 struct group;
 struct passwd;
-bool group_matches(const char *sudoers_group, const struct group *gr);
-bool hostname_matches(const char *shost, const char *lhost, const char *pattern);
-bool netgr_matches(const struct sudo_nss *nss, const char *netgr, const char *lhost, const char *shost, const char *user);
-bool usergr_matches(const char *group, const char *user, const struct passwd *pw);
-bool userpw_matches(const char *sudoers_user, const char *user, const struct passwd *pw);
+int group_matches(const char *sudoers_group, const struct group *gr);
+int hostname_matches(const char *shost, const char *lhost, const char *pattern);
+int netgr_matches(const struct sudo_nss *nss, const char *netgr, const char *lhost, const char *shost, const char *user);
+int usergr_matches(const char *group, const char *user, const struct passwd *pw);
+int userpw_matches(const char *sudoers_user, const char *user, const struct passwd *pw);
 int cmnd_matches(const struct sudoers_parse_tree *parse_tree, const struct member *m, const char *runchroot, struct cmnd_info *info);
 int cmnd_matches_all(const struct sudoers_parse_tree *parse_tree, const struct member *m, const char *runchroot, struct cmnd_info *info);
 int cmndlist_matches(const struct sudoers_parse_tree *parse_tree, const struct member_list *list, const char *runchroot, struct cmnd_info *info);

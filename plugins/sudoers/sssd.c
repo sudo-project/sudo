@@ -205,20 +205,20 @@ sudo_sss_check_user(struct sudoers_context *ctx, struct sudo_sss_handle *handle,
 	case '+':
 	    /* Netgroup spec found, check membership. */
 	    if (netgr_matches(NULL, val, def_netgroup_tuple ? host : NULL,
-		def_netgroup_tuple ? shost : NULL, handle->pw->pw_name)) {
+		def_netgroup_tuple ? shost : NULL, handle->pw->pw_name) == ALLOW) {
 		ret = true;
 	    }
 	    break;
 	case '%':
 	    /* User group found, check membership. */
-	    if (usergr_matches(val, handle->pw->pw_name, handle->pw)) {
+	    if (usergr_matches(val, handle->pw->pw_name, handle->pw) == ALLOW) {
 		ret = true;
 	    }
 	    break;
 	default:
 	    /* Not a netgroup or user group. */
 	    if (strcmp(val, "ALL") == 0 ||
-		userpw_matches(val, handle->pw->pw_name, handle->pw)) {
+		userpw_matches(val, handle->pw->pw_name, handle->pw) == ALLOW) {
 		ret = true;
 	    }
 	    break;

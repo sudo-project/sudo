@@ -57,7 +57,7 @@ check_addr(char *input)
 	sudo_fatalx("expecting 0 or 1, got %s", cp);
     input[len] = '\0';
 
-    matched = addr_matches(input);
+    matched = addr_matches(input) == ALLOW;
     if (matched != expected) {
 	sudo_warnx("%s %smatched: FAIL", input, matched ? "" : "not ");
 	return 1;

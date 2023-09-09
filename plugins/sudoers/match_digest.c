@@ -38,7 +38,7 @@
 #include "sudo_digest.h"
 #include <gram.h>
 
-bool
+int
 digest_matches(int fd, const char *path,
     const struct command_digest_list *digests)
 {
@@ -47,12 +47,12 @@ digest_matches(int fd, const char *path,
     unsigned char *sudoers_digest = NULL;
     struct command_digest *digest;
     size_t digest_len = (size_t)-1;
-    bool matched = false;
+    int matched = DENY;
     debug_decl(digest_matches, SUDOERS_DEBUG_MATCH);
 
     if (TAILQ_EMPTY(digests)) {
 	/* No digest, no problem. */
-	debug_return_bool(true);
+	debug_return_int(ALLOW);
     }
 
     if (fd == -1) {
@@ -104,7 +104,7 @@ digest_matches(int fd, const char *path,
 	    }
 	}
 	if (memcmp(file_digest, sudoers_digest, digest_len) == 0) {
-	    matched = true;
+	    matched = ALLOW;
 	    break;
 	}
 
@@ -122,5 +122,5 @@ bad_format:
 done:
     free(sudoers_digest);
     free(file_digest);
-    debug_return_bool(matched);
+    debug_return_int(matched);
 }
