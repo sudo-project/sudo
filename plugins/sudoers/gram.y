@@ -219,8 +219,7 @@ entry		:	'\n' {
 			}
 		|	include {
 			    const bool success = push_include($1,
-				parsed_policy.ctx->user.shost,
-				parser_conf.verbose);
+				parsed_policy.ctx->user.shost, &parser_conf);
 			    parser_leak_remove(LEAK_PTR, $1);
 			    free($1);
 			    if (!success && !parser_conf.recovery)
@@ -228,8 +227,7 @@ entry		:	'\n' {
 			}
 		|	includedir {
 			    const bool success = push_includedir($1,
-				parsed_policy.ctx->user.shost,
-				parser_conf.verbose);
+				parsed_policy.ctx->user.shost, &parser_conf);
 			    parser_leak_remove(LEAK_PTR, $1);
 			    free($1);
 			    if (!success && !parser_conf.recovery)

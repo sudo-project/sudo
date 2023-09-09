@@ -34,6 +34,7 @@ extern struct sudolinebuf sudolinebuf;
 extern int sudolineno;
 extern char *sudoers_search_path;
 
+struct sudoers_parser_config;
 bool append(const char *, int);
 bool fill_args(const char *, int, bool);
 bool fill_cmnd(const char *, int);
@@ -43,8 +44,8 @@ bool ipv6_valid(const char *s);
 int sudoers_trace_print(const char *);
 void sudoerserrorf(const char *, ...) sudo_printf0like(1, 2);
 void sudoerserror(const char *);
-bool push_include(const char *, const char *, int);
-bool push_includedir(const char *, const char *, int);
+bool push_include(const char *, const char *, struct sudoers_parser_config *);
+bool push_includedir(const char *, const char *, struct sudoers_parser_config *);
 
 #ifndef FLEX_SCANNER
 extern int (*trace_print)(const char *msg);

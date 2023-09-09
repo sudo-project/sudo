@@ -6047,7 +6047,8 @@ oflow:
  * Returns false on error, else true.
  */
 static bool
-push_include_int(const char *opath, const char *host, bool isdir, int verbose)
+push_include_int(const char *opath, const char *host, bool isdir,
+     struct sudoers_parser_config *conf)
 {
     struct path_list *pl;
     char *file = NULL, *path;
@@ -6062,7 +6063,7 @@ push_include_int(const char *opath, const char *host, bool isdir, int verbose)
 	struct include_stack *new_istack;
 
 	if (idepth > MAX_SUDOERS_DEPTH) {
-	    if (verbose > 0) {
+	    if (conf->verbose > 0) {
 		fprintf(stderr, U_("%s: %s"), path,
 		    U_("too many levels of includes"));
 		fputc('\n', stderr);
@@ -6089,12 +6090,20 @@ push_include_int(const char *opath, const char *host, bool isdir, int verbose)
 	size_t count;
 
 	fd = sudo_open_conf_path(path, dname, sizeof(dname), NULL);
-	status = sudo_secure_fd(fd, S_IFDIR, sudoers_file_uid(),
-	    sudoers_file_gid(), &sb);
+	if (conf->ignore_perms) {
+	    /* Skip sudoers security checks when ignore_perms is set. */
+	    if (fd == -1 || fstat(fd, &sb) == -1)
+		status = SUDO_PATH_MISSING;
+	    else
+		status = SUDO_PATH_SECURE;
+	} else {
+	    status = sudo_secure_fd(fd, S_IFDIR, sudoers_file_uid(),
+		sudoers_file_gid(), &sb);
+	}
 	if (fd != -1)
 	    close(fd); /* XXX use in read_dir_files? */
 	if (status != SUDO_PATH_SECURE) {
-	    if (verbose > 0) {
+	    if (conf->verbose > 0) {
 		switch (status) {
 		case SUDO_PATH_BAD_TYPE:
 		    errno = ENOTDIR;
@@ -6121,7 +6130,7 @@ push_include_int(const char *opath, const char *host, bool isdir, int verbose)
 	    sudo_rcstr_delref(path);
 	    debug_return_bool(true);
 	}
-	count = switch_dir(&istack[idepth], dname, verbose);
+	count = switch_dir(&istack[idepth], dname, conf->verbose);
 	switch (count) {
 	case SIZE_MAX:
 	case 0:
@@ -6174,15 +6183,17 @@ push_include_int(const char *opath, const char *host, bool isdir, int verbose)
 }
 
 bool
-push_include(const char *opath, const char *host, int verbose)
+push_include(const char *opath, const char *host,
+     struct sudoers_parser_config *conf)
 {
-    return push_include_int(opath, host, false, verbose);
+    return push_include_int(opath, host, false, conf);
 }
 
 bool
-push_includedir(const char *opath, const char *host, int verbose)
+push_includedir(const char *opath, const char *host,
+     struct sudoers_parser_config *conf)
 {
-    return push_include_int(opath, host, true, verbose);
+    return push_include_int(opath, host, true, conf);
 }
 
 /*
