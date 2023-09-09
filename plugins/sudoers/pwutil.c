@@ -1198,3 +1198,17 @@ done:
 	__func__, pw->pw_name, matched ? "" : "NOT ", group);
     debug_return_bool(matched);
 }
+
+/*
+ * Returns true if the user's shell is considered to be valid.
+ */
+bool
+user_shell_valid(const struct passwd *pw)
+{
+    debug_decl(user_shell_valid, SUDOERS_DEBUG_NSS);
+
+    if (!def_runas_check_shell)
+	debug_return_bool(true);
+
+    debug_return_bool(valid_shell(pw->pw_shell));
+}

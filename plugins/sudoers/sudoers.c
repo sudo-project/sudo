@@ -444,7 +444,7 @@ sudoers_check_common(struct sudoers_context *ctx, int pwflag)
 
     /* Check runas user's shell if running (or checking) a command. */
     if (ISSET(ctx->mode, MODE_RUN|MODE_CHECK)) {
-	if (!check_user_shell(ctx->runas.pw)) {
+	if (!user_shell_valid(ctx->runas.pw)) {
 	    log_warningx(ctx, SLOG_RAW_MSG|SLOG_AUDIT,
 		N_("invalid shell for user %s: %s"),
 		ctx->runas.pw->pw_name, ctx->runas.pw->pw_shell);

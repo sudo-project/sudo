@@ -449,3 +449,26 @@ again:
 
     debug_return_ptr(&grlitem->cache);
 }
+
+/*
+ * Returns true if the specified shell is allowed by /etc/shells, else false.
+ */
+bool
+valid_shell(const char *shell)
+{
+    const char *entry;
+    debug_decl(valid_shell, SUDOERS_DEBUG_NSS);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: checking /etc/shells for %s", __func__, shell);
+
+    setusershell();
+    while ((entry = getusershell()) != NULL) {
+	if (strcmp(entry, shell) == 0)
+	    debug_return_bool(true);
+    }
+    endusershell();
+
+    debug_return_bool(false);
+}
+

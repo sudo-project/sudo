@@ -311,7 +311,6 @@ int check_user(struct sudoers_context *ctx, unsigned int validated, unsigned int
 bool user_is_exempt(const struct sudoers_context *ctx);
 
 /* check_util.c */
-bool check_user_shell(const struct passwd *pw);
 int check_user_runchroot(const char *runchroot);
 int check_user_runcwd(const char *runcwd);
 
@@ -373,6 +372,7 @@ int  sudo_pwutil_get_max_groups(void);
 void sudo_pwutil_set_max_groups(int);
 void sudo_pwutil_set_backend(sudo_make_pwitem_t, sudo_make_gritem_t, sudo_make_gidlist_item_t, sudo_make_grlist_item_t);
 void sudo_setspent(void);
+bool user_shell_valid(const struct passwd *pw);
 
 /* timestr.c */
 char *get_timestr(time_t, int);

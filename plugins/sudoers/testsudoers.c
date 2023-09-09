@@ -383,7 +383,7 @@ main(int argc, char *argv[])
 
     /* Validate user-specified chroot or cwd (if any) and runas user shell. */
     if (ISSET(validated, VALIDATE_SUCCESS)) {
-	if (!check_user_shell(test_ctx.runas.pw)) {
+	if (!user_shell_valid(test_ctx.runas.pw)) {
 	    printf(U_("\nInvalid shell for user %s: %s\n"),
 		test_ctx.runas.pw->pw_name, test_ctx.runas.pw->pw_shell);
 	    CLR(validated, VALIDATE_SUCCESS);

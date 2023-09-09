@@ -729,13 +729,6 @@ check_user_runcwd(const char *runcwd)
 }
 
 /* STUB */
-bool
-check_user_shell(const struct passwd *pw)
-{
-    return true;
-}
-
-/* STUB */
 void
 group_plugin_unload(void)
 {

@@ -32,31 +32,6 @@
 #include "sudoers.h"
 
 /*
- * Returns true if the specified shell is allowed by /etc/shells, else false.
- */
-bool
-check_user_shell(const struct passwd *pw)
-{
-    const char *shell;
-    debug_decl(check_user_shell, SUDOERS_DEBUG_AUTH);
-
-    if (!def_runas_check_shell)
-	debug_return_bool(true);
-
-    sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: checking /etc/shells for %s", __func__, pw->pw_shell);
-
-    setusershell();
-    while ((shell = getusershell()) != NULL) {
-	if (strcmp(shell, pw->pw_shell) == 0)
-	    debug_return_bool(true);
-    }
-    endusershell();
-
-    debug_return_bool(false);
-}
-
-/*
  * Check whether specified runchroot matches def_runchroot.
  * Returns true if matched, false if not matched and -1 on error.
  */
