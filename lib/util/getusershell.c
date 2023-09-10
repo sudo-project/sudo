@@ -31,6 +31,11 @@
 #include "sudo_debug.h"
 #include "sudo_util.h"
 
+#ifdef TESTSUDOERS
+# include "tsgetgrpw.h"
+#endif
+
+static const char *shellfile = "/etc/shell";
 static char **allowed_shells, * const *current_shell;
 static const char *default_shells[] = {
     "/bin/sh",
@@ -53,7 +58,7 @@ read_shells(void)
     FILE *fp;
     debug_decl(read_shells, SUDO_DEBUG_UTIL);
 
-    if ((fp = fopen("/etc/shells", "r")) == NULL)
+    if ((fp = fopen(shellfile, "r")) == NULL)
 	goto bad;
 
     free(allowed_shells);
@@ -129,3 +134,12 @@ sudo_getusershell(void)
 
     debug_return_str(*current_shell++);
 }
+
+#ifdef TESTSUDOERS
+void
+testsudoers_setshellfile(const char *file)
+{
+    testsudoers_endusershell();
+    shellfile = file;
+}
+#endif /* TESTSUDOERS */

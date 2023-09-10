@@ -43,5 +43,10 @@ struct passwd *testsudoers_getpwent(void);
 struct passwd *testsudoers_getpwnam(const char *);
 struct passwd *testsudoers_getpwuid(uid_t);
 
+char *testsudoers_getusershell(void);
+void testsudoers_setusershell(void);
+void testsudoers_endusershell(void);
+void testsudoers_setshellfile(const char *file);
+
 int testsudoers_getgrouplist2(const char *name, GETGROUPS_T basegid,
     GETGROUPS_T **groupsp, int *ngroupsp);

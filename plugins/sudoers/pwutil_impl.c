@@ -462,12 +462,12 @@ PREFIX(valid_shell)(const char *shell)
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: checking /etc/shells for %s", __func__, shell);
 
-    setusershell();
-    while ((entry = getusershell()) != NULL) {
+    CALL(setusershell)();
+    while ((entry = CALL(getusershell)()) != NULL) {
 	if (strcmp(entry, shell) == 0)
 	    debug_return_bool(true);
     }
-    endusershell();
+    CALL(endusershell)();
 
     debug_return_bool(false);
 }

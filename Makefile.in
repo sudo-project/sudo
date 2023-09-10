@@ -212,7 +212,10 @@ uninstall-nls:
 siglist.c signame.c:
 	cd lib/util && exec $(MAKE) $@
 
-depend: siglist.c signame.c
+tsgetusershell.c:
+	cd plugins/sudoers && exec $(MAKE) $@
+
+depend: siglist.c signame.c tsgetusershell.c
 	$(scriptdir)/mkdep.pl \
 	    --srcdir=$(abs_top_srcdir) --builddir=$(abs_top_builddir) \
 	    lib/util/Makefile.in lib/zlib/Makefile.in \
