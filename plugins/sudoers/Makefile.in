@@ -546,7 +546,8 @@ $(devdir)/def_data.c $(devdir)/def_data.h: $(srcdir)/def_data.in
 	fi
 
 tsgetusershell.c: $(top_srcdir)/lib/util/getusershell.c
-	$(SED) -e 's/^sudo_/testsudoers_/' -e '/config.h/a#define TESTSUDOERS' $(top_srcdir)/lib/util/getusershell.c > $@
+	printf '#define TESTSUDOERS\n\n' > $@
+	$(SED) 's/^sudo_/testsudoers_/' $(top_srcdir)/lib/util/getusershell.c >> $@
 
 sudoers: $(srcdir)/sudoers.in
 	cd $(top_builddir) && $(SHELL) config.status --file=plugins/sudoers/$@
