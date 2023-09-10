@@ -29,11 +29,10 @@
 
 #include "sudo_compat.h"
 #include "sudo_debug.h"
-#include "sudo_gettext.h"
 #include "sudo_util.h"
 
-static char **allowed_shells, **current_shell;
-static char *default_shells[] = {
+static char **allowed_shells, * const *current_shell;
+static const char *default_shells[] = {
     "/bin/sh",
     "/bin/ksh",
     "/bin/ksh93",
