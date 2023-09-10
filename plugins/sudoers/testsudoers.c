@@ -95,7 +95,7 @@ main(int argc, char *argv[])
     struct sudo_nss_list snl = TAILQ_HEAD_INITIALIZER(snl);
     enum sudoers_formats input_format = format_sudoers;
     struct sudo_nss testsudoers_nss;
-    char *p, *grfile, *pwfile;
+    char *p, *grfile, *pwfile, *shells;
     const char *host = NULL;
     const char *errstr;
     int ch, dflag, exitcode = EXIT_FAILURE;
@@ -130,9 +130,9 @@ main(int argc, char *argv[])
 	goto done;
 
     dflag = 0;
-    grfile = pwfile = NULL;
+    grfile = pwfile = shells = NULL;
     test_ctx.mode = MODE_RUN;
-    while ((ch = getopt(argc, argv, "+D:dg:G:h:i:L:lP:p:R:T:tu:U:v")) != -1) {
+    while ((ch = getopt(argc, argv, "+D:dg:G:h:i:L:lP:p:R:S:T:tu:U:v")) != -1) {
 	switch (ch) {
 	    case 'D':
 		test_ctx.runas.cwd = optarg;
@@ -186,6 +186,9 @@ main(int argc, char *argv[])
 	    case 'P':
 		grfile = optarg;
 		break;
+	    case 'S':
+		shells = optarg;
+		break;
 	    case 'T':
 		now = parse_gentime(optarg);
 		if (now == -1)
@@ -225,12 +228,14 @@ main(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    if (grfile != NULL || pwfile != NULL) {
-	/* Set group/passwd file and init the cache. */
+    if (grfile != NULL || pwfile != NULL || shells != NULL) {
+	/* Set group/passwd/shells file and init the cache. */
 	if (grfile)
 	    testsudoers_setgrfile(grfile);
 	if (pwfile)
 	    testsudoers_setpwfile(pwfile);
+	if (shells)
+	    testsudoers_setshellfile(shells);
 
 	/* Use custom passwd/group backend. */
 	sudo_pwutil_set_backend(testsudoers_make_pwitem,
@@ -772,6 +777,6 @@ testsudoers_error(const char *restrict buf)
 sudo_noreturn static void
 usage(void)
 {
-    (void) fprintf(stderr, "usage: %s [-dltv] [-G sudoers_gid] [-g group] [-h host] [-i input_format] [-L list_user] [-P grfile] [-p pwfile] [-U sudoers_uid] [-u user] <user> <command> [args]\n", getprogname());
+    (void) fprintf(stderr, "usage: %s [-dltv] [-G sudoers_gid] [-g group] [-h host] [-i input_format] [-L list_user] [-P grfile] [-p pwfile] [-S shells] [-U sudoers_uid] [-u user] <user> <command> [args]\n", getprogname());
     exit(EXIT_FAILURE);
 }
