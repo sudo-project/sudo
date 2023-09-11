@@ -1704,6 +1704,7 @@ static bool
 ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 {
     char *pathname, **argv, **envp, *buf;
+    const int flags = closure->details->flags;
     int argc, envc, syscallno;
     struct sudo_ptrace_regs regs;
     bool path_mismatch = false;
@@ -1938,8 +1939,8 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 		}
 	    }
 	}
-	if (closure->state == POLICY_ACCEPT) {
-	    if (ISSET(closure->details->flags, CD_INTERCEPT|CD_INTERCEPT_VERIFY)) {
+	if (closure->state == POLICY_ACCEPT && ISSET(flags, CD_INTERCEPT)) {
+	    if (ISSET(flags, CD_INTERCEPT_VERIFY)) {
 		/* Verify execve(2) args post-exec. */
 		if (!ptrace_verify_post_exec(pid, &regs, closure)) {
 		    if (errno != ESRCH)
