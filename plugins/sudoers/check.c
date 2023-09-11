@@ -201,7 +201,7 @@ check_user(struct sudoers_context *ctx, unsigned int validated,
 
 	ret = verify_user(ctx, closure.auth_pw, prompt, validated, &callback);
 	if (ret == AUTH_SUCCESS && closure.lectured)
-	    (void)set_lectured(ctx->user.name);	/* lecture error not fatal */
+	    (void)set_lectured(ctx);	/* lecture error not fatal */
 	free(prompt);
 	break;
     }
@@ -251,7 +251,7 @@ display_lecture(struct sudo_conv_callback *callback)
 	debug_return;
 
     if (def_lecture == never ||
-	    (def_lecture == once && already_lectured(closure->ctx->user.name)))
+	    (def_lecture == once && already_lectured(closure->ctx)))
 	debug_return;
 
     memset(&msg, 0, sizeof(msg));

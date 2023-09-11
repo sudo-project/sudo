@@ -96,8 +96,8 @@ int   timestamp_status(void *vcookie, struct passwd *pw);
 uid_t timestamp_get_uid(void);
 bool  cb_timestampowner(struct sudoers_context *ctx, const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
 int   get_starttime(pid_t pid, struct timespec *starttime);
-bool  already_lectured(const char *user);
-int   set_lectured(const char *user);
+bool  already_lectured(const struct sudoers_context *ctx);
+int   set_lectured(const struct sudoers_context *ctx);
 void  display_lecture(struct sudo_conv_callback *callback);
 int   create_admin_success_flag(const struct sudoers_context *ctx);
 

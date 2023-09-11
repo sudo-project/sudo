@@ -442,9 +442,10 @@ ts_init_key_nonglobal(const struct sudoers_context *ctx,
 void *
 timestamp_open(const struct sudoers_context *ctx)
 {
+    int tries, len, dfd = -1, fd = -1;
+    char uidstr[STRLEN_MAX_UNSIGNED(uid_t) + 1];
     struct ts_cookie *cookie;
     char *fname = NULL;
-    int tries, dfd = -1, fd = -1;
     debug_decl(timestamp_open, SUDOERS_DEBUG_AUTH);
 
     /* Zero timeout means don't use the time stamp file. */
@@ -459,14 +460,19 @@ timestamp_open(const struct sudoers_context *ctx)
 	goto bad;
 
     /* Open time stamp file. */
-    if (asprintf(&fname, "%s/%s", def_timestampdir, ctx->user.name) == -1) {
+    len = snprintf(uidstr, sizeof(uidstr), "%u", (unsigned int)ctx->user.uid);
+    if (len < 0 || len >= ssizeof(uidstr)) {
+	errno = EINVAL;
+	goto bad;
+    }
+    if (asprintf(&fname, "%s/%s", def_timestampdir, uidstr) == -1) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto bad;
     }
     for (tries = 1; ; tries++) {
 	struct stat sb;
 
-	fd = ts_openat(dfd, ctx->user.name, O_RDWR|O_CREAT);
+	fd = ts_openat(dfd, uidstr, O_RDWR|O_CREAT);
 	switch (fd) {
 	case TIMESTAMP_OPEN_ERROR:
 	    log_warning(ctx, SLOG_SEND_MAIL, N_("unable to open %s"), fname);
@@ -492,7 +498,7 @@ timestamp_open(const struct sudoers_context *ctx)
 			sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
 			    "removing time stamp file that predates boot time");
 			close(fd);
-			unlinkat(dfd, ctx->user.name, 0);
+			unlinkat(dfd, uidstr, 0);
 			continue;
 		    }
 		}
@@ -1004,7 +1010,8 @@ int
 timestamp_remove(const struct sudoers_context *ctx, bool unlink_it)
 {
     struct timestamp_entry key, entry;
-    int dfd = -1, fd = -1, ret = true;
+    int len, dfd = -1, fd = -1, ret = true;
+    char uidstr[STRLEN_MAX_UNSIGNED(uid_t) + 1];
     char *fname = NULL;
     debug_decl(timestamp_remove, SUDOERS_DEBUG_AUTH);
 
@@ -1025,7 +1032,13 @@ timestamp_remove(const struct sudoers_context *ctx, bool unlink_it)
 	goto done;
     }
 
-    if (asprintf(&fname, "%s/%s", def_timestampdir, ctx->user.name) == -1) {
+    len = snprintf(uidstr, sizeof(uidstr), "%u", (unsigned int)ctx->user.uid);
+    if (len < 0 || len >= ssizeof(uidstr)) {
+	errno = EINVAL;
+	ret = -1;
+	goto done;
+    }
+    if (asprintf(&fname, "%s/%s", def_timestampdir, uidstr) == -1) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	ret = -1;
 	goto done;
@@ -1033,12 +1046,12 @@ timestamp_remove(const struct sudoers_context *ctx, bool unlink_it)
 
     /* For "sudo -K" simply unlink the time stamp file. */
     if (unlink_it) {
-	ret = unlinkat(dfd, ctx->user.name, 0) ? -1 : true;
+	ret = unlinkat(dfd, uidstr, 0) ? -1 : true;
 	goto done;
     }
 
     /* Open time stamp file and lock it for exclusive access. */
-    fd = ts_openat(dfd, ctx->user.name, O_RDWR);
+    fd = ts_openat(dfd, uidstr, O_RDWR);
     switch (fd) {
     case TIMESTAMP_OPEN_ERROR:
 	if (errno != ENOENT)
@@ -1113,18 +1126,28 @@ cb_timestampowner(struct sudoers_context *ctx, const char *file,
  * Returns true if the user has already been lectured.
  */
 bool
-already_lectured(const char *user)
+already_lectured(const struct sudoers_context *ctx)
 {
+    char uidstr[STRLEN_MAX_UNSIGNED(uid_t) + 1];
     bool ret = false;
     struct stat sb;
-    int dfd;
+    int dfd, len;
     debug_decl(already_lectured, SUDOERS_DEBUG_AUTH);
 
+    /* Check the existence and validity of timestamp dir. */
     dfd = ts_secure_opendir(def_lecture_status_dir, false, true);
-    if (dfd != -1) {
-	ret = fstatat(dfd, user, &sb, AT_SYMLINK_NOFOLLOW) == 0;
+    if (dfd == -1)
+	goto done;
+
+    len = snprintf(uidstr, sizeof(uidstr), "%u", (unsigned int)ctx->user.uid);
+    if (len < 0 || len >= ssizeof(uidstr))
+	goto done;
+
+    ret = fstatat(dfd, uidstr, &sb, AT_SYMLINK_NOFOLLOW) == 0;
+
+done:
+    if (dfd != -1)
 	close(dfd);
-    }
     debug_return_bool(ret);
 }
 
@@ -1133,9 +1156,10 @@ already_lectured(const char *user)
  * Returns true on success, false on failure or -1 on setuid failure.
  */
 int
-set_lectured(const char *user)
+set_lectured(const struct sudoers_context *ctx)
 {
-    int dfd, fd, ret = false;
+    char uidstr[STRLEN_MAX_UNSIGNED(uid_t) + 1];
+    int dfd, fd, len, ret = false;
     debug_decl(set_lectured, SUDOERS_DEBUG_AUTH);
 
     /* Check the validity of timestamp dir and create if missing. */
@@ -1143,8 +1167,12 @@ set_lectured(const char *user)
     if (dfd == -1)
 	goto done;
 
+    len = snprintf(uidstr, sizeof(uidstr), "%u", (unsigned int)ctx->user.uid);
+    if (len < 0 || len >= ssizeof(uidstr))
+	goto done;
+
     /* Create lecture file. */
-    fd = ts_openat(dfd, user, O_WRONLY|O_CREAT|O_EXCL);
+    fd = ts_openat(dfd, uidstr, O_WRONLY|O_CREAT|O_EXCL);
     switch (fd) {
     case TIMESTAMP_OPEN_ERROR:
 	/* Failed to open, not a fatal error. */
@@ -1159,9 +1187,10 @@ set_lectured(const char *user)
 	ret = true;
 	break;
     }
-    close(dfd);
 
 done:
+    if (dfd != -1)
+	close(dfd);
     debug_return_int(ret);
 }
 

@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "August 28, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "September 20, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -6199,7 +6199,7 @@ line in the
 sudo.conf(@mansectform@)
 file.
 .TP 3n
-unable to open @rundir@/ts/username
+unable to open @rundir@/ts/user-ID
 \fBsudoers\fR
 was unable to read or create the user's time stamp file.
 This can happen when
@@ -6213,7 +6213,7 @@ The default mode for
 \fI@rundir@\fR
 is 0711.
 .TP 3n
-unable to write to @rundir@/ts/username
+unable to write to @rundir@/ts/user-ID
 \fBsudoers\fR
 was unable to write to the user's time stamp file.
 .TP 3n

@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd August 28, 2023
+.Dd September 20, 2023
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -5797,7 +5797,7 @@ file) to the
 line in the
 .Xr sudo.conf @mansectform@
 file.
-.It unable to open @rundir@/ts/username
+.It unable to open @rundir@/ts/user-ID
 .Nm
 was unable to read or create the user's time stamp file.
 This can happen when
@@ -5810,7 +5810,7 @@ is not searchable by group or other.
 The default mode for
 .Pa @rundir@
 is 0711.
-.It unable to write to @rundir@/ts/username
+.It unable to write to @rundir@/ts/user-ID
 .Nm
 was unable to write to the user's time stamp file.
 .It @rundir@/ts is owned by uid X, should be Y
