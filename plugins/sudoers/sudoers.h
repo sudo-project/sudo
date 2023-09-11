@@ -49,6 +49,7 @@
 #include "defaults.h"
 #include "logging.h"
 #include "parse.h"
+#include "pivot.h"
 
 /*
  * Info passed in from the sudo front-end.
@@ -493,10 +494,6 @@ void unescape_string(char *str);
 
 /* serialize_list.c */
 char *serialize_list(const char *varname, struct list_members *members);
-
-/* pivot_root.c */
-bool pivot_root(const char *new_root, int fds[2]);
-bool unpivot_root(int fds[2]);
 
 /* sethost.c */
 bool sudoers_sethost(struct sudoers_context *ctx, const char *host, const char *remhost);

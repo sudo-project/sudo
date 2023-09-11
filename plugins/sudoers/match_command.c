@@ -806,7 +806,7 @@ command_matches(struct sudoers_context *ctx, const char *sudoers_cmnd,
     const struct command_digest_list *digests)
 {
     const bool intercepted = info ? info->intercepted : false;
-    int pivot_fds[2] = { -1, -1 };
+    sudoers_pivot_t pivot_state = SUDOERS_PIVOT_INITIALIZER;
     char *saved_user_cmnd = NULL;
     struct stat saved_user_stat;
     bool reset_cmnd = false;
@@ -832,7 +832,7 @@ command_matches(struct sudoers_context *ctx, const char *sudoers_cmnd,
 
     /* Pivot root. */
     if (runchroot != NULL) {
-	if (!pivot_root(runchroot, pivot_fds))
+	if (!pivot_root(runchroot, pivot_state))
 	    goto done;
     }
 
@@ -856,14 +856,15 @@ command_matches(struct sudoers_context *ctx, const char *sudoers_cmnd,
 
     if (sudoers_cmnd == NULL) {
 	sudoers_cmnd = "ALL";
-	ret = command_matches_all(ctx, pivot_fds[0], intercepted, digests);
+	ret = command_matches_all(ctx, pivot_get_root(pivot_state),
+	    intercepted, digests);
 	goto done;
     }
 
     /* Check for regular expressions first. */
     if (sudoers_cmnd[0] == '^') {
 	ret = command_matches_regex(ctx, sudoers_cmnd, sudoers_args,
-	    pivot_fds[0], intercepted, digests);
+	    pivot_get_root(pivot_state), intercepted, digests);
 	goto done;
     }
 
@@ -893,19 +894,19 @@ command_matches(struct sudoers_context *ctx, const char *sudoers_cmnd,
 	 */
 	if (def_fast_glob) {
 	    ret = command_matches_fnmatch(ctx, sudoers_cmnd, sudoers_args,
-		pivot_fds[0], intercepted, digests);
+		pivot_get_root(pivot_state), intercepted, digests);
 	} else {
 	    ret = command_matches_glob(ctx, sudoers_cmnd, sudoers_args,
-		pivot_fds[0], intercepted, digests);
+		pivot_get_root(pivot_state), intercepted, digests);
 	}
     } else {
 	ret = command_matches_normal(ctx, sudoers_cmnd, sudoers_args,
-	    pivot_fds[0], intercepted, digests);
+	    pivot_get_root(pivot_state), intercepted, digests);
     }
 done:
     /* Restore root. */
     if (runchroot != NULL)
-	(void)unpivot_root(pivot_fds);
+	(void)unpivot_root(pivot_state);
 
     /* Restore ctx->user.cmnd and ctx->user.cmnd_stat. */
     if (saved_user_cmnd != NULL) {

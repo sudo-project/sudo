@@ -98,14 +98,28 @@ init_eventlog_config(void)
 
 /* STUB */
 bool
-pivot_root(const char *new_root, int fds[2])
+pivot_root(const char *new_root, sudoers_pivot_t state)
 {
     return true;
 }
 
 /* STUB */
 bool
-unpivot_root(int fds[2])
+unpivot_root(sudoers_pivot_t state)
 {
     return true;
+}
+
+/* STUB */
+int
+pivot_get_root(sudoers_pivot_t state)
+{
+    return -1;
+}
+
+/* STUB */
+int
+pivot_get_cwd(sudoers_pivot_t state)
+{
+    return -1;
 }
