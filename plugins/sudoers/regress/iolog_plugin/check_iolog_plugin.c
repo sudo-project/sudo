@@ -246,6 +246,7 @@ test_endpoints(const struct sudoers_context *ctx, int *ntests, int *nerrors,
 	NULL
     };
     const char output[] = "uid=0(root) gid=0(wheel)\r\n";
+    const unsigned int outlen = sizeof(output) - 1;
 
     /* Set runas uid/gid to root. */
     snprintf(runas_uid, sizeof(runas_uid), "runas_uid=%u",
@@ -268,7 +269,7 @@ test_endpoints(const struct sudoers_context *ctx, int *ntests, int *nerrors,
     }
 
     /* Test log_ttyout endpoint. */
-    rc = sudoers_io.log_ttyout(output, strlen(output), &errstr);
+    rc = sudoers_io.log_ttyout(output, outlen, &errstr);
     (*ntests)++;
     if (rc != 1) {
 	sudo_warnx("I/O log_ttyout endpoint failed");
@@ -317,7 +318,7 @@ test_endpoints(const struct sudoers_context *ctx, int *ntests, int *nerrors,
     }
 
     /* Line 1: output of id command. */
-    if (!validate_timing(fp, 1, IO_EVENT_TTYOUT, strlen(output), 0)) {
+    if (!validate_timing(fp, 1, IO_EVENT_TTYOUT, outlen, 0)) {
 	(*nerrors)++;
 	return;
     }

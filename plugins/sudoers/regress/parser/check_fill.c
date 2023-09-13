@@ -48,7 +48,7 @@ YYSTYPE sudoerslval;
 struct fill_test {
     const char *input;
     const char *output;
-    size_t len;
+    int len;
     bool addspace;
 };
 
@@ -91,7 +91,7 @@ static struct fill_test args_data[] = {
 };
 
 static int
-check_fill(const char *input, size_t len, bool addspace, const char *expect, char **resultp)
+check_fill(const char *input, int len, bool addspace, const char *expect, char **resultp)
 {
     if (sudoerslval.string != NULL) {
 	free(sudoerslval.string);
@@ -104,7 +104,7 @@ check_fill(const char *input, size_t len, bool addspace, const char *expect, cha
 }
 
 static int
-check_fill_cmnd(const char *input, size_t len, bool addspace, const char *expect, char **resultp)
+check_fill_cmnd(const char *input, int len, bool addspace, const char *expect, char **resultp)
 {
     if (sudoerslval.command.cmnd != NULL) {
 	free(sudoerslval.command.cmnd);
@@ -117,7 +117,7 @@ check_fill_cmnd(const char *input, size_t len, bool addspace, const char *expect
 }
 
 static int
-check_fill_args(const char *input, size_t len, bool addspace, const char *expect, char **resultp)
+check_fill_args(const char *input, int len, bool addspace, const char *expect, char **resultp)
 {
     /* Must not free old sudoerslval.command.args as gets appended to. */
     if (!fill_args(input, len, addspace))
@@ -127,17 +127,17 @@ check_fill_args(const char *input, size_t len, bool addspace, const char *expect
 }
 
 static int
-do_tests(int (*checker)(const char *, size_t, bool, const char *, char **),
+do_tests(int (*checker)(const char *, int, bool, const char *, char **),
     struct fill_test *data, size_t ntests)
 {
     int errors = 0;
     unsigned int i;
-    size_t len;
+    int len;
     char *result;
 
     for (i = 0; i < ntests; i++) {
 	if (data[i].len == 0)
-	    len = strlen(data[i].input);
+	    len = (int)strlen(data[i].input);
 	else
 	    len = data[i].len;
 
