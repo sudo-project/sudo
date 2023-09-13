@@ -411,7 +411,7 @@ ts_init_key(const struct sudoers_context *ctx,
     case ppid:
 	/* ppid-based time stamp */
 	entry->type = TS_PPID;
-	entry->u.ppid = getppid();
+	entry->u.ppid = ctx->user.ppid;
 	get_starttime(entry->u.ppid, &entry->start_time);
 	break;
     case global:

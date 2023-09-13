@@ -486,6 +486,24 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 	    }
 	    continue;
 	}
+	if (MATCHES(*cur, "pid=")) {
+	    p = *cur + sizeof("pid=") - 1;
+	    ctx->user.pid = (pid_t) sudo_strtoid(p, &errstr);
+	    if (errstr != NULL) {
+		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
+		goto bad;
+	    }
+	    continue;
+	}
+	if (MATCHES(*cur, "ppid=")) {
+	    p = *cur + sizeof("ppid=") - 1;
+	    ctx->user.ppid = (pid_t) sudo_strtoid(p, &errstr);
+	    if (errstr != NULL) {
+		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
+		goto bad;
+	    }
+	    continue;
+	}
 	if (MATCHES(*cur, "sid=")) {
 	    p = *cur + sizeof("sid=") - 1;
 	    ctx->user.sid = (pid_t) sudo_strtoid(p, &errstr);

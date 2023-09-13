@@ -140,6 +140,8 @@ struct sudoers_user_context {
     mode_t umask;
     uid_t uid;
     uid_t gid;
+    pid_t pid;
+    pid_t ppid;
     pid_t sid;
     pid_t tcpgid;
 };
