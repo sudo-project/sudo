@@ -617,18 +617,6 @@ unpivot_root(struct sudoers_pivot *state)
 }
 
 int
-pivot_get_root(struct sudoers_pivot *state)
-{
-    return -1;
-}
-
-int
-pivot_get_cwd(struct sudoers_pivot *state)
-{
-    return -1;
-}
-
-int
 set_cmnd_path(struct sudoers_context *ctx, const char *runchroot)
 {
     /* Reallocate test_ctx.user.cmnd to catch bugs in command_matches(). */

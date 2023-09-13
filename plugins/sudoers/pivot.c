@@ -85,15 +85,3 @@ unpivot_root(struct sudoers_pivot *state)
 
     debug_return_bool(ret);
 }
-
-int
-pivot_get_root(struct sudoers_pivot *state)
-{
-    return state->saved_root;
-}
-
-int
-pivot_get_cwd(struct sudoers_pivot *state)
-{
-    return state->saved_cwd;
-}

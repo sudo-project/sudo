@@ -109,17 +109,3 @@ unpivot_root(struct sudoers_pivot *state)
 {
     return true;
 }
-
-/* STUB */
-int
-pivot_get_root(struct sudoers_pivot *state)
-{
-    return -1;
-}
-
-/* STUB */
-int
-pivot_get_cwd(struct sudoers_pivot *state)
-{
-    return -1;
-}

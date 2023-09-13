@@ -28,7 +28,5 @@ struct sudoers_pivot {
 
 bool pivot_root(const char *new_root, struct sudoers_pivot *state);
 bool unpivot_root(struct sudoers_pivot *state);
-int  pivot_get_root(struct sudoers_pivot *state);
-int  pivot_get_cwd(struct sudoers_pivot *state);
 
 #endif /* SUDOERS_PIVOT_H */
