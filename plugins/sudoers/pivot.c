@@ -35,20 +35,20 @@
  * Returns true on success, else false.
  */
 bool
-pivot_root(const char *new_root, sudoers_pivot_t state)
+pivot_root(const char *new_root, struct sudoers_pivot *state)
 {
     debug_decl(pivot_root, SUDOERS_DEBUG_UTIL);
 
-    state.saved_root = open("/", O_RDONLY);
-    state.saved_cwd = open(".", O_RDONLY);
-    if (state.saved_root == -1 || state.saved_cwd == -1 || chroot(new_root) == -1) {
-	if (state.saved_root != -1) {
-	    close(state.saved_root);
-	    state.saved_root = -1;
+    state->saved_root = open("/", O_RDONLY);
+    state->saved_cwd = open(".", O_RDONLY);
+    if (state->saved_root == -1 || state->saved_cwd == -1 || chroot(new_root) == -1) {
+	if (state->saved_root != -1) {
+	    close(state->saved_root);
+	    state->saved_root = -1;
 	}
-	if (state.saved_cwd != -1) {
-	    close(state.saved_cwd);
-	    state.saved_cwd = -1;
+	if (state->saved_cwd != -1) {
+	    close(state->saved_cwd);
+	    state->saved_cwd = -1;
 	}
 	debug_return_bool(false);
     }
@@ -60,40 +60,40 @@ pivot_root(const char *new_root, sudoers_pivot_t state)
  * Returns true on success, else false.
  */
 bool
-unpivot_root(sudoers_pivot_t state)
+unpivot_root(struct sudoers_pivot *state)
 {
     bool ret = true;
     debug_decl(unpivot_root, SUDOERS_DEBUG_UTIL);
 
     /* Order is important: restore old root, *then* change cwd. */
-    if (state.saved_root != -1) {
-	if (fchdir(state.saved_root) == -1 || chroot(".") == -1) {
+    if (state->saved_root != -1) {
+	if (fchdir(state->saved_root) == -1 || chroot(".") == -1) {
 	    sudo_warn("%s", U_("unable to restore root directory"));
 	    ret = false;
 	}
-	close(state.saved_root);
-	state.saved_root = -1;
+	close(state->saved_root);
+	state->saved_root = -1;
     }
-    if (state.saved_cwd != -1) {
-	if (fchdir(state.saved_cwd) == -1) {
+    if (state->saved_cwd != -1) {
+	if (fchdir(state->saved_cwd) == -1) {
 	    sudo_warn("%s", U_("unable to restore current working directory"));
 	    ret = false;
 	}
-	close(state.saved_cwd);
-	state.saved_cwd = -1;
+	close(state->saved_cwd);
+	state->saved_cwd = -1;
     }
 
     debug_return_bool(ret);
 }
 
 int
-pivot_get_root(sudoers_pivot_t state)
+pivot_get_root(struct sudoers_pivot *state)
 {
-    return state.saved_root;
+    return state->saved_root;
 }
 
 int
-pivot_get_cwd(sudoers_pivot_t state)
+pivot_get_cwd(struct sudoers_pivot *state)
 {
-    return state.saved_cwd;
+    return state->saved_cwd;
 }

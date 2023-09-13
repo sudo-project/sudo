@@ -1062,7 +1062,7 @@ init_vars(struct sudoers_context *ctx, char * const envp[])
 int
 set_cmnd_path(struct sudoers_context *ctx, const char *runchroot)
 {
-    sudoers_pivot_t pivot_state = SUDOERS_PIVOT_INITIALIZER;
+    struct sudoers_pivot pivot_state = SUDOERS_PIVOT_INITIALIZER;
     const char *cmnd_in;
     char *cmnd_out = NULL;
     char *path = ctx->user.path;
@@ -1083,7 +1083,7 @@ set_cmnd_path(struct sudoers_context *ctx, const char *runchroot)
 
     /* Pivot root. */
     if (runchroot != NULL) {
-	if (!pivot_root(runchroot, pivot_state))
+	if (!pivot_root(runchroot, &pivot_state))
 	    goto error;
     }
 
@@ -1121,12 +1121,12 @@ set_cmnd_path(struct sudoers_context *ctx, const char *runchroot)
 
     /* Restore root. */
     if (runchroot != NULL)
-	(void)unpivot_root(pivot_state);
+	(void)unpivot_root(&pivot_state);
 
     debug_return_int(ret);
 error:
     if (runchroot != NULL)
-	(void)unpivot_root(pivot_state);
+	(void)unpivot_root(&pivot_state);
     free(cmnd_out);
     debug_return_int(NOT_FOUND_ERROR);
 }

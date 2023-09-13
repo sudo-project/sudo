@@ -25,11 +25,10 @@ struct sudoers_pivot {
     int saved_root;
     int saved_cwd;
 };
-typedef struct sudoers_pivot sudoers_pivot_t;
 
-bool pivot_root(const char *new_root, sudoers_pivot_t cookie);
-bool unpivot_root(sudoers_pivot_t cookie);
-int  pivot_get_root(sudoers_pivot_t cookie);
-int  pivot_get_cwd(sudoers_pivot_t cookie);
+bool pivot_root(const char *new_root, struct sudoers_pivot *state);
+bool unpivot_root(struct sudoers_pivot *state);
+int  pivot_get_root(struct sudoers_pivot *state);
+int  pivot_get_cwd(struct sudoers_pivot *state);
 
 #endif /* SUDOERS_PIVOT_H */

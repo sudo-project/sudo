@@ -605,25 +605,25 @@ init_eventlog_config(void)
 }
 
 bool
-pivot_root(const char *new_root, sudoers_pivot_t state)
+pivot_root(const char *new_root, struct sudoers_pivot *state)
 {
     return true;
 }
 
 bool
-unpivot_root(sudoers_pivot_t state)
+unpivot_root(struct sudoers_pivot *state)
 {
     return true;
 }
 
 int
-pivot_get_root(sudoers_pivot_t state)
+pivot_get_root(struct sudoers_pivot *state)
 {
     return -1;
 }
 
 int
-pivot_get_cwd(sudoers_pivot_t state)
+pivot_get_cwd(struct sudoers_pivot *state)
 {
     return -1;
 }
