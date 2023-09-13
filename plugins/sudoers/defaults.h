@@ -48,7 +48,7 @@ struct def_values {
 };
 
 union sudo_defs_val {
-    int flag;
+    bool flag;
     int ival;
     unsigned int uival;
     enum def_tuple tuple;

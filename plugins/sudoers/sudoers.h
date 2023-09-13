@@ -316,7 +316,7 @@ bool sudo_goodpath(const char *path, struct stat *sbp);
 
 /* findpath.c */
 int find_path(const char *infile, char **outfile, struct stat *sbp,
-    const char *path, int ignore_dot, char * const *allowlist);
+    const char *path, bool ignore_dot, char * const *allowlist);
 
 /* check.c */
 int check_user(struct sudoers_context *ctx, unsigned int validated, unsigned int mode);

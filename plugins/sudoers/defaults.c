@@ -278,7 +278,7 @@ parse_default_entry(const struct sudoers_context *ctx,
 		rc = -1;
 		break;
 	    }
-	    def->sd_un.flag = op;
+	    def->sd_un.flag = (bool)op;
 	    rc = true;
 	    break;
 	case T_LIST:

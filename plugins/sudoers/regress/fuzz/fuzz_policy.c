@@ -832,7 +832,7 @@ display_privs(struct sudoers_context *ctx, const struct sudo_nss_list *snl,
 /* STUB */
 int
 find_path(const char *infile, char **outfile, struct stat *sbp,
-    const char *path, int ignore_dot, char * const *allowlist)
+    const char *path, bool ignore_dot, char * const *allowlist)
 {
     switch (pass) {
     case PASS_CHECK_NOT_FOUND:

@@ -87,7 +87,7 @@ cmnd_allowed(char *cmnd, size_t cmnd_size, struct stat *cmnd_sbp,
  */
 int
 find_path(const char *infile, char **outfile, struct stat *sbp,
-    const char *path, int ignore_dot, char * const *allowlist)
+    const char *path, bool ignore_dot, char * const *allowlist)
 {
     char command[PATH_MAX];
     const char *cp, *ep, *pathend;
