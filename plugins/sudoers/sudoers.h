@@ -138,7 +138,9 @@ struct sudoers_user_context {
     int   cols;
     int   timeout;
     mode_t umask;
+    uid_t euid;
     uid_t uid;
+    uid_t egid;
     uid_t gid;
     pid_t pid;
     pid_t ppid;

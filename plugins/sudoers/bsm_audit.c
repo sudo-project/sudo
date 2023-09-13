@@ -104,14 +104,13 @@ audit_sudo_selected(int sorf)
  * Returns 0 on success or -1 on error.
  */
 int
-bsm_audit_success(char *const exec_args[])
+bsm_audit_success(const struct sudoers_context *ctx, char *const exec_args[])
 {
 	auditinfo_addr_t ainfo_addr;
 	token_t *tok;
 	au_id_t auid;
 	long au_cond;
 	int aufd, selected;
-	pid_t pid;
 	debug_decl(bsm_audit_success, SUDOERS_DEBUG_AUDIT);
 
 	/*
@@ -140,10 +139,10 @@ bsm_audit_success(char *const exec_args[])
 		sudo_warn("au_open");
 		debug_return_int(-1);
 	}
-	pid = getpid();
 	if (getaudit_addr(&ainfo_addr, sizeof(ainfo_addr)) == 0) {
-		tok = au_to_subject_ex(auid, geteuid(), getegid(), getuid(),
-		    getuid(), pid, pid, &ainfo_addr.ai_termid);
+		tok = au_to_subject_ex(auid, ctx->user.euid, ctx->user.egid,
+		    ctx->user.uid, ctx->user.gid, ctx->user.pid, ctx->user.pid,
+		    &ainfo_addr.ai_termid);
 #ifdef BSM_AUDIT_COMPAT
 	} else if (errno == ENOSYS) {
 		auditinfo_t ainfo;
@@ -155,8 +154,9 @@ bsm_audit_success(char *const exec_args[])
 			sudo_warn("getaudit");
 			debug_return_int(-1);
 		}
-		tok = au_to_subject(auid, geteuid(), getegid(), getuid(),
-		    getuid(), pid, pid, &ainfo.ai_termid);
+		tok = au_to_subject(auid, ctx->user.euid, ctx->user.egid,
+		    ctx->user.uid, ctx->user.gid, ctx->user.pid, ctx->user.pid,
+		    &ainfo.ai_termid);
 #endif /* BSM_AUDIT_COMPAT */
 	} else {
 		sudo_warn("getaudit_addr");
@@ -195,13 +195,13 @@ bsm_audit_success(char *const exec_args[])
  * Returns 0 on success or -1 on error.
  */
 int
-bsm_audit_failure(char *const exec_args[], const char *errmsg)
+bsm_audit_failure(const struct sudoers_context *ctx, char *const exec_args[],
+    const char *errmsg)
 {
 	auditinfo_addr_t ainfo_addr;
 	token_t *tok;
 	long au_cond;
 	au_id_t auid;
-	pid_t pid;
 	int aufd;
 	debug_decl(bsm_audit_failure, SUDOERS_DEBUG_AUDIT);
 
@@ -226,10 +226,10 @@ bsm_audit_failure(char *const exec_args[], const char *errmsg)
 		sudo_warn("au_open");
 		debug_return_int(-1);
 	}
-	pid = getpid();
 	if (getaudit_addr(&ainfo_addr, sizeof(ainfo_addr)) == 0) { 
-		tok = au_to_subject_ex(auid, geteuid(), getegid(), getuid(),
-		    getuid(), pid, pid, &ainfo_addr.ai_termid);
+		tok = au_to_subject_ex(auid, ctx->user.euid, ctx->user.egid,
+		    ctx->user.uid, ctx->user.gid, ctx->user.pid, ctx->user.pid,
+		    &ainfo_addr.ai_termid);
 #ifdef BSM_AUDIT_COMPAT
 	} else if (errno == ENOSYS) {
 		auditinfo_t ainfo;
@@ -238,8 +238,9 @@ bsm_audit_failure(char *const exec_args[], const char *errmsg)
 			sudo_warn("getaudit");
 			debug_return_int(-1);
 		}
-		tok = au_to_subject(auid, geteuid(), getegid(), getuid(),
-		    getuid(), pid, pid, &ainfo.ai_termid);
+		tok = au_to_subject(auid, ctx->user.euid, ctx->user.egid,
+		    ctx->user.uid, ctx->user.gid, ctx->user.pid, ctx->user.pid,
+		    &ainfo.ai_termid);
 #endif /* BSM_AUDIT_COMPAT */
 	} else {
 		sudo_warn("getaudit_addr");

@@ -60,7 +60,7 @@ audit_success(const struct sudoers_context *ctx, char *const argv[])
 
     if (argv != NULL) {
 #ifdef HAVE_BSM_AUDIT
-	if (bsm_audit_success(argv) == -1)
+	if (bsm_audit_success(ctx, argv) == -1)
 	    rc = -1;
 #endif
 #ifdef HAVE_LINUX_AUDIT
@@ -86,7 +86,7 @@ audit_failure_int(const struct sudoers_context *ctx, char *const argv[],
 #if defined(HAVE_BSM_AUDIT) || defined(HAVE_LINUX_AUDIT)
     if (def_log_denied && argv != NULL) {
 #ifdef HAVE_BSM_AUDIT
-	if (bsm_audit_failure(argv, message) == -1)
+	if (bsm_audit_failure(ctx, argv, message) == -1)
 	    ret = -1;
 #endif
 #ifdef HAVE_LINUX_AUDIT

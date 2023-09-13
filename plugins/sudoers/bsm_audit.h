@@ -20,7 +20,7 @@
 #ifndef SUDOERS_BSM_AUDIT_H
 #define	SUDOERS_BSM_AUDIT_H
 
-int	bsm_audit_success(char *const argv[]);
-int	bsm_audit_failure(char *const argv[], const char *errmsg);
+int bsm_audit_success(const struct sudoers_context *ctx, char *const argv[]);
+int bsm_audit_failure(const struct sudoers_context *ctx, char *const argv[], const char *errmsg);
 
 #endif /* SUDOERS_BSM_AUDIT_H */

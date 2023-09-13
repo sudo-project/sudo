@@ -423,9 +423,27 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 		goto oom;
 	    continue;
 	}
+	if (MATCHES(*cur, "euid=")) {
+	    p = *cur + sizeof("euid=") - 1;
+	    ctx->user.euid = (uid_t) sudo_strtoid(p, &errstr);
+	    if (errstr != NULL) {
+		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
+		goto bad;
+	    }
+	    continue;
+	}
 	if (MATCHES(*cur, "uid=")) {
 	    p = *cur + sizeof("uid=") - 1;
 	    ctx->user.uid = (uid_t) sudo_strtoid(p, &errstr);
+	    if (errstr != NULL) {
+		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
+		goto bad;
+	    }
+	    continue;
+	}
+	if (MATCHES(*cur, "egid=")) {
+	    p = *cur + sizeof("egid=") - 1;
+	    ctx->user.egid = (gid_t) sudo_strtoid(p, &errstr);
 	    if (errstr != NULL) {
 		sudo_warnx(U_("%s: %s"), *cur, U_(errstr));
 		goto bad;
