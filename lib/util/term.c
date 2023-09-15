@@ -292,7 +292,7 @@ sudo_term_copy_v1(int src, int dst)
 	debug_return_bool(false);
 
     if (ioctl(src, TIOCGWINSZ, &wsize) == 0)
-	(void)ioctl(dst, (int)TIOCSWINSZ, &wsize);
+	(void)ioctl(dst, IOCTL_REQ_CAST TIOCSWINSZ, &wsize);
 
     debug_return_bool(true);
 }

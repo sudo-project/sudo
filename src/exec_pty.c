@@ -1439,7 +1439,7 @@ sync_ttysize(struct exec_closure *ec)
 	    log_winchange(ec, wsize.ws_row, wsize.ws_col);
 
 	    /* Update pty window size and send command SIGWINCH. */
-	    (void)ioctl(io_fds[SFD_LEADER], (int)TIOCSWINSZ, &wsize);
+	    (void)ioctl(io_fds[SFD_LEADER], IOCTL_REQ_CAST TIOCSWINSZ, &wsize);
 	    killpg(ec->cmnd_pid, SIGWINCH);
 
 	    /* Update rows/cols. */

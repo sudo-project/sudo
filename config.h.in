@@ -1141,6 +1141,10 @@
 /* The message given when a bad password is entered. */
 #undef INCORRECT_PASSWORD
 
+/* Define to (int) if the 'ioctl' function request takes an int request
+   argument. */
+#undef IOCTL_REQ_CAST
+
 /* The syslog facility sudo will use. */
 #undef LOGFAC
 
@@ -1241,7 +1245,7 @@
 /* The syslog priority sudo will use for successful attempts. */
 #undef PRI_SUCCESS
 
-/* Define to const if the 'putenv' takes a const argument. */
+/* Define to const if the 'putenv' function takes a const argument. */
 #undef PUTENV_CONST
 
 /* Define to 1 if you want insults from "Monty Python's Flying Circus". */

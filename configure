@@ -23394,6 +23394,49 @@ printf "%s\n" "#define PUTENV_CONST const" >>confdefs.h
 
   fi
 
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether ioctl() takes an int request argument" >&5
+printf %s "checking whether ioctl() takes an int request argument... " >&6; }
+if test ${sudo_cv_func_ioctl_req_int+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+      int ioctl(int fd, int req, ...) {return 0;}
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  sudo_cv_func_ioctl_req_int=yes
+else case e in #(
+  e) sudo_cv_func_ioctl_req_int=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+   ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_func_ioctl_req_int" >&5
+printf "%s\n" "$sudo_cv_func_ioctl_req_int" >&6; }
+  if test $sudo_cv_func_ioctl_req_int = yes; then
+
+printf "%s\n" "#define IOCTL_REQ_CAST (int)" >>confdefs.h
+
+  else
+    printf "%s\n" "#define IOCTL_REQ_CAST /**/" >>confdefs.h
+
+  fi
+
 if test -z "$SKIP_SETRESUID"
 then :
 

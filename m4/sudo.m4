@@ -366,9 +366,29 @@ AC_DEFUN([SUDO_FUNC_PUTENV_CONST],
     [sudo_cv_func_putenv_const=no])
   ])
   if test $sudo_cv_func_putenv_const = yes; then
-    AC_DEFINE(PUTENV_CONST, const, [Define to const if the 'putenv' takes a const argument.])
+    AC_DEFINE(PUTENV_CONST, const, [Define to const if the 'putenv' function takes a const argument.])
   else
     AC_DEFINE(PUTENV_CONST, [])
+  fi
+])
+
+dnl
+dnl check if ioctl() request argument is int.
+dnl
+AC_DEFUN([SUDO_FUNC_IOCTL_REQ_INT],
+  [AC_CACHE_CHECK([whether ioctl() takes an int request argument], [sudo_cv_func_ioctl_req_int],
+    [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <sys/types.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+      int ioctl(int fd, int req, ...) {return 0;}
+    ], [])],
+    [sudo_cv_func_ioctl_req_int=yes],
+    [sudo_cv_func_ioctl_req_int=no])
+  ])
+  if test $sudo_cv_func_ioctl_req_int = yes; then
+    AC_DEFINE(IOCTL_REQ_CAST, [(int)], [Define to (int) if the 'ioctl' function request takes an int request argument.])
+  else
+    AC_DEFINE(IOCTL_REQ_CAST, [])
   fi
 ])
 

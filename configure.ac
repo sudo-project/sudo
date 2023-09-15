@@ -2861,6 +2861,7 @@ AC_CHECK_FUNCS([openpty], [AC_CHECK_HEADERS([libutil.h util.h pty.h], [break])],
 ])
 AC_CHECK_FUNCS([unsetenv], [SUDO_FUNC_UNSETENV_VOID], [])
 SUDO_FUNC_PUTENV_CONST
+SUDO_FUNC_IOCTL_REQ_INT
 AS_IF([test -z "$SKIP_SETRESUID"], [
     AC_CHECK_FUNCS([setresuid], [
 	SKIP_SETREUID=yes
