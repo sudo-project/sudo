@@ -237,8 +237,11 @@ struct sudoers_context {
 /*
  * Return values for check_user() (rowhammer resistent).
  */
+#undef AUTH_SUCCESS
 #define AUTH_SUCCESS		0x52a2925	/* 0101001010100010100100100101 */
+#undef AUTH_FAILURE
 #define AUTH_FAILURE		0xad5d6da	/* 1010110101011101011011011010 */
+#undef AUTH_ERROR
 #define AUTH_ERROR		0x1fc8d3ac	/* 11111110010001101001110101100 */
 
 /*
