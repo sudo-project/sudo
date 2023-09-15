@@ -479,8 +479,8 @@ struct sudo_nss_list;
 unsigned int sudoers_lookup(struct sudo_nss_list *snl, struct sudoers_context *ctx, time_t now, sudoers_lookup_callback_fn_t callback, void *cb_data, int *cmnd_status, int pwflag);
 
 /* display.c */
-int display_privs(struct sudoers_context *ctx, const struct sudo_nss_list *snl, struct passwd *pw, bool verbose);
-int display_cmnd(struct sudoers_context *ctx, const struct sudo_nss_list *snl, struct passwd *pw, bool verbose);
+int display_privs(struct sudoers_context *ctx, const struct sudo_nss_list *snl, struct passwd *pw, int verbose);
+int display_cmnd(struct sudoers_context *ctx, const struct sudo_nss_list *snl, struct passwd *pw, int verbose);
 
 /* parse_ldif.c */
 bool sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree, FILE *fp, const char *sudoers_base, bool store_options);

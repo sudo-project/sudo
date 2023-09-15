@@ -908,7 +908,7 @@ done:
  * -2 for usage error.
  */
 int
-sudoers_list(int argc, char * const argv[], const char *list_user, bool verbose)
+sudoers_list(int argc, char * const argv[], const char *list_user, int verbose)
 {
     struct passwd *pw;
     int ret = -1;

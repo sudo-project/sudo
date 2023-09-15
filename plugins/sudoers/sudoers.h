@@ -440,7 +440,7 @@ int set_cmnd_path(struct sudoers_context *ctx, const char *runchroot);
 void set_cmnd_status(struct sudoers_context *ctx, const char *runchroot);
 int sudoers_init(void *info, sudoers_logger_t logger, char * const envp[]);
 int sudoers_check_cmnd(int argc, char *const argv[], char *env_add[], void *closure);
-int sudoers_list(int argc, char *const argv[], const char *list_user, bool verbose);
+int sudoers_list(int argc, char *const argv[], const char *list_user, int verbose);
 int sudoers_validate_user(void);
 void sudoers_cleanup(void);
 bool sudoers_override_umask(void);

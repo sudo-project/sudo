@@ -816,7 +816,7 @@ sudoers_lookup(struct sudo_nss_list *snl, struct sudoers_context *ctx,
 /* STUB */
 int
 display_cmnd(struct sudoers_context *ctx, const struct sudo_nss_list *snl,
-    struct passwd *pw, bool verbose)
+    struct passwd *pw, int verbose)
 {
     return true;
 }
@@ -824,7 +824,7 @@ display_cmnd(struct sudoers_context *ctx, const struct sudo_nss_list *snl,
 /* STUB */
 int
 display_privs(struct sudoers_context *ctx, const struct sudo_nss_list *snl,
-    struct passwd *pw, bool verbose)
+    struct passwd *pw, int verbose)
 {
     return true;
 }

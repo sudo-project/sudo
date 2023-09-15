@@ -455,7 +455,7 @@ output(const char *buf)
  */
 int
 display_privs(struct sudoers_context *ctx, const struct sudo_nss_list *snl,
-    struct passwd *pw, bool verbose)
+    struct passwd *pw, int verbose)
 {
     const struct sudo_nss *nss;
     struct sudo_lbuf def_buf, priv_buf;
@@ -463,6 +463,11 @@ display_privs(struct sudoers_context *ctx, const struct sudo_nss_list *snl,
     unsigned int olen;
     struct stat sb;
     debug_decl(display_privs, SUDOERS_DEBUG_PARSER);
+
+    if (verbose < 0) {
+	/* Nothing to display. */
+	debug_return_int(true);
+    }
 
     cols = ctx->user.cols;
     if (fstat(STDOUT_FILENO, &sb) == 0 && S_ISFIFO(sb.st_mode))
@@ -608,7 +613,7 @@ done:
  */
 int
 display_cmnd(struct sudoers_context *ctx, const struct sudo_nss_list *snl,
-    struct passwd *pw, bool verbose)
+    struct passwd *pw, int verbose)
 {
     struct sudoers_match_info match_info = { NULL };
     struct sudo_lbuf lbuf;
@@ -635,6 +640,10 @@ display_cmnd(struct sudoers_context *ctx, const struct sudo_nss_list *snl,
 	    break;
     }
     if (match == ALLOW) {
+	if (verbose < 0) {
+	    /* Nothing to display. */
+	    debug_return_int(true);
+	}
 	if (verbose) {
 	    /* Append matching sudoers rule (long form). */
 	    display_cmndspec_long(match_info.parse_tree, pw, match_info.us,
