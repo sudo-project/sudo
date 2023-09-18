@@ -285,7 +285,7 @@ main(int argc, char *argv[])
      * Parse the existing sudoers file(s) to highlight any existing
      * errors and to pull in editor and env_editor conf values.
      */
-    ctx.parser_conf.strict = true;
+    ctx.parser_conf.strict = strict + 1;
     ctx.parser_conf.verbose = quiet ? 0 : 2;
     ctx.parser_conf.sudoers_path = path_sudoers;
     init_parser(&ctx, NULL);

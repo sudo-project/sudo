@@ -81,10 +81,10 @@ struct group_list {
  */
 struct sudoers_parser_config {
     const char *sudoers_path;
-    bool strict;
+    int strict;
+    int verbose;
     bool recovery;
     bool ignore_perms;
-    int verbose;
     mode_t sudoers_mode;
     uid_t sudoers_uid;
     gid_t sudoers_gid;
@@ -92,9 +92,9 @@ struct sudoers_parser_config {
 #define SUDOERS_PARSER_CONFIG_INITIALIZER {				\
     NULL,	/* sudoers_path */					\
     false,	/* strict */						\
+    1,		/* verbose level 1 */					\
     true,	/* recovery */						\
     false,	/* ignore_perms */					\
-    1,		/* verbose level 1 */					\
     SUDOERS_MODE,							\
     SUDOERS_UID,							\
     SUDOERS_GID								\
