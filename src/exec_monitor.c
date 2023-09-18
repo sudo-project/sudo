@@ -44,7 +44,7 @@
 struct monitor_closure {
     const struct command_details *details;
     struct sudo_event_base *evbase;
-    struct sudo_event *errpipe_event;
+    struct sudo_event *errsock_event;
     struct sudo_event *backchannel_event;
     struct sudo_event *sigint_event;
     struct sudo_event *sigquit_event;
@@ -263,18 +263,18 @@ mon_signal_cb(int signo, int what, void *v)
     debug_return;
 }
 
-/* Note: this is basically the same as errpipe_cb() in exec_nopty.c */
+/* This is essentially the same as errpipe_cb() in exec_nopty.c */
 static void
-mon_errpipe_cb(int fd, int what, void *v)
+mon_errsock_cb(int fd, int what, void *v)
 {
     struct monitor_closure *mc = v;
     ssize_t nread;
     int errval;
-    debug_decl(mon_errpipe_cb, SUDO_DEBUG_EXEC);
+    debug_decl(mon_errsock_cb, SUDO_DEBUG_EXEC);
 
     /*
      * Read errno from child or EOF when command is executed.
-     * Note that the error pipe is *blocking*.
+     * Note that the error socket is *blocking*.
      */
     nread = read(fd, &errval, sizeof(errval));
     switch (nread) {
@@ -286,14 +286,14 @@ mon_errpipe_cb(int fd, int what, void *v)
 		mc->cstat->val = errno;
 	    }
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-		"%s: failed to read error pipe", __func__);
+		"%s: failed to read error socket", __func__);
 	    sudo_ev_loopbreak(mc->evbase);
 	}
 	break;
     default:
 	if (nread == 0) {
-	    /* The error pipe closes when the command is executed. */
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "EOF on error pipe");
+	    /* The error socket closes when the command is executed. */
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "EOF on error socket");
 	} else {
 	    /* Errno value when child is unable to execute command. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "errno from child: %s",
@@ -301,7 +301,7 @@ mon_errpipe_cb(int fd, int what, void *v)
 	    mc->cstat->type = CMD_ERRNO;
 	    mc->cstat->val = errval;
 	}
-	sudo_ev_del(mc->evbase, mc->errpipe_event);
+	sudo_ev_del(mc->evbase, mc->errsock_event);
 	close(fd);
 	break;
     }
@@ -374,13 +374,25 @@ exec_cmnd_pty(struct command_details *details, sigset_t *mask,
 
     /* Wait for parent to grant us the tty if we are foreground. */
     if (foreground) {
-	struct timespec ts = { 0, 1000 };  /* 1us */
-	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: waiting for controlling tty",
+	char ch;
+
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: waiting for controlling tty",
 	    __func__);
-	while (tcgetpgrp(io_fds[SFD_FOLLOWER]) != self)
-	    nanosleep(&ts, NULL);
-	sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: got controlling tty",
-	    __func__);
+	while (recv(errfd, &ch, sizeof(ch), 0) == -1) {
+	    if (errno != EINTR) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		    "%s: unable to receive message from parent", __func__);
+		debug_return;
+	    }
+	}
+	if (tcgetpgrp(io_fds[SFD_FOLLOWER]) == self) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: got controlling tty",
+		__func__);
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR,
+		"%s: unable to get controlling tty", __func__);
+	    foreground = false;
+	}
     }
 
     /* Done with the pty follower, don't leak it. */
@@ -418,11 +430,11 @@ fill_exec_closure_monitor(struct monitor_closure *mc,
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 
     /* Event for command status via errfd. */
-    mc->errpipe_event = sudo_ev_alloc(errfd,
-	SUDO_EV_READ|SUDO_EV_PERSIST, mon_errpipe_cb, mc);
-    if (mc->errpipe_event == NULL)
+    mc->errsock_event = sudo_ev_alloc(errfd,
+	SUDO_EV_READ|SUDO_EV_PERSIST, mon_errsock_cb, mc);
+    if (mc->errsock_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    if (sudo_ev_add(mc->evbase, mc->errpipe_event, NULL, false) == -1)
+    if (sudo_ev_add(mc->evbase, mc->errsock_event, NULL, false) == -1)
 	sudo_fatal("%s", U_("unable to add event to queue"));
 
     /* Event for forwarded signals via backchannel. */
@@ -534,7 +546,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
     struct monitor_closure mc = { 0 };
     struct command_status cstat;
     struct sigaction sa;
-    int errpipe[2];
+    int errsock[2];
     debug_decl(exec_monitor, SUDO_DEBUG_EXEC);
 
     /* Close fds the monitor doesn't use. */
@@ -568,10 +580,14 @@ exec_monitor(struct command_details *details, sigset_t *oset,
     }
 
     /*
-     * We use a pipe to get errno if execve(2) fails in the child.
+     * The child waits on the other end of a socketpair for the
+     * parent to set the controlling terminal.  It also writes
+     * error to the socket on execve(2) failure.
      */
-    if (pipe2(errpipe, O_CLOEXEC) != 0) {
-	sudo_warn("%s", U_("unable to create pipe"));
+    if (socketpair(PF_UNIX, SOCK_STREAM, 0, errsock) == -1 ||
+	    fcntl(errsock[0], F_SETFD, FD_CLOEXEC) == -1 ||
+	    fcntl(errsock[1], F_SETFD, FD_CLOEXEC) == -1) {
+	sudo_warn("%s", U_("unable to create sockets"));
 	goto bad;
     }
 
@@ -608,15 +624,15 @@ exec_monitor(struct command_details *details, sigset_t *oset,
     case 0:
 	/* child */
 	close(backchannel);
-	close(errpipe[0]);
+	close(errsock[0]);
 	/* setup tty and exec command */
-	exec_cmnd_pty(details, oset, foreground, intercept_fd, errpipe[1]);
-	if (write(errpipe[1], &errno, sizeof(int)) == -1)
+	exec_cmnd_pty(details, oset, foreground, intercept_fd, errsock[1]);
+	if (send(errsock[1], &errno, sizeof(int), 0) == -1)
 	    sudo_warn(U_("unable to execute %s"), details->command);
 	_exit(EXIT_FAILURE);
 	/* NOTREACHED */
     }
-    close(errpipe[1]);
+    close(errsock[1]);
     if (intercept_fd != -1)
 	close(intercept_fd);
 
@@ -635,7 +651,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
      * Create new event base and register read events for the
      * signal pipe, error pipe, and backchannel.
      */
-    fill_exec_closure_monitor(&mc, details, &cstat, errpipe[0], backchannel);
+    fill_exec_closure_monitor(&mc, details, &cstat, errsock[0], backchannel);
 
     /* Restore signal mask now that signal handlers are setup. */
     sigprocmask(SIG_SETMASK, oset, NULL);
@@ -659,6 +675,9 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 		"%s: unable to set foreground pgrp to %d (command)",
 		__func__, (int)mc.cmnd_pgrp);
 	}
+	/* Tell the child to go ahead now that it is the foreground pgrp. */
+	while (send(errsock[0], "", 1, 0) == -1 && errno == EINTR)
+	    continue;
     }
 
     /*
