@@ -78,11 +78,11 @@ cmnd_allowed(char *cmnd, size_t cmnd_size, struct stat *cmnd_sbp,
 }
 
 /*
- * This function finds the full pathname for a command and
- * stores it in a statically allocated array, filling in a pointer
- * to the array.  Returns FOUND if the command was found, NOT_FOUND
- * if it was not found, or NOT_FOUND_DOT if it would have been found
- * but it is in '.' and IGNORE_DOT is set.
+ * This function finds the full pathname for a command and stores it
+ * in a statically allocated array, filling in a pointer to the array.
+ * Returns FOUND if the command was found, NOT_FOUND if it was not found,
+ * NOT_FOUND_DOT if it would have been found but it is in '.' and
+ * ignore_dot is set or NOT_FOUND_ERROR if an error occurred.
  * The caller is responsible for freeing the output file.
  */
 int

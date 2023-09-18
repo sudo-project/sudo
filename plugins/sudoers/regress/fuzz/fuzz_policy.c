@@ -853,6 +853,14 @@ find_path(const char *infile, char **outfile, struct stat *sbp,
 }
 
 /* STUB */
+int
+resolve_cmnd(struct sudoers_context *ctx, const char *infile, char **outfile,
+    const char *path)
+{
+    return find_path(infile, outfile, NULL, path, false, NULL);
+}
+
+/* STUB */
 bool
 expand_iolog_path(const char *inpath, char *path, size_t pathlen,
     const struct iolog_path_escape *escapes, void *closure)

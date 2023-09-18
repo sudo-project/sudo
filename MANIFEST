@@ -683,8 +683,8 @@ plugins/sudoers/match_command.c
 plugins/sudoers/match_digest.c
 plugins/sudoers/mkdefaults
 plugins/sudoers/parse.h
-plugins/sudoers/parser_warnx.c
 plugins/sudoers/parse_ldif.c
+plugins/sudoers/parser_warnx.c
 plugins/sudoers/pivot.c
 plugins/sudoers/pivot.h
 plugins/sudoers/po/README
@@ -1148,6 +1148,7 @@ plugins/sudoers/regress/visudo/test8.out.ok
 plugins/sudoers/regress/visudo/test8.sh
 plugins/sudoers/regress/visudo/test9.out.ok
 plugins/sudoers/regress/visudo/test9.sh
+plugins/sudoers/resolve_cmnd.c
 plugins/sudoers/serialize_list.c
 plugins/sudoers/set_perms.c
 plugins/sudoers/sethost.c

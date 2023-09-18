@@ -175,11 +175,12 @@ FUZZ_VERBOSE =
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
 LIBPARSESUDOERS_OBJS = alias.lo b64_decode.lo canon_path.lo defaults.lo \
-		       digestname.lo exptilde.lo filedigest.lo gentime.lo \
-		       gram.lo match.lo match_addr.lo match_command.lo \
-		       match_digest.lo parser_warnx.lo pwutil.lo \
-		       pwutil_impl.lo redblack.lo strlist.lo sudoers_debug.lo \
-		       timeout.lo timestr.lo toke.lo toke_util.lo
+                       digestname.lo exptilde.lo filedigest.lo \
+                       gentime.lo gram.lo match.lo match_addr.lo \
+                       match_command.lo match_digest.lo parser_warnx.lo \
+                       pwutil.lo pwutil_impl.lo redblack.lo \
+                       resolve_cmnd.lo strlist.lo sudoers_debug.lo \
+                       timeout.lo timestr.lo toke.lo toke_util.lo
 
 LIBPARSESUDOERS_IOBJS = $(LIBPARSESUDOERS_OBJS:.lo=.i) passwd.i
 
@@ -2695,6 +2696,30 @@ redblack.i: $(srcdir)/redblack.c $(devdir)/def_data.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 redblack.plog: redblack.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/redblack.c --i-file $< --output-file $@
+resolve_cmnd.lo: $(srcdir)/resolve_cmnd.c $(devdir)/def_data.h \
+                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                 $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                 $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                 $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                 $(top_builddir)/pathnames.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/resolve_cmnd.c
+resolve_cmnd.i: $(srcdir)/resolve_cmnd.c $(devdir)/def_data.h \
+                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                 $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                 $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                 $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                 $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+resolve_cmnd.plog: resolve_cmnd.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/resolve_cmnd.c --i-file $< --output-file $@
 rfc1938.lo: $(authdir)/rfc1938.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
             $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \

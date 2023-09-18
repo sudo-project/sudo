@@ -321,6 +321,10 @@ bool sudo_goodpath(const char *path, struct stat *sbp);
 int find_path(const char *infile, char **outfile, struct stat *sbp,
     const char *path, bool ignore_dot, char * const *allowlist);
 
+/* resolve_cmnd.c */
+int resolve_cmnd(struct sudoers_context *ctx, const char *infile,
+    char **outfile, const char *path);
+
 /* check.c */
 int check_user(struct sudoers_context *ctx, unsigned int validated, unsigned int mode);
 bool user_is_exempt(const struct sudoers_context *ctx);

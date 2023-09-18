@@ -1087,23 +1087,8 @@ set_cmnd_path(struct sudoers_context *ctx, const char *runchroot)
 	    goto error;
     }
 
-    if (!set_perms(ctx, PERM_RUNAS))
-	goto error;
-    ret = find_path(cmnd_in, &cmnd_out, ctx->user.cmnd_stat, path,
-	def_ignore_dot, NULL);
-    if (!restore_perms())
-	goto error;
-    if (ret == NOT_FOUND) {
-	/* Failed as root, try as invoking user. */
-	if (!set_perms(ctx, PERM_USER))
-	    goto error;
-	ret = find_path(cmnd_in, &cmnd_out, ctx->user.cmnd_stat, path,
-	    def_ignore_dot, NULL);
-	if (!restore_perms())
-	    goto error;
-    }
-
-    if (cmnd_out != NULL) {
+    ret = resolve_cmnd(ctx, cmnd_in, &cmnd_out, path);
+    if (ret == FOUND) {
 	char *slash = strrchr(cmnd_out, '/');
 	if (slash != NULL) {
 	    *slash = '\0';
