@@ -89,12 +89,12 @@ TAILQ_HEAD(sudoersfile_list, sudoersfile);
 static void quit(int);
 static int whatnow(void);
 static char *get_editor(int *editor_argc, char ***editor_argv);
-static bool check_syntax(struct sudoers_context *ctx, const char *, bool, bool, bool, bool);
+static bool check_syntax(struct sudoers_context *ctx, const char *, bool, bool);
 static bool edit_sudoers(struct sudoersfile *, char *, int, char **, int);
 static bool install_sudoers(struct sudoersfile *, bool, bool);
 static bool visudo_track_error(const struct sudoers_context *ctx, const char *file, int line, int column, const char * restrict fmt, va_list args);
 static int print_unused(struct sudoers_parse_tree *, struct alias *, void *);
-static bool reparse_sudoers(struct sudoers_context *ctx, char *, int, char **, bool, bool);
+static bool reparse_sudoers(struct sudoers_context *ctx, char *, int, char **);
 static int run_command(const char *, char *const *);
 static void parse_sudoers_options(struct sudoers_context *ctx);
 static void setup_signals(void);
@@ -136,7 +136,7 @@ main(int argc, char *argv[])
     char *editor, **editor_argv;
     const char *export_path = NULL;
     int ch, oldlocale, editor_argc, exitcode = 0;
-    bool use_perms, use_owner, quiet, strict, fflag;
+    bool use_perms, use_owner, fflag;
     debug_decl(main, SUDOERS_DEBUG_MAIN);
 
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -174,7 +174,7 @@ main(int argc, char *argv[])
     /*
      * Arg handling.
      */
-    fflag = quiet = strict = use_owner = use_perms = false;
+    fflag = use_owner = use_perms = false;
     while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	switch (ch) {
 	    case 'V':
@@ -203,10 +203,10 @@ main(int argc, char *argv[])
 		use_perms = true;	/* check/set perms */
 		break;
 	    case 's':
-		strict = true;		/* strict mode */
+		ctx.parser_conf.strict = 2;
 		break;
 	    case 'q':
-		quiet = true;		/* quiet mode */
+		ctx.parser_conf.verbose = 0;
 		break;
 	    case 'x':
 		export_path = optarg;
@@ -276,8 +276,8 @@ main(int argc, char *argv[])
 	sudo_fatalx("%s", U_("unable to initialize sudoers default values"));
 
     if (checkonly) {
-	exitcode = check_syntax(&ctx, path_sudoers, quiet, strict,
-	    use_owner, use_perms) ? 0 : 1;
+	exitcode = check_syntax(&ctx, path_sudoers, use_owner, use_perms)
+	    ? 0 : 1;
 	goto done;
     }
 
@@ -285,8 +285,6 @@ main(int argc, char *argv[])
      * Parse the existing sudoers file(s) to highlight any existing
      * errors and to pull in editor and env_editor conf values.
      */
-    ctx.parser_conf.strict = strict + 1;
-    ctx.parser_conf.verbose = quiet ? 0 : 2;
     ctx.parser_conf.sudoers_path = path_sudoers;
     init_parser(&ctx, NULL);
     if ((sudoersin = open_sudoers(path_sudoers, &sudoers, true, NULL)) == NULL)
@@ -294,7 +292,7 @@ main(int argc, char *argv[])
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     (void) sudoersparse();
     (void) update_defaults(&ctx, &parsed_policy, NULL,
-	SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, quiet);
+	SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, !ctx.parser_conf.verbose);
     sudoers_setlocale(oldlocale, NULL);
 
     editor = get_editor(&editor_argc, &editor_argv);
@@ -318,7 +316,7 @@ main(int argc, char *argv[])
      * Check edited files for a parse error, re-edit any that fail
      * and install the edited files as needed.
      */
-    if (reparse_sudoers(&ctx, editor, editor_argc, editor_argv, strict, quiet)) {
+    if (reparse_sudoers(&ctx, editor, editor_argc, editor_argv)) {
 	TAILQ_FOREACH(sp, &sudoerslist, entries) {
 	    if (!install_sudoers(sp, use_owner, use_perms)) {
 		if (sp->tpath != NULL) {
@@ -624,8 +622,10 @@ done:
  * On error, visudo_track_error() will set the line number in sudoerslist.
  */
 static void
-check_defaults_and_aliases(bool strict, bool quiet)
+check_defaults_and_aliases(struct sudoers_context *ctx)
 {
+    const bool quiet = !ctx->parser_conf.verbose;
+    const bool strict = ctx->parser_conf.strict > 1;
     debug_decl(check_defaults_and_aliases, SUDOERS_DEBUG_UTIL);
 
     if (!check_defaults(&parsed_policy, quiet)) {
@@ -642,7 +642,7 @@ check_defaults_and_aliases(bool strict, bool quiet)
  */
 static bool
 reparse_sudoers(struct sudoers_context *ctx, char *editor, int editor_argc,
-    char **editor_argv, bool strict, bool quiet)
+    char **editor_argv)
 {
     struct sudoersfile *sp, *last;
     FILE *fp;
@@ -678,7 +678,7 @@ reparse_sudoers(struct sudoers_context *ctx, char *editor, int editor_argc,
 	if (!parse_error) {
 	    parse_error = !update_defaults(ctx, &parsed_policy, NULL,
 		SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, true);
-	    check_defaults_and_aliases(strict, quiet);
+	    check_defaults_and_aliases(ctx);
 	}
 	sudoers_setlocale(oldlocale, NULL);
 
@@ -937,7 +937,8 @@ run_command(const char *path, char *const *argv)
 }
 
 static bool
-check_file(const char *path, bool quiet, bool check_owner, bool check_mode)
+check_file(struct sudoers_context *ctx, const char *path, bool check_owner,
+    bool check_mode)
 {
     struct stat sb;
     bool ok = true;
@@ -947,7 +948,7 @@ check_file(const char *path, bool quiet, bool check_owner, bool check_mode)
 	if (check_owner) {
 	    if (sb.st_uid != sudoers_file_uid() || sb.st_gid != sudoers_file_gid()) {
 		ok = false;
-		if (!quiet) {
+		if (ctx->parser_conf.verbose) {
 		    fprintf(stderr,
 			_("%s: wrong owner (uid, gid) should be (%u, %u)\n"),
 			path, (unsigned int)sudoers_file_uid(),
@@ -958,7 +959,7 @@ check_file(const char *path, bool quiet, bool check_owner, bool check_mode)
 	if (check_mode) {
 	    if ((sb.st_mode & ALLPERMS) != sudoers_file_mode()) {
 		ok = false;
-		if (!quiet) {
+		if (ctx->parser_conf.verbose) {
 		    fprintf(stderr,
 			_("%s: bad permissions, should be mode 0%o\n"),
 			path, (unsigned int)sudoers_file_mode());
@@ -970,8 +971,8 @@ check_file(const char *path, bool quiet, bool check_owner, bool check_mode)
 }
 
 static bool
-check_syntax(struct sudoers_context *ctx, const char *path, bool quiet,
-    bool strict, bool check_owner, bool check_mode)
+check_syntax(struct sudoers_context *ctx, const char *path, bool check_owner,
+    bool check_mode)
 {
     bool ok = false;
     int fd, oldlocale;
@@ -984,7 +985,7 @@ check_syntax(struct sudoers_context *ctx, const char *path, bool quiet,
     } else {
 	fd = sudo_open_conf_path(path, fname, sizeof(fname), NULL);
 	if (fd == -1 || (sudoersin = fdopen(fd, "r")) == NULL) {
-	    if (!quiet)
+	    if (ctx->parser_conf.verbose)
 		sudo_warn(U_("unable to open %s"), fname);
 	    if (fd != -1)
 		close(fd);
@@ -994,14 +995,14 @@ check_syntax(struct sudoers_context *ctx, const char *path, bool quiet,
     init_parser(ctx, fname);
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
     if (sudoersparse() && !parse_error) {
-	if (!quiet)
+	if (ctx->parser_conf.verbose)
 	    sudo_warnx(U_("failed to parse %s file, unknown error"), fname);
 	parse_error = true;
     }
     if (!parse_error) {
 	parse_error = !update_defaults(ctx, &parsed_policy, NULL,
 	    SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER, true);
-	check_defaults_and_aliases(strict, quiet);
+	check_defaults_and_aliases(ctx);
     }
     sudoers_setlocale(oldlocale, NULL);
     ok = !parse_error;
@@ -1010,15 +1011,15 @@ check_syntax(struct sudoers_context *ctx, const char *path, bool quiet,
 	struct sudoersfile *sp;
 
 	/* Parsed OK, check mode and owner. */
-	if (check_file(fname, quiet, check_owner, check_mode)) {
-	    if (!quiet)
+	if (check_file(ctx, fname, check_owner, check_mode)) {
+	    if (ctx->parser_conf.verbose)
 		(void) printf(_("%s: parsed OK\n"), fname);
 	} else {
 	    ok = false;
 	}
 	TAILQ_FOREACH(sp, &sudoerslist, entries) {
-	    if (check_file(sp->opath, quiet, check_owner, check_mode)) {
-		if (!quiet)
+	    if (check_file(ctx, sp->opath, check_owner, check_mode)) {
+		if (ctx->parser_conf.verbose)
 		    (void) printf(_("%s: parsed OK\n"), sp->opath);
 	    } else {
 		ok = false;
