@@ -618,7 +618,6 @@ plugins/sudoers/b64_encode.c
 plugins/sudoers/boottime.c
 plugins/sudoers/bsm_audit.c
 plugins/sudoers/bsm_audit.h
-plugins/sudoers/callbacks.c
 plugins/sudoers/canon_path.c
 plugins/sudoers/check.c
 plugins/sudoers/check_aliases.c
@@ -1169,6 +1168,7 @@ plugins/sudoers/sudoers.c
 plugins/sudoers/sudoers.exp
 plugins/sudoers/sudoers.h
 plugins/sudoers/sudoers.in
+plugins/sudoers/sudoers_cb.c
 plugins/sudoers/sudoers_ctx_free.c
 plugins/sudoers/sudoers_debug.c
 plugins/sudoers/sudoers_debug.h

@@ -431,7 +431,7 @@ void register_env_file(void * (*ef_open)(const char *), void (*ef_close)(void *)
 /* env_pattern.c */
 bool matches_env_pattern(const char *pattern, const char *var, bool *full_match);
 
-/* callbacks.c */
+/* sudoers_cb.c */
 void set_callbacks(void);
 bool cb_log_input(struct sudoers_context *ctx, const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
 bool cb_log_output(struct sudoers_context *ctx, const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
