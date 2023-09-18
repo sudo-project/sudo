@@ -1191,6 +1191,7 @@ plugins/sudoers/tsgetgrpw.c
 plugins/sudoers/tsgetgrpw.h
 plugins/sudoers/unesc_str.c
 plugins/sudoers/visudo.c
+plugins/sudoers/visudo_cb.c
 plugins/system_group/Makefile.in
 plugins/system_group/system_group.c
 plugins/system_group/system_group.exp

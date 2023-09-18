@@ -197,7 +197,7 @@ SUDOERS_IOBJS = $(SUDOERS_OBJS:.lo=.i)
 
 VISUDO_OBJS = check_aliases.o editor.lo find_path.lo gc.lo goodpath.lo \
 	      locale.lo sethost.lo stubs.o sudo_printf.o sudoers_ctx_free.lo \
-	      visudo.o
+	      visudo.o visudo_cb.o
 
 VISUDO_IOBJS = sudo_printf.i visudo.i
 
@@ -3471,3 +3471,27 @@ visudo.i: $(srcdir)/visudo.c $(devdir)/def_data.h $(devdir)/gram.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 visudo.plog: visudo.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/visudo.c --i-file $< --output-file $@
+visudo_cb.o: $(srcdir)/visudo_cb.c $(devdir)/def_data.h \
+             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+             $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+             $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+             $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
+             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+             $(top_builddir)/pathnames.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/visudo_cb.c
+visudo_cb.i: $(srcdir)/visudo_cb.c $(devdir)/def_data.h \
+             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+             $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+             $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+             $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
+             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+             $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+visudo_cb.plog: visudo_cb.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/visudo_cb.c --i-file $< --output-file $@
