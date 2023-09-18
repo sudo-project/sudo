@@ -683,6 +683,7 @@ plugins/sudoers/match_command.c
 plugins/sudoers/match_digest.c
 plugins/sudoers/mkdefaults
 plugins/sudoers/parse.h
+plugins/sudoers/parser_warnx.c
 plugins/sudoers/parse_ldif.c
 plugins/sudoers/pivot.c
 plugins/sudoers/pivot.h

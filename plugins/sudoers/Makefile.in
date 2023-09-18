@@ -177,9 +177,9 @@ AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 LIBPARSESUDOERS_OBJS = alias.lo b64_decode.lo canon_path.lo defaults.lo \
 		       digestname.lo exptilde.lo filedigest.lo gentime.lo \
 		       gram.lo match.lo match_addr.lo match_command.lo \
-		       match_digest.lo pwutil.lo pwutil_impl.lo \
-		       redblack.lo strlist.lo sudoers_debug.lo timeout.lo \
-		       timestr.lo toke.lo toke_util.lo
+		       match_digest.lo parser_warnx.lo pwutil.lo \
+		       pwutil_impl.lo redblack.lo strlist.lo sudoers_debug.lo \
+		       timeout.lo timestr.lo toke.lo toke_util.lo
 
 LIBPARSESUDOERS_IOBJS = $(LIBPARSESUDOERS_OBJS:.lo=.i) passwd.i
 
@@ -2509,6 +2509,30 @@ parse_ldif.i: $(srcdir)/parse_ldif.c $(devdir)/def_data.h $(devdir)/gram.h \
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 parse_ldif.plog: parse_ldif.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/parse_ldif.c --i-file $< --output-file $@
+parser_warnx.lo: $(srcdir)/parser_warnx.c $(devdir)/def_data.h \
+                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                 $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                 $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                 $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                 $(top_builddir)/pathnames.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/parser_warnx.c
+parser_warnx.i: $(srcdir)/parser_warnx.c $(devdir)/def_data.h \
+                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                 $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
+                 $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
+                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
+                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                 $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
+                 $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                 $(top_builddir)/pathnames.h
+	$(CC) -E -o $@ $(CPPFLAGS) $<
+parser_warnx.plog: parser_warnx.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/parser_warnx.c --i-file $< --output-file $@
 passwd.lo: $(authdir)/passwd.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
            $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
            $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \

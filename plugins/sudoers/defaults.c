@@ -73,7 +73,6 @@ static bool store_timespec(const char *str, struct sudo_defs_types *def);
 static bool store_rlimit(const char *str, struct sudo_defs_types *def);
 static bool list_op(const char *str, size_t, struct list_members *list, enum list_ops op);
 static bool valid_path(const struct sudoers_context *ctx, struct sudo_defs_types *def, const char *val, const char *file, int line, int column, bool quiet);
-static bool defaults_warnx(const struct sudoers_context *ctx, const char *file, int line, int column, bool quiet, const char * restrict fmt, ...) sudo_printflike(6, 7);
 
 /*
  * Table describing compile-time and run-time options.
@@ -170,6 +169,21 @@ dump_defaults(void)
 	}
     }
     debug_return;
+}
+
+static bool
+defaults_warnx(const struct sudoers_context *ctx, const char *file, int line,
+    int column, bool quiet, const char * restrict fmt, ...)
+{
+    va_list ap;
+    bool ret;
+    debug_decl(defaults_warnx, SUDOERS_DEBUG_DEFAULTS);
+
+    va_start(ap, fmt);
+    ret = parser_vwarnx(ctx, file, line, column, true, quiet, fmt, ap);
+    va_end(ap);
+
+    debug_return_bool(ret);
 }
 
 /*
@@ -1261,42 +1275,4 @@ cb_passprompt_regex(struct sudoers_context *ctx, const char *file,
     }
 
     debug_return_bool(true);
-}
-
-static bool
-defaults_warnx(const struct sudoers_context *ctx, const char *file, int line,
-    int column, bool quiet, const char * restrict fmt, ...)
-{
-    bool ret = true;
-    va_list ap;
-    debug_decl(defaults_warnx, SUDOERS_DEBUG_DEFAULTS);
-
-    if (sudoers_error_hook != NULL) {
-	va_start(ap, fmt);
-	ret = sudoers_error_hook(ctx, file, line, column, fmt, ap);
-	va_end(ap);
-    }
-
-    if (!quiet) {
-	int oldlocale;
-	char *errstr;
-
-	sudoers_setlocale(SUDOERS_LOCALE_USER, &oldlocale);
-	va_start(ap, fmt);
-	if (vasprintf(&errstr, _(fmt), ap) == -1) {
-	    errstr = NULL;
-	    ret = false;
-	} else if (line > 0) {
-	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s:%d:%d: %s\n"), file,
-		line, column, errstr);
-	} else {
-	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s: %s\n"), file, errstr);
-	}
-	va_end(ap);
-	sudoers_setlocale(oldlocale, NULL);
-
-	free(errstr);
-    }
-
-    debug_return_bool(ret);
 }

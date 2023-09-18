@@ -499,4 +499,8 @@ bool sudoers_format_userspec(struct sudo_lbuf *lbuf, const struct sudoers_parse_
 bool sudoers_format_userspecs(struct sudo_lbuf *lbuf, const struct sudoers_parse_tree *parse_tree, const char *separator, bool expand_aliases, bool flush);
 bool sudoers_format_default_line(struct sudo_lbuf *lbuf, const struct sudoers_parse_tree *parse_tree, const struct defaults *d, struct defaults **next, bool expand_aliases);
 
+/* parser_warnx.c */
+bool parser_warnx(const struct sudoers_context *ctx, const char *file, int line, int column, bool strict, bool quiet, const char * restrict fmt, ...) sudo_printflike(7, 8);
+bool parser_vwarnx(const struct sudoers_context *ctx, const char *file, int line, int column, bool strict, bool quiet, const char * restrict fmt, va_list ap) sudo_printflike(7, 0);
+
 #endif /* SUDOERS_PARSE_H */
