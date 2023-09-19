@@ -1174,10 +1174,6 @@
 /* The max number of chars per log file line (for line wrapping). */
 #undef MAXLOGFILELEN
 
-/* Define to the max length of a uid_t in string context (excluding the NUL).
-   */
-#undef MAX_UID_T_LEN
-
 /* Define to 1 if resolv.h must be included to get the 'inet_ntop' or
    'inet_pton' function prototypes. */
 #undef NEED_RESOLV_H

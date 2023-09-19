@@ -2501,7 +2501,6 @@ AC_CHECK_TYPES([struct in6_addr], [], [], [#include <sys/types.h>
 AC_CHECK_TYPES(socklen_t, [], [], [
 AC_INCLUDES_DEFAULT
 #include <sys/socket.h>])
-SUDO_UID_T_LEN
 SUDO_SOCK_SA_LEN
 SUDO_SOCK_SIN_LEN
 AC_CHECK_SIZEOF([long])

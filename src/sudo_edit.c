@@ -387,7 +387,7 @@ selinux_fmt_sudo_user(const struct sudo_cred *user_cred)
     int i, len;
     debug_decl(selinux_fmt_sudo_user, SUDO_DEBUG_EDIT);
 
-    user_size = (MAX_UID_T_LEN + 1) * (2 + user_cred->ngroups);
+    user_size = (STRLEN_MAX_UNSIGNED(uid_t) + 1) * (2 + user_cred->ngroups);
     if ((user_str = malloc(user_size)) == NULL)
 	debug_return_ptr(NULL);
 

@@ -296,7 +296,7 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
     const char *runas_uid_str = "0", *runas_euid_str = NULL;
     const char *runas_gid_str = "0", *runas_egid_str = NULL;
     const char *errstr;
-    char idbuf[MAX_UID_T_LEN + 2];
+    char idbuf[STRLEN_MAX_UNSIGNED(uid_t) + 2];
     char * const *cur;
     struct passwd *pw;
     struct group *gr;

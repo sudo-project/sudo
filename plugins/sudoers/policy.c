@@ -810,7 +810,7 @@ sudoers_policy_store_result(struct sudoers_context *ctx, bool accepted,
 
 	/* We reserve an extra spot in the list for the effective gid. */
 	glsize = sizeof("runas_groups=") - 1 +
-	    (((size_t)gidlist->ngids + 1) * (MAX_UID_T_LEN + 1));
+	    (((size_t)gidlist->ngids + 1) * (STRLEN_MAX_UNSIGNED(gid_t) + 1));
 	gid_list = malloc(glsize);
 	if (gid_list == NULL) {
 	    sudo_gidlist_delref(gidlist);

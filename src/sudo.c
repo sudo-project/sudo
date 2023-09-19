@@ -479,7 +479,8 @@ get_user_groups(const char *user, struct sudo_cred *cred)
     /*
      * Format group list as a comma-separated string of gids.
      */
-    glsize = sizeof("groups=") - 1 + ((size_t)cred->ngroups * (MAX_UID_T_LEN + 1));
+    glsize = sizeof("groups=") - 1 +
+	((size_t)cred->ngroups * (STRLEN_MAX_UNSIGNED(gid_t) + 1));
     if ((gid_list = malloc(glsize)) == NULL)
 	goto done;
     memcpy(gid_list, "groups=", sizeof("groups=") - 1);

@@ -455,39 +455,6 @@ AC_DEFUN([SUDO_SOCK_SIN_LEN], [
 )
 
 dnl
-dnl check for max length of uid_t in string representation.
-dnl we can't really trust UID_MAX or MAXUID since they may exist
-dnl only for backward compatibility.
-dnl
-AC_DEFUN([SUDO_UID_T_LEN],
-[AC_REQUIRE([AC_TYPE_UID_T])
-AC_CACHE_CHECK([max length of uid_t], sudo_cv_uid_t_len, [
-rm -f conftestdata
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <stdio.h>
-#include <string.h>
-#include <pwd.h>
-#include <limits.h>
-#include <sys/types.h>
-int main() {
-  FILE *f;
-  char b[1024];
-  uid_t u = (uid_t) -1;
-
-  if ((f = fopen("conftestdata", "w")) == NULL)
-    return(1);
-
-  (void) sprintf(b, "%lu", (unsigned long) u);
-  (void) fprintf(f, "%d\n", (int)strlen(b));
-  (void) fclose(f);
-  return(0);
-}]])], [sudo_cv_uid_t_len=`cat conftestdata`], [sudo_cv_uid_t_len=10], [sudo_cv_uid_t_len=10])
-])
-rm -f conftestdata
-AC_DEFINE_UNQUOTED(MAX_UID_T_LEN, $sudo_cv_uid_t_len, [Define to the max length of a uid_t in string context (excluding the NUL).])
-])
-
-dnl
 dnl There are three different utmp variants we need to check for.
 dnl SUDO_CHECK_UTMP_MEMBERS(utmp_type)
 dnl

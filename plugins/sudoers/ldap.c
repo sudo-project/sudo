@@ -804,7 +804,8 @@ done:
 static char *
 sudo_ldap_build_pass1(struct sudoers_context *ctx, LDAP *ld, struct passwd *pw)
 {
-    char timebuffer[TIMEFILTER_LENGTH + 1], idbuf[MAX_UID_T_LEN + 1];
+    char idbuf[STRLEN_MAX_UNSIGNED(uid_t) + 1];
+    char timebuffer[TIMEFILTER_LENGTH + 1];
     char *buf, *notbuf;
     struct ldap_netgroup_list netgroups;
     struct ldap_netgroup *ng = NULL;
@@ -835,14 +836,14 @@ sudo_ldap_build_pass1(struct sudoers_context *ctx, LDAP *ld, struct passwd *pw)
 
     /* Add space for username and uid, including the negated versions. */
     sz += ((sizeof("(sudoUser=)(sudoUser=#)") - 1 +
-	sudo_ldap_value_len(pw->pw_name) + MAX_UID_T_LEN) * 2) + 2;
+	sudo_ldap_value_len(pw->pw_name) + sizeof(idbuf) - 1) * 2) + 2;
 
     /* Add space for primary and supplementary groups and gids */
     if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
 	sz += ((sizeof("(sudoUser=%)") - 1 +
 	    sudo_ldap_value_len(grp->gr_name)) * 2) + 1;
     }
-    sz += ((sizeof("(sudoUser=%#)") - 1 + MAX_UID_T_LEN) * 2) + 1;
+    sz += ((sizeof("(sudoUser=%#)") - 1 + sizeof(idbuf) - 1) * 2) + 1;
     if ((grlist = sudo_get_grlist(pw)) != NULL) {
 	for (i = 0; i < grlist->ngroups; i++) {
 	    if (grp != NULL && strcasecmp(grlist->groups[i], grp->gr_name) == 0)
@@ -855,7 +856,7 @@ sudo_ldap_build_pass1(struct sudoers_context *ctx, LDAP *ld, struct passwd *pw)
 	for (i = 0; i < gidlist->ngids; i++) {
 	    if (pw->pw_gid == gidlist->gids[i])
 		continue;
-	    sz += ((sizeof("(sudoUser=%#)") - 1 + MAX_UID_T_LEN) * 2) + 1;
+	    sz += ((sizeof("(sudoUser=%#)") - 1 + sizeof(idbuf) - 1) * 2) + 1;
 	}
     }
 

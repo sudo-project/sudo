@@ -854,7 +854,7 @@ bool
 rebuild_env(const struct sudoers_context *ctx)
 {
     char **ep, *cp, *ps1;
-    char idbuf[MAX_UID_T_LEN + 1];
+    char idbuf[STRLEN_MAX_UNSIGNED(uid_t) + 1];
     unsigned int didvar;
     bool reset_home = false;
     int len;

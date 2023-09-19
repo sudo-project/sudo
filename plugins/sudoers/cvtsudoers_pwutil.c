@@ -82,7 +82,7 @@ do {							\
 struct cache_item *
 cvtsudoers_make_pwitem(uid_t uid, const char *name)
 {
-    char *cp, uidstr[MAX_UID_T_LEN + 2];
+    char *cp, uidstr[STRLEN_MAX_UNSIGNED(uid_t) + 2];
     size_t nsize, psize, gsize, dsize, ssize, total;
 #ifdef HAVE_LOGIN_CAP_H
     size_t csize;
@@ -191,7 +191,7 @@ cvtsudoers_make_pwitem(uid_t uid, const char *name)
 struct cache_item *
 cvtsudoers_make_gritem(gid_t gid, const char *name)
 {
-    char *cp, gidstr[MAX_UID_T_LEN + 2];
+    char *cp, gidstr[STRLEN_MAX_UNSIGNED(gid_t) + 2];
     size_t nsize, psize, total, len, nmem = 0;
     struct cache_item_gr *gritem;
     struct group gr, *newgr;

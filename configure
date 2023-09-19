@@ -20843,85 +20843,6 @@ printf "%s\n" "#define HAVE_SOCKLEN_T 1" >>confdefs.h
 
 fi
 
-ac_fn_c_check_type "$LINENO" "uid_t" "ac_cv_type_uid_t" "$ac_includes_default"
-if test "x$ac_cv_type_uid_t" = xyes
-then :
-
-else case e in #(
-  e)
-printf "%s\n" "#define uid_t int" >>confdefs.h
- ;;
-esac
-fi
-
-ac_fn_c_check_type "$LINENO" "gid_t" "ac_cv_type_gid_t" "$ac_includes_default"
-if test "x$ac_cv_type_gid_t" = xyes
-then :
-
-else case e in #(
-  e)
-printf "%s\n" "#define gid_t int" >>confdefs.h
- ;;
-esac
-fi
-
-
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking max length of uid_t" >&5
-printf %s "checking max length of uid_t... " >&6; }
-if test ${sudo_cv_uid_t_len+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e)
-rm -f conftestdata
-if test "$cross_compiling" = yes
-then :
-  sudo_cv_uid_t_len=10
-else case e in #(
-  e) cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#include <stdio.h>
-#include <string.h>
-#include <pwd.h>
-#include <limits.h>
-#include <sys/types.h>
-int main() {
-  FILE *f;
-  char b[1024];
-  uid_t u = (uid_t) -1;
-
-  if ((f = fopen("conftestdata", "w")) == NULL)
-    return(1);
-
-  (void) sprintf(b, "%lu", (unsigned long) u);
-  (void) fprintf(f, "%d\n", (int)strlen(b));
-  (void) fclose(f);
-  return(0);
-}
-_ACEOF
-if ac_fn_c_try_run "$LINENO"
-then :
-  sudo_cv_uid_t_len=`cat conftestdata`
-else case e in #(
-  e) sudo_cv_uid_t_len=10 ;;
-esac
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext ;;
-esac
-fi
-
- ;;
-esac
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_uid_t_len" >&5
-printf "%s\n" "$sudo_cv_uid_t_len" >&6; }
-rm -f conftestdata
-
-printf "%s\n" "#define MAX_UID_T_LEN $sudo_cv_uid_t_len" >>confdefs.h
-
-
 
     ac_fn_c_check_member "$LINENO" "struct sockaddr" "sa_len" "ac_cv_member_struct_sockaddr_sa_len" "
 #	  include <sys/types.h>
@@ -21945,6 +21866,28 @@ fi
     ac_config_files="$ac_config_files $PYTHON_PLUGIN_SRC/Makefile"
 
 
+fi
+
+ac_fn_c_check_type "$LINENO" "uid_t" "ac_cv_type_uid_t" "$ac_includes_default"
+if test "x$ac_cv_type_uid_t" = xyes
+then :
+
+else case e in #(
+  e)
+printf "%s\n" "#define uid_t int" >>confdefs.h
+ ;;
+esac
+fi
+
+ac_fn_c_check_type "$LINENO" "gid_t" "ac_cv_type_gid_t" "$ac_includes_default"
+if test "x$ac_cv_type_gid_t" = xyes
+then :
+
+else case e in #(
+  e)
+printf "%s\n" "#define gid_t int" >>confdefs.h
+ ;;
+esac
 fi
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking type of array argument to getgroups" >&5
