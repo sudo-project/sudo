@@ -228,7 +228,7 @@ display_cmndspec_long(const struct sudoers_parse_tree *parse_tree,
 	if (cs->runcwd != NULL)
 	    sudo_lbuf_append(lbuf, "    Cwd: %s\n", cs->runcwd);
 	if (cs->timeout > 0) {
-	    char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
+	    char numbuf[STRLEN_MAX_SIGNED(int) + 1];
 	    (void)snprintf(numbuf, sizeof(numbuf), "%d", cs->timeout);
 	    sudo_lbuf_append(lbuf, "    Timeout: %s\n", numbuf);
 	}

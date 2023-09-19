@@ -318,7 +318,7 @@ sudo_json_add_value_int(struct json_container *jsonc, const char *name,
     struct json_value *value, bool as_object)
 {
     struct json_container saved_container = *jsonc;
-    char numbuf[(((sizeof(long long) * 8) + 2) / 3) + 2];
+    char numbuf[STRLEN_MAX_SIGNED(long long) + 1];
     debug_decl(sudo_json_add_value, SUDO_DEBUG_UTIL);
 
     /* Add comma if we are continuing an object/array. */

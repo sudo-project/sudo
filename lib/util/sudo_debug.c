@@ -112,7 +112,7 @@ struct sudo_debug_instance {
 static struct sudo_debug_instance *sudo_debug_instances[SUDO_DEBUG_INSTANCE_MAX];
 static int sudo_debug_last_instance = -1;
 
-static char sudo_debug_pidstr[(((sizeof(int) * 8) + 2) / 3) + 3];
+static char sudo_debug_pidstr[STRLEN_MAX_SIGNED(int) + 3];
 static size_t sudo_debug_pidlen;
 
 #define round_nfds(_n)	(((_n) + (4 * NBBY) - 1) & ~((4 * NBBY) - 1))

@@ -255,7 +255,7 @@ sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
     if (cs->runcwd != NULL && FIELD_CHANGED(prev_cs, cs, runcwd))
 	sudo_lbuf_append(lbuf, "CWD=%s ", cs->runcwd);
     if (cs->timeout > 0 && FIELD_CHANGED(prev_cs, cs, timeout)) {
-	char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
+	char numbuf[STRLEN_MAX_SIGNED(int) + 1];
 	(void)snprintf(numbuf, sizeof(numbuf), "%d", cs->timeout);
 	sudo_lbuf_append(lbuf, "TIMEOUT=%s ", numbuf);
     }

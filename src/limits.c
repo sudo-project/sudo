@@ -681,8 +681,8 @@ serialize_rlimits(char **info, size_t info_max)
     for (idx = 0; idx < nitems(saved_limits); idx++) {
 	const struct saved_limit *lim = &saved_limits[idx];
 	const struct rlimit *rl = &lim->oldlimit;
-	char curlim[(((sizeof(long long) * 8) + 2) / 3) + 2];
-	char maxlim[(((sizeof(long long) * 8) + 2) / 3) + 2];
+	char curlim[STRLEN_MAX_UNSIGNED(unsigned long long) + 1];
+	char maxlim[STRLEN_MAX_UNSIGNED(unsigned long long) + 1];
 
 	if (!lim->saved)
 	    continue;

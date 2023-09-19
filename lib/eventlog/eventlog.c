@@ -84,7 +84,7 @@ new_logline(int event_type, int flags, struct eventlog_args *args,
     const struct eventlog_config *evl_conf = eventlog_getconf();
     const char *iolog_file;
     const char *tty, *tsid = NULL;
-    char exit_str[(((sizeof(int) * 8) + 2) / 3) + 2];
+    char exit_str[STRLEN_MAX_SIGNED(int) + 1];
     char sessid[7], offsetstr[64] = "";
     size_t i;
     debug_decl(new_logline, SUDO_DEBUG_UTIL);

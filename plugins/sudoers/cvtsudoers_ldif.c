@@ -658,7 +658,7 @@ print_userspec_ldif(FILE *fp, const struct sudoers_parse_tree *parse_tree,
 	    print_cmndspec_ldif(fp, parse_tree, cs, &next, &priv->defaults);
 
 	    if (conf->sudo_order != 0) {
-		char numbuf[(((sizeof(conf->sudo_order) * 8) + 2) / 3) + 2];
+		char numbuf[STRLEN_MAX_UNSIGNED(conf->sudo_order) + 1];
 		if (conf->order_max != 0 && conf->sudo_order > conf->order_max) {
 		    sudo_fatalx(U_("too many sudoers entries, maximum %u"),
 			conf->order_padding);

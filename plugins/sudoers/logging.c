@@ -399,7 +399,7 @@ log_failure(const struct sudoers_context *ctx, unsigned int status,
 static char *
 fmt_authfail_message(unsigned int tries)
 {
-    char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
+    char numbuf[STRLEN_MAX_UNSIGNED(unsigned int) + 1];
     char *dst, *dst_end, *ret = NULL;
     const char *src;
     size_t len;

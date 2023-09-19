@@ -88,7 +88,7 @@ char *
 iolog_parse_delay(const char *cp, struct timespec *delay,
     const char *decimal_point)
 {
-    char numbuf[(((sizeof(long long) * 8) + 2) / 3) + 2];
+    char numbuf[STRLEN_MAX_SIGNED(long long) + 1];
     const char *errstr, *ep;
     long long llval;
     size_t len;

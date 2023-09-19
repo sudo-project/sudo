@@ -136,6 +136,10 @@
 #define sudo_isset(_a, _i)	((_a)[(_i) / NBBY] & (1<<((_i) % NBBY)))
 #define sudo_isclr(_a, _i)	(((_a)[(_i) / NBBY] & (1<<((_i) % NBBY))) == 0)
 
+/* Macros to determine the length of a type in string form. */
+#define STRLEN_MAX_UNSIGNED(t)	(((sizeof(t) * 8 * 1233) >> 12) + 1)
+#define STRLEN_MAX_SIGNED(t)	(STRLEN_MAX_UNSIGNED(t) + ((sizeof(t) == 8) ? 0 : 1))
+
 /* sudo_parseln() flags */
 #define PARSELN_COMM_BOL	0x01	/* comments only at beginning of line */
 #define PARSELN_CONT_IGN	0x02	/* ignore line continuation char */
