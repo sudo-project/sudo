@@ -725,7 +725,7 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
 	    sudoers_ctx.runas.argc++;
 	}
 
-#if defined(_AIX) || (defined(__linux__) && !defined(HAVE_PAM))
+#ifdef _PATH_ENVIRONMENT
 	/* Insert system-wide environment variables. */
 	if (!read_env_file(&sudoers_ctx, _PATH_ENVIRONMENT, true, false))
 	    sudo_warn("%s", _PATH_ENVIRONMENT);

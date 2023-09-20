@@ -911,7 +911,7 @@ rebuild_env(const struct sudoers_context *ctx)
 		}
 	    }
 #endif /* HAVE_LOGIN_CAP_H */
-#if defined(_AIX) || (defined(__linux__) && !defined(HAVE_PAM))
+#ifdef _PATH_ENVIRONMENT
 	    /* Insert system-wide environment variables. */
 	    if (!read_env_file(ctx, _PATH_ENVIRONMENT, true, false))
 		sudo_warn("%s", _PATH_ENVIRONMENT);
