@@ -2507,6 +2507,9 @@ AC_CHECK_SIZEOF([long])
 AC_CHECK_SIZEOF([long long])
 AC_CHECK_SIZEOF([id_t])
 AC_CHECK_SIZEOF([time_t])
+AC_CHECK_SIZEOF([uid_t])
+# sudo current assumes uid_t can be cast to unsigned int without problems
+AS_IF([test $ac_cv_sizeof_uid_t -gt 4], [AC_MSG_ERROR([sudo does not support systems where uid_t is larger than 32-bit])])
 AS_IF([test X"$ac_cv_header_utmps_h" = X"yes"], [
     SUDO_CHECK_UTMP_MEMBERS([utmps])
 ], [test X"$ac_cv_header_utmpx_h" = X"yes"], [

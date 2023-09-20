@@ -1306,6 +1306,9 @@
 /* The size of 'time_t', as computed by sizeof. */
 #undef SIZEOF_TIME_T
 
+/* The size of 'uid_t', as computed by sizeof. */
+#undef SIZEOF_UID_T
+
 /* Define to 1 to compile the sudoers plugin statically into the sudo binary.
    */
 #undef STATIC_SUDOERS_PLUGIN
