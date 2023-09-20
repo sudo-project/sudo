@@ -1,6 +1,15 @@
 Notes on upgrading from an older release
 ========================================
 
+ * Upgrading from a version prior to 1.9.15:
+
+    The sudoers plugin now uses a time stamp path name that is based
+    on the user-ID instead of the user name.  For example, a time
+    stamp file that was /var/run/sudo/ts/root in sudo 1.9.14 will
+    now be /var/run/sudo/ts/0.  The lecture flag file name is now
+    also based on the user-ID, which will result in users receiving
+    the sudo lecture again on upgrade to sudo 1.9.15.
+
  * Upgrading from a version prior to 1.9.14:
 
    Sudo now runs commands in a new pseudo-terminal by default.  This
