@@ -33,6 +33,32 @@
 #include "sudoers.h"
 #include "sudo_iolog.h"
 
+/*
+ * Like strlcpy(3) but replaces '/' with '_'.
+ */
+static size_t
+strlcpy_no_slash(char *dst, const char *src, size_t size)
+{
+    size_t len = 0;
+    char ch;
+    debug_decl(strlcpy_no_slash, SUDOERS_DEBUG_UTIL);
+
+    while ((ch = *src++) != '\0') {
+	if (size > 1) {
+	    /* Replace '/' with '_' */
+	    if (ch == '/')
+		ch = '_';
+	    *dst++ = ch;
+	    size--;
+	}
+	len++;
+    }
+    if (size > 0)
+	*dst = '\0';
+
+    debug_return_size_t(len);
+}
+
 static size_t
 fill_seq(char *str, size_t strsize, void *v)
 {
@@ -64,7 +90,7 @@ fill_user(char *str, size_t strsize, void *v)
 {
     struct sudoers_context *ctx = v;
     debug_decl(fill_user, SUDOERS_DEBUG_UTIL);
-    debug_return_size_t(strlcpy(str, ctx->user.name, strsize));
+    debug_return_size_t(strlcpy_no_slash(str, ctx->user.name, strsize));
 }
 
 static size_t
@@ -76,7 +102,7 @@ fill_group(char *str, size_t strsize, void *v)
     debug_decl(fill_group, SUDOERS_DEBUG_UTIL);
 
     if ((grp = sudo_getgrgid(ctx->user.gid)) != NULL) {
-	len = strlcpy(str, grp->gr_name, strsize);
+	len = strlcpy_no_slash(str, grp->gr_name, strsize);
 	sudo_gr_delref(grp);
     } else {
 	len = (size_t)snprintf(str, strsize, "#%u", (unsigned int)ctx->user.gid);
@@ -89,7 +115,7 @@ fill_runas_user(char *str, size_t strsize, void *v)
 {
     struct sudoers_context *ctx = v;
     debug_decl(fill_runas_user, SUDOERS_DEBUG_UTIL);
-    debug_return_size_t(strlcpy(str, ctx->runas.pw->pw_name, strsize));
+    debug_return_size_t(strlcpy_no_slash(str, ctx->runas.pw->pw_name, strsize));
 }
 
 static size_t
@@ -101,10 +127,10 @@ fill_runas_group(char *str, size_t strsize, void *v)
     debug_decl(fill_runas_group, SUDOERS_DEBUG_UTIL);
 
     if (ctx->runas.gr != NULL) {
-	len = strlcpy(str, ctx->runas.gr->gr_name, strsize);
+	len = strlcpy_no_slash(str, ctx->runas.gr->gr_name, strsize);
     } else {
 	if ((grp = sudo_getgrgid(ctx->runas.pw->pw_gid)) != NULL) {
-	    len = strlcpy(str, grp->gr_name, strsize);
+	    len = strlcpy_no_slash(str, grp->gr_name, strsize);
 	    sudo_gr_delref(grp);
 	} else {
 	    len = (size_t)snprintf(str, strsize, "#%u",
@@ -119,7 +145,7 @@ fill_hostname(char *str, size_t strsize, void *v)
 {
     struct sudoers_context *ctx = v;
     debug_decl(fill_hostname, SUDOERS_DEBUG_UTIL);
-    debug_return_size_t(strlcpy(str, ctx->user.shost, strsize));
+    debug_return_size_t(strlcpy_no_slash(str, ctx->user.shost, strsize));
 }
 
 static size_t
@@ -127,7 +153,7 @@ fill_command(char *str, size_t strsize, void *v)
 {
     struct sudoers_context *ctx = v;
     debug_decl(fill_command, SUDOERS_DEBUG_UTIL);
-    debug_return_size_t(strlcpy(str, ctx->user.cmnd_base, strsize));
+    debug_return_size_t(strlcpy_no_slash(str, ctx->user.cmnd_base, strsize));
 }
 
 /* Note: "seq" must be first in the list. */

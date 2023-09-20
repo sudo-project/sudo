@@ -1159,8 +1159,8 @@ expand_include(const char *src, const char *host)
 {
     const char *path = sudoers_search_path ? sudoers_search_path : sudoers;
     const char *path_end = path + strlen(path);
+    char *dst, *dst0 = NULL, *dynamic_host = NULL;
     const char *cp, *ep;
-    char *dst0, *dst;
     size_t dst_size, src_len;
     size_t nhost = 0;
     debug_decl(expand_include, SUDOERS_DEBUG_PARSER);
@@ -1186,18 +1186,35 @@ expand_include(const char *src, const char *host)
 	cp++;
     }
 
+    /* Check for a path separator in the host name, replace with '_'. */
+    if (nhost != 0 && strchr(host, '/') != NULL) {
+	dynamic_host = malloc(strlen(host) + 1);
+	if (dynamic_host == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto bad;
+	}
+	for (dst = dynamic_host; *host != '\0'; host++) {
+	    if (*host == '/') {
+		*dst++ = '_';
+		continue;
+	    }
+	    *dst++ = *host;
+	}
+	*dst = '\0';
+	host = dynamic_host;
+    }
+
     if (*src == '/') {
 	/* Fully-qualified path, make a copy and expand %h escapes. */
 	dst_size = src_len + (nhost * strlen(host)) - (nhost * 2) + 1;
 	dst0 = sudo_rcstr_alloc(dst_size - 1);
 	if (dst0 == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    sudoerserror(NULL);
-	    debug_return_str(NULL);
+	    goto bad;
 	}
 	if (strlcpy_expand_host(dst0, src, host, dst_size) >= dst_size)
 	    goto oflow;
-	debug_return_str(dst0);
+	goto done;
     }
 
     /*
@@ -1220,8 +1237,7 @@ expand_include(const char *src, const char *host)
     dst = dst0 = sudo_rcstr_alloc(dst_size - 1);
     if (dst0 == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	sudoerserror(NULL);
-	debug_return_str(NULL);
+	goto bad;
     }
     for (cp = sudo_strsplit(path, path_end, ":", &ep); cp != NULL;
 	    cp = sudo_strsplit(NULL, path_end, ":", &ep)) {
@@ -1253,10 +1269,14 @@ expand_include(const char *src, const char *host)
     }
     *dst = '\0';
 
+done:
+    free(dynamic_host);
     debug_return_str(dst0);
 oflow:
     sudo_warnx(U_("internal error, %s overflow"), __func__);
+bad:
     sudoerserror(NULL);
+    free(dynamic_host);
     free(dst0);
     debug_return_str(NULL);
 }

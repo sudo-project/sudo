@@ -2483,6 +2483,11 @@ will cause
 \fBsudo\fR
 to include the file
 \fI/etc/sudoers.xerxes\fR.
+Any path name separator characters
+(\(oq/\(cq)
+present in the host name will be replaced with an underbar
+(\(oq_\(cq)
+during expansion.
 .PP
 The
 \fI@includedir\fR
@@ -4654,6 +4659,12 @@ To include a literal
 character, the string
 \(oq%%\(cq
 should be used.
+.sp
+Any path name separator characters
+(\(oq/\(cq)
+present in the user, group or host name will be replaced with an underbar
+(\(oq_\(cq)
+during expansion.
 .RE
 .TP 18n
 iolog_file

@@ -2353,6 +2353,11 @@ will cause
 .Nm sudo
 to include the file
 .Pa /etc/sudoers.xerxes .
+Any path name separator characters
+.Pq Ql /
+present in the host name will be replaced with an underbar 
+.Pq Ql _
+during expansion.
 .Pp
 The
 .Em @includedir
@@ -4400,6 +4405,12 @@ To include a literal
 character, the string
 .Ql %%
 should be used.
+.Pp
+Any path name separator characters
+.Pq Ql /
+present in the user, group or host name will be replaced with an underbar 
+.Pq Ql _
+during expansion.
 .It iolog_file
 The path name, relative to
 .Em iolog_dir ,
