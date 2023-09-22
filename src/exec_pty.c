@@ -1322,10 +1322,8 @@ exec_pty(struct command_details *details,
     /* Tell the monitor to continue now that the follower is closed. */
     cstat->type = CMD_SIGNO;
     cstat->val = 0;
-    while (send(sv[0], cstat, sizeof(*cstat), 0) == -1) {
-	if (errno != EINTR && errno != EAGAIN)
-	    sudo_fatal("%s", U_("unable to send message to monitor process"));
-    }
+    if (send(sv[0], cstat, sizeof(*cstat), 0) == -1)
+	sudo_fatal("%s", U_("unable to send message to monitor process"));
 
     /* Close the other end of the stdin/stdout/stderr pipes and socketpair. */
     if (io_pipe[STDIN_FILENO][0] != -1)

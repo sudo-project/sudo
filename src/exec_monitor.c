@@ -378,12 +378,10 @@ exec_cmnd_pty(struct command_details *details, sigset_t *mask,
 
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: waiting for controlling tty",
 	    __func__);
-	while (recv(errfd, &ch, sizeof(ch), 0) == -1) {
-	    if (errno != EINTR) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-		    "%s: unable to receive message from parent", __func__);
-		debug_return;
-	    }
+	if (recv(errfd, &ch, sizeof(ch), 0) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		"%s: unable to receive message from parent", __func__);
+	    debug_return;
 	}
 	if (tcgetpgrp(io_fds[SFD_FOLLOWER]) == self) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: got controlling tty",
@@ -595,11 +593,9 @@ exec_monitor(struct command_details *details, sigset_t *oset,
      * Before forking, wait for the main sudo process to tell us to go.
      * Avoids race conditions when the command exits quickly.
      */
-    while (recv(backchannel, &cstat, sizeof(cstat), MSG_WAITALL) == -1) {
-	if (errno != EINTR && errno != EAGAIN) {
-	    sudo_warn("%s", U_("unable to receive message from parent"));
-	    goto bad;
-	}
+    if (recv(backchannel, &cstat, sizeof(cstat), MSG_WAITALL) == -1) {
+	sudo_warn("%s", U_("unable to receive message from parent"));
+	goto bad;
     }
 
 #ifdef HAVE_SELINUX
@@ -676,8 +672,10 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 		__func__, (int)mc.cmnd_pgrp);
 	}
 	/* Tell the child to go ahead now that it is the foreground pgrp. */
-	while (send(errsock[0], "", 1, 0) == -1 && errno == EINTR)
-	    continue;
+	if (send(errsock[0], "", 1, 0) == -1) {
+	    sudo_warn(U_("unable to execute %s"), details->command);
+	    terminate_command(mc.cmnd_pid, true);
+	}
     }
 
     /*
