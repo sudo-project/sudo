@@ -108,7 +108,7 @@ check_user(struct sudoers_context *ctx, unsigned int validated,
      */
     if (ISSET(ctx->mode, MODE_POLICY_INTERCEPTED)) {
 	if (!def_intercept_authenticate) {
-	    debug_return_int(true);
+	    debug_return_int(AUTH_SUCCESS);
 	}
     }
 
@@ -117,9 +117,11 @@ check_user(struct sudoers_context *ctx, unsigned int validated,
      * Required for proper PAM session support.
      */
     if ((closure.auth_pw = get_authpw(ctx, mode)) == NULL)
-	goto done;
-    if (sudo_auth_init(ctx, closure.auth_pw, mode) != AUTH_SUCCESS)
-	goto done;
+	debug_return_int(AUTH_ERROR);
+    if (sudo_auth_init(ctx, closure.auth_pw, mode) != AUTH_SUCCESS) {
+	sudo_pw_delref(closure.auth_pw);
+	debug_return_int(AUTH_ERROR);
+    }
     closure.ctx = ctx;
 
     /*
@@ -222,8 +224,7 @@ done:
     }
     timestamp_close(closure.cookie);
     sudo_auth_cleanup(ctx, closure.auth_pw, !ISSET(validated, VALIDATE_SUCCESS));
-    if (closure.auth_pw != NULL)
-	sudo_pw_delref(closure.auth_pw);
+    sudo_pw_delref(closure.auth_pw);
 
     debug_return_int(ret);
 }
