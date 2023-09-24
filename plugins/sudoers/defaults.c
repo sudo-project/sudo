@@ -71,6 +71,7 @@ static bool store_tuple(const char *str, struct sudo_defs_types *def);
 static bool store_uint(const char *str, struct sudo_defs_types *def);
 static bool store_timespec(const char *str, struct sudo_defs_types *def);
 static bool store_rlimit(const char *str, struct sudo_defs_types *def);
+static bool store_plugin(const char *str, struct sudo_defs_types *def, int op);
 static bool list_op(const char *str, size_t, struct list_members *list, enum list_ops op);
 static bool valid_path(const struct sudoers_context *ctx, struct sudo_defs_types *def, const char *val, const char *file, int line, int column, bool quiet);
 
@@ -306,6 +307,9 @@ parse_default_entry(const struct sudoers_context *ctx,
 	    break;
 	case T_TIMESPEC:
 	    rc = store_timespec(val, def);
+	    break;
+	case T_PLUGIN:
+	    rc = store_plugin(val, def, op);
 	    break;
 	case T_RLIMIT:
 	    rc = store_rlimit(val, def);
@@ -1077,6 +1081,22 @@ store_list(const char *str, struct sudo_defs_types *def, int op)
 	    }
 	}
     }
+    debug_return_bool(true);
+}
+
+static bool
+store_plugin(const char *str, struct sudo_defs_types *def, int op)
+{
+    const enum list_ops lop = op == '-' ? delete : add;
+    debug_decl(store_plugin, SUDOERS_DEBUG_DEFAULTS);
+
+    /* Remove all old members. */
+    if (op == false || op == true)
+	(void)list_op(NULL, 0, &def->sd_un.list, freeall);
+
+    if (!list_op(str, strlen(str), &def->sd_un.list, lop))
+	debug_return_bool(false);
+
     debug_return_bool(true);
 }
 

@@ -111,6 +111,8 @@ struct early_default {
 #define T_TIMEOUT	0x011
 #undef T_RLIMIT
 #define T_RLIMIT	0x012
+#undef T_PLUGIN
+#define T_PLUGIN	0x013
 #undef T_MASK
 #define T_MASK		0x0FF
 #undef T_BOOL

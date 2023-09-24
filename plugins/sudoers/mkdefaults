@@ -45,6 +45,7 @@ BEGIN {
     type_map["T_TIMESPEC"] = "tspec"
     type_map["T_TIMEOUT"] = "ival"
     type_map["T_RLIMIT"] = "str"
+    type_map["T_PLUGIN"] = "list"
 }
 {
     sub(/#.*/, "", $0)
