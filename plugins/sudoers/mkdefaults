@@ -12,22 +12,20 @@
 
 # Deal with optional -o (output) argument
 if [ "$1" = "-o" ]; then
+    if [ $# -lt 2 ]; then
+	echo "usage: $0 [-o output] [input_file ...]" 1>&2
+	exit 1
+    fi
     OUTFILE="$2"
     shift 2
 else
     OUTFILE=def_data
 fi
-if [ $# -gt 0 ]; then
-    INFILE="$1"
-    shift
-else
-    INFILE=def_data.in
-fi
-if [ $# -gt 0 ]; then
-    echo "usage: $0 [-o output] [input_file]" 1>&2
+if [ $# -eq 0 ]; then
+    set -- def_data.in
 fi
 
-${AWK-awk} -f - -v outfile=$OUTFILE $INFILE <<'EOF'
+${AWK-awk} -f - -v outfile=$OUTFILE "$@" <<'EOF'
 BEGIN {
     tuple_values[0] = "never"
     tuple_keys["never"] = 0
