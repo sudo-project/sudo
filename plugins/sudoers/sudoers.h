@@ -108,7 +108,6 @@ struct sudoers_plugin_settings {
     const char *ldap_conf;
     const char *ldap_secret;
     unsigned int flags;
-    int max_groups;
 };
 
 /*
