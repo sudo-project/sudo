@@ -36,7 +36,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif
 #include <stddef.h>
 #include <stdio.h>
@@ -48,19 +48,19 @@
 #include <grp.h>
 #include <pwd.h>
 #ifndef HAVE_GETADDRINFO
-# include "compat/getaddrinfo.h"
+# include <compat/getaddrinfo.h>
 #endif
 
-#include "pathnames.h"
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_eventlog.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_iolog.h"
-#include "sudo_util.h"
+#include <pathnames.h>
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_eventlog.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_iolog.h>
+#include <sudo_util.h>
 
-#include "logsrvd.h"
+#include <logsrvd.h>
 
 #if defined(HAVE_OPENSSL)
 # define DEFAULT_CA_CERT_PATH       "/etc/ssl/sudo/cacert.pem"

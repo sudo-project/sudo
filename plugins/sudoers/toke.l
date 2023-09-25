@@ -38,11 +38,11 @@
 #include <dirent.h>
 #include <errno.h>
 #include <ctype.h>
-#include "sudoers.h"
-#include "toke.h"
+#include <sudoers.h>
+#include <toke.h>
 #include <gram.h>
-#include "sudo_digest.h"
-#include "sudo_lbuf.h"
+#include <sudo_digest.h>
+#include <sudo_lbuf.h>
 
 #if defined(HAVE_STRUCT_DIRENT_D_NAMLEN) && HAVE_STRUCT_DIRENT_D_NAMLEN
 # define NAMLEN(dirent)	(dirent)->d_namlen

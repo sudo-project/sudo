@@ -26,7 +26,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif
 #include <stdlib.h>
 #include <string.h>
@@ -34,9 +34,9 @@
 
 #include <gcrypt.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_digest.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_digest.h>
 
 #define SUDO_LIBGCRYPT_VERSION_MIN "1.3.0"
 

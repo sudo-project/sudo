@@ -36,10 +36,10 @@
 #include <fcntl.h>
 #include <signal.h>
 
-#include "sudo.h"
-#include "sudo_exec.h"
-#include "sudo_plugin.h"
-#include "sudo_plugin_int.h"
+#include <sudo.h>
+#include <sudo_exec.h>
+#include <sudo_plugin.h>
+#include <sudo_plugin_int.h>
 
 struct monitor_closure {
     const struct command_details *details;

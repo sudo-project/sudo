@@ -30,7 +30,7 @@
 
 #include <string.h>
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 /*
  * Appends src to string dst of size dsize (unlike strncat, dsize is the

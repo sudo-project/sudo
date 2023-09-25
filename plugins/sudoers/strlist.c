@@ -26,11 +26,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sudo_compat.h"
-#include "sudo_queue.h"
-#include "sudo_util.h"
-#include "sudoers_debug.h"
-#include "strlist.h"
+#include <sudo_compat.h>
+#include <sudo_queue.h>
+#include <sudo_util.h>
+#include <sudoers_debug.h>
+#include <strlist.h>
 
 struct sudoers_string *
 sudoers_string_alloc(const char *s)

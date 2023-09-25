@@ -27,7 +27,7 @@
 # endif
 # include <openssl/ssl.h>
 # include <openssl/err.h>
-# include "sudo_ssl_compat.h"
+# include <sudo_ssl_compat.h>
 
 struct tls_client_closure {
     SSL *ssl;

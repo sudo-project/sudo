@@ -31,12 +31,12 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
-#include "sudo_debug.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
+#include <sudo_debug.h>
 
 /*
  * Read a line of input, honoring line continuation chars.

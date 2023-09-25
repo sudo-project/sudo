@@ -41,8 +41,8 @@
 # include <resolv.h>
 #endif /* NEED_RESOLV_H */
 
-#include "sudoers.h"
-#include "interfaces.h"
+#include <sudoers.h>
+#include <interfaces.h>
 
 static int
 addr_matches_if(const char *n)

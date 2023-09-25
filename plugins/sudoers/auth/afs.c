@@ -40,9 +40,9 @@
 #include <afs/stds.h>
 #include <afs/kautils.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 #include "sudo_auth.h"
-#include "timestamp.h"
+#include <timestamp.h>
 
 int
 sudo_afs_verify(const struct sudoers_context *ctx, struct passwd *pw,

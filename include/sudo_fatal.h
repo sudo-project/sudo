@@ -23,10 +23,10 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 
-#include "sudo_plugin.h"	/* for conversation function */
+#include <sudo_plugin.h>	/* for conversation function */
 
 /* No output to debug files when fuzzing. */
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION

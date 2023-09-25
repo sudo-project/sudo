@@ -30,9 +30,9 @@
 #include <errno.h>
 #include <limits.h>
 
-#include "sudo_compat.h"
-#include "sudoers_debug.h"
-#include "parse.h"
+#include <sudo_compat.h>
+#include <sudoers_debug.h>
+#include <parse.h>
 
 /*
  * Parse a command timeout in sudoers in the format 1d2h3m4s

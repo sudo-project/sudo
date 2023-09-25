@@ -43,10 +43,10 @@
 #include <signal.h>
 #include <termios.h>		/* for struct winsize on HP-UX */
 
-#include "sudo.h"
-#include "sudo_exec.h"
-#include "sudo_plugin.h"
-#include "sudo_plugin_int.h"
+#include <sudo.h>
+#include <sudo_exec.h>
+#include <sudo_plugin.h>
+#include <sudo_plugin_int.h>
 
 /* Tail queue of messages to send to the monitor. */
 struct monitor_message {

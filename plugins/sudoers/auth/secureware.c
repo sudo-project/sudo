@@ -43,7 +43,7 @@
 #endif /* __hpux */
 #include <prot.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 #include "sudo_auth.h"
 
 #ifdef __alpha

@@ -34,9 +34,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "sudo.h"
-#include "sudo_plugin.h"
-#include "sudo_plugin_int.h"
+#include <sudo.h>
+#include <sudo_plugin.h>
+#include <sudo_plugin_int.h>
 
 /*
  * Sudo conversation function.

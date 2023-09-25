@@ -26,8 +26,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "sudoers.h"
-#include "sudo_lbuf.h"
+#include <sudoers.h>
+#include <sudo_lbuf.h>
 #include <gram.h>
 
 struct sudo_file_handle {

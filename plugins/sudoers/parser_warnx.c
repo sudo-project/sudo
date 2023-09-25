@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 bool
 parser_vwarnx(const struct sudoers_context *ctx, const char *file, int line,

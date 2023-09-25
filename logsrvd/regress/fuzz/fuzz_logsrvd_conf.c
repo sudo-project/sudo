@@ -36,16 +36,16 @@
 # include <inttypes.h>
 #endif
 
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_eventlog.h"
-#include "sudo_fatal.h"
-#include "sudo_iolog.h"
-#include "sudo_plugin.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_conf.h>
+#include <sudo_debug.h>
+#include <sudo_eventlog.h>
+#include <sudo_fatal.h>
+#include <sudo_iolog.h>
+#include <sudo_plugin.h>
+#include <sudo_util.h>
 
-#include "logsrvd.h"
+#include <logsrvd.h>
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 

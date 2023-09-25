@@ -28,9 +28,9 @@
 #include <time.h>
 #include <errno.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_iolog.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_iolog.h>
 
 /*
  * I/O log wrapper for fflush/gzflush.

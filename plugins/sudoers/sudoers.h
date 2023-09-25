@@ -29,27 +29,27 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 
 #define DEFAULT_TEXT_DOMAIN	"sudoers"
 
-#include "pathnames.h"
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_eventlog.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_nss.h"
-#include "sudo_plugin.h"
-#include "sudo_queue.h"
-#include "sudo_util.h"
-#include "sudoers_debug.h"
+#include <pathnames.h>
+#include <sudo_compat.h>
+#include <sudo_conf.h>
+#include <sudo_eventlog.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_nss.h>
+#include <sudo_plugin.h>
+#include <sudo_queue.h>
+#include <sudo_util.h>
+#include <sudoers_debug.h>
 
-#include "defaults.h"
-#include "logging.h"
-#include "parse.h"
-#include "pivot.h"
+#include <defaults.h>
+#include <logging.h>
+#include <parse.h>
+#include <pivot.h>
 
 /*
  * Info passed in from the sudo front-end.

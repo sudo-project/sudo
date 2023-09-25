@@ -24,7 +24,7 @@
 
 #define SUDO_ERROR_WRAP 0
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 struct test_data {
     const char *input;

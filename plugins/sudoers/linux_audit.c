@@ -32,8 +32,8 @@
 #include <string.h>
 #include <libaudit.h>
 
-#include "sudoers.h"
-#include "linux_audit.h"
+#include <sudoers.h>
+#include <linux_audit.h>
 
 #define AUDIT_NOT_CONFIGURED	-2
 

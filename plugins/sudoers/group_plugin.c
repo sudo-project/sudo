@@ -31,8 +31,8 @@
 #include <ctype.h>
 #include <errno.h>
 
-#include "sudoers.h"
-#include "sudo_dso.h"
+#include <sudoers.h>
+#include <sudo_dso.h>
 
 #if defined(HAVE_DLOPEN) || defined(HAVE_SHL_LOAD)
 

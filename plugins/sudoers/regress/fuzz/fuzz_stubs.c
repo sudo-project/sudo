@@ -38,9 +38,9 @@
 #endif /* NEED_RESOLV_H */
 #include <netdb.h>
 
-#include "sudoers.h"
-#include "timestamp.h"
-#include "interfaces.h"
+#include <sudoers.h>
+#include <timestamp.h>
+#include <interfaces.h>
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 

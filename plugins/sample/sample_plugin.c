@@ -32,7 +32,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #include <string.h>
 #ifdef HAVE_STRINGS_H
@@ -45,10 +45,10 @@
 #include <grp.h>
 #include <pwd.h>
 
-#include "pathnames.h"
-#include "sudo_compat.h"
-#include "sudo_plugin.h"
-#include "sudo_util.h"
+#include <pathnames.h>
+#include <sudo_compat.h>
+#include <sudo_plugin.h>
+#include <sudo_util.h>
 
 /*
  * Sample plugin module that allows any user who knows the password

@@ -34,7 +34,7 @@
 #include <string.h>
 #include <pwd.h>
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 #define PW_SIZE(name, size)				\
 do {							\

@@ -23,12 +23,12 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_fatal.h"
-#include "sudo_queue.h"
-#include "sudo_digest.h"
-#include "sudo_util.h"
-#include "parse.h"
+#include <sudo_compat.h>
+#include <sudo_fatal.h>
+#include <sudo_queue.h>
+#include <sudo_digest.h>
+#include <sudo_util.h>
+#include <parse.h>
 
 sudo_dso_public int main(int argc, char *argv[]);
 

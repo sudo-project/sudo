@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 static int sudoers_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 static unsigned int sudoers_debug_refcnt;

@@ -22,9 +22,9 @@
 
 #define SUDO_ERROR_WRAP 0
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
-#include "sudo_fatal.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
+#include <sudo_fatal.h>
 
 #ifndef MAP_ANON
 # if defined(MAP_ANONYMOUS)

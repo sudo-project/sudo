@@ -29,7 +29,7 @@
 
 #include <sys/types.h>
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 size_t
 sudo_strnlen(const char *str, size_t maxlen)

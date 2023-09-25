@@ -34,8 +34,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "sudoers.h"
-#include "interfaces.h"
+#include <sudoers.h>
+#include <interfaces.h>
 
 /* STUB */
 bool

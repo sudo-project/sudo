@@ -37,8 +37,8 @@
 #include <netdb.h>
 #include <errno.h>
 
-#include "sudoers.h"
-#include "interfaces.h"
+#include <sudoers.h>
+#include <interfaces.h>
 
 static struct interface_list interfaces = SLIST_HEAD_INITIALIZER(interfaces);
 

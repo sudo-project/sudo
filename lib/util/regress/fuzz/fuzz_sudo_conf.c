@@ -28,12 +28,12 @@
 
 #define SUDO_ERROR_WRAP 0
 
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_fatal.h"
-#include "sudo_plugin.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_conf.h>
+#include <sudo_debug.h>
+#include <sudo_fatal.h>
+#include <sudo_plugin.h>
+#include <sudo_util.h>
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 

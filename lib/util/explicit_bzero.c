@@ -30,7 +30,7 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 #ifndef HAVE_EXPLICIT_BZERO
 

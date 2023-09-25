@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 sudo_dso_public int main(int argc, char *argv[]);
 

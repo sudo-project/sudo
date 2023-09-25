@@ -26,11 +26,11 @@
 #include <stdlib.h>
 #include <grp.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_util.h>
 
 /*
  * Parse a comma-separated list of gids into an allocated array of GETGROUPS_T.

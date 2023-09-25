@@ -29,7 +29,7 @@
 #include <unistd.h>
 #include <pwd.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 /*
  * Check whether specified runchroot matches def_runchroot.

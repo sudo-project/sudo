@@ -34,8 +34,8 @@
 #include <pwd.h>
 #include <fcntl.h>
 
-#include "sudo.h"
-#include "sudo_edit.h"
+#include <sudo.h>
+#include <sudo_edit.h>
 
 #if defined(HAVE_SETRESUID) || defined(HAVE_SETREUID) || defined(HAVE_SETEUID)
 

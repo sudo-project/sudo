@@ -35,10 +35,10 @@
 #include <grp.h>
 #include <pwd.h>
 
-#include "sudoers.h"
-#include "sudoers_version.h"
-#include "timestamp.h"
-#include "interfaces.h"
+#include <sudoers.h>
+#include <sudoers_version.h>
+#include <timestamp.h>
+#include <interfaces.h>
 #include "auth/sudo_auth.h"
 
 static char **command_info;

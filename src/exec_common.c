@@ -33,8 +33,8 @@
 #endif
 #include <errno.h>
 
-#include "sudo.h"
-#include "sudo_exec.h"
+#include <sudo.h>
+#include <sudo_exec.h>
 
 /*
  * Disable execution of child processes in the command we are about

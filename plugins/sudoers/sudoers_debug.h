@@ -19,7 +19,7 @@
 #ifndef SUDOERS_DEBUG_H
 #define SUDOERS_DEBUG_H
 
-#include "sudo_debug.h"
+#include <sudo_debug.h>
 
 /*
  * Sudoers debug subsystems.

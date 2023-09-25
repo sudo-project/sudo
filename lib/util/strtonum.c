@@ -26,9 +26,9 @@
 #include <ctype.h>
 #include <errno.h>
 
-#include "sudo_compat.h"
-#include "sudo_gettext.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_gettext.h>
+#include <sudo_util.h>
 
 enum strtonum_err {
     STN_INITIAL,

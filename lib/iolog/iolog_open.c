@@ -28,17 +28,17 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif
 #include <errno.h>
 #include <fcntl.h>
 #include <time.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_iolog.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_iolog.h>
+#include <sudo_util.h>
 
 static unsigned char const gzip_magic[2] = {0x1f, 0x8b};
 

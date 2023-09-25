@@ -34,8 +34,8 @@
 #include <string.h>
 #include <errno.h>
 
-#include "sudoers.h"
-#include "redblack.h"
+#include <sudoers.h>
+#include <redblack.h>
 #include <gram.h>
 
 /*

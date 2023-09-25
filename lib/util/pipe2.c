@@ -28,7 +28,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 int
 sudo_pipe2(int fildes[2], int flags)

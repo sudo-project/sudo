@@ -23,9 +23,9 @@
 
 #include <config.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_util.h>
 
 /*
  * Converts a two-byte hex string to decimal.

@@ -45,20 +45,20 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #ifdef HAVE_CRT_EXTERNS_H
 # include <crt_externs.h>
 #endif
 
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_exec.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_util.h"
-#include "intercept.pb-c.h"
+#include <sudo_compat.h>
+#include <sudo_conf.h>
+#include <sudo_debug.h>
+#include <sudo_exec.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_util.h>
+#include <intercept.pb-c.h>
 
 #ifdef HAVE__NSGETENVIRON
 # define environ (*_NSGetEnviron())

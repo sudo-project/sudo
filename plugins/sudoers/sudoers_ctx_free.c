@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 /*
  * Free memory allocated for struct sudoers_context.

@@ -33,7 +33,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 /*
  * Similar to setenv(3) but operates on a private copy of the environment.

@@ -35,7 +35,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 /*
  * Check the given command against the specified allowlist (NULL-terminated).

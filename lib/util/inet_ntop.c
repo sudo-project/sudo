@@ -32,7 +32,7 @@
 #include <errno.h>
 #include <stdio.h>
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 #ifndef EAFNOSUPPORT
 # define EAFNOSUPPORT EINVAL

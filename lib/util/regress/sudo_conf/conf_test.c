@@ -23,10 +23,10 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_conf.h>
+#include <sudo_debug.h>
+#include <sudo_util.h>
 
 static void sudo_conf_dump(void);
 

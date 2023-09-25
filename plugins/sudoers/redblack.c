@@ -52,8 +52,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "sudoers.h"
-#include "redblack.h"
+#include <sudoers.h>
+#include <redblack.h>
 
 static void rbrepair(struct rbtree *, struct rbnode *);
 static void rotate_left(struct rbtree *, struct rbnode *);

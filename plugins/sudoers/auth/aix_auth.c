@@ -41,7 +41,7 @@
 #include <signal.h>
 #include <usersec.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 #include "sudo_auth.h"
 
 /*

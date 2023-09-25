@@ -26,8 +26,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
 
 /*
  * Declare/define __progname[] if necessary.

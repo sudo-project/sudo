@@ -26,8 +26,8 @@
 #undef SIZEOF_TIME_T
 
 #include <config.h>
-#include "sudo_compat.h"
-#include "sudo_plugin.h"
+#include <sudo_compat.h>
+#include <sudo_plugin.h>
 
 #include "pyhelpers_cpychecker.h"
 

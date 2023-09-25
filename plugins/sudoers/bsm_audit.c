@@ -37,8 +37,8 @@
 #include <errno.h>
 #include <unistd.h>
 
-#include "sudoers.h"
-#include "bsm_audit.h"
+#include <sudoers.h>
+#include <bsm_audit.h>
 
 /*
  * Solaris auditon() returns EINVAL if BSM audit not configured.

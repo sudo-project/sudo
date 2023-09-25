@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 #ifndef HAVE_FREEZERO
 void

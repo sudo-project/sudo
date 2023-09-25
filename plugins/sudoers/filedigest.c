@@ -30,8 +30,8 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#include "sudoers.h"
-#include "sudo_digest.h"
+#include <sudoers.h>
+#include <sudo_digest.h>
 
 unsigned char *
 sudo_filedigest(int fd, const char *file, unsigned int digest_type,

@@ -23,7 +23,7 @@
 
 #include <config.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 /*
  * Derived from code with the following declaration:

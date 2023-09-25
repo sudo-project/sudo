@@ -42,7 +42,7 @@
 #include <login_cap.h>
 #include <bsd_auth.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 #include "sudo_auth.h"
 
 # ifndef LOGIN_DEFROOTCLASS

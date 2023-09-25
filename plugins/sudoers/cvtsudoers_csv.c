@@ -32,8 +32,8 @@
 #include <unistd.h>
 #include <stdarg.h>
 
-#include "sudoers.h"
-#include "cvtsudoers.h"
+#include <sudoers.h>
+#include <cvtsudoers.h>
 #include <gram.h>
 
 static void print_member_list_csv(FILE *fp, const struct sudoers_parse_tree *parse_tree, struct member_list *members, bool negated, short alias_type, bool expand_aliases);

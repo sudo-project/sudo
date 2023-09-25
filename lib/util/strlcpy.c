@@ -30,7 +30,7 @@
 
 #include <string.h>
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 /*
  * Copy string src to buffer dst of size dsize.  At most dsize-1

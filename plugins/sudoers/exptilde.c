@@ -29,8 +29,8 @@
 #include <grp.h>
 #include <pwd.h>
 
-#include "sudoers.h"
-#include "pwutil.h"
+#include <sudoers.h>
+#include <pwutil.h>
 
 /*
  * Expand leading tilde in *path, which must be dynamically allocated.

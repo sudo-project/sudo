@@ -38,9 +38,9 @@
 #endif
 #include <ldap.h>
 
-#include "sudoers.h"
-#include "sudo_ldap.h"
-#include "sudo_ldap_conf.h"
+#include <sudoers.h>
+#include <sudo_ldap.h>
+#include <sudo_ldap_conf.h>
 
 /*
  * Compare str to netgroup string ngstr of length nglen where str is a

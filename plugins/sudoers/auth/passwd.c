@@ -34,7 +34,7 @@
 #include <unistd.h>
 #include <pwd.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 #include "sudo_auth.h"
 
 #define DESLEN			13

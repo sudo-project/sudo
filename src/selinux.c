@@ -54,8 +54,8 @@
 # include <libaudit.h>
 #endif
 
-#include "sudo.h"
-#include "sudo_exec.h"
+#include <sudo.h>
+#include <sudo_exec.h>
 
 static struct selinux_state {
     char * old_context;

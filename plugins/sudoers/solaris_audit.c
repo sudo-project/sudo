@@ -35,8 +35,8 @@
 #include <bsm/adt.h>
 #include <bsm/adt_event.h>
 
-#include "sudoers.h"
-#include "solaris_audit.h"
+#include <sudoers.h>
+#include <solaris_audit.h>
 
 static adt_session_data_t *ah;		/* audit session handle */
 static adt_event_data_t	*event;		/* event to be generated */

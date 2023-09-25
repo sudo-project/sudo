@@ -27,7 +27,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 /*
  * Pivot to a new root directory, storing the old root and old cwd

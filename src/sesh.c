@@ -36,17 +36,17 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #ifdef HAVE_GETOPT_LONG
 # include <getopt.h>
 # else
-# include "compat/getopt.h"
+# include <compat/getopt.h>
 #endif /* HAVE_GETOPT_LONG */
 
-#include "sudo.h"
-#include "sudo_exec.h"
-#include "sudo_edit.h"
+#include <sudo.h>
+#include <sudo_exec.h>
+#include <sudo_edit.h>
 
 enum sesh_mode {
     SESH_RUN_COMMAND,

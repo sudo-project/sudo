@@ -31,9 +31,9 @@
 #endif
 #include <openssl/evp.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_digest.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_digest.h>
 
 struct sudo_digest {
     EVP_MD_CTX *ctx;

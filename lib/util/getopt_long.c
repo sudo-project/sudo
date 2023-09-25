@@ -64,9 +64,9 @@
 
 #define SUDO_ERROR_WRAP 0
 
-#include "sudo_compat.h"
-#include "sudo_fatal.h"
-#include "compat/getopt.h"
+#include <sudo_compat.h>
+#include <sudo_fatal.h>
+#include <compat/getopt.h>
 
 #define GNU_COMPATIBLE		/* Be more compatible with GNU getopt. */
 

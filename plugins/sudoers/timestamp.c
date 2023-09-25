@@ -41,8 +41,8 @@
 #include <pwd.h>
 #include <signal.h>
 
-#include "sudoers.h"
-#include "timestamp.h"
+#include <sudoers.h>
+#include <timestamp.h>
 
 #define TIMESTAMP_OPEN_ERROR	-1
 #define TIMESTAMP_PERM_ERROR	-2

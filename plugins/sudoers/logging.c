@@ -50,13 +50,13 @@
 #include <signal.h>
 #include <syslog.h>
 #ifndef HAVE_GETADDRINFO
-# include "compat/getaddrinfo.h"
+# include <compat/getaddrinfo.h>
 #endif
 
-#include "sudoers.h"
+#include <sudoers.h>
 #ifdef SUDOERS_LOG_CLIENT
-# include "log_client.h"
-# include "strlist.h"
+# include <log_client.h>
+# include <strlist.h>
 #endif
 
 struct parse_error {

@@ -30,7 +30,7 @@
 #include <fcntl.h>
 #include <limits.h>
 
-#include "sudo.h"
+#include <sudo.h>
 
 /*
  * Add an fd to preserve.

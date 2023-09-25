@@ -21,7 +21,7 @@
 #define SUDOERS_PARSE_H
 
 #include <sys/stat.h>
-#include "sudo_queue.h"
+#include <sudo_queue.h>
 
 /* Characters that must be quoted in sudoers. */
 #define SUDOERS_QUOTED		":,=#\""

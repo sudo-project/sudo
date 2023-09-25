@@ -26,7 +26,7 @@
 
 #include <time.h>
 #include <def_data.h>
-#include "sudo_queue.h"
+#include <sudo_queue.h>
 
 struct list_member {
     SLIST_ENTRY(list_member) entries;

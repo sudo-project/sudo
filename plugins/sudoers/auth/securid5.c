@@ -43,7 +43,7 @@
 #include <acexport.h>
 #include <sdacmvls.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 #include "sudo_auth.h"
 
 /*

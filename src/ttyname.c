@@ -60,7 +60,7 @@
 # include <sys/pstat.h>
 #endif
 
-#include "sudo.h"
+#include <sudo.h>
 
 /*
  * How to access the tty device number in struct kinfo_proc.

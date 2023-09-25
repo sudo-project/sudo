@@ -29,9 +29,9 @@
 #include <grp.h>
 #include <limits.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_util.h>
 
 int
 sudo_setgroups_v1(int ngids, const GETGROUPS_T *gids)

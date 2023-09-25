@@ -36,7 +36,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
@@ -51,27 +51,27 @@
 #ifdef HAVE_GETOPT_LONG
 # include <getopt.h>
 # else
-# include "compat/getopt.h"
+# include <compat/getopt.h>
 #endif /* HAVE_GETOPT_LONG */
 
 #define NEED_INET_NTOP		/* to expose sudo_inet_ntop in sudo_compat.h */
 
-#include "pathnames.h"
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_event.h"
-#include "sudo_eventlog.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_json.h"
-#include "sudo_iolog.h"
-#include "sudo_queue.h"
-#include "sudo_rand.h"
-#include "sudo_util.h"
+#include <pathnames.h>
+#include <sudo_compat.h>
+#include <sudo_conf.h>
+#include <sudo_debug.h>
+#include <sudo_event.h>
+#include <sudo_eventlog.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_json.h>
+#include <sudo_iolog.h>
+#include <sudo_queue.h>
+#include <sudo_rand.h>
+#include <sudo_util.h>
 
-#include "logsrvd.h"
-#include "hostcheck.h"
+#include <logsrvd.h>
+#include <hostcheck.h>
 
 #ifndef O_NOFOLLOW
 # define O_NOFOLLOW 0

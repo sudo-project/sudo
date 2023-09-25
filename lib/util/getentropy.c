@@ -76,9 +76,9 @@
 # include <openssl/rand.h>
 #endif
 
-#include "sudo_compat.h"
-#include "sudo_digest.h"
-#include "sudo_rand.h"
+#include <sudo_compat.h>
+#include <sudo_digest.h>
+#include <sudo_rand.h>
 
 #if !defined(MAP_ANON) && defined(MAP_ANONYMOUS)
 # define MAP_ANON MAP_ANONYMOUS

@@ -19,8 +19,8 @@
 #ifndef PARSE_JSON_H
 #define PARSE_JSON_H
 
-#include "sudo_json.h"
-#include "sudo_queue.h"
+#include <sudo_json.h>
+#include <sudo_queue.h>
 
 TAILQ_HEAD(json_item_list, json_item);
 

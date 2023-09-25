@@ -28,15 +28,15 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif
 #include <string.h>
 #include <errno.h>
 #include <time.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_iolog.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_iolog.h>
 
 /*
  * Close an I/O log.

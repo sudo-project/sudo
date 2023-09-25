@@ -29,7 +29,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 #include <gram.h>
 
 struct alias_warned {

@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 char *
 sudo_strndup(const char *str, size_t maxlen)

@@ -36,7 +36,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
@@ -51,17 +51,17 @@
 
 #define NEED_INET_NTOP		/* to expose sudo_inet_ntop in sudo_compat.h */
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_event.h"
-#include "sudo_eventlog.h"
-#include "sudo_gettext.h"
-#include "sudo_iolog.h"
-#include "sudo_fatal.h"
-#include "sudo_queue.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_event.h>
+#include <sudo_eventlog.h>
+#include <sudo_gettext.h>
+#include <sudo_iolog.h>
+#include <sudo_fatal.h>
+#include <sudo_queue.h>
+#include <sudo_util.h>
 
-#include "logsrvd.h"
+#include <logsrvd.h>
 
 static void relay_client_msg_cb(int fd, int what, void *v);
 static void relay_server_msg_cb(int fd, int what, void *v);

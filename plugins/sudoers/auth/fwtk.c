@@ -40,7 +40,7 @@
 #include <auth.h>
 #include <firewall.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 #include "sudo_auth.h"
 
 int

@@ -30,7 +30,7 @@
 #include <string.h>
 #include <limits.h>
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 ssize_t
 sudo_getdelim(char **buf, size_t *bufsize, int delim, FILE *fp)

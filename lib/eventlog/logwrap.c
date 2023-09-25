@@ -27,10 +27,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_util.h"
-#include "sudo_eventlog.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_util.h>
+#include <sudo_eventlog.h>
 
 size_t
 eventlog_writeln(FILE * restrict fp, char * restrict line, size_t linelen, size_t maxlen)

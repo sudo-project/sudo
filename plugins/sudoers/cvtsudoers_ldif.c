@@ -32,11 +32,11 @@
 #include <unistd.h>
 #include <stdarg.h>
 
-#include "sudoers.h"
-#include "sudo_ldap.h"
-#include "redblack.h"
-#include "cvtsudoers.h"
-#include "sudo_lbuf.h"
+#include <sudoers.h>
+#include <sudo_ldap.h>
+#include <redblack.h>
+#include <cvtsudoers.h>
+#include <sudo_lbuf.h>
 #include <gram.h>
 
 struct seen_user {

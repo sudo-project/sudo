@@ -5,6 +5,6 @@
 
 #define PWUTIL_PREFIX		testsudoers
 
-#include "testsudoers_pwutil.h"
-#include "tsgetgrpw.h"
+#include <testsudoers_pwutil.h>
+#include <tsgetgrpw.h>
 #include "pwutil_impl.c"

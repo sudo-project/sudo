@@ -52,10 +52,10 @@
 #ifdef HAVE_FNMATCH
 # include <fnmatch.h>
 #else
-# include "compat/fnmatch.h"
+# include <compat/fnmatch.h>
 #endif /* HAVE_FNMATCH */
 
-#include "sudoers.h"
+#include <sudoers.h>
 #include <gram.h>
 
 /*

@@ -39,12 +39,12 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-#include "sudoers.h"
-#include "sudo_eventlog.h"
-#include "sudo_iolog.h"
-#include "strlist.h"
+#include <sudoers.h>
+#include <sudo_eventlog.h>
+#include <sudo_iolog.h>
+#include <strlist.h>
 #ifdef SUDOERS_LOG_CLIENT
-# include "log_client.h"
+# include <log_client.h>
 #endif
 
 static struct iolog_file iolog_files[] = {

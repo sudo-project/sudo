@@ -61,11 +61,11 @@
 # endif
 #endif /* HAVE_LDAP_SASL_INTERACTIVE_BIND_S */
 
-#include "sudoers.h"
-#include "sudo_lbuf.h"
-#include "sudo_ldap.h"
-#include "sudo_ldap_conf.h"
-#include "sudo_dso.h"
+#include <sudoers.h>
+#include <sudo_lbuf.h>
+#include <sudo_ldap.h>
+#include <sudo_ldap_conf.h>
+#include <sudo_dso.h>
 
 #if defined(HAVE_LDAP_SASL_INTERACTIVE_BIND_S) && !defined(LDAP_SASL_QUIET)
 # define LDAP_SASL_QUIET	0

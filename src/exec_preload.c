@@ -30,9 +30,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "sudo.h"
-#include "sudo_exec.h"
-#include "sudo_util.h"
+#include <sudo.h>
+#include <sudo_exec.h>
+#include <sudo_util.h>
 
 #ifdef RTLD_PRELOAD_VAR
 typedef void * (*sudo_alloc_fn_t)(size_t, size_t);

@@ -23,7 +23,7 @@
 
 #include <config.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 /*
  * Set visudo Defaults callbacks.

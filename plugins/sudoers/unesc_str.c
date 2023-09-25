@@ -25,7 +25,7 @@
 
 #include <string.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 /*
  * Remove backslash escape chars.

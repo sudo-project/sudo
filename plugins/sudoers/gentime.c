@@ -28,15 +28,15 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
 
-#include "sudo_compat.h"
-#include "sudoers_debug.h"
-#include "parse.h"
+#include <sudo_compat.h>
+#include <sudoers_debug.h>
+#include <parse.h>
 
 /* Since timegm() is only used in one place we keep the macro local. */
 #ifndef HAVE_TIMEGM

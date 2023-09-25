@@ -25,10 +25,10 @@
 
 #define SUDO_ERROR_WRAP 0
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
-#include "sudoers_debug.h"
-#include "parse.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
+#include <sudoers_debug.h>
+#include <parse.h>
 
 sudo_dso_public int main(int argc, char *argv[]);
 

@@ -29,10 +29,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_lbuf.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_lbuf.h>
+#include <sudo_util.h>
 
 void
 sudo_lbuf_init_v1(struct sudo_lbuf *lbuf, sudo_lbuf_output_t output,

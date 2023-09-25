@@ -33,7 +33,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 /*
  * Verify that path is a normal file and executable by root.

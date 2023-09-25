@@ -28,20 +28,20 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_eventlog.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_json.h"
-#include "sudo_iolog.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_eventlog.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_json.h>
+#include <sudo_iolog.h>
+#include <sudo_util.h>
 
 struct eventlog *
 iolog_parse_loginfo(int dfd, const char *iolog_dir)

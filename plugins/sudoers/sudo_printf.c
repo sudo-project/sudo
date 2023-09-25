@@ -27,10 +27,10 @@
 #include <stdarg.h>
 #include <errno.h>
 
-#include "sudo_compat.h"
-#include "sudo_plugin.h"
-#include "sudo_debug.h"
-#include "pathnames.h"
+#include <sudo_compat.h>
+#include <sudo_plugin.h>
+#include <sudo_debug.h>
+#include <pathnames.h>
 
 static int
 sudo_printf_int(int msg_type, const char * restrict fmt, ...)

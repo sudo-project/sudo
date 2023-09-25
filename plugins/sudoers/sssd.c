@@ -39,10 +39,10 @@
 #include <errno.h>
 #include <pwd.h>
 
-#include "sudoers.h"
-#include "sudo_lbuf.h"
-#include "sudo_ldap.h"
-#include "sudo_dso.h"
+#include <sudoers.h>
+#include <sudo_lbuf.h>
+#include <sudo_ldap.h>
+#include <sudo_dso.h>
 
 /* SSSD <--> SUDO interface - do not change */
 struct sss_sudo_attr {

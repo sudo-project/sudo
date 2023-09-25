@@ -50,9 +50,9 @@
 # include <inttypes.h>
 #endif
 
-#include "sudo_compat.h"
-#include "sudo_fatal.h"
-#include "sudo_rand.h"
+#include <sudo_compat.h>
+#include <sudo_fatal.h>
+#include <sudo_rand.h>
 
 #define KEYSTREAM_ONLY
 #include "chacha_private.h"

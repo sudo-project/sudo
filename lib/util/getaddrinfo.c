@@ -50,8 +50,8 @@
 # include <resolv.h>
 #endif /* NEED_RESOLV_H */
 
-#include "sudo_compat.h"
-#include "compat/getaddrinfo.h"
+#include <sudo_compat.h>
+#include <compat/getaddrinfo.h>
 
 /* We need access to h_errno to map errors from gethostbyname. */
 #ifndef HAVE_DECL_H_ERRNO

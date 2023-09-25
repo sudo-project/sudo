@@ -24,8 +24,8 @@
 
 #define SUDO_ERROR_WRAP 0
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
 
 /* From parse.h */
 extern size_t base64_decode(const char *str, unsigned char *dst, size_t dsize);

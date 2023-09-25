@@ -41,16 +41,16 @@
 #ifdef HAVE_GETOPT_LONG
 # include <getopt.h>
 # else
-# include "compat/getopt.h"
+# include <compat/getopt.h>
 #endif /* HAVE_GETOPT_LONG */
 
-#include "sudoers.h"
-#include "sudoers_version.h"
-#include "sudo_lbuf.h"
-#include "redblack.h"
-#include "cvtsudoers.h"
-#include "testsudoers_pwutil.h"
-#include "tsgetgrpw.h"
+#include <sudoers.h>
+#include <sudoers_version.h>
+#include <sudo_lbuf.h>
+#include <redblack.h>
+#include <cvtsudoers.h>
+#include <testsudoers_pwutil.h>
+#include <tsgetgrpw.h>
 #include <gram.h>
 
 /* Long-only options values. */

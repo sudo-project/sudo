@@ -37,7 +37,7 @@
 # ifdef HAVE_GLOB
 #  include <glob.h>
 # else
-#  include "compat/glob.h"
+#  include <compat/glob.h>
 # endif /* HAVE_GLOB */
 #endif /* SUDOERS_NAME_MATCH */
 #include <dirent.h>
@@ -46,11 +46,11 @@
 #ifdef HAVE_FNMATCH
 # include <fnmatch.h>
 #else
-# include "compat/fnmatch.h"
+# include <compat/fnmatch.h>
 #endif /* HAVE_FNMATCH */
 #include <regex.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 #include <gram.h>
 
 #if !defined(O_EXEC) && defined(O_PATH)

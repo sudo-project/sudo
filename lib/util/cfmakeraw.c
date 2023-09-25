@@ -25,7 +25,7 @@
 
 #include <termios.h>
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 /* Non-standard termios input flags */
 #ifndef IUCLC

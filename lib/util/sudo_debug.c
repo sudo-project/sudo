@@ -38,13 +38,13 @@
 #include <fcntl.h>
 #include <time.h>
 
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_plugin.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_conf.h>
+#include <sudo_debug.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_plugin.h>
+#include <sudo_util.h>
 
 #ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
 /*

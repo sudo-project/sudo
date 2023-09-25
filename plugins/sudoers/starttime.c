@@ -62,8 +62,8 @@
 #include <limits.h>
 #include <unistd.h>
 
-#include "sudoers.h"
-#include "timestamp.h"
+#include <sudoers.h>
+#include <timestamp.h>
 
 /*
  * Arguments for sysctl(2) when reading the process start time.

@@ -32,7 +32,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "sudo_plugin.h"
+#include <sudo_plugin.h>
 
 sudo_dso_public int main(int argc, char *argv[]);
 

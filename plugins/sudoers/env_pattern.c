@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 /* extern for regress tests */
 bool

@@ -33,8 +33,8 @@
 #include <string.h>
 #include <regex.h>
 
-#include "sudoers.h"
-#include "toke.h"
+#include <sudoers.h>
+#include <toke.h>
 #include <gram.h>
 
 static size_t arg_len = 0;

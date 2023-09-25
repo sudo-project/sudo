@@ -30,10 +30,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_eventlog.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_eventlog.h>
+#include <sudo_util.h>
 
 /*
  * Free the strings in a struct eventlog.

@@ -32,9 +32,9 @@
 #include <string.h>
 #include <arpa/inet.h>
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
-#include "sudo_rand.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
+#include <sudo_rand.h>
 
 struct uuid {
     uint32_t time_low;

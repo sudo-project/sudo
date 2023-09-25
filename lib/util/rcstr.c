@@ -27,9 +27,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_util.h>
 
 /* Trivial reference-counted strings. */
 struct rcstr {

@@ -38,9 +38,9 @@
 #endif
 #include <errno.h>
 
-#include "sudo_compat.h"
-#include "sudo_dso.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_dso.h>
+#include <sudo_util.h>
 
 /*
  * Pointer for statically compiled symbols.

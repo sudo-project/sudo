@@ -35,13 +35,13 @@
 #include <unistd.h>
 #include <string.h>
 #ifndef HAVE_GETADDRINFO
-# include "compat/getaddrinfo.h"
+# include <compat/getaddrinfo.h>
 #endif
 
-#include "sudoers.h"
-#include "sudo_iolog.h"
-#include "interfaces.h"
-#include "timestamp.h"
+#include <sudoers.h>
+#include <sudo_iolog.h>
+#include <interfaces.h>
+#include <timestamp.h>
 #include "auth/sudo_auth.h"
 
 extern char **environ;

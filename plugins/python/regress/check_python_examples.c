@@ -24,7 +24,7 @@
 #include "testhelpers.h"
 #include <unistd.h>
 
-#include "sudo_dso.h"
+#include <sudo_dso.h>
 
 #define DECL_PLUGIN(type, variable_name) \
     static struct type *variable_name = NULL; \

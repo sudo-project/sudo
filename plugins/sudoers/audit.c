@@ -29,19 +29,19 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 #ifdef SUDOERS_LOG_CLIENT
-# include "log_client.h"
+# include <log_client.h>
 #endif
 
 #ifdef HAVE_BSM_AUDIT
-# include "bsm_audit.h"
+# include <bsm_audit.h>
 #endif
 #ifdef HAVE_LINUX_AUDIT
-# include "linux_audit.h"
+# include <linux_audit.h>
 #endif
 #ifdef HAVE_SOLARIS_AUDIT
-# include "solaris_audit.h"
+# include <solaris_audit.h>
 #endif
 
 #ifdef SUDOERS_LOG_CLIENT

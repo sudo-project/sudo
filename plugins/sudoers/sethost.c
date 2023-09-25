@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 /*
  * Set ctx->user.host. ctx->user.shost, ctx->runas.host and ctx->runas.shost

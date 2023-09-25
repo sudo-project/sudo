@@ -28,7 +28,7 @@
 
 #include <sys/types.h>
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 /*
  * Reverse memchr()

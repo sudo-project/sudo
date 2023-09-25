@@ -29,7 +29,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 int
 sudo_dup3(int oldd, int newd, int flags)

@@ -43,10 +43,10 @@
 # include <sys/task.h>
 #endif
 
-#include "sudo.h"
-#include "sudo_exec.h"
-#include "sudo_plugin.h"
-#include "sudo_plugin_int.h"
+#include <sudo.h>
+#include <sudo_exec.h>
+#include <sudo_plugin.h>
+#include <sudo_plugin_int.h>
 
 #ifdef HAVE_PTRACE_INTERCEPT
 static void

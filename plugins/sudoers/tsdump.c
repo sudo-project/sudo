@@ -32,8 +32,8 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "sudoers.h"
-#include "timestamp.h"
+#include <sudoers.h>
+#include <timestamp.h>
 
 struct timestamp_entry_common {
     unsigned short version;	/* version number */

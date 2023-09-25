@@ -39,8 +39,8 @@
 #include <pwd.h>
 #include <grp.h>
 
-#include "sudoers.h"
-#include "timestamp.h"
+#include <sudoers.h>
+#include <timestamp.h>
 
 /*
  * Get passwd entry for the user we are going to authenticate as.

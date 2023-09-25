@@ -24,10 +24,10 @@
 #include <errno.h>
 #include <limits.h>
 
-#include "sudo_compat.h"
-#include "sudo_dso.h"
-#include "sudo_util.h"
-#include "sudo_fatal.h"
+#include <sudo_compat.h>
+#include <sudo_dso.h>
+#include <sudo_util.h>
+#include <sudo_fatal.h>
 
 sudo_dso_public int main(int argc, char *argv[]);
 

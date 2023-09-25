@@ -26,9 +26,9 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_iolog.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_iolog.h>
 
 /*
  * I/O log wrapper for fseek/gzseek.

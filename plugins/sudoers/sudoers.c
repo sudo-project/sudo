@@ -58,12 +58,12 @@
 #endif
 #include <ctype.h>
 #ifndef HAVE_GETADDRINFO
-# include "compat/getaddrinfo.h"
+# include <compat/getaddrinfo.h>
 #endif
 
-#include "sudoers.h"
-#include "timestamp.h"
-#include "sudo_iolog.h"
+#include <sudoers.h>
+#include <timestamp.h>
+#include <sudo_iolog.h>
 
 /*
  * Prototypes

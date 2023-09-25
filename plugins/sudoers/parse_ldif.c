@@ -31,10 +31,10 @@
 #endif /* HAVE_STRINGS_H */
 #include <ctype.h>
 
-#include "sudoers.h"
-#include "sudo_ldap.h"
-#include "redblack.h"
-#include "strlist.h"
+#include <sudoers.h>
+#include <sudo_ldap.h>
+#include <redblack.h>
+#include <strlist.h>
 #include <gram.h>
 
 struct sudo_role {

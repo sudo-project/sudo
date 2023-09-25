@@ -6,7 +6,7 @@
 #define PROTOBUF_C__NO_DEPRECATED
 #endif
 
-#include "intercept.pb-c.h"
+#include <intercept.pb-c.h>
 void   intercept_request__init
                      (InterceptRequest         *message)
 {

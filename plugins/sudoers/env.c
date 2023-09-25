@@ -48,7 +48,7 @@
 #include <limits.h>
 #include <pwd.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 /*
  * Flags used in rebuild_env()

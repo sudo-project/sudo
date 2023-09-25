@@ -29,8 +29,8 @@
 #include <pwd.h>
 #include <time.h>
 
-#include "sudoers.h"
-#include "sudo_lbuf.h"
+#include <sudoers.h>
+#include <sudo_lbuf.h>
 #include <gram.h>
 
 /*

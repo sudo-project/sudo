@@ -53,7 +53,7 @@
 # define rfc1938verify(a,b)		opieverify((a),(b))
 #endif
 
-#include "sudoers.h"
+#include <sudoers.h>
 #include "sudo_auth.h"
 
 int

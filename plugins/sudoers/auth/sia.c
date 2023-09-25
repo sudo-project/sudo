@@ -39,7 +39,7 @@
 #include <signal.h>
 #include <siad.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 #include "sudo_auth.h"
 
 static int sudo_argc;

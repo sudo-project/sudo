@@ -26,7 +26,7 @@
 # include <inttypes.h>
 #endif
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 static int fuzz_printf(int msg_type, const char * restrict fmt, ...);
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);

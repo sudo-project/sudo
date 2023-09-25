@@ -38,9 +38,9 @@
 #include <limits.h>
 #include <syslog.h>
 
-#include "sudoers.h"
-#include "sudo_eventlog.h"
-#include "sudo_iolog.h"
+#include <sudoers.h>
+#include <sudo_eventlog.h>
+#include <sudo_iolog.h>
 #include <gram.h>
 
 static struct early_default early_defaults[] = {

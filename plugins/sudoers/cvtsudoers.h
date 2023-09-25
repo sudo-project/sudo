@@ -19,7 +19,7 @@
 #ifndef SUDOERS_CVTSUDOERS_H
 #define SUDOERS_CVTSUDOERS_H
 
-#include "strlist.h"
+#include <strlist.h>
 
 /* Supported input/output formats. */
 enum sudoers_formats {

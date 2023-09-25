@@ -41,10 +41,10 @@
 #include <time.h>
 #include <signal.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 #include "sudo_auth.h"
-#include "insults.h"
-#include "timestamp.h"
+#include <insults.h>
+#include <timestamp.h>
 
 static sudo_auth auth_switch[] = {
 /* Standalone entries first */

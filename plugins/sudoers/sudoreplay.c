@@ -46,31 +46,31 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #include <regex.h>
 #include <signal.h>
 #ifdef HAVE_GETOPT_LONG
 # include <getopt.h>
 # else
-# include "compat/getopt.h"
+# include <compat/getopt.h>
 #endif /* HAVE_GETOPT_LONG */
 
-#include "pathnames.h"
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_event.h"
-#include "sudo_eventlog.h"
-#include "sudo_lbuf.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_iolog.h"
-#include "sudo_plugin.h"
-#include "sudo_queue.h"
-#include "sudo_util.h"
+#include <pathnames.h>
+#include <sudo_compat.h>
+#include <sudo_conf.h>
+#include <sudo_debug.h>
+#include <sudo_event.h>
+#include <sudo_eventlog.h>
+#include <sudo_lbuf.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_iolog.h>
+#include <sudo_plugin.h>
+#include <sudo_queue.h>
+#include <sudo_util.h>
 
-#include "logging.h"
+#include <logging.h>
 
 struct replay_closure {
     const char *iolog_dir;

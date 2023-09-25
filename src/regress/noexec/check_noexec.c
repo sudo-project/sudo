@@ -25,7 +25,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #include <string.h>
 #ifdef HAVE_WORDEXP_H
@@ -36,11 +36,11 @@
 #include <limits.h>
 #include <errno.h>
 
-#include "sudo_compat.h"
-#include "sudo_fatal.h"
-#include "sudo_util.h"
-#include "sudo_queue.h"
-#include "sudo_exec.h"
+#include <sudo_compat.h>
+#include <sudo_fatal.h>
+#include <sudo_util.h>
+#include <sudo_queue.h>
+#include <sudo_exec.h>
 
 static bool verbose;
 

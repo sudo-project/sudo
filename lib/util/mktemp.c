@@ -43,9 +43,9 @@
 #include <ctype.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_rand.h"
-#include "pathnames.h"
+#include <sudo_compat.h>
+#include <sudo_rand.h>
+#include <pathnames.h>
 
 #define MKTEMP_FILE	1
 #define MKTEMP_DIR	2

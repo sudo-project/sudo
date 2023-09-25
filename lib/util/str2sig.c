@@ -34,8 +34,8 @@
 #include <signal.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
 
 #if !defined(HAVE_SIGABBREV_NP)
 # if defined(HAVE_DECL_SYS_SIGNAME) && HAVE_DECL_SYS_SIGNAME == 1

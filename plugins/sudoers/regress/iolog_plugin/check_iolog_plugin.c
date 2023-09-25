@@ -27,10 +27,10 @@
 
 #define SUDO_ERROR_WRAP 0
 
-#include "sudoers.h"
-#include "sudo_eventlog.h"
-#include "sudo_iolog.h"
-#include "sudo_plugin.h"
+#include <sudoers.h>
+#include <sudo_eventlog.h>
+#include <sudo_iolog.h>
+#include <sudo_plugin.h>
 
 #include <def_data.c>		/* for iolog_path.c */
 

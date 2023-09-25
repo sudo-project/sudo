@@ -23,7 +23,7 @@
 
 #include "../pyhelpers.h"
 
-#include "sudo_conf.h"
+#include <sudo_conf.h>
 
 // just for the IDE
 #ifndef SRC_DIR

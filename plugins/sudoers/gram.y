@@ -31,9 +31,9 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "sudoers.h"
-#include "sudo_digest.h"
-#include "toke.h"
+#include <sudoers.h>
+#include <sudo_digest.h>
+#include <toke.h>
 
 #ifdef YYBISON
 # define YYERROR_VERBOSE

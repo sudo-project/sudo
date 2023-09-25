@@ -60,7 +60,7 @@
 # define dgt(d, t)	dgettext(d, t)
 #endif
 
-#include "sudoers.h"
+#include <sudoers.h>
 #include "sudo_auth.h"
 
 /* Only OpenPAM and Linux PAM use const qualifiers. */

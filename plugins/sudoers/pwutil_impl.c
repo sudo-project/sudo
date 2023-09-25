@@ -38,8 +38,8 @@
 #include <pwd.h>
 #include <grp.h>
 
-#include "sudoers.h"
-#include "pwutil.h"
+#include <sudoers.h>
+#include <pwutil.h>
 
 #ifndef LOGIN_NAME_MAX
 # ifdef _POSIX_LOGIN_NAME_MAX

@@ -29,7 +29,7 @@
 #include <limits.h>
 #include <ctype.h>
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 
 #define EPOCH		1970

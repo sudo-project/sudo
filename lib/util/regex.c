@@ -30,10 +30,10 @@
 #include <limits.h>
 #include <regex.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_util.h"
-#include "sudo_gettext.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_util.h>
+#include <sudo_gettext.h>
 
 static char errbuf[1024];
 

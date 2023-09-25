@@ -21,7 +21,7 @@
 
 #include <time.h>	/* for struct timespec */
 #include <signal.h>	/* for sigatomic_t and NSIG */
-#include "sudo_queue.h"
+#include <sudo_queue.h>
 
 struct timeval;		/* for deprecated APIs */
 

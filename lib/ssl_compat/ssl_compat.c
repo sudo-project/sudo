@@ -31,8 +31,8 @@
 # endif
 # include <openssl/ssl.h>
 
-# include "sudo_compat.h"
-# include "sudo_ssl_compat.h"
+# include <sudo_compat.h>
+# include <sudo_ssl_compat.h>
 
 /*
  * Emulate SSL_read_ex() using SSL_read().

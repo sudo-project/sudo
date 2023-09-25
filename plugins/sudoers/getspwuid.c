@@ -46,7 +46,7 @@
 # include <prot.h>
 #endif /* HAVE_GETPRPWNAM */
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 /*
  * Exported for auth/secureware.c

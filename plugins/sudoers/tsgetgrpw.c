@@ -37,8 +37,8 @@
 #include <limits.h>
 #include <unistd.h>
 
-#include "tsgetgrpw.h"
-#include "sudoers.h"
+#include <tsgetgrpw.h>
+#include <sudoers.h>
 
 #undef GRMEM_MAX
 #define GRMEM_MAX 200

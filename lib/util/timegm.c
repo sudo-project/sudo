@@ -28,8 +28,8 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
 
 /*
  * Returns the offset from GMT in seconds (algorithm taken from sendmail).

@@ -29,19 +29,19 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 
 #define DEFAULT_TEXT_DOMAIN	"sudoers"
 
-#include "sudo_compat.h"
-#include "sudo_eventlog.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudoers_debug.h"
+#include <sudo_compat.h>
+#include <sudo_eventlog.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudoers_debug.h>
 
-#include "defaults.h"
-#include "logging.h"
+#include <defaults.h>
+#include <logging.h>
 
 static int current_locale = SUDOERS_LOCALE_USER;
 static char *user_locale;

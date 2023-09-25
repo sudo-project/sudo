@@ -37,9 +37,9 @@
 #include <signal.h>
 #include <fcntl.h>
 
-#include "sudo.h"
-#include "sudo_edit.h"
-#include "sudo_exec.h"
+#include <sudo.h>
+#include <sudo_edit.h>
+#include <sudo_exec.h>
 
 #if defined(HAVE_SETRESUID) || defined(HAVE_SETREUID) || defined(HAVE_SETEUID)
 

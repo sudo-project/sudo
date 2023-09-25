@@ -24,7 +24,7 @@
 
 #define SUDO_ERROR_WRAP 0
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 sudo_dso_public int main(int argc, char *argv[]);
 

@@ -60,14 +60,14 @@
 #ifdef HAVE_GETOPT_LONG
 # include <getopt.h>
 # else
-# include "compat/getopt.h"
+# include <compat/getopt.h>
 #endif /* HAVE_GETOPT_LONG */
 
-#include "sudoers.h"
-#include "interfaces.h"
-#include "redblack.h"
-#include "sudoers_version.h"
-#include "sudo_conf.h"
+#include <sudoers.h>
+#include <interfaces.h>
+#include <redblack.h>
+#include <sudoers_version.h>
+#include <sudo_conf.h>
 #include <gram.h>
 
 struct sudoersfile {

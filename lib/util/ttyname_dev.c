@@ -41,11 +41,11 @@
 #include <limits.h>
 #include <dirent.h>
 
-#include "pathnames.h"
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_conf.h"
-#include "sudo_util.h"
+#include <pathnames.h>
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_conf.h>
+#include <sudo_util.h>
 
 #if defined(HAVE_DEVNAME)
 /*

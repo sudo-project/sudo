@@ -33,7 +33,7 @@
 #include <string.h>
 #include <pwd.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 /*
  * Expand %h and %u escapes (if present) in the prompt and pass back

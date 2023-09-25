@@ -24,15 +24,15 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif
 #include <time.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_fatal.h"
-#include "sudo_iolog.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_fatal.h>
+#include <sudo_iolog.h>
+#include <sudo_util.h>
 
 sudo_dso_public int main(int argc, char *argv[]);
 

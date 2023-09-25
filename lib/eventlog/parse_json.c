@@ -28,7 +28,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #include <string.h>
 #include <unistd.h>
@@ -37,14 +37,14 @@
 #include <fcntl.h>
 #include <time.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_eventlog.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_eventlog.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_util.h>
 
-#include "parse_json.h"
+#include <parse_json.h>
 
 struct json_stack {
     unsigned int depth;

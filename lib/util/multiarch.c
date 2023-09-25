@@ -32,8 +32,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
 
 # if defined(__linux__)
 /* 

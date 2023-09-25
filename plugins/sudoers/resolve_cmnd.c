@@ -23,7 +23,7 @@
 
 #include <config.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 /*
  * Calls find_path() first with PERM_RUNAS, falling back to PERM_USER.

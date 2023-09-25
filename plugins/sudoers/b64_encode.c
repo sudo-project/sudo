@@ -23,7 +23,7 @@
 
 #include <config.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 static const unsigned char base64enc_tab[64] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";

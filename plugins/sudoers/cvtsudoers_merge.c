@@ -31,9 +31,9 @@
 #include <ctype.h>
 #include <errno.h>
 
-#include "sudoers.h"
-#include "redblack.h"
-#include "cvtsudoers.h"
+#include <sudoers.h>
+#include <redblack.h>
+#include <cvtsudoers.h>
 #include <gram.h>
 
 static struct member *

@@ -36,13 +36,13 @@
 # ifdef HAVE_NSS_DBDEFS_H
 #  include <nss_dbdefs.h>
 # else
-#  include "compat/nss_dbdefs.h"
+#  include <compat/nss_dbdefs.h>
 # endif
 #endif
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_util.h>
 
 #ifndef HAVE_GETGROUPLIST
 int

@@ -43,9 +43,9 @@
 #include <pwd.h>
 #include <grp.h>
 
-#include "sudoers.h"
-#include "redblack.h"
-#include "pwutil.h"
+#include <sudoers.h>
+#include <redblack.h>
+#include <pwutil.h>
 
 /*
  * The passwd and group caches.

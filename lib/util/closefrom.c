@@ -43,9 +43,9 @@
 # include <linux/close_range.h>
 #endif
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
-#include "pathnames.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
+#include <pathnames.h>
 
 #ifndef OPEN_MAX
 # define OPEN_MAX	256

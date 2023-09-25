@@ -26,8 +26,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
 
 /*
  * Return a malloc()ed copy of the system hostname, or NULL if 

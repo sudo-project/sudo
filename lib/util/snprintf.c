@@ -68,8 +68,8 @@
 #endif
 #include <fcntl.h>
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
 
 /* Avoid printf format attacks by ignoring the %n escape. */
 #define NO_PRINTF_PERCENT_N

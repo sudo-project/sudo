@@ -30,7 +30,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 /*
  * Non-destructive word-split that handles single and double quotes and

@@ -39,8 +39,8 @@
 #include <errno.h>
 #include <grp.h>
 
-#include "sudoers.h"
-#include "timestamp.h"
+#include <sudoers.h>
+#include <timestamp.h>
 
 /* No change when passed to setresuid(), etc. */
 #define NO_UID	(uid_t)-1

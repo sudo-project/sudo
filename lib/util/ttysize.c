@@ -29,9 +29,9 @@
 #include <termios.h>		/* for struct winsize on HP-UX */
 #include <limits.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_util.h>
 
 static int
 get_ttysize_ioctl(int fd, int *rowp, int *colp)

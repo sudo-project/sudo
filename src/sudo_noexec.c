@@ -51,8 +51,8 @@
 # include <dlfcn.h>
 #endif
 
-#include "sudo_compat.h"
-#include "pathnames.h"
+#include <sudo_compat.h>
+#include <pathnames.h>
 
 #ifdef HAVE___INTERPOSE
 /*

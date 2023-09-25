@@ -35,10 +35,10 @@
 
 # define NEED_INET_NTOP		/* to expose sudo_inet_ntop in sudo_compat.h */
 
-# include  "sudo_compat.h"
-# include  "sudo_debug.h"
-# include  "sudo_util.h"
-# include  "hostcheck.h"
+# include  <sudo_compat.h>
+# include  <sudo_debug.h>
+# include  <sudo_util.h>
+# include  <hostcheck.h>
 
 #ifndef INET_ADDRSTRLEN
 # define INET_ADDRSTRLEN 16

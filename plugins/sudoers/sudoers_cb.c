@@ -38,12 +38,12 @@
 #include <grp.h>
 #include <netdb.h>
 #ifndef HAVE_GETADDRINFO
-# include "compat/getaddrinfo.h"
+# include <compat/getaddrinfo.h>
 #endif
 
-#include "sudoers.h"
-#include "timestamp.h"
-#include "sudo_iolog.h"
+#include <sudoers.h>
+#include <timestamp.h>
+#include <sudo_iolog.h>
 
 #ifndef AI_FQDN
 # define AI_FQDN AI_CANONNAME

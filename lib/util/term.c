@@ -32,9 +32,9 @@
 #include <termios.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_util.h>
 
 /* TCSASOFT is a BSD extension that ignores control flags and speed. */
 #ifndef TCSASOFT

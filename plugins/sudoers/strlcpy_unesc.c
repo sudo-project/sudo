@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 /*
  * Like strlcpy() but collapses non-space chars escaped with a backslash.

@@ -29,10 +29,10 @@
 #include <string.h>
 #include <errno.h>
 
-#include "sudo.h"
-#include "sudo_plugin.h"
-#include "sudo_plugin_int.h"
-#include "sudo_dso.h"
+#include <sudo.h>
+#include <sudo_plugin.h>
+#include <sudo_plugin_int.h>
+#include <sudo_dso.h>
 
 #ifdef ENABLE_SUDO_PLUGIN_API
 static bool

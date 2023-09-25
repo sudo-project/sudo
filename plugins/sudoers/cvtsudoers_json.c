@@ -30,9 +30,9 @@
 #include <stdarg.h>
 #include <ctype.h>
 
-#include "sudoers.h"
-#include "sudo_json.h"
-#include "cvtsudoers.h"
+#include <sudoers.h>
+#include <sudo_json.h>
+#include <cvtsudoers.h>
 #include <gram.h>
 
 /*

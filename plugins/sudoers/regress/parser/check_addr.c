@@ -31,8 +31,8 @@
 
 #define SUDO_ERROR_WRAP 0
 
-#include "sudoers.h"
-#include "interfaces.h"
+#include <sudoers.h>
+#include <interfaces.h>
 
 sudo_dso_public int main(int argc, char *argv[]);
 

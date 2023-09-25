@@ -32,14 +32,14 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_digest.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_digest.h>
 
 #ifdef HAVE_SHA224UPDATE
 # include <sha2.h>
 #else
-# include "compat/sha2.h"
+# include <compat/sha2.h>
 #endif
 
 static struct digest_function {

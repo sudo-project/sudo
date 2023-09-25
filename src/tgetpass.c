@@ -41,8 +41,8 @@
 #include <signal.h>
 #include <fcntl.h>
 
-#include "sudo.h"
-#include "sudo_plugin.h"
+#include <sudo.h>
+#include <sudo_plugin.h>
 
 enum tgetpass_errval {
     TGP_ERRVAL_NOERROR,

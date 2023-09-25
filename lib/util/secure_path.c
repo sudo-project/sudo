@@ -29,9 +29,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
-#include "sudo_debug.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
+#include <sudo_debug.h>
 
 /*
  * Verify that path is the right type and not writable by other users.

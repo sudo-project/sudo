@@ -39,7 +39,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #if defined(HAVE_SHL_LOAD)
 # include <dl.h>
@@ -50,10 +50,10 @@
 # include <crt_externs.h>
 #endif
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_util.h"
-#include "pathnames.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_util.h>
+#include <pathnames.h>
 
 /* execl flavors */
 #define SUDO_EXECL	0x0

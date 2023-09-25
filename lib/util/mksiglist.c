@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <signal.h>
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 sudo_dso_public int main(int argc, char *argv[]);
 

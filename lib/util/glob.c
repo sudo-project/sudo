@@ -73,9 +73,9 @@
 #include <limits.h>
 #include <pwd.h>
 
-#include "sudo_compat.h"
-#include "compat/glob.h"
-#include "compat/charclass.h"
+#include <sudo_compat.h>
+#include <compat/glob.h>
+#include <compat/charclass.h>
 
 #define	DOLLAR		'$'
 #define	DOT		'.'

@@ -34,11 +34,11 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "sudoers.h"
-#include "interfaces.h"
-#include "sudo_lbuf.h"
-#include "sudo_ldap.h"
-#include "sudo_digest.h"
+#include <sudoers.h>
+#include <interfaces.h>
+#include <sudo_lbuf.h>
+#include <sudo_ldap.h>
+#include <sudo_digest.h>
 #include <gram.h>
 
 /*

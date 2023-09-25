@@ -35,11 +35,11 @@
 #include <string.h>
 #include <time.h>
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
-#include "sudo_fatal.h"
-#include "sudo_debug.h"
-#include "sudo_event.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
+#include <sudo_fatal.h>
+#include <sudo_debug.h>
+#include <sudo_event.h>
 
 int
 sudo_ev_base_alloc_impl(struct sudo_event_base *base)

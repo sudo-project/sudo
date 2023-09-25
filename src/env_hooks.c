@@ -27,9 +27,9 @@
 #include <string.h>
 #include <errno.h>
 
-#include "sudo.h"
-#include "sudo_plugin.h"
-#include "sudo_dso.h"
+#include <sudo.h>
+#include <sudo_plugin.h>
+#include <sudo_dso.h>
 
 extern char **environ;		/* global environment pointer */
 static char **priv_environ;	/* private environment pointer */

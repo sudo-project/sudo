@@ -35,12 +35,12 @@
 #ifdef HAVE_GETOPT_LONG
 # include <getopt.h>
 # else
-# include "compat/getopt.h"
+# include <compat/getopt.h>
 #endif /* HAVE_GETOPT_LONG */
 
 #include <sudo_usage.h>
-#include "sudo.h"
-#include "sudo_lbuf.h"
+#include <sudo.h>
+#include <sudo_lbuf.h>
 
 unsigned int tgetpass_flags;
 

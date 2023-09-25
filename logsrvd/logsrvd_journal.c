@@ -36,7 +36,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
@@ -49,17 +49,17 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_event.h"
-#include "sudo_eventlog.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_iolog.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_conf.h>
+#include <sudo_debug.h>
+#include <sudo_event.h>
+#include <sudo_eventlog.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_iolog.h>
+#include <sudo_util.h>
 
-#include "logsrvd.h"
+#include <logsrvd.h>
 
 /*
  * Helper function to set closure->journal and closure->journal_path.

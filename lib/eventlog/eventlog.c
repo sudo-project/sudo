@@ -47,16 +47,16 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "pathnames.h"
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_eventlog.h"
-#include "sudo_lbuf.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_json.h"
-#include "sudo_queue.h"
-#include "sudo_util.h"
+#include <pathnames.h>
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_eventlog.h>
+#include <sudo_lbuf.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_json.h>
+#include <sudo_queue.h>
+#include <sudo_util.h>
 
 #define IS_SESSID(s) ( \
     isalnum((unsigned char)(s)[0]) && isalnum((unsigned char)(s)[1]) && \

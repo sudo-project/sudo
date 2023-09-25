@@ -37,7 +37,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #include <string.h>
 #ifdef HAVE_STRINGS_H
@@ -46,13 +46,13 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "testsudoers_pwutil.h"
-#include "toke.h"
-#include "tsgetgrpw.h"
-#include "sudoers.h"
-#include "interfaces.h"
-#include "sudo_conf.h"
-#include "sudo_lbuf.h"
+#include <testsudoers_pwutil.h>
+#include <toke.h>
+#include <tsgetgrpw.h>
+#include <sudoers.h>
+#include <interfaces.h>
+#include <sudo_conf.h>
+#include <sudo_lbuf.h>
 #include <gram.h>
 
 #ifndef YYDEBUG

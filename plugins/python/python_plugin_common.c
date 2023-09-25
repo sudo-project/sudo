@@ -24,8 +24,8 @@
 #include "python_plugin_common.h"
 #include "sudo_python_module.h"
 
-#include "sudo_queue.h"
-#include "sudo_conf.h"
+#include <sudo_queue.h>
+#include <sudo_conf.h>
 
 #include <limits.h>
 #include <string.h>

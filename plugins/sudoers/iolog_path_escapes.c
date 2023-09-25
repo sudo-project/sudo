@@ -30,8 +30,8 @@
 #include <grp.h>
 #include <unistd.h>
 
-#include "sudoers.h"
-#include "sudo_iolog.h"
+#include <sudoers.h>
+#include <sudo_iolog.h>
 
 /*
  * Like strlcpy(3) but replaces '/' with '_'.

@@ -39,13 +39,13 @@
 #include <fcntl.h>
 #include <limits.h>
 
-#include "sudo.h"
-#include "sudo_exec.h"
-#include "sudo_plugin.h"
-#include "sudo_plugin_int.h"
-#include "sudo_rand.h"
-#include "intercept.pb-c.h"
-#include "exec_intercept.h"
+#include <sudo.h>
+#include <sudo_exec.h>
+#include <sudo_plugin.h>
+#include <sudo_plugin_int.h>
+#include <sudo_rand.h>
+#include <intercept.pb-c.h>
+#include <exec_intercept.h>
 
 #ifdef _PATH_SUDO_INTERCEPT
 static union sudo_token_un intercept_token;

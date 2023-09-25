@@ -34,8 +34,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "sudoers.h"
-#include "sudo_digest.h"
+#include <sudoers.h>
+#include <sudo_digest.h>
 #include <gram.h>
 
 int

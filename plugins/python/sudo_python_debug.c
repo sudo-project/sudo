@@ -27,12 +27,12 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-#include "sudo_gettext.h"
-#include "sudo_compat.h"
+#include <sudo_gettext.h>
+#include <sudo_compat.h>
 #include "sudo_python_debug.h"
-#include "sudo_queue.h"
-#include "sudo_conf.h"
-#include "sudo_fatal.h"
+#include <sudo_queue.h>
+#include <sudo_conf.h>
+#include <sudo_fatal.h>
 
 
 static int python_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;

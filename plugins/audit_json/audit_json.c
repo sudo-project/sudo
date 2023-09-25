@@ -31,7 +31,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #include <string.h>
 #include <signal.h>
@@ -40,16 +40,16 @@
 #include <limits.h>
 #include <time.h>
 
-#include "pathnames.h"
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_dso.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_json.h"
-#include "sudo_plugin.h"
-#include "sudo_util.h"
+#include <pathnames.h>
+#include <sudo_compat.h>
+#include <sudo_conf.h>
+#include <sudo_debug.h>
+#include <sudo_dso.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_json.h>
+#include <sudo_plugin.h>
+#include <sudo_util.h>
 
 static int audit_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 static sudo_conv_t audit_conv;

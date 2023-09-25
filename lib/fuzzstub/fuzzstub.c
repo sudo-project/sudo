@@ -39,8 +39,8 @@
 # include <inttypes.h>
 #endif
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 

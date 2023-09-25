@@ -34,7 +34,7 @@
 #include <errno.h>
 #include <limits.h>
 
-#include "sudo.h"
+#include <sudo.h>
 
 /*
  * Avoid using RLIM_INFINITY for the nofile soft limit to prevent

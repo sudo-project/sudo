@@ -28,10 +28,10 @@
 #include <stdlib.h>
 #include <errno.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_gettext.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_gettext.h>
+#include <sudo_util.h>
 
 /*
  * Parse an octal file mode in the range [0, 0777].

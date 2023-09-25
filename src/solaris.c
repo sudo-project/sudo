@@ -30,8 +30,8 @@
 # include <pwd.h>
 #endif
 
-#include "sudo.h"
-#include "sudo_dso.h"
+#include <sudo.h>
+#include <sudo_dso.h>
 
 int
 os_init(int argc, char *argv[], char *envp[])

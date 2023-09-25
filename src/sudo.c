@@ -64,9 +64,9 @@
 # include <prot.h>
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
-#include "sudo.h"
-#include "sudo_plugin.h"
-#include "sudo_plugin_int.h"
+#include <sudo.h>
+#include <sudo_plugin.h>
+#include <sudo_plugin_int.h>
 
 /*
  * Local variables

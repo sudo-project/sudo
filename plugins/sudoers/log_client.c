@@ -50,7 +50,7 @@
 #include <pwd.h>
 #include <grp.h>
 #ifndef HAVE_GETADDRINFO
-# include "compat/getaddrinfo.h"
+# include <compat/getaddrinfo.h>
 #endif
 
 #if defined(HAVE_OPENSSL)
@@ -64,13 +64,13 @@
 
 #define NEED_INET_NTOP		/* to expose sudo_inet_ntop in sudo_compat.h */
 
-#include "sudoers.h"
-#include "sudo_event.h"
-#include "sudo_eventlog.h"
-#include "sudo_iolog.h"
-#include "hostcheck.h"
-#include "log_client.h"
-#include "strlist.h"
+#include <sudoers.h>
+#include <sudo_event.h>
+#include <sudo_eventlog.h>
+#include <sudo_iolog.h>
+#include <hostcheck.h>
+#include <log_client.h>
+#include <strlist.h>
 
 /* Shared between iolog.c and audit.c */
 struct client_closure *client_closure;
