@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
 #include <unistd.h>
 
 #include <sudoers.h>
@@ -48,6 +49,7 @@ digest_matches(int fd, const char *path,
     struct command_digest *digest;
     size_t digest_len = (size_t)-1;
     int matched = DENY;
+    int fd2 = -1;
     debug_decl(digest_matches, SUDOERS_DEBUG_MATCH);
 
     if (TAILQ_EMPTY(digests)) {
@@ -56,8 +58,11 @@ digest_matches(int fd, const char *path,
     }
 
     if (fd == -1) {
-	/* No file, no match. */
-	goto done;
+	fd2 = open(path, O_RDONLY|O_NONBLOCK);
+	if (fd2 == -1) {
+	    /* No file, no match. */
+	    goto done;
+	}
     }
 
     TAILQ_FOREACH(digest, digests, entries) {
@@ -120,6 +125,8 @@ bad_format:
     sudo_warnx(U_("digest for %s (%s) is not in %s form"), path,
 	digest->digest_str, digest_type_to_name(digest->digest_type));
 done:
+    if (fd2 != -1)
+	close(fd2);
     free(sudoers_digest);
     free(file_digest);
     debug_return_int(matched);
