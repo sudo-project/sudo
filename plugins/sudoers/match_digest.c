@@ -63,6 +63,7 @@ digest_matches(int fd, const char *path,
 	    /* No file, no match. */
 	    goto done;
 	}
+	fd = fd2;
     }
 
     TAILQ_FOREACH(digest, digests, entries) {
