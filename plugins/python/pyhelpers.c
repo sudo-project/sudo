@@ -522,20 +522,20 @@ py_object_get_optional_attr_string(PyObject *py_object, const char *attr_name)
     return value;
 }
 
-long long
+long
 py_object_get_optional_attr_number(PyObject *py_object, const char *attr_name)
 {
     PyObject *py_value = py_object_get_optional_attr(py_object, attr_name, NULL);
     if (py_value == NULL)
         return -1;
 
-    long long value = PyLong_AsLongLong(py_value);
+    long value = PyLong_AsLong(py_value);
     Py_CLEAR(py_value);
     return value;
 }
 
 void
-py_object_set_attr_number(PyObject *py_object, const char *attr_name, long long number)
+py_object_set_attr_number(PyObject *py_object, const char *attr_name, long number)
 {
     PyObject *py_number = PyLong_FromLong(number);
     if (py_number == NULL)
