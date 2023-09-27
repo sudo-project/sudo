@@ -105,7 +105,7 @@ iolog_parse_delay(const char *cp, struct timespec *delay,
     }
     memcpy(numbuf, cp, len);
     numbuf[len] = '\0';
-    delay->tv_sec = sudo_strtonum(numbuf, 0, TIME_T_MAX, &errstr);
+    delay->tv_sec = (time_t)sudo_strtonum(numbuf, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "%s: number of seconds is %s", numbuf, errstr);

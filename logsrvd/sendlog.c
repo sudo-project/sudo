@@ -1142,8 +1142,8 @@ handle_commit_point(TimeSpec *commit_point, struct client_closure *closure)
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: commit point: [%lld, %d]",
 	__func__, (long long)commit_point->tv_sec, commit_point->tv_nsec);
-    closure->committed.tv_sec = commit_point->tv_sec;
-    closure->committed.tv_nsec = commit_point->tv_nsec;
+    closure->committed.tv_sec = (time_t)commit_point->tv_sec;
+    closure->committed.tv_nsec = (long)commit_point->tv_nsec;
 
     debug_return_bool(true);
 }
@@ -1518,14 +1518,14 @@ parse_timespec(struct timespec *ts, char *strval)
 	*nsecstr++ = '\0';
 
     ts->tv_nsec = 0;
-    ts->tv_sec = sudo_strtonum(strval, 0, TIME_T_MAX, &errstr);
+    ts->tv_sec = (time_t)sudo_strtonum(strval, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL) {
 	sudo_warnx(U_("%s: %s"), strval, U_(errstr));
 	debug_return_bool(false);
     }
 
     if (nsecstr != NULL) {
-	ts->tv_nsec = sudo_strtonum(nsecstr, 0, LONG_MAX, &errstr);
+	ts->tv_nsec = (long)sudo_strtonum(nsecstr, 0, LONG_MAX, &errstr);
 	if (errstr != NULL) {
 	    sudo_warnx(U_("%s: %s"), nsecstr, U_(errstr));
 	    debug_return_bool(false);

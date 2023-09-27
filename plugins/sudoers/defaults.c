@@ -999,7 +999,7 @@ store_timespec(const char *str, struct sudo_defs_types *def)
 		ts.tv_sec++;
 		nsec -= 1000000000;
 	    }
-	    ts.tv_nsec = nsec;
+	    ts.tv_nsec = (long)nsec;
 	}
     }
     if (sign == '-') {

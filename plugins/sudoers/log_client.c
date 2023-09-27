@@ -1513,8 +1513,8 @@ handle_commit_point(TimeSpec *commit_point, struct client_closure *closure)
 	debug_return_bool(false);
     }
 
-    closure->committed.tv_sec = commit_point->tv_sec;
-    closure->committed.tv_nsec = commit_point->tv_nsec;
+    closure->committed.tv_sec = (time_t)commit_point->tv_sec;
+    closure->committed.tv_nsec = (long)commit_point->tv_nsec;
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: received [%lld, %d], elapsed [%lld, %ld], committed [%lld, %ld]",
 	__func__, (long long)commit_point->tv_sec, commit_point->tv_nsec,

@@ -588,7 +588,7 @@ cb_server_timeout(struct logsrvd_config *config, const char *str, size_t offset)
     const char *errstr;
     debug_decl(cb_server_timeout, SUDO_DEBUG_UTIL);
 
-    timeout = sudo_strtonum(str, 0, TIME_T_MAX, &errstr);
+    timeout = (time_t)sudo_strtonum(str, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL)
 	debug_return_bool(false);
 
@@ -794,7 +794,7 @@ cb_relay_timeout(struct logsrvd_config *config, const char *str, size_t offset)
     const char *errstr;
     debug_decl(cb_relay_timeout, SUDO_DEBUG_UTIL);
 
-    timeout = sudo_strtonum(str, 0, TIME_T_MAX, &errstr);
+    timeout = (time_t)sudo_strtonum(str, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL)
 	debug_return_bool(false);
 
@@ -810,7 +810,7 @@ cb_relay_connect_timeout(struct logsrvd_config *config, const char *str, size_t 
     const char *errstr;
     debug_decl(cb_relay_connect_timeout, SUDO_DEBUG_UTIL);
 
-    timeout = sudo_strtonum(str, 0, TIME_T_MAX, &errstr);
+    timeout = (time_t)sudo_strtonum(str, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL)
 	debug_return_bool(false);
 
@@ -843,7 +843,7 @@ cb_retry_interval(struct logsrvd_config *config, const char *str, size_t offset)
     const char *errstr;
     debug_decl(cb_retry_interval, SUDO_DEBUG_UTIL);
 
-    interval = sudo_strtonum(str, 0, TIME_T_MAX, &errstr);
+    interval = (time_t)sudo_strtonum(str, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL)
 	debug_return_bool(false);
 

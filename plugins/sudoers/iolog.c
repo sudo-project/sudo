@@ -498,7 +498,7 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
 		continue;
 	    }
 	    if (strncmp(*cur, "log_server_timeout=", sizeof("log_server_timeout=") - 1) == 0) {
-		details->server_timeout.tv_sec =
+		details->server_timeout.tv_sec = (time_t)
 		    sudo_strtonum(*cur + sizeof("log_server_timeout=") - 1, 1,
 		    TIME_T_MAX, NULL);
 		continue;

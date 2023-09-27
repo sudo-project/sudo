@@ -150,8 +150,8 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 
     /* Submit time. */
     if (submit_time != NULL) {
-	evlog->submit_time.tv_sec = submit_time->tv_sec;
-	evlog->submit_time.tv_nsec = submit_time->tv_nsec;
+	evlog->submit_time.tv_sec = (time_t)submit_time->tv_sec;
+	evlog->submit_time.tv_nsec = (long)submit_time->tv_nsec;
     }
 
     /* Default values */
@@ -891,8 +891,8 @@ update_elapsed_time(TimeSpec *delta, struct timespec *elapsed)
     debug_decl(update_elapsed_time, SUDO_DEBUG_UTIL);
 
     /* Cannot use timespecadd since msg doesn't use struct timespec. */
-    elapsed->tv_sec += delta->tv_sec;
-    elapsed->tv_nsec += delta->tv_nsec;
+    elapsed->tv_sec += (time_t)delta->tv_sec;
+    elapsed->tv_nsec += (long)delta->tv_nsec;
     while (elapsed->tv_nsec >= 1000000000) {
 	elapsed->tv_sec++;
 	elapsed->tv_nsec -= 1000000000;

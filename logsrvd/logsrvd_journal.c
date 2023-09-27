@@ -443,8 +443,8 @@ journal_restart(RestartMessage *msg, uint8_t *buf, size_t buflen,
     }
 
     /* Seek forward to resume point. */
-    target.tv_sec = msg->resume_point->tv_sec;
-    target.tv_nsec = msg->resume_point->tv_nsec;
+    target.tv_sec = (time_t)msg->resume_point->tv_sec;
+    target.tv_nsec = (long)msg->resume_point->tv_nsec;
     if (!journal_seek(&target, closure)) {
 	sudo_warn(U_("unable to seek to [%lld, %ld] in journal file %s"),
 	    (long long)target.tv_sec, target.tv_nsec, journal_path);

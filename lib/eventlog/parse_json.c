@@ -382,11 +382,11 @@ json_store_timespec(struct json_item *item, struct timespec *ts)
 	if (item->type != JSON_NUMBER)
 	    continue;
 	if (strcmp(item->name, "seconds") == 0) {
-	    ts->tv_sec = item->u.number;
+	    ts->tv_sec = (time_t)item->u.number;
 	    continue;
 	}
 	if (strcmp(item->name, "nanoseconds") == 0) {
-	    ts->tv_nsec = item->u.number;
+	    ts->tv_nsec = (long)item->u.number;
 	    continue;
 	}
     }
