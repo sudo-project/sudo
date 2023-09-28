@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "September 20, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "September 28, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3339,6 +3339,9 @@ The
 flag uses the same underlying mechanism as the
 \fIintercept\fR
 setting.
+Some commands may not work properly when
+\fIlog_subcmds\fR
+is enabled, due to the way it intercepts sub-commands.
 See
 \fIPreventing shell escapes\fR
 for more information on what systems support this option and its limitations.
@@ -3544,6 +3547,9 @@ will behave as if the
 tag has been set, unless overridden by an
 \fRNOINTERCEPT\fR
 tag.
+Some commands may not work properly when
+\fIintercept\fR
+is enabled, due to the way it intercept sub-commands.
 See the description of
 \fRINTERCEPT and NOINTERCEPT\fR
 above as well as the
@@ -3640,6 +3646,14 @@ tag has been set for the command and the
 \fIintercept_type\fR
 option is set to
 \fItrace\fR.
+.sp
+This setting is incompatible with programs that change their root directory via
+chroot(2).
+If a program changes its root directory, path names will no longer match
+those seen by the
+\fBsudo\fR
+parent process and sub-commands will be terminated before they have a chance
+to run.
 This flag is
 \fIon\fR
 by default.
@@ -7393,6 +7407,9 @@ run a new command, allow or deny it based on
 rules, and log the result.
 For example, this can be used to restrict the commands run from
 within a privileged shell or editor.
+However, not all programs operate correctly when
+\fIintercept\fR
+is enabled.
 .sp
 There are two underlying mechanisms that may be used to implement
 \fIintercept\fR
@@ -7466,6 +7483,21 @@ execveat(2)
 system call, such as
 fexecve(3),
 are not currently intercepted.
+Programs that rely on
+ptrace(2)
+themselves, such as debuggers and system call tracers
+(such as
+strace(1)
+and
+truss(1))
+will be unable to function if
+\fIintercept\fR
+is enabled in
+\fItrace\fR
+mode.
+This same restriction applies to the
+\fIlog_subcmds\fR
+sudoers option.
 .sp
 The
 \fIintercept\fR

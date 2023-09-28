@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd September 20, 2023
+.Dd September 28, 2023
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3162,6 +3162,9 @@ The
 flag uses the same underlying mechanism as the
 .Em intercept
 setting.
+Some commands may not work properly when
+.Em log_subcmds
+is enabled, due to the way it intercepts sub-commands.
 See
 .Sx Preventing shell escapes
 for more information on what systems support this option and its limitations.
@@ -3355,6 +3358,9 @@ will behave as if the
 tag has been set, unless overridden by an
 .Dv NOINTERCEPT
 tag.
+Some commands may not work properly when
+.Em intercept
+is enabled, due to the way it intercept sub-commands.
 See the description of
 .Dv INTERCEPT and NOINTERCEPT
 above as well as the
@@ -3448,6 +3454,14 @@ tag has been set for the command and the
 .Em intercept_type
 option is set to
 .Em trace .
+.Pp
+This setting is incompatible with programs that change their root directory via
+.Xr chroot 2 .
+If a program changes its root directory, path names will no longer match
+those seen by the
+.Nm sudo
+parent process and sub-commands will be terminated before they have a chance
+to run.
 This flag is
 .Em on
 by default.
@@ -6838,6 +6852,9 @@ run a new command, allow or deny it based on
 rules, and log the result.
 For example, this can be used to restrict the commands run from
 within a privileged shell or editor.
+However, not all programs operate correctly when
+.Em intercept
+is enabled.
 .Pp
 There are two underlying mechanisms that may be used to implement
 .Em intercept
@@ -6911,6 +6928,23 @@ Functions utilizing the
 system call, such as
 .Xr fexecve 3 ,
 are not currently intercepted.
+Programs that rely on
+.Xr ptrace 2
+themselves, such as debuggers and system call tracers
+.Po
+such as
+.Xr strace 1
+and
+.Xr truss 1
+.Pc
+will be unable to function if
+.Em intercept
+is enabled in
+.Em trace
+mode.
+This same restriction applies to the
+.Em log_subcmds
+sudoers option.
 .Pp
 The
 .Em intercept
