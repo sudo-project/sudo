@@ -421,21 +421,21 @@ get_editor(int *editor_argc, char ***editor_argv)
  * No other wild cards are supported.
  */
 static const char *lineno_editors[] = {
-    "ex",
-    "nex",
-    "vi",
-    "nvi",
-    "vim",
-    "nvim",
-    "elvis",
     "*macs",
-    "mg",
-    "vile",
-    "jove",
-    "pico",
-    "nano",
     "ee",
+    "elvis",
+    "ex",
     "joe",
+    "jove",
+    "mg",
+    "nano",
+    "nex",
+    "nvi",
+    "nvim",
+    "pico",
+    "vi",
+    "vile",
+    "vim",
     "zile",
     NULL
 };
