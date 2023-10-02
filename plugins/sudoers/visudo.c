@@ -432,6 +432,7 @@ static const char *lineno_editors[] = {
     "nex",
     "nvi",
     "nvim",
+    "o",
     "pico",
     "vi",
     "vile",
