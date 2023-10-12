@@ -19,7 +19,7 @@
 #ifndef SUDO_AUTH_H
 #define SUDO_AUTH_H
 
-/* Private auth function return values (rowhammer resistent).  */
+/* Private auth function return values (rowhammer resistant).  */
 #define AUTH_INTR		0x69d61fc8	/* 1101001110101100001111111001000 */
 #define AUTH_NONINTERACTIVE	0x1629e037	/* 0010110001010011110000000110111 */
 
