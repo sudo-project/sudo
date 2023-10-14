@@ -1704,7 +1704,7 @@ static bool
 ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 {
     char *pathname, **argv, **envp, *buf;
-    const int flags = closure->details->flags;
+    const unsigned int flags = closure->details->flags;
     int argc, envc, syscallno;
     struct sudo_ptrace_regs regs;
     bool path_mismatch = false;
