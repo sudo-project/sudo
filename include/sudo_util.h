@@ -131,10 +131,10 @@
 #define ssizeof(_x)	((ssize_t)sizeof(_x))
 
 /* Bit map macros. */
-#define sudo_setbit(_a, _i)	((_a)[(_i) / NBBY] |= 1 << ((_i) % NBBY))
-#define sudo_clrbit(_a, _i)	((_a)[(_i) / NBBY] &= ~(1<<((_i) % NBBY)))
-#define sudo_isset(_a, _i)	((_a)[(_i) / NBBY] & (1<<((_i) % NBBY)))
-#define sudo_isclr(_a, _i)	(((_a)[(_i) / NBBY] & (1<<((_i) % NBBY))) == 0)
+#define sudo_setbit(_a, _i) ((_a)[(_i) / NBBY] |= 1U << ((_i) % NBBY))
+#define sudo_clrbit(_a, _i) ((_a)[(_i) / NBBY] &= ~(1U << ((_i) % NBBY)))
+#define sudo_isset(_a, _i)  ((_a)[(_i) / NBBY] & (1U << ((_i) % NBBY)))
+#define sudo_isclr(_a, _i)  (((_a)[(_i) / NBBY] & (1U << ((_i) % NBBY))) == 0)
 
 /* Macros to determine the length of a type in string form. */
 #define STRLEN_MAX_UNSIGNED(t)	(((sizeof(t) * 8 * 1233) >> 12) + 1)
