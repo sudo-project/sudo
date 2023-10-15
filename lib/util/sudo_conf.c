@@ -360,7 +360,7 @@ parse_plugin(const char *entry, const char *conf_file, unsigned int lineno)
 	options[nopts] = NULL;
     }
 
-    info = calloc(sizeof(*info), 1);
+    info = calloc(1, sizeof(*info));
     if (info == NULL)
 	    goto oom;
     info->symbol_name = strndup(symbol, symlen);
