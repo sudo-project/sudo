@@ -487,7 +487,7 @@ write_callback(int fd, int what, void *v)
 	}
     } else {
 	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "wrote %zd bytes to fd %d", n, fd);
+	    "wrote %zd of %u bytes to fd %d", n, iob->len - iob->off, fd);
 	iob->off += (unsigned int)n;
 	/* Disable writer and reset the buffer if fully consumed. */
 	if (iob->off == iob->len) {
@@ -1257,6 +1257,11 @@ exec_pty(struct command_details *details,
 	if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
 	    ec->term_raw = true;
     }
+
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: follower: %d, stdin: %d, stdout: %d, stderr: %d", __func__,
+	io_fds[SFD_FOLLOWER], io_fds[SFD_STDIN], io_fds[SFD_STDOUT],
+	io_fds[SFD_STDERR]);
 
     /*
      * Block signals until we have our handlers setup in the parent so
