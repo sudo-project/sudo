@@ -54,6 +54,13 @@ What's new in Sudo 1.9.15
    also applied when "log_subcmds" was enabled.  Sudo 1.9.14
    contained an incorrect fix for this.  Bug #1058.
 
+ * Changes to terminal settings are now performed atomically, where
+   possible.  If the command is being run in a pseudo-terminal and
+   the user's terminal is already in raw mode, sudo will not change
+   the user's terminal settings.  This prevents concurrent sudo
+   processes from restoring the terminal settings to the wrong values.
+   GitHub issue #312.
+
 What's new in Sudo 1.9.14p3
 
  * Fixed a crash with Python 3.12 when the sudo Python python is
