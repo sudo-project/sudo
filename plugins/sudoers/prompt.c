@@ -40,8 +40,8 @@
  * the dynamically allocated result.
  */
 char *
-expand_prompt(const struct sudoers_context *ctx, const char *old_prompt,
-    const char *auth_user)
+expand_prompt(const struct sudoers_context *ctx,
+        const char *restrict old_prompt, const char *restrict auth_user)
 {
     size_t len, n;
     int subst;

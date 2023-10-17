@@ -33,7 +33,7 @@
  * Like strlcpy() but collapses non-space chars escaped with a backslash.
  */
 size_t
-strlcpy_unescape(char *dst, const char *src, size_t size)
+strlcpy_unescape(char *restrict dst, const char *restrict src, size_t size)
 {
     size_t len = 0;
     char ch;

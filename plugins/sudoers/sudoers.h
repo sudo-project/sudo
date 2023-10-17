@@ -333,7 +333,7 @@ int check_user_runchroot(const char *runchroot);
 int check_user_runcwd(const char *runcwd);
 
 /* prompt.c */
-char *expand_prompt(const struct sudoers_context *ctx, const char *old_prompt, const char *auth_user);
+char *expand_prompt(const struct sudoers_context *ctx, const char *restrict old_prompt, const char *restrict auth_user);
 
 /* sudo_auth.c */
 bool sudo_auth_needs_end_session(void);
@@ -494,7 +494,7 @@ void canon_path_free(char *resolved);
 void canon_path_free_cache(void);
 
 /* strlcpy_unesc.c */
-size_t strlcpy_unescape(char *dst, const char *src, size_t size);
+size_t strlcpy_unescape(char *restrict dst, const char *restrict src, size_t size);
 
 /* strvec_join.c */
 char *strvec_join(char *const argv[], char sep, size_t (*cpy)(char *, const char *, size_t));
