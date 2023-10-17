@@ -33,7 +33,8 @@
 #include <sudo_compat.h>
 
 ssize_t
-sudo_getdelim(char **buf, size_t *bufsize, int delim, FILE *fp)
+sudo_getdelim(char ** restrict buf, size_t * restrict bufsize, int delim,
+    FILE * restrict fp)
 {
     char *cp, *ep;
     int ch;

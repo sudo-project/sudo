@@ -38,7 +38,8 @@
 
 sudo_dso_public int main(int argc, char *argv[]);
 
-ssize_t sudo_getdelim(char **bufp, size_t *bufsizep, int delim, FILE *fp);
+ssize_t sudo_getdelim(char ** restrict bufp, size_t * restrict bufsizep,
+    int delim, FILE * restrict fp);
 
 /*
  * Test that sudo_getdelim() works as expected.

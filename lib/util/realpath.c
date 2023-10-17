@@ -53,7 +53,7 @@
  * in which case the path which caused trouble is left in (resolved).
  */
 char *
-sudo_realpath(const char *path, char *resolved)
+sudo_realpath(const char * restrict path, char * restrict resolved)
 {
 	struct stat sb;
 	int idx = 0, nlnk = 0;

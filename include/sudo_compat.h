@@ -342,7 +342,7 @@ sudo_dso_public int sudo_getgrouplist(const char *name, GETGROUPS_T basegid, GET
 # define getgrouplist(_a, _b, _c, _d) sudo_getgrouplist((_a), (_b), (_c), (_d))
 #endif /* GETGROUPLIST */
 #if !defined(HAVE_GETDELIM)
-sudo_dso_public ssize_t sudo_getdelim(char **bufp, size_t *bufsizep, int delim, FILE *fp);
+sudo_dso_public ssize_t sudo_getdelim(char ** restrict bufp, size_t * restrict bufsizep, int delim, FILE * restrict fp);
 # undef getdelim
 # define getdelim(_a, _b, _c, _d) sudo_getdelim((_a), (_b), (_c), (_d))
 #elif defined(HAVE_DECL_GETDELIM) && !HAVE_DECL_GETDELIM
@@ -533,7 +533,7 @@ sudo_dso_public void *sudo_reallocarray(void *ptr, size_t nmemb, size_t size);
 # define reallocarray(_a, _b, _c) sudo_reallocarray((_a), (_b), (_c))
 #endif /* HAVE_REALLOCARRAY */
 #ifndef HAVE_REALPATH
-sudo_dso_public char *sudo_realpath(const char *path, char *resolved);
+sudo_dso_public char *sudo_realpath(const char * restrict path, char * restrict resolved);
 # undef realpath
 # define realpath(_a, _b) sudo_realpath((_a), (_b))
 #endif /* HAVE_REALPATH */

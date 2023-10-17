@@ -1118,7 +1118,8 @@ init_lexer(void)
  * Like strlcpy() but expand %h escapes.
  */
 static size_t
-strlcpy_expand_host(char *dst, const char *src, const char *host, size_t size)
+strlcpy_expand_host(char * restrict dst, const char * restrict src,
+    const char * restrict host, size_t size)
 {
     size_t len = 0;
     char ch;
