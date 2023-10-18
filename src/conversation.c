@@ -163,6 +163,8 @@ sudo_conversation_printf(int msg_type, const char * restrict fmt, ...)
     FILE *ttyfp = NULL;
     FILE *fp = stdout;
     char fmt2[1024];
+    char sbuf[8192];
+    char *buf = sbuf;
     va_list ap;
     int len;
     const int conv_debug_instance = sudo_debug_get_active_instance();
@@ -201,9 +203,26 @@ sudo_conversation_printf(int msg_type, const char * restrict fmt, ...)
 		}
 	    }
 	}
-	va_start(ap, fmt);
-	len = vfprintf(ttyfp ? ttyfp : fp, fmt, ap);
-	va_end(ap);
+        /*
+         * We use vsnprintf() instead of vfprintf() here to avoid
+         * problems on systems where the system printf(3) is not
+         * C99-compliant.  We use our own snprintf() on such systems.
+         */
+        va_start(ap, fmt);
+        len = vsnprintf(sbuf, sizeof(sbuf), fmt, ap);
+        va_end(ap);
+        if (len < 0 || len >= ssizeof(sbuf)) {
+            /* Try again with a dynamically-sized buffer. */
+            va_start(ap, fmt);
+            len = vasprintf(&buf, fmt, ap);
+            va_end(ap);
+        }
+        if (len != -1) {
+            if (fwrite(buf, 1, len, ttyfp ? ttyfp : fp) == 0)
+                len = -1;
+            if (buf != sbuf)
+                free(buf);
+        }
 	break;
     default:
 	len = -1;
