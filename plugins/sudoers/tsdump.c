@@ -184,7 +184,7 @@ valid_entry(union timestamp_entry_storage *u, off_t pos)
     debug_return_bool(true);
 }
 
-static char *
+static const char *
 type2string(int type)
 {
     static char name[64];
@@ -192,20 +192,20 @@ type2string(int type)
 
     switch (type) {
     case TS_LOCKEXCL:
-	debug_return_str("TS_LOCKEXCL");
+	debug_return_const_str("TS_LOCKEXCL");
     case TS_GLOBAL:
-	debug_return_str("TS_GLOBAL");
+	debug_return_const_str("TS_GLOBAL");
     case TS_TTY:
-	debug_return_str("TS_TTY");
+	debug_return_const_str("TS_TTY");
     case TS_PPID:
-	debug_return_str("TS_PPID");
+	debug_return_const_str("TS_PPID");
     }
     (void)snprintf(name, sizeof(name), "UNKNOWN (0x%x)", type);
-    debug_return_str(name);
+    debug_return_const_str(name);
 }
 
 static void
-print_flags(int flags)
+print_flags(unsigned int flags)
 {
     bool first = true;
     debug_decl(print_flags, SUDOERS_DEBUG_UTIL);
