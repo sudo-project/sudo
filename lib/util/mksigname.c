@@ -44,7 +44,7 @@ main(int argc, char *argv[])
      * so it cannot use any of the functions in libsudo_util.
      */
     puts("const char *const sudo_sys_signame[] = {");
-    for (i = 0; i < nitems(sudo_sys_signame); i++) {
+    for (i = 0; i < NSIG; i++) {
 	if (sudo_sys_signame[i] != NULL) {
 	    printf("    \"%s\",\n", sudo_sys_signame[i]);
 	} else {
