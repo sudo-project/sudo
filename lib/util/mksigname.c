@@ -34,16 +34,21 @@ sudo_dso_public int main(int argc, char *argv[]);
 int
 main(int argc, char *argv[])
 {
-    size_t i;
+    unsigned int i;
 
 #include "mksigname.h"
 
+    /*
+     * For portability we must not use %zu below.
+     * This program is compiled with the host C compiler,
+     * so it cannot use any of the functions in libsudo_util.
+     */
     puts("const char *const sudo_sys_signame[] = {");
     for (i = 0; i < nitems(sudo_sys_signame); i++) {
 	if (sudo_sys_signame[i] != NULL) {
 	    printf("    \"%s\",\n", sudo_sys_signame[i]);
 	} else {
-	    printf("    \"Signal %zu\",\n", i);
+	    printf("    \"Signal %u\",\n", i);
 	}
     }
     puts("};");

@@ -1118,7 +1118,7 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
         if (msg->redirect != NULL && msg->redirect[0] != '\0')
             printf("Redirect: %s\n", msg->redirect);
         for (n = 0; n < msg->n_servers; n++) {
-            printf("Server %zu: %s\n", n + 1, msg->servers[n]);
+            printf("Server %u: %s\n", (unsigned int)n + 1, msg->servers[n]);
         }
     }
 

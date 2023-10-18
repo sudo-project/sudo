@@ -47,7 +47,7 @@ main(int argc, char *argv[])
     int ch, lineno = 0, which = 0;
     char *line, lines[2][2048];
     const char *infile;
-    size_t len;
+    unsigned int len;
     FILE *fp;
 
     initprogname(argc > 0 ? argv[0] : "check_wrap");
@@ -83,35 +83,35 @@ main(int argc, char *argv[])
     while ((line = fgets(lines[which], sizeof(lines[which]), fp)) != NULL) {
 	char *cp, *last;
 
-	len = strcspn(line, "\n");
-	line[len] = '\0';
+	line[strcspn(line, "\n")] = '\0';
 
 	/* If we read the 2nd line, parse list of line lengths and check. */
 	if (which) {
 	    lineno++;
 	    for (cp = strtok_r(lines[1], ",", &last); cp != NULL; cp = strtok_r(NULL, ",", &last)) {
+		unsigned int maxlen;
 		const char *errstr;
 		char *dash;
-		size_t maxlen;
 
 		/* May be either a number or a range. */
 		dash = strchr(cp, '-');
 		if (dash != NULL) {
 		    *dash = '\0';
-		    len = (size_t)sudo_strtonum(cp, 0, INT_MAX, &errstr);
+		    len = (unsigned int)sudo_strtonum(cp, 0, INT_MAX, &errstr);
 		    if (errstr == NULL)
-			maxlen = (size_t)sudo_strtonum(dash + 1, 0, INT_MAX, &errstr);
+			maxlen = (unsigned int)sudo_strtonum(dash + 1, 0, INT_MAX, &errstr);
 		} else {
-		    len = maxlen = (size_t)sudo_strtonum(cp, 0, INT_MAX, &errstr);
+		    len = maxlen = (unsigned int)sudo_strtonum(cp, 0, INT_MAX, &errstr);
 		}
 		if (errstr != NULL) {
 		    sudo_fatalx("%s: invalid length on line %d", infile, lineno);
 		}
 		while (len <= maxlen) {
-		    if (len == 0)
+		    if (len == 0) {
 			puts("# word wrap disabled");
-		    else
-			printf("# word wrap at %zu characters\n", len);
+		    } else {
+			printf("# word wrap at %u characters\n", len);
+		    }
 		    eventlog_writeln(stdout, lines[0], strlen(lines[0]), len);
 		    len++;
 		}

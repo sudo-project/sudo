@@ -163,20 +163,20 @@ valid_entry(union timestamp_entry_storage *u, off_t pos)
     switch (entry->version) {
     case 1:
 	if (entry->size != sizeof(struct timestamp_entry_v1)) {
-	    printf("wrong sized v1 record @ %lld, got %hu, expected %zu\n",
+	    sudo_warn("wrong sized v1 record @ %lld, got %hu, expected %zu",
 		(long long)pos, entry->size, sizeof(struct timestamp_entry_v1));
 	    debug_return_bool(false);
 	}
 	break;
     case 2:
 	if (entry->size != sizeof(struct timestamp_entry)) {
-	    printf("wrong sized v2 record @ %lld, got %hu, expected %zu\n",
+	    sudo_warn("wrong sized v2 record @ %lld, got %hu, expected %zu",
 		(long long)pos, entry->size, sizeof(struct timestamp_entry));
 	    debug_return_bool(false);
 	}
 	break;
     default:
-	printf("unknown time stamp entry version %d @ %lld\n",
+	sudo_warn("unknown time stamp entry version %d @ %lld",
 	    (int)entry->version, (long long)pos);
 	debug_return_bool(false);
 	break;
