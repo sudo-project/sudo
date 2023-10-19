@@ -88,6 +88,7 @@ iolog_mkdirs(const char *path)
 	} else {
 	    sudo_warnx(U_("%s exists but is not a directory (0%o)"),
 		path, (unsigned int) sb.st_mode);
+	    errno = ENOTDIR;
 	    ok = false;
 	}
 	goto done;

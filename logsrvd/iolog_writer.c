@@ -573,7 +573,7 @@ create_iolog_path(struct connection_closure *closure)
      * Calls mkdtemp() if pathbuf ends in XXXXXX.
      */
     if (!iolog_mkpath(pathbuf)) {
-	sudo_warnx(U_("unable to create iolog path %s"), pathbuf);
+	sudo_warn(U_("unable to create iolog path %s"), pathbuf);
         goto bad;
     }
     if ((evlog->iolog_path = strdup(pathbuf)) == NULL) {
