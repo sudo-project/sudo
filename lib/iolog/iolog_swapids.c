@@ -58,6 +58,13 @@ iolog_swapids(bool restore)
     if (user_egid == (gid_t)-1)
 	user_egid = getegid();
 
+    if (user_euid == iolog_uid && user_egid == iolog_gid) {
+	sudo_debug_printf(SUDO_DEBUG_NOTICE,
+	    "%s: effective uid/gid matches iolog uid/gid, nothing to do",
+	    __func__);
+	debug_return_bool(true);
+    }
+
     if (restore) {
 	if (seteuid(user_euid) == -1) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
