@@ -507,9 +507,9 @@ fmt_runargv(const struct eventlog *evlog)
     debug_decl(fmt_runargv, SUDO_DEBUG_UTIL);
 
     /* We may have runargv from the log.json file. */
-    if (evlog->argv != NULL && evlog->argv[0] != NULL) {
-	/* Convert evlog->argv into a StringList. */
-	runargv = vec_to_stringlist(evlog->argv);
+    if (evlog->runargv != NULL && evlog->runargv[0] != NULL) {
+	/* Convert evlog->runargv into a StringList. */
+	runargv = vec_to_stringlist(evlog->runargv);
 	if (runargv != NULL) {
 	    /* Make sure command doesn't include arguments. */
 	    char *cp = strchr(evlog->command, ' ');
@@ -533,10 +533,10 @@ fmt_runenv(const struct eventlog *evlog)
     debug_decl(fmt_runenv, SUDO_DEBUG_UTIL);
 
     /* Only present in log.json. */
-    if (evlog->envp == NULL || evlog->envp[0] == NULL)
+    if (evlog->runenv == NULL || evlog->runenv[0] == NULL)
 	debug_return_ptr(NULL);
 
-    debug_return_ptr(vec_to_stringlist(evlog->envp));
+    debug_return_ptr(vec_to_stringlist(evlog->runenv));
 }
 
 static InfoMessage **

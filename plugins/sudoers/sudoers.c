@@ -989,7 +989,8 @@ init_vars(struct sudoers_context *ctx, char * const envp[])
 #define MATCHES(s, v)	\
     (strncmp((s), (v), sizeof(v) - 1) == 0 && (s)[sizeof(v) - 1] != '\0')
 
-    for (ep = envp; *ep; ep++) {
+    ctx->user.envp = envp;
+    for (ep = ctx->user.envp; *ep; ep++) {
 	switch (**ep) {
 	    case 'K':
 		if (MATCHES(*ep, "KRB5CCNAME="))

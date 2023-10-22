@@ -131,7 +131,7 @@ iolog_write_info_file_legacy(int dfd, struct eventlog *evlog)
 	evlog->lines, evlog->columns,
 	evlog->cwd ? evlog->cwd : "unknown");
     fputs(evlog->command ? evlog->command : "unknown", fp);
-    for (av = evlog->argv + 1; *av != NULL; av++) {
+    for (av = evlog->runargv + 1; *av != NULL; av++) {
 	fputc(' ', fp);
 	fputs(*av, fp);
     }

@@ -131,6 +131,7 @@ struct sudoers_user_context {
     char *cmnd_list;
     char *ccname;
     struct gid_list *gid_list;
+    char * const * envp;
     char * const * env_add;
     int   closefrom;
     int   lines;

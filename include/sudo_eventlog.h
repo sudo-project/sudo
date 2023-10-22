@@ -110,9 +110,9 @@ struct eventlog {
     char *submituser;
     char *submitgroup;
     char *ttyname;
-    char **argv;
+    char **runargv;
+    char **runenv;
     char **env_add;
-    char **envp;
     struct timespec submit_time;
     struct timespec iolog_offset;
     struct timespec run_time;

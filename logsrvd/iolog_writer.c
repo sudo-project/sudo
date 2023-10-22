@@ -205,8 +205,8 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	case 'r':
 	    if (strcmp(key, "runargv") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRLISTVAL)) {
-		    evlog->argv = strlist_copy(info->u.strlistval);
-		    if (evlog->argv == NULL)
+		    evlog->runargv = strlist_copy(info->u.strlistval);
+		    if (evlog->runargv == NULL)
 			goto bad;
 		}
 		continue;
@@ -233,8 +233,8 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	    }
 	    if (strcmp(key, "runenv") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRLISTVAL)) {
-		    evlog->envp = strlist_copy(info->u.strlistval);
-		    if (evlog->envp == NULL)
+		    evlog->runenv = strlist_copy(info->u.strlistval);
+		    if (evlog->runenv == NULL)
 			goto bad;
 		}
 		continue;

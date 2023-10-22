@@ -823,20 +823,20 @@ fmt_info_messages(struct client_closure *closure, struct eventlog *evlog,
     debug_decl(fmt_info_messages, SUDOERS_DEBUG_UTIL);
 
     /* Convert NULL-terminated vectors to StringList. */
-    if (evlog->argv != NULL) {
+    if (evlog->runargv != NULL) {
 	if ((runargv = malloc(sizeof(*runargv))) == NULL)
 	    goto bad;
 	info_message__string_list__init(runargv);
-	runargv->strings = evlog->argv;
+	runargv->strings = evlog->runargv;
 	while (runargv->strings[runargv->n_strings] != NULL)
 	    runargv->n_strings++;
     }
 
-    if (evlog->envp != NULL) {
+    if (evlog->runenv != NULL) {
 	if ((runenv = malloc(sizeof(*runenv))) == NULL)
 	    goto bad;
 	info_message__string_list__init(runenv);
-	runenv->strings = evlog->envp;
+	runenv->strings = evlog->runenv;
 	while (runenv->strings[runenv->n_strings] != NULL)
 	    runenv->n_strings++;
     }

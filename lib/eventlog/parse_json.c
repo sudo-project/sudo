@@ -201,14 +201,14 @@ json_store_runargv(struct json_item *item, struct eventlog *evlog)
     size_t i;
     debug_decl(json_store_runargv, SUDO_DEBUG_UTIL);
 
-    if (evlog->argv != NULL) {
-	for (i = 0; evlog->argv[i] != NULL; i++)
-	    free(evlog->argv[i]);
-	free(evlog->argv);
+    if (evlog->runargv != NULL) {
+	for (i = 0; evlog->runargv[i] != NULL; i++)
+	    free(evlog->runargv[i]);
+	free(evlog->runargv);
     }
-    evlog->argv = json_array_to_strvec(&item->u.child);
+    evlog->runargv = json_array_to_strvec(&item->u.child);
 
-    debug_return_bool(evlog->argv != NULL);
+    debug_return_bool(evlog->runargv != NULL);
 }
 
 static bool
@@ -217,14 +217,14 @@ json_store_runenv(struct json_item *item, struct eventlog *evlog)
     size_t i;
     debug_decl(json_store_runenv, SUDO_DEBUG_UTIL);
 
-    if (evlog->envp != NULL) {
-	for (i = 0; evlog->envp[i] != NULL; i++)
-	    free(evlog->envp[i]);
-	free(evlog->envp);
+    if (evlog->runenv != NULL) {
+	for (i = 0; evlog->runenv[i] != NULL; i++)
+	    free(evlog->runenv[i]);
+	free(evlog->runenv);
     }
-    evlog->envp = json_array_to_strvec(&item->u.child);
+    evlog->runenv = json_array_to_strvec(&item->u.child);
 
-    debug_return_bool(evlog->envp != NULL);
+    debug_return_bool(evlog->runenv != NULL);
 }
 
 static bool

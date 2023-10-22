@@ -197,10 +197,10 @@ free_iolog_details(void)
 
     if (iolog_details.evlog != NULL) {
 	/* We only make a shallow copy of argv and envp. */
-	free(iolog_details.evlog->argv);
-	iolog_details.evlog->argv = NULL;
-	free(iolog_details.evlog->envp);
-	iolog_details.evlog->envp = NULL;
+	free(iolog_details.evlog->runargv);
+	iolog_details.evlog->runargv = NULL;
+	free(iolog_details.evlog->runenv);
+	iolog_details.evlog->runenv = NULL;
 	eventlog_free(iolog_details.evlog);
     }
     str_list_free(iolog_details.log_servers);
@@ -601,13 +601,13 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
     }
 
     if (argv != NULL) {
-	evlog->argv = copy_vector_shallow(argv);
-	if (evlog->argv == NULL)
+	evlog->runargv = copy_vector_shallow(argv);
+	if (evlog->runargv == NULL)
 	    goto oom;
     }
     if (user_env != NULL) {
-	evlog->envp = copy_vector_shallow(user_env);
-	if (evlog->envp ==  NULL)
+	evlog->runenv = copy_vector_shallow(user_env);
+	if (evlog->runenv ==  NULL)
 	    goto oom;
     }
 
