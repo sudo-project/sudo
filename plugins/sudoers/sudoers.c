@@ -832,9 +832,6 @@ done:
     reset_parser();
 
     if (ret == -1) {
-	/* Free stashed copy of the environment. */
-	(void)env_init(NULL);
-
 	/* Free locally-allocated strings. */
 	free(iolog_path);
     } else {
@@ -843,6 +840,9 @@ done:
 	    sudoers_ctx.runas.argv, env_get(), cmnd_umask, iolog_path, closure))
 	    ret = -1;
     }
+
+    /* Zero out stashed copy of environment, it is owned by the front-end. */
+    (void)env_init(NULL);
 
     if (!rewind_perms())
 	ret = -1;

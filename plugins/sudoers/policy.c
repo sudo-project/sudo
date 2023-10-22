@@ -1159,9 +1159,6 @@ sudoers_policy_close(int exit_status, int error_code)
     /* Deregister the callback for sudo_fatal()/sudo_fatalx(). */
     sudo_fatal_callback_deregister(sudoers_cleanup);
 
-    /* Free stashed copy of the environment. */
-    (void)env_init(NULL);
-
     /* Free sudoers sources, ctx->user.and passwd/group caches. */
     sudoers_cleanup();
 
