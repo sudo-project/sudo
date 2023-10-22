@@ -201,6 +201,8 @@ free_iolog_details(void)
 	iolog_details.evlog->runargv = NULL;
 	free(iolog_details.evlog->runenv);
 	iolog_details.evlog->runenv = NULL;
+	free(iolog_details.evlog->submitenv);
+	iolog_details.evlog->submitenv = NULL;
 	eventlog_free(iolog_details.evlog);
     }
     str_list_free(iolog_details.log_servers);
@@ -292,6 +294,7 @@ static int
 iolog_deserialize_info(struct log_details *details, char * const user_info[],
     char * const command_info[], char * const argv[], char * const user_env[])
 {
+    const struct sudoers_context *ctx = sudoers_get_context();
     struct eventlog *evlog;
     const char *runas_uid_str = "0", *runas_euid_str = NULL;
     const char *runas_gid_str = "0", *runas_egid_str = NULL;
@@ -608,6 +611,11 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
     if (user_env != NULL) {
 	evlog->runenv = copy_vector_shallow(user_env);
 	if (evlog->runenv ==  NULL)
+	    goto oom;
+    }
+    if (ctx->user.envp != NULL) {
+	evlog->submitenv = copy_vector_shallow(ctx->user.envp);
+	if (evlog->submitenv ==  NULL)
 	    goto oom;
     }
 

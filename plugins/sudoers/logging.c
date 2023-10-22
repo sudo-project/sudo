@@ -969,7 +969,7 @@ should_mail(const struct sudoers_context *ctx, unsigned int status)
  */
 void
 sudoers_to_eventlog(const struct sudoers_context *ctx, struct eventlog *evlog,
-    const char *cmnd, char * const argv[], char * const envp[],
+    const char *cmnd, char * const runargv[], char * const runenv[],
     const char *uuid_str)
 {
     struct group *grp;
@@ -982,7 +982,7 @@ sudoers_to_eventlog(const struct sudoers_context *ctx, struct eventlog *evlog,
     memset(evlog, 0, sizeof(*evlog));
     evlog->iolog_file = ctx->iolog_file;
     evlog->iolog_path = ctx->iolog_path;
-    evlog->command = cmnd ? (char *)cmnd : (argv ? argv[0] : NULL);
+    evlog->command = cmnd ? (char *)cmnd : (runargv ? runargv[0] : NULL);
     evlog->cwd = ctx->user.cwd;
     if (def_runchroot != NULL && strcmp(def_runchroot, "*") != 0) {
 	evlog->runchroot = def_runchroot;
@@ -1001,9 +1001,10 @@ sudoers_to_eventlog(const struct sudoers_context *ctx, struct eventlog *evlog,
     if (grp != NULL)
 	evlog->submitgroup = grp->gr_name;
     evlog->ttyname = ctx->user.ttypath;
-    evlog->runargv = (char **)argv;
+    evlog->runargv = (char **)runargv;
     evlog->env_add = (char **)ctx->user.env_add;
-    evlog->runenv = (char **)envp;
+    evlog->runenv = (char **)runenv;
+    evlog->submitenv = (char **)ctx->user.envp;
     evlog->submit_time = ctx->submit_time;
     evlog->lines = ctx->user.lines;
     evlog->columns = ctx->user.cols;

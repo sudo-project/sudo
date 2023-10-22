@@ -55,6 +55,11 @@ eventlog_free(struct eventlog *evlog)
 	free(evlog->peeraddr);
 	free(evlog->signal_name);
 	free(evlog->source);
+	if (evlog->submitenv != NULL) {
+	    for (i = 0; evlog->submitenv[i] != NULL; i++)
+		free(evlog->submitenv[i]);
+	    free(evlog->submitenv);
+	}
 	free(evlog->submithost);
 	free(evlog->submituser);
 	free(evlog->submitgroup);

@@ -303,6 +303,14 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 		}
 		continue;
 	    }
+	    if (strcmp(key, "submitenv") == 0) {
+		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRLISTVAL)) {
+		    evlog->submitenv = strlist_copy(info->u.strlistval);
+		    if (evlog->submitenv == NULL)
+			goto bad;
+		}
+		continue;
+	    }
 	    if (strcmp(key, "submitgroup") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
 		    if ((evlog->submitgroup = strdup(info->u.strval)) == NULL) {

@@ -818,11 +818,21 @@ fmt_info_messages(struct client_closure *closure, struct eventlog *evlog,
 {
     InfoMessage__StringList *runargv = NULL;
     InfoMessage__StringList *runenv = NULL;
+    InfoMessage__StringList *submitenv = NULL;
     InfoMessage **info_msgs = NULL;
     size_t info_msgs_size, n = 0;
     debug_decl(fmt_info_messages, SUDOERS_DEBUG_UTIL);
 
     /* Convert NULL-terminated vectors to StringList. */
+    if (evlog->submitenv != NULL) {
+	if ((submitenv = malloc(sizeof(*submitenv))) == NULL)
+	    goto bad;
+	info_message__string_list__init(submitenv);
+	submitenv->strings = evlog->submitenv;
+	while (submitenv->strings[submitenv->n_strings] != NULL)
+	    submitenv->n_strings++;
+    }
+
     if (evlog->runargv != NULL) {
 	if ((runargv = malloc(sizeof(*runargv))) == NULL)
 	    goto bad;
@@ -912,7 +922,10 @@ fmt_info_messages(struct client_closure *closure, struct eventlog *evlog,
     if (evlog->cwd != NULL) {
 	fill_str("submitcwd", evlog->cwd);
     }
-    /* TODO - submitenv */
+    if (submitenv != NULL) {
+        fill_strlist("submitenv", submitenv);
+        submitenv = NULL;
+    }
     /* TODO - submitgid */
     /* TODO - submitgids */
     /* TODO - submitgroup */
@@ -935,6 +948,7 @@ bad:
     free_info_messages(info_msgs, n);
     free(runargv);
     free(runenv);
+    free(submitenv);
 
     *n_info_msgs = 0;
     debug_return_ptr(NULL);

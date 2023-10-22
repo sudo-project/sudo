@@ -196,6 +196,22 @@ json_array_to_strvec(struct eventlog_json_object *array)
 }
 
 static bool
+json_store_submitenv(struct json_item *item, struct eventlog *evlog)
+{
+    size_t i;
+    debug_decl(json_store_submitenv, SUDO_DEBUG_UTIL);
+
+    if (evlog->submitenv != NULL) {
+	for (i = 0; evlog->submitenv[i] != NULL; i++)
+	    free(evlog->submitenv[i]);
+	free(evlog->submitenv);
+    }
+    evlog->submitenv = json_array_to_strvec(&item->u.child);
+
+    debug_return_bool(evlog->submitenv != NULL);
+}
+
+static bool
 json_store_runargv(struct json_item *item, struct eventlog *evlog)
 {
     size_t i;
@@ -464,6 +480,7 @@ static struct evlog_json_key {
     { "source", JSON_STRING, json_store_source },
     { "signal", JSON_STRING, json_store_signal },
     { "submitcwd", JSON_STRING, json_store_submitcwd },
+    { "submitenv", JSON_ARRAY, json_store_submitenv },
     { "submithost", JSON_STRING, json_store_submithost },
     { "submitgroup", JSON_STRING, json_store_submitgroup },
     { "submituser", JSON_STRING, json_store_submituser },

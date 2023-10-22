@@ -539,6 +539,21 @@ fmt_runenv(const struct eventlog *evlog)
     debug_return_ptr(vec_to_stringlist(evlog->runenv));
 }
 
+/*
+ * Build submitenv StringList from env in evlog, if present.
+ */
+static InfoMessage__StringList *
+fmt_submitenv(const struct eventlog *evlog)
+{
+    debug_decl(fmt_submitenv, SUDO_DEBUG_UTIL);
+
+    /* Only present in log.json. */
+    if (evlog->submitenv == NULL || evlog->submitenv[0] == NULL)
+	debug_return_ptr(NULL);
+
+    debug_return_ptr(vec_to_stringlist(evlog->submitenv));
+}
+
 static InfoMessage **
 fmt_info_messages(const struct eventlog *evlog, char *hostname,
     size_t *n_info_msgs)
@@ -546,6 +561,7 @@ fmt_info_messages(const struct eventlog *evlog, char *hostname,
     InfoMessage **info_msgs = NULL;
     InfoMessage__StringList *runargv = NULL;
     InfoMessage__StringList *runenv = NULL;
+    InfoMessage__StringList *submitenv = NULL;
     size_t info_msgs_size, n = 0;
     debug_decl(fmt_info_messages, SUDO_DEBUG_UTIL);
 
@@ -553,8 +569,9 @@ fmt_info_messages(const struct eventlog *evlog, char *hostname,
     if (runargv == NULL)
 	goto oom;
 
-    /* runenv is only present in log.json */
+    /* runenv and submitenv are only present in log.json */
     runenv = fmt_runenv(evlog);
+    submitenv = fmt_submitenv(evlog);
 
     /* The sudo I/O log info file has limited info. */
     info_msgs_size = 14;
@@ -596,6 +613,10 @@ fmt_info_messages(const struct eventlog *evlog, char *hostname,
     fill_num("lines", evlog->lines);
     fill_strlist("runargv", runargv);
     runargv = NULL;
+    if (submitenv != NULL) {
+	fill_strlist("submitenv", submitenv);
+	submitenv = NULL;
+    }
     if (runenv != NULL) {
 	fill_strlist("runenv", runenv);
 	runenv = NULL;
@@ -636,6 +657,10 @@ oom:
     if (runenv != NULL) {
         free(runenv->strings);
         free(runenv);
+    }
+    if (submitenv != NULL) {
+        free(submitenv->strings);
+        free(submitenv);
     }
     *n_info_msgs = 0;
     debug_return_ptr(NULL);

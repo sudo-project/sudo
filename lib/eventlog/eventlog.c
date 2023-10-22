@@ -759,6 +759,19 @@ eventlog_store_json(struct json_container *jsonc, const struct eventlog *evlog)
 	    goto oom;
     }
 
+    if (evlog->submitenv != NULL) {
+	if (!sudo_json_open_array(jsonc, "submitenv"))
+	    goto oom;
+	for (i = 0; (cp = evlog->submitenv[i]) != NULL; i++) {
+	    json_value.type = JSON_STRING;
+	    json_value.u.string = cp;
+	    if (!sudo_json_add_value(jsonc, NULL, &json_value))
+		goto oom;
+	}
+	if (!sudo_json_close_array(jsonc))
+	    goto oom;
+    }
+
     debug_return_bool(true);
 
 oom:

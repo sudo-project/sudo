@@ -109,6 +109,7 @@ struct eventlog {
     char *submithost;
     char *submituser;
     char *submitgroup;
+    char **submitenv;
     char *ttyname;
     char **runargv;
     char **runenv;

@@ -85,7 +85,7 @@ bool log_warningx(const struct sudoers_context *ctx, unsigned int flags, const c
 bool gai_log_warning(const struct sudoers_context *ctx, unsigned int flags, int errnum, const char * restrict fmt, ...) sudo_printflike(4, 5);
 bool sudoers_initlocale(const char *ulocale, const char *slocale);
 bool sudoers_locale_callback(struct sudoers_context *ctx, const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
-void sudoers_to_eventlog(const struct sudoers_context *ctx, struct eventlog *evlog, const char *cmnd, char * const argv[], char *const envp[], const char *uuid_str);
+void sudoers_to_eventlog(const struct sudoers_context *ctx, struct eventlog *evlog, const char *cmnd, char * const runargv[], char *const runenv[], const char *uuid_str);
 void init_eventlog_config(void);
 bool init_log_details(struct log_details *details, struct eventlog *evlog);
 bool log_parse_error(const struct sudoers_context *ctx, const char *file, int line, int column, const char * restrict fmt, va_list ap) sudo_printf0like(5, 0);
