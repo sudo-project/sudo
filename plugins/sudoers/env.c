@@ -229,6 +229,20 @@ static const char *initial_keepenv_table[] = {
 };
 
 /*
+ * Free our copy (or copies) of the environment.
+ * This function is only safe to call after the command has executed.
+ */
+void
+env_free(void)
+{
+    sudoers_gc_remove(GC_PTR, env.envp);
+    free(env.envp);
+    sudoers_gc_remove(GC_PTR, env.old_envp);
+    free(env.old_envp);
+    memset(&env, 0, sizeof(env));
+}
+
+/*
  * Initialize env based on envp.
  */
 bool
@@ -243,7 +257,10 @@ env_init(char * const envp[])
 	sudoers_gc_remove(GC_PTR, env.old_envp);
 	free(env.old_envp);
 
-	/* Reset to initial state but keep a pointer to what we allocated. */
+	/*
+	 * Reset to initial state but keep a pointer to what we allocated
+	 * since it will be passed to execve(2).
+	 */
 	env.old_envp = env.envp;
 	env.envp = NULL;
 	env.env_size = 0;

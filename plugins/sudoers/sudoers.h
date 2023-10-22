@@ -414,6 +414,7 @@ extern const struct iolog_path_escape *sudoers_iolog_path_escapes;
 char **env_get(void);
 bool env_merge(const struct sudoers_context *ctx, char * const envp[]);
 bool env_swap_old(void);
+void env_free(void);
 bool env_init(char * const envp[]);
 bool init_envtables(void);
 bool insert_env_vars(char * const envp[]);
