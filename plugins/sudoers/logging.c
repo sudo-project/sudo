@@ -267,7 +267,7 @@ log_reject(const struct sudoers_context *ctx, const char *message,
 	    SET(evl_flags, EVLOG_MAIL_ONLY);
     }
     sudoers_to_eventlog(ctx, &evlog, ctx->runas.cmnd, ctx->runas.argv,
-	env_get(), uuid_str);
+	NULL, uuid_str);
     ret = eventlog_reject(&evlog, evl_flags, message, NULL, NULL);
     if (!log_server_reject(ctx, &evlog, message))
 	ret = false;
@@ -636,7 +636,7 @@ log_exit_status(const struct sudoers_context *ctx, int status)
 	sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
 
 	sudoers_to_eventlog(ctx, &evlog, ctx->runas.cmnd_saved,
-	    ctx->runas.argv_saved, env_get(), ctx->uuid_str);
+	    ctx->runas.argv_saved, NULL, ctx->uuid_str);
 	if (def_mail_always) {
 	    SET(evl_flags, EVLOG_MAIL);
 	    if (!def_log_exit_status)
@@ -740,7 +740,7 @@ vlog_warning(const struct sudoers_context *ctx, unsigned int flags,
 		SET(evl_flags, EVLOG_MAIL_ONLY);
 	}
 	sudoers_to_eventlog(ctx, &evlog, ctx->runas.cmnd, ctx->runas.argv,
-	    env_get(), ctx->uuid_str);
+	    NULL, ctx->uuid_str);
 	if (!eventlog_alert(&evlog, evl_flags, &now, message, errstr))
 	    ret = false;
 	if (!log_server_alert(ctx, &evlog, &now, message, errstr))
@@ -860,7 +860,7 @@ mail_parse_errors(const struct sudoers_context *ctx)
 	goto done;
     }
     sudoers_to_eventlog(ctx, &evlog, ctx->runas.cmnd, ctx->runas.argv,
-	env_get(), ctx->uuid_str);
+	NULL, ctx->uuid_str);
 
     /* Convert parse_error_list to a string vector. */
     n = 0;

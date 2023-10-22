@@ -418,8 +418,7 @@ sudoers_audit_reject(const char *plugin_name, unsigned int plugin_type,
 	    ret = false;
     }
 
-    audit_to_eventlog(ctx, &evlog, command_info, ctx->runas.argv, env_get(),
-	NULL);
+    audit_to_eventlog(ctx, &evlog, command_info, ctx->runas.argv, NULL, NULL);
     if (!eventlog_reject(&evlog, 0, message, NULL, NULL))
 	ret = false;
 
@@ -453,8 +452,7 @@ sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
 	debug_return_bool(false);
     }
 
-    audit_to_eventlog(ctx, &evlog, command_info, ctx->runas.argv, env_get(),
-	NULL);
+    audit_to_eventlog(ctx, &evlog, command_info, ctx->runas.argv, NULL, NULL);
     if (!eventlog_alert(&evlog, 0, &now, message, NULL))
 	ret = false;
 
