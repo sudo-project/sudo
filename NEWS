@@ -61,6 +61,11 @@ What's new in Sudo 1.9.15
    processes from restoring the terminal settings to the wrong values.
    GitHub issue #312.
 
+ * Reverted a change from sudo 1.9.4 that resulted in PAM session
+   modules being called with the environment of the command to be
+   run instead of the environment of the invoking user.
+   GitHub issue #318.
+
 What's new in Sudo 1.9.14p3
 
  * Fixed a crash with Python 3.12 when the sudo Python python is
