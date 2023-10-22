@@ -582,7 +582,7 @@ sudoers_check_common(struct sudoers_context *ctx, int pwflag)
 		U_("sorry, you are not allowed to preserve the environment"));
 	    goto bad;
 	} else {
-	    if (!validate_env_vars(ctx, ctx->user.env_vars))
+	    if (!validate_env_vars(ctx, ctx->user.env_add))
 		goto bad;
 	}
     }
@@ -641,7 +641,7 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
 
     /* Environment variables specified on the command line. */
     if (env_add != NULL && env_add[0] != NULL)
-	sudoers_ctx.user.env_vars = env_add;
+	sudoers_ctx.user.env_add = env_add;
 
     /*
      * Make a local copy of argc/argv, with special handling for the
@@ -754,7 +754,7 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
     }
 
     /* Insert user-specified environment variables. */
-    if (!insert_env_vars(sudoers_ctx.user.env_vars)) {
+    if (!insert_env_vars(sudoers_ctx.user.env_add)) {
 	sudo_warnx("%s",
 	    U_("error setting user-specified environment variables"));
 	goto error;

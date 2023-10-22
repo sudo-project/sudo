@@ -1002,7 +1002,7 @@ sudoers_to_eventlog(const struct sudoers_context *ctx, struct eventlog *evlog,
 	evlog->submitgroup = grp->gr_name;
     evlog->ttyname = ctx->user.ttypath;
     evlog->argv = (char **)argv;
-    evlog->env_add = (char **)ctx->user.env_vars;
+    evlog->env_add = (char **)ctx->user.env_add;
     evlog->envp = (char **)envp;
     evlog->submit_time = ctx->submit_time;
     evlog->lines = ctx->user.lines;
