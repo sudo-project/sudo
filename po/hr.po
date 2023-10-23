@@ -989,7 +989,7 @@ msgstr "nije moguće odrediti TTY"
 
 #: src/sudo.c:932
 msgid "The \"no new privileges\" flag is set, which prevents sudo from running as root."
-msgstr "Flag „no new privileges“ je podignut, i to sprječava da sudo da postane root."
+msgstr "Flag „no new privileges“ je podignut, i to sprečava da sudo postane root."
 
 #: src/sudo.c:934
 msgid "If sudo is running in a container, you may need to adjust the container configuration to disable the flag."
