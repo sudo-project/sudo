@@ -66,6 +66,13 @@ What's new in Sudo 1.9.15
    run instead of the environment of the invoking user.
    GitHub issue #318.
 
+ * New Indonesian translation from translationproject.org.
+
+ * The sudo_logsrvd server will now raise its open file descriptor
+   limit to the maximum allowed value when it starts up.  Each
+   connection can require up to nine open file descriptors so the
+   default soft limit may be too low.
+
 What's new in Sudo 1.9.14p3
 
  * Fixed a crash with Python 3.12 when the sudo Python python is
