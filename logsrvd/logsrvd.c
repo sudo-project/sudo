@@ -23,9 +23,10 @@
 
 #include <config.h>
 
+#include <sys/resource.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
@@ -1835,6 +1836,36 @@ write_pidfile(void)
 }
 
 /*
+ * Increase the number of open files to the maximum value.
+ */
+static void
+unlimit_nofile(void)
+{
+    struct rlimit rl = { RLIM_INFINITY, RLIM_INFINITY };
+    struct rlimit nofilelimit;
+    debug_decl(unlimit_nofile, SUDO_DEBUG_UTIL);
+
+    if (getrlimit(RLIMIT_NOFILE, &nofilelimit) != 0) {
+	sudo_warn("getrlimit(RLIMIT_NOFILE)");
+	debug_return;
+    }
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"RLIMIT_NOFILE [%lld, %lld] -> [inf, inf]",
+	(long long)nofilelimit.rlim_cur, (long long)nofilelimit.rlim_max);
+    if (setrlimit(RLIMIT_NOFILE, &rl) == -1) {
+	/* Unable to set to infinity, set to max instead. */
+	rl.rlim_cur = rl.rlim_max = nofilelimit.rlim_max;
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+            "RLIMIT_NOFILE [%lld, %lld] -> [%lld, %lld]",
+            (long long)nofilelimit.rlim_cur, (long long)nofilelimit.rlim_max,
+            (long long)rl.rlim_cur, (long long)rl.rlim_max);
+        if (setrlimit(RLIMIT_NOFILE, &rl) != 0)
+            sudo_warn("setrlimit(RLIMIT_NOFILE)");
+    }
+    debug_return;
+}
+
+/*
  * Fork, detach from the terminal and write pid file unless nofork set.
  */
 static void
@@ -1998,6 +2029,9 @@ main(int argc, char *argv[])
     /* Read sudo_logsrvd.conf */
     if (!logsrvd_conf_read(conf_file))
         return EXIT_FAILURE;
+
+    /* Crank the open file limit to the maximum value allowed. */
+    unlimit_nofile();
 
     if ((evbase = sudo_ev_base_alloc()) == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
