@@ -119,7 +119,8 @@ sudo_sia_cleanup(const struct sudoers_context *ctx, struct passwd *pw,
 }
 
 int
-sudo_sia_begin_session(struct passwd *pw, char **user_envp[], sudo_auth *auth)
+sudo_sia_begin_session(const struct sudoers_context *ctx, struct passwd *pw,
+    char **user_envp[], sudo_auth *auth)
 {
     SIAENTITY *siah;
     int status = AUTH_ERROR;
