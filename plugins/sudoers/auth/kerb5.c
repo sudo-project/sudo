@@ -53,7 +53,7 @@
 
 #ifndef HAVE_KRB5_VERIFY_USER
 static int verify_krb_v5_tgt(const struct sudoers_context *, krb5_context,
-    krb5_creds *, char *);
+    krb5_creds *, const char *);
 #endif
 static struct _sudo_krb5_data {
     krb5_context	sudo_context;
@@ -308,7 +308,7 @@ sudo_krb5_cleanup(const struct sudoers_context *ctx, struct passwd *pw,
  */
 static int
 verify_krb_v5_tgt(const struct sudoers_context *ctx, krb5_context sudo_context,
-    krb5_creds *cred, char *auth_name)
+    krb5_creds *cred, const char *auth_name)
 {
     krb5_error_code	error;
     krb5_principal	server;
