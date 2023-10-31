@@ -52,7 +52,8 @@
 #endif
 
 #ifndef HAVE_KRB5_VERIFY_USER
-static int verify_krb_v5_tgt(krb5_context, krb5_creds *, char *);
+static int verify_krb_v5_tgt(const struct sudoers_context *, krb5_context,
+    krb5_creds *, char *);
 #endif
 static struct _sudo_krb5_data {
     krb5_context	sudo_context;
@@ -246,7 +247,7 @@ sudo_krb5_verify(const struct sudoers_context *ctx, struct passwd *pw,
     creds = &credbuf;
 
     /* Verify the TGT to prevent spoof attacks. */
-    if ((error = verify_krb_v5_tgt(sudo_context, creds, auth->name)))
+    if ((error = verify_krb_v5_tgt(ctx, sudo_context, creds, auth->name)))
 	goto done;
 
     /* Store credential in cache. */
@@ -306,7 +307,8 @@ sudo_krb5_cleanup(const struct sudoers_context *ctx, struct passwd *pw,
  * Returns 0 for successful authentication, non-zero for failure.
  */
 static int
-verify_krb_v5_tgt(krb5_context sudo_context, krb5_creds *cred, char *auth_name)
+verify_krb_v5_tgt(const struct sudoers_context *ctx, krb5_context sudo_context,
+    krb5_creds *cred, char *auth_name)
 {
     krb5_error_code	error;
     krb5_principal	server;
