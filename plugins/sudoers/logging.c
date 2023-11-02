@@ -295,6 +295,8 @@ log_denial(const struct sudoers_context *ctx, unsigned int status,
 	message = N_("user NOT in sudoers");
     else if (ISSET(status, FLAG_NO_HOST))
 	message = N_("user NOT authorized on host");
+    else if (ISSET(status, FLAG_INTERCEPT_SETID))
+	message = N_("setid command rejected in intercept mode");
     else
 	message = N_("command not allowed");
 
@@ -322,6 +324,9 @@ log_denial(const struct sudoers_context *ctx, unsigned int status,
 	} else if (ISSET(status, FLAG_NO_HOST)) {
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s is not allowed to run sudo "
 		"on %s.\n"), ctx->user.name, ctx->runas.shost);
+	} else if (ISSET(status, FLAG_INTERCEPT_SETID)) {
+	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s: %s\n"), getprogname(),
+		_("setid commands are not permitted in intercept mode"));
 	} else if (ISSET(status, FLAG_NO_CHECK)) {
 	    sudo_printf(SUDO_CONV_ERROR_MSG, _("Sorry, user %s may not run "
 		"sudo on %s.\n"), ctx->user.name, ctx->runas.shost);

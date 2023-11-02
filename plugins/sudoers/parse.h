@@ -339,7 +339,6 @@ struct cmnd_info {
     struct stat cmnd_stat;
     char *cmnd_path;
     int status;
-    bool intercepted;
 };
 
 /*

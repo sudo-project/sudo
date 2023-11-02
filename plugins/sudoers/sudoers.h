@@ -233,6 +233,7 @@ struct sudoers_context {
 #define FLAG_NO_CHECK		0x080U
 #define FLAG_NO_USER_INPUT	0x100U
 #define FLAG_BAD_PASSWORD	0x200U
+#define FLAG_INTERCEPT_SETID	0x400U
 
 /*
  * Return values for check_user() (rowhammer resistant).

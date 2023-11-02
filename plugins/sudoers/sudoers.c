@@ -533,6 +533,23 @@ sudoers_check_common(struct sudoers_context *ctx, int pwflag)
 	goto bad;
     }
 
+    /*
+     * Check if the user is trying to run a setid binary in intercept mode.
+     * For the DSO intercept_type, we reject attempts to run setid binaries
+     * by default since the dynamic loader will clear LD_PRELOAD, defeating
+     * intercept.
+     */
+    if (def_intercept || ISSET(ctx->mode, MODE_POLICY_INTERCEPTED)) {
+	if (!def_intercept_allow_setid && ctx->user.cmnd_stat != NULL) {
+	    if (ISSET(ctx->user.cmnd_stat->st_mode, S_ISUID|S_ISGID)) {
+		CLR(validated, VALIDATE_SUCCESS);
+		if (!log_denial(ctx, validated|FLAG_INTERCEPT_SETID, true))
+		    goto done;
+		goto bad;
+	    }
+	}
+    }
+
     /* Create Ubuntu-style dot file to indicate sudo was successful. */
     if (create_admin_success_flag(ctx) == -1)
 	goto done;

@@ -134,25 +134,6 @@ do_stat(int fd, const char *path, struct stat *sb)
     }
     debug_return_bool(ret);
 }
-
-/*
- * Perform intercept-specific checks.
- * Returns true if allowed, else false.
- */
-static bool
-intercept_ok(const char *path, bool intercepted, struct stat *sb)
-{
-    debug_decl(intercept_ok, SUDOERS_DEBUG_MATCH);
-
-    if (intercepted) {
-	if (!def_intercept_allow_setid && ISSET(sb->st_mode, S_ISUID|S_ISGID)) {
-	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-		"rejecting setid command %s", path);
-	    debug_return_bool(false);
-	}
-    }
-    debug_return_bool(true);
-}
 #endif /* SUDOERS_NAME_MATCH */
 
 /*
@@ -257,8 +238,7 @@ set_cmnd_fd(struct sudoers_context *ctx, int fd, int real_root)
  */
 static int
 command_matches_dir(struct sudoers_context *ctx, const char *sudoers_dir,
-    size_t dlen, int real_root, bool intercepted,
-    const struct command_digest_list *digests)
+    size_t dlen, int real_root, const struct command_digest_list *digests)
 {
     struct stat sudoers_stat;
     char path[PATH_MAX];
@@ -288,8 +268,6 @@ command_matches_dir(struct sudoers_context *ctx, const char *sudoers_dir,
 	goto done;
     if (!do_stat(fd, path, &sudoers_stat))
 	goto done;
-    if (!intercept_ok(path, intercepted, &sudoers_stat))
-	goto done;
 
     if (ctx->user.cmnd_stat == NULL ||
 	(ctx->user.cmnd_stat->st_dev == sudoers_stat.st_dev &&
@@ -317,8 +295,7 @@ done:
  */
 static int
 command_matches_dir(struct sudoers_context *ctx, const char *sudoers_dir,
-    size_t dlen, int real_root, bool intercepted,
-    const struct command_digest_list *digests)
+    size_t dlen, int real_root, const struct command_digest_list *digests)
 {
     int fd = -1;
     debug_decl(command_matches_dir, SUDOERS_DEBUG_MATCH);
@@ -348,7 +325,7 @@ bad:
 
 static int
 command_matches_all(struct sudoers_context *ctx, int real_root,
-    bool intercepted, const struct command_digest_list *digests)
+    const struct command_digest_list *digests)
 {
 #ifndef SUDOERS_NAME_MATCH
     struct stat sb;
@@ -367,8 +344,6 @@ command_matches_all(struct sudoers_context *ctx, int real_root,
 		/* File exists but we couldn't open it above? */
 		goto bad;
 	    }
-	    if (!intercept_ok(ctx->user.cmnd, intercepted, &sb))
-		goto bad;
 	}
 #else
 	/* Open the file for fdexec or for digest matching. */
@@ -391,7 +366,7 @@ bad:
 
 static int
 command_matches_fnmatch(struct sudoers_context *ctx, const char *sudoers_cmnd,
-    const char *sudoers_args, int real_root, bool intercepted,
+    const char *sudoers_args, int real_root,
     const struct command_digest_list *digests)
 {
     const char *cmnd = ctx->user.cmnd;
@@ -430,8 +405,6 @@ command_matches_fnmatch(struct sudoers_context *ctx, const char *sudoers_cmnd,
 #ifndef SUDOERS_NAME_MATCH
 	if (!do_stat(fd, cmnd, &sb))
 	    goto bad;
-	if (!intercept_ok(cmnd, intercepted, &sb))
-	    goto bad;
 #endif
 	/* Check digest of cmnd since sudoers_cmnd is a pattern. */
 	if (digest_matches(fd, cmnd, digests) != ALLOW)
@@ -449,7 +422,7 @@ bad:
 
 static int
 command_matches_regex(struct sudoers_context *ctx, const char *sudoers_cmnd,
-    const char *sudoers_args, int real_root, bool intercepted,
+    const char *sudoers_args, int real_root,
     const struct command_digest_list *digests)
 {
     const char *cmnd = ctx->user.cmnd;
@@ -488,8 +461,6 @@ command_matches_regex(struct sudoers_context *ctx, const char *sudoers_cmnd,
 #ifndef SUDOERS_NAME_MATCH
 	if (!do_stat(fd, cmnd, &sb))
 	    goto bad;
-	if (!intercept_ok(cmnd, intercepted, &sb))
-	    goto bad;
 #endif
 	/* Check digest of cmnd since sudoers_cmnd is a pattern. */
 	if (digest_matches(fd, cmnd, digests) != ALLOW)
@@ -508,7 +479,7 @@ bad:
 #ifndef SUDOERS_NAME_MATCH
 static int
 command_matches_glob(struct sudoers_context *ctx, const char *sudoers_cmnd,
-    const char *sudoers_args, int real_root, bool intercepted,
+    const char *sudoers_args, int real_root,
     const struct command_digest_list *digests)
 {
     struct stat sudoers_stat;
@@ -558,8 +529,6 @@ command_matches_glob(struct sudoers_context *ctx, const char *sudoers_cmnd,
 		continue;
 	    if (!do_stat(fd, cp, &sudoers_stat))
 		continue;
-	    if (!intercept_ok(cp, intercepted, &sudoers_stat))
-		continue;
 	    if (ctx->user.cmnd_stat == NULL ||
 		(ctx->user.cmnd_stat->st_dev == sudoers_stat.st_dev &&
 		ctx->user.cmnd_stat->st_ino == sudoers_stat.st_ino)) {
@@ -592,8 +561,7 @@ command_matches_glob(struct sudoers_context *ctx, const char *sudoers_cmnd,
 	    /* If it ends in '/' it is a directory spec. */
 	    dlen = strlen(cp);
 	    if (cp[dlen - 1] == '/') {
-		if (command_matches_dir(ctx, cp, dlen, real_root, intercepted,
-			digests) == ALLOW) {
+		if (command_matches_dir(ctx, cp, dlen, real_root, digests) == ALLOW) {
 		    globfree(&gl);
 		    debug_return_int(ALLOW);
 		}
@@ -628,8 +596,6 @@ command_matches_glob(struct sudoers_context *ctx, const char *sudoers_cmnd,
 		continue;
 	    if (!do_stat(fd, cp, &sudoers_stat))
 		continue;
-	    if (!intercept_ok(cp, intercepted, &sudoers_stat))
-		continue;
 	    if (ctx->user.cmnd_stat == NULL ||
 		(ctx->user.cmnd_stat->st_dev == sudoers_stat.st_dev &&
 		ctx->user.cmnd_stat->st_ino == sudoers_stat.st_ino)) {
@@ -661,7 +627,7 @@ done:
 
 static int
 command_matches_normal(struct sudoers_context *ctx, const char *sudoers_cmnd,
-    const char *sudoers_args, int real_root, bool intercepted,
+    const char *sudoers_args, int real_root,
     const struct command_digest_list *digests)
 {
     struct stat sudoers_stat;
@@ -674,7 +640,7 @@ command_matches_normal(struct sudoers_context *ctx, const char *sudoers_cmnd,
     dlen = strlen(sudoers_cmnd);
     if (sudoers_cmnd[dlen - 1] == '/') {
 	debug_return_int(command_matches_dir(ctx, sudoers_cmnd, dlen,
-	    real_root, intercepted, digests));
+	    real_root, digests));
     }
 
     /* Only proceed if ctx->user.cmnd_base and basename(sudoers_cmnd) match */
@@ -716,8 +682,6 @@ command_matches_normal(struct sudoers_context *ctx, const char *sudoers_cmnd,
      *  d) there is a digest and it matches
      */
     if (ctx->user.cmnd_stat != NULL && do_stat(fd, sudoers_cmnd, &sudoers_stat)) {
-	if (!intercept_ok(sudoers_cmnd, intercepted, &sudoers_stat))
-	    goto bad;
 	if (ctx->user.cmnd_stat->st_dev != sudoers_stat.st_dev ||
 	    ctx->user.cmnd_stat->st_ino != sudoers_stat.st_ino)
 	    goto bad;
@@ -747,16 +711,16 @@ bad:
 #else /* SUDOERS_NAME_MATCH */
 static int
 command_matches_glob(struct sudoers_context *ctx, const char *sudoers_cmnd,
-    const char *sudoers_args, int real_root, bool intercepted,
+    const char *sudoers_args, int real_root,
     const struct command_digest_list *digests)
 {
     return command_matches_fnmatch(ctx, sudoers_cmnd, sudoers_args, real_root,
-	intercepted, digests);
+	digests);
 }
 
 static int
 command_matches_normal(struct sudoers_context *ctx, const char *sudoers_cmnd,
-    const char *sudoers_args, int real_root, bool intercepted,
+    const char *sudoers_args, int real_root,
     const struct command_digest_list *digests)
 {
     size_t dlen;
@@ -767,7 +731,7 @@ command_matches_normal(struct sudoers_context *ctx, const char *sudoers_cmnd,
     dlen = strlen(sudoers_cmnd);
     if (sudoers_cmnd[dlen - 1] == '/') {
 	debug_return_int(command_matches_dir(ctx, sudoers_cmnd, dlen, real_root,
-	    intercepted, digests));
+	    digests));
     }
 
     if (strcmp(ctx->user.cmnd, sudoers_cmnd) == 0) {
@@ -806,7 +770,6 @@ command_matches(struct sudoers_context *ctx, const char *sudoers_cmnd,
     const char *sudoers_args, const char *runchroot, struct cmnd_info *info,
     const struct command_digest_list *digests)
 {
-    const bool intercepted = info ? info->intercepted : false;
     struct sudoers_pivot pivot_state = SUDOERS_PIVOT_INITIALIZER;
     char *saved_user_cmnd = NULL;
     struct stat saved_user_stat;
@@ -859,14 +822,14 @@ command_matches(struct sudoers_context *ctx, const char *sudoers_cmnd,
 
     if (sudoers_cmnd == NULL) {
 	sudoers_cmnd = "ALL";
-	ret = command_matches_all(ctx, real_root, intercepted, digests);
+	ret = command_matches_all(ctx, real_root, digests);
 	goto done;
     }
 
     /* Check for regular expressions first. */
     if (sudoers_cmnd[0] == '^') {
 	ret = command_matches_regex(ctx, sudoers_cmnd, sudoers_args, real_root,
-	    intercepted, digests);
+	    digests);
 	goto done;
     }
 
@@ -896,14 +859,14 @@ command_matches(struct sudoers_context *ctx, const char *sudoers_cmnd,
 	 */
 	if (def_fast_glob) {
 	    ret = command_matches_fnmatch(ctx, sudoers_cmnd, sudoers_args,
-		real_root, intercepted, digests);
+		real_root, digests);
 	} else {
 	    ret = command_matches_glob(ctx, sudoers_cmnd, sudoers_args,
-		real_root, intercepted, digests);
+		real_root, digests);
 	}
     } else {
 	ret = command_matches_normal(ctx, sudoers_cmnd, sudoers_args,
-	    real_root, intercepted, digests);
+	    real_root, digests);
     }
 done:
     /* Restore root. */
