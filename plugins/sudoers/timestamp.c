@@ -481,6 +481,8 @@ timestamp_open(const struct sudoers_context *ctx)
 	    /* Already logged set_perms/restore_perms error. */
 	    goto bad;
 	}
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: opened time stamp file %s",
+	    __func__, fname);
 
 	/* Remove time stamp file if its mtime predates boot time. */
 	if (tries == 1 && fstat(fd, &sb) == 0) {
@@ -521,6 +523,8 @@ timestamp_open(const struct sudoers_context *ctx)
     close(dfd);
     debug_return_ptr(cookie);
 bad:
+    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	"%s: unable to open time stamp file %s", __func__, fname);
     if (dfd != -1)
 	close(dfd);
     if (fd >= 0)
