@@ -574,7 +574,7 @@ fmt_info_messages(const struct eventlog *evlog, char *hostname,
     submitenv = fmt_submitenv(evlog);
 
     /* The sudo I/O log info file has limited info. */
-    info_msgs_size = 14;
+    info_msgs_size = 15;
     info_msgs = calloc(info_msgs_size, sizeof(InfoMessage *));
     if (info_msgs == NULL)
 	goto oom;
