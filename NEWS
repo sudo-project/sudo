@@ -73,6 +73,11 @@ What's new in Sudo 1.9.15
    connection can require up to nine open file descriptors so the
    default soft limit may be too low.
 
+ * Better log message when rejecting a command if the "intercept"
+   option is enabled and the "intercept_allow_setid" option is
+   disabled.  Previously, "command not allowed" would be logged and
+   the user had no way of knowing what the actual problem was.
+
 What's new in Sudo 1.9.14p3
 
  * Fixed a crash with Python 3.12 when the sudo Python python is
