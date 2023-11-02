@@ -1094,8 +1094,10 @@ store_plugin(const char *str, struct sudo_defs_types *def, int op)
     if (op == false || op == true)
 	(void)list_op(NULL, 0, &def->sd_un.list, freeall);
 
-    if (!list_op(str, strlen(str), &def->sd_un.list, lop))
-	debug_return_bool(false);
+    if (str != NULL) {
+	if (!list_op(str, strlen(str), &def->sd_un.list, lop))
+	    debug_return_bool(false);
+    }
 
     debug_return_bool(true);
 }
