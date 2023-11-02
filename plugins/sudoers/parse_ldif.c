@@ -427,7 +427,7 @@ role_to_sudoers(struct sudoers_parse_tree *parse_tree, struct sudo_role *role,
 	    U_("unable to allocate memory"));
     }
 
-    if (reuse_privilege) {
+    if (reuse_privilege && !TAILQ_EMPTY(&us->privileges)) {
 	/* Hostspec unchanged, append cmndlist to previous privilege. */
 	struct privilege *prev_priv = TAILQ_LAST(&us->privileges, privilege_list);
 	if (reuse_runas) {
