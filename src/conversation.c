@@ -97,7 +97,8 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		    if (ISSET(msg->msg_type, SUDO_CONV_PREFER_TTY) &&
 			    !ISSET(flags, TGP_STDIN)) {
 			ttyfd = open(_PATH_TTY, O_WRONLY);
-			raw_tty = sudo_term_is_raw(ttyfd);
+			if (ttyfd != -1)
+			    raw_tty = sudo_term_is_raw(ttyfd);
 		    } else {
 			raw_tty = sudo_term_is_raw(fileno(fp));
 		    }

@@ -629,6 +629,9 @@ setup_terminal(struct eventlog *evlog, bool interactive, bool resize)
     /* Open fd for /dev/tty and set to raw mode. */
     if (interactive) {
 	ttyfd = open(_PATH_TTY, O_RDWR);
+	if (ttyfd == -1)
+	    sudo_fatal("%s", U_("unable to set tty to raw mode"));
+	if (ttyfd == -1)
 	while (!sudo_term_raw(ttyfd, SUDO_TERM_ISIG)) {
 	    if (errno != EINTR)
 		sudo_fatal("%s", U_("unable to set tty to raw mode"));
