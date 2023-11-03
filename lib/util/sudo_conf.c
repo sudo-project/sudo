@@ -40,6 +40,9 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#ifdef HAVE_DLOPEN
+# include <dlfcn.h>
+#endif
 
 #define SUDO_ERROR_WRAP	0
 
@@ -542,6 +545,28 @@ sudo_conf_debug_files_v1(const char *progname)
 	}
 	if (strcmp(debug_spec->progname, prog) == 0)
 	    debug_return_ptr(&debug_spec->debug_files);
+
+#ifdef RTLD_MEMBER
+	/* Handle names like sudoers.a(sudoers.so) for AIX. */
+	const char *cp = strchr(prog, '(');
+	const char *ep = strchr(prog, ')');
+	if (cp != NULL && ep != NULL) {
+	    /* Match on the program name without the member. */
+	    size_t len = (size_t)(cp - prog);
+	    if (strncmp(debug_spec->progname, prog, len) == 0 &&
+		    debug_spec->progname[len] == '\0') {
+		debug_return_ptr(&debug_spec->debug_files);
+	    }
+
+	    /* Match on the member itself. */
+	    cp++;
+	    len = (size_t)(ep - cp);
+	    if (strncmp(debug_spec->progname, cp, len) == 0 &&
+		    debug_spec->progname[len] == '\0') {
+		debug_return_ptr(&debug_spec->debug_files);
+	    }
+	}
+#endif
     }
     debug_return_ptr(NULL);
 }
