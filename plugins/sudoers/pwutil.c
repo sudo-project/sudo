@@ -959,6 +959,9 @@ sudo_set_grlist(struct passwd *pw, char * const *groups)
     struct cache_item key, *item;
     debug_decl(sudo_set_grlist, SUDOERS_DEBUG_NSS);
 
+    sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: setting group names for %s",
+	__func__, pw->pw_name);
+
     sudo_debug_group_list(pw->pw_name, groups, SUDO_DEBUG_DEBUG);
 
     if (grlist_cache == NULL) {
@@ -973,7 +976,7 @@ sudo_set_grlist(struct passwd *pw, char * const *groups)
      * Cache group db entry if it doesn't already exist
      */
     key.k.name = pw->pw_name;
-    getauthregistry(NULL, key.registry);
+    getauthregistry(pw->pw_name, key.registry);
     if (rbfind(grlist_cache, &key) == NULL) {
 	if ((item = make_grlist_item(pw, groups)) == NULL) {
 	    sudo_warnx(U_("unable to parse groups for %s"), pw->pw_name);
@@ -1067,6 +1070,9 @@ sudo_set_gidlist(struct passwd *pw, int ngids, GETGROUPS_T *gids,
     struct cache_item key, *item;
     debug_decl(sudo_set_gidlist, SUDOERS_DEBUG_NSS);
 
+    sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: setting group-IDs for %s",
+	__func__, pw->pw_name);
+
     /* XXX - ngids/gids too */
     sudo_debug_group_list(pw->pw_name, gidstrs, SUDO_DEBUG_DEBUG);
 
@@ -1083,7 +1089,7 @@ sudo_set_gidlist(struct passwd *pw, int ngids, GETGROUPS_T *gids,
      */
     key.k.name = pw->pw_name;
     key.type = type;
-    getauthregistry(NULL, key.registry);
+    getauthregistry(pw->pw_name, key.registry);
     if (rbfind(gidlist_cache, &key) == NULL) {
 	if ((item = make_gidlist_item(pw, ngids, gids, gidstrs, type)) == NULL) {
 	    sudo_warnx(U_("unable to parse gids for %s"), pw->pw_name);
