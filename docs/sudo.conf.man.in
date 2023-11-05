@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "July 29, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "November 4, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -486,7 +486,7 @@ Currently,
 \fBsudo\fR
 supports efficient group queries on AIX,
 BSD,
-HP-UX, Linux, macOS, and Solaris.
+Linux, macOS, and Solaris.
 This is the default behavior on macOS in
 \fBsudo\fR
 1.9.6 and higher.

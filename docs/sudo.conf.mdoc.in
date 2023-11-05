@@ -16,7 +16,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.Dd July 29, 2023
+.Dd November 4, 2023
 .Dt SUDO.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -452,7 +452,7 @@ Currently,
 .Nm sudo
 supports efficient group queries on AIX,
 .Bx ,
-HP-UX, Linux, macOS, and Solaris.
+Linux, macOS, and Solaris.
 This is the default behavior on macOS in
 .Nm sudo
 1.9.6 and higher.
