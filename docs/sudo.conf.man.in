@@ -602,6 +602,21 @@ would log all debugging statements, regardless of level, for the
 shared library that implements
 \fBsudo\fR's
 intercept functionality on some systems.
+.nf
+.sp
+.RS 4n
+Debug @sudoers_plugin@ @log_dir@/sudoers_debug all@debug
+.RE
+.fi
+.PP
+would log all debugging statements, regardless of level, for the
+\fBsudoers\fR
+plugin.
+See
+sudoers(@mansectform@)
+for the full list of subsystems supported by the
+\fBsudoers\fR
+plugin.
 .PP
 As of
 \fBsudo\fR

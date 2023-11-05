@@ -552,6 +552,18 @@ would log all debugging statements, regardless of level, for the
 shared library that implements
 .Nm sudo Ns 's
 intercept functionality on some systems.
+.Bd -literal -offset 4n
+Debug @sudoers_plugin@ @log_dir@/sudoers_debug all@debug
+.Ed
+.Pp
+would log all debugging statements, regardless of level, for the
+.Nm sudoers
+plugin.
+See
+.Xr sudoers @mansectform@
+for the full list of subsystems supported by the
+.Nm sudoers
+plugin.
 .Pp
 As of
 .Nm sudo
