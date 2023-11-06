@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd September 28, 2023
+.Dd November 6, 2023
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2355,7 +2355,7 @@ to include the file
 .Pa /etc/sudoers.xerxes .
 Any path name separator characters
 .Pq Ql /
-present in the host name will be replaced with an underbar 
+present in the host name will be replaced with an underbar
 .Pq Ql _
 during expansion.
 .Pp
@@ -4422,7 +4422,7 @@ should be used.
 .Pp
 Any path name separator characters
 .Pq Ql /
-present in the user, group or host name will be replaced with an underbar 
+present in the user, group or host name will be replaced with an underbar
 .Pq Ql _
 during expansion.
 .It iolog_file
@@ -4942,6 +4942,13 @@ before the file extension;
 .Pa group_plugin.so
 becomes
 .Pa group_plugin64.so .
+.Pp
+On AIX systems, the plugin may be either a shared object
+ending in
+.Ql .so
+or an archive file containing a shared object ending in
+.Ql .a
+with the name of the shared object in parentheses at the end.
 .Pp
 For more information see
 .Sx "GROUP PROVIDER PLUGINS" .

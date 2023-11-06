@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "September 28, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "November 6, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -5246,6 +5246,13 @@ before the file extension;
 \fIgroup_plugin.so\fR
 becomes
 \fIgroup_plugin64.so\fR.
+.sp
+On AIX systems, the plugin may be either a shared object
+ending in
+\(oq.so\(cq
+or an archive file containing a shared object ending in
+\(oq.a\(cq
+with the name of the shared object in parentheses at the end.
 .sp
 For more information see
 \fIGROUP PROVIDER PLUGINS\fR.

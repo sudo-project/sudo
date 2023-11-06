@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "November 4, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "November 6, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -152,6 +152,13 @@ For example:
 Plugin sudoers_policy @sudoers_plugin@
 .RE
 .fi
+.PP
+On AIX systems, the plugin may be either a shared object
+ending in
+\(oq.so\(cq
+or an archive file containing a shared object ending in
+\(oq.a\(cq
+with the name of the shared object in parentheses at the end.
 .PP
 Starting with
 \fBsudo\fR
@@ -576,6 +583,17 @@ plugin along with its associated programs and shared objects is
 but a third-party plugin is free to use a different format so long
 as it does not include a comma
 (\(oq\&,\(cq).
+.PP
+On AIX systems, a
+\fIDebug\fR
+line will match a plugin specified as either the name of an
+SVR4-style shared object file ending in
+\(oq.so\(cq,
+an archive file ending in
+\(oq.a\(cq,
+or an archive file ending in
+\(oq.a\(cq
+with the name of the shared object in parentheses.
 .PP
 Examples:
 .nf
