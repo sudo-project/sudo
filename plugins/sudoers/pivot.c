@@ -27,31 +27,28 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "sudoers.h"
-
-#define OLD_ROOT	0
-#define OLD_CWD		1
+#include <sudoers.h>
 
 /*
  * Pivot to a new root directory, storing the old root and old cwd
- * in fds[2].  Changes current working directory to the new root.
+ * in state.  Changes current working directory to the new root.
  * Returns true on success, else false.
  */
 bool
-pivot_root(const char *new_root, int fds[2])
+pivot_root(const char *new_root, struct sudoers_pivot *state)
 {
     debug_decl(pivot_root, SUDOERS_DEBUG_UTIL);
 
-    fds[OLD_ROOT] = open("/", O_RDONLY);
-    fds[OLD_CWD] = open(".", O_RDONLY);
-    if (fds[OLD_ROOT] == -1 || fds[OLD_CWD] == -1 || chroot(new_root) == -1) {
-	if (fds[OLD_ROOT] != -1) {
-	    close(fds[OLD_ROOT]);
-	    fds[OLD_ROOT] = -1;
+    state->saved_root = open("/", O_RDONLY);
+    state->saved_cwd = open(".", O_RDONLY);
+    if (state->saved_root == -1 || state->saved_cwd == -1 || chroot(new_root) == -1) {
+	if (state->saved_root != -1) {
+	    close(state->saved_root);
+	    state->saved_root = -1;
 	}
-	if (fds[OLD_CWD] != -1) {
-	    close(fds[OLD_CWD]);
-	    fds[OLD_CWD] = -1;
+	if (state->saved_cwd != -1) {
+	    close(state->saved_cwd);
+	    state->saved_cwd = -1;
 	}
 	debug_return_bool(false);
     }
@@ -63,27 +60,27 @@ pivot_root(const char *new_root, int fds[2])
  * Returns true on success, else false.
  */
 bool
-unpivot_root(int fds[2])
+unpivot_root(struct sudoers_pivot *state)
 {
     bool ret = true;
     debug_decl(unpivot_root, SUDOERS_DEBUG_UTIL);
 
     /* Order is important: restore old root, *then* change cwd. */
-    if (fds[OLD_ROOT] != -1) {
-	if (fchdir(fds[OLD_ROOT]) == -1 || chroot(".") == -1) {
+    if (state->saved_root != -1) {
+	if (fchdir(state->saved_root) == -1 || chroot(".") == -1) {
 	    sudo_warn("%s", U_("unable to restore root directory"));
 	    ret = false;
 	}
-	close(fds[OLD_ROOT]);
-	fds[OLD_ROOT] = -1;
+	close(state->saved_root);
+	state->saved_root = -1;
     }
-    if (fds[OLD_CWD] != -1) {
-	if (fchdir(fds[OLD_CWD]) == -1) {
+    if (state->saved_cwd != -1) {
+	if (fchdir(state->saved_cwd) == -1) {
 	    sudo_warn("%s", U_("unable to restore current working directory"));
 	    ret = false;
 	}
-	close(fds[OLD_CWD]);
-	fds[OLD_CWD] = -1;
+	close(state->saved_cwd);
+	state->saved_cwd = -1;
     }
 
     debug_return_bool(ret);

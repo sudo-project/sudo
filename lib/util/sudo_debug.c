@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2011-2017 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2011-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -38,13 +38,13 @@
 #include <fcntl.h>
 #include <time.h>
 
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_plugin.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_conf.h>
+#include <sudo_debug.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_plugin.h>
+#include <sudo_util.h>
 
 #ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
 /*
@@ -112,7 +112,7 @@ struct sudo_debug_instance {
 static struct sudo_debug_instance *sudo_debug_instances[SUDO_DEBUG_INSTANCE_MAX];
 static int sudo_debug_last_instance = -1;
 
-static char sudo_debug_pidstr[(((sizeof(int) * 8) + 2) / 3) + 3];
+static char sudo_debug_pidstr[STRLEN_MAX_SIGNED(int) + 3];
 static size_t sudo_debug_pidlen;
 
 #define round_nfds(_n)	(((_n) + (4 * NBBY) - 1) & ~((4 * NBBY) - 1))
@@ -201,10 +201,10 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 	const int new_size = round_nfds(output->fd + 1) / NBBY;
 	unsigned char *new_fds;
 
-	new_fds = realloc(sudo_debug_fds, new_size);
+	new_fds = realloc(sudo_debug_fds, (size_t)new_size);
 	if (new_fds == NULL)
 	    goto oom;
-	memset(new_fds + old_size, 0, new_size - old_size);
+	memset(new_fds + old_size, 0, (size_t)(new_size - old_size));
 	sudo_debug_fds = new_fds;
 	sudo_debug_fds_size = new_size * NBBY;
     }
@@ -304,7 +304,8 @@ sudo_debug_register_v2(const char *program, const char *const subsystems[],
     }
 
     if (instance == NULL) {
-	unsigned int i, j, max_id = NUM_DEF_SUBSYSTEMS - 1;
+	size_t i;
+	unsigned int j, max_id = NUM_DEF_SUBSYSTEMS - 1;
 
 	/* Fill in subsystem name -> id mapping as needed. */
 	if (ids != NULL) {
@@ -348,7 +349,7 @@ sudo_debug_register_v2(const char *program, const char *const subsystems[],
     } else {
 	/* Check for matching instance but different ids[]. */
 	if (ids != NULL && instance->subsystem_ids != ids) {
-	    unsigned int i;
+	    size_t i;
 
 	    for (i = 0; subsystems[i] != NULL; i++)
 		ids[i] = instance->subsystem_ids[i];
@@ -408,7 +409,7 @@ sudo_debug_deregister_v1(int idx)
 	return -1;			/* already deregistered */
 
     if (--instance->refcnt != 0)
-	return instance->refcnt;	/* ref held by other caller */
+	return (int)instance->refcnt;	/* ref held by other caller */
 
     /* Free up instance data, note that subsystems[] is owned by caller. */
     sudo_debug_instances[idx] = NULL;
@@ -494,118 +495,108 @@ sudo_debug_fork_v1(void)
     return pid;
 }
 
+/* Functions versions of sudo_debug_enter* for backwards compatibility. */
 void
 sudo_debug_enter_v1(const char *func, const char *file, int line,
-    int subsys)
+    unsigned int subsys)
 {
-    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"-> %s @ %s:%d", func, file, line);
+    sudo_debug_enter(func, file, line, subsys);
 }
 
 void
 sudo_debug_exit_v1(const char *func, const char *file, int line,
-    int subsys)
+    unsigned int subsys)
 {
-    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d", func, file, line);
+    sudo_debug_exit(func, file, line, subsys);
 }
 
 void
 sudo_debug_exit_int_v1(const char *func, const char *file, int line,
-    int subsys, int ret)
+    unsigned int subsys, int ret)
 {
-    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %d", func, file, line, ret);
+    sudo_debug_exit_int(func, file, line, subsys, ret);
+}
+
+void
+sudo_debug_exit_uint_v1(const char *func, const char *file, int line,
+    unsigned int subsys, unsigned int ret)
+{
+    sudo_debug_exit_uint(func, file, line, subsys, ret);
 }
 
 void
 sudo_debug_exit_long_v1(const char *func, const char *file, int line,
-    int subsys, long ret)
+    unsigned int subsys, long ret)
 {
-    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %ld", func, file, line, ret);
+    sudo_debug_exit_long(func, file, line, subsys, ret);
 }
 
 void
 sudo_debug_exit_id_t_v1(const char *func, const char *file, int line,
-    int subsys, id_t ret)
+    unsigned int subsys, id_t ret)
 {
-#if SIZEOF_ID_T == 8
-    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %lld", func, file, line, (long long)ret);
-#else
-    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %d", func, file, line, (int)ret);
-#endif
+    sudo_debug_exit_id_t(func, file, line, subsys, ret);
 }
 
 void
 sudo_debug_exit_size_t_v1(const char *func, const char *file, int line,
-    int subsys, size_t ret)
+    unsigned int subsys, size_t ret)
 {
-    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %zu", func, file, line, ret);
+    sudo_debug_exit_size_t(func, file, line, subsys, ret);
 }
 
 void
 sudo_debug_exit_ssize_t_v1(const char *func, const char *file, int line,
-    int subsys, ssize_t ret)
+    unsigned int subsys, ssize_t ret)
 {
-    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %zd", func, file, line, ret);
+    sudo_debug_exit_ssize_t(func, file, line, subsys, ret);
 }
 
 void
 sudo_debug_exit_time_t_v1(const char *func, const char *file, int line,
-    int subsys, time_t ret)
+    unsigned int subsys, time_t ret)
 {
-#if SIZEOF_TIME_T == 8
-    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %lld", func, file, line, (long long)ret);
-#else
-    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %d", func, file, line, (int)ret);
-#endif
+    sudo_debug_exit_time_t(func, file, line, subsys, ret);
+}
+
+void
+sudo_debug_exit_mode_t_v1(const char *func, const char *file, int line,
+    unsigned int subsys, mode_t ret)
+{
+    sudo_debug_exit_mode_t(func, file, line, subsys, ret);
 }
 
 void
 sudo_debug_exit_bool_v1(const char *func, const char *file, int line,
-    int subsys, bool ret)
+    unsigned int subsys, bool ret)
 {
-    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %s", func, file, line, ret ? "true" : "false");
+    sudo_debug_exit_bool(func, file, line, subsys, ret);
 }
 
 void
 sudo_debug_exit_str_v1(const char *func, const char *file, int line,
-    int subsys, const char *ret)
+    unsigned int subsys, const char *ret)
 {
-    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %s", func, file, line, ret ? ret : "(null)");
+    sudo_debug_exit_str(func, file, line, subsys, ret);
 }
 
 void
 sudo_debug_exit_str_masked_v1(const char *func, const char *file, int line,
-    int subsys, const char *ret)
+    unsigned int subsys, const char *ret)
 {
-    static const char stars[] = "********************************************************************************";
-    int len = ret ? strlen(ret) : sizeof("(null)") - 1;
-
-    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %.*s", func, file, line, len, ret ? stars : "(null)");
+    sudo_debug_exit_str_masked(func, file, line, subsys, ret);
 }
 
 void
 sudo_debug_exit_ptr_v1(const char *func, const char *file, int line,
-    int subsys, const void *ret)
+    unsigned int subsys, const void *ret)
 {
-    sudo_debug_printf2(NULL, NULL, 0, subsys | SUDO_DEBUG_TRACE,
-	"<- %s @ %s:%d := %p", func, file, line, ret);
+    sudo_debug_exit_ptr(func, file, line, subsys, ret);
 }
 
 void
 sudo_debug_write2_v1(int fd, const char *func, const char *file, int lineno,
-    const char *str, int len, int errnum)
+    const char *str, unsigned int len, int errnum)
 {
     char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
     char timebuf[64];
@@ -643,7 +634,7 @@ sudo_debug_write2_v1(int fd, const char *func, const char *file, int lineno,
     /* Add string, trimming any trailing newlines. */
     while (len > 0 && str[len - 1] == '\n')
 	len--;
-    if (len > 0) {
+    if (len != 0) {
 	iov[iovcnt].iov_base = (char *)str;
 	iov[iovcnt].iov_len = len;
 	iovcnt++;
@@ -651,7 +642,7 @@ sudo_debug_write2_v1(int fd, const char *func, const char *file, int lineno,
 
     /* Append error string if errno is specified. */
     if (errnum) {
-	if (len > 0) {
+	if (len != 0) {
 	    iov[iovcnt].iov_base = (char *)": ";
 	    iov[iovcnt].iov_len = 2;
 	    iovcnt++;
@@ -695,7 +686,7 @@ sudo_debug_write2_v1(int fd, const char *func, const char *file, int lineno,
 }
 
 bool
-sudo_debug_needed_v1(int level)
+sudo_debug_needed_v1(unsigned int level)
 {
     unsigned int subsys;
     int pri;
@@ -707,8 +698,8 @@ sudo_debug_needed_v1(int level)
         goto out;
 
     /* Extract priority and subsystem from level. */
-    pri = SUDO_DEBUG_PRI(level);
-    subsys = (unsigned int)SUDO_DEBUG_SUBSYS(level);
+    pri = (int)SUDO_DEBUG_PRI(level);
+    subsys = SUDO_DEBUG_SUBSYS(level);
 
     if (sudo_debug_active_instance > sudo_debug_last_instance)
         goto out;
@@ -730,10 +721,10 @@ out:
 }
 
 void
-sudo_debug_vprintf2_v1(const char *func, const char *file, int lineno, int level,
-    const char *fmt, va_list ap)
+sudo_debug_vprintf2_v1(const char *func, const char *file, int lineno,
+    unsigned int level, const char * restrict fmt, va_list ap)
 {
-    int buflen, pri, saved_errno = errno;
+    int pri, saved_errno = errno;
     unsigned int subsys;
     char static_buf[1024], *buf = static_buf;
     struct sudo_debug_instance *instance;
@@ -744,8 +735,15 @@ sudo_debug_vprintf2_v1(const char *func, const char *file, int lineno, int level
 	goto out;
 
     /* Extract priority and subsystem from level. */
-    pri = SUDO_DEBUG_PRI(level);
+    pri = (int)SUDO_DEBUG_PRI(level);
     subsys = SUDO_DEBUG_SUBSYS(level);
+
+    /* Disable extra info if SUDO_DEBUG_LINENO is not enabled. */
+    if (!ISSET(level, SUDO_DEBUG_LINENO)) {
+	func = NULL;
+	file = NULL;
+	lineno = 0;
+    }
 
     /* Find matching instance. */
     if (sudo_debug_active_instance > sudo_debug_last_instance) {
@@ -763,30 +761,35 @@ sudo_debug_vprintf2_v1(const char *func, const char *file, int lineno, int level
     SLIST_FOREACH(output, &instance->outputs, entries) {
 	/* Make sure we want debug info at this level. */
 	if (subsys <= instance->max_subsystem && output->settings[subsys] >= pri) {
+	    int errcode, buflen = 0;
 	    va_list ap2;
 
-	    /* Operate on a copy of ap to support multiple outputs. */
-	    va_copy(ap2, ap);
-	    buflen = fmt ? vsnprintf(static_buf, sizeof(static_buf), fmt, ap2) : 0;
-	    va_end(ap2);
-	    if (buflen >= ssizeof(static_buf)) {
-		va_list ap3;
-
-		/* Not enough room in static buf, allocate dynamically. */
-		va_copy(ap3, ap);
-		buflen = vasprintf(&buf, fmt, ap3);
-		va_end(ap3);
-	    }
-	    if (buflen != -1) {
-		int errcode = ISSET(level, SUDO_DEBUG_ERRNO) ? saved_errno : 0;
-		if (ISSET(level, SUDO_DEBUG_LINENO))
-		    sudo_debug_write2(output->fd, func, file, lineno, buf, buflen, errcode);
-		else
-		    sudo_debug_write2(output->fd, NULL, NULL, 0, buf, buflen, errcode);
-		if (buf != static_buf) {
-		    free(buf);
-		    buf = static_buf;
+	    if (fmt != NULL) {
+		/* Operate on a copy of ap to support multiple outputs. */
+		va_copy(ap2, ap);
+		buflen = vsnprintf(static_buf, sizeof(static_buf), fmt, ap2);
+		va_end(ap2);
+		if (buflen < 0) {
+		    sudo_warnx_nodebug("%s: invalid format string \"%s\"",
+			__func__, fmt);
+		    buflen = 0;
+		} else if (buflen >= ssizeof(static_buf)) {
+		    /* Not enough room in static buf, allocate dynamically. */
+		    va_copy(ap2, ap);
+		    buflen = vasprintf(&buf, fmt, ap2);
+		    if (buflen == -1) {
+			buf = static_buf;
+			buflen = (int)strlen(buf);
+		    }
+		    va_end(ap2);
 		}
+	    }
+	    errcode = ISSET(level, SUDO_DEBUG_ERRNO) ? saved_errno : 0;
+	    sudo_debug_write2(output->fd, func, file, lineno, buf,
+		(unsigned int)buflen, errcode);
+	    if (buf != static_buf) {
+		free(buf);
+		buf = static_buf;
 	    }
 	}
     }
@@ -796,7 +799,7 @@ out:
 
 #ifdef NO_VARIADIC_MACROS
 void
-sudo_debug_printf_nvm_v1(int pri, const char *fmt, ...)
+sudo_debug_printf_nvm_v1(int pri, const char * restrict fmt, ...)
 {
     va_list ap;
 
@@ -807,8 +810,8 @@ sudo_debug_printf_nvm_v1(int pri, const char *fmt, ...)
 #endif /* NO_VARIADIC_MACROS */
 
 void
-sudo_debug_printf2_v1(const char *func, const char *file, int lineno, int level,
-    const char *fmt, ...)
+sudo_debug_printf2_v1(const char *func, const char *file, int lineno,
+    unsigned int level, const char * restrict fmt, ...)
 {
     va_list ap;
 
@@ -820,22 +823,23 @@ sudo_debug_printf2_v1(const char *func, const char *file, int lineno, int level,
 #define EXEC_PREFIX "exec "
 
 void
-sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *const envp[])
+sudo_debug_execve2_v1(unsigned int level, const char *path, char *const argv[],
+    char *const envp[])
 {
-    int buflen, pri, saved_errno = errno;
+    int pri, saved_errno = errno;
     unsigned int subsys;
     struct sudo_debug_instance *instance;
     struct sudo_debug_output *output;
     char * const *av;
     char *cp, static_buf[4096], *buf = static_buf;
-    size_t plen;
+    size_t buflen, plen;
     debug_decl_func(sudo_debug_execve2);
 
     if (sudo_debug_active_instance == -1 || path == NULL)
 	goto out;
 
     /* Extract priority and subsystem from level. */
-    pri = SUDO_DEBUG_PRI(level);
+    pri = (int)SUDO_DEBUG_PRI(level);
     subsys = SUDO_DEBUG_SUBSYS(level);
 
     /* Find matching instance. */
@@ -879,7 +883,7 @@ sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *con
 		buflen += strlen(*av) + 1;
 	    buflen--;
 	}
-	if (buflen >= ssizeof(static_buf)) {
+	if (buflen >= sizeof(static_buf)) {
 	    buf = malloc(buflen + 1);
 	    if (buf == NULL)
 		goto out;
@@ -918,7 +922,7 @@ sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *con
 
 	*cp = '\0';
 
-	sudo_debug_write(output->fd, buf, buflen, 0);
+	sudo_debug_write(output->fd, buf, (unsigned int)buflen, 0);
 	if (buf != static_buf) {
 	    free(buf);
 	    buf = static_buf;
@@ -1036,109 +1040,122 @@ sudo_debug_fork_v1(void)
 
 void
 sudo_debug_enter_v1(const char *func, const char *file, int line,
-    int subsys)
+    unsigned int subsys)
 {
 }
 
 void
 sudo_debug_exit_v1(const char *func, const char *file, int line,
-    int subsys)
+    unsigned int subsys)
 {
 }
 
 void
 sudo_debug_exit_int_v1(const char *func, const char *file, int line,
-    int subsys, int ret)
+    unsigned int subsys, int ret)
+{
+}
+
+void
+sudo_debug_exit_uint_v1(const char *func, const char *file, int line,
+    unsigned int subsys, unsigned int ret)
 {
 }
 
 void
 sudo_debug_exit_long_v1(const char *func, const char *file, int line,
-    int subsys, long ret)
+    unsigned int subsys, long ret)
 {
 }
 
 void
 sudo_debug_exit_id_t_v1(const char *func, const char *file, int line,
-    int subsys, id_t ret)
+    unsigned int subsys, id_t ret)
 {
 }
 
 void
 sudo_debug_exit_size_t_v1(const char *func, const char *file, int line,
-    int subsys, size_t ret)
+    unsigned int subsys, size_t ret)
 {
 }
 
 void
 sudo_debug_exit_ssize_t_v1(const char *func, const char *file, int line,
-    int subsys, ssize_t ret)
+    unsigned int subsys, ssize_t ret)
 {
 }
 
 void
 sudo_debug_exit_time_t_v1(const char *func, const char *file, int line,
-    int subsys, time_t ret)
+    unsigned int subsys, time_t ret)
+{
+}
+
+void
+sudo_debug_exit_mode_t_v1(const char *func, const char *file, int line,
+    unsigned int subsys, mode_t ret)
 {
 }
 
 void
 sudo_debug_exit_bool_v1(const char *func, const char *file, int line,
-    int subsys, bool ret)
+    unsigned int subsys, bool ret)
 {
 }
 
 void
 sudo_debug_exit_str_v1(const char *func, const char *file, int line,
-    int subsys, const char *ret)
+    unsigned int subsys, const char *ret)
 {
 }
 
 void
 sudo_debug_exit_str_masked_v1(const char *func, const char *file, int line,
-    int subsys, const char *ret)
+    unsigned int subsys, const char *ret)
 {
 }
 
 void
 sudo_debug_exit_ptr_v1(const char *func, const char *file, int line,
-    int subsys, const void *ret)
+    unsigned int subsys, const void *ret)
 {
 }
 
 void
 sudo_debug_write2_v1(int fd, const char *func, const char *file, int lineno,
-    const char *str, int len, int errnum)
+    const char *str, unsigned int len, int errnum)
 {
 }
 
 bool
-sudo_debug_needed_v1(int level)
+sudo_debug_needed_v1(unsigned int level)
 {
     return false;
 }
 
 void
-sudo_debug_vprintf2_v1(const char *func, const char *file, int lineno, int level,
-    const char *fmt, va_list ap)
+sudo_debug_vprintf2_v1(const char *func, const char *file, int lineno,
+    unsigned int level, const char * restrict fmt, va_list ap)
 {
 }
 
 #ifdef NO_VARIADIC_MACROS
 void
-sudo_debug_printf_nvm_v1(int pri, const char *fmt, ...)
+sudo_debug_printf_nvm_v1(int pri, const char * restrict fmt, ...)
 {
 }
 #endif /* NO_VARIADIC_MACROS */
 
 void
-sudo_debug_printf2_v1(const char *func, const char *file, int lineno, int level,
-    const char *fmt, ...)
+sudo_debug_printf2_v1(const char *func, const char *file, int lineno,
+    unsigned int level, const char * restrict fmt, ...)
 {
 }
 
 void
-sudo_debug_execve2_v1(int level, const char *path, char *const argv[], char *const envp[])
+sudo_debug_execve2_v1(unsigned int level, const char *path, char *const argv[],
+    char *const envp[])
 {
 }
 

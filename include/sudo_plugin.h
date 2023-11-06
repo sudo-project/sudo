@@ -85,7 +85,7 @@ struct sudo_conv_callback {
 
 typedef int (*sudo_conv_t)(int num_msgs, const struct sudo_conv_message msgs[],
 	struct sudo_conv_reply replies[], struct sudo_conv_callback *callback);
-typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
+typedef int (*sudo_printf_t)(int msg_type, const char * restrict fmt, ...);
 
 /*
  * Hooks allow a plugin to hook into specific sudo and/or libc functions.

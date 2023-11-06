@@ -25,9 +25,10 @@
 #  include <wolfssl/options.h>
 # endif /* HAVE_WOLFSSL */
 # include <openssl/ssl.h>
+# include <sudo_ssl_compat.h>
 #endif /* HAVE_OPENSSL */
 
-#include "log_server.pb-c.h"
+#include <log_server.pb-c.h>
 
 #ifndef INET_ADDRSTRLEN
 # define INET_ADDRSTRLEN 16
@@ -51,9 +52,9 @@
 struct connection_buffer {
     TAILQ_ENTRY(connection_buffer) entries;
     uint8_t *data;
-    unsigned int size;
-    unsigned int len;
-    unsigned int off;
+    size_t size;
+    size_t len;
+    size_t off;
 };
 TAILQ_HEAD(connection_buffer_list, connection_buffer);
 

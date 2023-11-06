@@ -24,10 +24,10 @@
 
 #define SUDO_ERROR_WRAP 0
 
-#include "sudo_compat.h"
-#include "sudo_digest.h"
-#include "sudo_util.h"
-#include "sudo_fatal.h"
+#include <sudo_compat.h>
+#include <sudo_digest.h>
+#include <sudo_util.h>
+#include <sudo_fatal.h>
 
 sudo_dso_public int main(int argc, char *argv[]);
 
@@ -1104,15 +1104,15 @@ static struct test_vector sha512_vectors[] = {
 };
 
 static void
-run_tests(int digest_type, struct test_vector *test_vectors)
+run_tests(unsigned int digest_type, struct test_vector *test_vectors)
 {
     struct sudo_digest *ctx;
     unsigned char md[64];	/* SHA512_DIGEST_LENGTH */
     char mdhex[128 + 1];	/* SHA512_DIGEST_LENGTH * 2 + 1 */
-    int i, j, digest_len;
+    size_t i, j, digest_len;
 
     digest_len = sudo_digest_getlen(digest_type);
-    if (digest_len == -1)
+    if (digest_len == 0)
 	sudo_fatalx("unable to get digest length for type %d", digest_type);
     if (digest_len > ssizeof(md))
 	sudo_fatalx("digest length too big for type %d", digest_type);
@@ -1134,7 +1134,7 @@ run_tests(int digest_type, struct test_vector *test_vectors)
 	mdhex[j * 2] = '\0';
 
 	if (strcmp(test_vectors[i].md, mdhex) != 0) {
-	    sudo_warnx("test %d:%d: expected %s, got %s", digest_type, i,
+	    sudo_warnx("test %u:%zu: expected %s, got %s", digest_type, i,
 		mdhex, test_vectors[i].md);
 	    errors++;
 	}

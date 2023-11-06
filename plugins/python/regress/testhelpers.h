@@ -23,7 +23,7 @@
 
 #include "../pyhelpers.h"
 
-#include "sudo_conf.h"
+#include <sudo_conf.h>
 
 // just for the IDE
 #ifndef SRC_DIR
@@ -154,7 +154,7 @@ int fake_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 int fake_conversation_with_suspend(int num_msgs, const struct sudo_conv_message msgs[],
                                    struct sudo_conv_reply replies[], struct sudo_conv_callback *callback);
 
-int fake_printf(int msg_type, const char *fmt, ...);
+int fake_printf(int msg_type, const char * restrict fmt, ...);
 
 int verify_log_lines(const char *reference_path);
 

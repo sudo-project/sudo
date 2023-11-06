@@ -21,7 +21,7 @@
 .\" Agency (DARPA) and Air Force Research Laboratory, Air Force
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
-.TH "VISUDO" "@mansectsu@" "March 20, 2023" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "VISUDO" "@mansectsu@" "July 27, 2023" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -46,6 +46,11 @@ and checks for syntax errors before installing the edited file.
 If the
 \fIsudoers\fR
 file is currently being edited you will receive a message to try again later.
+.PP
+If the
+\fIsudoers\fR
+file does not exist, it will be created unless the editor exits
+without writing to the file.
 .PP
 \fBvisudo\fR
 parses the

@@ -56,10 +56,10 @@
 #elif defined(HAVE_MACHINE_ENDIAN_H)
 # include <machine/endian.h>
 #else
-# include "compat/endian.h"
+# include <compat/endian.h>
 #endif
 
-#include "protobuf-c/protobuf-c.h"
+#include <protobuf-c/protobuf-c.h>
 
 #if BYTE_ORDER == BIG_ENDIAN
 # define WORDS_BIGENDIAN

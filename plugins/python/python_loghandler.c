@@ -28,7 +28,7 @@
 #endif
 
 static void
-_debug_plugin(int log_level, const char *log_message)
+_debug_plugin(unsigned int log_level, const char *log_message)
 {
     debug_decl_vars(python_sudo_debug, PYTHON_DEBUG_PLUGIN);
 
@@ -55,7 +55,7 @@ python_sudo_debug(PyObject *Py_UNUSED(py_self), PyObject *py_args)
     debug_decl(python_sudo_debug, PYTHON_DEBUG_C_CALLS);
     py_debug_python_call("sudo", "debug", py_args, NULL, PYTHON_DEBUG_C_CALLS);
 
-    int log_level = SUDO_DEBUG_DEBUG;
+    unsigned int log_level = SUDO_DEBUG_DEBUG;
     const char *log_message = NULL;
     if (!PyArg_ParseTuple(py_args, "is:sudo.debug", &log_level, &log_message)) {
         debug_return_ptr(NULL);
@@ -66,7 +66,7 @@ python_sudo_debug(PyObject *Py_UNUSED(py_self), PyObject *py_args)
     debug_return_ptr_pynone;
 }
 
-static int
+static unsigned int
 _sudo_log_level_from_python(long level)
 {
     if (level >= 50)
@@ -100,7 +100,7 @@ _sudo_LogHandler__emit(PyObject *py_self, PyObject *py_args)
         goto cleanup;
     }
 
-    int sudo_loglevel = _sudo_log_level_from_python(python_loglevel);
+    unsigned int sudo_loglevel = _sudo_log_level_from_python(python_loglevel);
 
     py_message = PyObject_CallMethod(py_self, "format", "O", py_record);
     if (py_message == NULL)
@@ -130,7 +130,7 @@ static PyMethodDef _sudo_LogHandler_class_methods[] =
 int
 sudo_module_set_default_loghandler()
 {
-    debug_decl(sudo_module_register_loghandler, PYTHON_DEBUG_INTERNAL);
+    debug_decl(sudo_module_set_default_loghandler, PYTHON_DEBUG_INTERNAL);
 
     PyObject *py_sudo, *py_logging_module = NULL, *py_logger = NULL,
 	     *py_streamhandler = NULL, *py_class = NULL,

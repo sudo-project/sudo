@@ -76,9 +76,9 @@
 # include <openssl/rand.h>
 #endif
 
-#include "sudo_compat.h"
-#include "sudo_digest.h"
-#include "sudo_rand.h"
+#include <sudo_compat.h>
+#include <sudo_digest.h>
+#include <sudo_rand.h>
 
 #if !defined(MAP_ANON) && defined(MAP_ANONYMOUS)
 # define MAP_ANON MAP_ANONYMOUS
@@ -146,7 +146,7 @@ sudo_getentropy(void *buf, size_t len)
 		return (ret);
 
 #ifdef HAVE_OPENSSL
-	if (RAND_bytes(buf, len) == 1)
+	if (RAND_bytes(buf, (int)len) == 1)
 		return (0);
 #endif
 
@@ -249,9 +249,9 @@ start:
 	}
 	for (i = 0; i < len; ) {
 		size_t wanted = len - i;
-		ssize_t ret = read(fd, (char *)buf + i, wanted);
+		size_t ret = (size_t)read(fd, (char *)buf + i, wanted);
 
-		if (ret == -1) {
+		if (ret == (size_t)-1) {
 			if (errno == EAGAIN || errno == EINTR)
 				continue;
 			close(fd);
@@ -343,7 +343,7 @@ static int
 getentropy_getrandom(void *buf, size_t len)
 {
 	int pre_errno = errno;
-	int ret;
+	long ret;
 
         /*
          * Try descriptor-less getrandom(), in non-blocking mode.
@@ -413,9 +413,11 @@ static int
 getentropy_fallback(void *buf, size_t len)
 {
 	unsigned char *results = NULL;
-	int save_errno = errno, e, pgs = sysconf(_SC_PAGESIZE), faster = 0, repeat;
+	int save_errno = errno, e, faster = 0;
 	int ret = -1;
-	static int cnt;
+	static size_t cnt;
+	unsigned int repeat;
+	size_t pgs;
 	struct timespec ts;
 	struct timeval tv;
 	struct rusage ru;
@@ -427,10 +429,15 @@ getentropy_fallback(void *buf, size_t len)
 	size_t i, ii, m, digest_len;
 	char *p;
 
+	if (len == 0)
+		return 0;
+	pgs = (size_t)sysconf(_SC_PAGESIZE);
+	if (pgs == (size_t)-1)
+		return -1;
 	if ((ctx = sudo_digest_alloc(SUDO_DIGEST_SHA512)) == NULL)
-		goto done;
+		return -1;
 	digest_len = sudo_digest_getlen(SUDO_DIGEST_SHA512);
-	if (digest_len == (size_t)-1 || (results = malloc(digest_len)) == NULL)
+	if (digest_len == 0 || (results = malloc(digest_len)) == NULL)
 		goto done;
 
 	pid = getpid();
@@ -442,13 +449,14 @@ getentropy_fallback(void *buf, size_t len)
 		lastpid = pid;
 		repeat = REPEAT;
 	}
-	for (i = 0; i < len; ) {
-		int j;
+	i = 0;
+	do {
+		unsigned int j;
 		for (j = 0; j < repeat; j++) {
 			HX((e = gettimeofday(&tv, NULL)) == -1, tv);
 			if (e != -1) {
-				cnt += (int)tv.tv_sec;
-				cnt += (int)tv.tv_usec;
+				cnt += (size_t)tv.tv_sec;
+				cnt += (size_t)tv.tv_usec;
 			}
 #ifdef HAVE_DL_ITERATE_PHDR
 			dl_iterate_phdr(getentropy_phdr, ctx);
@@ -518,8 +526,7 @@ getentropy_fallback(void *buf, size_t len)
 						mo = cnt %
 						    (mm[m].npg * pgs - 1);
 						p[mo] = 1;
-						cnt += (int)((long)(mm[m].p)
-						    / pgs);
+						cnt += (size_t)mm[m].p / pgs;
 					}
 
 #ifdef HAVE_CLOCK_GETTIME
@@ -529,15 +536,15 @@ getentropy_fallback(void *buf, size_t len)
 						HX((e = clock_gettime(cl[ii],
 						    &ts)) == -1, ts);
 						if (e != -1)
-							cnt += (int)ts.tv_nsec;
+							cnt += (size_t)ts.tv_nsec;
 					}
 #endif /* HAVE_CLOCK_GETTIME */
 
 					HX((e = getrusage(RUSAGE_SELF,
 					    &ru)) == -1, ru);
 					if (e != -1) {
-						cnt += (int)ru.ru_utime.tv_sec;
-						cnt += (int)ru.ru_utime.tv_usec;
+						cnt += (size_t)ru.ru_utime.tv_sec;
+						cnt += (size_t)ru.ru_utime.tv_usec;
 					}
 				}
 
@@ -585,8 +592,8 @@ getentropy_fallback(void *buf, size_t len)
 				HX((e = getrusage(RUSAGE_CHILDREN,
 				    &ru)) == -1, ru);
 				if (e != -1) {
-					cnt += (int)ru.ru_utime.tv_sec;
-					cnt += (int)ru.ru_utime.tv_usec;
+					cnt += (size_t)ru.ru_utime.tv_sec;
+					cnt += (size_t)ru.ru_utime.tv_usec;
 				}
 			} else {
 				/* Subsequent hashes absorb previous result */
@@ -595,8 +602,8 @@ getentropy_fallback(void *buf, size_t len)
 
 			HX((e = gettimeofday(&tv, NULL)) == -1, tv);
 			if (e != -1) {
-				cnt += (int)tv.tv_sec;
-				cnt += (int)tv.tv_usec;
+				cnt += (size_t)tv.tv_sec;
+				cnt += (size_t)tv.tv_usec;
 			}
 
 			HD(cnt);
@@ -625,7 +632,7 @@ getentropy_fallback(void *buf, size_t len)
 		sudo_digest_reset(ctx);
 		memcpy((char *)buf + i, results, min(digest_len, len - i));
 		i += min(digest_len, len - i);
-	}
+	} while (i < len);
 	if (gotdata(buf, len) == 0) {
 		errno = save_errno;
 		ret = 0;		/* satisfied */

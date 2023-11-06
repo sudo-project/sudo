@@ -45,10 +45,10 @@
 # include <mps/ldap_ssl.h>
 #endif
 
-#include "sudoers.h"
-#include "sudo_lbuf.h"
-#include "sudo_ldap.h"
-#include "sudo_ldap_conf.h"
+#include <sudoers.h>
+#include <sudo_lbuf.h>
+#include <sudo_ldap.h>
+#include <sudo_ldap_conf.h>
 
 /* Older Netscape LDAP SDKs don't prototype ldapssl_set_strength() */
 #if defined(HAVE_LDAPSSL_SET_STRENGTH) && !defined(HAVE_LDAP_SSL_H) && !defined(HAVE_MPS_LDAP_SSL_H)
@@ -355,7 +355,7 @@ sudo_ldap_read_secret(const char *path)
     ssize_t len;
     debug_decl(sudo_ldap_read_secret, SUDOERS_DEBUG_LDAP);
 
-    if ((fp = fopen(policy_path_ldap_secret(), "r")) != NULL) {
+    if ((fp = fopen(path, "r")) != NULL) {
 	len = getdelim(&line, &linesize, '\n', fp);
 	if (len != -1) {
 	    /* trim newline */
@@ -384,8 +384,8 @@ sudo_ldap_read_secret(const char *path)
  * Returns true if found, else false.
  */
 static bool
-sudo_ldap_parse_keyword(const char *keyword, const char *value,
-    struct ldap_config_table *table)
+sudo_ldap_parse_keyword(const struct sudoers_context *ctx, const char *keyword,
+    const char *value, struct ldap_config_table *table)
 {
     struct ldap_config_table *cur;
     const char *errstr;
@@ -425,11 +425,11 @@ sudo_ldap_parse_keyword(const char *keyword, const char *value,
 		*(int *)(cur->valp) = sudo_strtobool(value) == true;
 		break;
 	    case CONF_INT:
-		*(int *)(cur->valp) = sudo_strtonum(value, INT_MIN, INT_MAX,
+		*(int *)(cur->valp) = (int)sudo_strtonum(value, INT_MIN, INT_MAX,
 		    &errstr);
 		if (errstr != NULL) {
-		    sudo_warnx(U_("%s: %s: %s: %s"),
-			policy_path_ldap_conf(), keyword, value, U_(errstr));
+		    sudo_warnx(U_("%s: %s: %s: %s"), ctx->settings.ldap_conf,
+			keyword, value, U_(errstr));
 		}
 		break;
 	    case CONF_STR:
@@ -483,6 +483,9 @@ sudo_krb5_ccname_path(const char *old_ccname)
     const char *ccname = old_ccname;
     debug_decl(sudo_krb5_ccname_path, SUDOERS_DEBUG_LDAP);
 
+    if (ccname == NULL)
+	debug_return_const_str(NULL);
+
     /* Strip off leading FILE: or WRFILE: prefix. */
     switch (ccname[0]) {
 	case 'F':
@@ -532,7 +535,7 @@ sudo_check_krb5_ccname(const char *ccname)
 #endif /* HAVE_LDAP_SASL_INTERACTIVE_BIND_S */
 
 bool
-sudo_ldap_read_config(void)
+sudo_ldap_read_config(const struct sudoers_context *ctx)
 {
     char *cp, *keyword, *value, *line = NULL;
     struct ldap_config_str *conf_str;
@@ -563,7 +566,7 @@ sudo_ldap_read_config(void)
 	debug_return_bool(false);
     }
 
-    if ((fp = fopen(policy_path_ldap_conf(), "r")) == NULL)
+    if ((fp = fopen(ctx->settings.ldap_conf, "r")) == NULL)
 	debug_return_bool(false);
 
     while (sudo_parseln(&line, &linesize, NULL, fp, PARSELN_COMM_BOL|PARSELN_CONT_IGN) != -1) {
@@ -583,8 +586,8 @@ sudo_ldap_read_config(void)
 	value = cp;
 
 	/* Look up keyword in config tables */
-	if (!sudo_ldap_parse_keyword(keyword, value, ldap_conf_global))
-	    sudo_ldap_parse_keyword(keyword, value, ldap_conf_conn);
+	if (!sudo_ldap_parse_keyword(ctx, keyword, value, ldap_conf_global))
+	    sudo_ldap_parse_keyword(ctx, keyword, value, ldap_conf_conn);
     }
     free(line);
     fclose(fp);
@@ -783,7 +786,7 @@ sudo_ldap_read_config(void)
 
     /* If rootbinddn set, read in /etc/ldap.secret if it exists. */
     if (ldap_conf.rootbinddn) {
-	sudo_ldap_read_secret(policy_path_ldap_secret());
+	sudo_ldap_read_secret(ctx->settings.ldap_secret);
     } else if (ldap_conf.bindpw) {
 	cp = sudo_ldap_decode_secret(ldap_conf.bindpw);
 	if (cp != NULL) {

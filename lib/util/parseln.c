@@ -23,19 +23,20 @@
 
 #include <config.h>
 
+#include <ctype.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
-#include "sudo_debug.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
+#include <sudo_debug.h>
 
 /*
  * Read a line of input, honoring line continuation chars.
@@ -47,8 +48,8 @@
 ssize_t
 sudo_parseln_v2(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp, int flags)
 {
-    size_t linesize = 0, total = 0;
-    ssize_t len;
+    ssize_t len, total = 0;
+    size_t bufsize, linesize = 0;
     char *cp, *line = NULL;
     bool continued, comment;
     debug_decl(sudo_parseln, SUDO_DEBUG_UTIL);
@@ -89,33 +90,31 @@ sudo_parseln_v2(char **bufp, size_t *bufsizep, unsigned int *lineno, FILE *fp, i
 	for (cp = line; isblank((unsigned char)*cp); cp++)
 	    len--;
 
-	if (*bufp == NULL || total + len >= *bufsizep) {
-	    void *tmp;
-	    size_t size = total + len + 1;
+	bufsize = (size_t)(total + len + 1);
+	if (*bufp == NULL || bufsize > *bufsizep) {
+	    const size_t newsize = sudo_pow2_roundup(bufsize);
+	    void *newbuf;
 
-	    if (size < 64) {
-		size = 64;
-	    } else if (size <= 0x80000000) {
-		/* Round up to next highest power of two. */
-		size--;
-		size |= size >> 1;
-		size |= size >> 2;
-		size |= size >> 4;
-		size |= size >> 8;
-		size |= size >> 16;
-		size++;
-	    }
-	    if ((tmp = realloc(*bufp, size)) == NULL) {
+	    if (newsize < bufsize) {
+		/* overflow */
+		errno = ENOMEM;
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "unable to allocate memory");
 		len = -1;
 		total = 0;
 		break;
 	    }
-	    *bufp = tmp;
-	    *bufsizep = size;
+	    if ((newbuf = realloc(*bufp, newsize)) == NULL) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unable to allocate memory");
+		len = -1;
+		total = 0;
+		break;
+	    }
+	    *bufp = newbuf;
+	    *bufsizep = newsize;
 	}
-	memcpy(*bufp + total, cp, len + 1);
+	memcpy(*bufp + total, cp, (size_t)(len + 1));
 	total += len;
     } while (continued);
     free(line);

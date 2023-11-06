@@ -26,7 +26,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 #if !defined(HAVE_PREAD) && !defined(HAVE_PREAD64)
 ssize_t

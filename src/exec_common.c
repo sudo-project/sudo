@@ -33,8 +33,8 @@
 #endif
 #include <errno.h>
 
-#include "sudo.h"
-#include "sudo_exec.h"
+#include <sudo.h>
+#include <sudo_exec.h>
 
 /*
  * Disable execution of child processes in the command we are about
@@ -95,7 +95,7 @@ enable_intercept(char *envp[], const char *dso, int intercept_fd)
  */
 int
 sudo_execve(int fd, const char *path, char *const argv[], char *envp[],
-    int intercept_fd, int flags)
+    int intercept_fd, unsigned int flags)
 {
     debug_decl(sudo_execve, SUDO_DEBUG_UTIL);
 
@@ -123,11 +123,11 @@ sudo_execve(int fd, const char *path, char *const argv[], char *envp[],
 
 	for (argc = 0; argv[argc] != NULL; argc++)
 	    continue;
-	nargv = reallocarray(NULL, argc + 2, sizeof(char *));
+	nargv = reallocarray(NULL, (size_t)argc + 2, sizeof(char *));
 	if (nargv != NULL) {
 	    nargv[0] = "sh";
 	    nargv[1] = path;
-	    memcpy(nargv + 2, argv + 1, argc * sizeof(char *));
+	    memcpy(nargv + 2, argv + 1, (size_t)argc * sizeof(char *));
 	    execve(_PATH_SUDO_BSHELL, (char **)nargv, envp);
 	    free(nargv);
 	}

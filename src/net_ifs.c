@@ -140,7 +140,7 @@ get_net_ifs(char **addrinfo_out)
     }
     if (num_interfaces == 0)
 	goto done;
-    ailen = num_interfaces * 2 * INET6_ADDRSTRLEN;
+    ailen = (size_t)num_interfaces * 2 * INET6_ADDRSTRLEN;
     if ((cp = malloc(ailen)) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "unable to allocate memory");
@@ -207,7 +207,7 @@ get_net_ifs(char **addrinfo_out)
 	    goto bad;
 	}
 	cp += len;
-	ailen -= len;
+	ailen -= (size_t)len;
     }
     *addrinfo_out = addrinfo;
     goto done;

@@ -26,8 +26,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "sudoers.h"
-#include "sudo_lbuf.h"
+#include <sudoers.h>
+#include <sudo_lbuf.h>
 #include <gram.h>
 
 struct sudo_file_handle {
@@ -36,7 +36,7 @@ struct sudo_file_handle {
 };
 
 static int
-sudo_file_close(struct sudo_nss *nss)
+sudo_file_close(struct sudoers_context *ctx, struct sudo_nss *nss)
 {
     debug_decl(sudo_file_close, SUDOERS_DEBUG_NSS);
     struct sudo_file_handle *handle = nss->handle;
@@ -54,7 +54,7 @@ sudo_file_close(struct sudo_nss *nss)
 }
 
 static int
-sudo_file_open(struct sudo_nss *nss)
+sudo_file_open(struct sudoers_context *ctx, struct sudo_nss *nss)
 {
     debug_decl(sudo_file_open, SUDOERS_DEBUG_NSS);
     struct sudo_file_handle *handle;
@@ -67,16 +67,16 @@ sudo_file_open(struct sudo_nss *nss)
     if (nss->handle != NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR,
 	    "%s: called with non-NULL handle %p", __func__, nss->handle);
-	sudo_file_close(nss);
+	sudo_file_close(ctx, nss);
     }
 
     handle = malloc(sizeof(*handle));
     if (handle != NULL) {
-	const struct sudoers_parser_config *conf = policy_sudoers_conf();
-	handle->fp = open_sudoers(conf->sudoers_path, &outfile, false, NULL);
+	init_parser(ctx, NULL);
+	handle->fp = open_sudoers(ctx->parser_conf.sudoers_path, &outfile,
+	    false, NULL);
 	if (handle->fp != NULL) {
-	    init_parser(NULL, policy_sudoers_conf());
-	    init_parse_tree(&handle->parse_tree, NULL, NULL, nss);
+	    init_parse_tree(&handle->parse_tree, NULL, NULL, ctx, nss);
 	    if (outfile != NULL) {
 		/* Update path to open sudoers file. */
 		sudo_rcstr_delref(sudoers);
@@ -95,7 +95,7 @@ sudo_file_open(struct sudo_nss *nss)
  * Parse and return the specified sudoers file.
  */
 static struct sudoers_parse_tree *
-sudo_file_parse(const struct sudo_nss *nss)
+sudo_file_parse(struct sudoers_context *ctx, const struct sudo_nss *nss)
 {
     debug_decl(sudo_file_close, SUDOERS_DEBUG_NSS);
     struct sudo_file_handle *handle = nss->handle;
@@ -124,7 +124,8 @@ sudo_file_parse(const struct sudo_nss *nss)
  * No need for explicit sudoers queries, the parse function handled it.
  */
 static int
-sudo_file_query(const struct sudo_nss *nss, struct passwd *pw)
+sudo_file_query(struct sudoers_context *ctx, const struct sudo_nss *nss,
+    struct passwd *pw)
 {
     debug_decl(sudo_file_query, SUDOERS_DEBUG_NSS);
     debug_return_int(0);
@@ -134,7 +135,7 @@ sudo_file_query(const struct sudo_nss *nss, struct passwd *pw)
  * No need to get defaults for sudoers file, the parse function handled it.
  */
 static int
-sudo_file_getdefs(const struct sudo_nss *nss)
+sudo_file_getdefs(struct sudoers_context *ctx, const struct sudo_nss *nss)
 {
     debug_decl(sudo_file_getdefs, SUDOERS_DEBUG_NSS);
     debug_return_int(0);

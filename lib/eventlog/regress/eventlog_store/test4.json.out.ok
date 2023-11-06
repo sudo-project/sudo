@@ -2,6 +2,7 @@
     "submituser": "millert",
     "command": "/usr/bin/vi",
     "runuser": "root",
+    "source": "/etc/sudoers:89:24",
     "ttyname": "/dev/ttypb",
     "submithost": "xerxes.sudo.ws",
     "submitcwd": "/etc/mail",

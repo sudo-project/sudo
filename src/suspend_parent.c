@@ -30,11 +30,11 @@
 #include <fcntl.h>
 #include <signal.h>
 
-#include "pathnames.h"
-#include "sudo_debug.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_exec.h"
+#include <pathnames.h>
+#include <sudo_debug.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_exec.h>
 
 static volatile sig_atomic_t got_sigttou;
 

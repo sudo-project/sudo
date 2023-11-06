@@ -35,7 +35,7 @@
 #include <errno.h>
 #include <limits.h>
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 /*
  * This is sqrt(SIZE_MAX+1), as s1*s2 <= SIZE_MAX

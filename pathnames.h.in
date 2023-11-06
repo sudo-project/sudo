@@ -53,7 +53,8 @@
 # define _PATH_STDPATH		"/usr/bin:/bin:/usr/sbin:/sbin"
 #endif /* _PATH_STDPATH */
 
-#ifndef _PATH_ENVIRONMENT
+/* Use /etc/environment on AIX or Linux w/o PAM (where pam_env handles it). */
+#if defined(_AIX) || (defined(__linux__) && !defined(HAVE_PAM))
 # define _PATH_ENVIRONMENT	"/etc/environment"
 #endif /* _PATH_ENVIRONMENT */
 

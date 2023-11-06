@@ -26,7 +26,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 #if !defined(HAVE_PWRITE) && !defined(HAVE_PWRITE64)
 ssize_t

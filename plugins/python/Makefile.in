@@ -238,7 +238,8 @@ check: $(TEST_PROGS) check-fuzzer
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    LSAN_OPTIONS=suppressions=$(srcdir)/lsan_suppr.txt \
-		./check_python_examples ".libs/python_plugin.so"; \
+		./check_python_examples $(TEST_VERBOSE) \
+		    ".libs/python_plugin.so"; \
 	fi
 
 check-verbose:

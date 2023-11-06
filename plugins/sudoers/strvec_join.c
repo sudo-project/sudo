@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 #ifdef HAVE_STRLCPY
 # define cpy_default	strlcpy

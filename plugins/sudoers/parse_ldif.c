@@ -31,10 +31,10 @@
 #endif /* HAVE_STRINGS_H */
 #include <ctype.h>
 
-#include "sudoers.h"
-#include "sudo_ldap.h"
-#include "redblack.h"
-#include "strlist.h"
+#include <sudoers.h>
+#include <sudo_ldap.h>
+#include <redblack.h>
+#include <strlist.h>
 #include <gram.h>
 
 struct sudo_role {
@@ -427,7 +427,7 @@ role_to_sudoers(struct sudoers_parse_tree *parse_tree, struct sudo_role *role,
 	    U_("unable to allocate memory"));
     }
 
-    if (reuse_privilege) {
+    if (reuse_privilege && !TAILQ_EMPTY(&us->privileges)) {
 	/* Hostspec unchanged, append cmndlist to previous privilege. */
 	struct privilege *prev_priv = TAILQ_LAST(&us->privileges, privilege_list);
 	if (reuse_runas) {
@@ -577,13 +577,10 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
     bool in_role = false;
     size_t linesize = 0;
     char *attr, *name, *line = NULL, *savedline = NULL;
-    ssize_t savedlen = 0;
+    size_t savedlen = 0;
     bool mismatch = false;
     int errors = 0;
     debug_decl(sudoers_parse_ldif, SUDOERS_DEBUG_UTIL);
-
-    /* Free old contents of the parse tree (if any). */
-    free_parse_tree(parse_tree);
 
     /*
      * We cache user, group and host lists to make it eay to detect when there
@@ -647,12 +644,12 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
 	    char *tmp;
 
 	    /* Append to saved line. */
-	    linesize = savedlen + len + 1;
+	    linesize = savedlen + (size_t)len + 1;
 	    if ((tmp = realloc(savedline, linesize)) == NULL) {
 		sudo_fatalx(U_("%s: %s"), __func__,
 		    U_("unable to allocate memory"));
 	    }
-	    memcpy(tmp + savedlen, line, len + 1);
+	    memcpy(tmp + savedlen, line, (size_t)len + 1);
 	    free(line);
 	    line = tmp;
 	    savedline = NULL;
@@ -661,7 +658,7 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
 	/* Check for folded line */
 	if ((ch = getc(fp)) == ' ') {
 	    /* folded line, append to the saved portion. */
-	    savedlen = len;
+	    savedlen = (size_t)len;
 	    savedline = line;
 	    line = NULL;
 	    linesize = 0;

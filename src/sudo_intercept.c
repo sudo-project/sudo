@@ -39,25 +39,33 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #if defined(HAVE_SHL_LOAD)
 # include <dl.h>
 #elif defined(HAVE_DLOPEN)
 # include <dlfcn.h>
 #endif
+#ifdef HAVE_CRT_EXTERNS_H
+# include <crt_externs.h>
+#endif
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_util.h"
-#include "pathnames.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_util.h>
+#include <pathnames.h>
 
 /* execl flavors */
 #define SUDO_EXECL	0x0
 #define SUDO_EXECLE	0x1
 #define SUDO_EXECLP	0x2
 
+#ifdef HAVE__NSGETENVIRON
+# define environ (*_NSGetEnviron())
+#else
 extern char **environ;
+#endif
+
 extern bool command_allowed(const char *cmnd, char * const argv[], char * const envp[], char **ncmnd, char ***nargv, char ***nenvp);
 
 typedef int (*sudo_fn_execve_t)(const char *, char *const *, char *const *);
@@ -82,7 +90,7 @@ static char **
 copy_vector(char * const *src)
 {
     char **copy;
-    int i, len = 0;
+    size_t i, len = 0;
     debug_decl(copy_vector, SUDO_DEBUG_EXEC);
 
     if (src != NULL) {
@@ -133,7 +141,7 @@ resolve_path(const char *cmnd, char *out_cmnd, size_t out_size)
     endp = cp + strlen(cp);
     while (cp < endp) {
 	char *colon = strchr(cp, ':');
-	dirlen = colon ? (colon - cp) : (endp - cp);
+	dirlen = colon ? (int)(colon - cp) : (int)(endp - cp);
 	if (dirlen == 0) {
 	    /* empty PATH component is the same as "." */
 	    len = snprintf(path, sizeof(path), "./%s", cmnd);
@@ -257,12 +265,12 @@ exec_wrapper(const char *cmnd, char * const argv[], char * const envp[],
 
 	    for (argc = 0; argv[argc] != NULL; argc++)
 		continue;
-	    shargv = sudo_mmap_allocarray(argc + 2, sizeof(char *));
+	    shargv = sudo_mmap_allocarray((size_t)argc + 2, sizeof(char *));
 	    if (shargv == NULL)
 		goto bad;
 	    shargv[0] = "sh";
 	    shargv[1] = ncmnd;
-	    memcpy(shargv + 2, nargv + 1, argc * sizeof(char *));
+	    memcpy(shargv + 2, nargv + 1, (size_t)argc * sizeof(char *));
 	    ((sudo_fn_execve_t)fn)(_PATH_SUDO_BSHELL, (char **)shargv, nenvp);
 	    sudo_mmap_free(shargv);
 	}
@@ -303,7 +311,7 @@ execl_wrapper(int type, const char *name, const char *arg, va_list ap)
     while (va_arg(ap2, char *) != NULL)
 	argc++;
     va_end(ap2);
-    argv = sudo_mmap_allocarray(argc + 1, sizeof(char *));
+    argv = sudo_mmap_allocarray((size_t)argc + 1, sizeof(char *));
     if (argv == NULL)
 	debug_return_int(-1);
 

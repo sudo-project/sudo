@@ -23,26 +23,30 @@
 
 #include <config.h>
 
-#include <stdlib.h>
-#include <string.h>
 #include <ctype.h>
 #include <errno.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_lbuf.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_lbuf.h>
+#include <sudo_util.h>
 
 void
 sudo_lbuf_init_v1(struct sudo_lbuf *lbuf, sudo_lbuf_output_t output,
-    int indent, const char *continuation, int cols)
+    unsigned int indent, const char *continuation, int cols)
 {
     debug_decl(sudo_lbuf_init, SUDO_DEBUG_UTIL);
+
+    if (cols < 0)
+	cols = 0;
 
     lbuf->output = output;
     lbuf->continuation = continuation;
     lbuf->indent = indent;
-    lbuf->cols = cols;
+    lbuf->cols = (unsigned short)cols;
     lbuf->error = 0;
     lbuf->len = 0;
     lbuf->size = 0;
@@ -79,10 +83,11 @@ sudo_lbuf_expand(struct sudo_lbuf *lbuf, unsigned int extra)
     }
 
     if (lbuf->len + extra + 1 > lbuf->size) {
-	unsigned int new_size = sudo_pow2_roundup(lbuf->len + extra + 1);
+	const size_t size = lbuf->len + extra + 1;
+	size_t new_size = sudo_pow2_roundup(size);
 	char *new_buf;
 
-	if (new_size < lbuf->size) {
+	if (new_size > UINT_MAX || new_size < lbuf->size) {
 	    errno = ENOMEM;
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"integer overflow updating lbuf->size");
@@ -98,7 +103,7 @@ sudo_lbuf_expand(struct sudo_lbuf *lbuf, unsigned int extra)
 	    debug_return_bool(false);
 	}
 	lbuf->buf = new_buf;
-	lbuf->size = new_size;
+	lbuf->size = (unsigned int)new_size;
     }
     debug_return_bool(true);
 }
@@ -108,23 +113,24 @@ sudo_lbuf_expand(struct sudo_lbuf *lbuf, unsigned int extra)
  * in buf, which must have at least 6 bytes available.
  * Returns the length of buf, not counting the terminating NUL byte.
  */
-static int
-escape(unsigned char ch, char *buf)
+static unsigned int
+escape(char ch, char *buf)
 {
-    const int len = ch < 0100 ? (ch < 010 ? 3 : 4) : 5;
+    unsigned char uch = (unsigned char)ch;
+    const unsigned int len = uch < 0100 ? (uch < 010 ? 3 : 4) : 5;
 
     /* Work backwards from the least significant digit to most significant. */
     switch (len) {
     case 5:
-	buf[4] = (ch & 7) + '0';
-	ch >>= 3;
+	buf[4] = (uch & 7) + '0';
+	uch >>= 3;
 	FALLTHROUGH;
     case 4:
-	buf[3] = (ch & 7) + '0';
-	ch >>= 3;
+	buf[3] = (uch & 7) + '0';
+	uch >>= 3;
 	FALLTHROUGH;
     case 3:
-	buf[2] = (ch & 7) + '0';
+	buf[2] = (uch & 7) + '0';
 	buf[1] = '0';
 	buf[0] = '#';
 	break;
@@ -139,7 +145,7 @@ escape(unsigned char ch, char *buf)
  * Any non-printable characters are escaped in octal as #0nn.
  */
 bool
-sudo_lbuf_append_esc_v1(struct sudo_lbuf *lbuf, int flags, const char *fmt, ...)
+sudo_lbuf_append_esc_v1(struct sudo_lbuf *lbuf, int flags, const char * restrict fmt, ...)
 {
     unsigned int saved_len = lbuf->len;
     bool ret = false;
@@ -214,13 +220,13 @@ done:
  * Any characters in set are quoted with a backslash.
  */
 bool
-sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char *fmt, ...)
+sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char * restrict fmt, ...)
 {
     unsigned int saved_len = lbuf->len;
     bool ret = false;
     const char *cp, *s;
     va_list ap;
-    int len;
+    unsigned int len;
     debug_decl(sudo_lbuf_append_quoted, SUDO_DEBUG_UTIL);
 
     if (sudo_lbuf_error(lbuf))
@@ -232,7 +238,7 @@ sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char *
 	    if ((s = va_arg(ap, char *)) == NULL)
 		s = "(NULL)";
 	    while ((cp = strpbrk(s, set)) != NULL) {
-		len = (int)(cp - s);
+		len = (unsigned int)(cp - s);
 		if (!sudo_lbuf_expand(lbuf, len + 2))
 		    goto done;
 		memcpy(lbuf->buf + lbuf->len, s, len);
@@ -242,7 +248,7 @@ sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char *
 		s = cp + 1;
 	    }
 	    if (*s != '\0') {
-		len = strlen(s);
+		len = (unsigned int)strlen(s);
 		if (!sudo_lbuf_expand(lbuf, len))
 		    goto done;
 		memcpy(lbuf->buf + lbuf->len, s, len);
@@ -273,13 +279,13 @@ done:
  * Parse the format and append strings, only %s, %n$s and %% escapes are supported.
  */
 bool
-sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...)
+sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char * restrict fmt, ...)
 {
     unsigned int saved_len = lbuf->len;
     bool ret = false;
     va_list ap;
     const char *s;
-    size_t len;
+    unsigned int len;
     debug_decl(sudo_lbuf_append, SUDO_DEBUG_UTIL);
 
     if (sudo_lbuf_error(lbuf))
@@ -296,8 +302,8 @@ sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...)
 		num_end++;
 	    if (num_end[0] == '$' && num_end[1] == 's' && num_end > num_start) {
 		/* Convert the numeric part to an integer */
-		char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
-		len = num_end - num_start;
+		char numbuf[STRLEN_MAX_SIGNED(int) + 1];
+		len = (unsigned int)(num_end - num_start);
 		if (len >= sizeof(numbuf)) {
 		    errno = EINVAL;
 		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -316,7 +322,7 @@ sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...)
 		    }
 		    if ((s = va_arg(arg_copy, char *)) == NULL)
 			s = "(NULL)";
-		    len = strlen(s);
+		    len = (unsigned int)strlen(s);
 		    if (!sudo_lbuf_expand(lbuf, len)) {
 			va_end(arg_copy);
 			goto done;
@@ -332,7 +338,7 @@ sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...)
 	if (fmt[0] == '%' && fmt[1] == 's') {
 	    if ((s = va_arg(ap, char *)) == NULL)
 		s = "(NULL)";
-	    len = strlen(s);
+	    len = (unsigned int)strlen(s);
 	    if (!sudo_lbuf_expand(lbuf, len))
 		goto done;
 	    memcpy(lbuf->buf + lbuf->len, s, len);
@@ -358,11 +364,11 @@ done:
 
 /* XXX - check output function return value */
 static void
-sudo_lbuf_println(struct sudo_lbuf *lbuf, char *line, int len)
+sudo_lbuf_println(struct sudo_lbuf *lbuf, char *line, size_t len)
 {
     char *cp, save;
-    int i, have, contlen = 0;
-    int indent = lbuf->indent;
+    size_t i, have, contlen = 0;
+    unsigned int indent = lbuf->indent;
     bool is_comment = false;
     debug_decl(sudo_lbuf_println, SUDO_DEBUG_UTIL);
 
@@ -382,14 +388,14 @@ sudo_lbuf_println(struct sudo_lbuf *lbuf, char *line, int len)
     have = lbuf->cols;
     while (cp != NULL && *cp != '\0') {
 	char *ep = NULL;
-	int need = len - (int)(cp - line);
+	size_t need = len - (size_t)(cp - line);
 
 	if (need > have) {
 	    have -= contlen;		/* subtract for continuation char */
 	    if ((ep = memrchr(cp, ' ', have)) == NULL)
 		ep = memchr(cp + have, ' ', need - have);
 	    if (ep != NULL)
-		need = (int)(ep - cp);
+		need = (size_t)(ep - cp);
 	}
 	if (cp != line) {
 	    if (is_comment) {
@@ -436,7 +442,7 @@ void
 sudo_lbuf_print_v1(struct sudo_lbuf *lbuf)
 {
     char *cp, *ep;
-    int len;
+    size_t len;
     debug_decl(sudo_lbuf_print, SUDO_DEBUG_UTIL);
 
     if (lbuf->buf == NULL || lbuf->len == 0)
@@ -458,9 +464,9 @@ sudo_lbuf_print_v1(struct sudo_lbuf *lbuf)
 	    lbuf->output("\n");
 	    cp++;
 	} else {
-	    len = lbuf->len - (cp - lbuf->buf);
+	    len = lbuf->len - (size_t)(cp - lbuf->buf);
 	    if ((ep = memchr(cp, '\n', len)) != NULL)
-		len = (int)(ep - cp);
+		len = (size_t)(ep - cp);
 	    if (len)
 		sudo_lbuf_println(lbuf, cp, len);
 	    cp = ep ? ep + 1 : NULL;

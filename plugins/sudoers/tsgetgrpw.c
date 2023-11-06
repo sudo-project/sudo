@@ -37,8 +37,8 @@
 #include <limits.h>
 #include <unistd.h>
 
-#include "tsgetgrpw.h"
-#include "sudoers.h"
+#include <tsgetgrpw.h>
+#include <sudoers.h>
 
 #undef GRMEM_MAX
 #define GRMEM_MAX 200
@@ -346,20 +346,21 @@ testsudoers_getgrgid(gid_t gid)
  * Copied from getgrouplist.c
  */
 int
-testsudoers_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
+testsudoers_getgrouplist2(const char *name, GETGROUPS_T basegid,
     GETGROUPS_T **groupsp, int *ngroupsp)
 {
     GETGROUPS_T *groups = *groupsp;
-    int i, grpsize, ngroups = 1;
+    int i, ngroups = 1;
+    long grpsize;
     int ret = -1;
     struct group *grp;
 
     if (groups == NULL) {
 	/* Dynamically-sized group vector. */
-	grpsize = (int)sysconf(_SC_NGROUPS_MAX);
+	grpsize = sysconf(_SC_NGROUPS_MAX);
 	if (grpsize < 0)
 	    grpsize = NGROUPS_MAX;
-	groups = reallocarray(NULL, grpsize, 4 * sizeof(*groups));
+	groups = reallocarray(NULL, (size_t)grpsize, 4 * sizeof(*groups));
 	if (groups == NULL)
 	    return -1;
 	grpsize <<= 2;
@@ -397,7 +398,7 @@ testsudoers_getgrouplist2_v1(const char *name, GETGROUPS_T basegid,
 		    /* Static group vector. */
 		    goto done;
 		}
-		tmp = reallocarray(groups, grpsize, 2 * sizeof(*groups));
+		tmp = reallocarray(groups, (size_t)grpsize, 2 * sizeof(*groups));
 		if (tmp == NULL) {
 		    free(groups);
 		    groups = NULL;

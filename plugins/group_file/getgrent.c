@@ -34,8 +34,8 @@
 #include <limits.h>
 #include <grp.h>
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
 
 #undef GRMEM_MAX
 #define GRMEM_MAX 200

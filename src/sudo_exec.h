@@ -76,8 +76,8 @@ struct exec_closure {
     pid_t monitor_pid;
     pid_t cmnd_pid;
     pid_t ppgrp;
-    short rows;
-    short cols;
+    int rows;
+    int cols;
     bool foreground;
     bool term_raw;
 };
@@ -95,8 +95,8 @@ struct io_buffer {
     struct sudo_event *revent;
     struct sudo_event *wevent;
     sudo_io_action_t action;
-    int len; /* buffer length (how much produced) */
-    int off; /* write position (how much already consumed) */
+    unsigned int len; /* buffer length (how much produced) */
+    unsigned int off; /* write position (how much already consumed) */
     char buf[64 * 1024];
 };
 SLIST_HEAD(io_buffer_list, io_buffer);
@@ -174,13 +174,15 @@ union sudo_token_un {
 #endif /* _PATH_SUDO_INTERCEPT && __linux__ */
 
 /* exec.c */
+struct stat;
 void exec_cmnd(struct command_details *details, sigset_t *mask, int intercept_fd, int errfd);
 void terminate_command(pid_t pid, bool use_pgrp);
 bool sudo_terminated(struct command_status *cstat);
 void free_exec_closure(struct exec_closure *ec);
+bool fd_matches_tty(int fd, struct stat *tty_sb, struct stat *fd_sb);
 
 /* exec_common.c */
-int sudo_execve(int fd, const char *path, char *const argv[], char *envp[], int intercept_fd, int flags);
+int sudo_execve(int fd, const char *path, char *const argv[], char *envp[], int intercept_fd, unsigned int flags);
 char **disable_execute(char *envp[], const char *dso);
 char **enable_monitor(char *envp[], const char *dso);
 

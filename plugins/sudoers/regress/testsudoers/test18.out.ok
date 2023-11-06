@@ -3,9 +3,11 @@ Parses OK
 Entries for user root:
 
 ALL = ^/bin/ls$ ^-[lAt]$
-	host  matched
-	runas matched
+	host  allowed
+	runas allowed
 	cmnd  allowed
+
+Password required
 
 Command allowed
 Parses OK
@@ -13,9 +15,11 @@ Parses OK
 Entries for user root:
 
 ALL = ^/bin/cat$ /var/log/*
-	host  matched
-	runas matched
+	host  allowed
+	runas allowed
 	cmnd  allowed
+
+Password required
 
 Command allowed
 Parses OK
@@ -23,9 +27,11 @@ Parses OK
 Entries for user root:
 
 ALL = /bin/cat ^/var/log/[^/]+$
-	host  matched
-	runas matched
+	host  allowed
+	runas allowed
 	cmnd  allowed
+
+Password required
 
 Command allowed
 Parses OK
@@ -33,9 +39,11 @@ Parses OK
 Entries for user root:
 
 ALL = /bin/*at ^/var/log/[^/]+$
-	host  matched
-	runas matched
+	host  allowed
+	runas allowed
 	cmnd  allowed
+
+Password required
 
 Command allowed
 Parses OK
@@ -43,9 +51,11 @@ Parses OK
 Entries for user root:
 
 ALL = /usr/bin/grep \^foo$
-	host  matched
-	runas matched
+	host  allowed
+	runas allowed
 	cmnd  allowed
+
+Password required
 
 Command allowed
 Parses OK
@@ -53,8 +63,10 @@ Parses OK
 Entries for user root:
 
 ALL = sudoedit ^/etc/(motd|issue|hosts)$
-	host  matched
-	runas matched
+	host  allowed
+	runas allowed
 	cmnd  allowed
+
+Password required
 
 Command allowed

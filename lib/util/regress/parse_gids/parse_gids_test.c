@@ -23,9 +23,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_fatal.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_fatal.h>
+#include <sudo_util.h>
 
 sudo_dso_public int main(int argc, char *argv[]);
 
@@ -69,7 +69,8 @@ int
 main(int argc, char *argv[])
 {
     GETGROUPS_T *gidlist = NULL;
-    int i, j, errors = 0, ntests = 0;
+    size_t i;
+    int j, errors = 0, ntests = 0;
     int ch, ngids;
 
     initprogname(argc > 0 ? argv[0] : "parse_gids_test");

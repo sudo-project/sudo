@@ -26,7 +26,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
@@ -39,14 +39,14 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_event.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_event.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
 
-#include "tls_common.h"
-#include "hostcheck.h"
+#include <tls_common.h>
+#include <hostcheck.h>
 
 #define DEFAULT_CIPHER_LST12 "HIGH:!aNULL"
 #define DEFAULT_CIPHER_LST13 "TLS_AES_256_GCM_SHA384"

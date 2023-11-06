@@ -27,32 +27,32 @@
 
 #define SUDO_ERROR_WRAP 0
 
-#include "sudoers.h"
-#include "sudo_eventlog.h"
-#include "sudo_iolog.h"
-#include "sudo_plugin.h"
+#include <sudoers.h>
+#include <sudo_eventlog.h>
+#include <sudo_iolog.h>
+#include <sudo_plugin.h>
 
 #include <def_data.c>		/* for iolog_path.c */
 
 extern struct io_plugin sudoers_io;
 
-struct sudo_user sudo_user;
-struct passwd *list_pw;
 sudo_printf_t sudo_printf;
 sudo_conv_t sudo_conv;
 struct sudo_plugin_event * (*plugin_event_alloc)(void);
 
+static struct sudoers_context io_ctx = SUDOERS_CONTEXT_INITIALIZER;
+
 sudo_dso_public int main(int argc, char *argv[], char *envp[]);
 
-static void
+sudo_noreturn static void
 usage(void)
 {
-    fprintf(stderr, "usage: %s pathname\n", getprogname());
+    fprintf(stderr, "usage: %s [-v] pathname\n", getprogname());
     exit(EXIT_FAILURE);
 }
 
 static int
-sudo_printf_int(int msg_type, const char *fmt, ...)
+sudo_printf_int(int msg_type, const char * restrict fmt, ...)
 {
     va_list ap;
     int len;
@@ -207,7 +207,8 @@ validate_timing(FILE *fp, int recno, int type, unsigned int p1, unsigned int p2)
  * Test sudoers I/O log plugin endpoints.
  */
 static void
-test_endpoints(int *ntests, int *nerrors, const char *iolog_dir, char *envp[])
+test_endpoints(const struct sudoers_context *ctx, int *ntests, int *nerrors,
+    const char *iolog_dir, char *envp[])
 {
     int rc, cmnd_argc = 1;
     const char *errstr = NULL;
@@ -245,12 +246,13 @@ test_endpoints(int *ntests, int *nerrors, const char *iolog_dir, char *envp[])
 	NULL
     };
     const char output[] = "uid=0(root) gid=0(wheel)\r\n";
+    const unsigned int outlen = sizeof(output) - 1;
 
     /* Set runas uid/gid to root. */
     snprintf(runas_uid, sizeof(runas_uid), "runas_uid=%u",
-	(unsigned int)runas_pw->pw_uid);
+	(unsigned int)ctx->runas.pw->pw_uid);
     snprintf(runas_gid, sizeof(runas_gid), "runas_gid=%u",
-	(unsigned int)runas_pw->pw_gid);
+	(unsigned int)ctx->runas.pw->pw_gid);
 
     /* Set path to the iolog directory the user passed in. */
     snprintf(iolog_path, sizeof(iolog_path), "iolog_path=%s", iolog_dir);
@@ -267,7 +269,7 @@ test_endpoints(int *ntests, int *nerrors, const char *iolog_dir, char *envp[])
     }
 
     /* Test log_ttyout endpoint. */
-    rc = sudoers_io.log_ttyout(output, strlen(output), &errstr);
+    rc = sudoers_io.log_ttyout(output, outlen, &errstr);
     (*ntests)++;
     if (rc != 1) {
 	sudo_warnx("I/O log_ttyout endpoint failed");
@@ -316,7 +318,7 @@ test_endpoints(int *ntests, int *nerrors, const char *iolog_dir, char *envp[])
     }
 
     /* Line 1: output of id command. */
-    if (!validate_timing(fp, 1, IO_EVENT_TTYOUT, strlen(output), 0)) {
+    if (!validate_timing(fp, 1, IO_EVENT_TTYOUT, outlen, 0)) {
 	(*nerrors)++;
 	return;
     }
@@ -358,31 +360,44 @@ int
 main(int argc, char *argv[], char *envp[])
 {
     struct passwd *tpw;
-    int tests = 0, errors = 0;
+    int ch, tests = 0, errors = 0;
     const char *iolog_dir;
 
     initprogname(argc > 0 ? argv[0] : "check_iolog_plugin");
 
-    if (argc != 2)
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+        switch (ch) {
+        case 'v':
+            /* ignored */
+            break;
+        default:
+            usage();
+            /* NOTREACHED */
+        }
+    }
+    argc -= optind;
+    argv += optind;
+
+    if (argc != 1)
 	usage();
-    iolog_dir = argv[1];
+    iolog_dir = argv[0];
 
     /* Set runas user. */
     if ((tpw = getpwuid(0)) == NULL) {
 	if ((tpw = getpwnam("root")) == NULL)
 	    sudo_fatalx("unable to look up uid 0 or root");
     }
-    sudo_user._runas_pw = pw_dup(tpw);
+    io_ctx.runas.pw = pw_dup(tpw);
 
     /* Set invoking user. */
     if ((tpw = getpwuid(geteuid())) == NULL)
 	sudo_fatalx("unable to look up invoking user's uid");
-    sudo_user.pw = pw_dup(tpw);
+    io_ctx.user.pw = pw_dup(tpw);
 
     /* Set iolog uid/gid to invoking user. */
-    iolog_set_owner(sudo_user.pw->pw_uid, sudo_user.pw->pw_gid);
+    iolog_set_owner(io_ctx.user.pw->pw_uid, io_ctx.user.pw->pw_gid);
 
-    test_endpoints(&tests, &errors, iolog_dir, envp);
+    test_endpoints(&io_ctx, &tests, &errors, iolog_dir, envp);
 
     if (tests != 0) {
 	printf("check_iolog_plugin: %d test%s run, %d errors, %d%% success rate\n",
@@ -396,7 +411,7 @@ main(int argc, char *argv[], char *envp[])
 /* Stub functions */
 
 bool
-set_perms(int perm)
+set_perms(const struct sudoers_context *ctx, int perm)
 {
     return true;
 }
@@ -408,7 +423,8 @@ restore_perms(void)
 }
 
 bool
-log_warning(int flags, const char *fmt, ...)
+log_warning(const struct sudoers_context *ctx, unsigned int flags,
+    const char * restrict fmt, ...)
 {
     va_list ap;
 
@@ -420,7 +436,8 @@ log_warning(int flags, const char *fmt, ...)
 }
 
 bool
-log_warningx(int flags, const char *fmt, ...)
+log_warningx(const struct sudoers_context *ctx, unsigned int flags,
+    const char * restrict fmt, ...)
 {
     va_list ap;
 
@@ -429,4 +446,10 @@ log_warningx(int flags, const char *fmt, ...)
     va_end(ap);
 
     return true;
+}
+
+const struct sudoers_context *
+sudoers_get_context(void)
+{
+    return &io_ctx;
 }

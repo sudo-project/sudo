@@ -36,7 +36,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif
 #include <stddef.h>
 #include <stdio.h>
@@ -48,19 +48,19 @@
 #include <grp.h>
 #include <pwd.h>
 #ifndef HAVE_GETADDRINFO
-# include "compat/getaddrinfo.h"
+# include <compat/getaddrinfo.h>
 #endif
 
-#include "pathnames.h"
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_eventlog.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_iolog.h"
-#include "sudo_util.h"
+#include <pathnames.h>
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_eventlog.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_iolog.h>
+#include <sudo_util.h>
 
-#include "logsrvd.h"
+#include <logsrvd.h>
 
 #if defined(HAVE_OPENSSL)
 # define DEFAULT_CA_CERT_PATH       "/etc/ssl/sudo/cacert.pem"
@@ -468,7 +468,7 @@ cb_iolog_maxseq(struct logsrvd_config *config, const char *str, size_t offset)
     unsigned int value;
     debug_decl(cb_iolog_maxseq, SUDO_DEBUG_UTIL);
 
-    value = sudo_strtonum(str, 0, SESSID_MAX, &errstr);
+    value = (unsigned int)sudo_strtonum(str, 0, SESSID_MAX, &errstr);
     if (errstr != NULL) {
         if (errno != ERANGE) {
 	    sudo_warnx(U_("invalid value for %s: %s"), "maxseq", errstr);
@@ -588,7 +588,7 @@ cb_server_timeout(struct logsrvd_config *config, const char *str, size_t offset)
     const char *errstr;
     debug_decl(cb_server_timeout, SUDO_DEBUG_UTIL);
 
-    timeout = sudo_strtonum(str, 0, TIME_T_MAX, &errstr);
+    timeout = (time_t)sudo_strtonum(str, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL)
 	debug_return_bool(false);
 
@@ -794,7 +794,7 @@ cb_relay_timeout(struct logsrvd_config *config, const char *str, size_t offset)
     const char *errstr;
     debug_decl(cb_relay_timeout, SUDO_DEBUG_UTIL);
 
-    timeout = sudo_strtonum(str, 0, TIME_T_MAX, &errstr);
+    timeout = (time_t)sudo_strtonum(str, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL)
 	debug_return_bool(false);
 
@@ -810,7 +810,7 @@ cb_relay_connect_timeout(struct logsrvd_config *config, const char *str, size_t 
     const char *errstr;
     debug_decl(cb_relay_connect_timeout, SUDO_DEBUG_UTIL);
 
-    timeout = sudo_strtonum(str, 0, TIME_T_MAX, &errstr);
+    timeout = (time_t)sudo_strtonum(str, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL)
 	debug_return_bool(false);
 
@@ -843,7 +843,7 @@ cb_retry_interval(struct logsrvd_config *config, const char *str, size_t offset)
     const char *errstr;
     debug_decl(cb_retry_interval, SUDO_DEBUG_UTIL);
 
-    interval = sudo_strtonum(str, 0, TIME_T_MAX, &errstr);
+    interval = (time_t)sudo_strtonum(str, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL)
 	debug_return_bool(false);
 
@@ -932,7 +932,7 @@ cb_syslog_maxlen(struct logsrvd_config *config, const char *str, size_t offset)
     const char *errstr;
     debug_decl(cb_syslog_maxlen, SUDO_DEBUG_UTIL);
 
-    maxlen = sudo_strtonum(str, 1, UINT_MAX, &errstr);
+    maxlen = (unsigned int)sudo_strtonum(str, 1, UINT_MAX, &errstr);
     if (errstr != NULL)
 	debug_return_bool(false);
 

@@ -23,7 +23,7 @@
 
 #include "sudo_python_module.h"
 
-static PyTypeObject *sudo_type_ConvMessage;
+PyTypeObject *sudo_type_ConvMessage;
 
 static PyObject *
 _sudo_ConvMessage__Init(PyObject *py_self, PyObject *py_args, PyObject *py_kwargs)
@@ -79,7 +79,7 @@ static PyMethodDef _sudo_ConvMessage_class_methods[] =
 int
 sudo_module_register_conv_message(PyObject *py_module)
 {
-    debug_decl(_sudo_module_register_conv_message, PYTHON_DEBUG_INTERNAL);
+    debug_decl(sudo_module_register_conv_message, PYTHON_DEBUG_INTERNAL);
     int rc = SUDO_RC_ERROR;
     PyObject *py_class = NULL;
 
@@ -138,7 +138,7 @@ sudo_module_ConvMessages_to_c(PyObject *py_tuple, Py_ssize_t *num_msgs, struct s
         debug_return_int(SUDO_RC_ERROR);
     }
 
-    *msgs = calloc(*num_msgs, sizeof(struct sudo_conv_message));
+    *msgs = calloc((size_t)*num_msgs, sizeof(struct sudo_conv_message));
     if (*msgs == NULL) {
         debug_return_int(SUDO_RC_ERROR);
     }

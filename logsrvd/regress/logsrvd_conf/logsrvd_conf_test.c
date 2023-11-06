@@ -23,22 +23,22 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
-#include "sudo_iolog.h"
-#include "sudo_queue.h"
-#include "logsrvd.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
+#include <sudo_iolog.h>
+#include <sudo_queue.h>
+#include <logsrvd.h>
 
 sudo_dso_public int main(int argc, char *argv[]);
 
-static void
+sudo_noreturn static void
 usage(void)
 {
     fprintf(stderr, "usage: %s [-v] conf_file\n", getprogname());
@@ -64,6 +64,7 @@ main(int argc, char *argv[])
 	    break;
 	default:
 	    usage();
+	    /* NOTREACHED */
 	}
     }
     argc -= optind;

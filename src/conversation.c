@@ -34,9 +34,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "sudo.h"
-#include "sudo_plugin.h"
-#include "sudo_plugin_int.h"
+#include <sudo.h>
+#include <sudo_plugin.h>
+#include <sudo_plugin_int.h>
 
 /*
  * Sudo conversation function.
@@ -45,16 +45,19 @@ int
 sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
     struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
 {
+    const int conv_debug_instance = sudo_debug_get_active_instance();
     char *pass;
     int n;
-    const int conv_debug_instance = sudo_debug_get_active_instance();
 
     sudo_debug_set_active_instance(sudo_debug_instance);
 
     for (n = 0; n < num_msgs; n++) {
 	const struct sudo_conv_message *msg = &msgs[n];
-	int flags = tgetpass_flags;
+	unsigned int flags = tgetpass_flags;
 	FILE *fp = stdout;
+
+	if (replies != NULL)
+	    replies[n].reply = NULL;
 
 	switch (msg->msg_type & 0xff) {
 	    case SUDO_CONV_PROMPT_ECHO_ON:
@@ -94,7 +97,8 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		    if (ISSET(msg->msg_type, SUDO_CONV_PREFER_TTY) &&
 			    !ISSET(flags, TGP_STDIN)) {
 			ttyfd = open(_PATH_TTY, O_WRONLY);
-			raw_tty = sudo_term_is_raw(ttyfd);
+			if (ttyfd != -1)
+			    raw_tty = sudo_term_is_raw(ttyfd);
 		    } else {
 			raw_tty = sudo_term_is_raw(fileno(fp));
 		    }
@@ -140,7 +144,7 @@ err:
 		continue;
 	    freezero(repl->reply, strlen(repl->reply));
 	    repl->reply = NULL;
-	} while (n--);
+	} while (n-- > 0);
     }
 
     sudo_debug_set_active_instance(conv_debug_instance);
@@ -155,12 +159,13 @@ sudo_conversation_1_7(int num_msgs, const struct sudo_conv_message msgs[],
 }
 
 int
-sudo_conversation_printf(int msg_type, const char *fmt, ...)
+sudo_conversation_printf(int msg_type, const char * restrict fmt, ...)
 {
-    const char *crnl = NULL;
     FILE *ttyfp = NULL;
     FILE *fp = stdout;
     char fmt2[1024];
+    char sbuf[8192];
+    char *buf = sbuf;
     va_list ap;
     int len;
     const int conv_debug_instance = sudo_debug_get_active_instance();
@@ -179,23 +184,46 @@ sudo_conversation_printf(int msg_type, const char *fmt, ...)
 	FALLTHROUGH;
     case SUDO_CONV_INFO_MSG:
 	/* Convert nl -> cr nl in case tty is in raw mode. */
-	len = strlen(fmt);
 	if (sudo_term_is_raw(fileno(ttyfp ? ttyfp : fp))) {
-	    if (len < ssizeof(fmt2) && len > 0 && fmt[len - 1] == '\n') {
-		if (len == 1 || fmt[len - 2] != '\r') {
-		    memcpy(fmt2, fmt, len - 1);
-		    fmt2[len - 1] = '\0';
+	    size_t fmtlen = strlen(fmt);
+	    if (fmtlen < sizeof(fmt2) - 1 && fmtlen && fmt[fmtlen - 1] == '\n') {
+		if (fmtlen == 1) {
+		    /* Convert bare newline -> \r\n. */
+		    len = (int)fwrite("\r\n", 1, 2, ttyfp ? ttyfp : fp);
+		    if (len != 2)
+			len = -1;
+		    break;
+		}
+		if (fmt[fmtlen - 2] != '\r') {
+		    /* Convert trailing \n -> \r\n. */
+		    memcpy(fmt2, fmt, fmtlen - 1);
+		    fmt2[fmtlen - 1] = '\r';
+		    fmt2[fmtlen    ] = '\n';
+		    fmt2[fmtlen + 1] = '\0';
 		    fmt = fmt2;
-		    crnl = "\r\n";
 		}
 	    }
 	}
-	va_start(ap, fmt);
-	len = vfprintf(ttyfp ? ttyfp : fp, fmt, ap);
-	va_end(ap);
-	if (len >= 0 && crnl != NULL) {
-	    len += fwrite(crnl, 1, 2, ttyfp ? ttyfp : fp);
-	}
+        /*
+         * We use vsnprintf() instead of vfprintf() here to avoid
+         * problems on systems where the system printf(3) is not
+         * C99-compliant.  We use our own snprintf() on such systems.
+         */
+        va_start(ap, fmt);
+        len = vsnprintf(sbuf, sizeof(sbuf), fmt, ap);
+        va_end(ap);
+        if (len < 0 || len >= ssizeof(sbuf)) {
+            /* Try again with a dynamically-sized buffer. */
+            va_start(ap, fmt);
+            len = vasprintf(&buf, fmt, ap);
+            va_end(ap);
+        }
+        if (len != -1) {
+            if (fwrite(buf, 1, len, ttyfp ? ttyfp : fp) == 0)
+                len = -1;
+            if (buf != sbuf)
+                free(buf);
+        }
 	break;
     default:
 	len = -1;

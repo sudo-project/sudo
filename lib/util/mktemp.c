@@ -43,9 +43,9 @@
 #include <ctype.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_rand.h"
-#include "pathnames.h"
+#include <sudo_compat.h>
+#include <sudo_rand.h>
+#include <pathnames.h>
 
 #define MKTEMP_FILE	1
 #define MKTEMP_DIR	2
@@ -90,7 +90,7 @@ mktemp_internal(int dfd, char *path, int slen, int mode, int flags)
 		cp = start;
 		do {
 			unsigned short rbuf[16];
-			unsigned int i;
+			size_t i;
 
 			/*
 			 * Avoid lots of arc4random() calls by using

@@ -32,8 +32,8 @@
 # include <inttypes.h>
 #endif
 
-#include "sudo_compat.h"
-#include "sudo_rand.h"
+#include <sudo_compat.h>
+#include <sudo_rand.h>
 
 #define minimum(a, b) ((a) < (b) ? (a) : (b))
 

@@ -35,7 +35,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,16 +43,16 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_eventlog.h"
-#include "sudo_gettext.h"
-#include "sudo_iolog.h"
-#include "sudo_fatal.h"
-#include "sudo_queue.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_eventlog.h>
+#include <sudo_gettext.h>
+#include <sudo_iolog.h>
+#include <sudo_fatal.h>
+#include <sudo_queue.h>
+#include <sudo_util.h>
 
-#include "logsrvd.h"
+#include <logsrvd.h>
 
 static bool
 type_matches(InfoMessage *info, const char *source,
@@ -106,8 +106,8 @@ strlist_copy(InfoMessage__StringList *strlist)
 
 bad:
     if (dst != NULL) {
-	while (i--)
-	    free(dst[i]);
+	while (i)
+	    free(dst[--i]);
 	free(dst);
     }
     debug_return_ptr(NULL);
@@ -150,8 +150,8 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 
     /* Submit time. */
     if (submit_time != NULL) {
-	evlog->submit_time.tv_sec = submit_time->tv_sec;
-	evlog->submit_time.tv_nsec = submit_time->tv_nsec;
+	evlog->submit_time.tv_sec = (time_t)submit_time->tv_sec;
+	evlog->submit_time.tv_nsec = (long)submit_time->tv_nsec;
     }
 
     /* Default values */
@@ -173,7 +173,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 			errno = ERANGE;
 			sudo_warn(U_("%s: %s"), source, "columns");
 		    } else {
-			evlog->columns = info->u.numval;
+			evlog->columns = (int)info->u.numval;
 		    }
 		}
 		continue;
@@ -196,7 +196,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 			errno = ERANGE;
 			sudo_warn(U_("%s: %s"), source, "lines");
 		    } else {
-			evlog->lines = info->u.numval;
+			evlog->lines = (int)info->u.numval;
 		    }
 		}
 		continue;
@@ -205,8 +205,8 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	case 'r':
 	    if (strcmp(key, "runargv") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRLISTVAL)) {
-		    evlog->argv = strlist_copy(info->u.strlistval);
-		    if (evlog->argv == NULL)
+		    evlog->runargv = strlist_copy(info->u.strlistval);
+		    if (evlog->runargv == NULL)
 			goto bad;
 		}
 		continue;
@@ -233,8 +233,8 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	    }
 	    if (strcmp(key, "runenv") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRLISTVAL)) {
-		    evlog->envp = strlist_copy(info->u.strlistval);
-		    if (evlog->envp == NULL)
+		    evlog->runenv = strlist_copy(info->u.strlistval);
+		    if (evlog->runenv == NULL)
 			goto bad;
 		}
 		continue;
@@ -245,7 +245,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 			errno = ERANGE;
 			sudo_warn(U_("%s: %s"), source, "rungid");
 		    } else {
-			evlog->rungid = info->u.numval;
+			evlog->rungid = (gid_t)info->u.numval;
 		    }
 		}
 		continue;
@@ -266,7 +266,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 			errno = ERANGE;
 			sudo_warn(U_("%s: %s"), source, "runuid");
 		    } else {
-			evlog->runuid = info->u.numval;
+			evlog->runuid = (uid_t)info->u.numval;
 		    }
 		}
 		continue;
@@ -283,6 +283,16 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	    }
 	    break;
 	case 's':
+	    if (strcmp(key, "source") == 0) {
+		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    if ((evlog->source = strdup(info->u.strval)) == NULL) {
+			sudo_warnx(U_("%s: %s"), __func__,
+			    U_("unable to allocate memory"));
+			goto bad;
+		    }
+		}
+		continue;
+	    }
 	    if (strcmp(key, "submitcwd") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
 		    if ((evlog->cwd = strdup(info->u.strval)) == NULL) {
@@ -290,6 +300,14 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 			    U_("unable to allocate memory"));
 			goto bad;
 		    }
+		}
+		continue;
+	    }
+	    if (strcmp(key, "submitenv") == 0) {
+		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRLISTVAL)) {
+		    evlog->submitenv = strlist_copy(info->u.strlistval);
+		    if (evlog->submitenv == NULL)
+			goto bad;
 		}
 		continue;
 	    }
@@ -420,11 +438,11 @@ fill_seq(char *str, size_t strsize, void *v)
 	sudo_warnx(U_("%s: unable to format session id"), __func__);
 	debug_return_size_t(strsize); /* handle non-standard snprintf() */
     }
-    debug_return_size_t(len);
+    debug_return_size_t((size_t)len);
 }
 
 static size_t
-fill_user(char *str, size_t strsize, void *v)
+fill_user(char * restrict str, size_t strsize, void * restrict v)
 {
     struct iolog_path_closure *closure = v;
     const struct eventlog *evlog = closure->evlog;
@@ -438,7 +456,7 @@ fill_user(char *str, size_t strsize, void *v)
 }
 
 static size_t
-fill_group(char *str, size_t strsize, void *v)
+fill_group(char * restrict str, size_t strsize, void * restrict v)
 {
     struct iolog_path_closure *closure = v;
     const struct eventlog *evlog = closure->evlog;
@@ -452,7 +470,7 @@ fill_group(char *str, size_t strsize, void *v)
 }
 
 static size_t
-fill_runas_user(char *str, size_t strsize, void *v)
+fill_runas_user(char * restrict str, size_t strsize, void * restrict v)
 {
     struct iolog_path_closure *closure = v;
     const struct eventlog *evlog = closure->evlog;
@@ -466,7 +484,7 @@ fill_runas_user(char *str, size_t strsize, void *v)
 }
 
 static size_t
-fill_runas_group(char *str, size_t strsize, void *v)
+fill_runas_group(char * restrict str, size_t strsize, void * restrict v)
 {
     struct iolog_path_closure *closure = v;
     const struct eventlog *evlog = closure->evlog;
@@ -481,7 +499,7 @@ fill_runas_group(char *str, size_t strsize, void *v)
 }
 
 static size_t
-fill_hostname(char *str, size_t strsize, void *v)
+fill_hostname(char * restrict str, size_t strsize, void * restrict v)
 {
     struct iolog_path_closure *closure = v;
     const struct eventlog *evlog = closure->evlog;
@@ -495,7 +513,7 @@ fill_hostname(char *str, size_t strsize, void *v)
 }
 
 static size_t
-fill_command(char *str, size_t strsize, void *v)
+fill_command(char * restrict str, size_t strsize, void * restrict v)
 {
     struct iolog_path_closure *closure = v;
     const struct eventlog *evlog = closure->evlog;
@@ -530,7 +548,7 @@ create_iolog_path(struct connection_closure *closure)
     struct eventlog *evlog = closure->evlog;
     struct iolog_path_closure path_closure;
     char expanded_dir[PATH_MAX], expanded_file[PATH_MAX], pathbuf[PATH_MAX];
-    size_t len;
+    int len;
     debug_decl(create_iolog_path, SUDO_DEBUG_UTIL);
 
     path_closure.evlog = evlog;
@@ -552,7 +570,7 @@ create_iolog_path(struct connection_closure *closure)
 
     len = snprintf(pathbuf, sizeof(pathbuf), "%s/%s", expanded_dir,
 	expanded_file);
-    if (len >= sizeof(pathbuf)) {
+    if (len < 0 || len >= ssizeof(pathbuf)) {
 	errno = ENAMETOOLONG;
 	sudo_warn("%s/%s", expanded_dir, expanded_file);
 	goto bad;
@@ -563,7 +581,7 @@ create_iolog_path(struct connection_closure *closure)
      * Calls mkdtemp() if pathbuf ends in XXXXXX.
      */
     if (!iolog_mkpath(pathbuf)) {
-	sudo_warnx(U_("unable to create iolog path %s"), pathbuf);
+	sudo_warn(U_("unable to create iolog path %s"), pathbuf);
         goto bad;
     }
     if ((evlog->iolog_path = strdup(pathbuf)) == NULL) {
@@ -606,14 +624,14 @@ void
 iolog_close_all(struct connection_closure *closure)
 {
     const char *errstr;
-    int i;
+    unsigned int i;
     debug_decl(iolog_close_all, SUDO_DEBUG_UTIL);
 
     for (i = 0; i < IOFD_MAX; i++) {
 	if (!closure->iolog_files[i].enabled)
 	    continue;
 	if (!iolog_close(&closure->iolog_files[i], &errstr)) {
-	    sudo_warnx(U_("error closing iofd %d: %s"), i, errstr);
+	    sudo_warnx(U_("error closing iofd %u: %s"), i, errstr);
 	}
     }
     if (closure->iolog_dir_fd != -1)
@@ -626,14 +644,15 @@ bool
 iolog_flush_all(struct connection_closure *closure)
 {
     const char *errstr;
-    int i, ret = true;
+    bool ret = true;
+    unsigned int i;
     debug_decl(iolog_flush_all, SUDO_DEBUG_UTIL);
 
     for (i = 0; i < IOFD_MAX; i++) {
 	if (!closure->iolog_files[i].enabled)
 	    continue;
 	if (!iolog_flush(&closure->iolog_files[i], &errstr)) {
-	    sudo_warnx(U_("error flushing iofd %d: %s"), i, errstr);
+	    sudo_warnx(U_("error flushing iofd %u: %s"), i, errstr);
 	    ret = false;
 	}
     }
@@ -683,14 +702,14 @@ iolog_copy(struct iolog_file *src, struct iolog_file *dst, off_t remainder,
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"copying %lld bytes", (long long)remainder);
     while (remainder > 0) {
-	const ssize_t toread = MIN(remainder, ssizeof(buf));
+	const size_t toread = MIN((size_t)remainder, sizeof(buf));
 	nread = iolog_read(src, buf, toread, errstr);
 	if (nread == -1)
 	    debug_return_bool(false);
 	remainder -= nread;
 
 	do {
-	    ssize_t nwritten = iolog_write(dst, buf, nread, errstr);
+	    ssize_t nwritten = iolog_write(dst, buf, (size_t)nread, errstr);
 	    if (nwritten == -1)
 		debug_return_bool(false);
 	    nread -= nwritten;
@@ -755,7 +774,7 @@ iolog_rewrite(const struct timespec *target, struct connection_closure *closure)
 		    evlog->iolog_path, iolog_fd_to_name(timing.event));
 		goto done;
 	    }
-	    iolog_file_sizes[timing.event] += timing.u.nbytes;
+	    iolog_file_sizes[timing.event] += (off_t)timing.u.nbytes;
 	}
 
 	if (sudo_timespeccmp(&closure->elapsed_time, target, >=)) {
@@ -880,8 +899,8 @@ update_elapsed_time(TimeSpec *delta, struct timespec *elapsed)
     debug_decl(update_elapsed_time, SUDO_DEBUG_UTIL);
 
     /* Cannot use timespecadd since msg doesn't use struct timespec. */
-    elapsed->tv_sec += delta->tv_sec;
-    elapsed->tv_nsec += delta->tv_nsec;
+    elapsed->tv_sec += (time_t)delta->tv_sec;
+    elapsed->tv_nsec += (long)delta->tv_nsec;
     while (elapsed->tv_nsec >= 1000000000) {
 	elapsed->tv_sec++;
 	elapsed->tv_nsec -= 1000000000;

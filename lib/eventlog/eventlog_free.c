@@ -30,10 +30,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_eventlog.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_eventlog.h>
+#include <sudo_util.h>
 
 /*
  * Free the strings in a struct eventlog.
@@ -41,7 +41,7 @@
 void
 eventlog_free(struct eventlog *evlog)
 {
-    int i;
+    size_t i;
     debug_decl(eventlog_free, SUDO_DEBUG_UTIL);
 
     if (evlog != NULL) {
@@ -54,19 +54,25 @@ eventlog_free(struct eventlog *evlog)
 	free(evlog->runuser);
 	free(evlog->peeraddr);
 	free(evlog->signal_name);
+	free(evlog->source);
+	if (evlog->submitenv != NULL) {
+	    for (i = 0; evlog->submitenv[i] != NULL; i++)
+		free(evlog->submitenv[i]);
+	    free(evlog->submitenv);
+	}
 	free(evlog->submithost);
 	free(evlog->submituser);
 	free(evlog->submitgroup);
 	free(evlog->ttyname);
-	if (evlog->argv != NULL) {
-	    for (i = 0; evlog->argv[i] != NULL; i++)
-		free(evlog->argv[i]);
-	    free(evlog->argv);
+	if (evlog->runargv != NULL) {
+	    for (i = 0; evlog->runargv[i] != NULL; i++)
+		free(evlog->runargv[i]);
+	    free(evlog->runargv);
 	}
-	if (evlog->envp != NULL) {
-	    for (i = 0; evlog->envp[i] != NULL; i++)
-		free(evlog->envp[i]);
-	    free(evlog->envp);
+	if (evlog->runenv != NULL) {
+	    for (i = 0; evlog->runenv[i] != NULL; i++)
+		free(evlog->runenv[i]);
+	    free(evlog->runenv);
 	}
 	if (evlog->env_add != NULL) {
 	    for (i = 0; evlog->env_add[i] != NULL; i++)

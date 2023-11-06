@@ -103,14 +103,6 @@
 # endif
 #endif
 
-#if defined(HAVE_DECL_SYMLOOP_MAX) && !HAVE_DECL_SYMLOOP_MAX
-# if defined(HAVE_DECL__POSIX_SYMLOOP_MAX) && HAVE_DECL__POSIX_SYMLOOP_MAX
-#  define SYMLOOP_MAX		_POSIX_SYMLOOP_MAX
-# else
-#  define SYMLOOP_MAX		8
-# endif
-#endif
-
 /* ACCESSPERMS and ALLPERMS are handy BSDisms. */
 #ifndef ACCESSPERMS
 # define ACCESSPERMS	00777
@@ -314,21 +306,6 @@ int getdomainname(char *, size_t);
 #endif
 
 /*
- * Compatibility defines for OpenSSL 1.0.2 (not needed for 1.1.x)
- */
-#if defined(HAVE_OPENSSL) && !defined(HAVE_WOLFSSL)
-# ifndef HAVE_X509_STORE_CTX_GET0_CERT
-#  define X509_STORE_CTX_get0_cert(x)   ((x)->cert)
-# endif
-# ifndef HAVE_ASN1_STRING_GET0_DATA
-#  define ASN1_STRING_get0_data(x)      ASN1_STRING_data(x)
-# endif
-# ifndef HAVE_TLS_METHOD
-#  define TLS_method()                  SSLv23_method()
-# endif
-#endif /* HAVE_OPENSSL && !HAVE_WOLFSSL */
-
-/*
  * Functions "missing" from libc.
  * All libc replacements are prefixed with "sudo_" to avoid namespace issues.
  */
@@ -365,7 +342,7 @@ sudo_dso_public int sudo_getgrouplist(const char *name, GETGROUPS_T basegid, GET
 # define getgrouplist(_a, _b, _c, _d) sudo_getgrouplist((_a), (_b), (_c), (_d))
 #endif /* GETGROUPLIST */
 #if !defined(HAVE_GETDELIM)
-sudo_dso_public ssize_t sudo_getdelim(char **bufp, size_t *bufsizep, int delim, FILE *fp);
+sudo_dso_public ssize_t sudo_getdelim(char ** restrict bufp, size_t * restrict bufsizep, int delim, FILE * restrict fp);
 # undef getdelim
 # define getdelim(_a, _b, _c, _d) sudo_getdelim((_a), (_b), (_c), (_d))
 #elif defined(HAVE_DECL_GETDELIM) && !HAVE_DECL_GETDELIM
@@ -422,32 +399,32 @@ sudo_dso_public int sudo_futimens(int fd, const struct timespec *times);
 # define futimens(_a, _b) sudo_futimens((_a), (_b))
 #endif /* HAVE_FUTIMENS */
 #if !defined(HAVE_SNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-sudo_dso_public int sudo_snprintf(char *str, size_t n, char const *fmt, ...) sudo_printflike(3, 4);
+sudo_dso_public int sudo_snprintf(char * restrict str, size_t n, char const * restrict fmt, ...) sudo_printflike(3, 4);
 # undef snprintf
 # define snprintf sudo_snprintf
 #endif /* HAVE_SNPRINTF */
 #if !defined(HAVE_VSNPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-sudo_dso_public int sudo_vsnprintf(char *str, size_t n, const char *fmt, va_list ap) sudo_printflike(3, 0);
+sudo_dso_public int sudo_vsnprintf(char * restrict str, size_t n, const char * restrict fmt, va_list ap) sudo_printflike(3, 0);
 # undef vsnprintf
 # define vsnprintf sudo_vsnprintf
 #endif /* HAVE_VSNPRINTF */
 #if !defined(HAVE_ASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-sudo_dso_public int sudo_asprintf(char **str, char const *fmt, ...) sudo_printflike(2, 3);
+sudo_dso_public int sudo_asprintf(char ** restrict str, char const * restrict fmt, ...) sudo_printflike(2, 3);
 # undef asprintf
 # define asprintf sudo_asprintf
 #endif /* HAVE_ASPRINTF */
 #if !defined(HAVE_VASPRINTF) || defined(PREFER_PORTABLE_SNPRINTF)
-sudo_dso_public int sudo_vasprintf(char **str, const char *fmt, va_list ap) sudo_printflike(2, 0);
+sudo_dso_public int sudo_vasprintf(char ** restrict str, const char * restrict fmt, va_list ap) sudo_printflike(2, 0);
 # undef vasprintf
 # define vasprintf sudo_vasprintf
 #endif /* HAVE_VASPRINTF */
 #ifndef HAVE_STRLCAT
-sudo_dso_public size_t sudo_strlcat(char *dst, const char *src, size_t siz);
+sudo_dso_public size_t sudo_strlcat(char * restrict dst, const char * restrict src, size_t siz);
 # undef strlcat
 # define strlcat(_a, _b, _c) sudo_strlcat((_a), (_b), (_c))
 #endif /* HAVE_STRLCAT */
 #ifndef HAVE_STRLCPY
-sudo_dso_public size_t sudo_strlcpy(char *dst, const char *src, size_t siz);
+sudo_dso_public size_t sudo_strlcpy(char * restrict dst, const char * restrict src, size_t siz);
 # undef strlcpy
 # define strlcpy(_a, _b, _c) sudo_strlcpy((_a), (_b), (_c))
 #endif /* HAVE_STRLCPY */
@@ -556,7 +533,7 @@ sudo_dso_public void *sudo_reallocarray(void *ptr, size_t nmemb, size_t size);
 # define reallocarray(_a, _b, _c) sudo_reallocarray((_a), (_b), (_c))
 #endif /* HAVE_REALLOCARRAY */
 #ifndef HAVE_REALPATH
-sudo_dso_public void *sudo_realpath(const char *path, char *resolved);
+sudo_dso_public char *sudo_realpath(const char * restrict path, char * restrict resolved);
 # undef realpath
 # define realpath(_a, _b) sudo_realpath((_a), (_b))
 #endif /* HAVE_REALPATH */

@@ -32,9 +32,9 @@
 #include <string.h>
 #include <arpa/inet.h>
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
-#include "sudo_rand.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
+#include <sudo_rand.h>
 
 struct uuid {
     uint32_t time_low;
@@ -75,7 +75,7 @@ sudo_uuid_to_string_v1(unsigned char uuid[16], char *dst, size_t dstsiz)
 {
     const char hex[] = "0123456789abcdef";
     char *cp = dst;
-    int i;
+    unsigned int i;
 
     if (dstsiz < sizeof("123e4567-e89b-12d3-a456-426655440000"))
 	return NULL;

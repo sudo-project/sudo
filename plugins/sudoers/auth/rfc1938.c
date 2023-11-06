@@ -53,11 +53,12 @@
 # define rfc1938verify(a,b)		opieverify((a),(b))
 #endif
 
-#include "sudoers.h"
+#include <sudoers.h>
 #include "sudo_auth.h"
 
 int
-sudo_rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
+sudo_rfc1938_setup(const struct sudoers_context *ctx, struct passwd *pw,
+    char **promptp, sudo_auth *auth)
 {
     char challenge[256];
     size_t challenge_len;
@@ -97,7 +98,7 @@ sudo_rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
     if (rfc1938challenge(&rfc1938, pw->pw_name, challenge, sizeof(challenge))) {
 	if (IS_ONEANDONLY(auth)) {
 	    sudo_warnx(U_("you do not exist in the %s database"), auth->name);
-	    debug_return_int(AUTH_FATAL);
+	    debug_return_int(AUTH_ERROR);
 	} else {
 	    debug_return_int(AUTH_FAILURE);
 	}
@@ -109,7 +110,7 @@ sudo_rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 	char *p = realloc(new_prompt, op_len + challenge_len + 7);
 	if (p == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    debug_return_int(AUTH_FATAL);
+	    debug_return_int(AUTH_ERROR);
 	}
 	np_size = op_len + challenge_len + 7;
 	new_prompt = p;
@@ -126,7 +127,8 @@ sudo_rfc1938_setup(struct passwd *pw, char **promptp, sudo_auth *auth)
 }
 
 int
-sudo_rfc1938_verify(struct passwd *pw, const char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
+sudo_rfc1938_verify(const struct sudoers_context *ctx, struct passwd *pw,
+    const char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     debug_decl(sudo_rfc1938_verify, SUDOERS_DEBUG_AUTH);
 

@@ -29,8 +29,8 @@
 # include <stdlib.h>
 # include <sys/apparmor.h>
 
-# include "sudo.h"
-# include "sudo_debug.h"
+# include <sudo.h>
+# include <sudo_debug.h>
 
 /**
  * @brief Check whether AppArmor is enabled.

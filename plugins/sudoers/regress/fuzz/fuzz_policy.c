@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2021-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -35,19 +35,18 @@
 #include <unistd.h>
 #include <string.h>
 #ifndef HAVE_GETADDRINFO
-# include "compat/getaddrinfo.h"
+# include <compat/getaddrinfo.h>
 #endif
 
-#include "sudoers.h"
-#include "sudo_iolog.h"
-#include "interfaces.h"
-#include "check.h"
+#include <sudoers.h>
+#include <sudo_iolog.h>
+#include <interfaces.h>
+#include <timestamp.h>
 #include "auth/sudo_auth.h"
 
 extern char **environ;
 extern sudo_dso_public struct policy_plugin sudoers_policy;
 
-const char *path_plugin_dir = _PATH_SUDO_PLUGIN_DIR;
 char *audit_msg;
 
 static int pass;
@@ -92,7 +91,7 @@ struct dynamic_array {
 static void
 free_strvec(char **vec)
 {
-    int i;
+    size_t i;
 
     for (i = 0; vec[i] != NULL; i++)
 	free(vec[i]);
@@ -161,7 +160,7 @@ fuzz_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 }
 
 static int
-fuzz_printf(int msg_type, const char *fmt, ...)
+fuzz_printf(int msg_type, const char * restrict fmt, ...)
 {
     return 0;
 }
@@ -435,11 +434,11 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		break;
 	    case PASS_CHECK_LOG_LOCAL: {
 		/* sudo command w/ local I/O logging (MODE_RUN) */
-		sudoers_policy.check_policy(argv.len, argv.entries,
+		sudoers_policy.check_policy((int)argv.len, argv.entries,
 		    env_add.entries, &command_info, &argv_out, &user_env_out,
 		    &errstr);
 		/* call check_policy() again to check for leaks. */
-		sudoers_policy.check_policy(argv.len, argv.entries,
+		sudoers_policy.check_policy((int)argv.len, argv.entries,
 		    env_add.entries, &command_info, &argv_out, &user_env_out,
 		    &errstr);
 		/* sudo_auth_begin_session() is stubbed out below. */
@@ -448,11 +447,11 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	    }
 	    case PASS_CHECK_LOG_REMOTE:
 		/* sudo command w/ remote I/O logging (MODE_RUN) */
-		sudoers_policy.check_policy(argv.len, argv.entries,
+		sudoers_policy.check_policy((int)argv.len, argv.entries,
 		    env_add.entries, &command_info, &argv_out, &user_env_out,
 		    &errstr);
 		/* call check_policy() again to check for leaks. */
-		sudoers_policy.check_policy(argv.len, argv.entries,
+		sudoers_policy.check_policy((int)argv.len, argv.entries,
 		    env_add.entries, &command_info, &argv_out, &user_env_out,
 		    &errstr);
 		/* sudo_auth_begin_session() is stubbed out below. */
@@ -460,7 +459,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		break;
 	    case PASS_CHECK_NOT_FOUND:
 		/* sudo command (not found) */
-		sudoers_policy.check_policy(argv.len, argv.entries,
+		sudoers_policy.check_policy((int)argv.len, argv.entries,
 		    env_add.entries, &command_info, &argv_out, &user_env_out,
 		    &errstr);
 		/* sudo_auth_begin_session() is stubbed out below. */
@@ -468,11 +467,11 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		break;
 	    case PASS_CHECK_NOT_FOUND_DOT:
 		/* sudo command (found but in cwd) */
-		sudoers_policy.check_policy(argv.len, argv.entries,
+		sudoers_policy.check_policy((int)argv.len, argv.entries,
 		    env_add.entries, &command_info, &argv_out, &user_env_out,
 		    &errstr);
 		/* call check_policy() again to check for leaks. */
-		sudoers_policy.check_policy(argv.len, argv.entries,
+		sudoers_policy.check_policy((int)argv.len, argv.entries,
 		    env_add.entries, &command_info, &argv_out, &user_env_out,
 		    &errstr);
 		/* sudo_auth_begin_session() is stubbed out below. */
@@ -492,10 +491,10 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		break;
 	    case PASS_LIST_CHECK:
 		/* sudo -l command (MODE_CHECK) */
-		sudoers_policy.list(argv.len, argv.entries, false, NULL,
+		sudoers_policy.list((int)argv.len, argv.entries, false, NULL,
 		    &errstr);
 		/* call list() again to check for leaks. */
-		sudoers_policy.list(argv.len, argv.entries, false, NULL,
+		sudoers_policy.list((int)argv.len, argv.entries, false, NULL,
 		    &errstr);
 		break;
 	    case PASS_VALIDATE:
@@ -537,7 +536,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
 /* STUB */
 bool
-user_is_exempt(void)
+user_is_exempt(const struct sudoers_context *ctx)
 {
     return false;
 }
@@ -565,14 +564,15 @@ dump_auth_methods(void)
 
 /* STUB */
 int
-sudo_auth_begin_session(struct passwd *pw, char **user_env[])
+sudo_auth_begin_session(const struct sudoers_context *ctx, struct passwd *pw,
+    char **user_env[])
 {
     return 1;
 }
 
 /* STUB */
 int
-sudo_auth_end_session(struct passwd *pw)
+sudo_auth_end_session(void)
 {
     return 1;
 }
@@ -586,35 +586,35 @@ sudo_auth_needs_end_session(void)
 
 /* STUB */
 int
-timestamp_remove(bool unlink_it)
+timestamp_remove(const struct sudoers_context *ctx, bool unlink_it)
 {
     return true;
 }
 
 /* STUB */
 int
-create_admin_success_flag(void)
+create_admin_success_flag(const struct sudoers_context *ctx)
 {
     return true;
 }
 
 /* STUB */
 static int
-sudo_file_open(struct sudo_nss *nss)
+sudo_file_open(struct sudoers_context *ctx, struct sudo_nss *nss)
 {
     return 0;
 }
 
 /* STUB */
 static int
-sudo_file_close(struct sudo_nss *nss)
+sudo_file_close(struct sudoers_context *ctx, struct sudo_nss *nss)
 {
     return 0;
 }
 
 /* STUB */
 static struct sudoers_parse_tree *
-sudo_file_parse(const struct sudo_nss *nss)
+sudo_file_parse(struct sudoers_context *ctx, const struct sudo_nss *nss)
 {
     static struct sudoers_parse_tree parse_tree;
 
@@ -623,62 +623,63 @@ sudo_file_parse(const struct sudo_nss *nss)
 
 /* STUB */
 static int
-sudo_file_query(const struct sudo_nss *nss, struct passwd *pw)
+sudo_file_query(struct sudoers_context *ctx, const struct sudo_nss *nss,
+    struct passwd *pw)
 {
     return 0;
 }
 
 /* STUB */
 static int
-sudo_file_getdefs(const struct sudo_nss *nss)
+sudo_file_getdefs(struct sudoers_context *ctx, const struct sudo_nss *nss)
 {
     /* Set some Defaults */
-    set_default("log_input", NULL, true, "sudoers", 1, 1, false);
-    set_default("log_output", NULL, true, "sudoers", 1, 1, false);
-    set_default("env_file", "/dev/null", true, "sudoers", 1, 1, false);
-    set_default("restricted_env_file", "/dev/null", true, "sudoers", 1, 1, false);
-    set_default("exempt_group", "sudo", true, "sudoers", 1, 1, false);
-    set_default("runchroot", "/", true, "sudoers", 1, 1, false);
-    set_default("runcwd", "~", true, "sudoers", 1, 1, false);
-    set_default("fqdn", NULL, true, "sudoers", 1, 1, false);
-    set_default("runas_default", "root", true, "sudoers", 1, 1, false);
-    set_default("tty_tickets", NULL, true, "sudoers", 1, 1, false);
-    set_default("umask", "022", true, "sudoers", 1, 1, false);
-    set_default("logfile", "/var/log/sudo", true, "sudoers", 1, 1, false);
-    set_default("syslog", "auth", true, "sudoers", 1, 1, false);
-    set_default("syslog_goodpri", "notice", true, "sudoers", 1, 1, false);
-    set_default("syslog_badpri", "alert", true, "sudoers", 1, 1, false);
-    set_default("syslog_maxlen", "2048", true, "sudoers", 1, 1, false);
-    set_default("loglinelen", "0", true, "sudoers", 1, 1, false);
-    set_default("log_year", NULL, true, "sudoers", 1, 1, false);
-    set_default("log_host", NULL, true, "sudoers", 1, 1, false);
-    set_default("mailerpath", NULL, false, "sudoers", 1, 1, false);
-    set_default("mailerflags", "-t", true, "sudoers", 1, 1, false);
-    set_default("mailto", "root@localhost", true, "sudoers", 1, 1, false);
-    set_default("mailfrom", "sudo@sudo.ws", true, "sudoers", 1, 1, false);
-    set_default("mailsub", "Someone has been naughty on %h", true, "sudoers", 1, 1, false);
-    set_default("timestampowner", "#0", true, "sudoers", 1, 1, false);
-    set_default("compress_io", NULL, true, "sudoers", 1, 1, false);
-    set_default("iolog_flush", NULL, true, "sudoers", 1, 1, false);
-    set_default("iolog_flush", NULL, true, "sudoers", 1, 1, false);
-    set_default("maxseq", "2176782336", true, "sudoers", 1, 1, false);
-    set_default("sudoedit_checkdir", NULL, false, "sudoers", 1, 1, false);
-    set_default("sudoedit_follow", NULL, true, "sudoers", 1, 1, false);
-    set_default("ignore_iolog_errors", NULL, true, "sudoers", 1, 1, false);
-    set_default("ignore_iolog_errors", NULL, true, "sudoers", 1, 1, false);
-    set_default("noexec", NULL, true, "sudoers", 1, 1, false);
-    set_default("exec_background", NULL, true, "sudoers", 1, 1, false);
-    set_default("use_pty", NULL, true, "sudoers", 1, 1, false);
-    set_default("utmp_runas", NULL, true, "sudoers", 1, 1, false);
-    set_default("iolog_mode", "0640", true, "sudoers", 1, 1, false);
-    set_default("iolog_user", NULL, false, "sudoers", 1, 1, false);
-    set_default("iolog_group", NULL, false, "sudoers", 1, 1, false);
+    set_default(ctx, "log_input", NULL, true, "sudoers", 1, 1, false);
+    set_default(ctx, "log_output", NULL, true, "sudoers", 1, 1, false);
+    set_default(ctx, "env_file", "/dev/null", true, "sudoers", 1, 1, false);
+    set_default(ctx, "restricted_env_file", "/dev/null", true, "sudoers", 1, 1, false);
+    set_default(ctx, "exempt_group", "sudo", true, "sudoers", 1, 1, false);
+    set_default(ctx, "runchroot", "/", true, "sudoers", 1, 1, false);
+    set_default(ctx, "runcwd", "~", true, "sudoers", 1, 1, false);
+    set_default(ctx, "fqdn", NULL, true, "sudoers", 1, 1, false);
+    set_default(ctx, "runas_default", "root", true, "sudoers", 1, 1, false);
+    set_default(ctx, "tty_tickets", NULL, true, "sudoers", 1, 1, false);
+    set_default(ctx, "umask", "022", true, "sudoers", 1, 1, false);
+    set_default(ctx, "logfile", "/var/log/sudo", true, "sudoers", 1, 1, false);
+    set_default(ctx, "syslog", "auth", true, "sudoers", 1, 1, false);
+    set_default(ctx, "syslog_goodpri", "notice", true, "sudoers", 1, 1, false);
+    set_default(ctx, "syslog_badpri", "alert", true, "sudoers", 1, 1, false);
+    set_default(ctx, "syslog_maxlen", "2048", true, "sudoers", 1, 1, false);
+    set_default(ctx, "loglinelen", "0", true, "sudoers", 1, 1, false);
+    set_default(ctx, "log_year", NULL, true, "sudoers", 1, 1, false);
+    set_default(ctx, "log_host", NULL, true, "sudoers", 1, 1, false);
+    set_default(ctx, "mailerpath", NULL, false, "sudoers", 1, 1, false);
+    set_default(ctx, "mailerflags", "-t", true, "sudoers", 1, 1, false);
+    set_default(ctx, "mailto", "root@localhost", true, "sudoers", 1, 1, false);
+    set_default(ctx, "mailfrom", "sudo@sudo.ws", true, "sudoers", 1, 1, false);
+    set_default(ctx, "mailsub", "Someone has been naughty on %h", true, "sudoers", 1, 1, false);
+    set_default(ctx, "timestampowner", "#0", true, "sudoers", 1, 1, false);
+    set_default(ctx, "compress_io", NULL, true, "sudoers", 1, 1, false);
+    set_default(ctx, "iolog_flush", NULL, true, "sudoers", 1, 1, false);
+    set_default(ctx, "iolog_flush", NULL, true, "sudoers", 1, 1, false);
+    set_default(ctx, "maxseq", "2176782336", true, "sudoers", 1, 1, false);
+    set_default(ctx, "sudoedit_checkdir", NULL, false, "sudoers", 1, 1, false);
+    set_default(ctx, "sudoedit_follow", NULL, true, "sudoers", 1, 1, false);
+    set_default(ctx, "ignore_iolog_errors", NULL, true, "sudoers", 1, 1, false);
+    set_default(ctx, "ignore_iolog_errors", NULL, true, "sudoers", 1, 1, false);
+    set_default(ctx, "noexec", NULL, true, "sudoers", 1, 1, false);
+    set_default(ctx, "exec_background", NULL, true, "sudoers", 1, 1, false);
+    set_default(ctx, "use_pty", NULL, true, "sudoers", 1, 1, false);
+    set_default(ctx, "utmp_runas", NULL, true, "sudoers", 1, 1, false);
+    set_default(ctx, "iolog_mode", "0640", true, "sudoers", 1, 1, false);
+    set_default(ctx, "iolog_user", NULL, false, "sudoers", 1, 1, false);
+    set_default(ctx, "iolog_group", NULL, false, "sudoers", 1, 1, false);
     if (pass != PASS_CHECK_LOG_LOCAL) {
-	set_default("log_servers", "localhost", true, "sudoers", 1, 1, false);
-	set_default("log_server_timeout", "30", true, "sudoers", 1, 1, false);
-	set_default("log_server_cabundle", "/etc/ssl/cacert.pem", true, "sudoers", 1, 1, false);
-	set_default("log_server_peer_cert", "/etc/ssl/localhost.crt", true, "sudoers", 1, 1, false);
-	set_default("log_server_peer_key", "/etc/ssl/private/localhost.key", true, "sudoers", 1, 1, false);
+	set_default(ctx, "log_servers", "localhost", true, "sudoers", 1, 1, false);
+	set_default(ctx, "log_server_timeout", "30", true, "sudoers", 1, 1, false);
+	set_default(ctx, "log_server_cabundle", "/etc/ssl/cacert.pem", true, "sudoers", 1, 1, false);
+	set_default(ctx, "log_server_peer_cert", "/etc/ssl/localhost.crt", true, "sudoers", 1, 1, false);
+	set_default(ctx, "log_server_peer_key", "/etc/ssl/private/localhost.key", true, "sudoers", 1, 1, false);
     }
 
     return 0;
@@ -707,14 +708,22 @@ sudo_read_nss(void)
 
 /* STUB */
 int
-check_user(int validated, int mode)
+check_user(struct sudoers_context *ctx, unsigned int validated,
+    unsigned int mode)
+{
+    return AUTH_SUCCESS;
+}
+
+/* STUB */
+int
+check_user_runchroot(const char *runchroot)
 {
     return true;
 }
 
 /* STUB */
-bool
-check_user_shell(const struct passwd *pw)
+int
+check_user_runcwd(const char *runcwd)
 {
     return true;
 }
@@ -728,86 +737,94 @@ group_plugin_unload(void)
 
 /* STUB */
 bool
-log_warning(int flags, const char *fmt, ...)
+log_warning(const struct sudoers_context *ctx, unsigned int flags,
+    const char * restrict fmt, ...)
 {
     return true;
 }
 
 /* STUB */
 bool
-log_warningx(int flags, const char *fmt, ...)
+log_warningx(const struct sudoers_context *ctx, unsigned int flags,
+    const char * restrict fmt, ...)
 {
     return true;
 }
 
 /* STUB */
 bool
-gai_log_warning(int flags, int errnum, const char *fmt, ...)
+gai_log_warning(const struct sudoers_context *ctx, unsigned int flags,
+    int errnum, const char * restrict fmt, ...)
 {
     return true;
 }
 
 /* STUB */
 bool
-log_denial(int status, bool inform_user)
+log_denial(const struct sudoers_context *ctx, unsigned int status,
+    bool inform_user)
 {
     return true;
 }
 
 /* STUB */
 bool
-log_failure(int status, int flags)
+log_failure(const  struct sudoers_context *ctx,unsigned int status, int flags)
 {
     return true;
 }
 
 /* STUB */
 bool
-log_exit_status(int exit_status)
+log_exit_status(const struct sudoers_context *ctx, int exit_status)
 {
     return true;
 }
 
 /* STUB */
 bool
-mail_parse_errors(void)
+mail_parse_errors(const struct sudoers_context *ctx)
 {
     return true;
 }
 
 /* STUB */
 bool
-log_parse_error(const char *file, int line, int column, const char *fmt,
-    va_list args)
+log_parse_error(const struct sudoers_context *ctx, const char *file,
+    int line, int column, const char * restrict fmt, va_list args)
 {
     return true;
 }
 
 /* STUB */
 int
-audit_failure(char *const argv[], char const *const fmt, ...)
+audit_failure(const struct sudoers_context *ctx, char *const argv[],
+    char const * restrict const fmt, ...)
 {
     return 0;
 }
 
 /* STUB */
-int
-sudoers_lookup(struct sudo_nss_list *snl, struct passwd *pw, int *cmnd_status,
-    int pwflag)
+unsigned int
+sudoers_lookup(struct sudo_nss_list *snl, struct sudoers_context *ctx,
+    time_t now, sudoers_lookup_callback_fn_t callback, void *cb_data,
+    int *cmnd_status, int pwflag)
 {
     return VALIDATE_SUCCESS;
 }
 
 /* STUB */
 int
-display_cmnd(struct sudo_nss_list *snl, struct passwd *pw)
+display_cmnd(struct sudoers_context *ctx, const struct sudo_nss_list *snl,
+    struct passwd *pw, int verbose)
 {
     return true;
 }
 
 /* STUB */
 int
-display_privs(struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
+display_privs(struct sudoers_context *ctx, const struct sudo_nss_list *snl,
+    struct passwd *pw, int verbose)
 {
     return true;
 }
@@ -815,7 +832,7 @@ display_privs(struct sudo_nss_list *snl, struct passwd *pw, bool verbose)
 /* STUB */
 int
 find_path(const char *infile, char **outfile, struct stat *sbp,
-    const char *path, int ignore_dot, char * const *allowlist)
+    const char *path, bool ignore_dot, char * const *allowlist)
 {
     switch (pass) {
     case PASS_CHECK_NOT_FOUND:
@@ -836,6 +853,14 @@ find_path(const char *infile, char **outfile, struct stat *sbp,
 }
 
 /* STUB */
+int
+resolve_cmnd(struct sudoers_context *ctx, const char *infile, char **outfile,
+    const char *path)
+{
+    return find_path(infile, outfile, NULL, path, false, NULL);
+}
+
+/* STUB */
 bool
 expand_iolog_path(const char *inpath, char *path, size_t pathlen,
     const struct iolog_path_escape *escapes, void *closure)
@@ -853,40 +878,48 @@ iolog_nextid(const char *iolog_dir, char sessid[7])
 
 /* STUB */
 bool
-cb_maxseq(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
+cb_maxseq(struct sudoers_context *ctx, const char *file,
+    int line, int column, const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }
 
 /* STUB */
 bool
-cb_iolog_user(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
+cb_iolog_user(struct sudoers_context *ctx, const char *file,
+    int line, int column, const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }
 
 /* STUB */
 bool
-cb_iolog_group(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
+cb_iolog_group(struct sudoers_context *ctx, const char *file,
+    int line, int column, const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }
 
 /* STUB */
 bool
-cb_iolog_mode(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
+cb_iolog_mode(struct sudoers_context *ctx, const char *file,
+    int line, int column, const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }
 
 /* STUB */
 bool
-cb_group_plugin(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
+cb_group_plugin(struct sudoers_context *ctx, const char *file,
+    int line, int column, const union sudo_defs_val *sd_un, int op)
+{
+    return true;
+}
+
+/* STUB */
+bool
+cb_timestampowner(struct sudoers_context *ctx, const char *file,
+    int line, int column, const union sudo_defs_val *sd_un, int op)
 {
     return true;
 }
@@ -897,4 +930,3 @@ bsdauth_set_style(const char *style)
 {
     return;
 }
-

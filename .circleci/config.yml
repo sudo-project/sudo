@@ -4,6 +4,10 @@ jobs:
   build_linux:
     description: Configure, build and package sudo (Linux)
     parameters:
+      krb5:
+        description: if true, build sudo's Kerberos V support
+        default: false
+        type: boolean
       ldap:
         description: if true, build sudo's LDAP support
         default: false
@@ -31,7 +35,7 @@ jobs:
       - checkout
       - run:
           name: "Building and packaging sudo (Linux)"
-          command: ./scripts/mkpkg <<# parameters.ldap >>--flavor=ldap --with-sssd --with-sssd-lib=/usr/lib/x86_64-linux-gnu <</ parameters.ldap >><<# parameters.wolfssl >>--enable-wolfssl <</ parameters.wolfssl >><<^ parameters.logsrvd >>--disable-log-server --disable-log-client <</ parameters.logsrvd >><<^ parameters.intercept >>--disable-intercept <</ parameters.intercept >><<# parameters.static_sudoers >>--enable-static-sudoers <</ parameters.static_sudoers >>--enable-warnings --enable-werror --enable-sanitizer
+          command: ./scripts/mkpkg <<# parameters.krb5 >>--without-pam --with-kerb5 <</ parameters.krb5 >><<# parameters.ldap >>--flavor=ldap --with-sssd --with-sssd-lib=/usr/lib/x86_64-linux-gnu <</ parameters.ldap >><<# parameters.wolfssl >>--enable-wolfssl <</ parameters.wolfssl >><<^ parameters.logsrvd >>--disable-log-server --disable-log-client <</ parameters.logsrvd >><<^ parameters.intercept >>--disable-intercept <</ parameters.intercept >><<# parameters.static_sudoers >>--enable-static-sudoers <</ parameters.static_sudoers >>--enable-warnings --enable-werror --enable-sanitizer
       # Save workspace for subsequent jobs (i.e. test)
       - persist_to_workspace:
           root: .
@@ -56,7 +60,7 @@ jobs:
   build_macos:
     description: Configure, build and package sudo (macOS)
     macos:
-      xcode: 13.4.1 # indicate our selected version of Xcode
+      xcode: 14.2.0 # indicate our selected version of Xcode
     steps:
       - checkout
       - run:
@@ -70,7 +74,7 @@ jobs:
   test_macos:
     description: run sudo tests in a pre-built workspace (macOS)
     macos:
-      xcode: 13.2.1 # indicate our selected version of Xcode
+      xcode: 14.2.0 # indicate our selected version of Xcode
     steps:
       # Reuse the workspace from the build job
       - attach_workspace:
@@ -84,6 +88,12 @@ workflows:
   version: 2
   build_and_test:
     jobs:
+      - build_linux:
+          name: build-linux-krb5
+          krb5: true
+          filters:
+            branches:
+              only: main
       - build_linux:
           name: build-linux-ldap
           ldap: true
@@ -119,6 +129,10 @@ workflows:
           filters:
             branches:
               only: main
+      - test_linux:
+          name: test-linux-krb5
+          requires:
+            - build-linux-krb5
       - test_linux:
           name: test-linux-ldap
           requires:

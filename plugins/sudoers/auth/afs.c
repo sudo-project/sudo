@@ -40,12 +40,13 @@
 #include <afs/stds.h>
 #include <afs/kautils.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 #include "sudo_auth.h"
-#include "check.h"
+#include <timestamp.h>
 
 int
-sudo_afs_verify(struct passwd *pw, const char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
+sudo_afs_verify(const struct sudoers_context *ctx, struct passwd *pw,
+    const char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     struct ktc_encryptionKey afs_key;
     struct ktc_token afs_token;

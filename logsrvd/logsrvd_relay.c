@@ -36,7 +36,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
@@ -51,17 +51,17 @@
 
 #define NEED_INET_NTOP		/* to expose sudo_inet_ntop in sudo_compat.h */
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_event.h"
-#include "sudo_eventlog.h"
-#include "sudo_gettext.h"
-#include "sudo_iolog.h"
-#include "sudo_fatal.h"
-#include "sudo_queue.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_event.h>
+#include <sudo_eventlog.h>
+#include <sudo_gettext.h>
+#include <sudo_iolog.h>
+#include <sudo_fatal.h>
+#include <sudo_queue.h>
+#include <sudo_util.h>
 
-#include "logsrvd.h"
+#include <logsrvd.h>
 
 static void relay_client_msg_cb(int fd, int what, void *v);
 static void relay_server_msg_cb(int fd, int what, void *v);
@@ -695,11 +695,11 @@ relay_server_msg_cb(int fd, int what, void *v)
     struct connection_closure *closure = v;
     struct relay_closure *relay_closure = closure->relay_closure;
     struct connection_buffer *buf = &relay_closure->read_buf;
-    ssize_t nread;
+    size_t nread;
     uint32_t msg_len;
     debug_decl(relay_server_msg_cb, SUDO_DEBUG_UTIL);
 
-    /* For TLS we may need to read as part of SSL_write(). */
+    /* For TLS we may need to read as part of SSL_write_ex(). */
     if (relay_closure->write_instead_of_read) {
 	relay_closure->write_instead_of_read = false;
         relay_client_msg_cb(fd, what, v);
@@ -716,15 +716,18 @@ relay_server_msg_cb(int fd, int what, void *v)
 #if defined(HAVE_OPENSSL)
     if (relay_closure->tls_client.ssl != NULL) {
 	SSL *ssl = relay_closure->tls_client.ssl;
+	int result;
+
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "%s: ServerMessage from relay %s (%s) [TLS]", __func__,
 	    relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
-        nread = SSL_read(ssl, buf->data + buf->len, buf->size - buf->len);
-        if (nread <= 0) {
+        result = SSL_read_ex(ssl, buf->data + buf->len, buf->size - buf->len,
+	    &nread);
+        if (result <= 0) {
+	    unsigned long errcode;
 	    const char *errstr;
-	    int err;
 
-            switch (SSL_get_error(ssl, nread)) {
+            switch (SSL_get_error(ssl, result)) {
 		case SSL_ERROR_ZERO_RETURN:
 		    /* ssl connection shutdown cleanly */
 		    nread = 0;
@@ -732,12 +735,12 @@ relay_server_msg_cb(int fd, int what, void *v)
                 case SSL_ERROR_WANT_READ:
                     /* ssl wants to read more, read event is always active */
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
-			"SSL_read returns SSL_ERROR_WANT_READ");
+			"SSL_read_ex returns SSL_ERROR_WANT_READ");
                     debug_return;
                 case SSL_ERROR_WANT_WRITE:
                     /* ssl wants to write, schedule a write if not pending */
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
-			"SSL_read returns SSL_ERROR_WANT_WRITE");
+			"SSL_read_ex returns SSL_ERROR_WANT_WRITE");
 		    if (!sudo_ev_pending(relay_closure->write_ev, SUDO_EV_WRITE, NULL)) {
 			/* Enable a temporary write event. */
 			if (sudo_ev_add(closure->evbase, relay_closure->write_ev, NULL, false) == -1) {
@@ -747,7 +750,7 @@ relay_server_msg_cb(int fd, int what, void *v)
 			}
 			relay_closure->temporary_write_event = true;
 		    }
-		    /* Redirect write event to finish SSL_read() */
+		    /* Redirect write event to finish SSL_read_ex() */
 		    relay_closure->read_instead_of_write = true;
                     debug_return;
                 case SSL_ERROR_SSL:
@@ -757,19 +760,19 @@ relay_server_msg_cb(int fd, int what, void *v)
                      * alert when we read ServerHello.  Convert to a more useful
                      * message and hope that no actual internal error occurs.
                      */
-                    err = ERR_get_error();
+                    errcode = ERR_get_error();
 #if !defined(HAVE_WOLFSSL)
                     if (closure->state == INITIAL &&
-                        ERR_GET_REASON(err) == SSL_R_TLSV1_ALERT_INTERNAL_ERROR) {
+                        ERR_GET_REASON(errcode) == SSL_R_TLSV1_ALERT_INTERNAL_ERROR) {
                         errstr = _("relay host name does not match certificate");
 			closure->errstr = errstr;
                     } else
 #endif
 		    {
-                        errstr = ERR_reason_error_string(err);
+                        errstr = ERR_reason_error_string(errcode);
 			closure->errstr = _("error reading from relay");
                     }
-		    sudo_warnx("%s: SSL_read: %s",
+		    sudo_warnx("%s: SSL_read_ex: %s",
 			relay_closure->relay_name.ipaddr,
 			errstr ? errstr : strerror(errno));
                     goto send_error;
@@ -780,12 +783,12 @@ relay_server_msg_cb(int fd, int what, void *v)
 			    relay_closure->relay_name.ipaddr);
 			break;
 		    }
-		    sudo_warn("%s: SSL_read", relay_closure->relay_name.ipaddr);
+		    sudo_warn("%s: SSL_read_ex", relay_closure->relay_name.ipaddr);
 		    closure->errstr = _("error reading from relay");
                     goto send_error;
                 default:
                     errstr = ERR_reason_error_string(ERR_get_error());
-		    sudo_warnx("%s: SSL_read: %s",
+		    sudo_warnx("%s: SSL_read_ex: %s",
 			relay_closure->relay_name.ipaddr,
 			errstr ? errstr : strerror(errno));
 		    closure->errstr = _("error reading from relay");
@@ -798,14 +801,14 @@ relay_server_msg_cb(int fd, int what, void *v)
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "%s: ServerMessage from relay %s (%s)", __func__,
 	    relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
-	nread = read(fd, buf->data + buf->len, buf->size - buf->len);
+	nread = (size_t)read(fd, buf->data + buf->len, buf->size - buf->len);
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: received %zd bytes from relay %s (%s)", __func__, nread,
 	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
     switch (nread) {
-    case -1:
+    case (size_t)-1:
 	if (errno == EAGAIN || errno == EINTR)
 	    debug_return;
 	sudo_warn("%s: read", relay_closure->relay_name.ipaddr);
@@ -890,13 +893,13 @@ relay_client_msg_cb(int fd, int what, void *v)
     struct connection_closure *closure = v;
     struct relay_closure *relay_closure = closure->relay_closure;
     struct connection_buffer *buf;
-    ssize_t nwritten;
+    size_t nwritten;
     debug_decl(relay_client_msg_cb, SUDO_DEBUG_UTIL);
 
-    /* For TLS we may need to write as part of SSL_read(). */
+    /* For TLS we may need to write as part of SSL_read_ex(). */
     if (relay_closure->read_instead_of_write) {
 	relay_closure->read_instead_of_write = false;
-        /* Delete write event if it was only due to SSL_read(). */
+        /* Delete write event if it was only due to SSL_read_ex(). */
         if (relay_closure->temporary_write_event) {
             relay_closure->temporary_write_event = false;
             sudo_ev_del(closure->evbase, relay_closure->write_ev);
@@ -918,18 +921,19 @@ relay_client_msg_cb(int fd, int what, void *v)
         goto close_connection;
     }
 
-    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending %u bytes to server %s (%s)",
+    sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending %zu bytes to server %s (%s)",
 	__func__, buf->len - buf->off, relay_closure->relay_name.name,
 	relay_closure->relay_name.ipaddr);
 
 #if defined(HAVE_OPENSSL)
     if (relay_closure->tls_client.ssl != NULL) {
 	SSL *ssl = relay_closure->tls_client.ssl;
-        nwritten = SSL_write(ssl, buf->data + buf->off, buf->len - buf->off);
-        if (nwritten <= 0) {
+        const int result = SSL_write_ex(ssl, buf->data + buf->off,
+	    buf->len - buf->off, &nwritten);
+        if (result <= 0) {
 	    const char *errstr;
 
-            switch (SSL_get_error(ssl, nwritten)) {
+            switch (SSL_get_error(ssl, result)) {
 		case SSL_ERROR_ZERO_RETURN:
 		    /* ssl connection shutdown cleanly */
 		    shutdown(relay_closure->sock, SHUT_RDWR);
@@ -949,23 +953,23 @@ relay_client_msg_cb(int fd, int what, void *v)
                 case SSL_ERROR_WANT_READ:
                     /* ssl wants to read, read event always active */
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
-			"SSL_write returns SSL_ERROR_WANT_READ");
-		    /* Redirect read event to finish SSL_write() */
+			"SSL_write_ex returns SSL_ERROR_WANT_READ");
+		    /* Redirect read event to finish SSL_write_ex() */
 		    relay_closure->write_instead_of_read = true;
                     debug_return;
                 case SSL_ERROR_WANT_WRITE:
 		    /* ssl wants to write more, write event remains active */
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
-			"SSL_write returns SSL_ERROR_WANT_WRITE");
+			"SSL_write_ex returns SSL_ERROR_WANT_WRITE");
                     debug_return;
                 case SSL_ERROR_SYSCALL:
-		    sudo_warn("%s: SSL_write",
+		    sudo_warn("%s: SSL_write_ex",
 			relay_closure->relay_name.ipaddr);
 		    closure->errstr = _("error writing to relay");
 		    goto send_error;
                 default:
 		    errstr = ERR_reason_error_string(ERR_get_error());
-		    sudo_warnx("%s: SSL_write: %s",
+		    sudo_warnx("%s: SSL_write_ex: %s",
 			relay_closure->relay_name.ipaddr,
 			errstr ? errstr : strerror(errno));
 		    closure->errstr = _("error writing to relay");
@@ -975,8 +979,8 @@ relay_client_msg_cb(int fd, int what, void *v)
     } else
 #endif
     {
-	nwritten = write(fd, buf->data + buf->off, buf->len - buf->off);
-	if (nwritten == -1) {
+	nwritten = (size_t)write(fd, buf->data + buf->off, buf->len - buf->off);
+	if (nwritten == (size_t)-1) {
 	    if (errno == EAGAIN || errno == EINTR)
 		debug_return;
 	    sudo_warn("%s: write", relay_closure->relay_name.ipaddr);
@@ -989,7 +993,7 @@ relay_client_msg_cb(int fd, int what, void *v)
     if (buf->off == buf->len) {
 	/* sent entire message, move buf to free list */
 	sudo_debug_printf(SUDO_DEBUG_INFO,
-	    "%s: finished sending %u bytes to server", __func__, buf->len);
+	    "%s: finished sending %zu bytes to server", __func__, buf->len);
 	buf->off = 0;
 	buf->len = 0;
 	TAILQ_REMOVE(&relay_closure->write_bufs, buf, entries);

@@ -1010,13 +1010,13 @@ sudo_intercept_common.plog: sudo_intercept_common.i
 suspend_parent.o: $(srcdir)/suspend_parent.c $(incdir)/compat/stdbool.h \
                   $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
-                  $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                  $(incdir)/sudo_queue.h $(srcdir)/sudo_exec.h \
                   $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/suspend_parent.c
 suspend_parent.i: $(srcdir)/suspend_parent.c $(incdir)/compat/stdbool.h \
                   $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
-                  $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+                  $(incdir)/sudo_queue.h $(srcdir)/sudo_exec.h \
                   $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -E -o $@ $(CPPFLAGS) $<
 suspend_parent.plog: suspend_parent.i

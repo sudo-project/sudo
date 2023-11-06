@@ -26,7 +26,7 @@
 
 #include <time.h>
 #include <def_data.h>
-#include "sudo_queue.h"
+#include <sudo_queue.h>
 
 struct list_member {
     SLIST_ENTRY(list_member) entries;
@@ -48,7 +48,7 @@ struct def_values {
 };
 
 union sudo_defs_val {
-    int flag;
+    bool flag;
     int ival;
     unsigned int uival;
     enum def_tuple tuple;
@@ -61,12 +61,13 @@ union sudo_defs_val {
 /*
  * Structure describing compile-time and run-time options.
  */
+struct sudoers_context;
 struct sudo_defs_types {
     const char *name;
     int type;
     const char *desc;
     struct def_values *values;
-    bool (*callback)(const char *file, int line, int column, const union sudo_defs_val *, int op);
+    bool (*callback)(struct sudoers_context *ctx, const char *file, int line, int column, const union sudo_defs_val *, int op);
     union sudo_defs_val sd_un;
 };
 
@@ -74,10 +75,10 @@ struct sudo_defs_types {
  * Defaults values to apply before others.
  */
 struct early_default {
-    short idx;
-    short run_callback;
-    short line;
-    short column;
+    int idx;
+    int run_callback;
+    int line;
+    int column;
     char *file;
 };
 
@@ -110,6 +111,8 @@ struct early_default {
 #define T_TIMEOUT	0x011
 #undef T_RLIMIT
 #define T_RLIMIT	0x012
+#undef T_PLUGIN
+#define T_PLUGIN	0x013
 #undef T_MASK
 #define T_MASK		0x0FF
 #undef T_BOOL
@@ -143,11 +146,11 @@ struct defaults_list;
 struct sudoers_parse_tree;
 void dump_default(void);
 bool init_defaults(void);
-bool set_default(const char *var, const char *val, int op, const char *file, int line, int column, bool quiet);
-bool update_defaults(struct sudoers_parse_tree *parse_tree, struct defaults_list *defs, int what, bool quiet);
+bool set_default(struct sudoers_context *ctx, const char *var, const char *val, int op, const char *file, int line, int column, bool quiet);
+bool update_defaults(struct sudoers_context *ctx, struct sudoers_parse_tree *parse_tree, struct defaults_list *defs, int what, bool quiet);
 bool check_defaults(const struct sudoers_parse_tree *parse_tree, bool quiet);
 bool append_default(const char *var, const char *val, int op, char *source, struct defaults_list *defs);
-bool cb_passprompt_regex(const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
+bool cb_passprompt_regex(struct sudoers_context *ctx, const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
 
 extern struct sudo_defs_types sudo_defs_table[];
 

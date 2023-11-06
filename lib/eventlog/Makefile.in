@@ -179,11 +179,11 @@ check: $(TEST_PROGS) check-fuzzer
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    umask 022; \
 	    rval=0; \
-	    ./check_parse_json $(srcdir)/regress/parse_json/*.in || rval=`expr $$rval + $$?`; \
-	    ./store_json_test $(srcdir)/regress/eventlog_store/*.json.in || rval=`expr $$rval + $$?`; \
-	    ./store_sudo_test $(srcdir)/regress/eventlog_store/*.json.in || rval=`expr $$rval + $$?`; \
+	    ./check_parse_json $(TEST_VERBOSE) $(srcdir)/regress/parse_json/*.in || rval=`expr $$rval + $$?`; \
+	    ./store_json_test $(TEST_VERBOSE) $(srcdir)/regress/eventlog_store/*.json.in || rval=`expr $$rval + $$?`; \
+	    ./store_sudo_test $(TEST_VERBOSE) $(srcdir)/regress/eventlog_store/*.json.in || rval=`expr $$rval + $$?`; \
 	    mkdir -p regress/logwrap; \
-	    ./check_wrap $(srcdir)/regress/logwrap/check_wrap.in > regress/logwrap/check_wrap.out; \
+	    ./check_wrap $(TEST_VERBOSE) $(srcdir)/regress/logwrap/check_wrap.in > regress/logwrap/check_wrap.out; \
 	    diff regress/logwrap/check_wrap.out $(srcdir)/regress/logwrap/check_wrap.out.ok || rval=`expr $$rval + $$?`; \
 	    exit $$rval; \
 	fi

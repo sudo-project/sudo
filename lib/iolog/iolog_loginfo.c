@@ -28,20 +28,20 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_eventlog.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_json.h"
-#include "sudo_iolog.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_eventlog.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_json.h>
+#include <sudo_iolog.h>
+#include <sudo_util.h>
 
 struct eventlog *
 iolog_parse_loginfo(int dfd, const char *iolog_dir)
@@ -131,7 +131,7 @@ iolog_write_info_file_legacy(int dfd, struct eventlog *evlog)
 	evlog->lines, evlog->columns,
 	evlog->cwd ? evlog->cwd : "unknown");
     fputs(evlog->command ? evlog->command : "unknown", fp);
-    for (av = evlog->argv + 1; *av != NULL; av++) {
+    for (av = evlog->runargv + 1; *av != NULL; av++) {
 	fputc(' ', fp);
 	fputs(*av, fp);
     }

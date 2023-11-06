@@ -30,8 +30,8 @@
 #include <string.h>
 #include <syslog.h>
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
 
 /*
  * GNU-compatible basename(3)

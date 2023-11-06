@@ -6,7 +6,7 @@
 #define PROTOBUF_C__NO_DEPRECATED
 #endif
 
-#include "log_server.pb-c.h"
+#include <log_server.pb-c.h>
 void   client_message__init
                      (ClientMessage         *message)
 {

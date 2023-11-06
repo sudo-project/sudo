@@ -29,7 +29,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif
 #include <string.h>
 #ifdef HAVE_STRINGS_H
@@ -40,17 +40,20 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#ifdef HAVE_DLOPEN
+# include <dlfcn.h>
+#endif
 
 #define SUDO_ERROR_WRAP	0
 
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_plugin.h"
-#include "sudo_util.h"
-#include "pathnames.h"
+#include <sudo_compat.h>
+#include <sudo_conf.h>
+#include <sudo_debug.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_plugin.h>
+#include <sudo_util.h>
+#include <pathnames.h>
 
 #ifndef _PATH_SUDO_INTERCEPT
 # define _PATH_SUDO_INTERCEPT NULL
@@ -360,7 +363,7 @@ parse_plugin(const char *entry, const char *conf_file, unsigned int lineno)
 	options[nopts] = NULL;
     }
 
-    info = calloc(sizeof(*info), 1);
+    info = calloc(1, sizeof(*info));
     if (info == NULL)
 	    goto oom;
     info->symbol_name = strndup(symbol, symlen);
@@ -377,8 +380,8 @@ parse_plugin(const char *entry, const char *conf_file, unsigned int lineno)
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     if (options != NULL) {
-	while (nopts--)
-	    free(options[nopts]);
+	while (nopts)
+	    free(options[--nopts]);
 	free(options);
     }
     if (info != NULL) {
@@ -432,7 +435,7 @@ set_var_max_groups(const char *strval, const char *conf_file,
     int max_groups;
     debug_decl(set_var_max_groups, SUDO_DEBUG_UTIL);
 
-    max_groups = sudo_strtonum(strval, 1, 1024, NULL);
+    max_groups = (int)sudo_strtonum(strval, 1, 1024, NULL);
     if (max_groups <= 0) {
 	sudo_warnx(U_("invalid max groups \"%s\" in %s, line %u"), strval,
 	    conf_file, lineno);
@@ -542,6 +545,28 @@ sudo_conf_debug_files_v1(const char *progname)
 	}
 	if (strcmp(debug_spec->progname, prog) == 0)
 	    debug_return_ptr(&debug_spec->debug_files);
+
+#ifdef RTLD_MEMBER
+	/* Handle names like sudoers.a(sudoers.so) for AIX. */
+	const char *cp = strchr(prog, '(');
+	const char *ep = strchr(prog, ')');
+	if (cp != NULL && ep != NULL) {
+	    /* Match on the program name without the member. */
+	    size_t len = (size_t)(cp - prog);
+	    if (strncmp(debug_spec->progname, prog, len) == 0 &&
+		    debug_spec->progname[len] == '\0') {
+		debug_return_ptr(&debug_spec->debug_files);
+	    }
+
+	    /* Match on the member itself. */
+	    cp++;
+	    len = (size_t)(ep - cp);
+	    if (strncmp(debug_spec->progname, cp, len) == 0 &&
+		    debug_spec->progname[len] == '\0') {
+		debug_return_ptr(&debug_spec->debug_files);
+	    }
+	}
+#endif
     }
     debug_return_ptr(NULL);
 }
@@ -575,7 +600,7 @@ sudo_conf_init(int conf_types)
     struct sudo_conf_debug *debug_spec;
     struct sudo_debug_file *debug_file;
     struct plugin_info *plugin_info;
-    int i;
+    size_t i;
     debug_decl(sudo_conf_init, SUDO_DEBUG_UTIL);
 
     /* Free and reset paths. */
@@ -672,7 +697,7 @@ sudo_conf_read_v1(const char *path, int conf_types)
 	/* _PATH_SUDO_CONF is a colon-separated list of path. */
 	fd = sudo_open_conf_path(_PATH_SUDO_CONF, conf_file,
 	    sizeof(conf_file), NULL);
-	error = sudo_secure_fd(fd, S_IFREG, ROOT_UID, -1, &sb);
+	error = sudo_secure_fd(fd, S_IFREG, ROOT_UID, (gid_t)-1, &sb);
 	switch (error) {
 	case SUDO_PATH_SECURE:
 	    /* OK! */
@@ -717,7 +742,7 @@ sudo_conf_read_v1(const char *path, int conf_types)
 
     while (sudo_parseln(&line, &linesize, &conf_lineno, fp, 0) != -1) {
 	struct sudo_conf_table *cur;
-	unsigned int i;
+	size_t i;
 	char *cp;
 
 	if (*(cp = line) == '\0')

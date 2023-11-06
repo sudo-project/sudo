@@ -35,8 +35,8 @@
 #include <bsm/adt.h>
 #include <bsm/adt_event.h>
 
-#include "sudoers.h"
-#include "solaris_audit.h"
+#include <sudoers.h>
+#include <solaris_audit.h>
 
 static adt_session_data_t *ah;		/* audit session handle */
 static adt_event_data_t	*event;		/* event to be generated */
@@ -44,35 +44,36 @@ static char		cwd[PATH_MAX];
 static char		cmdpath[PATH_MAX];
 
 static int
-adt_sudo_common(char *const argv[])
+adt_sudo_common(const struct sudoers_context *ctx, char *const argv[])
 {
 	int argc;
 
 	if (adt_start_session(&ah, NULL, ADT_USE_PROC_DATA) != 0) {
-		log_warning(SLOG_NO_STDERR, "adt_start_session");
+		log_warning(ctx, SLOG_NO_STDERR, "adt_start_session");
 		return -1;
 	}
 	if ((event = adt_alloc_event(ah, ADT_sudo)) == NULL) {
-		log_warning(SLOG_NO_STDERR, "alloc_event");
+		log_warning(ctx, SLOG_NO_STDERR, "alloc_event");
 		(void) adt_end_session(ah);
 		return -1;
 	}
 	if ((event->adt_sudo.cwdpath = getcwd(cwd, sizeof(cwd))) == NULL) {
-		log_warning(SLOG_NO_STDERR, _("unable to get current working directory"));
+		log_warning(ctx, SLOG_NO_STDERR,
+		    _("unable to get current working directory"));
 	}
 
 	/* get the real executable name */
-	if (user_cmnd != NULL) {
-		if (strlcpy(cmdpath, (const char *)user_cmnd,
+	if (ctx->user.cmnd != NULL) {
+		if (strlcpy(cmdpath, ctx->user.cmnd,
 		    sizeof(cmdpath)) >= sizeof(cmdpath)) {
-			log_warningx(SLOG_NO_STDERR,
-			    _("truncated audit path user_cmnd: %s"),
-			    user_cmnd);
+			log_warningx(ctx, SLOG_NO_STDERR,
+			    _("truncated audit path ctx->user.cmnd: %s"),
+			    ctx->user.cmnd);
 		}
 	} else {
 		if (strlcpy(cmdpath, argv[0],
 		    sizeof(cmdpath)) >= sizeof(cmdpath)) {
-			log_warningx(SLOG_NO_STDERR,
+			log_warningx(ctx, SLOG_NO_STDERR,
 			    _("truncated audit path argv[0]: %s"),
 			    argv[0]);
 		}
@@ -94,15 +95,15 @@ adt_sudo_common(char *const argv[])
  * Returns 0 on success or -1 on error.
  */
 int
-solaris_audit_success(char *const argv[])
+solaris_audit_success(const struct sudoers_context *ctx, char *const argv[])
 {
 	int rc = -1;
 
-	if (adt_sudo_common(argv) != 0) {
+	if (adt_sudo_common(ctx, argv) != 0) {
 		return -1;
 	}
 	if (adt_put_event(event, ADT_SUCCESS, ADT_SUCCESS) != 0) {
-		log_warning(SLOG_NO_STDERR, "adt_put_event(ADT_SUCCESS)");
+		log_warning(ctx, SLOG_NO_STDERR, "adt_put_event(ADT_SUCCESS)");
 	} else {
 		rc = 0;
 	}
@@ -116,17 +117,18 @@ solaris_audit_success(char *const argv[])
  * Returns 0 on success or -1 on error.
  */
 int
-solaris_audit_failure(char *const argv[], const char *errmsg)
+solaris_audit_failure(const struct sudoers_context *ctx, char *const argv[],
+    const char *errmsg)
 {
 	int rc = -1;
 
-	if (adt_sudo_common(argv) != 0) {
+	if (adt_sudo_common(ctx, argv) != 0) {
 		return -1;
 	}
 
 	event->adt_sudo.errmsg = (char *)errmsg;
 	if (adt_put_event(event, ADT_FAILURE, ADT_FAIL_VALUE_PROGRAM) != 0) {
-		log_warning(SLOG_NO_STDERR, "adt_put_event(ADT_FAILURE)");
+		log_warning(ctx, SLOG_NO_STDERR, "adt_put_event(ADT_FAILURE)");
 	} else {
 		rc = 0;
 	}

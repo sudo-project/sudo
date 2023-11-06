@@ -36,16 +36,16 @@
 # include <inttypes.h>
 #endif
 
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_eventlog.h"
-#include "sudo_fatal.h"
-#include "sudo_iolog.h"
-#include "sudo_plugin.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_conf.h>
+#include <sudo_debug.h>
+#include <sudo_eventlog.h>
+#include <sudo_fatal.h>
+#include <sudo_iolog.h>
+#include <sudo_plugin.h>
+#include <sudo_util.h>
 
-#include "logsrvd.h"
+#include <logsrvd.h>
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
@@ -181,7 +181,7 @@ int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     char tempfile[] = "/tmp/logsrvd_conf.XXXXXX";
-    size_t nwritten;
+    ssize_t nwritten;
     int fd;
 
     initprogname("fuzz_logsrvd_conf");
@@ -193,7 +193,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (fd == -1)
 	return 0;
     nwritten = write(fd, data, size);
-    if (nwritten != size) {
+    if (nwritten == -1) {
 	close(fd);
 	return 0;
     }

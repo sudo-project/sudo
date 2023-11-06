@@ -22,10 +22,10 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif
 
-#include "sudo_queue.h"
+#include <sudo_queue.h>
 
 /* Flags for sudo_conf_read() */
 #define SUDO_CONF_DEBUG		0x01

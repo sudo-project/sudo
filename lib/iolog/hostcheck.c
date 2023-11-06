@@ -35,10 +35,10 @@
 
 # define NEED_INET_NTOP		/* to expose sudo_inet_ntop in sudo_compat.h */
 
-# include  "sudo_compat.h"
-# include  "sudo_debug.h"
-# include  "sudo_util.h"
-# include  "hostcheck.h"
+# include  <sudo_compat.h>
+# include  <sudo_debug.h>
+# include  <sudo_util.h>
+# include  <hostcheck.h>
 
 #ifndef INET_ADDRSTRLEN
 # define INET_ADDRSTRLEN 16
@@ -46,6 +46,10 @@
 #ifndef INET6_ADDRSTRLEN
 # define INET6_ADDRSTRLEN 46
 #endif
+
+#if !defined(HAVE_ASN1_STRING_GET0_DATA) && !defined(HAVE_WOLFSSL)
+# define ASN1_STRING_get0_data(x)	ASN1_STRING_data(x)
+#endif /* !HAVE_ASN1_STRING_GET0_DATA && !HAVE_WOLFSSL */
 
 /**
  * @brief Checks if given hostname resolves to the given IP address.
@@ -129,9 +133,9 @@ exit:
 static HostnameValidationResult
 validate_name(const char *hostname, ASN1_STRING *certname_asn1)
 {
-    char *certname_s = (char *) ASN1_STRING_get0_data(certname_asn1);
-    int certname_len = ASN1_STRING_length(certname_asn1);
-    int hostname_len = strlen(hostname);
+    char *certname_s = (char *)ASN1_STRING_get0_data(certname_asn1);
+    size_t certname_len = (size_t)ASN1_STRING_length(certname_asn1);
+    size_t hostname_len = strlen(hostname);
     debug_decl(validate_name, SUDO_DEBUG_UTIL);
 
 	/* remove last '.' from hostname if exists */
@@ -140,18 +144,16 @@ validate_name(const char *hostname, ASN1_STRING *certname_asn1)
     }
 
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "comparing %.*s to %.*s in cert", hostname_len, hostname,
-	    certname_len, certname_s);
+	    "comparing %.*s to %.*s in cert", (int)hostname_len, hostname,
+	    (int)certname_len, certname_s);
 
 	/* skip the first label if wildcard */
 	if (certname_len > 2 && certname_s[0] == '*' && certname_s[1] == '.') {
-		if (hostname_len != 0) {
-			do {
-				--hostname_len;
-				if (*hostname++ == '.') {
-					break;
-                }
-			} while (hostname_len != 0);
+		while (hostname_len != 0) {
+			--hostname_len;
+			if (*hostname++ == '.') {
+				break;
+            }
 		}
 		certname_s += 2;
 		certname_len -= 2;
@@ -209,20 +211,19 @@ matches_common_name(const char *hostname, const char *ipaddr, const X509 *cert, 
 		debug_return_int(Error);
 	}			
 	const unsigned char *common_name_str = ASN1_STRING_get0_data(common_name_asn1);
+	const size_t common_name_length = (size_t)ASN1_STRING_length(common_name_asn1);
 
 	/* Make sure there isn't an embedded NUL character in the CN */
-    if (memchr(common_name_str, '\0', ASN1_STRING_length(common_name_asn1)) != NULL) {
+	if (memchr(common_name_str, '\0', common_name_length) != NULL) {
 		debug_return_int(MalformedCertificate);
 	}
 
 	/* Compare expected hostname with the CN */
-    if (validate_name(hostname, common_name_asn1) == MatchFound) {
+	if (validate_name(hostname, common_name_asn1) == MatchFound) {
 		debug_return_int(MatchFound);
 	}
 
-    int common_name_length = ASN1_STRING_length(common_name_asn1);
     char *nullterm_common_name = malloc(common_name_length + 1);
-
     if (nullterm_common_name == NULL) {
 	debug_return_int(Error);
     }
@@ -285,9 +286,10 @@ matches_subject_alternative_name(const char *hostname, const char *ipaddr, const
 
         if (current_name->type == GEN_DNS) {
             const unsigned char *dns_name = ASN1_STRING_get0_data(current_name->d.dNSName);
+	    const size_t dns_name_length = (size_t)ASN1_STRING_length(current_name->d.dNSName);
 
             /* Make sure there isn't an embedded NUL character in the DNS name */
-            if (memchr(dns_name, '\0', ASN1_STRING_length(current_name->d.dNSName)) != NULL) {
+            if (memchr(dns_name, '\0', dns_name_length) != NULL) {
                 result = MalformedCertificate;
                 break;
             } else {
@@ -297,9 +299,7 @@ matches_subject_alternative_name(const char *hostname, const char *ipaddr, const
                     break;
                 }
 
-                int dns_name_length = ASN1_STRING_length(current_name->d.dNSName);
                 char *nullterm_dns_name = malloc(dns_name_length + 1);
-
                 if (nullterm_dns_name == NULL) {
                     debug_return_int(Error);
                 }

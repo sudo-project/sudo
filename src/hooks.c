@@ -27,9 +27,9 @@
 #include <string.h>
 #include <errno.h>
 
-#include "sudo.h"
-#include "sudo_plugin.h"
-#include "sudo_plugin_int.h"
+#include <sudo.h>
+#include <sudo_plugin.h>
+#include <sudo_plugin_int.h>
 
 /* Singly linked hook list. */
 struct sudo_hook_entry {

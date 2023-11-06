@@ -36,7 +36,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
@@ -49,17 +49,17 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_event.h"
-#include "sudo_eventlog.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_iolog.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_conf.h>
+#include <sudo_debug.h>
+#include <sudo_event.h>
+#include <sudo_eventlog.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_iolog.h>
+#include <sudo_util.h>
 
-#include "logsrvd.h"
+#include <logsrvd.h>
 
 /*
  * Helper function to set closure->journal and closure->journal_path.
@@ -90,7 +90,7 @@ journal_fdopen(int fd, const char *journal_path,
 }
 
 static int
-journal_mkstemp(const char *parent_dir, char *pathbuf, int pathlen)
+journal_mkstemp(const char *parent_dir, char *pathbuf, size_t pathsize)
 {
     int len, dfd = -1, fd = -1;
     mode_t dirmode, oldmask;
@@ -105,9 +105,9 @@ journal_mkstemp(const char *parent_dir, char *pathbuf, int pathlen)
         dirmode |= S_IXOTH;
     oldmask = umask(ACCESSPERMS & ~dirmode);
 
-    len = snprintf(pathbuf, pathlen, "%s/%s/%s",
+    len = snprintf(pathbuf, pathsize, "%s/%s/%s",
 	logsrvd_conf_relay_dir(), parent_dir, RELAY_TEMPLATE);
-    if (len >= pathlen) {
+    if ((size_t)len >= pathsize) {
 	errno = ENAMETOOLONG;
 	sudo_warn("%s/%s/%s", logsrvd_conf_relay_dir(), parent_dir,
 	    RELAY_TEMPLATE);
@@ -120,7 +120,7 @@ journal_mkstemp(const char *parent_dir, char *pathbuf, int pathlen)
 	    "unable to create parent dir for %s", pathbuf);
 	goto done;
     }
-    template = pathbuf + (len - strlen(RELAY_TEMPLATE));
+    template = &pathbuf[(size_t)len - (sizeof(RELAY_TEMPLATE) - 1)];
     if ((fd = mkostempsat(dfd, template, 0, 0)) == -1) {
 	sudo_warn(U_("%s: %s"), "mkstemp", pathbuf);
 	goto done;
@@ -270,6 +270,7 @@ journal_seek(struct timespec *target, struct connection_closure *closure)
 		bufsize = sudo_pow2_roundup(msg_len);
 		if (bufsize < msg_len) {
 		    /* overflow */
+		    errno = ENOMEM;
 		    closure->errstr = _("unable to allocate memory");
 		    break;
 		}
@@ -442,8 +443,8 @@ journal_restart(RestartMessage *msg, uint8_t *buf, size_t buflen,
     }
 
     /* Seek forward to resume point. */
-    target.tv_sec = msg->resume_point->tv_sec;
-    target.tv_nsec = msg->resume_point->tv_nsec;
+    target.tv_sec = (time_t)msg->resume_point->tv_sec;
+    target.tv_nsec = (long)msg->resume_point->tv_nsec;
     if (!journal_seek(&target, closure)) {
 	sudo_warn(U_("unable to seek to [%lld, %ld] in journal file %s"),
 	    (long long)target.tv_sec, target.tv_nsec, journal_path);
@@ -454,7 +455,7 @@ journal_restart(RestartMessage *msg, uint8_t *buf, size_t buflen,
 }
 
 static bool
-journal_write(uint8_t *buf, size_t len, struct connection_closure *closure)
+journal_write(uint8_t * restrict buf, size_t len, struct connection_closure * restrict closure)
 {
     uint32_t msg_len;
     debug_decl(journal_write, SUDO_DEBUG_UTIL);
@@ -511,8 +512,8 @@ journal_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
  * Store a RejectMessage from the client in the journal.
  */
 static bool
-journal_reject(RejectMessage *msg, uint8_t *buf, size_t len,
-    struct connection_closure *closure)
+journal_reject(RejectMessage *msg, uint8_t * restrict buf, size_t len,
+    struct connection_closure * restrict closure)
 {
     debug_decl(journal_reject, SUDO_DEBUG_UTIL);
 
@@ -531,8 +532,8 @@ journal_reject(RejectMessage *msg, uint8_t *buf, size_t len,
  * Store an ExitMessage from the client in the journal.
  */
 static bool
-journal_exit(ExitMessage *msg, uint8_t *buf, size_t len,
-    struct connection_closure *closure)
+journal_exit(ExitMessage *msg, uint8_t * restrict buf, size_t len,
+    struct connection_closure * restrict closure)
 {
     debug_decl(journal_exit, SUDO_DEBUG_UTIL);
 
@@ -549,8 +550,8 @@ journal_exit(ExitMessage *msg, uint8_t *buf, size_t len,
  * Store an AlertMessage from the client in the journal.
  */
 static bool
-journal_alert(AlertMessage *msg, uint8_t *buf, size_t len,
-    struct connection_closure *closure)
+journal_alert(AlertMessage *msg, uint8_t * restrict buf, size_t len,
+    struct connection_closure * restrict closure)
 {
     debug_decl(journal_alert, SUDO_DEBUG_UTIL);
 
@@ -569,8 +570,8 @@ journal_alert(AlertMessage *msg, uint8_t *buf, size_t len,
  * Store an IoBuffer from the client in the journal.
  */
 static bool
-journal_iobuf(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len,
-    struct connection_closure *closure)
+journal_iobuf(int iofd, IoBuffer *iobuf, uint8_t * restrict buf, size_t len,
+    struct connection_closure * restrict closure)
 {
     debug_decl(journal_iobuf, SUDO_DEBUG_UTIL);
 
@@ -585,8 +586,8 @@ journal_iobuf(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len,
  * Store a CommandSuspend message from the client in the journal.
  */
 static bool
-journal_suspend(CommandSuspend *msg, uint8_t *buf, size_t len,
-    struct connection_closure *closure)
+journal_suspend(CommandSuspend *msg, uint8_t * restrict buf, size_t len,
+    struct connection_closure * restrict closure)
 {
     debug_decl(journal_suspend, SUDO_DEBUG_UTIL);
 
@@ -599,8 +600,8 @@ journal_suspend(CommandSuspend *msg, uint8_t *buf, size_t len,
  * Store a ChangeWindowSize message from the client in the journal.
  */
 static bool
-journal_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len,
-    struct connection_closure *closure)
+journal_winsize(ChangeWindowSize *msg, uint8_t * restrict buf, size_t len,
+    struct connection_closure * restrict closure)
 {
     debug_decl(journal_winsize, SUDO_DEBUG_UTIL);
 

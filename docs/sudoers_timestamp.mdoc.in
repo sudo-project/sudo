@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2017-2020, 2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2017-2020, 2022-2023 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 13, 2022
+.Dd September 20, 2023
 .Dt SUDOERS_TIMESTAMP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -24,7 +24,7 @@
 .Sh DESCRIPTION
 The
 .Nm sudoers
-plugin uses per-user time stamp files for credential caching.
+plugin uses per-user-ID time stamp files for credential caching.
 Once a user has been authenticated, they may use
 .Nm sudo
 without a password for a short period of time
@@ -256,6 +256,11 @@ This prevents re-use of the time stamp file after logout in most cases.
 Support was added for the kernel-based tty time stamps available in
 .Ox
 which do not use an on-disk time stamp file.
+.It 1.9.15
+Time stamp file path names are now based on the invoking user-ID
+instead of the user name.
+This avoids problems with user names that include a path separator
+character.
 .El
 .Sh AUTHORS
 Many people have worked on

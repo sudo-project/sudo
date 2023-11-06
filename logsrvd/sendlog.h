@@ -19,7 +19,7 @@
 #ifndef SUDO_SENDLOG_H
 #define SUDO_SENDLOG_H
 
-#include "log_server.pb-c.h"
+#include <log_server.pb-c.h>
 #if PROTOBUF_C_VERSION_NUMBER < 1003000
 # error protobuf-c version 1.30 or higher required
 #endif
@@ -35,7 +35,7 @@
 #endif
 
 #include "logsrv_util.h"
-#include "tls_common.h"
+#include <tls_common.h>
 
 enum client_state {
     ERROR,

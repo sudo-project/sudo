@@ -29,8 +29,8 @@
 #include <pwd.h>
 #include <time.h>
 
-#include "sudoers.h"
-#include "sudo_lbuf.h"
+#include <sudoers.h>
+#include <sudo_lbuf.h>
 #include <gram.h>
 
 /*
@@ -40,19 +40,21 @@
  */
 static bool
 sudoers_format_member_int(struct sudo_lbuf *lbuf,
-    const struct sudoers_parse_tree *parse_tree, char *name, int type,
-    bool negated, const char *separator, int alias_type)
+    const struct sudoers_parse_tree *parse_tree, const char *name, int type,
+    bool negated, const char *separator, short alias_type)
 {
+    const struct sudoers_context *ctx = parse_tree->ctx;
     struct alias *a;
-    struct member *m;
-    struct sudo_command *c;
-    struct command_digest *digest;
+    const struct member *m;
+    const struct sudo_command *c;
+    const struct command_digest *digest;
     debug_decl(sudoers_format_member_int, SUDOERS_DEBUG_UTIL);
 
     switch (type) {
 	case MYSELF:
 	    sudo_lbuf_append(lbuf, "%s%s", negated ? "!" : "",
-		list_pw ? list_pw->pw_name : (user_name ? user_name : ""));
+		ctx->runas.list_pw ? ctx->runas.list_pw->pw_name :
+		(ctx->user.name ? ctx->user.name : ""));
 	    break;
 	case ALL:
 	    if (name == NULL) {
@@ -104,8 +106,9 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
 		    TAILQ_FOREACH(m, &a->members, entries) {
 			if (m != TAILQ_FIRST(&a->members))
 			    sudo_lbuf_append(lbuf, "%s", separator);
-			sudoers_format_member_int(lbuf, parse_tree, m->name,
-			    m->type, negated ? !m->negated : m->negated,
+			sudoers_format_member_int(lbuf, parse_tree,
+			    m->name, m->type,
+			    negated ? !m->negated : m->negated,
 			    separator, alias_type);
 		    }
 		    alias_put(a);
@@ -136,8 +139,8 @@ sudoers_format_member_int(struct sudo_lbuf *lbuf,
 
 bool
 sudoers_format_member(struct sudo_lbuf *lbuf,
-    const struct sudoers_parse_tree *parse_tree, struct member *m,
-    const char *separator, int alias_type)
+    const struct sudoers_parse_tree *parse_tree, const struct member *m,
+    const char *separator, short alias_type)
 {
     return sudoers_format_member_int(lbuf, parse_tree, m->name, m->type,
 	m->negated, separator, alias_type);
@@ -185,10 +188,11 @@ sudoers_defaults_to_tags(const char *var, const char *val, int op,
  * Convert a defaults list to command tags.
  */
 bool
-sudoers_defaults_list_to_tags(struct defaults_list *defs, struct cmndtag *tags)
+sudoers_defaults_list_to_tags(const struct defaults_list *defs,
+    struct cmndtag *tags)
 {
+    const struct defaults *d;
     bool ret = true;
-    struct defaults *d;
     debug_decl(sudoers_defaults_list_to_tags, SUDOERS_DEBUG_UTIL);
 
     TAGS_INIT(tags);
@@ -222,8 +226,8 @@ sudoers_defaults_list_to_tags(struct defaults_list *defs, struct cmndtag *tags)
  */
 bool
 sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
-    const struct sudoers_parse_tree *parse_tree, struct cmndspec *cs,
-    struct cmndspec *prev_cs, struct cmndtag tags, bool expand_aliases)
+    const struct sudoers_parse_tree *parse_tree, const struct cmndspec *cs,
+    const struct cmndspec *prev_cs, struct cmndtag tags, bool expand_aliases)
 {
     debug_decl(sudoers_format_cmndspec, SUDOERS_DEBUG_UTIL);
 
@@ -251,7 +255,7 @@ sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
     if (cs->runcwd != NULL && FIELD_CHANGED(prev_cs, cs, runcwd))
 	sudo_lbuf_append(lbuf, "CWD=%s ", cs->runcwd);
     if (cs->timeout > 0 && FIELD_CHANGED(prev_cs, cs, timeout)) {
-	char numbuf[(((sizeof(int) * 8) + 2) / 3) + 2];
+	char numbuf[STRLEN_MAX_SIGNED(int) + 1];
 	(void)snprintf(numbuf, sizeof(numbuf), "%d", cs->timeout);
 	sudo_lbuf_append(lbuf, "TIMEOUT=%s ", numbuf);
     }
@@ -298,7 +302,7 @@ sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
  * Format and append a defaults entry to the specified lbuf.
  */
 bool
-sudoers_format_default(struct sudo_lbuf *lbuf, struct defaults *d)
+sudoers_format_default(struct sudo_lbuf *lbuf, const struct defaults *d)
 {
     debug_decl(sudoers_format_default, SUDOERS_DEBUG_UTIL);
 

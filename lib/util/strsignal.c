@@ -27,8 +27,8 @@
 
 #include <signal.h>
 
-#include "sudo_compat.h"
-#include "sudo_gettext.h"
+#include <sudo_compat.h>
+#include <sudo_gettext.h>
 
 #if defined(HAVE_DECL_SYS_SIGLIST) && HAVE_DECL_SYS_SIGLIST == 1
 # define sudo_sys_siglist	sys_siglist

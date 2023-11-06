@@ -21,17 +21,18 @@
  * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
-#include <unistd.h>
+#include <config.h>
 #include <ctype.h>
 #include <dlfcn.h>
 #include <errno.h>
 #include <limits.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
-#include "sudo_plugin.h"
+#include <sudo_plugin.h>
 
 sudo_dso_public int main(int argc, char *argv[]);
 
@@ -44,7 +45,7 @@ static void *group_handle;
 static struct sudoers_group_plugin *group_plugin;
 
 static int
-plugin_printf(int msg_type, const char *fmt, ...)
+plugin_printf(int msg_type, const char * restrict fmt, ...)
 {
     va_list ap;
     FILE *fp;
@@ -108,7 +109,7 @@ group_plugin_load(char *plugin_info)
 
     if (SUDO_API_VERSION_GET_MAJOR(group_plugin->version) != GROUP_API_VERSION_MAJOR) {
 	fprintf(stderr,
-	    "%s: incompatible group plugin major version %u, expected %d\n",
+	    "%s: incompatible group plugin major version %u, expected %u\n",
 	    path, SUDO_API_VERSION_GET_MAJOR(group_plugin->version),
 	    GROUP_API_VERSION_MAJOR);
 	return -1;
@@ -170,15 +171,16 @@ group_plugin_query(const char *user, const char *group,
 static void
 usage(void)
 {
-    fprintf(stderr,
-	"usage: plugin_test [-p \"plugin.so plugin_args ...\"] user:group ...\n");
+    fputs("usage: plugin_test [-p \"plugin.so plugin_args ...\"] user:group ...\n",
+        stderr);
     exit(EXIT_FAILURE);
 }
 
 int
 main(int argc, char *argv[])
 {
-    int ch, i, found;
+    int ch, found;
+    size_t i;
     char *plugin = "group_file.so";
     char *user, *group;
     struct passwd *pwd;
@@ -200,7 +202,7 @@ main(int argc, char *argv[])
 
     if (group_plugin_load(plugin) != 1) {
 	fprintf(stderr, "unable to load plugin: %s\n", plugin);
-	exit(EXIT_FAILURE);
+	return EXIT_FAILURE;
     }
 
     for (i = 0; argv[i] != NULL; i++) {
@@ -215,6 +217,6 @@ main(int argc, char *argv[])
     }
     group_plugin_unload();
 
-    exit(EXIT_SUCCESS);
+    return EXIT_SUCCESS;
 }
 

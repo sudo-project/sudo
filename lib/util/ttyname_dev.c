@@ -41,11 +41,11 @@
 #include <limits.h>
 #include <dirent.h>
 
-#include "pathnames.h"
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_conf.h"
-#include "sudo_util.h"
+#include <pathnames.h>
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_conf.h>
+#include <sudo_util.h>
 
 #if defined(HAVE_DEVNAME)
 /*
@@ -121,7 +121,7 @@ sudo_ttyname_scan(const char *dir, dev_t rdev, char *name, size_t namelen)
     char *ret = NULL;
     struct dirent *dp;
     struct stat sb;
-    unsigned int i;
+    size_t i;
     DIR *d = NULL;
     debug_decl(sudo_ttyname_scan, SUDO_DEBUG_UTIL);
 
@@ -223,7 +223,7 @@ done:
 }
 
 static char *
-sudo_dev_check(dev_t rdev, const char *devname, char *buf, size_t buflen)
+sudo_dev_check(dev_t rdev, const char * restrict devname, char * restrict buf, size_t buflen)
 {
     struct stat sb;
     debug_decl(sudo_dev_check, SUDO_DEBUG_UTIL);

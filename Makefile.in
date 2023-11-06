@@ -57,9 +57,10 @@ shlib_mode = @SHLIB_MODE@
 python_version = @PYTHON_VERSION@
 
 SUBDIRS = lib/util @ZLIB_SRC@ lib/eventlog lib/fuzzstub lib/iolog \
-	  lib/protobuf-c @LOGSRV_SRC@ @LOGSRVD_SRC@ plugins/audit_json \
-	  plugins/group_file plugins/sudoers plugins/system_group \
-	  @PYTHON_PLUGIN_SRC@ src include docs examples
+	  lib/protobuf-c @SSL_COMPAT_SRC@ @LOGSRV_SRC@ @LOGSRVD_SRC@ \
+	  plugins/audit_json plugins/group_file plugins/sudoers \
+	  plugins/system_group @PYTHON_PLUGIN_SRC@ src include \
+	  docs examples
 
 SAMPLES = plugins/sample plugins/sample_approval
 
@@ -193,6 +194,9 @@ install: config.status ChangeLog pre-install install-nls
 	    exit $$?; \
 	done
 
+postinstall:
+	@POSTINSTALL@
+
 uninstall: uninstall-nls
 	for d in $(SUBDIRS); do \
 	    (cd $$d && exec $(MAKE) $@) && continue; \
@@ -208,7 +212,10 @@ uninstall-nls:
 siglist.c signame.c:
 	cd lib/util && exec $(MAKE) $@
 
-depend: siglist.c signame.c
+tsgetusershell.c:
+	cd plugins/sudoers && exec $(MAKE) $@
+
+depend: siglist.c signame.c tsgetusershell.c
 	$(scriptdir)/mkdep.pl \
 	    --srcdir=$(abs_top_srcdir) --builddir=$(abs_top_builddir) \
 	    lib/util/Makefile.in lib/zlib/Makefile.in \
@@ -394,6 +401,7 @@ force-dist: ChangeLog $(srcdir)/MANIFEST
 package: @PPFILES@
 	DESTDIR=$(abs_top_builddir)/destdir; rm -rf $$DESTDIR; \
 	$(MAKE) install INSTALL_OWNER= DESTDIR=$$DESTDIR && \
+	$(MAKE) postinstall INSTALL_OWNER= DESTDIR=$$DESTDIR && \
 	for p in @PPFILES@; do \
 	    $(SHELL) $(scriptdir)/pp $(PPFLAGS) --destdir=$$DESTDIR $$p \
 		srcdir=$(top_srcdir) \

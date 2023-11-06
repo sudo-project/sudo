@@ -3,7 +3,7 @@
 #include <config.h>
 #include <sys/types.h>
 #include <signal.h>
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 int sudo_end_of_headers;
 static char *sudo_sys_signame[NSIG];

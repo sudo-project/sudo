@@ -31,8 +31,8 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "sudoers.h"
-#include "redblack.h"
+#include <sudoers.h>
+#include <redblack.h>
 
 static struct rbtree *canon_cache;
 

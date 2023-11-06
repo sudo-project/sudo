@@ -25,15 +25,22 @@
 
 #include <sys/resource.h>
 
-#include <stdlib.h>
+#include <limits.h>
 #include <poll.h>
+#include <stdlib.h>
 #include <time.h>
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
-#include "sudo_fatal.h"
-#include "sudo_debug.h"
-#include "sudo_event.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
+#include <sudo_fatal.h>
+#include <sudo_debug.h>
+#include <sudo_event.h>
+
+#if defined(OPEN_MAX) && OPEN_MAX > 256
+# define SUDO_OPEN_MAX  OPEN_MAX
+#else
+# define SUDO_OPEN_MAX  256
+#endif
 
 int
 sudo_ev_base_alloc_impl(struct sudo_event_base *base)
@@ -43,7 +50,7 @@ sudo_ev_base_alloc_impl(struct sudo_event_base *base)
 
     base->pfd_high = -1;
     base->pfd_max = 32;
-    base->pfds = reallocarray(NULL, base->pfd_max, sizeof(struct pollfd));
+    base->pfds = reallocarray(NULL, (size_t)base->pfd_max, sizeof(struct pollfd));
     if (base->pfds == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	    "%s: unable to allocate %d pollfds", __func__, base->pfd_max);
@@ -75,7 +82,9 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
     if (nofile_max == -1) {
 	struct rlimit rlim;
 	if (getrlimit(RLIMIT_NOFILE, &rlim) == 0) {
-	    nofile_max = rlim.rlim_cur;
+	    nofile_max = (int)rlim.rlim_cur;
+	} else {
+	    nofile_max = SUDO_OPEN_MAX;
 	}
     }
 
@@ -95,7 +104,7 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
 	}
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "%s: pfd_max %d -> %d", __func__, base->pfd_max, new_max);
-	pfds = reallocarray(base->pfds, new_max, sizeof(struct pollfd));
+	pfds = reallocarray(base->pfds, (size_t)new_max, sizeof(struct pollfd));
 	if (pfds == NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"%s: unable to allocate %d pollfds", __func__, new_max);
@@ -111,7 +120,7 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
     /* Fill in pfd entry. */
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	"%s: choosing free slot %d", __func__, base->pfd_free);
-    ev->pfd_idx = base->pfd_free;
+    ev->pfd_idx = (short)base->pfd_free;
     pfd = &base->pfds[ev->pfd_idx];
     pfd->fd = ev->fd;
     pfd->events = 0;
@@ -169,7 +178,7 @@ sudo_ev_poll(struct pollfd *fds, nfds_t nfds, const struct timespec *timo)
 #endif /* HAVE_PPOLL */
 
 int
-sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
+sudo_ev_scan_impl(struct sudo_event_base *base, unsigned int flags)
 {
     struct timespec now, ts, *timeout;
     struct sudo_event *ev;
@@ -191,7 +200,7 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
 	}
     }
 
-    nready = sudo_ev_poll(base->pfds, base->pfd_high + 1, timeout);
+    nready = sudo_ev_poll(base->pfds, (nfds_t)base->pfd_high + 1, timeout);
     switch (nready) {
     case -1:
 	/* Error: EINTR (signal) or EINVAL (nfds > RLIMIT_NOFILE) */
@@ -217,7 +226,7 @@ sudo_ev_scan_impl(struct sudo_event_base *base, int flags)
 		sudo_debug_printf(SUDO_DEBUG_DEBUG,
 		    "%s: polled fd %d, events %d, activating %p",
 		    __func__, ev->fd, what, ev);
-		ev->revents = what;
+		ev->revents = (short)what;
 		sudo_ev_activate(base, ev);
 	    }
 	}

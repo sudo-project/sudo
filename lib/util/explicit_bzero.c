@@ -30,7 +30,7 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 #ifndef HAVE_EXPLICIT_BZERO
 
@@ -70,7 +70,7 @@ sudo_explicit_bzero(void *v, size_t n)
 
     /* Updating through a volatile pointer should not be optimized away. */
     while (n--)
-	*s++ = '\0';
+	*s++ = 0;
 }
 # endif /* HAVE_BZERO */
 

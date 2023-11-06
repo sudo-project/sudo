@@ -17,7 +17,7 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .nr SL @SEMAN@
-.TH "SUDO.CONF" "@mansectform@" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO.CONF" "@mansectform@" "November 6, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -153,6 +153,13 @@ Plugin sudoers_policy @sudoers_plugin@
 .RE
 .fi
 .PP
+On AIX systems, the plugin may be either a shared object
+ending in
+\(oq.so\(cq
+or an archive file containing a shared object ending in
+\(oq.a\(cq
+with the name of the shared object in parentheses at the end.
+.PP
 Starting with
 \fBsudo\fR
 1.8.5, any additional parameters after the
@@ -210,7 +217,7 @@ versions, if
 \fBsudoers\fR
 is configured as the security policy, it will be used as an audit
 plugin as well.
-This guarantees that the logging behavior will be consistnet with that of
+This guarantees that the logging behavior will be consistent with that of
 \fBsudo\fR
 versions 1.9.0 and below.
 .PP
@@ -287,7 +294,7 @@ BSD,
 macOS and Solaris.
 .TP 6n
 intercept
-The fully-qualified path to a shared library containing a wrappers for the
+The path to a shared library containing a wrappers for the
 execve(2),
 execl(3),
 execle(3),
@@ -301,15 +308,29 @@ library functions that intercepts attempts to run further commands and
 performs a policy check before allowing them to be executed.
 This is used to implement the
 \fIintercept\fR
+and
+\fIlog_subcmds\fR
 functionality on systems that support
 \fRLD_PRELOAD\fR
-or its equivalent.
+or the equivalent.
+.sp
+The
+\fIintercept\fR
+path may be set to either a single fully-qualified path, or, for systems
+that support separate
+\fRLD_PRELOAD\fR
+environment variables for 32-bit and 64-bit executables, it may optionally
+be set to two fully-qualified paths separated by a colon
+(\(oq:\&\(cq).
+The first path should be the 32-bit version and the second the
+64-bit version.
+This two-path form is currently only supported on AIX and Solaris
+systems.
 The default value is
 \fI@intercept_file@\fR.
 .TP 6n
 noexec
-The fully-qualified path to a shared library containing wrappers
-for the
+The path to a shared library containing wrappers for the
 execve(2),
 execl(3),
 execle(3),
@@ -332,7 +353,20 @@ This is used to implement the
 \fInoexec\fR
 functionality on systems that support
 \fRLD_PRELOAD\fR
-or its equivalent.
+or the equivalent.
+.sp
+The
+\fInoexec\fR
+path may be set to either a single fully-qualified path, or, for systems
+that support separate
+\fRLD_PRELOAD\fR
+environment variables for 32-bit and 64-bit executables, it may optionally
+be set to two fully-qualified paths separated by a colon
+(\(oq:\&\(cq).
+The first path should be the 32-bit version and the second the
+64-bit version.
+This two-path form is currently only supported on AIX and Solaris
+systems.
 The default value is
 \fI@noexec_file@\fR.
 .TP 6n
@@ -459,7 +493,7 @@ Currently,
 \fBsudo\fR
 supports efficient group queries on AIX,
 BSD,
-HP-UX, Linux, macOS, and Solaris.
+Linux, macOS, and Solaris.
 This is the default behavior on macOS in
 \fBsudo\fR
 1.9.6 and higher.
@@ -550,6 +584,17 @@ but a third-party plugin is free to use a different format so long
 as it does not include a comma
 (\(oq\&,\(cq).
 .PP
+On AIX systems, a
+\fIDebug\fR
+line will match a plugin specified as either the name of an
+SVR4-style shared object file ending in
+\(oq.so\(cq,
+an archive file ending in
+\(oq.a\(cq,
+or an archive file ending in
+\(oq.a\(cq
+with the name of the shared object in parentheses.
+.PP
 Examples:
 .nf
 .sp
@@ -575,6 +620,21 @@ would log all debugging statements, regardless of level, for the
 shared library that implements
 \fBsudo\fR's
 intercept functionality on some systems.
+.nf
+.sp
+.RS 4n
+Debug @sudoers_plugin@ @log_dir@/sudoers_debug all@debug
+.RE
+.fi
+.PP
+would log all debugging statements, regardless of level, for the
+\fBsudoers\fR
+plugin.
+See
+sudoers(@mansectform@)
+for the full list of subsystems supported by the
+\fBsudoers\fR
+plugin.
 .PP
 As of
 \fBsudo\fR

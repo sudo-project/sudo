@@ -31,8 +31,8 @@
 
 #define SUDO_ERROR_WRAP 0
 
-#include "sudoers.h"
-#include "interfaces.h"
+#include <sudoers.h>
+#include <interfaces.h>
 
 sudo_dso_public int main(int argc, char *argv[]);
 
@@ -52,12 +52,12 @@ check_addr(char *input)
     cp = input + len;
     while (isspace((unsigned char)*cp))
 	cp++;
-    expected = sudo_strtonum(cp, 0, 1, &errstr);
+    expected = (int)sudo_strtonum(cp, 0, 1, &errstr);
     if (errstr != NULL)
 	sudo_fatalx("expecting 0 or 1, got %s", cp);
     input[len] = '\0';
 
-    matched = addr_matches(input);
+    matched = addr_matches(input) == ALLOW;
     if (matched != expected) {
 	sudo_warnx("%s %smatched: FAIL", input, matched ? "" : "not ");
 	return 1;
@@ -65,29 +65,42 @@ check_addr(char *input)
     return 0;
 }
 
-static void
+sudo_noreturn static void
 usage(void)
 {
-    fprintf(stderr, "usage: %s datafile\n", getprogname());
+    fprintf(stderr, "usage: %s [-v] datafile\n", getprogname());
     exit(EXIT_FAILURE);
 }
 
 int
 main(int argc, char *argv[])
 {
-    int ntests = 0, errors = 0;
+    int ch, ntests = 0, errors = 0;
     char *cp, line[2048];
     size_t len;
     FILE *fp;
 
     initprogname(argc > 0 ? argv[0] : "check_addr");
 
-    if (argc != 2)
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignored */
+	    break;
+	default:
+	    usage();
+	    /* NOTREACHED */
+	}
+    }
+    argc -= optind;
+    argv += optind;
+
+    if (argc != 1)
 	usage();
 
-    fp = fopen(argv[1], "r");
+    fp = fopen(argv[0], "r");
     if (fp == NULL)
-	sudo_fatalx("unable to open %s", argv[1]);
+	sudo_fatalx("unable to open %s", argv[0]);
 
     /*
      * Input is in the following format.  There are two types of

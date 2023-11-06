@@ -162,6 +162,9 @@ AC_DEFUN([SUDO_CHECK_OPENSSL], [
 	    AC_INCLUDES_DEFAULT
 	    #include <openssl/ssl.h>
 	])
+	AC_CHECK_FUNCS([SSL_read_ex], [], [
+	    SSL_COMPAT_SRC=lib/ssl_compat
+	])
 	# LibreSSL TLS 1.3 support may not be enabled, check for declaration too.
 	AC_CHECK_FUNC([SSL_CTX_set_ciphersuites], [
 	    AC_CHECK_DECL([SSL_CTX_set_ciphersuites], [AC_DEFINE(HAVE_SSL_CTX_SET_CIPHERSUITES)], [], [
@@ -292,5 +295,15 @@ AC_DEFUN([SUDO_CHECK_OPENSSL], [
 	    #include <wolfssl/options.h>
 	    #include <wolfssl/openssl/ssl.h>
 	])
+	AC_CHECK_DECL([SSL_read_ex], [AC_DEFINE(HAVE_SSL_READ_EX)], [
+	    SSL_COMPAT_SRC=lib/ssl_compat
+	], [
+	    AC_INCLUDES_DEFAULT
+	    #include <wolfssl/options.h>
+	    #include <wolfssl/openssl/ssl.h>
+	])
+    fi
+    if test -n "$SSL_COMPAT_SRC"; then
+	LIBTLS='$(top_builddir)/lib/ssl_compat/libssl_compat.la '"${LIBTLS}"
     fi
 ])

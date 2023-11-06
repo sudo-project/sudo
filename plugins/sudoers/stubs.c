@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2018-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -34,9 +34,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "sudoers.h"
-#include "cvtsudoers.h"
-#include "interfaces.h"
+#include <sudoers.h>
+#include <interfaces.h>
 
 /* STUB */
 bool
@@ -47,7 +46,7 @@ init_envtables(void)
 
 /* STUB */
 bool
-user_is_exempt(void)
+user_is_exempt(const struct sudoers_context *ctx)
 {
     return false;
 }
@@ -83,9 +82,9 @@ get_interfaces(void)
 
 /* STUB */
 int
-set_cmnd_path(const char *runchroot)
+set_cmnd_path(struct sudoers_context *ctx, const char *runchroot)
 {
-    /* Cannot return FOUND without also setting user_cmnd to a new value. */
+    /* Cannot return FOUND without also setting ctx->user.cmnd to a new value. */
     return NOT_FOUND;
 }
 
@@ -98,43 +97,14 @@ init_eventlog_config(void)
 
 /* STUB */
 bool
-pivot_root(const char *new_root, int fds[2])
+pivot_root(const char *new_root, struct sudoers_pivot *state)
 {
     return true;
 }
 
 /* STUB */
 bool
-unpivot_root(int fds[2])
+unpivot_root(struct sudoers_pivot *state)
 {
     return true;
-}
-
-/*
- * Look up the hostname and set user_host and user_shost.
- */
-void
-get_hostname(void)
-{
-    char *cp;
-    debug_decl(get_hostname, SUDOERS_DEBUG_UTIL);
-
-    if ((user_host = sudo_gethostname()) != NULL) {
-	if ((cp = strchr(user_host, '.'))) {
-	    *cp = '\0';
-	    if ((user_shost = strdup(user_host)) == NULL)
-		sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    *cp = '.';
-	} else {
-	    user_shost = user_host;
-	}
-    } else {
-	user_host = user_shost = strdup("localhost");
-	if (user_host == NULL)
-	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    }
-    user_runhost = user_host;
-    user_srunhost = user_shost;
-
-    debug_return;
 }

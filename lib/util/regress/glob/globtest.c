@@ -12,13 +12,13 @@
 #ifdef HAVE_GLOB
 # include <glob.h>
 #else
-# include "compat/glob.h"
+# include <compat/glob.h>
 #endif
 #include <errno.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
 
 #define MAX_RESULTS	256
 
@@ -80,8 +80,7 @@ main(int argc, char **argv)
 		len = strlen(buf);
 		if (len > 0) {
 			if (buf[len - 1] != '\n') {
-				fprintf(stderr,
-				    "globtest: missing newline at EOF\n");
+				fputs("globtest: missing newline at EOF\n", stderr);
 				return EXIT_FAILURE;
 			}
 			buf[--len] = '\0';

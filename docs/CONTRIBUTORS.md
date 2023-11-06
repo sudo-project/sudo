@@ -239,6 +239,7 @@ https://translationproject.org for more details.
     Spingos, Dimitris
     Taniguchi, Yasuaki
     Tomat, Fábio
+    Triwidada, Andika
     Úr, Balázs
     Uranga, Mikel Olasagasti
     Vorotnikov, Artem

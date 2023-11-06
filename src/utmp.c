@@ -41,8 +41,8 @@
 #include <fcntl.h>
 #include <signal.h>
 
-#include "sudo.h"
-#include "sudo_exec.h"
+#include <sudo.h>
+#include <sudo_exec.h>
 
 /*
  * GCC 8 warns about strncpy() where the size field is the size of the buffer.

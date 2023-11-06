@@ -33,8 +33,8 @@
 # include <utime.h>
 #endif
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
 
 #if !defined(HAVE_FUTIMES) && defined(HAVE_FUTIMESAT)
 # define futimes(_f, _tv)	futimesat(_f, NULL, _tv)

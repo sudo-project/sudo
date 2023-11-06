@@ -27,18 +27,19 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif
 #include <limits.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_fatal.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_fatal.h>
+#include <sudo_util.h>
 
 sudo_dso_public int main(int argc, char *argv[]);
 
-ssize_t sudo_getdelim(char **bufp, size_t *bufsizep, int delim, FILE *fp);
+ssize_t sudo_getdelim(char ** restrict bufp, size_t * restrict bufsizep,
+    int delim, FILE * restrict fp);
 
 /*
  * Test that sudo_getdelim() works as expected.

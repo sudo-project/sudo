@@ -26,17 +26,17 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_gettext.h"
-#include "sudo_util.h"
-#include "sudo_iolog.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_gettext.h>
+#include <sudo_util.h>
+#include <sudo_iolog.h>
 
 /*
  * Parse a string in the form host[:port] where host can also be

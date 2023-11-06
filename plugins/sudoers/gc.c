@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 struct sudoers_gc_entry {
     SLIST_ENTRY(sudoers_gc_entry) entries;

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2011-2015, 2017-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2011-2015, 2017-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -32,9 +32,9 @@
 #include <termios.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_util.h>
 
 /* TCSASOFT is a BSD extension that ignores control flags and speed. */
 #ifndef TCSASOFT
@@ -82,12 +82,16 @@
 #ifndef ECHOKE
 # define ECHOKE		0
 #endif
-#ifndef PENDIN
-# define PENDIN		0
-#endif
 
-static struct termios oterm;
-static int changed;
+/* Termios flags to copy between terminals. */
+#define INPUT_FLAGS (IGNPAR|PARMRK|INPCK|ISTRIP|INLCR|IGNCR|ICRNL|IUCLC|IXON|IXANY|IXOFF|IMAXBEL|IUTF8)
+#define OUTPUT_FLAGS (OPOST|OLCUC|ONLCR|OCRNL|ONOCR|ONLRET)
+#define CONTROL_FLAGS (CS7|CS8|PARENB|PARODD)
+#define LOCAL_FLAGS (ISIG|ICANON|XCASE|ECHO|ECHOE|ECHOK|ECHONL|NOFLSH|TOSTOP|IEXTEN|ECHOCTL|ECHOKE)
+
+static struct termios orig_term;
+static struct termios cur_term;
+static bool changed;
 
 /* tgetpass() needs to know the erase and kill chars for cbreak mode. */
 sudo_dso_public int sudo_term_eof;
@@ -129,7 +133,7 @@ tcsetattr_nobg(int fd, int flags, struct termios *tp)
     sigaction(SIGTTOU, &sa, &osa);
     do {
 	rc = tcsetattr(fd, flags, tp);
-    } while (rc != 0 && errno == EINTR && !got_sigttou);
+    } while (rc == -1 && errno == EINTR && !got_sigttou);
     sigaction(SIGTTOU, &osa, NULL);
 
     debug_return_int(rc);
@@ -142,15 +146,75 @@ tcsetattr_nobg(int fd, int flags, struct termios *tp)
 bool
 sudo_term_restore_v1(int fd, bool flush)
 {
+    const int flags = flush ? (TCSASOFT|TCSAFLUSH) : (TCSASOFT|TCSADRAIN);
+    struct termios term = { 0 };
+    bool ret = false;
     debug_decl(sudo_term_restore, SUDO_DEBUG_UTIL);
 
-    if (changed) {
-	const int flags = flush ? (TCSASOFT|TCSAFLUSH) : (TCSASOFT|TCSADRAIN);
-	if (tcsetattr_nobg(fd, flags, &oterm) != 0)
-	    debug_return_bool(false);
-	changed = 0;
+    if (!changed)
+	debug_return_bool(true);
+
+    sudo_lock_file(fd, SUDO_LOCK);
+
+    /* Avoid changing term settings if changed out from under us. */
+    if (tcgetattr(fd, &term) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: tcgetattr(%d)", __func__, fd);
+	goto unlock;
     }
-    debug_return_bool(true);
+    if ((term.c_iflag & INPUT_FLAGS) != (cur_term.c_iflag & INPUT_FLAGS)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: not restoring terminal, "
+	    "c_iflag changed; 0x%x, expected 0x%x", __func__,
+	    (unsigned int)term.c_iflag, (unsigned int)cur_term.c_iflag);
+	/* Not an error. */
+	ret = true;
+	goto unlock;
+    }
+    if ((term.c_oflag & OUTPUT_FLAGS) != (cur_term.c_oflag & OUTPUT_FLAGS)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: not restoring terminal, "
+	    "c_oflag changed; 0x%x, expected 0x%x", __func__,
+	    (unsigned int)term.c_oflag, (unsigned int)cur_term.c_oflag);
+	/* Not an error. */
+	ret = true;
+	goto unlock;
+    }
+    if ((term.c_cflag & CONTROL_FLAGS) != (cur_term.c_cflag & CONTROL_FLAGS)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: not restoring terminal, "
+	    "c_cflag changed; 0x%x, expected 0x%x", __func__,
+	    (unsigned int)term.c_cflag, (unsigned int)cur_term.c_cflag);
+	/* Not an error. */
+	ret = true;
+	goto unlock;
+    }
+    if ((term.c_lflag & LOCAL_FLAGS) != (cur_term.c_lflag & LOCAL_FLAGS)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: not restoring terminal, "
+	    "c_lflag changed; 0x%x, expected 0x%x", __func__,
+	    (unsigned int)term.c_lflag, (unsigned int)cur_term.c_lflag);
+	/* Not an error. */
+	ret = true;
+	goto unlock;
+    }
+    if (memcmp(term.c_cc, cur_term.c_cc, sizeof(term.c_cc)) != 0) {
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: not restoring terminal, c_cc[] changed", __func__);
+	/* Not an error. */
+	ret = true;
+	goto unlock;
+    }
+
+    if (tcsetattr_nobg(fd, flags, &orig_term) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: tcsetattr(%d)", __func__, fd);
+	goto unlock;
+    }
+    cur_term = orig_term;
+    changed = false;
+    ret = true;
+
+unlock:
+    sudo_lock_file(fd, SUDO_UNLOCK);
+
+    debug_return_bool(ret);
 }
 
 /*
@@ -160,21 +224,75 @@ sudo_term_restore_v1(int fd, bool flush)
 bool
 sudo_term_noecho_v1(int fd)
 {
-    struct termios term;
+    struct termios term = { 0 };
+    bool ret = false;
     debug_decl(sudo_term_noecho, SUDO_DEBUG_UTIL);
 
-    if (!changed && tcgetattr(fd, &oterm) != 0)
-	debug_return_bool(false);
-    (void) memcpy(&term, &oterm, sizeof(term));
+    sudo_lock_file(fd, SUDO_LOCK);
+    if (!changed && tcgetattr(fd, &orig_term) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: tcgetattr(%d)", __func__, fd);
+	goto unlock;
+    }
+
+    term = orig_term;
     CLR(term.c_lflag, ECHO|ECHONL);
 #ifdef VSTATUS
     term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
-    if (tcsetattr_nobg(fd, TCSASOFT|TCSADRAIN, &term) == 0) {
-	changed = 1;
-	debug_return_bool(true);
+    if (tcsetattr_nobg(fd, TCSASOFT|TCSADRAIN, &term) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: tcsetattr(%d)", __func__, fd);
+	goto unlock;
     }
-    debug_return_bool(false);
+    cur_term = term;
+    changed = true;
+    ret = true;
+
+unlock:
+    sudo_lock_file(fd, SUDO_UNLOCK);
+    debug_return_bool(ret);
+}
+
+/*
+ * Returns true if term is in raw mode, else false.
+ */
+static bool
+sudo_term_is_raw_int(struct termios *term)
+{
+    debug_decl(sudo_term_is_raw_int, SUDO_DEBUG_UTIL);
+
+    if (term->c_cc[VMIN] != 1 || term->c_cc[VTIME] != 0)
+	debug_return_bool(false);
+
+    if (ISSET(term->c_oflag, OPOST))
+	debug_return_bool(false);
+
+    if (ISSET(term->c_oflag, ECHO|ECHONL|ICANON))
+	debug_return_bool(false);
+
+    debug_return_bool(true);
+}
+
+/*
+ * Returns true if fd refers to a tty in raw mode, else false.
+ */
+bool
+sudo_term_is_raw_v1(int fd)
+{
+    struct termios term = { 0 };
+    debug_decl(sudo_term_is_raw, SUDO_DEBUG_UTIL);
+
+    sudo_lock_file(fd, SUDO_LOCK);
+    if (tcgetattr(fd, &term) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: tcgetattr(%d)", __func__, fd);
+	sudo_lock_file(fd, SUDO_UNLOCK);
+	debug_return_bool(false);
+    }
+    sudo_lock_file(fd, SUDO_UNLOCK);
+
+    debug_return_bool(sudo_term_is_raw_int(&term));
 }
 
 /*
@@ -184,29 +302,48 @@ sudo_term_noecho_v1(int fd)
 bool
 sudo_term_raw_v1(int fd, unsigned int flags)
 {
-    struct termios term;
+    struct termios term = { 0 };
+    bool ret = false;
     tcflag_t oflag;
     debug_decl(sudo_term_raw, SUDO_DEBUG_UTIL);
 
-    if (!changed && tcgetattr(fd, &oterm) != 0)
-	debug_return_bool(false);
-    (void) memcpy(&term, &oterm, sizeof(term));
+    sudo_lock_file(fd, SUDO_LOCK);
+    if (!changed && tcgetattr(fd, &orig_term) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: tcgetattr(%d)", __func__, fd);
+	goto unlock;
+    }
+
+    if (sudo_term_is_raw_int(&term)) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: fd %d already in raw mode",
+	    __func__, fd);
+	ret = true;
+	goto unlock;
+    }
+
     /*
      * Set terminal to raw mode but optionally enable terminal signals
      * and/or preserve output flags.
      */
-    if (ISSET(flags, SUDO_TERM_OFLAG))
-	oflag = term.c_oflag;
+    term = orig_term;
+    oflag = term.c_oflag;
     cfmakeraw(&term);
     if (ISSET(flags, SUDO_TERM_ISIG))
 	SET(term.c_lflag, ISIG);
     if (ISSET(flags, SUDO_TERM_OFLAG))
 	term.c_oflag = oflag;
-    if (tcsetattr_nobg(fd, TCSASOFT|TCSADRAIN, &term) == 0) {
-	changed = 1;
-    	debug_return_bool(true);
+    if (tcsetattr_nobg(fd, TCSASOFT|TCSADRAIN, &term) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: tcsetattr(%d)", __func__, fd);
+	goto unlock;
     }
-    debug_return_bool(false);
+    cur_term = term;
+    changed = true;
+    ret = true;
+
+unlock:
+    sudo_lock_file(fd, SUDO_UNLOCK);
+    debug_return_bool(ret);
 }
 
 /*
@@ -216,13 +353,19 @@ sudo_term_raw_v1(int fd, unsigned int flags)
 bool
 sudo_term_cbreak_v1(int fd)
 {
-    struct termios term;
+    struct termios term = { 0 };
+    bool ret = false;
     debug_decl(sudo_term_cbreak, SUDO_DEBUG_UTIL);
 
-    if (!changed && tcgetattr(fd, &oterm) != 0)
-	debug_return_bool(false);
-    (void) memcpy(&term, &oterm, sizeof(term));
+    sudo_lock_file(fd, SUDO_LOCK);
+    if (!changed && tcgetattr(fd, &orig_term) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: tcgetattr(%d)", __func__, fd);
+	goto unlock;
+    }
+
     /* Set terminal to half-cooked mode */
+    term = orig_term;
     term.c_cc[VMIN] = 1;
     term.c_cc[VTIME] = 0;
     /* cppcheck-suppress redundantAssignment */
@@ -232,21 +375,22 @@ sudo_term_cbreak_v1(int fd)
 #ifdef VSTATUS
     term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
-    if (tcsetattr_nobg(fd, TCSASOFT|TCSADRAIN, &term) == 0) {
-	sudo_term_eof = term.c_cc[VEOF];
-	sudo_term_erase = term.c_cc[VERASE];
-	sudo_term_kill = term.c_cc[VKILL];
-	changed = 1;
-	debug_return_bool(true);
+    if (tcsetattr_nobg(fd, TCSASOFT|TCSADRAIN, &term) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: tcsetattr(%d)", __func__, fd);
+	goto unlock;
     }
-    debug_return_bool(false);
-}
+    sudo_term_eof = term.c_cc[VEOF];
+    sudo_term_erase = term.c_cc[VERASE];
+    sudo_term_kill = term.c_cc[VKILL];
+    cur_term = term;
+    changed = true;
+    ret = true;
 
-/* Termios flags to copy between terminals. */
-#define INPUT_FLAGS (IGNPAR|PARMRK|INPCK|ISTRIP|INLCR|IGNCR|ICRNL|IUCLC|IXON|IXANY|IXOFF|IMAXBEL|IUTF8)
-#define OUTPUT_FLAGS (OPOST|OLCUC|ONLCR|OCRNL|ONOCR|ONLRET)
-#define CONTROL_FLAGS (CS7|CS8|PARENB|PARODD)
-#define LOCAL_FLAGS (ISIG|ICANON|XCASE|ECHO|ECHOE|ECHOK|ECHONL|NOFLSH|TOSTOP|IEXTEN|ECHOCTL|ECHOKE|PENDIN)
+unlock:
+    sudo_lock_file(fd, SUDO_UNLOCK);
+    debug_return_bool(ret);
+}
 
 /*
  * Copy terminal settings from one descriptor to another.
@@ -260,11 +404,17 @@ sudo_term_copy_v1(int src, int dst)
     struct termios tt_src, tt_dst;
     struct winsize wsize;
     speed_t speed;
-    int i;
+    unsigned int i;
+    bool ret = false;
     debug_decl(sudo_term_copy, SUDO_DEBUG_UTIL);
 
-    if (tcgetattr(src, &tt_src) != 0 || tcgetattr(dst, &tt_dst) != 0)
-	debug_return_bool(false);
+    sudo_lock_file(src, SUDO_LOCK);
+    sudo_lock_file(dst, SUDO_LOCK);
+    if (tcgetattr(src, &tt_src) == -1 || tcgetattr(dst, &tt_dst) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: tcgetattr", __func__);
+	goto unlock;
+    }
 
     /* Clear select input, output, control and local flags. */
     CLR(tt_dst.c_iflag, INPUT_FLAGS);
@@ -289,35 +439,18 @@ sudo_term_copy_v1(int src, int dst)
     speed = cfgetispeed(&tt_src);
     cfsetispeed(&tt_dst, speed);
 
-    if (tcsetattr_nobg(dst, TCSASOFT|TCSAFLUSH, &tt_dst) == -1)
-	debug_return_bool(false);
+    if (tcsetattr_nobg(dst, TCSASOFT|TCSAFLUSH, &tt_dst) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+	    "%s: tcsetattr(%d)", __func__, dst);
+	goto unlock;
+    }
+    ret = true;
 
     if (ioctl(src, TIOCGWINSZ, &wsize) == 0)
-	(void)ioctl(dst, TIOCSWINSZ, &wsize);
+	(void)ioctl(dst, IOCTL_REQ_CAST TIOCSWINSZ, &wsize);
 
-    debug_return_bool(true);
-}
-
-/*
- * Returns true if fd refers to a tty in raw mode, else false.
- */
-bool
-sudo_term_is_raw_v1(int fd)
-{
-    struct termios term;
-    debug_decl(sudo_term_is_raw, SUDO_DEBUG_UTIL);
-
-    if (tcgetattr(fd, &term) != 0)
-	debug_return_bool(false);
-
-    if (term.c_cc[VMIN] != 1 || term.c_cc[VTIME] != 0)
-	debug_return_bool(false);
-
-    if (ISSET(term.c_oflag, OPOST))
-	debug_return_bool(false);
-
-    if (ISSET(term.c_oflag, ECHO|ECHONL|ICANON))
-	debug_return_bool(false);
-
-    debug_return_bool(true);
+unlock:
+    sudo_lock_file(dst, SUDO_UNLOCK);
+    sudo_lock_file(src, SUDO_UNLOCK);
+    debug_return_bool(ret);
 }

@@ -42,10 +42,10 @@
 #include <signal.h>
 #include <termios.h>		/* for struct winsize on HP-UX */
 
-#include "sudo.h"
-#include "sudo_exec.h"
-#include "sudo_plugin.h"
-#include "sudo_plugin_int.h"
+#include <sudo.h>
+#include <sudo_exec.h>
+#include <sudo_plugin.h>
+#include <sudo_plugin_int.h>
 
 static void handle_sigchld_nopty(struct exec_closure *ec);
 
@@ -373,11 +373,11 @@ read_callback(int fd, int what, void *v)
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"read %zd bytes from fd %d", n, fd);
-	    if (!iob->action(iob->buf + iob->len, n, iob)) {
+	    if (!iob->action(iob->buf + iob->len, (unsigned int)n, iob)) {
 		terminate_command(iob->ec->cmnd_pid, false);
 		iob->ec->cmnd_pid = -1;
 	    }
-	    iob->len += n;
+	    iob->len += (unsigned int)n;
 	    /* Disable reader if buffer is full. */
 	    if (iob->len == sizeof(iob->buf))
 		sudo_ev_del(evbase, iob->revent);
@@ -410,7 +410,7 @@ write_callback(int fd, int what, void *v)
 	case EBADF:
 	    /* other end of pipe closed */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"unable to write %d bytes to fd %d",
+		"unable to write %u bytes to fd %d",
 		iob->len - iob->off, fd);
 	    /* Close reader if there is one. */
 	    if (iob->revent != NULL) {
@@ -436,7 +436,7 @@ write_callback(int fd, int what, void *v)
     } else {
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "wrote %zd bytes to fd %d", n, fd);
-	iob->off += n;
+	iob->off += (unsigned int)n;
 	/* Disable writer and reset the buffer if fully consumed. */
 	if (iob->off == iob->len) {
 	    iob->off = iob->len = 0;
@@ -467,12 +467,12 @@ write_callback(int fd, int what, void *v)
  * ourselves using a pipe.  Fills in io_pipe[][].
  */
 static void
-interpose_pipes(struct exec_closure *ec, int io_pipe[3][2])
+interpose_pipes(struct exec_closure *ec, const char *tty, int io_pipe[3][2])
 {
     bool interpose[3] = { false, false, false };
+    struct stat sb, tty_sbuf, *tty_sb = NULL;
     struct plugin_container *plugin;
     bool want_winch = false;
-    struct stat sb;
     debug_decl(interpose_pipes, SUDO_DEBUG_EXEC);
 
     /*
@@ -493,13 +493,16 @@ interpose_pipes(struct exec_closure *ec, int io_pipe[3][2])
     }
 
     /*
-     * If stdin, stdout or stderr is not a tty and logging is enabled,
-     * use a pipe to interpose ourselves.
+     * If stdin, stdout or stderr is not the user's tty and logging is
+     * enabled, use a pipe to interpose ourselves.
      */
+    if (tty != NULL && stat(tty, &tty_sbuf) != -1)
+	tty_sb = &tty_sbuf;
+
     if (interpose[STDIN_FILENO]) {
-	if (!sudo_isatty(STDIN_FILENO, &sb)) {
+	if (!fd_matches_tty(STDIN_FILENO, tty_sb, &sb)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stdin not a tty, creating a pipe");
+		"stdin not user's tty, creating a pipe");
 	    if (pipe2(io_pipe[STDIN_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
@@ -507,9 +510,9 @@ interpose_pipes(struct exec_closure *ec, int io_pipe[3][2])
 	}
     }
     if (interpose[STDOUT_FILENO]) {
-	if (!sudo_isatty(STDOUT_FILENO, &sb)) {
+	if (!fd_matches_tty(STDOUT_FILENO, tty_sb, &sb)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stdout not a tty, creating a pipe");
+		"stdout not user's tty, creating a pipe");
 	    if (pipe2(io_pipe[STDOUT_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
@@ -517,9 +520,9 @@ interpose_pipes(struct exec_closure *ec, int io_pipe[3][2])
 	}
     }
     if (interpose[STDERR_FILENO]) {
-	if (!sudo_isatty(STDERR_FILENO, &sb)) {
+	if (!fd_matches_tty(STDERR_FILENO, tty_sb, &sb)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stderr not a tty, creating a pipe");
+		"stderr not user's tty, creating a pipe");
 	    if (pipe2(io_pipe[STDERR_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
@@ -571,7 +574,7 @@ exec_nopty(struct command_details *details,
     }
 
     /* Interpose std{in,out,err} with pipes if logging I/O. */
-    interpose_pipes(&ec, io_pipe);
+    interpose_pipes(&ec, user_details->tty, io_pipe);
 
     /*
      * Block signals until we have our handlers setup in the parent so
@@ -633,6 +636,7 @@ exec_nopty(struct command_details *details,
 	}
 	sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, 1);
 	_exit(EXIT_FAILURE);
+	/* NOTREACHED */
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d", details->command,
 	(int)ec.cmnd_pid);

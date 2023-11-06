@@ -30,9 +30,9 @@
 #include <errno.h>
 #include <limits.h>
 
-#include "sudo_compat.h"
-#include "sudoers_debug.h"
-#include "parse.h"
+#include <sudo_compat.h>
+#include <sudoers_debug.h>
+#include <parse.h>
 
 /*
  * Parse a command timeout in sudoers in the format 1d2h3m4s
@@ -50,7 +50,7 @@ parse_timeout(const char *timestr)
 
     do {
 	char *ep;
-	char ch;
+	int ch;
 	long l;
 
 	/* Parse number, must be present and positive. */
@@ -94,12 +94,12 @@ parse_timeout(const char *timestr)
 		l *= 60;
 		break;
 	    }
-	    if (l > INT_MAX - timeout)
-		goto overflow;
 	}
 	cp = ep;
 
-	timeout += l;
+	if (l > INT_MAX - timeout)
+	    goto overflow;
+	timeout += (int)l;
     } while (*cp != '\0');
 
     debug_return_int(timeout);

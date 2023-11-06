@@ -31,8 +31,8 @@
 #include <signal.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
 
 #if !defined(HAVE_SIGABBREV_NP)
 # if defined(HAVE_DECL_SYS_SIGNAME) && HAVE_DECL_SYS_SIGNAME == 1
@@ -87,9 +87,9 @@ sudo_sig2str(int signo, char *signame)
 	    strlcpy(signame, cp, SIG2STR_MAX);
 	    /* Make sure we always return an upper case signame. */
 	    if (islower((unsigned char)signame[0])) {
-		int i;
+		size_t i;
 		for (i = 0; signame[i] != '\0'; i++)
-		    signame[i] = toupper((unsigned char)signame[i]);
+		    signame[i] = (char)toupper((unsigned char)signame[i]);
 	    }
 	    return 0;
 	}

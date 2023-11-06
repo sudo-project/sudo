@@ -23,9 +23,9 @@
 
 #include <config.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_util.h>
 
 /*
  * Like strtok_r but non-destructive and works w/o a NUL terminator.

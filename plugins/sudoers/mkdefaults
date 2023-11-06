@@ -12,22 +12,20 @@
 
 # Deal with optional -o (output) argument
 if [ "$1" = "-o" ]; then
+    if [ $# -lt 2 ]; then
+	echo "usage: $0 [-o output] [input_file ...]" 1>&2
+	exit 1
+    fi
     OUTFILE="$2"
     shift 2
 else
     OUTFILE=def_data
 fi
-if [ $# -gt 0 ]; then
-    INFILE="$1"
-    shift
-else
-    INFILE=def_data.in
-fi
-if [ $# -gt 0 ]; then
-    echo "usage: $0 [-o output] [input_file]" 1>&2
+if [ $# -eq 0 ]; then
+    set -- def_data.in
 fi
 
-${AWK-awk} -f - -v outfile=$OUTFILE $INFILE <<'EOF'
+${AWK-awk} -v outfile=$OUTFILE '
 BEGIN {
     tuple_values[0] = "never"
     tuple_keys["never"] = 0
@@ -47,11 +45,12 @@ BEGIN {
     type_map["T_TIMESPEC"] = "tspec"
     type_map["T_TIMEOUT"] = "ival"
     type_map["T_RLIMIT"] = "str"
+    type_map["T_PLUGIN"] = "list"
 }
 {
     sub(/#.*/, "", $0)
-    if (/^[[:blank:]]*$/) next
-    if (/^[[:alpha:]]/) {
+    if (/^[ \t]*$/) next
+    if (/^[a-zA-Z]/) {
 	# Store previous record and begin new one
 	if (var)
 	    records[count++] = sprintf("%s\n%s\n%s\n%s\n%s\n", var, type, desc, values, callback)
@@ -161,4 +160,4 @@ function print_record(rec, recnum) {
     }
     print "    }, {" > cfile
 }
-EOF
+' "$@"

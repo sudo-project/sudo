@@ -38,11 +38,11 @@
 #include <dirent.h>
 #include <errno.h>
 #include <ctype.h>
-#include "sudoers.h"
-#include "toke.h"
+#include <sudoers.h>
+#include <toke.h>
 #include <gram.h>
-#include "sudo_digest.h"
-#include "sudo_lbuf.h"
+#include <sudo_digest.h>
+#include <sudo_lbuf.h>
 
 #if defined(HAVE_STRUCT_DIRENT_D_NAMLEN) && HAVE_STRUCT_DIRENT_D_NAMLEN
 # define NAMLEN(dirent)	(dirent)->d_namlen
@@ -64,7 +64,7 @@ static int prev_state;
 static unsigned int digest_type = SUDO_DIGEST_INVALID;
 
 static bool pop_include(void);
-static yy_size_t sudoers_input(char *buf, yy_size_t max_size);
+static int sudoers_input(char *buf, yy_size_t max_size);
 
 #ifndef TRACELEXER
 static struct sudo_lbuf trace_lbuf;
@@ -72,18 +72,18 @@ static struct sudo_lbuf trace_lbuf;
 
 int (*trace_print)(const char *msg) = sudoers_trace_print;
 
-#define ECHO	ignore_result(fwrite(sudoerstext, sudoersleng, 1, sudoersout))
+#define ECHO	ignore_result(fwrite(sudoerstext, (size_t)sudoersleng, 1, sudoersout))
 
-#define YY_INPUT(buf, result, max_size)	(result) = sudoers_input(buf, max_size)
+#define YY_INPUT(buf, result, max_size)	(result) = sudoers_input(buf, (yy_size_t)(max_size))
 
 #define YY_USER_ACTION do {					\
 	sudolinebuf.toke_start = sudolinebuf.toke_end;		\
-	sudolinebuf.toke_end += sudoersleng;			\
+	sudolinebuf.toke_end += (size_t)sudoersleng;		\
 } while (0);
 
 #define sudoersless(n) do {					\
-	sudolinebuf.toke_end = sudolinebuf.toke_start + (n);	\
-	yyless(n);						\
+	sudolinebuf.toke_end = sudolinebuf.toke_start + (size_t)(n);	\
+	yyless((int)n);						\
 } while (0);
 
 %}
@@ -318,9 +318,9 @@ DEFVAR			[a-z_]+
 
 <WANTDIGEST>[[:xdigit:]]+ {
 			    /* Only return DIGEST if the length is correct. */
-			    yy_size_t digest_len =
+			    size_t digest_len =
 				sudo_digest_getlen(digest_type);
-			    if ((yy_size_t)sudoersleng == digest_len * 2) {
+			    if ((size_t)sudoersleng == digest_len * 2) {
 				if (!fill(sudoerstext, sudoersleng))
 				    yyterminate();
 				BEGIN INITIAL;
@@ -333,7 +333,7 @@ DEFVAR			[a-z_]+
 
 <WANTDIGEST>[A-Za-z0-9\+/=]+ {
 			    /* Only return DIGEST if the length is correct. */
-			    yy_size_t len, digest_len =
+			    size_t len, digest_len =
 				sudo_digest_getlen(digest_type);
 			    if (sudoerstext[sudoersleng - 1] == '=') {
 				/* use padding */
@@ -342,7 +342,7 @@ DEFVAR			[a-z_]+
 				/* no padding */
 				len = (4 * digest_len + 2) / 3;
 			    }
-			    if ((yy_size_t)sudoersleng == len) {
+			    if ((size_t)sudoersleng == len) {
 				if (!fill(sudoerstext, sudoersleng))
 				    yyterminate();
 				BEGIN INITIAL;
@@ -411,7 +411,7 @@ DEFVAR			[a-z_]+
 
 <INITIAL>^[[:blank:]]*Defaults([:@>\!][[:blank:]]*\!*\"?({ID}|{WORD}))? {
 			    char deftype;
-			    int n;
+			    size_t n;
 
 			    if (continued) {
 				sudoers_errstr = N_("invalid line continuation");
@@ -451,7 +451,7 @@ DEFVAR			[a-z_]+
 			}
 
 <INITIAL>^[[:blank:]]*(Host|Cmnd|Cmd|User|Runas)_Alias	{
-			    int n;
+			    size_t n;
 
 			    if (continued) {
 				sudoers_errstr = N_("invalid line continuation");
@@ -939,15 +939,15 @@ pl_compare(const void *v1, const void *v2)
 /*
  * Open dirpath and fill in pathsp with an array of regular files
  * that do not end in '~' or contain a '.'.
- * Returns the number of files or -1 on error.
+ * Returns the number of files or SIZE_MAX (-1) on error.
  * If zero files are found, NULL is stored in pathsp.
  */
-static int
+static size_t
 read_dir_files(const char *dirpath, struct path_list ***pathsp, int verbose)
 {
     DIR *dir;
-    int i, count = 0;
-    int max_paths = 32;
+    size_t i, count = 0;
+    size_t max_paths = 32;
     struct dirent *dent;
     struct path_list **paths = NULL;
     const size_t dirlen = strlen(dirpath);
@@ -1026,7 +1026,7 @@ read_dir_files(const char *dirpath, struct path_list ***pathsp, int verbose)
     }
 done:
     *pathsp = paths;
-    debug_return_int(count);
+    debug_return_size_t(count);
 oom:
     sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 bad:
@@ -1038,18 +1038,18 @@ bad:
 	free(paths[i]);
     }
     free(paths);
-    debug_return_int(-1);
+    debug_return_size_t(SIZE_MAX);
 }
 
 /*
  * Push a list of all files in dirpath onto stack.
  * Returns the number of files or -1 on error.
  */
-static int
+static size_t
 switch_dir(struct include_stack *stack, char *dirpath, int verbose)
 {
     struct path_list **paths = NULL;
-    int count, i;
+    size_t count, i;
     debug_decl(switch_dir, SUDOERS_DEBUG_PARSER);
 
     count = read_dir_files(dirpath, &paths, verbose);
@@ -1064,7 +1064,7 @@ switch_dir(struct include_stack *stack, char *dirpath, int verbose)
 	free(paths);
     }
 
-    debug_return_int(count);
+    debug_return_size_t(count);
 }
 
 #define MAX_SUDOERS_DEPTH	128
@@ -1115,10 +1115,11 @@ init_lexer(void)
 }
 
 /*
- * Like strlcpy() but expand %h escapes to user_shost.
+ * Like strlcpy() but expand %h escapes.
  */
 static size_t
-strlcpy_expand_host(char *dst, const char *src, size_t size)
+strlcpy_expand_host(char * restrict dst, const char * restrict src,
+    const char * restrict host, size_t size)
 {
     size_t len = 0;
     char ch;
@@ -1126,7 +1127,7 @@ strlcpy_expand_host(char *dst, const char *src, size_t size)
 
     while ((ch = *src++) != '\0') {
 	if (ch == '%' && *src == 'h') {
-	    size_t n = strlcpy(dst, user_shost, size);
+	    size_t n = strlcpy(dst, host, size);
 	    len += n;
 	    if (n >= size) {
 		/* truncated */
@@ -1155,14 +1156,14 @@ strlcpy_expand_host(char *dst, const char *src, size_t size)
  * Returns a reference-counted string on success or NULL on failure.
  */
 static char *
-expand_include(const char *src)
+expand_include(const char *src, const char *host)
 {
     const char *path = sudoers_search_path ? sudoers_search_path : sudoers;
     const char *path_end = path + strlen(path);
+    char *dst, *dst0 = NULL, *dynamic_host = NULL;
     const char *cp, *ep;
-    char *dst0, *dst;
     size_t dst_size, src_len;
-    unsigned int nhost = 0;
+    size_t nhost = 0;
     debug_decl(expand_include, SUDOERS_DEBUG_PARSER);
 
     /* Strip double quotes if present. */
@@ -1186,18 +1187,35 @@ expand_include(const char *src)
 	cp++;
     }
 
+    /* Check for a path separator in the host name, replace with '_'. */
+    if (nhost != 0 && strchr(host, '/') != NULL) {
+	dynamic_host = malloc(strlen(host) + 1);
+	if (dynamic_host == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto bad;
+	}
+	for (dst = dynamic_host; *host != '\0'; host++) {
+	    if (*host == '/') {
+		*dst++ = '_';
+		continue;
+	    }
+	    *dst++ = *host;
+	}
+	*dst = '\0';
+	host = dynamic_host;
+    }
+
     if (*src == '/') {
 	/* Fully-qualified path, make a copy and expand %h escapes. */
-	dst_size = src_len + (nhost * strlen(user_shost)) - (nhost * 2) + 1;
+	dst_size = src_len + (nhost * strlen(host)) - (nhost * 2) + 1;
 	dst0 = sudo_rcstr_alloc(dst_size - 1);
 	if (dst0 == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    sudoerserror(NULL);
-	    debug_return_str(NULL);
+	    goto bad;
 	}
-	if (strlcpy_expand_host(dst0, src, dst_size) >= dst_size)
+	if (strlcpy_expand_host(dst0, src, host, dst_size) >= dst_size)
 	    goto oflow;
-	debug_return_str(dst0);
+	goto done;
     }
 
     /*
@@ -1208,20 +1226,19 @@ expand_include(const char *src)
     dst_size = 0;
     for (cp = sudo_strsplit(path, path_end, ":", &ep); cp != NULL;
 	    cp = sudo_strsplit(NULL, path_end, ":", &ep)) {
-	char *dirend = memrchr(cp, '/', ep - cp);
+	char *dirend = memrchr(cp, '/', (size_t)(ep - cp));
 	if (dirend != NULL) {
 	    dst_size += (size_t)(dirend - cp) + 1;
 	}
 	/* Includes space for ':' separator and NUL terminator. */
-	dst_size += src_len + (nhost * strlen(user_shost)) - (nhost * 2) + 1;
+	dst_size += src_len + (nhost * strlen(host)) - (nhost * 2) + 1;
     }
 
     /* Make a copy of the fully-qualified path and return it. */
     dst = dst0 = sudo_rcstr_alloc(dst_size - 1);
     if (dst0 == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	sudoerserror(NULL);
-	debug_return_str(NULL);
+	goto bad;
     }
     for (cp = sudo_strsplit(path, path_end, ":", &ep); cp != NULL;
 	    cp = sudo_strsplit(NULL, path_end, ":", &ep)) {
@@ -1235,7 +1252,7 @@ expand_include(const char *src)
 	    dst_size--;
 	}
 
-	dirend = memrchr(cp, '/', ep - cp);
+	dirend = memrchr(cp, '/', (size_t)(ep - cp));
 	if (dirend != NULL) {
 	    len = (size_t)(dirend - cp) + 1;
 	    if (len >= dst_size)
@@ -1245,7 +1262,7 @@ expand_include(const char *src)
 	    dst_size -= len;
 	}
 
-	len = strlcpy_expand_host(dst, src, dst_size);
+	len = strlcpy_expand_host(dst, src, host, dst_size);
 	if (len >= dst_size)
 	    goto oflow;
 	dst += len;
@@ -1253,10 +1270,14 @@ expand_include(const char *src)
     }
     *dst = '\0';
 
+done:
+    free(dynamic_host);
     debug_return_str(dst0);
 oflow:
     sudo_warnx(U_("internal error, %s overflow"), __func__);
+bad:
     sudoerserror(NULL);
+    free(dynamic_host);
     free(dst0);
     debug_return_str(NULL);
 }
@@ -1268,14 +1289,15 @@ oflow:
  * Returns false on error, else true.
  */
 static bool
-push_include_int(const char *opath, bool isdir, int verbose)
+push_include_int(const char *opath, const char *host, bool isdir,
+     struct sudoers_parser_config *conf)
 {
     struct path_list *pl;
     char *file = NULL, *path;
     FILE *fp;
     debug_decl(push_include, SUDOERS_DEBUG_PARSER);
 
-    if ((path = expand_include(opath)) == NULL)
+    if ((path = expand_include(opath, host)) == NULL)
 	debug_return_bool(false);
 
     /* push current state onto stack */
@@ -1283,7 +1305,7 @@ push_include_int(const char *opath, bool isdir, int verbose)
 	struct include_stack *new_istack;
 
 	if (idepth > MAX_SUDOERS_DEPTH) {
-	    if (verbose > 0) {
+	    if (conf->verbose > 0) {
 		fprintf(stderr, U_("%s: %s"), path,
 		    U_("too many levels of includes"));
 		fputc('\n', stderr);
@@ -1306,15 +1328,24 @@ push_include_int(const char *opath, bool isdir, int verbose)
     if (isdir) {
 	struct stat sb;
 	char dname[PATH_MAX];
-	int count, fd, status;
+	int fd, status;
+	size_t count;
 
 	fd = sudo_open_conf_path(path, dname, sizeof(dname), NULL);
-	status = sudo_secure_fd(fd, S_IFDIR, sudoers_file_uid(),
-	    sudoers_file_gid(), &sb);
+	if (conf->ignore_perms) {
+	    /* Skip sudoers security checks when ignore_perms is set. */
+	    if (fd == -1 || fstat(fd, &sb) == -1)
+		status = SUDO_PATH_MISSING;
+	    else
+		status = SUDO_PATH_SECURE;
+	} else {
+	    status = sudo_secure_fd(fd, S_IFDIR, sudoers_file_uid(),
+		sudoers_file_gid(), &sb);
+	}
 	if (fd != -1)
 	    close(fd); /* XXX use in read_dir_files? */
 	if (status != SUDO_PATH_SECURE) {
-	    if (verbose > 0) {
+	    if (conf->verbose > 0) {
 		switch (status) {
 		case SUDO_PATH_BAD_TYPE:
 		    errno = ENOTDIR;
@@ -1341,8 +1372,10 @@ push_include_int(const char *opath, bool isdir, int verbose)
 	    sudo_rcstr_delref(path);
 	    debug_return_bool(true);
 	}
-	count = switch_dir(&istack[idepth], dname, verbose);
-	if (count <= 0) {
+	count = switch_dir(&istack[idepth], dname, conf->verbose);
+	switch (count) {
+	case SIZE_MAX:
+	case 0:
 	    /* switch_dir() called sudoerserror() for us */
 	    sudo_rcstr_delref(path);
 	    debug_return_bool(count ? false : true);
@@ -1392,15 +1425,17 @@ push_include_int(const char *opath, bool isdir, int verbose)
 }
 
 bool
-push_include(const char *opath, int verbose)
+push_include(const char *opath, const char *host,
+     struct sudoers_parser_config *conf)
 {
-    return push_include_int(opath, false, verbose);
+    return push_include_int(opath, host, false, conf);
 }
 
 bool
-push_includedir(const char *opath, int verbose)
+push_includedir(const char *opath, const char *host,
+     struct sudoers_parser_config *conf)
 {
-    return push_include_int(opath, true, verbose);
+    return push_include_int(opath, host, true, conf);
 }
 
 /*
@@ -1468,7 +1503,7 @@ sudoers_trace_print(const char *msg)
 int
 sudoers_trace_print(const char *msg)
 {
-    const int sudo_debug_subsys = SUDOERS_DEBUG_PARSER;
+    debug_decl_vars(sudoers_trace_print, SUDOERS_DEBUG_PARSER);
 
     if (sudo_debug_needed(SUDO_DEBUG_DEBUG)) {
 	sudo_lbuf_append(&trace_lbuf, "%s", msg);
@@ -1491,7 +1526,7 @@ sudoers_trace_print(const char *msg)
  * On success, buf is guaranteed to end in a newline and not contain
  * embedded NULs.  Calls YY_FATAL_ERROR on error.
  */
-static yy_size_t
+static int
 sudoers_input(char *buf, yy_size_t max_size)
 {
     char *cp;
@@ -1509,12 +1544,12 @@ sudoers_input(char *buf, yy_size_t max_size)
 	if (ch == EOF)
 	    goto sudoers_eof;
 	ungetc(ch, sudoersin);
-	avail = getdelim(&sudolinebuf.buf, &sudolinebuf.size, '\n', sudoersin);
+	avail = (size_t)getdelim(&sudolinebuf.buf, &sudolinebuf.size, '\n', sudoersin);
 	if (avail == (size_t)-1) {
 sudoers_eof:
 	    /* EOF or error. */
 	    if (feof(sudoersin))
-		return 0;
+		debug_return_int(0);
 	    YY_FATAL_ERROR("input in flex scanner failed");
 	}
 
@@ -1532,7 +1567,7 @@ sudoers_eof:
 		cp = realloc(sudolinebuf.buf, avail + 2);
 		if (cp == NULL) {
 		    YY_FATAL_ERROR("unable to allocate memory");
-		    return 0;
+		    debug_return_int(0);
 		}
 		sudolinebuf.buf = cp;
 		sudolinebuf.size = avail + 2;
@@ -1554,5 +1589,5 @@ sudoers_eof:
     memcpy(buf, sudolinebuf.buf + sudolinebuf.off, avail);
     sudolinebuf.off += avail;
 
-    debug_return_size_t(avail);
+    debug_return_int((int)avail);
 }

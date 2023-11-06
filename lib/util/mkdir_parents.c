@@ -29,7 +29,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #include <string.h>
 #include <unistd.h>
@@ -38,11 +38,11 @@
 #include <fcntl.h>
 #include <limits.h>
 
-#include "sudo_compat.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_debug.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_debug.h>
+#include <sudo_util.h>
 
 #ifndef O_NOFOLLOW
 # define O_NOFOLLOW 0
@@ -142,7 +142,7 @@ reopen:
 		    goto bad;
 		}
 		/* Make sure the path we created is still a directory. */
-		if (!is_dir(dfd, path, ep - path, quiet)) {
+		if (!is_dir(dfd, path, (int)(ep - path), quiet)) {
 		    close(dfd);
 		    goto bad;
 		}
@@ -164,7 +164,7 @@ reopen:
 	    }
 	} else {
 	    /* Already exists, make sure it is a directory. */
-	    if (!is_dir(dfd, path, ep - path, quiet)) {
+	    if (!is_dir(dfd, path, (int)(ep - path), quiet)) {
 		close(dfd);
 		goto bad;
 	    }

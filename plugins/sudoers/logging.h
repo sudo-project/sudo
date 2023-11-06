@@ -58,12 +58,10 @@ struct log_details {
 #define SLOG_AUDIT		0x40	/* send message to audit as well */
 #define SLOG_PARSE_ERROR	0x80	/* format as a parse error */
 
-typedef bool (*sudoers_logger_t)(const char *file, int line, int column, const char *fmt, va_list args);
+struct sudoers_context;
+typedef bool (*sudoers_logger_t)(const struct sudoers_context *ctx, const char *file, int line, int column, const char * restrict fmt, va_list args);
 
 /* XXX - needed for auditing */
-extern int NewArgc;
-extern char **NewArgv;
-extern char **saved_argv;
 extern char *audit_msg;
 
 union sudo_defs_val;
@@ -73,24 +71,24 @@ struct log_details;
 bool sudoers_warn_setlocale(bool restore, int *cookie);
 bool sudoers_setlocale(int locale_type, int *prev_locale);
 int sudoers_getlocale(void);
-int audit_failure(char *const argv[], char const *const fmt, ...) sudo_printflike(2, 3);
-int vaudit_failure(char *const argv[], char const *const fmt, va_list ap) sudo_printflike(2, 0);
-bool log_allowed(struct eventlog *evlog);
-bool log_exit_status(int exit_status);
-bool log_auth_failure(int status, unsigned int tries);
-bool log_denial(int status, bool inform_user);
-bool log_failure(int status, int flags);
-bool log_server_alert(struct eventlog *evlog, struct timespec *now, const char *message, const char *errstr);
-bool log_server_reject(struct eventlog *evlog, const char *message);
-bool log_warning(int flags, const char *fmt, ...) sudo_printflike(2, 3);
-bool log_warningx(int flags, const char *fmt, ...) sudo_printflike(2, 3);
-bool gai_log_warning(int flags, int errnum, const char *fmt, ...) sudo_printflike(3, 4);
+int audit_failure(const struct sudoers_context *ctx, char *const argv[], char const * restrict const fmt, ...) sudo_printflike(3, 4);
+int vaudit_failure(const struct sudoers_context *ctx, char *const argv[], char const * restrict const fmt, va_list ap) sudo_printflike(3, 0);
+bool log_allowed(const struct sudoers_context *ctx, struct eventlog *evlog);
+bool log_exit_status(const struct sudoers_context *ctx, int exit_status);
+bool log_auth_failure(const struct sudoers_context *ctx, unsigned int status, unsigned int tries);
+bool log_denial(const struct sudoers_context *ctx, unsigned int status, bool inform_user);
+bool log_failure(const struct sudoers_context *ctx, unsigned int status, int flags);
+bool log_server_alert(const struct sudoers_context *ctx, struct eventlog *evlog, struct timespec *now, const char *message, const char *errstr);
+bool log_server_reject(const struct sudoers_context *ctx, struct eventlog *evlog, const char *message);
+bool log_warning(const struct sudoers_context *ctx, unsigned int flags, const char * restrict fmt, ...) sudo_printflike(3, 4);
+bool log_warningx(const struct sudoers_context *ctx, unsigned int flags, const char * restrict fmt, ...) sudo_printflike(3, 4);
+bool gai_log_warning(const struct sudoers_context *ctx, unsigned int flags, int errnum, const char * restrict fmt, ...) sudo_printflike(4, 5);
 bool sudoers_initlocale(const char *ulocale, const char *slocale);
-bool sudoers_locale_callback(const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
-void sudoers_to_eventlog(struct eventlog *evlog, const char *cmnd, char * const argv[], char *const envp[], const char *uuid_str);
+bool sudoers_locale_callback(struct sudoers_context *ctx, const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
+void sudoers_to_eventlog(const struct sudoers_context *ctx, struct eventlog *evlog, const char *cmnd, char * const runargv[], char *const runenv[], const char *uuid_str);
 void init_eventlog_config(void);
 bool init_log_details(struct log_details *details, struct eventlog *evlog);
-bool log_parse_error(const char *file, int line, int column, const char *fmt, va_list ap) sudo_printf0like(4, 0);
-bool mail_parse_errors(void);
+bool log_parse_error(const struct sudoers_context *ctx, const char *file, int line, int column, const char * restrict fmt, va_list ap) sudo_printf0like(5, 0);
+bool mail_parse_errors(const struct sudoers_context *ctx);
 
 #endif /* SUDOERS_LOGGING_H */

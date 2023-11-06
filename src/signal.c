@@ -26,8 +26,8 @@
 #include <errno.h>
 #include <signal.h>
 
-#include "sudo.h"
-#include "sudo_exec.h"
+#include <sudo.h>
+#include <sudo_exec.h>
 
 static struct signal_state {
     int signo;

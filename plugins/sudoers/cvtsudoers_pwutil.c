@@ -41,9 +41,9 @@
 #include <pwd.h>
 #include <grp.h>
 
-#include "sudoers.h"
-#include "cvtsudoers.h"
-#include "pwutil.h"
+#include <sudoers.h>
+#include <cvtsudoers.h>
+#include <pwutil.h>
 
 #ifndef LOGIN_NAME_MAX
 # ifdef _POSIX_LOGIN_NAME_MAX
@@ -82,7 +82,7 @@ do {							\
 struct cache_item *
 cvtsudoers_make_pwitem(uid_t uid, const char *name)
 {
-    char *cp, uidstr[MAX_UID_T_LEN + 2];
+    char *cp, uidstr[STRLEN_MAX_UNSIGNED(uid_t) + 2];
     size_t nsize, psize, gsize, dsize, ssize, total;
 #ifdef HAVE_LOGIN_CAP_H
     size_t csize;
@@ -191,7 +191,7 @@ cvtsudoers_make_pwitem(uid_t uid, const char *name)
 struct cache_item *
 cvtsudoers_make_gritem(gid_t gid, const char *name)
 {
-    char *cp, gidstr[MAX_UID_T_LEN + 2];
+    char *cp, gidstr[STRLEN_MAX_UNSIGNED(gid_t) + 2];
     size_t nsize, psize, total, len, nmem = 0;
     struct cache_item_gr *gritem;
     struct group gr, *newgr;
@@ -297,8 +297,8 @@ static struct cache_item_gidlist *gidlist_item;
  * elements.  Fills in datum from the groups filter.
  */
 struct cache_item *
-cvtsudoers_make_gidlist_item(const struct passwd *pw, char * const *unused1,
-    unsigned int type)
+cvtsudoers_make_gidlist_item(const struct passwd *pw, int unused1,
+    GETGROUPS_T *unused2, char * const *unused3, unsigned int type)
 {
     char *cp;
     size_t nsize, total;
@@ -325,7 +325,7 @@ cvtsudoers_make_gidlist_item(const struct passwd *pw, char * const *unused1,
 
     /* Allocate gids[] array and fill it with parsed gids. */
     if (ngids != 0) {
-	gids = reallocarray(NULL, ngids, sizeof(GETGROUPS_T));
+	gids = reallocarray(NULL, (size_t)ngids, sizeof(GETGROUPS_T));
 	if (gids == NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to allocate memory");
@@ -352,7 +352,7 @@ cvtsudoers_make_gidlist_item(const struct passwd *pw, char * const *unused1,
     /* Allocate in one big chunk for easy freeing. */
     nsize = strlen(pw->pw_name) + 1;
     total = sizeof(*glitem) + nsize;
-    total += sizeof(gid_t *) * ngids;
+    total += sizeof(gid_t *) * (size_t)ngids;
 
     if ((glitem = calloc(1, total)) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -369,7 +369,7 @@ cvtsudoers_make_gidlist_item(const struct passwd *pw, char * const *unused1,
     gidlist = &glitem->gidlist;
     cp = (char *)(glitem + 1);
     gidlist->gids = (gid_t *)cp;
-    cp += sizeof(gid_t) * ngids;
+    cp += sizeof(gid_t) * (size_t)ngids;
 
     /* Set key and datum. */
     memcpy(cp, pw->pw_name, nsize);
@@ -403,7 +403,7 @@ cvtsudoers_make_grlist_item(const struct passwd *pw, char * const *unused1)
     struct cache_item_grlist *grlitem;
     struct sudoers_string *s;
     struct group_list *grlist;
-    int groupname_len;
+    size_t groupname_len;
     debug_decl(cvtsudoers_make_grlist_item, SUDOERS_DEBUG_NSS);
 
     /*
@@ -421,7 +421,7 @@ cvtsudoers_make_grlist_item(const struct passwd *pw, char * const *unused1)
     }
 
 #ifdef _SC_LOGIN_NAME_MAX
-    groupname_len = MAX((int)sysconf(_SC_LOGIN_NAME_MAX), 32);
+    groupname_len = MAX((size_t)sysconf(_SC_LOGIN_NAME_MAX), 32);
 #else
     groupname_len = MAX(LOGIN_NAME_MAX, 32);
 #endif
@@ -469,7 +469,7 @@ again:
 	    }
 	}
 	len = strlen(s->str) + 1;
-	if (cp - (char *)grlitem + len > total) {
+	if ((size_t)(cp - (char *)grlitem) + len > total) {
 	    total += len + groupname_len;
 	    free(grlitem);
 	    goto again;
@@ -478,7 +478,7 @@ again:
 	grlist->groups[ngroups++] = cp;
 	cp += len;
     }
-    grlist->ngroups = ngroups;
+    grlist->ngroups = (int)ngroups;
 
     debug_return_ptr(&grlitem->cache);
 }

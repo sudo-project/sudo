@@ -32,7 +32,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #include <string.h>
 #ifdef HAVE_STRINGS_H
@@ -45,10 +45,10 @@
 #include <grp.h>
 #include <pwd.h>
 
-#include "pathnames.h"
-#include "sudo_compat.h"
-#include "sudo_plugin.h"
-#include "sudo_util.h"
+#include <pathnames.h>
+#include <sudo_compat.h>
+#include <sudo_plugin.h>
+#include <sudo_util.h>
 
 /*
  * Sample plugin module that allows any user who knows the password
@@ -65,7 +65,7 @@ static sudo_conv_t sudo_conv;
 static sudo_printf_t sudo_log;
 static FILE *input, *output;
 static uid_t runas_uid = ROOT_UID;
-static gid_t runas_gid = -1;
+static gid_t runas_gid = (gid_t)-1;
 static int use_sudoedit = false;
 
 /*
@@ -286,7 +286,8 @@ find_editor(int nfiles, char * const files[], char **argv_out[])
     }
     if (editor_path != editor)
 	free(editor);
-    nargv = malloc((nargc + 1 + nfiles + 1) * sizeof(char *));
+    nargv = reallocarray(NULL, (size_t)nargc + 1 + (size_t)nfiles + 1,
+	sizeof(char *));
     if (nargv == NULL) {
 	sudo_log(SUDO_CONV_ERROR_MSG, "unable to allocate memory\n");
 	free(editor_path);

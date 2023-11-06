@@ -31,9 +31,9 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "sudoers.h"
-#include "sudo_digest.h"
-#include "toke.h"
+#include <sudoers.h>
+#include <sudo_digest.h>
+#include <toke.h>
 
 #ifdef YYBISON
 # define YYERROR_VERBOSE
@@ -69,17 +69,19 @@ struct sudoers_parse_tree parsed_policy = {
     TAILQ_HEAD_INITIALIZER(parsed_policy.defaults),
     NULL, /* aliases */
     NULL, /* lhost */
-    NULL /* shost */
+    NULL, /* shost */
+    NULL, /* nss */
+    NULL  /* ctx */
 };
 
 /*
  * Local prototypes
  */
 static void init_options(struct command_options *opts);
-static bool add_defaults(int, struct member *, struct defaults *);
+static bool add_defaults(short, struct member *, struct defaults *);
 static bool add_userspec(struct member *, struct privilege *);
 static struct defaults *new_default(char *, char *, short);
-static struct member *new_member(char *, int);
+static struct member *new_member(char *, short);
 static struct sudo_command *new_command(char *, char *);
 static struct command_digest *new_digest(unsigned int, char *);
 static void alias_error(const char *name, int errnum);
@@ -217,7 +219,7 @@ entry		:	'\n' {
 			}
 		|	include {
 			    const bool success = push_include($1,
-				parser_conf.verbose);
+				parsed_policy.ctx->user.shost, &parser_conf);
 			    parser_leak_remove(LEAK_PTR, $1);
 			    free($1);
 			    if (!success && !parser_conf.recovery)
@@ -225,7 +227,7 @@ entry		:	'\n' {
 			}
 		|	includedir {
 			    const bool success = push_includedir($1,
-				parser_conf.verbose);
+				parsed_policy.ctx->user.shost, &parser_conf);
 			    parser_leak_remove(LEAK_PTR, $1);
 			    free($1);
 			    if (!success && !parser_conf.recovery)
@@ -1023,7 +1025,7 @@ hostaliases	:	hostalias
 
 hostalias	:	ALIAS {
 			    alias_line = this_lineno;
-			    alias_column = sudolinebuf.toke_start + 1;
+			    alias_column = (int)sudolinebuf.toke_start + 1;
 			} '=' hostlist {
 			    if (!alias_add(&parsed_policy, $1, HOSTALIAS,
 				sudoers, alias_line, alias_column, $4)) {
@@ -1050,7 +1052,7 @@ cmndaliases	:	cmndalias
 
 cmndalias	:	ALIAS {
 			    alias_line = this_lineno;
-			    alias_column = sudolinebuf.toke_start + 1;
+			    alias_column = (int)sudolinebuf.toke_start + 1;
 			} '=' cmndlist {
 			    if (!alias_add(&parsed_policy, $1, CMNDALIAS,
 				sudoers, alias_line, alias_column, $4)) {
@@ -1077,7 +1079,7 @@ runasaliases	:	runasalias
 
 runasalias	:	ALIAS {
 			    alias_line = this_lineno;
-			    alias_column = sudolinebuf.toke_start + 1;
+			    alias_column = (int)sudolinebuf.toke_start + 1;
 			} '=' userlist {
 			    if (!alias_add(&parsed_policy, $1, RUNASALIAS,
 				sudoers, alias_line, alias_column, $4)) {
@@ -1096,7 +1098,7 @@ useraliases	:	useralias
 
 useralias	:	ALIAS {
 			    alias_line = this_lineno;
-			    alias_column = sudolinebuf.toke_start + 1;
+			    alias_column = (int)sudolinebuf.toke_start + 1;
 			} '=' userlist {
 			    if (!alias_add(&parsed_policy, $1, USERALIAS,
 				sudoers, alias_line, alias_column, $4)) {
@@ -1221,15 +1223,16 @@ group		:	ALIAS {
 %%
 /* Like yyerror() but takes a printf-style format string. */
 void
-sudoerserrorf(const char *fmt, ...)
+sudoerserrorf(const char * restrict fmt, ...)
 {
-    const int column = sudolinebuf.toke_start + 1;
+    const int column = (int)(sudolinebuf.toke_start + 1);
     va_list ap;
     debug_decl(sudoerserrorf, SUDOERS_DEBUG_PARSER);
 
     if (sudoers_error_hook != NULL) {
 	va_start(ap, fmt);
-	sudoers_error_hook(sudoers, this_lineno, column, fmt, ap);
+	sudoers_error_hook(parsed_policy.ctx, sudoers, this_lineno, column,
+	    fmt, ap);
 	va_end(ap);
     }
     if (parser_conf.verbose > 0 && fmt != NULL) {
@@ -1255,8 +1258,8 @@ sudoerserrorf(const char *fmt, ...)
 		    tofree = NULL;
 		}
 	    }
-	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s:%d:%d: %s\n"), sudoers,
-		this_lineno, (int)sudolinebuf.toke_start + 1, s);
+	    sudo_printf(SUDO_CONV_ERROR_MSG, _("%s:%d:%zu: %s\n"), sudoers,
+		this_lineno, sudolinebuf.toke_start + 1, s);
 	    free(tofree);
 	    va_end(ap);
 	    sudoers_setlocale(oldlocale, NULL);
@@ -1332,7 +1335,7 @@ new_default(char *var, char *val, short op)
     d->op = op;
     /* d->binding = NULL; */
     d->line = this_lineno;
-    d->column = sudolinebuf.toke_start + 1;
+    d->column = (int)(sudolinebuf.toke_start + 1);
     d->file = sudo_rcstr_addref(sudoers);
     HLTQ_INIT(d, entries);
 
@@ -1340,7 +1343,7 @@ new_default(char *var, char *val, short op)
 }
 
 static struct member *
-new_member(char *name, int type)
+new_member(char *name, short type)
 {
     struct member *m;
     debug_decl(new_member, SUDOERS_DEBUG_PARSER);
@@ -1425,7 +1428,7 @@ free_defaults_binding(struct defaults_binding *binding)
  * or runas users the entries apply to (determined by the type).
  */
 static bool
-add_defaults(int type, struct member *bmem, struct defaults *defs)
+add_defaults(short type, struct member *bmem, struct defaults *defs)
 {
     struct defaults *d, *next;
     struct defaults_binding *binding;
@@ -1484,7 +1487,7 @@ add_userspec(struct member *members, struct privilege *privs)
     }
     /* We already parsed the newline so sudolineno is off by one. */
     u->line = sudolineno - 1;
-    u->column = sudolinebuf.toke_start + 1;
+    u->column = (int)(sudolinebuf.toke_start + 1);
     u->file = sudo_rcstr_addref(sudoers);
     parser_leak_remove(LEAK_MEMBER, members);
     HLTQ_TO_TAILQ(&u->users, members, entries);
@@ -1755,13 +1758,14 @@ free_userspec(struct userspec *us)
  */
 void
 init_parse_tree(struct sudoers_parse_tree *parse_tree, char *lhost, char *shost,
-    struct sudo_nss *nss)
+    struct sudoers_context *ctx, struct sudo_nss *nss)
 {
     TAILQ_INIT(&parse_tree->userspecs);
     TAILQ_INIT(&parse_tree->defaults);
     parse_tree->aliases = NULL;
     parse_tree->shost = shost;
     parse_tree->lhost = lhost;
+    parse_tree->ctx = ctx;
     parse_tree->nss = nss;
 }
 
@@ -1791,6 +1795,8 @@ free_parse_tree(struct sudoers_parse_tree *parse_tree)
     if (parse_tree->shost != parse_tree->lhost)
 	free(parse_tree->shost);
     parse_tree->lhost = parse_tree->shost = NULL;
+    parse_tree->nss = NULL;
+    parse_tree->ctx = NULL;
 }
 
 /*
@@ -1798,18 +1804,19 @@ free_parse_tree(struct sudoers_parse_tree *parse_tree)
  * the current sudoers file to path.
  */
 bool
-init_parser(const char *file, const struct sudoers_parser_config *conf)
+init_parser(struct sudoers_context *ctx, const char *file)
 {
     bool ret = true;
     debug_decl(init_parser, SUDOERS_DEBUG_PARSER);
 
     free_parse_tree(&parsed_policy);
+    parsed_policy.ctx = ctx;
     parser_leak_init();
     init_lexer();
     parse_error = false;
 
-    if (conf != NULL) {
-	parser_conf = *conf;
+    if (ctx != NULL) {
+	parser_conf = ctx->parser_conf;
     } else {
 	const struct sudoers_parser_config def_conf =
 	    SUDOERS_PARSER_CONFIG_INITIALIZER;

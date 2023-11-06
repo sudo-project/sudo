@@ -41,11 +41,11 @@ typedef int (*sudo_lbuf_output_t)(const char *);
 #define LBUF_ESC_BLANK	0x02
 #define LBUF_ESC_QUOTE	0x04
 
-sudo_dso_public void sudo_lbuf_init_v1(struct sudo_lbuf *lbuf, sudo_lbuf_output_t output, int indent, const char *continuation, int cols);
+sudo_dso_public void sudo_lbuf_init_v1(struct sudo_lbuf *lbuf, sudo_lbuf_output_t output, unsigned int indent, const char *continuation, int cols);
 sudo_dso_public void sudo_lbuf_destroy_v1(struct sudo_lbuf *lbuf);
-sudo_dso_public bool sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char *fmt, ...) sudo_printflike(2, 3);
-sudo_dso_public bool sudo_lbuf_append_esc_v1(struct sudo_lbuf *lbuf, int flags, const char *fmt, ...) sudo_printflike(3, 4);
-sudo_dso_public bool sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char *fmt, ...) sudo_printflike(3, 4);
+sudo_dso_public bool sudo_lbuf_append_v1(struct sudo_lbuf *lbuf, const char * restrict fmt, ...) sudo_printflike(2, 3);
+sudo_dso_public bool sudo_lbuf_append_esc_v1(struct sudo_lbuf *lbuf, int flags, const char * restrict fmt, ...) sudo_printflike(3, 4);
+sudo_dso_public bool sudo_lbuf_append_quoted_v1(struct sudo_lbuf *lbuf, const char *set, const char * restrict fmt, ...) sudo_printflike(3, 4);
 sudo_dso_public void sudo_lbuf_print_v1(struct sudo_lbuf *lbuf);
 sudo_dso_public bool sudo_lbuf_error_v1(struct sudo_lbuf *lbuf);
 sudo_dso_public void sudo_lbuf_clearerr_v1(struct sudo_lbuf *lbuf);

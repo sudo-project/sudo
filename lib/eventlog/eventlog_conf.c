@@ -47,15 +47,15 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "pathnames.h"
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_eventlog.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_json.h"
-#include "sudo_queue.h"
-#include "sudo_util.h"
+#include <pathnames.h>
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_eventlog.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_json.h>
+#include <sudo_queue.h>
+#include <sudo_util.h>
 
 static FILE *eventlog_stub_open_log(int type, const char *logfile);
 static void eventlog_stub_close_log(int type, FILE *fp);
@@ -139,13 +139,13 @@ eventlog_set_syslog_alertpri(int pri)
 }
 
 void
-eventlog_set_syslog_maxlen(int len)
+eventlog_set_syslog_maxlen(size_t len)
 {
     evl_conf.syslog_maxlen = len;
 }
 
 void
-eventlog_set_file_maxlen(int len)
+eventlog_set_file_maxlen(size_t len)
 {
     evl_conf.file_maxlen = len;
 }

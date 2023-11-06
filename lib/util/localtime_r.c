@@ -28,8 +28,8 @@
 #include <sys/types.h>
 #include <time.h>
 
-#include "sudo_compat.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
 
 /*
  * Fake localtime_r() that just stores the result.

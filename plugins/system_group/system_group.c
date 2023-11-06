@@ -28,7 +28,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #include <string.h>
 #ifdef HAVE_STRINGS_H
@@ -36,10 +36,10 @@
 #endif /* HAVE_STRINGS_H */
 #include <grp.h>
 
-#include "sudo_compat.h"
-#include "sudo_dso.h"
-#include "sudo_plugin.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_dso.h>
+#include <sudo_plugin.h>
+#include <sudo_util.h>
 
 /*
  * Sudoers group plugin that does group name-based lookups using the system

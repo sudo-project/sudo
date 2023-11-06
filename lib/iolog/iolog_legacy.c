@@ -28,20 +28,20 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #include <string.h>
 #include <signal.h>
 #include <limits.h>
 #include <time.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_eventlog.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_iolog.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_eventlog.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_iolog.h>
+#include <sudo_util.h>
 
 bool
 iolog_parse_loginfo_legacy(FILE *fp, const char *iolog_dir,
@@ -84,7 +84,8 @@ iolog_parse_loginfo_legacy(FILE *fp, const char *iolog_dir,
 	goto done;
     }
     *ep = '\0';
-    evlog->submit_time.tv_sec = sudo_strtonum(cp, 0, TIME_T_MAX, &errstr);
+    evlog->submit_time.tv_sec =
+	(time_t)sudo_strtonum(cp, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL) {
 	sudo_warn(U_("%s: time stamp %s: %s"), iolog_dir, cp, errstr);
 	goto done;
@@ -145,14 +146,14 @@ iolog_parse_loginfo_legacy(FILE *fp, const char *iolog_dir,
 	if ((ep = strchr(cp, ':')) != NULL) {
 	    *ep = '\0';
 	}
-	evlog->lines = sudo_strtonum(cp, 1, INT_MAX, &errstr);
+	evlog->lines = (int)sudo_strtonum(cp, 1, INT_MAX, &errstr);
 	if (errstr != NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"%s: tty lines %s: %s", iolog_dir, cp, errstr);
 	}
 	if (ep != NULL) {
 	    cp = ep + 1;
-	    evlog->columns = sudo_strtonum(cp, 1, INT_MAX, &errstr);
+	    evlog->columns = (int)sudo_strtonum(cp, 1, INT_MAX, &errstr);
 	    if (errstr != NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "%s: tty cols %s: %s", iolog_dir, cp, errstr);

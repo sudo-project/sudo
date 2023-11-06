@@ -109,6 +109,9 @@
 /* Define to 1 if you have the 'close_range' function. */
 #undef HAVE_CLOSE_RANGE
 
+/* Define to 1 if you have the <crt_externs.h> header file. */
+#undef HAVE_CRT_EXTERNS_H
+
 /* Define to 1 if you have the 'crypt' function. */
 #undef HAVE_CRYPT
 
@@ -210,10 +213,6 @@
    don't. */
 #undef HAVE_DECL_SSIZE_MAX
 
-/* Define to 1 if you have the declaration of 'SYMLOOP_MAX', and to 0 if you
-   don't. */
-#undef HAVE_DECL_SYMLOOP_MAX
-
 /* Define to 1 if you have the declaration of 'sys_sigabbrev', and to 0 if you
    don't. */
 #undef HAVE_DECL_SYS_SIGABBREV
@@ -249,10 +248,6 @@
 /* Define to 1 if you have the declaration of '_POSIX_PATH_MAX', and to 0 if
    you don't. */
 #undef HAVE_DECL__POSIX_PATH_MAX
-
-/* Define to 1 if you have the declaration of '_POSIX_SYMLOOP_MAX', and to 0
-   if you don't. */
-#undef HAVE_DECL__POSIX_SYMLOOP_MAX
 
 /* Define to 1 if you have the declaration of '_sys_siglist', and to 0 if you
    don't. */
@@ -865,6 +860,9 @@
    macro. */
 #undef HAVE_SSL_CTX_SET_MIN_PROTO_VERSION
 
+/* Define to 1 if you have the 'SSL_read_ex' function. */
+#undef HAVE_SSL_READ_EX
+
 /* Define to 1 to enable SSSD support. */
 #undef HAVE_SSSD
 
@@ -1098,6 +1096,9 @@
 /* Define to 1 if you have the '_innetgr' function. */
 #undef HAVE__INNETGR
 
+/* Define to 1 if you have the '_NSGetEnviron' function. */
+#undef HAVE__NSGETENVIRON
+
 /* Define to 1 if you have the '_nss_initf_group' function. */
 #undef HAVE__NSS_INITF_GROUP
 
@@ -1106,6 +1107,12 @@
 
 /* Define to 1 if you have the '_ttyname_dev' function. */
 #undef HAVE__TTYNAME_DEV
+
+/* Define to 1 if you have the '__builtin_clz' built-in function */
+#undef HAVE___BUILTIN_CLZ
+
+/* Define to 1 if you have the '__builtin_clzl' built-in function */
+#undef HAVE___BUILTIN_CLZL
 
 /* Define to 1 if the compiler supports the C99 __func__ variable. */
 #undef HAVE___FUNC__
@@ -1133,6 +1140,10 @@
 
 /* The message given when a bad password is entered. */
 #undef INCORRECT_PASSWORD
+
+/* Define to (int) if the 'ioctl' function request takes an int request
+   argument. */
+#undef IOCTL_REQ_CAST
 
 /* The syslog facility sudo will use. */
 #undef LOGFAC
@@ -1162,10 +1173,6 @@
 
 /* The max number of chars per log file line (for line wrapping). */
 #undef MAXLOGFILELEN
-
-/* Define to the max length of a uid_t in string context (excluding the NUL).
-   */
-#undef MAX_UID_T_LEN
 
 /* Define to 1 if resolv.h must be included to get the 'inet_ntop' or
    'inet_pton' function prototypes. */
@@ -1234,7 +1241,7 @@
 /* The syslog priority sudo will use for successful attempts. */
 #undef PRI_SUCCESS
 
-/* Define to const if the 'putenv' takes a const argument. */
+/* Define to const if the 'putenv' function takes a const argument. */
 #undef PUTENV_CONST
 
 /* Define to 1 if you want insults from "Monty Python's Flying Circus". */
@@ -1252,6 +1259,14 @@
 
 /* The environment variable that controls preloading of dynamic objects. */
 #undef RTLD_PRELOAD_VAR
+
+/* The environment variable that controls preloading of 32-bit dynamic
+   objects. */
+#undef RTLD_PRELOAD_VAR_32
+
+/* The environment variable that controls preloading of 64-bit dynamic
+   objects. */
+#undef RTLD_PRELOAD_VAR_64
 
 /* The user sudo should run commands as by default. */
 #undef RUNAS_DEFAULT
@@ -1282,11 +1297,17 @@
 /* The size of 'id_t', as computed by sizeof. */
 #undef SIZEOF_ID_T
 
+/* The size of 'long', as computed by sizeof. */
+#undef SIZEOF_LONG
+
 /* The size of 'long long', as computed by sizeof. */
 #undef SIZEOF_LONG_LONG
 
 /* The size of 'time_t', as computed by sizeof. */
 #undef SIZEOF_TIME_T
+
+/* The size of 'uid_t', as computed by sizeof. */
+#undef SIZEOF_UID_T
 
 /* Define to 1 to compile the sudoers plugin statically into the sudo binary.
    */
@@ -1496,6 +1517,21 @@
 
 /* Define to an OS-specific initialization function or 'os_init_common'. */
 #undef os_init
+
+/* Define to the equivalent of the C99 'restrict' keyword, or to
+   nothing if this is not supported.  Do not define if restrict is
+   supported only directly.  */
+#undef restrict
+/* Work around a bug in older versions of Sun C++, which did not
+   #define __restrict__ or support _Restrict or __restrict__
+   even though the corresponding Sun C compiler ended up with
+   "#define restrict _Restrict" or "#define restrict __restrict__"
+   in the previous line.  This workaround can be removed once
+   we assume Oracle Developer Studio 12.5 (2016) or later.  */
+#if defined __SUNPRO_CC && !defined __RESTRICT && !defined __restrict__
+# define _Restrict
+# define __restrict__
+#endif
 
 /* Define as 'int' if <sys/types.h> doesn't define. */
 #undef uid_t

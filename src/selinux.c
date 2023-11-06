@@ -54,8 +54,8 @@
 # include <libaudit.h>
 #endif
 
-#include "sudo.h"
-#include "sudo_exec.h"
+#include <sudo.h>
+#include <sudo_exec.h>
 
 static struct selinux_state {
     char * old_context;
@@ -440,7 +440,7 @@ selinux_setexeccon(void)
 
 void
 selinux_execve(int fd, const char *path, char *const argv[], char *envp[],
-    const char *rundir, int flags)
+    const char *rundir, unsigned int flags)
 {
     char **nargv;
     const char *sesh;

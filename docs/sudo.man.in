@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDO" "@mansectsu@" "June 18, 2023" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "August 9, 2023" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -582,11 +582,21 @@ and the security policy supports a verbose output format.
 .sp
 If a
 \fIcommand\fR
-is specified and is permitted by the security policy, the fully-qualified
-path to the
+is specified and is permitted by the security policy for the invoking
+user (or the,
+\fIuser\fR
+specified by the
+\fB\-U\fR
+option) on the current host,
+the fully-qualified path to the
 \fIcommand\fR
 is displayed along with any
 \fIarg\fRs.
+If
+\fB\-l\fR
+is specified more than once (and the security policy supports it),
+the matching rule is displayed in a verbose format along with the
+\fIcommand\fR.
 If a
 \fIcommand\fR
 is specified but not allowed by the policy,
@@ -601,9 +611,12 @@ Unlike the
 flag, existing cached credentials are used if they are valid.
 To detect when the user's cached credentials are valid (or when no
 authentication is required), the following can be used:
-.RS 14n
+.nf
+.sp
+.RS 12n
 sudo -Nnv
 .RE
+.fi
 .RS 8n
 .sp
 Not all security policies support credential caching.

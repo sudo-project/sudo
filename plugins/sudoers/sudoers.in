@@ -27,7 +27,16 @@
 ## Groups of commands.  Often used to group related commands together.
 # Cmnd_Alias	PROCESSES = /usr/bin/nice, /bin/kill, /usr/bin/renice, \
 # 			    /usr/bin/pkill, /usr/bin/top
+#
 # Cmnd_Alias	REBOOT = /sbin/halt, /sbin/reboot, /sbin/poweroff
+#
+# Cmnd_Alias	DEBUGGERS = /usr/bin/gdb, /usr/bin/lldb, /usr/bin/strace, \
+# 			    /usr/bin/truss, /usr/bin/bpftrace, \
+# 			    /usr/bin/dtrace, /usr/bin/dtruss
+#
+# Cmnd_Alias	PKGMAN = /usr/bin/apt, /usr/bin/dpkg, /usr/bin/rpm, \
+# 			 /usr/bin/yum, /usr/bin/dnf,  /usr/bin/zypper, \
+# 			 /usr/bin/pacman
 
 ##
 ## Defaults specification
@@ -75,6 +84,16 @@
 # Defaults!/usr/local/bin/sudoreplay !log_output
 # Defaults!REBOOT !log_output
 # Defaults maxseq = 1000
+##
+## Uncomment to disable intercept and log_subcmds for debuggers and
+## tracers.  Otherwise, anything that uses ptrace(2) will be unable
+## to run under sudo if intercept_type is set to "trace".
+# Defaults!DEBUGGERS !intercept, !log_subcmds
+##
+## Uncomment to disable intercept and log_subcmds for package managers.
+## Some package scripts run a huge number of commands, which is made
+## slower by these options and also can clutter up the logs.
+# Defaults!PKGMAN !intercept, !log_subcmds
 
 ##
 ## Runas alias specification

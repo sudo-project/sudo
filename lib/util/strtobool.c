@@ -27,9 +27,9 @@
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_util.h>
 
 int
 sudo_strtobool_v1(const char *str)

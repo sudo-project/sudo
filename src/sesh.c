@@ -36,17 +36,17 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #ifdef HAVE_GETOPT_LONG
 # include <getopt.h>
 # else
-# include "compat/getopt.h"
+# include <compat/getopt.h>
 #endif /* HAVE_GETOPT_LONG */
 
-#include "sudo.h"
-#include "sudo_exec.h"
-#include "sudo_edit.h"
+#include <sudo.h>
+#include <sudo_exec.h>
+#include <sudo_edit.h>
 
 enum sesh_mode {
     SESH_RUN_COMMAND,
@@ -95,7 +95,7 @@ main(int argc, char *argv[], char *envp[])
 {
     enum sesh_mode mode = SESH_RUN_COMMAND;
     const char *errstr, *rundir = NULL;
-    int flags = CD_SUDOEDIT_FOLLOW;
+    unsigned int flags = CD_SUDOEDIT_FOLLOW;
     char *edit_user = NULL;
     int ch, ret, fd = -1;
     debug_decl(main, SUDO_DEBUG_MAIN);
@@ -148,7 +148,7 @@ main(int argc, char *argv[], char *envp[])
 	    break;
 	default:
 	    usage();
-	    break;
+	    /* NOTREACHED */
 	}
     }
     argc -= optind;
@@ -158,7 +158,7 @@ main(int argc, char *argv[], char *envp[])
 
     /* Read sudo.conf and initialize the debug subsystem. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
-	exit(EXIT_FAILURE);
+	return EXIT_FAILURE;
     sudo_debug_register(getprogname(), NULL, NULL,
 	sudo_conf_debug_files(getprogname()), -1);
 
@@ -198,7 +198,7 @@ main(int argc, char *argv[], char *envp[])
 	if (rundir != NULL && chdir(rundir) == -1) {
 	    sudo_warnx(U_("unable to change directory to %s"), rundir);
 	    if (!ISSET(flags, CD_CWD_OPTIONAL))
-		exit(EXIT_FAILURE);
+		return EXIT_FAILURE;
 	}
 
 	/* Make a copy of the command to execute. */

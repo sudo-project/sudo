@@ -43,9 +43,9 @@
 #include <pwd.h>
 #include <grp.h>
 
-#include "sudoers.h"
-#include "redblack.h"
-#include "pwutil.h"
+#include <sudoers.h>
+#include <redblack.h>
+#include <pwutil.h>
 
 /*
  * The passwd and group caches.
@@ -58,6 +58,8 @@ static int  cmp_pwuid(const void *, const void *);
 static int  cmp_pwnam(const void *, const void *);
 static int  cmp_grgid(const void *, const void *);
 
+static int max_groups;
+
 /*
  * Default functions for building cache items.
  */
@@ -65,6 +67,7 @@ static sudo_make_pwitem_t make_pwitem = sudo_make_pwitem;
 static sudo_make_gritem_t make_gritem = sudo_make_gritem;
 static sudo_make_gidlist_item_t make_gidlist_item = sudo_make_gidlist_item;
 static sudo_make_grlist_item_t make_grlist_item = sudo_make_grlist_item;
+static sudo_valid_shell_t valid_shell = sudo_valid_shell;
 
 #define cmp_grnam	cmp_pwnam
 
@@ -86,7 +89,8 @@ static sudo_make_grlist_item_t make_grlist_item = sudo_make_grlist_item;
  */
 void
 sudo_pwutil_set_backend(sudo_make_pwitem_t pwitem, sudo_make_gritem_t gritem,
-    sudo_make_gidlist_item_t gidlist_item, sudo_make_grlist_item_t grlist_item)
+    sudo_make_gidlist_item_t gidlist_item, sudo_make_grlist_item_t grlist_item,
+    sudo_valid_shell_t check_shell)
 {
     debug_decl(sudo_pwutil_set_backend, SUDOERS_DEBUG_NSS);
 
@@ -98,8 +102,24 @@ sudo_pwutil_set_backend(sudo_make_pwitem_t pwitem, sudo_make_gritem_t gritem,
 	make_gidlist_item = gidlist_item;
     if (grlist_item != NULL)
 	make_grlist_item = grlist_item;
+    if (check_shell != NULL)
+	valid_shell = check_shell;
 
     debug_return;
+}
+
+/* Get the max number of user groups if set, or 0 if not set. */
+int
+sudo_pwutil_get_max_groups(void)
+{
+    return max_groups;
+}
+
+/* Set the max number of user groups (negative values ignored). */
+void
+sudo_pwutil_set_max_groups(int n)
+{
+    max_groups = n > 0 ? n : 0;
 }
 
 /*
@@ -337,7 +357,7 @@ sudo_mkpwent(const char *user, uid_t uid, gid_t gid, const char *home,
     struct cache_item *item;
     struct passwd *pw;
     size_t len, name_len, home_len, shell_len;
-    int i;
+    unsigned int i;
     debug_decl(sudo_mkpwent, SUDOERS_DEBUG_NSS);
 
     if (pwcache_byuid == NULL)
@@ -648,7 +668,7 @@ sudo_mkgrent(const char *group, gid_t gid, ...)
     size_t nmem, nsize, total;
     char *cp, *mem;
     va_list ap;
-    int i;
+    unsigned int i;
     debug_decl(sudo_mkgrent, SUDOERS_DEBUG_NSS);
 
     if (grcache_bygid == NULL)
@@ -902,7 +922,8 @@ done:
 }
 
 static void
-sudo_debug_group_list(const char *user, char * const *groups, int level)
+sudo_debug_group_list(const char *user, char * const *groups,
+    unsigned int level)
 {
     size_t i, len = 0;
     debug_decl(sudo_debug_group_list, SUDOERS_DEBUG_NSS);
@@ -918,7 +939,8 @@ sudo_debug_group_list(const char *user, char * const *groups, int level)
 	if (groupstr != NULL) {
 	    char *cp = groupstr;
 	    for (i = 0; groups[i] != NULL; i++) {
-		size_t n = snprintf(cp, len, "%s%s", i ? "," : "", groups[i]);
+		size_t n = (size_t)snprintf(cp, len, "%s%s", i ? "," : "",
+		    groups[i]);
 		if (n >= len)
 		    break;
 		cp += n;
@@ -937,6 +959,9 @@ sudo_set_grlist(struct passwd *pw, char * const *groups)
     struct cache_item key, *item;
     debug_decl(sudo_set_grlist, SUDOERS_DEBUG_NSS);
 
+    sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: setting group names for %s",
+	__func__, pw->pw_name);
+
     sudo_debug_group_list(pw->pw_name, groups, SUDO_DEBUG_DEBUG);
 
     if (grlist_cache == NULL) {
@@ -951,7 +976,7 @@ sudo_set_grlist(struct passwd *pw, char * const *groups)
      * Cache group db entry if it doesn't already exist
      */
     key.k.name = pw->pw_name;
-    getauthregistry(NULL, key.registry);
+    getauthregistry(pw->pw_name, key.registry);
     if (rbfind(grlist_cache, &key) == NULL) {
 	if ((item = make_grlist_item(pw, groups)) == NULL) {
 	    sudo_warnx(U_("unable to parse groups for %s"), pw->pw_name);
@@ -1005,7 +1030,7 @@ sudo_get_gidlist(const struct passwd *pw, unsigned int type)
     /*
      * Cache group db entry if it exists or a negative response if not.
      */
-    item = make_gidlist_item(pw, NULL, type);
+    item = make_gidlist_item(pw, -1, NULL, NULL, type);
     if (item == NULL) {
 	/* Out of memory? */
 	debug_return_ptr(NULL);
@@ -1039,12 +1064,17 @@ done:
 }
 
 int
-sudo_set_gidlist(struct passwd *pw, char * const *gids, unsigned int type)
+sudo_set_gidlist(struct passwd *pw, int ngids, GETGROUPS_T *gids,
+    char * const *gidstrs, unsigned int type)
 {
     struct cache_item key, *item;
     debug_decl(sudo_set_gidlist, SUDOERS_DEBUG_NSS);
 
-    sudo_debug_group_list(pw->pw_name, gids, SUDO_DEBUG_DEBUG);
+    sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: setting group-IDs for %s",
+	__func__, pw->pw_name);
+
+    /* XXX - ngids/gids too */
+    sudo_debug_group_list(pw->pw_name, gidstrs, SUDO_DEBUG_DEBUG);
 
     if (gidlist_cache == NULL) {
 	gidlist_cache = rbcreate(cmp_gidlist);
@@ -1059,9 +1089,9 @@ sudo_set_gidlist(struct passwd *pw, char * const *gids, unsigned int type)
      */
     key.k.name = pw->pw_name;
     key.type = type;
-    getauthregistry(NULL, key.registry);
+    getauthregistry(pw->pw_name, key.registry);
     if (rbfind(gidlist_cache, &key) == NULL) {
-	if ((item = make_gidlist_item(pw, gids, type)) == NULL) {
+	if ((item = make_gidlist_item(pw, ngids, gids, gidstrs, type)) == NULL) {
 	    sudo_warnx(U_("unable to parse gids for %s"), pw->pw_name);
 	    debug_return_int(-1);
 	}
@@ -1157,17 +1187,9 @@ user_in_group(const struct passwd *pw, const char *group)
 	else
 	    compare = strcmp;
 
-	/* Check the supplementary group vector. */
+	/* Check the user's group vector, which includes the primary group. */
 	for (i = 0; i < grlist->ngroups; i++) {
 	    if (compare(group, grlist->groups[i]) == 0) {
-		matched = true;
-		goto done;
-	    }
-	}
-
-	/* Check against user's primary (passwd file) group. */
-	if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
-	    if (compare(group, grp->gr_name) == 0) {
 		matched = true;
 		goto done;
 	    }
@@ -1185,4 +1207,18 @@ done:
     sudo_debug_printf(SUDO_DEBUG_DEBUG, "%s: user %s %sin group %s",
 	__func__, pw->pw_name, matched ? "" : "NOT ", group);
     debug_return_bool(matched);
+}
+
+/*
+ * Returns true if the user's shell is considered to be valid.
+ */
+bool
+user_shell_valid(const struct passwd *pw)
+{
+    debug_decl(user_shell_valid, SUDOERS_DEBUG_NSS);
+
+    if (!def_runas_check_shell)
+	debug_return_bool(true);
+
+    debug_return_bool(valid_shell(pw->pw_shell));
 }

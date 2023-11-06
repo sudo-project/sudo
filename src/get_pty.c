@@ -48,7 +48,7 @@
 # endif
 #endif
 
-#include "sudo.h"
+#include <sudo.h>
 
 #if defined(HAVE_OPENPTY)
 char *

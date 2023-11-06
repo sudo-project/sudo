@@ -46,31 +46,31 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #include <regex.h>
 #include <signal.h>
 #ifdef HAVE_GETOPT_LONG
 # include <getopt.h>
 # else
-# include "compat/getopt.h"
+# include <compat/getopt.h>
 #endif /* HAVE_GETOPT_LONG */
 
-#include "pathnames.h"
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_event.h"
-#include "sudo_eventlog.h"
-#include "sudo_lbuf.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_iolog.h"
-#include "sudo_plugin.h"
-#include "sudo_queue.h"
-#include "sudo_util.h"
+#include <pathnames.h>
+#include <sudo_compat.h>
+#include <sudo_conf.h>
+#include <sudo_debug.h>
+#include <sudo_event.h>
+#include <sudo_eventlog.h>
+#include <sudo_lbuf.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_iolog.h>
+#include <sudo_plugin.h>
+#include <sudo_queue.h>
+#include <sudo_util.h>
 
-#include "logging.h"
+#include <logging.h>
 
 struct replay_closure {
     const char *iolog_dir;
@@ -90,9 +90,9 @@ struct replay_closure {
     bool interactive;
     bool suspend_wait;
     struct io_buffer {
-	unsigned int len; /* buffer length (how much produced) */
-	unsigned int off; /* write position (how much already consumed) */
-	unsigned int toread; /* how much remains to be read */
+	size_t len; /* buffer length (how much produced) */
+	size_t off; /* write position (how much already consumed) */
+	size_t toread; /* how much remains to be read */
 	int lastc;	  /* last char written */
 	char buf[64 * 1024];
     } iobuf;
@@ -225,7 +225,7 @@ main(int argc, char *argv[])
 
     /* Read sudo.conf and initialize the debug subsystem. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
-	exit(EXIT_FAILURE);
+	return EXIT_FAILURE;
     sudo_debug_register(getprogname(), NULL, NULL,
 	sudo_conf_debug_files(getprogname()), -1);
 
@@ -269,9 +269,9 @@ main(int argc, char *argv[])
 	    if (dval <= 0.0) {
 		sudo_timespecclear(&max_delay_storage);
 	    } else {
-		max_delay_storage.tv_sec = dval;
-		max_delay_storage.tv_nsec =
-		    (dval - max_delay_storage.tv_sec) * 1000000000.0;
+		max_delay_storage.tv_sec = (time_t)dval;
+		max_delay_storage.tv_nsec = (long)
+		    ((dval - (double)max_delay_storage.tv_sec) * 1000000000.0);
 	    }
 	    max_delay = &max_delay_storage;
 	    break;
@@ -366,9 +366,9 @@ main(int argc, char *argv[])
     if ((evlog = iolog_parse_loginfo(iolog_dir_fd, iolog_dir)) == NULL)
 	goto done;
     printf(_("Replaying sudo session: %s"), evlog->command);
-    if (evlog->argv != NULL && evlog->argv[0] != NULL) {
-	for (i = 1; evlog->argv[i] != NULL; i++)
-	    printf(" %s", evlog->argv[i]);
+    if (evlog->runargv != NULL && evlog->runargv[0] != NULL) {
+	for (i = 1; evlog->runargv[i] != NULL; i++)
+	    printf(" %s", evlog->runargv[i]);
     }
 
     /* Setup terminal if appropriate. */
@@ -629,6 +629,9 @@ setup_terminal(struct eventlog *evlog, bool interactive, bool resize)
     /* Open fd for /dev/tty and set to raw mode. */
     if (interactive) {
 	ttyfd = open(_PATH_TTY, O_RDWR);
+	if (ttyfd == -1)
+	    sudo_fatal("%s", U_("unable to set tty to raw mode"));
+	if (ttyfd == -1)
 	while (!sudo_term_raw(ttyfd, SUDO_TERM_ISIG)) {
 	    if (errno != EINTR)
 		sudo_fatal("%s", U_("unable to set tty to raw mode"));
@@ -682,7 +685,7 @@ setup_terminal(struct eventlog *evlog, bool interactive, bool resize)
     }
 
     if (evlog->lines > terminal_lines || evlog->columns > terminal_cols) {
-	fputs(_("Warning: your terminal is too small to properly replay the log.\n"), stdout);
+	puts(_("Warning: your terminal is too small to properly replay the log."));
 	printf(_("Log geometry is %d x %d, your terminal's geometry is %d x %d."), evlog->lines, evlog->columns, terminal_lines, terminal_cols);
     }
     debug_return;
@@ -857,7 +860,7 @@ fill_iobuf(struct replay_closure *closure)
 	if (nread <= 0) {
 	    if (nread == 0) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "%s/%s: premature EOF, expected %u bytes",
+		    "%s/%s: premature EOF, expected %zu bytes",
 		    closure->iolog_dir, iolog_fd_to_name(timing->event),
 		    closure->iobuf.toread);
 	    } else {
@@ -869,8 +872,8 @@ fill_iobuf(struct replay_closure *closure)
 		closure->iolog_dir, iolog_fd_to_name(timing->event), errstr);
 	    debug_return_bool(false);
 	}
-	closure->iobuf.toread -= nread;
-	closure->iobuf.len += nread;
+	closure->iobuf.toread -= (size_t)nread;
+	closure->iobuf.len += (size_t)nread;
     }
 
     debug_return_bool(true);
@@ -1096,10 +1099,11 @@ write_output(int fd, int what, void *v)
     struct replay_closure *closure = v;
     const struct timing_closure *timing = &closure->timing;
     struct io_buffer *iobuf = &closure->iobuf;
-    unsigned iovcnt = 1;
+    int iovcnt = 1;
     struct iovec iov[2];
     bool added_cr = false;
-    size_t nbytes, nwritten;
+    size_t nbytes;
+    ssize_t nwritten;
     debug_decl(write_output, SUDO_DEBUG_UTIL);
 
     /* Refill iobuf if there is more to read and buf is empty. */
@@ -1136,7 +1140,7 @@ write_output(int fd, int what, void *v)
     }
 
     nwritten = writev(fd, iov, iovcnt);
-    switch ((ssize_t)nwritten) {
+    switch (nwritten) {
     case -1:
 	if (errno != EINTR && errno != EAGAIN)
 	    sudo_fatal(U_("unable to write to %s"), "stdout");
@@ -1145,9 +1149,9 @@ write_output(int fd, int what, void *v)
 	/* Should not happen. */
 	break;
     default:
-	if (added_cr && nwritten >= nbytes - 1) {
+	if (added_cr && (size_t)nwritten >= nbytes - 1) {
 	    /* The last char written was either '\r' or '\n'. */
-	    iobuf->lastc = nwritten == nbytes ? '\n' : '\r';
+	    iobuf->lastc = (size_t)nwritten == nbytes ? '\n' : '\r';
 	} else {
 	    /* Stash the last char written. */
 	    iobuf->lastc = *((char *)iov[0].iov_base + nwritten);
@@ -1156,7 +1160,7 @@ write_output(int fd, int what, void *v)
 	    /* Subtract one for the carriage return we added above. */
 	    nwritten--;
 	}
-	iobuf->off += nwritten;
+	iobuf->off += (size_t)nwritten;
 	break;
     }
 
@@ -1266,7 +1270,7 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
 		goto bad;
 	    if (!sub_expr)
 		sudo_fatalx("%s", U_("unmatched ')' in expression"));
-	    debug_return_int(av - argv + 1);
+	    debug_return_int((int)(av - argv) + 1);
 	default:
 	bad:
 	    sudo_fatalx(U_("unknown search term \"%s\""), *av);
@@ -1309,7 +1313,7 @@ parse_expr(struct search_node_list *head, char *argv[], bool sub_expr)
     if (not)
 	sudo_fatalx("%s", U_("illegal trailing \"!\""));
 
-    debug_return_int(av - argv);
+    debug_return_int((int)(av - argv));
 }
 
 static char *
@@ -1320,15 +1324,15 @@ expand_command(struct eventlog *evlog, char **newbuf)
     int ac;
     debug_decl(expand_command, SUDO_DEBUG_UTIL);
 
-    if (evlog->argv == NULL || evlog->argv[0] == NULL || evlog->argv[1] == NULL) {
+    if (evlog->runargv == NULL || evlog->runargv[0] == NULL || evlog->runargv[1] == NULL) {
 	/* No arguments, we can use the command as-is. */
 	*newbuf = NULL;
 	debug_return_str(evlog->command);
     }
 
     /* Skip argv[0], we use evlog->command instead. */
-    for (ac = 1; evlog->argv[ac] != NULL; ac++)
-	bufsize += strlen(evlog->argv[ac]) + 1;
+    for (ac = 1; evlog->runargv[ac] != NULL; ac++)
+	bufsize += strlen(evlog->runargv[ac]) + 1;
 
     if ((buf = malloc(bufsize)) == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -1340,13 +1344,13 @@ expand_command(struct eventlog *evlog, char **newbuf)
     cp += len;
     bufsize -= len;
 
-    for (ac = 1; evlog->argv[ac] != NULL; ac++) {
+    for (ac = 1; evlog->runargv[ac] != NULL; ac++) {
 	if (bufsize < 2)
 	    sudo_fatalx(U_("internal error, %s overflow"), __func__);
 	*cp++ = ' ';
 	bufsize--;
 
-	len = strlcpy(cp, evlog->argv[ac], bufsize);
+	len = strlcpy(cp, evlog->runargv[ac], bufsize);
 	if (len >= bufsize)
 	    sudo_fatalx(U_("internal error, %s overflow"), __func__);
 	cp += len;
@@ -1479,7 +1483,7 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
     struct stat sb;
     struct sudo_lbuf lbuf;
     size_t sdlen, sessions_len = 0, sessions_size = 0;
-    unsigned int i;
+    size_t i;
     int len;
     char pathbuf[PATH_MAX], **sessions = NULL;
 #ifdef HAVE_STRUCT_DIRENT_D_TYPE
@@ -1550,11 +1554,11 @@ find_sessions(const char *dir, regex_t *re, const char *user, const char *tty)
 
 	    /* Check for dir with a log file. */
 	    if (lstat(pathbuf, &sb) == 0 && S_ISREG(sb.st_mode)) {
-		pathbuf[sdlen + len - 4] = '\0';
+		pathbuf[sdlen + (size_t)len - 4] = '\0';
 		list_session(&lbuf, pathbuf, re, user, tty);
 	    } else {
 		/* Strip off "/log" and recurse if a non-log dir. */
-		pathbuf[sdlen + len - 4] = '\0';
+		pathbuf[sdlen + (size_t)len - 4] = '\0';
 		if (checked_type ||
 		    (lstat(pathbuf, &sb) == 0 && S_ISDIR(sb.st_mode)))
 		    find_sessions(pathbuf, re, user, tty);
@@ -1673,7 +1677,7 @@ read_keyboard(int fd, int what, void *v)
 }
 
 static void
-print_usage(FILE *fp)
+display_usage(FILE *fp)
 {
     fprintf(fp, _("usage: %s [-hnRS] [-d dir] [-m num] [-s num] ID\n"),
 	getprogname());
@@ -1681,18 +1685,18 @@ print_usage(FILE *fp)
 	getprogname());
 }
 
-static void
+sudo_noreturn static void
 usage(void)
 {
-    print_usage(stderr);
+    display_usage(stderr);
     exit(EXIT_FAILURE);
 }
 
-static void
+sudo_noreturn static void
 help(void)
 {
     (void) printf(_("%s - replay sudo session logs\n\n"), getprogname());
-    print_usage(stdout);
+    display_usage(stdout);
     (void) puts(_("\nOptions:\n"
 	"  -d, --directory=dir    specify directory for session logs\n"
 	"  -f, --filter=filter    specify which I/O type(s) to display\n"

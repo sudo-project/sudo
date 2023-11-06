@@ -434,24 +434,30 @@ Defaults are listed in brackets after the description.
         This is also used to support the "log_subcmds" sudoers
         setting.  For example, this means that for a shell run
         through sudo, the individual commands run by the shell are
-        also subject to rules in the sudoers file.  See the
-        "Preventing Shell Escapes" section in the sudoers man page
-        for details.  If specified, PATH should be a fully qualified
-        path name, e.g.  /usr/local/libexec/sudo/sudo_intercept.so.
-        If PATH is "no", intercept support will not be compiled in.
-        The default is to compile intercept support if libtool
-        supports building shared objects on your system.
+        also subject to rules in the sudoers file.  See the "Preventing
+        Shell Escapes" section in the sudoers man page for details.
+        If specified, PATH should either be a fully-qualified path
+        name such as /usr/local/libexec/sudo/sudo_intercept.so, or,
+        for AIX and Solaris systems, it may optionally be set to a
+        32-bit shared library followed by a 64-bit shared library,
+        separated by a colon.  If PATH is "no", intercept support
+        will not be compiled in.  The default is to compile intercept
+        support if libtool supports building shared objects on your
+        system.
 
     --with-noexec[=PATH]
         Enable support for the "noexec" functionality which prevents
         a dynamically-linked program being run by sudo from executing
         another program (think shell escapes).  See the "Preventing
         Shell Escapes" section in the sudoers man page for details.
-        If specified, PATH should be a fully qualified path name,
-        e.g. /usr/local/libexec/sudo/sudo_noexec.so.  If PATH is
-        "no", noexec support will not be compiled in.  The default
-        is to compile noexec support if libtool supports building
-        shared objects on your system.
+        If specified, PATH should either be a fully-qualified path
+        name such as /usr/local/libexec/sudo/sudo_noexec.so, or,
+        for AIX and Solaris systems, it may optionally be set to a
+        32-bit shared library followed by a 64-bit shared library,
+        separated by a colon.  If PATH is "no", noexec support
+        will not be compiled in.  The default is to compile noexec
+        support if libtool supports building shared objects on your
+        system.
 
     --with-selinux
         Enable support for role based access control (RBAC) on systems
@@ -703,6 +709,11 @@ Defaults are listed in brackets after the description.
         enables extra checks to make sure the environment does not
         become corrupted.
 
+    --enable-postinstall=PATH
+        Enable the use of a postinstall script that is run after
+        the "install" target but before packages as built as part
+        of the "package" target.
+
     --enable-warnings
         Enable compiler warnings when building sudo with gcc or clang.
 
@@ -836,7 +847,7 @@ Defaults are listed in brackets after the description.
         Sudoers option: exempt_group
 
     --with-fqdn
-        Define this if you want to put fully qualified host names in the sudoers
+        Define this if you want to put fully-qualified host names in the sudoers
         file.  Ie: instead of myhost you would use myhost.mydomain.edu.  You may
         still use the short form if you wish (and even mix the two).  Beware
         that turning FQDN on requires sudo to make DNS lookups which may make

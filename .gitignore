@@ -79,6 +79,7 @@ plugins/sudoers/sudoers
 plugins/sudoers/sudoreplay
 plugins/sudoers/testsudoers
 plugins/sudoers/tsdump
+plugins/sudoers/tsgetusershell.c
 plugins/sudoers/visudo
 plugins/sudoers/prologue
 plugins/sudoers/check_[a-z]*

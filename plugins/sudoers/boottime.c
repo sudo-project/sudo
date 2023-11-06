@@ -42,7 +42,7 @@
 # endif
 #endif /* !__linux__ */
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 /*
  * Fill in a struct timespec with the time the system booted.

@@ -31,7 +31,7 @@
 #endif /* HAVE_STRINGS_H */
 #include <ctype.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 extern struct sudo_nss sudo_nss_file;
 #ifdef HAVE_LDAP

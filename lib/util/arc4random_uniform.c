@@ -34,8 +34,8 @@
 # include <inttypes.h>
 #endif
 
-#include "sudo_compat.h"
-#include "sudo_rand.h"
+#include <sudo_compat.h>
+#include <sudo_rand.h>
 
 /*
  * Calculate a uniformly distributed random number less than upper_bound

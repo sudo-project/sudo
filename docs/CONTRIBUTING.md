@@ -12,18 +12,22 @@ writing a single line of code.
 
 ## Filing bug reports/issues
 
-If you find a bug in Sudo, you may open a [GitHub
-issue](https://github.com/sudo-project/sudo/issues) or file a
-[Bugzilla bug](https://bugzilla.sudo.ws).  If you would rather use
-email, messages may be sent to the [sudo-workers@sudo.ws
-mailing list](https://www.sudo.ws/mailman/listinfo/sudo-workers)
-(public) or to sudo@sudo.ws (private).
+If you believe you have found a bug, you can either file a bug
+report in the sudo bug database, https://bugzilla.sudo.ws/, or open
+a [GitHub issue](https://github.com/sudo-project/sudo/issues),
+whichever you find easier.  If you would prefer to use email,
+messages may be sent to the [sudo-workers@sudo.ws mailing
+list](https://www.sudo.ws/mailman/listinfo/sudo-workers) (public)
+or to sudo@sudo.ws (private).
 
-For information on reporting security issues, see [SECURITY.md](SECURITY.md).
+For sudo's security policy and how to report security issues, see
+[SECURITY.md](SECURITY.md).
 
-Include the version of sudo you are using, the operating system
-and/or distro that is affected, and, if possible, step-by-step
-instructions to reproduce the problem.
+Please check [TROUBLESHOOTING.md](TROUBLESHOOTING.md) *before*
+submitting a bug report.  When reporting bugs, be sure to include
+the version of sudo you are using, the operating system and/or
+distro that is affected, and, if possible, step-by-step instructions
+to reproduce the problem.
 
 ## Making changes to Sudo
 

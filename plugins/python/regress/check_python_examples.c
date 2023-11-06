@@ -24,7 +24,7 @@
 #include "testhelpers.h"
 #include <unistd.h>
 
-#include "sudo_dso.h"
+#include <sudo_dso.h>
 
 #define DECL_PLUGIN(type, variable_name) \
     static struct type *variable_name = NULL; \
@@ -474,7 +474,7 @@ create_debug_config(const char *debug_spec)
     if (asprintf(&content, "Debug %s %s/debug.log %s\n",
                  "python_plugin.so", data.tmp_dir, debug_spec) < 0)
     {
-        printf("Failed to allocate string\n");
+        puts("Failed to allocate string");
         goto cleanup;
     }
 
@@ -1527,6 +1527,9 @@ main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
     python_plugin_so_path = argv[0];
+
+    // Unbuffer stdout so we don't miss output during a crash.
+    setvbuf(stdout, NULL, _IONBF, 0);
 
     RUN_TEST(check_example_io_plugin_version_display(true));
     RUN_TEST(check_example_io_plugin_version_display(false));

@@ -28,16 +28,16 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_gettext.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_gettext.h>
+#include <sudo_util.h>
 
 /*
  * Make sure that the ID ends with a valid separator char.
@@ -74,7 +74,7 @@ sudo_strtoidx_v1(const char *p, const char *sep, char **endp, const char **errst
     id_t ret;
     debug_decl(sudo_strtoid, SUDO_DEBUG_UTIL);
 
-    ret = sudo_strtonumx(p, INT_MIN, UINT_MAX, &ep, &errstr);
+    ret = (id_t)sudo_strtonumx(p, INT_MIN, UINT_MAX, &ep, &errstr);
     if (errstr == NULL) {
 	/*
 	 * Disallow id -1 (UINT_MAX), which means "no change"

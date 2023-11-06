@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <signal.h>
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 sudo_dso_public int main(int argc, char *argv[]);
 
@@ -38,15 +38,20 @@ main(int argc, char *argv[])
 
 #include "mksiglist.h"
 
-    printf("const char *const sudo_sys_siglist[] = {\n");
-    for (i = 0; i < nitems(sudo_sys_siglist); i++) {
+    /*
+     * For portability we must not use %zu below.
+     * This program is compiled with the host C compiler,
+     * so it cannot use any of the functions in libsudo_util.
+     */
+    puts("const char *const sudo_sys_siglist[] = {");
+    for (i = 0; i < NSIG; i++) {
 	if (sudo_sys_siglist[i] != NULL) {
 	    printf("    \"%s\",\n", sudo_sys_siglist[i]);
 	} else {
 	    printf("    \"Signal %u\",\n", i);
 	}
     }
-    printf("};\n");
+    puts("};");
 
-    exit(EXIT_SUCCESS);
+    return EXIT_SUCCESS;
 }

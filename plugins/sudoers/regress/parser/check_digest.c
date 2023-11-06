@@ -23,12 +23,12 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_fatal.h"
-#include "sudo_queue.h"
-#include "sudo_digest.h"
-#include "sudo_util.h"
-#include "parse.h"
+#include <sudo_compat.h>
+#include <sudo_fatal.h>
+#include <sudo_queue.h>
+#include <sudo_digest.h>
+#include <sudo_util.h>
+#include <parse.h>
 
 sudo_dso_public int main(int argc, char *argv[]);
 
@@ -87,9 +87,23 @@ main(int argc, char *argv[])
     unsigned char *digest;
     unsigned int i, j;
     size_t digest_len;
+    int ch;
     unsigned int digest_type;
 
     initprogname(argc > 0 ? argv[0] : "check_digest");
+
+    while ((ch = getopt(argc, argv, "v")) != -1) {
+	switch (ch) {
+	case 'v':
+	    /* ignored */
+	    break;
+	default:
+	    fprintf(stderr, "usage: %s [-v]\n", getprogname());
+	    return EXIT_FAILURE;
+	}
+    }
+    argc -= optind;
+    argv += optind;
 
     for (digest_type = 0; digest_type < SUDO_DIGEST_INVALID; digest_type++) {
 	for (i = 0; i < NUM_TESTS; i++) {

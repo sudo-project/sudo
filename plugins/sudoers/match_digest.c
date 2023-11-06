@@ -32,13 +32,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
 #include <unistd.h>
 
-#include "sudoers.h"
-#include "sudo_digest.h"
+#include <sudoers.h>
+#include <sudo_digest.h>
 #include <gram.h>
 
-bool
+int
 digest_matches(int fd, const char *path,
     const struct command_digest_list *digests)
 {
@@ -47,17 +48,22 @@ digest_matches(int fd, const char *path,
     unsigned char *sudoers_digest = NULL;
     struct command_digest *digest;
     size_t digest_len = (size_t)-1;
-    bool matched = false;
+    int matched = DENY;
+    int fd2 = -1;
     debug_decl(digest_matches, SUDOERS_DEBUG_MATCH);
 
     if (TAILQ_EMPTY(digests)) {
 	/* No digest, no problem. */
-	debug_return_bool(true);
+	debug_return_int(ALLOW);
     }
 
     if (fd == -1) {
-	/* No file, no match. */
-	goto done;
+	fd2 = open(path, O_RDONLY|O_NONBLOCK);
+	if (fd2 == -1) {
+	    /* No file, no match. */
+	    goto done;
+	}
+	fd = fd2;
     }
 
     TAILQ_FOREACH(digest, digests, entries) {
@@ -84,9 +90,9 @@ digest_matches(int fd, const char *path,
 	}
 	if (strlen(digest->digest_str) == digest_len * 2) {
 	    /* Convert ascii hex to binary. */
-	    unsigned int i;
+	    size_t i;
 	    for (i = 0; i < digest_len; i++) {
-		const int h = sudo_hexchar(&digest->digest_str[i + i]);
+		const int h = sudo_hexchar(&digest->digest_str[2 * i]);
 		if (h == -1)
 		    goto bad_format;
 		sudoers_digest[i] = (unsigned char)h;
@@ -104,7 +110,7 @@ digest_matches(int fd, const char *path,
 	    }
 	}
 	if (memcmp(file_digest, sudoers_digest, digest_len) == 0) {
-	    matched = true;
+	    matched = ALLOW;
 	    break;
 	}
 
@@ -120,7 +126,9 @@ bad_format:
     sudo_warnx(U_("digest for %s (%s) is not in %s form"), path,
 	digest->digest_str, digest_type_to_name(digest->digest_type));
 done:
+    if (fd2 != -1)
+	close(fd2);
     free(sudoers_digest);
     free(file_digest);
-    debug_return_bool(matched);
+    debug_return_int(matched);
 }

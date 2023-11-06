@@ -29,16 +29,16 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #include <string.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_json.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_json.h>
+#include <sudo_util.h>
 
 /*
  * Double the size of the json buffer.
@@ -72,7 +72,7 @@ json_expand_buf(struct json_container *jsonc)
 static bool
 json_new_line(struct json_container *jsonc)
 {
-    int indent = jsonc->indent_level;
+    unsigned int indent = jsonc->indent_level;
     debug_decl(json_new_line, SUDO_DEBUG_UTIL);
 
     /* No non-essential white space in minimal mode. */
@@ -109,7 +109,7 @@ json_append_buf(struct json_container *jsonc, const char *str)
     }
 
     memcpy(jsonc->buf + jsonc->buflen, str, len);
-    jsonc->buflen += len;
+    jsonc->buflen += (unsigned int)len;
     jsonc->buf[jsonc->buflen] = '\0';
 
     debug_return_bool(true);
@@ -123,7 +123,7 @@ static bool
 json_append_string(struct json_container *jsonc, const char *str)
 {
     const char hex[] = "0123456789abcdef";
-    unsigned char ch;
+    char ch;
     debug_decl(json_append_string, SUDO_DEBUG_UTIL);
 
     if (!json_append_buf(jsonc, "\""))
@@ -157,7 +157,7 @@ json_append_string(struct json_container *jsonc, const char *str)
 	    ch = 't';
 	    break;
 	default:
-	    if (iscntrl(ch)) {
+	    if (iscntrl((unsigned char)ch)) {
 		/* Escape control characters like \u0000 */
 		*cp++ = '\\';
 		*cp++ = 'u';
@@ -180,8 +180,8 @@ json_append_string(struct json_container *jsonc, const char *str)
 }
 
 bool
-sudo_json_init_v2(struct json_container *jsonc, int indent, bool minimal,
-    bool memfatal, bool quiet)
+sudo_json_init_v2(struct json_container *jsonc, unsigned int indent,
+    bool minimal, bool memfatal, bool quiet)
 {
     debug_decl(sudo_json_init, SUDO_DEBUG_UTIL);
 
@@ -208,8 +208,8 @@ sudo_json_init_v2(struct json_container *jsonc, int indent, bool minimal,
 }
 
 bool
-sudo_json_init_v1(struct json_container *jsonc, int indent, bool minimal,
-    bool memfatal)
+sudo_json_init_v1(struct json_container *jsonc, unsigned int indent,
+    bool minimal, bool memfatal)
 {
     return sudo_json_init_v2(jsonc, indent, minimal, memfatal, false);
 }
@@ -318,7 +318,7 @@ sudo_json_add_value_int(struct json_container *jsonc, const char *name,
     struct json_value *value, bool as_object)
 {
     struct json_container saved_container = *jsonc;
-    char numbuf[(((sizeof(long long) * 8) + 2) / 3) + 2];
+    char numbuf[STRLEN_MAX_SIGNED(long long) + 1];
     debug_decl(sudo_json_add_value, SUDO_DEBUG_UTIL);
 
     /* Add comma if we are continuing an object/array. */

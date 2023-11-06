@@ -31,14 +31,13 @@
 #include <ctype.h>
 #include <errno.h>
 
-#include "sudoers.h"
-#include "sudo_dso.h"
+#include <sudoers.h>
+#include <sudo_dso.h>
 
 #if defined(HAVE_DLOPEN) || defined(HAVE_SHL_LOAD)
 
 static void *group_handle;
 static struct sudoers_group_plugin *group_plugin;
-const char *path_plugin_dir = _PATH_SUDO_PLUGIN_DIR;
 
 /*
  * Check for a fallback path when the original group plugin is not loadable.
@@ -80,7 +79,7 @@ group_plugin_fallback(char *path, size_t pathsize)
     }
 
     /* If directory ends in /lib/, try again with /lib/64/ or /lib64/. */
-    dirlen = slash - path;
+    dirlen = (int)(slash - path);
     if (dirlen < 4 || strncmp(slash - 4, "/lib", 4) != 0) {
 	goto done;
     }
@@ -98,7 +97,7 @@ group_plugin_fallback(char *path, size_t pathsize)
     if (dot == NULL) {
 	goto done;
     }
-    plen = dot - path;
+    plen = (int)(dot - path);
 
     /* If basename(path) doesn't match libfoo64.so, try adding the 64. */
     if (plen >= 2 && strncmp(dot - 2, "64", 2) == 0) {
@@ -130,9 +129,10 @@ done:
  * Returns -1 if unable to open the plugin, else it returns
  * the value from the plugin's init function.
  */
-int
-group_plugin_load(const char *plugin_info)
+static int
+group_plugin_load(const struct sudoers_context *ctx, const char *plugin_info)
 {
+    const char *plugin_dir = ctx->settings.plugin_dir;
     char *args, path[PATH_MAX];
     char **argv = NULL;
     int len, rc = -1;
@@ -144,17 +144,17 @@ group_plugin_load(const char *plugin_info)
      */
     if ((args = strpbrk(plugin_info, " \t")) != NULL) {
 	len = snprintf(path, sizeof(path), "%s%.*s",
-	    (*plugin_info != '/') ? path_plugin_dir : "",
+	    (*plugin_info != '/') ? plugin_dir : "",
 	    (int)(args - plugin_info), plugin_info);
 	args++;
     } else {
 	len = snprintf(path, sizeof(path), "%s%s",
-	    (*plugin_info != '/') ? path_plugin_dir : "", plugin_info);
+	    (*plugin_info != '/') ? plugin_dir : "", plugin_info);
     }
     if (len < 0 || len >= ssizeof(path)) {
 	errno = ENAMETOOLONG;
 	sudo_warn("%s%s",
-	    (*plugin_info != '/') ? path_plugin_dir : "", plugin_info);
+	    (*plugin_info != '/') ? plugin_dir : "", plugin_info);
 	goto done;
     }
 
@@ -206,7 +206,7 @@ group_plugin_load(const char *plugin_info)
             }
         }
 	if (ac != 0) {
-	    argv = reallocarray(NULL, ac + 1, sizeof(char *));
+	    argv = reallocarray(NULL, (size_t)ac + 1, sizeof(char *));
 	    if (argv == NULL) {
 		sudo_warnx(U_("%s: %s"), __func__,
 		    U_("unable to allocate memory"));
@@ -271,8 +271,8 @@ group_plugin_query(const char *user, const char *group,
  * No loadable shared object support.
  */
 
-int
-group_plugin_load(const char *plugin_info)
+static int
+group_plugin_load(const struct sudoers_context *ctx, const char *plugin_info)
 {
     debug_decl(group_plugin_load, SUDOERS_DEBUG_UTIL);
     debug_return_int(false);
@@ -299,8 +299,8 @@ group_plugin_query(const char *user, const char *group,
  * Group plugin sudoers callback.
  */
 bool
-cb_group_plugin(const char *file, int line, int column,
-    const union sudo_defs_val *sd_un, int op)
+cb_group_plugin(struct sudoers_context *ctx, const char *file,
+    int line, int column, const union sudo_defs_val *sd_un, int op)
 {
     bool rc = true;
     debug_decl(cb_group_plugin, SUDOERS_DEBUG_PLUGIN);
@@ -308,6 +308,6 @@ cb_group_plugin(const char *file, int line, int column,
     /* Unload any existing group plugin before loading a new one. */
     group_plugin_unload();
     if (sd_un->str != NULL)
-	rc = group_plugin_load(sd_un->str);
+	rc = group_plugin_load(ctx, sd_un->str);
     debug_return_bool(rc);
 }

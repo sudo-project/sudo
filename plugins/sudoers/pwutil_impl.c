@@ -38,8 +38,8 @@
 #include <pwd.h>
 #include <grp.h>
 
-#include "sudoers.h"
-#include "pwutil.h"
+#include <sudoers.h>
+#include <pwutil.h>
 
 #ifndef LOGIN_NAME_MAX
 # ifdef _POSIX_LOGIN_NAME_MAX
@@ -48,6 +48,20 @@
 #  define LOGIN_NAME_MAX 9
 # endif
 #endif /* LOGIN_NAME_MAX */
+
+/*
+ * For testsudoers and cvtsudoers need to support building with a different
+ * function prefix and using custom getpwnam/getpwuid/getgrnam/getgrgid.
+ */
+#define EXPAND(p, f)	p ## _ ## f
+#define WRAP(p, f)	EXPAND(p, f)
+#ifdef PWUTIL_PREFIX
+# define CALL(x)	WRAP(PWUTIL_PREFIX, x)
+# define PREFIX(x)	WRAP(PWUTIL_PREFIX, x)
+#else
+# define CALL(x)	x
+# define PREFIX(x)	WRAP(sudo, x)
+#endif
 
 #define FIELD_SIZE(src, name, size)			\
 do {							\
@@ -76,7 +90,7 @@ do {							\
  * to ENOMEM or ENOENT respectively.
  */
 struct cache_item *
-sudo_make_pwitem(uid_t uid, const char *name)
+PREFIX(make_pwitem)(uid_t uid, const char *name)
 {
     char *cp;
     const char *pw_shell;
@@ -89,7 +103,7 @@ sudo_make_pwitem(uid_t uid, const char *name)
     debug_decl(sudo_make_pwitem, SUDOERS_DEBUG_NSS);
 
     /* Look up by name or uid. */
-    pw = name ? getpwnam(name) : getpwuid(uid);
+    pw = name ? CALL(getpwnam)(name) : CALL(getpwuid)(uid);
     if (pw == NULL) {
 	errno = ENOENT;
 	debug_return_ptr(NULL);
@@ -161,7 +175,7 @@ sudo_make_pwitem(uid_t uid, const char *name)
  * to ENOMEM or ENOENT respectively.
  */
 struct cache_item *
-sudo_make_gritem(gid_t gid, const char *name)
+PREFIX(make_gritem)(gid_t gid, const char *name)
 {
     char *cp;
     size_t nsize, psize, total, len, nmem = 0;
@@ -170,7 +184,7 @@ sudo_make_gritem(gid_t gid, const char *name)
     debug_decl(sudo_make_gritem, SUDOERS_DEBUG_NSS);
 
     /* Look up by name or gid. */
-    gr = name ? getgrnam(name) : getgrgid(gid);
+    gr = name ? CALL(getgrnam)(name) : CALL(getgrgid)(gid);
     if (gr == NULL) {
 	errno = ENOENT;
 	debug_return_ptr(NULL);
@@ -231,32 +245,29 @@ sudo_make_gritem(gid_t gid, const char *name)
 }
 
 /*
- * Dynamically allocate space for a struct item plus the key and data
- * elements.  Fills in datum from user_gids or from sudo_getgrouplist2(3).
+ * Dynamically allocate space for a struct item plus the key and data elements.
  */
 struct cache_item *
-sudo_make_gidlist_item(const struct passwd *pw, char * const *gidstrs,
-    unsigned int type)
+PREFIX(make_gidlist_item)(const struct passwd *pw, int ngids, GETGROUPS_T *gids,
+    char * const *gidstrs, unsigned int type)
 {
     char *cp;
     size_t nsize, total;
     struct cache_item_gidlist *glitem;
     struct gid_list *gidlist;
-    GETGROUPS_T *gids;
-    int i, ngids;
+    int i;
     debug_decl(sudo_make_gidlist_item, SUDOERS_DEBUG_NSS);
 
     /*
      * Ignore supplied gids if the entry type says we must query the group db.
      */
-    if (type != ENTRY_TYPE_QUERIED && (gidstrs != NULL ||
-	    (pw == sudo_user.pw && sudo_user.gids != NULL))) {
-	if (gidstrs != NULL) {
-	    /* Use supplied gids list (string format). */
+    if (type != ENTRY_TYPE_QUERIED && (gids != NULL || gidstrs != NULL)) {
+	if (gids == NULL) {
+	    /* Convert the supplied gids list from string format to gid_t. */
 	    ngids = 1;
 	    for (i = 0; gidstrs[i] != NULL; i++)
 		ngids++;
-	    gids = reallocarray(NULL, ngids, sizeof(GETGROUPS_T));
+	    gids = reallocarray(NULL, (size_t)ngids, sizeof(GETGROUPS_T));
 	    if (gids == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "unable to allocate memory");
@@ -275,30 +286,24 @@ sudo_make_gidlist_item(const struct passwd *pw, char * const *gidstrs,
 		if (gid != gids[0])
 		    gids[ngids++] = gid;
 	    }
-	} else {
-	    /* Adopt sudo_user.gids. */
-	    gids = user_gids;
-	    ngids = user_ngids;
-	    user_gids = NULL;
-	    user_ngids = 0;
 	}
 	type = ENTRY_TYPE_FRONTEND;
     } else {
 	type = ENTRY_TYPE_QUERIED;
-	if (sudo_user.max_groups > 0) {
-	    ngids = sudo_user.max_groups;
-	    gids = reallocarray(NULL, ngids, sizeof(GETGROUPS_T));
+	ngids = sudo_pwutil_get_max_groups();
+	if (ngids > 0) {
+	    gids = reallocarray(NULL, (size_t)ngids, sizeof(GETGROUPS_T));
 	    if (gids == NULL) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "unable to allocate memory");
 		debug_return_ptr(NULL);
 	    }
 	    /* Clamp to max_groups if insufficient space for all groups. */
-	    if (sudo_getgrouplist2(pw->pw_name, pw->pw_gid, &gids, &ngids) == -1)
-		ngids = sudo_user.max_groups;
+	    if (PREFIX(getgrouplist2)(pw->pw_name, pw->pw_gid, &gids, &ngids) == -1)
+		ngids = sudo_pwutil_get_max_groups();
 	} else {
 	    gids = NULL;
-	    if (sudo_getgrouplist2(pw->pw_name, pw->pw_gid, &gids, &ngids) == -1) {
+	    if (PREFIX(getgrouplist2)(pw->pw_name, pw->pw_gid, &gids, &ngids) == -1) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "unable to allocate memory");
 		debug_return_ptr(NULL);
@@ -314,7 +319,7 @@ sudo_make_gidlist_item(const struct passwd *pw, char * const *gidstrs,
     /* Allocate in one big chunk for easy freeing. */
     nsize = strlen(pw->pw_name) + 1;
     total = sizeof(*glitem) + nsize;
-    total += sizeof(gid_t *) * ngids;
+    total += sizeof(gid_t *) * (size_t)ngids;
 
     if ((glitem = calloc(1, total)) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -331,7 +336,7 @@ sudo_make_gidlist_item(const struct passwd *pw, char * const *gidstrs,
     gidlist = &glitem->gidlist;
     cp = (char *)(glitem + 1);
     gidlist->gids = (gid_t *)cp;
-    cp += sizeof(gid_t) * ngids;
+    cp += sizeof(gid_t) * (size_t)ngids;
 
     /* Set key and datum. */
     memcpy(cp, pw->pw_name, nsize);
@@ -356,7 +361,7 @@ sudo_make_gidlist_item(const struct passwd *pw, char * const *gidstrs,
  * elements.  Fills in group names from a call to sudo_get_gidlist().
  */
 struct cache_item *
-sudo_make_grlist_item(const struct passwd *pw, char * const *unused1)
+PREFIX(make_grlist_item)(const struct passwd *pw, char * const *unused1)
 {
     char *cp;
     size_t groupname_len, len, ngroups, nsize, total;
@@ -376,7 +381,7 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1)
     }
 
 #ifdef _SC_LOGIN_NAME_MAX
-    groupname_len = MAX(sysconf(_SC_LOGIN_NAME_MAX), 32);
+    groupname_len = MAX((size_t)sysconf(_SC_LOGIN_NAME_MAX), 32);
 #else
     groupname_len = MAX(LOGIN_NAME_MAX, 32);
 #endif
@@ -384,8 +389,8 @@ sudo_make_grlist_item(const struct passwd *pw, char * const *unused1)
     /* Allocate in one big chunk for easy freeing. */
     nsize = strlen(pw->pw_name) + 1;
     total = sizeof(*grlitem) + nsize;
-    total += sizeof(char *) * gidlist->ngids;
-    total += groupname_len * gidlist->ngids;
+    total += sizeof(char *) * (size_t)gidlist->ngids;
+    total += groupname_len * (size_t)gidlist->ngids;
 
 again:
     if ((grlitem = calloc(1, total)) == NULL) {
@@ -403,7 +408,7 @@ again:
     grlist = &grlitem->grlist;
     cp = (char *)(grlitem + 1);
     grlist->groups = (char **)cp;
-    cp += sizeof(char *) * gidlist->ngids;
+    cp += sizeof(char *) * (size_t)gidlist->ngids;
 
     /* Set key and datum. */
     memcpy(cp, pw->pw_name, nsize);
@@ -423,7 +428,7 @@ again:
     for (i = 0; i < gidlist->ngids; i++) {
 	if ((grp = sudo_getgrgid(gidlist->gids[i])) != NULL) {
 	    len = strlen(grp->gr_name) + 1;
-	    if (cp - (char *)grlitem + len > total) {
+	    if ((size_t)(cp - (char *)grlitem) + len > total) {
 		total += len + groupname_len;
 		free(grlitem);
 		sudo_gr_delref(grp);
@@ -435,7 +440,7 @@ again:
 	    sudo_gr_delref(grp);
 	}
     }
-    grlist->ngroups = ngroups;
+    grlist->ngroups = (int)ngroups;
     sudo_gidlist_delref(gidlist);
 
 #ifdef HAVE_SETAUTHDB
@@ -443,4 +448,26 @@ again:
 #endif
 
     debug_return_ptr(&grlitem->cache);
+}
+
+/*
+ * Returns true if the specified shell is allowed by /etc/shells, else false.
+ */
+bool
+PREFIX(valid_shell)(const char *shell)
+{
+    const char *entry;
+    debug_decl(valid_shell, SUDOERS_DEBUG_NSS);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: checking /etc/shells for %s", __func__, shell);
+
+    CALL(setusershell)();
+    while ((entry = CALL(getusershell)()) != NULL) {
+	if (strcmp(entry, shell) == 0)
+	    debug_return_bool(true);
+    }
+    CALL(endusershell)();
+
+    debug_return_bool(false);
 }

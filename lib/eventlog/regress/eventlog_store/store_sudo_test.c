@@ -26,15 +26,15 @@
 
 #define SUDO_ERROR_WRAP 0
 
-#include "sudo_compat.h"
-#include "sudo_eventlog.h"
-#include "sudo_fatal.h"
-#include "sudo_lbuf.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_eventlog.h>
+#include <sudo_fatal.h>
+#include <sudo_lbuf.h>
+#include <sudo_util.h>
 
 sudo_dso_public int main(int argc, char *argv[]);
 
-static void
+sudo_noreturn static void
 usage(void)
 {
     fprintf(stderr, "usage: %s [-cv] input_file ...\n",
@@ -51,7 +51,7 @@ compare(FILE *fp, const char *infile, const char *output)
 
     /* Expect two log lines, one for accept, one for exit. */
     for (i = 0; i < 2; i++) {
-	ssize_t output_len = strcspn(output, "\n");
+	ssize_t output_len = (ssize_t)strcspn(output, "\n");
 	ssize_t len = getdelim(&line, &linesize, '\n', fp);
 	if (len == -1) {
 	    sudo_warn("getdelim");
@@ -60,7 +60,7 @@ compare(FILE *fp, const char *infile, const char *output)
 	if (line[len - 1] == '\n')
 	    len--;
 
-	if (len != output_len || strncmp(line, output, len) != 0) {
+	if (len != output_len || strncmp(line, output, (size_t)len) != 0) {
 	    fprintf(stderr, "%s: %s mismatch\n", infile, i ? "exit" : "accept");
 	    fprintf(stderr, "expected: %.*s\n", (int)len, line);
 	    fprintf(stderr, "got     : %.*s\n", (int)output_len, output);
@@ -99,6 +99,7 @@ main(int argc, char *argv[])
 		break;
 	    default:
 		usage();
+		/* NOTREACHED */
 	}
     }
     argc -= optind;

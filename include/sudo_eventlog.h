@@ -24,7 +24,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 
 /* Supported event types. */
@@ -73,11 +73,11 @@ enum eventlog_format {
 struct eventlog_config {
     int type;
     enum eventlog_format format;
+    size_t file_maxlen;
+    size_t syslog_maxlen;
     int syslog_acceptpri;
     int syslog_rejectpri;
     int syslog_alertpri;
-    int syslog_maxlen;
-    int file_maxlen;
     uid_t mailuid;
     bool omit_hostname;
     const char *logpath;
@@ -105,13 +105,15 @@ struct eventlog {
     char *runuser;
     char *peeraddr;
     char *signal_name;
+    char *source;
     char *submithost;
     char *submituser;
     char *submitgroup;
+    char **submitenv;
     char *ttyname;
-    char **argv;
+    char **runargv;
+    char **runenv;
     char **env_add;
-    char **envp;
     struct timespec submit_time;
     struct timespec iolog_offset;
     struct timespec run_time;
@@ -146,8 +148,8 @@ void eventlog_set_format(enum eventlog_format format);
 void eventlog_set_syslog_acceptpri(int pri);
 void eventlog_set_syslog_rejectpri(int pri);
 void eventlog_set_syslog_alertpri(int pri);
-void eventlog_set_syslog_maxlen(int len);
-void eventlog_set_file_maxlen(int len);
+void eventlog_set_syslog_maxlen(size_t len);
+void eventlog_set_file_maxlen(size_t len);
 void eventlog_set_mailuid(uid_t uid);
 void eventlog_set_omit_hostname(bool omit_hostname);
 void eventlog_set_logpath(const char *path);

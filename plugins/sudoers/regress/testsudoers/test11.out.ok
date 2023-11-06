@@ -7,7 +7,9 @@ testsudoers: unable to open sudoers.local: No such file or directory
 
 Entries for user root:
 
-Command unmatched
+Password required
+
+Parse error
 
 Testing #include with garbage after the path name
 
@@ -18,4 +20,6 @@ testsudoers: unable to open sudoers.local: No such file or directory
 
 Entries for user root:
 
-Command unmatched
+Password required
+
+Parse error

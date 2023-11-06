@@ -24,19 +24,23 @@
 #include <config.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdarg.h>
 #include <errno.h>
 
-#include "sudo_compat.h"
-#include "sudo_plugin.h"
-#include "sudo_debug.h"
-#include "pathnames.h"
+#include <sudo_compat.h>
+#include <sudo_util.h>
+#include <sudo_plugin.h>
+#include <sudo_debug.h>
+#include <pathnames.h>
 
 static int
-sudo_printf_int(int msg_type, const char *fmt, ...)
+sudo_printf_int(int msg_type, const char * restrict fmt, ...)
 {
     FILE *fp = stdout;
     FILE *ttyfp = NULL;
+    char sbuf[8192];
+    char *buf = sbuf;
     va_list ap;
     int len;
 
@@ -50,9 +54,26 @@ sudo_printf_int(int msg_type, const char *fmt, ...)
 	fp = stderr;
 	FALLTHROUGH;
     case SUDO_CONV_INFO_MSG:
+	/*
+	 * We use vsnprintf() instead of vfprintf() here to avoid
+	 * problems on systems where the system printf(3) is not
+	 * C99-compliant.  We use our own snprintf() on such systems.
+	 */
 	va_start(ap, fmt);
-	len = vfprintf(ttyfp ? ttyfp : fp, fmt, ap);
+	len = vsnprintf(sbuf, sizeof(sbuf), fmt, ap);
 	va_end(ap);
+	if (len < 0 || len >= ssizeof(sbuf)) {
+	    /* Try again with a dynamically-sized buffer. */
+	    va_start(ap, fmt);
+	    len = vasprintf(&buf, fmt, ap);
+	    va_end(ap);
+	}
+	if (len != -1) {
+	    if (fwrite(buf, 1, len, ttyfp ? ttyfp : fp) == 0)
+		len = -1;
+	    if (buf != sbuf)
+		free(buf);
+	}
 	break;
     default:
 	len = -1;

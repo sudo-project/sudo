@@ -26,14 +26,14 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #include <string.h>
 #include <stdarg.h>
 #include <signal.h>
 #include <pwd.h>
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 #define MAX_OUTPUT (2 << 16)
 
@@ -49,8 +49,8 @@ char *str_replaced(const char *string, size_t dest_length, const char *old, cons
 // same, but "string" must be able to store 'max_length' number of characters including the null terminator
 void str_replace_in_place(char *string, size_t max_length, const char *old, const char *new);
 
-int vsnprintf_append(char *output, size_t max_output_len, const char *fmt, va_list args);
-int snprintf_append(char *output, size_t max_output_len, const char *fmt, ...);
+int vsnprintf_append(char * restrict output, size_t max_output_len, const char * restrict fmt, va_list args);
+int snprintf_append(char * restrict output, size_t max_output_len, const char * restrict fmt, ...);
 
 int str_array_count(char **str_array);
 void str_array_snprint(char *out_str, size_t max_len, char **str_array, int array_len);

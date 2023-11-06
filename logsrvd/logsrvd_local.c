@@ -37,7 +37,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
@@ -50,19 +50,19 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_event.h"
-#include "sudo_eventlog.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_json.h"
-#include "sudo_iolog.h"
-#include "sudo_rand.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_conf.h>
+#include <sudo_debug.h>
+#include <sudo_event.h>
+#include <sudo_eventlog.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_json.h>
+#include <sudo_iolog.h>
+#include <sudo_rand.h>
+#include <sudo_util.h>
 
-#include "logsrvd.h"
+#include <logsrvd.h>
 
 struct logsrvd_info_closure {
     InfoMessage **info_msgs;
@@ -404,8 +404,8 @@ store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len,
     debug_decl(store_exit_local, SUDO_DEBUG_UTIL);
 
     if (msg->run_time != NULL) {
-	evlog->run_time.tv_sec = msg->run_time->tv_sec;
-	evlog->run_time.tv_nsec = msg->run_time->tv_nsec;
+	evlog->run_time.tv_sec = (time_t)msg->run_time->tv_sec;
+	evlog->run_time.tv_nsec = (long)msg->run_time->tv_nsec;
     }
     evlog->exit_value = msg->exit_value;
     if (msg->signal != NULL && msg->signal[0] != '\0') {
@@ -430,6 +430,8 @@ store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len,
     }
 
     if (closure->log_io) {
+	mode_t mode;
+
 	/* Store the run time and exit status in log.json. */
 	if (!store_exit_info_json(closure->iolog_dir_fd, evlog)) {
 	    closure->errstr = _("error logging exit event");
@@ -437,7 +439,7 @@ store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len,
 	}
 
 	/* Clear write bits from I/O timing file to indicate completion. */
-	mode_t mode = logsrvd_conf_iolog_mode();
+	mode = logsrvd_conf_iolog_mode();
 	CLR(mode, S_IWUSR|S_IWGRP|S_IWOTH);
 	if (fchmodat(closure->iolog_dir_fd, "timing", mode, 0) == -1) {
 	    sudo_warn("chmod 0%o %s/%s", (unsigned int)mode, "timing",
@@ -457,8 +459,8 @@ store_restart_local(RestartMessage *msg, uint8_t *buf, size_t len,
     int iofd;
     debug_decl(store_restart_local, SUDO_DEBUG_UTIL);
 
-    target.tv_sec = msg->resume_point->tv_sec;
-    target.tv_nsec = msg->resume_point->tv_nsec;
+    target.tv_sec = (time_t)msg->resume_point->tv_sec;
+    target.tv_nsec = (long)msg->resume_point->tv_nsec;
 
     /* We must allocate closure->evlog for iolog_path. */
     closure->evlog = calloc(1, sizeof(*closure->evlog));
@@ -542,8 +544,8 @@ store_alert_local(AlertMessage *msg, uint8_t *buf, size_t len,
 	if (closure->evlog == NULL)
 	    closure->evlog = evlog;
     }
-    alert_time.tv_sec = msg->alert_time->tv_sec;
-    alert_time.tv_nsec = msg->alert_time->tv_nsec;
+    alert_time.tv_sec = (time_t)msg->alert_time->tv_sec;
+    alert_time.tv_nsec = (long)msg->alert_time->tv_nsec;
 
     if (!eventlog_alert(evlog, 0, &alert_time, msg->reason, NULL)) {
 	closure->errstr = _("error logging alert event");
@@ -603,7 +605,7 @@ store_iobuf_local(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t buflen,
 
     /* Write timing data. */
     if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
-	    len, &errstr)) {
+	    (size_t)len, &errstr)) {
 	sudo_warnx(U_("%s/%s: %s"), evlog->iolog_path,
 	    iolog_fd_to_name(IOFD_TIMING), errstr);
 	goto bad;
@@ -651,7 +653,7 @@ store_winsize_local(ChangeWindowSize *msg, uint8_t *buf, size_t buflen,
 
     /* Write timing data. */
     if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
-	    len, &errstr)) {
+	    (size_t)len, &errstr)) {
 	sudo_warnx(U_("%s/%s: %s"), closure->evlog->iolog_path,
 	    iolog_fd_to_name(IOFD_TIMING), errstr);
 	goto bad;
@@ -686,7 +688,7 @@ store_suspend_local(CommandSuspend *msg, uint8_t *buf, size_t buflen,
 
     /* Write timing data. */
     if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
-	    len, &errstr)) {
+	    (size_t)len, &errstr)) {
 	sudo_warnx(U_("%s/%s: %s"), closure->evlog->iolog_path,
 	    iolog_fd_to_name(IOFD_TIMING), errstr);
 	goto bad;

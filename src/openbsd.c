@@ -23,7 +23,7 @@
 
 #include <config.h>
 
-#include "sudo.h"
+#include <sudo.h>
 
 int
 os_init(int argc, char *argv[], char *envp[])

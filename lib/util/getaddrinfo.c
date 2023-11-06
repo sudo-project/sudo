@@ -50,8 +50,8 @@
 # include <resolv.h>
 #endif /* NEED_RESOLV_H */
 
-#include "sudo_compat.h"
-#include "compat/getaddrinfo.h"
+#include <sudo_compat.h>
+#include <compat/getaddrinfo.h>
 
 /* We need access to h_errno to map errors from gethostbyname. */
 #ifndef HAVE_DECL_H_ERRNO
@@ -282,7 +282,7 @@ gai_lookup(const char *nodename, int flags, int socktype, unsigned short port,
     struct in_addr addr;
     struct hostent *host;
     const char *canonical;
-    int i;
+    size_t i;
 
     if (inet_pton(AF_INET, nodename, &addr)) {
         canonical = (flags & AI_CANONNAME) ? nodename : NULL;

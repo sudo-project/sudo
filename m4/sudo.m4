@@ -342,16 +342,12 @@ dnl check unsetenv() return value
 dnl
 AC_DEFUN([SUDO_FUNC_UNSETENV_VOID],
   [AC_CACHE_CHECK([whether unsetenv returns void], [sudo_cv_func_unsetenv_void],
-    [AC_RUN_IFELSE([AC_LANG_PROGRAM(
-      [AC_INCLUDES_DEFAULT
-        int unsetenv();
-      ], [
-        [return unsetenv("FOO") != 0;]
+    [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT], [
+        [return unsetenv("FOO");]
       ])
     ],
     [sudo_cv_func_unsetenv_void=no],
-    [sudo_cv_func_unsetenv_void=yes],
-    [sudo_cv_func_unsetenv_void=no])])
+    [sudo_cv_func_unsetenv_void=yes])])
     if test $sudo_cv_func_unsetenv_void = yes; then
       AC_DEFINE(UNSETENV_VOID, 1,
         [Define to 1 if the 'unsetenv' function returns void instead of 'int'.])
@@ -362,17 +358,37 @@ dnl
 dnl check putenv() argument for const
 dnl
 AC_DEFUN([SUDO_FUNC_PUTENV_CONST],
-[AC_CACHE_CHECK([whether putenv takes a const argument],
-sudo_cv_func_putenv_const,
-[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
-int putenv(const char *string) {return 0;}], [])],
+  [AC_CACHE_CHECK([whether putenv takes a const argument], [sudo_cv_func_putenv_const],
+    [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
+      int putenv(const char *string) {return 0;}
+    ], [])],
     [sudo_cv_func_putenv_const=yes],
     [sudo_cv_func_putenv_const=no])
   ])
   if test $sudo_cv_func_putenv_const = yes; then
-    AC_DEFINE(PUTENV_CONST, const, [Define to const if the 'putenv' takes a const argument.])
+    AC_DEFINE(PUTENV_CONST, const, [Define to const if the 'putenv' function takes a const argument.])
   else
     AC_DEFINE(PUTENV_CONST, [])
+  fi
+])
+
+dnl
+dnl check if ioctl() request argument is int.
+dnl
+AC_DEFUN([SUDO_FUNC_IOCTL_REQ_INT],
+  [AC_CACHE_CHECK([whether ioctl() takes an int request argument], [sudo_cv_func_ioctl_req_int],
+    [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <sys/types.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+      int ioctl(int fd, int req, ...) {return 0;}
+    ], [])],
+    [sudo_cv_func_ioctl_req_int=yes],
+    [sudo_cv_func_ioctl_req_int=no])
+  ])
+  if test $sudo_cv_func_ioctl_req_int = yes; then
+    AC_DEFINE(IOCTL_REQ_CAST, [(int)], [Define to (int) if the 'ioctl' function request takes an int request argument.])
+  else
+    AC_DEFINE(IOCTL_REQ_CAST, [])
   fi
 ])
 
@@ -437,39 +453,6 @@ AC_DEFUN([SUDO_SOCK_SIN_LEN], [
 #	  include <sys/socket.h>]
     )]
 )
-
-dnl
-dnl check for max length of uid_t in string representation.
-dnl we can't really trust UID_MAX or MAXUID since they may exist
-dnl only for backward compatibility.
-dnl
-AC_DEFUN([SUDO_UID_T_LEN],
-[AC_REQUIRE([AC_TYPE_UID_T])
-AC_CACHE_CHECK([max length of uid_t], sudo_cv_uid_t_len, [
-rm -f conftestdata
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <stdio.h>
-#include <string.h>
-#include <pwd.h>
-#include <limits.h>
-#include <sys/types.h>
-int main() {
-  FILE *f;
-  char b[1024];
-  uid_t u = (uid_t) -1;
-
-  if ((f = fopen("conftestdata", "w")) == NULL)
-    return(1);
-
-  (void) sprintf(b, "%lu", (unsigned long) u);
-  (void) fprintf(f, "%d\n", (int)strlen(b));
-  (void) fclose(f);
-  return(0);
-}]])], [sudo_cv_uid_t_len=`cat conftestdata`], [sudo_cv_uid_t_len=10], [sudo_cv_uid_t_len=10])
-])
-rm -f conftestdata
-AC_DEFINE_UNQUOTED(MAX_UID_T_LEN, $sudo_cv_uid_t_len, [Define to the max length of a uid_t in string context (excluding the NUL).])
-])
 
 dnl
 dnl There are three different utmp variants we need to check for.
@@ -639,6 +622,11 @@ AC_DEFUN([SUDO_PVS_STUDIO_CFG], [
 		analysis-mode = 4
 		language = C
 	EOF
+
+	# Check for a license file in the default location
+	if test -f "$HOME/.config/PVS-Studio/PVS-Studio.lic"; then
+	    echo "lic-file = $HOME/.config/PVS-Studio/PVS-Studio.lic" >> PVS-Studio.cfg
+	fi
     fi
 ])
 

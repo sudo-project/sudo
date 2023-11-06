@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2015, 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2015, 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -29,19 +29,19 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 #ifdef SUDOERS_LOG_CLIENT
-# include "log_client.h"
+# include <log_client.h>
 #endif
 
 #ifdef HAVE_BSM_AUDIT
-# include "bsm_audit.h"
+# include <bsm_audit.h>
 #endif
 #ifdef HAVE_LINUX_AUDIT
-# include "linux_audit.h"
+# include <linux_audit.h>
 #endif
 #ifdef HAVE_SOLARIS_AUDIT
-# include "solaris_audit.h"
+# include <solaris_audit.h>
 #endif
 
 #ifdef SUDOERS_LOG_CLIENT
@@ -53,14 +53,14 @@ char *audit_msg = NULL;
 extern sudo_dso_public struct audit_plugin sudoers_audit;
 
 static int
-audit_success(char *const argv[])
+audit_success(const struct sudoers_context *ctx, char *const argv[])
 {
     int rc = 0;
     debug_decl(audit_success, SUDOERS_DEBUG_AUDIT);
 
     if (argv != NULL) {
 #ifdef HAVE_BSM_AUDIT
-	if (bsm_audit_success(argv) == -1)
+	if (bsm_audit_success(ctx, argv) == -1)
 	    rc = -1;
 #endif
 #ifdef HAVE_LINUX_AUDIT
@@ -68,7 +68,7 @@ audit_success(char *const argv[])
 	    rc = -1;
 #endif
 #ifdef HAVE_SOLARIS_AUDIT
-	if (solaris_audit_success(argv) == -1)
+	if (solaris_audit_success(ctx, argv) == -1)
 	    rc = -1;
 #endif
     }
@@ -77,7 +77,8 @@ audit_success(char *const argv[])
 }
 
 static int
-audit_failure_int(char *const argv[], const char *message)
+audit_failure_int(const struct sudoers_context *ctx, char *const argv[],
+    const char *message)
 {
     int ret = 0;
     debug_decl(audit_failure_int, SUDOERS_DEBUG_AUDIT);
@@ -85,7 +86,7 @@ audit_failure_int(char *const argv[], const char *message)
 #if defined(HAVE_BSM_AUDIT) || defined(HAVE_LINUX_AUDIT)
     if (def_log_denied && argv != NULL) {
 #ifdef HAVE_BSM_AUDIT
-	if (bsm_audit_failure(argv, message) == -1)
+	if (bsm_audit_failure(ctx, argv, message) == -1)
 	    ret = -1;
 #endif
 #ifdef HAVE_LINUX_AUDIT
@@ -93,7 +94,7 @@ audit_failure_int(char *const argv[], const char *message)
 	    ret = -1;
 #endif
 #ifdef HAVE_SOLARIS_AUDIT
-	if (solaris_audit_failure(argv, message) == -1)
+	if (solaris_audit_failure(ctx, argv, message) == -1)
 	    ret = -1;
 #endif
     }
@@ -103,7 +104,8 @@ audit_failure_int(char *const argv[], const char *message)
 }
 
 int
-vaudit_failure(char *const argv[], char const *const fmt, va_list ap)
+vaudit_failure(const struct sudoers_context *ctx, char *const argv[],
+    char const * restrict const fmt, va_list ap)
 {
     int oldlocale, ret;
     char *message;
@@ -120,7 +122,7 @@ vaudit_failure(char *const argv[], char const *const fmt, va_list ap)
 	free(audit_msg);
 	audit_msg = message;
 
-	ret = audit_failure_int(argv, audit_msg);
+	ret = audit_failure_int(ctx, argv, audit_msg);
     }
 
     sudoers_setlocale(oldlocale, NULL);
@@ -129,14 +131,15 @@ vaudit_failure(char *const argv[], char const *const fmt, va_list ap)
 }
 
 int
-audit_failure(char *const argv[], char const *const fmt, ...)
+audit_failure(const struct sudoers_context *ctx, char *const argv[],
+    char const * restrict const fmt, ...)
 {
     va_list ap;
     int ret;
     debug_decl(audit_failure, SUDOERS_DEBUG_AUDIT);
 
     va_start(ap, fmt);
-    ret = vaudit_failure(argv, fmt, ap);
+    ret = vaudit_failure(ctx, argv, fmt, ap);
     va_end(ap);
 
     debug_return_int(ret);
@@ -201,14 +204,15 @@ sudoers_audit_open(unsigned int version, sudo_conv_t conversation,
 }
 
 static void
-audit_to_eventlog(struct eventlog *evlog, char * const command_info[],
-    char * const run_argv[], char * const run_envp[], const char *uuid_str)
+audit_to_eventlog(const struct sudoers_context *ctx, struct eventlog *evlog,
+    char * const command_info[], char * const run_argv[],
+    char * const run_envp[], const char *uuid_str)
 {
     char * const *cur;
     debug_decl(audit_to_eventlog, SUDOERS_DEBUG_PLUGIN);
 
     /* Fill in evlog from sudoers Defaults, run_argv and run_envp. */
-    sudoers_to_eventlog(evlog, NULL, run_argv, run_envp, uuid_str);
+    sudoers_to_eventlog(ctx, evlog, NULL, run_argv, run_envp, uuid_str);
 
     /* Update iolog and execution environment from command_info[]. */
     if (command_info != NULL) {
@@ -245,7 +249,7 @@ audit_to_eventlog(struct eventlog *evlog, char * const command_info[],
 
 #ifdef SUDOERS_LOG_CLIENT
 static bool
-log_server_accept(struct eventlog *evlog)
+log_server_accept(const struct sudoers_context *ctx, struct eventlog *evlog)
 {
     struct timespec now;
     bool ret = false;
@@ -254,7 +258,7 @@ log_server_accept(struct eventlog *evlog)
     if (SLIST_EMPTY(&def_log_servers))
 	debug_return_bool(true);
 
-    if (client_closure != NULL && ISSET(sudo_mode, MODE_POLICY_INTERCEPTED)) {
+    if (client_closure != NULL && ISSET(ctx->mode, MODE_POLICY_INTERCEPTED)) {
 	/* Older servers don't support multiple commands per session. */
 	if (!client_closure->subcommands)
 	    debug_return_bool(true);
@@ -321,7 +325,7 @@ log_server_exit(int status_type, int status)
 }
 #else
 static bool
-log_server_accept(struct eventlog *evlog)
+log_server_accept(const struct sudoers_context *ctx, struct eventlog *evlog)
 {
     return true;
 }
@@ -338,6 +342,7 @@ sudoers_audit_accept(const char *plugin_name, unsigned int plugin_type,
     char * const command_info[], char * const run_argv[],
     char * const run_envp[], const char **errstr)
 {
+    const struct sudoers_context *ctx = sudoers_get_context();
     const char *uuid_str = NULL;
     struct eventlog evlog;
     static bool first = true;
@@ -348,31 +353,47 @@ sudoers_audit_accept(const char *plugin_name, unsigned int plugin_type,
     if (plugin_type != SUDO_FRONT_END)
 	debug_return_int(true);
 
+    /* Log sub-commands with the uuid of the original command. */
+    if (!ISSET(ctx->mode, MODE_POLICY_INTERCEPTED))
+	uuid_str = ctx->uuid_str;
+
+    /*
+     * We must always call log_allowed() even if def_log_allowed is disabled
+     * since it will send mail if def_mail_always or def_mail_all_cmnds are
+     * set (it has its own checks for def_log_allowed).
+     */
+    audit_to_eventlog(ctx, &evlog, command_info, run_argv, run_envp, uuid_str);
+    if (!log_allowed(ctx, &evlog) && !def_ignore_logfile_errors)
+	ret = false;
+
+    /*
+     * Skip auditing and log server logging if "log_allowed" is disabled.
+     */
     if (!def_log_allowed)
-	debug_return_int(true);
+	goto done;
 
-    if (audit_success(run_argv) != 0 && !def_ignore_audit_errors)
-	ret = false;
+    if (audit_success(ctx, run_argv) != 0) {
+	if (!def_ignore_logfile_errors)
+	    ret = false;
+    }
 
-    if (!ISSET(sudo_mode, MODE_POLICY_INTERCEPTED))
-	uuid_str = sudo_user.uuid_str;
-
-    audit_to_eventlog(&evlog, command_info, run_argv, run_envp, uuid_str);
-    if (!log_allowed(&evlog) && !def_ignore_logfile_errors)
-	ret = false;
-
-    if (!log_server_accept(&evlog)) {
+    if (!log_server_accept(ctx, &evlog)) {
 	if (!def_ignore_logfile_errors)
 	    ret = false;
     }
 
     if (first) {
 	/* log_subcmds doesn't go through sudo_policy_main again to set this. */
-	if (def_log_subcmds)
-	    SET(sudo_mode, MODE_POLICY_INTERCEPTED);
+	if (def_log_subcmds) {
+	    if (!sudoers_set_mode(MODE_POLICY_INTERCEPTED, UINT_MAX)) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "unable to set 0x%x in ctx->mode", MODE_POLICY_INTERCEPTED);
+	    }
+	}
 	first = false;
     }
 
+done:
     debug_return_int(ret);
 }
 
@@ -380,6 +401,7 @@ static int
 sudoers_audit_reject(const char *plugin_name, unsigned int plugin_type,
     const char *message, char * const command_info[], const char **errstr)
 {
+    const struct sudoers_context *ctx = sudoers_get_context();
     struct eventlog evlog;
     int ret = true;
     debug_decl(sudoers_audit_reject, SUDOERS_DEBUG_PLUGIN);
@@ -391,16 +413,16 @@ sudoers_audit_reject(const char *plugin_name, unsigned int plugin_type,
     if (!def_log_denied)
 	debug_return_int(true);
 
-    if (audit_failure_int(NewArgv, message) != 0) {
+    if (audit_failure_int(ctx, ctx->runas.argv, message) != 0) {
 	if (!def_ignore_audit_errors)
 	    ret = false;
     }
 
-    audit_to_eventlog(&evlog, command_info, NewArgv, env_get(), NULL);
+    audit_to_eventlog(ctx, &evlog, command_info, ctx->runas.argv, NULL, NULL);
     if (!eventlog_reject(&evlog, 0, message, NULL, NULL))
 	ret = false;
 
-    if (!log_server_reject(&evlog, message))
+    if (!log_server_reject(ctx, &evlog, message))
 	ret = false;
 
     debug_return_int(ret);
@@ -410,6 +432,7 @@ static int
 sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
     const char *message, char * const command_info[], const char **errstr)
 {
+    const struct sudoers_context *ctx = sudoers_get_context();
     struct eventlog evlog;
     struct timespec now;
     int ret = true;
@@ -419,7 +442,7 @@ sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
     if (strncmp(plugin_name, "sudoers_", 8) == 0)
 	debug_return_int(true);
 
-    if (audit_failure_int(NewArgv, message) != 0) {
+    if (audit_failure_int(ctx, ctx->runas.argv, message) != 0) {
 	if (!def_ignore_audit_errors)
 	    ret = false;
     }
@@ -429,11 +452,11 @@ sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
 	debug_return_bool(false);
     }
 
-    audit_to_eventlog(&evlog, command_info, NewArgv, env_get(), NULL);
+    audit_to_eventlog(ctx, &evlog, command_info, ctx->runas.argv, NULL, NULL);
     if (!eventlog_alert(&evlog, 0, &now, message, NULL))
 	ret = false;
 
-    if (!log_server_alert(&evlog, &now, message, NULL))
+    if (!log_server_alert(ctx, &evlog, &now, message, NULL))
 	ret = false;
 
     debug_return_int(ret);

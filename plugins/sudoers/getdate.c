@@ -105,7 +105,7 @@
 #include <limits.h>
 #include <ctype.h>
 
-#include "sudo_compat.h"
+#include <sudo_compat.h>
 
 
 #define EPOCH		1970
@@ -2188,7 +2188,7 @@ LookupWord(char *buff)
     /* Make it lowercase. */
     for (p = buff; *p; p++) {
 	if (isupper((unsigned char)*p))
-	    *p = tolower((unsigned char)*p);
+	    *p = (char)tolower((unsigned char)*p);
     }
     if ((bufflen = (int)(p - buff)) == 0)
 	return '\0';
@@ -2345,7 +2345,7 @@ difftm(struct tm *a, struct tm *b)
 {
   int ay = a->tm_year + (TM_YEAR_ORIGIN - 1);
   int by = b->tm_year + (TM_YEAR_ORIGIN - 1);
-  int days = (
+  long days = (
 	      /* difference in day of year */
 	      a->tm_yday - b->tm_yday
 	      /* + intervening leap days */
@@ -2440,18 +2440,16 @@ main(int argc, char *argv[])
     char	buff[128];
     time_t	d;
 
-    (void)printf("Enter date, or blank line to exit.\n\t> ");
+    (void)fputs("Enter date, or blank line to exit.\n\t> ", stdout);
     (void)fflush(stdout);
     while (fgets(buff, sizeof(buff), stdin) && buff[0]) {
 	d = get_date(buff);
 	if (d == -1)
-	    (void)printf("Bad format - couldn't convert.\n");
+	    (void)fputs("Bad format - couldn't convert.\n\t> ", stdout);
 	else
-	    (void)printf("%s", ctime(&d));
-	(void)printf("\t> ");
+	    (void)printf("%s\t> ", ctime(&d));
 	(void)fflush(stdout);
     }
-    exit(0);
-    /* NOTREACHED */
+    return 0;
 }
 #endif	/* TEST */

@@ -28,6 +28,9 @@
 /* Default maximum session ID */
 #define SESSID_MAX	2176782336U
 
+/* Default value for "iolog_file" */
+#define IOLOG_FILE	"%{seq}"
+
 /*
  * I/O log event types as stored as the first field in the timing file.
  * Changing existing values will result in incompatible I/O log files.
@@ -150,6 +153,6 @@ void *iolog_pwfilt_alloc(void);
 bool iolog_pwfilt_add(void *handle, const char *pattern);
 void iolog_pwfilt_free(void *handle);
 bool iolog_pwfilt_remove(void *handle, const char *pattern);
-bool iolog_pwfilt_run(void *handle, int event, const char *buf, unsigned int len, char **newbuf);
+bool iolog_pwfilt_run(void *handle, int event, const char *buf, size_t len, char **newbuf);
 
 #endif /* SUDO_IOLOG_H */

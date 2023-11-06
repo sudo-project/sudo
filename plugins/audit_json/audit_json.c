@@ -31,7 +31,7 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif /* HAVE_STDBOOL_H */
 #include <string.h>
 #include <signal.h>
@@ -40,16 +40,16 @@
 #include <limits.h>
 #include <time.h>
 
-#include "pathnames.h"
-#include "sudo_compat.h"
-#include "sudo_conf.h"
-#include "sudo_debug.h"
-#include "sudo_dso.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_json.h"
-#include "sudo_plugin.h"
-#include "sudo_util.h"
+#include <pathnames.h>
+#include <sudo_compat.h>
+#include <sudo_conf.h>
+#include <sudo_debug.h>
+#include <sudo_dso.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_json.h>
+#include <sudo_plugin.h>
+#include <sudo_util.h>
 
 static int audit_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
 static sudo_conv_t audit_conv;
@@ -342,7 +342,7 @@ add_timestamp(struct json_container *jsonc, struct timespec *ts)
     time_t secs = ts->tv_sec;
     char timebuf[1024];
     struct tm gmt;
-    int len;
+    size_t len;
     debug_decl(add_timestamp, SUDO_DEBUG_PLUGIN);
 
     if (gmtime_r(&secs, &gmt) == NULL)
@@ -380,7 +380,7 @@ add_timestamp(struct json_container *jsonc, struct timespec *ts)
 }
 
 static int
-audit_write_json(struct json_container *jsonc)
+audit_write_json(struct json_container * restrict jsonc)
 {
     struct stat sb;
     int ret = -1;

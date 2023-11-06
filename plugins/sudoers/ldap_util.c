@@ -34,11 +34,11 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "sudoers.h"
-#include "interfaces.h"
-#include "sudo_lbuf.h"
-#include "sudo_ldap.h"
-#include "sudo_digest.h"
+#include <sudoers.h>
+#include <interfaces.h>
+#include <sudo_lbuf.h>
+#include <sudo_ldap.h>
+#include <sudo_digest.h>
 #include <gram.h>
 
 /*
@@ -253,7 +253,7 @@ sudo_ldap_extract_digest(const char *cmnd, char **endptr,
 {
     const char *ep, *cp = cmnd;
     struct command_digest *digest;
-    int digest_type = SUDO_DIGEST_INVALID;
+    unsigned int digest_type = SUDO_DIGEST_INVALID;
     debug_decl(sudo_ldap_extract_digest, SUDOERS_DEBUG_LDAP);
 
     /*
@@ -661,7 +661,7 @@ sudo_ldap_value_len(const char *value)
  * Like strlcat() but escapes characters as per RFC 4515.
  */
 size_t
-sudo_ldap_value_cat(char *dst, const char *src, size_t size)
+sudo_ldap_value_cat(char * restrict dst, const char * restrict src, size_t size)
 {
     char *d = dst;
     const char *s = src;
@@ -671,7 +671,7 @@ sudo_ldap_value_cat(char *dst, const char *src, size_t size)
     /* Find the end of dst and adjust bytes left but don't go past end */
     while (n-- != 0 && *d != '\0')
 	d++;
-    dlen = d - dst;
+    dlen = (size_t)(d - dst);
     n = size - dlen;
 
     if (n == 0)
@@ -723,7 +723,7 @@ done:
     *d = '\0';
     while (*s != '\0')
 	s++;
-    return dlen + (s - src);	/* count does not include NUL */
+    return dlen + (size_t)(s - src);	/* count does not include NUL */
 }
 
 /*

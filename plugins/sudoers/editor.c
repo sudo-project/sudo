@@ -30,7 +30,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 
 /*
  * Non-destructive word-split that handles single and double quotes and
@@ -65,7 +65,7 @@ wordsplit(const char *str, const char *endstr, const char **last)
     if (*str == '"' || *str == '\'') {
 	const char *endquote;
 	for (cp = str + 1; cp < endstr; cp = endquote + 1) {
-	    endquote = memchr(cp, *str, endstr - cp);
+	    endquote = memchr(cp, *str, (size_t)(endstr - cp));
 	    if (endquote == NULL)
 		break;
 	    /* ignore escaped quotes */
@@ -142,13 +142,13 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char * const *files,
     cp = wordsplit(ed, edend, &ep);
     if (cp == NULL)
 	debug_return_str(NULL);
-    editor = copy_arg(cp, ep - cp);
+    editor = copy_arg(cp, (size_t)(ep - cp));
     if (editor == NULL)
 	goto oom;
 
     /* If we can't find the editor in the user's PATH, give up. */
     if (find_path(editor, &editor_path, &user_editor_sb, getenv("PATH"),
-	    0, allowlist) != FOUND) {
+	    false, allowlist) != FOUND) {
 	errno = ENOENT;
 	goto bad;
     }
@@ -158,7 +158,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char * const *files,
 	nargc++;
     if (nfiles != 0)
 	nargc += nfiles + 1;
-    nargv = reallocarray(NULL, nargc + 1, sizeof(char *));
+    nargv = reallocarray(NULL, (size_t)nargc + 1, sizeof(char *));
     if (nargv == NULL)
 	goto oom;
     sudoers_gc_add(GC_PTR, nargv);
@@ -168,7 +168,7 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char * const *files,
     editor = NULL;
     for (nargc = 1; (cp = wordsplit(NULL, edend, &ep)) != NULL; nargc++) {
 	/* Copy string, collapsing chars escaped with a backslash. */
-	nargv[nargc] = copy_arg(cp, ep - cp);
+	nargv[nargc] = copy_arg(cp, (size_t)(ep - cp));
 	if (nargv[nargc] == NULL)
 	    goto oom;
 
@@ -185,8 +185,9 @@ resolve_editor(const char *ed, size_t edlen, int nfiles, char * const *files,
     }
     if (nfiles != 0) {
 	nargv[nargc++] = (char *)"--";
-	while (nfiles--)
+	do
 	    nargv[nargc++] = *files++;
+	while (--nfiles > 0);
     }
     nargv[nargc] = NULL;
 
@@ -200,8 +201,8 @@ bad:
     free(editor);
     free(editor_path);
     if (nargv != NULL) {
-	while (nargc--) {
-	    sudoers_gc_remove(GC_PTR, nargv[nargc]);
+	while (nargc > 0) {
+	    sudoers_gc_remove(GC_PTR, nargv[--nargc]);
 	    free(nargv[nargc]);
 	}
 	sudoers_gc_remove(GC_PTR, nargv);
@@ -224,7 +225,7 @@ find_editor(int nfiles, char * const *files, int *argc_out, char ***argv_out,
 {
     char *editor_path = NULL;
     const char *ev[3];
-    unsigned int i;
+    size_t i;
     debug_decl(find_editor, SUDOERS_DEBUG_UTIL);
 
     /*

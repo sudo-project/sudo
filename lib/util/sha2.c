@@ -44,11 +44,11 @@
 #elif defined(HAVE_MACHINE_ENDIAN_H)
 # include <machine/endian.h>
 #else
-# include "compat/endian.h"
+# include <compat/endian.h>
 #endif
 
-#include "sudo_compat.h"
-#include "compat/sha2.h"
+#include <sudo_compat.h>
+#include <compat/sha2.h>
 
 /*
  * SHA-2 operates on 32-bit and 64-bit words in big endian byte order.

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996, 1998-2005, 2007-2015, 2017-2018, 2021-2022
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2015, 2017-2018, 2021-2023
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -21,8 +21,17 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#ifndef SUDOERS_CHECK_H
-#define SUDOERS_CHECK_H
+#ifndef SUDOERS_TIMESTAMP_H
+#define SUDOERS_TIMESTAMP_H
+
+struct passwd;
+struct sudoers_context;
+struct getpass_closure {
+    int lectured;
+    void *cookie;
+    struct passwd *auth_pw;
+    const struct sudoers_context *ctx;
+};
 
 /* Status codes for timestamp_status() */
 #define TS_CURRENT		0
@@ -39,14 +48,14 @@
 #define	TS_VERSION		2
 
 /* Time stamp entry types */
-#define TS_GLOBAL		0x01	/* not restricted by tty or ppid */
-#define TS_TTY			0x02	/* restricted by tty */
-#define TS_PPID			0x03	/* restricted by ppid */
-#define TS_LOCKEXCL		0x04	/* special lock record */
+#define TS_GLOBAL		0x01U	/* not restricted by tty or ppid */
+#define TS_TTY			0x02U	/* restricted by tty */
+#define TS_PPID			0x03U	/* restricted by ppid */
+#define TS_LOCKEXCL		0x04U	/* special lock record */
 
 /* Time stamp flags */
-#define TS_DISABLED		0x01	/* entry disabled */
-#define TS_ANYUID		0x02	/* ignore uid, only valid in the key */
+#define TS_DISABLED		0x01U	/* entry disabled */
+#define TS_ANYUID		0x02U	/* ignore uid, only valid in the key */
 
 struct timestamp_entry_v1 {
     unsigned short version;	/* version number */
@@ -77,17 +86,19 @@ struct timestamp_entry {
     } u;
 };
 
-void *timestamp_open(const char *user, pid_t sid);
+union sudo_defs_val;
+void *timestamp_open(const struct sudoers_context *ctx);
 void  timestamp_close(void *vcookie);
 bool  timestamp_lock(void *vcookie, struct passwd *pw);
 bool  timestamp_update(void *vcookie, struct passwd *pw);
+int   timestamp_remove(const struct sudoers_context *ctx, bool unlinkit);
 int   timestamp_status(void *vcookie, struct passwd *pw);
 uid_t timestamp_get_uid(void);
-void  timestamp_set_owner(uid_t uid, gid_t gid);
+bool  cb_timestampowner(struct sudoers_context *ctx, const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);
 int   get_starttime(pid_t pid, struct timespec *starttime);
-bool  already_lectured(void);
-int   set_lectured(void);
-void display_lecture(struct sudo_conv_callback *callback);
-int   create_admin_success_flag(void);
+bool  already_lectured(const struct sudoers_context *ctx);
+int   set_lectured(const struct sudoers_context *ctx);
+void  display_lecture(struct sudo_conv_callback *callback);
+int   create_admin_success_flag(const struct sudoers_context *ctx);
 
-#endif /* SUDOERS_CHECK_H */
+#endif /* SUDOERS_TIMESTAMP_H */

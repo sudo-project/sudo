@@ -34,7 +34,7 @@
 #include <errno.h>
 #include <limits.h>
 
-#include "sudo.h"
+#include <sudo.h>
 
 /*
  * Avoid using RLIM_INFINITY for the nofile soft limit to prevent
@@ -671,18 +671,18 @@ set_policy_rlimits(void)
     debug_return;
 }
 
-int
+size_t
 serialize_rlimits(char **info, size_t info_max)
 {
     char *str;
-    unsigned int idx, nstored = 0;
+    size_t idx, nstored = 0;
     debug_decl(serialize_rlimits, SUDO_DEBUG_UTIL);
 
     for (idx = 0; idx < nitems(saved_limits); idx++) {
 	const struct saved_limit *lim = &saved_limits[idx];
 	const struct rlimit *rl = &lim->oldlimit;
-	char curlim[(((sizeof(long long) * 8) + 2) / 3) + 2];
-	char maxlim[(((sizeof(long long) * 8) + 2) / 3) + 2];
+	char curlim[STRLEN_MAX_UNSIGNED(unsigned long long) + 1];
+	char maxlim[STRLEN_MAX_UNSIGNED(unsigned long long) + 1];
 
 	if (!lim->saved)
 	    continue;
@@ -706,9 +706,9 @@ serialize_rlimits(char **info, size_t info_max)
 	    goto oom;
 	info[nstored++] = str;
     }
-    debug_return_int(nstored);
+    debug_return_size_t(nstored);
 oom:
-    while (nstored--)
-	free(info[nstored]);
-    debug_return_int(-1);
+    while (nstored)
+	free(info[--nstored]);
+    debug_return_size_t((size_t)-1);
 }

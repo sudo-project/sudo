@@ -25,10 +25,10 @@
 
 #include <pwd.h>
 #include <signal.h>
-#include "pathnames.h"
+#include <pathnames.h>
 
 static int
-_sudo_printf_default(int msg_type, const char *fmt, ...)
+_sudo_printf_default(int msg_type, const char * restrict fmt, ...)
 {
     FILE *fp = stdout;
     FILE *ttyfp = NULL;
@@ -205,7 +205,7 @@ py_str_array_from_tuple(PyObject *py_tuple)
     Py_ssize_t tuple_size = PyTuple_Size(py_tuple);
 
     // we need an extra 0 at the end
-    char **result = calloc(tuple_size + 1, sizeof(char *));
+    char **result = calloc((size_t)tuple_size + 1, sizeof(char *));
     if (result == NULL) {
         debug_return_ptr(NULL);
     }
@@ -321,7 +321,7 @@ done:
 
 static void
 _py_debug_python_function(const char *class_name, const char *function_name, const char *message,
-                          PyObject *py_args, PyObject *py_kwargs, int subsystem_id)
+                          PyObject *py_args, PyObject *py_kwargs, unsigned int subsystem_id)
 {
     debug_decl_vars(_py_debug_python_function, subsystem_id);
 
@@ -344,8 +344,7 @@ _py_debug_python_function(const char *class_name, const char *function_name, con
 		/* Strip leading RC. to match python 3.10 behavior. */
 		memmove(args_str, args_str + 3, strlen(args_str + 3) + 1);
 	    }
-            if (py_args_sorted != NULL)
-                Py_DECREF(py_args_sorted);
+	    Py_XDECREF(py_args_sorted);
         }
         if (py_kwargs != NULL) {
             /* Sort by key for consistent output on Python < 3.6 */
@@ -359,8 +358,7 @@ _py_debug_python_function(const char *class_name, const char *function_name, con
 		}
 	    }
             kwargs_str = py_create_string_rep(py_kwargs);
-            if (py_kwargs_sorted != NULL)
-                Py_DECREF(py_kwargs_sorted);
+	    Py_XDECREF(py_kwargs_sorted);
         }
 
         sudo_debug_printf(SUDO_DEBUG_DIAG, "%s.%s %s: %s%s%s\n", class_name,
@@ -373,7 +371,8 @@ _py_debug_python_function(const char *class_name, const char *function_name, con
 
 void
 py_debug_python_call(const char *class_name, const char *function_name,
-                     PyObject *py_args, PyObject *py_kwargs, int subsystem_id)
+                     PyObject *py_args, PyObject *py_kwargs,
+                     unsigned int subsystem_id)
 {
     debug_decl_vars(py_debug_python_call, subsystem_id);
 
@@ -397,7 +396,7 @@ py_debug_python_call(const char *class_name, const char *function_name,
 
 void
 py_debug_python_result(const char *class_name, const char *function_name,
-                       PyObject *py_result, int subsystem_id)
+                       PyObject *py_result, unsigned int subsystem_id)
 {
     if (py_result == NULL) {
         debug_decl_vars(py_debug_python_result, subsystem_id);
@@ -523,20 +522,20 @@ py_object_get_optional_attr_string(PyObject *py_object, const char *attr_name)
     return value;
 }
 
-long long
+long
 py_object_get_optional_attr_number(PyObject *py_object, const char *attr_name)
 {
     PyObject *py_value = py_object_get_optional_attr(py_object, attr_name, NULL);
     if (py_value == NULL)
         return -1;
 
-    long long value = PyLong_AsLongLong(py_value);
+    long value = PyLong_AsLong(py_value);
     Py_CLEAR(py_value);
     return value;
 }
 
 void
-py_object_set_attr_number(PyObject *py_object, const char *attr_name, long long number)
+py_object_set_attr_number(PyObject *py_object, const char *attr_name, long number)
 {
     PyObject *py_number = PyLong_FromLong(number);
     if (py_number == NULL)

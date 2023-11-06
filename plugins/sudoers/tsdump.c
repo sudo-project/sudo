@@ -32,8 +32,8 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "sudoers.h"
-#include "check.h"
+#include <sudoers.h>
+#include <timestamp.h>
 
 struct timestamp_entry_common {
     unsigned short version;	/* version number */
@@ -81,7 +81,7 @@ main(int argc, char *argv[])
 
     /* Initialize the debug subsystem. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
-	exit(EXIT_FAILURE);
+	return EXIT_FAILURE;
     sudoers_debug_register(getprogname(), sudo_conf_debug_files(getprogname()));
 
     while ((ch = getopt(argc, argv, "f:u:")) != -1) {
@@ -163,20 +163,20 @@ valid_entry(union timestamp_entry_storage *u, off_t pos)
     switch (entry->version) {
     case 1:
 	if (entry->size != sizeof(struct timestamp_entry_v1)) {
-	    printf("wrong sized v1 record @ %lld, got %hu, expected %zu\n",
+	    sudo_warn("wrong sized v1 record @ %lld, got %hu, expected %zu",
 		(long long)pos, entry->size, sizeof(struct timestamp_entry_v1));
 	    debug_return_bool(false);
 	}
 	break;
     case 2:
 	if (entry->size != sizeof(struct timestamp_entry)) {
-	    printf("wrong sized v2 record @ %lld, got %hu, expected %zu\n",
+	    sudo_warn("wrong sized v2 record @ %lld, got %hu, expected %zu",
 		(long long)pos, entry->size, sizeof(struct timestamp_entry));
 	    debug_return_bool(false);
 	}
 	break;
     default:
-	printf("unknown time stamp entry version %d @ %lld\n",
+	sudo_warn("unknown time stamp entry version %d @ %lld",
 	    (int)entry->version, (long long)pos);
 	debug_return_bool(false);
 	break;
@@ -184,7 +184,7 @@ valid_entry(union timestamp_entry_storage *u, off_t pos)
     debug_return_bool(true);
 }
 
-static char *
+static const char *
 type2string(int type)
 {
     static char name[64];
@@ -192,20 +192,20 @@ type2string(int type)
 
     switch (type) {
     case TS_LOCKEXCL:
-	debug_return_str("TS_LOCKEXCL");
+	debug_return_const_str("TS_LOCKEXCL");
     case TS_GLOBAL:
-	debug_return_str("TS_GLOBAL");
+	debug_return_const_str("TS_GLOBAL");
     case TS_TTY:
-	debug_return_str("TS_TTY");
+	debug_return_const_str("TS_TTY");
     case TS_PPID:
-	debug_return_str("TS_PPID");
+	debug_return_const_str("TS_PPID");
     }
     (void)snprintf(name, sizeof(name), "UNKNOWN (0x%x)", type);
-    debug_return_str(name);
+    debug_return_const_str(name);
 }
 
 static void
-print_flags(int flags)
+print_flags(unsigned int flags)
 {
     bool first = true;
     debug_decl(print_flags, SUDOERS_DEBUG_UTIL);
@@ -297,12 +297,12 @@ dump_entry(struct timestamp_entry *entry, off_t pos)
     } else if (entry->type == TS_PPID) {
 	printf("parent pid: %d\n", (int)entry->u.ppid);
     }
-    printf("\n");
+    fputc('\n', stdout);
 
     debug_return;
 }
 
-static void
+sudo_noreturn static void
 usage(void)
 {
     fprintf(stderr, "usage: %s [-f timestamp_file] | [-u username]\n",

@@ -22,6 +22,7 @@
  */
 
 #include "iohelpers.h"
+#include <sudo_fatal.h>
 
 int
 rmdir_recursive(const char *path)
@@ -69,7 +70,7 @@ freadall(const char *file_path, char *output, size_t max_len)
     int rc = false;
     FILE *file = fopen(file_path, "rb");
     if (file == NULL) {
-        printf("Failed to open file '%s'\n", file_path);
+	sudo_warn_nodebug("failed to open file '%s'", file_path);
         goto cleanup;
     }
 
@@ -77,12 +78,13 @@ freadall(const char *file_path, char *output, size_t max_len)
     output[len] = '\0';
 
     if (ferror(file) != 0) {
-        printf("Failed to read file '%s' (Error %d)\n", file_path, ferror(file));
+        sudo_warn_nodebug("failed to read file '%s'", file_path);
         goto cleanup;
     }
 
     if (!feof(file)) {
-        printf("File '%s' was bigger than allocated buffer %zu", file_path, max_len);
+        sudo_warn_nodebug("file '%s' was bigger than allocated buffer %zu",
+	    file_path, max_len);
         goto cleanup;
     }
 
@@ -96,7 +98,7 @@ cleanup:
 }
 
 int
-vsnprintf_append(char *output, size_t max_output_len, const char *fmt, va_list args)
+vsnprintf_append(char * restrict output, size_t max_output_len, const char * restrict fmt, va_list args)
 {
     va_list args2;
     va_copy(args2, args);
@@ -109,7 +111,7 @@ vsnprintf_append(char *output, size_t max_output_len, const char *fmt, va_list a
 }
 
 int
-snprintf_append(char *output, size_t max_output_len, const char *fmt, ...)
+snprintf_append(char * restrict output, size_t max_output_len, const char * restrict fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
@@ -149,7 +151,7 @@ str_replaced(const char *source, size_t dest_len, const char *old, const char *n
         return NULL;
 
     while ((pos = strstr(source, old)) != NULL) {
-        size_t len = snprintf(dest, dest_len,
+        size_t len = (size_t)snprintf(dest, dest_len,
             "%.*s%s", (int)(pos - source), source, new);
         if (len >= dest_len)
             goto fail;

@@ -26,11 +26,11 @@
 #include <stdlib.h>
 #include <grp.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_util.h>
 
 /*
  * Parse a comma-separated list of gids into an allocated array of GETGROUPS_T.
@@ -61,7 +61,7 @@ sudo_parse_gids_v1(const char *gidstr, const gid_t *basegid, GETGROUPS_T **gidsp
 	ngids++;
     /* Allocate and fill in array. */
     if (ngids != 0) {
-	gids = reallocarray(NULL, ngids, sizeof(GETGROUPS_T));
+	gids = reallocarray(NULL, (size_t)ngids, sizeof(GETGROUPS_T));
 	if (gids == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    debug_return_int(-1);

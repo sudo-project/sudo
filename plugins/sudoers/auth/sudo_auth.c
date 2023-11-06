@@ -41,10 +41,10 @@
 #include <time.h>
 #include <signal.h>
 
-#include "sudoers.h"
+#include <sudoers.h>
 #include "sudo_auth.h"
-#include "insults.h"
-#include "check.h"
+#include <insults.h>
+#include <timestamp.h>
 
 static sudo_auth auth_switch[] = {
 /* Standalone entries first */
@@ -96,17 +96,17 @@ static bool standalone;
 
 /*
  * Initialize sudoers authentication method(s).
- * Returns 0 on success and -1 on error.
+ * Returns AUTH_SUCCESS on success and AUTH_ERROR on error.
  */
 int
-sudo_auth_init(struct passwd *pw, int mode)
+sudo_auth_init(const struct sudoers_context *ctx, struct passwd *pw,
+    unsigned int mode)
 {
     sudo_auth *auth;
-    int status = AUTH_SUCCESS;
     debug_decl(sudo_auth_init, SUDOERS_DEBUG_AUTH);
 
     if (auth_switch[0].name == NULL)
-	debug_return_int(0);
+	debug_return_int(AUTH_SUCCESS);
 
     /* Initialize auth methods and unconfigure the method if necessary. */
     for (auth = auth_switch; auth->name; auth++) {
@@ -114,11 +114,16 @@ sudo_auth_init(struct passwd *pw, int mode)
 	    SET(auth->flags, FLAG_NONINTERACTIVE);
 	if (auth->init && !IS_DISABLED(auth)) {
 	    /* Disable if it failed to init unless there was a fatal error. */
-	    status = (auth->init)(pw, auth);
-	    if (status == AUTH_FAILURE)
+	    switch ((auth->init)(ctx, pw, auth)) {
+	    case AUTH_SUCCESS:
+		break;
+	    case AUTH_FAILURE:
 		SET(auth->flags, FLAG_DISABLED);
-	    else if (status == AUTH_FATAL)
-		break;		/* assume error msg already printed */
+		break;
+	    default:
+		/* Assume error msg already printed. */
+		debug_return_int(AUTH_ERROR);
+	    }
 	}
     }
 
@@ -132,11 +137,12 @@ sudo_auth_init(struct passwd *pw, int mode)
 	    if (IS_DISABLED(auth))
 		continue;
 	    if (!IS_STANDALONE(auth)) {
-		audit_failure(NewArgv, N_("invalid authentication methods"));
-		log_warningx(SLOG_SEND_MAIL,
+		audit_failure(ctx, ctx->runas.argv,
+		    N_("invalid authentication methods"));
+		log_warningx(ctx, SLOG_SEND_MAIL,
 		    N_("Invalid authentication methods compiled into sudo!  "
 		    "You may not mix standalone and non-standalone authentication."));
-		debug_return_int(-1);
+		debug_return_int(AUTH_ERROR);
 	    }
 	    if (!found) {
 		/* Found first standalone method. */
@@ -164,39 +170,42 @@ sudo_auth_init(struct passwd *pw, int mode)
 	}
     }
 
-    debug_return_int(status == AUTH_FATAL ? -1 : 0);
+    debug_return_int(AUTH_SUCCESS);
 }
 
 /*
- * Cleanup all authentication approval methods.
- * Returns true on success, false on failure and -1 on error.
+ * Call all authentication approval methods, if any.
+ * Returns AUTH_SUCCESS, AUTH_FAILURE or AUTH_ERROR.
  */
 int
-sudo_auth_approval(struct passwd *pw, int validated, bool exempt)
+sudo_auth_approval(const struct sudoers_context *ctx, struct passwd *pw,
+    unsigned int validated, bool exempt)
 {
+    int ret = AUTH_SUCCESS;
     sudo_auth *auth;
     debug_decl(sudo_auth_approval, SUDOERS_DEBUG_AUTH);
 
     /* Call approval routines. */
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->approval && !IS_DISABLED(auth)) {
-	    int status = (auth->approval)(pw, auth, exempt);
-	    if (status != AUTH_SUCCESS) {
+	    ret = (auth->approval)(ctx, pw, auth, exempt);
+	    if (ret != AUTH_SUCCESS) {
 		/* Assume error msg already printed. */
-		log_auth_failure(validated, 0);
-		debug_return_int(status == AUTH_FAILURE ? false : -1);
+		log_auth_failure(ctx, validated, 0);
+		break;
 	    }
 	}
     }
-    debug_return_int(true);
+    debug_return_int(ret);
 }
 
 /*
  * Cleanup all authentication methods.
- * Returns 0 on success and -1 on error.
+ * Returns AUTH_SUCCESS on success and AUTH_ERROR on error.
  */
 int
-sudo_auth_cleanup(struct passwd *pw, bool force)
+sudo_auth_cleanup(const struct sudoers_context *ctx, struct passwd *pw,
+    bool force)
 {
     sudo_auth *auth;
     debug_decl(sudo_auth_cleanup, SUDOERS_DEBUG_AUTH);
@@ -204,14 +213,14 @@ sudo_auth_cleanup(struct passwd *pw, bool force)
     /* Call cleanup routines. */
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->cleanup && !IS_DISABLED(auth)) {
-	    int status = (auth->cleanup)(pw, auth, force);
-	    if (status == AUTH_FATAL) {
+	    int status = (auth->cleanup)(ctx, pw, auth, force);
+	    if (status != AUTH_SUCCESS) {
 		/* Assume error msg already printed. */
-		debug_return_int(-1);
+		debug_return_int(AUTH_ERROR);
 	    }
 	}
     }
-    debug_return_int(0);
+    debug_return_int(AUTH_SUCCESS);
 }
 
 static void
@@ -239,31 +248,62 @@ user_interrupted(void)
 }
 
 /*
+ * Called when getpass is suspended so we can drop the lock.
+ */
+static int
+getpass_suspend(int signo, void *vclosure)
+{
+    struct getpass_closure *closure = vclosure;
+
+    timestamp_close(closure->cookie);
+    closure->cookie = NULL;
+    return 0;
+}
+
+/*
+ * Called when getpass is resumed so we can reacquire the lock.
+ */
+static int
+getpass_resume(int signo, void *vclosure)
+{
+    struct getpass_closure *closure = vclosure;
+
+    closure->cookie = timestamp_open(closure->ctx);
+    if (closure->cookie == NULL)
+	return -1;
+    if (!timestamp_lock(closure->cookie, closure->auth_pw))
+	return -1;
+    return 0;
+}
+
+/*
  * Verify the specified user.
- * Returns true if verified, false if not or -1 on error.
+ * Returns AUTH_SUCCESS, AUTH_FAILURE or AUTH_ERROR.
  */
 int
-verify_user(struct passwd *pw, char *prompt, int validated,
-    struct sudo_conv_callback *callback)
+verify_user(const struct sudoers_context *ctx, struct passwd *pw, char *prompt,
+    unsigned int validated, struct sudo_conv_callback *callback)
 {
-    unsigned int ntries;
-    int ret, status, success = AUTH_FAILURE;
-    sudo_auth *auth;
-    sigset_t mask, omask;
     struct sigaction sa, saved_sigtstp;
+    int ret = AUTH_FAILURE;
+    unsigned int ntries;
+    sigset_t mask, omask;
+    sudo_auth *auth;
     debug_decl(verify_user, SUDOERS_DEBUG_AUTH);
 
     /* Make sure we have at least one auth method. */
     if (auth_switch[0].name == NULL) {
-	audit_failure(NewArgv, N_("no authentication methods"));
-    	log_warningx(SLOG_SEND_MAIL,
+	audit_failure(ctx, ctx->runas.argv, N_("no authentication methods"));
+    	log_warningx(ctx, SLOG_SEND_MAIL,
 	    N_("There are no authentication methods compiled into sudo!  "
 	    "If you want to turn off authentication, use the "
 	    "--disable-authentication configure option."));
-	debug_return_int(-1);
+	debug_return_int(AUTH_ERROR);
     }
 
     /* Enable suspend during password entry. */
+    callback->on_suspend = getpass_suspend;
+    callback->on_resume = getpass_resume;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
     sa.sa_handler = SIG_DFL;
@@ -297,26 +337,35 @@ verify_user(struct passwd *pw, char *prompt, int validated,
 		continue;
 	    num_methods++;
 	    if (auth->setup != NULL) {
-		status = (auth->setup)(pw, &prompt, auth);
-		if (status == AUTH_FAILURE)
+		switch ((auth->setup)(ctx, pw, &prompt, auth)) {
+		case AUTH_SUCCESS:
+		    if (user_interrupted())
+			goto done;	/* assume error msg already printed */
+		    break;
+		case AUTH_FAILURE:
 		    SET(auth->flags, FLAG_DISABLED);
-		else if (status == AUTH_NONINTERACTIVE)
+		    break;
+		case AUTH_NONINTERACTIVE:
+		    /* Non-interactive mode, cannot prompt user. */
 		    goto done;
-		else if (status == AUTH_FATAL || user_interrupted())
-		    goto done;		/* assume error msg already printed */
+		default:
+		    ret = AUTH_ERROR;
+		    goto done;
+		}
 	    }
 	}
 	if (num_methods == 0) {
-	    audit_failure(NewArgv, N_("no authentication methods"));
-	    log_warningx(SLOG_SEND_MAIL,
+	    audit_failure(ctx, ctx->runas.argv,
+		N_("no authentication methods"));
+	    log_warningx(ctx, SLOG_SEND_MAIL,
 		N_("Unable to initialize authentication methods."));
-	    debug_return_int(-1);
+	    debug_return_int(AUTH_ERROR);
 	}
 
 	/* Get the password unless the auth function will do it for us */
 	if (!standalone) {
 	    if (IS_NONINTERACTIVE(&auth_switch[0])) {
-		success = AUTH_NONINTERACTIVE;
+		ret = AUTH_NONINTERACTIVE;
 		goto done;
 	    }
 	    pass = auth_getpass(prompt, SUDO_CONV_PROMPT_ECHO_OFF, callback);
@@ -329,15 +378,15 @@ verify_user(struct passwd *pw, char *prompt, int validated,
 	    if (IS_DISABLED(auth))
 		continue;
 
-	    success = auth->status =
-		(auth->verify)(pw, standalone ? prompt : pass, auth, callback);
-	    if (success != AUTH_FAILURE)
+	    ret = auth->status = (auth->verify)(ctx, pw,
+		standalone ? prompt : pass, auth, callback);
+	    if (ret != AUTH_FAILURE)
 		break;
 	}
 	if (pass != NULL)
 	    freezero(pass, strlen(pass));
 
-	if (success != AUTH_FAILURE)
+	if (ret != AUTH_FAILURE)
 	    goto done;
     }
 
@@ -346,24 +395,23 @@ done:
     (void) sigaction(SIGTSTP, &saved_sigtstp, NULL);
     (void) sigprocmask(SIG_SETMASK, &omask, NULL);
 
-    switch (success) {
+    switch (ret) {
 	case AUTH_SUCCESS:
-	    ret = true;
 	    break;
 	case AUTH_INTR:
+	    ret = AUTH_FAILURE;
+	    FALLTHROUGH;
 	case AUTH_FAILURE:
 	    if (ntries != 0)
 		SET(validated, FLAG_BAD_PASSWORD);
-	    log_auth_failure(validated, ntries);
-	    ret = false;
+	    log_auth_failure(ctx, validated, ntries);
 	    break;
 	case AUTH_NONINTERACTIVE:
 	    SET(validated, FLAG_NO_USER_INPUT);
 	    FALLTHROUGH;
-	case AUTH_FATAL:
 	default:
-	    log_auth_failure(validated, 0);
-	    ret = -1;
+	    log_auth_failure(ctx, validated, 0);
+	    ret = AUTH_ERROR;
 	    break;
     }
 
@@ -372,24 +420,33 @@ done:
 
 /*
  * Call authentication method begin session hooks.
- * Returns 1 on success and -1 on error.
+ * Returns true on success, false on failure and -1 on error.
  */
 int
-sudo_auth_begin_session(struct passwd *pw, char **user_env[])
+sudo_auth_begin_session(const struct sudoers_context *ctx, struct passwd *pw,
+    char **user_env[])
 {
     sudo_auth *auth;
+    int ret = true;
     debug_decl(sudo_auth_begin_session, SUDOERS_DEBUG_AUTH);
 
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->begin_session && !IS_DISABLED(auth)) {
-	    int status = (auth->begin_session)(pw, user_env, auth);
-	    if (status != AUTH_SUCCESS) {
+	    int status = (auth->begin_session)(ctx, pw, user_env, auth);
+	    switch (status) {
+	    case AUTH_SUCCESS:
+		break;
+	    case AUTH_FAILURE:
+		ret = false;
+		break;
+	    default:
 		/* Assume error msg already printed. */
-		debug_return_int(-1);
+		ret = -1;
+		break;
 	    }
 	}
     }
-    debug_return_int(1);
+    debug_return_int(ret);
 }
 
 bool
@@ -410,25 +467,33 @@ sudo_auth_needs_end_session(void)
 
 /*
  * Call authentication method end session hooks.
- * Returns 1 on success and -1 on error.
+ * Returns true on success, false on failure and -1 on error.
  */
 int
-sudo_auth_end_session(struct passwd *pw)
+sudo_auth_end_session(void)
 {
     sudo_auth *auth;
+    int ret = true;
     int status;
     debug_decl(sudo_auth_end_session, SUDOERS_DEBUG_AUTH);
 
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->end_session && !IS_DISABLED(auth)) {
-	    status = (auth->end_session)(pw, auth);
-	    if (status == AUTH_FATAL) {
+	    status = (auth->end_session)(auth);
+	    switch (status) {
+	    case AUTH_SUCCESS:
+		break;
+	    case AUTH_FAILURE:
+		ret = false;
+		break;
+	    default:
 		/* Assume error msg already printed. */
-		debug_return_int(-1);
+		ret = -1;
+		break;
 	    }
 	}
     }
-    debug_return_int(1);
+    debug_return_int(ret);
 }
 
 /*
@@ -465,7 +530,7 @@ auth_getpass(const char *prompt, int type, struct sudo_conv_callback *callback)
     /* Call conversation function. */
     memset(&msg, 0, sizeof(msg));
     msg.msg_type = type;
-    msg.timeout = def_passwd_timeout.tv_sec;
+    msg.timeout = (int)def_passwd_timeout.tv_sec;
     msg.msg = prompt;
     memset(&repl, 0, sizeof(repl));
     sudo_conv(1, &msg, &repl, callback);

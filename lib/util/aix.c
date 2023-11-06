@@ -31,11 +31,11 @@
 #include <usersec.h>
 #include <uinfo.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_util.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_util.h>
 
 #ifdef HAVE_GETUSERATTR
 

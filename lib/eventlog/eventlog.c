@@ -47,16 +47,16 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "pathnames.h"
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_eventlog.h"
-#include "sudo_lbuf.h"
-#include "sudo_fatal.h"
-#include "sudo_gettext.h"
-#include "sudo_json.h"
-#include "sudo_queue.h"
-#include "sudo_util.h"
+#include <pathnames.h>
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_eventlog.h>
+#include <sudo_lbuf.h>
+#include <sudo_fatal.h>
+#include <sudo_gettext.h>
+#include <sudo_json.h>
+#include <sudo_queue.h>
+#include <sudo_util.h>
 
 #define IS_SESSID(s) ( \
     isalnum((unsigned char)(s)[0]) && isalnum((unsigned char)(s)[1]) && \
@@ -84,9 +84,9 @@ new_logline(int event_type, int flags, struct eventlog_args *args,
     const struct eventlog_config *evl_conf = eventlog_getconf();
     const char *iolog_file;
     const char *tty, *tsid = NULL;
-    char exit_str[(((sizeof(int) * 8) + 2) / 3) + 2];
+    char exit_str[STRLEN_MAX_SIGNED(int) + 1];
     char sessid[7], offsetstr[64] = "";
-    int i;
+    size_t i;
     debug_decl(new_logline, SUDO_DEBUG_UTIL);
 
     if (ISSET(flags, EVLOG_RAW) || evlog == NULL) {
@@ -191,24 +191,24 @@ new_logline(int event_type, int flags, struct eventlog_args *args,
 	}
 	sudo_lbuf_append(lbuf, " ; ");
     }
-    if (evlog->command != NULL && evlog->argv != NULL) {
+    if (evlog->command != NULL && evlog->runargv != NULL) {
 	/* Command plus argv. */
 	sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL|LBUF_ESC_BLANK,
 	    "COMMAND=%s", evlog->command);
-	if (evlog->argv[0] != NULL) {
-	    for (i = 1; evlog->argv[i] != NULL; i++) {
+	if (evlog->runargv[0] != NULL) {
+	    for (i = 1; evlog->runargv[i] != NULL; i++) {
 		sudo_lbuf_append(lbuf, " ");
-		if (strchr(evlog->argv[i], ' ') != NULL) {
+		if (strchr(evlog->runargv[i], ' ') != NULL) {
 		    /* Wrap args containing spaces in single quotes. */
 		    sudo_lbuf_append(lbuf, "'");
 		    sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL|LBUF_ESC_QUOTE,
-			"%s", evlog->argv[i]);
+			"%s", evlog->runargv[i]);
 		    sudo_lbuf_append(lbuf, "'");
 		} else {
 		    /* Escape quotes here too for consistency. */
 		    sudo_lbuf_append_esc(lbuf,
 			LBUF_ESC_CNTRL|LBUF_ESC_BLANK|LBUF_ESC_QUOTE,
-			"%s", evlog->argv[i]);
+			"%s", evlog->runargv[i]);
 		}
 	    }
 	}
@@ -286,7 +286,7 @@ exec_mailer(int pipein)
     const struct eventlog_config *evl_conf = eventlog_getconf();
     char *last, *mflags, *p, *argv[MAX_MAILFLAGS + 1];
     const char *mpath = evl_conf->mailerpath;
-    int i;
+    size_t i;
     const char * const root_envp[] = {
 	"HOME=/",
 	"PATH=/usr/bin:/bin:/usr/sbin:/sbin",
@@ -317,10 +317,10 @@ exec_mailer(int pipein)
     argv[0] = sudo_basename(mpath);
 
     i = 1;
-    if ((p = strtok_r(mflags, " \t", &last))) {
-	do {
-	    argv[i] = p;
-	} while (++i < MAX_MAILFLAGS && (p = strtok_r(NULL, " \t", &last)));
+    for (p = strtok_r(mflags, " \t", &last); p != NULL;
+            p = strtok_r(NULL, " \t", &last)) {
+        if (i < MAX_MAILFLAGS)
+            argv[i++] = p;
     }
     argv[i] = NULL;
 
@@ -361,7 +361,8 @@ send_mail(const struct eventlog *evlog, const char *message)
     struct tm tm;
     time_t now;
     FILE *mail;
-    int fd, len, pfd[2], status;
+    int fd, pfd[2], status;
+    size_t len;
     pid_t pid, rv;
     struct stat sb;
 #if defined(HAVE_NL_LANGINFO) && defined(CODESET)
@@ -405,6 +406,7 @@ send_mail(const struct eventlog *evlog, const char *message)
 			strerror(errno));
 		    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 		    _exit(EXIT_FAILURE);
+		    /* NOTREACHED */
 		case 0:
 		    /* Grandchild continues below. */
 		    sudo_debug_enter(__func__, __FILE__, __LINE__, sudo_debug_subsys);
@@ -412,6 +414,7 @@ send_mail(const struct eventlog *evlog, const char *message)
 		default:
 		    /* Parent will wait for us. */
 		    _exit(EXIT_SUCCESS);
+		    /* NOTREACHED */
 	    }
 	    break;
 	default:
@@ -471,7 +474,7 @@ send_mail(const struct eventlog *evlog, const char *message)
 		"unable to fork");
 	    sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
 	    _exit(EXIT_FAILURE);
-	    break;
+	    /* NOTREACHED */
 	case 0:
 	    /* Child. */
 	    exec_mailer(pfd[0]);
@@ -559,7 +562,7 @@ json_add_timestamp(struct json_container *jsonc, const char *name,
     const struct timespec *ts, bool format_timestamp)
 {
     struct json_value json_value;
-    int len;
+    size_t len;
     debug_decl(json_add_timestamp, SUDO_DEBUG_PLUGIN);
 
     if (!sudo_json_open_object(jsonc, name))
@@ -678,6 +681,13 @@ eventlog_store_json(struct json_container *jsonc, const struct eventlog *evlog)
 	    goto oom;
     }
 
+    if (evlog->source != NULL) {
+	json_value.type = JSON_STRING;
+	json_value.u.string = evlog->source;
+	if (!sudo_json_add_value(jsonc, "source", &json_value))
+	    goto oom;
+    }
+
     if (evlog->ttyname != NULL) {
 	json_value.type = JSON_STRING;
 	json_value.u.string = evlog->ttyname;
@@ -723,10 +733,10 @@ eventlog_store_json(struct json_container *jsonc, const struct eventlog *evlog)
     if (!sudo_json_add_value(jsonc, "lines", &json_value))
         goto oom;
 
-    if (evlog->argv != NULL) {
+    if (evlog->runargv != NULL) {
 	if (!sudo_json_open_array(jsonc, "runargv"))
 	    goto oom;
-	for (i = 0; (cp = evlog->argv[i]) != NULL; i++) {
+	for (i = 0; (cp = evlog->runargv[i]) != NULL; i++) {
 	    json_value.type = JSON_STRING;
 	    json_value.u.string = cp;
 	    if (!sudo_json_add_value(jsonc, NULL, &json_value))
@@ -736,10 +746,23 @@ eventlog_store_json(struct json_container *jsonc, const struct eventlog *evlog)
 	    goto oom;
     }
 
-    if (evlog->envp != NULL) {
+    if (evlog->runenv != NULL) {
 	if (!sudo_json_open_array(jsonc, "runenv"))
 	    goto oom;
-	for (i = 0; (cp = evlog->envp[i]) != NULL; i++) {
+	for (i = 0; (cp = evlog->runenv[i]) != NULL; i++) {
+	    json_value.type = JSON_STRING;
+	    json_value.u.string = cp;
+	    if (!sudo_json_add_value(jsonc, NULL, &json_value))
+		goto oom;
+	}
+	if (!sudo_json_close_array(jsonc))
+	    goto oom;
+    }
+
+    if (evlog->submitenv != NULL) {
+	if (!sudo_json_open_array(jsonc, "submitenv"))
+	    goto oom;
+	for (i = 0; (cp = evlog->submitenv[i]) != NULL; i++) {
 	    json_value.type = JSON_STRING;
 	    json_value.u.string = cp;
 	    if (!sudo_json_add_value(jsonc, NULL, &json_value))
@@ -858,9 +881,9 @@ format_json(int event_type, struct eventlog_args *args,
 	}
     }
 
-    if (event_type == EVLOG_EXIT) {
+    if (event_type == EVLOG_EXIT && evlog != NULL) {
 	/* Exit events don't need evlog details if there is a UUID. */
-	if (evlog != NULL && evlog->uuid_str[0] != '\0') {
+	if (evlog->uuid_str[0] != '\0') {
 	    if (args->json_info == NULL)
 		info = NULL;
 	}
@@ -889,8 +912,8 @@ format_json(int event_type, struct eventlog_args *args,
 	    goto bad;
     }
 
-     /* Event log info may be missing for alert messages. */
-     if (evlog != NULL) {
+    /* Event log info may be missing for alert messages. */
+    if (evlog != NULL) {
 	if (evlog->peeraddr != NULL) {
 	    json_value.type = JSON_STRING;
 	    json_value.u.string = evlog->peeraddr;
@@ -911,6 +934,38 @@ format_json(int event_type, struct eventlog_args *args,
 		    goto bad;
 		}
 	    }
+	}
+
+	if (event_type == EVLOG_EXIT) {
+	    /* Exit events don't need evlog details if there is a UUID. */
+	    if (evlog->uuid_str[0] != '\0') {
+		if (args->json_info == NULL)
+		    info = NULL;
+	    }
+
+	    if (sudo_timespecisset(&evlog->run_time)) {
+		if (!json_add_timestamp(&jsonc, "run_time", &evlog->run_time,
+			false)) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+			"unable format timestamp");
+		    goto bad;
+		}
+	    }
+	    if (evlog->signal_name != NULL) {
+		json_value.type = JSON_STRING;
+		json_value.u.string = evlog->signal_name;
+		if (!sudo_json_add_value(&jsonc, "signal", &json_value))
+		    goto bad;
+
+		json_value.type = JSON_BOOL;
+		json_value.u.boolean = evlog->dumped_core;
+		if (!sudo_json_add_value(&jsonc, "dumped_core", &json_value))
+		    goto bad;
+	    }
+	    json_value.type = JSON_NUMBER;
+	    json_value.u.number = evlog->exit_value;
+	    if (!sudo_json_add_value(&jsonc, "exit_value", &json_value))
+		goto bad;
 	}
     }
 
@@ -1133,7 +1188,7 @@ do_logfile_sudo(const char *logline, const struct eventlog *evlog,
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
     }
-    eventlog_writeln(fp, full_line, len, evl_conf->file_maxlen);
+    eventlog_writeln(fp, full_line, (size_t)len, evl_conf->file_maxlen);
     free(full_line);
     (void)fflush(fp);
     if (ferror(fp)) {

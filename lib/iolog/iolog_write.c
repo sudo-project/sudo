@@ -27,16 +27,16 @@
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
-# include "compat/stdbool.h"
+# include <compat/stdbool.h>
 #endif
 #include <string.h>
 #include <errno.h>
 #include <limits.h>
 #include <time.h>
 
-#include "sudo_compat.h"
-#include "sudo_debug.h"
-#include "sudo_iolog.h"
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_iolog.h>
 
 /*
  * Write to an I/O log, optionally compressing.
@@ -48,7 +48,7 @@ iolog_write(struct iolog_file *iol, const void *buf, size_t len,
     ssize_t ret;
     debug_decl(iolog_write, SUDO_DEBUG_UTIL);
 
-    if (len > UINT_MAX) {
+    if (len > UINT_MAX || len > SSIZE_MAX) { // -V590
 	errno = EINVAL;
 	if (errstr != NULL)
 	    *errstr = strerror(errno);
@@ -59,7 +59,7 @@ iolog_write(struct iolog_file *iol, const void *buf, size_t len,
     if (iol->compressed) {
 	int errnum;
 
-	ret = gzwrite(iol->fd.g, (const voidp)buf, len);
+	ret = gzwrite(iol->fd.g, buf, (unsigned int)len);
 	if (ret == 0) {
 	    ret = -1;
 	    if (errstr != NULL) {
@@ -83,8 +83,8 @@ iolog_write(struct iolog_file *iol, const void *buf, size_t len,
     } else
 #endif
     {
-	ret = fwrite(buf, 1, len, iol->fd.f);
-	if (ret == 0) {
+	ret = (ssize_t)fwrite(buf, 1, len, iol->fd.f);
+	if (ret <= 0) {
 	    ret = -1;
 	    if (errstr != NULL)
 		*errstr = strerror(errno);
