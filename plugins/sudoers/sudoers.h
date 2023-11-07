@@ -78,6 +78,7 @@ struct group_list {
 
 /*
  * Parse configuration settings.
+ * Do not change the order without updating SUDOERS_PARSER_CONFIG_INITIALIZER.
  */
 struct sudoers_parser_config {
     const char *sudoers_path;
@@ -102,6 +103,7 @@ struct sudoers_parser_config {
 
 /*
  * Settings passed in from the sudo front-end.
+ * Do not change the order without updating SUDOERS_CONTEXT_INITIALIZER.
  */
 struct sudoers_plugin_settings {
     const char *plugin_dir;
@@ -183,7 +185,7 @@ struct sudoers_runas_context {
 
 #define SUDOERS_CONTEXT_INITIALIZER {					\
     SUDOERS_PARSER_CONFIG_INITIALIZER,					\
-    { _PATH_LDAP_CONF, _PATH_LDAP_SECRET, _PATH_SUDO_PLUGIN_DIR }	\
+    { _PATH_SUDO_PLUGIN_DIR, _PATH_LDAP_CONF, _PATH_LDAP_SECRET }	\
 }
 
 /*
