@@ -78,7 +78,6 @@ struct group_list {
 
 /*
  * Parse configuration settings.
- * Do not change the order without updating SUDOERS_PARSER_CONFIG_INITIALIZER.
  */
 struct sudoers_parser_config {
     const char *sudoers_path;
@@ -91,19 +90,18 @@ struct sudoers_parser_config {
     gid_t sudoers_gid;
 };
 #define SUDOERS_PARSER_CONFIG_INITIALIZER {				\
-    NULL,	/* sudoers_path */					\
-    false,	/* strict */						\
-    1,		/* verbose level 1 */					\
-    true,	/* recovery */						\
-    false,	/* ignore_perms */					\
-    SUDOERS_MODE,							\
-    SUDOERS_UID,							\
-    SUDOERS_GID								\
+    .sudoers_path = NULL,						\
+    .strict = false,							\
+    .verbose = 1,							\
+    .recovery = true,							\
+    .ignore_perms = false,						\
+    .sudoers_mode = SUDOERS_MODE,					\
+    .sudoers_uid = SUDOERS_UID,						\
+    .sudoers_gid = SUDOERS_GID						\
 }
 
 /*
  * Settings passed in from the sudo front-end.
- * Do not change the order without updating SUDOERS_CONTEXT_INITIALIZER.
  */
 struct sudoers_plugin_settings {
     const char *plugin_dir;
@@ -111,6 +109,11 @@ struct sudoers_plugin_settings {
     const char *ldap_secret;
     unsigned int flags;
 };
+#define SUDOERS_PLUGIN_SETTINGS_INITIALIZER {				\
+    .plugin_dir = _PATH_SUDO_PLUGIN_DIR,				\
+    .ldap_conf = _PATH_LDAP_CONF,					\
+    .ldap_secret = _PATH_LDAP_SECRET					\
+}
 
 /*
  * Info pertaining to the invoking user.
@@ -183,11 +186,6 @@ struct sudoers_runas_context {
 #endif
 };
 
-#define SUDOERS_CONTEXT_INITIALIZER {					\
-    SUDOERS_PARSER_CONFIG_INITIALIZER,					\
-    { _PATH_SUDO_PLUGIN_DIR, _PATH_LDAP_CONF, _PATH_LDAP_SECRET }	\
-}
-
 /*
  * Global configuration for the sudoers module.
  */
@@ -205,6 +203,10 @@ struct sudoers_context {
     unsigned int mode;
     char uuid_str[37];
 };
+#define SUDOERS_CONTEXT_INITIALIZER {					\
+    SUDOERS_PARSER_CONFIG_INITIALIZER,					\
+    SUDOERS_PLUGIN_SETTINGS_INITIALIZER,				\
+}
 
 /*
  * sudo_get_gidlist() type values
