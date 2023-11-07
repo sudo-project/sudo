@@ -1,3 +1,9 @@
+What's new in Sudo 1.9.15p1
+
+ * Fixed a bug introduced in sudo 1.9.15 that prevented LDAP-based
+   sudoers from being able to read the ldap.conf file.
+   GitHub issue #325.
+
 What's new in Sudo 1.9.15
 
  * Fixed an undefined symbol problem on older versions of macOS
