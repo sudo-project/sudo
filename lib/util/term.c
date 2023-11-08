@@ -178,6 +178,8 @@ sudo_term_restore_v1(int fd, bool flush)
 	ret = true;
 	goto unlock;
     }
+#if !TCSASOFT
+    /* Only systems without TCSASOFT make changes to c_cflag. */
     if ((term.c_cflag & CONTROL_FLAGS) != (cur_term.c_cflag & CONTROL_FLAGS)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: not restoring terminal, "
 	    "c_cflag changed; 0x%x, expected 0x%x", __func__,
@@ -186,6 +188,7 @@ sudo_term_restore_v1(int fd, bool flush)
 	ret = true;
 	goto unlock;
     }
+#endif
     if ((term.c_lflag & LOCAL_FLAGS) != (cur_term.c_lflag & LOCAL_FLAGS)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: not restoring terminal, "
 	    "c_lflag changed; 0x%x, expected 0x%x", __func__,
