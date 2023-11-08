@@ -104,7 +104,7 @@ configure="${scriptdir}/../configure"
 osrelease=`echo "$osversion" | sed -e 's/^[^0-9]*//' -e 's/-.*$//'`
 : ${MAKE=make}
 
-if [ $build_packages = true -a $osversion = unknown ]; then
+if [ $build_packages = true -a "$osversion" = "unknown" ]; then
     echo "unable to determine platform" 1>&2
     exit 1
 fi
