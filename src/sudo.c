@@ -315,9 +315,10 @@ main(int argc, char *argv[], char *envp[])
     if (WIFSIGNALED(status)) {
 	struct sigaction sa;
 
-	if (WCOREDUMP(status))
-	    disable_coredump();
+	/* Make sure sudo doesn't dump core itself. */
+	disable_coredump();
 
+	/* Re-send the signal to the main sudo process. */
 	memset(&sa, 0, sizeof(sa));
 	sigemptyset(&sa.sa_mask);
 	sa.sa_handler = SIG_DFL;
