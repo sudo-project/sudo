@@ -388,13 +388,13 @@ print_alias_csv(struct sudoers_parse_tree *parse_tree, struct alias *a, void *v)
     title = alias_type_to_string(a->type);
     if (title == NULL) {
         sudo_warnx("unexpected alias type %d", a->type);
-	debug_return_int(0);
+	debug_return_int(-1);
     }
 
     fprintf(fp, "%s,%s,", title, a->name);
     print_member_list_csv(fp, parse_tree, &a->members, false, a->type, false);
     putc('\n', fp);
-    debug_return_int(0);
+    debug_return_int(ferror(fp));
 }
 
 /*
@@ -403,6 +403,7 @@ print_alias_csv(struct sudoers_parse_tree *parse_tree, struct alias *a, void *v)
 static bool
 print_aliases_csv(FILE *fp, const struct sudoers_parse_tree *parse_tree)
 {
+    bool ret;
     debug_decl(print_aliases_csv, SUDOERS_DEBUG_UTIL);
 
     if (TAILQ_EMPTY(&parse_tree->defaults))
@@ -412,10 +413,13 @@ print_aliases_csv(FILE *fp, const struct sudoers_parse_tree *parse_tree)
     fputs("alias_type,alias_name,members\n", fp);
 
     /* print_alias_csv() does not modify parse_tree. */
-    alias_apply((struct sudoers_parse_tree *)parse_tree, print_alias_csv, fp);
+    ret = alias_apply((struct sudoers_parse_tree *)parse_tree,
+	print_alias_csv, fp);
     putc('\n', fp);
+    if (ferror(fp))
+	ret = false;
 
-    debug_return_bool(true);
+    debug_return_bool(ret);
 }
 
 /*

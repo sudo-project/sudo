@@ -177,22 +177,24 @@ alias_apply_func(void *v1, void *v2)
 /*
  * Apply a function to each alias entry and pass in a cookie.
  */
-void
+bool
 alias_apply(struct sudoers_parse_tree *parse_tree,
     int (*func)(struct sudoers_parse_tree *, struct alias *, void *),
     void *cookie)
 {
     struct alias_apply_closure closure;
+    bool ret = true;
     debug_decl(alias_apply, SUDOERS_DEBUG_ALIAS);
 
     if (parse_tree->aliases != NULL) {
 	closure.parse_tree = parse_tree;
 	closure.func = func;
 	closure.cookie = cookie;
-	rbapply(parse_tree->aliases, alias_apply_func, &closure, inorder);
+	if (rbapply(parse_tree->aliases, alias_apply_func, &closure, inorder) != 0)
+	    ret = false;
     }
 
-    debug_return;
+    debug_return_bool(ret);
 }
 
 /*

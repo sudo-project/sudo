@@ -388,7 +388,7 @@ const char *alias_type_to_string(short alias_type);
 struct alias *alias_get(const struct sudoers_parse_tree *parse_tree, const char *name, short type);
 struct alias *alias_remove(struct sudoers_parse_tree *parse_tree, const char *name, short type);
 bool alias_find_used(struct sudoers_parse_tree *parse_tree, struct rbtree *used_aliases);
-void alias_apply(struct sudoers_parse_tree *parse_tree, int (*func)(struct sudoers_parse_tree *, struct alias *, void *), void *cookie);
+bool alias_apply(struct sudoers_parse_tree *parse_tree, int (*func)(struct sudoers_parse_tree *, struct alias *, void *), void *cookie);
 void alias_free(void *a);
 void alias_put(struct alias *a);
 
