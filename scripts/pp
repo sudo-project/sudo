@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright 2023 One Identity LLC. ALL RIGHTS RESERVED
-pp_revision="20230127"
+pp_revision="20231108"
  # Copyright 2018 One Identity LLC.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -794,6 +794,11 @@ pp_strip_binaries () {
     fi
 }
 
+pp_is_version_greater () {
+  smaller_version="$(echo -e "$1\n$2" | sort -V | head -1)"
+  test x"$smaller_version" = x"$1"
+}
+
 pp_if_true=0
 pp_if_false=0
 
@@ -1293,6 +1298,7 @@ pp_files_expand () {
     if test $# -gt 0; then
         _a=`eval echo \"$1\"`
 	case ",$_a," in *,volatile,*) _flags="${_flags}v";; esac
+	case ",$_a," in *,missingok,*) _flags="${_flags}m";; esac
 	case ",$_a," in *,optional,*) _optional=true;; esac
 	case ",$_a," in *,symlink,*) _has_target=true;; esac
 	case ",$_a," in *,ignore-others,*) _flags="${_flags}i";; esac
@@ -1947,6 +1953,10 @@ pp_backend_aix () {
                 pp_debug "$cmp ROOT $pp_aix_bff_name.$ex.inventory:"
                 cat $root_wrkdir/$pp_aix_bff_name.$ex.inventory
             fi >&2
+
+            for fileset in ${pp_aix_deprecated_filesets}; do
+                echo "$fileset"
+            done >$user_wrkdir/$pp_aix_bff_name.$ex.namelist
 
 	    if test x"" != x"${pp_aix_copyright:-$copyright}"; then
 	        echo "${pp_aix_copyright:-$copyright}" > $user_wrkdir/$pp_aix_bff_name.$ex.copyright
@@ -5702,7 +5712,10 @@ pp_rpm_writefiles () {
 	    test x"$farch" = x"noarch" || pp_add_to_list pp_rpm_arch_seen $farch
 	fi
 
-	case $f in *v*) _l="%config(noreplace) $_l";; esac
+	case $f in
+		*v*) _l="%config(noreplace) $_l";;
+		*m*) _l="%config(missingok) $_l";;
+	esac
 	echo "$_l"
     done
     echo
@@ -6321,7 +6334,7 @@ pp_rpm_service_group_make_init_script () {
     local script=/etc/init.d/$grp
     local out=$pp_destdir$script
 
-    pp_add_file_if_missing $script run 755 || return 0
+    pp_add_file_if_missing $script run 755 m || return 0
 
     cat <<-. >>$out
 	#!/bin/sh
@@ -6411,7 +6424,7 @@ pp_rpm_service_make_service_files () {
     local out=$pp_destdir$script
     local _process _cmd _rpmlevels
 
-    pp_add_file_if_missing $script run 755 || return 0
+    pp_add_file_if_missing $script run 755 m || return 0
 
     #-- start out as an empty shell script
     cat <<-'.' >$out
@@ -7954,8 +7967,8 @@ pp_backend_bsd_init () {
     pp_bsd_desc=
     pp_bsd_message=
 
-    # FreeBSD uses package.txz, DragonFly uses package.pkg.
-    if [ "$pp_bsd_os" = "DragonFly" ]; then
+    # Newer "pkg" (>=1.17.0) generates package.pkg, before that package.txz.
+    if pp_is_version_greater 1.17.0 "$(pkg --version)"; then
         pp_bsd_pkg_sfx=pkg
     else
         pp_bsd_pkg_sfx=txz
@@ -8982,17 +8995,29 @@ pp_systemd_service_install_common () {
                                 ;;
                         esac
                     fi
-                else
-                    RUNNING=1
+                fi
+
+                # If the service is not running according to its sysv script (eg. systemd service
+                # is not using a pidfile the sysv script needs), or its sysv script is not present any more,
+                # check how systemd thinks.
+                # We also try to restart the service in case something went wrong with it.
+                if $systemctl_cmd is-active "$svc" >/dev/null 2>&1 || $systemctl_cmd is-failed "$svc" >/dev/null 2>&1; then
+                        $systemctl_cmd stop "$svc" >/dev/null 2>&1
+                        RUNNING=0
                 fi
 
                 # Enable the $svc.service
                 $systemctl_cmd daemon-reload >/dev/null 2>&1
+
+                # We do not need the init.d script any more, and it causes problems on SLES
+                # where systemd sysv compatibility is enforced and broken on default installs
+                rm -f "/etc/init.d/$svc"
+
                 $systemctl_cmd enable $svc.service >/dev/null 2>&1
 
                 # Now that the service has been enabled, start it again if it was running before.
                 if [ $RUNNING -eq 0 ]; then
-                    /etc/init.d/$svc start > /dev/null 2>&1
+                    $systemctl_cmd start $svc.service >/dev/null 2>&1
                 fi
             fi
         }
@@ -9057,6 +9082,8 @@ pp_systemd_service_remove_common () {
             if test -z "$systemctl_cmd"; then
                 _pp_systemd_init
             fi
+
+            $systemctl_cmd stop $svc.service > /dev/null 2>&1
 
             # Remove the systemd unit service file
             if [ "x$systemd_service_dir" != "x$systemd_system_unit_dir" ]; then
