@@ -1,3 +1,9 @@
+What's new in Sudo 1.9.15p2
+
+ * Fixed a bug on BSD systems where sudo would not restore the
+   terminal settings on exit if the terminal had parity enabled.
+   GitHub issue #326.
+
 What's new in Sudo 1.9.15p1
 
  * Fixed a bug introduced in sudo 1.9.15 that prevented LDAP-based
