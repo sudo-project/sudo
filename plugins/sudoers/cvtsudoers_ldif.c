@@ -46,6 +46,8 @@ struct seen_user {
 
 static struct rbtree *seen_users;
 
+static bool printf_attribute_ldif(FILE *fp, const char *name, const char * restrict fmt, ...) sudo_printflike(3, 4);
+
 static int
 seen_user_compare(const void *aa, const void *bb)
 {
@@ -123,6 +125,29 @@ print_attribute_ldif(FILE *fp, const char *name, const char *value)
     debug_return_bool(true);
 }
 
+static bool
+printf_attribute_ldif(FILE *fp, const char *name, const char * restrict fmt, ...)
+{
+    char *attr_val;
+    va_list ap;
+    bool ret;
+    int len;
+    debug_decl(printf_attribute_ldif, SUDOERS_DEBUG_UTIL);
+
+    va_start(ap, fmt);
+    len = vasprintf(&attr_val, fmt, ap);
+    va_end(ap);
+    if (len == -1) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_bool(false);
+    }
+
+    ret = print_attribute_ldif(fp, name, attr_val);
+    free(attr_val);
+
+    debug_return_bool(ret);
+}
+
 /*
  * Print sudoOptions from a defaults_list.
  */
@@ -130,8 +155,6 @@ static bool
 print_options_ldif(FILE *fp, const struct defaults_list *options)
 {
     struct defaults *opt;
-    char *attr_val;
-    int len;
     debug_decl(print_options_ldif, SUDOERS_DEBUG_UTIL);
 
     TAILQ_FOREACH(opt, options, entries) {
@@ -140,19 +163,13 @@ print_options_ldif(FILE *fp, const struct defaults_list *options)
 
 	if (opt->val != NULL) {
 	    /* There is no need to double quote values here. */
-	    len = asprintf(&attr_val, "%s%s%s", opt->var,
+	    printf_attribute_ldif(fp, "sudoOption", "%s%s%s", opt->var,
 		opt->op == '+' ? "+=" : opt->op == '-' ? "-=" : "=", opt->val);
 	} else {
 	    /* Boolean flag. */
-	    len = asprintf(&attr_val, "%s%s",
+	    printf_attribute_ldif(fp, "sudoOption", "%s%s",
 		opt->op == false ? "!" : "", opt->var);
 	}
-	if (len == -1) {
-	    sudo_fatalx(U_("%s: %s"), __func__,
-		U_("unable to allocate memory"));
-	}
-	print_attribute_ldif(fp, "sudoOption", attr_val);
-	free(attr_val);
     }
 
     debug_return_bool(!ferror(fp));
@@ -168,7 +185,6 @@ print_global_defaults_ldif(FILE *fp,
     unsigned int count = 0;
     struct sudo_lbuf lbuf;
     struct defaults *opt;
-    char *dn;
     debug_decl(print_global_defaults_ldif, SUDOERS_DEBUG_UTIL);
 
     sudo_lbuf_init(&lbuf, NULL, 0, NULL, 80);
@@ -190,12 +206,7 @@ print_global_defaults_ldif(FILE *fp,
     if (count == 0)
 	debug_return_bool(true);
 
-    if (asprintf(&dn, "cn=defaults,%s", base) == -1) {
-	sudo_fatalx(U_("%s: %s"), __func__,
-	    U_("unable to allocate memory"));
-    }
-    print_attribute_ldif(fp, "dn", dn);
-    free(dn);
+    printf_attribute_ldif(fp, "dn", "cn=defaults,%s", base);
     print_attribute_ldif(fp, "objectClass", "top");
     print_attribute_ldif(fp, "objectClass", "sudoRole");
     print_attribute_ldif(fp, "cn", "defaults");
@@ -266,7 +277,6 @@ print_member_ldif(FILE *fp, const struct sudoers_parse_tree *parse_tree,
     struct alias *a;
     struct member *m;
     char *attr_val;
-    int len;
     debug_decl(print_member_ldif, SUDOERS_DEBUG_UTIL);
 
     switch (type) {
@@ -296,13 +306,7 @@ print_member_ldif(FILE *fp, const struct sudoers_parse_tree *parse_tree,
 	}
 	FALLTHROUGH;
     default:
-	len = asprintf(&attr_val, "%s%s", negated ? "!" : "", name);
-	if (len == -1) {
-	    sudo_fatalx(U_("%s: %s"), __func__,
-		U_("unable to allocate memory"));
-	}
-	print_attribute_ldif(fp, attr_name, attr_val);
-	free(attr_val);
+	printf_attribute_ldif(fp, attr_name, "%s%s", negated ? "!" : "", name);
 	break;
     }
 
@@ -322,7 +326,6 @@ print_cmndspec_ldif(FILE *fp, const struct sudoers_parse_tree *parse_tree,
     struct cmndspec *next = *nextp;
     struct member *m;
     struct tm gmt;
-    char *attr_val;
     bool last_one;
     size_t len;
     debug_decl(print_cmndspec_ldif, SUDOERS_DEBUG_UTIL);
@@ -373,12 +376,8 @@ print_cmndspec_ldif(FILE *fp, const struct sudoers_parse_tree *parse_tree,
 
     /* Print timeout as a sudoOption. */
     if (cs->timeout > 0) {
-	if (asprintf(&attr_val, "command_timeout=%d", cs->timeout) == -1) {
-	    sudo_fatalx(U_("%s: %s"), __func__,
-		U_("unable to allocate memory"));
-	}
-	print_attribute_ldif(fp, "sudoOption", attr_val);
-	free(attr_val);
+	printf_attribute_ldif(fp, "sudoOption", "command_timeout=%d",
+	    cs->timeout);
     }
 
     /* Print tags as sudoOption attributes */
@@ -427,50 +426,25 @@ print_cmndspec_ldif(FILE *fp, const struct sudoers_parse_tree *parse_tree,
 
     /* Print runchroot and runcwd. */
     if (cs->runchroot != NULL) {
-	if (asprintf(&attr_val, "runchroot=%s", cs->runchroot) == -1) {
-	    sudo_fatalx(U_("%s: %s"), __func__,
-		U_("unable to allocate memory"));
-	}
-	print_attribute_ldif(fp, "sudoOption", attr_val);
-	free(attr_val);
+	printf_attribute_ldif(fp, "sudoOption", "runchroot=%s", cs->runchroot);
     }
     if (cs->runcwd != NULL) {
-	if (asprintf(&attr_val, "runcwd=%s", cs->runcwd) == -1) {
-	    sudo_fatalx(U_("%s: %s"), __func__,
-		U_("unable to allocate memory"));
-	}
-	print_attribute_ldif(fp, "sudoOption", attr_val);
-	free(attr_val);
+	printf_attribute_ldif(fp, "sudoOption", "runcwd=%s", cs->runcwd);
     }
 
 #ifdef HAVE_SELINUX
     /* Print SELinux role/type */
     if (cs->role != NULL && cs->type != NULL) {
-	if (asprintf(&attr_val, "role=%s", cs->role) == -1) {
-	    sudo_fatalx(U_("%s: %s"), __func__,
-		U_("unable to allocate memory"));
-	}
-	print_attribute_ldif(fp, "sudoOption", attr_val);
-	free(attr_val);
-
-	if (asprintf(&attr_val, "type=%s", cs->type) == -1) {
-	    sudo_fatalx(U_("%s: %s"), __func__,
-		U_("unable to allocate memory"));
-	}
-	print_attribute_ldif(fp, "sudoOption", attr_val);
-	free(attr_val);
+	printf_attribute_ldif(fp, "sudoOption", "role=%s", cs->role);
+	printf_attribute_ldif(fp, "sudoOption", "type=%s", cs->type);
     }
 #endif /* HAVE_SELINUX */
 
 #ifdef HAVE_APPARMOR
     /* Print AppArmor profile */
     if (cs->apparmor_profile != NULL) {
-	if (asprintf(&attr_val, "apparmor_profile=%s", cs->apparmor_profile) == -1) {
-	    sudo_fatalx(U_("%s: %s"), __func__,
-		U_("unable to allocate memory"));
-	}
-	print_attribute_ldif(fp, "sudoOption", attr_val);
-	free(attr_val);
+	printf_attribute_ldif(fp, "sudoOption", "apparmor_profile=%s",
+	    cs->apparmor_profile);
     }
 #endif /* HAVE_APPARMOR */
 
@@ -478,20 +452,11 @@ print_cmndspec_ldif(FILE *fp, const struct sudoers_parse_tree *parse_tree,
     /* Print Solaris privs/limitprivs */
     if (cs->privs != NULL || cs->limitprivs != NULL) {
 	if (cs->privs != NULL) {
-	    if (asprintf(&attr_val, "privs=%s", cs->privs) == -1) {
-		sudo_fatalx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-	    }
-	    print_attribute_ldif(fp, "sudoOption", attr_val);
-	    free(attr_val);
+	    printf_attribute_ldif(fp, "sudoOption", "privs=%s", cs->privs);
 	}
 	if (cs->limitprivs != NULL) {
-	    if (asprintf(&attr_val, "limitprivs=%s", cs->limitprivs) == -1) {
-		sudo_fatalx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-	    }
-	    print_attribute_ldif(fp, "sudoOption", attr_val);
-	    free(attr_val);
+	    printf_attribute_ldif(fp, "sudoOption", "limitprivs=%s",
+		cs->limitprivs);
 	}
     }
 #endif /* HAVE_PRIV_SET */
@@ -625,7 +590,7 @@ print_userspec_ldif(FILE *fp, const struct sudoers_parse_tree *parse_tree,
     TAILQ_FOREACH(priv, &us->privileges, entries) {
 	TAILQ_FOREACH_SAFE(cs, &priv->cmndlist, entries, next) {
 	    const char *base = conf->sudoers_base;
-	    char *cn, *dn;
+	    char *cn;
 
 	    /*
 	     * Increment the number of times we have seen this user.
@@ -633,17 +598,16 @@ print_userspec_ldif(FILE *fp, const struct sudoers_parse_tree *parse_tree,
 	     */
 	    m = TAILQ_FIRST(&us->users);
 	    cn = user_to_cn(m->type == ALL ? "ALL" : m->name);
-	    if (cn == NULL || asprintf(&dn, "cn=%s,%s", cn, base) == -1) {
+	    if (cn == NULL) {
 		sudo_fatalx(U_("%s: %s"), __func__,
 		    U_("unable to allocate memory"));
 	    }
 
-	    print_attribute_ldif(fp, "dn", dn);
+	    printf_attribute_ldif(fp, "dn", "cn=%s,%s", cn, base);
 	    print_attribute_ldif(fp, "objectClass", "top");
 	    print_attribute_ldif(fp, "objectClass", "sudoRole");
 	    print_attribute_ldif(fp, "cn", cn);
 	    free(cn);
-	    free(dn);
 
 	    TAILQ_FOREACH(m, &us->users, entries) {
 		print_member_ldif(fp, parse_tree, m->name, m->type, m->negated,
