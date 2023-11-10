@@ -44,17 +44,19 @@ new_member(const char *name, short type)
 
     m = calloc(1, sizeof(struct member));
     if (m == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto oom;
     if (name != NULL) {
 	m->name = strdup(name);
-	if (m->name == NULL) {
-	    sudo_fatalx(U_("%s: %s"), __func__,
-		U_("unable to allocate memory"));
-	}
+	if (m->name == NULL)
+	    goto oom;
     }
     m->type = type;
 
     debug_return_ptr(m);
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    free(m);
+    debug_return_ptr(NULL);
 }
 
 /*
@@ -238,7 +240,7 @@ member_list_equivalent(struct member_list *ml1, struct member_list *ml2)
  * If a host list contains all hosts in bound_hosts, replace them with
  * "ALL".  Also prune hosts on either side of "ALL" when possible.
  */
-static void
+static bool
 simplify_host_list(struct member_list *hosts, const char *file, int line,
     int column, struct member_list *bound_hosts)
 {
@@ -290,6 +292,8 @@ simplify_host_list(struct member_list *hosts, const char *file, int line,
 		}
 	    }
 	    m = new_member(NULL, ALL);
+	    if (m == NULL)
+		debug_return_bool(false);
 	    TAILQ_INSERT_TAIL(hosts, m, entries);
 	}
     }
@@ -316,7 +320,7 @@ simplify_host_list(struct member_list *hosts, const char *file, int line,
 	}
     }
 
-    debug_return;
+    debug_return_bool(true);
 }
 
 /*
@@ -766,7 +770,8 @@ defaults_list_equivalent(struct defaults_list *dl1, struct defaults_list *dl2)
 enum cvtsudoers_conflict {
     CONFLICT_NONE,
     CONFLICT_RESOLVED,
-    CONFLICT_UNRESOLVED
+    CONFLICT_UNRESOLVED,
+    CONFLICT_ERROR
 };
 
 /*
@@ -806,11 +811,15 @@ defaults_check_conflict(struct defaults *def,
 			 */
 			if (d->type == DEFAULTS) {
 			    struct member *m = new_member(NULL, ALL);
+			    if (m == NULL)
+				debug_return_int(CONFLICT_ERROR);
 			    TAILQ_INSERT_TAIL(&d->binding->members, m, entries);
 			    d->type = def->type;
 			}
 			if (def->type == DEFAULTS) {
 			    struct member *m = new_member(NULL, ALL);
+			    if (m == NULL)
+				debug_return_int(CONFLICT_ERROR);
 			    TAILQ_INSERT_TAIL(&def->binding->members, m, entries);
 			    def->type = d->type;
 			}
@@ -861,6 +870,8 @@ merge_defaults(struct sudoers_parse_tree_list *parse_trees,
 	TAILQ_FOREACH(def, &parse_tree->defaults, entries) {
 	    if (parse_tree->lhost != NULL && def->type == DEFAULTS) {
 		m = new_member(parse_tree->lhost, WORD);
+		if (m == NULL)
+		    debug_return_bool(false);
 		log_warnx(U_("%s:%d:%d: made Defaults \"%s\" specific to host %s"),
 		    def->file, def->line, def->column, def->var,
 		    parse_tree->lhost);
@@ -893,6 +904,10 @@ merge_defaults(struct sudoers_parse_tree_list *parse_trees,
 		    def->file, def->line, def->column, def->var);
 		free_default(def);
 		break;
+	    default:
+		/* warning printed by defaults_check_conflict() */
+		free_default(def);
+		debug_return_bool(false);
 	    }
 	}
     }
@@ -903,8 +918,10 @@ merge_defaults(struct sudoers_parse_tree_list *parse_trees,
     TAILQ_FOREACH(def, &merged_tree->defaults, entries) {
 	/* TODO: handle refcnt != 1 */
 	if (def->type == DEFAULTS_HOST && def->binding->refcnt == 1) {
-	    simplify_host_list(&def->binding->members, def->file, def->line,
-		def->column, bound_hosts);
+	    if (!simplify_host_list(&def->binding->members, def->file,
+		    def->line, def->column, bound_hosts)) {
+		debug_return_bool(false);
+	    }
 	    m = TAILQ_FIRST(&def->binding->members);
 	    if (m->type == ALL && !m->negated) {
 		if (TAILQ_NEXT(m, entries) == NULL) {
@@ -1183,6 +1200,10 @@ merge_userspecs(struct sudoers_parse_tree_list *parse_trees,
 		    us->file, us->line, us->column);
 		free_userspec(us);
 		break;
+	    default:
+		/* warning printed by defaults_check_conflict() */
+		free_userspec(us);
+		debug_return_bool(false);
 	    }
 	}
     }
@@ -1195,8 +1216,10 @@ merge_userspecs(struct sudoers_parse_tree_list *parse_trees,
     TAILQ_FOREACH_REVERSE(us, &merged_tree->userspecs, userspec_list, entries) {
 	TAILQ_FOREACH_REVERSE(priv, &us->privileges, privilege_list, entries) {
 	    /* TODO: simplify other lists? */
-	    simplify_host_list(&priv->hostlist, us->file, us->line, us->column,
-		bound_hosts);
+	    if (!simplify_host_list(&priv->hostlist, us->file, us->line,
+		    us->column, bound_hosts)) {
+		debug_return_bool(false);
+	    }
 	}
     }
 
@@ -1223,6 +1246,8 @@ merge_sudoers(struct sudoers_parse_tree_list *parse_trees,
     if (parse_tree == NULL) {
 	TAILQ_FOREACH(parse_tree, parse_trees, entries) {
 	    struct member *m = new_member(parse_tree->lhost, WORD);
+	    if (m == NULL)
+		goto bad;
 	    TAILQ_INSERT_TAIL(&bound_hosts, m, entries);
 	}
     }
