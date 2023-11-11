@@ -783,13 +783,17 @@ convert_sudoers_ldif(const struct sudoers_parse_tree *parse_tree,
 	    goto cleanup;
     }
 
+    ret = true;
+
 cleanup:
     if (seen_users != NULL)
 	rbdestroy(seen_users, seen_user_free);
 
     (void)fflush(output_fp);
-    if (!ferror(output_fp))
-	ret = true;
+    if (ferror(output_fp)) {
+	sudo_warn("%s", output_file);
+	ret = false;
+    }
     if (output_fp != stdout)
 	fclose(output_fp);
 
