@@ -709,8 +709,9 @@ print_userspec_ldif(FILE *fp, const struct sudoers_parse_tree *parse_tree,
 	    if (conf->sudo_order != 0) {
 		char numbuf[STRLEN_MAX_UNSIGNED(conf->sudo_order) + 1];
 		if (conf->order_max != 0 && conf->sudo_order > conf->order_max) {
-		    sudo_fatalx(U_("too many sudoers entries, maximum %u"),
+		    sudo_warnx(U_("too many sudoers entries, maximum %u"),
 			conf->order_padding);
+		    debug_return_bool(false);
 		}
 		(void)snprintf(numbuf, sizeof(numbuf), "%u", conf->sudo_order);
 		if (!print_attribute_ldif(fp, "sudoOrder", numbuf))
