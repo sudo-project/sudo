@@ -349,6 +349,9 @@ log_denial(const struct sudoers_context *ctx, unsigned int status,
 		ctx->runas.gr ? ":" : "",
 		ctx->runas.gr ? ctx->runas.gr->gr_name : "",
 		ctx->user.host);
+	    if (def_cmddenial_message != NULL) {
+		sudo_printf(SUDO_CONV_ERROR_MSG, "%s\n", def_cmddenial_message);
+	    }
 	}
 	if (mailit) {
 	    sudo_printf(SUDO_CONV_ERROR_MSG, "%s",

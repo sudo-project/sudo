@@ -112,6 +112,7 @@ sudoOption: user_command_timeouts
 sudoOption: iolog_flush
 sudoOption: syslog_pid
 sudoOption: timestamp_type=tty
+sudoOption: cmddenial_message=That's not allowed!
 sudoOption: authfail_message=Learn to type!
 sudoOption: case_insensitive_user
 sudoOption: case_insensitive_group

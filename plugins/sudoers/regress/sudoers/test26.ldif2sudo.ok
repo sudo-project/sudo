@@ -107,6 +107,7 @@ Defaults user_command_timeouts
 Defaults iolog_flush
 Defaults syslog_pid
 Defaults timestamp_type=tty
+Defaults cmddenial_message="That's not allowed!"
 Defaults authfail_message="Learn to type!"
 Defaults case_insensitive_user
 Defaults case_insensitive_group

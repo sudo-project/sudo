@@ -696,6 +696,11 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("AppArmor profile to use in the new security context: %s"),
 	NULL,
     }, {
+	"cmddenial_message", T_STR,
+	N_("Command denial message: %s"),
+	NULL,
+
+    }, {
 	NULL, 0, NULL
     }
 };
