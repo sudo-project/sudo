@@ -4271,6 +4271,9 @@ option.
 This option is only available when sudo is built with AppArmor
 support.
 .\}
+.It cmddenial_message
+Message that is displayed after a user's command execution is denied.
+It does not override the default message, instead, it adds additional information for the user when set.
 .It authfail_message
 Message that is displayed after a user fails to authenticate.
 The message may include the

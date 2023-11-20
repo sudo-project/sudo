@@ -322,6 +322,9 @@
 #define def_intercept_verify    (sudo_defs_table[I_INTERCEPT_VERIFY].sd_un.flag)
 #define I_APPARMOR_PROFILE      160
 #define def_apparmor_profile    (sudo_defs_table[I_APPARMOR_PROFILE].sd_un.str)
+#define I_CMDDENIAL_MESSAGE     161
+#define def_cmddenial_message   (sudo_defs_table[I_CMDDENIAL_MESSAGE].sd_un.str)
+
 
 enum def_tuple {
     never,
