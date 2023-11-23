@@ -1983,8 +1983,10 @@ client_closure_alloc(struct log_details *details, struct timespec *now,
     closure->state = RECV_HELLO;
     closure->initial_state = initial_state;
 
-    closure->start_time.tv_sec = now->tv_sec;
-    closure->start_time.tv_nsec = now->tv_nsec;
+    if (now != NULL) {
+	closure->start_time.tv_sec = now->tv_sec;
+	closure->start_time.tv_nsec = now->tv_nsec;
+    }
 
     TAILQ_INIT(&closure->write_bufs);
     TAILQ_INIT(&closure->free_bufs);

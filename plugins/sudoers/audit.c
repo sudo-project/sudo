@@ -456,7 +456,7 @@ sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
     if (!eventlog_alert(&evlog, 0, &now, message, NULL))
 	ret = false;
 
-    if (!log_server_alert(ctx, &evlog, &now, message, NULL))
+    if (!log_server_alert(ctx, &evlog, message, NULL))
 	ret = false;
 
     debug_return_int(ret);

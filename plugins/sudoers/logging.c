@@ -175,7 +175,7 @@ done:
 
 bool
 log_server_alert(const struct sudoers_context *ctx, struct eventlog *evlog,
-    struct timespec *now, const char *message, const char *errstr)
+    const char *message, const char *errstr)
 {
     struct log_details details;
     char *emessage = NULL;
@@ -213,7 +213,7 @@ log_server_alert(const struct sudoers_context *ctx, struct eventlog *evlog,
 	    goto done;
 
 	/* Open connection to log server, send hello and alert messages. */
-	client_closure = log_server_open(&details, now, false,
+	client_closure = log_server_open(&details, NULL, false,
 	    SEND_ALERT, emessage ? emessage : message);
 	if (client_closure != NULL) {
 	    client_closure_free(client_closure);
@@ -239,7 +239,7 @@ log_server_reject(const struct sudoers_context *ctx, struct eventlog *evlog,
 
 bool
 log_server_alert(const struct sudoers_context *ctx, struct eventlog *evlog,
-    struct timespec *now, const char *message, const char *errstr)
+    const char *message, const char *errstr)
 {
     return true;
 }
@@ -748,7 +748,7 @@ vlog_warning(const struct sudoers_context *ctx, unsigned int flags,
 	    NULL, ctx->uuid_str);
 	if (!eventlog_alert(&evlog, evl_flags, &now, message, errstr))
 	    ret = false;
-	if (!log_server_alert(ctx, &evlog, &now, message, errstr))
+	if (!log_server_alert(ctx, &evlog, message, errstr))
 	    ret = false;
     }
 
