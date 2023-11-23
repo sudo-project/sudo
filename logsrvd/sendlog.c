@@ -691,8 +691,8 @@ fmt_reject_message(struct client_closure *closure)
     }
 
     /* Sudo I/O logs only store start time in seconds. */
-    tv.tv_sec = (int64_t)closure->evlog->submit_time.tv_sec;
-    tv.tv_nsec = (int32_t)closure->evlog->submit_time.tv_nsec;
+    tv.tv_sec = (int64_t)closure->evlog->event_time.tv_sec;
+    tv.tv_nsec = (int32_t)closure->evlog->event_time.tv_nsec;
     reject_msg.submit_time = &tv;
 
     /* Why the command was rejected. */
@@ -750,8 +750,8 @@ fmt_accept_message(struct client_closure *closure)
     }
 
     /* Sudo I/O logs only store start time in seconds. */
-    tv.tv_sec = (int64_t)closure->evlog->submit_time.tv_sec;
-    tv.tv_nsec = (int32_t)closure->evlog->submit_time.tv_nsec;
+    tv.tv_sec = (int64_t)closure->evlog->event_time.tv_sec;
+    tv.tv_nsec = (int32_t)closure->evlog->event_time.tv_nsec;
     accept_msg.submit_time = &tv;
 
     /* Client will send IoBuffer messages. */

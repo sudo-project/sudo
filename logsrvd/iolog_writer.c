@@ -150,8 +150,8 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 
     /* Submit time. */
     if (submit_time != NULL) {
-	evlog->submit_time.tv_sec = (time_t)submit_time->tv_sec;
-	evlog->submit_time.tv_nsec = (long)submit_time->tv_nsec;
+	evlog->event_time.tv_sec = (time_t)submit_time->tv_sec;
+	evlog->event_time.tv_nsec = (long)submit_time->tv_nsec;
     }
 
     /* Default values */

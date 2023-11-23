@@ -84,7 +84,7 @@ iolog_parse_loginfo_legacy(FILE *fp, const char *iolog_dir,
 	goto done;
     }
     *ep = '\0';
-    evlog->submit_time.tv_sec =
+    evlog->event_time.tv_sec =
 	(time_t)sudo_strtonum(cp, 0, TIME_T_MAX, &errstr);
     if (errstr != NULL) {
 	sudo_warn(U_("%s: time stamp %s: %s"), iolog_dir, cp, errstr);

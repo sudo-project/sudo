@@ -741,7 +741,7 @@ vlog_warning(const struct sudoers_context *ctx, unsigned int flags,
 	}
 	sudoers_to_eventlog(ctx, &evlog, ctx->runas.cmnd, ctx->runas.argv,
 	    NULL, ctx->uuid_str);
-	if (!eventlog_alert(&evlog, evl_flags, &evlog.submit_time, message, errstr))
+	if (!eventlog_alert(&evlog, evl_flags, &evlog.event_time, message, errstr))
 	    ret = false;
 	if (!log_server_alert(ctx, &evlog, message, errstr))
 	    ret = false;
@@ -1005,7 +1005,7 @@ sudoers_to_eventlog(const struct sudoers_context *ctx, struct eventlog *evlog,
     evlog->env_add = (char **)ctx->user.env_add;
     evlog->runenv = (char **)runenv;
     evlog->submitenv = (char **)ctx->user.envp;
-    if (sudo_gettime_real(&evlog->submit_time) == -1) {
+    if (sudo_gettime_real(&evlog->event_time) == -1) {
 	sudo_warn("%s", U_("unable to get time of day"));
     }
     evlog->lines = ctx->user.lines;

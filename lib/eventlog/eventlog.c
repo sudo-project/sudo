@@ -620,7 +620,7 @@ oom:
 
 /*
  * Store the contents of struct eventlog as JSON.
- * The submit_time and iolog_path members are not stored, they should
+ * The event_time and iolog_path members are not stored, they should
  * be stored and formatted by the caller.
  */
 bool
@@ -638,7 +638,7 @@ eventlog_store_json(struct json_container *jsonc, const struct eventlog *evlog)
     /*
      * The most important values are written first in case
      * the log record gets truncated.
-     * Note: submit_time and iolog_path are not stored here.
+     * Note: event_time and iolog_path are not stored here.
      */
 
     json_value.type = JSON_STRING;
@@ -1317,7 +1317,7 @@ eventlog_accept(const struct eventlog *evlog, int flags,
     bool ret = true;
     debug_decl(eventlog_accept, SUDO_DEBUG_UTIL);
 
-    args.event_time = &evlog->submit_time;
+    args.event_time = &evlog->event_time;
     args.json_info_cb = info_cb;
     args.json_info = info;
 
@@ -1345,7 +1345,7 @@ eventlog_reject(const struct eventlog *evlog, int flags, const char *reason,
     debug_decl(eventlog_reject, SUDO_DEBUG_UTIL);
 
     args.reason = reason;
-    args.event_time = &evlog->submit_time;
+    args.event_time = &evlog->event_time;
     args.json_info_cb = info_cb;
     args.json_info = info;
 
@@ -1444,7 +1444,7 @@ eventlog_exit(const struct eventlog *evlog, int flags)
     debug_decl(eventlog_exit, SUDO_DEBUG_UTIL);
 
     if (sudo_timespecisset(&evlog->run_time)) {
-	sudo_timespecadd(&evlog->submit_time, &evlog->run_time, &exit_time);
+	sudo_timespecadd(&evlog->event_time, &evlog->run_time, &exit_time);
 	args.event_time = &exit_time;
     }
 

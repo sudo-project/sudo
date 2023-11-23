@@ -447,7 +447,7 @@ sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
     }
 
     audit_to_eventlog(ctx, &evlog, command_info, ctx->runas.argv, NULL, NULL);
-    if (!eventlog_alert(&evlog, 0, &evlog.submit_time, message, NULL))
+    if (!eventlog_alert(&evlog, 0, &evlog.event_time, message, NULL))
 	ret = false;
 
     if (!log_server_alert(ctx, &evlog, message, NULL))

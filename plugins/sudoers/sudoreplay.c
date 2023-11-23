@@ -1411,10 +1411,10 @@ match_expr(struct search_node_list *head, struct eventlog *evlog, bool last_matc
 	    free(tofree);
 	    break;
 	case ST_FROMDATE:
-	    res = sudo_timespeccmp(&evlog->submit_time, &sn->u.tstamp, >=);
+	    res = sudo_timespeccmp(&evlog->event_time, &sn->u.tstamp, >=);
 	    break;
 	case ST_TODATE:
-	    res = sudo_timespeccmp(&evlog->submit_time, &sn->u.tstamp, <=);
+	    res = sudo_timespeccmp(&evlog->event_time, &sn->u.tstamp, <=);
 	    break;
 	default:
 	    sudo_fatalx(U_("unknown search type %d"), sn->type);
@@ -1450,7 +1450,7 @@ list_session(struct sudo_lbuf *lbuf, char *log_dir, regex_t *re,
     if (!STAILQ_EMPTY(&search_expr) && !match_expr(&search_expr, evlog, true))
 	goto done;
 
-    timestr = get_timestr(evlog->submit_time.tv_sec, 1);
+    timestr = get_timestr(evlog->event_time.tv_sec, 1);
     sudo_lbuf_append_esc(lbuf, LBUF_ESC_CNTRL, "%s : %s : ",
 	timestr ? timestr : "invalid date", evlog->submituser);
 

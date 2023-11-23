@@ -314,7 +314,7 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
     evlog->columns = 80;
     evlog->runuid = ROOT_UID;
     evlog->rungid = 0;
-    sudo_gettime_real(&evlog->submit_time);
+    sudo_gettime_real(&evlog->event_time);
 
     for (cur = user_info; *cur != NULL; cur++) {
 	switch (**cur) {
