@@ -157,8 +157,8 @@ log_server_reject(const struct sudoers_context *ctx, struct eventlog *evlog,
 	    debug_return_bool(false);
 
 	/* Open connection to log server, send hello and reject messages. */
-	client_closure = log_server_open(&details, &evlog->submit_time,
-	    false, SEND_REJECT, message);
+	client_closure = log_server_open(&details, NULL, false,
+	    SEND_REJECT, message);
 	if (client_closure != NULL) {
 	    client_closure_free(client_closure);
 	    client_closure = NULL;

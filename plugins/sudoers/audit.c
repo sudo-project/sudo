@@ -251,7 +251,7 @@ audit_to_eventlog(const struct sudoers_context *ctx, struct eventlog *evlog,
 static bool
 log_server_accept(const struct sudoers_context *ctx, struct eventlog *evlog)
 {
-    struct timespec now;
+    struct timespec start_time;
     bool ret = false;
     debug_decl(log_server_accept, SUDOERS_DEBUG_PLUGIN);
 
@@ -268,7 +268,7 @@ log_server_accept(const struct sudoers_context *ctx, struct eventlog *evlog)
 	    debug_return_bool(true);
     }
 
-    if (sudo_gettime_real(&now) == -1) {
+    if (sudo_gettime_awake(&start_time) == -1) {
 	sudo_warn("%s", U_("unable to get time of day"));
 	goto done;
     }
@@ -288,7 +288,7 @@ log_server_accept(const struct sudoers_context *ctx, struct eventlog *evlog)
 	    goto done;
 
 	/* Open connection to log server, send hello and accept messages. */
-	client_closure = log_server_open(&audit_details, &now, false,
+	client_closure = log_server_open(&audit_details, &start_time, false,
 	    SEND_ACCEPT, NULL);
 	if (client_closure != NULL)
 	    ret = true;
