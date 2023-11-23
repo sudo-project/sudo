@@ -194,7 +194,7 @@ struct sudoers_context {
     struct sudoers_plugin_settings settings;
     struct sudoers_user_context user;
     struct sudoers_runas_context runas;
-    struct timespec submit_time;
+    struct timespec start_time;
     char *source;
     char *iolog_file;
     char *iolog_dir;
@@ -314,7 +314,6 @@ struct sudoers_context {
 struct sudo_lbuf;
 struct passwd;
 struct stat;
-struct timespec;
 
 /*
  * Function prototypes

@@ -119,11 +119,6 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
     } \
 } while (0)
 
-    if (sudo_gettime_real(&ctx->submit_time) == -1) {
-	sudo_warn("%s", U_("unable to get time of day"));
-	goto bad;
-    }
-
     /* Parse sudo.conf plugin args. */
     if (info->plugin_args != NULL) {
 	for (cur = info->plugin_args; *cur != NULL; cur++) {
@@ -1046,6 +1041,14 @@ sudoers_policy_store_result(struct sudoers_context *ctx, bool accepted,
 	    goto oom;
     }
 #endif /* HAVE_PRIV_SET */
+
+    /* Set command start time (monotonic) for the first accepted command. */
+    if (accepted && !ISSET(ctx->mode, MODE_POLICY_INTERCEPTED)) {
+	if (sudo_gettime_awake(&ctx->start_time) == -1) {
+	    sudo_warn("%s", U_("unable to get time of day"));
+	    goto bad;
+	}
+    }
 
     /* Fill in exec environment info. */
     *(exec_args->argv) = argv;

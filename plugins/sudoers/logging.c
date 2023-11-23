@@ -615,12 +615,12 @@ log_exit_status(const struct sudoers_context *ctx, int status)
     debug_decl(log_exit_status, SUDOERS_DEBUG_LOGGING);
 
     if (def_log_exit_status || def_mail_always) {
-	if (sudo_gettime_real(&run_time) == -1) {
+	if (sudo_gettime_awake(&run_time) == -1) {
 	    sudo_warn("%s", U_("unable to get time of day"));
 	    ret = false;
 	    goto done;
 	}
-	sudo_timespecsub(&run_time, &ctx->submit_time, &run_time);
+	sudo_timespecsub(&run_time, &ctx->start_time, &run_time);
 
         if (WIFEXITED(status)) {
 	    exit_value = WEXITSTATUS(status);
@@ -1010,7 +1010,9 @@ sudoers_to_eventlog(const struct sudoers_context *ctx, struct eventlog *evlog,
     evlog->env_add = (char **)ctx->user.env_add;
     evlog->runenv = (char **)runenv;
     evlog->submitenv = (char **)ctx->user.envp;
-    evlog->submit_time = ctx->submit_time;
+    if (sudo_gettime_real(&evlog->submit_time) == -1) {
+	sudo_warn("%s", U_("unable to get time of day"));
+    }
     evlog->lines = ctx->user.lines;
     evlog->columns = ctx->user.cols;
     if (ctx->runas.pw != NULL) {
@@ -1032,11 +1034,11 @@ sudoers_to_eventlog(const struct sudoers_context *ctx, struct eventlog *evlog,
 	strlcpy(evlog->uuid_str, uuid_str, sizeof(evlog->uuid_str));
     }
     if (ISSET(ctx->mode, MODE_POLICY_INTERCEPTED)) {
-	struct timespec now;
-	if (sudo_gettime_real(&now) == -1) {
+	if (sudo_gettime_awake(&evlog->iolog_offset) == -1) {
 	    sudo_warn("%s", U_("unable to get time of day"));
 	} else {
-	    sudo_timespecsub(&now, &ctx->submit_time, &evlog->iolog_offset);
+	    sudo_timespecsub(&evlog->iolog_offset, &ctx->start_time,
+		&evlog->iolog_offset);
 	}
     }
 
