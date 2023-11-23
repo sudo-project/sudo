@@ -688,7 +688,6 @@ vlog_warning(const struct sudoers_context *ctx, unsigned int flags,
     int errnum, const char * restrict fmt, va_list ap)
 {
     struct eventlog evlog;
-    struct timespec now;
     const char *errstr = NULL;
     char *message;
     bool ret = true;
@@ -733,10 +732,6 @@ vlog_warning(const struct sudoers_context *ctx, unsigned int flags,
     }
 
     if (ISSET(flags, SLOG_SEND_MAIL) || !ISSET(flags, SLOG_NO_LOG)) {
-	if (sudo_gettime_real(&now) == -1) {
-	    sudo_warn("%s", U_("unable to get time of day"));
-	    goto done;
-	}
 	if (ISSET(flags, SLOG_RAW_MSG))
 	    SET(evl_flags, EVLOG_RAW);
 	if (ISSET(flags, SLOG_SEND_MAIL)) {
@@ -746,7 +741,7 @@ vlog_warning(const struct sudoers_context *ctx, unsigned int flags,
 	}
 	sudoers_to_eventlog(ctx, &evlog, ctx->runas.cmnd, ctx->runas.argv,
 	    NULL, ctx->uuid_str);
-	if (!eventlog_alert(&evlog, evl_flags, &now, message, errstr))
+	if (!eventlog_alert(&evlog, evl_flags, &evlog.submit_time, message, errstr))
 	    ret = false;
 	if (!log_server_alert(ctx, &evlog, message, errstr))
 	    ret = false;

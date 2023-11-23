@@ -434,7 +434,6 @@ sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
 {
     const struct sudoers_context *ctx = sudoers_get_context();
     struct eventlog evlog;
-    struct timespec now;
     int ret = true;
     debug_decl(sudoers_audit_error, SUDOERS_DEBUG_PLUGIN);
 
@@ -447,13 +446,8 @@ sudoers_audit_error(const char *plugin_name, unsigned int plugin_type,
 	    ret = false;
     }
 
-    if (sudo_gettime_real(&now)) {
-	sudo_warn("%s", U_("unable to get time of day"));
-	debug_return_bool(false);
-    }
-
     audit_to_eventlog(ctx, &evlog, command_info, ctx->runas.argv, NULL, NULL);
-    if (!eventlog_alert(&evlog, 0, &now, message, NULL))
+    if (!eventlog_alert(&evlog, 0, &evlog.submit_time, message, NULL))
 	ret = false;
 
     if (!log_server_alert(ctx, &evlog, message, NULL))
