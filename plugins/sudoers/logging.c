@@ -200,7 +200,7 @@ log_server_alert(const struct sudoers_context *ctx, struct eventlog *evlog,
 	}
 
 	/* Use existing client closure. */
-        if (fmt_reject_message(client_closure, evlog)) {
+        if (fmt_alert_message(client_closure, evlog)) {
             if (client_closure->write_ev->add(client_closure->write_ev,
                     &client_closure->log_details->server_timeout) == -1) {
                 sudo_warn("%s", U_("unable to add event to queue"));

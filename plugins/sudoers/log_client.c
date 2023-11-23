@@ -1057,7 +1057,7 @@ done:
  * Appends the wire format message to the closure's write queue.
  * Returns true on success, false on failure.
  */
-static bool
+bool
 fmt_alert_message(struct client_closure *closure, struct eventlog *evlog)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
