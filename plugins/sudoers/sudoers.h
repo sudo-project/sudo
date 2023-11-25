@@ -24,7 +24,7 @@
 #ifndef SUDOERS_SUDOERS_H
 #define SUDOERS_SUDOERS_H
 
-#include <sys/types.h>		/* for gid_t, mode_t, pid_t, size_t, uid_t */
+#include <sys/types.h>		/* dev_t, gid_t, mode_t, pid_t, size_t, uid_t */
 #include <limits.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
@@ -142,6 +142,7 @@ struct sudoers_user_context {
     int   lines;
     int   cols;
     int   timeout;
+    dev_t ttydev;
     mode_t umask;
     uid_t euid;
     uid_t uid;

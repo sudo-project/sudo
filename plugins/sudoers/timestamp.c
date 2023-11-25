@@ -379,7 +379,6 @@ ts_init_key(const struct sudoers_context *ctx,
     struct timestamp_entry *entry, struct passwd *pw,
     unsigned short flags, enum def_tuple ticket_type)
 {
-    struct stat sb;
     debug_decl(ts_init_key, SUDOERS_DEBUG_AUTH);
 
     memset(entry, 0, sizeof(*entry));
@@ -398,10 +397,10 @@ ts_init_key(const struct sudoers_context *ctx,
 	sudo_warnx("unknown time stamp ticket type %d", ticket_type);
 	FALLTHROUGH;
     case tty:
-	if (ctx->user.ttypath != NULL && stat(ctx->user.ttypath, &sb) == 0) {
+	if (ctx->user.ttydev != (dev_t)-1) {
 	    /* tty-based time stamp */
 	    entry->type = TS_TTY;
-	    entry->u.ttydev = sb.st_rdev;
+	    entry->u.ttydev = ctx->user.ttydev;
 	    if (entry->sid != -1)
 		get_starttime(entry->sid, &entry->start_time);
 	    break;
