@@ -153,6 +153,13 @@ struct sudo_conf_debug_file_list;
 	    "<- %s @ %s:%d := %ld", (_func), (_file), (_line), (_ret));	       \
     } while (0)
 
+# define sudo_debug_exit_dev_t(_func, _file, _line, _sys, _ret)		       \
+    do {								       \
+	sudo_debug_printf2(NULL, NULL, 0, (_sys) | SUDO_DEBUG_TRACE,	       \
+	    "<- %s @ %s:%d := %lu", (_func), (_file), (_line),		       \
+	    (unsigned long)(_ret));					       \
+    } while (0)
+
 # if SIZEOF_ID_T == 8
 #  define sudo_debug_exit_id_t(_func, _file, _line, _sys, _ret)		       \
     do {								       \
@@ -263,6 +270,14 @@ struct sudo_conf_debug_file_list;
     do {								       \
 	unsigned int sudo_debug_ret = (ret);				       \
 	sudo_debug_exit_uint(__func__, __FILE__, __LINE__, sudo_debug_subsys,  \
+	    sudo_debug_ret);						       \
+	return sudo_debug_ret;						       \
+    } while (0)
+
+#define debug_return_dev_t(ret)					       \
+    do {								       \
+	dev_t sudo_debug_ret = (ret);				       \
+	sudo_debug_exit_dev_t(__func__, __FILE__, __LINE__, sudo_debug_subsys,\
 	    sudo_debug_ret);						       \
 	return sudo_debug_ret;						       \
     } while (0)

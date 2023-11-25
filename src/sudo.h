@@ -317,7 +317,7 @@ char *getenv_unhooked(const char *name);
 int get_net_ifs(char **addrinfo);
 
 /* ttyname.c */
-char *get_process_ttyname(char *name, size_t namelen);
+dev_t get_process_ttyname(char *name, size_t namelen);
 bool sudo_isatty(int fd, struct stat *sb);
 
 /* signal.c */
