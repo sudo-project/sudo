@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "November 6, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "November 26, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -292,6 +292,14 @@ The
 option can be used to select the type of time stamp record
 \fBsudoers\fR
 will use.
+.PP
+The
+\fBtsdump\fR
+utility, included with the sudo source distribution, can be used to
+display the contents of a time stamp file.
+See
+sudoers_timestamp(@mansectform@)
+for details of the time stamp file format.
 .SS "Logging"
 By default,
 \fBsudoers\fR

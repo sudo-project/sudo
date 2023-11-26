@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 20, 2023
+.Dd November 26, 2023
 .Dt SUDOERS_TIMESTAMP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -162,6 +162,13 @@ records of type
 The ID of the parent process for records of type
 .Dv TS_PPID .
 .El
+.Pp
+The
+.Nm tsdump
+utility, included with the sudo source distribution, can be used to
+display the contents of a
+.Em sudoers
+time stamp file.
 .Sh LOCKING
 In
 .Nm sudoers

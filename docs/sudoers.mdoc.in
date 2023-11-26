@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd November 6, 2023
+.Dd November 26, 2023
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -280,6 +280,14 @@ The
 option can be used to select the type of time stamp record
 .Nm
 will use.
+.Pp
+The
+.Nm tsdump
+utility, included with the sudo source distribution, can be used to
+display the contents of a time stamp file.
+See
+.Xr sudoers_timestamp @mansectform@
+for details of the time stamp file format.
 .Ss Logging
 By default,
 .Nm
