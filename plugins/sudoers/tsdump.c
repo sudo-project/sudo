@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2018-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2018-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,6 +22,13 @@
  */
 
 #include <config.h>
+
+#include <sys/types.h>
+#if defined(MAJOR_IN_MKDEV)
+# include <sys/mkdev.h>
+#elif defined(MAJOR_IN_SYSMACROS)
+# include <sys/sysmacros.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -287,7 +294,7 @@ dump_entry(struct timestamp_entry *entry, off_t pos)
     printf("size: %hu\n", entry->size);
     printf("type: %s\n", type2string(entry->type));
     print_flags(entry->flags);
-    printf("auth uid: %d\n", (int)entry->auth_uid);
+    printf("auth uid: %u\n", (unsigned int)entry->auth_uid);
     printf("session ID: %d\n", (int)entry->sid);
     if (sudo_timespecisset(&entry->start_time))
 	printf("start time: %s", ctime(&entry->start_time.tv_sec));
@@ -295,10 +302,13 @@ dump_entry(struct timestamp_entry *entry, off_t pos)
 	printf("time stamp: %s", ctime(&entry->ts.tv_sec));
     if (entry->type == TS_TTY) {
 	char tty[PATH_MAX];
-	if (sudo_ttyname_dev(entry->u.ttydev, tty, sizeof(tty)) == NULL)
-	    printf("terminal: %d\n", (int)entry->u.ttydev);
-	else
-	    printf("terminal: %s\n", tty);
+	if (sudo_ttyname_dev(entry->u.ttydev, tty, sizeof(tty)) == NULL) {
+	    printf("terminal: %u, %u (0x%x)\n", major(entry->u.ttydev),
+		minor(entry->u.ttydev), (unsigned int)entry->u.ttydev);
+	} else {
+	    printf("terminal: %s (0x%x)\n", tty,
+		(unsigned int)entry->u.ttydev);
+	}
     } else if (entry->type == TS_PPID) {
 	printf("parent pid: %d\n", (int)entry->u.ppid);
     }
