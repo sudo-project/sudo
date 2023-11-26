@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd July 10, 2023
+.Dd November 25, 2023
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -600,10 +600,16 @@ device associated with the
 process or 0 if there is no terminal present.
 Only available starting with API version 1.2.
 .It tty=string
-The path to the user's terminal device.
-If the user has no terminal device associated with the session,
-the value will be empty, as in
-.Ql tty= .
+The path to the user's terminal device, if one exists.
+This entry is only present if the user has a terminal device
+associated with the session.
+.It ttydev=dev_t
+The number of the user's terminal device, if one exists,
+in the form of a
+.Vt dev_t .
+This entry is only present if the user has a terminal device
+associated with the session.
+Only available starting with API version 1.22.
 .It uid=uid_t
 The real user-ID of the user invoking
 .Nm sudo .
@@ -4856,6 +4862,12 @@ The
 .Em sudoedit_nfiles
 entry was added to the
 .Fa command_info
+list.
+.It Version 1.22 (sudo 1.9.16)
+The
+.Em ttydev
+entry was added to the
+.Fa user_info
 list.
 .El
 .Sh SEE ALSO
