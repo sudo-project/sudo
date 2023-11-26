@@ -301,12 +301,14 @@ dump_entry(struct timestamp_entry *entry, off_t pos)
     if (sudo_timespecisset(&entry->ts))
 	printf("time stamp: %s", ctime(&entry->ts.tv_sec));
     if (entry->type == TS_TTY) {
-	char tty[PATH_MAX];
-	if (sudo_ttyname_dev(entry->u.ttydev, tty, sizeof(tty)) == NULL) {
-	    printf("terminal: %u, %u (0x%x)\n", major(entry->u.ttydev),
-		minor(entry->u.ttydev), (unsigned int)entry->u.ttydev);
+	char ttypath[PATH_MAX];
+	if (sudo_ttyname_dev(entry->u.ttydev, ttypath, sizeof(ttypath)) == NULL) {
+	    printf("terminal: %u, %u (0x%x)\n",
+		(unsigned int)major(entry->u.ttydev),
+		(unsigned int)minor(entry->u.ttydev),
+		(unsigned int)entry->u.ttydev);
 	} else {
-	    printf("terminal: %s (0x%x)\n", tty,
+	    printf("terminal: %s (0x%x)\n", ttypath,
 		(unsigned int)entry->u.ttydev);
 	}
     } else if (entry->type == TS_PPID) {
