@@ -152,7 +152,7 @@ DEVEL = @DEVEL@
 
 SHELL = @SHELL@
 
-PROGS = sudoers.la visudo sudoreplay cvtsudoers testsudoers
+PROGS = sudoers.la visudo sudoreplay cvtsudoers testsudoers tsdump
 
 # Regression tests
 TEST_PROGS = check_addr check_base64 check_digest check_editor \
