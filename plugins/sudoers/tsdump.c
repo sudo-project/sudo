@@ -112,14 +112,19 @@ main(int argc, char *argv[])
     sudo_timespecsub(&now, &timediff, &timediff);
 
     if (fname == NULL) {
-	struct passwd *pw;
+	uid_t uid;
+	int len;
 
 	if (user == NULL) {
-	    if ((pw = getpwuid(geteuid())) == NULL)
-		sudo_fatalx(U_("unknown uid %u"), (unsigned int)geteuid());
-	    user = pw->pw_name;
+	    uid = geteuid();
+	} else {
+	    struct passwd *pw = getpwnam(user);
+	    if (pw == NULL)
+		sudo_fatalx(U_("unknown user %s"), user);
+	    uid = pw->pw_uid;
 	}
-	if (asprintf(&fname, "%s/%s", _PATH_SUDO_TIMEDIR, user) == -1)
+	len = asprintf(&fname, "%s/%u", _PATH_SUDO_TIMEDIR, (unsigned int)uid);
+	if (len == -1)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
 
