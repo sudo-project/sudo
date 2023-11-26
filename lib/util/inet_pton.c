@@ -89,7 +89,7 @@ inet_pton4(const char *src, u_char *dst)
 		const char *pch;
 
 		if ((pch = strchr(digits, ch)) != NULL) {
-			u_int new = *tp * 10 + (pch - digits);
+			unsigned int new = *tp * 10 + (pch - digits);
 
 			if (new > 255)
 				return (0);
@@ -135,7 +135,7 @@ inet_pton6(const char *src, u_char *dst)
 	u_char tmp[NS_IN6ADDRSZ], *tp, *endp, *colonp;
 	const char *xdigits, *curtok;
 	int ch, saw_xdigit, count_xdigit;
-	u_int val;
+	unsigned int val;
 
 	/* cppcheck-suppress uninitvar */
 	memset((tp = tmp), 0, NS_IN6ADDRSZ);
