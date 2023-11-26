@@ -238,6 +238,7 @@ struct sudo_conf_debug_file_list;
 # define sudo_debug_exit_int(_a, _b, _c, _d, _e)	((void)&(_d))
 # define sudo_debug_exit_uint(_a, _b, _c, _d, _e)	((void)&(_d))
 # define sudo_debug_exit_long(_a, _b, _c, _d, _e)	((void)&(_d))
+# define sudo_debug_exit_dev_t(_a, _b, _c, _d, _e)	((void)&(_d))
 # define sudo_debug_exit_id_t(_a, _b, _c, _d, _e)	((void)&(_d))
 # define sudo_debug_exit_size_t(_a, _b, _c, _d, _e)	((void)&(_d))
 # define sudo_debug_exit_ssize_t(_a, _b, _c, _d, _e)	((void)&(_d))
