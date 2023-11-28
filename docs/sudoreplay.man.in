@@ -170,7 +170,7 @@ In this mode,
 will list available sessions in a format similar to the
 \fBsudo\fR
 log file format, sorted by file name (or sequence number).
-Any control characters present in the log data are formated in octal
+Any control characters present in the log data are formatted in octal
 with a leading
 \(oq#\(cq
 character.
@@ -178,6 +178,7 @@ For example, a horizontal tab is displayed as
 \(oq#011\(cq
 and an embedded carriage return is displayed as
 \(oq#015\(cq.
+Space characters in the command name and arguments are also formatted in octal.
 .sp
 If a
 \fIsearch expression\fR
