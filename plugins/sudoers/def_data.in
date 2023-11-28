@@ -500,3 +500,6 @@ intercept_verify
 apparmor_profile
 	T_STR
 	"AppArmor profile to use in the new security context: %s"
+cmddenial_message
+	T_STR
+	"Command denial message: %s"

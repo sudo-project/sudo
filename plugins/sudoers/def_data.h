@@ -325,7 +325,6 @@
 #define I_CMDDENIAL_MESSAGE     161
 #define def_cmddenial_message   (sudo_defs_table[I_CMDDENIAL_MESSAGE].sd_un.str)
 
-
 enum def_tuple {
     never,
     once,

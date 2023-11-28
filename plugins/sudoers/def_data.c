@@ -699,7 +699,6 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"cmddenial_message", T_STR,
 	N_("Command denial message: %s"),
 	NULL,
-
     }, {
 	NULL, 0, NULL
     }
