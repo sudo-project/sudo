@@ -54,7 +54,7 @@ class SudoIOPlugin(sudo.Plugin):
         """
         if not version.startswith("1."):
             raise sudo.SudoException(
-                "This plugin plugin is not compatible with python plugin"
+                "This plugin is not compatible with python plugin"
                 "API version {}".format(version))
 
         # convert tuple of "key=value"s to dict

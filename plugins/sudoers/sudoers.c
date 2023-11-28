@@ -335,7 +335,7 @@ cb_lookup(const struct sudoers_parse_tree *parse_tree,
 
 /*
  * Find the command, perform a sudoers lookup, ask for a password as
- * needed, and perform post-lokup checks.  Logs success/failure.
+ * needed, and perform post-lookup checks.  Logs success/failure.
  * This is used by the check, list and validate plugin methods.
  *
  * Returns true if allowed, false if denied, -1 on error and

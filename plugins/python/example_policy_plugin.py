@@ -58,7 +58,7 @@ class SudoPolicyPlugin(sudo.Plugin):
         """
         if not version.startswith("1."):
             raise sudo.PluginError(
-                "This plugin plugin is not compatible with python plugin"
+                "This plugin is not compatible with python plugin"
                 "API version {}".format(version))
 
         self.user_env = sudo.options_as_dict(user_env)

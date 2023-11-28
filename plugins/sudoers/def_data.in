@@ -91,13 +91,13 @@ env_editor
 	"Visudo will honor the EDITOR environment variable"
 rootpw
 	T_FLAG
-	"Prompt for root's password, not the users's"
+	"Prompt for root's password, not the user's"
 runaspw
 	T_FLAG
-	"Prompt for the runas_default user's password, not the users's"
+	"Prompt for the runas_default user's password, not the user's"
 targetpw
 	T_FLAG
-	"Prompt for the target user's password, not the users's"
+	"Prompt for the target user's password, not the user's"
 use_loginclass
 	T_FLAG
 	"Apply defaults in the target user's login class if there is one"

@@ -240,7 +240,7 @@ Defaults are listed in brackets after the description.
         production environment.
 
     --enable-pie
-        Build sudo and related programs as as a position independent
+        Build sudo and related programs as position independent
         executables (PIE).  This improves the effectiveness of address
         space layout randomization (ASLR) on systems that support it.
         Sudo will create PIE binaries by default on Linux systems.
@@ -1077,7 +1077,7 @@ You need to have a C compiler in order to build sudo.  Since Solaris
 does not come with one by default this means that you either need
 to either install the Solaris Studio compiler suite, available for
 free from www.oracle.com, or install the GNU C compiler (gcc) which
-is can be installed via the pkg utility on Solaris 11 and higher
+can be installed via the pkg utility on Solaris 11 and higher
 and is distributed on the Solaris Companion CD for older Solaris
 releases.  You can also download gcc packages from
 https://www.opencsw.org/packages/CSWgcc4core/.

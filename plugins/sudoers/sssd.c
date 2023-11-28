@@ -387,7 +387,7 @@ sss_to_sudoers(struct sudoers_context *ctx, struct sudo_sss_handle *handle,
      *
      * Sssd has already sorted the rules in descending order.
      * The conversion to a sudoers parse tree requires that entries be
-     * in *ascending* order so we we iterate from last to first.
+     * in *ascending* order so we iterate from last to first.
      */
     for (i = sss_result->num_rules; i; ) {
 	struct sss_sudo_rule *rule = sss_result->rules + --i;

@@ -65,7 +65,7 @@ static void schedule_signal(struct exec_closure *ec, int signo);
 /*
  * Allocate a pty if /dev/tty is a tty.
  * Fills in io_fds[SFD_USERTTY], io_fds[SFD_LEADER] and io_fds[SFD_FOLLOWER].
- * Returns the dyamically allocated pty name on success, NULL on failure.
+ * Returns the dynamically allocated pty name on success, NULL on failure.
  */
 static char *
 pty_setup(struct command_details *details)
@@ -234,7 +234,7 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 	}
 	if (ec->foreground) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"%s: command received SIG%s, parent running in the foregound",
+		"%s: command received SIG%s, parent running in the foreground",
 		__func__, signame);
 	    if (!ec->term_raw) {
 		if (sudo_term_raw(io_fds[SFD_USERTTY], term_raw_flags))
@@ -718,7 +718,7 @@ backchannel_cb(int fd, int what, void *v)
 }
 
 /*
- * Handle changes to the monitors's status (SIGCHLD).
+ * Handle changes to the monitor's status (SIGCHLD).
  */
 static void
 handle_sigchld_pty(struct exec_closure *ec)

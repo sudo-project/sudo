@@ -583,9 +583,9 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
     debug_decl(sudoers_parse_ldif, SUDOERS_DEBUG_UTIL);
 
     /*
-     * We cache user, group and host lists to make it eay to detect when there
+     * We cache user, group and host lists to make it easy to detect when there
      * are identical lists (simple pointer compare).  This makes it possible
-     * to merge multiplpe sudoRole objects into a single UserSpec and/or
+     * to merge multiple sudoRole objects into a single UserSpec and/or
      * Privilege.  The lists are sorted since LDAP order is arbitrary.
      */
     usercache = rbcreate(str_list_cmp);

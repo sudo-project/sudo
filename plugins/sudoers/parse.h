@@ -240,7 +240,7 @@ struct cmndspec {
     struct member_list *runasuserlist;	/* list of runas users */
     struct member_list *runasgrouplist;	/* list of runas groups */
     struct member *cmnd;		/* command to allow/deny */
-    struct cmndtag tags;		/* tag specificaion */
+    struct cmndtag tags;		/* tag specification */
     int timeout;			/* command timeout */
     time_t notbefore;			/* time restriction */
     time_t notafter;			/* time restriction */

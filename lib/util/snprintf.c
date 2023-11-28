@@ -412,7 +412,7 @@ xxxprintf(char ** restrict strp, size_t strsize, int alloc, const char * restric
 
 /*
 * Get the argument indexed by nextarg.   If the argument table is
-* built, use it to get the argument.  If its not, get the next
+* built, use it to get the argument.  If it's not, get the next
 * argument (and arguments must be gotten sequentially).
 */
 #define GETARG(type) \
