@@ -232,7 +232,7 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 	    continue;
 	}
 	if (MATCHES(*cur, "prompt=")) {
-	    /* Allow epmpty prompt. */
+	    /* Allow empty prompt. */
 	    ctx->user.prompt = *cur + sizeof("prompt=") - 1;
 	    if (!append_default("passprompt_override", NULL, true, NULL, defaults))
 		goto oom;

@@ -345,7 +345,7 @@ policy_check(int argc, char * const argv[],
 	}
 	use_sudoedit = true;
     } else {
-	/* No changes needd to argv */
+	/* No changes needed to argv */
 	*argv_out = (char **)argv;
     }
 

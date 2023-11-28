@@ -2015,7 +2015,7 @@ sudo_ldap_result_from_search(LDAP *ldap, LDAPMessage *searchresult)
     last = sudo_ldap_result_add_search(result, ldap, searchresult);
 
     /*
-     * Now add each entry in the search result to the array of of entries
+     * Now add each entry in the search result to the array of entries
      * in the ldap_result object.
      */
     LDAP_FOREACH(entry, last->ldap, last->searchresult) {

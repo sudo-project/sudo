@@ -542,7 +542,7 @@ Notes on upgrading from an older release
 
         Defaults !env_reset
 
-   There have  also been changes to how the "env_keep" and
+   There have also been changes to how the "env_keep" and
    "env_check" options behave.
 
    Prior to sudo 1.6.9, the TERM and PATH environment variables
@@ -593,7 +593,7 @@ Notes on upgrading from an older release
    without a password and `/bin/ls` as root with a password.
 
    As of sudo 1.6, the same line now means that millert is able
-   to run run both `/usr/bin/whoami` and `/bin/ls` as user daemon
+   to run both `/usr/bin/whoami` and `/bin/ls` as user daemon
    without a password.  To expand on this, take the following
    example:
 

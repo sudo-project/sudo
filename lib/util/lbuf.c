@@ -415,8 +415,8 @@ sudo_lbuf_println(struct sudo_lbuf *lbuf, char *line, size_t len)
 	cp = ep;
 
 	/*
-	 * If there is more to print, reset have, incremement cp past
-	 * the whitespace, and print a line continuaton char if needed.
+	 * If there is more to print, reset have, increment cp past
+	 * the whitespace, and print a line continuation char if needed.
 	 */
 	if (cp != NULL) {
 	    have = lbuf->cols - indent;

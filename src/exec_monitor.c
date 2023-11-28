@@ -150,7 +150,7 @@ send_status(int fd, struct command_status *cstat)
 
 /*
  * Wait for command status after receiving SIGCHLD.
- * If the command was stopped, the status is send back to the parent.
+ * If the command was stopped, the status is sent back to the parent.
  * Otherwise, cstat is filled in but not sent.
  */
 static void

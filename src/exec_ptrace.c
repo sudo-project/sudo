@@ -1797,7 +1797,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	goto done;
     }
 
-    /* We can only pass the pathname to exececute via argv[0] (plugin API). */
+    /* We can only pass the pathname to execute via argv[0] (plugin API). */
     orig_argv0 = argv[0] ? argv[0] : (char *)"";
     argv[0] = pathname;
     if (argc == 0) {

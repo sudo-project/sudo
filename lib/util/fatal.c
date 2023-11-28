@@ -303,7 +303,7 @@ sudo_fatal_callback_deregister_v1(sudo_fatal_callback_t func)
 }
 
 /*
- * Set the conversation function to use for output insteaf of the
+ * Set the conversation function to use for output instead of the
  * standard error.  If conv is NULL, switch back to standard error.
  */
 void

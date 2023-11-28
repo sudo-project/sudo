@@ -152,7 +152,7 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct sudoers_context *ctx,
 			runas_match = ALLOW;
 		    } else if (date_match != DENY) {
 			/*
-			 * To list another user's prilileges, the runas
+			 * To list another user's privileges, the runas
 			 * user must match the list user or root.
 			 */
 			runas_match = runas_matches_pw(nss->parse_tree, cs,
