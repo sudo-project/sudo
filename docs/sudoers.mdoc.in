@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd November 26, 2023
+.Dd November 28, 2023
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -4272,8 +4272,16 @@ This option is only available when sudo is built with AppArmor
 support.
 .\}
 .It cmddenial_message
-Message that is displayed after a user's command execution is denied.
-It does not override the default message, instead, it adds additional information for the user when set.
+It set,
+.Nm sudo
+will display this message when a user is denied access to run the
+specified command, but is listed in the
+.Em sudoers
+file for the host.
+This can be used to provide additional, site-specific information
+to the user when a command is denied by the security policy.
+It does not override the standard warning the user receives when
+a command is denied.
 .It authfail_message
 Message that is displayed after a user fails to authenticate.
 The message may include the

@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "November 26, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "November 28, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -4508,8 +4508,17 @@ This option is only available when sudo is built with AppArmor
 support.
 .TP 18n
 cmddenial_message
-Message that is displayed after a user's command execution is denied.
-It does not override the default message, instead, it adds additional information for the user when set.
+.br
+It set,
+\fBsudo\fR
+will display this message when a user is denied access to run the
+specified command, but is listed in the
+\fIsudoers\fR
+file for the host.
+This can be used to provide additional, site-specific information
+to the user when a command is denied by the security policy.
+It does not override the standard warning the user receives when
+a command is denied.
 .TP 18n
 authfail_message
 Message that is displayed after a user fails to authenticate.
