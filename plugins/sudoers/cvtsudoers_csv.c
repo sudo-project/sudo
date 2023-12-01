@@ -239,8 +239,11 @@ print_member_csv(FILE *fp, const struct sudoers_parse_tree *parse_tree,
     case ALIAS:
 	if (expand_aliases) {
 	    if ((a = alias_get(parse_tree, name, alias_type)) != NULL) {
-		print_member_list_csv(fp, parse_tree, &a->members, negated,
-		    alias_type, expand_aliases);
+		if (!print_member_list_csv(fp, parse_tree, &a->members, negated,
+			alias_type, expand_aliases)) {
+		    alias_put(a);
+		    debug_return_bool(false);
+		}
 		alias_put(a);
 		break;
 	    }
