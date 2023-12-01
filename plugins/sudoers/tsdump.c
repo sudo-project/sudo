@@ -89,7 +89,8 @@ main(int argc, char *argv[])
     /* Initialize the debug subsystem. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
 	return EXIT_FAILURE;
-    sudoers_debug_register(getprogname(), sudo_conf_debug_files(getprogname()));
+    if (!sudoers_debug_register(getprogname(), sudo_conf_debug_files(getprogname())))
+	return EXIT_FAILURE;
 
     while ((ch = getopt(argc, argv, "f:u:")) != -1) {
 	switch (ch) {
