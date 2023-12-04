@@ -23,6 +23,7 @@
 
 #include <config.h>
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -47,10 +48,13 @@ sudoers_sethost(struct sudoers_context *ctx, const char *host,
     ctx->user.host = NULL;
     ctx->user.shost = NULL;
 
-    if (host == NULL)
+    if (host == NULL) {
 	ctx->user.host = sudo_gethostname();
-    else
+	if (ctx->user.host == NULL && errno != ENOMEM)
+	    ctx->user.host = strdup("localhost");
+    } else {
 	ctx->user.host = strdup(host);
+    }
     if (ctx->user.host == NULL)
 	    goto oom;
     if ((cp = strchr(ctx->user.host, '.')) != NULL) {
