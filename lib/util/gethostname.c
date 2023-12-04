@@ -41,7 +41,7 @@ sudo_gethostname_v1(void)
 
 #ifdef _SC_HOST_NAME_MAX
     host_name_max = (size_t)sysconf(_SC_HOST_NAME_MAX);
-    if (host_name_max == (size_t)-1)
+    if ((ssize_t)host_name_max <= 0)
 #endif
 	host_name_max = 255;	/* POSIX and historic BSD */
 
