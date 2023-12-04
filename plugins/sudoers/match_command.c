@@ -575,7 +575,7 @@ command_matches_glob(struct sudoers_context *ctx, const char *sudoers_cmnd,
 
 	    /* Compare the canonicalized parent directories, if possible. */
 	    if (ctx->user.cmnd_dir != NULL) {
-		char *slash = strchr(cp, '/');
+		char *slash = strrchr(cp, '/');
 		if (slash != NULL) {
 		    char *resolved;
 		    *slash = '\0';
