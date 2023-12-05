@@ -377,8 +377,18 @@ command_matches_fnmatch(struct sudoers_context *ctx, const char *sudoers_cmnd,
 #endif
     debug_decl(command_matches_fnmatch, SUDOERS_DEBUG_MATCH);
 
-    /* A relative ctx->user.cmnd will not match, try canonicalized version. */
-    if (ctx->user.cmnd[0] != '/') {
+    /*
+     * Return ALLOW if fnmatch(3) succeeds AND
+     *  a) there are no args in sudoers OR
+     *  b) there are no args on command line and none required by sudoers OR
+     *  c) there are args in sudoers and on command line and they match
+     *     else return DENY.
+     *
+     * We do not attempt to match a relative path unless there is a
+     * canonicalized version.
+     */
+    if (cmnd[0] != '/' || fnmatch(sudoers_cmnd, cmnd, FNM_PATHNAME) != 0) {
+	/* No match, retry using the canonicalized path (if possible). */
 	if (ctx->user.cmnd_dir == NULL)
 	    debug_return_int(DENY);
 	len = snprintf(buf, sizeof(buf), "%s/%s", ctx->user.cmnd_dir,
@@ -386,17 +396,9 @@ command_matches_fnmatch(struct sudoers_context *ctx, const char *sudoers_cmnd,
 	if (len < 0 || len >= ssizeof(buf))
 	    debug_return_int(DENY);
 	cmnd = buf;
+	if (fnmatch(sudoers_cmnd, cmnd, FNM_PATHNAME) != 0)
+	    debug_return_int(DENY);
     }
-
-    /*
-     * Return ALLOW if fnmatch(3) succeeds AND
-     *  a) there are no args in sudoers OR
-     *  b) there are no args on command line and none required by sudoers OR
-     *  c) there are args in sudoers and on command line and they match
-     *     else return DENY.
-     */
-    if (fnmatch(sudoers_cmnd, cmnd, FNM_PATHNAME) != 0)
-	debug_return_int(DENY);
 
     if (command_args_match(ctx, sudoers_cmnd, sudoers_args) == ALLOW) {
 	/* Open the file for fdexec or for digest matching. */
