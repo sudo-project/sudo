@@ -435,17 +435,6 @@ command_matches_regex(struct sudoers_context *ctx, const char *sudoers_cmnd,
 #endif
     debug_decl(command_matches_regex, SUDOERS_DEBUG_MATCH);
 
-    /* A relative ctx->user.cmnd will not match, try canonicalized version. */
-    if (ctx->user.cmnd[0] != '/') {
-	if (ctx->user.cmnd_dir == NULL)
-	    debug_return_int(DENY);
-	len = snprintf(buf, sizeof(buf), "%s/%s", ctx->user.cmnd_dir,
-	    ctx->user.cmnd_base);
-	if (len < 0 || len >= ssizeof(buf))
-	    debug_return_int(DENY);
-	cmnd = buf;
-    }
-
     /*
      * Return ALLOW if sudoers_cmnd regex matches cmnd AND
      *  a) there are no args in sudoers OR
@@ -453,8 +442,18 @@ command_matches_regex(struct sudoers_context *ctx, const char *sudoers_cmnd,
      *  c) there are args in sudoers and on command line and they match
      *     else return DENY.
      */
-    if (regex_matches(sudoers_cmnd, cmnd) != ALLOW)
-	debug_return_int(DENY);
+    if (cmnd[0] != '/' || regex_matches(sudoers_cmnd, cmnd) != ALLOW) {
+	/* No match, retry using the canonicalized path (if possible). */
+	if (ctx->user.cmnd_dir == NULL)
+	    debug_return_int(DENY);
+	len = snprintf(buf, sizeof(buf), "%s/%s", ctx->user.cmnd_dir,
+	    ctx->user.cmnd_base);
+	if (len < 0 || len >= ssizeof(buf))
+	    debug_return_int(DENY);
+	cmnd = buf;
+	if (regex_matches(sudoers_cmnd, cmnd) != ALLOW)
+	    debug_return_int(DENY);
+    }
 
     if (command_args_match(ctx, sudoers_cmnd, sudoers_args) == ALLOW) {
 	/* Open the file for fdexec or for digest matching. */
