@@ -325,6 +325,8 @@ extern int (*sudo_printf)(int msg_type, const char * restrict fmt, ...);
 /* term.c */
 #define SUDO_TERM_ISIG	0x01U
 #define SUDO_TERM_OFLAG	0x02U
+sudo_dso_public bool sudo_isatty_v1(int fd, struct stat *sbp);
+#define sudo_isatty(_a, _b) sudo_isatty_v1((_a), (_b))
 sudo_dso_public bool sudo_term_cbreak_v1(int fd);
 #define sudo_term_cbreak(_a) sudo_term_cbreak_v1((_a))
 sudo_dso_public bool sudo_term_copy_v1(int src, int dst);

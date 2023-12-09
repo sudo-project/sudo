@@ -405,27 +405,3 @@ get_process_ttyname(char *name, size_t namelen)
     debug_return_dev_t((dev_t)-1);
 }
 #endif
-
-/*
- * Like isatty(3) but stats the fd and stores the result in sb.
- * Only calls isatty(3) if fd is a character special device.
- * Returns true if a tty, else returns false and sets errno.
- */
-bool
-sudo_isatty(int fd, struct stat *sb)
-{
-    bool ret = false;
-    debug_decl(sudo_isatty, SUDO_DEBUG_EXEC);
-
-    if (fstat(fd, sb) == 0) {
-        if (!S_ISCHR(sb->st_mode)) {
-            errno = ENOTTY;
-        } else {
-            ret = isatty(fd) == 1;
-        }
-    } else {
-	/* Always initialize sb. */
-	memset(sb, 0, sizeof(*sb));
-    }
-    debug_return_bool(ret);
-}
