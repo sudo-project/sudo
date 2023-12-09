@@ -24,6 +24,7 @@
 #include <config.h>
 
 #include <sys/ioctl.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -286,6 +287,9 @@ sudo_term_is_raw_v1(int fd)
     struct termios term = { 0 };
     debug_decl(sudo_term_is_raw, SUDO_DEBUG_UTIL);
 
+    if (!sudo_isatty(fd, NULL))
+	debug_return_bool(false);
+
     sudo_lock_file(fd, SUDO_LOCK);
     if (tcgetattr(fd, &term) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
@@ -455,5 +459,33 @@ sudo_term_copy_v1(int src, int dst)
 unlock:
     sudo_lock_file(dst, SUDO_UNLOCK);
     sudo_lock_file(src, SUDO_UNLOCK);
+    debug_return_bool(ret);
+}
+
+/*
+ * Like isatty(3) but stats the fd and stores the result in sb.
+ * Only calls isatty(3) if fd is a character special device.
+ * Returns true if a tty, else returns false and sets errno.
+ */
+bool
+sudo_isatty_v1(int fd, struct stat *sbp)
+{
+    bool ret = false;
+    struct stat sb;
+    debug_decl(sudo_isatty, SUDO_DEBUG_EXEC);
+
+    if (sbp == NULL)
+	sbp = &sb;
+
+    if (fstat(fd, sbp) == 0) {
+        if (!S_ISCHR(sbp->st_mode)) {
+            errno = ENOTTY;
+        } else {
+            ret = isatty(fd) == 1;
+        }
+    } else if (sbp != &sb) {
+        /* Always initialize sbp. */
+        memset(sbp, 0, sizeof(*sbp));
+    }
     debug_return_bool(ret);
 }

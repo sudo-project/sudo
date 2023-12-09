@@ -39,11 +39,13 @@ get_ttysize_ioctl(int fd, int *rowp, int *colp)
     struct winsize wsize;
     debug_decl(get_ttysize_ioctl, SUDO_DEBUG_UTIL);
 
-    if (fd != -1 && isatty(fd) && ioctl(fd, TIOCGWINSZ, &wsize) == 0) {
-	if (wsize.ws_row != 0 && wsize.ws_col != 0) {
-	    *rowp = wsize.ws_row;
-	    *colp = wsize.ws_col;
-	    debug_return_int(0);
+    if (fd != -1 && sudo_isatty(fd, NULL)) {
+	if (ioctl(fd, TIOCGWINSZ, &wsize) == 0) {
+	    if (wsize.ws_row != 0 && wsize.ws_col != 0) {
+		*rowp = wsize.ws_row;
+		*colp = wsize.ws_col;
+		debug_return_int(0);
+	    }
 	}
     }
     debug_return_int(-1);
