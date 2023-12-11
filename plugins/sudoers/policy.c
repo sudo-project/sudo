@@ -1058,11 +1058,11 @@ sudoers_policy_store_result(struct sudoers_context *ctx, bool accepted,
 #endif /* HAVE_APPARMOR */
 #ifdef HAVE_PRIV_SET
     if (ctx->runas.privs != NULL) {
-	if ((command_info[info_len++] = sudo_new_key_val("privs", ctx->runas.privs)) == NULL)
+	if ((command_info[info_len++] = sudo_new_key_val("runas_privs", ctx->runas.privs)) == NULL)
 	    goto oom;
     }
     if (ctx->runas.limitprivs != NULL) {
-	if ((command_info[info_len++] = sudo_new_key_val("limitprivs", ctx->runas.limitprivs)) == NULL)
+	if ((command_info[info_len++] = sudo_new_key_val("runas_limitprivs", ctx->runas.limitprivs)) == NULL)
 	    goto oom;
     }
 #endif /* HAVE_PRIV_SET */
