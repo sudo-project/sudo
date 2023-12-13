@@ -1,3 +1,28 @@
+What's new in Sudo 1.9.15p3
+
+ * Always disable core dumps when sudo sends itself a fatal signal.
+   Fixes a problem where sudo could potentially dump core dump when
+   it re-sends the fatal signal to itself.  This is only an issue
+   if the command received a signal that would normally result in
+   a core dump but the command did not actually dump core.
+
+ * Fixed a bug matching a command with a relative path name when
+   the sudoers rule uses shell globbing rules for the path name.
+   Bug #1062.
+
+ * Permit visudo to be run even if the local host name is not set.
+   GitHub issue #332.
+
+ * Fixed an editing error introduced in sudo 1.9.15 that could
+   prevent sudoreplay from replaying sessions correctly.
+   GitHub issue #334.
+
+ * Fixed a bug introduced in sudo 1.9.15 where "sudo -l > /dev/null"
+   could hang on Linux systems.  GitHub issue #335.
+
+ * Fixed a bug introduced in sudo 1.9.15 where Solaris privileges
+   specified in sudoers were not applied to the command being run.
+
 What's new in Sudo 1.9.15p2
 
  * Fixed a bug on BSD systems where sudo would not restore the
