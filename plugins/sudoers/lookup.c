@@ -65,7 +65,7 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct sudoers_context *ctx,
     struct privilege *priv;
     struct userspec *us;
     struct defaults *def;
-    int nopass, match = DENY;
+    int nopass, match = UNSPEC;
     unsigned int validated = 0;
     enum def_tuple pwcheck;
     debug_decl(sudoers_lookup_pseudo, SUDOERS_DEBUG_PARSER);
@@ -207,8 +207,10 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct sudoers_context *ctx,
     if (match == ALLOW || ctx->user.uid == 0) {
 	/* User has an entry for this host. */
 	SET(validated, VALIDATE_SUCCESS);
-    } else if (match == DENY)
+    } else {
+	/* No entry or user is not allowed to list other users. */
 	SET(validated, VALIDATE_FAILURE);
+    }
     if (pwcheck == always && def_authenticate)
 	SET(validated, FLAG_CHECK_USER);
     else if (nopass == true)
