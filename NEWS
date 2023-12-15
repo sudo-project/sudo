@@ -1,3 +1,10 @@
+What's new in Sudo 1.9.15p4
+
+ * Fixed a bug introduced in sudo 1.9.15 that could prevent a user's
+   privileges from being listed by "sudo -l" if the sudoers entry
+   in /etc/nsswitch.conf contains "[SUCCESS=return]".  This did not
+   affect the ability to run commands via sudo.  Bug #1063.
+
 What's new in Sudo 1.9.15p3
 
  * Always disable core dumps when sudo sends itself a fatal signal.
