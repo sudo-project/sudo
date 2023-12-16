@@ -233,18 +233,18 @@ parse_default_entry(const struct sudoers_context *ctx,
      */
     if (val == NULL) {
 	switch (def->type & T_MASK) {
-	case T_FLAG:
-	    break;
-	case T_TUPLE:
-	    if (ISSET(def->type, T_BOOL))
-		break;
-	    FALLTHROUGH;
 	case T_LOGFAC:
 	    if (op == true) {
 		/* Use default syslog facility if none specified. */
 		val = LOGFAC;
 	    }
 	    break;
+	case T_FLAG:
+	    break;
+	case T_TUPLE:
+	    if (ISSET(def->type, T_BOOL))
+		break;
+	    FALLTHROUGH;
 	default:
 	    if (!ISSET(def->type, T_BOOL) || op != false) {
 		defaults_warnx(ctx, file, line, column, quiet,
