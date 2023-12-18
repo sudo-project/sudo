@@ -264,7 +264,7 @@ closefrom_nodebug(int lowfd)
 
     /* Close fds [lowfd, startfd) that are not in debug_fds. */
     for (fd = lowfd; fd < startfd; fd++) {
-	if (sudo_isset(debug_fds, fd))
+	if (fd < 0 || sudo_isset(debug_fds, fd))
 	    continue;
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "closing fd %d", fd);
