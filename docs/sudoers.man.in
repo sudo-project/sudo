@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "November 28, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "December 19, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1937,7 +1937,7 @@ may run
 \fI/usr/bin/more\fR
 and
 \fI/usr/bin/vi\fR
-but shell escapes will be disabled.
+on the host shanty, but shell escapes will be disabled.
 .nf
 .sp
 .RS 2n

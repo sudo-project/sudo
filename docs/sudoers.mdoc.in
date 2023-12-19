@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd November 28, 2023
+.Dd December 19, 2023
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1854,7 +1854,7 @@ may run
 .Pa /usr/bin/more
 and
 .Pa /usr/bin/vi
-but shell escapes will be disabled.
+on the host shanty, but shell escapes will be disabled.
 .Bd -literal
 aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
 .Ed
