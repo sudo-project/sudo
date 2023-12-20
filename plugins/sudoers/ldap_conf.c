@@ -599,8 +599,10 @@ sudo_ldap_read_config(const struct sudoers_context *ctx)
 	    debug_return_bool(false);
 	}
     }
-    if (!STAILQ_EMPTY(&ldap_conf.netgroup_base))
+    if (STAILQ_EMPTY(&ldap_conf.netgroup_base)) {
+	/* netgroup_query is only valid in conjunction with netgroup_base */
 	ldap_conf.netgroup_query = false;
+    }
 
     DPRINTF1("LDAP Config Summary");
     DPRINTF1("===================");
