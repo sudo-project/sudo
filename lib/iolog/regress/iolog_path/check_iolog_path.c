@@ -252,24 +252,24 @@ main(int argc, char *argv[])
 		sudo_fatal(NULL);
 	    break;
 	case 7:
-	    if (dir_in != NULL)
-		free(dir_in);
-	    dir_in = strdup(line);
+	    free(dir_in);
+	    if ((dir_in = strdup(line)) == NULL)
+		sudo_fatal(NULL);
 	    break;
 	case 8:
-	    if (file_in != NULL)
-		free(file_in);
-	    file_in = strdup(line);
+	    free(file_in);
+	    if ((file_in = strdup(line)) == NULL)
+		sudo_fatal(NULL);
 	    break;
 	case 9:
-	    if (dir_out != NULL)
-		free(dir_out);
-	    dir_out = strdup(line);
+	    free(dir_out);
+	    if ((dir_out = strdup(line)) == NULL)
+		sudo_fatal(NULL);
 	    break;
 	case 10:
-	    if (file_out != NULL)
-		free(file_out);
-	    file_out = strdup(line);
+	    free(file_out);
+	    if ((file_out = strdup(line)) == NULL)
+		sudo_fatal(NULL);
 	    break;
 	case 11:
 	    errors += do_check(dir_in, file_in, dir_out, file_out);
