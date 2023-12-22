@@ -758,6 +758,9 @@
 /* Define to 1 if you have the 'realpath' function. */
 #undef HAVE_REALPATH
 
+/* Define to 1 if you have the 'renameat' function. */
+#undef HAVE_RENAMEAT
+
 /* Define to 1 if you have the 'revoke' function. */
 #undef HAVE_REVOKE
 
