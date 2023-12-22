@@ -1147,6 +1147,35 @@ already_lectured(const struct sudoers_context *ctx)
 	goto done;
 
     ret = fstatat(dfd, uidstr, &sb, AT_SYMLINK_NOFOLLOW) == 0;
+    if (!ret && errno == ENOENT && strchr(ctx->user.name, '/') == NULL) {
+	/* No uid-based lecture path, check for username-based path. */
+	ret = fstatat(dfd, ctx->user.name, &sb, AT_SYMLINK_NOFOLLOW) == 0;
+	if (ret) {
+	    /* Migrate lecture file to uid-based path. */
+#ifdef HAVE_RENAMEAT
+	    if (renameat(dfd, ctx->user.name, dfd, uidstr) == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		    "%s: unable to rename %s/%s to %s/%s", __func__,
+		    def_lecture_status_dir, ctx->user.name,
+		    def_lecture_status_dir, uidstr);
+	    }
+#else
+	    char from[PATH_MAX], to[PATH_MAX];
+	    len = snprintf(from, sizeof(from), "%s/%s", def_lecture_status_dir,
+		ctx->user.name);
+	    if (len < 0 || len >= ssizeof(from))
+		goto done;
+	    len = snprintf(to, sizeof(to), "%s/%s", def_lecture_status_dir,
+		uidstr);
+	    if (len < 0 || len >= ssizeof(to))
+		goto done;
+	    if (rename(from, to) == -1) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		    "%s: unable to rename %s to %s", __func__, from, to);
+	    }
+#endif
+	}
+    }
 
 done:
     if (dfd != -1)
