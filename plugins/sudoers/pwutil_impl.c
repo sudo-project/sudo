@@ -381,7 +381,7 @@ PREFIX(make_grlist_item)(const struct passwd *pw, char * const *unused1)
     }
 
 #ifdef _SC_LOGIN_NAME_MAX
-    groupname_len = MAX((size_t)sysconf(_SC_LOGIN_NAME_MAX), 32);
+    groupname_len = (size_t)MAX(sysconf(_SC_LOGIN_NAME_MAX), 32);
 #else
     groupname_len = MAX(LOGIN_NAME_MAX, 32);
 #endif
