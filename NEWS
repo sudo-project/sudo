@@ -1,3 +1,22 @@
+What's new in Sudo 1.9.15p5
+
+ * Fixed evaluation of the "lecture", "listpw", "verifypw", and
+   "fdexec" sudoers Defaults settings when used without an explicit
+   value.  Previously, if specified without a value they were
+   evaluated as boolean "false", even when the negation operator
+   ('!') was not present.
+
+ * Fixed a bug introduced in sudo 1.9.14 that prevented LDAP
+   netgroup queries using the NETGROUP_BASE setting from being
+   performed.
+
+ * Sudo will now transparently rename a user's lecture file from
+   the older name-based path to the newer user-ID-based path.
+   GitHub issue #342.
+
+ * Fixed a bug introduced in sudo 1.9.15 that could cause a memory
+   allocation failure if sysconf(_SC_LOGIN_NAME_MAX) fails.  Bug #1066.
+
 What's new in Sudo 1.9.15p4
 
  * Fixed a bug introduced in sudo 1.9.15 that could prevent a user's
