@@ -318,7 +318,7 @@ case "$osversion" in
 		if [ -z $osmajor ] || [ $osmajor -ge 14 ]; then
 		    with_apparmor=true
 		fi
-		configure_opts="${configure_opts}${configure_opts+$tab}--enable-admin-flag${tab}--without-lecture"
+		configure_opts="--enable-admin-flag${tab}--without-lecture${configure_opts+$tab}${configure_opts}"
 		;;
 	esac
 
@@ -330,12 +330,12 @@ case "$osversion" in
 	    # Python plugins
 	    with_python=true
 	    # PAM
-	    configure_opts="${configure_opts}${configure_opts+$tab}--with-pam"
+	    configure_opts="--with-pam${configure_opts+$tab}${configure_opts}"
 	    # Linux audit
-	    configure_opts="${configure_opts}${configure_opts+$tab}--with-linux-audit"
+	    configure_opts="--with-linux-audit${configure_opts+$tab}${configure_opts}"
 	    # AppArmor
 	    if [ X"$with_apparmor" = X"true" ]; then
-		configure_opts="${configure_opts}${configure_opts+$tab}--with-apparmor"
+		configure_opts="--with-apparmor${configure_opts+$tab}${configure_opts}"
 	    fi
 	    ;;
 	esac
@@ -348,13 +348,12 @@ case "$osversion" in
 	MULTIARCH=`dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null`
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	if [ "$flavor" = "ldap" ]; then
-	    configure_opts="${configure_opts}${configure_opts+$tab}--with-ldap
-		--with-ldap-conf-file=/etc/sudo-ldap.conf"
+	    configure_opts="--with-ldap${tab}--with-ldap-conf-file=/etc/sudo-ldap.conf${configure_opts+$tab}${configure_opts}"
 	else
-	    configure_opts="${configure_opts}${configure_opts+$tab}--with-sssd"
+	    configure_opts="--with-sssd${configure_opts+$tab}${configure_opts}"
 	    if [ -n "$MULTIARCH" ]; then
 		# SSSD backend needs to know where to find the sssd lib
-		configure_opts="${configure_opts}${configure_opts+$tab}--with-sssd-lib=/usr/lib/$MULTIARCH"
+		configure_opts="--with-sssd-lib=/usr/lib/$MULTIARCH${configure_opts+$tab}${configure_opts}"
 	    fi
 	fi
 	configure_opts="--prefix=/usr
