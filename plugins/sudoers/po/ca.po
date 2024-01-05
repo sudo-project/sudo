@@ -1191,7 +1191,7 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"Confiem que heu rebut la llissó habitual de l'Administrador del\n"
+"Confiem que heu rebut la lliçó habitual de l'Administrador del\n"
 "Sistema. Generalment es resumeix en aquestes tres coses:\n"
 "\n"
 "    #1) Respecteu la privacitat dels altres.\n"
@@ -1450,12 +1450,12 @@ msgstr "Usa una marca horària separada per a cada combinació usuari/terminal"
 
 #: plugins/sudoers/def_data.c:98
 msgid "Lecture user the first time they run sudo"
-msgstr "Dóna una llissó a l'usuari cada cop que executi sudo"
+msgstr "Dóna una lliçó a l'usuari cada cop que executi sudo"
 
 #: plugins/sudoers/def_data.c:102
 #, c-format
 msgid "File containing the sudo lecture: %s"
-msgstr "Fitxer que conté la llissó de sudo: %s"
+msgstr "Fitxer que conté la lliçó de sudo: %s"
 
 #: plugins/sudoers/def_data.c:106
 msgid "Require users to authenticate by default"
@@ -1596,7 +1596,7 @@ msgstr "Missatge de contrasenya incorrecta: %s"
 #: plugins/sudoers/def_data.c:230
 #, c-format
 msgid "Path to lecture status dir: %s"
-msgstr "Camí al directori d'estat de la llissó: %s"
+msgstr "Camí al directori d'estat de la lliçó: %s"
 
 #: plugins/sudoers/def_data.c:234
 #, c-format
