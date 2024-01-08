@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2023
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2024
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -4060,6 +4060,14 @@ user's terminal device even after the main program has finished
 executing.
 By running the command in a separate pseudo-terminal, this attack is
 no longer possible.
+.Pp
+A side effect of running the command in a new pseudo-terminal is
+that input will be passed to the command even if it is non-interactive.
+This means that, for example, keys pressed while a non-interactive
+command is running will be consumed by
+.Nm sudo
+instead of being passed to the shell after the command exits.
+.Pp
 This flag is
 .Em on
 by default for
