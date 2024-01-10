@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1994-1996, 1998-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1994-1996, 1998-2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -507,9 +507,14 @@ log_auth_failure(const struct sudoers_context *ctx, unsigned int status,
     /* Do auditing first (audit_failure() handles the locale itself). */
     audit_failure(ctx, ctx->runas.argv, "%s", N_("authentication failure"));
 
-    /* If sudoers denied the command we'll log that separately. */
-    if (!ISSET(status, FLAG_BAD_PASSWORD|FLAG_NO_USER_INPUT))
+    if (ISSET(status, FLAG_NO_USER_INPUT)) {
+	/* For "sudo -n", only log the entry if an actual command was run. */
+	if (ISSET(ctx->mode, MODE_LIST|MODE_VALIDATE))
+	    logit = false;
+    } else if (!ISSET(status, FLAG_BAD_PASSWORD)) {
+	/* Autheticated OK, sudoers denials are logged separately. */
 	logit = false;
+    }
 
     /*
      * Do we need to send mail?
