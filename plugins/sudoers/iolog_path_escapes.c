@@ -37,7 +37,7 @@
  * Like strlcpy(3) but replaces '/' with '_'.
  */
 static size_t
-strlcpy_no_slash(char *dst, const char *src, size_t size)
+strlcpy_no_slash(char * restrict dst, const char * restrict src, size_t size)
 {
     size_t len = 0;
     char ch;
