@@ -1233,7 +1233,7 @@ exec_pty(struct command_details *details,
 		sudo_fatal("dup");
 	} else {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stderr /dev/tty, creating a pipe");
+		"stderr not user's tty, creating a pipe");
 	    if (pipe2(io_pipe[STDERR_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
