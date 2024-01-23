@@ -299,7 +299,7 @@ The file getentropy.c bears the following license:
 
 The embedded copy of zlib bears the following license:
 
-    Copyright (C) 1995-2023 Jean-loup Gailly and Mark Adler
+    Copyright (C) 1995-2024 Jean-loup Gailly and Mark Adler
 
     This software is provided 'as-is', without any express or implied
     warranty.  In no event will the authors be held liable for any damages
