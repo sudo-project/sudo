@@ -292,10 +292,12 @@ display_lecture(struct sudo_conv_callback *callback)
     msg[0].msg_type = SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY;
     msg[0].msg = _("\n"
 	"We trust you have received the usual lecture from the local System\n"
-	"Administrator. It usually boils down to these three things:\n\n"
+	"Administrator. It usually boils down to these five things:\n\n"
 	"    #1) Respect the privacy of others.\n"
 	"    #2) Think before you type.\n"
-	"    #3) With great power comes great responsibility.\n\n");
+	"    #3) With great power comes great responsibility.\n"
+	"    #4) We all make mistakes.\n"
+	"    #5) You can still eat candy and be sweet.\n\n");
     if (!def_pwfeedback) {
 	msg[1].msg_type = SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY;
 	msg[1].msg = _("For security reasons, the password you type will not be visible.\n\n");
