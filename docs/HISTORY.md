@@ -66,7 +66,8 @@ In 2010, Quest Software began sponsoring Sudo development by hiring
 Todd to work on Sudo as part of his full-time job.  This enabled
 the addition of I/O logging, the plugin API, the log server,
 additional regression and fuzz tests, support for binary packages
-and more regular releases.
+and more regular releases.  Quest's sponsorship of Sudo ended in
+February of 2024.
 
 ## Present Day
 
