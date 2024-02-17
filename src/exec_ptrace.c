@@ -878,11 +878,12 @@ ptrace_write_vec(pid_t pid, struct sudo_ptrace_regs *regs, char **vec,
     unsigned long addr, unsigned long strtab)
 {
     const unsigned long strtab0 = strtab;
+    ssize_t nwritten;
     size_t i;
     debug_decl(ptrace_write_vec, SUDO_DEBUG_EXEC);
 
 #ifdef HAVE_PROCESS_VM_READV
-    ssize_t nwritten = ptrace_writev_vec(pid, regs, vec, addr, strtab);
+    nwritten = ptrace_writev_vec(pid, regs, vec, addr, strtab);
     if (nwritten != -1 || errno != ENOSYS)
 	debug_return_ssize_t(nwritten);
 #endif /* HAVE_PROCESS_VM_READV */
