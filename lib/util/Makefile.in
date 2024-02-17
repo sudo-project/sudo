@@ -272,11 +272,17 @@ $(srcdir)/sys_signame.h: $(srcdir)/siglist.in
 	    $(AWK) 'BEGIN {print "/* public domain */\n\n#include <config.h>\n#include <sys/types.h>\n#include <signal.h>\n#include \"sudo_compat.h\"\n\nint sudo_end_of_headers;\nstatic char *sudo_sys_signame[NSIG];\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (sudo_sys_signame[SIG%s] == NULL)\n\tsudo_sys_signame[SIG%s] = \"%s\";\n#endif\n", $$1, $$1, $$1, $$1)}' < $(srcdir)/siglist.in > $@; \
 	fi
 
-mksiglist.h: $(srcdir)/sys_siglist.h
-	$(CPP) $(CPPFLAGS) $(srcdir)/sys_siglist.h | $(SED) -e '1,/^int sudo_end_of_headers;/d' -e '/^#/d' > mksiglist.h
+sys_siglist.i: $(srcdir)/sys_siglist.h
+	$(CPP) $(CPPFLAGS) $< > $@
 
-mksigname.h: $(srcdir)/sys_signame.h
-	$(CPP) $(CPPFLAGS) $(srcdir)/sys_signame.h | $(SED) -e '1,/^int sudo_end_of_headers;/d' -e '/^#/d' > mksigname.h
+sys_signame.i: $(srcdir)/sys_signame.h
+	$(CPP) $(CPPFLAGS) $< > $@
+
+mksiglist.h: sys_siglist.i
+	$(SED) -e '1,/^int sudo_end_of_headers;/d' -e '/^#/d' < $< > mksiglist.h
+
+mksigname.h: sys_signame.i
+	$(SED) -e '1,/^int sudo_end_of_headers;/d' -e '/^#/d' < $< > mksigname.h
 
 closefrom_test: $(CLOSEFROM_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CLOSEFROM_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
