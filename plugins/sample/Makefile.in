@@ -217,6 +217,6 @@ sample_plugin.i: $(srcdir)/sample_plugin.c $(incdir)/compat/stdbool.h \
                   $(incdir)/sudo_compat.h $(incdir)/sudo_plugin.h \
                   $(incdir)/sudo_util.h $(top_builddir)/config.h \
                   $(top_builddir)/pathnames.h
-	$(CPP) $(CPPFLAGS) $< > $@
+	$(CPP) $(CPPFLAGS) $(srcdir)/sample_plugin.c > $@
 sample_plugin.plog: sample_plugin.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sample_plugin.c --i-file $< --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sample_plugin.c --i-file sample_plugin.i --output-file $@

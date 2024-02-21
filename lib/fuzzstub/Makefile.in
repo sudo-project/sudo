@@ -172,6 +172,6 @@ fuzzstub.lo: $(srcdir)/fuzzstub.c $(incdir)/compat/stdbool.h \
 fuzzstub.i: $(srcdir)/fuzzstub.c $(incdir)/compat/stdbool.h \
              $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
              $(top_builddir)/config.h
-	$(CPP) $(CPPFLAGS) $< > $@
+	$(CPP) $(CPPFLAGS) $(srcdir)/fuzzstub.c > $@
 fuzzstub.plog: fuzzstub.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/fuzzstub.c --i-file $< --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/fuzzstub.c --i-file fuzzstub.i --output-file $@
