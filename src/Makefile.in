@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2010-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2010-2024 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -34,6 +34,7 @@ cross_compiling = @CROSS_COMPILING@
 
 # Compiler & tools to use
 CC = @CC@
+CPP = @CPP@
 LIBTOOL = @LIBTOOL@
 EGREP = @EGREP@
 SED = @SED@
@@ -195,7 +196,7 @@ Makefile: $(srcdir)/Makefile.in
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $<
 
 .c.i:
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 
 .i.plog:
 	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
@@ -396,7 +397,7 @@ apparmor.i: $(srcdir)/apparmor.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
             $(incdir)/sudo_util.h $(srcdir)/sudo.h $(top_builddir)/config.h \
             $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 apparmor.plog: apparmor.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/apparmor.c --i-file $< --output-file $@
 check_net_ifs.o: $(srcdir)/regress/net_ifs/check_net_ifs.c \
@@ -406,7 +407,7 @@ check_net_ifs.o: $(srcdir)/regress/net_ifs/check_net_ifs.c \
 check_net_ifs.i: $(srcdir)/regress/net_ifs/check_net_ifs.c \
                  $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                  $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 check_net_ifs.plog: check_net_ifs.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/net_ifs/check_net_ifs.c --i-file $< --output-file $@
 check_noexec.o: $(srcdir)/regress/noexec/check_noexec.c \
@@ -420,7 +421,7 @@ check_noexec.i: $(srcdir)/regress/noexec/check_noexec.c \
                 $(incdir)/sudo_fatal.h $(incdir)/sudo_plugin.h \
                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                 $(srcdir)/sudo_exec.h $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 check_noexec.plog: check_noexec.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/noexec/check_noexec.c --i-file $< --output-file $@
 check_ttyname.o: $(srcdir)/regress/ttyname/check_ttyname.c \
@@ -434,7 +435,7 @@ check_ttyname.i: $(srcdir)/regress/ttyname/check_ttyname.c \
                  $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
                  $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                  $(incdir)/sudo_util.h $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 check_ttyname.plog: check_ttyname.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/ttyname/check_ttyname.c --i-file $< --output-file $@
 conversation.o: $(srcdir)/conversation.c $(incdir)/compat/stdbool.h \
@@ -454,7 +455,7 @@ conversation.i: $(srcdir)/conversation.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_util.h $(srcdir)/sudo.h \
                 $(srcdir)/sudo_plugin_int.h $(top_builddir)/config.h \
                 $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 conversation.plog: conversation.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/conversation.c --i-file $< --output-file $@
 copy_file.o: $(srcdir)/copy_file.c $(incdir)/compat/stdbool.h \
@@ -472,7 +473,7 @@ copy_file.i: $(srcdir)/copy_file.c $(incdir)/compat/stdbool.h \
              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
              $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_edit.h \
              $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 copy_file.plog: copy_file.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/copy_file.c --i-file $< --output-file $@
 edit_open.o: $(srcdir)/edit_open.c $(incdir)/compat/stdbool.h \
@@ -490,7 +491,7 @@ edit_open.i: $(srcdir)/edit_open.c $(incdir)/compat/stdbool.h \
              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
              $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_edit.h \
              $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 edit_open.plog: edit_open.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/edit_open.c --i-file $< --output-file $@
 env_hooks.o: $(srcdir)/env_hooks.c $(incdir)/compat/stdbool.h \
@@ -508,7 +509,7 @@ env_hooks.i: $(srcdir)/env_hooks.c $(incdir)/compat/stdbool.h \
              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/sudo.h \
              $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 env_hooks.plog: env_hooks.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/env_hooks.c --i-file $< --output-file $@
 exec.o: $(srcdir)/exec.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -524,7 +525,7 @@ exec.i: $(srcdir)/exec.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
         $(srcdir)/sudo.h $(srcdir)/sudo_exec.h $(srcdir)/sudo_plugin_int.h \
         $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 exec.plog: exec.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/exec.c --i-file $< --output-file $@
 exec_common.o: $(srcdir)/exec_common.c $(incdir)/compat/stdbool.h \
@@ -542,7 +543,7 @@ exec_common.i: $(srcdir)/exec_common.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
                $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 exec_common.plog: exec_common.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/exec_common.c --i-file $< --output-file $@
 exec_intercept.o: $(srcdir)/exec_intercept.c $(incdir)/compat/stdbool.h \
@@ -566,7 +567,7 @@ exec_intercept.i: $(srcdir)/exec_intercept.c $(incdir)/compat/stdbool.h \
                   $(srcdir)/exec_intercept.h $(srcdir)/sudo.h \
                   $(srcdir)/sudo_exec.h $(srcdir)/sudo_plugin_int.h \
                   $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 exec_intercept.plog: exec_intercept.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/exec_intercept.c --i-file $< --output-file $@
 exec_iolog.o: $(srcdir)/exec_iolog.c $(incdir)/compat/stdbool.h \
@@ -586,7 +587,7 @@ exec_iolog.i: $(srcdir)/exec_iolog.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
               $(srcdir)/sudo_plugin_int.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 exec_iolog.plog: exec_iolog.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/exec_iolog.c --i-file $< --output-file $@
 exec_monitor.o: $(srcdir)/exec_monitor.c $(incdir)/compat/stdbool.h \
@@ -606,7 +607,7 @@ exec_monitor.i: $(srcdir)/exec_monitor.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
                 $(srcdir)/sudo_plugin_int.h $(top_builddir)/config.h \
                 $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 exec_monitor.plog: exec_monitor.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/exec_monitor.c --i-file $< --output-file $@
 exec_nopty.o: $(srcdir)/exec_nopty.c $(incdir)/compat/stdbool.h \
@@ -626,7 +627,7 @@ exec_nopty.i: $(srcdir)/exec_nopty.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
               $(srcdir)/sudo_plugin_int.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 exec_nopty.plog: exec_nopty.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/exec_nopty.c --i-file $< --output-file $@
 exec_preload.lo: $(srcdir)/exec_preload.c $(incdir)/compat/stdbool.h \
@@ -644,7 +645,7 @@ exec_preload.i: $(srcdir)/exec_preload.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                  $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
                  $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 exec_preload.plog: exec_preload.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/exec_preload.c --i-file $< --output-file $@
 exec_preload.o: $(srcdir)/exec_preload.c $(incdir)/compat/stdbool.h \
@@ -674,7 +675,7 @@ exec_ptrace.i: $(srcdir)/exec_ptrace.c $(incdir)/compat/endian.h \
                $(srcdir)/exec_intercept.h $(srcdir)/exec_ptrace.h \
                $(srcdir)/sudo.h $(srcdir)/sudo_exec.h $(top_builddir)/config.h \
                $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 exec_ptrace.plog: exec_ptrace.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/exec_ptrace.c --i-file $< --output-file $@
 exec_pty.o: $(srcdir)/exec_pty.c $(incdir)/compat/stdbool.h \
@@ -694,7 +695,7 @@ exec_pty.i: $(srcdir)/exec_pty.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
             $(srcdir)/sudo_plugin_int.h $(top_builddir)/config.h \
             $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 exec_pty.plog: exec_pty.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/exec_pty.c --i-file $< --output-file $@
 get_pty.o: $(srcdir)/get_pty.c $(incdir)/compat/stdbool.h \
@@ -712,7 +713,7 @@ get_pty.i: $(srcdir)/get_pty.c $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
            $(incdir)/sudo_util.h $(srcdir)/sudo.h $(top_builddir)/config.h \
            $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 get_pty.plog: get_pty.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/get_pty.c --i-file $< --output-file $@
 hooks.o: $(srcdir)/hooks.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -728,7 +729,7 @@ hooks.i: $(srcdir)/hooks.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
          $(srcdir)/sudo.h $(srcdir)/sudo_plugin_int.h $(top_builddir)/config.h \
          $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 hooks.plog: hooks.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/hooks.c --i-file $< --output-file $@
 intercept.pb-c.lo: $(srcdir)/intercept.pb-c.c $(incdir)/intercept.pb-c.h \
@@ -752,7 +753,7 @@ limits.i: $(srcdir)/limits.c $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/sudo.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 limits.plog: limits.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/limits.c --i-file $< --output-file $@
 load_plugins.o: $(srcdir)/load_plugins.c $(incdir)/compat/stdbool.h \
@@ -772,7 +773,7 @@ load_plugins.i: $(srcdir)/load_plugins.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/sudo.h \
                 $(srcdir)/sudo_plugin_int.h $(top_builddir)/config.h \
                 $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 load_plugins.plog: load_plugins.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/load_plugins.c --i-file $< --output-file $@
 net_ifs.o: $(srcdir)/net_ifs.c $(incdir)/compat/stdbool.h \
@@ -790,7 +791,7 @@ net_ifs.i: $(srcdir)/net_ifs.c $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
            $(incdir)/sudo_util.h $(srcdir)/sudo.h $(top_builddir)/config.h \
            $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 net_ifs.plog: net_ifs.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/net_ifs.c --i-file $< --output-file $@
 openbsd.o: $(srcdir)/openbsd.c $(incdir)/compat/stdbool.h \
@@ -808,7 +809,7 @@ openbsd.i: $(srcdir)/openbsd.c $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
            $(incdir)/sudo_util.h $(srcdir)/sudo.h $(top_builddir)/config.h \
            $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 openbsd.plog: openbsd.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/openbsd.c --i-file $< --output-file $@
 parse_args.o: $(srcdir)/parse_args.c $(incdir)/compat/getopt.h \
@@ -828,7 +829,7 @@ parse_args.i: $(srcdir)/parse_args.c $(incdir)/compat/getopt.h \
               $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
               $(incdir)/sudo_util.h $(srcdir)/sudo.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h ./sudo_usage.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 parse_args.plog: parse_args.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/parse_args.c --i-file $< --output-file $@
 preload.o: $(srcdir)/preload.c $(incdir)/compat/stdbool.h \
@@ -846,7 +847,7 @@ preload.i: $(srcdir)/preload.c $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
            $(incdir)/sudo_util.h $(srcdir)/sudo.h $(top_builddir)/config.h \
            $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 preload.plog: preload.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/preload.c --i-file $< --output-file $@
 preserve_fds.o: $(srcdir)/preserve_fds.c $(incdir)/compat/stdbool.h \
@@ -864,7 +865,7 @@ preserve_fds.i: $(srcdir)/preserve_fds.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                 $(incdir)/sudo_util.h $(srcdir)/sudo.h \
                 $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 preserve_fds.plog: preserve_fds.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/preserve_fds.c --i-file $< --output-file $@
 selinux.o: $(srcdir)/selinux.c $(incdir)/compat/stdbool.h \
@@ -882,7 +883,7 @@ selinux.i: $(srcdir)/selinux.c $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
            $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_exec.h \
            $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 selinux.plog: selinux.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/selinux.c --i-file $< --output-file $@
 sesh.o: $(srcdir)/sesh.c $(incdir)/compat/getopt.h $(incdir)/compat/stdbool.h \
@@ -898,7 +899,7 @@ sesh.i: $(srcdir)/sesh.c $(incdir)/compat/getopt.h $(incdir)/compat/stdbool.h \
         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
         $(srcdir)/sudo.h $(srcdir)/sudo_edit.h $(srcdir)/sudo_exec.h \
         $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 sesh.plog: sesh.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sesh.c --i-file $< --output-file $@
 signal.o: $(srcdir)/signal.c $(incdir)/compat/stdbool.h \
@@ -916,7 +917,7 @@ signal.i: $(srcdir)/signal.c $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/sudo.h \
           $(srcdir)/sudo_exec.h $(top_builddir)/config.h \
           $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 signal.plog: signal.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/signal.c --i-file $< --output-file $@
 solaris.o: $(srcdir)/solaris.c $(incdir)/compat/stdbool.h \
@@ -934,7 +935,7 @@ solaris.i: $(srcdir)/solaris.c $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
            $(incdir)/sudo_util.h $(srcdir)/sudo.h $(top_builddir)/config.h \
            $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 solaris.plog: solaris.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/solaris.c --i-file $< --output-file $@
 sudo.o: $(srcdir)/sudo.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -950,7 +951,7 @@ sudo.i: $(srcdir)/sudo.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
         $(srcdir)/sudo.h $(srcdir)/sudo_plugin_int.h $(top_builddir)/config.h \
         $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 sudo.plog: sudo.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sudo.c --i-file $< --output-file $@
 sudo_edit.o: $(srcdir)/sudo_edit.c $(incdir)/compat/stdbool.h \
@@ -970,7 +971,7 @@ sudo_edit.i: $(srcdir)/sudo_edit.c $(incdir)/compat/stdbool.h \
              $(incdir)/sudo_util.h $(srcdir)/sudo.h $(srcdir)/sudo_edit.h \
              $(srcdir)/sudo_exec.h $(top_builddir)/config.h \
              $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 sudo_edit.plog: sudo_edit.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sudo_edit.c --i-file $< --output-file $@
 sudo_intercept.lo: $(srcdir)/sudo_intercept.c $(incdir)/compat/stdbool.h \
@@ -982,7 +983,7 @@ sudo_intercept.i: $(srcdir)/sudo_intercept.c $(incdir)/compat/stdbool.h \
                    $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                    $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                    $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 sudo_intercept.plog: sudo_intercept.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sudo_intercept.c --i-file $< --output-file $@
 sudo_intercept_common.lo: $(srcdir)/sudo_intercept_common.c \
@@ -1004,7 +1005,7 @@ sudo_intercept_common.i: $(srcdir)/sudo_intercept_common.c \
                           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                           $(srcdir)/sudo_exec.h $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 sudo_intercept_common.plog: sudo_intercept_common.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sudo_intercept_common.c --i-file $< --output-file $@
 suspend_parent.o: $(srcdir)/suspend_parent.c $(incdir)/compat/stdbool.h \
@@ -1018,7 +1019,7 @@ suspend_parent.i: $(srcdir)/suspend_parent.c $(incdir)/compat/stdbool.h \
                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                   $(incdir)/sudo_queue.h $(srcdir)/sudo_exec.h \
                   $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 suspend_parent.plog: suspend_parent.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/suspend_parent.c --i-file $< --output-file $@
 test_ptrace.o: $(srcdir)/regress/intercept/test_ptrace.c \
@@ -1042,7 +1043,7 @@ test_ptrace.i: $(srcdir)/regress/intercept/test_ptrace.c \
                $(srcdir)/exec_ptrace.c $(srcdir)/exec_ptrace.h \
                $(srcdir)/sudo.h $(srcdir)/sudo_exec.h $(top_builddir)/config.h \
                $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 test_ptrace.plog: test_ptrace.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/intercept/test_ptrace.c --i-file $< --output-file $@
 tgetpass.o: $(srcdir)/tgetpass.c $(incdir)/compat/stdbool.h \
@@ -1060,7 +1061,7 @@ tgetpass.i: $(srcdir)/tgetpass.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
             $(incdir)/sudo_util.h $(srcdir)/sudo.h $(top_builddir)/config.h \
             $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 tgetpass.plog: tgetpass.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/tgetpass.c --i-file $< --output-file $@
 ttyname.o: $(srcdir)/ttyname.c $(incdir)/compat/stdbool.h \
@@ -1078,7 +1079,7 @@ ttyname.i: $(srcdir)/ttyname.c $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
            $(incdir)/sudo_util.h $(srcdir)/sudo.h $(top_builddir)/config.h \
            $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 ttyname.plog: ttyname.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/ttyname.c --i-file $< --output-file $@
 utmp.o: $(srcdir)/utmp.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -1094,6 +1095,6 @@ utmp.i: $(srcdir)/utmp.c $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
         $(srcdir)/sudo.h $(srcdir)/sudo_exec.h $(top_builddir)/config.h \
         $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 utmp.plog: utmp.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/utmp.c --i-file $< --output-file $@

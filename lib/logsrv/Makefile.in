@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2019-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2019-2024 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -32,6 +32,7 @@ incdir = $(top_srcdir)/include
 
 # Compiler & tools to use
 CC = @CC@
+CPP = @CPP@
 LIBTOOL = @LIBTOOL@
 
 # Libraries
@@ -100,7 +101,7 @@ Makefile: $(srcdir)/Makefile.in
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $<
 
 .c.i:
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 
 .i.plog:
 	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
