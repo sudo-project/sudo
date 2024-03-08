@@ -512,7 +512,7 @@ log_auth_failure(const struct sudoers_context *ctx, unsigned int status,
 	if (ISSET(ctx->mode, MODE_LIST|MODE_VALIDATE))
 	    logit = false;
     } else if (!ISSET(status, FLAG_BAD_PASSWORD)) {
-	/* Autheticated OK, sudoers denials are logged separately. */
+	/* Authenticated OK, sudoers denials are logged separately. */
 	logit = false;
     }
 
