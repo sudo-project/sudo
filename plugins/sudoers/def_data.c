@@ -41,6 +41,7 @@ static struct def_values def_data_timestamp_type[] = {
 static struct def_values def_data_log_format[] = {
     { "sudo", sudo },
     { "json", json },
+    { "json_compact", json_compact },
     { NULL, 0 },
 };
 

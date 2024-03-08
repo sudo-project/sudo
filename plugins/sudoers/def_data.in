@@ -426,7 +426,7 @@ runchroot
 log_format
 	T_TUPLE
 	"The format of logs to produce: %s"
-	sudo json
+	sudo json json_compact
 selinux
 	T_FLAG
 	"Enable SELinux RBAC support"

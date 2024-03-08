@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "March 8, 2024" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -682,15 +682,48 @@ Defaults to
 .TP 6n
 log_format = string
 The event log format.
-Supported log formats are
-\(lqsudo\(rq
-for traditional sudo-style logs and
-\(lqjson\(rq
-for JSON-format logs.
+Supported log formats are:
+.PP
+.RS 6n
+.PD 0
+.TP 6n
+json
+Log events in JSON format.
 The JSON log entries contain the full contents of the accept, reject, exit
 and alert messages.
+When logging to a file, the entire file is treated as a single JSON
+object consisting of multiple events, each event spanning multiple lines.
+When logging via
+\fIsyslog\fR,
+events are stored in compact (minified) format, described below.
+.PD
+.TP 6n
+json_compact
+Log events in compact (minified) JSON format.
+Each event is written as a separate JSON object on single line without
+extraneous white space.
+When logging via
+\fIsyslog\fR,
+there is no difference between the
+\fIjson\fR
+and
+\fIjson_compact\fR
+formats.
+Due to limitations of the protocol, JSON events sent via
+\fIsyslog\fR
+may be truncated.
+.TP 6n
+sudo
+Log events in traditional sudo-style log format.
+See the
+\fIEVENT LOGGING\fR
+section in
+sudoers(@mansectform@)
+for details.
+.PP
 The default value is
 \fIsudo\fR.
+.RE
 .SS "syslog"
 The
 \fIsyslog\fR

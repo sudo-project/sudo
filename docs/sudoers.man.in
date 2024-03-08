@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "December 19, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "March 8, 2024" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -5381,18 +5381,35 @@ Supported log formats are:
 .PD 0
 .TP 6n
 json
-Logs in JSON format.
+Log events in JSON format.
 JSON log entries contain the full user details as well as the execution
 environment if the command was allowed.
+When logging to a file, the entire file is treated as a single JSON
+object consisting of multiple events, each event spanning multiple lines.
+When logging via
+\fIsyslog\fR,
+events are stored in compact (minified) format, described below.
+.PD
+.TP 6n
+json_compact
+Log events in compact (minified) JSON format.
+Each event is written as a separate JSON object on single line without
+extraneous white space.
+When logging via
+\fIsyslog\fR,
+there is no difference between the
+\fIjson\fR
+and
+\fIjson_compact\fR
+formats.
 Due to limitations of the protocol, JSON events sent via
 \fIsyslog\fR
 may be truncated.
-.PD
 .TP 6n
 sudo
-Traditional sudo-style logs, see
+Log events in traditional sudo-style format, see
 \fIEVENT LOGGING\fR
-for a description of the log file format.
+for details.
 .PP
 This setting affects logs sent via
 syslog(3)

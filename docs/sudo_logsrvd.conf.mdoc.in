@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 16, 2023
+.Dd March 8, 2024
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -611,13 +611,40 @@ Defaults to
 .Em false .
 .It log_format = string
 The event log format.
-Supported log formats are
-.Dq sudo
-for traditional sudo-style logs and
-.Dq json
-for JSON-format logs.
+Supported log formats are:
+.Bl -tag -width 4n
+.It json
+Log events in JSON format.
 The JSON log entries contain the full contents of the accept, reject, exit
 and alert messages.
+When logging to a file, the entire file is treated as a single JSON
+object consisting of multiple events, each event spanning multiple lines.
+When logging via
+.Em syslog ,
+events are stored in compact (minified) format, described below.
+.It json_compact
+Log events in compact (minified) JSON format.
+Each event is written as a separate JSON object on single line without
+extraneous white space.
+When logging via
+.Em syslog ,
+there is no difference between the
+.Em json
+and
+.Em json_compact
+formats.
+Due to limitations of the protocol, JSON events sent via
+.Em syslog
+may be truncated.
+.It sudo
+Log events in traditional sudo-style log format.
+See the
+.Em "EVENT LOGGING"
+section in
+.Xr sudoers @mansectform@
+for details.
+.El
+.Pp
 The default value is
 .Em sudo .
 .El

@@ -228,9 +228,22 @@ static bool
 cb_log_format(struct sudoers_context *ctx, const char *file,
     int line, int column, const union sudo_defs_val *sd_un, int op)
 {
+    enum eventlog_format format;
     debug_decl(cb_log_format, SUDOERS_DEBUG_PLUGIN);
 
-    eventlog_set_format(sd_un->tuple == sudo ? EVLOG_SUDO : EVLOG_JSON);
+    switch (sd_un->tuple) {
+    case json:
+	format = EVLOG_JSON;
+	break;
+    case json_compact:
+	format = EVLOG_JSON_COMPACT;
+	break;
+    default:
+	format = EVLOG_SUDO;
+	break;
+    }
+
+    eventlog_set_format(format);
 
     debug_return_bool(true);
 }

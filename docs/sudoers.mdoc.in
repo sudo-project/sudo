@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd December 19, 2023
+.Dd March 8, 2024
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -5054,16 +5054,32 @@ The event log format.
 Supported log formats are:
 .Bl -tag -width 4n
 .It json
-Logs in JSON format.
+Log events in JSON format.
 JSON log entries contain the full user details as well as the execution
 environment if the command was allowed.
+When logging to a file, the entire file is treated as a single JSON
+object consisting of multiple events, each event spanning multiple lines.
+When logging via
+.Em syslog ,
+events are stored in compact (minified) format, described below.
+.It json_compact
+Log events in compact (minified) JSON format.
+Each event is written as a separate JSON object on single line without
+extraneous white space.
+When logging via
+.Em syslog ,
+there is no difference between the
+.Em json
+and
+.Em json_compact
+formats.
 Due to limitations of the protocol, JSON events sent via
 .Em syslog
 may be truncated.
 .It sudo
-Traditional sudo-style logs, see
+Log events in traditional sudo-style format, see
 .Sx "EVENT LOGGING"
-for a description of the log file format.
+for details.
 .El
 .Pp
 This setting affects logs sent via

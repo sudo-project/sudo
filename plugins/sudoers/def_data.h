@@ -338,6 +338,7 @@ enum def_tuple {
     kernel,
     sudo,
     json,
+    json_compact,
     dso,
     trace
 };

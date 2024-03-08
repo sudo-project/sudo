@@ -903,6 +903,8 @@ cb_eventlog_format(struct logsrvd_config *config, const char *str, size_t offset
 
     if (strcmp(str, "json") == 0)
 	config->eventlog.log_format = EVLOG_JSON;
+    else if (strcmp(str, "json_compact") == 0)
+	config->eventlog.log_format = EVLOG_JSON_COMPACT;
     else if (strcmp(str, "sudo") == 0)
 	config->eventlog.log_format = EVLOG_SUDO;
     else
