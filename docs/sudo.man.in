@@ -1415,6 +1415,9 @@ Default editor to use in
 \fRSUDO_GID\fR
 Set to the group-ID of the user who invoked sudo.
 .TP 17n
+\fRSUDO_HOME\fR
+Set to the home directory of the user who invoked sudo.
+.TP 17n
 \fRSUDO_PROMPT\fR
 Used as the default password prompt unless the
 \fB\-p\fR

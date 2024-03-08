@@ -1345,6 +1345,8 @@ Default editor to use in
 (sudoedit) mode.
 .It Ev SUDO_GID
 Set to the group-ID of the user who invoked sudo.
+.It Ev SUDO_HOME
+Set to the home directory of the user who invoked sudo.
 .It Ev SUDO_PROMPT
 Used as the default password prompt unless the
 .Fl p
