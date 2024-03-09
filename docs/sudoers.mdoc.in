@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd March 8, 2024
+.Dd March 9, 2024
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -5054,28 +5054,37 @@ The event log format.
 Supported log formats are:
 .Bl -tag -width 4n
 .It json
-Log events in JSON format.
+Currently, this is an alias for
+.Em json_pretty .
+In a future version of
+.Nm sudo ,
+.Em json
+will be equivalent to
+.Em json_compact .
 JSON log entries contain the full user details as well as the execution
 environment if the command was allowed.
+.It json_compact
+Log events in
+.Dq compact
+(minified) JSON format.
+Each event is written as a separate JSON object on single line without
+extraneous white space.
+Due to limitations of the protocol, JSON events sent via
+.Em syslog
+may be truncated.
+.It json_pretty
+Log events in
+.Dq pretty
+JSON format.
 When logging to a file, the entire file is treated as a single JSON
 object consisting of multiple events, each event spanning multiple lines.
 When logging via
 .Em syslog ,
-events are stored in compact (minified) format, described below.
-.It json_compact
-Log events in compact (minified) JSON format.
-Each event is written as a separate JSON object on single line without
-extraneous white space.
-When logging via
-.Em syslog ,
 there is no difference between the
-.Em json
+.Em json_pretty
 and
 .Em json_compact
 formats.
-Due to limitations of the protocol, JSON events sent via
-.Em syslog
-may be truncated.
 .It sudo
 Log events in traditional sudo-style format, see
 .Sx "EVENT LOGGING"

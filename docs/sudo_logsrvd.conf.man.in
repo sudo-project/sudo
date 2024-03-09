@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "March 8, 2024" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "March 9, 2024" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -688,30 +688,40 @@ Supported log formats are:
 .PD 0
 .TP 6n
 json
-Log events in JSON format.
-The JSON log entries contain the full contents of the accept, reject, exit
+Currently, this is an alias for
+\fIjson_pretty\fR.
+In a future version of
+\fBsudo_logsrvd\fR,
+\fIjson\fR
+will be equivalent to
+\fIjson_compact\fR.
+JSON log entries contain the full contents of the accept, reject, exit
 and alert messages.
+.PD
+.TP 6n
+json_compact
+Log events in
+\(lqcompact\(rq
+(minified) JSON format.
+Each event is written as a separate JSON object on single line without
+extraneous white space.
+Due to limitations of the protocol, JSON events sent via
+\fIsyslog\fR
+may be truncated.
+.TP 6n
+json_pretty
+Log events in
+\(lqpretty\(rq
+JSON format.
 When logging to a file, the entire file is treated as a single JSON
 object consisting of multiple events, each event spanning multiple lines.
 When logging via
 \fIsyslog\fR,
-events are stored in compact (minified) format, described below.
-.PD
-.TP 6n
-json_compact
-Log events in compact (minified) JSON format.
-Each event is written as a separate JSON object on single line without
-extraneous white space.
-When logging via
-\fIsyslog\fR,
 there is no difference between the
-\fIjson\fR
+\fIjson_pretty\fR
 and
 \fIjson_compact\fR
 formats.
-Due to limitations of the protocol, JSON events sent via
-\fIsyslog\fR
-may be truncated.
 .TP 6n
 sudo
 Log events in traditional sudo-style log format.

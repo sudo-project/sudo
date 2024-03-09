@@ -459,6 +459,7 @@ void sudoers_cleanup(void);
 bool sudoers_override_umask(void);
 const struct sudoers_context *sudoers_get_context(void);
 bool sudoers_set_mode(unsigned int flags, unsigned int mask);
+bool sudoers_set_log_format(enum def_tuple tuple);
 
 /* sudoers_ctx_free.c */
 void sudoers_ctx_free(struct sudoers_context *ctx);

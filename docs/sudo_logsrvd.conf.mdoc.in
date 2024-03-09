@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd March 8, 2024
+.Dd March 9, 2024
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -614,28 +614,37 @@ The event log format.
 Supported log formats are:
 .Bl -tag -width 4n
 .It json
-Log events in JSON format.
-The JSON log entries contain the full contents of the accept, reject, exit
+Currently, this is an alias for
+.Em json_pretty .
+In a future version of
+.Nm sudo_logsrvd ,
+.Em json
+will be equivalent to
+.Em json_compact .
+JSON log entries contain the full contents of the accept, reject, exit
 and alert messages.
+.It json_compact
+Log events in
+.Dq compact
+(minified) JSON format.
+Each event is written as a separate JSON object on single line without
+extraneous white space.
+Due to limitations of the protocol, JSON events sent via
+.Em syslog
+may be truncated.
+.It json_pretty
+Log events in
+.Dq pretty
+JSON format.
 When logging to a file, the entire file is treated as a single JSON
 object consisting of multiple events, each event spanning multiple lines.
 When logging via
 .Em syslog ,
-events are stored in compact (minified) format, described below.
-.It json_compact
-Log events in compact (minified) JSON format.
-Each event is written as a separate JSON object on single line without
-extraneous white space.
-When logging via
-.Em syslog ,
 there is no difference between the
-.Em json
+.Em json_pretty
 and
 .Em json_compact
 formats.
-Due to limitations of the protocol, JSON events sent via
-.Em syslog
-may be truncated.
 .It sudo
 Log events in traditional sudo-style log format.
 See the

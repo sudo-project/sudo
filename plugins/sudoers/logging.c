@@ -1132,29 +1132,16 @@ sudoers_log_close(int type, FILE *fp)
 void
 init_eventlog_config(void)
 {
-    enum eventlog_format format;
     int logtype = 0;
     debug_decl(init_eventlog_config, SUDOERS_DEBUG_LOGGING);
-
-    switch (def_log_format) {
-    case json:
-	format = EVLOG_JSON;
-	break;
-    case json_compact:
-	format = EVLOG_JSON_COMPACT;
-	break;
-    default:
-	format = EVLOG_SUDO;
-	break;
-    }
 
     if (def_syslog)
 	logtype |= EVLOG_SYSLOG;
     if (def_logfile)
 	logtype |= EVLOG_FILE;
 
+    sudoers_set_log_format(def_log_format);
     eventlog_set_type(logtype);
-    eventlog_set_format(format);
     eventlog_set_syslog_acceptpri(def_syslog_goodpri);
     eventlog_set_syslog_rejectpri(def_syslog_badpri);
     eventlog_set_syslog_alertpri(def_syslog_badpri);

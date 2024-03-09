@@ -339,6 +339,7 @@ enum def_tuple {
     sudo,
     json,
     json_compact,
+    json_pretty,
     dso,
     trace
 };

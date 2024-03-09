@@ -1132,6 +1132,7 @@ do_syslog(int event_type, int flags, struct eventlog_args *args,
 	break;
     case EVLOG_JSON:
     case EVLOG_JSON_COMPACT:
+    case EVLOG_JSON_PRETTY:
 	ret = do_syslog_json(pri, event_type, args, evlog);
 	break;
     default:
@@ -1304,6 +1305,7 @@ do_logfile(int event_type, int flags, struct eventlog_args *args,
 	break;
     case EVLOG_JSON:
     case EVLOG_JSON_COMPACT:
+    case EVLOG_JSON_PRETTY:
 	ret = do_logfile_json(evl_conf->format, event_type, args, evlog);
 	break;
     default:
