@@ -1064,7 +1064,7 @@ sudoers_log_open(int type, const char *log_file)
 	    break;
 	case EVLOG_FILE:
 	    /* Open log file as root, mode 0600 (cannot append to JSON). */
-	    if (def_log_format == json) {
+	    if (def_log_format == json || def_log_format == json_pretty) {
 		flags = O_RDWR|O_CREAT;
 		omode = "w";
 	    } else {

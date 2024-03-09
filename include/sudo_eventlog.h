@@ -43,7 +43,6 @@ enum event_type {
 /* Supported eventlog formats. */
 enum eventlog_format {
     EVLOG_SUDO,
-    EVLOG_JSON,
     EVLOG_JSON_COMPACT,
     EVLOG_JSON_PRETTY
 };

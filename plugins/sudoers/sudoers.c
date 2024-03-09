@@ -1561,13 +1561,12 @@ sudoers_set_log_format(enum def_tuple tuple)
     enum eventlog_format format;
     debug_decl(cb_log_format, SUDOERS_DEBUG_PLUGIN);
 
+    /* FFR - make "json" an alias for EVLOG_JSON_COMPACT instead. */
     switch (tuple) {
-    case json:
-        format = EVLOG_JSON;
-        break;
     case json_compact:
         format = EVLOG_JSON_COMPACT;
         break;
+    case json:
     case json_pretty:
         format = EVLOG_JSON_PRETTY;
         break;

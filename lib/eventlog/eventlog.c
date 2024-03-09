@@ -1130,7 +1130,6 @@ do_syslog(int event_type, int flags, struct eventlog_args *args,
     case EVLOG_SUDO:
 	ret = do_syslog_sudo(pri, lbuf.buf, evlog);
 	break;
-    case EVLOG_JSON:
     case EVLOG_JSON_COMPACT:
     case EVLOG_JSON_PRETTY:
 	ret = do_syslog_json(pri, event_type, args, evlog);
@@ -1303,7 +1302,6 @@ do_logfile(int event_type, int flags, struct eventlog_args *args,
 	ret = do_logfile_sudo(lbuf.buf ? lbuf.buf : args->reason, evlog,
 	    args->event_time);
 	break;
-    case EVLOG_JSON:
     case EVLOG_JSON_COMPACT:
     case EVLOG_JSON_PRETTY:
 	ret = do_logfile_json(evl_conf->format, event_type, args, evlog);
