@@ -476,10 +476,6 @@ Defaults are listed in brackets after the description.
         Specify the path to the SSSD shared library, which is loaded
         at run-time.
 
-    --enable-offensive-insults
-        Enable potentially offensive sudo insults from the classic
-        version of sudo.
-
     --enable-pvs-studio
         Generate a sample PVS-Studio.cfg file based on the compiler and
         platform type.  The "pvs-studio" Makefile target can then be

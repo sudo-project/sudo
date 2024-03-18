@@ -924,7 +924,6 @@ ac_user_opts='
 enable_option_checking
 with_otp_only
 with_alertmail
-with_pc_insults
 with_devel
 with_CC
 with_rpath
@@ -1043,7 +1042,6 @@ with_selinux
 with_apparmor
 enable_sasl
 enable_timestamp_type
-enable_offensive_insults
 enable_package_build
 enable_gss_krb5_ccache_name
 enable_pvs_studio
@@ -1760,8 +1758,6 @@ Optional Features:
   --enable-sasl           Enable/disable LDAP SASL support
   --timestamp-type=TYPE   Set the default time stamp record type to global,
                           ppid or tty.
-  --enable-offensive-insults
-                          Enable potentially offensive sudo insults.
   --enable-package-build  Enable options for package building.
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
@@ -1797,7 +1793,6 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-otp-only         deprecated
   --with-alertmail        deprecated
-  --with-pc-insults       deprecated
   --with-devel            add development options
   --with-CC               C compiler to use
   --with-rpath            deprecated, use --disable-rpath
@@ -5002,23 +4997,6 @@ fi
 
 
 
-# Check whether --with-pc-insults was given.
-if test ${with_pc_insults+y}
-then :
-  withval=$with_pc_insults; case $with_pc_insults in
-    yes)	enable_offensive_insults=no
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: --with-pc-insults option deprecated, it is now the default" >&5
-printf "%s\n" "$as_me: --with-pc-insults option deprecated, it is now the default" >&6;}
-		;;
-    no)		enable_offensive_insults=yes
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: --without-pc-insults option deprecated, use --enable-offensive-insults" >&5
-printf "%s\n" "$as_me: --without-pc-insults option deprecated, use --enable-offensive-insults" >&6;}
-		;;
-esac
-fi
-
-
-
 
 # Check whether --with-devel was given.
 if test ${with_devel+y}
@@ -7065,21 +7043,6 @@ fi
 
 printf "%s\n" "#define TIMESTAMP_TYPE $timestamp_type" >>confdefs.h
 
-
-# Check whether --enable-offensive_insults was given.
-if test ${enable_offensive_insults+y}
-then :
-  enableval=$enable_offensive_insults;
-else case e in #(
-  e) enable_offensive_insults=no ;;
-esac
-fi
-
-if test "$enable_offensive_insults" = "yes"
-then :
-  printf "%s\n" "#define OFFENSIVE_INSULTS 1" >>confdefs.h
-
-fi
 
 # Check whether --enable-package_build was given.
 if test ${enable_package_build+y}
@@ -26352,7 +26315,7 @@ esac
 fi
 
 	    done
-	    if test "$CPPFLAGS" = "$O_CPPFLAGS"; then
+	    if test "$cross_compiling" != "yes" -a "$CPPFLAGS" = "$O_CPPFLAGS"; then
 		# So we find the openssl compat headers under wolfssl (XXX)
 
 if test ${CPPFLAGS+y}
@@ -38445,7 +38408,6 @@ echo "  password tries		: ${passwd_tries}" >&6
 echo "  bad password message		: ${badpass_message}" >&6
 if test "$insults" = "on"; then
     i=""
-    test "$enable_offensive_insults" = "yes" && i="offensive ${i}"
     test "$with_python_insults" = "yes" && i="python ${i}"
     test "$with_goons_insults" = "yes" && i="goons ${i}"
     test "$with_hal_insults" = "yes" && i="hal ${i}"
@@ -38591,7 +38553,6 @@ printf "%s\n" "$as_me: warning: the $rundir/ts directory must be cleared at boot
 printf "%s\n" "$as_me:          You may need to create a startup item to do this." >&6;}
 
 fi
-
 
 
 

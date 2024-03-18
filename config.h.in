@@ -1203,10 +1203,6 @@
 /* Define if your C preprocessor does not support variadic macros. */
 #undef NO_VARIADIC_MACROS
 
-/* Define to 1 to include offensive insults from the classic version of sudo.
-   */
-#undef OFFENSIVE_INSULTS
-
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 

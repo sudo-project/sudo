@@ -299,16 +299,6 @@ AC_ARG_WITH(alertmail, [AS_HELP_STRING([--with-alertmail], [deprecated])],
 		;;
 esac])
 
-AC_ARG_WITH(pc-insults, [AS_HELP_STRING([--with-pc-insults], [deprecated])],
-[case $with_pc_insults in
-    yes)	enable_offensive_insults=no
-		AC_MSG_NOTICE([--with-pc-insults option deprecated, it is now the default])
-		;;
-    no)		enable_offensive_insults=yes
-		AC_MSG_NOTICE([--without-pc-insults option deprecated, use --enable-offensive-insults])
-		;;
-esac])
-
 dnl
 dnl Options for --with
 dnl
@@ -1482,11 +1472,6 @@ AC_ARG_ENABLE(timestamp-type,
   esac
 ])
 AC_DEFINE_UNQUOTED(TIMESTAMP_TYPE, $timestamp_type)
-
-AC_ARG_ENABLE(offensive_insults,
-[AS_HELP_STRING([--enable-offensive-insults], [Enable potentially offensive sudo insults.])],
-[], [enable_offensive_insults=no])
-AS_IF([test "$enable_offensive_insults" = "yes"], [AC_DEFINE(OFFENSIVE_INSULTS)])
 
 AC_ARG_ENABLE(package_build,
 [AS_HELP_STRING([--enable-package-build], [Enable options for package building.])],
@@ -4526,7 +4511,6 @@ echo "  password tries		: ${passwd_tries}" >&AS_MESSAGE_FD
 echo "  bad password message		: ${badpass_message}" >&AS_MESSAGE_FD
 if test "$insults" = "on"; then
     i=""
-    test "$enable_offensive_insults" = "yes" && i="offensive ${i}"
     test "$with_python_insults" = "yes" && i="python ${i}"
     test "$with_goons_insults" = "yes" && i="goons ${i}"
     test "$with_hal_insults" = "yes" && i="hal ${i}"
@@ -4735,7 +4719,6 @@ AH_TEMPLATE(NO_PAM_SESSION, [Define to 1 if you don't want to use sudo's PAM ses
 AH_TEMPLATE(NO_ROOT_MAILER, [Define to avoid running the mailer as root.])
 AH_TEMPLATE(NO_ROOT_SUDO, [Define to 1 if root should not be allowed to use sudo.])
 AH_TEMPLATE(TIMESTAMP_TYPE, [Define to global, ppid or tty to set the default timestamp record type.])
-AH_TEMPLATE(OFFENSIVE_INSULTS, [Define to 1 to include offensive insults from the classic version of sudo.])
 AH_TEMPLATE(SECURE_PATH, [A colon-separated list of directories to override the user's PATH with.])
 AH_TEMPLATE(SEND_MAIL_WHEN_NOT_OK, [Define to 1 to send mail when the user is not allowed to run a command.])
 AH_TEMPLATE(SEND_MAIL_WHEN_NO_HOST, [Define to 1 to send mail when the user is not allowed to run sudo on this host.])
