@@ -24,14 +24,14 @@
      * CSOps insults (may be site dependent).
      */
 
-    "Maybe if you used more than just two fingers...",
-    "BOB says:  You seem to have forgotten your passwd, enter another!",
-    "stty: unknown mode: doofus",
-    "I can't hear you -- I'm using the scrambler.",
-    "The more you drive -- the dumber you get.",
-    "Listen, broccoli brains, I don't have time to listen to this trash.",
-    "I've seen penguins that can type better than that.",
-    "Have you considered trying to match wits with a rutabaga?",
-    "You speak an infinite deal of nothing",
+    _("Maybe if you used more than just two fingers..."),
+    _("BOB says:  You seem to have forgotten your passwd, enter another!"),
+    _("stty: unknown mode: doofus"),
+    _("I can't hear you -- I'm using the scrambler."),
+    _("The more you drive -- the dumber you get."),
+    _("Listen, broccoli brains, I don't have time to listen to this trash."),
+    _("I've seen penguins that can type better than that."),
+    _("Have you considered trying to match wits with a rutabaga?"),
+    _("You speak an infinite deal of nothing"),
 
 #endif /* SUDOERS_INS_CSOPS_H */
