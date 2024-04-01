@@ -23,17 +23,17 @@
      * Insults from "Monty Python's Flying Circus" and family.
      */
 
-    "That is no basis for supreme executive power!",
-    "You empty-headed animal food trough wiper!",
-    "I fart in your general direction!",
-    "Your mother was a hamster and your father smelt of elderberries!",
-    "You must cut down the mightiest tree in the forest... with... a herring!",
-    "I wave my private parts at your aunties!",
-    "He's not the Messiah, he's a very naughty boy!",
-    "I wish to make a complaint.",
-    "When you're walking home tonight, and some homicidal maniac comes after you with a bunch of loganberries, don't come crying to me!",
-    "This man, he doesn't know when he's beaten! He doesn't know when he's winning, either. He has no... sort of... sensory apparatus...",
-    "There's nothing wrong with you that an expensive operation can't prolong.",
-    "I'm very sorry, but I'm not allowed to argue unless you've paid.",
+    _("That is no basis for supreme executive power!"),
+    _("You empty-headed animal food trough wiper!"),
+    _("I fart in your general direction!"),
+    _("Your mother was a hamster and your father smelt of elderberries!"),
+    _("You must cut down the mightiest tree in the forest... with... a herring!"),
+    _("I wave my private parts at your aunties!"),
+    _("He's not the Messiah, he's a very naughty boy!"),
+    _("I wish to make a complaint."),
+    _("When you're walking home tonight, and some homicidal maniac comes after you with a bunch of loganberries, don't come crying to me!"),
+    _("This man, he doesn't know when he's beaten! He doesn't know when he's winning, either. He has no... sort of... sensory apparatus..."),
+    _("There's nothing wrong with you that an expensive operation can't prolong."),
+    _("I'm very sorry, but I'm not allowed to argue unless you've paid."),
 
 #endif /* SUDOERS_INS_PYTHON_H */
