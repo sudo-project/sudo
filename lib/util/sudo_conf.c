@@ -79,6 +79,7 @@ struct sudo_conf_settings {
     bool updated;
     bool disable_coredump;
     bool probe_interfaces;
+    bool pam_silent;
     int group_source;
     int max_groups;
 };
@@ -100,12 +101,14 @@ static int set_var_disable_coredump(const char *entry, const char *conf_file, un
 static int set_var_group_source(const char *entry, const char *conf_file, unsigned int);
 static int set_var_max_groups(const char *entry, const char *conf_file, unsigned int);
 static int set_var_probe_interfaces(const char *entry, const char *conf_file, unsigned int);
+static int set_var_pam_silent(const char *entry, const char *conf_file, unsigned int);
 
 static struct sudo_conf_table sudo_conf_var_table[] = {
     { "disable_coredump", sizeof("disable_coredump") - 1, set_var_disable_coredump },
     { "group_source", sizeof("group_source") - 1, set_var_group_source },
     { "max_groups", sizeof("max_groups") - 1, set_var_max_groups },
     { "probe_interfaces", sizeof("probe_interfaces") - 1, set_var_probe_interfaces },
+    { "pam_silent", sizeof("pam_silent") - 1, set_var_pam_silent },
     { NULL }
 };
 
@@ -142,6 +145,7 @@ static struct sudo_conf_table sudo_conf_var_table[] = {
     false,			/* updated */				\
     true,			/* disable_coredump */			\
     true,			/* probe_interfaces */			\
+    true,			/* pam_silent */			\
     GROUP_SOURCE_DEFAULT,	/* group_source */			\
     -1				/* max_groups */			\
 }
@@ -461,6 +465,22 @@ set_var_probe_interfaces(const char *strval, const char *conf_file,
     debug_return_int(true);
 }
 
+static int
+set_var_pam_silent(const char *strval, const char *conf_file,
+    unsigned int lineno)
+{
+    int val = sudo_strtobool(strval);
+    debug_decl(set_var_pam_silent, SUDO_DEBUG_UTIL);
+
+    if (val == -1) {
+	sudo_warnx(U_("invalid value for %s \"%s\" in %s, line %u"),
+	    "pam_silent", strval, conf_file, lineno);
+	debug_return_int(false);
+    }
+    sudo_conf_data.settings.pam_silent = val;
+    debug_return_int(true);
+}
+
 const char *
 sudo_conf_askpass_path_v1(void)
 {
@@ -588,6 +608,12 @@ bool
 sudo_conf_probe_interfaces_v1(void)
 {
     return sudo_conf_data.settings.probe_interfaces;
+}
+
+bool
+sudo_conf_pam_silent_v1(void)
+{
+    return sudo_conf_data.settings.pam_silent;
 }
 
 /*

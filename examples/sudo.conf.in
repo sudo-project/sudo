@@ -117,6 +117,16 @@
 #Set probe_interfaces false
 
 #
+# PAM verbosity:
+#   Set pam_silent true|false
+#
+# By default, sudo will call PAM's authentication in silent mode to reduce
+# messages printed on the terminal. This can however hide potentially
+# important messages such as the account lockout messages by pam_faillock.
+#
+#Set pam_silent true
+
+#
 # Sudo debug files:
 #   Debug program /path/to/debug_log subsystem@priority[,subsyste@priority]
 #

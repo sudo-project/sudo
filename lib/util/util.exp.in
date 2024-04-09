@@ -15,6 +15,7 @@ sudo_conf_noexec_path_v1
 sudo_conf_plugin_dir_path_v1
 sudo_conf_plugins_v1
 sudo_conf_probe_interfaces_v1
+sudo_conf_pam_silent_v1
 sudo_conf_read_v1
 sudo_conf_sesh_path_v1
 sudo_debug_deregister_v1
