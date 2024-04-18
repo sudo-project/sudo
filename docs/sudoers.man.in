@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "March 9, 2024" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "April 17, 2024" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3823,6 +3823,22 @@ This flag is
 by default.
 .sp
 This setting is only supported by version 1.8.8 or higher.
+.TP 18n
+pam_silent
+If set, PAM authentication will be performed in silent mode.
+This prevents PAM authentication modules from generating output.
+In some cases, this may suppress important information about why
+authentication failed.
+For example, PAM modules such as
+\fIpam_faillock\fR
+will only display a warning if
+\fIpam_silent\fR
+is disabled.
+This flag is
+\fIon\fR
+by default.
+.sp
+This setting is only supported by version 1.8.16 or higher.
 .TP 18n
 passprompt_override
 If set, the prompt specified by

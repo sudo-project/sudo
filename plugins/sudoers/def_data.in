@@ -304,6 +304,9 @@ pam_session
 pam_acct_mgmt
 	T_FLAG
 	"Perform PAM account validation management"
+pam_silent
+	T_FLAG
+	"Do not allow PAM authentication modules to generate output"
 maxseq
 	T_STR
 	"Maximum I/O log sequence number: %s"

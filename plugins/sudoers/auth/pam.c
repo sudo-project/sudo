@@ -318,7 +318,7 @@ sudo_pam_verify(const struct sudoers_context *ctx, struct passwd *pw,
 	}
 
     /* PAM_SILENT prevents the authentication service from generating output. */
-    *pam_status = pam_authenticate(pamh, PAM_SILENT);
+    *pam_status = pam_authenticate(pamh, def_pam_silent ? PAM_SILENT : 0);
 
     /* Restore def_prompt, the passed-in prompt may be freed later. */
     def_prompt = PASSPROMPT;

@@ -442,6 +442,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Perform PAM account validation management"),
 	NULL,
     }, {
+	"pam_silent", T_FLAG,
+	N_("Do not allow PAM authentication modules to generate output"),
+	NULL,
+    }, {
 	"maxseq", T_STR,
 	N_("Maximum I/O log sequence number: %s"),
 	NULL,

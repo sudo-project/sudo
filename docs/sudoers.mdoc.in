@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd March 9, 2024
+.Dd April 17, 2024
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3623,6 +3623,21 @@ This flag is
 by default.
 .Pp
 This setting is only supported by version 1.8.8 or higher.
+.It pam_silent
+If set, PAM authentication will be performed in silent mode.
+This prevents PAM authentication modules from generating output.
+In some cases, this may suppress important information about why
+authentication failed.
+For example, PAM modules such as
+.Em pam_faillock
+will only display a warning if
+.Em pam_silent
+is disabled.
+This flag is
+.Em on
+by default.
+.Pp
+This setting is only supported by version 1.8.16 or higher.
 .It passprompt_override
 If set, the prompt specified by
 .Em passprompt
