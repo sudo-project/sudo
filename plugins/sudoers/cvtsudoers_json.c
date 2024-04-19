@@ -716,13 +716,13 @@ print_cmndspec_json(struct json_container *jsonc,
 	if (cs->runchroot != NULL) {
 	    value.type = JSON_STRING;
 	    value.u.string = cs->runchroot;
-	    if (!sudo_json_add_value(jsonc, "runchroot", &value))
+	    if (!sudo_json_add_value_as_object(jsonc, "runchroot", &value))
 		goto oom;
 	}
 	if (cs->runcwd != NULL) {
 	    value.type = JSON_STRING;
 	    value.u.string = cs->runcwd;
-	    if (!sudo_json_add_value(jsonc, "runcwd", &value))
+	    if (!sudo_json_add_value_as_object(jsonc, "runchroot", &value))
 		goto oom;
 	}
 	if (cs->timeout > 0) {

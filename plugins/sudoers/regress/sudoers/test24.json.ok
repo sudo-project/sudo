@@ -22,8 +22,8 @@
             "Cmnd_Specs": [
                 {
                     "Options": [
-                        "runchroot": "/var/www",
-                        "runcwd": "/htdocs"
+                        { "runchroot": "/var/www" },
+                        { "runchroot": "/htdocs" }
                     ],
                     "Commands": [
                         { "command": "/bin/ksh" }
@@ -41,7 +41,7 @@
             "Cmnd_Specs": [
                 {
                     "Options": [
-                        "runcwd": "~root"
+                        { "runchroot": "~root" }
                     ],
                     "Commands": [
                         { "command": "/usr/bin/id" }
@@ -49,7 +49,7 @@
                 },
                 {
                     "Options": [
-                        "runcwd": "/tmp"
+                        { "runchroot": "/tmp" }
                     ],
                     "Commands": [
                         { "command": "/bin/ls" }
