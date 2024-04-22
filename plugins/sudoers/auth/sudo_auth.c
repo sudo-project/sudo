@@ -231,7 +231,7 @@ pass_warn(void)
 
 #ifdef INSULT
     if (def_insults)
-	warning = INSULT;
+	warning = _(INSULT);
 #endif
     sudo_printf(SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY, "%s\n", warning);
 

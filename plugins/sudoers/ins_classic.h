@@ -23,13 +23,13 @@
      * Insults from the original sudo(8).
      */
 
-    _("Wrong!  You cheating scum!"),
-    _("And you call yourself a Rocket Scientist!"),
-    _("Where did you learn to type?"),
-    _("Are you on drugs?"),
-    _("My pet ferret can type better than you!"),
-    _("You type like i drive."),
-    _("Do you think like you type?"),
-    _("Your mind just hasn't been the same since the electro-shock, has it?"),
+    N_("Wrong!  You cheating scum!"),
+    N_("And you call yourself a Rocket Scientist!"),
+    N_("Where did you learn to type?"),
+    N_("Are you on drugs?"),
+    N_("My pet ferret can type better than you!"),
+    N_("You type like i drive."),
+    N_("Do you think like you type?"),
+    N_("Your mind just hasn't been the same since the electro-shock, has it?"),
 
 #endif /* SUDOERS_INS_CLASSIC_H */
