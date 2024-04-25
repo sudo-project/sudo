@@ -31,6 +31,7 @@
 #include <ctype.h>
 
 #include <sudoers.h>
+#include <sudo_digest.h>
 #include <sudo_json.h>
 #include <cvtsudoers.h>
 #include <gram.h>
@@ -67,6 +68,7 @@ print_command_json(struct json_container *jsonc, const char *name, bool negated)
     struct command_digest *digest;
     struct json_value value;
     char *cmnd = c->cmnd;
+    unsigned int digest_type;
     const char *digest_name;
     debug_decl(print_command_json, SUDOERS_DEBUG_UTIL);
 
@@ -89,13 +91,36 @@ print_command_json(struct json_container *jsonc, const char *name, bool negated)
 	if (!sudo_json_add_value(jsonc, "command", &value))
 	    debug_return_bool(false);
 
-	/* Optional digest list. */
-	TAILQ_FOREACH(digest, &c->digests, entries) {
-	    digest_name = digest_type_to_name(digest->digest_type);
-	    value.type = JSON_STRING;
-	    value.u.string = digest->digest_str;
-	    if (!sudo_json_add_value(jsonc, digest_name, &value))
-		debug_return_bool(false);
+	/* Optional digest list, ordered by digest type. */
+	for (digest_type = 0; digest_type < SUDO_DIGEST_INVALID; digest_type++) {
+	    unsigned int ndigests = 0;
+
+	    TAILQ_FOREACH(digest, &c->digests, entries) {
+		if (digest->digest_type == digest_type)
+		    ndigests++;
+	    }
+	    if (ndigests == 0)
+		continue;
+
+	    digest_name = digest_type_to_name(digest_type);
+	    if (ndigests > 1) {
+		if (!sudo_json_open_array(jsonc, digest_name))
+		    debug_return_bool(false);
+		/* Only use digest_name for the array key, not value. */
+		digest_name = NULL;
+	    }
+	    TAILQ_FOREACH(digest, &c->digests, entries) {
+		if (digest->digest_type != digest_type)
+		    continue;
+		value.type = JSON_STRING;
+		value.u.string = digest->digest_str;
+		if (!sudo_json_add_value(jsonc, digest_name, &value))
+		    debug_return_bool(false);
+	    }
+	    if (ndigests > 1) {
+		if (!sudo_json_close_array(jsonc))
+		    debug_return_bool(false);
+	    }
 	}
 
 	/* Command may be negated. */
