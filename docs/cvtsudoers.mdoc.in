@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 16, 2023
+.Dd April 26, 2024
 .Dt CVTSUDOERS 1
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -793,17 +793,25 @@ it will match any command.
 A boolean value that, if true, will negate any comparison performed
 with the object.
 .It sha224
-A string containing the SHA224 digest of the
-.Em command .
+One or more SHA224 digests for the
+.Em command
+in string form.
+Multiple digests of the same type are stored as an array.
 .It sha256
-A string containing the SHA256 digest of the
-.Em command .
+One or more SHA256 digests for the
+.Em command
+in string form.
+Multiple digests of the same type are stored as an array.
 .It sha384
-A string containing the SHA384 digest of the
-.Em command .
+One or more SHA384 digests for the
+.Em command
+in string form.
+Multiple digests of the same type are stored as an array.
 .It sha512
-A string containing the SHA512 digest of the
-.Em command .
+One or more SHA512 digests for the
+.Em command
+in string form.
+Multiple digests of the same type are stored as an array.
 .El
 .Pp
 The
