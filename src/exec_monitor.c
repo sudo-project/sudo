@@ -118,6 +118,8 @@ deliver_signal(struct monitor_closure *mc, int signo, bool from_parent)
 	/* NOTREACHED */
     default:
 	/* Relay signal to command. */
+	sudo_debug_printf(SUDO_DEBUG_NOTICE, "%s: killpg(%d, %d)",
+	    __func__, (int)mc->cmnd_pid, signo);
 	killpg(mc->cmnd_pid, signo);
 	break;
     }
@@ -334,11 +336,53 @@ mon_backchannel_cb(int fd, int what, void *v)
 	mc->cstat->val = n ? EIO : ECONNRESET;
 	sudo_ev_loopbreak(mc->evbase);
     } else {
-	if (cstmp.type == CMD_SIGNO) {
+	switch (cstmp.type) {
+	case CMD_IOCTL:
+	    if (cstmp.val != TIOCNOTTY) {
+		sudo_warnx(U_("unexpected ioctl on backchannel: %d"),
+		    cstmp.val);
+	    } else if (io_fds[SFD_FOLLOWER] != -1) {
+		int result, ttyfd;
+
+		/*
+		 * Parent asks us to revoke the terminal when the
+		 * user's terminal goes away.  Doing this in the
+		 * monitor allows the foreground command to receive
+		 * SIGHUP before the terminal is revoked.
+		 */
+		result = ioctl(io_fds[SFD_FOLLOWER], TIOCNOTTY, NULL);
+		if (result == -1) {
+		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+			"%s: unable to revoke follower pty", __func__);
+		    ttyfd = open(_PATH_TTY, O_RDWR);
+		    if (ttyfd != -1) {
+			result = ioctl(ttyfd, TIOCNOTTY, NULL);
+			if (result == -1) {
+			    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+				"%s: unable to revoke controlling tty",
+				__func__);
+			}
+			close(ttyfd);
+		    } else {
+			sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+			    "%s: unable to open %s", __func__, _PATH_TTY);
+		    }
+		}
+		if (result == 0) {
+		    sudo_debug_printf(SUDO_DEBUG_INFO,
+			"%s: revoked controlling tty for session", __func__);
+		}
+		/* Now tell the parent to close the pty leader. */
+		send_status(fd, &cstmp);
+	    }
+	    break;
+	case CMD_SIGNO:
 	    deliver_signal(mc, cstmp.val, true);
-	} else {
+	    break;
+	default:
 	    sudo_warnx(U_("unexpected reply type on backchannel: %d"),
 		cstmp.type);
+	    break;
 	}
     }
     debug_return;

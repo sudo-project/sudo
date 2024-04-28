@@ -61,6 +61,7 @@ static struct exec_closure pty_ec;
 
 static void sync_ttysize(struct exec_closure *ec);
 static void schedule_signal(struct exec_closure *ec, int signo);
+static void send_command_status(struct exec_closure *ec, int type, int val);
 
 /*
  * Allocate a pty if /dev/tty is a tty.
@@ -383,8 +384,18 @@ read_callback(int fd, int what, void *v)
 	    ev_free_by_fd(evbase, fd);
 	    /* If writer already consumed the buffer, close it too. */
 	    if (iob->wevent != NULL && iob->off == iob->len) {
-		safe_close(sudo_ev_get_fd(iob->wevent));
-		ev_free_by_fd(evbase, sudo_ev_get_fd(iob->wevent));
+		/*
+		 * Don't close the pty leader, it will invalidate the pty.
+		 * We ask the monitor to revoke the pty nicely using TIOCNOTTY. 
+		 */
+		const int wfd = sudo_ev_get_fd(iob->wevent);
+		if (wfd == io_fds[SFD_LEADER]) {
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE, "user's tty revoked");
+		    send_command_status(iob->ec, CMD_IOCTL, TIOCNOTTY);
+		} else {
+		    safe_close(wfd);
+		}
+		ev_free_by_fd(evbase, wfd);
 		iob->off = iob->len = 0;
 	    }
 	    break;
@@ -461,8 +472,18 @@ write_callback(int fd, int what, void *v)
 		iob->len - iob->off, fd);
 	    /* Close reader if there is one. */
 	    if (iob->revent != NULL) {
-		safe_close(sudo_ev_get_fd(iob->revent));
-		ev_free_by_fd(evbase, sudo_ev_get_fd(iob->revent));
+		/*
+		 * Don't close the pty leader, it will invalidate the pty.
+		 * We ask the monitor to revoke the pty nicely using TIOCNOTTY. 
+		 */
+		const int rfd = sudo_ev_get_fd(iob->revent);
+		if (rfd == io_fds[SFD_LEADER]) {
+		    sudo_debug_printf(SUDO_DEBUG_NOTICE, "user's tty revoked");
+		    send_command_status(iob->ec, CMD_IOCTL, TIOCNOTTY);
+		} else {
+		    safe_close(rfd);
+		}
+		ev_free_by_fd(evbase, rfd);
 	    }
 	    safe_close(fd);
 	    ev_free_by_fd(evbase, fd);
@@ -656,6 +677,28 @@ backchannel_cb(int fd, int what, void *v)
     case sizeof(cstat):
 	/* Check command status. */
 	switch (cstat.type) {
+	case CMD_ERRNO:
+	    /* Monitor was unable to execute command or broken pipe. */
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "errno from monitor: %s",
+		strerror(cstat.val));
+	    sudo_ev_loopbreak(ec->evbase);
+	    *ec->cstat = cstat;
+	    break;
+	case CMD_IOCTL:
+	    if (cstat.val != TIOCNOTTY) {
+		sudo_warnx(U_("unexpected ioctl on backchannel: %d"),
+		    cstat.val);
+	    } else if (io_fds[SFD_LEADER] != -1) {
+		/*
+		 * Monitor requests that we revoke the user's terminal.
+		 * This must happen after the monitor has used TIOCNOTTY
+		 * to invalidate the session and gracefully kill the
+		 * controlling terminal's process group.
+		 */
+		close(io_fds[SFD_LEADER]);
+		io_fds[SFD_LEADER] = -1;
+	    }
+	    break;
 	case CMD_PID:
 	    ec->cmnd_pid = cstat.val;
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d",
@@ -692,13 +735,6 @@ backchannel_cb(int fd, int what, void *v)
 		sudo_ev_loopexit(ec->evbase);
 		*ec->cstat = cstat;
 	    }
-	    break;
-	case CMD_ERRNO:
-	    /* Monitor was unable to execute command or broken pipe. */
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "errno from monitor: %s",
-		strerror(cstat.val));
-	    sudo_ev_loopbreak(ec->evbase);
-	    *ec->cstat = cstat;
 	    break;
 	}
 	/* Keep reading command status messages until EAGAIN or EOF. */
@@ -1382,7 +1418,7 @@ exec_pty(struct command_details *details,
 	if (sudo_ev_dispatch(ec->evbase) == -1)
 	    sudo_warn("%s", U_("error in event loop"));
 	if (sudo_ev_got_break(ec->evbase)) {
-	    /* error from callback or monitor died */
+	    /* error from callback */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR, "event loop exited prematurely");
 	    /* XXX: no good way to know if we should terminate the command. */
 	    if (cstat->val == CMD_INVALID && ec->cmnd_pid != -1) {
