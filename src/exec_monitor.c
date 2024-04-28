@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -310,6 +310,48 @@ mon_errsock_cb(int fd, int what, void *v)
     debug_return;
 }
 
+/*
+ * Called when the user's terminal has gone away but before our pty is
+ * actually revoked.  We simulate the effect of ioctl(TIOCNOTTY) on Linux
+ * by sending SIGHUP and SIGCONT to the foreground process group.
+ */
+static void
+mon_handle_revoke(int fd, pid_t cmnd_pid, struct command_status *cstat)
+{
+    debug_decl(mon_handle_revoke, SUDO_DEBUG_EXEC);
+
+    /*
+     * Signal the foreground process group and the command's process group
+     * (if different).  We must do this before the pty is revoked be the
+     * main sudo process so we can determine the foreground process group.
+     * Otherwise, if the foreground process group is different from the
+     * command's process group it will not be signaled.
+     */
+    if (io_fds[SFD_FOLLOWER] != -1) {
+	const pid_t pgrp = tcgetpgrp(io_fds[SFD_FOLLOWER]);
+	if (pgrp != -1 && pgrp != cmnd_pid) {
+	    sudo_debug_printf(SUDO_DEBUG_NOTICE, "%s: killpg(%d, SIGHUP)",
+		__func__, pgrp);
+	    killpg(pgrp, SIGHUP);
+	    sudo_debug_printf(SUDO_DEBUG_NOTICE, "%s: killpg(%d, SIGCONT)",
+		__func__, pgrp);
+	    killpg(pgrp, SIGCONT);
+	}
+    }
+    sudo_debug_printf(SUDO_DEBUG_NOTICE, "%s: killpg(%d, SIGHUP)",
+	__func__, cmnd_pid);
+    killpg(cmnd_pid, SIGHUP);
+    sudo_debug_printf(SUDO_DEBUG_NOTICE, "%s: killpg(%d, SIGCONT)",
+	__func__, cmnd_pid);
+    killpg(cmnd_pid, SIGCONT);
+
+    /*
+     * Now that the running command as been signaled, tell the
+     * parent it is OK to close the pty leader, revoking the pty.
+     */
+    send_status(fd, cstat);
+}
+
 static void
 mon_backchannel_cb(int fd, int what, void *v)
 {
@@ -337,44 +379,8 @@ mon_backchannel_cb(int fd, int what, void *v)
 	sudo_ev_loopbreak(mc->evbase);
     } else {
 	switch (cstmp.type) {
-	case CMD_IOCTL:
-	    if (cstmp.val != TIOCNOTTY) {
-		sudo_warnx(U_("unexpected ioctl on backchannel: %d"),
-		    cstmp.val);
-	    } else if (io_fds[SFD_FOLLOWER] != -1) {
-		int result, ttyfd;
-
-		/*
-		 * Parent asks us to revoke the terminal when the
-		 * user's terminal goes away.  Doing this in the
-		 * monitor allows the foreground command to receive
-		 * SIGHUP before the terminal is revoked.
-		 */
-		result = ioctl(io_fds[SFD_FOLLOWER], TIOCNOTTY, NULL);
-		if (result == -1) {
-		    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-			"%s: unable to revoke follower pty", __func__);
-		    ttyfd = open(_PATH_TTY, O_RDWR);
-		    if (ttyfd != -1) {
-			result = ioctl(ttyfd, TIOCNOTTY, NULL);
-			if (result == -1) {
-			    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-				"%s: unable to revoke controlling tty",
-				__func__);
-			}
-			close(ttyfd);
-		    } else {
-			sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
-			    "%s: unable to open %s", __func__, _PATH_TTY);
-		    }
-		}
-		if (result == 0) {
-		    sudo_debug_printf(SUDO_DEBUG_INFO,
-			"%s: revoked controlling tty for session", __func__);
-		}
-		/* Now tell the parent to close the pty leader. */
-		send_status(fd, &cstmp);
-	    }
+	case CMD_REVOKE:
+	    mon_handle_revoke(fd, mc->cmnd_pid, &cstmp);
 	    break;
 	case CMD_SIGNO:
 	    deliver_signal(mc, cstmp.val, true);

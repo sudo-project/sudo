@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -385,13 +385,13 @@ read_callback(int fd, int what, void *v)
 	    /* If writer already consumed the buffer, close it too. */
 	    if (iob->wevent != NULL && iob->off == iob->len) {
 		/*
-		 * Don't close the pty leader, it will invalidate the pty.
-		 * We ask the monitor to revoke the pty nicely using TIOCNOTTY. 
+		 * Don't close the pty leader yet, it will invalidate the pty.
+		 * We ask the monitor to signal the running process first.
 		 */
 		const int wfd = sudo_ev_get_fd(iob->wevent);
 		if (wfd == io_fds[SFD_LEADER]) {
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE, "user's tty revoked");
-		    send_command_status(iob->ec, CMD_IOCTL, TIOCNOTTY);
+		    send_command_status(iob->ec, CMD_REVOKE, 0);
 		} else {
 		    safe_close(wfd);
 		}
@@ -474,12 +474,12 @@ write_callback(int fd, int what, void *v)
 	    if (iob->revent != NULL) {
 		/*
 		 * Don't close the pty leader, it will invalidate the pty.
-		 * We ask the monitor to revoke the pty nicely using TIOCNOTTY. 
+		 * We ask the monitor to signal the running process first.
 		 */
 		const int rfd = sudo_ev_get_fd(iob->revent);
 		if (rfd == io_fds[SFD_LEADER]) {
 		    sudo_debug_printf(SUDO_DEBUG_NOTICE, "user's tty revoked");
-		    send_command_status(iob->ec, CMD_IOCTL, TIOCNOTTY);
+		    send_command_status(iob->ec, CMD_REVOKE, 0);
 		} else {
 		    safe_close(rfd);
 		}
@@ -684,15 +684,11 @@ backchannel_cb(int fd, int what, void *v)
 	    sudo_ev_loopbreak(ec->evbase);
 	    *ec->cstat = cstat;
 	    break;
-	case CMD_IOCTL:
-	    if (cstat.val != TIOCNOTTY) {
-		sudo_warnx(U_("unexpected ioctl on backchannel: %d"),
-		    cstat.val);
-	    } else if (io_fds[SFD_LEADER] != -1) {
+	case CMD_REVOKE:
+	    if (io_fds[SFD_LEADER] != -1) {
 		/*
 		 * Monitor requests that we revoke the user's terminal.
-		 * This must happen after the monitor has used TIOCNOTTY
-		 * to invalidate the session and gracefully kill the
+		 * This must happen after the monitor has signaled the
 		 * controlling terminal's process group.
 		 */
 		close(io_fds[SFD_LEADER]);
@@ -855,6 +851,15 @@ signal_cb_pty(int signo, int what, void *v)
     case SIGWINCH:
 	sync_ttysize(ec);
 	break;
+    case SIGHUP:
+	/*
+	 * Avoid forwarding SIGHUP sent by the kernel, it probably means
+	 * that the user's terminal was revoked.  When we detect that the
+	 * terminal has been revoked, the monitor will send SIGHUP itself.
+	 */
+	if (!USER_SIGNALED(sc->siginfo))
+	    break;
+	FALLTHROUGH;
     default:
 	/*
 	 * Do not forward signals sent by the command itself or a member of the
