@@ -312,42 +312,35 @@ mon_errsock_cb(int fd, int what, void *v)
 
 /*
  * Called when the user's terminal has gone away but before our pty is
- * actually revoked.  We simulate the effect of ioctl(TIOCNOTTY) on Linux
- * by sending SIGHUP and SIGCONT to the foreground process group.
+ * actually revoked.  We simulate the effect of the session leader
+ * (sudo) exiting by sending SIGHUP to the foreground process group.
+ * The monitor process will not actually exit until the command exits.
  */
 static void
-mon_handle_revoke(int fd, pid_t cmnd_pid, struct command_status *cstat)
+mon_handle_revoke(int fd, pid_t pgrp, struct command_status *cstat)
 {
     debug_decl(mon_handle_revoke, SUDO_DEBUG_EXEC);
 
     /*
-     * Signal the foreground process group and the command's process group
-     * (if different).  We must do this before the pty is revoked be the
-     * main sudo process so we can determine the foreground process group.
+     * Signal the foreground process group (or the command's process group
+     * if no pty).  We must do this before the pty is revoked by the main
+     * sudo process so we can determine the foreground process group.
      * Otherwise, if the foreground process group is different from the
-     * command's process group it will not be signaled.
+     * command's process group, it will not be signaled.  This fixes a
+     * problem on Linux with, e.g. "sudo su" where su(1) blocks SIGHUP.
      */
     if (io_fds[SFD_FOLLOWER] != -1) {
-	const pid_t pgrp = tcgetpgrp(io_fds[SFD_FOLLOWER]);
-	if (pgrp != -1 && pgrp != cmnd_pid) {
-	    sudo_debug_printf(SUDO_DEBUG_NOTICE, "%s: killpg(%d, SIGHUP)",
-		__func__, pgrp);
-	    killpg(pgrp, SIGHUP);
-	    sudo_debug_printf(SUDO_DEBUG_NOTICE, "%s: killpg(%d, SIGCONT)",
-		__func__, pgrp);
-	    killpg(pgrp, SIGCONT);
-	}
+	const pid_t tcpgrp = tcgetpgrp(io_fds[SFD_FOLLOWER]);
+	if (tcpgrp != -1)
+	    pgrp = tcpgrp;
     }
     sudo_debug_printf(SUDO_DEBUG_NOTICE, "%s: killpg(%d, SIGHUP)",
-	__func__, cmnd_pid);
-    killpg(cmnd_pid, SIGHUP);
-    sudo_debug_printf(SUDO_DEBUG_NOTICE, "%s: killpg(%d, SIGCONT)",
-	__func__, cmnd_pid);
-    killpg(cmnd_pid, SIGCONT);
+	__func__, pgrp);
+    killpg(pgrp, SIGHUP);
 
     /*
-     * Now that the running command as been signaled, tell the
-     * parent it is OK to close the pty leader, revoking the pty.
+     * Now that the foreground process as been signaled, send the
+     * parent CMD_REVOKE to close the pty leader, revoking the pty.
      */
     send_status(fd, cstat);
 }
