@@ -253,7 +253,7 @@ If you enter '.', the field will be left blank.
 Country Name (2 letter code) [AU]:US
 State or Province Name (full name) [Some-State]:Colorado
 Locality Name (eg, city) []:
-Organization Name (eg, company) [Internet Widgits Pty Ltd]:sudo
+Organization Name (eg, company) [Internet Widgets Pty Ltd]:sudo
 Organizational Unit Name (eg, section) []:sudo Certificate Authority
 Common Name (e.g., server FQDN or YOUR name) []:sudo Root CA
 Email Address []:
@@ -302,7 +302,7 @@ If you enter '.', the field will be left blank.
 Country Name (2 letter code) [AU]:US
 State or Province Name (full name) [Some-State]:Colorado
 Locality Name (eg, city) []:
-Organization Name (eg, company) [Internet Widgits Pty Ltd]:sudo
+Organization Name (eg, company) [Internet Widgets Pty Ltd]:sudo
 Organizational Unit Name (eg, section) []:sudo log server
 Common Name (e.g., server FQDN or YOUR name) []:logserver.example.com
 Email Address []:

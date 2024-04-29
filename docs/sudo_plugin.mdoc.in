@@ -1399,7 +1399,7 @@ front-end to determine which elements of the
 vector are files to be edited.
 The
 .Ql --
-element must immediately precede the first file to be editied.
+element must immediately precede the first file to be edited.
 If
 .Em sudoedit_nfiles
 is not specified, the

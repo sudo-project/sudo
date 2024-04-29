@@ -333,7 +333,7 @@ role_to_sudoers(struct sudoers_parse_tree *parse_tree, struct sudo_role *role,
      */
 
     if (reuse_userspec) {
-	/* Re-use the previous userspec */
+	/* Reuse the previous userspec */
 	us = TAILQ_LAST(&parse_tree->userspecs, userspec_list);
     } else {
 	/* Allocate a new userspec and fill in the user list. */
@@ -388,7 +388,7 @@ role_to_sudoers(struct sudoers_parse_tree *parse_tree, struct sudo_role *role,
     if (role->cn != NULL) {
 	struct sudoers_comment *comment = NULL;
 	if (reuse_userspec) {
-	    /* Try to re-use comment too. */
+	    /* Try to reuse comment too. */
 	    STAILQ_FOREACH(comment, &us->comments, entries) {
 		if (strncasecmp(comment->str, "sudoRole ", 9) == 0) {
 		    char *tmpstr;

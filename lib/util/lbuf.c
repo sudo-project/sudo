@@ -474,7 +474,7 @@ sudo_lbuf_print_v1(struct sudo_lbuf *lbuf)
     }
 
 done:
-    lbuf->len = 0;		/* reset the buffer for re-use. */
+    lbuf->len = 0;		/* reset the buffer for reuse. */
     lbuf->error = 0;
 
     debug_return;

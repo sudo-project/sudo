@@ -4186,7 +4186,7 @@ it will
 .Dq roll over
 to zero, after which
 .Nm
-will truncate and re-use any existing I/O log path names.
+will truncate and reuse any existing I/O log path names.
 .Pp
 This setting is only supported by version 1.8.7 or higher.
 .It passwd_tries
@@ -6353,7 +6353,7 @@ Once the I/O log sequence number reaches
 .Em maxseq ,
 it will be reset to zero and
 .Nm
-will truncate and re-use any existing I/O logs.
+will truncate and reuse any existing I/O logs.
 .Sh FILES
 .Bl -tag -width 24n
 .It Pa @sysconfdir@/sudo.conf
@@ -7333,7 +7333,7 @@ If no terminal is present or the
 option is set to
 .Dq ppid ,
 the start time of the parent process is used instead.
-In most cases this will prevent a time stamp record from being re-used
+In most cases this will prevent a time stamp record from being reused
 without the user entering a password when logging out and back in again.
 .Sh DEBUGGING
 Versions 1.8.4 and higher of the
