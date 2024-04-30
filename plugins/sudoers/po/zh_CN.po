@@ -2905,7 +2905,7 @@ msgstr "命令禁止使用"
 #: plugins/sudoers/logging.c:315
 #, c-format
 msgid "%s is not in the sudoers file.\n"
-msgstr "%s 不是 sudoers 文件。\n"
+msgstr "%s 不在 sudoers 文件中。\n"
 
 #: plugins/sudoers/logging.c:318
 #, c-format
