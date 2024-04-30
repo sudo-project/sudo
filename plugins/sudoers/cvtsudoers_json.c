@@ -693,6 +693,7 @@ print_cmndspec_json(struct json_container *jsonc,
 {
     char timebuf[sizeof("20120727121554Z")];
     struct cmndspec *next = *nextp;
+    bool has_options = false;
     struct json_value value;
     struct defaults *def;
     struct member *m;
@@ -731,9 +732,22 @@ print_cmndspec_json(struct json_container *jsonc,
     }
 
     /* Print options and tags */
-    if (cs->timeout > 0 || cs->notbefore != UNSPEC || cs->notafter != UNSPEC ||
-	cs->runchroot != NULL || cs->runcwd != NULL || TAGS_SET(cs->tags) ||
-	!TAILQ_EMPTY(options)) {
+    has_options = TAGS_SET(cs->tags) || !TAILQ_EMPTY(options) ||
+	cs->timeout > 0 || cs->notbefore != UNSPEC || cs->notafter != UNSPEC ||
+	cs->runchroot != NULL || cs->runcwd != NULL;
+#ifdef HAVE_SELINUX
+    if (cs->role != NULL && cs->type != NULL)
+	has_options = true;
+#endif /* HAVE_SELINUX */
+#ifdef HAVE_APPARMOR
+    if (cs->apparmor_profile != NULL)
+	has_options = true;
+#endif /* HAVE_APPARMOR */
+#ifdef HAVE_PRIV_SET
+    if (cs->privs != NULL || cs->limitprivs != NULL)
+	has_options = true;
+#endif /* HAVE_PRIV_SET */
+    if (has_options) {
 	struct cmndtag tag = cs->tags;
 
 	if (!sudo_json_open_array(jsonc, "Options"))
@@ -859,60 +873,42 @@ print_cmndspec_json(struct json_container *jsonc,
 		    goto oom;
 	    }
 	}
-	if (!sudo_json_close_array(jsonc))
-	    goto oom;
-    }
-
 #ifdef HAVE_SELINUX
-    /* Print SELinux role/type */
-    if (cs->role != NULL && cs->type != NULL) {
-	if (!sudo_json_open_array(jsonc, "SELinux_Spec"))
-	    goto oom;
-	value.type = JSON_STRING;
-	value.u.string = cs->role;
-	if (!sudo_json_add_value(jsonc, "role", &value))
-	    goto oom;
-	value.u.string = cs->type;
-	if (!sudo_json_add_value(jsonc, "type", &value))
-	    goto oom;
-	if (!sudo_json_close_array(jsonc))
-	    goto oom;
-    }
+	if (cs->role != NULL && cs->type != NULL) {
+	    value.type = JSON_STRING;
+	    value.u.string = cs->role;
+	    if (!sudo_json_add_value_as_object(jsonc, "role", &value))
+		goto oom;
+	    value.u.string = cs->type;
+	    if (!sudo_json_add_value_as_object(jsonc, "type", &value))
+		goto oom;
+	}
 #endif /* HAVE_SELINUX */
-
 #ifdef HAVE_APPARMOR
-    if (cs->apparmor_profile != NULL) {
-	if (!sudo_json_open_array(jsonc, "AppArmor_Spec"))
-	    goto oom;
-	value.type = JSON_STRING;
-	value.u.string = cs->apparmor_profile;
-	if (!sudo_json_add_value(jsonc, "apparmor_profile", &value))
-	    goto oom;
-	if (!sudo_json_close_array(jsonc))
-	    goto oom;
-    }
+	if (cs->apparmor_profile != NULL) {
+	    value.type = JSON_STRING;
+	    value.u.string = cs->apparmor_profile;
+	    if (!sudo_json_add_value_as_object(jsonc, "apparmor_profile", &value))
+		goto oom;
+	}
 #endif /* HAVE_APPARMOR */
-
 #ifdef HAVE_PRIV_SET
-    /* Print Solaris privs/limitprivs */
-    if (cs->privs != NULL || cs->limitprivs != NULL) {
-	if (!sudo_json_open_array(jsonc, "Solaris_Priv_Spec"))
-	    goto oom;
-	value.type = JSON_STRING;
 	if (cs->privs != NULL) {
+	    value.type = JSON_STRING;
 	    value.u.string = cs->privs;
-	    if (!sudo_json_add_value(jsonc, "privs", &value))
+	    if (!sudo_json_add_value_as_object(jsonc, "privs", &value))
 		goto oom;
 	}
 	if (cs->limitprivs != NULL) {
+	    value.type = JSON_STRING;
 	    value.u.string = cs->limitprivs;
-	    if (!sudo_json_add_value(jsonc, "limitprivs", &value))
+	    if (!sudo_json_add_value_as_object(jsonc, "limitprivs", &value))
 		goto oom;
 	}
+#endif /* HAVE_PRIV_SET */
 	if (!sudo_json_close_array(jsonc))
 	    goto oom;
     }
-#endif /* HAVE_PRIV_SET */
 
     /*
      * Merge adjacent commands with matching tags, runas, SELinux
