@@ -335,7 +335,7 @@ mon_handle_revoke(int fd, pid_t pgrp, struct command_status *cstat)
 	    pgrp = tcpgrp;
     }
     sudo_debug_printf(SUDO_DEBUG_NOTICE, "%s: killpg(%d, SIGHUP)",
-	__func__, pgrp);
+	__func__, (int)pgrp);
     killpg(pgrp, SIGHUP);
 
     /*
