@@ -704,6 +704,7 @@ host_os
 host_vendor
 host_cpu
 host
+JQ
 LDFLAGS_FOR_BUILD
 CPPFLAGS_FOR_BUILD
 CFLAGS_FOR_BUILD
@@ -8803,6 +8804,55 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
+
+for ac_prog in jq
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+printf %s "checking for $ac_word... " >&6; }
+if test ${ac_cv_prog_JQ+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) if test -n "$JQ"; then
+  ac_cv_prog_JQ="$JQ" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  case $as_dir in #(((
+    '') as_dir=./ ;;
+    */) ;;
+    *) as_dir=$as_dir/ ;;
+  esac
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
+    ac_cv_prog_JQ="$ac_prog"
+    printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi ;;
+esac
+fi
+JQ=$ac_cv_prog_JQ
+if test -n "$JQ"; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $JQ" >&5
+printf "%s\n" "$JQ" >&6; }
+else
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+fi
+
+
+  test -n "$JQ" && break
+done
+test -n "$JQ" || JQ=":"
 
 
 if test "x$ac_cv_prog_cc_c89" = "xno"

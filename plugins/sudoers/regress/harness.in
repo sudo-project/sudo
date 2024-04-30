@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2022 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2022, 2024 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -20,6 +20,7 @@
 srcdir="@abs_srcdir@"
 builddir="@abs_builddir@"
 SHELL=@SHELL@
+JQ=@JQ@
 verbose=0
 rval=0
 ntests=0
@@ -97,7 +98,11 @@ sudoers)
 	$builddir/cvtsudoers -c "" -f json $in >$json 2>/dev/null || true
 	ntests=`expr $ntests + 1`
 	if cmp $json $json_ok >/dev/null; then
-	    if [ $verbose -eq 1 ]; then
+	    $JQ empty < $json
+	    if [ $? -ne 0 ]; then
+		errors=`expr $errors + 1`
+		echo "$group/$test (json): FAIL"
+	    elif [ $verbose -eq 1 ]; then
 		echo "$group/$test (json): OK"
 	    fi
 	else

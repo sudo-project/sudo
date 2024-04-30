@@ -1583,6 +1583,7 @@ AS_IF([test X"$AR" = X"false"], [
     AC_MSG_ERROR([the "ar" utility is required to build sudo])
 ])
 AX_PROG_CC_FOR_BUILD
+AC_CHECK_PROGS(JQ, jq, :)
 
 AS_IF([test "x$ac_cv_prog_cc_c89" = "xno"], [
     AC_MSG_ERROR([Sudo version $PACKAGE_VERSION requires an ANSI C compiler to build.])
