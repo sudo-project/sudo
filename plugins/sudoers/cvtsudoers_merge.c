@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2021-2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1008,7 +1008,6 @@ cmndspec_equivalent(struct cmndspec *cs1, struct cmndspec *cs2, bool check_negat
     } else if (cs1->runchroot != cs2->runchroot) {
 	debug_return_bool(false);
     }
-#ifdef HAVE_SELINUX
     if (cs1->role != NULL && cs2->role != NULL) {
 	if (strcmp(cs1->role, cs2->role) != 0)
 	    debug_return_bool(false);
@@ -1021,16 +1020,12 @@ cmndspec_equivalent(struct cmndspec *cs1, struct cmndspec *cs2, bool check_negat
     } else if (cs1->type != cs2->type) {
 	debug_return_bool(false);
     }
-#endif
-#ifdef HAVE_APPARMOR
     if (cs1->apparmor_profile != NULL && cs2->apparmor_profile != NULL) {
 	if (strcmp(cs1->apparmor_profile, cs2->apparmor_profile) != 0)
 	    debug_return_bool(false);
     } else if (cs1->apparmor_profile != cs2->apparmor_profile) {
 	debug_return_bool(false);
     }
-#endif
-#ifdef HAVE_PRIV_SET
     if (cs1->privs != NULL && cs2->privs != NULL) {
 	if (strcmp(cs1->privs, cs2->privs) != 0)
 	    debug_return_bool(false);
@@ -1043,7 +1038,6 @@ cmndspec_equivalent(struct cmndspec *cs1, struct cmndspec *cs2, bool check_negat
     } else if (cs1->limitprivs != cs2->limitprivs) {
 	debug_return_bool(false);
     }
-#endif
 
     debug_return_bool(true);
 }

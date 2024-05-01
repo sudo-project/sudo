@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2005, 2007-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004-2005, 2007-2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -322,7 +322,6 @@ apply_cmndspec(struct sudoers_context *ctx, struct cmndspec *cs)
     debug_decl(apply_cmndspec, SUDOERS_DEBUG_PARSER);
 
     if (cs != NULL) {
-#ifdef HAVE_SELINUX
 	/* Set role and type if not specified on command line. */
 	if (ctx->runas.role == NULL) {
 	    if (cs->role != NULL) {
@@ -358,8 +357,6 @@ apply_cmndspec(struct sudoers_context *ctx, struct cmndspec *cs)
 		    "ctx->runas.type -> %s", ctx->runas.type);
 	    }
 	}
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_APPARMOR
 	/* Set AppArmor profile, if specified */
 	if (cs->apparmor_profile != NULL) {
 	    ctx->runas.apparmor_profile = strdup(cs->apparmor_profile);
@@ -376,8 +373,6 @@ apply_cmndspec(struct sudoers_context *ctx, struct cmndspec *cs)
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"ctx->runas.apparmor_profile -> %s", ctx->runas.apparmor_profile);
 	}
-#endif
-#ifdef HAVE_PRIV_SET
 	/* Set Solaris privilege sets */
 	if (ctx->runas.privs == NULL) {
 	    if (cs->privs != NULL) {
@@ -413,7 +408,6 @@ apply_cmndspec(struct sudoers_context *ctx, struct cmndspec *cs)
 		    "ctx->runas.limitprivs -> %s", ctx->runas.limitprivs);
 	    }
 	}
-#endif /* HAVE_PRIV_SET */
 	if (cs->timeout > 0) {
 	    def_command_timeout = cs->timeout;
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,

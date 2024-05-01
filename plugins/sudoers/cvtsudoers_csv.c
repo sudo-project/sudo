@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2021-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2021-2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -574,24 +574,19 @@ print_cmndspec_csv(FILE *fp, const struct sudoers_parse_tree *parse_tree,
 	need_comma = true;
     }
 
-#ifdef HAVE_SELINUX
     /* Print SELinux role/type */
     if (cs->role != NULL && cs->type != NULL) {
 	fprintf(fp, "%srole=%s,type=%s", need_comma ? "," : "",
 	    cs->role, cs->type);
 	need_comma = true;
     }
-#endif /* HAVE_SELINUX */
 
-#ifdef HAVE_APPARMOR
     if (cs->apparmor_profile != NULL) {
 	fprintf(fp, "%sapparmor_profile=%s,", need_comma ? "," : "",
 	    cs->apparmor_profile);
 	need_comma = true;
     }
-#endif /* HAVE_APPARMOR */
 
-#ifdef HAVE_PRIV_SET
     /* Print Solaris privs/limitprivs */
     if (cs->privs != NULL || cs->limitprivs != NULL) {
 	if (cs->privs != NULL) {
@@ -603,7 +598,6 @@ print_cmndspec_csv(FILE *fp, const struct sudoers_parse_tree *parse_tree,
 	    need_comma = true;
 	}
     }
-#endif /* HAVE_PRIV_SET */
 #ifdef __clang_analyzer__
     (void)&need_comma;
 #endif
@@ -620,15 +614,9 @@ print_cmndspec_csv(FILE *fp, const struct sudoers_parse_tree *parse_tree,
 	/* XXX - TAG_SET does not account for implied SETENV */
 	last_one = next == NULL ||
 	    RUNAS_CHANGED(cs, next) || TAGS_CHANGED(cs->tags, next->tags)
-#ifdef HAVE_PRIV_SET
 	    || cs->privs != next->privs || cs->limitprivs != next->limitprivs
-#endif /* HAVE_PRIV_SET */
-#ifdef HAVE_SELINUX
 	    || cs->role != next->role || cs->type != next->type
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_APPARMOR
 	    || cs->apparmor_profile != next->apparmor_profile
-#endif /* HAVE_APPARMOR  */
 	    || cs->runchroot != next->runchroot || cs->runcwd != next->runcwd;
 
 	if (!quoted && !last_one) {

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2023-2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -73,17 +73,11 @@ sudoers_ctx_free(struct sudoers_context *ctx)
     if (ctx->runas.shost != ctx->runas.host)
 	free(ctx->runas.shost);
     free(ctx->runas.host);
-#ifdef HAVE_SELINUX
     free(ctx->runas.role);
     free(ctx->runas.type);
-#endif
-#ifdef HAVE_APPARMOR
     free(ctx->runas.apparmor_profile);
-#endif
-#ifdef HAVE_PRIV_SET
     free(ctx->runas.privs);
     free(ctx->runas.limitprivs);
-#endif
 
     /* Free dynamic contents of ctx. */
     free(ctx->source);

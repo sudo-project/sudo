@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010-2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -317,7 +317,6 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 		goto bad;
 	    continue;
 	}
-#ifdef HAVE_SELINUX
 	if (MATCHES(*cur, "selinux_role=")) {
 	    CHECK(*cur, "selinux_role=");
 	    free(ctx->runas.role);
@@ -334,8 +333,6 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 		goto oom;
 	    continue;
 	}
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_APPARMOR
 	if (MATCHES(*cur, "apparmor_profile=")) {
 	    CHECK(*cur, "apparmor_profile=");
 	    free(ctx->runas.apparmor_profile);
@@ -344,7 +341,6 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 		goto oom;
 	    continue;
 	}
-#endif /* HAVE_APPARMOR */
 #ifdef HAVE_BSD_AUTH_H
 	if (MATCHES(*cur, "bsdauth_type=")) {
 	    CHECK(*cur, "bsdauth_type=");
@@ -1040,7 +1036,6 @@ sudoers_policy_store_result(struct sudoers_context *ctx, bool accepted,
 	    goto oom;
     }
 #endif /* HAVE_LOGIN_CAP_H */
-#ifdef HAVE_SELINUX
     if (def_selinux && ctx->runas.role != NULL) {
 	if ((command_info[info_len++] = sudo_new_key_val("selinux_role", ctx->runas.role)) == NULL)
 	    goto oom;
@@ -1049,14 +1044,10 @@ sudoers_policy_store_result(struct sudoers_context *ctx, bool accepted,
 	if ((command_info[info_len++] = sudo_new_key_val("selinux_type", ctx->runas.type)) == NULL)
 	    goto oom;
     }
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_APPARMOR
-	if (ctx->runas.apparmor_profile != NULL) {
-	    if ((command_info[info_len++] = sudo_new_key_val("apparmor_profile", ctx->runas.apparmor_profile)) == NULL)
-		goto oom;
-	}
-#endif /* HAVE_APPARMOR */
-#ifdef HAVE_PRIV_SET
+    if (ctx->runas.apparmor_profile != NULL) {
+	if ((command_info[info_len++] = sudo_new_key_val("apparmor_profile", ctx->runas.apparmor_profile)) == NULL)
+	    goto oom;
+    }
     if (ctx->runas.privs != NULL) {
 	if ((command_info[info_len++] = sudo_new_key_val("runas_privs", ctx->runas.privs)) == NULL)
 	    goto oom;
@@ -1065,7 +1056,6 @@ sudoers_policy_store_result(struct sudoers_context *ctx, bool accepted,
 	if ((command_info[info_len++] = sudo_new_key_val("runas_limitprivs", ctx->runas.limitprivs)) == NULL)
 	    goto oom;
     }
-#endif /* HAVE_PRIV_SET */
 
     /* Set command start time (monotonic) for the first accepted command. */
     if (accepted && !ISSET(ctx->mode, MODE_POLICY_INTERCEPTED)) {

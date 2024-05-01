@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2018-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2018-2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -492,7 +492,6 @@ print_cmndspec_ldif(FILE *fp, const struct sudoers_parse_tree *parse_tree,
 	}
     }
 
-#ifdef HAVE_SELINUX
     /* Print SELinux role/type */
     if (cs->role != NULL && cs->type != NULL) {
 	if (!printf_attribute_ldif(fp, "sudoOption", "role=%s", cs->role) ||
@@ -500,9 +499,7 @@ print_cmndspec_ldif(FILE *fp, const struct sudoers_parse_tree *parse_tree,
 	    debug_return_bool(false);
 	}
     }
-#endif /* HAVE_SELINUX */
 
-#ifdef HAVE_APPARMOR
     /* Print AppArmor profile */
     if (cs->apparmor_profile != NULL) {
 	if (!printf_attribute_ldif(fp, "sudoOption", "apparmor_profile=%s",
@@ -510,9 +507,7 @@ print_cmndspec_ldif(FILE *fp, const struct sudoers_parse_tree *parse_tree,
 	    debug_return_bool(false);
 	}
     }
-#endif /* HAVE_APPARMOR */
 
-#ifdef HAVE_PRIV_SET
     /* Print Solaris privs/limitprivs */
     if (cs->privs != NULL || cs->limitprivs != NULL) {
 	if (cs->privs != NULL) {
@@ -528,7 +523,6 @@ print_cmndspec_ldif(FILE *fp, const struct sudoers_parse_tree *parse_tree,
 	    }
 	}
     }
-#endif /* HAVE_PRIV_SET */
 
     /*
      * Merge adjacent commands with matching tags, runas, SELinux
@@ -540,12 +534,8 @@ print_cmndspec_ldif(FILE *fp, const struct sudoers_parse_tree *parse_tree,
 	/* XXX - TAG_SET does not account for implied SETENV */
 	last_one = next == NULL ||
 	    RUNAS_CHANGED(cs, next) || TAGS_CHANGED(cs->tags, next->tags)
-#ifdef HAVE_PRIV_SET
 	    || cs->privs != next->privs || cs->limitprivs != next->limitprivs
-#endif /* HAVE_PRIV_SET */
-#ifdef HAVE_SELINUX
 	    || cs->role != next->role || cs->type != next->type
-#endif /* HAVE_SELINUX */
 	    || cs->runchroot != next->runchroot || cs->runcwd != next->runcwd;
 
 	if (!print_member_ldif(fp, parse_tree, cs->cmnd->name, cs->cmnd->type,

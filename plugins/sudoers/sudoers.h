@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996, 1998-2005, 2007-2023
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2024
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -174,17 +174,11 @@ struct sudoers_runas_context {
     char *host;
     char *shost;
     char *user;
-#ifdef HAVE_SELINUX
     char *role;
     char *type;
-#endif
-#ifdef HAVE_APPARMOR
     char *apparmor_profile;
-#endif
-#ifdef HAVE_PRIV_SET
     char *privs;
     char *limitprivs;
-#endif
 };
 
 /*

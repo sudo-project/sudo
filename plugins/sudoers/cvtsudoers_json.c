@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2013-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -667,15 +667,9 @@ cmndspec_continues(struct cmndspec *cs, struct cmndspec *next)
 {
     bool ret = next != NULL &&
 	!RUNAS_CHANGED(cs, next) && !TAGS_CHANGED(cs->tags, next->tags)
-#ifdef HAVE_PRIV_SET
 	&& cs->privs == next->privs && cs->limitprivs == next->limitprivs
-#endif /* HAVE_PRIV_SET */
-#ifdef HAVE_SELINUX
 	&& cs->role == next->role && cs->type == next->type
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_APPARMOR
 	&& cs->apparmor_profile == next->apparmor_profile
-#endif /* HAVE_APPARMOR */
 	&& cs->runchroot == next->runchroot && cs->runcwd == next->runcwd;
     return ret;
 }
@@ -734,19 +728,9 @@ print_cmndspec_json(struct json_container *jsonc,
     /* Print options and tags */
     has_options = TAGS_SET(cs->tags) || !TAILQ_EMPTY(options) ||
 	cs->timeout > 0 || cs->notbefore != UNSPEC || cs->notafter != UNSPEC ||
-	cs->runchroot != NULL || cs->runcwd != NULL;
-#ifdef HAVE_SELINUX
-    if (cs->role != NULL && cs->type != NULL)
-	has_options = true;
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_APPARMOR
-    if (cs->apparmor_profile != NULL)
-	has_options = true;
-#endif /* HAVE_APPARMOR */
-#ifdef HAVE_PRIV_SET
-    if (cs->privs != NULL || cs->limitprivs != NULL)
-	has_options = true;
-#endif /* HAVE_PRIV_SET */
+	cs->runchroot != NULL || cs->runcwd != NULL ||
+	(cs->role != NULL && cs->type != NULL) || cs->apparmor_profile != NULL
+	|| cs->privs != NULL || cs->limitprivs != NULL;
     if (has_options) {
 	struct cmndtag tag = cs->tags;
 
@@ -873,7 +857,6 @@ print_cmndspec_json(struct json_container *jsonc,
 		    goto oom;
 	    }
 	}
-#ifdef HAVE_SELINUX
 	if (cs->role != NULL && cs->type != NULL) {
 	    value.type = JSON_STRING;
 	    value.u.string = cs->role;
@@ -883,16 +866,12 @@ print_cmndspec_json(struct json_container *jsonc,
 	    if (!sudo_json_add_value_as_object(jsonc, "type", &value))
 		goto oom;
 	}
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_APPARMOR
 	if (cs->apparmor_profile != NULL) {
 	    value.type = JSON_STRING;
 	    value.u.string = cs->apparmor_profile;
 	    if (!sudo_json_add_value_as_object(jsonc, "apparmor_profile", &value))
 		goto oom;
 	}
-#endif /* HAVE_APPARMOR */
-#ifdef HAVE_PRIV_SET
 	if (cs->privs != NULL) {
 	    value.type = JSON_STRING;
 	    value.u.string = cs->privs;
@@ -905,7 +884,6 @@ print_cmndspec_json(struct json_container *jsonc,
 	    if (!sudo_json_add_value_as_object(jsonc, "limitprivs", &value))
 		goto oom;
 	}
-#endif /* HAVE_PRIV_SET */
 	if (!sudo_json_close_array(jsonc))
 	    goto oom;
     }

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2000, 2004, 2007-2023
+ * Copyright (c) 1996, 1998-2000, 2004, 2007-2024
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -159,15 +159,9 @@ struct command_options {
     int timeout;			/* command timeout */
     char *runcwd;			/* working directory */
     char *runchroot;			/* root directory */
-#ifdef HAVE_SELINUX
     char *role, *type;			/* SELinux role and type */
-#endif
-#ifdef HAVE_APPARMOR
     char *apparmor_profile;		/* AppArmor profile */
-#endif
-#ifdef HAVE_PRIV_SET
     char *privs, *limitprivs;		/* Solaris privilege sets */
-#endif
 };
 
 /*
@@ -246,15 +240,9 @@ struct cmndspec {
     time_t notafter;			/* time restriction */
     char *runcwd;			/* working directory */
     char *runchroot;			/* root directory */
-#ifdef HAVE_SELINUX
     char *role, *type;			/* SELinux role and type */
-#endif
-#ifdef HAVE_APPARMOR
     char *apparmor_profile;		/* AppArmor profile */
-#endif
-#ifdef HAVE_PRIV_SET
     char *privs, *limitprivs;		/* Solaris privilege sets */
-#endif
 };
 
 /*
