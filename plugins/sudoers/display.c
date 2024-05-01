@@ -211,16 +211,22 @@ display_cmndspec_long(const struct sudoers_parse_tree *parse_tree,
 	} else {
 	    lbuf->len = olen;	/* no options */
 	}
+#ifdef HAVE_APPARMOR
+	if (cs->apparmor_profile != NULL) {
+	    sudo_lbuf_append(lbuf, "    ApparmorProfile: %s\n",
+		cs->apparmor_profile);
+	}
+#endif /* HAVE_APPARMOR */
 #ifdef HAVE_PRIV_SET
-	if (cs->privs)
+	if (cs->privs != NULL)
 	    sudo_lbuf_append(lbuf, "    Privs: %s\n", cs->privs);
-	if (cs->limitprivs)
+	if (cs->limitprivs != NULL)
 	    sudo_lbuf_append(lbuf, "    Limitprivs: %s\n", cs->limitprivs);
 #endif /* HAVE_PRIV_SET */
 #ifdef HAVE_SELINUX
-	if (cs->role)
+	if (cs->role != NULL)
 	    sudo_lbuf_append(lbuf, "    Role: %s\n", cs->role);
-	if (cs->type)
+	if (cs->type != NULL)
 	    sudo_lbuf_append(lbuf, "    Type: %s\n", cs->type);
 #endif /* HAVE_SELINUX */
 	if (cs->runchroot != NULL)

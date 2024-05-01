@@ -443,6 +443,9 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 	    cmndspec->role = prev_cmndspec->role;
 	    cmndspec->type = prev_cmndspec->type;
 #endif /* HAVE_SELINUX */
+#ifdef HAVE_APPARMOR
+	    cmndspec->apparmor_profile = prev_cmndspec->apparmor_profile;
+#endif /* HAVE_APPARMOR */
 #ifdef HAVE_PRIV_SET
 	    cmndspec->privs = prev_cmndspec->privs;
 	    cmndspec->limitprivs = prev_cmndspec->limitprivs;
@@ -534,6 +537,16 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 			if ((cmndspec->type = strdup(val)) == NULL)
 			    break;
 #endif /* HAVE_SELINUX */
+#ifdef HAVE_APPARMOR
+		    } else if (strcmp(var, "apparmor_profile") == 0 && val != NULL) {
+			if (cmndspec->apparmor_profile != NULL) {
+			    free(cmndspec->apparmor_profile);
+			    sudo_warnx(U_("duplicate sudoOption: %s%s%s"), var,
+				op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
+			}
+			if ((cmndspec->apparmor_profile = strdup(val)) == NULL)
+			    break;
+#endif /* HAVE_APPARMOR */
 #ifdef HAVE_PRIV_SET
 		    } else if (strcmp(var, "privs") == 0 && val != NULL) {
 			if (cmndspec->privs != NULL) {

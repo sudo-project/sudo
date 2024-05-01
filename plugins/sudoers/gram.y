@@ -453,6 +453,11 @@ cmndspeclist	:	cmndspec
 				$3->type = prev->type;
 			    }
 #endif /* HAVE_SELINUX */
+#ifdef HAVE_APPARMOR
+			    /* propagate apparmor_profile */
+			    if ($3->apparmor_profile == NULL)
+			        $3->apparmor_profile = prev->apparmor_profile;
+#endif /* HAVE_APPARMOR */
 #ifdef HAVE_PRIV_SET
 			    /* propagate privs & limitprivs */
 			    if ($3->privs == NULL && $3->limitprivs == NULL) {
@@ -1639,6 +1644,9 @@ free_cmndspecs(struct cmndspec_list *csl)
 #ifdef HAVE_SELINUX
     char *role = NULL, *type = NULL;
 #endif /* HAVE_SELINUX */
+#ifdef HAVE_APPARMOR
+    char *apparmor_profile = NULL;
+#endif /* HAVE_APPARMOR */
 #ifdef HAVE_PRIV_SET
     char *privs = NULL, *limitprivs = NULL;
 #endif /* HAVE_PRIV_SET */
@@ -1668,6 +1676,13 @@ free_cmndspecs(struct cmndspec_list *csl)
 	    free(cs->type);
 	}
 #endif /* HAVE_SELINUX */
+#ifdef HAVE_APPARMOR
+	/* Only free the first instance of apparmor_profile. */
+	if (cs->apparmor_profile != apparmor_profile) {
+	    apparmor_profile = cs->apparmor_profile;
+	    free(cs->apparmor_profile);
+	}
+#endif /* HAVE_APPARMOR */
 #ifdef HAVE_PRIV_SET
 	/* Only free the first instance of privs/limitprivs. */
 	if (cs->privs != privs) {
