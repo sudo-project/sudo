@@ -1,0 +1,62 @@
+{
+    "User_Specs": [
+        {
+            "User_List": [
+                { "username": "user1" }
+            ],
+            "Host_List": [
+                { "hostname": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "Options": [
+                        { "setenv": true },
+                        { "role": "foo_r" },
+                        { "type": "bar_t" }
+                    ],
+                    "Commands": [
+                        { "command": "ALL" }
+                    ]
+                }
+            ]
+        },
+        {
+            "User_List": [
+                { "username": "user2" }
+            ],
+            "Host_List": [
+                { "hostname": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "Options": [
+                        { "apparmor_profile": "usr.bin.tcpdump" }
+                    ],
+                    "Commands": [
+                        { "command": "/usr/bin/tcpdump" }
+                    ]
+                }
+            ]
+        },
+        {
+            "User_List": [
+                { "username": "user3" }
+            ],
+            "Host_List": [
+                { "hostname": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "Options": [
+                        { "setenv": true },
+                        { "privs": "file_link_any,net_access,proc_exec,proc_fork,proc_info,proc_session" },
+                        { "limitprivs": "default" }
+                    ],
+                    "Commands": [
+                        { "command": "ALL" }
+                    ]
+                }
+            ]
+        }
+    ]
+}

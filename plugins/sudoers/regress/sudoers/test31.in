@@ -1,0 +1,7 @@
+# Test parsing of SELinux, AppArmor and Solaris privilege parsing.
+
+user1 ALL = ROLE=foo_r TYPE=bar_t ALL
+
+user2 ALL = APPARMOR_PROFILE=usr.bin.tcpdump /usr/bin/tcpdump
+
+user3 ALL = PRIVS="file_link_any,net_access,proc_exec,proc_fork,proc_info,proc_session" LIMITPRIVS=default ALL
