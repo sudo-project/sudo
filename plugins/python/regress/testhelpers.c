@@ -27,19 +27,19 @@ struct TestData data;
 
 /*
  * Starting with Python 3.11, backtraces may contain a line with
- * '^' characters to bring attention to the important part of the
- * line.
+ * '~' and '^' characters to bring attention to the important part
+ * of the line.
  */
 static void
 remove_underline(char *output)
 {
     char *cp, *ep;
 
-    // Remove lines that only consist of '^' and white space.
+    // Remove lines that only consist of '~', '^' and white space.
     cp = output;
     ep = output + strlen(output);
     for (;;) {
-	size_t len = strspn(cp, "^ \t");
+	size_t len = strspn(cp, "~^ \t");
 	if (len > 0 && cp[len] == '\n') {
 	    /* Prune out lines that are "underlining". */
 	    memmove(cp, cp + len + 1, (size_t)(ep - cp));
