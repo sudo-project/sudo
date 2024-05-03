@@ -1580,6 +1580,11 @@ free_cmndspec(struct cmndspec *cs, struct cmndspec_list *csl)
 	(next == NULL || cs->type != next->type)) {
 	free(cs->type);
     }
+    /* Don't free apparmor_profile that is in use by other entries. */
+    if ((prev == NULL || cs->apparmor_profile != prev->apparmor_profile) &&
+	(next == NULL || cs->apparmor_profile != next->apparmor_profile)) {
+	free(cs->apparmor_profile);
+    }
     /* Don't free privs/limitprivs that are in use by other entries. */
     if ((prev == NULL || cs->privs != prev->privs) &&
 	(next == NULL || cs->privs != next->privs)) {
