@@ -333,14 +333,6 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 		goto oom;
 	    continue;
 	}
-	if (MATCHES(*cur, "apparmor_profile=")) {
-	    CHECK(*cur, "apparmor_profile=");
-	    free(ctx->runas.apparmor_profile);
-	    ctx->runas.apparmor_profile = strdup(*cur + sizeof("apparmor_profile=") - 1);
-	    if (ctx->runas.apparmor_profile == NULL)
-		goto oom;
-	    continue;
-	}
 #ifdef HAVE_BSD_AUTH_H
 	if (MATCHES(*cur, "bsdauth_type=")) {
 	    CHECK(*cur, "bsdauth_type=");

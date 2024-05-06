@@ -105,7 +105,6 @@
 #define ARG_ASKPASS		26
 #define ARG_INTERCEPT_SETID	27
 #define ARG_INTERCEPT_PTRACE	28
-#define ARG_APPARMOR_PROFILE	29
 
 /*
  * Flags for tgetpass()
