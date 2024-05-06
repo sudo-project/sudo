@@ -367,6 +367,7 @@ apply_cmndspec(struct sudoers_context *ctx, struct cmndspec *cs)
 		debug_return_bool(false);
 	    }
 	} else {
+	    free(ctx->runas.apparmor_profile);
 	    ctx->runas.apparmor_profile = def_apparmor_profile;
 	    def_apparmor_profile = NULL;
 	}
@@ -384,6 +385,7 @@ apply_cmndspec(struct sudoers_context *ctx, struct cmndspec *cs)
 		debug_return_bool(false);
 	    }
 	} else {
+	    free(ctx->runas.privs);
 	    ctx->runas.privs = def_privs;
 	    def_privs = NULL;
 	}
@@ -400,6 +402,7 @@ apply_cmndspec(struct sudoers_context *ctx, struct cmndspec *cs)
 		debug_return_bool(false);
 	    }
 	} else {
+	    free(ctx->runas.limitprivs);
 	    ctx->runas.limitprivs = def_limitprivs;
 	    def_limitprivs = NULL;
 	}
