@@ -1259,15 +1259,24 @@ verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
     X509 *peer_cert;
     debug_decl(verify_peer_identity, SUDO_DEBUG_UTIL);
 
+    current_cert = X509_STORE_CTX_get_current_cert(ctx);
+
     /* if pre-verification of the cert failed, just propagate that result back */
     if (preverify_ok != 1) {
+        int err = X509_STORE_CTX_get_error(ctx);
+        char current_cert_name[256] = "";
+        if (current_cert != NULL)
+            X509_NAME_oneline(X509_get_subject_name(current_cert), current_cert_name, sizeof(current_cert_name));
+
+        sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+            "TLS verification failed for cert '%s': '%d:%s'", current_cert_name,
+            err, X509_verify_cert_error_string(err));
         debug_return_int(0);
     }
 
     /* since this callback is called for each cert in the chain,
      * check that current cert is the peer's certificate
      */
-    current_cert = X509_STORE_CTX_get_current_cert(ctx);
     peer_cert = X509_STORE_CTX_get0_cert(ctx);
 
     if (current_cert != peer_cert) {
