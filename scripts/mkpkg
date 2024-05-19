@@ -375,7 +375,7 @@ case "$osversion" in
 	# Use correct libaudit dependency for Linux audit
 	case "$configure_opts" in
 	*--with-linux-audit*)
-	    for f in /lib/${MULTIARCH}${MULTIARCH:+/}libaudit.so.[0-9]* /lib/libaudit.so.[0-9]*; do
+	    for f in /usr/lib/${MULTIARCH}${MULTIARCH:+/}libaudit.so.[0-9]* /usr/lib/libaudit.so.[0-9]* /lib/${MULTIARCH}${MULTIARCH:+/}libaudit.so.[0-9]* /lib/libaudit.so.[0-9]*; do
 		if [ -f "$f" ]; then
 		    linux_audit=`dpkg-query -S "$f" 2>/dev/null | sed -n 's/:.*//p'`
 		    test -n "$linux_audit" && break
