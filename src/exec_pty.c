@@ -333,6 +333,32 @@ sigttin(int signo)
 }
 
 /*
+ * Close the leader fd to revoke the pty and signal the foreground pgrp.
+ * We send SIGHUP to the foreground process group (or the command's
+ * process group if no pty) after closing the leader fd.  We cannot
+ * just forward the SIGHUP we receive from the kernel since the
+ * command may not be the foreground process.  This fixes a problem
+ * on Linux with, e.g. "sudo su" where su(1) blocks SIGHUP.
+ */
+static void
+revoke_pty(struct exec_closure *ec)
+{
+    pid_t pgrp = ec->cmnd_pid;
+    debug_decl(revoke_pty, SUDO_DEBUG_EXEC);
+
+    sudo_debug_printf(SUDO_DEBUG_NOTICE, "user's tty revoked");
+    if (io_fds[SFD_LEADER] != -1) {
+	const pid_t tcpgrp = tcgetpgrp(io_fds[SFD_LEADER]);
+	if (tcpgrp != -1)
+	    pgrp = tcpgrp;
+	close(io_fds[SFD_LEADER]);
+    }
+    sudo_debug_printf(SUDO_DEBUG_NOTICE, "%s: killpg(%d, SIGHUP)",
+	__func__, (int)pgrp);
+    kill(pgrp, SIGHUP);
+}
+
+/*
  * Read an iobuf that is ready.
  */
 static void
@@ -390,8 +416,7 @@ read_callback(int fd, int what, void *v)
 		 */
 		const int wfd = sudo_ev_get_fd(iob->wevent);
 		if (wfd == io_fds[SFD_LEADER]) {
-		    sudo_debug_printf(SUDO_DEBUG_NOTICE, "user's tty revoked");
-		    send_command_status(iob->ec, CMD_REVOKE, 0);
+		    revoke_pty(iob->ec);
 		} else {
 		    safe_close(wfd);
 		}
@@ -478,8 +503,7 @@ write_callback(int fd, int what, void *v)
 		 */
 		const int rfd = sudo_ev_get_fd(iob->revent);
 		if (rfd == io_fds[SFD_LEADER]) {
-		    sudo_debug_printf(SUDO_DEBUG_NOTICE, "user's tty revoked");
-		    send_command_status(iob->ec, CMD_REVOKE, 0);
+		    revoke_pty(iob->ec);
 		} else {
 		    safe_close(rfd);
 		}
@@ -683,17 +707,6 @@ backchannel_cb(int fd, int what, void *v)
 		strerror(cstat.val));
 	    sudo_ev_loopbreak(ec->evbase);
 	    *ec->cstat = cstat;
-	    break;
-	case CMD_REVOKE:
-	    if (io_fds[SFD_LEADER] != -1) {
-		/*
-		 * Monitor requests that we revoke the user's terminal.
-		 * This must happen after the monitor has signaled the
-		 * controlling terminal's process group.
-		 */
-		close(io_fds[SFD_LEADER]);
-		io_fds[SFD_LEADER] = -1;
-	    }
 	    break;
 	case CMD_PID:
 	    ec->cmnd_pid = cstat.val;
