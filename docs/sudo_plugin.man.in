@@ -1,4 +1,4 @@
-.\" Automatically generated from an mdoc input file.  Do not edit.
+.\" Automatically generated from the sudo_plugin.mdoc.in file.  Do not edit.
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
@@ -1559,7 +1559,7 @@ front-end to determine which elements of the
 vector are files to be edited.
 The
 \(oq--\(cq
-element must immediately precede the first file to be editied.
+element must immediately precede the first file to be edited.
 If
 \fIsudoedit_nfiles\fR
 is not specified, the

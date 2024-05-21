@@ -1,4 +1,4 @@
-.\" Automatically generated from an mdoc input file.  Do not edit.
+.\" Automatically generated from the sudoers_timestamp.mdoc.in file.  Do not edit.
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
@@ -138,7 +138,7 @@ or of the parent process for records of type
 \fRTS_PPID\fR.
 The
 \fIstart_time\fR
-is used to help prevent re-use of a time stamp record after a
+is used to help prevent reuse of a time stamp record after a
 user has logged out.
 Not all systems support a method to easily retrieve a process's
 start time.
@@ -257,13 +257,13 @@ Information about the terminal device was stored in
 tty-based time stamp files for validity checks.
 This included the terminal device numbers, inode number and, on systems
 where it was not updated when the device was written to, the inode change time.
-This helped prevent re-use of the time stamp file after logout.
+This helped prevent reuse of the time stamp file after logout.
 .TP 6n
 1.8.6p7
 The terminal session ID was added to tty-based time stamp files to
-prevent re-use of the time stamp by the same user in a different
+prevent reuse of the time stamp by the same user in a different
 terminal session.
-It also helped prevent re-use of the time stamp file on systems where
+It also helped prevent reuse of the time stamp file on systems where
 the terminal device's inode change time was updated by writing.
 .TP 6n
 1.8.10
@@ -280,7 +280,7 @@ entire file and the lock is held until authentication is complete.
 1.8.22
 The start time of the terminal session leader or parent process is
 now stored in non-global time stamp records.
-This prevents re-use of the time stamp file after logout in most cases.
+This prevents reuse of the time stamp file after logout in most cases.
 .sp
 Support was added for the kernel-based tty time stamps available in
 OpenBSD
