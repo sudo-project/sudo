@@ -766,10 +766,11 @@ sudoedit		{
 				yyterminate();
 			}			/* a regex */
 
-<INITIAL,GOTDEFS>\"	{
+<INITIAL,EXPECTPATH,GOTDEFS>\"	{
 			    LEXTRACE("BEGINSTR ");
 			    sudoerslval.string = NULL;
-			    prev_state = YY_START;
+			    if (YY_START != EXPECTPATH)
+				prev_state = YY_START;
 			    BEGIN INSTR;
 			}
 
