@@ -1,0 +1,27 @@
+{
+    "Defaults": [
+        {
+            "Binding": [
+                { "username": "CLI_USR" }
+            ],
+            "Options": [
+                { "lecture": false }
+            ]
+        },
+        {
+            "Binding": [
+                { "hostname": "SUN_HST" }
+            ],
+            "Options": [
+                { "log_year": true }
+            ]
+        },
+        {
+            "Binding": [
+            ],
+            "Options": [
+                { "use_pty": false }
+            ]
+        }
+    ]
+}

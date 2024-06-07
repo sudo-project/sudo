@@ -192,8 +192,9 @@ print_member_json_int(struct json_container *jsonc,
 {
     struct json_value value;
     const char *typestr = NULL;
-    const char *errstr;
     short alias_type = UNSPEC;
+    struct alias *a = NULL;
+    const char *errstr;
     id_t id;
     debug_decl(print_member_json_int, SUDOERS_DEBUG_UTIL);
 
@@ -215,6 +216,37 @@ print_member_json_int(struct json_container *jsonc,
 	if (name == NULL)
 	    sudo_fatalx("missing member name for type %d", type);
 	value.u.string = name;
+    }
+
+    /* Special handling for ALIAS, which might actually be a WORD. */
+    if (type == ALIAS) {
+	switch (word_type) {
+	case TYPE_COMMAND:
+	    alias_type = CMNDALIAS;
+	    typestr = "cmndalias";
+	    break;
+	case TYPE_HOSTNAME:
+	    alias_type = HOSTALIAS;
+	    typestr = "hostalias";
+	    break;
+	case TYPE_RUNASGROUP:
+	case TYPE_RUNASUSER:
+	    alias_type = RUNASALIAS;
+	    typestr = "runasalias";
+	    break;
+	case TYPE_USERNAME:
+	    alias_type = USERALIAS;
+	    typestr = "useralias";
+	    break;
+	default:
+	    sudo_fatalx("unexpected word type %d", word_type);
+	}
+
+	a = alias_get(parse_tree, value.u.string, alias_type);
+	if (a == NULL && alias_type != CMNDALIAS) {
+	    /* Alias does not resolve, treat as WORD instead. */
+	    type = WORD;
+	}
     }
 
     switch (type) {
@@ -293,57 +325,22 @@ print_member_json_int(struct json_container *jsonc,
 	}
 	break;
     case ALIAS:
-	switch (word_type) {
-	case TYPE_COMMAND:
-	    if (expand_aliases) {
-		alias_type = CMNDALIAS;
-	    } else {
-		typestr = "cmndalias";
-	    }
-	    break;
-	case TYPE_HOSTNAME:
-	    if (expand_aliases) {
-		alias_type = HOSTALIAS;
-	    } else {
-		typestr = "hostalias";
-	    }
-	    break;
-	case TYPE_RUNASGROUP:
-	case TYPE_RUNASUSER:
-	    if (expand_aliases) {
-		alias_type = RUNASALIAS;
-	    } else {
-		typestr = "runasalias";
-	    }
-	    break;
-	case TYPE_USERNAME:
-	    if (expand_aliases) {
-		alias_type = USERALIAS;
-	    } else {
-		typestr = "useralias";
-	    }
-	    break;
-	default:
-	    sudo_fatalx("unexpected word type %d", word_type);
-	}
+	/* handled earlier */
 	break;
     default:
 	sudo_fatalx("unexpected member type %d", type);
     }
 
     if (expand_aliases && type == ALIAS) {
-	struct alias *a;
-	struct member *m;
-
 	/* Print each member of the alias. */
-	if ((a = alias_get(parse_tree, value.u.string, alias_type)) != NULL) {
+	if (a != NULL) {
+	    struct member *m;
+
 	    TAILQ_FOREACH(m, &a->members, entries) {
 		if (!print_member_json_int(jsonc, parse_tree, m->name, m->type,
-			negated ? !m->negated : m->negated,
-			alias_to_word_type(alias_type), true))
+			negated ? !m->negated : m->negated, word_type, true))
 		    goto oom;
 	    }
-	    alias_put(a);
 	}
     } else {
 	if (negated) {
@@ -363,9 +360,13 @@ print_member_json_int(struct json_container *jsonc,
 	}
     }
 
+    if (a != NULL)
+	alias_put(a);
     debug_return_bool(true);
 oom:
     /* warning printed by caller */
+    if (a != NULL)
+	alias_put(a);
     debug_return_bool(false);
 }
 
