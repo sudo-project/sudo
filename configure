@@ -5295,8 +5295,6 @@ printf "%s\n" "$as_me: adding CSOps standard options" >&6;}
 		CHECKSIA=false
 		with_ignore_dot=yes
 		insults=on
-		with_classic_insults=yes
-		with_csops_insults=yes
 		with_env_editor=yes
 		: ${mansectsu='8'}
 		: ${mansectform='5'}
@@ -6135,6 +6133,8 @@ esac
 fi
 
 
+with_classic_insults=yes
+with_csops_insults=yes
 
 # Check whether --with-insults was given.
 if test ${with_insults+y}
@@ -6143,14 +6143,12 @@ then :
     yes)	insults=on
 		printf "%s\n" "#define USE_INSULTS 1" >>confdefs.h
 
-		with_classic_insults=yes
-		with_csops_insults=yes
 		;;
     disabled)	insults=off
-		with_classic_insults=yes
-		with_csops_insults=yes
 		;;
     no)		insults=off
+		with_classic_insults=no
+		with_csops_insults=no
 		;;
     *)		as_fn_error $? "--with-insults does not take an argument." "$LINENO" 5
 		;;
@@ -38456,17 +38454,18 @@ echo "  password prompt		: ${passprompt}" >&6
 echo "  password prompt timeout	: ${password_timeout} minutes" >&6
 echo "  password tries		: ${passwd_tries}" >&6
 echo "  bad password message		: ${badpass_message}" >&6
-if test "$insults" = "on"; then
-    i=""
-    test "$with_python_insults" = "yes" && i="python ${i}"
-    test "$with_goons_insults" = "yes" && i="goons ${i}"
-    test "$with_hal_insults" = "yes" && i="hal ${i}"
-    test "$with_csops_insults" = "yes" && i="csops ${i}"
-    test "$with_classic_insults" = "yes" && i="classic ${i}"
-else
-    i=no
+insult_sets=""
+test "$with_python_insults" = "yes" && insult_sets="python ${insult_sets}"
+test "$with_goons_insults" = "yes" && insult_sets="goons ${insult_sets}"
+test "$with_hal_insults" = "yes" && insult_sets="hal ${insult_sets}"
+test "$with_csops_insults" = "yes" && insult_sets="csops ${insult_sets}"
+test "$with_classic_insults" = "yes" && insult_sets="classic ${insult_sets}"
+if test -z "$insult_sets"; then
+    insult_sets=no
+elif test "$insults" != "on"; then
+    insult_sets="${insult_sets} (disabled)"
 fi
-echo "  insults			: $i" >&6
+echo "  insults			: $insult_sets" >&6
 echo "  display lecture		: ${lecture}" >&6
 echo "  timestamp (credential) type	: ${timestamp_type}" >&6
 echo "  timestamp (credential) timeout: ${timeout} minutes" >&6

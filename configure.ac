@@ -440,8 +440,6 @@ AC_ARG_WITH(csops, [AS_HELP_STRING([--with-csops], [add CSOps standard options])
 		CHECKSIA=false
 		with_ignore_dot=yes
 		insults=on
-		with_classic_insults=yes
-		with_csops_insults=yes
 		with_env_editor=yes
 		: ${mansectsu='8'}
 		: ${mansectform='5'}
@@ -963,18 +961,23 @@ AC_ARG_WITH(tty-tickets, [AS_HELP_STRING([--with-tty-tickets], [use a different 
 		;;
 esac])
 
+dnl
+dnl The order of the insults options is important.  The main option
+dnl must come first, followed by all-insults, then the individual ones.
+dnl The classic and csops insult sets are always included by default.
+dnl
+with_classic_insults=yes
+with_csops_insults=yes
 AC_ARG_WITH(insults, [AS_HELP_STRING([--with-insults], [insult the user for entering an incorrect password])],
 [case $with_insults in
     yes)	insults=on
 		AC_DEFINE(USE_INSULTS)
-		with_classic_insults=yes
-		with_csops_insults=yes
 		;;
     disabled)	insults=off
-		with_classic_insults=yes
-		with_csops_insults=yes
 		;;
     no)		insults=off
+		with_classic_insults=no
+		with_csops_insults=no
 		;;
     *)		AC_MSG_ERROR([--with-insults does not take an argument.])
 		;;
@@ -4510,17 +4513,18 @@ echo "  password prompt		: ${passprompt}" >&AS_MESSAGE_FD
 echo "  password prompt timeout	: ${password_timeout} minutes" >&AS_MESSAGE_FD
 echo "  password tries		: ${passwd_tries}" >&AS_MESSAGE_FD
 echo "  bad password message		: ${badpass_message}" >&AS_MESSAGE_FD
-if test "$insults" = "on"; then
-    i=""
-    test "$with_python_insults" = "yes" && i="python ${i}"
-    test "$with_goons_insults" = "yes" && i="goons ${i}"
-    test "$with_hal_insults" = "yes" && i="hal ${i}"
-    test "$with_csops_insults" = "yes" && i="csops ${i}"
-    test "$with_classic_insults" = "yes" && i="classic ${i}"
-else
-    i=no
+insult_sets=""
+test "$with_python_insults" = "yes" && insult_sets="python ${insult_sets}"
+test "$with_goons_insults" = "yes" && insult_sets="goons ${insult_sets}"
+test "$with_hal_insults" = "yes" && insult_sets="hal ${insult_sets}"
+test "$with_csops_insults" = "yes" && insult_sets="csops ${insult_sets}"
+test "$with_classic_insults" = "yes" && insult_sets="classic ${insult_sets}"
+if test -z "$insult_sets"; then
+    insult_sets=no
+elif test "$insults" != "on"; then
+    insult_sets="${insult_sets} (disabled)"
 fi
-echo "  insults			: $i" >&AS_MESSAGE_FD
+echo "  insults			: $insult_sets" >&AS_MESSAGE_FD
 echo "  display lecture		: ${lecture}" >&AS_MESSAGE_FD
 echo "  timestamp (credential) type	: ${timestamp_type}" >&AS_MESSAGE_FD
 echo "  timestamp (credential) timeout: ${timeout} minutes" >&AS_MESSAGE_FD

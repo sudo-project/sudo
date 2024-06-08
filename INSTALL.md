@@ -807,14 +807,16 @@ Defaults are listed in brackets after the description.
 
     --with-classic-insults
         Uses insults from sudo "classic."  If you just specify --with-insults
-        you will get the classic and CSOps insults.  This is on by default if
-        --with-insults is given.
+	you will get the classic and CSOps insults.  You must either specify
+	--with-insults or enable insults in the sudoers file for this to have
+	any effect.
 
     --with-csops-insults
         Insults the user with an extra set of insults (some quotes, some
-        original) from a sysadmin group at CU (CSOps).  You must specify
-        --with-insults as well for this to have any effect.  This is on by
-        default if --with-insults is given.
+	original) from a sysadmin group at CU (CSOps).  If you just specify
+	--with-insults you will get the classic and CSOps insults.  You
+	must either specify --with-insults or enable insults in the sudoers
+	file for this to have any effect.
 
     --with-editor=PATH
         Specify the default editor path for use by visudo.  This may be a
@@ -880,13 +882,19 @@ Defaults are listed in brackets after the description.
         Sudoers option: ignore_dot
 
     --with-insults
-        Define this if you want to be insulted for typing an incorrect password
-        just like the original sudo(8).  This is off by default.  
+        Define this if you want to be insulted by default for typing
+        an incorrect password just like the original sudo(8).
+        Insults may be optionally disabled in the sudoers file.
         Sudoers option: insults
+
+    --with-insults=no, --without-insults
+        By default, sudo will include support for insults that can be
+        enabled via the sudoers file.  However, if --with-insults=no is
+	used, no insults will be available, even if enabled in sudoers.
 
     --with-insults=disabled
         Include support for insults but disable them unless explicitly
-        enabled in sudoers.  
+        enabled in the sudoers file.  This is the default.
         Sudoers option: !insults
 
     --with-iologdir[=DIR]
