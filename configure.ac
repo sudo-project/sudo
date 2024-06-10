@@ -75,6 +75,7 @@ AC_SUBST([NOEXECFILE])dnl
 AC_SUBST([NOEXECDIR])dnl
 AC_SUBST([noexec_file])dnl
 AC_SUBST([sesh_file])dnl
+AC_SUBST([visudo])dnl
 AC_SUBST([INSTALL_BACKUP])dnl
 AC_SUBST([INSTALL_INTERCEPT])dnl
 AC_SUBST([INSTALL_NOEXEC])dnl
@@ -225,6 +226,7 @@ netsvc_conf=/etc/netsvc.conf
 intercept_file="$libexecdir/sudo/sudo_intercept.so"
 noexec_file="$libexecdir/sudo/sudo_noexec.so"
 sesh_file="$libexecdir/sudo/sesh"
+visudo="$sbindir/visudo"
 nsswitch_conf=/etc/nsswitch.conf
 secure_path="not set"
 pam_session=on
@@ -4299,6 +4301,13 @@ _noexec_file=
 while test X"$noexec_file" != X"$_noexec_file"; do
     _noexec_file="$noexec_file"
     eval "noexec_file=\"$_noexec_file\""
+done
+
+# Update exec_prefix in visudo
+_visudo=
+while test X"$visudo" != X"$_visudo"; do
+    _visudo="$visudo"
+    eval "visudo=\"$_visudo\""
 done
 
 # Update exec_prefix in sesh_file

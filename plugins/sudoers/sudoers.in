@@ -41,6 +41,10 @@
 ##
 ## Defaults specification
 ##
+## Preserve editor environment variables for visudo.
+## To preserve these for all commands, remove the "!visudo" qualifier.
+Defaults!@visudo@ env_keep += "SUDO_EDITOR EDITOR VISUAL"
+##
 ## You may wish to keep some of the following environment variables
 ## when running commands via sudo.
 ##

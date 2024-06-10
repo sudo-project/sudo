@@ -827,6 +827,7 @@ PRELOAD_MODULE
 INSTALL_NOEXEC
 INSTALL_INTERCEPT
 INSTALL_BACKUP
+visudo
 sesh_file
 noexec_file
 NOEXECDIR
@@ -3724,6 +3725,7 @@ netsvc_conf=/etc/netsvc.conf
 intercept_file="$libexecdir/sudo/sudo_intercept.so"
 noexec_file="$libexecdir/sudo/sudo_noexec.so"
 sesh_file="$libexecdir/sudo/sesh"
+visudo="$sbindir/visudo"
 nsswitch_conf=/etc/nsswitch.conf
 secure_path="not set"
 pam_session=on
@@ -35837,6 +35839,13 @@ _noexec_file=
 while test X"$noexec_file" != X"$_noexec_file"; do
     _noexec_file="$noexec_file"
     eval "noexec_file=\"$_noexec_file\""
+done
+
+# Update exec_prefix in visudo
+_visudo=
+while test X"$visudo" != X"$_visudo"; do
+    _visudo="$visudo"
+    eval "visudo=\"$_visudo\""
 done
 
 # Update exec_prefix in sesh_file
