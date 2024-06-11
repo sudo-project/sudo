@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "April 17, 2024" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "June 11, 2024" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -5648,17 +5648,37 @@ If set,
 will use this value in place of the user's
 \fRPATH\fR
 environment variable.
-This option can be used to reset the
-\fRPATH\fR
-to a known good value that contains directories for system administrator
-commands such as
+There are two basic use cases for
+\fIsecure_path\fR:
+.PP
+.RS 14n
+.PD 0
+.TP 3n
+1.\&
+To make it possible for
+\fBsudo\fR
+to find system administrator commands located in directories that
+may not be in the default user path, such as
 \fI/usr/sbin\fR.
-.sp
+.PD
+.TP 3n
+2.\&
+To help protect scripts and programs that execute other commands without
+first setting
+\fRPATH\fR
+to a safe value.
+Otherwise, a user with limited privileges may be able to run arbitrary
+commands by manipulating the
+\fRPATH\fR
+if the command being run executes other commands without using a
+fully-qualified path name.
+.PP
 Users in the group specified by the
 \fIexempt_group\fR
 option are not affected by
 \fIsecure_path\fR.
-This option is @secure_path@ by default.
+This option is @secure_path_set@ by default.
+.RE
 .TP 14n
 syslog
 Syslog facility if syslog is being used for logging (negate to

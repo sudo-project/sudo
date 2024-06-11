@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd April 17, 2024
+.Dd June 11, 2024
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -5295,11 +5295,26 @@ If set,
 will use this value in place of the user's
 .Ev PATH
 environment variable.
-This option can be used to reset the
-.Ev PATH
-to a known good value that contains directories for system administrator
-commands such as
+There are two basic use cases for
+.Em secure_path :
+.Bl -enum -width 1n
+.It
+To make it possible for
+.Nm sudo
+to find system administrator commands located in directories that
+may not be in the default user path, such as
 .Pa /usr/sbin .
+.It
+To help protect scripts and programs that execute other commands without
+first setting
+.Ev PATH
+to a safe value.
+Otherwise, a user with limited privileges may be able to run arbitrary
+commands by manipulating the
+.Ev PATH
+if the command being run executes other commands without using a
+fully-qualified path name.
+.El
 .Pp
 Users in the group specified by the
 .Em exempt_group
