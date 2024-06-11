@@ -733,6 +733,7 @@ plugindir
 pam_login_service
 pam_session
 editor
+secure_path_set
 secure_path
 netsvc_conf
 nsswitch_conf
@@ -3682,6 +3683,7 @@ sudoers_path='$(sysconfdir)/sudoers'
 
 
 
+
 #
 # Begin initial values for man page substitution
 #
@@ -3727,7 +3729,8 @@ noexec_file="$libexecdir/sudo/sudo_noexec.so"
 sesh_file="$libexecdir/sudo/sesh"
 visudo="$sbindir/visudo"
 nsswitch_conf=/etc/nsswitch.conf
-secure_path="not set"
+secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+secure_path_set="disabled"
 pam_session=on
 pam_login_service=sudo
 plugindir="$libexecdir/sudo"
@@ -6308,19 +6311,22 @@ EOF
 if test ${with_secure_path+y}
 then :
   withval=$with_secure_path; case $with_secure_path in
-    yes)	with_secure_path="/bin:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc"
-		printf "%s\n" "#define SECURE_PATH \"$with_secure_path\"" >>confdefs.h
-
-		secure_path="set to $with_secure_path"
+    yes)	with_secure_path="$secure_path"
 		;;
     no)		;;
-    *)		printf "%s\n" "#define SECURE_PATH \"$with_secure_path\"" >>confdefs.h
-
-		secure_path="set to $with_secure_path"
+    *)		secure_path="$with_secure_path"
 		;;
 esac
 fi
 
+if test "${with_secure_path-no}" != "no"
+then :
+
+	printf "%s\n" "#define SECURE_PATH \"$secure_path\"" >>confdefs.h
+
+	secure_path_set="set to $secure_path"
+
+fi
 
 
 # Check whether --with-interfaces was given.

@@ -999,7 +999,8 @@ Defaults are listed in brackets after the description.
         be separate from the "user path."  You will need to customize the
         path for your site.  This is not applied to users in the group
         specified by --with-exemptgroup.  If you do not specify a path,
-        "/bin:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc" is used.  
+        "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        is used.  
         Sudoers option: secure_path
 
     --with-sendmail=PATH

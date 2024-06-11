@@ -177,6 +177,7 @@ AC_SUBST([sssd_lib])
 AC_SUBST([nsswitch_conf])
 AC_SUBST([netsvc_conf])
 AC_SUBST([secure_path])
+AC_SUBST([secure_path_set])
 AC_SUBST([editor])
 AC_SUBST([pam_session])
 AC_SUBST([pam_login_service])
@@ -228,7 +229,8 @@ noexec_file="$libexecdir/sudo/sudo_noexec.so"
 sesh_file="$libexecdir/sudo/sesh"
 visudo="$sbindir/visudo"
 nsswitch_conf=/etc/nsswitch.conf
-secure_path="not set"
+secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+secure_path_set="disabled"
 pam_session=on
 pam_login_service=sudo
 plugindir="$libexecdir/sudo"
@@ -1068,15 +1070,16 @@ SUDO_DEFINE_UNQUOTED(_PATH_LDAP_SECRET, "$ldap_secret", [Path to the ldap.secret
 
 AC_ARG_WITH(secure-path, [AS_HELP_STRING([--with-secure-path], [override the user's path with a built-in one])],
 [case $with_secure_path in
-    yes)	with_secure_path="/bin:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc"
-		AC_DEFINE_UNQUOTED(SECURE_PATH, "$with_secure_path")
-		secure_path="set to $with_secure_path"
+    yes)	with_secure_path="$secure_path"
 		;;
     no)		;;
-    *)		AC_DEFINE_UNQUOTED(SECURE_PATH, "$with_secure_path")
-		secure_path="set to $with_secure_path"
+    *)		secure_path="$with_secure_path"
 		;;
 esac])
+AS_IF([test "${with_secure_path-no}" != "no"], [
+	AC_DEFINE_UNQUOTED(SECURE_PATH, "$secure_path")
+	secure_path_set="set to $secure_path"
+])
 
 AC_ARG_WITH(interfaces, [AS_HELP_STRING([--without-interfaces], [don't try to read the ip addr of network interfaces])],
 [case $with_interfaces in
