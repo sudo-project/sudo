@@ -54,6 +54,10 @@ What's new in Sudo 1.9.16
    the --with-insults configure option is specified or the "insults"
    sudoers option is enabled.
 
+ * The default sudoers file now enables the "secure_path" option
+   by default and preserves the EDITOR, VISUAL, and SUDO_EDITOR
+   environment variables when running visudo.
+
 What's new in Sudo 1.9.15p5
 
  * Fixed evaluation of the "lecture", "listpw", "verifypw", and
