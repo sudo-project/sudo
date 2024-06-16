@@ -33,8 +33,6 @@ What's new in Sudo 1.9.16
  * Fixed several cvtsudoers JSON output problems.
    GitHub issues #369, #370, #371, #373, #381.
 
- * Sudo will now send SIGHUP to the foreground process when running
-
  * When sudo runs a command in a pseudo-terminal and the user's
    terminal is revoked, the pseudo-terminal's foreground process
    group will now receive SIGHUP before the terminal is revoked.
