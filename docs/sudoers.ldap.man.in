@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOERS.LDAP" "@mansectform@" "June 7, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "@mansectform@" "June 25, 2024" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -651,20 +651,24 @@ distribution includes versions of the
 \fBsudoers\fR
 schema for multiple LDAP servers:
 .TP 6n
-\fIschema.OpenLDAP\fR
-OpenLDAP slapd and
-OpenBSD
-ldapd
+\fIschema.ActiveDirectory\fR
+Microsoft Active Directory
 .TP 6n
-\fIschema.olcSudo\fR
-OpenLDAP slapd 2.3 and higher when on-line configuration is enabled
+\fIschema.IBM_LDAP\fR
+IBM Directory Server, also known as IBM Tivoli Directory Server,
+IBM Security Directory Server, and IBM Security Verify Directory
 .TP 6n
 \fIschema.iPlanet\fR
 Netscape-derived servers such as the iPlanet, Oracle,
 and 389 Directory Servers
 .TP 6n
-\fIschema.ActiveDirectory\fR
-Microsoft Active Directory
+\fIschema.olcSudo\fR
+OpenLDAP slapd 2.3 and higher when on-line configuration is enabled
+.TP 6n
+\fIschema.OpenLDAP\fR
+OpenLDAP slapd and
+OpenBSD
+ldapd
 .PP
 The schema in OpenLDAP format is also included in the
 \fIEXAMPLES\fR
