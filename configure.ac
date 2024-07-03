@@ -3053,6 +3053,14 @@ AS_IF([test X"$sudo_mktemp" = X"yes"], [
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }mktemp_test"
 ])
 AX_FUNC_SNPRINTF
+AS_IF([test X"$ac_cv_prog_cc_c99" != X"no"], [
+    # If we have a C99 compiler and are cross-compiling, assume
+    # C99-compliant v?snprintf().
+    AS_IF([test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"crosscross"], [
+	ac_cv_have_working_snprintf=yes
+	ac_cv_have_working_vsnprintf=yes
+    ])
+])
 AS_IF([test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"], [
     # System has a C99-compliant v?snprintf(), check for v?asprintf()
     AC_CHECK_FUNCS([asprintf], [], [
