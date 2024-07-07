@@ -56,6 +56,15 @@ What's new in Sudo 1.9.16
    by default and preserves the EDITOR, VISUAL, and SUDO_EDITOR
    environment variables when running visudo.
 
+ * A sudoers schema for IBM Directory Server (aka IBM Tivoli Directory
+   Server, IBM Security Directory Server, and IBM Security Verify
+   Directory) is now included.
+
+ * When cross-compiling sudo, the configure script now assumes that
+   the snprintf() function is C99-compliant if the C compiler
+   supports the C99 standard.  Previously, configure would use
+   sudo's own snprintf() when cross-compiling.  GitHub issue #386.
+
 What's new in Sudo 1.9.15p5
 
  * Fixed evaluation of the "lecture", "listpw", "verifypw", and
