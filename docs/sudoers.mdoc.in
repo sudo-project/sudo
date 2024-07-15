@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd June 11, 2024
+.Dd July 14, 2024
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -7453,10 +7453,12 @@ manual.
 .Xr mktemp 3 ,
 .Xr strftime 3 ,
 .Xr sudo.conf @mansectform@ ,
+.Xr sudo_logsrv.proto @mansectform@ ,
 .Xr sudo_plugin @mansectform@ ,
 .Xr sudoers.ldap @mansectform@ ,
 .Xr sudoers_timestamp @mansectform@ ,
 .Xr sudo @mansectsu@ ,
+.Xr sudo_logsrvd @mansectsu@ ,
 .Xr visudo @mansectsu@
 .Sh AUTHORS
 Many people have worked on

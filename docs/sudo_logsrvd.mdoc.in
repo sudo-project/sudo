@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2024 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 16, 2023
+.Dd July 14, 2024
 .Dt SUDO_LOGSRVD @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -397,6 +397,7 @@ If peer authentication is enabled on the client, a copy of
 must be present on the client system too.
 .Sh SEE ALSO
 .Xr sudo.conf @mansectform@ ,
+.Xr sudo_logsrv.proto @mansectform@ ,
 .Xr sudo_logsrvd.conf @mansectform@ ,
 .Xr sudoers @mansectform@ ,
 .Xr sudo @mansectsu@ ,
