@@ -1,15 +1,15 @@
 # Messages français pour sudo.
-# Copyright (C) 2023 Free Software Foundation, Inc.
+# Copyright (C) 2024 Free Software Foundation, Inc.
 # This file is put in the public domain.
 # Todd C. Miller <Todd.Miller@courtesan.com>, 2011-2013
-# Frédéric Marchal <fmarchal@perso.be>, 2023
+# Frédéric Marchal <fmarchal@perso.be>, 2024
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.9.14b1\n"
+"Project-Id-Version: sudo 1.9.16b1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2023-06-07 13:27-0600\n"
-"PO-Revision-Date: 2023-06-08 21:12+0200\n"
+"POT-Creation-Date: 2024-06-08 09:06-0600\n"
+"PO-Revision-Date: 2024-07-24 11:41+0200\n"
 "Last-Translator: Frédéric Marchal <fmarchal@perso.be>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "Language: fr\n"
@@ -33,78 +33,80 @@ msgid "unable to restore registry"
 msgstr "impossible de rétablir le registre"
 
 #: lib/util/aix.c:272 lib/util/gidlist.c:66 lib/util/gidlist.c:76
-#: lib/util/json.c:55 lib/util/json.c:197 lib/util/sudo_conf.c:215
-#: lib/util/sudo_conf.c:301 lib/util/sudo_conf.c:378 lib/util/sudo_conf.c:647
-#: src/conversation.c:78 src/exec_iolog.c:122 src/exec_iolog.c:133
-#: src/exec_iolog.c:210 src/exec_monitor.c:171 src/exec_monitor.c:418
-#: src/exec_monitor.c:424 src/exec_monitor.c:432 src/exec_monitor.c:440
-#: src/exec_monitor.c:447 src/exec_monitor.c:454 src/exec_monitor.c:461
-#: src/exec_monitor.c:468 src/exec_monitor.c:475 src/exec_monitor.c:482
-#: src/exec_monitor.c:489 src/exec_nopty.c:231 src/exec_nopty.c:240
+#: lib/util/json.c:55 lib/util/json.c:197 lib/util/sudo_conf.c:218
+#: lib/util/sudo_conf.c:304 lib/util/sudo_conf.c:381 lib/util/sudo_conf.c:672
+#: src/conversation.c:81 src/exec_iolog.c:122 src/exec_iolog.c:133
+#: src/exec_iolog.c:210 src/exec_monitor.c:173 src/exec_monitor.c:430
+#: src/exec_monitor.c:436 src/exec_monitor.c:444 src/exec_monitor.c:452
+#: src/exec_monitor.c:459 src/exec_monitor.c:466 src/exec_monitor.c:473
+#: src/exec_monitor.c:480 src/exec_monitor.c:487 src/exec_monitor.c:494
+#: src/exec_monitor.c:501 src/exec_nopty.c:231 src/exec_nopty.c:240
 #: src/exec_nopty.c:247 src/exec_nopty.c:254 src/exec_nopty.c:261
 #: src/exec_nopty.c:268 src/exec_nopty.c:275 src/exec_nopty.c:282
 #: src/exec_nopty.c:289 src/exec_nopty.c:296 src/exec_nopty.c:303
 #: src/exec_nopty.c:310 src/exec_nopty.c:318 src/exec_nopty.c:326
-#: src/exec_nopty.c:744 src/exec_preload.c:343 src/exec_ptrace.c:475
-#: src/exec_ptrace.c:768 src/exec_ptrace.c:983 src/exec_ptrace.c:1096
-#: src/exec_ptrace.c:1271 src/exec_ptrace.c:1624 src/exec_ptrace.c:1651
-#: src/exec_ptrace.c:1841 src/exec_pty.c:581 src/exec_pty.c:765
-#: src/exec_pty.c:963 src/exec_pty.c:972 src/exec_pty.c:979 src/exec_pty.c:986
-#: src/exec_pty.c:993 src/exec_pty.c:1000 src/exec_pty.c:1007
-#: src/exec_pty.c:1014 src/exec_pty.c:1021 src/exec_pty.c:1028
-#: src/exec_pty.c:1035 src/exec_pty.c:1042 src/exec_pty.c:1050
-#: src/load_plugins.c:100 src/load_plugins.c:125 src/load_plugins.c:161
-#: src/load_plugins.c:394 src/load_plugins.c:400 src/parse_args.c:172
-#: src/parse_args.c:193 src/parse_args.c:269 src/parse_args.c:625
-#: src/parse_args.c:647 src/parse_args.c:672 src/preserve_fds.c:46
-#: src/preserve_fds.c:131 src/selinux.c:89 src/selinux.c:362 src/selinux.c:472
-#: src/selinux.c:489 src/selinux.c:496 src/sesh.c:206 src/sesh.c:240
-#: src/sesh.c:246 src/sesh.c:253 src/sesh.c:259 src/sesh.c:470 src/sudo.c:644
-#: src/sudo.c:709 src/sudo.c:719 src/sudo.c:746 src/sudo.c:769 src/sudo.c:778
-#: src/sudo.c:787 src/sudo.c:805 src/sudo.c:846 src/sudo.c:855 src/sudo.c:865
-#: src/sudo.c:898 src/sudo.c:1127 src/sudo.c:1148 src/sudo.c:1441
-#: src/sudo.c:1610 src/sudo.c:1837 src/sudo.c:2171 src/sudo_edit.c:89
-#: src/sudo_edit.c:149 src/sudo_edit.c:430 src/sudo_edit.c:439
-#: src/sudo_edit.c:540 src/sudo_edit.c:547 src/sudo_edit.c:692
-#: src/sudo_edit.c:712 src/sudo_intercept_common.c:115
-#: src/sudo_intercept_common.c:340
+#: src/exec_nopty.c:748 src/exec_preload.c:347 src/exec_ptrace.c:475
+#: src/exec_ptrace.c:768 src/exec_ptrace.c:985 src/exec_ptrace.c:1098
+#: src/exec_ptrace.c:1273 src/exec_ptrace.c:1626 src/exec_ptrace.c:1653
+#: src/exec_ptrace.c:1845 src/exec_pty.c:599 src/exec_pty.c:783
+#: src/exec_pty.c:990 src/exec_pty.c:999 src/exec_pty.c:1006
+#: src/exec_pty.c:1013 src/exec_pty.c:1020 src/exec_pty.c:1027
+#: src/exec_pty.c:1034 src/exec_pty.c:1041 src/exec_pty.c:1048
+#: src/exec_pty.c:1055 src/exec_pty.c:1062 src/exec_pty.c:1069
+#: src/exec_pty.c:1077 src/load_plugins.c:100 src/load_plugins.c:125
+#: src/load_plugins.c:161 src/load_plugins.c:394 src/load_plugins.c:400
+#: src/parse_args.c:171 src/parse_args.c:192 src/parse_args.c:268
+#: src/parse_args.c:624 src/parse_args.c:646 src/parse_args.c:671
+#: src/preserve_fds.c:46 src/preserve_fds.c:131 src/selinux.c:89
+#: src/selinux.c:362 src/selinux.c:472 src/selinux.c:489 src/selinux.c:496
+#: src/sesh.c:206 src/sesh.c:240 src/sesh.c:246 src/sesh.c:253 src/sesh.c:259
+#: src/sesh.c:470 src/sudo.c:581 src/sudo.c:607 src/sudo.c:660 src/sudo.c:726
+#: src/sudo.c:737 src/sudo.c:764 src/sudo.c:787 src/sudo.c:796 src/sudo.c:805
+#: src/sudo.c:818 src/sudo.c:827 src/sudo.c:868 src/sudo.c:878 src/sudo.c:888
+#: src/sudo.c:921 src/sudo.c:923 src/sudo.c:1150 src/sudo.c:1171
+#: src/sudo.c:1462 src/sudo.c:1631 src/sudo.c:1858 src/sudo.c:2191
+#: src/sudo_edit.c:89 src/sudo_edit.c:149 src/sudo_edit.c:430
+#: src/sudo_edit.c:439 src/sudo_edit.c:540 src/sudo_edit.c:547
+#: src/sudo_edit.c:692 src/sudo_edit.c:712 src/sudo_intercept_common.c:122
+#: src/sudo_intercept_common.c:347
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
 #: lib/util/aix.c:272 lib/util/gidlist.c:66 lib/util/json.c:56
-#: lib/util/json.c:198 lib/util/regex.c:173 lib/util/sudo_conf.c:216
-#: lib/util/sudo_conf.c:301 lib/util/sudo_conf.c:378 lib/util/sudo_conf.c:647
-#: src/conversation.c:79 src/exec_intercept.c:111 src/exec_intercept.c:350
-#: src/exec_intercept.c:525 src/exec_intercept.c:589 src/exec_intercept.c:713
-#: src/exec_intercept.c:837 src/exec_iolog.c:122 src/exec_iolog.c:133
-#: src/exec_iolog.c:210 src/exec_monitor.c:418 src/exec_monitor.c:424
-#: src/exec_monitor.c:432 src/exec_monitor.c:440 src/exec_monitor.c:447
-#: src/exec_monitor.c:454 src/exec_monitor.c:461 src/exec_monitor.c:468
-#: src/exec_monitor.c:475 src/exec_monitor.c:482 src/exec_monitor.c:489
+#: lib/util/json.c:198 lib/util/regex.c:173 lib/util/sudo_conf.c:219
+#: lib/util/sudo_conf.c:304 lib/util/sudo_conf.c:381 lib/util/sudo_conf.c:672
+#: src/conversation.c:82 src/exec_intercept.c:112 src/exec_intercept.c:351
+#: src/exec_intercept.c:527 src/exec_intercept.c:591 src/exec_intercept.c:715
+#: src/exec_intercept.c:839 src/exec_iolog.c:122 src/exec_iolog.c:133
+#: src/exec_iolog.c:210 src/exec_monitor.c:430 src/exec_monitor.c:436
+#: src/exec_monitor.c:444 src/exec_monitor.c:452 src/exec_monitor.c:459
+#: src/exec_monitor.c:466 src/exec_monitor.c:473 src/exec_monitor.c:480
+#: src/exec_monitor.c:487 src/exec_monitor.c:494 src/exec_monitor.c:501
 #: src/exec_nopty.c:231 src/exec_nopty.c:240 src/exec_nopty.c:247
 #: src/exec_nopty.c:254 src/exec_nopty.c:261 src/exec_nopty.c:268
 #: src/exec_nopty.c:275 src/exec_nopty.c:282 src/exec_nopty.c:289
 #: src/exec_nopty.c:296 src/exec_nopty.c:303 src/exec_nopty.c:310
-#: src/exec_nopty.c:318 src/exec_nopty.c:326 src/exec_preload.c:343
-#: src/exec_ptrace.c:475 src/exec_ptrace.c:768 src/exec_ptrace.c:983
-#: src/exec_ptrace.c:1651 src/exec_ptrace.c:1842 src/exec_pty.c:581
-#: src/exec_pty.c:963 src/exec_pty.c:972 src/exec_pty.c:979 src/exec_pty.c:986
-#: src/exec_pty.c:993 src/exec_pty.c:1000 src/exec_pty.c:1007
-#: src/exec_pty.c:1014 src/exec_pty.c:1021 src/exec_pty.c:1028
-#: src/exec_pty.c:1035 src/exec_pty.c:1042 src/exec_pty.c:1050
-#: src/load_plugins.c:100 src/load_plugins.c:125 src/load_plugins.c:161
-#: src/load_plugins.c:394 src/load_plugins.c:400 src/parse_args.c:172
-#: src/parse_args.c:194 src/parse_args.c:269 src/parse_args.c:625
-#: src/parse_args.c:647 src/parse_args.c:672 src/preserve_fds.c:46
-#: src/preserve_fds.c:131 src/selinux.c:89 src/selinux.c:362 src/selinux.c:472
-#: src/selinux.c:489 src/selinux.c:496 src/sesh.c:206 src/sesh.c:471
-#: src/sudo.c:228 src/sudo.c:644 src/sudo.c:898 src/sudo.c:1127
-#: src/sudo.c:1148 src/sudo.c:1441 src/sudo.c:1610 src/sudo.c:1837
-#: src/sudo.c:2171 src/sudo_edit.c:89 src/sudo_edit.c:149 src/sudo_edit.c:430
+#: src/exec_nopty.c:318 src/exec_nopty.c:326 src/exec_preload.c:347
+#: src/exec_ptrace.c:475 src/exec_ptrace.c:768 src/exec_ptrace.c:985
+#: src/exec_ptrace.c:1653 src/exec_ptrace.c:1846 src/exec_pty.c:599
+#: src/exec_pty.c:990 src/exec_pty.c:999 src/exec_pty.c:1006
+#: src/exec_pty.c:1013 src/exec_pty.c:1020 src/exec_pty.c:1027
+#: src/exec_pty.c:1034 src/exec_pty.c:1041 src/exec_pty.c:1048
+#: src/exec_pty.c:1055 src/exec_pty.c:1062 src/exec_pty.c:1069
+#: src/exec_pty.c:1077 src/load_plugins.c:100 src/load_plugins.c:125
+#: src/load_plugins.c:161 src/load_plugins.c:394 src/load_plugins.c:400
+#: src/parse_args.c:171 src/parse_args.c:193 src/parse_args.c:268
+#: src/parse_args.c:624 src/parse_args.c:646 src/parse_args.c:671
+#: src/preserve_fds.c:46 src/preserve_fds.c:131 src/selinux.c:89
+#: src/selinux.c:362 src/selinux.c:472 src/selinux.c:489 src/selinux.c:496
+#: src/sesh.c:206 src/sesh.c:471 src/sudo.c:229 src/sudo.c:581 src/sudo.c:607
+#: src/sudo.c:660 src/sudo.c:819 src/sudo.c:921 src/sudo.c:923 src/sudo.c:1150
+#: src/sudo.c:1171 src/sudo.c:1462 src/sudo.c:1631 src/sudo.c:1858
+#: src/sudo.c:2191 src/sudo_edit.c:89 src/sudo_edit.c:149 src/sudo_edit.c:430
 #: src/sudo_edit.c:439 src/sudo_edit.c:540 src/sudo_edit.c:547
-#: src/sudo_edit.c:692 src/sudo_edit.c:712 src/sudo_intercept_common.c:115
-#: src/sudo_intercept_common.c:340
+#: src/sudo_edit.c:692 src/sudo_edit.c:712 src/sudo_intercept_common.c:122
+#: src/sudo_intercept_common.c:347
 msgid "unable to allocate memory"
 msgstr "impossible d'allouer la mémoire"
 
@@ -118,9 +120,9 @@ msgstr "impossible d'évaluer par stat() %.*s"
 msgid "%.*s exists but is not a directory (0%o)"
 msgstr "%.*s existe mais il n'est pas un répertoire (0%o)"
 
-#: lib/util/mkdir_parents.c:103 lib/util/sudo_conf.c:664
-#: lib/util/sudo_conf.c:683 lib/util/sudo_conf.c:710 src/selinux.c:235
-#: src/selinux.c:265 src/sudo.c:373 src/sudo_edit.c:495 src/sudo_edit.c:559
+#: lib/util/mkdir_parents.c:103 lib/util/sudo_conf.c:689
+#: lib/util/sudo_conf.c:708 lib/util/sudo_conf.c:735 src/selinux.c:235
+#: src/selinux.c:265 src/sudo.c:375 src/sudo_edit.c:495 src/sudo_edit.c:559
 #, c-format
 msgid "unable to open %s"
 msgstr "impossible d'ouvrir %s"
@@ -143,55 +145,55 @@ msgstr "l'expression régulière est trop grande"
 msgid "Unknown signal"
 msgstr "Signal inconnu"
 
-#: lib/util/strtoid.c:84 lib/util/strtomode.c:52 lib/util/strtonum.c:148
-#: lib/util/strtonum.c:187 src/sesh.c:240 src/sesh.c:253
+#: lib/util/strtoid.c:84 lib/util/strtomode.c:52 lib/util/strtonum.c:147
+#: lib/util/strtonum.c:186 src/sesh.c:240 src/sesh.c:253
 msgid "invalid value"
 msgstr "valeur incorrecte"
 
-#: lib/util/strtomode.c:58 lib/util/strtonum.c:160
+#: lib/util/strtomode.c:58 lib/util/strtonum.c:159
 msgid "value too large"
 msgstr "valeur trop grande"
 
-#: lib/util/strtomode.c:58 lib/util/strtonum.c:154
+#: lib/util/strtomode.c:58 lib/util/strtonum.c:153
 msgid "value too small"
 msgstr "valeur trop petite"
 
-#: lib/util/sudo_conf.c:234
+#: lib/util/sudo_conf.c:237
 #, c-format
 msgid "invalid Path value \"%s\" in %s, line %u"
 msgstr "valeur de chemin « %s » incorrecte dans %s, ligne %u"
 
-#: lib/util/sudo_conf.c:400 lib/util/sudo_conf.c:453
+#: lib/util/sudo_conf.c:403 lib/util/sudo_conf.c:456
 #, c-format
 msgid "invalid value for %s \"%s\" in %s, line %u"
 msgstr "valeur « %2$s » incorrecte pour %1$s dans %3$s, ligne %4$u"
 
-#: lib/util/sudo_conf.c:421
+#: lib/util/sudo_conf.c:424
 #, c-format
 msgid "unsupported group source \"%s\" in %s, line %u"
 msgstr "source de groupe « %s » non supportée dans %s, ligne %u"
 
-#: lib/util/sudo_conf.c:437
+#: lib/util/sudo_conf.c:440
 #, c-format
 msgid "invalid max groups \"%s\" in %s, line %u"
 msgstr "groupes max « %s » incorrects dans %s, ligne %u"
 
-#: lib/util/sudo_conf.c:686
+#: lib/util/sudo_conf.c:711
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s n'est pas un fichier régulier"
 
-#: lib/util/sudo_conf.c:689 src/copy_file.c:164
+#: lib/util/sudo_conf.c:714 src/copy_file.c:164
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s est la propriété du uid %u alors que ça devrait être %u"
 
-#: lib/util/sudo_conf.c:693
+#: lib/util/sudo_conf.c:718
 #, c-format
 msgid "%s is world writable"
 msgstr "%s peut être écrit par tout le monde"
 
-#: lib/util/sudo_conf.c:696
+#: lib/util/sudo_conf.c:721
 #, c-format
 msgid "%s is group writable"
 msgstr "%s peut être écrit par le groupe"
@@ -285,18 +287,18 @@ msgstr "impossible de changer le répertoire vers %s"
 msgid "starting from %s"
 msgstr "au départ de %s"
 
-#: src/exec.c:278 src/exec.c:351 src/exec_monitor.c:552 src/exec_monitor.c:554
-#: src/exec_pty.c:1122 src/exec_pty.c:1124 src/signal.c:144 src/signal.c:151
+#: src/exec.c:278 src/exec.c:351 src/exec_monitor.c:564 src/exec_monitor.c:566
+#: src/exec_pty.c:1148 src/exec_pty.c:1150 src/signal.c:144 src/signal.c:151
 #: src/signal.c:165 src/suspend_parent.c:143
 #, c-format
 msgid "unable to set handler for signal %d"
 msgstr "impossible de spécifier le gestionnaire pour le signal %d"
 
-#: src/exec.c:424
+#: src/exec.c:447
 msgid "intercept mode is not supported with SELinux RBAC on this system"
 msgstr "le mode d'interception n'est pas supporté avec SELinux RBAC sur ce système"
 
-#: src/exec.c:429
+#: src/exec.c:452
 msgid "unable to log sub-commands with SELinux RBAC on this system"
 msgstr "impossible d'écrire les sous-commandes dans le journal avec SELinux RBAC sur ce système"
 
@@ -304,63 +306,63 @@ msgstr "impossible d'écrire les sous-commandes dans le journal avec SELinux RBA
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "impossible de supprimer PRIV_PROC_EXEC de PRIV_LIMIT"
 
-#: src/exec_intercept.c:70 src/exec_iolog.c:163 src/exec_iolog.c:173
+#: src/exec_intercept.c:71 src/exec_iolog.c:163 src/exec_iolog.c:173
 #: src/exec_iolog.c:218 src/exec_iolog.c:225 src/exec_iolog.c:252
-#: src/exec_monitor.c:426 src/exec_monitor.c:434 src/exec_monitor.c:442
-#: src/exec_monitor.c:449 src/exec_monitor.c:456 src/exec_monitor.c:463
-#: src/exec_monitor.c:470 src/exec_monitor.c:477 src/exec_monitor.c:484
-#: src/exec_monitor.c:491 src/exec_nopty.c:233 src/exec_nopty.c:242
+#: src/exec_monitor.c:438 src/exec_monitor.c:446 src/exec_monitor.c:454
+#: src/exec_monitor.c:461 src/exec_monitor.c:468 src/exec_monitor.c:475
+#: src/exec_monitor.c:482 src/exec_monitor.c:489 src/exec_monitor.c:496
+#: src/exec_monitor.c:503 src/exec_nopty.c:233 src/exec_nopty.c:242
 #: src/exec_nopty.c:249 src/exec_nopty.c:256 src/exec_nopty.c:263
 #: src/exec_nopty.c:270 src/exec_nopty.c:277 src/exec_nopty.c:284
 #: src/exec_nopty.c:291 src/exec_nopty.c:298 src/exec_nopty.c:305
 #: src/exec_nopty.c:312 src/exec_nopty.c:320 src/exec_nopty.c:328
-#: src/exec_nopty.c:387 src/exec_nopty.c:457 src/exec_pty.c:432
-#: src/exec_pty.c:537 src/exec_pty.c:587 src/exec_pty.c:965 src/exec_pty.c:974
-#: src/exec_pty.c:981 src/exec_pty.c:988 src/exec_pty.c:995
-#: src/exec_pty.c:1002 src/exec_pty.c:1009 src/exec_pty.c:1016
-#: src/exec_pty.c:1023 src/exec_pty.c:1030 src/exec_pty.c:1037
-#: src/exec_pty.c:1044
+#: src/exec_nopty.c:387 src/exec_nopty.c:457 src/exec_pty.c:441
+#: src/exec_pty.c:555 src/exec_pty.c:605 src/exec_pty.c:992 src/exec_pty.c:1001
+#: src/exec_pty.c:1008 src/exec_pty.c:1015 src/exec_pty.c:1022
+#: src/exec_pty.c:1029 src/exec_pty.c:1036 src/exec_pty.c:1043
+#: src/exec_pty.c:1050 src/exec_pty.c:1057 src/exec_pty.c:1064
+#: src/exec_pty.c:1071
 msgid "unable to add event to queue"
 msgstr "impossible d'ajouter l'événement à la queue"
 
-#: src/exec_intercept.c:323 src/sudo.c:1033
+#: src/exec_intercept.c:324 src/sudo.c:1056
 msgid "command not set by the security policy"
 msgstr "commande pas définie par la politique de sécurité"
 
-#: src/exec_intercept.c:401 src/exec_intercept.c:441 src/sudo.c:1253
-#: src/sudo.c:1298 src/sudo.c:1342
+#: src/exec_intercept.c:403 src/exec_intercept.c:443 src/sudo.c:1274
+#: src/sudo.c:1319 src/sudo.c:1363
 msgid "command rejected by policy"
 msgstr "commande rejetée par la politique"
 
-#: src/exec_intercept.c:512 src/sudo.c:1940
+#: src/exec_intercept.c:514 src/sudo.c:1961
 msgid "approval plugin error"
 msgstr "erreur du greffon d'approbation"
 
-#: src/exec_intercept.c:537 src/sudo.c:1258 src/sudo.c:1303 src/sudo.c:1347
-#: src/sudo.c:1421
+#: src/exec_intercept.c:539 src/sudo.c:1279 src/sudo.c:1324 src/sudo.c:1368
+#: src/sudo.c:1442
 msgid "policy plugin error"
 msgstr "erreur du greffon de politique"
 
-#: src/exec_intercept.c:566
+#: src/exec_intercept.c:568
 msgid "invalid PolicyCheckRequest"
 msgstr "PolicyCheckRequest invalide"
 
-#: src/exec_intercept.c:709
+#: src/exec_intercept.c:711
 #, c-format
 msgid "client request too large: %zu"
 msgstr "demande client trop grand : %zu"
 
-#: src/exec_intercept.c:751
+#: src/exec_intercept.c:753
 #, c-format
 msgid "unable to unpack %s size %zu"
 msgstr "impossible de décompresser %s avec une taille de %zu"
 
-#: src/exec_intercept.c:799
+#: src/exec_intercept.c:801
 #, c-format
 msgid "unexpected type_case value %d in %s from %s"
 msgstr "valeur %d inattendue pour type_case dans %s de %s"
 
-#: src/exec_intercept.c:825
+#: src/exec_intercept.c:827
 #, c-format
 msgid "server message too large: %zu"
 msgstr "message serveur trop grand : %zu"
@@ -383,135 +385,135 @@ msgstr "l'enregistrement des erreurs est suspendu"
 msgid "error changing window size"
 msgstr "erreur lors du changement de la taille de la fenêtre"
 
-#: src/exec_monitor.c:328
+#: src/exec_monitor.c:330
 msgid "error reading from socketpair"
 msgstr "erreur de lecture sur la paire de sockets"
 
-#: src/exec_monitor.c:340
+#: src/exec_monitor.c:342
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr "réponse inattendue sur le backchannel : %d"
 
-#: src/exec_monitor.c:566
+#: src/exec_monitor.c:578
 msgid "unable to set controlling tty"
 msgstr "impossible de choisir le tty de contrôle"
 
-#: src/exec_monitor.c:574 src/exec_nopty.c:504 src/exec_nopty.c:514
-#: src/exec_nopty.c:524 src/exec_nopty.c:560 src/exec_pty.c:1195
-#: src/exec_pty.c:1222 src/exec_pty.c:1242 src/exec_pty.c:1262
-#: src/tgetpass.c:306
-msgid "unable to create pipe"
-msgstr "impossible de créer le tube"
+#: src/exec_monitor.c:590 src/exec_nopty.c:572 src/exec_pty.c:1126
+#: src/exec_pty.c:1135
+msgid "unable to create sockets"
+msgstr "impossible de créer des sockets"
 
-#: src/exec_monitor.c:584
+#: src/exec_monitor.c:599
 msgid "unable to receive message from parent"
 msgstr "impossible de recevoir un message du parent"
 
-#: src/exec_monitor.c:600 src/exec_nopty.c:603 src/exec_pty.c:1303
+#: src/exec_monitor.c:614 src/exec_nopty.c:606 src/exec_pty.c:1336
 #: src/sudo_edit.c:361 src/tgetpass.c:310
 msgid "unable to fork"
 msgstr "erreur de fork"
 
-#: src/exec_monitor.c:604 src/exec_monitor.c:700 src/exec_nopty.c:708
+#: src/exec_monitor.c:618 src/exec_monitor.c:720 src/exec_nopty.c:712
 msgid "unable to restore tty label"
 msgstr "impossible de rétablir l'étiquette du tty"
 
-#: src/exec_monitor.c:615 src/sesh.c:217 src/sudo.c:1204
+#: src/exec_monitor.c:629 src/exec_monitor.c:678 src/sesh.c:217 src/sudo.c:1225
 #, c-format
 msgid "unable to execute %s"
 msgstr "impossible d'exécuter %s"
 
-#: src/exec_nopty.c:554 src/exec_pty.c:1131
+#: src/exec_nopty.c:507 src/exec_nopty.c:517 src/exec_nopty.c:527
+#: src/exec_nopty.c:563 src/exec_pty.c:1224 src/exec_pty.c:1251
+#: src/exec_pty.c:1274 src/exec_pty.c:1292 src/tgetpass.c:306
+msgid "unable to create pipe"
+msgstr "impossible de créer le tube"
+
+#: src/exec_nopty.c:557 src/exec_pty.c:1157
 msgid "policy plugin failed session initialization"
 msgstr "le greffon de règles a échoué lors de l'initialisation de la session"
 
-#: src/exec_nopty.c:569 src/exec_pty.c:1100 src/exec_pty.c:1109
-msgid "unable to create sockets"
-msgstr "impossible de créer des sockets"
-
-#: src/exec_nopty.c:696 src/exec_pty.c:1406
+#: src/exec_nopty.c:700 src/exec_pty.c:1437
 msgid "error in event loop"
 msgstr "erreur dans la boucle des événements"
 
-#: src/exec_preload.c:167 src/net_ifs.c:206 src/net_ifs.c:372
-#: src/net_ifs.c:433 src/net_ifs.c:620 src/net_ifs.c:852 src/sudo.c:488
-#: src/sudo_edit.c:398 src/sudo_edit.c:406
+#: src/exec_preload.c:168 src/net_ifs.c:206 src/net_ifs.c:372 src/net_ifs.c:433
+#: src/net_ifs.c:620 src/net_ifs.c:852 src/sudo.c:494 src/sudo_edit.c:398
+#: src/sudo_edit.c:406
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "erreur interne, débordement %s"
 
-#: src/exec_ptrace.c:1080 src/exec_ptrace.c:1105 src/exec_ptrace.c:1925
+#: src/exec_ptrace.c:1082 src/exec_ptrace.c:1107 src/exec_ptrace.c:1930
 #, c-format
 msgid "unable to set registers for process %d"
 msgstr "impossible de définir les registres pour le processus %d"
 
-#: src/exec_ptrace.c:1100 src/exec_ptrace.c:1275 src/exec_ptrace.c:1628
+#: src/exec_ptrace.c:1102 src/exec_ptrace.c:1277 src/exec_ptrace.c:1630
 #, c-format
 msgid "process %d exited unexpectedly"
 msgstr "le processus %d s'est terminé de manière inattendue"
 
-#: src/exec_ptrace.c:1209
+#: src/exec_ptrace.c:1211
 msgid "unable to set seccomp filter"
 msgstr "impossible de définir le filtre seccomp"
 
-#: src/exec_ptrace.c:1406
+#: src/exec_ptrace.c:1408
 #, c-format
 msgid "interpreter argument , expected \"%s\", got \"%s\""
 msgstr "interpréteur d'argument, « %s » attendu, « %s » obtenu"
 
-#: src/exec_ptrace.c:1505
+#: src/exec_ptrace.c:1506
 #, c-format
 msgid "pathname mismatch, expected \"%s\", got \"%s\""
 msgstr "désaccord dans le nom du chemin, « %s » attendu, « %s » obtenu"
 
-#: src/exec_ptrace.c:1514 src/exec_ptrace.c:1521 src/exec_ptrace.c:1545
-#: src/exec_ptrace.c:1553 src/exec_ptrace.c:1559 src/exec_ptrace.c:1565
+#: src/exec_ptrace.c:1515 src/exec_ptrace.c:1522 src/exec_ptrace.c:1546
+#: src/exec_ptrace.c:1554 src/exec_ptrace.c:1560 src/exec_ptrace.c:1566
 #, c-format
 msgid "%s[%d] mismatch, expected \"%s\", got \"%s\""
 msgstr "désaccord dans %s[%d], « %s » attendu, « %s » obtenu"
 
-#: src/exec_ptrace.c:1632
+#: src/exec_ptrace.c:1634
 #, c-format
 msgid "process %d unexpected status 0x%x"
 msgstr "le processus %d a retourné le statut inattendu 0x%x"
 
-#: src/exec_ptrace.c:1723
+#: src/exec_ptrace.c:1727
 #, c-format
 msgid "unable to get event message for process %d"
 msgstr "impossible d'obtenir le message de l'événement pour le processus %d"
 
-#: src/exec_ptrace.c:1730
+#: src/exec_ptrace.c:1734
 #, c-format
 msgid "unable to get registers for process %d"
 msgstr "impossible d'obtenir les registres pour le processus %d"
 
-#: src/exec_pty.c:84
+#: src/exec_pty.c:87
 msgid "unable to allocate pty"
 msgstr "impossible d'allouer le pty"
 
-#: src/exec_pty.c:131 src/exec_pty.c:284 src/tgetpass.c:251
+#: src/exec_pty.c:118 src/exec_pty.c:257 src/tgetpass.c:251
 msgid "unable to restore terminal settings"
 msgstr "impossible de rétablir les paramètres du terminal"
 
-#: src/exec_pty.c:243
+#: src/exec_pty.c:218
 msgid "unable to set handler for SIGCONT"
 msgstr "impossible de spécifier le gestionnaire pour SIGCONT"
 
-#: src/exec_pty.c:293
+#: src/exec_pty.c:267
 #, c-format
 msgid "unable to set handler for SIG%s"
 msgstr "impossible de spécifier le gestionnaire pour SIG%s"
 
-#: src/exec_pty.c:317
+#: src/exec_pty.c:291
 #, c-format
 msgid "unable to restore handler for SIG%s"
 msgstr "impossible de rétablir le gestionnaire pour SIG%s"
 
-#: src/exec_pty.c:345
+#: src/exec_pty.c:319
 msgid "unable to restore handler for SIGCONT"
 msgstr "impossible de rétablir le gestionnaire pour SIGCONT"
 
-#: src/exec_pty.c:1353
+#: src/exec_pty.c:1385
 msgid "unable to send message to monitor process"
 msgstr "impossible d'envoyer le message au processus de monitoring"
 
@@ -560,40 +562,40 @@ msgstr "type de greffon %d inconnu dans %s"
 msgid "policy plugin %s does not include a check_policy method"
 msgstr "le greffon de règles %s ne contient pas de méthode check_policy"
 
-#: src/parse_args.c:214
+#: src/parse_args.c:213
 #, c-format
 msgid "invalid environment variable name: %s"
 msgstr "nom de variable d'environnement invalide: %s"
 
-#: src/parse_args.c:319
+#: src/parse_args.c:318
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "l'argument à -C doit être un nombre plus grand ou égal à 3"
 
-#: src/parse_args.c:556
+#: src/parse_args.c:555
 msgid "you may not specify both the -i and -s options"
 msgstr "vous ne pouvez pas spécifier les options -i et -s en même temps"
 
-#: src/parse_args.c:561
+#: src/parse_args.c:560
 msgid "you may not specify both the -i and -E options"
 msgstr "vous ne pouvez pas spécifier les options -i et -E en même temps"
 
-#: src/parse_args.c:571
+#: src/parse_args.c:570
 msgid "the -E option is not valid in edit mode"
 msgstr "l'option -E n'est pas valable en mode édition"
 
-#: src/parse_args.c:574
+#: src/parse_args.c:573
 msgid "you may not specify environment variables in edit mode"
 msgstr "vous ne pouvez pas spécifier de variable d'environnement en mode édition"
 
-#: src/parse_args.c:584
+#: src/parse_args.c:583
 msgid "the -U option may only be used with the -l option"
 msgstr "l'option -U ne peut être utilisée qu'avec l'option -l"
 
-#: src/parse_args.c:588
+#: src/parse_args.c:587
 msgid "the -A and -S options may not be used together"
 msgstr "les options -A et -S ne peuvent pas être utilisées ensemble"
 
-#: src/parse_args.c:686
+#: src/parse_args.c:685
 msgid "sudoedit is not supported on this platform"
 msgstr "sudoedit n'est pas pris en charge sur cette plate-forme"
 
@@ -947,151 +949,151 @@ msgstr "setproject a échoué pour le projet « %s »"
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "attention, l'assignement du contrôle de ressources a échoue pour le projet « %s »"
 
-#: src/sudo.c:214
+#: src/sudo.c:215
 #, c-format
 msgid "Sudo version %s\n"
 msgstr "Sudo version %s\n"
 
-#: src/sudo.c:216
+#: src/sudo.c:217
 #, c-format
 msgid "Configure options: %s\n"
 msgstr "Options de configuration : %s\n"
 
-#: src/sudo.c:224
+#: src/sudo.c:225
 msgid "fatal error, unable to load plugins"
 msgstr "erreur fatale, impossible de charger les greffons"
 
-#: src/sudo.c:270
+#: src/sudo.c:271
 msgid "plugin did not return a command to execute"
 msgstr "le greffon n'a pas retourné une commande à exécuter"
 
-#: src/sudo.c:306
+#: src/sudo.c:307
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr "mode sudo 0x%x inattendu"
 
-#: src/sudo.c:559
+#: src/sudo.c:567
 #, c-format
 msgid "you do not exist in the %s database"
 msgstr "vous n'existez pas dans la base de données %s"
 
-#: src/sudo.c:616
+#: src/sudo.c:632
 msgid "unable to determine tty"
 msgstr "impossible de déterminer le tty"
 
-#: src/sudo.c:932
+#: src/sudo.c:955
 msgid "The \"no new privileges\" flag is set, which prevents sudo from running as root."
 msgstr "Le fanion « no new privileges » (« pas de nouveau privilèges ») est défini. Il empêche sudo de s'exécuter en tant que root."
 
-#: src/sudo.c:934
+#: src/sudo.c:957
 msgid "If sudo is running in a container, you may need to adjust the container configuration to disable the flag."
 msgstr "Si sudo est exécuté dans un conteneur, vous devrez ajuster la configuration du conteneur pour désactiver ce fanion."
 
-#: src/sudo.c:968
+#: src/sudo.c:991
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s doit être la propriété du uid %d et avoir le bit setuid mis"
 
-#: src/sudo.c:971
+#: src/sudo.c:994
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "le uid effectif n'est pas %d. Est-ce que %s est sur un système de fichiers avec l'option « nosuid » ou un système de fichiers NFS sans privilèges root ?"
 
-#: src/sudo.c:977
+#: src/sudo.c:1000
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "le uid effectif n'est pas %d. Est-ce que sudo est installé setuid root ?"
 
-#: src/sudo.c:993 src/tgetpass.c:332
+#: src/sudo.c:1016 src/tgetpass.c:332
 msgid "unable to set supplementary group IDs"
 msgstr "impossible d'attribuer les ID de groupe supplémentaires"
 
-#: src/sudo.c:1000
+#: src/sudo.c:1023
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "impossible de changer le gid effectif à runas gid %u"
 
-#: src/sudo.c:1006
+#: src/sudo.c:1029
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "impossible de changer le gid à runas gid %u"
 
-#: src/sudo.c:1037
+#: src/sudo.c:1060
 msgid "argv not set by the security policy"
 msgstr "argv pas défini par la politique de sécurité"
 
-#: src/sudo.c:1041
+#: src/sudo.c:1064
 msgid "envp not set by the security policy"
 msgstr "envp pas défini par la politique de sécurité"
 
-#: src/sudo.c:1063
+#: src/sudo.c:1086
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "condition de fin de l'enfant inconnue: %d"
 
-#: src/sudo.c:1176
+#: src/sudo.c:1198
 msgid "unable to initialize policy plugin"
 msgstr "impossible d'initialiser le greffon de règles"
 
-#: src/sudo.c:1238
+#: src/sudo.c:1259
 #, c-format
 msgid "policy plugin %s is missing the \"check_policy\" method"
 msgstr "le greffon de règles %s n'a pas de méthode « check_policy »"
 
-#: src/sudo.c:1284
+#: src/sudo.c:1305
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "le greffon de règles %s ne supporte pas les privilèges de listage"
 
-#: src/sudo.c:1328
+#: src/sudo.c:1349
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "le greffon de règles %s ne supporte pas l'option -v"
 
-#: src/sudo.c:1366
+#: src/sudo.c:1387
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "le greffon de règles %s ne supporte pas les options -k/-K"
 
-#: src/sudo.c:1495
+#: src/sudo.c:1516
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "erreur à l'initialisation du greffon E/S %s"
 
-#: src/sudo.c:1498
+#: src/sudo.c:1519
 msgid "error initializing I/O plugin"
 msgstr "erreur à l'initialisation du greffon E/S"
 
-#: src/sudo.c:1647
+#: src/sudo.c:1668
 #, c-format
 msgid "error initializing audit plugin %s"
 msgstr "erreur à l'initialisation du greffon d'audit %s"
 
-#: src/sudo.c:1726
+#: src/sudo.c:1747
 #, c-format
 msgid "%s: unable to log error event%s%s"
 msgstr "%s: impossible d'enregistrer dans le journal l'événement d'erreur%s%s"
 
-#: src/sudo.c:1762
+#: src/sudo.c:1783
 #, c-format
 msgid "%s: unable to log accept event%s%s"
 msgstr "%s: impossible d'enregistrer dans le journal l'événement d'acceptation%s%s"
 
-#: src/sudo.c:1767 src/sudo.c:1805
+#: src/sudo.c:1788 src/sudo.c:1826
 msgid "audit plugin error"
 msgstr "erreur du greffon d'audit"
 
-#: src/sudo.c:1800
+#: src/sudo.c:1821
 #, c-format
 msgid "%s: unable to log reject event%s%s"
 msgstr "%s: impossible d'enregistrer dans le journal l'événement de rejet%s%s"
 
-#: src/sudo.c:1860
+#: src/sudo.c:1881
 #, c-format
 msgid "error initializing approval plugin %s"
 msgstr "erreur à l'initialisation du greffon d'approbation %s"
 
-#: src/sudo.c:1930
+#: src/sudo.c:1951
 msgid "command rejected by approver"
 msgstr "commande rejetée par l'approbateur"
 
@@ -1151,7 +1153,7 @@ msgstr "erreur de greffon : liste de fichiers manquantes pour sudoedit"
 msgid "unable to read the clock"
 msgstr "impossible de lire l'horloge"
 
-#: src/sudo_intercept_common.c:365
+#: src/sudo_intercept_common.c:372
 msgid "intercept port not set"
 msgstr "port d'interception non défini"
 
@@ -1189,6 +1191,12 @@ msgstr "impossible de changer le uid en %u"
 #, c-format
 msgid "unable to run %s"
 msgstr "impossible d'exécuter %s"
+
+#: src/ttyname.c:139 src/ttyname.c:182 src/ttyname.c:199 src/ttyname.c:284
+#: src/ttyname.c:312 src/ttyname.c:356
+#, c-format
+msgid "unable to find terminal name for device %u, %u"
+msgstr "impossible de trouver le nom du terminal pour le périphérique %u, %u"
 
 #: src/utmp.c:283
 msgid "unable to save stdin"
@@ -1252,9 +1260,6 @@ msgstr "impossible de rétablir stdin"
 
 #~ msgid "error reading from signal pipe"
 #~ msgstr "erreur lors de la lecture du tube signal"
-
-#~ msgid "unable to set terminal to raw mode"
-#~ msgstr "impossible de mettre le terminal en mode brut"
 
 #~ msgid "internal error, tried allocate zero bytes"
 #~ msgstr "erreur interne, a tenté d'allouer zéro octets"
