@@ -1002,6 +1002,7 @@ with_nsswitch
 with_ldap
 with_ldap_conf_file
 with_ldap_secret_file
+with_secure_path_value
 with_secure_path
 with_interfaces
 with_askpass
@@ -1883,6 +1884,8 @@ Optional Packages:
   --with-ldap[=DIR]       enable LDAP support
   --with-ldap-conf-file   path to LDAP configuration file
   --with-ldap-secret-file path to LDAP secret password file
+  --with-secure-path-value
+                          value of secure_path in the default sudoers file
   --with-secure-path      override the user's path with a built-in one
   --without-interfaces    don't try to read the ip addr of network interfaces
   --with-askpass=PATH     Fully qualified pathname of askpass helper
@@ -6304,6 +6307,19 @@ test -n "$with_ldap_secret_file" && ldap_secret="$with_ldap_secret_file"
 cat >>confdefs.h <<EOF
 #define _PATH_LDAP_SECRET "$ldap_secret"
 EOF
+
+
+
+# Check whether --with-secure-path-value was given.
+if test ${with_secure_path_value+y}
+then :
+  withval=$with_secure_path_value; case $with_secure_path_value in
+    yes|no)	as_fn_error $? "must give --secure-path-value an argument." "$LINENO" 5
+		;;
+    *)		secure_path="$with_secure_path_value"
+		;;
+esac
+fi
 
 
 

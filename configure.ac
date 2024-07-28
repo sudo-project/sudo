@@ -1068,6 +1068,14 @@ AC_ARG_WITH(ldap-secret-file, [AS_HELP_STRING([--with-ldap-secret-file], [path t
 test -n "$with_ldap_secret_file" && ldap_secret="$with_ldap_secret_file"
 SUDO_DEFINE_UNQUOTED(_PATH_LDAP_SECRET, "$ldap_secret", [Path to the ldap.secret file])
 
+AC_ARG_WITH(secure-path-value, [AS_HELP_STRING([--with-secure-path-value], [value of secure_path in the default sudoers file])],
+[case $with_secure_path_value in
+    yes|no)	AC_MSG_ERROR([must give --secure-path-value an argument.])
+		;;
+    *)		secure_path="$with_secure_path_value"
+		;;
+esac])
+
 AC_ARG_WITH(secure-path, [AS_HELP_STRING([--with-secure-path], [override the user's path with a built-in one])],
 [case $with_secure_path in
     yes)	with_secure_path="$secure_path"

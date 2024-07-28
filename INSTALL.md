@@ -1003,6 +1003,13 @@ Defaults are listed in brackets after the description.
         is used.  
         Sudoers option: secure_path
 
+    --with-secure-path-value[=PATH]
+        Sets the value of "secure_path" that is substituted into
+        the default sudoers file.  This option is intended to be
+        used by package maintainers who wish to set "secure_path"
+        to a system-specific value in the default sudoers file.
+        It does not actually enable "secure-path".
+
     --with-sendmail=PATH
         Override configure's guess as to the location of sendmail.  
         Sudoers option: mailerpath
