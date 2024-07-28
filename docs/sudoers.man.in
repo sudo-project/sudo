@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "June 11, 2024" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "July 14, 2024" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -8050,10 +8050,12 @@ glob(3),
 mktemp(3),
 strftime(3),
 sudo.conf(@mansectform@),
+sudo_logsrv.proto(@mansectform@),
 sudo_plugin(@mansectform@),
 sudoers.ldap(@mansectform@),
 sudoers_timestamp(@mansectform@),
 sudo(@mansectsu@),
+sudo_logsrvd(@mansectsu@),
 visudo(@mansectsu@)
 .SH "AUTHORS"
 Many people have worked on
