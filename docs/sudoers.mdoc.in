@@ -5320,7 +5320,7 @@ Users in the group specified by the
 .Em exempt_group
 option are not affected by
 .Em secure_path .
-This option is @secure_path_set@ by default.
+This option is @secure_path_status@ by default.
 .It syslog
 Syslog facility if syslog is being used for logging (negate to
 disable syslog logging).

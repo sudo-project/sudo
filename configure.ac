@@ -177,7 +177,7 @@ AC_SUBST([sssd_lib])
 AC_SUBST([nsswitch_conf])
 AC_SUBST([netsvc_conf])
 AC_SUBST([secure_path])
-AC_SUBST([secure_path_set])
+AC_SUBST([secure_path_status])
 AC_SUBST([editor])
 AC_SUBST([pam_session])
 AC_SUBST([pam_login_service])
@@ -230,7 +230,7 @@ sesh_file="$libexecdir/sudo/sesh"
 visudo="$sbindir/visudo"
 nsswitch_conf=/etc/nsswitch.conf
 secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-secure_path_set="disabled"
+secure_path_status="disabled"
 pam_session=on
 pam_login_service=sudo
 plugindir="$libexecdir/sudo"
@@ -1078,7 +1078,7 @@ AC_ARG_WITH(secure-path, [AS_HELP_STRING([--with-secure-path], [override the use
 esac])
 AS_IF([test "${with_secure_path-no}" != "no"], [
 	AC_DEFINE_UNQUOTED(SECURE_PATH, "$secure_path")
-	secure_path_set="set to $secure_path"
+	secure_path_status="set to $secure_path"
 ])
 
 AC_ARG_WITH(interfaces, [AS_HELP_STRING([--without-interfaces], [don't try to read the ip addr of network interfaces])],

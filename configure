@@ -733,7 +733,7 @@ plugindir
 pam_login_service
 pam_session
 editor
-secure_path_set
+secure_path_status
 secure_path
 netsvc_conf
 nsswitch_conf
@@ -3730,7 +3730,7 @@ sesh_file="$libexecdir/sudo/sesh"
 visudo="$sbindir/visudo"
 nsswitch_conf=/etc/nsswitch.conf
 secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-secure_path_set="disabled"
+secure_path_status="disabled"
 pam_session=on
 pam_login_service=sudo
 plugindir="$libexecdir/sudo"
@@ -6324,7 +6324,7 @@ then :
 
 	printf "%s\n" "#define SECURE_PATH \"$secure_path\"" >>confdefs.h
 
-	secure_path_set="set to $secure_path"
+	secure_path_status="set to $secure_path"
 
 fi
 

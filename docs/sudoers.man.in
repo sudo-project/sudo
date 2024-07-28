@@ -5677,7 +5677,7 @@ Users in the group specified by the
 \fIexempt_group\fR
 option are not affected by
 \fIsecure_path\fR.
-This option is @secure_path_set@ by default.
+This option is @secure_path_status@ by default.
 .RE
 .TP 14n
 syslog
