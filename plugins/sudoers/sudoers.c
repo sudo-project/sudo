@@ -1317,7 +1317,7 @@ open_sudoers(const char *path, char **outfile, bool doedit, bool *keepopen)
 	    } else {
 		/* Rewind fp and set close on exec flag. */
 		rewind(fp);
-		(void)fcntl(fileno(fp), F_SETFD, 1);
+		(void)fcntl(fileno(fp), F_SETFD, FD_CLOEXEC);
 		if (outfile != NULL) {
                     *outfile = sudo_rcstr_dup(fname);
 		    if (*outfile == NULL) {
