@@ -106,7 +106,7 @@ utimens_ts_to_tv(int fd, const char *file, const struct timespec *ts,
  * Emulate futimens() via futimes()
  */
 int
-sudo_futimens(int fd, const struct timespec *ts)
+sudo_futimens(int fd, const struct timespec ts[2])
 {
     struct timeval tv[2], *times = NULL;
 
@@ -122,7 +122,7 @@ sudo_futimens(int fd, const struct timespec *ts)
  * Emulate futimens() via futime()
  */
 int
-sudo_futimens(int fd, const struct timespec *ts)
+sudo_futimens(int fd, const struct timespec ts[2])
 {
     struct utimbuf utb, *times = NULL;
 
@@ -142,7 +142,7 @@ sudo_futimens(int fd, const struct timespec *ts)
  * Nothing to do but fail.
  */
 int
-sudo_futimens(int fd, const struct timespec *ts)
+sudo_futimens(int fd, const struct timespec ts[2])
 {
     errno = ENOSYS;
     return -1;
@@ -154,7 +154,7 @@ sudo_futimens(int fd, const struct timespec *ts)
  * Emulate utimensat() via utimes()
  */
 int
-sudo_utimensat(int fd, const char *file, const struct timespec *ts, int flag)
+sudo_utimensat(int fd, const char *file, const struct timespec ts[2], int flag)
 {
     struct timeval tv[2], *times = NULL;
 
@@ -175,7 +175,7 @@ sudo_utimensat(int fd, const char *file, const struct timespec *ts, int flag)
  * Emulate utimensat() via utime()
  */
 int
-sudo_utimensat(int fd, const char *file, const struct timespec *ts, int flag)
+sudo_utimensat(int fd, const char *file, const struct timespec ts[2], int flag)
 {
     struct utimbuf utb, *times = NULL;
 
