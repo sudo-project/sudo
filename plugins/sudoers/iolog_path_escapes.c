@@ -60,7 +60,7 @@ strlcpy_no_slash(char * restrict dst, const char * restrict src, size_t size)
 }
 
 static size_t
-fill_seq(char *str, size_t strsize, void *v)
+fill_seq(char * restrict str, size_t strsize, void * restrict v)
 {
 #ifdef SUDOERS_NO_SEQ
     debug_decl(fill_seq, SUDOERS_DEBUG_UTIL);
@@ -86,7 +86,7 @@ fill_seq(char *str, size_t strsize, void *v)
 }
 
 static size_t
-fill_user(char *str, size_t strsize, void *v)
+fill_user(char * restrict str, size_t strsize, void * restrict v)
 {
     struct sudoers_context *ctx = v;
     debug_decl(fill_user, SUDOERS_DEBUG_UTIL);
@@ -94,7 +94,7 @@ fill_user(char *str, size_t strsize, void *v)
 }
 
 static size_t
-fill_group(char *str, size_t strsize, void *v)
+fill_group(char * restrict str, size_t strsize, void * restrict v)
 {
     struct sudoers_context *ctx = v;
     struct group *grp;
@@ -111,7 +111,7 @@ fill_group(char *str, size_t strsize, void *v)
 }
 
 static size_t
-fill_runas_user(char *str, size_t strsize, void *v)
+fill_runas_user(char * restrict str, size_t strsize, void * restrict v)
 {
     struct sudoers_context *ctx = v;
     debug_decl(fill_runas_user, SUDOERS_DEBUG_UTIL);
@@ -119,7 +119,7 @@ fill_runas_user(char *str, size_t strsize, void *v)
 }
 
 static size_t
-fill_runas_group(char *str, size_t strsize, void *v)
+fill_runas_group(char * restrict str, size_t strsize, void * restrict v)
 {
     struct sudoers_context *ctx = v;
     struct group *grp;
@@ -141,7 +141,7 @@ fill_runas_group(char *str, size_t strsize, void *v)
 }
 
 static size_t
-fill_hostname(char *str, size_t strsize, void *v)
+fill_hostname(char * restrict str, size_t strsize, void * restrict v)
 {
     struct sudoers_context *ctx = v;
     debug_decl(fill_hostname, SUDOERS_DEBUG_UTIL);
@@ -149,7 +149,7 @@ fill_hostname(char *str, size_t strsize, void *v)
 }
 
 static size_t
-fill_command(char *str, size_t strsize, void *v)
+fill_command(char * restrict str, size_t strsize, void * restrict v)
 {
     struct sudoers_context *ctx = v;
     debug_decl(fill_command, SUDOERS_DEBUG_UTIL);

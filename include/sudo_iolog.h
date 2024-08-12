@@ -94,7 +94,7 @@ struct iolog_file {
 
 struct iolog_path_escape {
     const char *name;
-    size_t (*copy_fn)(char *, size_t, void *);
+    size_t (*copy_fn)(char * restrict, size_t, void * restrict );
 };
 
 /* host_port.c */
