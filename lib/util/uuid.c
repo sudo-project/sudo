@@ -71,7 +71,7 @@ sudo_uuid_create_v1(unsigned char uuid_out[16])
  * Format a uuid as a 36-byte string (plus one for the NUL).
  */
 char *
-sudo_uuid_to_string_v1(const unsigned char uuid[16], char *dst, size_t dstsiz)
+sudo_uuid_to_string_v1(const unsigned char uuid[restrict 16], char * restrict dst, size_t dstsiz)
 {
     const char hex[] = "0123456789abcdef";
     char *cp = dst;
