@@ -29,7 +29,7 @@ static const unsigned char base64enc_tab[64] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 size_t
-base64_encode(const unsigned char *in, size_t in_len, char *out, size_t out_len)
+base64_encode(const unsigned char * restrict in, size_t in_len, char * restrict out, size_t out_len)
 {
     size_t ii, io;
     unsigned int rem, v;
