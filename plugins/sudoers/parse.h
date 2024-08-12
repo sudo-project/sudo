@@ -446,7 +446,7 @@ extern FILE *sudoersin;
 extern char *sudoers;
 
 /* base64.c */
-size_t base64_decode(const char * restrict str, unsigned char *dst, size_t dsize);
+size_t base64_decode(const char * restrict str, unsigned char * restrict dst, size_t dsize);
 size_t base64_encode(const unsigned char * restrict in, size_t in_len, char * restrict out, size_t out_len);
 
 /* timeout.c */
