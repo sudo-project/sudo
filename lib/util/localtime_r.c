@@ -36,7 +36,7 @@
  * Still has the normal localtime() side effects.
  */
 struct tm *
-sudo_localtime_r(const time_t *timer, struct tm *result)
+sudo_localtime_r(const time_t * restrict timer, struct tm * restrict result)
 {
     struct tm *tm;
 
