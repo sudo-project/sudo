@@ -466,18 +466,19 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 	    continue;
 	}
 	if (MATCHES(*cur, "ttydev=")) {
-	    unsigned long long ullval;
-	    char *ep;
+	    long long llval;
 
+	    /*
+	     * dev_t is unsigned but sudo_strtonum() deals with signed values.
+	     * This is not a problem in practice since we allow the full range.
+	     */
 	    p = *cur + sizeof("ttydev=") - 1;
-	    errno = 0;
-	    ullval = strtoull(p, &ep, 10);
-	    if ((*p == '\0' || *ep != '\0') ||
-		    (errno == ERANGE && ullval == ULLONG_MAX)) {
+	    llval = sudo_strtonum(p, LLONG_MIN, LLONG_MAX, &errstr);
+	    if (errstr != NULL) {
 		INVALID("ttydev=");
 		goto bad;
 	    }
-	    ctx->user.ttydev = (dev_t)ullval;
+	    ctx->user.ttydev = (dev_t)llval;
 	    continue;
 	}
 	if (MATCHES(*cur, "host=")) {
