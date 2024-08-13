@@ -195,7 +195,7 @@ sudo_dso_public int sudo_getgrouplist2_v1(const char *name, gid_t basegid, GETGR
 #define sudo_getgrouplist2(_a, _b, _c, _d) sudo_getgrouplist2_v1((_a), (_b), (_c), (_d))
 
 /* hexchar.c */
-sudo_dso_public int sudo_hexchar_v1(const char *s);
+sudo_dso_public int sudo_hexchar_v1(const char s[restrict static 2]);
 #define sudo_hexchar(_a) sudo_hexchar_v1(_a)
 
 /* key_val.c */

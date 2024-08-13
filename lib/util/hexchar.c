@@ -32,7 +32,7 @@
  * Returns a value 0-255 on success or -1 for invalid input.
  */
 int
-sudo_hexchar_v1(const char *s)
+sudo_hexchar_v1(const char s[restrict static 2])
 {
     unsigned char result[2];
     unsigned int i;
