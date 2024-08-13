@@ -69,7 +69,7 @@ typedef struct {
 #define	GLOB_NOMATCH	(-3)	/* No match and GLOB_NOCHECK not set. */
 #define	GLOB_NOSYS	(-4)	/* Function not supported. */
 
-sudo_dso_public int  sudo_glob(const char *, int, int (*)(const char *, int), glob_t *);
+sudo_dso_public int  sudo_glob(const char * restrict, int, int (*)(const char *, int), glob_t * restrict);
 sudo_dso_public void sudo_globfree(glob_t *);
 
 #define glob(_a, _b, _c, _d) sudo_glob((_a), (_b), (_c), (_d))
