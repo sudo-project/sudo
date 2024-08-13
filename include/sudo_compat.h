@@ -28,6 +28,9 @@
 #include <sys/stat.h>	/* to avoid problems with mismatched headers and libc */
 #include <unistd.h>	/* to avoid problems with mismatched headers and libc */
 #include <stdio.h>
+#if !defined(HAVE_UTIMENSAT) || !defined(HAVE_FUTIMENS)
+# include <time.h>
+#endif
 #if !defined(HAVE_VSNPRINTF) || !defined(HAVE_VASPRINTF) || \
     !defined(HAVE_VSYSLOG) || defined(PREFER_PORTABLE_SNPRINTF)
 # include <stdarg.h>
