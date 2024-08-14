@@ -40,7 +40,7 @@
 sudo_dso_public int main(int argc, char *argv[]);
 
 int sudo_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
-extern char *get_process_ttyname(char *name, size_t namelen);
+extern dev_t get_process_ttyname(char *name, size_t namelen);
 
 static int
 match_ttys(const char *tty1, const char *tty2)
@@ -67,9 +67,10 @@ int
 main(int argc, char *argv[])
 {
     char *tty_libc = NULL, *tty_sudo = NULL;
+    int ch, errors = 0, ntests = 1;
     char pathbuf[PATH_MAX];
     bool verbose = false;
-    int ch, errors = 0, ntests = 1;
+    dev_t ttydev;
 
     initprogname(argc > 0 ? argv[0] : "check_ttyname");
 
@@ -85,7 +86,8 @@ main(int argc, char *argv[])
     }
 
     /* Lookup tty name using kernel info if possible. */
-    if (get_process_ttyname(pathbuf, sizeof(pathbuf)) != NULL)
+    ttydev = get_process_ttyname(pathbuf, sizeof(pathbuf));
+    if (ttydev != (dev_t)-1)
 	tty_sudo = pathbuf;
 
 #if defined(HAVE_KINFO_PROC2_NETBSD) || \
