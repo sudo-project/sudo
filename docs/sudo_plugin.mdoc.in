@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2009-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2009-2024 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 25, 2023
+.Dd August 14, 2024
 .Dt SUDO_PLUGIN @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -605,8 +605,9 @@ This entry is only present if the user has a terminal device
 associated with the session.
 .It ttydev=dev_t
 The number of the user's terminal device, if one exists,
-in the form of a
-.Vt dev_t .
+formatted as a
+.Vt long long
+value.
 This entry is only present if the user has a terminal device
 associated with the session.
 Only available starting with API version 1.22.
