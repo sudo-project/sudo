@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2013-2020, 2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2020, 2022, 2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -88,8 +88,7 @@ main(int argc, char *argv[])
     /* Lookup tty name using kernel info if possible. */
     ttydev = get_process_ttyname(pathbuf, sizeof(pathbuf));
     if (ttydev != (dev_t)-1) {
-	char numbuf[STRLEN_MAX_UNSIGNED(unsigned long long) + 1];
-	unsigned long long ullval;
+	char numbuf[STRLEN_MAX_SIGNED(long long) + 1];
 	const char *errstr;
 	dev_t newdev;
 
@@ -98,20 +97,15 @@ main(int argc, char *argv[])
 
 	/* Check that we can format a dev_t as a string and parse it. */
 	ntests++;
-#if SIZEOF_DEV_T == SIZEOF_LONG
-	ullval = (unsigned long)ttydev;
-#else
-	ullval = (unsigned long long)ttydev;
-#endif
-	(void)snprintf(numbuf, sizeof(numbuf), "%llu", ullval);
+	(void)snprintf(numbuf, sizeof(numbuf), "%lld", (long long)ttydev);
 	newdev = sudo_strtonum(numbuf, LLONG_MIN, LLONG_MAX, &errstr);
 	if (errstr != NULL) {
 	    printf("%s: FAIL unable to parse device number %s: %s",
 		getprogname(), numbuf, errstr);
 	    errors++;
 	} else if (ttydev != newdev) {
-	    printf("%s: FAIL device mismatch for %s, %s != %llu",
-		getprogname(), pathbuf, numbuf, ullval);
+	    printf("%s: FAIL device mismatch for %s, %s != %lld",
+		getprogname(), pathbuf, numbuf, (long long)ttydev);
 	    errors++;
 	}
     }
