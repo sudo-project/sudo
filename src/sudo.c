@@ -620,12 +620,13 @@ get_user_info(struct user_details *ud)
 
     ttydev = get_process_ttyname(path, sizeof(path));
     if (ttydev != (dev_t)-1) {
+	int len;
 #if SIZEOF_DEV_T == SIZEOF_LONG
-	n = asprintf(&info[++i], "ttydev=%lu", (unsigned long)ttydev);
+	len = asprintf(&info[++i], "ttydev=%lu", (unsigned long)ttydev);
 #else
-	n = asprintf(&info[++i], "ttydev=%llu", (unsigned long long)ttydev);
+	len = asprintf(&info[++i], "ttydev=%llu", (unsigned long long)ttydev);
 #endif
-	if (n == -1)
+	if (len == -1)
 	    goto oom;
 	info[++i] = sudo_new_key_val("tty", path);
 	if (info[i] == NULL)
