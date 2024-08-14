@@ -1293,6 +1293,9 @@
 /* Define to 1 if you want sudo to set $HOME in shell mode. */
 #undef SHELL_SETS_HOME
 
+/* The size of 'dev_t', as computed by sizeof. */
+#undef SIZEOF_DEV_T
+
 /* The size of 'id_t', as computed by sizeof. */
 #undef SIZEOF_ID_T
 

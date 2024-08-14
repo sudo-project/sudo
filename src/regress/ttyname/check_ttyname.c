@@ -67,10 +67,10 @@ int
 main(int argc, char *argv[])
 {
     char *tty_libc = NULL, *tty_sudo = NULL;
-    int ch, errors = 0, ntests = 1;
     char pathbuf[PATH_MAX];
     bool verbose = false;
-    dev_t ttydev;
+    dev_t ttydev = -1;
+    int ch, errors = 0, ntests = 1;
 
     initprogname(argc > 0 ? argv[0] : "check_ttyname");
 
@@ -87,8 +87,34 @@ main(int argc, char *argv[])
 
     /* Lookup tty name using kernel info if possible. */
     ttydev = get_process_ttyname(pathbuf, sizeof(pathbuf));
-    if (ttydev != (dev_t)-1)
+    if (ttydev != (dev_t)-1) {
+	char numbuf[STRLEN_MAX_UNSIGNED(unsigned long long) + 1];
+	unsigned long long ullval;
+	const char *errstr;
+	dev_t newdev;
+
+	/* For comparison below. */
 	tty_sudo = pathbuf;
+
+	/* Check that we can format a dev_t as a string and parse it. */
+	ntests++;
+#if SIZEOF_DEV_T == SIZEOF_LONG
+	ullval = (unsigned long)ttydev;
+#else
+	ullval = (unsigned long long)ttydev;
+#endif
+	(void)snprintf(numbuf, sizeof(numbuf), "%llu", ullval);
+	newdev = sudo_strtonum(numbuf, LLONG_MIN, LLONG_MAX, &errstr);
+	if (errstr != NULL) {
+	    printf("%s: FAIL unable to parse device number %s: %s",
+		getprogname(), numbuf, errstr);
+	    errors++;
+	} else if (ttydev != newdev) {
+	    printf("%s: FAIL device mismatch for %s, %s != %llu",
+		getprogname(), pathbuf, numbuf, ullval);
+	    errors++;
+	}
+    }
 
 #if defined(HAVE_KINFO_PROC2_NETBSD) || \
     defined(HAVE_KINFO_PROC_OPENBSD) || \

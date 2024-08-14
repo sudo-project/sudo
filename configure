@@ -21007,6 +21007,41 @@ printf "%s\n" "#define SIZEOF_LONG_LONG $ac_cv_sizeof_long_long" >>confdefs.h
 # version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
 # declarations like 'int a3[[(sizeof (unsigned char)) >= 0]];'.
 # This bug is HP SR number 8606223364.
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking size of dev_t" >&5
+printf %s "checking size of dev_t... " >&6; }
+if test ${ac_cv_sizeof_dev_t+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) if ac_fn_c_compute_int "$LINENO" "(long int) (sizeof (dev_t))" "ac_cv_sizeof_dev_t"        "$ac_includes_default"
+then :
+
+else case e in #(
+  e) if test "$ac_cv_type_dev_t" = yes; then
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: error: in '$ac_pwd':" >&5
+printf "%s\n" "$as_me: error: in '$ac_pwd':" >&2;}
+as_fn_error 77 "cannot compute sizeof (dev_t)
+See 'config.log' for more details" "$LINENO" 5; }
+   else
+     ac_cv_sizeof_dev_t=0
+   fi ;;
+esac
+fi
+ ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sizeof_dev_t" >&5
+printf "%s\n" "$ac_cv_sizeof_dev_t" >&6; }
+
+
+
+printf "%s\n" "#define SIZEOF_DEV_T $ac_cv_sizeof_dev_t" >>confdefs.h
+
+
+# The cast to long int works around a bug in the HP C Compiler
+# version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
+# declarations like 'int a3[[(sizeof (unsigned char)) >= 0]];'.
+# This bug is HP SR number 8606223364.
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking size of id_t" >&5
 printf %s "checking size of id_t... " >&6; }
 if test ${ac_cv_sizeof_id_t+y}
