@@ -469,14 +469,16 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 	    long long llval;
 
 	    /*
-	     * dev_t is unsigned but sudo_strtonum() deals with signed values.
-	     * This is not a problem in practice since we allow the full range.
+	     * dev_t can be signed or unsigned.  The front-end formats it
+	     * as long long (signed).  We allow the full range of values
+	     * which should work with either signed or unsigned dev_t.
 	     */
 	    p = *cur + sizeof("ttydev=") - 1;
 	    llval = sudo_strtonum(p, LLONG_MIN, LLONG_MAX, &errstr);
 	    if (errstr != NULL) {
+		/* Front end bug?  Not a fatal error. */
 		INVALID("ttydev=");
-		goto bad;
+		continue;
 	    }
 	    ctx->user.ttydev = (dev_t)llval;
 	    continue;
