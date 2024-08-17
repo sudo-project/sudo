@@ -141,7 +141,7 @@ sudo_edit_mktemp(const char *ofile, char **tfile)
     suff = strrchr(base, '.');
     if (suff != NULL) {
 	len = asprintf(tfile, "%s/%.*sXXXXXXXX%s", edit_tmpdir,
-	    (int)(size_t)(suff - base), base, suff);
+	    (int)(suff - base), base, suff);
     } else {
 	len = asprintf(tfile, "%s/%s.XXXXXXXX", edit_tmpdir, base);
     }

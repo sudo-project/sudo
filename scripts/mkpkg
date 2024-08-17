@@ -282,6 +282,12 @@ case "$osversion" in
 	make_opts="${make_opts}${make_opts+ }"'docdir=$(datarootdir)/doc/packages/$(PACKAGE_TARNAME)'
 	;;
     deb*|ubu*)
+	if [ "$crossbuild" = "true" ]; then
+	    osname="unknown"
+	else
+	    osname="`uname`"
+	fi
+
 	# Sudo-specific executables moved to /usr/libexec/sudo starting in
 	# Debian: Debian 12 (Bookworm)
 	# Ubuntu: Ubuntu 22.04 (Jammy Jellyfish)
@@ -294,55 +300,64 @@ case "$osversion" in
 	osmajor=`sed -n -e 's/^VERSION_ID=\"\([0-9]*\).*$/\1/p' /etc/os-release`
 	case "$osversion" in
 	    deb*)
-		if [ -z $osmajor ] || [ $osmajor -ge 10 ]; then
-		    with_apparmor=true
-		fi
 		if [ -z $osmajor ] || [ $osmajor -ge 12 ]; then
 		    libexec=libexec
 		fi
+		case "$osname" in
+		Linux|unknown)
+		    if [ -z $osmajor ] || [ $osmajor -ge 10 ]; then
+			with_apparmor=true
+		    fi
+		    ;;
+		esac
 		;;
 	    ubu*)
-		if [ -z $osmajor ] || [ $osmajor -ge 14 ]; then
-		    with_apparmor=true
-		fi
 		if [ -z $osmajor ] || [ $osmajor -ge 22 ]; then
 		    libexec=libexec
 		fi
+		if [ -z $osmajor ] || [ $osmajor -ge 14 ]; then
+		    with_apparmor=true
+		fi
+		configure_opts="--enable-admin-flag${tab}--without-lecture${configure_opts+$tab}${configure_opts}"
 		;;
 	esac
 
+	case "$osname" in
+	GNU)
+	    # GNU hurd doesn't have PAM, AppArmor or have Python packages
+	    ;;
+	*)
+	    # Python plugins
+	    with_python=true
+	    # PAM
+	    configure_opts="--with-pam${configure_opts+$tab}${configure_opts}"
+	    # Linux audit
+	    configure_opts="--with-linux-audit${configure_opts+$tab}${configure_opts}"
+	    # AppArmor
+	    if [ X"$with_apparmor" = X"true" ]; then
+		configure_opts="--with-apparmor${configure_opts+$tab}${configure_opts}"
+	    fi
+	    ;;
+	esac
 	# Encrypted remote I/O log support.
 	with_openssl=true
-	# Python plugins
-	with_python=true
 	# Man pages should be compressed in .deb files
 	export MANCOMPRESS='gzip -9'
 	export MANCOMPRESSEXT='.gz'
-	# If Ubuntu, add --enable-admin-flag
-	case "$osversion" in
-	    ubu*)
-		configure_opts="${configure_opts}${configure_opts+$tab}--enable-admin-flag${tab}--without-lecture"
-		;;
-	esac
 	# Newer Debian uses arch-specific lib dirs
 	MULTIARCH=`dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null`
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	if [ "$flavor" = "ldap" ]; then
-	    configure_opts="${configure_opts}${configure_opts+$tab}--with-ldap
-		--with-ldap-conf-file=/etc/sudo-ldap.conf"
+	    configure_opts="--with-ldap${tab}--with-ldap-conf-file=/etc/sudo-ldap.conf${configure_opts+$tab}${configure_opts}"
 	else
-	    configure_opts="${configure_opts}${configure_opts+$tab}--with-sssd"
+	    configure_opts="--with-sssd${configure_opts+$tab}${configure_opts}"
 	    if [ -n "$MULTIARCH" ]; then
 		# SSSD backend needs to know where to find the sssd lib
-		configure_opts="${configure_opts}${configure_opts+$tab}--with-sssd-lib=/usr/lib/$MULTIARCH"
+		configure_opts="--with-sssd-lib=/usr/lib/$MULTIARCH${configure_opts+$tab}${configure_opts}"
 	    fi
-	fi
-	if [ X"$with_apparmor" = X"true" ]; then
-		configure_opts="${configure_opts}${configure_opts+$tab}--with-apparmor"
 	fi
 	configure_opts="--prefix=/usr
 		--with-all-insults
-		--with-pam
 		--enable-zlib=system
 		--with-fqdn
 		--with-logging=syslog
@@ -356,20 +371,23 @@ case "$osversion" in
 		--with-sendmail=/usr/sbin/sendmail
 		--mandir=/usr/share/man
 		--libexecdir=/usr/$libexec
-		--with-linux-audit
 		$configure_opts"
-	# Use correct libaudit dependency
-	for f in /lib/${MULTIARCH}${MULTIARCH:+/}libaudit.so.[0-9]* /lib/libaudit.so.[0-9]*; do
-	    if [ -f "$f" ]; then
-		linux_audit=`dpkg-query -S "$f" 2>/dev/null | sed -n 's/:.*//p'`
-		test -n "$linux_audit" && break
+	# Use correct libaudit dependency for Linux audit
+	case "$configure_opts" in
+	*--with-linux-audit*)
+	    for f in /usr/lib/${MULTIARCH}${MULTIARCH:+/}libaudit.so.[0-9]* /usr/lib/libaudit.so.[0-9]* /lib/${MULTIARCH}${MULTIARCH:+/}libaudit.so.[0-9]* /lib/libaudit.so.[0-9]*; do
+		if [ -f "$f" ]; then
+		    linux_audit=`dpkg-query -S "$f" 2>/dev/null | sed -n 's/:.*//p'`
+		    test -n "$linux_audit" && break
+		fi
+	    done
+	    if [ -z "$linux_audit" ]; then
+		echo "unable to determine package for libaudit" 1>&2
+		exit 1
 	    fi
-	done
-	if [ -z "$linux_audit" ]; then
-	    echo "unable to determine package for libaudit" 1>&2
-	    exit 1
-	fi
-	PPVARS="${PPVARS}${PPVARS+$space}linux_audit=$linux_audit"
+	    PPVARS="${PPVARS}${PPVARS+$space}linux_audit=$linux_audit"
+	    ;;
+	esac
 	# Use correct libssl dependency
 	libssl_dep=`dpkg-query -S /usr/lib/${MULTIARCH}${MULTIARCH:+/}libssl.so.[1-9]* /lib/${MULTIARCH}${MULTIARCH:+/}libssl.so.[1-9]* 2>/dev/null | sort -rn | awk -F: '{ print $1; exit }'`
 	if [ -z "$libssl_dep" ]; then

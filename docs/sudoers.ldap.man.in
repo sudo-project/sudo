@@ -1,4 +1,4 @@
-.\" Automatically generated from an mdoc input file.  Do not edit.
+.\" Automatically generated from the sudoers.ldap.mdoc.in file.  Do not edit.
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOERS.LDAP" "@mansectform@" "June 7, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS.LDAP" "@mansectform@" "June 25, 2024" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -651,20 +651,24 @@ distribution includes versions of the
 \fBsudoers\fR
 schema for multiple LDAP servers:
 .TP 6n
-\fIschema.OpenLDAP\fR
-OpenLDAP slapd and
-OpenBSD
-ldapd
+\fIschema.ActiveDirectory\fR
+Microsoft Active Directory
 .TP 6n
-\fIschema.olcSudo\fR
-OpenLDAP slapd 2.3 and higher when on-line configuration is enabled
+\fIschema.IBM_LDAP\fR
+IBM Directory Server, also known as IBM Tivoli Directory Server,
+IBM Security Directory Server, and IBM Security Verify Directory
 .TP 6n
 \fIschema.iPlanet\fR
 Netscape-derived servers such as the iPlanet, Oracle,
 and 389 Directory Servers
 .TP 6n
-\fIschema.ActiveDirectory\fR
-Microsoft Active Directory
+\fIschema.olcSudo\fR
+OpenLDAP slapd 2.3 and higher when on-line configuration is enabled
+.TP 6n
+\fIschema.OpenLDAP\fR
+OpenLDAP slapd and
+OpenBSD
+ldapd
 .PP
 The schema in OpenLDAP format is also included in the
 \fIEXAMPLES\fR
@@ -1783,8 +1787,20 @@ See the
 section for more information.
 .SH "BUGS"
 If you believe you have found a bug in
-\fBsudo\fR,
-you can submit a bug report at https://bugzilla.sudo.ws/
+\fBsudoers.ldap\fR,
+you can either file a bug report in the sudo bug database,
+https://bugzilla.sudo.ws/, or open an issue at
+https://github.com/sudo-project/sudo/issues.
+If you would prefer to use email, messages may be sent to the
+sudo-workers mailing list,
+https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
+or <sudo@sudo.ws> (private).
+.PP
+Please not report security vulnerabilities through public GitHub
+issues, Bugzilla or mailing lists.
+Instead, report them via email to <Todd.Miller@sudo.ws>.
+You may encrypt your message with PGP if you would like, using
+the key found at https://www.sudo.ws/dist/PGPKEYS.
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or

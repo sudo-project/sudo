@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2005, 2007-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004-2005, 2007-2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -234,22 +234,16 @@ sudoers_format_cmndspec(struct sudo_lbuf *lbuf,
     /* Merge privilege-level tags with cmndspec tags. */
     TAGS_MERGE(tags, cs->tags);
 
-#ifdef HAVE_PRIV_SET
     if (cs->privs != NULL && FIELD_CHANGED(prev_cs, cs, privs))
 	sudo_lbuf_append(lbuf, "PRIVS=\"%s\" ", cs->privs);
     if (cs->limitprivs != NULL && FIELD_CHANGED(prev_cs, cs, limitprivs))
 	sudo_lbuf_append(lbuf, "LIMITPRIVS=\"%s\" ", cs->limitprivs);
-#endif /* HAVE_PRIV_SET */
-#ifdef HAVE_SELINUX
     if (cs->role != NULL && FIELD_CHANGED(prev_cs, cs, role))
 	sudo_lbuf_append(lbuf, "ROLE=%s ", cs->role);
     if (cs->type != NULL && FIELD_CHANGED(prev_cs, cs, type))
 	sudo_lbuf_append(lbuf, "TYPE=%s ", cs->type);
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_APPARMOR
     if (cs->apparmor_profile != NULL && FIELD_CHANGED(prev_cs, cs, apparmor_profile))
 	sudo_lbuf_append(lbuf, "APPARMOR_PROFILE=%s ", cs->apparmor_profile);
-#endif /* HAVE_APPARMOR */
     if (cs->runchroot != NULL && FIELD_CHANGED(prev_cs, cs, runchroot))
 	sudo_lbuf_append(lbuf, "CHROOT=%s ", cs->runchroot);
     if (cs->runcwd != NULL && FIELD_CHANGED(prev_cs, cs, runcwd))

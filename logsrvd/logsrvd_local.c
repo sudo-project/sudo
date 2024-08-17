@@ -220,7 +220,7 @@ store_accept_local(AcceptMessage *msg, uint8_t *buf, size_t len,
 	    evlog->iolog_file = evlog->iolog_path +
 		(closure->evlog->iolog_file - closure->evlog->iolog_path);
 	}
-	sudo_timespecsub(&evlog->submit_time, &closure->evlog->submit_time,
+	sudo_timespecsub(&evlog->event_time, &closure->evlog->event_time,
 	    &evlog->iolog_offset);
     }
 
@@ -283,7 +283,7 @@ store_reject_local(RejectMessage *msg, uint8_t *buf, size_t len,
 	    evlog->iolog_file = evlog->iolog_path +
 		(closure->evlog->iolog_file - closure->evlog->iolog_path);
 	}
-	sudo_timespecsub(&evlog->submit_time, &closure->evlog->submit_time,
+	sudo_timespecsub(&evlog->event_time, &closure->evlog->event_time,
 	    &evlog->iolog_offset);
     }
 

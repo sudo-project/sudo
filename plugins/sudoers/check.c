@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1993-1996,1998-2005, 2007-2018
+ * Copyright (c) 1993-1996,1998-2005, 2007-2024
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -139,16 +139,9 @@ check_user(struct sudoers_context *ctx, unsigned int validated,
     if (ctx->user.uid == 0 || (ctx->user.uid == ctx->runas.pw->pw_uid &&
 	(ctx->runas.gr == NULL ||
 	user_in_group(ctx->user.pw, ctx->runas.gr->gr_name)))) {
-#ifdef HAVE_SELINUX
-	if (ctx->runas.role == NULL && ctx->runas.type == NULL)
-#endif
-#ifdef HAVE_APPARMOR
-	if (ctx->runas.apparmor_profile == NULL)
-#endif
-#ifdef HAVE_PRIV_SET
-	if (ctx->runas.privs == NULL && ctx->runas.limitprivs == NULL)
-#endif
-	{
+	if (ctx->runas.role == NULL && ctx->runas.type == NULL &&
+	    ctx->runas.apparmor_profile == NULL &&
+	    ctx->runas.privs == NULL && ctx->runas.limitprivs == NULL) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"%s: user running command as self", __func__);
 	    ret = AUTH_SUCCESS;

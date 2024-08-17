@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2013, 2016, 2018-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013, 2016, 2018-2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * This code is derived from software contributed by Aaron Spangler.
  *
@@ -439,14 +439,11 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 	    cmndspec->timeout = prev_cmndspec->timeout;
 	    cmndspec->runchroot = prev_cmndspec->runchroot;
 	    cmndspec->runcwd = prev_cmndspec->runcwd;
-#ifdef HAVE_SELINUX
 	    cmndspec->role = prev_cmndspec->role;
 	    cmndspec->type = prev_cmndspec->type;
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_PRIV_SET
+	    cmndspec->apparmor_profile = prev_cmndspec->apparmor_profile;
 	    cmndspec->privs = prev_cmndspec->privs;
 	    cmndspec->limitprivs = prev_cmndspec->limitprivs;
-#endif /* HAVE_PRIV_SET */
 	    cmndspec->tags = prev_cmndspec->tags;
 	    if (cmndspec->tags.setenv == IMPLIED)
 		cmndspec->tags.setenv = UNSPEC;
@@ -516,7 +513,6 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 			}
 			if ((cmndspec->runcwd = strdup(val)) == NULL)
 			    break;
-#ifdef HAVE_SELINUX
 		    } else if (strcmp(var, "role") == 0 && val != NULL) {
 			if (cmndspec->role != NULL) {
 			    free(cmndspec->role);
@@ -533,8 +529,14 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 			}
 			if ((cmndspec->type = strdup(val)) == NULL)
 			    break;
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_PRIV_SET
+		    } else if (strcmp(var, "apparmor_profile") == 0 && val != NULL) {
+			if (cmndspec->apparmor_profile != NULL) {
+			    free(cmndspec->apparmor_profile);
+			    sudo_warnx(U_("duplicate sudoOption: %s%s%s"), var,
+				op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
+			}
+			if ((cmndspec->apparmor_profile = strdup(val)) == NULL)
+			    break;
 		    } else if (strcmp(var, "privs") == 0 && val != NULL) {
 			if (cmndspec->privs != NULL) {
 			    free(cmndspec->privs);
@@ -551,7 +553,6 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 			}
 			if ((cmndspec->limitprivs = strdup(val)) == NULL)
 			    break;
-#endif /* HAVE_PRIV_SET */
 		    } else if (store_options) {
 			if (!append_default(var, val, op, source,
 			    &priv->defaults)) {

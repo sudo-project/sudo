@@ -1,8 +1,8 @@
-.\" Automatically generated from an mdoc input file.  Do not edit.
+.\" Automatically generated from the sudoers.mdoc.in file.  Do not edit.
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2023
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2024
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "December 19, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "July 14, 2024" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -292,6 +292,14 @@ The
 option can be used to select the type of time stamp record
 \fBsudoers\fR
 will use.
+.PP
+The
+\fBtsdump\fR
+utility, included with the sudo source distribution, can be used to
+display the contents of a time stamp file.
+See
+sudoers_timestamp(@mansectform@)
+for details of the time stamp file format.
 .SS "Logging"
 By default,
 \fBsudoers\fR
@@ -3816,6 +3824,22 @@ by default.
 .sp
 This setting is only supported by version 1.8.8 or higher.
 .TP 18n
+pam_silent
+If set, PAM authentication will be performed in silent mode.
+This prevents PAM authentication modules from generating output.
+In some cases, this may suppress important information about why
+authentication failed.
+For example, PAM modules such as
+\fIpam_faillock\fR
+will only display a warning if
+\fIpam_silent\fR
+is disabled.
+This flag is
+\fIon\fR
+by default.
+.sp
+This setting is only supported by version 1.8.16 or higher.
+.TP 18n
 passprompt_override
 If set, the prompt specified by
 \fIpassprompt\fR
@@ -4280,6 +4304,14 @@ user's terminal device even after the main program has finished
 executing.
 By running the command in a separate pseudo-terminal, this attack is
 no longer possible.
+.sp
+A side effect of running the command in a new pseudo-terminal is
+that input will be passed to the command even if it is non-interactive.
+This means that, for example, keys pressed while a non-interactive
+command is running will be consumed by
+\fBsudo\fR
+instead of being passed to the shell after the command exits.
+.sp
 This flag is
 \fIon\fR
 by default for
@@ -4388,7 +4420,7 @@ it will
 \(lqroll over\(rq
 to zero, after which
 \fBsudoers\fR
-will truncate and re-use any existing I/O log path names.
+will truncate and reuse any existing I/O log path names.
 .sp
 This setting is only supported by version 1.8.7 or higher.
 .TP 18n
@@ -4498,6 +4530,19 @@ entries by specifying the
 option.
 This option is only available when sudo is built with AppArmor
 support.
+.TP 18n
+cmddenial_message
+.br
+It set,
+\fBsudo\fR
+will display this message when a user is denied access to run the
+specified command, but is listed in the
+\fIsudoers\fR
+file for the host.
+This can be used to provide additional, site-specific information
+to the user when a command is denied by the security policy.
+It does not override the standard warning the user receives when
+a command is denied.
 .TP 18n
 authfail_message
 Message that is displayed after a user fails to authenticate.
@@ -5352,18 +5397,45 @@ Supported log formats are:
 .PD 0
 .TP 6n
 json
-Logs in JSON format.
+Currently, this is an alias for
+\fIjson_pretty\fR.
+In a future version of
+\fBsudo\fR,
+\fIjson\fR
+will be equivalent to
+\fIjson_compact\fR.
 JSON log entries contain the full user details as well as the execution
 environment if the command was allowed.
+.PD
+.TP 6n
+json_compact
+Log events in
+\(lqcompact\(rq
+(minified) JSON format.
+Each event is written as a separate JSON object on single line without
+extraneous white space.
 Due to limitations of the protocol, JSON events sent via
 \fIsyslog\fR
 may be truncated.
-.PD
+.TP 6n
+json_pretty
+Log events in
+\(lqpretty\(rq
+JSON format.
+When logging to a file, the entire file is treated as a single JSON
+object consisting of multiple events, each event spanning multiple lines.
+When logging via
+\fIsyslog\fR,
+there is no difference between the
+\fIjson_pretty\fR
+and
+\fIjson_compact\fR
+formats.
 .TP 6n
 sudo
-Traditional sudo-style logs, see
+Log events in traditional sudo-style format, see
 \fIEVENT LOGGING\fR
-for a description of the log file format.
+for details.
 .PP
 This setting affects logs sent via
 syslog(3)
@@ -5576,17 +5648,37 @@ If set,
 will use this value in place of the user's
 \fRPATH\fR
 environment variable.
-This option can be used to reset the
-\fRPATH\fR
-to a known good value that contains directories for system administrator
-commands such as
+There are two basic use cases for
+\fIsecure_path\fR:
+.PP
+.RS 14n
+.PD 0
+.TP 3n
+1.\&
+To make it possible for
+\fBsudo\fR
+to find system administrator commands located in directories that
+may not be in the default user path, such as
 \fI/usr/sbin\fR.
-.sp
+.PD
+.TP 3n
+2.\&
+To help protect scripts and programs that execute other commands without
+first setting
+\fRPATH\fR
+to a safe value.
+Otherwise, a user with limited privileges may be able to run arbitrary
+commands by manipulating the
+\fRPATH\fR
+if the command being run executes other commands without using a
+fully-qualified path name.
+.PP
 Users in the group specified by the
 \fIexempt_group\fR
 option are not affected by
 \fIsecure_path\fR.
-This option is @secure_path@ by default.
+This option is @secure_path_status@ by default.
+.RE
 .TP 14n
 syslog
 Syslog facility if syslog is being used for logging (negate to
@@ -6757,7 +6849,7 @@ Once the I/O log sequence number reaches
 \fImaxseq\fR,
 it will be reset to zero and
 \fBsudoers\fR
-will truncate and re-use any existing I/O logs.
+will truncate and reuse any existing I/O logs.
 .SH "FILES"
 .TP 26n
 \fI@sysconfdir@/sudo.conf\fR
@@ -7834,7 +7926,7 @@ If no terminal is present or the
 option is set to
 \(lqppid\(rq,
 the start time of the parent process is used instead.
-In most cases this will prevent a time stamp record from being re-used
+In most cases this will prevent a time stamp record from being reused
 without the user entering a password when logging out and back in again.
 .SH "DEBUGGING"
 Versions 1.8.4 and higher of the
@@ -7958,10 +8050,12 @@ glob(3),
 mktemp(3),
 strftime(3),
 sudo.conf(@mansectform@),
+sudo_logsrv.proto(@mansectform@),
 sudo_plugin(@mansectform@),
 sudoers.ldap(@mansectform@),
 sudoers_timestamp(@mansectform@),
 sudo(@mansectsu@),
+sudo_logsrvd(@mansectsu@),
 visudo(@mansectsu@)
 .SH "AUTHORS"
 Many people have worked on
@@ -8013,8 +8107,20 @@ option in
 \fIsudoers\fR.
 .SH "BUGS"
 If you believe you have found a bug in
-\fBsudo\fR,
-you can submit a bug report at https://bugzilla.sudo.ws/
+\fBsudoers\fR,
+you can either file a bug report in the sudo bug database,
+https://bugzilla.sudo.ws/, or open an issue at
+https://github.com/sudo-project/sudo/issues.
+If you would prefer to use email, messages may be sent to the
+sudo-workers mailing list,
+https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
+or <sudo@sudo.ws> (private).
+.PP
+Please not report security vulnerabilities through public GitHub
+issues, Bugzilla or mailing lists.
+Instead, report them via email to <Todd.Miller@sudo.ws>.
+You may encrypt your message with PGP if you would like, using
+the key found at https://www.sudo.ws/dist/PGPKEYS.
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or

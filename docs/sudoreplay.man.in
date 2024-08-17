@@ -1,4 +1,4 @@
-.\" Automatically generated from an mdoc input file.  Do not edit.
+.\" Automatically generated from the sudoreplay.mdoc.in file.  Do not edit.
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
@@ -170,7 +170,7 @@ In this mode,
 will list available sessions in a format similar to the
 \fBsudo\fR
 log file format, sorted by file name (or sequence number).
-Any control characters present in the log data are formated in octal
+Any control characters present in the log data are formatted in octal
 with a leading
 \(oq#\(cq
 character.
@@ -178,6 +178,7 @@ For example, a horizontal tab is displayed as
 \(oq#011\(cq
 and an embedded carriage return is displayed as
 \(oq#015\(cq.
+Space characters in the command name and arguments are also formatted in octal.
 .sp
 If a
 \fIsearch expression\fR
@@ -517,7 +518,19 @@ exhaustive list of people who have contributed to
 .SH "BUGS"
 If you believe you have found a bug in
 \fBsudoreplay\fR,
-you can submit a bug report at https://bugzilla.sudo.ws/
+you can either file a bug report in the sudo bug database,
+https://bugzilla.sudo.ws/, or open an issue at
+https://github.com/sudo-project/sudo/issues.
+If you would prefer to use email, messages may be sent to the
+sudo-workers mailing list,
+https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
+or <sudo@sudo.ws> (private).
+.PP
+Please not report security vulnerabilities through public GitHub
+issues, Bugzilla or mailing lists.
+Instead, report them via email to <Todd.Miller@sudo.ws>.
+You may encrypt your message with PGP if you would like, using
+the key found at https://www.sudo.ws/dist/PGPKEYS.
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or

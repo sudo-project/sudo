@@ -151,6 +151,8 @@ main(int argc, char *argv[])
 	argv += optind;
 
 	pg = (size_t)sysconf(_SC_PAGESIZE);
+	if (pg == (size_t)-1)
+		sudo_fatal("sysconf(_SC_PAGESIZE)");
 	if (getcwd(cwd, sizeof cwd - 1) == NULL)
 		sudo_fatal("getcwd");
 	clen = strlen(cwd);

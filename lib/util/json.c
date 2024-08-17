@@ -265,6 +265,7 @@ sudo_json_close_object_v1(struct json_container *jsonc)
     }
     if (!json_append_buf(jsonc, "}"))
 	debug_return_bool(false);
+    jsonc->need_comma = true;
 
     debug_return_bool(true);
 }
@@ -309,6 +310,7 @@ sudo_json_close_array_v1(struct json_container *jsonc)
     }
     if (!json_append_buf(jsonc, "]"))
 	debug_return_bool(false);
+    jsonc->need_comma = true;
 
     debug_return_bool(true);
 }

@@ -87,7 +87,7 @@ sudo_fwtk_verify(const struct sudoers_context *ctx, struct passwd *pw,
     const char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     char *pass;				/* Password from the user */
-    char buf[SUDO_CONV_REPL_MAX + 12];	/* General prupose buffer */
+    char buf[SUDO_CONV_REPL_MAX + 12];	/* General purpose buffer */
     char resp[128];			/* Response from the server */
     int error;
     debug_decl(sudo_fwtk_verify, SUDOERS_DEBUG_AUTH);

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2010-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2010-2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -119,11 +119,6 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
     } \
 } while (0)
 
-    if (sudo_gettime_real(&ctx->submit_time) == -1) {
-	sudo_warn("%s", U_("unable to get time of day"));
-	goto bad;
-    }
-
     /* Parse sudo.conf plugin args. */
     if (info->plugin_args != NULL) {
 	for (cur = info->plugin_args; *cur != NULL; cur++) {
@@ -237,7 +232,7 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 	    continue;
 	}
 	if (MATCHES(*cur, "prompt=")) {
-	    /* Allow epmpty prompt. */
+	    /* Allow empty prompt. */
 	    ctx->user.prompt = *cur + sizeof("prompt=") - 1;
 	    if (!append_default("passprompt_override", NULL, true, NULL, defaults))
 		goto oom;
@@ -322,7 +317,6 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 		goto bad;
 	    continue;
 	}
-#ifdef HAVE_SELINUX
 	if (MATCHES(*cur, "selinux_role=")) {
 	    CHECK(*cur, "selinux_role=");
 	    free(ctx->runas.role);
@@ -339,17 +333,6 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 		goto oom;
 	    continue;
 	}
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_APPARMOR
-	if (MATCHES(*cur, "apparmor_profile=")) {
-	    CHECK(*cur, "apparmor_profile=");
-	    free(ctx->runas.apparmor_profile);
-	    ctx->runas.apparmor_profile = strdup(*cur + sizeof("apparmor_profile=") - 1);
-	    if (ctx->runas.apparmor_profile == NULL)
-		goto oom;
-	    continue;
-	}
-#endif /* HAVE_APPARMOR */
 #ifdef HAVE_BSD_AUTH_H
 	if (MATCHES(*cur, "bsdauth_type=")) {
 	    CHECK(*cur, "bsdauth_type=");
@@ -415,6 +398,7 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
     ctx->user.gid = (gid_t)-1;
     ctx->user.uid = (gid_t)-1;
     ctx->user.umask = (mode_t)-1;
+    ctx->user.ttydev = (dev_t)-1;
     for (cur = info->user_info; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "user=")) {
 	    CHECK(*cur, "user=");
@@ -479,6 +463,24 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 	    ctx->user.tty = ctx->user.ttypath;
 	    if (strncmp(ctx->user.tty, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
 		ctx->user.tty += sizeof(_PATH_DEV) - 1;
+	    continue;
+	}
+	if (MATCHES(*cur, "ttydev=")) {
+	    long long llval;
+
+	    /*
+	     * dev_t can be signed or unsigned.  The front-end formats it
+	     * as long long (signed).  We allow the full range of values
+	     * which should work with either signed or unsigned dev_t.
+	     */
+	    p = *cur + sizeof("ttydev=") - 1;
+	    llval = sudo_strtonum(p, LLONG_MIN, LLONG_MAX, &errstr);
+	    if (errstr != NULL) {
+		/* Front end bug?  Not a fatal error. */
+		INVALID("ttydev=");
+		continue;
+	    }
+	    ctx->user.ttydev = (dev_t)llval;
 	    continue;
 	}
 	if (MATCHES(*cur, "host=")) {
@@ -592,6 +594,15 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
 	    free(gids);
 	    goto bad;
 	}
+    }
+
+    /* ttydev is only set in user_info[] for API 1.22 and above. */
+    if (ctx->user.ttydev == (dev_t)-1 && ctx->user.ttypath != NULL) {
+	struct stat sb;
+	if (stat(ctx->user.ttypath, &sb) == 0)
+	    ctx->user.ttydev = sb.st_rdev;
+	else
+	    sudo_warn("%s", ctx->user.ttypath);
     }
 
     /* umask is only set in user_info[] for API 1.10 and above. */
@@ -1020,7 +1031,6 @@ sudoers_policy_store_result(struct sudoers_context *ctx, bool accepted,
 	    goto oom;
     }
 #endif /* HAVE_LOGIN_CAP_H */
-#ifdef HAVE_SELINUX
     if (def_selinux && ctx->runas.role != NULL) {
 	if ((command_info[info_len++] = sudo_new_key_val("selinux_role", ctx->runas.role)) == NULL)
 	    goto oom;
@@ -1029,14 +1039,10 @@ sudoers_policy_store_result(struct sudoers_context *ctx, bool accepted,
 	if ((command_info[info_len++] = sudo_new_key_val("selinux_type", ctx->runas.type)) == NULL)
 	    goto oom;
     }
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_APPARMOR
-	if (ctx->runas.apparmor_profile != NULL) {
-	    if ((command_info[info_len++] = sudo_new_key_val("apparmor_profile", ctx->runas.apparmor_profile)) == NULL)
-		goto oom;
-	}
-#endif /* HAVE_APPARMOR */
-#ifdef HAVE_PRIV_SET
+    if (ctx->runas.apparmor_profile != NULL) {
+	if ((command_info[info_len++] = sudo_new_key_val("apparmor_profile", ctx->runas.apparmor_profile)) == NULL)
+	    goto oom;
+    }
     if (ctx->runas.privs != NULL) {
 	if ((command_info[info_len++] = sudo_new_key_val("runas_privs", ctx->runas.privs)) == NULL)
 	    goto oom;
@@ -1045,7 +1051,14 @@ sudoers_policy_store_result(struct sudoers_context *ctx, bool accepted,
 	if ((command_info[info_len++] = sudo_new_key_val("runas_limitprivs", ctx->runas.limitprivs)) == NULL)
 	    goto oom;
     }
-#endif /* HAVE_PRIV_SET */
+
+    /* Set command start time (monotonic) for the first accepted command. */
+    if (accepted && !ISSET(ctx->mode, MODE_POLICY_INTERCEPTED)) {
+	if (sudo_gettime_awake(&ctx->start_time) == -1) {
+	    sudo_warn("%s", U_("unable to get time of day"));
+	    goto bad;
+	}
+    }
 
     /* Fill in exec environment info. */
     *(exec_args->argv) = argv;

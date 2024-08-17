@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2005, 2007-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004-2005, 2007-2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -112,22 +112,16 @@ new_long_entry(const struct cmndspec *cs, const struct cmndspec *prev_cs)
 	debug_return_bool(true);
     if (RUNAS_CHANGED(cs, prev_cs) || TAGS_CHANGED(prev_cs->tags, cs->tags))
 	debug_return_bool(true);
-#ifdef HAVE_PRIV_SET
     if (cs->privs && (!prev_cs->privs || strcmp(cs->privs, prev_cs->privs) != 0))
 	debug_return_bool(true);
     if (cs->limitprivs && (!prev_cs->limitprivs || strcmp(cs->limitprivs, prev_cs->limitprivs) != 0))
 	debug_return_bool(true);
-#endif /* HAVE_PRIV_SET */
-#ifdef HAVE_SELINUX
     if (cs->role && (!prev_cs->role || strcmp(cs->role, prev_cs->role) != 0))
 	debug_return_bool(true);
     if (cs->type && (!prev_cs->type || strcmp(cs->type, prev_cs->type) != 0))
 	debug_return_bool(true);
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_APPARMOR
     if (cs->apparmor_profile && (!prev_cs->apparmor_profile || strcmp(cs->apparmor_profile, prev_cs->apparmor_profile) != 0))
 	debug_return_bool(true);
-#endif /* HAVE_APPARMOR */
     if (cs->runchroot && (!prev_cs->runchroot || strcmp(cs->runchroot, prev_cs->runchroot) != 0))
 	debug_return_bool(true);
     if (cs->runcwd && (!prev_cs->runcwd || strcmp(cs->runcwd, prev_cs->runcwd) != 0))
@@ -211,18 +205,18 @@ display_cmndspec_long(const struct sudoers_parse_tree *parse_tree,
 	} else {
 	    lbuf->len = olen;	/* no options */
 	}
-#ifdef HAVE_PRIV_SET
-	if (cs->privs)
+	if (cs->apparmor_profile != NULL) {
+	    sudo_lbuf_append(lbuf, "    ApparmorProfile: %s\n",
+		cs->apparmor_profile);
+	}
+	if (cs->privs != NULL)
 	    sudo_lbuf_append(lbuf, "    Privs: %s\n", cs->privs);
-	if (cs->limitprivs)
+	if (cs->limitprivs != NULL)
 	    sudo_lbuf_append(lbuf, "    Limitprivs: %s\n", cs->limitprivs);
-#endif /* HAVE_PRIV_SET */
-#ifdef HAVE_SELINUX
-	if (cs->role)
+	if (cs->role != NULL)
 	    sudo_lbuf_append(lbuf, "    Role: %s\n", cs->role);
-	if (cs->type)
+	if (cs->type != NULL)
 	    sudo_lbuf_append(lbuf, "    Type: %s\n", cs->type);
-#endif /* HAVE_SELINUX */
 	if (cs->runchroot != NULL)
 	    sudo_lbuf_append(lbuf, "    Chroot: %s\n", cs->runchroot);
 	if (cs->runcwd != NULL)

@@ -7,6 +7,16 @@
         },
         {
             "Options": [
+                { "runcwd": "~" }
+            ]
+        },
+        {
+            "Options": [
+                { "runchroot": "/" }
+            ]
+        },
+        {
+            "Options": [
                 { "runchroot": "/" }
             ]
         }
@@ -22,8 +32,8 @@
             "Cmnd_Specs": [
                 {
                     "Options": [
-                        "runchroot": "/var/www",
-                        "runcwd": "/htdocs"
+                        { "runchroot": "/var/www" },
+                        { "runcwd": "/htdocs" }
                     ],
                     "Commands": [
                         { "command": "/bin/ksh" }
@@ -41,7 +51,26 @@
             "Cmnd_Specs": [
                 {
                     "Options": [
-                        "runcwd": "~root"
+                        { "runchroot": "/var/www" },
+                        { "runcwd": "/htdocs" }
+                    ],
+                    "Commands": [
+                        { "command": "/bin/ksh" }
+                    ]
+                }
+            ]
+        },
+        {
+            "User_List": [
+                { "username": "user2" }
+            ],
+            "Host_List": [
+                { "hostname": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "Options": [
+                        { "runcwd": "~root" }
                     ],
                     "Commands": [
                         { "command": "/usr/bin/id" }
@@ -49,7 +78,33 @@
                 },
                 {
                     "Options": [
-                        "runcwd": "/tmp"
+                        { "runcwd": "/tmp" }
+                    ],
+                    "Commands": [
+                        { "command": "/bin/ls" }
+                    ]
+                }
+            ]
+        },
+        {
+            "User_List": [
+                { "username": "user3" }
+            ],
+            "Host_List": [
+                { "hostname": "ALL" }
+            ],
+            "Cmnd_Specs": [
+                {
+                    "Options": [
+                        { "runcwd": "~root" }
+                    ],
+                    "Commands": [
+                        { "command": "/usr/bin/id" }
+                    ]
+                },
+                {
+                    "Options": [
+                        { "runcwd": "/tmp" }
                     ],
                     "Commands": [
                         { "command": "/bin/ls" }

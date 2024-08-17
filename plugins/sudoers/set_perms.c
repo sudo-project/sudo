@@ -54,7 +54,7 @@ static struct gid_list *runas_setgroups(const struct sudoers_context *ctx);
 #endif
 
 /*
- * We keep track of the current permisstions and use a stack to restore
+ * We keep track of the current permissions and use a stack to restore
  * the old permissions.  A depth of 16 is overkill.
  */
 struct perm_state {

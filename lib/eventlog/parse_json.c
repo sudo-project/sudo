@@ -424,7 +424,7 @@ json_store_run_time(struct json_item *item, struct eventlog *evlog)
 static bool
 json_store_timestamp(struct json_item *item, struct eventlog *evlog)
 {
-    return json_store_timespec(item, &evlog->submit_time);
+    return json_store_timespec(item, &evlog->event_time);
 }
 
 static bool

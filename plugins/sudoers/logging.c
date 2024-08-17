@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1994-1996, 1998-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1994-1996, 1998-2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -157,8 +157,8 @@ log_server_reject(const struct sudoers_context *ctx, struct eventlog *evlog,
 	    debug_return_bool(false);
 
 	/* Open connection to log server, send hello and reject messages. */
-	client_closure = log_server_open(&details, &evlog->submit_time,
-	    false, SEND_REJECT, message);
+	client_closure = log_server_open(&details, NULL, false,
+	    SEND_REJECT, message);
 	if (client_closure != NULL) {
 	    client_closure_free(client_closure);
 	    client_closure = NULL;
@@ -175,7 +175,7 @@ done:
 
 bool
 log_server_alert(const struct sudoers_context *ctx, struct eventlog *evlog,
-    struct timespec *now, const char *message, const char *errstr)
+    const char *message, const char *errstr)
 {
     struct log_details details;
     char *emessage = NULL;
@@ -200,7 +200,7 @@ log_server_alert(const struct sudoers_context *ctx, struct eventlog *evlog,
 	}
 
 	/* Use existing client closure. */
-        if (fmt_reject_message(client_closure, evlog)) {
+        if (fmt_alert_message(client_closure, evlog)) {
             if (client_closure->write_ev->add(client_closure->write_ev,
                     &client_closure->log_details->server_timeout) == -1) {
                 sudo_warn("%s", U_("unable to add event to queue"));
@@ -213,7 +213,7 @@ log_server_alert(const struct sudoers_context *ctx, struct eventlog *evlog,
 	    goto done;
 
 	/* Open connection to log server, send hello and alert messages. */
-	client_closure = log_server_open(&details, now, false,
+	client_closure = log_server_open(&details, NULL, false,
 	    SEND_ALERT, emessage ? emessage : message);
 	if (client_closure != NULL) {
 	    client_closure_free(client_closure);
@@ -239,7 +239,7 @@ log_server_reject(const struct sudoers_context *ctx, struct eventlog *evlog,
 
 bool
 log_server_alert(const struct sudoers_context *ctx, struct eventlog *evlog,
-    struct timespec *now, const char *message, const char *errstr)
+    const char *message, const char *errstr)
 {
     return true;
 }
@@ -349,6 +349,9 @@ log_denial(const struct sudoers_context *ctx, unsigned int status,
 		ctx->runas.gr ? ":" : "",
 		ctx->runas.gr ? ctx->runas.gr->gr_name : "",
 		ctx->user.host);
+	    if (def_cmddenial_message != NULL) {
+		sudo_printf(SUDO_CONV_ERROR_MSG, "%s\n", def_cmddenial_message);
+	    }
 	}
 	if (mailit) {
 	    sudo_printf(SUDO_CONV_ERROR_MSG, "%s",
@@ -504,9 +507,14 @@ log_auth_failure(const struct sudoers_context *ctx, unsigned int status,
     /* Do auditing first (audit_failure() handles the locale itself). */
     audit_failure(ctx, ctx->runas.argv, "%s", N_("authentication failure"));
 
-    /* If sudoers denied the command we'll log that separately. */
-    if (!ISSET(status, FLAG_BAD_PASSWORD|FLAG_NO_USER_INPUT))
+    if (ISSET(status, FLAG_NO_USER_INPUT)) {
+	/* For "sudo -n", only log the entry if an actual command was run. */
+	if (ISSET(ctx->mode, MODE_LIST|MODE_VALIDATE))
+	    logit = false;
+    } else if (!ISSET(status, FLAG_BAD_PASSWORD)) {
+	/* Authenticated OK, sudoers denials are logged separately. */
 	logit = false;
+    }
 
     /*
      * Do we need to send mail?
@@ -615,12 +623,12 @@ log_exit_status(const struct sudoers_context *ctx, int status)
     debug_decl(log_exit_status, SUDOERS_DEBUG_LOGGING);
 
     if (def_log_exit_status || def_mail_always) {
-	if (sudo_gettime_real(&run_time) == -1) {
+	if (sudo_gettime_awake(&run_time) == -1) {
 	    sudo_warn("%s", U_("unable to get time of day"));
 	    ret = false;
 	    goto done;
 	}
-	sudo_timespecsub(&run_time, &ctx->submit_time, &run_time);
+	sudo_timespecsub(&run_time, &ctx->start_time, &run_time);
 
         if (WIFEXITED(status)) {
 	    exit_value = WEXITSTATUS(status);
@@ -688,7 +696,6 @@ vlog_warning(const struct sudoers_context *ctx, unsigned int flags,
     int errnum, const char * restrict fmt, va_list ap)
 {
     struct eventlog evlog;
-    struct timespec now;
     const char *errstr = NULL;
     char *message;
     bool ret = true;
@@ -733,10 +740,6 @@ vlog_warning(const struct sudoers_context *ctx, unsigned int flags,
     }
 
     if (ISSET(flags, SLOG_SEND_MAIL) || !ISSET(flags, SLOG_NO_LOG)) {
-	if (sudo_gettime_real(&now) == -1) {
-	    sudo_warn("%s", U_("unable to get time of day"));
-	    goto done;
-	}
 	if (ISSET(flags, SLOG_RAW_MSG))
 	    SET(evl_flags, EVLOG_RAW);
 	if (ISSET(flags, SLOG_SEND_MAIL)) {
@@ -746,9 +749,9 @@ vlog_warning(const struct sudoers_context *ctx, unsigned int flags,
 	}
 	sudoers_to_eventlog(ctx, &evlog, ctx->runas.cmnd, ctx->runas.argv,
 	    NULL, ctx->uuid_str);
-	if (!eventlog_alert(&evlog, evl_flags, &now, message, errstr))
+	if (!eventlog_alert(&evlog, evl_flags, &evlog.event_time, message, errstr))
 	    ret = false;
-	if (!log_server_alert(ctx, &evlog, &now, message, errstr))
+	if (!log_server_alert(ctx, &evlog, message, errstr))
 	    ret = false;
     }
 
@@ -1010,7 +1013,9 @@ sudoers_to_eventlog(const struct sudoers_context *ctx, struct eventlog *evlog,
     evlog->env_add = (char **)ctx->user.env_add;
     evlog->runenv = (char **)runenv;
     evlog->submitenv = (char **)ctx->user.envp;
-    evlog->submit_time = ctx->submit_time;
+    if (sudo_gettime_real(&evlog->event_time) == -1) {
+	sudo_warn("%s", U_("unable to get time of day"));
+    }
     evlog->lines = ctx->user.lines;
     evlog->columns = ctx->user.cols;
     if (ctx->runas.pw != NULL) {
@@ -1032,11 +1037,11 @@ sudoers_to_eventlog(const struct sudoers_context *ctx, struct eventlog *evlog,
 	strlcpy(evlog->uuid_str, uuid_str, sizeof(evlog->uuid_str));
     }
     if (ISSET(ctx->mode, MODE_POLICY_INTERCEPTED)) {
-	struct timespec now;
-	if (sudo_gettime_real(&now) == -1) {
+	if (sudo_gettime_awake(&evlog->iolog_offset) == -1) {
 	    sudo_warn("%s", U_("unable to get time of day"));
 	} else {
-	    sudo_timespecsub(&now, &ctx->submit_time, &evlog->iolog_offset);
+	    sudo_timespecsub(&evlog->iolog_offset, &ctx->start_time,
+		&evlog->iolog_offset);
 	}
     }
 
@@ -1059,7 +1064,7 @@ sudoers_log_open(int type, const char *log_file)
 	    break;
 	case EVLOG_FILE:
 	    /* Open log file as root, mode 0600 (cannot append to JSON). */
-	    if (def_log_format == json) {
+	    if (def_log_format == json || def_log_format == json_pretty) {
 		flags = O_RDWR|O_CREAT;
 		omode = "w";
 	    } else {
@@ -1135,8 +1140,8 @@ init_eventlog_config(void)
     if (def_logfile)
 	logtype |= EVLOG_FILE;
 
+    sudoers_set_log_format(def_log_format);
     eventlog_set_type(logtype);
-    eventlog_set_format(def_log_format == sudo ? EVLOG_SUDO : EVLOG_JSON);
     eventlog_set_syslog_acceptpri(def_syslog_goodpri);
     eventlog_set_syslog_rejectpri(def_syslog_badpri);
     eventlog_set_syslog_alertpri(def_syslog_badpri);

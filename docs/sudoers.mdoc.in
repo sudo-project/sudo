@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2023
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2024
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd December 19, 2023
+.Dd July 14, 2024
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -280,6 +280,14 @@ The
 option can be used to select the type of time stamp record
 .Nm
 will use.
+.Pp
+The
+.Nm tsdump
+utility, included with the sudo source distribution, can be used to
+display the contents of a time stamp file.
+See
+.Xr sudoers_timestamp @mansectform@
+for details of the time stamp file format.
 .Ss Logging
 By default,
 .Nm
@@ -3615,6 +3623,21 @@ This flag is
 by default.
 .Pp
 This setting is only supported by version 1.8.8 or higher.
+.It pam_silent
+If set, PAM authentication will be performed in silent mode.
+This prevents PAM authentication modules from generating output.
+In some cases, this may suppress important information about why
+authentication failed.
+For example, PAM modules such as
+.Em pam_faillock
+will only display a warning if
+.Em pam_silent
+is disabled.
+This flag is
+.Em on
+by default.
+.Pp
+This setting is only supported by version 1.8.16 or higher.
 .It passprompt_override
 If set, the prompt specified by
 .Em passprompt
@@ -4052,6 +4075,14 @@ user's terminal device even after the main program has finished
 executing.
 By running the command in a separate pseudo-terminal, this attack is
 no longer possible.
+.Pp
+A side effect of running the command in a new pseudo-terminal is
+that input will be passed to the command even if it is non-interactive.
+This means that, for example, keys pressed while a non-interactive
+command is running will be consumed by
+.Nm sudo
+instead of being passed to the shell after the command exits.
+.Pp
 This flag is
 .Em on
 by default for
@@ -4155,7 +4186,7 @@ it will
 .Dq roll over
 to zero, after which
 .Nm
-will truncate and re-use any existing I/O log path names.
+will truncate and reuse any existing I/O log path names.
 .Pp
 This setting is only supported by version 1.8.7 or higher.
 .It passwd_tries
@@ -4263,6 +4294,17 @@ option.
 This option is only available when sudo is built with AppArmor
 support.
 .\}
+.It cmddenial_message
+It set,
+.Nm sudo
+will display this message when a user is denied access to run the
+specified command, but is listed in the
+.Em sudoers
+file for the host.
+This can be used to provide additional, site-specific information
+to the user when a command is denied by the security policy.
+It does not override the standard warning the user receives when
+a command is denied.
 .It authfail_message
 Message that is displayed after a user fails to authenticate.
 The message may include the
@@ -5027,16 +5069,41 @@ The event log format.
 Supported log formats are:
 .Bl -tag -width 4n
 .It json
-Logs in JSON format.
+Currently, this is an alias for
+.Em json_pretty .
+In a future version of
+.Nm sudo ,
+.Em json
+will be equivalent to
+.Em json_compact .
 JSON log entries contain the full user details as well as the execution
 environment if the command was allowed.
+.It json_compact
+Log events in
+.Dq compact
+(minified) JSON format.
+Each event is written as a separate JSON object on single line without
+extraneous white space.
 Due to limitations of the protocol, JSON events sent via
 .Em syslog
 may be truncated.
+.It json_pretty
+Log events in
+.Dq pretty
+JSON format.
+When logging to a file, the entire file is treated as a single JSON
+object consisting of multiple events, each event spanning multiple lines.
+When logging via
+.Em syslog ,
+there is no difference between the
+.Em json_pretty
+and
+.Em json_compact
+formats.
 .It sudo
-Traditional sudo-style logs, see
+Log events in traditional sudo-style format, see
 .Sx "EVENT LOGGING"
-for a description of the log file format.
+for details.
 .El
 .Pp
 This setting affects logs sent via
@@ -5228,17 +5295,32 @@ If set,
 will use this value in place of the user's
 .Ev PATH
 environment variable.
-This option can be used to reset the
-.Ev PATH
-to a known good value that contains directories for system administrator
-commands such as
+There are two basic use cases for
+.Em secure_path :
+.Bl -enum -width 1n
+.It
+To make it possible for
+.Nm sudo
+to find system administrator commands located in directories that
+may not be in the default user path, such as
 .Pa /usr/sbin .
+.It
+To help protect scripts and programs that execute other commands without
+first setting
+.Ev PATH
+to a safe value.
+Otherwise, a user with limited privileges may be able to run arbitrary
+commands by manipulating the
+.Ev PATH
+if the command being run executes other commands without using a
+fully-qualified path name.
+.El
 .Pp
 Users in the group specified by the
 .Em exempt_group
 option are not affected by
 .Em secure_path .
-This option is @secure_path@ by default.
+This option is @secure_path_status@ by default.
 .It syslog
 Syslog facility if syslog is being used for logging (negate to
 disable syslog logging).
@@ -6286,7 +6368,7 @@ Once the I/O log sequence number reaches
 .Em maxseq ,
 it will be reset to zero and
 .Nm
-will truncate and re-use any existing I/O logs.
+will truncate and reuse any existing I/O logs.
 .Sh FILES
 .Bl -tag -width 24n
 .It Pa @sysconfdir@/sudo.conf
@@ -7266,7 +7348,7 @@ If no terminal is present or the
 option is set to
 .Dq ppid ,
 the start time of the parent process is used instead.
-In most cases this will prevent a time stamp record from being re-used
+In most cases this will prevent a time stamp record from being reused
 without the user entering a password when logging out and back in again.
 .Sh DEBUGGING
 Versions 1.8.4 and higher of the
@@ -7371,10 +7453,12 @@ manual.
 .Xr mktemp 3 ,
 .Xr strftime 3 ,
 .Xr sudo.conf @mansectform@ ,
+.Xr sudo_logsrv.proto @mansectform@ ,
 .Xr sudo_plugin @mansectform@ ,
 .Xr sudoers.ldap @mansectform@ ,
 .Xr sudoers_timestamp @mansectform@ ,
 .Xr sudo @mansectsu@ ,
+.Xr sudo_logsrvd @mansectsu@ ,
 .Xr visudo @mansectsu@
 .Sh AUTHORS
 Many people have worked on
@@ -7425,8 +7509,20 @@ option in
 .Em sudoers .
 .Sh BUGS
 If you believe you have found a bug in
-.Nm sudo ,
-you can submit a bug report at https://bugzilla.sudo.ws/
+.Nm ,
+you can either file a bug report in the sudo bug database,
+https://bugzilla.sudo.ws/, or open an issue at
+https://github.com/sudo-project/sudo/issues.
+If you would prefer to use email, messages may be sent to the
+sudo-workers mailing list,
+https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
+or <sudo@sudo.ws> (private).
+.Pp
+Please not report security vulnerabilities through public GitHub
+issues, Bugzilla or mailing lists.
+Instead, report them via email to <Todd.Miller@sudo.ws>.
+You may encrypt your message with PGP if you would like, using
+the key found at https://www.sudo.ws/dist/PGPKEYS.
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or

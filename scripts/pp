@@ -1,6 +1,6 @@
 #!/bin/sh
-# Copyright 2023 One Identity LLC. ALL RIGHTS RESERVED
-pp_revision="20231108"
+# Copyright 2024 One Identity LLC. ALL RIGHTS RESERVED
+pp_revision="20240518"
  # Copyright 2018 One Identity LLC.  ALL RIGHTS RESERVED.
  #
  # Redistribution and use in source and binary forms, with or without
@@ -8394,7 +8394,6 @@ pp_backend_bsd_cleanup () {
 }
 
 pp_backend_bsd_probe () {
-        echo "${pp_bsd_os}-${pp_bsd_platform_std}"
         echo "${pp_bsd_os}${pp_bsd_os_rev}-${pp_bsd_platform_std}"
 }
 
@@ -8968,7 +8967,7 @@ pp_systemd_service_install_common () {
 
         _pp_systemd_enable () {
             local svc="$1"
-            local RUNNING
+            local RUNNING=0
 
             # If $systemctl_cmd is not set, then call _pp_systemd_init. If still not
             # set, we do not know where the systemctl command is so do nothing;

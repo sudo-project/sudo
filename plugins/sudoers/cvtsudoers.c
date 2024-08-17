@@ -98,7 +98,7 @@ static unsigned int cvtsudoers_parse_suppression(char *expression);
 static void filter_userspecs(struct sudoers_parse_tree *parse_tree, struct cvtsudoers_config *conf);
 static void filter_defaults(struct sudoers_parse_tree *parse_tree, struct cvtsudoers_config *conf);
 static void alias_remove_unused(struct sudoers_parse_tree *parse_tree);
-static void alias_prune(struct sudoers_parse_tree *parse_tree, struct cvtsudoers_config *conf);
+static bool alias_prune(struct sudoers_parse_tree *parse_tree, struct cvtsudoers_config *conf);
 sudo_noreturn static void help(void);
 sudo_noreturn static void usage(void);
 
@@ -1078,9 +1078,7 @@ print_aliases_sudoers(struct sudoers_parse_tree *parse_tree,
 {
     debug_decl(print_aliases_sudoers, SUDOERS_DEBUG_UTIL);
 
-    alias_apply(parse_tree, print_alias_sudoers, lbuf);
-
-    debug_return_bool(!sudo_lbuf_error(lbuf));
+    debug_return_bool(alias_apply(parse_tree, print_alias_sudoers, lbuf));
 }
 
 static FILE *output_fp;		/* global for convert_sudoers_output */
@@ -1432,15 +1430,13 @@ alias_prune_helper(struct sudoers_parse_tree *parse_tree, struct alias *a,
 /*
  * Prune out non-matching entries from within aliases.
  */
-static void
+static bool
 alias_prune(struct sudoers_parse_tree *parse_tree,
     struct cvtsudoers_config *conf)
 {
     debug_decl(alias_prune, SUDOERS_DEBUG_ALIAS);
 
-    alias_apply(parse_tree, alias_prune_helper, conf);
-
-    debug_return;
+    debug_return_bool(alias_apply(parse_tree, alias_prune_helper, conf));
 }
 
 /*

@@ -105,7 +105,6 @@
 #define ARG_ASKPASS		26
 #define ARG_INTERCEPT_SETID	27
 #define ARG_INTERCEPT_PTRACE	28
-#define ARG_APPARMOR_PROFILE	29
 
 /*
  * Flags for tgetpass()
@@ -316,7 +315,8 @@ char *getenv_unhooked(const char *name);
 /* interfaces.c */
 int get_net_ifs(char **addrinfo);
 
-char *get_process_ttyname(char *name, size_t namelen);
+/* ttyname.c */
+dev_t get_process_ttyname(char *name, size_t namelen);
 
 /* signal.c */
 struct sigaction;

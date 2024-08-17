@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -118,6 +118,8 @@ deliver_signal(struct monitor_closure *mc, int signo, bool from_parent)
 	/* NOTREACHED */
     default:
 	/* Relay signal to command. */
+	sudo_debug_printf(SUDO_DEBUG_NOTICE, "%s: killpg(%d, %d)",
+	    __func__, (int)mc->cmnd_pid, signo);
 	killpg(mc->cmnd_pid, signo);
 	break;
     }
@@ -150,7 +152,7 @@ send_status(int fd, struct command_status *cstat)
 
 /*
  * Wait for command status after receiving SIGCHLD.
- * If the command was stopped, the status is send back to the parent.
+ * If the command was stopped, the status is sent back to the parent.
  * Otherwise, cstat is filled in but not sent.
  */
 static void

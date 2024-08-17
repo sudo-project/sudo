@@ -179,8 +179,10 @@ check_aliases(struct sudoers_parse_tree *parse_tree, bool strict, bool quiet,
     free_aliases(used_aliases);
 
     /* If all aliases were referenced we will have an empty tree. */
-    if (!no_aliases(parse_tree))
-	alias_apply(parse_tree, cb_unused, &quiet);
+    if (!no_aliases(parse_tree)) {
+	if (!alias_apply(parse_tree, cb_unused, &quiet))
+	    errors++;
+    }
 
     debug_return_int(strict ? errors : 0);
 }

@@ -44,7 +44,7 @@ struct cache_item {
 };
 
 /*
- * Container structs to simpify size and offset calculations and guarantee
+ * Container structs to simplify size and offset calculations and guarantee
  * proper alignment of struct passwd, group, gid_list and group_list.
  */
 struct cache_item_pw {

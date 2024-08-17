@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2013-2020, 2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2020, 2022, 2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -40,7 +40,7 @@
 sudo_dso_public int main(int argc, char *argv[]);
 
 int sudo_debug_instance = SUDO_DEBUG_INSTANCE_INITIALIZER;
-extern char *get_process_ttyname(char *name, size_t namelen);
+extern dev_t get_process_ttyname(char *name, size_t namelen);
 
 static int
 match_ttys(const char *tty1, const char *tty2)
@@ -69,6 +69,7 @@ main(int argc, char *argv[])
     char *tty_libc = NULL, *tty_sudo = NULL;
     char pathbuf[PATH_MAX];
     bool verbose = false;
+    dev_t ttydev = -1;
     int ch, errors = 0, ntests = 1;
 
     initprogname(argc > 0 ? argv[0] : "check_ttyname");
@@ -85,8 +86,29 @@ main(int argc, char *argv[])
     }
 
     /* Lookup tty name using kernel info if possible. */
-    if (get_process_ttyname(pathbuf, sizeof(pathbuf)) != NULL)
+    ttydev = get_process_ttyname(pathbuf, sizeof(pathbuf));
+    if (ttydev != (dev_t)-1) {
+	char numbuf[STRLEN_MAX_SIGNED(long long) + 1];
+	const char *errstr;
+	dev_t newdev;
+
+	/* For comparison below. */
 	tty_sudo = pathbuf;
+
+	/* Check that we can format a dev_t as a string and parse it. */
+	ntests++;
+	(void)snprintf(numbuf, sizeof(numbuf), "%lld", (long long)ttydev);
+	newdev = sudo_strtonum(numbuf, LLONG_MIN, LLONG_MAX, &errstr);
+	if (errstr != NULL) {
+	    printf("%s: FAIL unable to parse device number %s: %s",
+		getprogname(), numbuf, errstr);
+	    errors++;
+	} else if (ttydev != newdev) {
+	    printf("%s: FAIL device mismatch for %s, %s != %lld",
+		getprogname(), pathbuf, numbuf, (long long)ttydev);
+	    errors++;
+	}
+    }
 
 #if defined(HAVE_KINFO_PROC2_NETBSD) || \
     defined(HAVE_KINFO_PROC_OPENBSD) || \

@@ -1,7 +1,11 @@
 Parses OK
 
 Defaults runcwd=~
+Defaults runcwd=~
+Defaults runchroot=/
 Defaults runchroot=/
 
 user0 ALL = CHROOT=/var/www CWD=/htdocs /bin/ksh
-user1 ALL = CWD=~root /usr/bin/id, CWD=/tmp /bin/ls
+user1 ALL = CHROOT=/var/www CWD=/htdocs /bin/ksh
+user2 ALL = CWD=~root /usr/bin/id, CWD=/tmp /bin/ls
+user3 ALL = CWD=~root /usr/bin/id, CWD=/tmp /bin/ls

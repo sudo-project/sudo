@@ -1,8 +1,8 @@
-.\" Automatically generated from an mdoc input file.  Do not edit.
+.\" Automatically generated from the sudo_logsrvd.mdoc.in file.  Do not edit.
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2024 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD" "@mansectsu@" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO_LOGSRVD" "@mansectsu@" "July 14, 2024" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -277,7 +277,7 @@ If you enter '.', the field will be left blank.
 Country Name (2 letter code) [AU]:US
 State or Province Name (full name) [Some-State]:Colorado
 Locality Name (eg, city) []:
-Organization Name (eg, company) [Internet Widgits Pty Ltd]:sudo
+Organization Name (eg, company) [Internet Widgets Pty Ltd]:sudo
 Organizational Unit Name (eg, section) []:sudo Certificate Authority
 Common Name (e.g., server FQDN or YOUR name) []:sudo Root CA
 Email Address []:
@@ -335,7 +335,7 @@ If you enter '.', the field will be left blank.
 Country Name (2 letter code) [AU]:US
 State or Province Name (full name) [Some-State]:Colorado
 Locality Name (eg, city) []:
-Organization Name (eg, company) [Internet Widgits Pty Ltd]:sudo
+Organization Name (eg, company) [Internet Widgets Pty Ltd]:sudo
 Organizational Unit Name (eg, section) []:sudo log server
 Common Name (e.g., server FQDN or YOUR name) []:logserver.example.com
 Email Address []:
@@ -440,6 +440,7 @@ If peer authentication is enabled on the client, a copy of
 must be present on the client system too.
 .SH "SEE ALSO"
 sudo.conf(@mansectform@),
+sudo_logsrv.proto(@mansectform@),
 sudo_logsrvd.conf(@mansectform@),
 sudoers(@mansectform@),
 sudo(@mansectsu@),
@@ -462,7 +463,19 @@ exhaustive list of people who have contributed to
 .SH "BUGS"
 If you believe you have found a bug in
 \fBsudo_logsrvd\fR,
-you can submit a bug report at https://bugzilla.sudo.ws/
+you can either file a bug report in the sudo bug database,
+https://bugzilla.sudo.ws/, or open an issue at
+https://github.com/sudo-project/sudo/issues.
+If you would prefer to use email, messages may be sent to the
+sudo-workers mailing list,
+https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
+or <sudo@sudo.ws> (private).
+.PP
+Please not report security vulnerabilities through public GitHub
+issues, Bugzilla or mailing lists.
+Instead, report them via email to <Todd.Miller@sudo.ws>.
+You may encrypt your message with PGP if you would like, using
+the key found at https://www.sudo.ws/dist/PGPKEYS.
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or

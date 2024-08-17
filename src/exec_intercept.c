@@ -145,7 +145,7 @@ bad:
 }
 
 /*
- * Reset intercept_closure so it can be re-used.
+ * Reset intercept_closure so it can be reused.
  */
 void
 intercept_closure_reset(struct intercept_closure *closure)
@@ -777,7 +777,7 @@ unpack:
 	if (!ret)
 	    goto done;
 	if (!ISSET(closure->details->flags, CD_INTERCEPT)) {
-	    /* Just logging, re-use event to read next InterceptHello. */
+	    /* Just logging, reuse event to read next InterceptHello. */
 	    ret = enable_read_event(fd, RECV_HELLO, intercept_cb, closure);
 	    goto done;
 	}
@@ -987,7 +987,7 @@ intercept_write(int fd, struct intercept_closure *closure)
 
     switch (closure->state) {
     case RECV_HELLO_INITIAL:
-	/* Re-use the listener event. */
+	/* Reuse the listener event. */
 	close(fd);
 	if (!enable_read_event(closure->listen_sock, RECV_CONNECTION,
 		intercept_accept_cb, closure))
@@ -997,7 +997,7 @@ intercept_write(int fd, struct intercept_closure *closure)
 	accept_closure = closure;
 	break;
     case POLICY_ACCEPT:
-	/* Re-use event to read InterceptHello from sudo_intercept.so ctor. */
+	/* Reuse event to read InterceptHello from sudo_intercept.so ctor. */
 	if (!enable_read_event(fd, RECV_HELLO, intercept_cb, closure))
 	    goto done;
 	break;

@@ -228,7 +228,7 @@ AC_DEFUN([SUDO_CHECK_OPENSSL], [
 		# So we find the openssl compat headers under wolfssl
 		AX_APPEND_FLAG([$f/wolfssl], [CPPFLAGS])
 	    done
-	    if test "$CPPFLAGS" = "$O_CPPFLAGS"; then
+	    if test "$cross_compiling" != "yes" -a "$CPPFLAGS" = "$O_CPPFLAGS"; then
 		# So we find the openssl compat headers under wolfssl (XXX)
 		AX_APPEND_FLAG([-I/usr/include/wolfssl], [CPPFLAGS])
 	    fi

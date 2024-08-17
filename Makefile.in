@@ -221,20 +221,24 @@ depend: siglist.c signame.c tsgetusershell.c
 	    lib/util/Makefile.in lib/zlib/Makefile.in \
 	    lib/fuzzstub/Makefile.in lib/eventlog/Makefile.in \
 	    lib/iolog/Makefile.in lib/logsrv/Makefile.in logsrvd/Makefile.in \
-	    lib/protobuf-c/Makefile.in plugins/group_file/Makefile.in \
-	    plugins/sample/Makefile.in plugins/sudoers/Makefile.in \
-	    plugins/system_group/Makefile.in plugins/python/Makefile.in \
-	    src/Makefile.in && \
+	    lib/protobuf-c/Makefile.in lib/ssl_compat/Makefile.in \
+	    plugins/group_file/Makefile.in plugins/audit_json/Makefile.in \
+	    plugins/sample/Makefile.in plugins/sample_approval/Makefile.in \
+	    plugins/sudoers/Makefile.in plugins/system_group/Makefile.in \
+	    plugins/python/Makefile.in src/Makefile.in && \
 	$(top_builddir)/config.status --file $(top_builddir)/lib/util/Makefile \
 	    --file $(top_builddir)/lib/zlib/Makefile \
-	    --file $(top_builddir)/lib/eventlog/Makefile \
 	    --file $(top_builddir)/lib/fuzzstub/Makefile \
+	    --file $(top_builddir)/lib/eventlog/Makefile \
 	    --file $(top_builddir)/lib/iolog/Makefile \
 	    --file $(top_builddir)/lib/logsrv/Makefile \
 	    --file $(top_builddir)/lib/protobuf-c/Makefile \
+	    --file $(top_builddir)/lib/ssl_compat/Makefile \
 	    --file $(top_builddir)/logsrvd/Makefile \
-	    --file $(top_builddir)/plugins/sample/Makefile \
 	    --file $(top_builddir)/plugins/group_file/Makefile \
+	    --file $(top_builddir)/plugins/audit_json/Makefile \
+	    --file $(top_builddir)/plugins/sample/Makefile \
+	    --file $(top_builddir)/plugins/sample_approval/Makefile \
 	    --file $(top_builddir)/plugins/sudoers/Makefile \
 	    --file $(top_builddir)/plugins/system_group/Makefile \
 	    --file $(top_builddir)/plugins/python/Makefile \

@@ -43,7 +43,8 @@ enum event_type {
 /* Supported eventlog formats. */
 enum eventlog_format {
     EVLOG_SUDO,
-    EVLOG_JSON
+    EVLOG_JSON_COMPACT,
+    EVLOG_JSON_PRETTY
 };
 
 /* Eventlog flag values. */
@@ -114,7 +115,7 @@ struct eventlog {
     char **runargv;
     char **runenv;
     char **env_add;
-    struct timespec submit_time;
+    struct timespec event_time;
     struct timespec iolog_offset;
     struct timespec run_time;
     int exit_value;

@@ -1,4 +1,4 @@
-.\" Automatically generated from an mdoc input file.  Do not edit.
+.\" Automatically generated from the sudo_plugin_python.mdoc.in file.  Do not edit.
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
@@ -1868,8 +1868,20 @@ exhaustive list of people who have contributed to
 Python plugin support is currently considered experimental.
 .PP
 If you believe you have found a bug in
-\fBsudo\fR,
-you can submit a bug report at https://bugzilla.sudo.ws/
+\fBsudo_plugin_python\fR,
+you can either file a bug report in the sudo bug database,
+https://bugzilla.sudo.ws/, or open an issue at
+https://github.com/sudo-project/sudo/issues.
+If you would prefer to use email, messages may be sent to the
+sudo-workers mailing list,
+https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
+or <sudo@sudo.ws> (private).
+.PP
+Please not report security vulnerabilities through public GitHub
+issues, Bugzilla or mailing lists.
+Instead, report them via email to <Todd.Miller@sudo.ws>.
+You may encrypt your message with PGP if you would like, using
+the key found at https://www.sudo.ws/dist/PGPKEYS.
 .SH "SECURITY CONSIDERATIONS"
 All Python plugin handling is implemented inside the
 \fI@python_plugin@\fR

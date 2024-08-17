@@ -73,7 +73,7 @@ static bool store_timespec(const char *str, struct sudo_defs_types *def);
 static bool store_rlimit(const char *str, struct sudo_defs_types *def);
 static bool store_plugin(const char *str, struct sudo_defs_types *def, int op);
 static bool list_op(const char *str, size_t, struct list_members *list, enum list_ops op);
-static bool valid_path(const struct sudoers_context *ctx, struct sudo_defs_types *def, const char *val, const char *file, int line, int column, bool quiet);
+static bool valid_path(const struct sudoers_context *ctx, const struct sudo_defs_types *def, const char *val, const char *file, int line, int column, bool quiet);
 
 /*
  * Table describing compile-time and run-time options.
@@ -86,9 +86,9 @@ static bool valid_path(const struct sudoers_context *ctx, struct sudo_defs_types
 void
 dump_defaults(void)
 {
-    struct sudo_defs_types *cur;
-    struct list_member *item;
-    struct def_values *def;
+    const struct sudo_defs_types *cur;
+    const struct list_member *item;
+    const struct def_values *def;
     const char *desc;
     debug_decl(dump_defaults, SUDOERS_DEBUG_DEFAULTS);
 
@@ -661,6 +661,7 @@ init_defaults(void)
     def_set_utmp = true;
     def_pam_acct_mgmt = true;
     def_pam_setcred = true;
+    def_pam_silent = true;
     def_syslog_maxlen = MAXSYSLOGLEN;
     def_case_insensitive_user = true;
     def_case_insensitive_group = true;
@@ -695,7 +696,7 @@ oom:
  * Returns true if it matches, else false.
  */
 static bool
-default_type_matches(struct defaults *d, int what)
+default_type_matches(const struct defaults *d, int what)
 {
     debug_decl(default_type_matches, SUDOERS_DEBUG_DEFAULTS);
 
@@ -730,7 +731,7 @@ default_type_matches(struct defaults *d, int what)
  */
 static bool
 default_binding_matches(const struct sudoers_context *ctx,
-    struct sudoers_parse_tree *parse_tree, struct defaults *d, int what)
+    struct sudoers_parse_tree *parse_tree, const struct defaults *d, int what)
 {
     debug_decl(default_binding_matches, SUDOERS_DEBUG_DEFAULTS);
 
@@ -764,9 +765,9 @@ default_binding_matches(const struct sudoers_context *ctx,
 bool
 update_defaults(struct sudoers_context *ctx,
     struct sudoers_parse_tree *parse_tree,
-    struct defaults_list *defs, int what, bool quiet)
+    const struct defaults_list *defs, int what, bool quiet)
 {
-    struct defaults *d;
+    const struct defaults *d;
     bool global_defaults = false;
     bool ret = true;
     debug_decl(update_defaults, SUDOERS_DEBUG_DEFAULTS);
@@ -834,7 +835,7 @@ update_defaults(struct sudoers_context *ctx,
 bool
 check_defaults(const struct sudoers_parse_tree *parse_tree, bool quiet)
 {
-    struct defaults *d;
+    const struct defaults *d;
     bool ret = true;
     int idx;
     debug_decl(check_defaults, SUDOERS_DEBUG_DEFAULTS);
@@ -1015,7 +1016,7 @@ store_timespec(const char *str, struct sudo_defs_types *def)
 static bool
 store_tuple(const char *str, struct sudo_defs_types *def, int op)
 {
-    struct def_values *v;
+    const struct def_values *v;
     debug_decl(store_tuple, SUDOERS_DEBUG_DEFAULTS);
 
     /*
@@ -1177,7 +1178,7 @@ store_timeout(const char *str, struct sudo_defs_types *def)
 }
 
 static bool
-valid_path(const struct sudoers_context *ctx, struct sudo_defs_types *def,
+valid_path(const struct sudoers_context *ctx, const struct sudo_defs_types *def,
     const char *val, const char *file, int line, int column, bool quiet)
 {
     bool ret = true;

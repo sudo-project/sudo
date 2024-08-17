@@ -1,8 +1,8 @@
-.\" Automatically generated from an mdoc input file.  Do not edit.
+.\" Automatically generated from the sudo_plugin.mdoc.in file.  Do not edit.
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2009-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2009-2024 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN" "5" "July 10, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN" "5" "August 14, 2024" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -674,10 +674,18 @@ process or 0 if there is no terminal present.
 Only available starting with API version 1.2.
 .TP 6n
 tty=string
-The path to the user's terminal device.
-If the user has no terminal device associated with the session,
-the value will be empty, as in
-\(oqtty=\(cq.
+The path to the user's terminal device, if one exists.
+This entry is only present if the user has a terminal device
+associated with the session.
+.TP 6n
+ttydev=dev_t
+The number of the user's terminal device, if one exists,
+formatted as a
+\fIlong long\fR
+value.
+This entry is only present if the user has a terminal device
+associated with the session.
+Only available starting with API version 1.22.
 .TP 6n
 uid=uid_t
 The real user-ID of the user invoking
@@ -1552,7 +1560,7 @@ front-end to determine which elements of the
 vector are files to be edited.
 The
 \(oq--\(cq
-element must immediately precede the first file to be editied.
+element must immediately precede the first file to be edited.
 If
 \fIsudoedit_nfiles\fR
 is not specified, the
@@ -5474,6 +5482,13 @@ The
 entry was added to the
 \fIcommand_info\fR
 list.
+.TP 6n
+Version 1.22 (sudo 1.9.16)
+The
+\fIttydev\fR
+entry was added to the
+\fIuser_info\fR
+list.
 .SH "SEE ALSO"
 sudo.conf(@mansectform@),
 sudoers(@mansectform@),
@@ -5494,8 +5509,20 @@ exhaustive list of people who have contributed to
 \fBsudo\fR.
 .SH "BUGS"
 If you believe you have found a bug in
-\fBsudo\fR,
-you can submit a bug report at https://bugzilla.sudo.ws/
+\fBsudo_plugin\fR,
+you can either file a bug report in the sudo bug database,
+https://bugzilla.sudo.ws/, or open an issue at
+https://github.com/sudo-project/sudo/issues.
+If you would prefer to use email, messages may be sent to the
+sudo-workers mailing list,
+https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
+or <sudo@sudo.ws> (private).
+.PP
+Please not report security vulnerabilities through public GitHub
+issues, Bugzilla or mailing lists.
+Instead, report them via email to <Todd.Miller@sudo.ws>.
+You may encrypt your message with PGP if you would like, using
+the key found at https://www.sudo.ws/dist/PGPKEYS.
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or

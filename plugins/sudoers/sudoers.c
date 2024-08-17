@@ -335,7 +335,7 @@ cb_lookup(const struct sudoers_parse_tree *parse_tree,
 
 /*
  * Find the command, perform a sudoers lookup, ask for a password as
- * needed, and perform post-lokup checks.  Logs success/failure.
+ * needed, and perform post-lookup checks.  Logs success/failure.
  * This is used by the check, list and validate plugin methods.
  *
  * Returns true if allowed, false if denied, -1 on error and
@@ -1317,7 +1317,7 @@ open_sudoers(const char *path, char **outfile, bool doedit, bool *keepopen)
 	    } else {
 		/* Rewind fp and set close on exec flag. */
 		rewind(fp);
-		(void)fcntl(fileno(fp), F_SETFD, 1);
+		(void)fcntl(fileno(fp), F_SETFD, FD_CLOEXEC);
 		if (outfile != NULL) {
                     *outfile = sudo_rcstr_dup(fname);
 		    if (*outfile == NULL) {
@@ -1553,4 +1553,30 @@ const struct sudoers_context *
 sudoers_get_context(void)
 {
     return &sudoers_ctx;
+}
+
+bool
+sudoers_set_log_format(enum def_tuple tuple)
+{
+    enum eventlog_format format;
+    debug_decl(cb_log_format, SUDOERS_DEBUG_PLUGIN);
+
+    /* FFR - make "json" an alias for EVLOG_JSON_COMPACT instead. */
+    switch (tuple) {
+    case json_compact:
+        format = EVLOG_JSON_COMPACT;
+        break;
+    case json:
+    case json_pretty:
+        format = EVLOG_JSON_PRETTY;
+        break;
+    case sudo:
+        format = EVLOG_SUDO;
+        break;
+    default:
+	debug_return_bool(false);
+    }
+    eventlog_set_format(format);
+
+    debug_return_bool(true);
 }

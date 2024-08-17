@@ -23,13 +23,13 @@
      * HAL insults (paraphrased) from 2001.
      */
 
-    "Just what do you think you're doing Dave?",
-    "It can only be attributed to human error.",
-    "That's something I cannot allow to happen.",
-    "My mind is going. I can feel it.",
-    "Sorry about this, I know it's a bit silly.",
-    "Take a stress pill and think things over.",
-    "This mission is too important for me to allow you to jeopardize it.",
-    "I feel much better now.",
+    N_("Just what do you think you're doing Dave?"),
+    N_("It can only be attributed to human error."),
+    N_("That's something I cannot allow to happen."),
+    N_("My mind is going. I can feel it."),
+    N_("Sorry about this, I know it's a bit silly."),
+    N_("Take a stress pill and think things over."),
+    N_("This mission is too important for me to allow you to jeopardize it."),
+    N_("I feel much better now."),
 
 #endif /* SUDOERS_INS_2001_H */

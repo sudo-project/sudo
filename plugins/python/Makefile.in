@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2019-2024 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -35,6 +35,7 @@ cross_compiling = @CROSS_COMPILING@
 
 # Compiler & tools to use
 CC = @CC@
+CPP = @CPP@
 LIBTOOL = @LIBTOOL@
 EGREP = @EGREP@
 SED = @SED@
@@ -157,7 +158,7 @@ Makefile: $(srcdir)/Makefile.in
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $<
 
 .c.i:
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $< > $@
 
 .i.plog:
 	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
@@ -275,19 +276,21 @@ check_python_examples.i: $(srcdir)/regress/check_python_examples.c \
                          $(srcdir)/regress/iohelpers.h \
                          $(srcdir)/regress/testhelpers.h \
                          $(srcdir)/sudo_python_debug.h $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $(srcdir)/regress/check_python_examples.c > $@
 check_python_examples.plog: check_python_examples.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/check_python_examples.c --i-file $< --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/check_python_examples.c --i-file check_python_examples.i --output-file $@
 iohelpers.o: $(srcdir)/regress/iohelpers.c $(incdir)/compat/stdbool.h \
-             $(incdir)/sudo_compat.h $(srcdir)/regress/iohelpers.h \
+             $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
+             $(incdir)/sudo_plugin.h $(srcdir)/regress/iohelpers.h \
              $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/iohelpers.c
 iohelpers.i: $(srcdir)/regress/iohelpers.c $(incdir)/compat/stdbool.h \
-             $(incdir)/sudo_compat.h $(srcdir)/regress/iohelpers.h \
+             $(incdir)/sudo_compat.h $(incdir)/sudo_fatal.h \
+             $(incdir)/sudo_plugin.h $(srcdir)/regress/iohelpers.h \
              $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $(srcdir)/regress/iohelpers.c > $@
 iohelpers.plog: iohelpers.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/iohelpers.c --i-file $< --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/iohelpers.c --i-file iohelpers.i --output-file $@
 pyhelpers.lo: $(srcdir)/pyhelpers.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
               $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
@@ -301,9 +304,9 @@ pyhelpers.i: $(srcdir)/pyhelpers.c $(incdir)/compat/stdbool.h \
               $(srcdir)/pyhelpers.h $(srcdir)/pyhelpers_cpychecker.h \
               $(srcdir)/sudo_python_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $(srcdir)/pyhelpers.c > $@
 pyhelpers.plog: pyhelpers.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/pyhelpers.c --i-file $< --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/pyhelpers.c --i-file pyhelpers.i --output-file $@
 pyhelpers.o: $(srcdir)/pyhelpers.c $(incdir)/compat/stdbool.h \
              $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
              $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
@@ -324,9 +327,9 @@ python_baseplugin.i: $(srcdir)/python_baseplugin.c $(incdir)/compat/stdbool.h \
                       $(srcdir)/pyhelpers.h $(srcdir)/pyhelpers_cpychecker.h \
                       $(srcdir)/sudo_python_debug.h \
                       $(srcdir)/sudo_python_module.h $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $(srcdir)/python_baseplugin.c > $@
 python_baseplugin.plog: python_baseplugin.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_baseplugin.c --i-file $< --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_baseplugin.c --i-file python_baseplugin.i --output-file $@
 python_convmessage.lo: $(srcdir)/python_convmessage.c \
                        $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                        $(incdir)/sudo_debug.h $(incdir)/sudo_plugin.h \
@@ -342,9 +345,9 @@ python_convmessage.i: $(srcdir)/python_convmessage.c \
                        $(srcdir)/pyhelpers_cpychecker.h \
                        $(srcdir)/sudo_python_debug.h \
                        $(srcdir)/sudo_python_module.h $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $(srcdir)/python_convmessage.c > $@
 python_convmessage.plog: python_convmessage.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_convmessage.c --i-file $< --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_convmessage.c --i-file python_convmessage.i --output-file $@
 python_loghandler.lo: $(srcdir)/python_loghandler.c $(incdir)/compat/stdbool.h \
                       $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                       $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
@@ -358,9 +361,9 @@ python_loghandler.i: $(srcdir)/python_loghandler.c $(incdir)/compat/stdbool.h \
                       $(srcdir)/pyhelpers.h $(srcdir)/pyhelpers_cpychecker.h \
                       $(srcdir)/sudo_python_debug.h \
                       $(srcdir)/sudo_python_module.h $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $(srcdir)/python_loghandler.c > $@
 python_loghandler.plog: python_loghandler.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_loghandler.c --i-file $< --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_loghandler.c --i-file python_loghandler.i --output-file $@
 python_plugin_approval.lo: $(srcdir)/python_plugin_approval.c \
                            $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                            $(incdir)/sudo_debug.h $(incdir)/sudo_plugin.h \
@@ -380,9 +383,9 @@ python_plugin_approval.i: $(srcdir)/python_plugin_approval.c \
                            $(srcdir)/python_plugin_common.h \
                            $(srcdir)/sudo_python_debug.h \
                            $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $(srcdir)/python_plugin_approval.c > $@
 python_plugin_approval.plog: python_plugin_approval.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_plugin_approval.c --i-file $< --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_plugin_approval.c --i-file python_plugin_approval.i --output-file $@
 python_plugin_audit.lo: $(srcdir)/python_plugin_audit.c \
                         $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                         $(incdir)/sudo_debug.h $(incdir)/sudo_plugin.h \
@@ -400,9 +403,9 @@ python_plugin_audit.i: $(srcdir)/python_plugin_audit.c \
                         $(srcdir)/python_plugin_audit_multi.inc \
                         $(srcdir)/python_plugin_common.h \
                         $(srcdir)/sudo_python_debug.h $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $(srcdir)/python_plugin_audit.c > $@
 python_plugin_audit.plog: python_plugin_audit.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_plugin_audit.c --i-file $< --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_plugin_audit.c --i-file python_plugin_audit.i --output-file $@
 python_plugin_common.lo: $(srcdir)/python_plugin_common.c \
                          $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                          $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -422,9 +425,9 @@ python_plugin_common.i: $(srcdir)/python_plugin_common.c \
                          $(srcdir)/python_plugin_common.h \
                          $(srcdir)/sudo_python_debug.h \
                          $(srcdir)/sudo_python_module.h $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $(srcdir)/python_plugin_common.c > $@
 python_plugin_common.plog: python_plugin_common.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_plugin_common.c --i-file $< --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_plugin_common.c --i-file python_plugin_common.i --output-file $@
 python_plugin_group.lo: $(srcdir)/python_plugin_group.c \
                         $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                         $(incdir)/sudo_debug.h $(incdir)/sudo_plugin.h \
@@ -440,9 +443,9 @@ python_plugin_group.i: $(srcdir)/python_plugin_group.c \
                         $(srcdir)/pyhelpers_cpychecker.h \
                         $(srcdir)/python_plugin_common.h \
                         $(srcdir)/sudo_python_debug.h $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $(srcdir)/python_plugin_group.c > $@
 python_plugin_group.plog: python_plugin_group.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_plugin_group.c --i-file $< --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_plugin_group.c --i-file python_plugin_group.i --output-file $@
 python_plugin_io.lo: $(srcdir)/python_plugin_io.c $(incdir)/compat/stdbool.h \
                      $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                      $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
@@ -458,9 +461,9 @@ python_plugin_io.i: $(srcdir)/python_plugin_io.c $(incdir)/compat/stdbool.h \
                      $(srcdir)/python_plugin_common.h \
                      $(srcdir)/python_plugin_io_multi.inc \
                      $(srcdir)/sudo_python_debug.h $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $(srcdir)/python_plugin_io.c > $@
 python_plugin_io.plog: python_plugin_io.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_plugin_io.c --i-file $< --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_plugin_io.c --i-file python_plugin_io.i --output-file $@
 python_plugin_policy.lo: $(srcdir)/python_plugin_policy.c \
                          $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                          $(incdir)/sudo_debug.h $(incdir)/sudo_plugin.h \
@@ -476,9 +479,9 @@ python_plugin_policy.i: $(srcdir)/python_plugin_policy.c \
                          $(srcdir)/pyhelpers_cpychecker.h \
                          $(srcdir)/python_plugin_common.h \
                          $(srcdir)/sudo_python_debug.h $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $(srcdir)/python_plugin_policy.c > $@
 python_plugin_policy.plog: python_plugin_policy.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_plugin_policy.c --i-file $< --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/python_plugin_policy.c --i-file python_plugin_policy.i --output-file $@
 sudo_python_debug.lo: $(srcdir)/sudo_python_debug.c $(incdir)/compat/stdbool.h \
                       $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
                       $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
@@ -492,9 +495,9 @@ sudo_python_debug.i: $(srcdir)/sudo_python_debug.c $(incdir)/compat/stdbool.h \
                       $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                       $(incdir)/sudo_queue.h $(srcdir)/sudo_python_debug.h \
                       $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $(srcdir)/sudo_python_debug.c > $@
 sudo_python_debug.plog: sudo_python_debug.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sudo_python_debug.c --i-file $< --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sudo_python_debug.c --i-file sudo_python_debug.i --output-file $@
 sudo_python_debug.o: $(srcdir)/sudo_python_debug.c $(incdir)/compat/stdbool.h \
                      $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
                      $(incdir)/sudo_debug.h $(incdir)/sudo_fatal.h \
@@ -517,9 +520,9 @@ sudo_python_module.i: $(srcdir)/sudo_python_module.c \
                        $(srcdir)/pyhelpers_cpychecker.h \
                        $(srcdir)/sudo_python_debug.h \
                        $(srcdir)/sudo_python_module.h $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $(srcdir)/sudo_python_module.c > $@
 sudo_python_module.plog: sudo_python_module.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sudo_python_module.c --i-file $< --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sudo_python_module.c --i-file sudo_python_module.i --output-file $@
 testhelpers.o: $(srcdir)/regress/testhelpers.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
                $(incdir)/sudo_debug.h $(incdir)/sudo_plugin.h \
@@ -535,6 +538,6 @@ testhelpers.i: $(srcdir)/regress/testhelpers.c $(incdir)/compat/stdbool.h \
                $(srcdir)/pyhelpers_cpychecker.h $(srcdir)/regress/iohelpers.h \
                $(srcdir)/regress/testhelpers.h $(srcdir)/sudo_python_debug.h \
                $(top_builddir)/config.h
-	$(CC) -E -o $@ $(CPPFLAGS) $<
+	$(CPP) $(CPPFLAGS) $(srcdir)/regress/testhelpers.c > $@
 testhelpers.plog: testhelpers.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/testhelpers.c --i-file $< --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/testhelpers.c --i-file testhelpers.i --output-file $@

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -61,11 +61,12 @@ static struct exec_closure pty_ec;
 
 static void sync_ttysize(struct exec_closure *ec);
 static void schedule_signal(struct exec_closure *ec, int signo);
+static void send_command_status(struct exec_closure *ec, int type, int val);
 
 /*
  * Allocate a pty if /dev/tty is a tty.
  * Fills in io_fds[SFD_USERTTY], io_fds[SFD_LEADER] and io_fds[SFD_FOLLOWER].
- * Returns the dyamically allocated pty name on success, NULL on failure.
+ * Returns the dynamically allocated pty name on success, NULL on failure.
  */
 static char *
 pty_setup(struct command_details *details)
@@ -234,7 +235,7 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 	}
 	if (ec->foreground) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"%s: command received SIG%s, parent running in the foregound",
+		"%s: command received SIG%s, parent running in the foreground",
 		__func__, signame);
 	    if (!ec->term_raw) {
 		if (sudo_term_raw(io_fds[SFD_USERTTY], term_raw_flags))
@@ -332,6 +333,32 @@ sigttin(int signo)
 }
 
 /*
+ * Close the leader fd to revoke the pty and signal the foreground pgrp.
+ * We send SIGHUP to the foreground process group (or the command's
+ * process group if no pty) after closing the leader fd.  We cannot
+ * just forward the SIGHUP we receive from the kernel since the
+ * command may not be the foreground process.  This fixes a problem
+ * on Linux with, e.g. "sudo su" where su(1) blocks SIGHUP.
+ */
+static void
+revoke_pty(struct exec_closure *ec)
+{
+    pid_t pgrp = ec->cmnd_pid;
+    debug_decl(revoke_pty, SUDO_DEBUG_EXEC);
+
+    sudo_debug_printf(SUDO_DEBUG_NOTICE, "user's tty revoked");
+    if (io_fds[SFD_LEADER] != -1) {
+	const pid_t tcpgrp = tcgetpgrp(io_fds[SFD_LEADER]);
+	if (tcpgrp != -1)
+	    pgrp = tcpgrp;
+	close(io_fds[SFD_LEADER]);
+    }
+    sudo_debug_printf(SUDO_DEBUG_NOTICE, "%s: killpg(%d, SIGHUP)",
+	__func__, (int)pgrp);
+    kill(pgrp, SIGHUP);
+}
+
+/*
  * Read an iobuf that is ready.
  */
 static void
@@ -383,8 +410,17 @@ read_callback(int fd, int what, void *v)
 	    ev_free_by_fd(evbase, fd);
 	    /* If writer already consumed the buffer, close it too. */
 	    if (iob->wevent != NULL && iob->off == iob->len) {
-		safe_close(sudo_ev_get_fd(iob->wevent));
-		ev_free_by_fd(evbase, sudo_ev_get_fd(iob->wevent));
+		/*
+		 * Don't close the pty leader yet, it will invalidate the pty.
+		 * We ask the monitor to signal the running process first.
+		 */
+		const int wfd = sudo_ev_get_fd(iob->wevent);
+		if (wfd == io_fds[SFD_LEADER]) {
+		    revoke_pty(iob->ec);
+		} else {
+		    safe_close(wfd);
+		}
+		ev_free_by_fd(evbase, wfd);
 		iob->off = iob->len = 0;
 	    }
 	    break;
@@ -461,8 +497,17 @@ write_callback(int fd, int what, void *v)
 		iob->len - iob->off, fd);
 	    /* Close reader if there is one. */
 	    if (iob->revent != NULL) {
-		safe_close(sudo_ev_get_fd(iob->revent));
-		ev_free_by_fd(evbase, sudo_ev_get_fd(iob->revent));
+		/*
+		 * Don't close the pty leader, it will invalidate the pty.
+		 * We ask the monitor to signal the running process first.
+		 */
+		const int rfd = sudo_ev_get_fd(iob->revent);
+		if (rfd == io_fds[SFD_LEADER]) {
+		    revoke_pty(iob->ec);
+		} else {
+		    safe_close(rfd);
+		}
+		ev_free_by_fd(evbase, rfd);
 	    }
 	    safe_close(fd);
 	    ev_free_by_fd(evbase, fd);
@@ -656,6 +701,13 @@ backchannel_cb(int fd, int what, void *v)
     case sizeof(cstat):
 	/* Check command status. */
 	switch (cstat.type) {
+	case CMD_ERRNO:
+	    /* Monitor was unable to execute command or broken pipe. */
+	    sudo_debug_printf(SUDO_DEBUG_INFO, "errno from monitor: %s",
+		strerror(cstat.val));
+	    sudo_ev_loopbreak(ec->evbase);
+	    *ec->cstat = cstat;
+	    break;
 	case CMD_PID:
 	    ec->cmnd_pid = cstat.val;
 	    sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d",
@@ -693,13 +745,6 @@ backchannel_cb(int fd, int what, void *v)
 		*ec->cstat = cstat;
 	    }
 	    break;
-	case CMD_ERRNO:
-	    /* Monitor was unable to execute command or broken pipe. */
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "errno from monitor: %s",
-		strerror(cstat.val));
-	    sudo_ev_loopbreak(ec->evbase);
-	    *ec->cstat = cstat;
-	    break;
 	}
 	/* Keep reading command status messages until EAGAIN or EOF. */
 	break;
@@ -718,7 +763,7 @@ backchannel_cb(int fd, int what, void *v)
 }
 
 /*
- * Handle changes to the monitors's status (SIGCHLD).
+ * Handle changes to the monitor's status (SIGCHLD).
  */
 static void
 handle_sigchld_pty(struct exec_closure *ec)
@@ -819,6 +864,15 @@ signal_cb_pty(int signo, int what, void *v)
     case SIGWINCH:
 	sync_ttysize(ec);
 	break;
+    case SIGHUP:
+	/*
+	 * Avoid forwarding SIGHUP sent by the kernel, it probably means
+	 * that the user's terminal was revoked.  When we detect that the
+	 * terminal has been revoked, the monitor will send SIGHUP itself.
+	 */
+	if (!USER_SIGNALED(sc->siginfo))
+	    break;
+	FALLTHROUGH;
     default:
 	/*
 	 * Do not forward signals sent by the command itself or a member of the
@@ -1233,7 +1287,7 @@ exec_pty(struct command_details *details,
 		sudo_fatal("dup");
 	} else {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stderr /dev/tty, creating a pipe");
+		"stderr not user's tty, creating a pipe");
 	    if (pipe2(io_pipe[STDERR_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
@@ -1382,7 +1436,7 @@ exec_pty(struct command_details *details,
 	if (sudo_ev_dispatch(ec->evbase) == -1)
 	    sudo_warn("%s", U_("error in event loop"));
 	if (sudo_ev_got_break(ec->evbase)) {
-	    /* error from callback or monitor died */
+	    /* error from callback */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR, "event loop exited prematurely");
 	    /* XXX: no good way to know if we should terminate the command. */
 	    if (cstat->val == CMD_INVALID && ec->cmnd_pid != -1) {

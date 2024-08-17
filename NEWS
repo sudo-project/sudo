@@ -1,3 +1,72 @@
+What's new in Sudo 1.9.16
+
+ * Added the "cmddenial_message" sudoers option to provide additional
+   information to the user when a command is denied by the sudoers
+   policy.  The default message is still displayed.
+
+ * The time stamp used for file-based logs is now more consistent
+   with the time stamp produced by syslog.  GitHub issues #327.
+
+ * Sudo will now warn the user if it can detect the user's terminal
+   but cannot determine the path to the terminal device.  The sudoers
+   time stamp file will now use the terminal device number directly.
+   GitHub issue #329.
+
+ * The embedded copy of zlib has been updated to version 1.3.1.
+
+ * Improved error handling if generating the list of signals and signal
+   names fails at build time.
+
+ * Fixed a compilation issue on Linux systems without process_vm_readv().
+
+ * Fixed cross-compilation with WolfSSL.
+
+ * Added a "json_compact" value for the sudoers "log_format" option
+   which can be used when logging to a file.  The existing "json"
+   value has been aliased to "json_pretty".  In a future release,
+   "json" will be an alias for "json_compact".  GitHub issue #357.
+
+ * A new "pam_silent" sudoers option has been added which may be
+   negated to avoid suppressing output from PAM authentication modules.
+   GitHub issue #216.
+
+ * Fixed several cvtsudoers JSON output problems.
+   GitHub issues #369, #370, #371, #373, #381.
+
+ * When sudo runs a command in a pseudo-terminal and the user's
+   terminal is revoked, the pseudo-terminal's foreground process
+   group will now receive SIGHUP before the terminal is revoked.
+   This emulates the behavior of the session leader exiting and is
+   consistent with what happens when, for example, an ssh session
+   is closed.  GitHub issue #367.
+
+ * Fixed "make test" with Python 3.12.  GitHub issue #374.
+
+ * In schema.ActiveDirectory, fixed the quoting in the example command.
+   GitHub issue #376.
+
+ * Paths specified via a Chdir_Spec or Chroot_Spec in sudoers may
+   now be double-quoted.
+
+ * Sudo insults are now included by default, but disabled unless
+   the --with-insults configure option is specified or the "insults"
+   sudoers option is enabled.
+
+ * The default sudoers file now enables the "secure_path" option by
+   default and preserves the EDITOR, VISUAL, and SUDO_EDITOR environment
+   variables when running visudo.  The new --with-secure-path-value
+   configure option can be used to set the value of "secure_path" in
+   the default sudoers file.  GitHub issue #387.
+
+ * A sudoers schema for IBM Directory Server (aka IBM Tivoli Directory
+   Server, IBM Security Directory Server, and IBM Security Verify
+   Directory) is now included.
+
+ * When cross-compiling sudo, the configure script now assumes that
+   the snprintf() function is C99-compliant if the C compiler
+   supports the C99 standard.  Previously, configure would use
+   sudo's own snprintf() when cross-compiling.  GitHub issue #386.
+
 What's new in Sudo 1.9.15p5
 
  * Fixed evaluation of the "lecture", "listpw", "verifypw", and

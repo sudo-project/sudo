@@ -2,7 +2,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2023
+ * Copyright (c) 1996, 1998-2005, 2007-2024
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -658,50 +658,29 @@ ALL {
 			}
 
 <INITIAL>ROLE {
-#ifdef HAVE_SELINUX
 			    LEXTRACE("ROLE ");
 			    return ROLE;
-#else
-			    goto got_alias;
-#endif
 			}
 
 <INITIAL>TYPE {
-#ifdef HAVE_SELINUX
 			    LEXTRACE("TYPE ");
 			    return TYPE;
-#else
-			    goto got_alias;
-#endif
 			}
 <INITIAL>APPARMOR_PROFILE {
-#ifdef HAVE_APPARMOR
 			    LEXTRACE("APPARMOR_PROFILE ");
 			    return APPARMOR_PROFILE;
-#else
-			    goto got_alias;
-#endif
 			}
 <INITIAL>PRIVS {
-#ifdef HAVE_PRIV_SET
 			    LEXTRACE("PRIVS ");
 			    return PRIVS;
-#else
-			    goto got_alias;
-#endif
 			}
 
 <INITIAL>LIMITPRIVS {
-#ifdef HAVE_PRIV_SET
 			    LEXTRACE("LIMITPRIVS ");
 			    return LIMITPRIVS;
-#else
-			    goto got_alias;
-#endif
 			}
 
 [[:upper:]][[:upper:][:digit:]_]* {
-			got_alias:
 			    if (!fill(sudoerstext, sudoersleng))
 				yyterminate();
 			    LEXTRACE("ALIAS ");
@@ -787,10 +766,11 @@ sudoedit		{
 				yyterminate();
 			}			/* a regex */
 
-<INITIAL,GOTDEFS>\"	{
+<INITIAL,EXPECTPATH,GOTDEFS>\"	{
 			    LEXTRACE("BEGINSTR ");
 			    sudoerslval.string = NULL;
-			    prev_state = YY_START;
+			    if (YY_START != EXPECTPATH)
+				prev_state = YY_START;
 			    BEGIN INSTR;
 			}
 

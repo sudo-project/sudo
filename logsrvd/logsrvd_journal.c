@@ -484,7 +484,7 @@ journal_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
     debug_decl(journal_accept, SUDO_DEBUG_UTIL);
 
     if (closure->journal_path != NULL) {
-	/* Re-use existing journal file. */
+	/* Reuse existing journal file. */
 	debug_return_bool(journal_write(buf, len, closure));
     }
 

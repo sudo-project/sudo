@@ -140,7 +140,7 @@ $(srcdir)/sudo.man.in: $(srcdir)/sudo.mdoc.in $(srcdir)/sudo.man.in.sed
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e 's/^\(\.nr [A-Z][A-Z]\) .[A-Z][A-Z]MAN./\1 1/' -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO" \)"8"\(.*\)/\1"'$$mansectsu'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -f $(srcdir)/sudo.man.in.sed > $@; \
+	    $(SED) -e 's/^\(\.nr [A-Z][A-Z]\) .[A-Z][A-Z]MAN./\1 1/' -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO" \)"8"\(.*\)/\1"'$$mansectsu'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's/an mdoc input/the sudo.mdoc.in/' -f $(srcdir)/sudo.man.in.sed > $@; \
 	fi
 
 fixman.sed: $(srcdir)/fixman.sh
@@ -150,189 +150,203 @@ fixman.sed: $(srcdir)/fixman.sh
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo.man.in | $(SED) -f fixman.sed > $@
 
 ./sudo.mdoc: $(top_builddir)/config.status $(srcdir)/sudo.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
+	printf '.\\" Automatically generated from the sudo.mdoc.in file.  Do not edit.\n' > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo.mdoc.in >> $@
 
 $(srcdir)/visudo.man.in: $(srcdir)/visudo.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/visudo.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "VISUDO" \)"8"\(.*\)/\1"'$$mansectsu'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/visudo.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "VISUDO" \)"8"\(.*\)/\1"'$$mansectsu'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's/an mdoc input/the visudo.mdoc.in/' > $@; \
 	fi
 
 ./visudo.man: $(top_builddir)/config.status $(srcdir)/visudo.man.in fixman.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/visudo.man.in | $(SED) -f fixman.sed > $@
 
 ./visudo.mdoc: $(top_builddir)/config.status $(srcdir)/visudo.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
+	printf '.\\" Automatically generated from the visudo.mdoc.in file.  Do not edit.\n' > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/visudo.mdoc.in >> $@
 
 $(srcdir)/sudo.conf.man.in: $(srcdir)/sudo.conf.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e 's/^\(\.nr [A-Z][A-Z]\) .[A-Z][A-Z]MAN./\1 1/' -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo.conf.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO.CONF" \)"5"\(.*\)/\1"'$$mansectform'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -f $(srcdir)/sudo.conf.man.in.sed > $@; \
+	    $(SED) -e 's/^\(\.nr [A-Z][A-Z]\) .[A-Z][A-Z]MAN./\1 1/' -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo.conf.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO.CONF" \)"5"\(.*\)/\1"'$$mansectform'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's/an mdoc input/the sudo.conf.mdoc.in/' -f $(srcdir)/sudo.conf.man.in.sed > $@; \
 	fi
 
 ./sudo.conf.man: $(top_builddir)/config.status $(srcdir)/sudo.conf.man.in fixman.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo.conf.man.in | $(SED) -f fixman.sed > $@
 
 ./sudo.conf.mdoc: $(top_builddir)/config.status $(srcdir)/sudo.conf.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
+	printf '.\\" Automatically generated from the sudo.conf.mdoc.in file.  Do not edit.\n' > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo.conf.mdoc.in >> $@
 
 $(srcdir)/sudoers.man.in: $(srcdir)/sudoers.mdoc.in $(srcdir)/sudoers.man.in.sed
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e 's/^\(\.nr [A-Z][A-Z]\) .[A-Z][A-Z]MAN./\1 1/' -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoers.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOERS" \)"5"\(.*\)/\1"'$$mansectform'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -f $(srcdir)/sudoers.man.in.sed> $@; \
+	    $(SED) -e 's/^\(\.nr [A-Z][A-Z]\) .[A-Z][A-Z]MAN./\1 1/' -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoers.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOERS" \)"5"\(.*\)/\1"'$$mansectform'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's/an mdoc input/the sudoers.mdoc.in/' -f $(srcdir)/sudoers.man.in.sed> $@; \
 	fi
 
 ./sudoers.man: $(top_builddir)/config.status $(srcdir)/sudoers.man.in fixman.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoers.man.in | $(SED) -f fixman.sed > $@
 
 ./sudoers.mdoc: $(top_builddir)/config.status $(srcdir)/sudoers.mdoc.in $(srcdir)/fixmdoc.sed
-	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoers.mdoc.in | $(SED) -f $(srcdir)/fixmdoc.sed > $@
+	printf '.\\" Automatically generated from the sudoers.mdoc.in file.  Do not edit.\n' > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoers.mdoc.in | $(SED) -f $(srcdir)/fixmdoc.sed >> $@
 
 $(srcdir)/sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoers.ldap.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOERS.LDAP" \)"5"\(.*\)/\1"'$$mansectform'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoers.ldap.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOERS.LDAP" \)"5"\(.*\)/\1"'$$mansectform'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's/an mdoc input/the sudoers.ldap.mdoc.in/' > $@; \
 	fi
 
 ./sudoers.ldap.man: $(top_builddir)/config.status $(srcdir)/sudoers.ldap.man.in fixman.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoers.ldap.man.in | $(SED) -f fixman.sed > $@
 
 ./sudoers.ldap.mdoc: $(top_builddir)/config.status $(srcdir)/sudoers.ldap.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
+	printf '.\\" Automatically generated from the sudoers.ldap.mdoc.in file.  Do not edit.\n' > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoers.ldap.mdoc.in >> $@
 
 $(srcdir)/sudoers_timestamp.man.in: $(srcdir)/sudoers_timestamp.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoers_timestamp.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOERS_TIMESTAMP" \)"5"\(.*\)/\1"'$$mansectform'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoers_timestamp.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOERS_TIMESTAMP" \)"5"\(.*\)/\1"'$$mansectform'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's/an mdoc input/the sudoers_timestamp.mdoc.in/' > $@; \
 	fi
 
 ./sudoers_timestamp.man: $(top_builddir)/config.status $(srcdir)/sudoers_timestamp.man.in fixman.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoers_timestamp.man.in | $(SED) -f fixman.sed > $@
 
 ./sudoers_timestamp.mdoc: $(top_builddir)/config.status $(srcdir)/sudoers_timestamp.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
+	printf '.\\" Automatically generated from the sudoers_timestamp.mdoc.in file.  Do not edit.\n' > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoers_timestamp.mdoc.in >> $@
 
 $(srcdir)/cvtsudoers.man.in: $(srcdir)/cvtsudoers.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/cvtsudoers.mdoc.in | $(MANDOC) -Tman | $(SED) -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/cvtsudoers.mdoc.in | $(MANDOC) -Tman | $(SED) -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's/an mdoc input/the cvtsudoers.mdoc.in/' > $@; \
 	fi
 
 ./cvtsudoers.man: $(top_builddir)/config.status $(srcdir)/cvtsudoers.man.in fixman.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/cvtsudoers.man.in | $(SED) -f fixman.sed > $@
 
 ./cvtsudoers.mdoc: $(top_builddir)/config.status $(srcdir)/cvtsudoers.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
+	printf '.\\" Automatically generated from the cvtsudoers.mdoc.in file.  Do not edit.\n' > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/cvtsudoers.mdoc.in >> $@
 
 $(srcdir)/sudoreplay.man.in: $(srcdir)/sudoreplay.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoreplay.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOREPLAY" \)"8"\(.*\)/\1"'$$mansectsu'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudoreplay.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDOREPLAY" \)"8"\(.*\)/\1"'$$mansectsu'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's/an mdoc input/the sudoreplay.mdoc.in/' > $@; \
 	fi
 
 ./sudoreplay.man: $(top_builddir)/config.status $(srcdir)/sudoreplay.man.in fixman.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoreplay.man.in | $(SED) -f fixman.sed > $@
 
 ./sudoreplay.mdoc: $(top_builddir)/config.status $(srcdir)/sudoreplay.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
+	printf '.\\" Automatically generated from the sudoreplay.mdoc.in file.  Do not edit.\n' > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudoreplay.mdoc.in >> $@
 
 $(srcdir)/sudo_logsrvd.man.in: $(srcdir)/sudo_logsrvd.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo_logsrvd.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO_LOGSRVD" \)"8"\(.*\)/\1"'$$mansectsu'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo_logsrvd.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO_LOGSRVD" \)"8"\(.*\)/\1"'$$mansectsu'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's/an mdoc input/the sudo_logsrvd.mdoc.in/' > $@; \
 	fi
 
 ./sudo_logsrvd.man: $(top_builddir)/config.status $(srcdir)/sudo_logsrvd.man.in fixman.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo_logsrvd.man.in | $(SED) -f fixman.sed > $@
 
 ./sudo_logsrvd.mdoc: $(top_builddir)/config.status $(srcdir)/sudo_logsrvd.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
+	printf '.\\" Automatically generated from the sudo_logsrvd.mdoc.in file.  Do not edit.\n' > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo_logsrvd.mdoc.in >> $@
 
 $(srcdir)/sudo_logsrv.proto.man.in: $(srcdir)/sudo_logsrv.proto.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo_logsrv.proto.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO_LOGSRV.PROTO" \)"5"\(.*\)/\1"'$$mansectform'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(5)/($$mansectform)/g" > $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo_logsrv.proto.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO_LOGSRV.PROTO" \)"5"\(.*\)/\1"'$$mansectform'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(5)/($$mansectform)/g" -e 's/an mdoc input/the sudo_logsrv.proto.mdoc.in/' > $@; \
 	fi
 
 ./sudo_logsrv.proto.man: $(top_builddir)/config.status $(srcdir)/sudo_logsrv.proto.man.in fixman.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo_logsrv.proto.man.in | $(SED) -f fixman.sed > $@
 
 ./sudo_logsrv.proto.mdoc: $(top_builddir)/config.status $(srcdir)/sudo_logsrv.proto.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
+	printf '.\\" Automatically generated from the sudo_logsrv.proto.mdoc.in file.  Do not edit.\n' > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo_logsrv.proto.mdoc.in >> $@
 
 $(srcdir)/sudo_logsrvd.conf.man.in: $(srcdir)/sudo_logsrvd.conf.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo_logsrvd.conf.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO_LOGSRVD.CONF" \)"5"\(.*\)/\1"'$$mansectform'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(5)/($$mansectform)/g" > $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo_logsrvd.conf.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO_LOGSRVD.CONF" \)"5"\(.*\)/\1"'$$mansectform'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(5)/($$mansectform)/g" -e 's/an mdoc input/the sudo_logsrvd.conf.mdoc.in/' > $@; \
 	fi
 
 ./sudo_logsrvd.conf.man: $(top_builddir)/config.status $(srcdir)/sudo_logsrvd.conf.man.in fixman.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo_logsrvd.conf.man.in | $(SED) -f fixman.sed > $@
 
 ./sudo_logsrvd.conf.mdoc: $(top_builddir)/config.status $(srcdir)/sudo_logsrvd.conf.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
+	printf '.\\" Automatically generated from the sudo_logsrvd.conf.mdoc.in file.  Do not edit.\n' > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo_logsrvd.conf.mdoc.in >> $@
 
 $(srcdir)/sudo_plugin.man.in: $(srcdir)/sudo_plugin.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo_plugin.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO_PLUGIN" \)"8"\(.*\)/\1"'$$mansectsu'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo_plugin.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO_PLUGIN" \)"8"\(.*\)/\1"'$$mansectsu'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's/an mdoc input/the sudo_plugin.mdoc.in/' > $@; \
 	fi
 
 ./sudo_plugin.man: $(top_builddir)/config.status $(srcdir)/sudo_plugin.man.in fixman.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo_plugin.man.in | $(SED) -f fixman.sed > $@
 
 ./sudo_plugin.mdoc: $(top_builddir)/config.status $(srcdir)/sudo_plugin.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
+	printf '.\\" Automatically generated from the sudo_plugin.mdoc.in file.  Do not edit.\n' > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo_plugin.mdoc.in >> $@
 
 $(srcdir)/sudo_plugin_python.man.in: $(srcdir)/sudo_plugin_python.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo_plugin_python.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO_PLUGIN_PYTHON" \)"8"\(.*\)/\1"'$$mansectsu'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo_plugin_python.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO_PLUGIN_PYTHON" \)"8"\(.*\)/\1"'$$mansectsu'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's/an mdoc input/the sudo_plugin_python.mdoc.in/' > $@; \
 	fi
 
 ./sudo_plugin_python.man: $(top_builddir)/config.status $(srcdir)/sudo_plugin_python.man.in fixman.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo_plugin_python.man.in | $(SED) -f fixman.sed > $@
 
 ./sudo_plugin_python.mdoc: $(top_builddir)/config.status $(srcdir)/sudo_plugin_python.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
+	printf '.\\" Automatically generated from the sudo_plugin_python.mdoc.in file.  Do not edit.\n' > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo_plugin_python.mdoc.in >> $@
 
 $(srcdir)/sudo_sendlog.man.in: $(srcdir)/sudo_sendlog.mdoc.in
 	@if [ -n "$(DEVEL)" ]; then \
 	    echo "Generating $@"; \
 	    mansectsu=`echo @MANSECTSU@|$(TR) A-Z a-z`; \
 	    mansectform=`echo @MANSECTFORM@|$(TR) A-Z a-z`; \
-	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo_sendlog.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO_SENDLOG" \)"8"\(.*\)/\1"'$$mansectsu'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" > $@; \
+	    $(SED) -e "s/$$mansectsu/8/g" -e "s/$$mansectform/5/g" $(srcdir)/sudo_sendlog.mdoc.in | $(MANDOC) -Tman | $(SED) -e 's/^\(\.TH "SUDO_SENDLOG" \)"8"\(.*\)/\1"'$$mansectsu'"\2/' -e "s/(5)/($$mansectform)/g" -e "s/(8)/($$mansectsu)/g" -e 's/an mdoc input/the sudo_sendlog.mdoc.in/' > $@; \
 	fi
 
 ./sudo_sendlog.man: $(top_builddir)/config.status $(srcdir)/sudo_sendlog.man.in fixman.sed
 	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo_sendlog.man.in | $(SED) -f fixman.sed > $@
 
 ./sudo_sendlog.mdoc: $(top_builddir)/config.status $(srcdir)/sudo_sendlog.mdoc.in
-	cd $(top_builddir) && $(SHELL) config.status --file=docs/$@
+	printf '.\\" Automatically generated from the sudo_sendlog.mdoc.in file.  Do not edit.\n' > $@
+	(cd $(top_builddir) && $(SHELL) config.status --file=-) < $(srcdir)/sudo_sendlog.mdoc.in >> $@
 
 pre-install:
 

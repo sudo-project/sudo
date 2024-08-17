@@ -96,8 +96,17 @@ copy the schema.iPlanet file to the schema directory with the name 99sudo.ldif.
 On Solaris, schemas are stored in /var/Sun/mps/slapd-\`hostname\`/config/schema/.
 For Fedora Directory Server, they are stored in /etc/dirsrv/schema/.
 
-After copying the schema file to the appropriate directory, restart
-the LDAP server.
+For IBM Directory Server, IBM Tivoli Directory Server, IBM Security
+Directory Server, and IBM Security Verify Directory, the schema is
+supplied in LDIF format.  It can be installed using the ldapmodify
+utility:
+
+    # ldapmodify -c -f schema.IBM_LDAP -h ldapserver:port -w passwod \
+      -D cn=Manager,dc=example,dc=com
+
+For schema files other than schema.olcSudo and schema.IBM_LDAP, you
+will need to restart the LDAP server after copying the schema file
+into place.
 
 Finally, using an LDAP browser/editor, enable indexing by editing the
 client profile to provide a Service Search Descriptor (SSD) for sudoers,

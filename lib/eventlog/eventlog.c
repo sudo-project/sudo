@@ -264,7 +264,7 @@ closefrom_nodebug(int lowfd)
 
     /* Close fds [lowfd, startfd) that are not in debug_fds. */
     for (fd = lowfd; fd < startfd; fd++) {
-	if (sudo_isset(debug_fds, fd))
+	if (fd < 0 || sudo_isset(debug_fds, fd))
 	    continue;
 	sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	    "closing fd %d", fd);
@@ -620,7 +620,7 @@ oom:
 
 /*
  * Store the contents of struct eventlog as JSON.
- * The submit_time and iolog_path members are not stored, they should
+ * The event_time and iolog_path members are not stored, they should
  * be stored and formatted by the caller.
  */
 bool
@@ -638,7 +638,7 @@ eventlog_store_json(struct json_container *jsonc, const struct eventlog *evlog)
     /*
      * The most important values are written first in case
      * the log record gets truncated.
-     * Note: submit_time and iolog_path are not stored here.
+     * Note: event_time and iolog_path are not stored here.
      */
 
     json_value.type = JSON_STRING;
@@ -1130,7 +1130,8 @@ do_syslog(int event_type, int flags, struct eventlog_args *args,
     case EVLOG_SUDO:
 	ret = do_syslog_sudo(pri, lbuf.buf, evlog);
 	break;
-    case EVLOG_JSON:
+    case EVLOG_JSON_COMPACT:
+    case EVLOG_JSON_PRETTY:
 	ret = do_syslog_json(pri, event_type, args, evlog);
 	break;
     default:
@@ -1205,11 +1206,12 @@ done:
 }
 
 static bool
-do_logfile_json(int event_type, struct eventlog_args *args,
-    const struct eventlog *evlog)
+do_logfile_json(enum eventlog_format format, int event_type,
+    struct eventlog_args *args, const struct eventlog *evlog)
 {
     const struct eventlog_config *evl_conf = eventlog_getconf();
     const char *logfile = evl_conf->logpath;
+    const bool compact = format == EVLOG_JSON_COMPACT;
     struct stat sb;
     char *json_str;
     int ret = false;
@@ -1219,7 +1221,7 @@ do_logfile_json(int event_type, struct eventlog_args *args,
     if ((fp = evl_conf->open_log(EVLOG_FILE, logfile)) == NULL)
 	debug_return_bool(false);
 
-    json_str = format_json(event_type, args, evlog, false);
+    json_str = format_json(event_type, args, evlog, compact);
     if (json_str == NULL)
 	goto done;
 
@@ -1229,25 +1231,32 @@ do_logfile_json(int event_type, struct eventlog_args *args,
 	goto done;
     }
 
-    /* Note: assumes file ends in "\n}\n" */
-    if (fstat(fileno(fp), &sb) == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-	    "unable to stat %s", logfile);
-	goto done;
-    }
-    if (sb.st_size == 0) {
-	/* New file */
-	putc('{', fp);
-    } else if (fseeko(fp, -3, SEEK_END) == 0) {
-	/* Continue file, overwrite the final "\n}\n" */
-	putc(',', fp);
+    if (!compact) {
+	/* Note: assumes file ends in "\n}\n" */
+	if (fstat(fileno(fp), &sb) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		"unable to stat %s", logfile);
+	    goto done;
+	}
+	if (sb.st_size == 0) {
+	    /* New file */
+	    putc('{', fp);
+	} else if (fseeko(fp, -3, SEEK_END) == 0) {
+	    /* Continue file, overwrite the final "\n}\n" */
+	    putc(',', fp);
+	} else {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		"unable to seek %s", logfile);
+	    goto done;
+	}
+	fputs(json_str, fp);
+	fputs("\n}\n", fp);			/* close JSON */
     } else {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
-	    "unable to seek %s", logfile);
-	goto done;
+	/* Compact (minified) JSON records, one per line. */
+	putc('{', fp);
+	fputs(json_str, fp);
+	fputs("}\n", fp);
     }
-    fputs(json_str, fp);
-    fputs("\n}\n", fp);			/* close JSON */
     fflush(fp);
     /* XXX - check for file error and recover */
 
@@ -1293,8 +1302,9 @@ do_logfile(int event_type, int flags, struct eventlog_args *args,
 	ret = do_logfile_sudo(lbuf.buf ? lbuf.buf : args->reason, evlog,
 	    args->event_time);
 	break;
-    case EVLOG_JSON:
-	ret = do_logfile_json(event_type, args, evlog);
+    case EVLOG_JSON_COMPACT:
+    case EVLOG_JSON_PRETTY:
+	ret = do_logfile_json(evl_conf->format, event_type, args, evlog);
 	break;
     default:
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
@@ -1317,7 +1327,7 @@ eventlog_accept(const struct eventlog *evlog, int flags,
     bool ret = true;
     debug_decl(eventlog_accept, SUDO_DEBUG_UTIL);
 
-    args.event_time = &evlog->submit_time;
+    args.event_time = &evlog->event_time;
     args.json_info_cb = info_cb;
     args.json_info = info;
 
@@ -1345,7 +1355,7 @@ eventlog_reject(const struct eventlog *evlog, int flags, const char *reason,
     debug_decl(eventlog_reject, SUDO_DEBUG_UTIL);
 
     args.reason = reason;
-    args.event_time = &evlog->submit_time;
+    args.event_time = &evlog->event_time;
     args.json_info_cb = info_cb;
     args.json_info = info;
 
@@ -1444,7 +1454,7 @@ eventlog_exit(const struct eventlog *evlog, int flags)
     debug_decl(eventlog_exit, SUDO_DEBUG_UTIL);
 
     if (sudo_timespecisset(&evlog->run_time)) {
-	sudo_timespecadd(&evlog->submit_time, &evlog->run_time, &exit_time);
+	sudo_timespecadd(&evlog->event_time, &evlog->run_time, &exit_time);
 	args.event_time = &exit_time;
     }
 

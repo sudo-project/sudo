@@ -1,6 +1,6 @@
 Sudo is distributed under the following license:
 
-    Copyright (c) 1994-1996, 1998-2023
+    Copyright (c) 1994-1996, 1998-2024
         Todd C. Miller <Todd.Miller@sudo.ws>
 
     Permission to use, copy, modify, and distribute this software for any
@@ -299,7 +299,7 @@ The file getentropy.c bears the following license:
 
 The embedded copy of zlib bears the following license:
 
-    Copyright (C) 1995-2022 Jean-loup Gailly and Mark Adler
+    Copyright (C) 1995-2024 Jean-loup Gailly and Mark Adler
 
     This software is provided 'as-is', without any express or implied
     warranty.  In no event will the authors be held liable for any damages

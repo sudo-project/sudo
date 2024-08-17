@@ -240,7 +240,7 @@ Defaults are listed in brackets after the description.
         production environment.
 
     --enable-pie
-        Build sudo and related programs as as a position independent
+        Build sudo and related programs as position independent
         executables (PIE).  This improves the effectiveness of address
         space layout randomization (ASLR) on systems that support it.
         Sudo will create PIE binaries by default on Linux systems.
@@ -475,10 +475,6 @@ Defaults are listed in brackets after the description.
     --with-sssd-lib=PATH
         Specify the path to the SSSD shared library, which is loaded
         at run-time.
-
-    --enable-offensive-insults
-        Enable potentially offensive sudo insults from the classic
-        version of sudo.
 
     --enable-pvs-studio
         Generate a sample PVS-Studio.cfg file based on the compiler and
@@ -811,14 +807,16 @@ Defaults are listed in brackets after the description.
 
     --with-classic-insults
         Uses insults from sudo "classic."  If you just specify --with-insults
-        you will get the classic and CSOps insults.  This is on by default if
-        --with-insults is given.
+	you will get the classic and CSOps insults.  You must either specify
+	--with-insults or enable insults in the sudoers file for this to have
+	any effect.
 
     --with-csops-insults
         Insults the user with an extra set of insults (some quotes, some
-        original) from a sysadmin group at CU (CSOps).  You must specify
-        --with-insults as well for this to have any effect.  This is on by
-        default if --with-insults is given.
+	original) from a sysadmin group at CU (CSOps).  If you just specify
+	--with-insults you will get the classic and CSOps insults.  You
+	must either specify --with-insults or enable insults in the sudoers
+	file for this to have any effect.
 
     --with-editor=PATH
         Specify the default editor path for use by visudo.  This may be a
@@ -884,13 +882,19 @@ Defaults are listed in brackets after the description.
         Sudoers option: ignore_dot
 
     --with-insults
-        Define this if you want to be insulted for typing an incorrect password
-        just like the original sudo(8).  This is off by default.  
+        Define this if you want to be insulted by default for typing
+        an incorrect password just like the original sudo(8).
+        Insults may be optionally disabled in the sudoers file.
         Sudoers option: insults
+
+    --with-insults=no, --without-insults
+        By default, sudo will include support for insults that can be
+        enabled via the sudoers file.  However, if --with-insults=no is
+	used, no insults will be available, even if enabled in sudoers.
 
     --with-insults=disabled
         Include support for insults but disable them unless explicitly
-        enabled in sudoers.  
+        enabled in the sudoers file.  This is the default.
         Sudoers option: !insults
 
     --with-iologdir[=DIR]
@@ -995,8 +999,16 @@ Defaults are listed in brackets after the description.
         be separate from the "user path."  You will need to customize the
         path for your site.  This is not applied to users in the group
         specified by --with-exemptgroup.  If you do not specify a path,
-        "/bin:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc" is used.  
+        "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        is used.  
         Sudoers option: secure_path
+
+    --with-secure-path-value[=PATH]
+        Sets the value of "secure_path" that is substituted into
+        the default sudoers file.  This option is intended to be
+        used by package maintainers who wish to set "secure_path"
+        to a system-specific value in the default sudoers file.
+        It does not actually enable "secure-path".
 
     --with-sendmail=PATH
         Override configure's guess as to the location of sendmail.  
@@ -1077,7 +1089,7 @@ You need to have a C compiler in order to build sudo.  Since Solaris
 does not come with one by default this means that you either need
 to either install the Solaris Studio compiler suite, available for
 free from www.oracle.com, or install the GNU C compiler (gcc) which
-is can be installed via the pkg utility on Solaris 11 and higher
+can be installed via the pkg utility on Solaris 11 and higher
 and is distributed on the Solaris Companion CD for older Solaris
 releases.  You can also download gcc packages from
 https://www.opencsw.org/packages/CSWgcc4core/.

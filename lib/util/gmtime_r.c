@@ -36,7 +36,7 @@
  * Still has the normal gmtime() side effects.
  */
 struct tm *
-sudo_gmtime_r(const time_t *timer, struct tm *result)
+sudo_gmtime_r(const time_t * restrict timer, struct tm * restrict result)
 {
     struct tm *tm;
 

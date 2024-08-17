@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2000, 2004, 2007-2023
+ * Copyright (c) 1996, 1998-2000, 2004, 2007-2024
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -159,15 +159,9 @@ struct command_options {
     int timeout;			/* command timeout */
     char *runcwd;			/* working directory */
     char *runchroot;			/* root directory */
-#ifdef HAVE_SELINUX
     char *role, *type;			/* SELinux role and type */
-#endif
-#ifdef HAVE_APPARMOR
     char *apparmor_profile;		/* AppArmor profile */
-#endif
-#ifdef HAVE_PRIV_SET
     char *privs, *limitprivs;		/* Solaris privilege sets */
-#endif
 };
 
 /*
@@ -240,21 +234,15 @@ struct cmndspec {
     struct member_list *runasuserlist;	/* list of runas users */
     struct member_list *runasgrouplist;	/* list of runas groups */
     struct member *cmnd;		/* command to allow/deny */
-    struct cmndtag tags;		/* tag specificaion */
+    struct cmndtag tags;		/* tag specification */
     int timeout;			/* command timeout */
     time_t notbefore;			/* time restriction */
     time_t notafter;			/* time restriction */
     char *runcwd;			/* working directory */
     char *runchroot;			/* root directory */
-#ifdef HAVE_SELINUX
     char *role, *type;			/* SELinux role and type */
-#endif
-#ifdef HAVE_APPARMOR
     char *apparmor_profile;		/* AppArmor profile */
-#endif
-#ifdef HAVE_PRIV_SET
     char *privs, *limitprivs;		/* Solaris privilege sets */
-#endif
 };
 
 /*
@@ -388,7 +376,7 @@ const char *alias_type_to_string(short alias_type);
 struct alias *alias_get(const struct sudoers_parse_tree *parse_tree, const char *name, short type);
 struct alias *alias_remove(struct sudoers_parse_tree *parse_tree, const char *name, short type);
 bool alias_find_used(struct sudoers_parse_tree *parse_tree, struct rbtree *used_aliases);
-void alias_apply(struct sudoers_parse_tree *parse_tree, int (*func)(struct sudoers_parse_tree *, struct alias *, void *), void *cookie);
+bool alias_apply(struct sudoers_parse_tree *parse_tree, int (*func)(struct sudoers_parse_tree *, struct alias *, void *), void *cookie);
 void alias_free(void *a);
 void alias_put(struct alias *a);
 
@@ -458,8 +446,8 @@ extern FILE *sudoersin;
 extern char *sudoers;
 
 /* base64.c */
-size_t base64_decode(const char *str, unsigned char *dst, size_t dsize);
-size_t base64_encode(const unsigned char *in, size_t in_len, char *out, size_t out_len);
+size_t base64_decode(const char * restrict str, unsigned char * restrict dst, size_t dsize);
+size_t base64_encode(const unsigned char * restrict in, size_t in_len, char * restrict out, size_t out_len);
 
 /* timeout.c */
 int parse_timeout(const char *timestr);

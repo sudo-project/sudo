@@ -28,6 +28,9 @@
 #include <sys/stat.h>	/* to avoid problems with mismatched headers and libc */
 #include <unistd.h>	/* to avoid problems with mismatched headers and libc */
 #include <stdio.h>
+#if !defined(HAVE_UTIMENSAT) || !defined(HAVE_FUTIMENS)
+# include <time.h>
+#endif
 #if !defined(HAVE_VSNPRINTF) || !defined(HAVE_VASPRINTF) || \
     !defined(HAVE_VSYSLOG) || defined(PREFER_PORTABLE_SNPRINTF)
 # include <stdarg.h>
@@ -347,7 +350,7 @@ sudo_dso_public ssize_t sudo_getdelim(char ** restrict bufp, size_t * restrict b
 # define getdelim(_a, _b, _c, _d) sudo_getdelim((_a), (_b), (_c), (_d))
 #elif defined(HAVE_DECL_GETDELIM) && !HAVE_DECL_GETDELIM
 /* getdelim present in libc but missing prototype (old gcc fixed includes?) */
-ssize_t getdelim(char **bufp, size_t *bufsizep, int delim, FILE *fp);
+ssize_t getdelim(char ** restrict bufp, size_t * restrict bufsizep, int delim, FILE * restrict fp);
 #endif /* HAVE_GETDELIM */
 #ifndef HAVE_GETUSERSHELL
 sudo_dso_public char *sudo_getusershell(void);
@@ -366,12 +369,12 @@ void setusershell(void);
 void endusershell(void);
 #endif /* HAVE_GETUSERSHELL */
 #ifndef HAVE_GMTIME_R
-sudo_dso_public struct tm *sudo_gmtime_r(const time_t *, struct tm *);
+sudo_dso_public struct tm *sudo_gmtime_r(const time_t * restrict, struct tm * restrict);
 # undef gmtime_r
 # define gmtime_r(_a, _b) sudo_gmtime_r((_a), (_b))
 #endif /* HAVE_GMTIME_R */
 #ifndef HAVE_LOCALTIME_R
-sudo_dso_public struct tm *sudo_localtime_r(const time_t *, struct tm *);
+sudo_dso_public struct tm *sudo_localtime_r(const time_t * restrict, struct tm * restrict);
 # undef localtime_r
 # define localtime_r(_a, _b) sudo_localtime_r((_a), (_b))
 #endif /* HAVE_LOCALTIME_R */
@@ -379,7 +382,7 @@ sudo_dso_public struct tm *sudo_localtime_r(const time_t *, struct tm *);
 sudo_dso_public time_t sudo_timegm(struct tm *);
 #endif /* HAVE_TIMEGM */
 #ifndef HAVE_UTIMENSAT
-sudo_dso_public int sudo_utimensat(int fd, const char *file, const struct timespec *times, int flag);
+sudo_dso_public int sudo_utimensat(int fd, const char *file, const struct timespec times[2], int flag);
 # undef utimensat
 # define utimensat(_a, _b, _c, _d) sudo_utimensat((_a), (_b), (_c), (_d))
 #endif /* HAVE_UTIMENSAT */
@@ -389,12 +392,12 @@ sudo_dso_public int sudo_fchmodat(int dfd, const char *path, mode_t mode, int fl
 # define fchmodat(_a, _b, _c, _d) sudo_fchmodat((_a), (_b), (_c), (_d))
 #endif /* HAVE_FCHMODAT */
 #ifndef HAVE_FSTATAT
-sudo_dso_public int sudo_fstatat(int dfd, const char *path, struct stat *sb, int flag);
+sudo_dso_public int sudo_fstatat(int dfd, const char * restrict path, struct stat * restrict sb, int flag);
 # undef fstatat
 # define fstatat(_a, _b, _c, _d) sudo_fstatat((_a), (_b), (_c), (_d))
 #endif /* HAVE_FSTATAT */
 #ifndef HAVE_FUTIMENS
-sudo_dso_public int sudo_futimens(int fd, const struct timespec *times);
+sudo_dso_public int sudo_futimens(int fd, const struct timespec times[2]);
 # undef futimens
 # define futimens(_a, _b) sudo_futimens((_a), (_b))
 #endif /* HAVE_FUTIMENS */
@@ -508,12 +511,12 @@ sudo_dso_public int sudo_str2sig(const char *signame, int *signum);
 # define str2sig(_a, _b) sudo_str2sig((_a), (_b))
 #endif /* HAVE_STR2SIG */
 #if !defined(HAVE_INET_NTOP) && defined(NEED_INET_NTOP)
-sudo_dso_public char *sudo_inet_ntop(int af, const void *src, char *dst, socklen_t size);
+sudo_dso_public const char *sudo_inet_ntop(int af, const void * restrict src, char * restrict dst, socklen_t size);
 # undef inet_ntop
 # define inet_ntop(_a, _b, _c, _d) sudo_inet_ntop((_a), (_b), (_c), (_d))
 #endif /* HAVE_INET_NTOP */
 #ifndef HAVE_INET_PTON
-sudo_dso_public int sudo_inet_pton(int af, const char *src, void *dst);
+sudo_dso_public int sudo_inet_pton(int af, const char * restrict src, void * restrict dst);
 # undef inet_pton
 # define inet_pton(_a, _b, _c) sudo_inet_pton((_a), (_b), (_c))
 #endif /* HAVE_INET_PTON */

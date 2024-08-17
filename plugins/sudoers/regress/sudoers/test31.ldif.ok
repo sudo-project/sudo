@@ -1,0 +1,32 @@
+dn: cn=user1,ou=SUDOers,dc=sudo,dc=ws
+objectClass: top
+objectClass: sudoRole
+cn: user1
+sudoUser: user1
+sudoHost: ALL
+sudoOption: role=foo_r
+sudoOption: type=bar_t
+sudoCommand: ALL
+sudoOrder: 1
+
+dn: cn=user2,ou=SUDOers,dc=sudo,dc=ws
+objectClass: top
+objectClass: sudoRole
+cn: user2
+sudoUser: user2
+sudoHost: ALL
+sudoOption: apparmor_profile=usr.bin.tcpdump
+sudoCommand: /usr/bin/tcpdump
+sudoOrder: 2
+
+dn: cn=user3,ou=SUDOers,dc=sudo,dc=ws
+objectClass: top
+objectClass: sudoRole
+cn: user3
+sudoUser: user3
+sudoHost: ALL
+sudoOption: privs=file_link_any,net_access,proc_exec,proc_fork,proc_info,proc_session
+sudoOption: limitprivs=default
+sudoCommand: ALL
+sudoOrder: 3
+

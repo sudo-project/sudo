@@ -124,7 +124,7 @@ sudo_dso_findsym_v1(void *vhandle, const char *symbol)
     }
 
     /*
-     * Note that the behavior of of SUDO_DSO_NEXT and SUDO_DSO_SELF
+     * Note that the behavior of SUDO_DSO_NEXT and SUDO_DSO_SELF
      * differs from most implementations when called from
      * a shared library.
      */

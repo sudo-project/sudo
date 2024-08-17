@@ -195,7 +195,7 @@ sudo_dso_public int sudo_getgrouplist2_v1(const char *name, gid_t basegid, GETGR
 #define sudo_getgrouplist2(_a, _b, _c, _d) sudo_getgrouplist2_v1((_a), (_b), (_c), (_d))
 
 /* hexchar.c */
-sudo_dso_public int sudo_hexchar_v1(const char *s);
+sudo_dso_public int sudo_hexchar_v1(const char s[restrict static 2]);
 #define sudo_hexchar(_a) sudo_hexchar_v1(_a)
 
 /* key_val.c */
@@ -242,7 +242,7 @@ sudo_dso_public int sudo_mmap_protect_v1(void *ptr);
 #define sudo_mmap_protect(_a) sudo_mmap_protect_v1(_a)
 
 /* multiarch.c */
-sudo_dso_public char *sudo_stat_multiarch_v1(const char *path, struct stat *sb);
+sudo_dso_public char *sudo_stat_multiarch_v1(const char * restrict path, struct stat * restrict sb);
 #define sudo_stat_multiarch(_a, _b) sudo_stat_multiarch_v1((_a), (_b))
 
 /* parseln.c */
@@ -350,9 +350,9 @@ sudo_dso_public void sudo_get_ttysize_v2(int fd, int *rowp, int *colp);
 #define sudo_get_ttysize(_a, _b, _c) sudo_get_ttysize_v2((_a), (_b), (_c))
 
 /* uuid.c */
-sudo_dso_public void sudo_uuid_create_v1(unsigned char uuid_out[16]);
+sudo_dso_public void sudo_uuid_create_v1(unsigned char uuid_out[restrict static 16]);
 #define sudo_uuid_create(_a) sudo_uuid_create_v1((_a))
-sudo_dso_public char *sudo_uuid_to_string_v1(unsigned char uuid[16], char *dst, size_t dstsiz);
+sudo_dso_public char *sudo_uuid_to_string_v1(const unsigned char uuid[restrict static 16], char * restrict dst, size_t dstsiz);
 #define sudo_uuid_to_string(_a, _b, _c) sudo_uuid_to_string_v1((_a), (_b), (_c))
 
 #endif /* SUDO_UTIL_H */

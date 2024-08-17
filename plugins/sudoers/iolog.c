@@ -57,7 +57,7 @@ static struct iolog_file iolog_files[] = {
 };
 
 static struct sudoers_io_operations {
-    int (*open)(struct timespec *now);
+    int (*open)(struct timespec *start_time);
     void (*close)(int exit_status, int error, const char **errstr);
     int (*log)(int event, const char *buf, unsigned int len,
 	struct timespec *delay, const char **errstr);
@@ -314,7 +314,7 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
     evlog->columns = 80;
     evlog->runuid = ROOT_UID;
     evlog->rungid = 0;
-    sudo_gettime_real(&evlog->submit_time);
+    sudo_gettime_real(&evlog->event_time);
 
     for (cur = user_info; *cur != NULL; cur++) {
 	switch (**cur) {
@@ -685,7 +685,7 @@ oom:
 }
 
 static int
-sudoers_io_open_local(struct timespec *now)
+sudoers_io_open_local(struct timespec *start_time)
 {
     const struct sudoers_context *ctx = sudoers_get_context();
     struct eventlog *evlog = iolog_details.evlog;
@@ -756,13 +756,13 @@ done:
 
 #ifdef SUDOERS_LOG_CLIENT
 static int
-sudoers_io_open_remote(struct timespec *now)
+sudoers_io_open_remote(struct timespec *start_time)
 {
     debug_decl(sudoers_io_open_remote, SUDOERS_DEBUG_PLUGIN);
 
     /* Open connection to log server, send hello and accept messages. */
-    client_closure = log_server_open(&iolog_details, now, true, SEND_ACCEPT,
-	NULL);
+    client_closure = log_server_open(&iolog_details, start_time, true,
+	SEND_ACCEPT, NULL);
     if (client_closure != NULL)
 	debug_return_int(1);
 

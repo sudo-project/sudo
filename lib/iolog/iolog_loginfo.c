@@ -123,7 +123,7 @@ iolog_write_info_file_legacy(int dfd, struct eventlog *evlog)
     }
 
     fprintf(fp, "%lld:%s:%s:%s:%s:%d:%d\n%s\n",
-	(long long)evlog->submit_time.tv_sec,
+	(long long)evlog->event_time.tv_sec,
 	evlog->submituser ? evlog->submituser : "unknown",
 	evlog->runuser ? evlog->runuser : RUNAS_DEFAULT,
 	evlog->rungroup ? evlog->rungroup : "",
@@ -168,12 +168,12 @@ iolog_write_info_file_json(int dfd, struct eventlog *evlog)
 	goto oom;
 
     json_value.type = JSON_NUMBER;
-    json_value.u.number = evlog->submit_time.tv_sec;
+    json_value.u.number = evlog->event_time.tv_sec;
     if (!sudo_json_add_value(&jsonc, "seconds", &json_value))
         goto oom;
 
     json_value.type = JSON_NUMBER;
-    json_value.u.number = evlog->submit_time.tv_nsec;
+    json_value.u.number = evlog->event_time.tv_nsec;
     if (!sudo_json_add_value(&jsonc, "nanoseconds", &json_value))
         goto oom;
 

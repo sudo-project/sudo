@@ -529,6 +529,11 @@
         },
         {
             "Options": [
+                { "cmddenial_message": "That's not allowed!" }
+            ]
+        },
+        {
+            "Options": [
                 { "authfail_message": "Learn to type!" }
             ]
         },

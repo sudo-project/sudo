@@ -78,7 +78,7 @@ bool log_exit_status(const struct sudoers_context *ctx, int exit_status);
 bool log_auth_failure(const struct sudoers_context *ctx, unsigned int status, unsigned int tries);
 bool log_denial(const struct sudoers_context *ctx, unsigned int status, bool inform_user);
 bool log_failure(const struct sudoers_context *ctx, unsigned int status, int flags);
-bool log_server_alert(const struct sudoers_context *ctx, struct eventlog *evlog, struct timespec *now, const char *message, const char *errstr);
+bool log_server_alert(const struct sudoers_context *ctx, struct eventlog *evlog, const char *message, const char *errstr);
 bool log_server_reject(const struct sudoers_context *ctx, struct eventlog *evlog, const char *message);
 bool log_warning(const struct sudoers_context *ctx, unsigned int flags, const char * restrict fmt, ...) sudo_printflike(3, 4);
 bool log_warningx(const struct sudoers_context *ctx, unsigned int flags, const char * restrict fmt, ...) sudo_printflike(3, 4);

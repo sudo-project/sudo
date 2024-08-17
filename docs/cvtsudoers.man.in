@@ -1,4 +1,4 @@
-.\" Automatically generated from an mdoc input file.  Do not edit.
+.\" Automatically generated from the cvtsudoers.mdoc.in file.  Do not edit.
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "CVTSUDOERS" "1" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
+.TH "CVTSUDOERS" "1" "April 26, 2024" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -912,20 +912,28 @@ A boolean value that, if true, will negate any comparison performed
 with the object.
 .TP 9n
 sha224
-A string containing the SHA224 digest of the
-\fIcommand\fR.
+One or more SHA224 digests for the
+\fIcommand\fR
+in string form.
+Multiple digests of the same type are stored as an array.
 .TP 9n
 sha256
-A string containing the SHA256 digest of the
-\fIcommand\fR.
+One or more SHA256 digests for the
+\fIcommand\fR
+in string form.
+Multiple digests of the same type are stored as an array.
 .TP 9n
 sha384
-A string containing the SHA384 digest of the
-\fIcommand\fR.
+One or more SHA384 digests for the
+\fIcommand\fR
+in string form.
+Multiple digests of the same type are stored as an array.
 .TP 9n
 sha512
-A string containing the SHA512 digest of the
-\fIcommand\fR.
+One or more SHA512 digests for the
+\fIcommand\fR
+in string form.
+Multiple digests of the same type are stored as an array.
 .PP
 The
 \fIrunasusers\fR
@@ -1374,7 +1382,19 @@ exhaustive list of people who have contributed to
 .SH "BUGS"
 If you believe you have found a bug in
 \fBcvtsudoers\fR,
-you can submit a bug report at https://bugzilla.sudo.ws/
+you can either file a bug report in the sudo bug database,
+https://bugzilla.sudo.ws/, or open an issue at
+https://github.com/sudo-project/sudo/issues.
+If you would prefer to use email, messages may be sent to the
+sudo-workers mailing list,
+https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
+or <sudo@sudo.ws> (private).
+.PP
+Please not report security vulnerabilities through public GitHub
+issues, Bugzilla or mailing lists.
+Instead, report them via email to <Todd.Miller@sudo.ws>.
+You may encrypt your message with PGP if you would like, using
+the key found at https://www.sudo.ws/dist/PGPKEYS.
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or

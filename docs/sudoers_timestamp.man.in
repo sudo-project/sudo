@@ -1,4 +1,4 @@
-.\" Automatically generated from an mdoc input file.  Do not edit.
+.\" Automatically generated from the sudoers_timestamp.mdoc.in file.  Do not edit.
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDOERS_TIMESTAMP" "@mansectform@" "September 20, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS_TIMESTAMP" "@mansectform@" "November 26, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -60,14 +60,14 @@ Time stamp records have the following structure:
 .sp
 .RS 0n
 /* Time stamp entry types */
-#define TS_GLOBAL               0x01    /* not restricted by tty or ppid */
-#define TS_TTY                  0x02    /* restricted by tty */
-#define TS_PPID                 0x03    /* restricted by ppid */
-#define TS_LOCKEXCL             0x04    /* special lock record */
+#define TS_GLOBAL               0x01U   /* not restricted by tty or ppid */
+#define TS_TTY                  0x02U   /* restricted by tty */
+#define TS_PPID                 0x03U   /* restricted by ppid */
+#define TS_LOCKEXCL             0x04U   /* special lock record */
 
 /* Time stamp flags */
-#define TS_DISABLED             0x01    /* entry disabled */
-#define TS_ANYUID               0x02    /* ignore uid, only valid in key */
+#define TS_DISABLED             0x01U   /* entry disabled */
+#define TS_ANYUID               0x02U   /* ignore uid, only valid in key */
 
 struct timestamp_entry {
     unsigned short version;     /* version number */
@@ -138,7 +138,7 @@ or of the parent process for records of type
 \fRTS_PPID\fR.
 The
 \fIstart_time\fR
-is used to help prevent re-use of a time stamp record after a
+is used to help prevent reuse of a time stamp record after a
 user has logged out.
 Not all systems support a method to easily retrieve a process's
 start time.
@@ -174,6 +174,13 @@ records of type
 u.ppid
 The ID of the parent process for records of type
 \fRTS_PPID\fR.
+.PP
+The
+\fBtsdump\fR
+utility, included with the sudo source distribution, can be used to
+display the contents of a
+\fIsudoers\fR
+time stamp file.
 .SH "LOCKING"
 In
 \fBsudoers\fR
@@ -250,13 +257,13 @@ Information about the terminal device was stored in
 tty-based time stamp files for validity checks.
 This included the terminal device numbers, inode number and, on systems
 where it was not updated when the device was written to, the inode change time.
-This helped prevent re-use of the time stamp file after logout.
+This helped prevent reuse of the time stamp file after logout.
 .TP 6n
 1.8.6p7
 The terminal session ID was added to tty-based time stamp files to
-prevent re-use of the time stamp by the same user in a different
+prevent reuse of the time stamp by the same user in a different
 terminal session.
-It also helped prevent re-use of the time stamp file on systems where
+It also helped prevent reuse of the time stamp file on systems where
 the terminal device's inode change time was updated by writing.
 .TP 6n
 1.8.10
@@ -273,7 +280,7 @@ entire file and the lock is held until authentication is complete.
 1.8.22
 The start time of the terminal session leader or parent process is
 now stored in non-global time stamp records.
-This prevents re-use of the time stamp file after logout in most cases.
+This prevents reuse of the time stamp file after logout in most cases.
 .sp
 Support was added for the kernel-based tty time stamps available in
 OpenBSD
@@ -300,8 +307,20 @@ exhaustive list of people who have contributed to
 \fBsudo\fR.
 .SH "BUGS"
 If you believe you have found a bug in
-\fBsudo\fR,
-you can submit a bug report at https://bugzilla.sudo.ws/
+\fBsudoers_timestamp\fR,
+you can either file a bug report in the sudo bug database,
+https://bugzilla.sudo.ws/, or open an issue at
+https://github.com/sudo-project/sudo/issues.
+If you would prefer to use email, messages may be sent to the
+sudo-workers mailing list,
+https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
+or <sudo@sudo.ws> (private).
+.PP
+Please not report security vulnerabilities through public GitHub
+issues, Bugzilla or mailing lists.
+Instead, report them via email to <Todd.Miller@sudo.ws>.
+You may encrypt your message with PGP if you would like, using
+the key found at https://www.sudo.ws/dist/PGPKEYS.
 .SH "SUPPORT"
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or

@@ -138,33 +138,33 @@ struct glob_lim {
 };
 
 static int	 compare(const void *, const void *);
-static int	 g_Ctoc(const Char *, char *, size_t);
-static int	 g_lstat(Char *, struct stat *, glob_t *);
+static int	 g_Ctoc(const Char * restrict, char * restrict, size_t);
+static int	 g_lstat(Char * restrict, struct stat * restrict, glob_t *restrict);
 static DIR	*g_opendir(Char *, glob_t *);
 static Char	*g_strchr(const Char *, int);
 static int	 g_strncmp(const Char *, const char *, size_t);
-static int	 g_stat(Char *, struct stat *, glob_t *);
-static int	 glob0(const Char *, glob_t *, struct glob_lim *);
-static int	 glob1(Char *, Char *, glob_t *, struct glob_lim *);
+static int	 g_stat(Char * restrict, struct stat * restrict, glob_t * restrict);
+static int	 glob0(const Char * restrict, glob_t * restrict, struct glob_lim * restrict);
+static int	 glob1(Char *, Char *, glob_t * restrict, struct glob_lim * restrict);
 static int	 glob2(Char *, Char *, Char *, Char *, Char *, Char *,
-		    glob_t *, struct glob_lim *);
+		    glob_t * restrict, struct glob_lim * restrict);
 static int	 glob3(Char *, Char *, Char *, Char *, Char *,
-		    Char *, Char *, glob_t *, struct glob_lim *);
-static int	 globextend(const Char *, glob_t *, struct glob_lim *,
-		    struct stat *);
+		    Char *, Char *, glob_t * restrict, struct glob_lim * restrict);
+static int	 globextend(const Char * restrict, glob_t * restrict, struct glob_lim * restrict,
+		    struct stat * restrict);
 static const Char *
-		 globtilde(const Char *, Char *, size_t, glob_t *);
-static int	 globexp1(const Char *, glob_t *, struct glob_lim *);
-static int	 globexp2(const Char *, const Char *, glob_t *,
-		    struct glob_lim *);
+		 globtilde(const Char * restrict, Char * restrict, size_t, glob_t * restrict);
+static int	 globexp1(const Char * restrict, glob_t * restrict, struct glob_lim * restrict);
+static int	 globexp2(const Char *, const Char *, glob_t * restrict,
+		    struct glob_lim * restrict);
 static int	 match(Char *, Char *, Char *);
 #ifdef DEBUG
-static void	 qprintf(const char *, Char *);
+static void	 qprintf(const char * restrict, Char * restrict);
 #endif
 
 int
-sudo_glob(const char *pattern, int flags, int (*errfunc)(const char *, int),
-    glob_t *pglob)
+sudo_glob(const char * restrict pattern, int flags, int (*errfunc)(const char *, int),
+    glob_t * restrict pglob)
 {
 	const unsigned char *patnext;
 	int c;
@@ -220,7 +220,7 @@ sudo_glob(const char *pattern, int flags, int (*errfunc)(const char *, int),
  * characters
  */
 static int
-globexp1(const Char *pattern, glob_t *pglob, struct glob_lim *limitp)
+globexp1(const Char * restrict pattern, glob_t * restrict pglob, struct glob_lim * restrict limitp)
 {
 	const Char* ptr = pattern;
 
@@ -241,10 +241,11 @@ globexp1(const Char *pattern, glob_t *pglob, struct glob_lim *limitp)
  * If it fails then it tries to glob the rest of the pattern and returns.
  */
 static int
-globexp2(const Char *ptr, const Char *pattern, glob_t *pglob,
-    struct glob_lim *limitp)
+globexp2(const Char *ptr, const Char *pattern, glob_t * restrict pglob,
+    struct glob_lim * restrict limitp)
 {
-	int     i, rv;
+	size_t  i;
+	int     rv;
 	Char   *lm, *ls;
 	const Char *pe, *pm, *pl;
 	Char    patbuf[PATH_MAX];
@@ -346,7 +347,7 @@ globexp2(const Char *ptr, const Char *pattern, glob_t *pglob,
  * expand tilde from the passwd file.
  */
 static const Char *
-globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob_t *pglob)
+globtilde(const Char * restrict pattern, Char * restrict patbuf, size_t patbuf_len, glob_t * restrict pglob)
 {
 	struct passwd *pwd;
 	char *h;
@@ -413,7 +414,7 @@ g_strncmp(const Char *s1, const char *s2, size_t n)
 }
 
 static int
-g_charclass(const Char **patternp, Char **bufnextp)
+g_charclass(const Char ** restrict patternp, Char ** restrict bufnextp)
 {
 	const Char *pattern = *patternp + 1;
 	Char *bufnext = *bufnextp;
@@ -447,7 +448,7 @@ g_charclass(const Char **patternp, Char **bufnextp)
  * to find no matches.
  */
 static int
-glob0(const Char *pattern, glob_t *pglob, struct glob_lim *limitp)
+glob0(const Char * restrict pattern, glob_t * restrict pglob, struct glob_lim * restrict limitp)
 {
 	const Char *qpatnext;
 	int c, err;
@@ -551,7 +552,7 @@ compare(const void *p, const void *q)
 }
 
 static int
-glob1(Char *pattern, Char *pattern_last, glob_t *pglob, struct glob_lim *limitp)
+glob1(Char *pattern, Char *pattern_last, glob_t * restrict pglob, struct glob_lim * restrict limitp)
 {
 	Char pathbuf[PATH_MAX];
 
@@ -570,7 +571,7 @@ glob1(Char *pattern, Char *pattern_last, glob_t *pglob, struct glob_lim *limitp)
  */
 static int
 glob2(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last,
-    Char *pattern, Char *pattern_last, glob_t *pglob, struct glob_lim *limitp)
+    Char *pattern, Char *pattern_last, glob_t * restrict pglob, struct glob_lim * restrict limitp)
 {
 	struct stat sb;
 	Char *p, *q;
@@ -638,8 +639,8 @@ glob2(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last,
 
 static int
 glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last,
-    Char *pattern, Char *restpattern, Char *restpattern_last, glob_t *pglob,
-    struct glob_lim *limitp)
+    Char *pattern, Char *restpattern, Char *restpattern_last, glob_t * restrict pglob,
+    struct glob_lim * restrict limitp)
 {
 	struct dirent *dp;
 	DIR *dirp;
@@ -721,8 +722,8 @@ glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last,
  *	gl_pathv points to (gl_offs + gl_pathc + 1) items.
  */
 static int
-globextend(const Char *path, glob_t *pglob, struct glob_lim *limitp,
-    struct stat *sb)
+globextend(const Char * restrict path, glob_t * restrict pglob, struct glob_lim * restrict limitp,
+    struct stat * restrict sb)
 {
 	char **pathv;
 	size_t i, newn, len;
@@ -892,7 +893,7 @@ g_opendir(Char *str, glob_t *pglob)
 }
 
 static int
-g_lstat(Char *fn, struct stat *sb, glob_t *pglob)
+g_lstat(Char * restrict fn, struct stat * restrict sb, glob_t * restrict pglob)
 {
 	char buf[PATH_MAX];
 
@@ -902,7 +903,7 @@ g_lstat(Char *fn, struct stat *sb, glob_t *pglob)
 }
 
 static int
-g_stat(Char *fn, struct stat *sb, glob_t *pglob)
+g_stat(Char * restrict fn, struct stat * restrict sb, glob_t * restrict pglob)
 {
 	char buf[PATH_MAX];
 
@@ -922,7 +923,7 @@ g_strchr(const Char *str, int ch)
 }
 
 static int
-g_Ctoc(const Char *str, char *buf, size_t len)
+g_Ctoc(const Char * restrict str, char * restrict buf, size_t len)
 {
 
 	while (len--) {
@@ -934,20 +935,20 @@ g_Ctoc(const Char *str, char *buf, size_t len)
 
 #ifdef DEBUG
 static void
-qprintf(const char *str, Char *s)
+qprintf(const char * restrict str, Char * restrict s)
 {
 	Char *p;
 
 	(void)printf("%s:\n", str);
 	for (p = s; *p; p++)
-		(void)fputc(CHAR(*p), stdout);
-	(void)fputc('\n', stdout);
+		(void)putchar(CHAR(*p));
+	(void)putchar('\n');
 	for (p = s; *p; p++)
-		(void)fputc(*p & M_PROTECT ? '"' : ' ', stdout);
-	(void)fputc('\n', stdout);
+		(void)putchar(*p & M_PROTECT ? '"' : ' ');
+	(void)putchar('\n');
 	for (p = s; *p; p++)
-		(void)fputc(ismeta(*p) ? '_' : ' ', stdout);
-	(void)fputc('\n', stdout);
+		(void)putchar(ismeta(*p) ? '_' : ' ');
+	(void)putchar('\n');
 }
 #endif /* DEBUG */
 #endif /* HAVE_GLOB */

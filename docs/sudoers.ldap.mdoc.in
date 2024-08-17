@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd June 7, 2023
+.Dd June 25, 2024
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -616,17 +616,20 @@ distribution includes versions of the
 .Nm sudoers
 schema for multiple LDAP servers:
 .Bl -tag -width 4n
+.It Pa schema.ActiveDirectory
+Microsoft Active Directory
+.It Pa schema.IBM_LDAP
+IBM Directory Server, also known as IBM Tivoli Directory Server,
+IBM Security Directory Server, and IBM Security Verify Directory
+.It Pa schema.iPlanet
+Netscape-derived servers such as the iPlanet, Oracle,
+and 389 Directory Servers
+.It Pa schema.olcSudo
+OpenLDAP slapd 2.3 and higher when on-line configuration is enabled
 .It Pa schema.OpenLDAP
 OpenLDAP slapd and
 .Ox
 ldapd
-.It Pa schema.olcSudo
-OpenLDAP slapd 2.3 and higher when on-line configuration is enabled
-.It Pa schema.iPlanet
-Netscape-derived servers such as the iPlanet, Oracle,
-and 389 Directory Servers
-.It Pa schema.ActiveDirectory
-Microsoft Active Directory
 .El
 .Pp
 The schema in OpenLDAP format is also included in the
@@ -1635,8 +1638,20 @@ See the
 section for more information.
 .Sh BUGS
 If you believe you have found a bug in
-.Nm sudo ,
-you can submit a bug report at https://bugzilla.sudo.ws/
+.Nm ,
+you can either file a bug report in the sudo bug database,
+https://bugzilla.sudo.ws/, or open an issue at
+https://github.com/sudo-project/sudo/issues.
+If you would prefer to use email, messages may be sent to the
+sudo-workers mailing list,
+https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
+or <sudo@sudo.ws> (private).
+.Pp
+Please not report security vulnerabilities through public GitHub
+issues, Bugzilla or mailing lists.
+Instead, report them via email to <Todd.Miller@sudo.ws>.
+You may encrypt your message with PGP if you would like, using
+the key found at https://www.sudo.ws/dist/PGPKEYS.
 .Sh SUPPORT
 Limited free support is available via the sudo-users mailing list,
 see https://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or

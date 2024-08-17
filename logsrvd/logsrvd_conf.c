@@ -901,8 +901,13 @@ cb_eventlog_format(struct logsrvd_config *config, const char *str, size_t offset
 {
     debug_decl(cb_eventlog_format, SUDO_DEBUG_UTIL);
 
+    /* FFR - make "json" an alias for EVLOG_JSON_COMPACT instead. */
     if (strcmp(str, "json") == 0)
-	config->eventlog.log_format = EVLOG_JSON;
+	config->eventlog.log_format = EVLOG_JSON_PRETTY;
+    else if (strcmp(str, "json_compact") == 0)
+	config->eventlog.log_format = EVLOG_JSON_COMPACT;
+    else if (strcmp(str, "json_pretty") == 0)
+	config->eventlog.log_format = EVLOG_JSON_PRETTY;
     else if (strcmp(str, "sudo") == 0)
 	config->eventlog.log_format = EVLOG_SUDO;
     else
@@ -1292,8 +1297,8 @@ logsrvd_open_eventlog(struct logsrvd_config *config)
     int flags;
     debug_decl(logsrvd_open_eventlog, SUDO_DEBUG_UTIL);
 
-    /* Cannot append to a JSON file. */
-    if (config->eventlog.log_format == EVLOG_JSON) {
+    /* Cannot append to a JSON file that is a single object. */
+    if (config->eventlog.log_format == EVLOG_JSON_PRETTY) {
 	flags = O_RDWR|O_CREAT;
     } else {
 	flags = O_WRONLY|O_APPEND|O_CREAT;

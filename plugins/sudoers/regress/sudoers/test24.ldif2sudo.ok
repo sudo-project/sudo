@@ -1,8 +1,16 @@
 Defaults runcwd=~
+Defaults runcwd=~
+Defaults runchroot=/
 Defaults runchroot=/
 
 # sudoRole user0
 user0 ALL = CHROOT=/var/www CWD=/htdocs /bin/ksh
 
-# sudoRole user1, user1_1
-user1 ALL = CWD=~root /usr/bin/id, CWD=/tmp /bin/ls
+# sudoRole user1
+user1 ALL = CHROOT=/var/www CWD=/htdocs /bin/ksh
+
+# sudoRole user2, user2_1
+user2 ALL = CWD=~root /usr/bin/id, CWD=/tmp /bin/ls
+
+# sudoRole user3, user3_1
+user3 ALL = CWD=~root /usr/bin/id, CWD=/tmp /bin/ls

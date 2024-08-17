@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2018-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2018-2023 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,6 +22,13 @@
  */
 
 #include <config.h>
+
+#include <sys/types.h>
+#if defined(MAJOR_IN_MKDEV)
+# include <sys/mkdev.h>
+#elif defined(MAJOR_IN_SYSMACROS)
+# include <sys/sysmacros.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -82,7 +89,8 @@ main(int argc, char *argv[])
     /* Initialize the debug subsystem. */
     if (sudo_conf_read(NULL, SUDO_CONF_DEBUG) == -1)
 	return EXIT_FAILURE;
-    sudoers_debug_register(getprogname(), sudo_conf_debug_files(getprogname()));
+    if (!sudoers_debug_register(getprogname(), sudo_conf_debug_files(getprogname())))
+	return EXIT_FAILURE;
 
     while ((ch = getopt(argc, argv, "f:u:")) != -1) {
 	switch (ch) {
@@ -112,14 +120,19 @@ main(int argc, char *argv[])
     sudo_timespecsub(&now, &timediff, &timediff);
 
     if (fname == NULL) {
-	struct passwd *pw;
+	uid_t uid;
+	int len;
 
 	if (user == NULL) {
-	    if ((pw = getpwuid(geteuid())) == NULL)
-		sudo_fatalx(U_("unknown uid %u"), (unsigned int)geteuid());
-	    user = pw->pw_name;
+	    uid = geteuid();
+	} else {
+	    struct passwd *pw = getpwnam(user);
+	    if (pw == NULL)
+		sudo_fatalx(U_("unknown user %s"), user);
+	    uid = pw->pw_uid;
 	}
-	if (asprintf(&fname, "%s/%s", _PATH_SUDO_TIMEDIR, user) == -1)
+	len = asprintf(&fname, "%s/%u", _PATH_SUDO_TIMEDIR, (unsigned int)uid);
+	if (len == -1)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
     }
 
@@ -282,22 +295,27 @@ dump_entry(struct timestamp_entry *entry, off_t pos)
     printf("size: %hu\n", entry->size);
     printf("type: %s\n", type2string(entry->type));
     print_flags(entry->flags);
-    printf("auth uid: %d\n", (int)entry->auth_uid);
+    printf("auth uid: %u\n", (unsigned int)entry->auth_uid);
     printf("session ID: %d\n", (int)entry->sid);
     if (sudo_timespecisset(&entry->start_time))
 	printf("start time: %s", ctime(&entry->start_time.tv_sec));
     if (sudo_timespecisset(&entry->ts))
 	printf("time stamp: %s", ctime(&entry->ts.tv_sec));
     if (entry->type == TS_TTY) {
-	char tty[PATH_MAX];
-	if (sudo_ttyname_dev(entry->u.ttydev, tty, sizeof(tty)) == NULL)
-	    printf("terminal: %d\n", (int)entry->u.ttydev);
-	else
-	    printf("terminal: %s\n", tty);
+	char ttypath[PATH_MAX];
+	if (sudo_ttyname_dev(entry->u.ttydev, ttypath, sizeof(ttypath)) == NULL) {
+	    printf("terminal: %u, %u (0x%x)\n",
+		(unsigned int)major(entry->u.ttydev),
+		(unsigned int)minor(entry->u.ttydev),
+		(unsigned int)entry->u.ttydev);
+	} else {
+	    printf("terminal: %s (0x%x)\n", ttypath,
+		(unsigned int)entry->u.ttydev);
+	}
     } else if (entry->type == TS_PPID) {
 	printf("parent pid: %d\n", (int)entry->u.ppid);
     }
-    fputc('\n', stdout);
+    putchar('\n');
 
     debug_return;
 }

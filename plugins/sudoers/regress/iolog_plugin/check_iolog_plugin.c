@@ -144,9 +144,9 @@ validate_iolog_info(const char *log_dir, bool legacy)
 	return false;
     }
 
-    if (evlog->submit_time.tv_sec < now - 10 || evlog->submit_time.tv_sec > now + 10) {
-	sudo_warnx("bad submit_time: want %lld got %lld", (long long)now,
-	    (long long)evlog->submit_time.tv_sec);
+    if (evlog->event_time.tv_sec < now - 10 || evlog->event_time.tv_sec > now + 10) {
+	sudo_warnx("bad event_time: want %lld got %lld", (long long)now,
+	    (long long)evlog->event_time.tv_sec);
 	return false;
     }
 

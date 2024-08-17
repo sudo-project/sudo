@@ -32,6 +32,7 @@ docs/cvtsudoers.mdoc.in
 docs/fixman.sh
 docs/fixmdoc.sed
 docs/schema.ActiveDirectory
+docs/schema.IBM_LDAP
 docs/schema.OpenLDAP
 docs/schema.iPlanet
 docs/schema.olcSudo
@@ -716,6 +717,8 @@ plugins/sudoers/po/hr.mo
 plugins/sudoers/po/hr.po
 plugins/sudoers/po/hu.mo
 plugins/sudoers/po/hu.po
+plugins/sudoers/po/id.mo
+plugins/sudoers/po/id.po
 plugins/sudoers/po/it.mo
 plugins/sudoers/po/it.po
 plugins/sudoers/po/ja.mo

@@ -147,7 +147,7 @@ struct sudoers_parse_tree;
 void dump_default(void);
 bool init_defaults(void);
 bool set_default(struct sudoers_context *ctx, const char *var, const char *val, int op, const char *file, int line, int column, bool quiet);
-bool update_defaults(struct sudoers_context *ctx, struct sudoers_parse_tree *parse_tree, struct defaults_list *defs, int what, bool quiet);
+bool update_defaults(struct sudoers_context *ctx, struct sudoers_parse_tree *parse_tree, const struct defaults_list *defs, int what, bool quiet);
 bool check_defaults(const struct sudoers_parse_tree *parse_tree, bool quiet);
 bool append_default(const char *var, const char *val, int op, char *source, struct defaults_list *defs);
 bool cb_passprompt_regex(struct sudoers_context *ctx, const char *file, int line, int column, const union sudo_defs_val *sd_un, int op);

@@ -3,7 +3,7 @@ dnl Use the top-level autogen.sh script to generate configure and config.h.in
 dnl
 dnl SPDX-License-Identifier: ISC
 dnl
-dnl Copyright (c) 1994-1996, 1998-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+dnl Copyright (c) 1994-1996, 1998-2024 Todd C. Miller <Todd.Miller@sudo.ws>
 dnl
 dnl Permission to use, copy, modify, and distribute this software for any
 dnl purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,7 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.69])
-AC_INIT([sudo], [1.9.15p5], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.9.16], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 AC_CONFIG_AUX_DIR([scripts])
@@ -75,6 +75,7 @@ AC_SUBST([NOEXECFILE])dnl
 AC_SUBST([NOEXECDIR])dnl
 AC_SUBST([noexec_file])dnl
 AC_SUBST([sesh_file])dnl
+AC_SUBST([visudo])dnl
 AC_SUBST([INSTALL_BACKUP])dnl
 AC_SUBST([INSTALL_INTERCEPT])dnl
 AC_SUBST([INSTALL_NOEXEC])dnl
@@ -176,6 +177,7 @@ AC_SUBST([sssd_lib])
 AC_SUBST([nsswitch_conf])
 AC_SUBST([netsvc_conf])
 AC_SUBST([secure_path])
+AC_SUBST([secure_path_status])
 AC_SUBST([editor])
 AC_SUBST([pam_session])
 AC_SUBST([pam_login_service])
@@ -225,8 +227,10 @@ netsvc_conf=/etc/netsvc.conf
 intercept_file="$libexecdir/sudo/sudo_intercept.so"
 noexec_file="$libexecdir/sudo/sudo_noexec.so"
 sesh_file="$libexecdir/sudo/sesh"
+visudo="$sbindir/visudo"
 nsswitch_conf=/etc/nsswitch.conf
-secure_path="not set"
+secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+secure_path_status="disabled"
 pam_session=on
 pam_login_service=sudo
 plugindir="$libexecdir/sudo"
@@ -296,16 +300,6 @@ AC_ARG_WITH(alertmail, [AS_HELP_STRING([--with-alertmail], [deprecated])],
 [case $with_alertmail in
     *)		with_mailto="$with_alertmail"
 		AC_MSG_NOTICE([--with-alertmail option deprecated, treating as --mailto])
-		;;
-esac])
-
-AC_ARG_WITH(pc-insults, [AS_HELP_STRING([--with-pc-insults], [deprecated])],
-[case $with_pc_insults in
-    yes)	enable_offensive_insults=no
-		AC_MSG_NOTICE([--with-pc-insults option deprecated, it is now the default])
-		;;
-    no)		enable_offensive_insults=yes
-		AC_MSG_NOTICE([--without-pc-insults option deprecated, use --enable-offensive-insults])
 		;;
 esac])
 
@@ -450,8 +444,6 @@ AC_ARG_WITH(csops, [AS_HELP_STRING([--with-csops], [add CSOps standard options])
 		CHECKSIA=false
 		with_ignore_dot=yes
 		insults=on
-		with_classic_insults=yes
-		with_csops_insults=yes
 		with_env_editor=yes
 		: ${mansectsu='8'}
 		: ${mansectform='5'}
@@ -973,18 +965,23 @@ AC_ARG_WITH(tty-tickets, [AS_HELP_STRING([--with-tty-tickets], [use a different 
 		;;
 esac])
 
+dnl
+dnl The order of the insults options is important.  The main option
+dnl must come first, followed by all-insults, then the individual ones.
+dnl The classic and csops insult sets are always included by default.
+dnl
+with_classic_insults=yes
+with_csops_insults=yes
 AC_ARG_WITH(insults, [AS_HELP_STRING([--with-insults], [insult the user for entering an incorrect password])],
 [case $with_insults in
     yes)	insults=on
 		AC_DEFINE(USE_INSULTS)
-		with_classic_insults=yes
-		with_csops_insults=yes
 		;;
     disabled)	insults=off
-		with_classic_insults=yes
-		with_csops_insults=yes
 		;;
     no)		insults=off
+		with_classic_insults=no
+		with_csops_insults=no
 		;;
     *)		AC_MSG_ERROR([--with-insults does not take an argument.])
 		;;
@@ -1071,17 +1068,26 @@ AC_ARG_WITH(ldap-secret-file, [AS_HELP_STRING([--with-ldap-secret-file], [path t
 test -n "$with_ldap_secret_file" && ldap_secret="$with_ldap_secret_file"
 SUDO_DEFINE_UNQUOTED(_PATH_LDAP_SECRET, "$ldap_secret", [Path to the ldap.secret file])
 
-AC_ARG_WITH(secure-path, [AS_HELP_STRING([--with-secure-path], [override the user's path with a built-in one])],
-[case $with_secure_path in
-    yes)	with_secure_path="/bin:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc"
-		AC_DEFINE_UNQUOTED(SECURE_PATH, "$with_secure_path")
-		secure_path="set to $with_secure_path"
+AC_ARG_WITH(secure-path-value, [AS_HELP_STRING([--with-secure-path-value], [value of secure_path in the default sudoers file])],
+[case $with_secure_path_value in
+    yes|no)	AC_MSG_ERROR([must give --secure-path-value an argument.])
 		;;
-    no)		;;
-    *)		AC_DEFINE_UNQUOTED(SECURE_PATH, "$with_secure_path")
-		secure_path="set to $with_secure_path"
+    *)		secure_path="$with_secure_path_value"
 		;;
 esac])
+
+AC_ARG_WITH(secure-path, [AS_HELP_STRING([--with-secure-path], [override the user's path with a built-in one])],
+[case $with_secure_path in
+    yes)	with_secure_path="$secure_path"
+		;;
+    no)		;;
+    *)		secure_path="$with_secure_path"
+		;;
+esac])
+AS_IF([test "${with_secure_path-no}" != "no"], [
+	AC_DEFINE_UNQUOTED(SECURE_PATH, "$secure_path")
+	secure_path_status="set to $secure_path"
+])
 
 AC_ARG_WITH(interfaces, [AS_HELP_STRING([--without-interfaces], [don't try to read the ip addr of network interfaces])],
 [case $with_interfaces in
@@ -1483,11 +1489,6 @@ AC_ARG_ENABLE(timestamp-type,
 ])
 AC_DEFINE_UNQUOTED(TIMESTAMP_TYPE, $timestamp_type)
 
-AC_ARG_ENABLE(offensive_insults,
-[AS_HELP_STRING([--enable-offensive-insults], [Enable potentially offensive sudo insults.])],
-[], [enable_offensive_insults=no])
-AS_IF([test "$enable_offensive_insults" = "yes"], [AC_DEFINE(OFFENSIVE_INSULTS)])
-
 AC_ARG_ENABLE(package_build,
 [AS_HELP_STRING([--enable-package-build], [Enable options for package building.])],
 [], [enable_package_build=no])
@@ -1598,6 +1599,7 @@ AS_IF([test X"$AR" = X"false"], [
     AC_MSG_ERROR([the "ar" utility is required to build sudo])
 ])
 AX_PROG_CC_FOR_BUILD
+AC_CHECK_PROGS(JQ, jq, :)
 
 AS_IF([test "x$ac_cv_prog_cc_c89" = "xno"], [
     AC_MSG_ERROR([Sudo version $PACKAGE_VERSION requires an ANSI C compiler to build.])
@@ -2380,7 +2382,7 @@ break)
 AC_SYS_LARGEFILE
 m4_ifdef([AC_SYS_YEAR2038], [AC_SYS_YEAR2038], [
     # GNU libc only allows setting _TIME_BITS when FILE_OFFSET_BITS is also set.    # GNU libc defines __TIMESIZE on systems where _TIME_BITS can be set.
-    AS_IF([test X"$ac_cv_sys_file_offset_bits" = X"yes"], [
+    AS_IF([test X"$ac_cv_sys_file_offset_bits" = X"64"], [
 	AC_CHECK_DECL(__TIMESIZE, [
 	    AC_DEFINE([_TIME_BITS], [64], [Number of bits in a timestamp, on hosts where this is settable.])
 	], [], [
@@ -3059,6 +3061,14 @@ AS_IF([test X"$sudo_mktemp" = X"yes"], [
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }mktemp_test"
 ])
 AX_FUNC_SNPRINTF
+AS_IF([test X"$ac_cv_prog_cc_c99" != X"no"], [
+    # If we have a C99 compiler and are cross-compiling, assume
+    # C99-compliant v?snprintf().
+    AS_IF([test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"crosscross"], [
+	ac_cv_have_working_snprintf=yes
+	ac_cv_have_working_vsnprintf=yes
+    ])
+])
 AS_IF([test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"], [
     # System has a C99-compliant v?snprintf(), check for v?asprintf()
     AC_CHECK_FUNCS([asprintf], [], [
@@ -4312,6 +4322,13 @@ while test X"$noexec_file" != X"$_noexec_file"; do
     eval "noexec_file=\"$_noexec_file\""
 done
 
+# Update exec_prefix in visudo
+_visudo=
+while test X"$visudo" != X"$_visudo"; do
+    _visudo="$visudo"
+    eval "visudo=\"$_visudo\""
+done
+
 # Update exec_prefix in sesh_file
 _sesh_file=
 while test X"$sesh_file" != X"$_sesh_file"; do
@@ -4524,18 +4541,18 @@ echo "  password prompt		: ${passprompt}" >&AS_MESSAGE_FD
 echo "  password prompt timeout	: ${password_timeout} minutes" >&AS_MESSAGE_FD
 echo "  password tries		: ${passwd_tries}" >&AS_MESSAGE_FD
 echo "  bad password message		: ${badpass_message}" >&AS_MESSAGE_FD
-if test "$insults" = "on"; then
-    i=""
-    test "$enable_offensive_insults" = "yes" && i="offensive ${i}"
-    test "$with_python_insults" = "yes" && i="python ${i}"
-    test "$with_goons_insults" = "yes" && i="goons ${i}"
-    test "$with_hal_insults" = "yes" && i="hal ${i}"
-    test "$with_csops_insults" = "yes" && i="csops ${i}"
-    test "$with_classic_insults" = "yes" && i="classic ${i}"
-else
-    i=no
+insult_sets=""
+test "$with_python_insults" = "yes" && insult_sets="python ${insult_sets}"
+test "$with_goons_insults" = "yes" && insult_sets="goons ${insult_sets}"
+test "$with_hal_insults" = "yes" && insult_sets="hal ${insult_sets}"
+test "$with_csops_insults" = "yes" && insult_sets="csops ${insult_sets}"
+test "$with_classic_insults" = "yes" && insult_sets="classic ${insult_sets}"
+if test -z "$insult_sets"; then
+    insult_sets=no
+elif test "$insults" != "on"; then
+    insult_sets="${insult_sets} (disabled)"
 fi
-echo "  insults			: $i" >&AS_MESSAGE_FD
+echo "  insults			: $insult_sets" >&AS_MESSAGE_FD
 echo "  display lecture		: ${lecture}" >&AS_MESSAGE_FD
 echo "  timestamp (credential) type	: ${timestamp_type}" >&AS_MESSAGE_FD
 echo "  timestamp (credential) timeout: ${timeout} minutes" >&AS_MESSAGE_FD
@@ -4735,7 +4752,6 @@ AH_TEMPLATE(NO_PAM_SESSION, [Define to 1 if you don't want to use sudo's PAM ses
 AH_TEMPLATE(NO_ROOT_MAILER, [Define to avoid running the mailer as root.])
 AH_TEMPLATE(NO_ROOT_SUDO, [Define to 1 if root should not be allowed to use sudo.])
 AH_TEMPLATE(TIMESTAMP_TYPE, [Define to global, ppid or tty to set the default timestamp record type.])
-AH_TEMPLATE(OFFENSIVE_INSULTS, [Define to 1 to include offensive insults from the classic version of sudo.])
 AH_TEMPLATE(SECURE_PATH, [A colon-separated list of directories to override the user's PATH with.])
 AH_TEMPLATE(SEND_MAIL_WHEN_NOT_OK, [Define to 1 to send mail when the user is not allowed to run a command.])
 AH_TEMPLATE(SEND_MAIL_WHEN_NO_HOST, [Define to 1 to send mail when the user is not allowed to run sudo on this host.])

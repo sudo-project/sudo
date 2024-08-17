@@ -2,7 +2,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2023
+ * Copyright (c) 1996, 1998-2005, 2007-2013, 2014-2024
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -446,20 +446,19 @@ cmndspeclist	:	cmndspec
 				$3->runcwd = prev->runcwd;
 			    if ($3->runchroot == NULL)
 				$3->runchroot = prev->runchroot;
-#ifdef HAVE_SELINUX
 			    /* propagate role and type */
 			    if ($3->role == NULL && $3->type == NULL) {
 				$3->role = prev->role;
 				$3->type = prev->type;
 			    }
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_PRIV_SET
+			    /* propagate apparmor_profile */
+			    if ($3->apparmor_profile == NULL)
+			        $3->apparmor_profile = prev->apparmor_profile;
 			    /* propagate privs & limitprivs */
 			    if ($3->privs == NULL && $3->limitprivs == NULL) {
 			        $3->privs = prev->privs;
 			        $3->limitprivs = prev->limitprivs;
 			    }
-#endif /* HAVE_PRIV_SET */
 			    /* propagate command time restrictions */
 			    if ($3->notbefore == UNSPEC)
 				$3->notbefore = prev->notbefore;
@@ -532,22 +531,16 @@ cmndspec	:	runasspec options cmndtag digcmnd {
 				parser_leak_remove(LEAK_RUNAS, $1);
 				free($1);
 			    }
-#ifdef HAVE_SELINUX
 			    cs->role = $2.role;
 			    parser_leak_remove(LEAK_PTR, $2.role);
 			    cs->type = $2.type;
 			    parser_leak_remove(LEAK_PTR, $2.type);
-#endif
-#ifdef HAVE_APPARMOR
 			    cs->apparmor_profile = $2.apparmor_profile;
 			    parser_leak_remove(LEAK_PTR, $2.apparmor_profile);
-#endif
-#ifdef HAVE_PRIV_SET
 			    cs->privs = $2.privs;
 			    parser_leak_remove(LEAK_PTR, $2.privs);
 			    cs->limitprivs = $2.limitprivs;
 			    parser_leak_remove(LEAK_PTR, $2.limitprivs);
-#endif
 			    cs->notbefore = $2.notbefore;
 			    cs->notafter = $2.notafter;
 			    cs->timeout = $2.timeout;
@@ -863,39 +856,29 @@ options		:	/* empty */ {
 			    }
 			}
 		|	options rolespec {
-#ifdef HAVE_SELINUX
 			    parser_leak_remove(LEAK_PTR, $$.role);
 			    free($$.role);
 			    $$.role = $2;
-#endif
 			}
 		|	options typespec {
-#ifdef HAVE_SELINUX
 			    parser_leak_remove(LEAK_PTR, $$.type);
 			    free($$.type);
 			    $$.type = $2;
-#endif
 			}
 		|	options apparmor_profilespec {
-#ifdef HAVE_APPARMOR
 			    parser_leak_remove(LEAK_PTR, $$.apparmor_profile);
 			    free($$.apparmor_profile);
 			    $$.apparmor_profile = $2;
-#endif
 			}
 		|	options privsspec {
-#ifdef HAVE_PRIV_SET
 			    parser_leak_remove(LEAK_PTR, $$.privs);
 			    free($$.privs);
 			    $$.privs = $2;
-#endif
 			}
 		|	options limitprivsspec {
-#ifdef HAVE_PRIV_SET
 			    parser_leak_remove(LEAK_PTR, $$.limitprivs);
 			    free($$.limitprivs);
 			    $$.limitprivs = $2;
-#endif
 			}
 		;
 
@@ -1588,7 +1571,6 @@ free_cmndspec(struct cmndspec *cs, struct cmndspec_list *csl)
 	(next == NULL || cs->runchroot != next->runchroot)) {
 	free(cs->runchroot);
     }
-#ifdef HAVE_SELINUX
     /* Don't free root/type that are in use by other entries. */
     if ((prev == NULL || cs->role != prev->role) &&
 	(next == NULL || cs->role != next->role)) {
@@ -1598,8 +1580,11 @@ free_cmndspec(struct cmndspec *cs, struct cmndspec_list *csl)
 	(next == NULL || cs->type != next->type)) {
 	free(cs->type);
     }
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_PRIV_SET
+    /* Don't free apparmor_profile that is in use by other entries. */
+    if ((prev == NULL || cs->apparmor_profile != prev->apparmor_profile) &&
+	(next == NULL || cs->apparmor_profile != next->apparmor_profile)) {
+	free(cs->apparmor_profile);
+    }
     /* Don't free privs/limitprivs that are in use by other entries. */
     if ((prev == NULL || cs->privs != prev->privs) &&
 	(next == NULL || cs->privs != next->privs)) {
@@ -1609,7 +1594,6 @@ free_cmndspec(struct cmndspec *cs, struct cmndspec_list *csl)
 	(next == NULL || cs->limitprivs != next->limitprivs)) {
 	free(cs->limitprivs);
     }
-#endif /* HAVE_PRIV_SET */
     /* Don't free user/group lists that are in use by other entries. */
     if (cs->runasuserlist != NULL) {
 	if ((prev == NULL || cs->runasuserlist != prev->runasuserlist) &&
@@ -1636,12 +1620,9 @@ free_cmndspecs(struct cmndspec_list *csl)
 {
     struct member_list *runasuserlist = NULL, *runasgrouplist = NULL;
     char *runcwd = NULL, *runchroot = NULL;
-#ifdef HAVE_SELINUX
     char *role = NULL, *type = NULL;
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_PRIV_SET
+    char *apparmor_profile = NULL;
     char *privs = NULL, *limitprivs = NULL;
-#endif /* HAVE_PRIV_SET */
     struct cmndspec *cs;
     debug_decl(free_cmndspecs, SUDOERS_DEBUG_PARSER);
 
@@ -1657,7 +1638,6 @@ free_cmndspecs(struct cmndspec_list *csl)
 	    runchroot = cs->runchroot;
 	    free(cs->runchroot);
 	}
-#ifdef HAVE_SELINUX
 	/* Only free the first instance of a role/type. */
 	if (cs->role != role) {
 	    role = cs->role;
@@ -1667,8 +1647,11 @@ free_cmndspecs(struct cmndspec_list *csl)
 	    type = cs->type;
 	    free(cs->type);
 	}
-#endif /* HAVE_SELINUX */
-#ifdef HAVE_PRIV_SET
+	/* Only free the first instance of apparmor_profile. */
+	if (cs->apparmor_profile != apparmor_profile) {
+	    apparmor_profile = cs->apparmor_profile;
+	    free(cs->apparmor_profile);
+	}
 	/* Only free the first instance of privs/limitprivs. */
 	if (cs->privs != privs) {
 	    privs = cs->privs;
@@ -1678,7 +1661,6 @@ free_cmndspecs(struct cmndspec_list *csl)
 	    limitprivs = cs->limitprivs;
 	    free(cs->limitprivs);
 	}
-#endif /* HAVE_PRIV_SET */
 	/* Only free the first instance of runas user/group lists. */
 	if (cs->runasuserlist && cs->runasuserlist != runasuserlist) {
 	    runasuserlist = cs->runasuserlist;
@@ -1864,17 +1846,11 @@ init_options(struct command_options *opts)
     opts->timeout = UNSPEC;
     opts->runchroot = NULL;
     opts->runcwd = NULL;
-#ifdef HAVE_SELINUX
     opts->role = NULL;
     opts->type = NULL;
-#endif
-#ifdef HAVE_PRIV_SET
+    opts->apparmor_profile = NULL;
     opts->privs = NULL;
     opts->limitprivs = NULL;
-#endif
-#ifdef HAVE_APPARMOR
-    opts->apparmor_profile = NULL;
-#endif
 }
 
 uid_t
