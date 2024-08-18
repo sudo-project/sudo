@@ -496,10 +496,10 @@ void canon_path_free(char *resolved);
 void canon_path_free_cache(void);
 
 /* strlcpy_unesc.c */
-size_t strlcpy_unescape(char *restrict dst, const char *restrict src, size_t size);
+size_t strlcpy_unescape(char * restrict dst, const char * restrict src, size_t size);
 
 /* strvec_join.c */
-char *strvec_join(char *const argv[], char sep, size_t (*cpy)(char *, const char *, size_t));
+char *strvec_join(char *const argv[], char sep, size_t (*cpy)(char * restrict, const char * restrict, size_t));
 
 /* unesc_str.c */
 void unescape_string(char *str);
