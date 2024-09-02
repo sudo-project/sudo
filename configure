@@ -24790,7 +24790,31 @@ esac
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }mktemp_test"
 
 fi
-ac_fn_c_check_func "$LINENO" "snprintf" "ac_cv_func_snprintf"
+if test X"$ac_cv_build_prog_cc_c99" != X"no" -a X"$cross_compiling" = X"yes"
+then :
+
+    # If we have a C99 compiler and are cross-compiling, assume
+    # C99-compliant v?snprintf().
+    ac_fn_c_check_func "$LINENO" "snprintf" "ac_cv_func_snprintf"
+if test "x$ac_cv_func_snprintf" = xyes
+then :
+  printf "%s\n" "#define HAVE_SNPRINTF 1" >>confdefs.h
+
+fi
+ac_fn_c_check_func "$LINENO" "vsnprintf" "ac_cv_func_vsnprintf"
+if test "x$ac_cv_func_vsnprintf" = xyes
+then :
+  printf "%s\n" "#define HAVE_VSNPRINTF 1" >>confdefs.h
+
+fi
+
+    ac_cv_have_working_snprintf="$ac_cv_func_snprintf"
+    ac_cv_have_working_vsnprintf="$ac_cv_func_vsnprintf"
+
+else case e in #(
+  e)
+    # Check for C99-compliant v?snprintf().
+    ac_fn_c_check_func "$LINENO" "snprintf" "ac_cv_func_snprintf"
 if test "x$ac_cv_func_snprintf" = xyes
 then :
   printf "%s\n" "#define HAVE_SNPRINTF 1" >>confdefs.h
@@ -24919,19 +24943,8 @@ printf "%s\n" "$as_me: WARNING: Replacing missing/broken (v)snprintf() with sudo
 printf "%s\n" "#define PREFER_PORTABLE_SNPRINTF 1" >>confdefs.h
 
 fi
-if test X"$ac_cv_build_prog_cc_c99" != X"no"
-then :
-
-    # If we have a C99 compiler and are cross-compiling, assume
-    # C99-compliant v?snprintf().
-    if test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"crosscross"
-then :
-
-	ac_cv_have_working_snprintf=yes
-	ac_cv_have_working_vsnprintf=yes
-
-fi
-
+ ;;
+esac
 fi
 if test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"
 then :
