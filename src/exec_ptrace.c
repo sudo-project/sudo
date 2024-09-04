@@ -1386,7 +1386,7 @@ script_matches(const char *script, const char *execpath, int argc,
 	/* Match interpreter. */
 	if (!pathname_matches(execpath, interp, true)) {
 	    /* It is possible for the interpreter to be a script too. */
-	    if (argv > 0 && strcmp(interp, argv[1]) == 0) {
+	    if (argc > 0 && strcmp(interp, argv[1]) == 0) {
 		/* Interpreter args must match for *this* interpreter. */
 		if (interp_args == NULL ||
 			(argc > 1 && strcmp(interp_args, argv[2]) == 0)) {
