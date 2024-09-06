@@ -1453,6 +1453,7 @@ eventlog_exit(const struct eventlog *evlog, int flags)
     bool ret = true;
     debug_decl(eventlog_exit, SUDO_DEBUG_UTIL);
 
+    /* We expect evlog->event_time to be the command start time. */
     if (sudo_timespecisset(&evlog->run_time)) {
 	sudo_timespecadd(&evlog->event_time, &evlog->run_time, &exit_time);
 	args.event_time = &exit_time;

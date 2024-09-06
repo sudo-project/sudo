@@ -655,6 +655,11 @@ log_exit_status(const struct sudoers_context *ctx, int status)
 	    if (!def_log_exit_status)
 		SET(evl_flags, EVLOG_MAIL_ONLY);
 	}
+	/*
+	 * eventlog_exit() expects event_time to be the command start time,
+	 * not the current time as set by sudoers_to_eventlog().
+	 */
+	sudo_timespecsub(&evlog.event_time, &run_time, &evlog.event_time);
 	evlog.run_time = run_time;
 	evlog.exit_value = exit_value;
 	evlog.signal_name = signal_name;
