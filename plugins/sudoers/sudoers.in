@@ -107,6 +107,10 @@ Defaults secure_path="@secure_path@"
 ## Some package scripts run a huge number of commands, which is made
 ## slower by these options and also can clutter up the logs.
 # Defaults!PKGMAN !intercept, !log_subcmds
+##
+## Uncomment to disable PAM silent mode.  Otherwise messages by PAM
+## modules such as pam_faillock will not be printed.
+# Defaults !pam_silent
 
 ##
 ## Runas alias specification
