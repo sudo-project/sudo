@@ -3637,7 +3637,7 @@ This flag is
 .Em on
 by default.
 .Pp
-This setting is only supported by version 1.8.16 or higher.
+This setting is only supported by version 1.9.16 or higher.
 .It passprompt_override
 If set, the prompt specified by
 .Em passprompt

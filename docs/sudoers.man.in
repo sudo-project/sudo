@@ -3838,7 +3838,7 @@ This flag is
 \fIon\fR
 by default.
 .sp
-This setting is only supported by version 1.8.16 or higher.
+This setting is only supported by version 1.9.16 or higher.
 .TP 18n
 passprompt_override
 If set, the prompt specified by
