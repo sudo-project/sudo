@@ -84,7 +84,7 @@ static struct defaults *new_default(char *, char *, short);
 static struct member *new_member(char *, short);
 static struct sudo_command *new_command(char *, char *);
 static struct command_digest *new_digest(unsigned int, char *);
-static void alias_error(const char *name, int errnum);
+static void alias_error(const char *name, short type, int errnum);
 %}
 
 %union {
@@ -1012,7 +1012,7 @@ hostalias	:	ALIAS {
 			} '=' hostlist {
 			    if (!alias_add(&parsed_policy, $1, HOSTALIAS,
 				sudoers, alias_line, alias_column, $4)) {
-				alias_error($1, errno);
+				alias_error($1, HOSTALIAS, errno);
 				YYERROR;
 			    }
 			    parser_leak_remove(LEAK_PTR, $1);
@@ -1039,7 +1039,7 @@ cmndalias	:	ALIAS {
 			} '=' cmndlist {
 			    if (!alias_add(&parsed_policy, $1, CMNDALIAS,
 				sudoers, alias_line, alias_column, $4)) {
-				alias_error($1, errno);
+				alias_error($1, CMNDALIAS, errno);
 				YYERROR;
 			    }
 			    parser_leak_remove(LEAK_PTR, $1);
@@ -1066,7 +1066,7 @@ runasalias	:	ALIAS {
 			} '=' userlist {
 			    if (!alias_add(&parsed_policy, $1, RUNASALIAS,
 				sudoers, alias_line, alias_column, $4)) {
-				alias_error($1, errno);
+				alias_error($1, RUNASALIAS, errno);
 				YYERROR;
 			    }
 			    parser_leak_remove(LEAK_PTR, $1);
@@ -1085,7 +1085,7 @@ useralias	:	ALIAS {
 			} '=' userlist {
 			    if (!alias_add(&parsed_policy, $1, USERALIAS,
 				sudoers, alias_line, alias_column, $4)) {
-				alias_error($1, errno);
+				alias_error($1, USERALIAS, errno);
 				YYERROR;
 			    }
 			    parser_leak_remove(LEAK_PTR, $1);
@@ -1292,12 +1292,27 @@ sudoerserror(const char *s)
 }
 
 static void
-alias_error(const char *name, int errnum)
+alias_error(const char *name, short type, int errnum)
 {
-    if (errnum == EEXIST)
-	sudoerserrorf(U_("Alias \"%s\" already defined"), name);
-    else
+    if (errnum == EEXIST) {
+	struct alias *a = alias_get(&parsed_policy, name, type);
+	if (a != NULL) {
+	    sudoerserrorf(
+		U_("duplicate %s \"%s\", previously defined at %s:%d:%d"),
+		alias_type_to_string(type), name, a->file, a->line, a->column);
+	    alias_put(a);
+	} else {
+	    if (errno == ELOOP) {
+		sudoerserrorf(U_("cycle in %s \"%s\""),
+		    alias_type_to_string(type), name);
+	    } else {
+		sudoerserrorf(U_("duplicate %s \"%s\""),
+		    alias_type_to_string(type), name);
+	    }
+	}
+    } else {
 	sudoerserror(N_("unable to allocate memory"));
+    }
 }
 
 static struct defaults *
