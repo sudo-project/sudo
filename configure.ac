@@ -177,6 +177,7 @@ AC_SUBST([sssd_lib])
 AC_SUBST([nsswitch_conf])
 AC_SUBST([netsvc_conf])
 AC_SUBST([secure_path])
+AC_SUBST([secure_path_config])
 AC_SUBST([secure_path_status])
 AC_SUBST([editor])
 AC_SUBST([pam_session])
@@ -230,6 +231,7 @@ sesh_file="$libexecdir/sudo/sesh"
 visudo="$sbindir/visudo"
 nsswitch_conf=/etc/nsswitch.conf
 secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+secure_path_config=
 secure_path_status="disabled"
 pam_session=on
 pam_login_service=sudo
@@ -1068,9 +1070,11 @@ AC_ARG_WITH(ldap-secret-file, [AS_HELP_STRING([--with-ldap-secret-file], [path t
 test -n "$with_ldap_secret_file" && ldap_secret="$with_ldap_secret_file"
 SUDO_DEFINE_UNQUOTED(_PATH_LDAP_SECRET, "$ldap_secret", [Path to the ldap.secret file])
 
-AC_ARG_WITH(secure-path-value, [AS_HELP_STRING([--with-secure-path-value], [value of secure_path in the default sudoers file])],
+AC_ARG_WITH(secure-path-value, [AS_HELP_STRING([--with-secure-path-value], [value of secure_path in the default sudoers file, or "no" to comment out by default])],
 [case $with_secure_path_value in
-    yes|no)	AC_MSG_ERROR([must give --secure-path-value an argument.])
+    yes)	AC_MSG_ERROR([must give --with-secure-path-value an argument.])
+		;;
+    no)		secure_path_config="# "
 		;;
     *)		secure_path="$with_secure_path_value"
 		;;
