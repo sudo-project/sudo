@@ -47,7 +47,7 @@ Defaults!@visudo@ env_keep += "SUDO_EDITOR EDITOR VISUAL"
 ##
 ## Use a hard-coded PATH instead of the user's to find commands.
 ## This also helps prevent poorly written scripts from running
-## artbitrary commands under sudo.
+## arbitrary commands under sudo.
 @secure_path_config@Defaults secure_path="@secure_path@"
 ##
 ## You may wish to keep some of the following environment variables
