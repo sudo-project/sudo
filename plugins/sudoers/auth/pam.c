@@ -330,6 +330,19 @@ sudo_pam_verify(const struct sudoers_context *ctx, struct passwd *pw,
 		debug_return_int(AUTH_FAILURE);
 	}
 
+    if (*pam_status == PAM_SUCCESS) {
+	const char *pam_user = NULL;
+
+	*pam_status = pam_get_item(pamh, PAM_USER, (const void **) &pam_user);
+	if (*pam_status == PAM_SUCCESS &&
+	    (pam_user == NULL || strcmp(pam_user, pw->pw_name) != 0)) {
+	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+			      "unable to authenticate '%s' as user '%s'",
+			      pw->pw_name, pam_user);
+	    debug_return_int(AUTH_FAILURE);
+	}
+    }
+
     if (getpass_error) {
 	/* error or ^C from tgetpass() or running non-interactive */
 	debug_return_int(noninteractive ? AUTH_NONINTERACTIVE : AUTH_INTR);
