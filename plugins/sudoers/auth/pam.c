@@ -297,9 +297,8 @@ int
 sudo_pam_verify(const struct sudoers_context *ctx, struct passwd *pw,
     const char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
-    const char *envccname;
-    const char *s;
-    int *pam_status = (int *)auth->data;
+    const char *envccname, *pam_user;
+    int rc, *pam_status = (int *)auth->data;
     debug_decl(sudo_pam_verify, SUDOERS_DEBUG_AUTH);
 
     def_prompt = prompt;		/* for converse */
@@ -332,25 +331,22 @@ sudo_pam_verify(const struct sudoers_context *ctx, struct passwd *pw,
 	debug_return_int(AUTH_FAILURE);
     }
 
-    if (*pam_status == PAM_SUCCESS) {
-	const char *pam_user = NULL;
-
-	*pam_status = pam_get_item(pamh, PAM_USER, (const void **) &pam_user);
-	if (*pam_status == PAM_SUCCESS &&
-	    (pam_user == NULL || strcmp(pam_user, pw->pw_name) != 0)) {
-	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-			      "unable to authenticate '%s' as user '%s'",
-			      pw->pw_name, pam_user);
-	    debug_return_int(AUTH_FAILURE);
-	}
-    }
-
     if (getpass_error) {
 	/* error or ^C from tgetpass() or running non-interactive */
 	debug_return_int(noninteractive ? AUTH_NONINTERACTIVE : AUTH_INTR);
     }
+
     switch (*pam_status) {
     case PAM_SUCCESS:
+	/* Verify user did not change during PAM transaction. */
+	rc = pam_get_item(pamh, PAM_USER, (const void **)&pam_user);
+	if (rc == PAM_SUCCESS &&
+		(pam_user == NULL || strcmp(pam_user, pw->pw_name) != 0)) {
+	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+		"unable to authenticate '%s' as user '%s'",
+		pw->pw_name, pam_user);
+	    debug_return_int(AUTH_FAILURE);
+	}
 	debug_return_int(AUTH_SUCCESS);
     case PAM_AUTH_ERR:
     case PAM_AUTHINFO_UNAVAIL:
@@ -360,8 +356,8 @@ sudo_pam_verify(const struct sudoers_context *ctx, struct passwd *pw,
 	    "pam_authenticate: %d", *pam_status);
 	debug_return_int(AUTH_FAILURE);
     default:
-	s = sudo_pam_strerror(pamh, *pam_status);
-	log_warningx(ctx, 0, N_("PAM authentication error: %s"), s);
+	log_warningx(ctx, 0, N_("PAM authentication error: %s"),
+	    sudo_pam_strerror(pamh, *pam_status));
 	debug_return_int(AUTH_ERROR);
     }
 }
