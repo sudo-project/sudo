@@ -70,7 +70,8 @@ sudo_aix_authtype(void)
 
     while ((len = getdelim(&line, &linesize, '\n', fp)) != -1) {
 	/* First remove comments. */
-	if ((cp = strchr(line, '#')) != NULL) {
+	// Check line for Null before using strchr
+	if (line != NULL && (cp = strchr(line, '#')) != NULL) {
 	    *cp = '\0';
 	    len = (ssize_t)(cp - line);
 	}
@@ -85,7 +86,7 @@ sudo_aix_authtype(void)
 
 	/* Match start of the usw stanza. */
 	if (!in_stanza) {
-	    if (strncmp(line, "usw:", 4) == 0)
+	    if (line != NULL && strncmp(line, "usw:", 4) == 0)
 		in_stanza = true;
 	    continue;
 	}
@@ -103,7 +104,7 @@ sudo_aix_authtype(void)
 	} while (isblank((unsigned char)*cp));
 
 	/* Match "auth_type = (PAM_AUTH|STD_AUTH)". */
-	if (strncmp(cp, "auth_type", 9) != 0)
+	if (cp != NULL && strncmp(cp, "auth_type", 9) != 0)
 	    continue;
 	cp += 9;
 	while (isblank((unsigned char)*cp))
