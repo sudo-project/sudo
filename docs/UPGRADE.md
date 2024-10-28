@@ -35,7 +35,7 @@ Notes on upgrading from an older release
        Defaults !use_pty
 
  * Upgrading from a version prior to 1.9.13:
-   
+
    Sudo now builds AIX-style shared libraries and dynamic shared
    objects by default instead of svr4-style.  This means that the
    default sudo plugins are now .a (archive) files that contain a

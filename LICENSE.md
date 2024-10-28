@@ -247,9 +247,9 @@ The file inet_pton.c bears the following license:
 
 The file arc4random.c bears the following license:
 
-    Copyright (c) 1996, David Mazieres <dm@uun.org>  
-    Copyright (c) 2008, Damien Miller <djm@openbsd.org>  
-    Copyright (c) 2013, Markus Friedl <markus@openbsd.org>  
+    Copyright (c) 1996, David Mazieres <dm@uun.org>
+    Copyright (c) 2008, Damien Miller <djm@openbsd.org>
+    Copyright (c) 2013, Markus Friedl <markus@openbsd.org>
     Copyright (c) 2014, Theo de Raadt <deraadt@openbsd.org>
 
     Permission to use, copy, modify, and distribute this software for any
@@ -282,7 +282,7 @@ The file arc4random_uniform.c bears the following license:
 
 The file getentropy.c bears the following license:
 
-    Copyright (c) 2014 Theo de Raadt <deraadt@openbsd.org>  
+    Copyright (c) 2014 Theo de Raadt <deraadt@openbsd.org>
     Copyright (c) 2014 Bob Beck <beck@obtuse.com>
 
     Permission to use, copy, modify, and distribute this software for any
