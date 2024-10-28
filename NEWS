@@ -596,7 +596,7 @@ What's new in Sudo 1.9.12
    from the EDITOR environment variable.  GitHub issue #179.
 
  * The sudo Python plugin now implements the "find_spec" method instead
-   of the the deprecated "find_module".  This fixes a test failure when
+   of the deprecated "find_module".  This fixes a test failure when
    a newer version of setuptools that doesn't include "find_module" is
    found on the system.
 
@@ -1042,7 +1042,7 @@ What's new in Sudo 1.9.7p2
    to load a plugin with a name that conflicts with a Python module
    installed in the system location.
 
- * Sudo no longer sets the the open files resource limit to "unlimited"
+ * Sudo no longer sets the open files resource limit to "unlimited"
    while it runs.  This avoids a problem where sudo's closefrom()
    emulation would need to close a very large number of descriptors
    on systems without a way to determine which ones are actually open.
@@ -1719,7 +1719,7 @@ What's new in Sudo 1.9.0
 
  * Fixed an issue where PAM session modules could be called with
    the wrong user name when multiple users in the passwd database
-   share the the same user-ID.  Debian bug #734752.
+   share the same user-ID.  Debian bug #734752.
 
  * Sudo command line options that take a value may only be specified
    once.  This is to help guard against problems caused by poorly
@@ -3620,7 +3620,7 @@ What's new in Sudo 1.8.6p1?
 
 What's new in Sudo 1.8.6?
 
- * Sudo is now built with the -fstack-protector flag if the the
+ * Sudo is now built with the -fstack-protector flag if the
    compiler supports it.  Also, the -zrelro linker flag is used if
    supported.  The --disable-hardening configure option can be used
    to build sudo without stack smashing protection.
