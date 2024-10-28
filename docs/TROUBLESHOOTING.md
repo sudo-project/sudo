@@ -95,10 +95,10 @@ It just says "Sorry, try again." three times and exits.
 > Don't forget to send a SIGHUP to your syslogd so that it re-reads
 > its conf file.  Also, remember that syslogd does *not* create
 > log files, you need to create the file before syslogd will log
-> to it (e.g.: touch /var/log/sudo).
+> to it (e.g., `touch /var/log/sudo`).
 
-> The facility (e.g. 'auth.debug') must be separated from
-> the destination (e.g. '/var/log/auth' or '@loghost') by tabs,
+> The facility (e.g., 'auth.debug') must be separated from
+> the destination (e.g., '/var/log/auth' or '@loghost') by tabs,
 > *not* spaces.  This is a common error.
 
 #### Sudo won't accept my password, even when entered correctly
@@ -137,9 +137,9 @@ It just says "Sorry, try again." three times and exits.
 > site you may be interested in sudo's LDAP sudoers support, see
 > [README.LDAP.md](../README.LDAP.md) and the sudoers.ldap manual.
 
-#### I don't run sendmail, does this mean that I cannot use sudo?
+#### I don't run sendmail, can I still use sudo?
 
-> No, you just need to disable mailing with a line like:
+> Yes, you just need to disable mailing with a line like:
 
     Defaults !mailerpath
 

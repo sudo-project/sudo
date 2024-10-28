@@ -263,7 +263,7 @@ What's new in Sudo 1.9.14
    The sudoers plugin will now change the root directory id needed
    before performing command matching.  Previously, the root directory
    was simply prepended to the path that was being processed.
- 
+
  * When NETGROUP_BASE is set in the ldap.conf file, sudo will now
    perform its own netgroup lookups of the host name instead of
    using the system innetgr(3) function.  This guarantees that user
@@ -273,7 +273,7 @@ What's new in Sudo 1.9.14
  * Fixed a bug introduced in sudo 1.9.13 that resulted in a missing
    " ; " separator between environment variables and the command
    in log entries.
-   
+
  * The visudo utility now displays a warning when it ignores a file
    in an include dir such as /etc/sudoers.d.
 
@@ -442,7 +442,7 @@ What's new in Sudo 1.9.13
  * Sudo no longer checks the ownership and mode of the plugins that
    it loads.  Plugins are configured via either the sudo.conf or
    sudoers file which are trusted configuration files.  These checks
-   suffered from time-of-check vs. time-of-use race conditions and
+   suffered from time-of-check versus time-of-use race conditions and
    complicate loading plugins that are not simple paths.  Ownership
    and mode checks are still performed when loading the sudo.conf
    and sudoers files, which do not suffer from race conditions.
@@ -531,7 +531,7 @@ What's new in Sudo 1.9.12
    security policy.  The new "intercept_verify" sudoers setting can
    be used to control this behavior.
 
- * Fixed running commands with a relative path (e.g. ./foo) in
+ * Fixed running commands with a relative path (e.g., ./foo) in
    intercept mode.  Previously, this would fail if sudo's current
    working directory was different from that of the command.
 
@@ -831,7 +831,7 @@ What's new in Sudo 1.9.9
 
  * visudo now only warns about an undefined alias or a cycle in an
    alias once for each alias.
- 
+
  * The sudoRole cn was truncated by a single character in warning messages.
    GitHub issue #115.
 
@@ -997,7 +997,7 @@ What's new in Sudo 1.9.8
  * The new "log_exit_status" sudoers setting can be used to log
    the exit status commands run via sudo.  This is also a corresponding
    "log_exit" setting in the sudo_logsrvd.conf eventlog stanza.
- 
+
  * Support for logging sudo_logsrvd errors via syslog or to a file.
    Previously, most sudo_logsrvd errors were only visible in the
    debug log.
@@ -1089,7 +1089,7 @@ What's new in Sudo 1.9.7
  * The "fuzz" Makefile target now runs all the fuzzers for 8192
    passes (can be overridden via the FUZZ_RUNS variable).  This makes
    it easier to run the fuzzers in-tree.  To run a fuzzer indefinitely,
-   set FUZZ_RUNS=-1, e.g. "make FUZZ_RUNS=-1 fuzz".
+   set FUZZ_RUNS=-1, e.g., "make FUZZ_RUNS=-1 fuzz".
 
  * Fixed fuzzing on FreeBSD where the ld.lld linker returns an
    error by default when a symbol is multiply-defined.
@@ -1766,7 +1766,7 @@ What's new in Sudo 1.8.30
  * Sudo now treats an attempt to run "sudo sudoedit" as simply
    "sudoedit".  If the sudoers file contains a fully-qualified path
    to sudoedit, sudo will now treat it simply as "sudoedit" (with
-   no path).  Visudo will will now treat a fully-qualified path
+   no path).  Visudo will now treat a fully-qualified path
    to sudoedit as an error.  Bug #871.
 
  * Fixed a bug introduced in sudo 1.8.28 where sudo would warn about
@@ -2826,7 +2826,7 @@ What's new in Sudo 1.8.15
 *  When the command sudo is running dies due to a signal, sudo will
    now send itself that same signal with the default signal handler
    installed instead of exiting.  The bash shell appears to ignore
-   some signals, e.g. SIGINT, unless the command being run is killed
+   some signals, e.g., SIGINT, unless the command being run is killed
    by that signal.  This makes the behavior of commands run under
    sudo the same as without sudo when bash is the shell.  Bug #722
 
@@ -3758,7 +3758,7 @@ What's new in Sudo 1.8.5?
 
  * On systems with an SVR4-style /proc file system, the /proc/pid/psinfo
    file is now uses to determine the controlling terminal, if possible.
-   This allows tty-based tickets to work properly even when, e.g.
+   This allows tty-based tickets to work properly even when, e.g.,
    standard input, output and error are redirected to /dev/null.
 
  * The output of "sudoreplay -l" is now sorted by file name (or
@@ -3766,7 +3766,7 @@ What's new in Sudo 1.8.5?
    order in which they were found on the file system.
 
  * Sudo now behaves properly when I/O logging is enabled and the
-   controlling terminal is revoked (e.g. the running sshd is killed).
+   controlling terminal is revoked (e.g., the running sshd is killed).
    Previously, sudo may have exited without calling the I/O plugin's
    close function which can lead to an incomplete I/O log.
 
@@ -3877,19 +3877,19 @@ What's new in Sudo 1.8.4?
  * The deprecated "noexec_file" sudoers option is no longer supported.
 
  * Fixed a race condition when I/O logging is not enabled that could
-   result in tty-generated signals (e.g. control-C) being received
+   result in tty-generated signals (e.g., control-C) being received
    by the command twice.
 
  * If none of the standard input, output or error are connected to
    a tty device, sudo will now check its parent's standard input,
    output or error for the tty name on systems with /proc and BSD
    systems that support the KERN_PROC_PID sysctl.  This allows
-   tty-based tickets to work properly even when, e.g. standard
+   tty-based tickets to work properly even when, e.g., standard
    input, output and error are redirected to /dev/null.
 
  * Added the --enable-kerb5-instance configure option to allow
    people using Kerberos V authentication to specify a custom
-   instance so the principal name can be, e.g. "username/sudo"
+   instance so the principal name can be, e.g., "username/sudo"
    similar to how ksu uses "username/root".
 
  * Fixed a bug where a pattern like "/usr/*" included /usr/bin/ in
@@ -4076,7 +4076,7 @@ What's new in Sudo 1.8.1?
    fixed.
 
  * Sudo will now create an entry in the utmp (or utmpx) file when
-   allocating a pseudo-tty (e.g. when logging I/O).  The "set_utmp"
+   allocating a pseudo-tty (e.g., when logging I/O).  The "set_utmp"
    and "utmp_runas" sudoers file options can be used to control this.
    Other policy plugins may use the "set_utmp" and "utmp_user"
    entries in the command_info list.
@@ -4377,7 +4377,7 @@ What's new in Sudo 1.7.3?
    now taken into account when looking up users and groups.  Sudo
    now applies the correct the user and group ids when running a
    command as a user whose account details come from a different
-   source (e.g. LDAP or DCE vs.  local files).
+   source (e.g., LDAP or DCE versus local files).
 
  * Support for multiple 'sudoers_base' and 'uri' entries in ldap.conf.
    When multiple entries are listed, sudo will try each one in the
