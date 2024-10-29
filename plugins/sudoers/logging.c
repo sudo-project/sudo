@@ -507,15 +507,6 @@ log_auth_failure(const struct sudoers_context *ctx, unsigned int status,
     /* Do auditing first (audit_failure() handles the locale itself). */
     audit_failure(ctx, ctx->runas.argv, "%s", N_("authentication failure"));
 
-    if (ISSET(status, FLAG_NO_USER_INPUT)) {
-	/* For "sudo -n", only log the entry if an actual command was run. */
-	if (ISSET(ctx->mode, MODE_LIST|MODE_VALIDATE))
-	    logit = false;
-    } else if (!ISSET(status, FLAG_BAD_PASSWORD)) {
-	/* Authenticated OK, sudoers denials are logged separately. */
-	logit = false;
-    }
-
     /*
      * Do we need to send mail?
      * We want to avoid sending multiple messages for the same command
@@ -533,6 +524,18 @@ log_auth_failure(const struct sudoers_context *ctx, unsigned int status,
 	if (def_mail_badpass && !should_mail(ctx, status))
 	    mailit = true;
 	/* Don't log the bad password message, we'll log a denial instead. */
+	logit = false;
+    }
+
+    /* Special case overrides for logging and mailing. */
+    if (ISSET(status, FLAG_NO_USER_INPUT)) {
+	/* For "sudo -n", only log the entry if an actual command was run. */
+	if (ISSET(ctx->mode, MODE_LIST|MODE_VALIDATE)) {
+	    logit = false;
+	    mailit = false;
+	}
+    } else if (!ISSET(status, FLAG_BAD_PASSWORD)) {
+	/* Authenticated OK, sudoers denials are logged separately. */
 	logit = false;
     }
 
