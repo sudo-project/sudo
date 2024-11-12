@@ -1,3 +1,30 @@
+What's new in Sudo 1.9.16p1
+
+ * Fixed the test for cross-compiling when checking for C99 snprintf().
+   The changes made to the test in sudo 1.9.16 resulted in a different
+   problem.  GitHub issue #386.
+
+ * Fixed the date used by the exit record in sudo-format log files.
+   This was a regression introduced in sudo 1.9.16 and only affected
+   file-based logs, not syslog. GitHub issue #405.
+
+ * Fixed the root cause of the "unable to find terminal name for
+   device" message when running sudo on AIX when no terminal is
+   present.  In sudo 1.9.16 this was turned from a debug message
+   into a warning.  GitHub issue #408
+
+ * When a duplicate alias is found in the sudoers file, the warning
+   message now includes the file and line number of the previous
+   definition.
+
+ * Added support for the --with-secure-path-value=no configure
+   option to allow packagers to ship the default sudoers file with
+   the secure path line commented out.
+
+ * Sudo no longer sends mail when a user runs "sudo -nv" or "sudo -nl",
+   even if "mail_badpass" or "mail_always" are set.  Sudo already
+   avoids logging to a file or syslog in this case.  Bug #1072.
+
 What's new in Sudo 1.9.16
 
  * Added the "cmddenial_message" sudoers option to provide additional
