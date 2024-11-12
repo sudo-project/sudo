@@ -60,7 +60,7 @@ can store sudoers content.
 For OpenLDAP, there are two options, depending on how slapd is configured.
 
 The first option is to copy the file schema.OpenLDAP to the schema
-directory (e.g. /etc/openldap/schema).  You must then edit your
+directory (e.g., /etc/openldap/schema).  You must then edit your
 slapd.conf and add an include line the new schema, for example:
 
     # Sudo LDAP schema

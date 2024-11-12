@@ -13,7 +13,7 @@ We try to respond to security issues in a timely manner but understand that Sudo
 
 Include as much of the following information as possible to help us better understand the nature and scope of the potential issue:
 
-  * Type of issue (e.g. buffer overflow, privilege escalation, etc.)
+  * Type of issue (e.g., buffer overflow, privilege escalation, etc.)
   * Full paths of source file(s) related to the issue
   * The location of the affected source code (tag/branch/commit or direct URL)
   * Any special configuration required to reproduce the issue

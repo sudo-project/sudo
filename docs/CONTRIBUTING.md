@@ -36,7 +36,7 @@ work flows:
 
  * clone the [sudo repo](https://github.com/sudo-project/sudo), make
    your changes, and submit a Pull Request (PR).
-   
+
  * send a diff with your changes to the [sudo-workers@sudo.ws mailing
    list](https://www.sudo.ws/mailman/listinfo/sudo-workers) to start
    a discussion.

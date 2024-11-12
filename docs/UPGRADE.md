@@ -35,7 +35,7 @@ Notes on upgrading from an older release
        Defaults !use_pty
 
  * Upgrading from a version prior to 1.9.13:
-   
+
    Sudo now builds AIX-style shared libraries and dynamic shared
    objects by default instead of svr4-style.  This means that the
    default sudo plugins are now .a (archive) files that contain a
@@ -294,8 +294,8 @@ Notes on upgrading from an older release
    important that the time stamp files not persist when the system
    reboots.  For this reason, the default location for the time
    stamp files has changed back to a directory located in `/var/run`.
-   Systems that do not have `/var/run` (e.g. AIX) or that do not clear
-   it on boot (e.g. HP-UX) will need to clear the time stamp
+   Systems that do not have `/var/run` (e.g., AIX) or that do not clear
+   it on boot (e.g., HP-UX) will need to clear the time stamp
    directory via a start up script.  Such a script is installed by
    default on AIX and HP-UX systems.
 
@@ -504,7 +504,7 @@ Notes on upgrading from an older release
    When sudo is build with LDAP support the `/etc/nsswitch.conf` file is
    now used to determine the sudoers sea ch order.  sudo will default to
    only using `/etc/sudoers` unless `/etc/nsswitch.conf` says otherwise.
-   This can be changed with an nsswitch.conf line, e.g.:
+   This can be changed with an nsswitch.conf line, for example:
 
        sudoers: ldap files
 
@@ -548,7 +548,7 @@ Notes on upgrading from an older release
    Prior to sudo 1.6.9, the TERM and PATH environment variables
    would always be preserved even if the env_keep option was
    redefined.  That is no longer the case.  Consequently, if
-   env_keep is set with "=" and not simply appended to (i.e. using
+   env_keep is set with "=" and not simply appended to (i.e., using
    "+="), PATH and TERM must be explicitly included in the list
    of environment variables to keep.  The LOGNAME, SHELL, USER,
    and USERNAME environment variables are still always set.

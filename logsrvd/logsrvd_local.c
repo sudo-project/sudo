@@ -423,7 +423,7 @@ store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len,
 	    "command exited with %d", msg->exit_value);
     }
     if (logsrvd_conf_log_exit()) {
-	if (!eventlog_exit(closure->evlog, flags)) {
+	if (!eventlog_exit(evlog, flags)) {
 	    closure->errstr = _("error logging exit event");
 	    debug_return_bool(false);
 	}

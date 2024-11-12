@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2012-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2012-2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -23,7 +23,7 @@
 
 #include <config.h>
 
-/* Large files not supported by procfs.h on Solaris. */
+/* Large files may not be supported by procfs.h on Solaris. */
 #if defined(HAVE_STRUCT_PSINFO_PR_TTYDEV)
 # undef _FILE_OFFSET_BITS
 # undef _LARGE_FILES
@@ -175,7 +175,8 @@ get_process_ttyname(char *name, size_t namelen)
 	    if ((psinfo.pr_ttydev & DEVNO64) && sizeof(dev_t) == 4)
 		ttydev = makedev(major64(psinfo.pr_ttydev), minor64(psinfo.pr_ttydev));
 #endif
-	    if (ttydev != (dev_t)-1) {
+	    /* On AIX, pr_ttydev is 0 (not -1) when no terminal is present. */
+	    if (ttydev != 0 && ttydev != (dev_t)-1) {
 		errno = serrno;
 		if (sudo_ttyname_dev(ttydev, name, namelen) == NULL) {
 		    sudo_warnx(
@@ -185,6 +186,7 @@ get_process_ttyname(char *name, size_t namelen)
 		}
 		goto done;
 	    }
+	    ttydev = (dev_t)-1;
 	}
     } else {
 	struct stat sb;

@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd July 14, 2024
+.Dd November 11, 2024
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3637,7 +3637,7 @@ This flag is
 .Em on
 by default.
 .Pp
-This setting is only supported by version 1.8.16 or higher.
+This setting is only supported by version 1.9.16 or higher.
 .It passprompt_override
 If set, the prompt specified by
 .Em passprompt
@@ -5220,11 +5220,16 @@ The
 .Em restricted_env_file
 option specifies the fully qualified path to a file containing variables
 to be set in the environment of the program being run.
-Entries in this file should either be of the form
+Entries in this file should be assignments in the form
 .Ql VARIABLE=value
 or
-.Ql export VARIABLE=value .
+.Ql export VARIABLE=value ,
+separated by newline characters.
 The value may optionally be enclosed in single or double quotes.
+Shell-style variable substitution is not supported.
+Empty lines and comments starting with a pound sign
+.Pq Ql #
+are ignored.
 Variables in this file are only added if the variable does not already
 exist in the environment.
 Unlike

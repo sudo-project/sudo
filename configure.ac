@@ -18,7 +18,7 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.69])
-AC_INIT([sudo], [1.9.16], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.9.16p1], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 AC_CONFIG_AUX_DIR([scripts])
@@ -177,6 +177,7 @@ AC_SUBST([sssd_lib])
 AC_SUBST([nsswitch_conf])
 AC_SUBST([netsvc_conf])
 AC_SUBST([secure_path])
+AC_SUBST([secure_path_config])
 AC_SUBST([secure_path_status])
 AC_SUBST([editor])
 AC_SUBST([pam_session])
@@ -230,6 +231,7 @@ sesh_file="$libexecdir/sudo/sesh"
 visudo="$sbindir/visudo"
 nsswitch_conf=/etc/nsswitch.conf
 secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+secure_path_config=
 secure_path_status="disabled"
 pam_session=on
 pam_login_service=sudo
@@ -1068,9 +1070,11 @@ AC_ARG_WITH(ldap-secret-file, [AS_HELP_STRING([--with-ldap-secret-file], [path t
 test -n "$with_ldap_secret_file" && ldap_secret="$with_ldap_secret_file"
 SUDO_DEFINE_UNQUOTED(_PATH_LDAP_SECRET, "$ldap_secret", [Path to the ldap.secret file])
 
-AC_ARG_WITH(secure-path-value, [AS_HELP_STRING([--with-secure-path-value], [value of secure_path in the default sudoers file])],
+AC_ARG_WITH(secure-path-value, [AS_HELP_STRING([--with-secure-path-value], [value of secure_path in the default sudoers file, or "no" to comment out by default])],
 [case $with_secure_path_value in
-    yes|no)	AC_MSG_ERROR([must give --secure-path-value an argument.])
+    yes)	AC_MSG_ERROR([must give --with-secure-path-value an argument.])
+		;;
+    no)		secure_path_config="# "
 		;;
     *)		secure_path="$with_secure_path_value"
 		;;
@@ -3060,14 +3064,15 @@ AS_IF([test X"$sudo_mktemp" = X"yes"], [
     SUDO_APPEND_COMPAT_EXP(sudo_mkdtemp sudo_mkdtempat sudo_mkostempsat sudo_mkstemp sudo_mkstemps)
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }mktemp_test"
 ])
-AX_FUNC_SNPRINTF
-AS_IF([test X"$ac_cv_prog_cc_c99" != X"no"], [
+AS_IF([test X"$ac_cv_prog_cc_c99" != X"no" -a X"$cross_compiling" = X"yes"], [
     # If we have a C99 compiler and are cross-compiling, assume
     # C99-compliant v?snprintf().
-    AS_IF([test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"crosscross"], [
-	ac_cv_have_working_snprintf=yes
-	ac_cv_have_working_vsnprintf=yes
-    ])
+    AC_CHECK_FUNCS(snprintf vsnprintf)
+    ac_cv_have_working_snprintf="$ac_cv_func_snprintf"
+    ac_cv_have_working_vsnprintf="$ac_cv_func_vsnprintf"
+], [
+    # Check for C99-compliant v?snprintf().
+    AX_FUNC_SNPRINTF
 ])
 AS_IF([test X"$ac_cv_have_working_snprintf$ac_cv_have_working_vsnprintf" = X"yesyes"], [
     # System has a C99-compliant v?snprintf(), check for v?asprintf()

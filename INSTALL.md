@@ -728,12 +728,12 @@ Defaults are listed in brackets after the description.
         By default, sudo requires the user to authenticate via a
         password or similar means.  This options causes sudo to
         **not** require authentication.  It is possible to turn
-        authentication back on in sudoers via the PASSWD attribute.  
+        authentication back on in sudoers via the PASSWD attribute.
         Sudoers option: !authenticate
 
     --disable-env-reset
         Disable environment resetting.  This sets the default value
-        of the "env_reset" Defaults option in sudoers to false.  
+        of the "env_reset" Defaults option in sudoers to false.
         Sudoers option: !env_reset
 
     --disable-path-info
@@ -742,43 +742,43 @@ Defaults are listed in brackets after the description.
         be used to gather information on the location of executables that
         the normal user does not have access to.  The disadvantage is that
         if the executable is simply not in the user's path, sudo will tell
-        the user that they are not allowed to run it, which can be confusing.  
+        the user that they are not allowed to run it, which can be confusing.
         Sudoers option: path_info
 
     --disable-root-sudo
         Don't let root run sudo.  This can be used to prevent people from
         "chaining" sudo commands to get a root shell by doing something
-        like `sudo sudo /bin/sh`.  
+        like `sudo sudo /bin/sh`.
         Sudoers option: !root_sudo
 
     --disable-zlib
         Disable the use of the zlib compress library when storing
-        I/O log files.  
+        I/O log files.
         Sudoers option: !compress_io
 
     --enable-log-host
-        Log the hostname in the log file.  
+        Log the hostname in the log file.
         Sudoers option: log_host
 
     --enable-noargs-shell
         If sudo is invoked with no arguments it acts as if the "-s" flag had
         been given.  That is, it runs a shell as root (the shell is determined
         by the SHELL environment variable, falling back on the shell listed
-        in the invoking user's `/etc/passwd` entry).  
+        in the invoking user's `/etc/passwd` entry).
         Sudoers option: shell_noargs
 
     --enable-shell-sets-home
         If sudo is invoked with the "-s" flag the HOME environment variable
         will be set to the home directory of the target user (which is root
         unless the "-u" option is used).  This option effectively makes the
-        "-s" flag imply "-H".  
+        "-s" flag imply "-H".
         Sudoers option: set_home
 
     --enable-timestamp-type=TYPE
         Set the default time stamp record type.  The TYPE may be "global"
         (a single record per user), "ppid" (a single record for process
         with the same parent process), or "tty" (a separate record for
-        each login session).  The default is "tty".  
+        each login session).  The default is "tty".
         Sudoers option: timestamp_type
 
     --with-all-insults
@@ -796,13 +796,13 @@ Defaults are listed in brackets after the description.
 
     --with-badpass-message="MESSAGE"
         Message that is displayed if a user enters an incorrect password.
-        The default is "Sorry, try again." unless insults are turned on.  
+        The default is "Sorry, try again." unless insults are turned on.
         Sudoers option: badpass_message
 
     --with-badpri=PRIORITY
         Determines which syslog priority to log unauthenticated
         commands and errors.  The following priorities are supported:
-        alert, crit, debug, emerg, err, info, notice, and warning.  
+        alert, crit, debug, emerg, err, info, notice, and warning.
         Sudoers option: syslog_badpri
 
     --with-classic-insults
@@ -823,7 +823,7 @@ Defaults are listed in brackets after the description.
         single path name or a colon-separated list of editors.  In the latter
         case, visudo will choose the editor that matches the user's SUDO_EDITOR,
         VISUAL or EDITOR environment variable, or the first editor in the list
-        that exists.  The default is the path to vi on your system.  
+        that exists.  The default is the path to vi on your system.
         Sudoers option: editor
 
     --with-env-editor=no, --without-env-editor
@@ -834,14 +834,14 @@ Defaults are listed in brackets after the description.
         commands as root without logging.  Some sites may with to disable this
         and use a colon-separated list of "safe" editors with the --with-editor
         option.  visudo will then only use the SUDO_EDITOR, VISUAL, or EDITOR
-        variables if they match a value specified via --with-editor.  
+        variables if they match a value specified via --with-editor.
         Sudoers option: env_editor
 
     --with-exempt=GROUP
         Users in the specified group don't need to enter a password when
         running sudo.  This may be useful for sites that don't want their
         "core" sysadmins to have to enter a password but where Jr. sysadmins
-        need to.  You should probably use NOPASSWD in sudoers instead.  
+        need to.  You should probably use NOPASSWD in sudoers instead.
         Sudoers option: exempt_group
 
     --with-fqdn
@@ -852,13 +852,13 @@ Defaults are listed in brackets after the description.
         sudo unusable if your DNS is totally hosed.  You must use the host's
         official name as DNS knows it.  That is, you may not use a host alias
         (CNAME entry) due to performance issues and the fact that there is no
-        way to get all aliases from DNS.  
+        way to get all aliases from DNS.
         Sudoers option: fqdn
 
     --with-goodpri=PRIORITY
         Determines which syslog priority to log successfully authenticated
         commands.  The following priorities are supported: alert, crit, debug,
-        emerg, err, info, notice, and warning.  
+        emerg, err, info, notice, and warning.
         Sudoers option: syslog_goodpri
 
     --with-python-insults
@@ -878,7 +878,7 @@ Defaults are listed in brackets after the description.
 
     --with-ignore-dot
         If set, sudo will ignore "." or "" (current dir) in $PATH.
-        The $PATH itself is not modified.  
+        The $PATH itself is not modified.
         Sudoers option: ignore_dot
 
     --with-insults
@@ -900,11 +900,11 @@ Defaults are listed in brackets after the description.
     --with-iologdir[=DIR]
         By default, sudo stores I/O log files in either /var/log/sudo-io,
         /var/adm/sudo-io, or /usr/log/sudo-io.  If this option is specified,
-        I/O logs will be stored in the indicated directory instead.  
+        I/O logs will be stored in the indicated directory instead.
         Sudoers option: iolog_dir
 
     --with-lecture=no, --without-lecture
-        Don't print the lecture the first time a user runs sudo.  
+        Don't print the lecture the first time a user runs sudo.
         Sudoers option: !lecture
 
     --with-logfac=FACILITY
@@ -913,83 +913,83 @@ Defaults are listed in brackets after the description.
         this for ancient syslogs but it will have no effect.  The
         following facilities are supported: authpriv (if your OS
         supports it), auth, daemon, user, local0, local1, local2,
-        local3, local4, local5, local6, and local7.  
+        local3, local4, local5, local6, and local7.
         Sudoers option: syslog
 
     --with-logging=TYPE
         How you want to do your logging.  You may choose "syslog",
         "file", or "both".  Setting this to "syslog" is nice because
         you can keep all of your sudo logs in one place (see the
-        example syslog.conf file).  The default is "syslog".  
+        example syslog.conf file).  The default is "syslog".
         Sudoers options: syslog and logfile
 
     --with-loglen=NUMBER
         Number of characters per line for the file log.  This is only used if
         you are to "file" or "both".  This value is used to decide when to wrap
         lines for nicer log files.  The default is 80.  Setting this to 0
-        will disable the wrapping.  
+        will disable the wrapping.
         Sudoers options: loglinelen
 
     --with-logpath=PATH
         Override the default location of the sudo log file and use
         "path" instead.  By default will use /var/log/sudo.log if
         there is a /var/log dir, falling back to /var/adm/sudo.log
-        or /usr/adm/sudo.log if not.  
+        or /usr/adm/sudo.log if not.
         Sudoers option: logfile
 
     --with-long-otp-prompt
         When validating with a One Time Password scheme (S/Key or
         OPIE), a two-line prompt is used to make it easier to cut
         and paste the challenge to a local window.  It's not as
-        pretty as the default but some people find it more convenient.  
+        pretty as the default but some people find it more convenient.
         Sudoers option: long_otp_prompt
 
     --with-mail-if-no-user=no, --without-mail-if-no-user
         Normally, sudo will mail to the "alertmail" user if the user invoking
-        sudo is not in the sudoers file.  This option disables that behavior.  
+        sudo is not in the sudoers file.  This option disables that behavior.
         Sudoers option: mail_no_user
 
     --with-mail-if-no-host
         Send mail to the "alermail" user if the user exists in the sudoers
-        file, but is not allowed to run commands on the current host.  
+        file, but is not allowed to run commands on the current host.
         Sudoers option: mail_no_host
 
     --with-mail-if-noperms
         Send mail to the "alermail" user if the user is allowed to use sudo but
-        the command they are trying is not listed in their sudoers file entry.  
+        the command they are trying is not listed in their sudoers file entry.
         Sudoers option: mail_no_perms
 
     --with-mailsubject="SUBJECT"
         Subject of the mail sent to the "mailto" user. The token "%h"
         will expand to the hostname of the machine.
-        The default value is "*** SECURITY information for %h ***".  
+        The default value is "*** SECURITY information for %h ***".
         Sudoers option: mailsub
 
     --with-mailto=USER|MAIL_ALIAS
         User (or mail alias) that mail from sudo is sent to.
-        This should go to a sysadmin at your site.  The default value is "root".  
+        This should go to a sysadmin at your site.  The default value is "root".
         Sudoers option: mailto
 
     --with-passprompt="PROMPT"
         Default prompt to use when asking for a password; can be overridden
         via the -p option and the SUDO_PROMPT environment variable. Supports
         the "%H", "%h", "%U", and "%u" escapes as documented in the sudo
-        manual page.  The default value is "Password:".  
+        manual page.  The default value is "Password:".
         Sudoers option: passprompt
 
     --with-password-timeout=NUMBER
         Number of minutes before the sudo password prompt times out.
-        The default is 5, set this to 0 for no password timeout.  
+        The default is 5, set this to 0 for no password timeout.
         Sudoers option: passwd_timeout
 
     --with-passwd-tries=NUMBER
         Number of tries a user gets to enter his/her password before sudo logs
-        the failure and exits.  The default is 3.  
+        the failure and exits.  The default is 3.
         Sudoers option: passwd_tries
 
     --with-runas-default=USER
         The default user to run commands as if the -u flag is not specified
-        on the command line.  This defaults to "root".  
+        on the command line.  This defaults to "root".
         Sudoers option: runas_default
 
     --with-secure-path[=PATH]
@@ -1000,23 +1000,25 @@ Defaults are listed in brackets after the description.
         path for your site.  This is not applied to users in the group
         specified by --with-exemptgroup.  If you do not specify a path,
         "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-        is used.  
+        is used.
         Sudoers option: secure_path
 
     --with-secure-path-value[=PATH]
         Sets the value of "secure_path" that is substituted into
-        the default sudoers file.  This option is intended to be
-        used by package maintainers who wish to set "secure_path"
-        to a system-specific value in the default sudoers file.
-        It does not actually enable "secure-path".
+        the default sudoers file.  A value of "no" will cause the
+        "secure_path" line in the default sudoers file to be commented
+        out.  This option is intended to be used by package maintainers
+        who wish to set "secure_path" to a system-specific value
+        in the default sudoers file.  It does not actually enable
+        "secure-path" in the sudoers plugin itself.
 
     --with-sendmail=PATH
-        Override configure's guess as to the location of sendmail.  
+        Override configure's guess as to the location of sendmail.
         Sudoers option: mailerpath
 
     --with-sendmail=no, --without-sendmail
         Do not use sendmail to mail messages to the "mailto" user.
-        Use only if you don't run sendmail or the equivalent.  
+        Use only if you don't run sendmail or the equivalent.
         Sudoers options: !mailerpath or !mailto
 
     --with-sudoers-mode=MODE
@@ -1037,21 +1039,21 @@ Defaults are listed in brackets after the description.
 
     --with-timeout=NUMBER
         Number of minutes that can elapse before sudo will ask for a passwd
-        again.  The default is 5, set it to 0 to always prompt for a password.  
+        again.  The default is 5, set it to 0 to always prompt for a password.
         Sudoers option: timestamp_timeout
 
     --with-umask=MASK
-        Umask to use when running the root command.  The default is 0022.  
+        Umask to use when running the root command.  The default is 0022.
         Sudoers option: umask
 
     --with-umask=no, --without-umask
-        Preserves the umask of the user invoking sudo.  
+        Preserves the umask of the user invoking sudo.
         Sudoers option: !umask
 
     --with-umask-override
         Use the umask specified in sudoers even if it is less restrictive
         than the user's.  The default is to use the intersection of the
-        user's umask and the umask specified in sudoers.  
+        user's umask and the umask specified in sudoers.
         Sudoers option: umask_override
 
 ## OS dependent notes

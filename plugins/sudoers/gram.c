@@ -167,7 +167,7 @@ static struct defaults *new_default(char *, char *, short);
 static struct member *new_member(char *, short);
 static struct sudo_command *new_command(char *, char *);
 static struct command_digest *new_digest(unsigned int, char *);
-static void alias_error(const char *name, int errnum);
+static void alias_error(const char *name, short type, int errnum);
 
 #line 167 "gram.c"
 
@@ -2927,7 +2927,7 @@ yyreduce:
                                        {
 			    if (!alias_add(&parsed_policy, (yyvsp[-3].string), HOSTALIAS,
 				sudoers, alias_line, alias_column, (yyvsp[0].member))) {
-				alias_error((yyvsp[-3].string), errno);
+				alias_error((yyvsp[-3].string), HOSTALIAS, errno);
 				YYERROR;
 			    }
 			    parser_leak_remove(LEAK_PTR, (yyvsp[-3].string));
@@ -2960,7 +2960,7 @@ yyreduce:
                                        {
 			    if (!alias_add(&parsed_policy, (yyvsp[-3].string), CMNDALIAS,
 				sudoers, alias_line, alias_column, (yyvsp[0].member))) {
-				alias_error((yyvsp[-3].string), errno);
+				alias_error((yyvsp[-3].string), CMNDALIAS, errno);
 				YYERROR;
 			    }
 			    parser_leak_remove(LEAK_PTR, (yyvsp[-3].string));
@@ -2993,7 +2993,7 @@ yyreduce:
                                        {
 			    if (!alias_add(&parsed_policy, (yyvsp[-3].string), RUNASALIAS,
 				sudoers, alias_line, alias_column, (yyvsp[0].member))) {
-				alias_error((yyvsp[-3].string), errno);
+				alias_error((yyvsp[-3].string), RUNASALIAS, errno);
 				YYERROR;
 			    }
 			    parser_leak_remove(LEAK_PTR, (yyvsp[-3].string));
@@ -3016,7 +3016,7 @@ yyreduce:
                                        {
 			    if (!alias_add(&parsed_policy, (yyvsp[-3].string), USERALIAS,
 				sudoers, alias_line, alias_column, (yyvsp[0].member))) {
-				alias_error((yyvsp[-3].string), errno);
+				alias_error((yyvsp[-3].string), USERALIAS, errno);
 				YYERROR;
 			    }
 			    parser_leak_remove(LEAK_PTR, (yyvsp[-3].string));
@@ -3475,12 +3475,27 @@ sudoerserror(const char *s)
 }
 
 static void
-alias_error(const char *name, int errnum)
+alias_error(const char *name, short type, int errnum)
 {
-    if (errnum == EEXIST)
-	sudoerserrorf(U_("Alias \"%s\" already defined"), name);
-    else
+    if (errnum == EEXIST) {
+	struct alias *a = alias_get(&parsed_policy, name, type);
+	if (a != NULL) {
+	    sudoerserrorf(
+		U_("duplicate %s \"%s\", previously defined at %s:%d:%d"),
+		alias_type_to_string(type), name, a->file, a->line, a->column);
+	    alias_put(a);
+	} else {
+	    if (errno == ELOOP) {
+		sudoerserrorf(U_("cycle in %s \"%s\""),
+		    alias_type_to_string(type), name);
+	    } else {
+		sudoerserrorf(U_("duplicate %s \"%s\""),
+		    alias_type_to_string(type), name);
+	    }
+	}
+    } else {
 	sudoerserror(N_("unable to allocate memory"));
+    }
 }
 
 static struct defaults *

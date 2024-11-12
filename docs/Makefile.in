@@ -102,18 +102,20 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 
 all: $(DEVDOCS) $(DOCS)
 
-igor: all
-	@if [ "$(mantype)" != "mdoc" ]; then \
-	    echo "make igor only supported for mdoc manuals" 1>&2; \
-	    exit 1; \
-	else \
-	    rval=0; \
-	    for m in $(DOCS); do \
-		echo $(IGOR) -D $$m; \
-		$(IGOR) -D $$m || rval=`expr $$rval + $$?`; \
-	    done; \
-	    exit $$rval; \
-	fi
+igor:
+	@rval=0; \
+	for f in *.mdoc.in; do \
+	    echo $(IGOR) -D $$f; \
+	    $(IGOR) -D $$f || rval=`expr $$rval + $$?`; \
+	done; \
+	for f in $(OTHER_DOCS) $(OTHER_DOCS_LDAP); do \
+	    case `basename $$f` in \
+	    [A-Z][A-Z]*) \
+		echo $(IGOR) -abrw $$f; \
+		$(IGOR) -abrw $$f || rval=`expr $$rval + $$?`;; \
+	    esac; \
+	done; \
+	exit $$rval
 
 lint: all
 	@if [ "$(mantype)" != "mdoc" ]; then \
