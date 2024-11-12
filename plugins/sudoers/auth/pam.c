@@ -339,7 +339,7 @@ sudo_pam_verify(const struct sudoers_context *ctx, struct passwd *pw,
     switch (*pam_status) {
     case PAM_SUCCESS:
 	/* Verify user did not change during PAM transaction. */
-	rc = pam_get_item(pamh, PAM_USER, (const void **)&pam_user);
+	rc = pam_get_item(pamh, PAM_USER, (PAM_CONST void **)&pam_user);
 	if (rc == PAM_SUCCESS &&
 		(pam_user == NULL || strcmp(pam_user, pw->pw_name) != 0)) {
 	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
