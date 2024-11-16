@@ -253,10 +253,38 @@ char *
 sudo_ttyname_dev_v1(dev_t rdev, char *buf, size_t buflen)
 {
     const char *devsearch, *devsearch_end;
-    char path[PATH_MAX], *ret;
+    char path[PATH_MAX], *ret = NULL;
     const char *cp, *ep;
     size_t len;
     debug_decl(sudo_ttyname_dev, SUDO_DEBUG_UTIL);
+
+#ifdef __linux__
+    /*
+     * First check std{in,out,err} and use /proc/self/fd/{0,1,2} if possible.
+     */
+    for (int fd = STDIN_FILENO; fd <= STDERR_FILENO; fd++) {
+	char fdpath[] = "/proc/self/fd/N";
+	struct stat sb;
+
+	if (fstat(fd, &sb) == -1 || !S_ISCHR(sb.st_mode))
+	    continue;
+	if (rdev != sb.st_rdev)
+	    continue;
+
+	fdpath[sizeof("/proc/self/fd/N") - 2] = '0' + fd;
+	len = readlink(fdpath, buf, buflen);
+	if (len != (size_t)-1) {
+	    if (len == buflen) {
+		errno = ERANGE;	/* buf too small */
+	    } else {
+		/* readlink(2) does not NUL-terminate. */
+		buf[len] = '\0';
+		ret = buf;
+	    }
+	    goto done;
+	}
+    }
+#endif
 
     /*
      * First, check /dev/console.
