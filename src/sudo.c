@@ -622,10 +622,13 @@ get_user_info(struct user_details *ud)
     if (ttydev != (dev_t)-1) {
 	if (asprintf(&info[++i], "ttydev=%lld", (long long)ttydev) == -1)
 	    goto oom;
-	info[++i] = sudo_new_key_val("tty", path);
-	if (info[i] == NULL)
-	    goto oom;
-	ud->tty = info[i] + sizeof("tty=") - 1;
+	/* The terminal device file may be missing in a chroot() jail. */
+	if (path[0] != '\0') {
+	    info[++i] = sudo_new_key_val("tty", path);
+	    if (info[i] == NULL)
+		goto oom;
+	    ud->tty = info[i] + sizeof("tty=") - 1;
+	}
     } else {
 	/* tty may not always be present */
 	if (errno != ENOENT)
