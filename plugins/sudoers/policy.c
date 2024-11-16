@@ -1358,10 +1358,10 @@ sudoers_policy_version(int verbose)
 }
 
 static struct sudo_hook sudoers_hooks[] = {
-    { SUDO_HOOK_VERSION, SUDO_HOOK_SETENV, sudoers_hook_setenv, NULL },
-    { SUDO_HOOK_VERSION, SUDO_HOOK_UNSETENV, sudoers_hook_unsetenv, NULL },
-    { SUDO_HOOK_VERSION, SUDO_HOOK_GETENV, sudoers_hook_getenv, NULL },
-    { SUDO_HOOK_VERSION, SUDO_HOOK_PUTENV, sudoers_hook_putenv, NULL },
+    { SUDO_HOOK_VERSION, SUDO_HOOK_SETENV, (sudo_hook_fn_t)sudoers_hook_setenv, NULL },
+    { SUDO_HOOK_VERSION, SUDO_HOOK_UNSETENV, (sudo_hook_fn_t)sudoers_hook_unsetenv, NULL },
+    { SUDO_HOOK_VERSION, SUDO_HOOK_GETENV, (sudo_hook_fn_t)sudoers_hook_getenv, NULL },
+    { SUDO_HOOK_VERSION, SUDO_HOOK_PUTENV, (sudo_hook_fn_t)sudoers_hook_putenv, NULL },
     { 0, 0, NULL, NULL }
 };
 
