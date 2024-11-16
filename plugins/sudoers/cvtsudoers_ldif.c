@@ -204,7 +204,7 @@ print_global_defaults_ldif(FILE *fp,
 	    lbuf.len = 0;
 	    if (!sudo_lbuf_append(&lbuf, "# "))
 		goto done;
-	    if (!sudoers_format_default_line(&lbuf, parse_tree, opt, false, true))
+	    if (!sudoers_format_default_line(&lbuf, parse_tree, opt, NULL, true))
 		goto done;
 	    fprintf(fp, "# Unable to translate %s:%d:%d:\n%s\n",
 		opt->file, opt->line, opt->column, lbuf.buf);
