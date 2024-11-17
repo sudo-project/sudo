@@ -403,7 +403,7 @@ cvtsudoers_make_grlist_item(const struct passwd *pw, char * const *unused1)
     struct cache_item_grlist *grlitem;
     struct sudoers_string *s;
     struct group_list *grlist;
-    size_t groupname_len;
+    long groupname_len;
     debug_decl(cvtsudoers_make_grlist_item, SUDOERS_DEBUG_NSS);
 
     /*
@@ -421,7 +421,9 @@ cvtsudoers_make_grlist_item(const struct passwd *pw, char * const *unused1)
     }
 
 #ifdef _SC_LOGIN_NAME_MAX
-    groupname_len = (size_t)MAX(sysconf(_SC_LOGIN_NAME_MAX), 32);
+    groupname_len = sysconf(_SC_LOGIN_NAME_MAX);
+    if (groupname_len < 32)
+	groupname_len = 32;
 #else
     groupname_len = MAX(LOGIN_NAME_MAX, 32);
 #endif
@@ -429,7 +431,7 @@ cvtsudoers_make_grlist_item(const struct passwd *pw, char * const *unused1)
     /* Allocate in one big chunk for easy freeing. */
     nsize = strlen(pw->pw_name) + 1;
     total = sizeof(*grlitem) + nsize;
-    total += groupname_len * ngroups;
+    total += (size_t)groupname_len * ngroups;
 
 again:
     if ((grlitem = calloc(1, total)) == NULL) {
@@ -470,7 +472,7 @@ again:
 	}
 	len = strlen(s->str) + 1;
 	if ((size_t)(cp - (char *)grlitem) + len > total) {
-	    total += len + groupname_len;
+	    total += len + (size_t)groupname_len;
 	    free(grlitem);
 	    goto again;
 	}

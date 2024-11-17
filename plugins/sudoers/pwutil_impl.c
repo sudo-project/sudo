@@ -363,12 +363,13 @@ PREFIX(make_gidlist_item)(const struct passwd *pw, int ngids, GETGROUPS_T *gids,
 struct cache_item *
 PREFIX(make_grlist_item)(const struct passwd *pw, char * const *unused1)
 {
-    char *cp;
-    size_t groupname_len, len, ngroups, nsize, total;
+    size_t len, ngroups, nsize, total;
     struct cache_item_grlist *grlitem;
     struct group_list *grlist;
     struct gid_list *gidlist;
     struct group *grp = NULL;
+    long groupname_len;
+    char *cp;
     int i;
     debug_decl(sudo_make_grlist_item, SUDOERS_DEBUG_NSS);
 
@@ -381,7 +382,9 @@ PREFIX(make_grlist_item)(const struct passwd *pw, char * const *unused1)
     }
 
 #ifdef _SC_LOGIN_NAME_MAX
-    groupname_len = (size_t)MAX(sysconf(_SC_LOGIN_NAME_MAX), 32);
+    groupname_len = sysconf(_SC_LOGIN_NAME_MAX);
+    if (groupname_len < 32)
+	groupname_len = 32;
 #else
     groupname_len = MAX(LOGIN_NAME_MAX, 32);
 #endif
@@ -390,7 +393,7 @@ PREFIX(make_grlist_item)(const struct passwd *pw, char * const *unused1)
     nsize = strlen(pw->pw_name) + 1;
     total = sizeof(*grlitem) + nsize;
     total += sizeof(char *) * (size_t)gidlist->ngids;
-    total += groupname_len * (size_t)gidlist->ngids;
+    total += (size_t)(groupname_len * gidlist->ngids);
 
 again:
     if ((grlitem = calloc(1, total)) == NULL) {
@@ -429,7 +432,7 @@ again:
 	if ((grp = sudo_getgrgid(gidlist->gids[i])) != NULL) {
 	    len = strlen(grp->gr_name) + 1;
 	    if ((size_t)(cp - (char *)grlitem) + len > total) {
-		total += len + groupname_len;
+		total += len + (size_t)groupname_len;
 		free(grlitem);
 		sudo_gr_delref(grp);
 		goto again;
