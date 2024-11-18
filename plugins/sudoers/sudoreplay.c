@@ -1678,9 +1678,9 @@ read_keyboard(int fd, int what, void *v)
 static void
 display_usage(FILE *fp)
 {
-    fprintf(fp, _("usage: %s [-hnRS] [-d dir] [-m num] [-s num] ID\n"),
+    fprintf(fp, "usage: %s [-hnRS] [-d dir] [-m num] [-s num] ID\n",
 	getprogname());
-    fprintf(fp, _("usage: %s [-h] [-d dir] -l [search expression]\n"),
+    fprintf(fp, "usage: %s [-h] [-d dir] -l [search expression]\n",
 	getprogname());
 }
 
