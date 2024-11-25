@@ -1,3 +1,18 @@
+What's new in Sudo 1.9.16p2
+
+ * Sudo now passes the terminal device number to the policy plugin
+   even if it cannot resolve it to a path name.  This allows sudo
+   to run without warnings in a chroot jail when the terminal device
+   files are not present. GitHub issue #421.
+
+ * On Linux systems, sudo will now attempt to use the symbolic links
+   in /proc/self/fd/{0,1,2} when resolving the terminal device
+   number.  This can allow sudo to map a terminal device to its
+   path name even when /dev/pts is not mounted in a chroot jail.
+
+ * Fixed compilation errors with gcc and clang in C23 mode.
+   C23 no longer supports functions with unspecified arguments.
+
 What's new in Sudo 1.9.16p1
 
  * Fixed the test for cross-compiling when checking for C99 snprintf().

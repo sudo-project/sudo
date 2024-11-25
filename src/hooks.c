@@ -125,7 +125,7 @@ process_hooks_unsetenv(const char *name)
 /* Hook registration internals. */
 static int
 register_hook_internal(struct sudo_hook_list *head,
-    int (*hook_fn)(), void *closure)
+    sudo_hook_fn_t hook_fn, void *closure)
 {
     struct sudo_hook_entry *hook;
     debug_decl(register_hook_internal, SUDO_DEBUG_HOOKS);
@@ -185,7 +185,7 @@ register_hook(struct sudo_hook *hook)
 /* Hook deregistration internals. */
 static void
 deregister_hook_internal(struct sudo_hook_list *head,
-    int (*hook_fn)(), void *closure)
+    sudo_hook_fn_t hook_fn, void *closure)
 {
     struct sudo_hook_entry *hook, *prev = NULL;
     debug_decl(deregister_hook_internal, SUDO_DEBUG_HOOKS);

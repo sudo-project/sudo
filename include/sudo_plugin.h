@@ -96,7 +96,11 @@ typedef int (*sudo_printf_t)(int msg_type, const char * restrict fmt, ...);
 #endif
 
 /* Hook functions typedefs. */
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 202311L)
+typedef int (*sudo_hook_fn_t)(...);
+#else
 typedef int (*sudo_hook_fn_t)();
+#endif
 typedef int (*sudo_hook_fn_setenv_t)(const char *name, const char *value, int overwrite, void *closure);
 typedef int (*sudo_hook_fn_putenv_t)(char *string, void *closure);
 typedef int (*sudo_hook_fn_getenv_t)(const char *name, char **value, void *closure);

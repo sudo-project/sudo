@@ -50,7 +50,7 @@ static struct parse_gids_test test_data[] = {
     { "1,2,3,4", &test_data[0].basegid, 0, 5, test1_out },
     { "1,2,3,4", NULL, 0, 4, test2_out },
     { "1,-2,3,4", &test_data[2].basegid, 0, 5, test3_out },
-    { NULL, false, 0, 0, NULL }
+    { NULL, NULL, 0, 0, NULL }
 };
 
 static void

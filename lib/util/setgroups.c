@@ -50,7 +50,7 @@ sudo_setgroups_v1(int ngids, const GETGROUPS_T *gids)
 	if (maxgids == -1)
 	    maxgids = NGROUPS_MAX;
 	if (ngids > maxgids)
-	    ret = setgroups(maxgids, (GETGROUPS_T *)gids);
+	    ret = setgroups((int)maxgids, (GETGROUPS_T *)gids);
     }
     debug_return_int(ret);
 }
