@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2014-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2014-2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -397,7 +397,7 @@ ts_init_key(const struct sudoers_context *ctx,
 	sudo_warnx("unknown time stamp ticket type %d", ticket_type);
 	FALLTHROUGH;
     case tty:
-	if (ctx->user.ttydev != (dev_t)-1) {
+	if (ctx->user.ttydev != NODEV) {
 	    /* tty-based time stamp */
 	    entry->type = TS_TTY;
 	    entry->u.ttydev = ctx->user.ttydev;

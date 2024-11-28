@@ -619,7 +619,7 @@ get_user_info(struct user_details *ud)
     }
 
     ttydev = get_process_ttyname(path, sizeof(path));
-    if (ttydev != (dev_t)-1) {
+    if (ttydev != NODEV) {
 	if (asprintf(&info[++i], "ttydev=%lld", (long long)ttydev) == -1)
 	    goto oom;
 	/* The terminal device file may be missing in a chroot() jail. */

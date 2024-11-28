@@ -69,7 +69,7 @@ main(int argc, char *argv[])
     char *tty_libc = NULL, *tty_sudo = NULL;
     char pathbuf[PATH_MAX];
     bool verbose = false;
-    dev_t ttydev = -1;
+    dev_t ttydev = NODEV;
     int ch, errors = 0, ntests = 1;
 
     initprogname(argc > 0 ? argv[0] : "check_ttyname");
@@ -87,7 +87,7 @@ main(int argc, char *argv[])
 
     /* Lookup tty name using kernel info if possible. */
     ttydev = get_process_ttyname(pathbuf, sizeof(pathbuf));
-    if (ttydev != (dev_t)-1) {
+    if (ttydev != NODEV) {
 	char numbuf[STRLEN_MAX_SIGNED(long long) + 1];
 	const char *errstr;
 	dev_t newdev;
