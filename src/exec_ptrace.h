@@ -66,7 +66,7 @@
  * For example code, see tools/testing/selftests/seccomp/seccomp_bpf.c
  *
  * The structs and registers vary among the different platforms.
- * We define user_regs_struct as the struct to use for gettings
+ * We define user_regs_struct as the struct to use for getting
  * and setting the general registers and define accessor
  * macros to get/set the individual struct members.
  *
