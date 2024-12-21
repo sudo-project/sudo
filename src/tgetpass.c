@@ -137,8 +137,13 @@ restart:
 	ttyfd = open(_PATH_TTY, O_RDWR);
 	if (ttyfd == -1 && !ISSET(flags, TGP_ECHO|TGP_NOECHO_TRY)) {
 	    if (askpass == NULL || getenv_unhooked("DISPLAY") == NULL) {
-		sudo_warnx("%s",
-		    U_("a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper"));
+		if (getenv_unhooked("SSH_CONNECTION") != NULL && getenv_unhooked("SSH_TTY") == NULL) {
+		    sudo_warnx("%s",
+			U_("a terminal is required to read the password; either use ssh's -t option or configure an askpass helper"));
+		} else {
+		    sudo_warnx("%s",
+			U_("a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper"));
+		}
 		debug_return_str(NULL);
 	    }
 	    SET(flags, TGP_ASKPASS);
