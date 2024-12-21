@@ -154,8 +154,8 @@ Sudo front-end configuration
 .El
 .Sh SEE ALSO
 .Xr sudo.conf @mansectform@ ,
-.Xr sudo @mansectsu@ ,
 .Xr sudo_logsrv.proto @mansectform@ ,
+.Xr sudo @mansectsu@ ,
 .Xr sudo_logsrvd @mansectsu@
 .Sh AUTHORS
 Many people have worked on

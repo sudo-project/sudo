@@ -168,8 +168,8 @@ refer to its manual.
 Sudo front-end configuration
 .SH "SEE ALSO"
 sudo.conf(@mansectform@),
-sudo(@mansectsu@),
 sudo_logsrv.proto(@mansectform@),
+sudo(@mansectsu@),
 sudo_logsrvd(@mansectsu@)
 .SH "AUTHORS"
 Many people have worked on
