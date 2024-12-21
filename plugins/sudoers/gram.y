@@ -77,14 +77,15 @@ struct sudoers_parse_tree parsed_policy = {
 /*
  * Local prototypes
  */
-static void init_options(struct command_options *opts);
 static bool add_defaults(short, struct member *, struct defaults *);
 static bool add_userspec(struct member *, struct privilege *);
+static struct command_digest *new_digest(unsigned int, char *);
 static struct defaults *new_default(char *, char *, short);
 static struct member *new_member(char *, short);
 static struct sudo_command *new_command(char *, char *);
-static struct command_digest *new_digest(unsigned int, char *);
 static void alias_error(const char *name, short type, int errnum);
+static void init_options(struct command_options *opts);
+static void propagate_cmndspec(struct cmndspec *cs, const struct cmndspec *prev);
 %}
 
 %union {
@@ -436,62 +437,11 @@ host		:	ALIAS {
 
 cmndspeclist	:	cmndspec
 		|	cmndspeclist ',' cmndspec {
-			    struct cmndspec *prev;
-			    prev = HLTQ_LAST($1, cmndspec, entries);
+			    const struct cmndspec *prev =
+				HLTQ_LAST($1, cmndspec, entries);
+			    propagate_cmndspec($3, prev);
 			    parser_leak_remove(LEAK_CMNDSPEC, $3);
 			    HLTQ_CONCAT($1, $3, entries);
-
-			    /* propagate runcwd and runchroot */
-			    if ($3->runcwd == NULL)
-				$3->runcwd = prev->runcwd;
-			    if ($3->runchroot == NULL)
-				$3->runchroot = prev->runchroot;
-			    /* propagate role and type */
-			    if ($3->role == NULL && $3->type == NULL) {
-				$3->role = prev->role;
-				$3->type = prev->type;
-			    }
-			    /* propagate apparmor_profile */
-			    if ($3->apparmor_profile == NULL)
-			        $3->apparmor_profile = prev->apparmor_profile;
-			    /* propagate privs & limitprivs */
-			    if ($3->privs == NULL && $3->limitprivs == NULL) {
-			        $3->privs = prev->privs;
-			        $3->limitprivs = prev->limitprivs;
-			    }
-			    /* propagate command time restrictions */
-			    if ($3->notbefore == UNSPEC)
-				$3->notbefore = prev->notbefore;
-			    if ($3->notafter == UNSPEC)
-				$3->notafter = prev->notafter;
-			    /* propagate command timeout */
-			    if ($3->timeout == UNSPEC)
-				$3->timeout = prev->timeout;
-			    /* propagate tags and runas list */
-			    if ($3->tags.nopasswd == UNSPEC)
-				$3->tags.nopasswd = prev->tags.nopasswd;
-			    if ($3->tags.noexec == UNSPEC)
-				$3->tags.noexec = prev->tags.noexec;
-			    if ($3->tags.intercept == UNSPEC)
-				$3->tags.intercept = prev->tags.intercept;
-			    if ($3->tags.setenv == UNSPEC &&
-				prev->tags.setenv != IMPLIED)
-				$3->tags.setenv = prev->tags.setenv;
-			    if ($3->tags.log_input == UNSPEC)
-				$3->tags.log_input = prev->tags.log_input;
-			    if ($3->tags.log_output == UNSPEC)
-				$3->tags.log_output = prev->tags.log_output;
-			    if ($3->tags.send_mail == UNSPEC)
-				$3->tags.send_mail = prev->tags.send_mail;
-			    if ($3->tags.follow == UNSPEC)
-				$3->tags.follow = prev->tags.follow;
-			    if (($3->runasuserlist == NULL &&
-				 $3->runasgrouplist == NULL) &&
-				(prev->runasuserlist != NULL ||
-				 prev->runasgrouplist != NULL)) {
-				$3->runasuserlist = prev->runasuserlist;
-				$3->runasgrouplist = prev->runasgrouplist;
-			    }
 			    $$ = $1;
 			}
 		;
@@ -1866,6 +1816,65 @@ init_options(struct command_options *opts)
     opts->apparmor_profile = NULL;
     opts->privs = NULL;
     opts->limitprivs = NULL;
+}
+
+/*
+ * Propagate inheritable settings and tags from prev to cs.
+ */
+static void
+propagate_cmndspec(struct cmndspec *cs, const struct cmndspec *prev)
+{
+    /* propagate runcwd and runchroot */
+    if (cs->runcwd == NULL)
+	cs->runcwd = prev->runcwd;
+    if (cs->runchroot == NULL)
+	cs->runchroot = prev->runchroot;
+    /* propagate role and type */
+    if (cs->role == NULL && cs->type == NULL) {
+	cs->role = prev->role;
+	cs->type = prev->type;
+    }
+    /* propagate apparmor_profile */
+    if (cs->apparmor_profile == NULL)
+	cs->apparmor_profile = prev->apparmor_profile;
+    /* propagate privs & limitprivs */
+    if (cs->privs == NULL && cs->limitprivs == NULL) {
+	cs->privs = prev->privs;
+	cs->limitprivs = prev->limitprivs;
+    }
+    /* propagate command time restrictions */
+    if (cs->notbefore == UNSPEC)
+	cs->notbefore = prev->notbefore;
+    if (cs->notafter == UNSPEC)
+	cs->notafter = prev->notafter;
+    /* propagate command timeout */
+    if (cs->timeout == UNSPEC)
+	cs->timeout = prev->timeout;
+    /* propagate tags and runas list */
+    if (cs->tags.nopasswd == UNSPEC)
+	cs->tags.nopasswd = prev->tags.nopasswd;
+    if (cs->tags.noexec == UNSPEC)
+	cs->tags.noexec = prev->tags.noexec;
+    if (cs->tags.intercept == UNSPEC)
+	cs->tags.intercept = prev->tags.intercept;
+    /* Need to handle IMPLIED setting for SETENV tag specially. */
+    if (!TAG_SET(cs->tags.setenv) && TAG_SET(prev->tags.setenv))
+	cs->tags.setenv = prev->tags.setenv;
+    if (cs->tags.log_input == UNSPEC)
+	cs->tags.log_input = prev->tags.log_input;
+    if (cs->tags.log_output == UNSPEC)
+	cs->tags.log_output = prev->tags.log_output;
+    if (cs->tags.send_mail == UNSPEC)
+	cs->tags.send_mail = prev->tags.send_mail;
+    if (cs->tags.follow == UNSPEC)
+	cs->tags.follow = prev->tags.follow;
+    if ((cs->runasuserlist == NULL &&
+	 cs->runasgrouplist == NULL) &&
+	(prev->runasuserlist != NULL ||
+	 prev->runasgrouplist != NULL)) {
+	cs->runasuserlist = prev->runasuserlist;
+	cs->runasgrouplist = prev->runasgrouplist;
+    }
 }
 
 uid_t
