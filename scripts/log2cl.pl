@@ -48,6 +48,8 @@ my @lines;
 
 # Wrap like "hg log --template=changelog"
 $Text::Wrap::columns = 77;
+# Don't preserve tabs
+$Text::Wrap::unexpand = 0;
 
 while (<LOG>) {
     chomp;
@@ -110,6 +112,6 @@ sub print_entry
     my $files = "* " . join(", ", @_) . ":";
 
     print wrap("\t", "\t", $files) . "\n";
-    print wrap("\t", "\t", $body) . "\n";
+    print fill("\t", "\t", $body) . "\n";
     print "\t[$hash]\n\n";
 }
