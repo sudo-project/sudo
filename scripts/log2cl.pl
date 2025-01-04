@@ -32,8 +32,7 @@ my $format="%ad  %aN  <%aE>%n%h%n%B%n";
 # Parse options and build up "git log" command
 my @cmd = ( "git" );
 my %opts;
-getopts('b:mR:', \%opts);
-push(@cmd, "-b", $opts{"b"}) if exists $opts{"b"};
+getopts('mR:', \%opts);
 push(@cmd, "--git-dir", $opts{"R"}) if exists $opts{"R"};
 push(@cmd, "log", "--log-size", "--name-only", "--date=short", "--format=$format", @ARGV);
 
