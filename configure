@@ -18747,8 +18747,9 @@ fi
 
 done
 
-		# We need to force a flat namespace to make libc
-		# symbol hooking work like it does on ELF.
+		# We need to force a flat namespace on macOS to make libc
+		# symbol hooking work like it does on ELF.  Newer versions of
+		# macOS treat -force_flat_namespace as -flat_namespace.
 		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-force_flat_namespace" >&5
 printf %s "checking whether the linker accepts -Wl,-force_flat_namespace... " >&6; }
 if test ${ax_cv_check_ldflags___Wl__force_flat_namespace+y}
@@ -18786,6 +18787,7 @@ printf "%s\n" "$ax_cv_check_ldflags___Wl__force_flat_namespace" >&6; }
 if test x"$ax_cv_check_ldflags___Wl__force_flat_namespace" = xyes
 then :
 
+
 if test ${SUDO_LDFLAGS+y}
 then :
 
@@ -18819,8 +18821,87 @@ else case e in #(
 esac
 fi
 
+
+else case e in #(
+  e)
+		    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -Wl,-flat_namespace" >&5
+printf %s "checking whether the linker accepts -Wl,-flat_namespace... " >&6; }
+if test ${ax_cv_check_ldflags___Wl__flat_namespace+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -Wl,-flat_namespace"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ax_cv_check_ldflags___Wl__flat_namespace=yes
+else case e in #(
+  e) ax_cv_check_ldflags___Wl__flat_namespace=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__flat_namespace" >&5
+printf "%s\n" "$ax_cv_check_ldflags___Wl__flat_namespace" >&6; }
+if test x"$ax_cv_check_ldflags___Wl__flat_namespace" = xyes
+then :
+
+
+if test ${SUDO_LDFLAGS+y}
+then :
+
+  case " $SUDO_LDFLAGS " in #(
+  *" -Wl,-flat_namespace "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDO_LDFLAGS already contains -Wl,-flat_namespace"; } >&5
+  (: SUDO_LDFLAGS already contains -Wl,-flat_namespace) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append SUDO_LDFLAGS " -Wl,-flat_namespace"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDO_LDFLAGS=\"\$SUDO_LDFLAGS\""; } >&5
+  (: SUDO_LDFLAGS="$SUDO_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  SUDO_LDFLAGS=-Wl,-flat_namespace
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : SUDO_LDFLAGS=\"\$SUDO_LDFLAGS\""; } >&5
+  (: SUDO_LDFLAGS="$SUDO_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
+
 else case e in #(
   e) : ;;
+esac
+fi
+
+		 ;;
 esac
 fi
 

@@ -2234,9 +2234,16 @@ case "$host" in
 		# We cannot directly access environ from a shared object
 		AC_CHECK_HEADERS([crt_externs.h], [AC_CHECK_FUNCS([_NSGetEnviron])])
 
-		# We need to force a flat namespace to make libc
-		# symbol hooking work like it does on ELF.
-		AX_CHECK_LINK_FLAG([-Wl,-force_flat_namespace], [AX_APPEND_FLAG([-Wl,-force_flat_namespace], [SUDO_LDFLAGS])])
+		# We need to force a flat namespace on macOS to make libc
+		# symbol hooking work like it does on ELF.  Newer versions of
+		# macOS treat -force_flat_namespace as -flat_namespace.
+		AX_CHECK_LINK_FLAG([-Wl,-force_flat_namespace], [
+		    AX_APPEND_FLAG([-Wl,-force_flat_namespace], [SUDO_LDFLAGS])
+		], [
+		    AX_CHECK_LINK_FLAG([-Wl,-flat_namespace], [
+			AX_APPEND_FLAG([-Wl,-flat_namespace], [SUDO_LDFLAGS])
+		    ])
+		])
 
 		# Examples go in share/examples/sudo
 		AS_IF([test X"$with_exampledir" = X""], [
