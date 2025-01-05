@@ -130,10 +130,12 @@ dump_defaults(void)
 		    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    break;
 		case T_TIMESPEC: {
-		    /* display timespec in minutes as a double */
-		    double d = (double)cur->sd_un.tspec.tv_sec +
-			((double)cur->sd_un.tspec.tv_nsec / 1000000000.0);
-		    sudo_printf(SUDO_CONV_INFO_MSG, desc, d / 60.0);
+		    /* display timespec in minutes and 10ths of a minute */
+		    const int min = cur->sd_un.tspec.tv_sec / 60;
+		    int decimin =
+			(((cur->sd_un.tspec.tv_sec % 60) * 10) + 30) / 60;
+		    decimin += cur->sd_un.tspec.tv_nsec / 100000000;
+		    sudo_printf(SUDO_CONV_INFO_MSG, desc, min, decimin);
 		    sudo_printf(SUDO_CONV_INFO_MSG, "\n");
 		    break;
 		}
