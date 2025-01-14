@@ -47,7 +47,7 @@ digest_matches(int fd, const char *path,
     unsigned char *file_digest = NULL;
     unsigned char *sudoers_digest = NULL;
     struct command_digest *digest;
-    size_t digest_len = (size_t)-1;
+    size_t digest_len;
     int matched = DENY;
     int fd2 = -1;
     debug_decl(digest_matches, SUDOERS_DEBUG_MATCH);
