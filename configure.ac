@@ -3,7 +3,7 @@ dnl Use the top-level autogen.sh script to generate configure and config.h.in
 dnl
 dnl SPDX-License-Identifier: ISC
 dnl
-dnl Copyright (c) 1994-1996, 1998-2024 Todd C. Miller <Todd.Miller@sudo.ws>
+dnl Copyright (c) 1994-1996, 1998-2025 Todd C. Miller <Todd.Miller@sudo.ws>
 dnl
 dnl Permission to use, copy, modify, and distribute this software for any
 dnl purpose with or without fee is hereby granted, provided that the above
@@ -2519,6 +2519,7 @@ SUDO_SOCK_SIN_LEN
 AC_CHECK_SIZEOF([long])
 AC_CHECK_SIZEOF([long long])
 AC_CHECK_SIZEOF([id_t])
+AC_CHECK_SIZEOF([off_t])
 AC_CHECK_SIZEOF([time_t])
 AC_CHECK_SIZEOF([uid_t])
 # sudo current assumes uid_t can be cast to unsigned int without problems

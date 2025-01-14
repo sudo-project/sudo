@@ -1302,6 +1302,9 @@
 /* The size of 'long long', as computed by sizeof. */
 #undef SIZEOF_LONG_LONG
 
+/* The size of 'off_t', as computed by sizeof. */
+#undef SIZEOF_OFF_T
+
 /* The size of 'time_t', as computed by sizeof. */
 #undef SIZEOF_TIME_T
 

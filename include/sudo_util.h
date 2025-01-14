@@ -33,6 +33,14 @@
 #endif
 #define ROOT_GID	0
 
+#ifndef OFF_T_MAX
+# if SIZEOF_OFF_T == 8
+#  define OFF_T_MAX	LLONG_MAX
+# else
+#  define OFF_T_MAX	INT_MAX
+# endif
+#endif
+
 #ifndef TIME_T_MIN
 # if SIZEOF_TIME_T == 8
 #  define TIME_T_MIN	LLONG_MIN
