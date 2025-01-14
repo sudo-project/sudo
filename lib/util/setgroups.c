@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2011-2012, 2014-2016 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2011-2012, 2014-2025 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -43,11 +43,12 @@ sudo_setgroups_v1(int ngids, const GETGROUPS_T *gids)
     if (ngids < 0)
 	debug_return_int(-1);
 
+    /* Linux uses size_t for ngids, BSD uses int. */
     ret = setgroups(ngids, (GETGROUPS_T *)gids);
     if (ret == -1 && errno == EINVAL) {
 	/* Too many groups, try again with fewer. */
 	maxgids = sysconf(_SC_NGROUPS_MAX);
-	if (maxgids == -1)
+	if (maxgids < 0)
 	    maxgids = NGROUPS_MAX;
 	if (ngids > maxgids)
 	    ret = setgroups((int)maxgids, (GETGROUPS_T *)gids);
