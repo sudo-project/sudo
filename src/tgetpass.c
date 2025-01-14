@@ -218,11 +218,11 @@ restart:
 
     if (ISSET(flags, TGP_BELL) && output != STDERR_FILENO) {
 	/* Ring the bell if requested and there is a tty. */
-	if (write(output, "\a", 1) == -1)
+	if (write(output, "\a", 1) != 1)
 	    goto restore;
     }
     if (prompt) {
-	if (write(output, prompt, strlen(prompt)) == -1)
+	if (write(output, prompt, strlen(prompt)) < 0)
 	    goto restore;
     }
 
@@ -233,7 +233,7 @@ restart:
     save_errno = errno;
 
     if (neednl || pass == NULL) {
-	if (write(output, "\n", 1) == -1)
+	if (write(output, "\n", 1) != 1)
 	    goto restore;
     }
     tgetpass_display_error(errval);
@@ -403,7 +403,7 @@ getln(int fd, char *buf, size_t bufsiz, bool feedback,
 		break;
 	    } else if (c == sudo_term_kill) {
 		while (cp > buf) {
-		    if (write(fd, "\b \b", 3) == -1)
+		    if (write(fd, "\b \b", 3) != 3)
 			break;
 		    cp--;
 		}
@@ -426,7 +426,7 @@ getln(int fd, char *buf, size_t bufsiz, bool feedback,
     if (feedback) {
 	/* erase stars */
 	while (cp > buf) {
-	    if (write(fd, "\b \b", 3) == -1)
+	    if (write(fd, "\b \b", 3) != 3)
 		break;
 	    --cp;
 	}

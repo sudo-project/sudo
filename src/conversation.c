@@ -113,8 +113,8 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		    }
 		    if (ttyfd != -1) {
 			/* Try writing to tty but fall back to fp on error. */
-			if ((len == 0 || write(ttyfd, msg->msg, len) != -1) &&
-				(crnl == NULL || write(ttyfd, crnl, 2) != -1)) {
+			if ((len == 0 || write(ttyfd, msg->msg, len) > 0) &&
+				(crnl == NULL || write(ttyfd, crnl, 2) > 0)) {
 			    written = true;
 			}
 			close(ttyfd);

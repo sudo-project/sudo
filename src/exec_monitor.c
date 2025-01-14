@@ -279,8 +279,7 @@ mon_errsock_cb(int fd, int what, void *v)
      * Note that the error socket is *blocking*.
      */
     nread = read(fd, &errval, sizeof(errval));
-    switch (nread) {
-    case -1:
+    if (nread < 0) {
 	if (errno != EAGAIN && errno != EINTR) {
 	    if (mc->cstat->val == CMD_INVALID) {
 		/* XXX - need a way to distinguish non-exec error. */
@@ -291,22 +290,22 @@ mon_errsock_cb(int fd, int what, void *v)
 		"%s: failed to read error socket", __func__);
 	    sudo_ev_loopbreak(mc->evbase);
 	}
-	break;
-    default:
-	if (nread == 0) {
-	    /* The error socket closes when the command is executed. */
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "EOF on error socket");
-	} else {
-	    /* Errno value when child is unable to execute command. */
-	    sudo_debug_printf(SUDO_DEBUG_INFO, "errno from child: %s",
-		strerror(errval));
-	    mc->cstat->type = CMD_ERRNO;
-	    mc->cstat->val = errval;
-	}
-	sudo_ev_del(mc->evbase, mc->errsock_event);
-	close(fd);
-	break;
+	debug_return;
     }
+
+    if (nread == 0) {
+	/* The error socket closes when the command is executed. */
+	sudo_debug_printf(SUDO_DEBUG_INFO, "EOF on error socket");
+    } else {
+	/* Errno value when child is unable to execute command. */
+	sudo_debug_printf(SUDO_DEBUG_INFO, "errno from child: %s",
+	    strerror(errval));
+	mc->cstat->type = CMD_ERRNO;
+	mc->cstat->val = errval;
+    }
+    sudo_ev_del(mc->evbase, mc->errsock_event);
+    close(fd);
+
     debug_return;
 }
 

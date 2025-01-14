@@ -1791,21 +1791,24 @@ server_msg_cb(int fd, int what, void *v)
     } else
 #endif /* HAVE_OPENSSL */
     {
-        nread = (size_t)read(fd, buf->data + buf->len, buf->size - buf->len);
+	const ssize_t n = read(fd, buf->data + buf->len, buf->size - buf->len);
+	if (n < 0) {
+	    if (errno == EAGAIN)
+		debug_return;
+	    sudo_warn("read");
+	    goto bad;
+	}
+	nread = (size_t)n;
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received %zd bytes from server",
 	__func__, nread);
-    switch (nread) {
-    case (size_t)-1:
-	if (errno == EAGAIN)
-	    debug_return;
-	sudo_warn("read");
-	goto bad;
-    case 0:
+    if (nread == 0) {
 	sudo_warnx("%s", U_("lost connection to log server"));
 	goto bad;
-    default:
-	break;
+    }
+    if (nread > SIZE_MAX - buf->len) {
+	sudo_warnx(U_("internal error, %s overflow"), __func__);
+	goto bad;
     }
     buf->len += nread;
 
@@ -1928,11 +1931,15 @@ client_msg_cb(int fd, int what, void *v)
     } else
 #endif /* HAVE_OPENSSL */
     {
-        nwritten = (size_t)write(fd, buf->data + buf->off, buf->len - buf->off);
+	const ssize_t n = write(fd, buf->data + buf->off, buf->len - buf->off);
+	if (n < 0) {
+	    sudo_warn("send");
+	    goto bad;
+	}
+	nwritten = (size_t)n;
     }
-
-    if (nwritten == (size_t)-1) {
-	sudo_warn("send");
+    if (nwritten > SIZE_MAX - buf->off) {
+	sudo_warnx(U_("internal error, %s overflow"), __func__);
 	goto bad;
     }
     buf->off += nwritten;

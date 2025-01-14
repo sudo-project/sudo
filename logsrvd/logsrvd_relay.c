@@ -798,23 +798,26 @@ relay_server_msg_cb(int fd, int what, void *v)
     } else
 #endif
     {
+	ssize_t n;
+
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "%s: ServerMessage from relay %s (%s)", __func__,
 	    relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
-	nread = (size_t)read(fd, buf->data + buf->len, buf->size - buf->len);
+	n = read(fd, buf->data + buf->len, buf->size - buf->len);
+	if (n < 0) {
+	    if (errno == EAGAIN || errno == EINTR)
+		debug_return;
+	    sudo_warn("%s: read", relay_closure->relay_name.ipaddr);
+	    closure->errstr = _("error reading from relay");
+	    goto send_error;
+	}
+	nread = (size_t)n;
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: received %zd bytes from relay %s (%s)", __func__, nread,
 	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
-    switch (nread) {
-    case (size_t)-1:
-	if (errno == EAGAIN || errno == EINTR)
-	    debug_return;
-	sudo_warn("%s: read", relay_closure->relay_name.ipaddr);
-	closure->errstr = _("unable to read from relay");
-	goto send_error;
-    case 0:
+    if (nread == 0) {
 	/* EOF from relay server, close the socket. */
 	shutdown(relay_closure->sock, SHUT_RDWR);
 	close(relay_closure->sock);
@@ -833,8 +836,11 @@ relay_server_msg_cb(int fd, int what, void *v)
 	if (closure->sock == -1)
 	    connection_close(closure);
 	debug_return;
-    default:
-	break;
+    }
+    if (nread > SIZE_MAX - buf->len) {
+	sudo_warnx(U_("internal error, %s overflow"), __func__);
+	closure->errstr = _("error reading from relay");
+	goto send_error;
     }
     buf->len += nread;
 
@@ -979,14 +985,20 @@ relay_client_msg_cb(int fd, int what, void *v)
     } else
 #endif
     {
-	nwritten = (size_t)write(fd, buf->data + buf->off, buf->len - buf->off);
-	if (nwritten == (size_t)-1) {
+	const ssize_t n = write(fd, buf->data + buf->off, buf->len - buf->off);
+	if (n < 0) {
 	    if (errno == EAGAIN || errno == EINTR)
 		debug_return;
 	    sudo_warn("%s: write", relay_closure->relay_name.ipaddr);
 	    closure->errstr = _("error writing to relay");
 	    goto send_error;
 	}
+	nwritten = (size_t)n;
+    }
+    if (nwritten > SIZE_MAX - buf->off) {
+	sudo_warnx(U_("internal error, %s overflow"), __func__);
+	closure->errstr = _("error writing to relay");
+	goto send_error;
     }
     buf->off += nwritten;
 

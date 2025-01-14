@@ -80,7 +80,7 @@ send_req(int sock, const void *buf, size_t len)
 
     do {
 	nwritten = send(sock, cp, len, 0);
-	if (nwritten == -1) {
+	if (nwritten < 0) {
 	    if (errno == EINTR)
 		continue;
 	    debug_return_bool(false);

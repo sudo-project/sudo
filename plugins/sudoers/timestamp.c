@@ -348,7 +348,7 @@ ts_write(const struct sudoers_context *ctx, int fd, const char *fname,
 	nwritten = pwrite(fd, entry, entry->size, offset);
     }
     if ((size_t)nwritten != entry->size) {
-	if (nwritten == -1) {
+	if (nwritten < 0) {
 	    log_warning(ctx, SLOG_SEND_MAIL,
 		N_("unable to write to %s"), fname);
 	} else {

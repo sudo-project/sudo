@@ -376,7 +376,7 @@ store_exit_info_json(int dfd, struct eventlog *evlog)
     iov[1].iov_len = sudo_json_get_len(&jsonc);
     iov[2].iov_base = (char *)"\n}\n";
     iov[2].iov_len = 3;
-    if (writev(fd, iov, 3) == -1) {
+    if (writev(fd, iov, 3) < 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to write %s/log.json", evlog->iolog_path);
 	/* Back up and try to restore to original state. */

@@ -969,13 +969,17 @@ server_msg_cb(int fd, int what, void *v)
     } else
 #endif
     {
-	nwritten = (size_t)write(fd, buf->data + buf->off, buf->len - buf->off);
+	const ssize_t n = write(fd, buf->data + buf->off, buf->len - buf->off);
+	if (n < 0) {
+	    if (errno == EAGAIN || errno == EINTR)
+		debug_return;
+	    sudo_warn("%s: write", closure->ipaddr);
+	    goto finished;
+	}
+	nwritten = (size_t)n;
     }
-
-    if (nwritten == (size_t)-1) {
-	if (errno == EAGAIN || errno == EINTR)
-	    debug_return;
-	sudo_warn("%s: write", closure->ipaddr);
+    if (nwritten > SIZE_MAX - buf->off) {
+	sudo_warnx(U_("internal error, %s overflow"), __func__);
 	goto finished;
     }
     buf->off += nwritten;
@@ -1082,25 +1086,28 @@ client_msg_cb(int fd, int what, void *v)
     } else
 #endif
     {
-        nread = (size_t)read(fd, buf->data + buf->len, buf->size - buf->len);
+	const ssize_t n = read(fd, buf->data + buf->len, buf->size - buf->len);
+	if (n < 0) {
+	    if (errno == EAGAIN || errno == EINTR)
+		debug_return;
+	    sudo_warn("%s: read", closure->ipaddr);
+	    goto close_connection;
+	}
+        nread = (size_t)n;
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received %zd bytes from client %s",
 	__func__, nread, closure->ipaddr);
-    switch (nread) {
-    case (size_t)-1:
-	if (errno == EAGAIN || errno == EINTR)
-	    debug_return;
-	sudo_warn("%s: read", closure->ipaddr);
-	goto close_connection;
-    case 0:
+    if (nread == 0) {
         if (closure->state != FINISHED) {
             sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
                 "unexpected EOF");
         }
         goto close_connection;
-    default:
-	break;
+    }
+    if (nread > SIZE_MAX - buf->len) {
+	sudo_warnx(U_("internal error, %s overflow"), __func__);
+        goto close_connection;
     }
     buf->len += nread;
 

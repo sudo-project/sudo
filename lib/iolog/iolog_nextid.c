@@ -107,7 +107,7 @@ iolog_nextid(const char *iolog_dir, char sessid[7])
     /* Read current seq number (base 36). */
     nread = read(fd, buf, sizeof(buf) - 1);
     if (nread != 0) {
-	if (nread == -1) {
+	if (nread < 0) {
 	    goto done;
 	}
 	if (buf[nread - 1] == '\n')

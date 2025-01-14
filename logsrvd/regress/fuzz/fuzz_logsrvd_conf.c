@@ -193,7 +193,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (fd == -1)
 	return 0;
     nwritten = write(fd, data, size);
-    if (nwritten == -1) {
+    if ((size_t)nwritten != size) {
 	close(fd);
 	return 0;
     }

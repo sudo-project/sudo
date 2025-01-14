@@ -248,7 +248,7 @@ get_process_ttyname(char *name, size_t namelen)
     if ((fd = open(path, O_RDONLY | O_NOFOLLOW)) != -1) {
 	cp = buf;
 	while ((nread = read(fd, cp, sizeof(buf) - (size_t)(cp - buf))) != 0) {
-	    if (nread == -1) {
+	    if (nread < 0) {
 		if (errno == EAGAIN || errno == EINTR)
 		    continue;
 		break;

@@ -147,7 +147,7 @@ main(int argc, char *argv[])
 
 	if ((nread = read(fd, &cur, sizeof(cur))) == 0)
 	    break;
-	if (nread == -1)
+	if (nread < 0)
 	    sudo_fatal(U_("unable to read %s"), fname);
 
 	valid = valid_entry(&cur, pos);

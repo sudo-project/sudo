@@ -104,7 +104,7 @@ main(int argc, char *argv[])
 	}
 	nread = read(fd, buf, filesize);
 	if ((size_t)nread != filesize) {
-	    if (nread == -1)
+	    if (nread < 0)
 		fprintf(stderr, "read %s: %s\n", arg, strerror(errno));
 	    else
 		fprintf(stderr, "read %s: short read\n", arg);

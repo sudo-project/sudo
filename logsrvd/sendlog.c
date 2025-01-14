@@ -1370,23 +1370,28 @@ server_msg_cb(int fd, int what, void *v)
     } else
 #endif
     {
+	ssize_t n;
+
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: reading ServerMessage", __func__);
-	nread = (size_t)read(fd, buf->data + buf->len, buf->size - buf->len);
+	n = read(fd, buf->data + buf->len, buf->size - buf->len);
+	if (n < 0) {
+	    if (errno == EAGAIN || errno == EINTR)
+		debug_return;
+	    sudo_warn("read");
+	    goto bad;
+	}
+	nread = (size_t)n;
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received %zd bytes from server",
 	__func__, nread);
-    switch (nread) {
-    case (size_t)-1:
-	if (errno == EAGAIN || errno == EINTR)
-	    debug_return;
-	sudo_warn("read");
-	goto bad;
-    case 0:
+    if (nread == 0) {
 	if (closure->state != FINISHED)
 	    sudo_warnx("%s", U_("premature EOF"));
 	goto bad;
-    default:
-	break;
+    }
+    if (nread > SIZE_MAX - buf->len) {
+	sudo_warnx(U_("internal error, %s overflow"), __func__);
+	goto bad;
     }
     buf->len += nread;
 
@@ -1496,12 +1501,17 @@ client_msg_cb(int fd, int what, void *v)
     } else
 #endif
     {
-	nwritten = (size_t)write(fd, buf->data + buf->off, buf->len - buf->off);
+	const ssize_t n = write(fd, buf->data + buf->off, buf->len - buf->off);
+	if (n < 0) {
+	    if (errno == EAGAIN || errno == EINTR)
+		debug_return;
+	    sudo_warn("write");
+	    goto bad;
+	}
+	nwritten = (size_t)n;
     }
-    if (nwritten == (size_t)-1) {
-	if (errno == EAGAIN || errno == EINTR)
-	    debug_return;
-	sudo_warn("write");
+    if (nwritten > SIZE_MAX - buf->off) {
+	sudo_warnx(U_("internal error, %s overflow"), __func__);
 	goto bad;
     }
     buf->off += nwritten;

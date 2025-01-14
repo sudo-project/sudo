@@ -43,38 +43,42 @@ sudo_extend_file(int fd, const char *name, off_t new_size)
 {
     off_t old_size, size;
     ssize_t nwritten;
+    int serrno;
     char zeroes[BUFSIZ] = { '\0' };
     debug_decl(sudo_extend_file, SUDO_DEBUG_UTIL);
 
-    if ((old_size = lseek(fd, 0, SEEK_END)) == -1) {
+    if ((old_size = lseek(fd, 0, SEEK_END)) < 0) {
 	sudo_warn("lseek");
 	debug_return_int(-1);
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: extending %s from %lld to %lld",
 	__func__, name, (long long)old_size, (long long)new_size);
 
-    for (size = old_size; size < new_size; size += nwritten) {
+    for (size = old_size; size < new_size; ) {
 	off_t len = new_size - size;
 	if (len > ssizeof(zeroes))
 	    len = ssizeof(zeroes);
 	nwritten = write(fd, zeroes, (size_t)len);
-	if (nwritten == -1) {
-	    int serrno = errno;
-	    if (ftruncate(fd, old_size) == -1) {
-		sudo_debug_printf(
-		    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-		    "unable to truncate %s to %lld", name, (long long)old_size);
-	    }
-	    errno = serrno;
-	    debug_return_int(-1);
+	if (nwritten < 0 || nwritten > OFF_T_MAX - size) {
+	    goto fail;
 	}
+	size += nwritten;
     }
-    if (lseek(fd, 0, SEEK_SET) == -1) {
+    if (lseek(fd, 0, SEEK_SET) < 0) {
 	sudo_warn("lseek");
 	debug_return_int(-1);
     }
 
     debug_return_int(0);
+fail:
+    serrno = errno;
+    if (ftruncate(fd, old_size) != 0) {
+	sudo_debug_printf(
+	    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+	    "unable to truncate %s to %lld", name, (long long)old_size);
+    }
+    errno = serrno;
+    debug_return_int(-1);
 }
 
 /*
@@ -107,24 +111,27 @@ sudo_copy_file(const char *src, int src_fd, off_t src_len, const char *dst,
     }
 
     /* Overwrite the old file with the new contents. */
-    while ((nread = read(src_fd, buf, sizeof(buf))) > 0) {
+    for (;;) {
 	ssize_t off = 0;
-	do {
+	nread = read(src_fd, buf, sizeof(buf));
+	if (nread <= 0) {
+	    if (nread == 0)
+		break;
+	    sudo_warn(U_("unable to read from %s"), src);
+	    debug_return_int(-1);
+	}
+	while (nread > off) {
 	    nwritten = write(dst_fd, buf + off, (size_t)(nread - off));
-	    if (nwritten == -1)
+	    if (nwritten < 0 || nwritten > SSIZE_MAX - off)
 		goto write_error;
 	    off += nwritten;
-	} while (nread > off);
-    }
-    if (nread == -1) {
-	sudo_warn(U_("unable to read from %s"), src);
-	debug_return_int(-1);
+	}
     }
 
     /* Did the file shrink? */
     if (src_len < dst_len) {
 	/* We don't open with O_TRUNC so must truncate manually. */
-	if (ftruncate(dst_fd, src_len) == -1) {
+	if (ftruncate(dst_fd, src_len) != 0) {
 	    sudo_debug_printf(
 		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 		"unable to truncate %s to %lld", dst, (long long)src_len);
