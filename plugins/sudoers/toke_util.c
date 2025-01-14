@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2016
+ * Copyright (c) 1996, 1998-2005, 2007-2023, 2025
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -47,24 +47,25 @@ static size_t arg_size = 0;
 static void
 copy_string(char *dst, const char *src, size_t len)
 {
-    int h;
+    const char *end = src + len;
+    debug_decl(copy_string, SUDOERS_DEBUG_PARSER);
 
-    while (len--) {
-	if (*src == '\\' && len) {
-	    if (src[1] == 'x' && len >= 3 && (h = sudo_hexchar(src + 2)) != -1) {
-		*dst++ = (char)h;
-		src += 4;
-		len -= 3;
+    while (src < end) {
+	int ch = *src++;
+	if (ch == '\\' && src < end) {
+	    if (*src == 'x' && src + 3 <= end && (ch = sudo_hexchar(src + 1)) != -1) {
+		/* Hex character, skip remaining part of src. */
+		src += 3;
 	    } else {
-		src++;
-		len--;
-		*dst++ = *src++;
+		/* Escaped regular character. */
+		ch = *src++;
 	    }
-	} else {
-	    *dst++ = *src++;
 	}
+	*dst++ = (char)ch;
     }
     *dst = '\0';
+
+    debug_return;
 }
 
 bool
