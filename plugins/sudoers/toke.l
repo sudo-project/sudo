@@ -2,7 +2,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2024
+ * Copyright (c) 1996, 1998-2005, 2007-2025
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -1203,14 +1203,15 @@ expand_include(const char *src, const char *host)
      * If the current sudoers file was opened via a colon-separated path,
      * use the same path when opening src.
      */
-    dst_size = 0;
+    dst_size = 1;
     for (cp = sudo_strsplit(path, path_end, ":", &ep); cp != NULL;
 	    cp = sudo_strsplit(NULL, path_end, ":", &ep)) {
 	char *dirend = memrchr(cp, '/', (size_t)(ep - cp));
 	if (dirend != NULL) {
+	    /* Include space for trailing '/' separator. */
 	    dst_size += (size_t)(dirend - cp) + 1;
 	}
-	/* Includes space for ':' separator and NUL terminator. */
+	/* Includes space for expanded host and ':' separator. */
 	dst_size += src_len + (nhost * strlen(host)) - (nhost * 2) + 1;
     }
 
