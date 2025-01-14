@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2013-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2025 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -185,6 +185,8 @@ sudo_dso_public char *sudo_basename_v1(const char *filename);
 /* gethostname.c */
 sudo_dso_public char *sudo_gethostname_v1(void);
 #define sudo_gethostname() sudo_gethostname_v1()
+sudo_dso_public size_t sudo_host_name_max_v1(void);
+#define sudo_host_name_max() sudo_host_name_max_v1()
 
 /* gettime.c */
 sudo_dso_public int sudo_gettime_awake_v1(struct timespec *ts);
@@ -224,6 +226,10 @@ sudo_dso_public bool sudo_str2logfac_v1(const char *str, int *logfac);
 #define sudo_str2logfac(_a, _b) sudo_str2logfac_v1((_a), (_b))
 sudo_dso_public const char *sudo_logfac2str_v1(int num);
 #define sudo_logfac2str(_a) sudo_logfac2str_v1((_a))
+
+/* login_max.c */
+sudo_dso_public size_t sudo_login_name_max_v1(void);
+#define sudo_login_name_max() sudo_login_name_max_v1()
 
 /* logpri.c */
 sudo_dso_public bool sudo_str2logpri_v1(const char *str, int *logpri);

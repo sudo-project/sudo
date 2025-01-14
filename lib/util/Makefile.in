@@ -1,7 +1,7 @@
 #
 # SPDX-License-Identifier: ISC
 #
-# Copyright (c) 2011-2024 Todd C. Miller <Todd.Miller@sudo.ws>
+# Copyright (c) 2011-2025 Todd C. Miller <Todd.Miller@sudo.ws>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -147,11 +147,11 @@ SHELL = @SHELL@
 
 LTOBJS = basename.lo @DIGEST@ event.lo fatal.lo key_val.lo gethostname.lo \
 	 gettime.lo getgrouplist.lo gidlist.lo hexchar.lo json.lo lbuf.lo \
-	 locking.lo logfac.lo logpri.lo mkdir_parents.lo mmap_alloc.lo \
-	 multiarch.lo parseln.lo progname.lo rcstr.lo regex.lo roundup.lo \
-	 secure_path.lo setgroups.lo strsplit.lo strtobool.lo strtoid.lo \
-	 strtomode.lo strtonum.lo sudo_conf.lo sudo_debug.lo sudo_dso.lo \
-	 term.lo ttyname_dev.lo ttysize.lo uuid.lo \
+	 locking.lo logfac.lo login_max.lo logpri.lo mkdir_parents.lo \
+	 mmap_alloc.lo multiarch.lo parseln.lo progname.lo rcstr.lo regex.lo \
+	 roundup.lo secure_path.lo setgroups.lo strsplit.lo strtobool.lo \
+	 strtoid.lo strtomode.lo strtonum.lo sudo_conf.lo sudo_debug.lo \
+	 sudo_dso.lo term.lo ttyname_dev.lo ttysize.lo uuid.lo \
 	 @COMMON_OBJS@ @LTLIBOBJS@
 
 IOBJS = $(LTOBJS:.lo=.i)
@@ -1102,6 +1102,16 @@ logfac.i: $(srcdir)/logfac.c $(incdir)/compat/stdbool.h \
 	$(CPP) $(CPPFLAGS) $(srcdir)/logfac.c > $@
 logfac.plog: logfac.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/logfac.c --i-file logfac.i --output-file $@
+login_max.lo: $(srcdir)/login_max.c $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
+              $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/login_max.c
+login_max.i: $(srcdir)/login_max.c $(incdir)/compat/stdbool.h \
+              $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
+              $(top_builddir)/config.h
+	$(CPP) $(CPPFLAGS) $(srcdir)/login_max.c > $@
+login_max.plog: login_max.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/login_max.c --i-file login_max.i --output-file $@
 logpri.lo: $(srcdir)/logpri.c $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
            $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(top_builddir)/config.h

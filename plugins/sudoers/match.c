@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2023
+ * Copyright (c) 1996, 1998-2005, 2007-2023, 2025
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -703,14 +703,8 @@ sudo_getdomainname(void)
     debug_decl(sudo_getdomainname, SUDOERS_DEBUG_MATCH);
 
     if (!initialized) {
-	size_t host_name_max;
+	const size_t host_name_max = sudo_host_name_max();
 	int rc;
-
-# ifdef _SC_HOST_NAME_MAX
-	host_name_max = (size_t)sysconf(_SC_HOST_NAME_MAX);
-	if (host_name_max == (size_t)-1)
-# endif
-	    host_name_max = 255;    /* POSIX and historic BSD */
 
 	domain = malloc(host_name_max + 1);
 	if (domain != NULL) {

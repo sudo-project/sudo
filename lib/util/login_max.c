@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2015, 2025 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2025 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -25,44 +25,24 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <limits.h>
 
 #include <sudo_compat.h>
 #include <sudo_util.h>
 
-/*
- * Return a malloc()ed copy of the system hostname, or NULL if 
- * malloc() or gethostname() fails.
- */
-char *
-sudo_gethostname_v1(void)
-{
-    const size_t host_name_max = sudo_host_name_max();
-    char *hname = malloc(host_name_max + 1);
-    if (hname != NULL) {
-	if (gethostname(hname, host_name_max + 1) == 0 && *hname != '\0') {
-	    /* Old gethostname() may not NUL-terminate if there is no room. */
-	    hname[host_name_max] = '\0';
-	} else {
-	    free(hname);
-	    hname = NULL;
-	}
-    }
-    return hname;
-}
-
 size_t
-sudo_host_name_max_v1(void)
+sudo_login_name_max_v1(void)
 {
     static size_t maxval;
 
     if (maxval == 0) {
 	long lval;
 
-#ifdef _SC_HOST_NAME_MAX
-	lval = sysconf(_SC_HOST_NAME_MAX);
-	if (lval <= 0)
+#ifdef _SC_LOGIN_NAME_MAX
+	lval = sysconf(_SC_LOGIN_NAME_MAX);
+	if (lval < 0)
 #endif
-	    lval = 255;	/* POSIX and historic BSD */
+	    lval = LOGIN_NAME_MAX;
 	maxval = (size_t)lval;
     }
 
