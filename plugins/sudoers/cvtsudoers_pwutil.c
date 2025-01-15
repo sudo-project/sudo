@@ -45,14 +45,6 @@
 #include <cvtsudoers.h>
 #include <pwutil.h>
 
-#ifndef LOGIN_NAME_MAX
-# ifdef _POSIX_LOGIN_NAME_MAX
-#  define LOGIN_NAME_MAX _POSIX_LOGIN_NAME_MAX
-# else
-#  define LOGIN_NAME_MAX 9
-# endif
-#endif /* LOGIN_NAME_MAX */
-
 #define FIELD_SIZE(src, name, size)			\
 do {							\
 	if ((src)->name) {				\
