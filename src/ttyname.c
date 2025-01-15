@@ -301,7 +301,7 @@ get_process_ttyname(char *name, size_t namelen)
 			    }
 			    break;
 			}
-			if (field == 3) {
+			if (field == 4) {
 			    ppid =
 				(int)sudo_strtonum(cp, INT_MIN, INT_MAX, NULL);
 			}
