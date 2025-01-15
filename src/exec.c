@@ -25,6 +25,10 @@
 
 #include <sys/resource.h>
 #include <sys/stat.h>
+#ifdef __linux__
+#include <sys/sysmacros.h>
+#include <linux/major.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -385,6 +389,10 @@ sudo_needs_pty(const struct command_details *details)
 bool
 fd_matches_tty(int fd, struct stat *tty_sb, struct stat *fd_sb)
 {
+    int consoles_fd;
+    ssize_t nread;
+    char *cp, buf[1024], console_path[PATH_MAX];
+
     debug_decl(fd_is_user_tty, SUDO_DEBUG_EXEC);
 
     if (fstat(fd, fd_sb) == -1) {
@@ -392,6 +400,44 @@ fd_matches_tty(int fd, struct stat *tty_sb, struct stat *fd_sb)
 	memset(fd_sb, 0, sizeof(*fd_sb));
 	debug_return_bool(false);
     }
+#ifdef __linux__
+    if (fd_sb->st_rdev == makedev(TTYAUX_MAJOR, 1)) {
+        /* Since fd is /dev/console, the actual device is the active
+           console, i.e., the last name of /sys/class/tty/console/active. */
+        if ((consoles_fd = open("/sys/class/tty/console/active",
+                                O_RDONLY | O_NOFOLLOW)) != -1) {
+            cp = buf;
+            while ((nread = read(consoles_fd, cp,
+                                 sizeof buf - (size_t)(cp - buf))) != 0) {
+                if (nread == -1) {
+                    if (errno == EAGAIN || errno == EINTR)
+                        continue;
+                    break;
+                }
+                cp += nread;
+                if (cp >= buf + sizeof buf)
+                    break;
+            }
+
+            if (nread == 0 && cp > buf
+                && memchr(buf, '\0', (size_t)(cp - buf)) == NULL) {
+                if (*(cp - 1) == '\n')
+                    --cp;
+                *cp = '\0';
+                cp = strrchr(buf, ' ');
+                if (cp == NULL)
+                    cp = buf;
+                else
+                    ++cp;
+                snprintf(console_path, sizeof console_path, "/dev/%s", cp);
+                if (stat(console_path, fd_sb) == -1) {
+                    memset(fd_sb, 0, sizeof *fd_sb);
+                    debug_return_bool(false);
+                }
+            }
+        }
+    }
+#endif
     if (!S_ISCHR(fd_sb->st_mode))
 	debug_return_bool(false);
 
