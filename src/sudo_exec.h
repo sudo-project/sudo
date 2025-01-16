@@ -179,7 +179,7 @@ void exec_cmnd(struct command_details *details, sigset_t *mask, int intercept_fd
 void terminate_command(pid_t pid, bool use_pgrp);
 bool sudo_terminated(struct command_status *cstat);
 void free_exec_closure(struct exec_closure *ec);
-bool fd_matches_tty(int fd, struct stat *tty_sb, struct stat *fd_sb);
+bool fd_matches_pgrp(int fd, pid_t pgrp, struct stat *sb);
 
 /* exec_common.c */
 int sudo_execve(int fd, const char *path, char *const argv[], char *envp[], int intercept_fd, unsigned int flags);

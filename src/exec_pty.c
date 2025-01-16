@@ -1095,7 +1095,7 @@ exec_pty(struct command_details *details,
 {
     int io_pipe[3][2] = { { -1, -1 }, { -1, -1 }, { -1, -1 } };
     bool interpose[3] = { false, false, false };
-    struct stat sb, tty_sbuf, *tty_sb = NULL;
+    struct stat sb;
     int sv[2], intercept_sv[2] = { -1, -1 };
     struct exec_closure *ec = &pty_ec;
     struct plugin_container *plugin;
@@ -1203,10 +1203,7 @@ exec_pty(struct command_details *details,
      * enabled, use a pipe to interpose ourselves instead of using the
      * pty fd.  We always use a pipe for stdin when in background mode.
      */
-    if (user_details->tty != NULL && stat(user_details->tty, &tty_sbuf) != -1)
-	tty_sb = &tty_sbuf;
-
-    if (!fd_matches_tty(STDIN_FILENO, tty_sb, &sb)) {
+    if (!fd_matches_pgrp(STDIN_FILENO, ppgrp, &sb)) {
 	if (!interpose[STDIN_FILENO]) {
 	    /* Not logging stdin, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -1253,7 +1250,7 @@ exec_pty(struct command_details *details,
 	    close(io_pipe[STDIN_FILENO][1]);
 	    io_pipe[STDIN_FILENO][1] = -1;
     }
-    if (!fd_matches_tty(STDOUT_FILENO, tty_sb, &sb)) {
+    if (!fd_matches_pgrp(STDOUT_FILENO, ppgrp, &sb)) {
 	if (!interpose[STDOUT_FILENO]) {
 	    /* Not logging stdout, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -1277,7 +1274,7 @@ exec_pty(struct command_details *details,
 	    io_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
 	}
     }
-    if (!fd_matches_tty(STDERR_FILENO, tty_sb, &sb)) {
+    if (!fd_matches_pgrp(STDERR_FILENO, ppgrp, &sb)) {
 	if (!interpose[STDERR_FILENO]) {
 	    /* Not logging stderr, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,

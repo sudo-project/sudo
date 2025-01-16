@@ -470,9 +470,10 @@ static void
 interpose_pipes(struct exec_closure *ec, const char *tty, int io_pipe[3][2])
 {
     bool interpose[3] = { false, false, false };
-    struct stat sb, tty_sbuf, *tty_sb = NULL;
     struct plugin_container *plugin;
+    const pid_t pgrp = getpgrp();
     bool want_winch = false;
+    struct stat sb;
     debug_decl(interpose_pipes, SUDO_DEBUG_EXEC);
 
     /*
@@ -496,11 +497,8 @@ interpose_pipes(struct exec_closure *ec, const char *tty, int io_pipe[3][2])
      * If stdin, stdout or stderr is not the user's tty and logging is
      * enabled, use a pipe to interpose ourselves.
      */
-    if (tty != NULL && stat(tty, &tty_sbuf) != -1)
-	tty_sb = &tty_sbuf;
-
     if (interpose[STDIN_FILENO]) {
-	if (!fd_matches_tty(STDIN_FILENO, tty_sb, &sb)) {
+	if (!fd_matches_pgrp(STDIN_FILENO, pgrp, &sb)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdin not user's tty, creating a pipe");
 	    if (pipe2(io_pipe[STDIN_FILENO], O_CLOEXEC) != 0)
@@ -510,7 +508,7 @@ interpose_pipes(struct exec_closure *ec, const char *tty, int io_pipe[3][2])
 	}
     }
     if (interpose[STDOUT_FILENO]) {
-	if (!fd_matches_tty(STDOUT_FILENO, tty_sb, &sb)) {
+	if (!fd_matches_pgrp(STDOUT_FILENO, pgrp, &sb)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdout not user's tty, creating a pipe");
 	    if (pipe2(io_pipe[STDOUT_FILENO], O_CLOEXEC) != 0)
@@ -520,7 +518,7 @@ interpose_pipes(struct exec_closure *ec, const char *tty, int io_pipe[3][2])
 	}
     }
     if (interpose[STDERR_FILENO]) {
-	if (!fd_matches_tty(STDERR_FILENO, tty_sb, &sb)) {
+	if (!fd_matches_pgrp(STDERR_FILENO, pgrp, &sb)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stderr not user's tty, creating a pipe");
 	    if (pipe2(io_pipe[STDERR_FILENO], O_CLOEXEC) != 0)
