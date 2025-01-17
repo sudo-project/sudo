@@ -1086,7 +1086,7 @@ fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
  * Execute a command in a pty, potentially with I/O logging, and
  * wait for it to finish.
  * This is a little bit tricky due to how POSIX job control works and
- * we fact that we have two different controlling terminals to deal with.
+ * the fact that we have two different controlling terminals to deal with.
  */
 bool
 exec_pty(struct command_details *details,
