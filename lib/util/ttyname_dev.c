@@ -272,7 +272,7 @@ sudo_ttyname_dev_v1(dev_t rdev, char *buf, size_t buflen)
 	    continue;
 
 	fdpath[sizeof("/proc/self/fd/N") - 2] = '0' + fd;
-	len = readlink(fdpath, buf, buflen);
+	len = (size_t)readlink(fdpath, buf, buflen);
 	if (len != (size_t)-1) {
 	    if (len == buflen) {
 		errno = ERANGE;	/* buf too small */
