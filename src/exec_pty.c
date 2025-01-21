@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2024 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2025 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -64,44 +64,6 @@ static void schedule_signal(struct exec_closure *ec, int signo);
 static void send_command_status(struct exec_closure *ec, int type, int val);
 
 /*
- * Allocate a pty if /dev/tty is a tty.
- * Fills in io_fds[SFD_USERTTY], io_fds[SFD_LEADER] and io_fds[SFD_FOLLOWER].
- * Returns the dynamically allocated pty name on success, NULL on failure.
- */
-static char *
-pty_setup(struct command_details *details)
-{
-    char *ptyname = NULL;
-    debug_decl(pty_setup, SUDO_DEBUG_EXEC);
-
-    io_fds[SFD_USERTTY] = open(_PATH_TTY, O_RDWR);
-    if (io_fds[SFD_USERTTY] == -1) {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: no %s, not allocating a pty",
-	    __func__, _PATH_TTY);
-	debug_return_ptr(NULL);
-    }
-
-    ptyname = get_pty(&io_fds[SFD_LEADER], &io_fds[SFD_FOLLOWER],
-	details->cred.euid);
-    if (ptyname == NULL)
-	sudo_fatal("%s", U_("unable to allocate pty"));
-
-    /* Add entry to utmp/utmpx? */
-    if (ISSET(details->flags, CD_SET_UTMP))
-	utmp_login(details->tty, ptyname, io_fds[SFD_FOLLOWER], details->utmp_user);
-
-    /* Update tty name in command details (used by monitor, SELinux, AIX). */
-    details->tty = ptyname;
-
-    sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: %s fd %d, pty leader fd %d, pty follower fd %d",
-	__func__, _PATH_TTY, io_fds[SFD_USERTTY], io_fds[SFD_LEADER],
-	io_fds[SFD_FOLLOWER]);
-
-    debug_return_str(ptyname);
-}
-
-/*
  * Restore user's terminal settings and update utmp, as needed.
  */
 static void
@@ -134,6 +96,49 @@ static void
 pty_cleanup_hook(void)
 {
     pty_cleanup(&pty_ec, 0);
+}
+
+/*
+ * Allocate a pty if /dev/tty is a tty.
+ * Fills in io_fds[SFD_USERTTY], io_fds[SFD_LEADER] and io_fds[SFD_FOLLOWER].
+ * Returns the dynamically allocated pty name on success, NULL on failure.
+ */
+static bool
+pty_setup(struct exec_closure *ec)
+{
+    struct command_details *details = ec->details;
+    debug_decl(pty_setup, SUDO_DEBUG_EXEC);
+
+    io_fds[SFD_USERTTY] = open(_PATH_TTY, O_RDWR);
+    if (io_fds[SFD_USERTTY] == -1) {
+	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: no %s, not allocating a pty",
+	    __func__, _PATH_TTY);
+	debug_return_bool(false);
+    }
+
+    ec->ptyname = get_pty(&io_fds[SFD_LEADER], &io_fds[SFD_FOLLOWER],
+	details->cred.euid);
+    if (ec->ptyname == NULL)
+	sudo_fatal("%s", U_("unable to allocate pty"));
+
+    /* Add entry to utmp/utmpx? */
+    if (ISSET(details->flags, CD_SET_UTMP)) {
+	utmp_login(details->tty, ec->ptyname, io_fds[SFD_FOLLOWER],
+	    details->utmp_user);
+    }
+
+    /* Update tty name in command details (used by monitor, SELinux, AIX). */
+    details->tty = ec->ptyname;
+
+    /* Register cleanup function. */
+    sudo_fatal_callback_register(pty_cleanup_hook);
+
+    sudo_debug_printf(SUDO_DEBUG_INFO,
+	"%s: %s fd %d, pty leader fd %d, pty follower fd %d",
+	__func__, _PATH_TTY, io_fds[SFD_USERTTY], io_fds[SFD_LEADER],
+	io_fds[SFD_FOLLOWER]);
+
+    debug_return_bool(true);
 }
 
 /*
@@ -956,16 +961,14 @@ fwdchannel_cb(int sock, int what, void *v)
 }
 
 /*
- * Fill in the exec closure and setup initial exec events.
- * Allocates events for the signal pipe and backchannel.
- * Forwarded signals on the backchannel are enabled on demand.
+ * Fill in the non-event part of the exec closure.
  */
 static void
-fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
+init_exec_closure(struct exec_closure *ec, struct command_status *cstat,
     struct command_details *details, const struct user_details *user_details,
-    struct sudo_event_base *evbase, pid_t sudo_pid, pid_t ppgrp, int backchannel)
+    pid_t sudo_pid, pid_t ppgrp)
 {
-    debug_decl(fill_exec_closure, SUDO_DEBUG_EXEC);
+    debug_decl(init_exec_closure, SUDO_DEBUG_EXEC);
 
     /* Fill in the non-event part of the closure. */
     ec->sudo_pid = sudo_pid;
@@ -976,9 +979,18 @@ fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
     ec->rows = user_details->ts_rows;
     ec->cols = user_details->ts_cols;
 
-    /* Reset cstat for running the command. */
-    cstat->type = CMD_INVALID;
-    cstat->val = 0;
+    debug_return;
+}
+
+/*
+ * Allocate and set events for the signal pipe and backchannel.
+ * Forwarded signals on the backchannel are enabled on demand.
+ */
+static void
+init_exec_events(struct exec_closure *ec, struct sudo_event_base *evbase,
+    int backchannel)
+{
+    debug_decl(init_exec_events, SUDO_DEBUG_EXEC);
 
     /* Setup event base and events. */
     ec->evbase = evbase;
@@ -1099,22 +1111,21 @@ exec_pty(struct command_details *details,
     int sv[2], intercept_sv[2] = { -1, -1 };
     struct exec_closure *ec = &pty_ec;
     struct plugin_container *plugin;
+    const pid_t sudo_pid = getpid();
+    const pid_t ppgrp = getpgrp();
     int evloop_retries = -1;
     bool cmnd_foreground;
     sigset_t set, oset;
     struct sigaction sa;
-    pid_t ppgrp, sudo_pid;
     debug_decl(exec_pty, SUDO_DEBUG_EXEC);
 
     /*
-     * Allocate a pty if sudo is running in a terminal.
+     * Allocate a pty if sudo is running in a terminal.  The exec
+     * closure must be set for pty_setup() and pty_cleanup_hook().
      */
-    ec->ptyname = pty_setup(details);
-    if (ec->ptyname == NULL)
+    init_exec_closure(ec, cstat, details, user_details, sudo_pid, ppgrp);
+    if (!pty_setup(ec))
 	debug_return_bool(false);
-
-    /* Register cleanup function */
-    sudo_fatal_callback_register(pty_cleanup_hook);
 
     /*
      * We communicate with the monitor over a bi-directional pair of sockets.
@@ -1161,8 +1172,6 @@ exec_pty(struct command_details *details,
      * to and from pty.
      */
     init_ttyblock();
-    ppgrp = getpgrp();	/* parent's pgrp, so child can signal us */
-    sudo_pid = getpid();
 
     /* Determine whether any of std{in,out,err} should be logged. */
     TAILQ_FOREACH(plugin, &io_plugins, entries) {
@@ -1400,12 +1409,8 @@ exec_pty(struct command_details *details,
     if (ISSET(details->flags, CD_SET_TIMEOUT))
 	alarm(details->timeout);
 
-    /*
-     * Fill in exec closure, allocate event base, signal events and
-     * the backchannel event.
-     */
-    fill_exec_closure(ec, cstat, details, user_details, evbase,
-	sudo_pid, ppgrp, sv[0]);
+    /* Allocate and set signal events and the backchannel event.  */
+    init_exec_events(ec, evbase, sv[0]);
 
     /* Create event and closure for intercept mode. */
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
@@ -1413,6 +1418,10 @@ exec_pty(struct command_details *details,
 	if (ec->intercept == NULL)
 	    terminate_command(ec->cmnd_pid, true);
     }
+
+    /* Reset cstat for running the command. */
+    cstat->type = CMD_INVALID;
+    cstat->val = 0;
 
     /* Restore signal mask now that signal handlers are setup. */
     sigprocmask(SIG_SETMASK, &oset, NULL);
