@@ -275,6 +275,7 @@ lib/util/lbuf.c
 lib/util/localtime_r.c
 lib/util/locking.c
 lib/util/logfac.c
+lib/util/login_max.c
 lib/util/logpri.c
 lib/util/memrchr.c
 lib/util/mkdir_parents.c
