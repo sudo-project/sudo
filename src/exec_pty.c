@@ -971,6 +971,7 @@ init_exec_closure(struct exec_closure *ec, struct command_status *cstat,
     debug_decl(init_exec_closure, SUDO_DEBUG_EXEC);
 
     /* Fill in the non-event part of the closure. */
+    memset(ec, 0, sizeof(*ec));
     ec->sudo_pid = sudo_pid;
     ec->ppgrp = ppgrp;
     ec->cmnd_pid = -1;

@@ -201,25 +201,35 @@ signal_cb_nopty(int signo, int what, void *v)
     debug_return;
 }
 
-
 /*
- * Fill in the exec closure and setup initial exec events.
- * Allocates events for the signal pipe and error pipe.
+ * Fill in the non-event part of the exec closure.
  */
 static void
-fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
-    struct command_details *details, const struct user_details *user_details,
-    struct sudo_event_base *evbase, int errfd)
+init_exec_closure(struct exec_closure *ec, struct command_status *cstat,
+    struct command_details *details, const struct user_details *user_details)
 {
-    debug_decl(fill_exec_closure, SUDO_DEBUG_EXEC);
+    debug_decl(init_exec_closure, SUDO_DEBUG_EXEC);
 
     /* Fill in the non-event part of the closure. */
+    memset(ec, 0, sizeof(*ec));
     ec->sudo_pid = getpid();
     ec->ppgrp = getpgrp();
     ec->cstat = cstat;
     ec->details = details;
     ec->rows = user_details->ts_rows;
     ec->cols = user_details->ts_cols;
+
+    debug_return;
+}
+
+/*
+ * Allocate and set events for the signal pipe and error pipe.
+ */
+static void
+init_exec_events(struct exec_closure *ec, struct sudo_event_base *evbase,
+    int errfd)
+{
+    debug_decl(init_exec_events, SUDO_DEBUG_EXEC);
 
     /* Setup event base and events. */
     ec->evbase = evbase;
@@ -543,7 +553,7 @@ exec_nopty(struct command_details *details,
 {
     int io_pipe[3][2] = { { -1, -1 }, { -1, -1 }, { -1, -1 } };
     int errpipe[2], intercept_sv[2] = { -1, -1 };
-    struct exec_closure ec = { 0 };
+    struct exec_closure ec;
     sigset_t set, oset;
     debug_decl(exec_nopty, SUDO_DEBUG_EXEC);
 
@@ -553,6 +563,9 @@ exec_nopty(struct command_details *details,
      */
     if (policy_init_session(details) != true)
 	sudo_fatalx("%s", U_("policy plugin failed session initialization"));
+
+    /* Fill in exec closure. */
+    init_exec_closure(&ec, cstat, details, user_details);
 
     /*
      * We use a pipe to get errno if execve(2) fails in the child.
@@ -659,11 +672,8 @@ exec_nopty(struct command_details *details,
     if (ISSET(details->flags, CD_SET_TIMEOUT))
 	alarm(details->timeout);
 
-    /*
-     * Fill in exec closure, allocate event base, signal events and
-     * the error pipe event.
-     */
-    fill_exec_closure(&ec, cstat, details, user_details, evbase, errpipe[0]);
+    /* Allocate and set signal events and the error pipe event.  */
+    init_exec_events(&ec, evbase, errpipe[0]);
 
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
 	int rc = 1;

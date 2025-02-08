@@ -407,21 +407,33 @@ exec_cmnd_pty(struct command_details *details, sigset_t *mask,
 }
 
 /*
- * Fill in the monitor closure and setup initial events.
- * Allocates read events for the signal pipe, error pipe and backchannel.
+ * Fill in the non-event part of the monitor closure.
  */
 static void
-fill_exec_closure_monitor(struct monitor_closure *mc,
+init_exec_closure_monitor(struct monitor_closure *mc,
     const struct command_details *details, struct command_status *cstat,
-    int errfd, int backchannel)
+    int backchannel)
 {
-    debug_decl(fill_exec_closure_monitor, SUDO_DEBUG_EXEC);
+    debug_decl(init_exec_closure_monitor, SUDO_DEBUG_EXEC);
     
     /* Fill in the non-event part of the closure. */
+    memset(mc, 0, sizeof(*mc));
     mc->details = details;
     mc->cstat = cstat;
     mc->backchannel = backchannel;
     mc->mon_pgrp = getpgrp();
+
+    debug_return;
+}
+
+/*
+ * Fill in the monitor closure and setup initial events.
+ * Allocates read events for the signal pipe, error pipe and backchannel.
+ */
+static void
+init_exec_events_monitor(struct monitor_closure *mc, int errfd)
+{
+    debug_decl(init_exec_events_monitor, SUDO_DEBUG_EXEC);
 
     /* Setup event base and events. */
     mc->evbase = sudo_ev_base_alloc();
@@ -437,7 +449,7 @@ fill_exec_closure_monitor(struct monitor_closure *mc,
 	sudo_fatal("%s", U_("unable to add event to queue"));
 
     /* Event for forwarded signals via backchannel. */
-    mc->backchannel_event = sudo_ev_alloc(backchannel,
+    mc->backchannel_event = sudo_ev_alloc(mc->backchannel,
 	SUDO_EV_READ|SUDO_EV_PERSIST, mon_backchannel_cb, mc);
     if (mc->backchannel_event == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -542,7 +554,7 @@ int
 exec_monitor(struct command_details *details, sigset_t *oset,
     bool foreground, int backchannel, int intercept_fd)
 {
-    struct monitor_closure mc = { 0 };
+    struct monitor_closure mc;
     struct command_status cstat;
     struct sigaction sa;
     int errsock[2];
@@ -577,6 +589,9 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 	sudo_warn("%s", U_("unable to set controlling tty"));
 	goto bad;
     }
+
+    /* Fill in exec closure after creating a new session. */
+    init_exec_closure_monitor(&mc, details, &cstat, backchannel);
 
     /*
      * The child waits on the other end of a socketpair for the
@@ -648,7 +663,7 @@ exec_monitor(struct command_details *details, sigset_t *oset,
      * Create new event base and register read events for the
      * signal pipe, error pipe, and backchannel.
      */
-    fill_exec_closure_monitor(&mc, details, &cstat, errsock[0], backchannel);
+    init_exec_events_monitor(&mc, errsock[0]);
 
     /* Restore signal mask now that signal handlers are setup. */
     sigprocmask(SIG_SETMASK, oset, NULL);
