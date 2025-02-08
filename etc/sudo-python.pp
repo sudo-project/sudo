@@ -3,7 +3,7 @@
 	summary="Sudo Python plugin framework"
 	description="The sudo Python plugin allows you to extend sudo using Python."
 	vendor="Todd C. Miller"
-	copyright="Copyright 2019-2024 Todd C. Miller"
+	copyright="Copyright 2019-2025 Todd C. Miller"
 
 %if [aix]
 	# Convert to 4 part version for AIX, including patch level
@@ -117,10 +117,16 @@
 	    extradirs="$extradirs `dirname $docdir`"
 	    test "`dirname $exampledir`" != "$docdir" && extradirs="$extradirs `dirname $exampledir`"
 	    for dir in $libexecdir $extradirs; do
+		# Only package directories that match the prefix,
+		# otherwise we could package directories like /var.
+		case "$dir" in
+		${prefix}*)
 		    while test "$dir" != "/"; do
 			    parentdirs="${parentdirs}${parentdirs+ }$dir/"
 			    dir=`dirname $dir`
 		    done
+		;;
+		esac
 	    done
 	    parentdirs=`echo $parentdirs | tr " " "\n" | sort -u`
 	fi

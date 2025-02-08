@@ -10,7 +10,7 @@ limited root privileges to users and log root activity.  \
 The basic philosophy is to give as few privileges as possible but \
 still allow people to get their work done."
 	vendor="Todd C. Miller"
-	copyright="Copyright 1994-1996,1998-2024 Todd C. Miller"
+	copyright="Copyright 1994-1996,1998-2025 Todd C. Miller"
 	sudoedit_man=`echo ${pp_destdir}$mandir/*/sudoedit.*|sed "s:^${pp_destdir}::"`
 	sudoedit_man_target=`basename $sudoedit_man | sed 's/edit//'`
 
@@ -295,10 +295,16 @@ still allow people to get their work done."
 	    test "`dirname $exampledir`" != "$docdir" && extradirs="$extradirs `dirname $exampledir`"
 	    test -d ${pp_destdir}${localedir} && extradirs="$extradirs $localedir"
 	    for dir in $bindir $sbindir $libexecdir $includedir $extradirs; do
+		# Only package directories that match the prefix,
+		# otherwise we could package directories like /var.
+		case "$dir" in
+		${prefix}*)
 		    while test "$dir" != "/"; do
 			    parentdirs="${parentdirs}${parentdirs+ }$dir/"
 			    dir=`dirname $dir`
 		    done
+		    ;;
+		esac
 	    done
 	    parentdirs=`echo $parentdirs | tr " " "\n" | sort -u`
 	fi

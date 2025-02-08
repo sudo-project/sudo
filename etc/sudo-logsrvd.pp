@@ -5,7 +5,7 @@
 from sudo clients.
 This makes it possible to have all sudo I/O logs on a central server."
 	vendor="Todd C. Miller"
-	copyright="Copyright 2019-2024 Todd C. Miller"
+	copyright="Copyright 2019-2025 Todd C. Miller"
 
 %if [aix]
 	# Convert to 4 part version for AIX, including patch level
@@ -167,10 +167,16 @@ This makes it possible to have all sudo I/O logs on a central server."
 	    extradirs="$extradirs `dirname $docdir` `dirname $rundir`"
 	    test "`dirname $exampledir`" != "$docdir" && extradirs="$extradirs `dirname $exampledir`"
 	    for dir in $sbindir $extradirs; do
+		# Only package directories that match the prefix,
+		# otherwise we could package directories like /var.
+		case "$dir" in
+		${prefix}*)
 		    while test "$dir" != "/"; do
 			    parentdirs="${parentdirs}${parentdirs+ }$dir/"
 			    dir=`dirname $dir`
 		    done
+		    ;;
+		esac
 	    done
 	    parentdirs=`echo $parentdirs | tr " " "\n" | sort -u`
 	fi
