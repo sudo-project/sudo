@@ -324,7 +324,7 @@ In lieu of a path name, the string "sudoedit" is used when consulting
 the security policy.
 If the user is authorized by the policy, the following steps are
 taken:
-.Bl -enum -offset 4
+.Bl -enum -offset 4n
 .It
 Temporary copies are made of the files to be edited with the owner
 set to the invoking user.

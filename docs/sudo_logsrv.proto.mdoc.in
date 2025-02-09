@@ -646,7 +646,7 @@ entries are recognized, but not required:
 .It submitgroup Ta string Ta submitting user's primary group name
 .It submitgroups Ta StringList Ta submit user's supplementary group names
 .It submituid Ta int64 Ta submit user's user-ID
-.It ttyname Ta string Ta the terminal the command was submitted from
+.It ttyname Ta string Ta terminal the command was submitted from
 .El
 .Pp
 The server must accept other variables not listed above but may

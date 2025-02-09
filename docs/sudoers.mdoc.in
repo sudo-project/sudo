@@ -5775,7 +5775,7 @@ locale.
 If the user is not allowed to run the command, the reason for the denial
 will follow the user name.
 Possible reasons include:
-.Bl -tag -width 4
+.Bl -tag -width 4n
 .It user NOT in sudoers
 The user is not listed in the
 .Em sudoers
@@ -5809,7 +5809,7 @@ If an error occurs,
 will log a message and, in most cases, send a message to the
 administrator via email.
 Possible errors include:
-.Bl -tag -width 4
+.Bl -tag -width 4n
 .It parse error in @sysconfdir@/sudoers near line N
 .Nm
 encountered an error when parsing the specified file.
