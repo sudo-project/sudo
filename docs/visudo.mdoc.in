@@ -397,7 +397,7 @@ In addition to reporting
 syntax errors,
 .Nm
 may produce the following messages:
-.Bl -tag -width 4n
+.Bl -tag -width 2n
 .It sudoers file busy, try again later.
 Someone else is currently editing the
 .Em sudoers
