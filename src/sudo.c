@@ -537,7 +537,7 @@ get_user_info(struct user_details *ud)
 
     ud->pid = getpid();
     ud->ppid = getppid();
-    ud->pgid = getpgid(0);
+    ud->pgid = getpgrp();
     ttyfd = open(_PATH_TTY, O_RDWR);
     sudo_get_ttysize(ttyfd, &ud->ts_rows, &ud->ts_cols);
     if (ttyfd != -1) {

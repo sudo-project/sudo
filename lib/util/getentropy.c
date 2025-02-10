@@ -470,7 +470,7 @@ getentropy_fallback(void *buf, size_t len)
 			HX((pid = getpid()) == -1, pid);
 			HX((pid = getsid(pid)) == -1, pid);
 			HX((pid = getppid()) == -1, pid);
-			HX((pid = getpgid(0)) == -1, pid);
+			HX((pid = getpgrp()) == -1, pid);
 			HX((e = getpriority(0, 0)) == -1, e);
 
 			if (!faster) {
