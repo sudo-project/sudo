@@ -6174,34 +6174,34 @@ locale.
 If the user is not allowed to run the command, the reason for the denial
 will follow the user name.
 Possible reasons include:
-.TP 3n
+.TP 6n
 user NOT in sudoers
 The user is not listed in the
 \fIsudoers\fR
 file.
-.TP 3n
+.TP 6n
 user NOT authorized on host
 The user is listed in the
 \fIsudoers\fR
 file but is not allowed to run commands on the host.
-.TP 3n
+.TP 6n
 command not allowed
 The user is listed in the
 \fIsudoers\fR
 file for the host but they are not allowed to run the specified command.
-.TP 3n
+.TP 6n
 3 incorrect password attempts
 The user failed to enter their password after 3 tries.
 The actual number of tries will vary based on the number of
 failed attempts and the value of the
 \fIpasswd_tries\fR
 option.
-.TP 3n
+.TP 6n
 a password is required
 The
 \fB\-n\fR
 option was specified but a password was required.
-.TP 3n
+.TP 6n
 sorry, you are not allowed to set the following environment variables
 The user specified environment variables on the command line that
 were not allowed by
@@ -6212,13 +6212,13 @@ If an error occurs,
 will log a message and, in most cases, send a message to the
 administrator via email.
 Possible errors include:
-.TP 3n
+.TP 6n
 parse error in @sysconfdir@/sudoers near line N
 \fBsudoers\fR
 encountered an error when parsing the specified file.
 In some cases, the actual error may be one line above or below the
 line number listed, depending on the type of error.
-.TP 3n
+.TP 6n
 problem with defaults entries
 The
 \fIsudoers\fR
@@ -6229,12 +6229,12 @@ from running, but the
 \fIsudoers\fR
 file should be checked using
 \fBvisudo\fR.
-.TP 3n
+.TP 6n
 timestamp owner (username): \&No such user
 The time stamp directory owner, as specified by the
 \fItimestampowner\fR
 setting, could not be found in the password database.
-.TP 3n
+.TP 6n
 unable to open/read @sysconfdir@/sudoers
 The
 \fIsudoers\fR
@@ -6262,17 +6262,17 @@ file) to the end of the
 line in the
 sudo.conf(@mansectform@)
 file.
-.TP 3n
+.TP 6n
 unable to open @sysconfdir@/sudoers
 The
 \fI@sysconfdir@/sudoers\fR
 file is missing.
-.TP 3n
+.TP 6n
 @sysconfdir@/sudoers is not a regular file
 The
 \fI@sysconfdir@/sudoers\fR
 file exists but is not a regular file or symbolic link.
-.TP 3n
+.TP 6n
 @sysconfdir@/sudoers is owned by uid N, should be 0
 The
 \fIsudoers\fR
@@ -6291,7 +6291,7 @@ file) to the
 line in the
 sudo.conf(@mansectform@)
 file.
-.TP 3n
+.TP 6n
 @sysconfdir@/sudoers is world writable
 The permissions on the
 \fIsudoers\fR
@@ -6308,7 +6308,7 @@ option to the
 line in the
 sudo.conf(@mansectform@)
 file.
-.TP 3n
+.TP 6n
 @sysconfdir@/sudoers is owned by gid N, should be 1
 The
 \fIsudoers\fR
@@ -6327,7 +6327,7 @@ file) to the
 line in the
 sudo.conf(@mansectform@)
 file.
-.TP 3n
+.TP 6n
 unable to open @rundir@/ts/user-ID
 \fBsudoers\fR
 was unable to read or create the user's time stamp file.
@@ -6341,11 +6341,11 @@ is not searchable by group or other.
 The default mode for
 \fI@rundir@\fR
 is 0711.
-.TP 3n
+.TP 6n
 unable to write to @rundir@/ts/user-ID
 \fBsudoers\fR
 was unable to write to the user's time stamp file.
-.TP 3n
+.TP 6n
 @rundir@/ts is owned by uid X, should be Y
 The time stamp directory is owned by a user other than
 \fItimestampowner\fR.
@@ -6354,7 +6354,7 @@ This can occur when the value of
 has been changed.
 \fBsudoers\fR
 will ignore the time stamp directory until the owner is corrected.
-.TP 3n
+.TP 6n
 @rundir@/ts is group writable
 The time stamp directory is group-writable; it should be writable only by
 \fItimestampowner\fR.

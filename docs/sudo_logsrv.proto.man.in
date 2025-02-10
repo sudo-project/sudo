@@ -726,7 +726,7 @@ submitgroups	StringList	submit user's supplementary group names
 .PP
 submituid	int64	submit user's user-ID
 .PP
-ttyname	string	the terminal the command was submitted from
+ttyname	string	terminal the command was submitted from
 .TE
 .PP
 The server must accept other variables not listed above but may
