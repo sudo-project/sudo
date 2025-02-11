@@ -1726,6 +1726,7 @@ dnl
 AC_PATH_PROG(SHA1SUM, [sha1sum], [openssl dgst -sha1])
 AC_PATH_PROG(UNAMEPROG, [uname], [uname])
 AC_PATH_PROG(TRPROG, [tr], [tr])
+AC_PATH_PROG(GROFFPROG, [groff], [groff])
 AC_CACHE_CHECK([for mandoc or nroff], [ac_cv_path_NROFF], [
     AC_PATH_PROGS_FEATURE_CHECK([NROFF], [mandoc nroff], [ac_cv_path_NROFF="$ac_path_NROFF"], [ac_cv_path_NROFF=no])
 ])

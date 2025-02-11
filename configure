@@ -674,6 +674,7 @@ PYTHON
 FLEX
 YFLAGS
 YACC
+GROFFPROG
 TRPROG
 UNAMEPROG
 SHA1SUM
@@ -17595,6 +17596,53 @@ TRPROG=$ac_cv_path_TRPROG
 if test -n "$TRPROG"; then
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $TRPROG" >&5
 printf "%s\n" "$TRPROG" >&6; }
+else
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+fi
+
+
+# Extract the first word of "groff", so it can be a program name with args.
+set dummy groff; ac_word=$2
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+printf %s "checking for $ac_word... " >&6; }
+if test ${ac_cv_path_GROFFPROG+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) case $GROFFPROG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_GROFFPROG="$GROFFPROG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  case $as_dir in #(((
+    '') as_dir=./ ;;
+    */) ;;
+    *) as_dir=$as_dir/ ;;
+  esac
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
+    ac_cv_path_GROFFPROG="$as_dir$ac_word$ac_exec_ext"
+    printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_GROFFPROG" && ac_cv_path_GROFFPROG="groff"
+  ;;
+esac ;;
+esac
+fi
+GROFFPROG=$ac_cv_path_GROFFPROG
+if test -n "$GROFFPROG"; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $GROFFPROG" >&5
+printf "%s\n" "$GROFFPROG" >&6; }
 else
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
 printf "%s\n" "no" >&6; }
