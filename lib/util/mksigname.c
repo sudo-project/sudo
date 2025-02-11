@@ -22,14 +22,21 @@
  */
 
 
-#include <config.h>
+/*
+ * Self-contained program run on the host to generate sudo_sys_signame[]
+ * for systems that lack sys_signame[] or the equivalent (like HP-UX).
+ *
+ * We cannot include config.h or sudo_compat.h here since those refer
+ * to the target, not the host, system.
+ */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
 
-#include <sudo_compat.h>
-
-sudo_dso_public int main(int argc, char *argv[]);
+#ifndef nitems
+# define nitems(_a)	(sizeof((_a)) / sizeof((_a)[0]))
+#endif
 
 int
 main(int argc, char *argv[])
@@ -44,7 +51,7 @@ main(int argc, char *argv[])
      * so it cannot use any of the functions in libsudo_util.
      */
     puts("const char *const sudo_sys_signame[] = {");
-    for (i = 0; i < NSIG; i++) {
+    for (i = 0; i < nitems(sudo_sys_signame); i++) {
 	if (sudo_sys_signame[i] != NULL) {
 	    printf("    \"%s\",\n", sudo_sys_signame[i]);
 	} else {

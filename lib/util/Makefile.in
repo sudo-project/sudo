@@ -1148,19 +1148,15 @@ mkdirat.i: $(srcdir)/mkdirat.c $(incdir)/sudo_compat.h $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/mkdirat.c > $@
 mkdirat.plog: mkdirat.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/mkdirat.c --i-file mkdirat.i --output-file $@
-mksiglist.lo: $(srcdir)/mksiglist.c $(incdir)/sudo_compat.h \
-              $(srcdir)/mksiglist.h $(top_builddir)/config.h
+mksiglist.lo: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/mksiglist.c
-mksiglist.i: $(srcdir)/mksiglist.c $(incdir)/sudo_compat.h \
-              $(srcdir)/mksiglist.h $(top_builddir)/config.h
+mksiglist.i: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/mksiglist.c > $@
 mksiglist.plog: mksiglist.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/mksiglist.c --i-file mksiglist.i --output-file $@
-mksigname.lo: $(srcdir)/mksigname.c $(incdir)/sudo_compat.h \
-              $(srcdir)/mksigname.h $(top_builddir)/config.h
+mksigname.lo: $(srcdir)/mksigname.c $(srcdir)/mksigname.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/mksigname.c
-mksigname.i: $(srcdir)/mksigname.c $(incdir)/sudo_compat.h \
-              $(srcdir)/mksigname.h $(top_builddir)/config.h
+mksigname.i: $(srcdir)/mksigname.c $(srcdir)/mksigname.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/mksigname.c > $@
 mksigname.plog: mksigname.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/mksigname.c --i-file mksigname.i --output-file $@
