@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2024
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2025
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd November 11, 2024
+.Dd February 14, 2025
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1302,14 +1302,16 @@ It is not an error to use the
 operator to remove an element
 that does not exist in a list.
 .Pp
-Defaults entries are parsed in the following order: global, host,
-user, and runas Defaults first, then command defaults.
-If there are multiple Defaults settings of the same type, the last
-matching setting is used.
-The following Defaults settings are parsed before all others since
-they may affect subsequent entries:
+In general Defaults settings are applied in order, later entries
+will override earlier ones.
+However, command-specific Defaults settings are applied later, once
+the command's path is known.
+In addition, the following Defaults settings must be applied before
+all others since they may affect subsequent entries:
 .Em fqdn ,
 .Em group_plugin ,
+.Em ignore_unknown_defaults ,
+.Em match_group_by_gid ,
 .Em runas_default ,
 .Em sudoers_locale .
 .Pp
