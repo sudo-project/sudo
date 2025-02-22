@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "February 14, 2025" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "February 22, 2025" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -672,16 +672,16 @@ Resource limits may also be set in the
 \fIsudoers\fR
 file itself, in which case they override those set by the system.
 See the
-\fIrlimit_as,\fR
-\fIrlimit_core,\fR
-\fIrlimit_cpu,\fR
-\fIrlimit_data,\fR
-\fIrlimit_fsize,\fR
-\fIrlimit_locks,\fR
-\fIrlimit_memlock,\fR
-\fIrlimit_nofile,\fR
-\fIrlimit_nproc,\fR
-\fIrlimit_rss,\fR
+\fIrlimit_as\fR,
+\fIrlimit_core\fR,
+\fIrlimit_cpu\fR,
+\fIrlimit_data\fR,
+\fIrlimit_fsize\fR,
+\fIrlimit_locks\fR,
+\fIrlimit_memlock\fR,
+\fIrlimit_nofile\fR,
+\fIrlimit_nproc\fR,
+\fIrlimit_rss\fR,
 \fIrlimit_stack\fR
 options described below.
 Resource limits in
@@ -805,7 +805,7 @@ Cmnd_Alias ::= NAME
 
 Cmnd_Alias_Spec ::= Cmnd_Alias '=' Cmnd_List
 
-NAME ::= [A-Z]([A-Z][0-9]_)*
+NAME ::= [A\(enZ]([A\(enZ][0\(en9]_)*
 .RE
 .fi
 .PP
@@ -1038,8 +1038,8 @@ only the case for non-networked systems.
 .nf
 .sp
 .RS 0n
-digest ::= [A-Fa-f0-9]+ |
-           [A-Za-z0-9\e+/=]+
+digest ::= [A\(enFa\(enf0\(en9]+ |
+           [A\(enZa\(enz0\(en9\e+/=]+
 
 Digest_Spec ::= "sha224" ':' digest |
                 "sha256" ':' digest |
@@ -1225,7 +1225,7 @@ For example, using openssl:
 .nf
 .sp
 .RS 0n
-$ openssl dgst -sha224 /bin/ls
+$ openssl dgst \-sha224 /bin/ls
 SHA224(/bin/ls)= 118187da8364d490b4a7debbf483004e8f3e053ec954309de2c41a25
 .RE
 .fi
@@ -1234,7 +1234,7 @@ It is also possible to use openssl to generate base64 output:
 .nf
 .sp
 .RS 0n
-$ openssl dgst -binary -sha224 /bin/ls | openssl base64
+$ openssl dgst \-binary \-sha224 /bin/ls | openssl base64
 EYGH2oNk1JC0p9679IMATo8+BT7JVDCd4sQaJQ==
 .RE
 .fi
@@ -1509,7 +1509,7 @@ For example:
 .nf
 .sp
 .RS 0n
-$ sudo -u operator /bin/ls
+$ sudo \-u operator /bin/ls
 .RE
 .fi
 .PP
@@ -1564,9 +1564,9 @@ The following would all be permitted by the sudoers entry above:
 .nf
 .sp
 .RS 0n
-$ sudo -u operator /bin/ls
-$ sudo -u operator -g operator /bin/ls
-$ sudo -g operator /bin/ls
+$ sudo \-u operator /bin/ls
+$ sudo \-u operator \-g operator /bin/ls
+$ sudo \-g operator /bin/ls
 .RE
 .fi
 .PP
@@ -1588,7 +1588,7 @@ For example:
 .nf
 .sp
 .RS 0n
-$ sudo -g dialer /usr/bin/cu
+$ sudo \-g dialer /usr/bin/cu
 .RE
 .fi
 .PP
@@ -1729,7 +1729,7 @@ For example:
 .nf
 .sp
 .RS 0n
-$ ppriv -l
+$ ppriv \-l
 .RE
 .fi
 .PP
@@ -1776,7 +1776,7 @@ It is also possible to specify a timezone offset from UTC in hours
 and minutes instead of a
 \(oqZ\(cq.
 For example,
-\(oq-0500\(cq
+\(oq\-0500\(cq
 would correspond to Eastern Standard time in the US.
 As an extension, if no
 \(oqZ\(cq
@@ -2083,10 +2083,10 @@ By default, if the
 \fRNOPASSWD\fR
 tag is applied to any of a user's entries for the current host,
 the user will be able to run
-\(oqsudo -l\(cq
+\(oqsudo \-l\(cq
 without a password.
 Additionally, a user may only run
-\(oqsudo -v\(cq
+\(oqsudo \-v\(cq
 without a password if all of the user's entries for the current
 host have the
 \fRNOPASSWD\fR
@@ -2338,7 +2338,7 @@ This kind of rule is impossible to express safely using wildcards.
 .nf
 .sp
 .RS 4n
-john	ALL = /usr/bin/passwd ^[a-zA-Z0-9_]+$,\e
+john	ALL = /usr/bin/passwd ^[a\-zA\-Z0\-9_]+$,\e
               !/usr/bin/passwd root
 .RE
 .fi
@@ -4265,7 +4265,7 @@ if one exists.
 Only available if
 \fBsudo\fR
 is configured with the
-\fR--with-logincap\fR
+\fR\-\-with-logincap\fR
 option.
 This flag is
 \fIoff\fR
@@ -4373,7 +4373,7 @@ closefrom
 Before it executes a command,
 \fBsudo\fR
 will close all open file descriptors other than standard input,
-standard output, and standard error (file descriptors 0-2).
+standard output, and standard error (file descriptors 0\(en2).
 The
 \fIclosefrom\fR
 option can be used to specify a different file descriptor at which
@@ -4484,9 +4484,9 @@ Set this to 0 to always prompt for a password.
 If set to a value less than 0 the user's time stamp will not expire
 until the system is rebooted.
 This can be used to allow users to create or delete their own time stamps via
-\(oqsudo -v\(cq
+\(oqsudo \-v\(cq
 and
-\(oqsudo -k\(cq
+\(oqsudo \-k\(cq
 respectively.
 .TP 18n
 umask
@@ -5169,7 +5169,7 @@ groups runs
 Only available if
 \fBsudo\fR
 is configured with the
-\fR--enable-admin-flag\fR
+\fR\-\-enable-admin-flag\fR
 option.
 The default value is
 \fI~/.sudo_as_admin_successful\fR.
@@ -5866,7 +5866,7 @@ single value without double-quotes.
 The list can be replaced, added to, deleted from, or disabled by using the
 \(oq=\(cq,
 \(oq+=\(cq,
-\(oq-=\(cq,
+\(oq\-=\(cq,
 and
 \(oq\&!\(cq
 operators respectively.
@@ -5893,7 +5893,7 @@ single value without double-quotes.
 The list can be replaced, added to, deleted from, or disabled by using the
 \(oq=\(cq,
 \(oq+=\(cq,
-\(oq-=\(cq,
+\(oq\-=\(cq,
 and
 \(oq\&!\(cq
 operators respectively.
@@ -6542,7 +6542,7 @@ statement is never executed.
 .nf
 .sp
 .RS 4n
-$ sh -s < test.sh
+$ sh \-s < test.sh
 testing
 .RE
 .fi
@@ -6615,7 +6615,7 @@ flag or the
 command tag will enable
 \fIlog_stdout\fR
 and
-\fIlog_stderr.\fR
+\fIlog_stderr\fR.
 Careful ordering of rules may be necessary to achieve the results
 that you expect.
 .SS "I/O log format"
@@ -6774,7 +6774,7 @@ No post-processing is performed.
 For manual viewing, you may wish to convert carriage return characters
 in the log to line feeds.
 For example:
-\(oqgunzip -c ttyin | tr \&"\er\&" \&"\en\&"\(cq
+\(oqgunzip \-c ttyin | tr \&"\er\&" \&"\en\&"\(cq
 .TP 10n
 \fIstdin\fR
 The standard input when no terminal is present, or input redirected from
@@ -7108,7 +7108,7 @@ to operator.
 .nf
 .sp
 .RS 0n
-pete		HPPA = /usr/bin/passwd [A-Za-z]*, !/usr/bin/passwd *root*
+pete		HPPA = /usr/bin/passwd [A\-Za\-z]*, !/usr/bin/passwd *root*
 
 %opers		ALL = (: ADMINGRP) /usr/sbin/
 .RE
@@ -7153,7 +7153,7 @@ As a result, this rule will also allow:
 .nf
 .sp
 .RS 4n
-passwd username --expire
+passwd username \-\-expire
 .RE
 .fi
 .PP
@@ -7225,7 +7225,7 @@ without giving a password.
 .nf
 .sp
 .RS 0n
-john		ALPHA = /usr/bin/su [!-]*, !/usr/bin/su *root*
+john		ALPHA = /usr/bin/su [!\-]*, !/usr/bin/su *root*
 .RE
 .fi
 .PP
@@ -7318,7 +7318,7 @@ to www.
 .sp
 .RS 0n
 ALL		CDROM = NOPASSWD: /sbin/umount /CDROM,\e
-		/sbin/mount -o nosuid\e,nodev /dev/cd0a /CDROM
+		/sbin/mount \-o nosuid\e,nodev /dev/cd0a /CDROM
 .RE
 .fi
 .PP
@@ -7382,8 +7382,8 @@ file entry:
 .nf
 .sp
 .RS 0n
-john	ALL = /usr/bin/passwd [a-zA-Z0-9]*, /usr/bin/chsh [a-zA-Z0-9]*,\e
-              /usr/bin/chfn [a-zA-Z0-9]*, !/usr/bin/* root
+john	ALL = /usr/bin/passwd [a\-zA\-Z0\-9]*, /usr/bin/chsh [a\-zA\-Z0\-9]*,\e
+              /usr/bin/chfn [a\-zA\-Z0\-9]*, !/usr/bin/* root
 .RE
 .fi
 .PP
