@@ -1,9 +1,9 @@
 s/^\(.TH .*\)/.nr SL @SEMAN@\
 \1/
 
-/^\.TP 10n$/ {
+/^\.TP 6n$/ {
 	N
-	/^.TP 10n\nsesh$/ {
+	/^.TP 6n\nsesh$/ {
 		i\
 .if \\n(SL \\{\\
 	}

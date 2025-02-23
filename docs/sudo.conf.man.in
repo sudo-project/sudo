@@ -375,6 +375,7 @@ The default directory to use when searching for plugins
 that are specified without a fully qualified path name.
 The default value is
 \fI@plugindir@\fR.
+.if \n(SL \{\
 .TP 6n
 sesh
 The fully-qualified path to the

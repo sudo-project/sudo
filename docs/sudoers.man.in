@@ -22,6 +22,7 @@
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
 .nr SL @SEMAN@
+.nr AA @AAMAN@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
@@ -1387,20 +1388,28 @@ Cmnd_Spec ::= Runas_Spec? Option_Spec* (Tag_Spec ':')* Cmnd
 Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 
 .ie \n(SL \{\
-.ie \n(PS Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec)
-.el Option_Spec ::= (SELinux_Spec | Date_Spec | Timeout_Spec)
+.ie \n(PS Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
+.el Option_Spec ::= (SELinux_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
 .\}
 .el \{\
-.ie \n(PS Option_Spec ::= (Solaris_Priv_Spec | Date_Spec | Timeout_Spec)
-.el Option_Spec ::= (Date_Spec | Timeout_Spec)
+.ie \n(AA \{\
+.ie \n(PS Option_Spec ::= (AppArmor_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
+.el Option_Spec ::= (AppArmor_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
+.\}
+.el \{\
+.ie \n(PS Option_Spec ::= (Solaris_Priv_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
+.el Option_Spec ::= (Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
+.\}
 .\}
 
 .if \n(SL \{\
 SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
 .\}
+.if \n(AA \{\
 AppArmor_Spec ::= 'APPARMOR_PROFILE=profile'
 
+.\}
 .if \n(PS \{\
 Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
 
@@ -1622,7 +1631,9 @@ Options may consist of
 .if \n(SL \{\
 SELinux roles and/or types,
 .\}
+.if \n(AA \{\
 AppArmor profiles,
+.\}
 .if \n(PS \{\
 Solaris privileges sets,
 .\}
@@ -1653,6 +1664,7 @@ A role or type specified on the command line,
 however, will supersede the values in
 \fIsudoers\fR.
 .\}
+.if \n(AA \{\
 .SS "AppArmor_Spec"
 On systems supporting AppArmor,
 \fIsudoers\fR
@@ -1711,6 +1723,7 @@ and user
 to run
 \fI/bin/ls\fR
 without any confinement at all.
+.\}
 .if \n(PS \{\
 .SS "Solaris_Priv_Spec"
 On Solaris systems,
@@ -4255,7 +4268,7 @@ will set the umask to be the union of the user's umask and what is specified in
 This flag is
 \fI@umask_override@\fR
 by default.
-.if \n(BA \{\
+.if \n(LC \{\
 .TP 18n
 use_loginclass
 If set,
@@ -4519,6 +4532,7 @@ The umask setting in PAM is not used for
 which does not create a new PAM session.
 .PP
 \fBStrings\fR:
+.if \n(AA \{\
 .TP 18n
 apparmor_profile
 The default AppArmor profile to transition into when executing the
@@ -4532,6 +4546,7 @@ entries by specifying the
 option.
 This option is only available when sudo is built with AppArmor
 support.
+.\}
 .TP 18n
 cmddenial_message
 .br

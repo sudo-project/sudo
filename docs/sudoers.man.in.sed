@@ -1,4 +1,5 @@
 s/^\(.TH .*\)/.nr SL @SEMAN@\
+.nr AA @AAMAN@\
 .nr BA @BAMAN@\
 .nr LC @LCMAN@\
 .nr PS @PSMAN@\
@@ -21,6 +22,15 @@ s/^\(.TH .*\)/.nr SL @SEMAN@\
     }
 }
 
+/^\.SS "AppArmor_Spec"$/,/^\.SS/ {
+    /^\.SS / {
+	/^\.SS "AppArmor_Spec"$/i\
+.if \\n(AA \\{\\
+	/^\.SS "AppArmor_Spec"$/!i\
+.\\}
+    }
+}
+
 /^\.SS "Solaris_Priv_Spec"$/,/^\.SS/ {
     /^\.SS / {
 	/^\.SS "Solaris_Priv_Spec"$/i\
@@ -32,18 +42,32 @@ s/^\(.TH .*\)/.nr SL @SEMAN@\
 
 /^Option_Spec ::= / {
     s/^.*$/.ie \\n(SL \\{\\\
-.ie \\n(PS Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec)\
-.el Option_Spec ::= (SELinux_Spec | Date_Spec | Timeout_Spec)\
+.ie \\n(PS Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)\
+.el Option_Spec ::= (SELinux_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)\
 .\\}\
 .el \\{\\\
-.ie \\n(PS Option_Spec ::= (Solaris_Priv_Spec | Date_Spec | Timeout_Spec)\
-.el Option_Spec ::= (Date_Spec | Timeout_Spec)\
+.ie \\n(AA \\{\\\
+.ie \\n(PS Option_Spec ::= (AppArmor_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)\
+.el Option_Spec ::= (AppArmor_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)\
+.\\}\
+.el \\{\\\
+.ie \\n(PS Option_Spec ::= (Solaris_Priv_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)\
+.el Option_Spec ::= (Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)\
+.\\}\
 .\\}/
 }
 
 /^SELinux_Spec ::=/ {
     i\
 .if \\n(SL \\{\\
+    N
+    a\
+.\\}
+}
+
+/^AppArmor_Spec ::=/ {
+    i\
+.if \\n(AA \\{\\
     N
     a\
 .\\}
@@ -64,6 +88,13 @@ s/^\(.TH .*\)/.nr SL @SEMAN@\
 .\\}
 }
 
+/^AppArmor profiles,/ {
+    i\
+.if \\n(AA \\{\\
+    a\
+.\\}
+}
+
 /^Solaris privileges sets,/ {
     i\
 .if \\n(PS \\{\\
@@ -76,8 +107,16 @@ s/^\(.TH .*\)/.nr SL @SEMAN@\
 	/^\.TP 18n\nuse_loginclass$/,/^\.TP 18n/ {
 	    /^\.TP 18n/ {
 		/^\.TP 18n\nuse_loginclass$/i\
-.if \\n(BA \\{\\
+.if \\n(LC \\{\\
 		/^\.TP 18n\nuse_loginclass$/!i\
+.\\}
+	    }
+	}
+	/^\.TP 18n\napparmor_profile$/,/^\.TP 18n/ {
+	    /^\.TP 18n/ {
+		/^\.TP 18n\napparmor_profile$/i\
+.if \\n(AA \\{\\
+		/^\.TP 18n\napparmor_profile$/!i\
 .\\}
 	    }
 	}
