@@ -1,0 +1,49 @@
+#!/bin/sh
+
+MANDOC="@MANDOCPROG@"
+GROFF="@GROFFPROG@"
+MANTYPE="@MANTYPE@"
+EGREP="@EGREP@"
+
+if [ "$MANTYPE" != "mdoc" ]; then
+    echo "$0 only supports mdoc manuals" 1>&2
+    exit 1
+fi
+
+TFILE=`mktemp -t check_man.XXXXXX` || exit 1
+
+rval=0
+while [ $# != 0 ]; do
+    if [ "$MANDOC" != "mandoc" ]; then
+	# Ignore OS warning and missing cross-references
+	$MANDOC -Tlint $1 | $EGREP -v 'STYLE: (operating system explicitly specified|referenced manual not found):' > "$TFILE" 2>&1
+	if [ -s "$TFILE" ]; then
+	    rval=`expr $rval + 1`
+	    cat "$TFILE"
+	fi
+    fi
+
+    if [ "$GROFF" != "groff" ]; then
+	$GROFF -mandoc -K utf8 -rF0 -rHY=0 -rCHECKSTYLE=10 -ww -b -z $1 || \
+	    rval=`expr $rval + $?`
+    fi
+
+    $EGREP '^\.It[ 	].*[ 	]Ta$' $1 > "$TFILE" 2>&1
+    if [ -s "$TFILE" ]; then
+	rval=`expr $rval + 1`
+	echo "Empty table cell at EOL leads to trailing whitespace:"
+	cat "$TFILE"
+    fi
+
+    $EGREP '[ 	]$' $1 > "$TFILE" 2>&1
+    if [ -s "$TFILE" ]; then
+	rval=`expr $rval + 1`
+	echo "Trailing whitespace:"
+	cat "$TFILE"
+    fi
+
+    shift
+done
+
+rm -f "$TFILE"
+exit $rval

@@ -1727,21 +1727,24 @@ AC_PATH_PROG(SHA1SUM, [sha1sum], [openssl dgst -sha1])
 AC_PATH_PROG(UNAMEPROG, [uname], [uname])
 AC_PATH_PROG(TRPROG, [tr], [tr])
 AC_PATH_PROG(GROFFPROG, [groff], [groff])
-AC_CACHE_CHECK([for mandoc or nroff], [ac_cv_path_NROFF], [
-    AC_PATH_PROGS_FEATURE_CHECK([NROFF], [mandoc nroff], [ac_cv_path_NROFF="$ac_path_NROFF"], [ac_cv_path_NROFF=no])
+AC_PATH_PROG(MANDOCPROG, [mandoc], [mandoc])
+AS_IF([test "$ac_cv_path_MANDOCPROG" != "mandoc"], [
+    ac_cv_path_NROFFPROG="$ac_cv_path_MANDOCPROG"
+], [
+    AC_PATH_PROG(NROFFPROG, [nroff], [nroff])
 ])
-case "$ac_cv_path_NROFF" in
-*mandoc|no)
-    # Prefer mdoc format for mandoc (or when no formatter is present).
-    : ${MANTYPE='mdoc'}
-    ;;
-*)
-    # Check whether nroff supports -mdoc, this may produce incorrect
-    # results when cross-compiling.
-    test -n "$MANTYPE" && sudo_cv_var_mantype="$MANTYPE"
-    AC_CACHE_CHECK([which macro set to use for manual pages],
-	[sudo_cv_var_mantype],
-	[
+# Check whether nroff supports -mdoc, this may produce incorrect
+# results when cross-compiling.
+test -n "$MANTYPE" && sudo_cv_var_mantype="$MANTYPE"
+AC_CACHE_CHECK([which macro set to use for manual pages],
+    [sudo_cv_var_mantype],
+    [
+	case "$ac_cv_path_NROFFPROG" in
+	*mandoc|nroff)
+	    # Prefer mdoc format for mandoc (or when no formatter is present).
+	    sudo_cv_var_mantype="mdoc"
+	    ;;
+	*)
 	    sudo_cv_var_mantype="man"
 	    echo ".Sh NAME" > conftest
 	    echo ".Nm sudo" >> conftest
@@ -1752,11 +1755,11 @@ case "$ac_cv_path_NROFF" in
 		sudo_cv_var_mantype="mdoc"
 	    fi
 	    rm -f conftest
-	]
-    )
-    MANTYPE="$sudo_cv_var_mantype"
-    ;;
-esac
+	    ;;
+	esac
+    ]
+)
+MANTYPE="$sudo_cv_var_mantype"
 
 dnl
 dnl If a config.cache exists make sure it matches the current host.
@@ -4470,7 +4473,7 @@ AS_IF([test X"$INIT_SCRIPT" != X""], [
     AC_CONFIG_FILES([etc/init.d/sudo.conf])
 ])
 
-AC_CONFIG_FILES([Makefile docs/Makefile examples/Makefile examples/sudoers examples/sudo.conf examples/sudo_logsrvd.conf examples/syslog.conf include/Makefile lib/eventlog/Makefile lib/fuzzstub/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/protobuf-c/Makefile lib/ssl_compat/Makefile lib/util/Makefile lib/util/regress/harness lib/util/util.exp logsrvd/Makefile src/intercept.exp src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/sample_approval/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/regress/harness plugins/sudoers/sudoers])
+AC_CONFIG_FILES([Makefile docs/Makefile examples/Makefile examples/sudoers examples/sudo.conf examples/sudo_logsrvd.conf examples/syslog.conf include/Makefile lib/eventlog/Makefile lib/fuzzstub/Makefile lib/iolog/Makefile lib/logsrv/Makefile lib/protobuf-c/Makefile lib/ssl_compat/Makefile lib/util/Makefile lib/util/regress/harness lib/util/util.exp logsrvd/Makefile src/intercept.exp src/sudo_usage.h src/Makefile plugins/audit_json/Makefile plugins/sample/Makefile plugins/group_file/Makefile plugins/sample_approval/Makefile plugins/system_group/Makefile plugins/sudoers/Makefile plugins/sudoers/regress/harness plugins/sudoers/sudoers scripts/check_man])
 AC_CONFIG_COMMANDS([harness], [chmod +x lib/util/regress/harness plugins/sudoers/regress/harness])
 
 AC_OUTPUT

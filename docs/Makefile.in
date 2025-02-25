@@ -32,11 +32,10 @@ scriptdir = $(top_srcdir)/scripts
 # Tools to use
 SED = @SED@
 IGOR = igor
-MANDOC = mandoc
+MANDOC = @MANDOCPROG@
 MANCOMPRESS = @MANCOMPRESS@
 MANCOMPRESSEXT = @MANCOMPRESSEXT@
 TR = @TRPROG@
-GROFF = @GROFFPROG@
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(scriptdir)/install-sh -c
@@ -119,21 +118,7 @@ igor:
 	exit $$rval
 
 lint: all
-	@if [ "$(mantype)" != "mdoc" ]; then \
-	    echo "make lint only supported for mdoc manuals" 1>&2; \
-	    exit 1; \
-	else \
-	    rval=0; \
-	    for m in $(DOCS); do \
-		echo $(MANDOC) -Tlint -Wwarning $$m; \
-		$(MANDOC) -Tlint -Wwarning $$m || rval=`expr $$rval + $$?`; \
-		if [ -n "$(GROFF)" ]; then \
-		    echo $(GROFF) -mandoc -K utf8 -rF0 -rHY=0 -ww -b -z $$m; \
-		    $(GROFF) -mandoc -K utf8 -rF0 -rHY=0 -ww -b -z $$m || rval=`expr $$rval + $$?`; \
-		fi; \
-	    done; \
-	    exit $$rval; \
-	fi
+	$(SHELL) $(top_builddir)/scripts/check_man $(DOCS)
 
 depend:
 
