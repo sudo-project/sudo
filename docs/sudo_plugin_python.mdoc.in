@@ -2,7 +2,7 @@
 .\" SPDX-License-Identifier: ISC
 .\"
 .\" Copyright (c) 2019-2021 Robert Manner <robert.manner@oneidentity.com>
-.\" Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2025 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 16, 2023
+.Dd February 26, 2025
 .Dt SUDO_PLUGIN_PYTHON @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1403,14 +1403,14 @@ one or more messages to log
 .Em Available log levels:
 .Bl -column "name in sudo.conf" "Python constant" "only critical messages"
 .It Sy sudo.conf name Ta Sy Python constant Ta Sy description
-.It crit Ta Dv sudo.DEBUG.CRIT Ta only critical messages
-.It err Ta Dv sudo.DEBUG.ERROR Ta
-.It warn Ta Dv sudo.DEBUG.WARN Ta
-.It notice Ta Dv sudo.DEBUG.NOTICE Ta
-.It diag Ta Dv sudo.DEBUG.DIAG Ta
-.It info Ta Dv sudo.DEBUG.INFO Ta
-.It trace Ta Dv sudo.DEBUG.TRACE Ta
-.It debug Ta Dv sudo.DEBUG.DEBUG Ta very extreme verbose debugging
+.It crit Ta Dv sudo.DEBUG.CRIT Ta critical errors
+.It err Ta Dv sudo.DEBUG.ERROR Ta non-critical errors
+.It warn Ta Dv sudo.DEBUG.WARN Ta non-fatal warnings
+.It notice Ta Dv sudo.DEBUG.NOTICE Ta non-error condition notices
+.It diag Ta Dv sudo.DEBUG.DIAG Ta diagnostic messages
+.It info Ta Dv sudo.DEBUG.INFO Ta informational message
+.It trace Ta Dv sudo.DEBUG.TRACE Ta log function enter/exit
+.It debug Ta Dv sudo.DEBUG.DEBUG Ta very verbose debugging
 .El
 .Pp
 .Em Using the logging module
