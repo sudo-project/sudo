@@ -978,7 +978,7 @@ Sudo log server configuration file
 # password prompts in the terminal output when log_passwords is
 # disabled.  Multiple passprompt_regex settings may be specified.
 #passprompt_regex = [Pp]assword[: ]*
-#passprompt_regex = [Pp]assword for [a-z0-9]+: *
+#passprompt_regex = [Pp]assword for [a\-z0\-9]+: *
 
 [eventlog]
 # Where to log accept, reject, exit, and alert events.

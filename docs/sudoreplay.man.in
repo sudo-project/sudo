@@ -486,7 +486,7 @@ that match a regular expression:
 .nf
 .sp
 .RS 4n
-# sudoreplay -l user jeff command '/bin/[a-z]*sh'
+# sudoreplay \-l user jeff command '/bin/[a\-z]*sh'
 .RE
 .fi
 .PP

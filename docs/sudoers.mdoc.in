@@ -895,7 +895,7 @@ Group in the same domain: "%:Group Name"
 .It
 Group in any domain: "%:Group Name@FULLY.QUALIFIED.DOMAIN"
 .It
-Group SID: "%:S-1-2-34-5678901234-5678901234-5678901234-567"
+Group SID: "%:S\-1\-2\-34\-5678901234\-5678901234\-5678901234\-567"
 .El
 .Pp
 See

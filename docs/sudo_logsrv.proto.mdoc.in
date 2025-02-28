@@ -229,7 +229,7 @@ The total amount of elapsed time since the command started,
 calculated using a monotonic clock where possible.
 This is not the wall clock time.
 .It exit_value
-The command's exit value in the range 0-255.
+The command's exit value in the range 0\(en255.
 .It dumped_core
 True if the command was terminated by a signal and dumped core.
 .It signal
@@ -733,7 +733,7 @@ message RejectMessage {
 /* Might revisit runtime and use end_time instead */
 message ExitMessage {
   TimeSpec run_time = 1;	/* total elapsed run time */
-  int32 exit_value = 2;		/* 0-255 */
+  int32 exit_value = 2;		/* 0\(en255 */
   bool dumped_core = 3;		/* true if command dumped core */
   string signal = 4;		/* signal name if killed by signal */
   string error = 5;		/* if killed due to other error */

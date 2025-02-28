@@ -433,7 +433,7 @@ List sessions run by user
 .Em jeff
 that match a regular expression:
 .Bd -literal -offset 4n
-# sudoreplay -l user jeff command '/bin/[a-z]*sh'
+# sudoreplay \-l user jeff command '/bin/[a\-z]*sh'
 .Ed
 .Pp
 List sessions run by jeff or bob on the console:
