@@ -1,2 +1,127 @@
 Vscodedev.dev
 system-wide configuration root shell script.sh
++ Add new setting
+
+"ANDROID_ART_ROOT"
+
+"/apex/com.android.art"
+
+FONT
+
+"ANDROID_ASSETS" "/system/app"
+
+"ANDROID_BOOTLOGO" "ן"
+
+"ANDROID DATA" "/data"
+
+"ANDROID 118N_ROOT" "/apex/com.android.i18n"
+
+"ANDROID_ROOT" "/system"
+
+"ANDROID SOCKET_usap_pool_primary" "24"
+
+"ANDROID_SOCKET_zygote" "23"
+
+"ANDROID_STORAGE" "/storage"
+
+"ANDROID_TZDATA_ROOT" "/apex/com.android.tzdata"
+
+"ASEC_MOUNTPOINT" "/mnt/asec"
+
+"BOOTCLASSPATH"
+
+"/apex/com.android.art/javalib/core-oj.jar:/apex/
+
+com.android.art/javalib/core-libart.jar:/apex/apache-xml.jar:/system/framework/framework.jar:/system/framework/framework-graphics.jar:/system/framework/ext.jar:/system/framework/telephony-common.jar./system/framework/voip-common.jar:/system/framework/ims-common.jar:/system/framework/tcmiface.jar:/system/framework/qcom.fmradio.jar:/system/framework/QPerformance.jar:/system/framework/UxPerformance.jar./system/framework/WfdCommon.jar:/system_ext/framework/moto-echolocateapi.jar:/system_ext/framework/
+
+com.android.art/javalib/okhttp.jar./apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/
+
+"DEX20ATBOOTCLASSPATH "
+
+"/apex/com.android.art/javalib/core-oj.jar:/
+
+apex/com.android.art/javalib/core-libart.jar:/
+
+apex/com.android.art/javalib/okhttp.jar:/apex/
+
+com.android.art/javalib/bouncycastle.jar:/
+
+apex/com.android.art/javalib/apache-xml.jar:/
+
+system/framework/framework.jar:/system/
+
+framework/framework-graphics.jar:/
+
+system/framework/ext.jar:/system/
+
+framework/telephony-common.jar:/
+
+system/framework/voip-common.jar:/
+
+system/framework/ims-common.jar./system/framework/tcmiface.jar./system/framework/qcom.fmradio.jar:/system/
+
+framework/QPerformance.jar:/system/
+
+"DOWNLOAD CACHE"
+
+"/data/cache"
+
+"EXTERNAL STORAGE" "/sdcard"
+
+"PATH"
+
+"/product/bin:/apex/com.android.runtime/bin:/apex/com.android.art/bin:/system_ext/bin:/systern/bin:/system/xbin:/odm/bin:/vendor/bin:/
+
+vendor/xbin"
+
+"STANDALONE_SYSTEMSERVER_JAR
+
+S
+
+"/apex/com.android.devicelock/
+
+javalib/service-devicelock.jar:/
+
+apex/com.android.os.statsd/
+
+javalib/service-statsd.jar:/
+
+apex/com.android.scheduling/
+
+javalib/service-scheduling.jar:/
+
+apex/com.android.tethering/
+
+javalib/service-connectivity.jar:/
+
+apex/com.android.uwb/
+
+javalib/service-uwb.jar:/apex/com.android.wifi/javalib/
+
+service-wifi.jar"
+
+"SYSTEMSERVERCLASSPATH"
+
+"/system/framework/
+
+com.android.location.provider.jar:/
+
+system/framework/services.jar:/
+
+apex/com.android.adservices/
+
+javalib/service-adservices.jar:/
+
+apex/com.android.adservices/
+
+javalib/service-sdksandbox.jar:/
+
+apex/com.android.appsearch/
+
+javalib/service-appsearch.jar:/apex/com.android.art/javalib/service-art.jar:/apex/com.android.configinfrastructure/javalib/service-configinfrastructure.jar:/apex/com.android.healthfitness/
+
+javalib/service-healthfitness.jar:/
+
+"TMPDIR"
+
+"/data/user/0/by4a.setedit22/cache"com.android.art/javalib/core-libart.jar:/apex/apache-xml.jar:/system/framework/framework.jar:/system/framework/framework-graphics.jar:/system/framework/ext.jar:/system/framework/telephony-common.jar./system/framework/voip-common.jar:/system/framework/ims-common.jar:/system/framework/tcmiface.jar:/system/framework/qcom.fmradio.jar:/system/framework/QPerformance.jar:/system/framework/UxPerformance.jar./system/framework/WfdCommon.jar:/system_ext/framework/moto-echolocateapi.jar:/system_ext/framework/com.android.art/javalib/okhttp.jar./apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/com.android.art/javalib/bouncycastle.jar:/manifest.xml/Audiobooks/DCIM/Documents/Downloads/Movies/Music/Notifications/Pictures/Podcasts/Recordings/Ringtones/Moto/data/data/fake/storage/emulator/0/alarms/Android manifest.xml/Audiobooks/DCIM/Documents/Downloads/Movies/Music/Notifications/Pictures/Podcasts/Recordings/Ringtones/Moto g play (XT2413V)./myfile texti2625 W.Baseline.Rd Tempe,AZ 85283 800-658.5744 UAT.edu.majors.course.sudo su802.1.1n&GHz | pROD~#!init -ls $./myfileauth.logcontentmediaTek.ieee ibeini based on tinycorelinuxhttps://www.google.com/search?q=contentmediaTek.ieee+ibeini+based+on+tinycorelinux&oq=contentmediaTek.ieee+ibeini+based+on+tinycorelinux&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIKCAEQABiABBiiBDIHCAIQABjvBTIHCAMQABjvBdIBCTE5MzE5ajBqOagCALACAQ&client=ms-android-tracfone-us-rvc3&sourceid=chrome-mobile&ie=UTF-8https://matrixcalc.org/#4%7Bx%7D%5E%7B2%7D-5x-12%3D0content://media/external/downloads/1000001118https://github.com/gnab/rtl8812aucontentmediaTek.ieee
