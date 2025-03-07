@@ -415,9 +415,12 @@ ptrace_readv_string(pid_t pid, unsigned long addr, char *buf, size_t bufsize)
 static ssize_t
 ptrace_read_string(pid_t pid, unsigned long addr, char *buf, size_t bufsize)
 {
-    const char *cp, *buf0 = buf;
-    unsigned long word;
+    const char *buf0 = buf;
     size_t i;
+    union {
+        unsigned long word;
+        char buf[sizeof(unsigned long)];
+    } u;
     debug_decl(ptrace_read_string, SUDO_DEBUG_EXEC);
 
 #ifdef HAVE_PROCESS_VM_READV
@@ -432,28 +435,27 @@ ptrace_read_string(pid_t pid, unsigned long addr, char *buf, size_t bufsize)
      * is the unit ptrace(2) uses.
      */
     for (;;) {
-	word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
-	if (word == (unsigned long)-1) {
+	u.word = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
+	if (u.word == (unsigned long)-1) {
 	    sudo_debug_printf(
 		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 		"ptrace(PTRACE_PEEKDATA, %d, 0x%lx, NULL)", (int)pid, addr);
 	    debug_return_ssize_t(-1);
 	}
 
-	cp = (char *)&word;
-	for (i = 0; i < sizeof(unsigned long); i++) {
+	for (i = 0; i < sizeof(u.buf); i++) {
 	    if (bufsize == 0) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR,
 		    "%s: %d: out of space reading string", __func__, (int)pid);
 		errno = ENOSPC;
 		debug_return_ssize_t(-1);
 	    }
-	    *buf = cp[i];
+	    *buf = u.buf[i];
 	    if (*buf++ == '\0')
 		debug_return_ssize_t(buf - buf0);
 	    bufsize--;
 	}
-	addr += sizeof(unsigned long);
+	addr += sizeof(u.word);
     }
 }
 
@@ -468,6 +470,12 @@ growbuf(char **bufp, size_t *bufsizep, char **curp, size_t *remp)
     const size_t oldsize = *bufsizep;
     char *newbuf;
     debug_decl(growbuf, SUDO_DEBUG_EXEC);
+
+    /* Check for overflow when doubling the size of the buffer. */
+    if (oldsize > SIZE_MAX / 2) {
+       sudo_warnx(U_("%s: %s"), __func__, U_("buffer size overflow"));
+       debug_return_bool(false);
+    }
 
     /* Double the size of the buffer. */
     newbuf = reallocarray(*bufp, 2, oldsize);
@@ -952,14 +960,23 @@ proc_read_link(pid_t pid, const char *name, char *buf, size_t bufsize)
     char path[PATH_MAX];
     debug_decl(proc_read_link, SUDO_DEBUG_EXEC);
 
+    /* Ensure minimum buffer size and termination */
+    if (bufsize < 2) {
+        errno = EOVERFLOW;
+        debug_return_bool(false);
+    }
+
     len = snprintf(path, sizeof(path), "/proc/%d/%s", (int)pid, name);
-    if (len > 0 && len < ssizeof(path)) {
-	len = readlink(path, buf, bufsize - 1);
-	if (len != -1) {
-	    /* readlink(2) does not add the NUL for us. */
-	    buf[len] = '\0';
-	    debug_return_bool(true);
-	}
+    if (len < 0 || len >= ssizeof(path)) {
+        errno = ENAMETOOLONG;
+        debug_return_bool(false);
+    }
+    
+    len = readlink(path, buf, bufsize - 1);
+    if (len != -1) {
+        /* readlink(2) does not add the NUL for us. */
+        buf[len] = '\0';
+        debug_return_bool(true);
     }
     debug_return_bool(false);
 }
