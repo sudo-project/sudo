@@ -1025,6 +1025,7 @@ enable_noargs_shell
 enable_shell_sets_home
 enable_path_info
 enable_env_debug
+enable_ignore_dot
 enable_postinstall
 enable_zlib
 enable_env_reset
@@ -1737,6 +1738,7 @@ Optional Features:
                           Set $HOME to target user in shell mode
   --disable-path-info     Print 'command not allowed' not 'command not found'
   --enable-env-debug      Whether to enable environment debugging.
+  --disable-ignore-dot    allow '.' and "" in the PATH
   --enable-postinstall    Script to run after the install phase
   --enable-zlib[=PATH]    Whether to enable or disable zlib
   --enable-env-reset      Whether to enable environment resetting by default.
@@ -1843,7 +1845,7 @@ Optional Packages:
   --with-badpri           syslog priority for failures (def is "alert")
   --with-logpath          path to the sudo log file
   --with-loglen           maximum length of a log file line (default is 80)
-  --with-ignore-dot       ignore '.' in the PATH
+  --with-ignore-dot       deprecated, use --disable-ignore-dot
   --without-mail-if-no-user
                           do not send mail if user not in sudoers
   --with-mail-if-no-host  send mail if user in sudoers but not for this host
@@ -3715,7 +3717,7 @@ logfac=auth
 goodpri=notice
 badpri=alert
 loglen=80
-ignore_dot=off
+ignore_dot=on
 mail_no_user=on
 mail_no_host=off
 mail_no_perms=off
@@ -5310,9 +5312,7 @@ then :
     yes)	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: adding CSOps standard options" >&5
 printf "%s\n" "$as_me: adding CSOps standard options" >&6;}
 		CHECKSIA=false
-		with_ignore_dot=yes
 		insults=on
-		with_env_editor=yes
 		: ${mansectsu='8'}
 		: ${mansectform='5'}
 		: ${mansectmisc='7'}
@@ -5664,16 +5664,7 @@ printf "%s\n" "#define MAXLOGFILELEN $loglen" >>confdefs.h
 # Check whether --with-ignore-dot was given.
 if test ${with_ignore_dot+y}
 then :
-  withval=$with_ignore_dot; case $with_ignore_dot in
-    yes)	ignore_dot=on
-		printf "%s\n" "#define IGNORE_DOT_PATH 1" >>confdefs.h
-
-		;;
-    no)		ignore_dot=off
-		;;
-    *)		as_fn_error $? "--with-ignore-dot does not take an argument." "$LINENO" 5
-		;;
-esac
+  withval=$with_ignore_dot; enable_ignore_dot="$with_ignore_dot"
 fi
 
 
@@ -6635,6 +6626,24 @@ printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-env-debug:
 fi
 
 
+# Check whether --enable-ignore-dot was given.
+if test ${enable_ignore_dot+y}
+then :
+  enableval=$enable_ignore_dot;  case "$enableval" in
+    yes)	ignore_dot=on
+		;;
+    no)		ignore_dot=off
+		printf "%s\n" "#define ALLOW_DOT_PATH 1" >>confdefs.h
+
+		;;
+    *)		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --enable-ignore-dot: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-ignore-dot: $enableval" >&2;}
+		;;
+  esac
+
+fi
+
+
 # Check whether --enable-postinstall was given.
 if test ${enable_postinstall+y}
 then :
@@ -6842,8 +6851,8 @@ then :
     no)	    printf "%s\n" "#define NO_LEAKS 1" >>confdefs.h
 
 	    ;;
-    *)	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --disable-leaks: $enableval" >&5
-printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --disable-leaks: $enableval" >&2;}
+    *)	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ignoring unknown argument to --enable-leaks: $enableval" >&5
+printf "%s\n" "$as_me: WARNING: ignoring unknown argument to --enable-leaks: $enableval" >&2;}
 	    ;;
   esac
 

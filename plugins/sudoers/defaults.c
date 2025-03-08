@@ -483,7 +483,7 @@ init_defaults(void)
 #ifdef LONG_OTP_PROMPT
     def_long_otp_prompt = true;
 #endif
-#ifdef IGNORE_DOT_PATH
+#ifndef ALLOW_DOT_PATH
     def_ignore_dot = true;
 #endif
 #ifdef ALWAYS_SEND_MAIL
