@@ -106,16 +106,38 @@ sudo_passwd_verify(const struct sudoers_context *ctx, struct passwd *pw,
     debug_return_int(ret);
 }
 #else
+/*
+ * Constant-time string match, compares "candidate" against "target".
+ * Will always traverse the entirety of "candidate".
+ * Returns 0 for match, -1 for mismatch.
+ */
+static int
+timingsafe_strmatch(const char *candidate, const char *target)
+{
+    int ret = 0;
+    debug_decl(timingsafe_strmatch, SUDOERS_DEBUG_AUTH);
+
+    for (;;) {
+	ret |= *candidate ^ *target;
+	if (*candidate == '\0')
+	    break;
+	candidate++;
+	target += *target != '\0';
+    }
+    debug_return_int(ret ? -1 : 0);
+}
+
 int
 sudo_passwd_verify(const struct sudoers_context *ctx, struct passwd *pw,
     const char *pass, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
-    char *pw_passwd = auth->data;
+    int (* volatile cmp)(const char *, const char *) = timingsafe_strmatch;
+    const char *pw_passwd = auth->data;
     int ret;
     debug_decl(sudo_passwd_verify, SUDOERS_DEBUG_AUTH);
 
     /* Simple string compare for systems without crypt(). */
-    if (strcmp(pass, pw_passwd) == 0)
+    if (cmp(pass, pw_passwd) == 0)
 	ret = AUTH_SUCCESS;
     else
 	ret = AUTH_FAILURE;
