@@ -379,21 +379,22 @@ static char *
 getln(int fd, char *buf, size_t bufsiz, bool feedback,
     enum tgetpass_errval *errval)
 {
-    size_t left = bufsiz;
     ssize_t nr = -1;
+    const char *ep;
     char *cp = buf;
     char c = '\0';
     debug_decl(getln, SUDO_DEBUG_CONV);
 
     *errval = TGP_ERRVAL_NOERROR;
 
-    if (left == 0) {
+    if (bufsiz == 0) {
 	*errval = TGP_ERRVAL_READERROR;
 	errno = EINVAL;
 	debug_return_str(NULL);
     }
+    ep = buf + bufsiz - 1;	/* reserve space for NUL byte */
 
-    while (--left) {
+    while (cp < ep) {
 	nr = read(fd, &c, 1);
 	if (nr != 1 || c == '\n' || c == '\r')
 	    break;
@@ -408,13 +409,11 @@ getln(int fd, char *buf, size_t bufsiz, bool feedback,
 		    cp--;
 		}
 		cp = buf;
-		left = bufsiz;
 		continue;
 	    } else if (c == sudo_term_erase) {
 		if (cp > buf) {
 		    ignore_result(write(fd, "\b \b", 3));
 		    cp--;
-		    left++;
 		}
 		continue;
 	    }
@@ -428,7 +427,7 @@ getln(int fd, char *buf, size_t bufsiz, bool feedback,
 	while (cp > buf) {
 	    if (write(fd, "\b \b", 3) != 3)
 		break;
-	    --cp;
+	    cp--;
 	}
     }
 
@@ -444,7 +443,7 @@ getln(int fd, char *buf, size_t bufsiz, bool feedback,
 	debug_return_str(NULL);
     case 0:
 	/* EOF is only an error if no bytes were read. */
-	if (left == bufsiz - 1) {
+	if (buf[0] == '\0') {
 	    *errval = TGP_ERRVAL_NOPASSWORD;
 	    debug_return_str(NULL);
 	}
