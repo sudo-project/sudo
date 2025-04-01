@@ -141,6 +141,7 @@ audit_json_open(unsigned int version, sudo_conv_t conversation,
     if (plugin_options != NULL) {
 	for (cur = plugin_options; (cp = *cur) != NULL; cur++) {
 	    if (strncmp(cp, "logfile=", sizeof("logfile=") - 1) == 0) {
+		free(state.logfile);
 		state.logfile = strdup(cp + sizeof("logfile=") - 1);
 		if (state.logfile == NULL)
 		    goto oom;
