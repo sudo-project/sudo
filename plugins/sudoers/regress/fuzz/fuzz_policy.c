@@ -832,7 +832,8 @@ display_privs(struct sudoers_context *ctx, const struct sudo_nss_list *snl,
 /* STUB */
 int
 find_path(const char *infile, char **outfile, struct stat *sbp,
-    const char *path, bool ignore_dot, char * const *allowlist)
+    const char *path, const char *runchroot, bool ignore_dot,
+    char * const *allowlist)
 {
     switch (pass) {
     case PASS_CHECK_NOT_FOUND:
@@ -855,9 +856,9 @@ find_path(const char *infile, char **outfile, struct stat *sbp,
 /* STUB */
 int
 resolve_cmnd(struct sudoers_context *ctx, const char *infile, char **outfile,
-    const char *path)
+    const char *path, const char *runchroot)
 {
-    return find_path(infile, outfile, NULL, path, false, NULL);
+    return find_path(infile, outfile, NULL, path, NULL, false, NULL);
 }
 
 /* STUB */

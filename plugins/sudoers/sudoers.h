@@ -49,7 +49,6 @@
 #include <defaults.h>
 #include <logging.h>
 #include <parse.h>
-#include <pivot.h>
 
 /*
  * Info passed in from the sudo front-end.
@@ -314,15 +313,16 @@ struct stat;
  * Function prototypes
  */
 /* goodpath.c */
-bool sudo_goodpath(const char *path, struct stat *sbp);
+bool sudo_goodpath(const char *path, const char *runchroot, struct stat *sbp);
 
 /* findpath.c */
 int find_path(const char *infile, char **outfile, struct stat *sbp,
-    const char *path, bool ignore_dot, char * const *allowlist);
+    const char *path, const char *runchroot, bool ignore_dot,
+    char * const *allowlist);
 
 /* resolve_cmnd.c */
 int resolve_cmnd(struct sudoers_context *ctx, const char *infile,
-    char **outfile, const char *path);
+    char **outfile, const char *path, const char *runchroot);
 
 /* check.c */
 int check_user(struct sudoers_context *ctx, unsigned int validated, unsigned int mode);

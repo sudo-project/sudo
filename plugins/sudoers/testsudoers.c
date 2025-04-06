@@ -604,18 +604,6 @@ init_eventlog_config(void)
     return;
 }
 
-bool
-pivot_root(const char *new_root, struct sudoers_pivot *state)
-{
-    return true;
-}
-
-bool
-unpivot_root(struct sudoers_pivot *state)
-{
-    return true;
-}
-
 int
 set_cmnd_path(struct sudoers_context *ctx, const char *runchroot)
 {

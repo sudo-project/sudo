@@ -57,18 +57,6 @@ init_eventlog_config(void)
     return;
 }
 
-bool
-pivot_root(const char *new_root, struct sudoers_pivot *state)
-{
-    return true;
-}
-
-bool
-unpivot_root(struct sudoers_pivot *state)
-{
-    return true;
-}
-
 int
 group_plugin_query(const char *user, const char *group, const struct passwd *pw)
 {
