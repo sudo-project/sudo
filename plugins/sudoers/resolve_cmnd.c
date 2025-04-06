@@ -34,7 +34,7 @@
  */
 int
 resolve_cmnd(struct sudoers_context *ctx, const char *infile,
-    char **outfile, const char *path)
+    char **outfile, const char *path, const char *runchroot)
 {
     int ret = NOT_FOUND_ERROR;
     debug_decl(resolve_cmnd, SUDOERS_DEBUG_UTIL);
@@ -42,7 +42,7 @@ resolve_cmnd(struct sudoers_context *ctx, const char *infile,
     if (!set_perms(ctx, PERM_RUNAS))
         goto done;
     ret = find_path(infile, outfile, ctx->user.cmnd_stat, path,
-        def_ignore_dot, NULL);
+        runchroot, def_ignore_dot, NULL);
     if (!restore_perms())
         goto done;
     if (ret == NOT_FOUND) {
@@ -50,7 +50,7 @@ resolve_cmnd(struct sudoers_context *ctx, const char *infile,
         if (!set_perms(ctx, PERM_USER))
             goto done;
         ret = find_path(infile, outfile, ctx->user.cmnd_stat, path,
-            def_ignore_dot, NULL);
+            runchroot, def_ignore_dot, NULL);
         if (!restore_perms())
             goto done;
     }

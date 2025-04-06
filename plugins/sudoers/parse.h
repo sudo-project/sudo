@@ -418,7 +418,7 @@ int addr_matches(char *n);
 int command_matches(struct sudoers_context *ctx, const char *sudoers_cmnd, const char *sudoers_args, const char *runchroot, struct cmnd_info *info, const struct command_digest_list *digests);
 
 /* match_digest.c */
-int digest_matches(int fd, const char *path, const struct command_digest_list *digests);
+int digest_matches(int fd, const char *path, const char *runchroot, const struct command_digest_list *digests);
 
 /* match.c */
 struct group;

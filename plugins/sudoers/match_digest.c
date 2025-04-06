@@ -40,13 +40,14 @@
 #include <gram.h>
 
 int
-digest_matches(int fd, const char *path,
+digest_matches(int fd, const char *path, const char *runchroot,
     const struct command_digest_list *digests)
 {
     unsigned int digest_type = SUDO_DIGEST_INVALID;
     unsigned char *file_digest = NULL;
     unsigned char *sudoers_digest = NULL;
     struct command_digest *digest;
+    char pathbuf[PATH_MAX];
     size_t digest_len;
     int matched = DENY;
     int fd2 = -1;
@@ -64,6 +65,17 @@ digest_matches(int fd, const char *path,
 	    goto done;
 	}
 	fd = fd2;
+    }
+
+    if (runchroot != NULL) {
+	/* XXX - handle symlinks and '..' in path outside chroot */
+	const int len =
+	    snprintf(pathbuf, sizeof(pathbuf), "%s%s", runchroot, path);
+	if (len >= ssizeof(pathbuf)) {
+	    errno = ENAMETOOLONG;
+	    debug_return_bool(false);
+	}
+	path = pathbuf;
     }
 
     TAILQ_FOREACH(digest, digests, entries) {

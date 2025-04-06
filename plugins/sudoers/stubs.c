@@ -94,17 +94,3 @@ init_eventlog_config(void)
 {
     return;
 }
-
-/* STUB */
-bool
-pivot_root(const char *new_root, struct sudoers_pivot *state)
-{
-    return true;
-}
-
-/* STUB */
-bool
-unpivot_root(struct sudoers_pivot *state)
-{
-    return true;
-}

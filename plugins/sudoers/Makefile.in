@@ -189,11 +189,11 @@ SUDOERS_OBJS = $(AUTH_OBJS) audit.lo boottime.lo check.lo check_util.lo \
                display.lo editor.lo env.lo sudoers_hooks.lo env_pattern.lo \
                file.lo find_path.lo fmtsudoers.lo gc.lo goodpath.lo \
                group_plugin.lo interfaces.lo iolog.lo iolog_path_escapes.lo \
-               locale.lo log_client.lo logging.lo lookup.lo pivot.lo \
-               policy.lo prompt.lo serialize_list.lo set_perms.lo \
-               sethost.lo starttime.lo strlcpy_unesc.lo strvec_join.lo \
-               sudo_nss.lo sudoers.lo sudoers_cb.lo sudoers_ctx_free.lo \
-               timestamp.lo unesc_str.lo @SUDOERS_OBJS@
+               locale.lo log_client.lo logging.lo lookup.lo policy.lo \
+	       prompt.lo serialize_list.lo set_perms.lo sethost.lo \
+	       starttime.lo strlcpy_unesc.lo strvec_join.lo sudo_nss.lo \
+	       sudoers.lo sudoers_cb.lo sudoers_ctx_free.lo timestamp.lo \
+	       unesc_str.lo @SUDOERS_OBJS@
 
 SUDOERS_IOBJS = $(SUDOERS_OBJS:.lo=.i)
 
@@ -727,9 +727,9 @@ afs.lo: $(authdir)/afs.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
         $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-        $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-        $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
-        $(top_builddir)/config.h $(top_builddir)/pathnames.h
+        $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+        $(srcdir)/timestamp.h $(top_builddir)/config.h \
+        $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(authdir)/afs.c
 afs.i: $(authdir)/afs.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
         $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -737,9 +737,9 @@ afs.i: $(authdir)/afs.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
         $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-        $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-        $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
-        $(top_builddir)/config.h $(top_builddir)/pathnames.h
+        $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+        $(srcdir)/timestamp.h $(top_builddir)/config.h \
+        $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(authdir)/afs.c > $@
 afs.plog: afs.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(authdir)/afs.c --i-file afs.i --output-file $@
@@ -749,10 +749,9 @@ aix_auth.lo: $(authdir)/aix_auth.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
              $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-             $(top_builddir)/pathnames.h
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(authdir)/aix_auth.c
 aix_auth.i: $(authdir)/aix_auth.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -760,10 +759,9 @@ aix_auth.i: $(authdir)/aix_auth.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
              $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-             $(top_builddir)/pathnames.h
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(authdir)/aix_auth.c > $@
 aix_auth.plog: aix_auth.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(authdir)/aix_auth.c --i-file aix_auth.i --output-file $@
@@ -773,10 +771,9 @@ alias.lo: $(srcdir)/alias.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-          $(srcdir)/redblack.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-          $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-          $(top_builddir)/pathnames.h
+          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/redblack.h \
+          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/alias.c
 alias.i: $(srcdir)/alias.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -784,10 +781,9 @@ alias.i: $(srcdir)/alias.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-          $(srcdir)/redblack.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-          $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-          $(top_builddir)/pathnames.h
+          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/redblack.h \
+          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/alias.c > $@
 alias.plog: alias.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/alias.c --i-file alias.i --output-file $@
@@ -799,8 +795,8 @@ audit.lo: $(srcdir)/audit.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_ssl_compat.h \
           $(incdir)/sudo_util.h $(srcdir)/bsm_audit.h $(srcdir)/defaults.h \
           $(srcdir)/linux_audit.h $(srcdir)/log_client.h $(srcdir)/logging.h \
-          $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/solaris_audit.h \
-          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(srcdir)/parse.h $(srcdir)/solaris_audit.h $(srcdir)/sudo_nss.h \
+          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/audit.c
 audit.i: $(srcdir)/audit.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
@@ -811,8 +807,8 @@ audit.i: $(srcdir)/audit.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_ssl_compat.h \
           $(incdir)/sudo_util.h $(srcdir)/bsm_audit.h $(srcdir)/defaults.h \
           $(srcdir)/linux_audit.h $(srcdir)/log_client.h $(srcdir)/logging.h \
-          $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/solaris_audit.h \
-          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(srcdir)/parse.h $(srcdir)/solaris_audit.h $(srcdir)/sudo_nss.h \
+          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/audit.c > $@
 audit.plog: audit.i
@@ -824,7 +820,7 @@ b64_decode.lo: $(srcdir)/b64_decode.c $(devdir)/def_data.h \
                $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-               $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/b64_decode.c
@@ -835,7 +831,7 @@ b64_decode.i: $(srcdir)/b64_decode.c $(devdir)/def_data.h \
                $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-               $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/b64_decode.c > $@
@@ -848,7 +844,7 @@ b64_encode.o: $(srcdir)/b64_encode.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-              $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/b64_encode.c
@@ -859,7 +855,7 @@ b64_encode.i: $(srcdir)/b64_encode.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-              $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/b64_encode.c > $@
@@ -871,10 +867,9 @@ boottime.lo: $(srcdir)/boottime.c $(devdir)/def_data.h \
              $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-             $(top_builddir)/pathnames.h
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/boottime.c
 boottime.i: $(srcdir)/boottime.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -882,10 +877,9 @@ boottime.i: $(srcdir)/boottime.c $(devdir)/def_data.h \
              $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-             $(top_builddir)/pathnames.h
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/boottime.c > $@
 boottime.plog: boottime.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/boottime.c --i-file boottime.i --output-file $@
@@ -895,8 +889,8 @@ bsdauth.lo: $(authdir)/bsdauth.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
             $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
             $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-            $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(authdir)/bsdauth.c
 bsdauth.i: $(authdir)/bsdauth.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
@@ -905,8 +899,8 @@ bsdauth.i: $(authdir)/bsdauth.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
             $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
             $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-            $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(authdir)/bsdauth.c > $@
 bsdauth.plog: bsdauth.i
@@ -918,9 +912,9 @@ bsm_audit.lo: $(srcdir)/bsm_audit.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/bsm_audit.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-              $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-              $(top_builddir)/config.h $(top_builddir)/pathnames.h
+              $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/bsm_audit.c
 bsm_audit.i: $(srcdir)/bsm_audit.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -929,9 +923,9 @@ bsm_audit.i: $(srcdir)/bsm_audit.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/bsm_audit.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-              $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-              $(top_builddir)/config.h $(top_builddir)/pathnames.h
+              $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/bsm_audit.c > $@
 bsm_audit.plog: bsm_audit.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/bsm_audit.c --i-file bsm_audit.i --output-file $@
@@ -942,9 +936,9 @@ canon_path.lo: $(srcdir)/canon_path.c $(devdir)/def_data.h \
                $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-               $(srcdir)/pivot.h $(srcdir)/redblack.h $(srcdir)/sudo_nss.h \
-               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-               $(top_builddir)/config.h $(top_builddir)/pathnames.h
+               $(srcdir)/redblack.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/canon_path.c
 canon_path.i: $(srcdir)/canon_path.c $(devdir)/def_data.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -953,9 +947,9 @@ canon_path.i: $(srcdir)/canon_path.c $(devdir)/def_data.h \
                $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-               $(srcdir)/pivot.h $(srcdir)/redblack.h $(srcdir)/sudo_nss.h \
-               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-               $(top_builddir)/config.h $(top_builddir)/pathnames.h
+               $(srcdir)/redblack.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/canon_path.c > $@
 canon_path.plog: canon_path.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/canon_path.c --i-file canon_path.i --output-file $@
@@ -964,20 +958,18 @@ check.lo: $(srcdir)/check.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-          $(srcdir)/timestamp.h $(top_builddir)/config.h \
-          $(top_builddir)/pathnames.h
+          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
+          $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/check.c
 check.i: $(srcdir)/check.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
           $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-          $(srcdir)/timestamp.h $(top_builddir)/config.h \
-          $(top_builddir)/pathnames.h
+          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
+          $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/check.c > $@
 check.plog: check.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/check.c --i-file check.i --output-file $@
@@ -988,9 +980,9 @@ check_addr.o: $(srcdir)/regress/parser/check_addr.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/interfaces.h $(srcdir)/logging.h \
-              $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-              $(top_builddir)/config.h $(top_builddir)/pathnames.h
+              $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/parser/check_addr.c
 check_addr.i: $(srcdir)/regress/parser/check_addr.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -999,9 +991,9 @@ check_addr.i: $(srcdir)/regress/parser/check_addr.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/interfaces.h $(srcdir)/logging.h \
-              $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-              $(top_builddir)/config.h $(top_builddir)/pathnames.h
+              $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+              $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/regress/parser/check_addr.c > $@
 check_addr.plog: check_addr.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/parser/check_addr.c --i-file check_addr.i --output-file $@
@@ -1012,10 +1004,9 @@ check_aliases.o: $(srcdir)/check_aliases.c $(devdir)/def_data.h \
                  $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                  $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                  $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-                 $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-                 $(top_builddir)/pathnames.h
+                 $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+                 $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                 $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/check_aliases.c
 check_aliases.i: $(srcdir)/check_aliases.c $(devdir)/def_data.h \
                  $(devdir)/gram.h $(incdir)/compat/stdbool.h \
@@ -1024,10 +1015,9 @@ check_aliases.i: $(srcdir)/check_aliases.c $(devdir)/def_data.h \
                  $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                  $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                  $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-                 $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-                 $(top_builddir)/pathnames.h
+                 $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+                 $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                 $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/check_aliases.c > $@
 check_aliases.plog: check_aliases.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/check_aliases.c --i-file check_aliases.i --output-file $@
@@ -1062,9 +1052,9 @@ check_editor.o: $(srcdir)/regress/editor/check_editor.c $(devdir)/def_data.c \
                 $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                 $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                 $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-                $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-                $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-                $(top_builddir)/config.h $(top_builddir)/pathnames.h
+                $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/editor/check_editor.c
 check_editor.i: $(srcdir)/regress/editor/check_editor.c $(devdir)/def_data.c \
                 $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
@@ -1073,9 +1063,9 @@ check_editor.i: $(srcdir)/regress/editor/check_editor.c $(devdir)/def_data.c \
                 $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                 $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                 $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-                $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-                $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-                $(top_builddir)/config.h $(top_builddir)/pathnames.h
+                $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/regress/editor/check_editor.c > $@
 check_editor.plog: check_editor.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/editor/check_editor.c --i-file check_editor.i --output-file $@
@@ -1086,7 +1076,7 @@ check_env_pattern.o: $(srcdir)/regress/env_match/check_env_pattern.c \
                      $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                      $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                      $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-                     $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
+                     $(srcdir)/logging.h $(srcdir)/parse.h \
                      $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                      $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                      $(top_builddir)/pathnames.h
@@ -1098,7 +1088,7 @@ check_env_pattern.i: $(srcdir)/regress/env_match/check_env_pattern.c \
                      $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                      $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                      $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-                     $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
+                     $(srcdir)/logging.h $(srcdir)/parse.h \
                      $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                      $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                      $(top_builddir)/pathnames.h
@@ -1113,7 +1103,7 @@ check_exptilde.o: $(srcdir)/regress/exptilde/check_exptilde.c \
                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                   $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                  $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                  $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                   $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                   $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/exptilde/check_exptilde.c
@@ -1125,7 +1115,7 @@ check_exptilde.i: $(srcdir)/regress/exptilde/check_exptilde.c \
                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                   $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                  $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                  $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                   $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                   $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/regress/exptilde/check_exptilde.c > $@
@@ -1167,7 +1157,7 @@ check_iolog_plugin.o: $(srcdir)/regress/iolog_plugin/check_iolog_plugin.c \
                       $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
                       $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                       $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-                      $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
+                      $(srcdir)/logging.h $(srcdir)/parse.h \
                       $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                       $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                       $(top_builddir)/pathnames.h
@@ -1180,7 +1170,7 @@ check_iolog_plugin.i: $(srcdir)/regress/iolog_plugin/check_iolog_plugin.c \
                       $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
                       $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                       $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-                      $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
+                      $(srcdir)/logging.h $(srcdir)/parse.h \
                       $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                       $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                       $(top_builddir)/pathnames.h
@@ -1196,9 +1186,9 @@ check_serialize_list.lo: \
                          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                          $(incdir)/sudo_util.h $(srcdir)/defaults.h \
                          $(srcdir)/logging.h $(srcdir)/parse.h \
-                         $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-                         $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-                         $(top_builddir)/config.h $(top_builddir)/pathnames.h
+                         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                         $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                         $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/serialize_list/check_serialize_list.c
 check_serialize_list.i: \
                          $(srcdir)/regress/serialize_list/check_serialize_list.c \
@@ -1209,9 +1199,9 @@ check_serialize_list.i: \
                          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                          $(incdir)/sudo_util.h $(srcdir)/defaults.h \
                          $(srcdir)/logging.h $(srcdir)/parse.h \
-                         $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-                         $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-                         $(top_builddir)/config.h $(top_builddir)/pathnames.h
+                         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                         $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                         $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/regress/serialize_list/check_serialize_list.c > $@
 check_serialize_list.plog: check_serialize_list.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/serialize_list/check_serialize_list.c --i-file check_serialize_list.i --output-file $@
@@ -1250,7 +1240,7 @@ check_unesc.o: $(srcdir)/regress/unescape/check_unesc.c $(devdir)/def_data.h \
                $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-               $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/unescape/check_unesc.c
@@ -1261,7 +1251,7 @@ check_unesc.i: $(srcdir)/regress/unescape/check_unesc.c $(devdir)/def_data.h \
                $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-               $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/regress/unescape/check_unesc.c > $@
@@ -1274,7 +1264,7 @@ check_util.lo: $(srcdir)/check_util.c $(devdir)/def_data.h \
                $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-               $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/check_util.c
@@ -1285,7 +1275,7 @@ check_util.i: $(srcdir)/check_util.c $(devdir)/def_data.h \
                $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-               $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/check_util.c > $@
@@ -1299,8 +1289,8 @@ cvtsudoers.o: $(srcdir)/cvtsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(incdir)/sudo_lbuf.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/cvtsudoers.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-              $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/redblack.h \
-              $(srcdir)/strlist.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/parse.h $(srcdir)/redblack.h $(srcdir)/strlist.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(srcdir)/sudoers_version.h \
               $(srcdir)/testsudoers_pwutil.h $(srcdir)/tsgetgrpw.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
@@ -1313,8 +1303,8 @@ cvtsudoers.i: $(srcdir)/cvtsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(incdir)/sudo_lbuf.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/cvtsudoers.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-              $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/redblack.h \
-              $(srcdir)/strlist.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/parse.h $(srcdir)/redblack.h $(srcdir)/strlist.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(srcdir)/sudoers_version.h \
               $(srcdir)/testsudoers_pwutil.h $(srcdir)/tsgetgrpw.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
@@ -1329,9 +1319,9 @@ cvtsudoers_csv.o: $(srcdir)/cvtsudoers_csv.c $(devdir)/def_data.h \
                   $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                   $(incdir)/sudo_util.h $(srcdir)/cvtsudoers.h \
                   $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                  $(srcdir)/pivot.h $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
-                  $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-                  $(top_builddir)/config.h $(top_builddir)/pathnames.h
+                  $(srcdir)/strlist.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                  $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                  $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/cvtsudoers_csv.c
 cvtsudoers_csv.i: $(srcdir)/cvtsudoers_csv.c $(devdir)/def_data.h \
                   $(devdir)/gram.h $(incdir)/compat/stdbool.h \
@@ -1341,9 +1331,9 @@ cvtsudoers_csv.i: $(srcdir)/cvtsudoers_csv.c $(devdir)/def_data.h \
                   $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                   $(incdir)/sudo_util.h $(srcdir)/cvtsudoers.h \
                   $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                  $(srcdir)/pivot.h $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
-                  $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-                  $(top_builddir)/config.h $(top_builddir)/pathnames.h
+                  $(srcdir)/strlist.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                  $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                  $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/cvtsudoers_csv.c > $@
 cvtsudoers_csv.plog: cvtsudoers_csv.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/cvtsudoers_csv.c --i-file cvtsudoers_csv.i --output-file $@
@@ -1356,7 +1346,7 @@ cvtsudoers_json.o: $(srcdir)/cvtsudoers_json.c $(devdir)/def_data.h \
                    $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                    $(incdir)/sudo_util.h $(srcdir)/cvtsudoers.h \
                    $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                   $(srcdir)/pivot.h $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
+                   $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
                    $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
                    $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/cvtsudoers_json.c
@@ -1369,7 +1359,7 @@ cvtsudoers_json.i: $(srcdir)/cvtsudoers_json.c $(devdir)/def_data.h \
                    $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                    $(incdir)/sudo_util.h $(srcdir)/cvtsudoers.h \
                    $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                   $(srcdir)/pivot.h $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
+                   $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
                    $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
                    $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/cvtsudoers_json.c > $@
@@ -1383,11 +1373,11 @@ cvtsudoers_ldif.o: $(srcdir)/cvtsudoers_ldif.c $(devdir)/def_data.h \
                    $(incdir)/sudo_lbuf.h $(incdir)/sudo_plugin.h \
                    $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                    $(srcdir)/cvtsudoers.h $(srcdir)/defaults.h \
-                   $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-                   $(srcdir)/redblack.h $(srcdir)/strlist.h \
-                   $(srcdir)/sudo_ldap.h $(srcdir)/sudo_nss.h \
-                   $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-                   $(top_builddir)/config.h $(top_builddir)/pathnames.h
+                   $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/redblack.h \
+                   $(srcdir)/strlist.h $(srcdir)/sudo_ldap.h \
+                   $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                   $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                   $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/cvtsudoers_ldif.c
 cvtsudoers_ldif.i: $(srcdir)/cvtsudoers_ldif.c $(devdir)/def_data.h \
                    $(devdir)/gram.h $(incdir)/compat/stdbool.h \
@@ -1397,11 +1387,11 @@ cvtsudoers_ldif.i: $(srcdir)/cvtsudoers_ldif.c $(devdir)/def_data.h \
                    $(incdir)/sudo_lbuf.h $(incdir)/sudo_plugin.h \
                    $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                    $(srcdir)/cvtsudoers.h $(srcdir)/defaults.h \
-                   $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-                   $(srcdir)/redblack.h $(srcdir)/strlist.h \
-                   $(srcdir)/sudo_ldap.h $(srcdir)/sudo_nss.h \
-                   $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-                   $(top_builddir)/config.h $(top_builddir)/pathnames.h
+                   $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/redblack.h \
+                   $(srcdir)/strlist.h $(srcdir)/sudo_ldap.h \
+                   $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                   $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                   $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/cvtsudoers_ldif.c > $@
 cvtsudoers_ldif.plog: cvtsudoers_ldif.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/cvtsudoers_ldif.c --i-file cvtsudoers_ldif.i --output-file $@
@@ -1413,7 +1403,7 @@ cvtsudoers_merge.o: $(srcdir)/cvtsudoers_merge.c $(devdir)/def_data.h \
                     $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                     $(incdir)/sudo_util.h $(srcdir)/cvtsudoers.h \
                     $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                    $(srcdir)/pivot.h $(srcdir)/redblack.h $(srcdir)/strlist.h \
+                    $(srcdir)/redblack.h $(srcdir)/strlist.h \
                     $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                     $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                     $(top_builddir)/pathnames.h
@@ -1426,7 +1416,7 @@ cvtsudoers_merge.i: $(srcdir)/cvtsudoers_merge.c $(devdir)/def_data.h \
                     $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                     $(incdir)/sudo_util.h $(srcdir)/cvtsudoers.h \
                     $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                    $(srcdir)/pivot.h $(srcdir)/redblack.h $(srcdir)/strlist.h \
+                    $(srcdir)/redblack.h $(srcdir)/strlist.h \
                     $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                     $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                     $(top_builddir)/pathnames.h
@@ -1440,11 +1430,10 @@ cvtsudoers_pwutil.o: $(srcdir)/cvtsudoers_pwutil.c $(devdir)/def_data.h \
                      $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                      $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                      $(srcdir)/cvtsudoers.h $(srcdir)/defaults.h \
-                     $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-                     $(srcdir)/pwutil.h $(srcdir)/strlist.h \
-                     $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-                     $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-                     $(top_builddir)/pathnames.h
+                     $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pwutil.h \
+                     $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
+                     $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                     $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/cvtsudoers_pwutil.c
 cvtsudoers_pwutil.i: $(srcdir)/cvtsudoers_pwutil.c $(devdir)/def_data.h \
                      $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -1453,11 +1442,10 @@ cvtsudoers_pwutil.i: $(srcdir)/cvtsudoers_pwutil.c $(devdir)/def_data.h \
                      $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                      $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                      $(srcdir)/cvtsudoers.h $(srcdir)/defaults.h \
-                     $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-                     $(srcdir)/pwutil.h $(srcdir)/strlist.h \
-                     $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-                     $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-                     $(top_builddir)/pathnames.h
+                     $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pwutil.h \
+                     $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
+                     $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                     $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/cvtsudoers_pwutil.c > $@
 cvtsudoers_pwutil.plog: cvtsudoers_pwutil.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/cvtsudoers_pwutil.c --i-file cvtsudoers_pwutil.i --output-file $@
@@ -1467,9 +1455,9 @@ dce.lo: $(authdir)/dce.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
         $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-        $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-        $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
-        $(top_builddir)/config.h $(top_builddir)/pathnames.h
+        $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+        $(srcdir)/timestamp.h $(top_builddir)/config.h \
+        $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(authdir)/dce.c
 dce.i: $(authdir)/dce.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
         $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -1477,9 +1465,9 @@ dce.i: $(authdir)/dce.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
         $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-        $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-        $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
-        $(top_builddir)/config.h $(top_builddir)/pathnames.h
+        $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+        $(srcdir)/timestamp.h $(top_builddir)/config.h \
+        $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(authdir)/dce.c > $@
 dce.plog: dce.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(authdir)/dce.c --i-file dce.i --output-file $@
@@ -1490,10 +1478,9 @@ defaults.lo: $(srcdir)/defaults.c $(devdir)/def_data.c $(devdir)/def_data.h \
              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
              $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-             $(top_builddir)/pathnames.h
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/defaults.c
 defaults.i: $(srcdir)/defaults.c $(devdir)/def_data.c $(devdir)/def_data.h \
              $(devdir)/gram.h $(incdir)/compat/stdbool.h \
@@ -1502,10 +1489,9 @@ defaults.i: $(srcdir)/defaults.c $(devdir)/def_data.c $(devdir)/def_data.h \
              $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
              $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-             $(top_builddir)/pathnames.h
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/defaults.c > $@
 defaults.plog: defaults.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/defaults.c --i-file defaults.i --output-file $@
@@ -1530,9 +1516,9 @@ display.lo: $(srcdir)/display.c $(devdir)/def_data.h $(devdir)/gram.h \
             $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
             $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
             $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-            $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-            $(top_builddir)/config.h $(top_builddir)/pathnames.h
+            $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+            $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+            $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/display.c
 display.i: $(srcdir)/display.c $(devdir)/def_data.h $(devdir)/gram.h \
             $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -1541,9 +1527,9 @@ display.i: $(srcdir)/display.c $(devdir)/def_data.h $(devdir)/gram.h \
             $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
             $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
             $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-            $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-            $(top_builddir)/config.h $(top_builddir)/pathnames.h
+            $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+            $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+            $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/display.c > $@
 display.plog: display.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/display.c --i-file display.i --output-file $@
@@ -1553,9 +1539,9 @@ editor.lo: $(srcdir)/editor.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
            $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-           $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-           $(top_builddir)/config.h $(top_builddir)/pathnames.h
+           $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+           $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+           $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/editor.c
 editor.i: $(srcdir)/editor.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
@@ -1563,9 +1549,9 @@ editor.i: $(srcdir)/editor.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
            $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-           $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-           $(top_builddir)/config.h $(top_builddir)/pathnames.h
+           $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+           $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+           $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/editor.c > $@
 editor.plog: editor.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/editor.c --i-file editor.i --output-file $@
@@ -1574,18 +1560,18 @@ env.lo: $(srcdir)/env.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
         $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
         $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-        $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-        $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-        $(top_builddir)/config.h $(top_builddir)/pathnames.h
+        $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+        $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+        $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/env.c
 env.i: $(srcdir)/env.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
         $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
         $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
         $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
         $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-        $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-        $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-        $(top_builddir)/config.h $(top_builddir)/pathnames.h
+        $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+        $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+        $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/env.c > $@
 env.plog: env.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/env.c --i-file env.i --output-file $@
@@ -1596,7 +1582,7 @@ env_pattern.lo: $(srcdir)/env_pattern.c $(devdir)/def_data.h \
                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                 $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                 $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/env_pattern.c
@@ -1607,7 +1593,7 @@ env_pattern.i: $(srcdir)/env_pattern.c $(devdir)/def_data.h \
                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                 $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                 $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/env_pattern.c > $@
@@ -1619,8 +1605,8 @@ exptilde.lo: $(srcdir)/exptilde.c $(devdir)/def_data.h \
              $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-             $(srcdir)/pwutil.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pwutil.h \
+             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
              $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/exptilde.c
@@ -1630,8 +1616,8 @@ exptilde.i: $(srcdir)/exptilde.c $(devdir)/def_data.h \
              $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-             $(srcdir)/pwutil.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pwutil.h \
+             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
              $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/exptilde.c > $@
@@ -1644,9 +1630,8 @@ file.lo: $(srcdir)/file.c $(devdir)/def_data.h $(devdir)/gram.h \
          $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
          $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-         $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-         $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-         $(top_builddir)/pathnames.h
+         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+         $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/file.c
 file.i: $(srcdir)/file.c $(devdir)/def_data.h $(devdir)/gram.h \
          $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -1655,9 +1640,8 @@ file.i: $(srcdir)/file.c $(devdir)/def_data.h $(devdir)/gram.h \
          $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
          $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-         $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-         $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-         $(top_builddir)/pathnames.h
+         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+         $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/file.c > $@
 file.plog: file.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/file.c --i-file file.i --output-file $@
@@ -1668,9 +1652,9 @@ filedigest.lo: $(srcdir)/filedigest.c $(devdir)/def_data.h \
                $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-               $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-               $(top_builddir)/config.h $(top_builddir)/pathnames.h
+               $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/filedigest.c
 filedigest.i: $(srcdir)/filedigest.c $(devdir)/def_data.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -1679,9 +1663,9 @@ filedigest.i: $(srcdir)/filedigest.c $(devdir)/def_data.h \
                $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-               $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-               $(top_builddir)/config.h $(top_builddir)/pathnames.h
+               $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/filedigest.c > $@
 filedigest.plog: filedigest.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/filedigest.c --i-file filedigest.i --output-file $@
@@ -1692,7 +1676,7 @@ find_path.lo: $(srcdir)/find_path.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-              $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/find_path.c
@@ -1703,7 +1687,7 @@ find_path.i: $(srcdir)/find_path.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-              $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/find_path.c > $@
@@ -1716,9 +1700,9 @@ fmtsudoers.lo: $(srcdir)/fmtsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-               $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-               $(top_builddir)/config.h $(top_builddir)/pathnames.h
+               $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/fmtsudoers.c
 fmtsudoers.i: $(srcdir)/fmtsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -1727,9 +1711,9 @@ fmtsudoers.i: $(srcdir)/fmtsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-               $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-               $(top_builddir)/config.h $(top_builddir)/pathnames.h
+               $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/fmtsudoers.c > $@
 fmtsudoers.plog: fmtsudoers.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/fmtsudoers.c --i-file fmtsudoers.i --output-file $@
@@ -1741,7 +1725,7 @@ fmtsudoers_cvt.lo: $(srcdir)/fmtsudoers_cvt.c $(devdir)/def_data.h \
                    $(incdir)/sudo_lbuf.h $(incdir)/sudo_plugin.h \
                    $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                    $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                   $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                   $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                    $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                    $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/fmtsudoers_cvt.c
@@ -1753,7 +1737,7 @@ fmtsudoers_cvt.i: $(srcdir)/fmtsudoers_cvt.c $(devdir)/def_data.h \
                    $(incdir)/sudo_lbuf.h $(incdir)/sudo_plugin.h \
                    $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                    $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                   $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                   $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                    $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                    $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/fmtsudoers_cvt.c > $@
@@ -1768,7 +1752,7 @@ fuzz_policy.o: $(srcdir)/regress/fuzz/fuzz_policy.c $(devdir)/def_data.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                $(srcdir)/auth/sudo_auth.h $(srcdir)/defaults.h \
                $(srcdir)/interfaces.h $(srcdir)/logging.h $(srcdir)/parse.h \
-               $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
                $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/fuzz/fuzz_policy.c
@@ -1781,7 +1765,7 @@ fuzz_policy.i: $(srcdir)/regress/fuzz/fuzz_policy.c $(devdir)/def_data.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                $(srcdir)/auth/sudo_auth.h $(srcdir)/defaults.h \
                $(srcdir)/interfaces.h $(srcdir)/logging.h $(srcdir)/parse.h \
-               $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
                $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/regress/fuzz/fuzz_policy.c > $@
@@ -1794,10 +1778,9 @@ fuzz_stubs.o: $(srcdir)/regress/fuzz/fuzz_stubs.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/interfaces.h $(srcdir)/logging.h \
-              $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-              $(srcdir)/timestamp.h $(top_builddir)/config.h \
-              $(top_builddir)/pathnames.h
+              $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
+              $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/fuzz/fuzz_stubs.c
 fuzz_stubs.i: $(srcdir)/regress/fuzz/fuzz_stubs.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -1806,10 +1789,9 @@ fuzz_stubs.i: $(srcdir)/regress/fuzz/fuzz_stubs.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/interfaces.h $(srcdir)/logging.h \
-              $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-              $(srcdir)/timestamp.h $(top_builddir)/config.h \
-              $(top_builddir)/pathnames.h
+              $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
+              $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/regress/fuzz/fuzz_stubs.c > $@
 fuzz_stubs.plog: fuzz_stubs.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/fuzz/fuzz_stubs.c --i-file fuzz_stubs.i --output-file $@
@@ -1820,10 +1802,9 @@ fuzz_sudoers.o: $(srcdir)/regress/fuzz/fuzz_sudoers.c $(devdir)/def_data.h \
                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                 $(srcdir)/defaults.h $(srcdir)/interfaces.h \
-                $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-                $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-                $(top_builddir)/pathnames.h
+                $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+                $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/fuzz/fuzz_sudoers.c
 fuzz_sudoers.i: $(srcdir)/regress/fuzz/fuzz_sudoers.c $(devdir)/def_data.h \
                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -1832,10 +1813,9 @@ fuzz_sudoers.i: $(srcdir)/regress/fuzz/fuzz_sudoers.c $(devdir)/def_data.h \
                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                 $(srcdir)/defaults.h $(srcdir)/interfaces.h \
-                $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-                $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-                $(top_builddir)/pathnames.h
+                $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+                $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/regress/fuzz/fuzz_sudoers.c > $@
 fuzz_sudoers.plog: fuzz_sudoers.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/fuzz/fuzz_sudoers.c --i-file fuzz_sudoers.i --output-file $@
@@ -1846,7 +1826,7 @@ fuzz_sudoers_ldif.o: $(srcdir)/regress/fuzz/fuzz_sudoers_ldif.c \
                      $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                      $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                      $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-                     $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
+                     $(srcdir)/logging.h $(srcdir)/parse.h \
                      $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                      $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                      $(top_builddir)/pathnames.h
@@ -1858,7 +1838,7 @@ fuzz_sudoers_ldif.i: $(srcdir)/regress/fuzz/fuzz_sudoers_ldif.c \
                      $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                      $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                      $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-                     $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
+                     $(srcdir)/logging.h $(srcdir)/parse.h \
                      $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                      $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                      $(top_builddir)/pathnames.h
@@ -1871,8 +1851,8 @@ fwtk.lo: $(authdir)/fwtk.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
          $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
          $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
          $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-         $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+         $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+         $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
          $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(authdir)/fwtk.c
 fwtk.i: $(authdir)/fwtk.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
@@ -1881,8 +1861,8 @@ fwtk.i: $(authdir)/fwtk.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
          $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
          $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
          $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-         $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+         $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+         $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
          $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(authdir)/fwtk.c > $@
 fwtk.plog: fwtk.i
@@ -1892,8 +1872,8 @@ gc.lo: $(srcdir)/gc.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
        $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
        $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
        $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-       $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-       $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+       $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+       $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
        $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/gc.c
 gc.i: $(srcdir)/gc.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
@@ -1901,8 +1881,8 @@ gc.i: $(srcdir)/gc.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
        $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
        $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
        $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-       $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-       $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+       $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+       $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
        $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/gc.c > $@
 gc.plog: gc.i
@@ -1932,7 +1912,7 @@ getspwuid.lo: $(srcdir)/getspwuid.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-              $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/getspwuid.c
@@ -1943,7 +1923,7 @@ getspwuid.i: $(srcdir)/getspwuid.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-              $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/getspwuid.c > $@
@@ -1955,10 +1935,9 @@ goodpath.lo: $(srcdir)/goodpath.c $(devdir)/def_data.h \
              $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-             $(top_builddir)/pathnames.h
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/goodpath.c
 goodpath.i: $(srcdir)/goodpath.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -1966,10 +1945,9 @@ goodpath.i: $(srcdir)/goodpath.c $(devdir)/def_data.h \
              $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-             $(top_builddir)/pathnames.h
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/goodpath.c > $@
 goodpath.plog: goodpath.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/goodpath.c --i-file goodpath.i --output-file $@
@@ -1979,9 +1957,8 @@ gram.lo: $(devdir)/gram.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
          $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-         $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-         $(srcdir)/sudoers_debug.h $(srcdir)/toke.h $(top_builddir)/config.h \
-         $(top_builddir)/pathnames.h
+         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+         $(srcdir)/toke.h $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(devdir)/gram.c
 gram.i: $(devdir)/gram.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -1989,9 +1966,8 @@ gram.i: $(devdir)/gram.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
          $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-         $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-         $(srcdir)/sudoers_debug.h $(srcdir)/toke.h $(top_builddir)/config.h \
-         $(top_builddir)/pathnames.h
+         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+         $(srcdir)/toke.h $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(devdir)/gram.c > $@
 gram.plog: gram.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(devdir)/gram.c --i-file gram.i --output-file $@
@@ -2002,10 +1978,9 @@ group_plugin.lo: $(srcdir)/group_plugin.c $(devdir)/def_data.h \
                  $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                  $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                  $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-                 $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-                 $(top_builddir)/pathnames.h
+                 $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+                 $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                 $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/group_plugin.c
 group_plugin.i: $(srcdir)/group_plugin.c $(devdir)/def_data.h \
                  $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -2014,10 +1989,9 @@ group_plugin.i: $(srcdir)/group_plugin.c $(devdir)/def_data.h \
                  $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                  $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                  $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-                 $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-                 $(top_builddir)/pathnames.h
+                 $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+                 $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                 $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/group_plugin.c > $@
 group_plugin.plog: group_plugin.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/group_plugin.c --i-file group_plugin.i --output-file $@
@@ -2028,9 +2002,9 @@ interfaces.lo: $(srcdir)/interfaces.c $(devdir)/def_data.h \
                $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                $(srcdir)/defaults.h $(srcdir)/interfaces.h $(srcdir)/logging.h \
-               $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-               $(top_builddir)/config.h $(top_builddir)/pathnames.h
+               $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/interfaces.c
 interfaces.i: $(srcdir)/interfaces.c $(devdir)/def_data.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -2039,9 +2013,9 @@ interfaces.i: $(srcdir)/interfaces.c $(devdir)/def_data.h \
                $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                $(srcdir)/defaults.h $(srcdir)/interfaces.h $(srcdir)/logging.h \
-               $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-               $(top_builddir)/config.h $(top_builddir)/pathnames.h
+               $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/interfaces.c > $@
 interfaces.plog: interfaces.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/interfaces.c --i-file interfaces.i --output-file $@
@@ -2053,8 +2027,8 @@ iolog.lo: $(srcdir)/iolog.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
           $(incdir)/sudo_ssl_compat.h $(incdir)/sudo_util.h \
           $(srcdir)/defaults.h $(srcdir)/log_client.h $(srcdir)/logging.h \
-          $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/strlist.h \
-          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(srcdir)/parse.h $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
+          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/iolog.c
 iolog.i: $(srcdir)/iolog.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
@@ -2065,8 +2039,8 @@ iolog.i: $(srcdir)/iolog.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
           $(incdir)/sudo_ssl_compat.h $(incdir)/sudo_util.h \
           $(srcdir)/defaults.h $(srcdir)/log_client.h $(srcdir)/logging.h \
-          $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/strlist.h \
-          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(srcdir)/parse.h $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
+          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog.c > $@
 iolog.plog: iolog.i
@@ -2078,7 +2052,7 @@ iolog_path_escapes.lo: $(srcdir)/iolog_path_escapes.c $(devdir)/def_data.h \
                        $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
                        $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                        $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-                       $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
+                       $(srcdir)/logging.h $(srcdir)/parse.h \
                        $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                        $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                        $(top_builddir)/pathnames.h
@@ -2090,7 +2064,7 @@ iolog_path_escapes.i: $(srcdir)/iolog_path_escapes.c $(devdir)/def_data.h \
                        $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
                        $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                        $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-                       $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
+                       $(srcdir)/logging.h $(srcdir)/parse.h \
                        $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                        $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                        $(top_builddir)/pathnames.h
@@ -2103,8 +2077,8 @@ kerb5.lo: $(authdir)/kerb5.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
           $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(authdir)/kerb5.c
 kerb5.i: $(authdir)/kerb5.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
@@ -2113,8 +2087,8 @@ kerb5.i: $(authdir)/kerb5.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
           $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(authdir)/kerb5.c > $@
 kerb5.plog: kerb5.i
@@ -2125,8 +2099,8 @@ ldap.lo: $(srcdir)/ldap.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
          $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-         $(srcdir)/pivot.h $(srcdir)/sudo_ldap.h $(srcdir)/sudo_ldap_conf.h \
-         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+         $(srcdir)/sudo_ldap.h $(srcdir)/sudo_ldap_conf.h $(srcdir)/sudo_nss.h \
+         $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
          $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/ldap.c
 ldap.i: $(srcdir)/ldap.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
@@ -2135,8 +2109,8 @@ ldap.i: $(srcdir)/ldap.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
          $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-         $(srcdir)/pivot.h $(srcdir)/sudo_ldap.h $(srcdir)/sudo_ldap_conf.h \
-         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+         $(srcdir)/sudo_ldap.h $(srcdir)/sudo_ldap_conf.h $(srcdir)/sudo_nss.h \
+         $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
          $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/ldap.c > $@
 ldap.plog: ldap.i
@@ -2148,7 +2122,7 @@ ldap_conf.lo: $(srcdir)/ldap_conf.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
               $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
               $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-              $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_ldap.h \
+              $(srcdir)/parse.h $(srcdir)/sudo_ldap.h \
               $(srcdir)/sudo_ldap_conf.h $(srcdir)/sudo_nss.h \
               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
@@ -2160,7 +2134,7 @@ ldap_conf.i: $(srcdir)/ldap_conf.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
               $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
               $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-              $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_ldap.h \
+              $(srcdir)/parse.h $(srcdir)/sudo_ldap.h \
               $(srcdir)/sudo_ldap_conf.h $(srcdir)/sudo_nss.h \
               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
@@ -2174,10 +2148,10 @@ ldap_innetgr.lo: $(srcdir)/ldap_innetgr.c $(devdir)/def_data.h \
                  $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                  $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                  $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                 $(srcdir)/pivot.h $(srcdir)/sudo_ldap.h \
-                 $(srcdir)/sudo_ldap_conf.h $(srcdir)/sudo_nss.h \
-                 $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-                 $(top_builddir)/config.h $(top_builddir)/pathnames.h
+                 $(srcdir)/sudo_ldap.h $(srcdir)/sudo_ldap_conf.h \
+                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                 $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/ldap_innetgr.c
 ldap_innetgr.i: $(srcdir)/ldap_innetgr.c $(devdir)/def_data.h \
                  $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -2186,10 +2160,10 @@ ldap_innetgr.i: $(srcdir)/ldap_innetgr.c $(devdir)/def_data.h \
                  $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                  $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                  $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                 $(srcdir)/pivot.h $(srcdir)/sudo_ldap.h \
-                 $(srcdir)/sudo_ldap_conf.h $(srcdir)/sudo_nss.h \
-                 $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-                 $(top_builddir)/config.h $(top_builddir)/pathnames.h
+                 $(srcdir)/sudo_ldap.h $(srcdir)/sudo_ldap_conf.h \
+                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                 $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/ldap_innetgr.c > $@
 ldap_innetgr.plog: ldap_innetgr.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/ldap_innetgr.c --i-file ldap_innetgr.i --output-file $@
@@ -2201,10 +2175,9 @@ ldap_util.lo: $(srcdir)/ldap_util.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(incdir)/sudo_lbuf.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/interfaces.h $(srcdir)/logging.h \
-              $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_ldap.h \
-              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-              $(top_builddir)/pathnames.h
+              $(srcdir)/parse.h $(srcdir)/sudo_ldap.h $(srcdir)/sudo_nss.h \
+              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+              $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/ldap_util.c
 ldap_util.i: $(srcdir)/ldap_util.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -2214,10 +2187,9 @@ ldap_util.i: $(srcdir)/ldap_util.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(incdir)/sudo_lbuf.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/interfaces.h $(srcdir)/logging.h \
-              $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_ldap.h \
-              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-              $(top_builddir)/pathnames.h
+              $(srcdir)/parse.h $(srcdir)/sudo_ldap.h $(srcdir)/sudo_nss.h \
+              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+              $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/ldap_util.c > $@
 ldap_util.plog: ldap_util.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/ldap_util.c --i-file ldap_util.i --output-file $@
@@ -2228,10 +2200,9 @@ linux_audit.lo: $(srcdir)/linux_audit.c $(devdir)/def_data.h \
                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                 $(srcdir)/defaults.h $(srcdir)/linux_audit.h \
-                $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-                $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-                $(top_builddir)/pathnames.h
+                $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+                $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/linux_audit.c
 linux_audit.i: $(srcdir)/linux_audit.c $(devdir)/def_data.h \
                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -2240,10 +2211,9 @@ linux_audit.i: $(srcdir)/linux_audit.c $(devdir)/def_data.h \
                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                 $(srcdir)/defaults.h $(srcdir)/linux_audit.h \
-                $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-                $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-                $(top_builddir)/pathnames.h
+                $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+                $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/linux_audit.c > $@
 linux_audit.plog: linux_audit.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/linux_audit.c --i-file linux_audit.i --output-file $@
@@ -2274,9 +2244,9 @@ log_client.lo: $(srcdir)/log_client.c $(devdir)/def_data.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_ssl_compat.h \
                $(incdir)/sudo_util.h $(srcdir)/defaults.h \
                $(srcdir)/log_client.h $(srcdir)/logging.h $(srcdir)/parse.h \
-               $(srcdir)/pivot.h $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
-               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-               $(top_builddir)/config.h $(top_builddir)/pathnames.h
+               $(srcdir)/strlist.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/log_client.c
 log_client.i: $(srcdir)/log_client.c $(devdir)/def_data.h \
                $(incdir)/compat/getaddrinfo.h $(incdir)/compat/stdbool.h \
@@ -2289,9 +2259,9 @@ log_client.i: $(srcdir)/log_client.c $(devdir)/def_data.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_ssl_compat.h \
                $(incdir)/sudo_util.h $(srcdir)/defaults.h \
                $(srcdir)/log_client.h $(srcdir)/logging.h $(srcdir)/parse.h \
-               $(srcdir)/pivot.h $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
-               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-               $(top_builddir)/config.h $(top_builddir)/pathnames.h
+               $(srcdir)/strlist.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/log_client.c > $@
 log_client.plog: log_client.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/log_client.c --i-file log_client.i --output-file $@
@@ -2304,8 +2274,8 @@ logging.lo: $(srcdir)/logging.c $(devdir)/def_data.h \
             $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
             $(incdir)/sudo_ssl_compat.h $(incdir)/sudo_util.h \
             $(srcdir)/defaults.h $(srcdir)/log_client.h $(srcdir)/logging.h \
-            $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/strlist.h \
-            $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+            $(srcdir)/parse.h $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
+            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/logging.c
 logging.i: $(srcdir)/logging.c $(devdir)/def_data.h \
@@ -2317,8 +2287,8 @@ logging.i: $(srcdir)/logging.c $(devdir)/def_data.h \
             $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
             $(incdir)/sudo_ssl_compat.h $(incdir)/sudo_util.h \
             $(srcdir)/defaults.h $(srcdir)/log_client.h $(srcdir)/logging.h \
-            $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/strlist.h \
-            $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+            $(srcdir)/parse.h $(srcdir)/strlist.h $(srcdir)/sudo_nss.h \
+            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/logging.c > $@
 logging.plog: logging.i
@@ -2329,8 +2299,8 @@ lookup.lo: $(srcdir)/lookup.c $(devdir)/def_data.h $(devdir)/gram.h \
            $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
            $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
            $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-           $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-           $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+           $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
            $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/lookup.c
 lookup.i: $(srcdir)/lookup.c $(devdir)/def_data.h $(devdir)/gram.h \
@@ -2339,8 +2309,8 @@ lookup.i: $(srcdir)/lookup.c $(devdir)/def_data.h $(devdir)/gram.h \
            $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
            $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
            $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-           $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-           $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+           $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
            $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/lookup.c > $@
 lookup.plog: lookup.i
@@ -2351,8 +2321,8 @@ match.lo: $(srcdir)/match.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/match.c
 match.i: $(srcdir)/match.c $(devdir)/def_data.h $(devdir)/gram.h \
@@ -2361,8 +2331,8 @@ match.i: $(srcdir)/match.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
           $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/match.c > $@
 match.plog: match.i
@@ -2374,9 +2344,9 @@ match_addr.lo: $(srcdir)/match_addr.c $(devdir)/def_data.h \
                $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                $(srcdir)/defaults.h $(srcdir)/interfaces.h $(srcdir)/logging.h \
-               $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-               $(top_builddir)/config.h $(top_builddir)/pathnames.h
+               $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/match_addr.c
 match_addr.i: $(srcdir)/match_addr.c $(devdir)/def_data.h \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -2385,9 +2355,9 @@ match_addr.i: $(srcdir)/match_addr.c $(devdir)/def_data.h \
                $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                $(srcdir)/defaults.h $(srcdir)/interfaces.h $(srcdir)/logging.h \
-               $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-               $(top_builddir)/config.h $(top_builddir)/pathnames.h
+               $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/match_addr.c > $@
 match_addr.plog: match_addr.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/match_addr.c --i-file match_addr.i --output-file $@
@@ -2399,10 +2369,9 @@ match_command.lo: $(srcdir)/match_command.c $(devdir)/def_data.h \
                   $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                   $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                   $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-                  $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-                  $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-                  $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-                  $(top_builddir)/pathnames.h
+                  $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+                  $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                  $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/match_command.c
 match_command.i: $(srcdir)/match_command.c $(devdir)/def_data.h \
                   $(devdir)/gram.h $(incdir)/compat/fnmatch.h \
@@ -2412,10 +2381,9 @@ match_command.i: $(srcdir)/match_command.c $(devdir)/def_data.h \
                   $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                   $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                   $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-                  $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-                  $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-                  $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-                  $(top_builddir)/pathnames.h
+                  $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+                  $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                  $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/match_command.c > $@
 match_command.plog: match_command.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/match_command.c --i-file match_command.i --output-file $@
@@ -2427,7 +2395,7 @@ match_digest.lo: $(srcdir)/match_digest.c $(devdir)/def_data.h \
                  $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                  $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                  $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                 $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                  $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                  $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/match_digest.c
@@ -2439,7 +2407,7 @@ match_digest.i: $(srcdir)/match_digest.c $(devdir)/def_data.h \
                  $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                  $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                  $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                 $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                  $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                  $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/match_digest.c > $@
@@ -2469,9 +2437,8 @@ pam.lo: $(authdir)/pam.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
         $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-        $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-        $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-        $(top_builddir)/pathnames.h
+        $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+        $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(authdir)/pam.c
 pam.i: $(authdir)/pam.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
         $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -2479,9 +2446,8 @@ pam.i: $(authdir)/pam.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
         $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-        $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-        $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-        $(top_builddir)/pathnames.h
+        $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+        $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(authdir)/pam.c > $@
 pam.plog: pam.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(authdir)/pam.c --i-file pam.i --output-file $@
@@ -2492,8 +2458,8 @@ parse_ldif.o: $(srcdir)/parse_ldif.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-              $(srcdir)/pivot.h $(srcdir)/redblack.h $(srcdir)/strlist.h \
-              $(srcdir)/sudo_ldap.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/redblack.h $(srcdir)/strlist.h $(srcdir)/sudo_ldap.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/parse_ldif.c
@@ -2504,8 +2470,8 @@ parse_ldif.i: $(srcdir)/parse_ldif.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-              $(srcdir)/pivot.h $(srcdir)/redblack.h $(srcdir)/strlist.h \
-              $(srcdir)/sudo_ldap.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/redblack.h $(srcdir)/strlist.h $(srcdir)/sudo_ldap.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/parse_ldif.c > $@
@@ -2518,7 +2484,7 @@ parser_warnx.lo: $(srcdir)/parser_warnx.c $(devdir)/def_data.h \
                  $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                  $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                  $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                 $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                  $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                  $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/parser_warnx.c
@@ -2529,7 +2495,7 @@ parser_warnx.i: $(srcdir)/parser_warnx.c $(devdir)/def_data.h \
                  $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                  $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                  $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                 $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                  $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                  $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/parser_warnx.c > $@
@@ -2541,8 +2507,8 @@ passwd.lo: $(authdir)/passwd.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
            $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
            $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
            $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-           $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-           $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+           $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
            $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(authdir)/passwd.c
 passwd.i: $(authdir)/passwd.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
@@ -2551,32 +2517,12 @@ passwd.i: $(authdir)/passwd.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
            $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
            $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
            $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-           $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-           $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+           $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
            $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(authdir)/passwd.c > $@
 passwd.plog: passwd.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(authdir)/passwd.c --i-file passwd.i --output-file $@
-pivot.lo: $(srcdir)/pivot.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
-          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
-          $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
-          $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
-          $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-          $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/pivot.c
-pivot.i: $(srcdir)/pivot.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
-          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
-          $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
-          $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
-          $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-          $(top_builddir)/config.h $(top_builddir)/pathnames.h
-	$(CPP) $(CPPFLAGS) $(srcdir)/pivot.c > $@
-pivot.plog: pivot.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/pivot.c --i-file pivot.i --output-file $@
 policy.lo: $(srcdir)/policy.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
            $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
@@ -2584,10 +2530,10 @@ policy.lo: $(srcdir)/policy.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
            $(incdir)/sudo_util.h $(srcdir)/auth/sudo_auth.h \
            $(srcdir)/defaults.h $(srcdir)/interfaces.h $(srcdir)/logging.h \
-           $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-           $(srcdir)/sudoers_version.h $(srcdir)/timestamp.h \
-           $(top_builddir)/config.h $(top_builddir)/pathnames.h
+           $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+           $(srcdir)/sudoers_debug.h $(srcdir)/sudoers_version.h \
+           $(srcdir)/timestamp.h $(top_builddir)/config.h \
+           $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/policy.c
 policy.i: $(srcdir)/policy.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
@@ -2596,10 +2542,10 @@ policy.i: $(srcdir)/policy.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
            $(incdir)/sudo_util.h $(srcdir)/auth/sudo_auth.h \
            $(srcdir)/defaults.h $(srcdir)/interfaces.h $(srcdir)/logging.h \
-           $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-           $(srcdir)/sudoers_version.h $(srcdir)/timestamp.h \
-           $(top_builddir)/config.h $(top_builddir)/pathnames.h
+           $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+           $(srcdir)/sudoers_debug.h $(srcdir)/sudoers_version.h \
+           $(srcdir)/timestamp.h $(top_builddir)/config.h \
+           $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/policy.c > $@
 policy.plog: policy.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/policy.c --i-file policy.i --output-file $@
@@ -2609,9 +2555,9 @@ prompt.lo: $(srcdir)/prompt.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
            $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-           $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-           $(top_builddir)/config.h $(top_builddir)/pathnames.h
+           $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+           $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+           $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/prompt.c
 prompt.i: $(srcdir)/prompt.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
@@ -2619,9 +2565,9 @@ prompt.i: $(srcdir)/prompt.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
            $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-           $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-           $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-           $(top_builddir)/config.h $(top_builddir)/pathnames.h
+           $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+           $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+           $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/prompt.c > $@
 prompt.plog: prompt.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/prompt.c --i-file prompt.i --output-file $@
@@ -2631,10 +2577,9 @@ pwutil.lo: $(srcdir)/pwutil.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
            $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-           $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/pwutil.h \
-           $(srcdir)/redblack.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-           $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-           $(top_builddir)/pathnames.h
+           $(srcdir)/parse.h $(srcdir)/pwutil.h $(srcdir)/redblack.h \
+           $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+           $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/pwutil.c
 pwutil.i: $(srcdir)/pwutil.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h \
@@ -2642,10 +2587,9 @@ pwutil.i: $(srcdir)/pwutil.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
            $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
            $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
            $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-           $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/pwutil.h \
-           $(srcdir)/redblack.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-           $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-           $(top_builddir)/pathnames.h
+           $(srcdir)/parse.h $(srcdir)/pwutil.h $(srcdir)/redblack.h \
+           $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+           $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/pwutil.c > $@
 pwutil.plog: pwutil.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/pwutil.c --i-file pwutil.i --output-file $@
@@ -2656,9 +2600,9 @@ pwutil_impl.lo: $(srcdir)/pwutil_impl.c $(devdir)/def_data.h \
                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                 $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                $(srcdir)/pivot.h $(srcdir)/pwutil.h $(srcdir)/sudo_nss.h \
-                $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-                $(top_builddir)/config.h $(top_builddir)/pathnames.h
+                $(srcdir)/pwutil.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/pwutil_impl.c
 pwutil_impl.i: $(srcdir)/pwutil_impl.c $(devdir)/def_data.h \
                 $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -2667,9 +2611,9 @@ pwutil_impl.i: $(srcdir)/pwutil_impl.c $(devdir)/def_data.h \
                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                 $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                $(srcdir)/pivot.h $(srcdir)/pwutil.h $(srcdir)/sudo_nss.h \
-                $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-                $(top_builddir)/config.h $(top_builddir)/pathnames.h
+                $(srcdir)/pwutil.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+                $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/pwutil_impl.c > $@
 pwutil_impl.plog: pwutil_impl.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/pwutil_impl.c --i-file pwutil_impl.i --output-file $@
@@ -2679,8 +2623,8 @@ redblack.lo: $(srcdir)/redblack.c $(devdir)/def_data.h \
              $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-             $(srcdir)/redblack.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/redblack.h \
+             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
              $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/redblack.c
@@ -2690,8 +2634,8 @@ redblack.i: $(srcdir)/redblack.c $(devdir)/def_data.h \
              $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-             $(srcdir)/redblack.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/redblack.h \
+             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
              $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
              $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/redblack.c > $@
@@ -2704,7 +2648,7 @@ resolve_cmnd.lo: $(srcdir)/resolve_cmnd.c $(devdir)/def_data.h \
                  $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                  $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                  $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                 $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                  $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                  $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/resolve_cmnd.c
@@ -2715,7 +2659,7 @@ resolve_cmnd.i: $(srcdir)/resolve_cmnd.c $(devdir)/def_data.h \
                  $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                  $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                  $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                 $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                 $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                  $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                  $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/resolve_cmnd.c > $@
@@ -2727,8 +2671,8 @@ rfc1938.lo: $(authdir)/rfc1938.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
             $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
             $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-            $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(authdir)/rfc1938.c
 rfc1938.i: $(authdir)/rfc1938.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
@@ -2737,8 +2681,8 @@ rfc1938.i: $(authdir)/rfc1938.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
             $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
             $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-            $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(authdir)/rfc1938.c > $@
 rfc1938.plog: rfc1938.i
@@ -2750,9 +2694,9 @@ secureware.lo: $(authdir)/secureware.c $(authdir)/sudo_auth.h \
                $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-               $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-               $(top_builddir)/config.h $(top_builddir)/pathnames.h
+               $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(authdir)/secureware.c
 secureware.i: $(authdir)/secureware.c $(authdir)/sudo_auth.h \
                $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
@@ -2761,9 +2705,9 @@ secureware.i: $(authdir)/secureware.c $(authdir)/sudo_auth.h \
                $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                $(incdir)/sudo_util.h $(srcdir)/defaults.h $(srcdir)/logging.h \
-               $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-               $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-               $(top_builddir)/config.h $(top_builddir)/pathnames.h
+               $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+               $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(authdir)/secureware.c > $@
 secureware.plog: secureware.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(authdir)/secureware.c --i-file secureware.i --output-file $@
@@ -2773,10 +2717,9 @@ securid5.lo: $(authdir)/securid5.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
              $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-             $(top_builddir)/pathnames.h
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(authdir)/securid5.c
 securid5.i: $(authdir)/securid5.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -2784,10 +2727,9 @@ securid5.i: $(authdir)/securid5.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
              $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-             $(top_builddir)/pathnames.h
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(authdir)/securid5.c > $@
 securid5.plog: securid5.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(authdir)/securid5.c --i-file securid5.i --output-file $@
@@ -2798,7 +2740,7 @@ serialize_list.lo: $(srcdir)/serialize_list.c $(devdir)/def_data.h \
                    $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                    $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                    $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                   $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                   $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                    $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                    $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/serialize_list.c
@@ -2809,7 +2751,7 @@ serialize_list.i: $(srcdir)/serialize_list.c $(devdir)/def_data.h \
                    $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                    $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                    $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                   $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                   $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                    $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                    $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/serialize_list.c > $@
@@ -2822,7 +2764,7 @@ set_perms.lo: $(srcdir)/set_perms.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-              $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/set_perms.c
@@ -2833,7 +2775,7 @@ set_perms.i: $(srcdir)/set_perms.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-              $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/set_perms.c > $@
@@ -2845,8 +2787,8 @@ sethost.lo: $(srcdir)/sethost.c $(devdir)/def_data.h \
             $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
             $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-            $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/sethost.c
 sethost.i: $(srcdir)/sethost.c $(devdir)/def_data.h \
@@ -2855,8 +2797,8 @@ sethost.i: $(srcdir)/sethost.c $(devdir)/def_data.h \
             $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
             $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-            $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/sethost.c > $@
 sethost.plog: sethost.i
@@ -2867,9 +2809,8 @@ sia.lo: $(authdir)/sia.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
         $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-        $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-        $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-        $(top_builddir)/pathnames.h
+        $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+        $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(authdir)/sia.c
 sia.i: $(authdir)/sia.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
         $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -2877,9 +2818,8 @@ sia.i: $(authdir)/sia.c $(authdir)/sudo_auth.h $(devdir)/def_data.h \
         $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
         $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
         $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-        $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-        $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-        $(top_builddir)/pathnames.h
+        $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+        $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(authdir)/sia.c > $@
 sia.plog: sia.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(authdir)/sia.c --i-file sia.i --output-file $@
@@ -2890,10 +2830,9 @@ solaris_audit.lo: $(srcdir)/solaris_audit.c $(devdir)/def_data.h \
                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                   $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                  $(srcdir)/pivot.h $(srcdir)/solaris_audit.h \
-                  $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-                  $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-                  $(top_builddir)/pathnames.h
+                  $(srcdir)/solaris_audit.h $(srcdir)/sudo_nss.h \
+                  $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                  $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/solaris_audit.c
 solaris_audit.i: $(srcdir)/solaris_audit.c $(devdir)/def_data.h \
                   $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -2902,10 +2841,9 @@ solaris_audit.i: $(srcdir)/solaris_audit.c $(devdir)/def_data.h \
                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                   $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                  $(srcdir)/pivot.h $(srcdir)/solaris_audit.h \
-                  $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-                  $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-                  $(top_builddir)/pathnames.h
+                  $(srcdir)/solaris_audit.h $(srcdir)/sudo_nss.h \
+                  $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+                  $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/solaris_audit.c > $@
 solaris_audit.plog: solaris_audit.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/solaris_audit.c --i-file solaris_audit.i --output-file $@
@@ -2915,9 +2853,9 @@ sssd.lo: $(srcdir)/sssd.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
          $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-         $(srcdir)/pivot.h $(srcdir)/sudo_ldap.h $(srcdir)/sudo_nss.h \
-         $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-         $(top_builddir)/config.h $(top_builddir)/pathnames.h
+         $(srcdir)/sudo_ldap.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+         $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+         $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/sssd.c
 sssd.i: $(srcdir)/sssd.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -2925,9 +2863,9 @@ sssd.i: $(srcdir)/sssd.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
          $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-         $(srcdir)/pivot.h $(srcdir)/sudo_ldap.h $(srcdir)/sudo_nss.h \
-         $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-         $(top_builddir)/config.h $(top_builddir)/pathnames.h
+         $(srcdir)/sudo_ldap.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+         $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
+         $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/sssd.c > $@
 sssd.plog: sssd.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sssd.c --i-file sssd.i --output-file $@
@@ -2938,7 +2876,7 @@ starttime.lo: $(srcdir)/starttime.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-              $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/starttime.c
@@ -2949,7 +2887,7 @@ starttime.i: $(srcdir)/starttime.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-              $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/starttime.c > $@
@@ -2962,7 +2900,7 @@ strlcpy_unesc.lo: $(srcdir)/strlcpy_unesc.c $(devdir)/def_data.h \
                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                   $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                  $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                  $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                   $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                   $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/strlcpy_unesc.c
@@ -2973,7 +2911,7 @@ strlcpy_unesc.i: $(srcdir)/strlcpy_unesc.c $(devdir)/def_data.h \
                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                   $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                  $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                  $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                   $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                   $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/strlcpy_unesc.c > $@
@@ -2998,7 +2936,7 @@ strvec_join.lo: $(srcdir)/strvec_join.c $(devdir)/def_data.h \
                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                 $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                 $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/strvec_join.c
@@ -3009,7 +2947,7 @@ strvec_join.i: $(srcdir)/strvec_join.c $(devdir)/def_data.h \
                 $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                 $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                 $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                 $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/strvec_join.c > $@
@@ -3021,9 +2959,8 @@ stubs.o: $(srcdir)/stubs.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
          $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
          $(srcdir)/interfaces.h $(srcdir)/logging.h $(srcdir)/parse.h \
-         $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-         $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-         $(top_builddir)/pathnames.h
+         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+         $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/stubs.c
 stubs.i: $(srcdir)/stubs.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
@@ -3031,9 +2968,8 @@ stubs.i: $(srcdir)/stubs.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
          $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
          $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
          $(srcdir)/interfaces.h $(srcdir)/logging.h $(srcdir)/parse.h \
-         $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-         $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-         $(top_builddir)/pathnames.h
+         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+         $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/stubs.c > $@
 stubs.plog: stubs.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/stubs.c --i-file stubs.i --output-file $@
@@ -3047,10 +2983,9 @@ sudo_auth.lo: $(authdir)/sudo_auth.c $(authdir)/sudo_auth.h \
               $(srcdir)/ins_2001.h $(srcdir)/ins_classic.h \
               $(srcdir)/ins_csops.h $(srcdir)/ins_goons.h \
               $(srcdir)/ins_python.h $(srcdir)/insults.h $(srcdir)/logging.h \
-              $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-              $(srcdir)/timestamp.h $(top_builddir)/config.h \
-              $(top_builddir)/pathnames.h
+              $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
+              $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(authdir)/sudo_auth.c
 sudo_auth.i: $(authdir)/sudo_auth.c $(authdir)/sudo_auth.h \
               $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
@@ -3062,10 +2997,9 @@ sudo_auth.i: $(authdir)/sudo_auth.c $(authdir)/sudo_auth.h \
               $(srcdir)/ins_2001.h $(srcdir)/ins_classic.h \
               $(srcdir)/ins_csops.h $(srcdir)/ins_goons.h \
               $(srcdir)/ins_python.h $(srcdir)/insults.h $(srcdir)/logging.h \
-              $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
-              $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-              $(srcdir)/timestamp.h $(top_builddir)/config.h \
-              $(top_builddir)/pathnames.h
+              $(srcdir)/parse.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
+              $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(authdir)/sudo_auth.c > $@
 sudo_auth.plog: sudo_auth.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(authdir)/sudo_auth.c --i-file sudo_auth.i --output-file $@
@@ -3075,10 +3009,9 @@ sudo_nss.lo: $(srcdir)/sudo_nss.c $(devdir)/def_data.h \
              $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-             $(top_builddir)/pathnames.h
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/sudo_nss.c
 sudo_nss.i: $(srcdir)/sudo_nss.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -3086,10 +3019,9 @@ sudo_nss.i: $(srcdir)/sudo_nss.c $(devdir)/def_data.h \
              $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-             $(top_builddir)/pathnames.h
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/sudo_nss.c > $@
 sudo_nss.plog: sudo_nss.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sudo_nss.c --i-file sudo_nss.i --output-file $@
@@ -3114,8 +3046,8 @@ sudoers.lo: $(srcdir)/sudoers.c $(devdir)/def_data.h \
             $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
             $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-            $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
             $(srcdir)/timestamp.h $(top_builddir)/config.h \
             $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/sudoers.c
@@ -3126,8 +3058,8 @@ sudoers.i: $(srcdir)/sudoers.c $(devdir)/def_data.h \
             $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
             $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-            $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
             $(srcdir)/timestamp.h $(top_builddir)/config.h \
             $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/sudoers.c > $@
@@ -3141,7 +3073,7 @@ sudoers_cb.lo: $(srcdir)/sudoers_cb.c $(devdir)/def_data.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-               $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
                $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/sudoers_cb.c
@@ -3153,7 +3085,7 @@ sudoers_cb.i: $(srcdir)/sudoers_cb.c $(devdir)/def_data.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_plugin.h \
                $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-               $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
                $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/sudoers_cb.c > $@
@@ -3166,7 +3098,7 @@ sudoers_ctx_free.lo: $(srcdir)/sudoers_ctx_free.c $(devdir)/def_data.h \
                      $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                      $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                      $(srcdir)/defaults.h $(srcdir)/logging.h \
-                     $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
+                     $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
                      $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
                      $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/sudoers_ctx_free.c
@@ -3177,7 +3109,7 @@ sudoers_ctx_free.i: $(srcdir)/sudoers_ctx_free.c $(devdir)/def_data.h \
                      $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                      $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                      $(srcdir)/defaults.h $(srcdir)/logging.h \
-                     $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/sudo_nss.h \
+                     $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
                      $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
                      $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/sudoers_ctx_free.c > $@
@@ -3190,7 +3122,7 @@ sudoers_debug.lo: $(srcdir)/sudoers_debug.c $(devdir)/def_data.h \
                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                   $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                  $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                  $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                   $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                   $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/sudoers_debug.c
@@ -3201,7 +3133,7 @@ sudoers_debug.i: $(srcdir)/sudoers_debug.c $(devdir)/def_data.h \
                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                   $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                  $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                  $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                   $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                   $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/sudoers_debug.c > $@
@@ -3214,7 +3146,7 @@ sudoers_hooks.lo: $(srcdir)/sudoers_hooks.c $(devdir)/def_data.h \
                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                   $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                  $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                  $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                   $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                   $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/sudoers_hooks.c
@@ -3225,7 +3157,7 @@ sudoers_hooks.i: $(srcdir)/sudoers_hooks.c $(devdir)/def_data.h \
                   $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                   $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-                  $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+                  $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                   $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
                   $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/sudoers_hooks.c > $@
@@ -3261,7 +3193,7 @@ testsudoers.o: $(srcdir)/testsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                $(incdir)/sudo_util.h $(srcdir)/defaults.h \
                $(srcdir)/interfaces.h $(srcdir)/logging.h $(srcdir)/parse.h \
-               $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                $(srcdir)/sudoers_debug.h $(srcdir)/testsudoers_pwutil.h \
                $(srcdir)/toke.h $(srcdir)/tsgetgrpw.h $(top_builddir)/config.h \
                $(top_builddir)/pathnames.h
@@ -3274,7 +3206,7 @@ testsudoers.i: $(srcdir)/testsudoers.c $(devdir)/def_data.h $(devdir)/gram.h \
                $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h \
                $(incdir)/sudo_util.h $(srcdir)/defaults.h \
                $(srcdir)/interfaces.h $(srcdir)/logging.h $(srcdir)/parse.h \
-               $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+               $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
                $(srcdir)/sudoers_debug.h $(srcdir)/testsudoers_pwutil.h \
                $(srcdir)/toke.h $(srcdir)/tsgetgrpw.h $(top_builddir)/config.h \
                $(top_builddir)/pathnames.h
@@ -3288,7 +3220,7 @@ testsudoers_pwutil.o: $(srcdir)/testsudoers_pwutil.c $(devdir)/def_data.h \
                       $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                       $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                       $(srcdir)/defaults.h $(srcdir)/logging.h \
-                      $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/pwutil.h \
+                      $(srcdir)/parse.h $(srcdir)/pwutil.h \
                       $(srcdir)/pwutil_impl.c $(srcdir)/sudo_nss.h \
                       $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
                       $(srcdir)/testsudoers_pwutil.h $(srcdir)/tsgetgrpw.h \
@@ -3301,7 +3233,7 @@ testsudoers_pwutil.i: $(srcdir)/testsudoers_pwutil.c $(devdir)/def_data.h \
                       $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
                       $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                       $(srcdir)/defaults.h $(srcdir)/logging.h \
-                      $(srcdir)/parse.h $(srcdir)/pivot.h $(srcdir)/pwutil.h \
+                      $(srcdir)/parse.h $(srcdir)/pwutil.h \
                       $(srcdir)/pwutil_impl.c $(srcdir)/sudo_nss.h \
                       $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
                       $(srcdir)/testsudoers_pwutil.h $(srcdir)/tsgetgrpw.h \
@@ -3328,7 +3260,7 @@ timestamp.lo: $(srcdir)/timestamp.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-              $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/timestamp.c
@@ -3339,7 +3271,7 @@ timestamp.i: $(srcdir)/timestamp.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-              $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/timestamp.c > $@
@@ -3351,8 +3283,8 @@ timestr.lo: $(srcdir)/timestr.c $(devdir)/def_data.h \
             $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
             $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-            $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/timestr.c
 timestr.i: $(srcdir)/timestr.c $(devdir)/def_data.h \
@@ -3361,8 +3293,8 @@ timestr.i: $(srcdir)/timestr.c $(devdir)/def_data.h \
             $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
             $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
             $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-            $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+            $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+            $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/timestr.c > $@
 timestr.plog: timestr.i
@@ -3374,9 +3306,8 @@ toke.lo: $(devdir)/toke.c $(devdir)/def_data.h $(devdir)/gram.h \
          $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
          $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-         $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-         $(srcdir)/sudoers_debug.h $(srcdir)/toke.h $(top_builddir)/config.h \
-         $(top_builddir)/pathnames.h
+         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+         $(srcdir)/toke.h $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(devdir)/toke.c
 toke.i: $(devdir)/toke.c $(devdir)/def_data.h $(devdir)/gram.h \
          $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -3385,9 +3316,8 @@ toke.i: $(devdir)/toke.c $(devdir)/def_data.h $(devdir)/gram.h \
          $(incdir)/sudo_gettext.h $(incdir)/sudo_lbuf.h \
          $(incdir)/sudo_plugin.h $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
          $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-         $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-         $(srcdir)/sudoers_debug.h $(srcdir)/toke.h $(top_builddir)/config.h \
-         $(top_builddir)/pathnames.h
+         $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+         $(srcdir)/toke.h $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(devdir)/toke.c > $@
 toke.plog: toke.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(devdir)/toke.c --i-file toke.i --output-file $@
@@ -3398,7 +3328,7 @@ toke_util.lo: $(srcdir)/toke_util.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-              $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(srcdir)/toke.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/toke_util.c
@@ -3409,7 +3339,7 @@ toke_util.i: $(srcdir)/toke_util.c $(devdir)/def_data.h $(devdir)/gram.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-              $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(srcdir)/toke.h \
               $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/toke_util.c > $@
@@ -3420,20 +3350,18 @@ tsdump.o: $(srcdir)/tsdump.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-          $(srcdir)/timestamp.h $(top_builddir)/config.h \
-          $(top_builddir)/pathnames.h
+          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
+          $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/tsdump.c
 tsdump.i: $(srcdir)/tsdump.c $(devdir)/def_data.h $(incdir)/compat/stdbool.h \
           $(incdir)/sudo_compat.h $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
           $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-          $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-          $(srcdir)/timestamp.h $(top_builddir)/config.h \
-          $(top_builddir)/pathnames.h
+          $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h $(srcdir)/timestamp.h \
+          $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/tsdump.c > $@
 tsdump.plog: tsdump.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/tsdump.c --i-file tsdump.i --output-file $@
@@ -3443,10 +3371,10 @@ tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(devdir)/def_data.h \
              $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-             $(srcdir)/sudoers_debug.h $(srcdir)/tsgetgrpw.h \
-             $(top_builddir)/config.h $(top_builddir)/pathnames.h
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+             $(srcdir)/tsgetgrpw.h $(top_builddir)/config.h \
+             $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/tsgetgrpw.c
 tsgetgrpw.i: $(srcdir)/tsgetgrpw.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -3454,10 +3382,10 @@ tsgetgrpw.i: $(srcdir)/tsgetgrpw.c $(devdir)/def_data.h \
              $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-             $(srcdir)/sudoers_debug.h $(srcdir)/tsgetgrpw.h \
-             $(top_builddir)/config.h $(top_builddir)/pathnames.h
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+             $(srcdir)/tsgetgrpw.h $(top_builddir)/config.h \
+             $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/tsgetgrpw.c > $@
 tsgetgrpw.plog: tsgetgrpw.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/tsgetgrpw.c --i-file tsgetgrpw.i --output-file $@
@@ -3480,7 +3408,7 @@ unesc_str.lo: $(srcdir)/unesc_str.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-              $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/unesc_str.c
@@ -3491,7 +3419,7 @@ unesc_str.i: $(srcdir)/unesc_str.c $(devdir)/def_data.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
               $(srcdir)/defaults.h $(srcdir)/logging.h $(srcdir)/parse.h \
-              $(srcdir)/pivot.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+              $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
               $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
               $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/unesc_str.c > $@
@@ -3504,10 +3432,9 @@ visudo.o: $(srcdir)/visudo.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
           $(srcdir)/interfaces.h $(srcdir)/logging.h $(srcdir)/parse.h \
-          $(srcdir)/pivot.h $(srcdir)/redblack.h $(srcdir)/sudo_nss.h \
-          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-          $(srcdir)/sudoers_version.h $(top_builddir)/config.h \
-          $(top_builddir)/pathnames.h
+          $(srcdir)/redblack.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+          $(srcdir)/sudoers_debug.h $(srcdir)/sudoers_version.h \
+          $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/visudo.c
 visudo.i: $(srcdir)/visudo.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/compat/getopt.h $(incdir)/compat/stdbool.h \
@@ -3516,10 +3443,9 @@ visudo.i: $(srcdir)/visudo.c $(devdir)/def_data.h $(devdir)/gram.h \
           $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
           $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
           $(srcdir)/interfaces.h $(srcdir)/logging.h $(srcdir)/parse.h \
-          $(srcdir)/pivot.h $(srcdir)/redblack.h $(srcdir)/sudo_nss.h \
-          $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
-          $(srcdir)/sudoers_version.h $(top_builddir)/config.h \
-          $(top_builddir)/pathnames.h
+          $(srcdir)/redblack.h $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
+          $(srcdir)/sudoers_debug.h $(srcdir)/sudoers_version.h \
+          $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/visudo.c > $@
 visudo.plog: visudo.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/visudo.c --i-file visudo.i --output-file $@
@@ -3529,10 +3455,9 @@ visudo_cb.o: $(srcdir)/visudo_cb.c $(devdir)/def_data.h \
              $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-             $(top_builddir)/pathnames.h
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/visudo_cb.c
 visudo_cb.i: $(srcdir)/visudo_cb.c $(devdir)/def_data.h \
              $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
@@ -3540,10 +3465,9 @@ visudo_cb.i: $(srcdir)/visudo_cb.c $(devdir)/def_data.h \
              $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
              $(incdir)/sudo_gettext.h $(incdir)/sudo_plugin.h \
              $(incdir)/sudo_queue.h $(incdir)/sudo_util.h $(srcdir)/defaults.h \
-             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/pivot.h \
-             $(srcdir)/sudo_nss.h $(srcdir)/sudoers.h \
-             $(srcdir)/sudoers_debug.h $(top_builddir)/config.h \
-             $(top_builddir)/pathnames.h
+             $(srcdir)/logging.h $(srcdir)/parse.h $(srcdir)/sudo_nss.h \
+             $(srcdir)/sudoers.h $(srcdir)/sudoers_debug.h \
+             $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/visudo_cb.c > $@
 visudo_cb.plog: visudo_cb.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/visudo_cb.c --i-file visudo_cb.i --output-file $@
