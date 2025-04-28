@@ -268,7 +268,7 @@ was previously interrupted.
 It contains the following members:
 .Bl -tag -width Ds
 .It log_id
-The the server-side name for an I/O log that was previously
+The server-side name for an I/O log that was previously
 sent to the client by the server.
 This may be a path name on the server or some other kind of server-side
 identifier.
@@ -793,7 +793,7 @@ message ServerHello {
 .Xr sudo_logsrvd @mansectsu@
 .Rs
 .%T Protocol Buffers
-.%U https://developers.google.com/protocol-buffers/
+.%U https://protobuf.dev/
 .Re
 .Sh AUTHORS
 Many people have worked on
