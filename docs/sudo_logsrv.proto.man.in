@@ -290,7 +290,7 @@ was previously interrupted.
 It contains the following members:
 .TP 8n
 log_id
-The the server-side name for an I/O log that was previously
+The server-side name for an I/O log that was previously
 sent to the client by the server.
 This may be a path name on the server or some other kind of server-side
 identifier.
@@ -876,7 +876,7 @@ sudo(8),
 sudo_logsrvd(8)
 .PP
 \fIProtocol Buffers\fR,
-https://developers.google.com/protocol-buffers/.
+https://protobuf.dev/.
 .SH "AUTHORS"
 Many people have worked on
 \fBsudo\fR
@@ -902,7 +902,7 @@ sudo-workers mailing list,
 https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
 or <sudo@sudo.ws> (private).
 .PP
-Please not report security vulnerabilities through public GitHub
+Please do not report security vulnerabilities through public GitHub
 issues, Bugzilla or mailing lists.
 Instead, report them via email to <Todd.Miller@sudo.ws>.
 You may encrypt your message with PGP if you would like, using
