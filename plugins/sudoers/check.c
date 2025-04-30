@@ -136,8 +136,8 @@ check_user(struct sudoers_context *ctx, unsigned int validated,
 	ret = AUTH_SUCCESS;
 	goto done;
     }
-    if (ctx->user.uid == 0 || (ctx->user.uid == ctx->runas.pw->pw_uid &&
-	(ctx->runas.gr == NULL ||
+    if (ctx->user.uid == 0 || (ISSET(mode, MODE_RUN|MODE_EDIT) &&
+	ctx->user.uid == ctx->runas.pw->pw_uid && (ctx->runas.gr == NULL ||
 	user_in_group(ctx->user.pw, ctx->runas.gr->gr_name)))) {
 	if (ctx->runas.role == NULL && ctx->runas.type == NULL &&
 	    ctx->runas.apparmor_profile == NULL &&
