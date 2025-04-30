@@ -369,28 +369,30 @@ bool
 log_failure(const struct sudoers_context *ctx, unsigned int status,
     int cmnd_status)
 {
-    bool ret, inform_user = true;
+    bool ret, warn_not_found = false;
     debug_decl(log_failure, SUDOERS_DEBUG_LOGGING);
 
-    /* The user doesn't always get to see the log message (path info). */
+    /*
+     * If the command was not found but the user has a sudoers entry
+     * for this host, we want to give them a better warning than just
+     * "Sorry, user foo may not run sudo on bar."  Otherwise, a mistyped
+     * sudo command can make it appear that the user has no sudo
+     * privileges on the host, even when they do.
+     *
+     * This behavior is controlled by the "path_info" setting.  We
+     * only do this when running an actual command since FLAG_NO_USER
+     * and FLAG_NO_HOST are not set for pseudo-commands like "list".
+     */
     if (!ISSET(status, FLAG_NO_USER | FLAG_NO_HOST) &&
-	    ctx->runas.list_pw == NULL && def_path_info &&
+	    ISSET(ctx->mode, MODE_RUN) && def_path_info &&
 	    (cmnd_status == NOT_FOUND_DOT || cmnd_status == NOT_FOUND))
-	inform_user = false;
-    ret = log_denial(ctx, status, inform_user);
+	warn_not_found = true;
+    ret = log_denial(ctx, status, !warn_not_found);
 
-    if (!inform_user) {
+    if (warn_not_found) {
 	const char *cmnd = ctx->user.cmnd;
-	if (ISSET(ctx->mode, MODE_CHECK))
-	    cmnd = ctx->user.cmnd_list ? ctx->user.cmnd_list : ctx->runas.argv[1];
 
-	/*
-	 * We'd like to not leak path info at all here, but that can
-	 * *really* confuse the users.  To really close the leak we'd
-	 * have to say "not allowed to run foo" even when the problem
-	 * is just "no foo in path" since the user can trivially set
-	 * their path to just contain a single dir.
-	 */
+	/* This text must be kept in sync with sudoers_check_common() */
 	if (cmnd_status == NOT_FOUND)
 	    sudo_warnx(U_("%s: command not found"), cmnd);
 	else if (cmnd_status == NOT_FOUND_DOT)
