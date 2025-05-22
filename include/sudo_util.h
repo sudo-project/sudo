@@ -342,7 +342,8 @@ extern int (*sudo_printf)(int msg_type, const char * restrict fmt, ...);
 sudo_dso_public bool sudo_isatty_v1(int fd, struct stat *sbp);
 #define sudo_isatty(_a, _b) sudo_isatty_v1((_a), (_b))
 sudo_dso_public bool sudo_term_cbreak_v1(int fd);
-#define sudo_term_cbreak(_a) sudo_term_cbreak_v1((_a))
+sudo_dso_public bool sudo_term_cbreak_v2(int fd, bool flush);
+#define sudo_term_cbreak(_a, _b) sudo_term_cbreak_v2((_a), (_b))
 sudo_dso_public bool sudo_term_copy_v1(int src, int dst);
 #define sudo_term_copy(_a, _b) sudo_term_copy_v1((_a), (_b))
 sudo_dso_public bool sudo_term_noecho_v1(int fd);

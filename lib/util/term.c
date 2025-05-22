@@ -244,7 +244,7 @@ sudo_term_noecho_v1(int fd)
 #ifdef VSTATUS
     term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
-    if (tcsetattr_nobg(fd, TCSASOFT|TCSADRAIN, &term) == -1) {
+    if (tcsetattr_nobg(fd, TCSASOFT|TCSAFLUSH, &term) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: tcsetattr(%d)", __func__, fd);
 	goto unlock;
@@ -358,8 +358,9 @@ unlock:
  * Returns true on success or false on failure.
  */
 bool
-sudo_term_cbreak_v1(int fd)
+sudo_term_cbreak_v2(int fd, bool flush)
 {
+    const int flags = flush ? (TCSASOFT|TCSAFLUSH) : (TCSASOFT|TCSADRAIN);
     struct termios term = { 0 };
     bool ret = false;
     debug_decl(sudo_term_cbreak, SUDO_DEBUG_UTIL);
@@ -382,7 +383,7 @@ sudo_term_cbreak_v1(int fd)
 #ifdef VSTATUS
     term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
-    if (tcsetattr_nobg(fd, TCSASOFT|TCSADRAIN, &term) == -1) {
+    if (tcsetattr_nobg(fd, flags, &term) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: tcsetattr(%d)", __func__, fd);
 	goto unlock;
@@ -397,6 +398,12 @@ sudo_term_cbreak_v1(int fd)
 unlock:
     sudo_lock_file(fd, SUDO_UNLOCK);
     debug_return_bool(ret);
+}
+
+bool
+sudo_term_cbreak_v1(int fd)
+{
+    return sudo_term_cbreak_v2(fd, false);
 }
 
 /*

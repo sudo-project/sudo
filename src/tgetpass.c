@@ -185,7 +185,7 @@ restart:
     if (!ISSET(flags, TGP_ECHO)) {
 	for (;;) {
 	    if (ISSET(flags, TGP_MASK))
-		neednl = feedback = sudo_term_cbreak(input);
+		neednl = feedback = sudo_term_cbreak(input, true);
 	    else
 		neednl = sudo_term_noecho(input);
 	    if (neednl || errno != EINTR)
