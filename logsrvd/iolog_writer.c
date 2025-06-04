@@ -447,7 +447,7 @@ struct iolog_path_closure {
 };
 
 static size_t
-fill_seq(char *str, size_t strsize, void *v)
+fill_seq(char * restrict str, size_t strsize, void * restrict v)
 {
     struct iolog_path_closure *closure = v;
     char *sessid = closure->evlog->sessid;
