@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2024
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2025
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd December 20, 2024
+.Dd June 7, 2025
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1355,6 +1355,8 @@ option was specified.
 If set,
 .Ev PS1
 will be set to its value for the program being run.
+.It Ev SUDO_TTY
+Set to the terminal device of the user who invoked sudo, if one is present.
 .It Ev SUDO_UID
 Set to the user-ID of the user who invoked sudo.
 .It Ev SUDO_USER
