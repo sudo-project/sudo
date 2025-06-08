@@ -1,3 +1,69 @@
+What's new in Sudo 1.9.17
+
+ * Sudo now uses the NODEV macro consistently. Bug #1074.
+
+ * Fixed a bug where the "ALL" command in a sudoers rule would
+   override a previous NOSETENV tag.  Command tags are inherited
+   from previous Cmnds in a Cmnd_Spec_List.  There is a special
+   case for the SETENV tag with the "ALL" command, where SETENV is
+   implied if no explicit SETENV or NOSETENV tag is specified.  This
+   special case did not take into account that a NOSETENV tag that
+   was inherited should override this behavior.
+
+ * If sudo is run via ssh without a terminal and a password is
+   required, it now suggest using ssh's "-t" option.
+
+ * Fixed the display of timeout values in the "sudo -V" output
+   on systems without a C99-compliant snprintf() function.
+
+ * Quieted a number of Coverity minor warnings.
+
+ * Fixed a problem running sudo from a serial console on Linux when
+   the command is run in a pseudo-terminal (the default).
+
+ * Fixed a crash in sudo which could occur if there was a fatal
+   error after the user was validated but before the command was
+   actually run.
+
+ * Fixed a number of man page style warnings.  The "lint" make target
+   in the docs directory will now run groff with warnings enabled
+   if it is available.  Bug #1075.
+
+ * The "ignore_dot" sudoers setting is now on by default.  There
+   is now a "--disable-ignore-dot" configure option to disable it.
+   The "--with-ignore-dot" configure option has been deprecated.
+
+ * Fixed a problem with the "pwfeedback" option where an initial
+   backspace would reduce the maximum length allowed for the password.
+   GitHub issue #439.
+
+ * Fixed minor grammar and spelling problems in the man pages.
+
+ * Fixed a bug where a user could avoid entering a password for
+   "sudo -l command" if they specified their own user or group name
+   via the "-u" or "-g" options.
+
+ * Avoid potential password guessing based on timing attacks on
+   the strcmp() function on systems without PAM or a crypt() function
+   where plaintext passwords are stored in the shadow password file.
+
+ * Fixed a potential information leak where "sudo -l command" could
+   be used to determine whether an executable exists in a directory
+   that they do not have search access to.
+
+ * Sudo uses TCSAFLUSH, not TCSADRAIN, when disabling echo once
+   again.  A long time ago sudo changed from using TCSAFLUSH to
+   TCSADRAIN due to some systems having bugs related to TCSAFLUSH.
+   That should no longer be a concern.  Using TCSAFLUSH ensures
+   that password input that has been received by the kernel, but
+   not yet read by sudo, will be discarded and not echoed.
+
+ * Added the SUDO_TTY environment variable if the user has a terminal.
+   This can be used to find the user's original tty device when sudo
+   runs the command in its own pseudo-terminal.  GitHub issue #447.
+
+ * New Cantonese translation for sudo.
+
 What's new in Sudo 1.9.16p2
 
  * Sudo now passes the terminal device number to the policy plugin
@@ -2285,7 +2351,7 @@ What's new in Sudo 1.8.22
    of the session leader.  When the "timestamp_type" option is set
    to "ppid" or when no terminal is available, the start time of
    the parent process is used instead.  This significantly reduces
-   the likelihood of a time stamp record being re-used when a user
+   the likelihood of a time stamp record being reused when a user
    logs out and back in again.  Bug #818.
 
  * The sudoers time stamp file format is now documented in the new
