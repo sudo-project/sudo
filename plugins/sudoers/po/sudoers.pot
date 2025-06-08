@@ -5,9 +5,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.9.16\n"
+"Project-Id-Version: sudo 1.9.16p2\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2024-06-08 09:06-0600\n"
+"POT-Creation-Date: 2025-06-08 16:30-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: confstr.sh:1 gram.y:1240 plugins/sudoers/logging.c:919
+#: confstr.sh:1 gram.y:1190 plugins/sudoers/logging.c:929
 msgid "syntax error"
 msgstr ""
 
@@ -41,13 +41,13 @@ msgstr ""
 msgid "Sorry, try again."
 msgstr ""
 
-#: gram.y:238 gram.y:305 gram.y:314 gram.y:323 gram.y:333 gram.y:343 gram.y:367
-#: gram.y:394 gram.y:403 gram.y:411 gram.y:420 gram.y:429 gram.y:502 gram.y:512
-#: gram.y:524 gram.y:566 gram.y:575 gram.y:584 gram.y:593 gram.y:726 gram.y:735
-#: gram.y:750 gram.y:770 gram.y:789 gram.y:942 gram.y:947 gram.y:955 gram.y:969
-#: gram.y:975 gram.y:987 gram.y:993 gram.y:1118 gram.y:1127 gram.y:1135
-#: gram.y:1144 gram.y:1153 gram.y:1182 gram.y:1191 gram.y:1199 gram.y:1300
-#: gram.y:1430 gram.y:1811 gram.y:1822 gram.y:1898 lib/eventlog/eventlog.c:236
+#: gram.y:239 gram.y:306 gram.y:315 gram.y:324 gram.y:334 gram.y:344 gram.y:368
+#: gram.y:395 gram.y:404 gram.y:412 gram.y:421 gram.y:430 gram.y:452 gram.y:462
+#: gram.y:474 gram.y:516 gram.y:525 gram.y:534 gram.y:543 gram.y:676 gram.y:685
+#: gram.y:700 gram.y:720 gram.y:739 gram.y:892 gram.y:897 gram.y:905 gram.y:919
+#: gram.y:925 gram.y:937 gram.y:943 gram.y:1068 gram.y:1077 gram.y:1085
+#: gram.y:1094 gram.y:1103 gram.y:1132 gram.y:1141 gram.y:1149 gram.y:1264
+#: gram.y:1395 gram.y:1776 gram.y:1787 gram.y:1922 lib/eventlog/eventlog.c:236
 #: lib/eventlog/eventlog.c:313 lib/eventlog/eventlog.c:778
 #: lib/eventlog/eventlog.c:855 lib/eventlog/eventlog.c:1189
 #: lib/eventlog/parse_json.c:185 lib/eventlog/parse_json.c:501
@@ -57,18 +57,18 @@ msgstr ""
 #: lib/iolog/iolog_legacy.c:124 lib/iolog/iolog_legacy.c:134
 #: lib/iolog/iolog_legacy.c:140 lib/iolog/iolog_loginfo.c:76
 #: lib/iolog/iolog_loginfo.c:212 logsrvd/iolog_writer.c:95
-#: logsrvd/iolog_writer.c:100 logsrvd/iolog_writer.c:134
-#: logsrvd/iolog_writer.c:147 logsrvd/iolog_writer.c:185
-#: logsrvd/iolog_writer.c:218 logsrvd/iolog_writer.c:228
-#: logsrvd/iolog_writer.c:257 logsrvd/iolog_writer.c:278
-#: logsrvd/iolog_writer.c:290 logsrvd/iolog_writer.c:300
-#: logsrvd/iolog_writer.c:318 logsrvd/iolog_writer.c:328
-#: logsrvd/iolog_writer.c:338 logsrvd/iolog_writer.c:350
-#: logsrvd/iolog_writer.c:385 logsrvd/iolog_writer.c:391
-#: logsrvd/iolog_writer.c:398 logsrvd/iolog_writer.c:404
-#: logsrvd/iolog_writer.c:588 logsrvd/logsrv_util.c:92 logsrvd/logsrvd.c:324
-#: logsrvd/logsrvd.c:1058 logsrvd/logsrvd.c:1121 logsrvd/logsrvd.c:1599
-#: logsrvd/logsrvd.c:1604 logsrvd/logsrvd.c:1791 logsrvd/logsrvd.c:2046
+#: logsrvd/iolog_writer.c:100 logsrvd/iolog_writer.c:148
+#: logsrvd/iolog_writer.c:161 logsrvd/iolog_writer.c:200
+#: logsrvd/iolog_writer.c:235 logsrvd/iolog_writer.c:246
+#: logsrvd/iolog_writer.c:277 logsrvd/iolog_writer.c:299
+#: logsrvd/iolog_writer.c:312 logsrvd/iolog_writer.c:323
+#: logsrvd/iolog_writer.c:343 logsrvd/iolog_writer.c:354
+#: logsrvd/iolog_writer.c:365 logsrvd/iolog_writer.c:378
+#: logsrvd/iolog_writer.c:413 logsrvd/iolog_writer.c:419
+#: logsrvd/iolog_writer.c:426 logsrvd/iolog_writer.c:432
+#: logsrvd/iolog_writer.c:616 logsrvd/logsrv_util.c:92 logsrvd/logsrvd.c:324
+#: logsrvd/logsrvd.c:1062 logsrvd/logsrvd.c:1128 logsrvd/logsrvd.c:1606
+#: logsrvd/logsrvd.c:1611 logsrvd/logsrvd.c:1798 logsrvd/logsrvd.c:2053
 #: logsrvd/logsrvd_conf.c:357 logsrvd/logsrvd_conf.c:370
 #: logsrvd/logsrvd_conf.c:511 logsrvd/logsrvd_conf.c:534
 #: logsrvd/logsrvd_conf.c:538 logsrvd/logsrvd_conf.c:556
@@ -84,19 +84,19 @@ msgstr ""
 #: logsrvd/logsrvd_journal.c:76 logsrvd/logsrvd_journal.c:216
 #: logsrvd/logsrvd_journal.c:217 logsrvd/logsrvd_journal.c:274
 #: logsrvd/logsrvd_journal.c:279 logsrvd/logsrvd_journal.c:439
-#: logsrvd/logsrvd_journal.c:441 logsrvd/logsrvd_local.c:215
-#: logsrvd/logsrvd_local.c:216 logsrvd/logsrvd_local.c:278
-#: logsrvd/logsrvd_local.c:279 logsrvd/logsrvd_local.c:417
-#: logsrvd/logsrvd_local.c:468 logsrvd/logsrvd_local.c:469
-#: logsrvd/logsrvd_local.c:474 logsrvd/logsrvd_local.c:475
+#: logsrvd/logsrvd_journal.c:441 logsrvd/logsrvd_local.c:216
+#: logsrvd/logsrvd_local.c:217 logsrvd/logsrvd_local.c:280
+#: logsrvd/logsrvd_local.c:281 logsrvd/logsrvd_local.c:420
+#: logsrvd/logsrvd_local.c:471 logsrvd/logsrvd_local.c:472
+#: logsrvd/logsrvd_local.c:477 logsrvd/logsrvd_local.c:478
 #: logsrvd/logsrvd_queue.c:159 logsrvd/logsrvd_queue.c:189
 #: logsrvd/logsrvd_queue.c:266 logsrvd/logsrvd_relay.c:446
-#: logsrvd/logsrvd_relay.c:748 logsrvd/logsrvd_relay.c:855
+#: logsrvd/logsrvd_relay.c:748 logsrvd/logsrvd_relay.c:861
 #: logsrvd/sendlog.c:256 logsrvd/sendlog.c:265 logsrvd/sendlog.c:297
 #: logsrvd/sendlog.c:303 logsrvd/sendlog.c:352 logsrvd/sendlog.c:651
-#: logsrvd/sendlog.c:1847 plugins/sudoers/audit.c:118
+#: logsrvd/sendlog.c:1857 plugins/sudoers/audit.c:118
 #: plugins/sudoers/auth/bsdauth.c:154 plugins/sudoers/auth/kerb5.c:123
-#: plugins/sudoers/auth/kerb5.c:151 plugins/sudoers/auth/pam.c:697
+#: plugins/sudoers/auth/kerb5.c:151 plugins/sudoers/auth/pam.c:708
 #: plugins/sudoers/auth/rfc1938.c:112 plugins/sudoers/auth/sia.c:61
 #: plugins/sudoers/canon_path.c:129 plugins/sudoers/canon_path.c:161
 #: plugins/sudoers/check_aliases.c:128 plugins/sudoers/check_util.c:56
@@ -122,9 +122,9 @@ msgstr ""
 #: plugins/sudoers/cvtsudoers_merge.c:588
 #: plugins/sudoers/cvtsudoers_merge.c:664
 #: plugins/sudoers/cvtsudoers_merge.c:1197
-#: plugins/sudoers/cvtsudoers_merge.c:1281 plugins/sudoers/defaults.c:455
-#: plugins/sudoers/defaults.c:690 plugins/sudoers/defaults.c:1062
-#: plugins/sudoers/defaults.c:1248 plugins/sudoers/editor.c:198
+#: plugins/sudoers/cvtsudoers_merge.c:1281 plugins/sudoers/defaults.c:457
+#: plugins/sudoers/defaults.c:692 plugins/sudoers/defaults.c:1064
+#: plugins/sudoers/defaults.c:1250 plugins/sudoers/editor.c:198
 #: plugins/sudoers/env.c:280 plugins/sudoers/exptilde.c:92
 #: plugins/sudoers/filedigest.c:66 plugins/sudoers/filedigest.c:70
 #: plugins/sudoers/gc.c:57 plugins/sudoers/group_plugin.c:212
@@ -132,9 +132,9 @@ msgstr ""
 #: plugins/sudoers/iolog.c:683 plugins/sudoers/iolog.c:711
 #: plugins/sudoers/ldap.c:161 plugins/sudoers/ldap.c:448
 #: plugins/sudoers/ldap.c:625 plugins/sudoers/ldap.c:789
-#: plugins/sudoers/ldap.c:1214 plugins/sudoers/ldap.c:1642
-#: plugins/sudoers/ldap.c:1679 plugins/sudoers/ldap.c:1897
-#: plugins/sudoers/ldap.c:2007 plugins/sudoers/ldap.c:2023
+#: plugins/sudoers/ldap.c:1214 plugins/sudoers/ldap.c:1648
+#: plugins/sudoers/ldap.c:1685 plugins/sudoers/ldap.c:1903
+#: plugins/sudoers/ldap.c:2013 plugins/sudoers/ldap.c:2029
 #: plugins/sudoers/ldap_conf.c:215 plugins/sudoers/ldap_conf.c:247
 #: plugins/sudoers/ldap_conf.c:299 plugins/sudoers/ldap_conf.c:335
 #: plugins/sudoers/ldap_conf.c:441 plugins/sudoers/ldap_conf.c:456
@@ -146,10 +146,10 @@ msgstr ""
 #: plugins/sudoers/log_client.c:726 plugins/sudoers/log_client.c:748
 #: plugins/sudoers/log_client.c:753 plugins/sudoers/log_client.c:1449
 #: plugins/sudoers/log_client.c:1570 plugins/sudoers/log_client.c:1693
-#: plugins/sudoers/log_client.c:2018 plugins/sudoers/log_client.c:2077
+#: plugins/sudoers/log_client.c:2025 plugins/sudoers/log_client.c:2084
 #: plugins/sudoers/logging.c:110 plugins/sudoers/logging.c:190
-#: plugins/sudoers/logging.c:483 plugins/sudoers/logging.c:723
-#: plugins/sudoers/logging.c:880 plugins/sudoers/lookup.c:331
+#: plugins/sudoers/logging.c:485 plugins/sudoers/logging.c:733
+#: plugins/sudoers/logging.c:890 plugins/sudoers/lookup.c:331
 #: plugins/sudoers/lookup.c:348 plugins/sudoers/lookup.c:366
 #: plugins/sudoers/lookup.c:384 plugins/sudoers/lookup.c:401
 #: plugins/sudoers/lookup.c:423 plugins/sudoers/lookup.c:434
@@ -166,7 +166,7 @@ msgstr ""
 #: plugins/sudoers/parse_ldif.c:625 plugins/sudoers/parse_ldif.c:650
 #: plugins/sudoers/parse_ldif.c:708 plugins/sudoers/parse_ldif.c:725
 #: plugins/sudoers/parse_ldif.c:753 plugins/sudoers/parse_ldif.c:760
-#: plugins/sudoers/policy.c:654 plugins/sudoers/policy.c:1071
+#: plugins/sudoers/policy.c:657 plugins/sudoers/policy.c:1074
 #: plugins/sudoers/prompt.c:94 plugins/sudoers/pwutil.c:219
 #: plugins/sudoers/pwutil.c:290 plugins/sudoers/pwutil.c:368
 #: plugins/sudoers/pwutil.c:542 plugins/sudoers/pwutil.c:607
@@ -191,78 +191,88 @@ msgstr ""
 #: plugins/sudoers/testsudoers.c:282 plugins/sudoers/testsudoers.c:302
 #: plugins/sudoers/testsudoers.c:756 plugins/sudoers/timestamp.c:468
 #: plugins/sudoers/timestamp.c:514 plugins/sudoers/timestamp.c:1045
-#: plugins/sudoers/timestamp.c:1248 plugins/sudoers/toke_util.c:79
-#: plugins/sudoers/toke_util.c:108 plugins/sudoers/toke_util.c:134
-#: plugins/sudoers/toke_util.c:164 plugins/sudoers/toke_util.c:204
+#: plugins/sudoers/timestamp.c:1248 plugins/sudoers/toke_util.c:80
+#: plugins/sudoers/toke_util.c:109 plugins/sudoers/toke_util.c:135
+#: plugins/sudoers/toke_util.c:165 plugins/sudoers/toke_util.c:205
 #: plugins/sudoers/tsdump.c:136 plugins/sudoers/visudo.c:151
 #: plugins/sudoers/visudo.c:258 plugins/sudoers/visudo.c:383
 #: plugins/sudoers/visudo.c:389 plugins/sudoers/visudo.c:501
 #: plugins/sudoers/visudo.c:1073 plugins/sudoers/visudo.c:1095
 #: plugins/sudoers/visudo.c:1189 toke.l:1011 toke.l:1174 toke.l:1193
-#: toke.l:1220 toke.l:1300
+#: toke.l:1221 toke.l:1301
 msgid "unable to allocate memory"
 msgstr ""
 
-#: gram.y:617
+#: gram.y:567
 msgid "a digest requires a path name"
 msgstr ""
 
-#: gram.y:639
+#: gram.y:589
 msgid "values for \"CWD\" must start with a '/', '~', or '*'"
 msgstr ""
 
-#: gram.y:645
+#: gram.y:595
 msgid "\"CWD\" path too long"
 msgstr ""
 
-#: gram.y:655
+#: gram.y:605
 msgid "values for \"CHROOT\" must start with a '/', '~', or '*'"
 msgstr ""
 
-#: gram.y:661
+#: gram.y:611
 msgid "\"CHROOT\" path too long"
 msgstr ""
 
-#: gram.y:810
+#: gram.y:760
 #, c-format
 msgid "syntax error, reserved word %s used as an alias name"
 msgstr ""
 
-#: gram.y:833
+#: gram.y:783
 msgid "invalid notbefore value"
 msgstr ""
 
-#: gram.y:842
+#: gram.y:792
 msgid "invalid notafter value"
 msgstr ""
 
-#: gram.y:852 plugins/sudoers/policy.c:373
+#: gram.y:802 plugins/sudoers/policy.c:373
 msgid "timeout value too large"
 msgstr ""
 
-#: gram.y:854 plugins/sudoers/policy.c:375
+#: gram.y:804 plugins/sudoers/policy.c:375
 msgid "invalid timeout value"
 msgstr ""
 
-#: gram.y:965 plugins/sudoers/sudoers.c:1180
+#: gram.y:915 plugins/sudoers/sudoers.c:1180
 msgid "command too long"
 msgstr ""
 
-#: gram.y:999
+#: gram.y:949
 msgid "expected a fully-qualified path name"
 msgstr ""
 
-#: gram.y:1244
+#: gram.y:1194
 #, c-format
 msgid "%s:%d:%zu: %s\n"
 msgstr ""
 
-#: gram.y:1298
+#: gram.y:1251
 #, c-format
-msgid "Alias \"%s\" already defined"
+msgid "duplicate %s \"%s\", previously defined at %s:%d:%d"
 msgstr ""
 
-#: gram.y:1811 gram.y:1822 gram.y:1898 lib/eventlog/eventlog.c:236
+#: gram.y:1256 plugins/sudoers/check_aliases.c:93
+#, c-format
+msgid "cycle in %s \"%s\""
+msgstr ""
+
+#: gram.y:1259
+#, c-format
+msgid "duplicate %s \"%s\""
+msgstr ""
+
+#: gram.y:1776 gram.y:1787 gram.y:1922 lib/eventlog/eventlog.c:236
 #: lib/eventlog/eventlog.c:778 lib/eventlog/eventlog.c:851
 #: lib/eventlog/eventlog.c:854 lib/eventlog/eventlog.c:1189
 #: lib/eventlog/parse_json.c:185 lib/eventlog/parse_json.c:500
@@ -272,23 +282,23 @@ msgstr ""
 #: lib/iolog/iolog_legacy.c:124 lib/iolog/iolog_legacy.c:134
 #: lib/iolog/iolog_legacy.c:140 lib/iolog/iolog_loginfo.c:76
 #: lib/iolog/iolog_loginfo.c:212 logsrvd/iolog_writer.c:95
-#: logsrvd/iolog_writer.c:100 logsrvd/iolog_writer.c:134
-#: logsrvd/iolog_writer.c:147 logsrvd/iolog_writer.c:174
-#: logsrvd/iolog_writer.c:184 logsrvd/iolog_writer.c:197
-#: logsrvd/iolog_writer.c:217 logsrvd/iolog_writer.c:227
-#: logsrvd/iolog_writer.c:246 logsrvd/iolog_writer.c:256
-#: logsrvd/iolog_writer.c:267 logsrvd/iolog_writer.c:277
-#: logsrvd/iolog_writer.c:289 logsrvd/iolog_writer.c:299
-#: logsrvd/iolog_writer.c:317 logsrvd/iolog_writer.c:327
-#: logsrvd/iolog_writer.c:337 logsrvd/iolog_writer.c:349
-#: logsrvd/iolog_writer.c:385 logsrvd/iolog_writer.c:391
-#: logsrvd/iolog_writer.c:398 logsrvd/iolog_writer.c:404
-#: logsrvd/iolog_writer.c:588 logsrvd/logsrv_util.c:92 logsrvd/logsrvd.c:324
+#: logsrvd/iolog_writer.c:100 logsrvd/iolog_writer.c:148
+#: logsrvd/iolog_writer.c:161 logsrvd/iolog_writer.c:188
+#: logsrvd/iolog_writer.c:199 logsrvd/iolog_writer.c:212
+#: logsrvd/iolog_writer.c:234 logsrvd/iolog_writer.c:245
+#: logsrvd/iolog_writer.c:265 logsrvd/iolog_writer.c:276
+#: logsrvd/iolog_writer.c:287 logsrvd/iolog_writer.c:298
+#: logsrvd/iolog_writer.c:311 logsrvd/iolog_writer.c:322
+#: logsrvd/iolog_writer.c:342 logsrvd/iolog_writer.c:353
+#: logsrvd/iolog_writer.c:364 logsrvd/iolog_writer.c:377
+#: logsrvd/iolog_writer.c:413 logsrvd/iolog_writer.c:419
+#: logsrvd/iolog_writer.c:426 logsrvd/iolog_writer.c:432
+#: logsrvd/iolog_writer.c:616 logsrvd/logsrv_util.c:92 logsrvd/logsrvd.c:324
 #: logsrvd/logsrvd.c:462 logsrvd/logsrvd.c:499 logsrvd/logsrvd.c:531
 #: logsrvd/logsrvd.c:585 logsrvd/logsrvd.c:620 logsrvd/logsrvd.c:669
-#: logsrvd/logsrvd.c:705 logsrvd/logsrvd.c:741 logsrvd/logsrvd.c:1132
-#: logsrvd/logsrvd.c:1456 logsrvd/logsrvd.c:1463 logsrvd/logsrvd.c:1599
-#: logsrvd/logsrvd.c:1604 logsrvd/logsrvd.c:1791 logsrvd/logsrvd.c:2046
+#: logsrvd/logsrvd.c:705 logsrvd/logsrvd.c:741 logsrvd/logsrvd.c:1139
+#: logsrvd/logsrvd.c:1463 logsrvd/logsrvd.c:1470 logsrvd/logsrvd.c:1606
+#: logsrvd/logsrvd.c:1611 logsrvd/logsrvd.c:1798 logsrvd/logsrvd.c:2053
 #: logsrvd/logsrvd_conf.c:357 logsrvd/logsrvd_conf.c:370
 #: logsrvd/logsrvd_conf.c:511 logsrvd/logsrvd_conf.c:534
 #: logsrvd/logsrvd_conf.c:538 logsrvd/logsrvd_conf.c:556
@@ -305,16 +315,16 @@ msgstr ""
 #: logsrvd/logsrvd_journal.c:216 logsrvd/logsrvd_journal.c:246
 #: logsrvd/logsrvd_journal.c:250 logsrvd/logsrvd_journal.c:258
 #: logsrvd/logsrvd_journal.c:287 logsrvd/logsrvd_journal.c:291
-#: logsrvd/logsrvd_journal.c:439 logsrvd/logsrvd_local.c:215
-#: logsrvd/logsrvd_local.c:278 logsrvd/logsrvd_local.c:468
-#: logsrvd/logsrvd_local.c:474 logsrvd/logsrvd_local.c:493
+#: logsrvd/logsrvd_journal.c:439 logsrvd/logsrvd_local.c:216
+#: logsrvd/logsrvd_local.c:280 logsrvd/logsrvd_local.c:471
+#: logsrvd/logsrvd_local.c:477 logsrvd/logsrvd_local.c:496
 #: logsrvd/logsrvd_queue.c:158 logsrvd/logsrvd_queue.c:189
 #: logsrvd/logsrvd_queue.c:266 logsrvd/sendlog.c:256 logsrvd/sendlog.c:265
 #: logsrvd/sendlog.c:297 logsrvd/sendlog.c:303 logsrvd/sendlog.c:352
-#: logsrvd/sendlog.c:651 logsrvd/sendlog.c:1548 logsrvd/sendlog.c:1555
-#: logsrvd/sendlog.c:1778 logsrvd/sendlog.c:1847 logsrvd/tls_init.c:305
+#: logsrvd/sendlog.c:651 logsrvd/sendlog.c:1558 logsrvd/sendlog.c:1565
+#: logsrvd/sendlog.c:1788 logsrvd/sendlog.c:1857 logsrvd/tls_init.c:305
 #: logsrvd/tls_init.c:329 logsrvd/tls_init.c:340 plugins/sudoers/audit.c:118
-#: plugins/sudoers/auth/pam.c:518 plugins/sudoers/auth/pam.c:697
+#: plugins/sudoers/auth/pam.c:529 plugins/sudoers/auth/pam.c:708
 #: plugins/sudoers/auth/rfc1938.c:112 plugins/sudoers/canon_path.c:129
 #: plugins/sudoers/canon_path.c:161 plugins/sudoers/check_aliases.c:128
 #: plugins/sudoers/check_util.c:56 plugins/sudoers/check_util.c:84
@@ -340,9 +350,9 @@ msgstr ""
 #: plugins/sudoers/cvtsudoers_merge.c:661
 #: plugins/sudoers/cvtsudoers_merge.c:664
 #: plugins/sudoers/cvtsudoers_merge.c:1196
-#: plugins/sudoers/cvtsudoers_merge.c:1281 plugins/sudoers/defaults.c:455
-#: plugins/sudoers/defaults.c:690 plugins/sudoers/defaults.c:1062
-#: plugins/sudoers/defaults.c:1248 plugins/sudoers/editor.c:198
+#: plugins/sudoers/cvtsudoers_merge.c:1281 plugins/sudoers/defaults.c:457
+#: plugins/sudoers/defaults.c:692 plugins/sudoers/defaults.c:1064
+#: plugins/sudoers/defaults.c:1250 plugins/sudoers/editor.c:198
 #: plugins/sudoers/env.c:280 plugins/sudoers/exptilde.c:92
 #: plugins/sudoers/filedigest.c:66 plugins/sudoers/filedigest.c:70
 #: plugins/sudoers/gc.c:57 plugins/sudoers/group_plugin.c:211
@@ -350,9 +360,9 @@ msgstr ""
 #: plugins/sudoers/iolog.c:683 plugins/sudoers/iolog.c:711
 #: plugins/sudoers/ldap.c:161 plugins/sudoers/ldap.c:448
 #: plugins/sudoers/ldap.c:625 plugins/sudoers/ldap.c:789
-#: plugins/sudoers/ldap.c:1214 plugins/sudoers/ldap.c:1642
-#: plugins/sudoers/ldap.c:1679 plugins/sudoers/ldap.c:1897
-#: plugins/sudoers/ldap.c:2007 plugins/sudoers/ldap.c:2023
+#: plugins/sudoers/ldap.c:1214 plugins/sudoers/ldap.c:1648
+#: plugins/sudoers/ldap.c:1685 plugins/sudoers/ldap.c:1903
+#: plugins/sudoers/ldap.c:2013 plugins/sudoers/ldap.c:2029
 #: plugins/sudoers/ldap_conf.c:215 plugins/sudoers/ldap_conf.c:247
 #: plugins/sudoers/ldap_conf.c:299 plugins/sudoers/ldap_conf.c:335
 #: plugins/sudoers/ldap_conf.c:441 plugins/sudoers/ldap_conf.c:456
@@ -365,12 +375,12 @@ msgstr ""
 #: plugins/sudoers/log_client.c:411 plugins/sudoers/log_client.c:726
 #: plugins/sudoers/log_client.c:748 plugins/sudoers/log_client.c:753
 #: plugins/sudoers/log_client.c:1449 plugins/sudoers/log_client.c:1570
-#: plugins/sudoers/log_client.c:1693 plugins/sudoers/log_client.c:2018
-#: plugins/sudoers/log_client.c:2077 plugins/sudoers/logging.c:110
+#: plugins/sudoers/log_client.c:1693 plugins/sudoers/log_client.c:2025
+#: plugins/sudoers/log_client.c:2084 plugins/sudoers/logging.c:110
 #: plugins/sudoers/logging.c:189 plugins/sudoers/logging.c:190
-#: plugins/sudoers/logging.c:483 plugins/sudoers/logging.c:723
-#: plugins/sudoers/logging.c:763 plugins/sudoers/logging.c:880
-#: plugins/sudoers/logging.c:933 plugins/sudoers/logging.c:940
+#: plugins/sudoers/logging.c:485 plugins/sudoers/logging.c:733
+#: plugins/sudoers/logging.c:773 plugins/sudoers/logging.c:890
+#: plugins/sudoers/logging.c:943 plugins/sudoers/logging.c:950
 #: plugins/sudoers/lookup.c:330 plugins/sudoers/lookup.c:347
 #: plugins/sudoers/lookup.c:365 plugins/sudoers/lookup.c:383
 #: plugins/sudoers/lookup.c:400 plugins/sudoers/lookup.c:422
@@ -393,11 +403,11 @@ msgstr ""
 #: plugins/sudoers/policy.c:373 plugins/sudoers/policy.c:375
 #: plugins/sudoers/policy.c:414 plugins/sudoers/policy.c:423
 #: plugins/sudoers/policy.c:432 plugins/sudoers/policy.c:441
-#: plugins/sudoers/policy.c:492 plugins/sudoers/policy.c:501
-#: plugins/sudoers/policy.c:510 plugins/sudoers/policy.c:519
-#: plugins/sudoers/policy.c:528 plugins/sudoers/policy.c:537
-#: plugins/sudoers/policy.c:546 plugins/sudoers/policy.c:654
-#: plugins/sudoers/policy.c:1071 plugins/sudoers/prompt.c:94
+#: plugins/sudoers/policy.c:495 plugins/sudoers/policy.c:504
+#: plugins/sudoers/policy.c:513 plugins/sudoers/policy.c:522
+#: plugins/sudoers/policy.c:531 plugins/sudoers/policy.c:540
+#: plugins/sudoers/policy.c:549 plugins/sudoers/policy.c:657
+#: plugins/sudoers/policy.c:1074 plugins/sudoers/prompt.c:94
 #: plugins/sudoers/pwutil.c:219 plugins/sudoers/pwutil.c:290
 #: plugins/sudoers/pwutil.c:368 plugins/sudoers/pwutil.c:542
 #: plugins/sudoers/pwutil.c:607 plugins/sudoers/pwutil.c:679
@@ -424,15 +434,15 @@ msgstr ""
 #: plugins/sudoers/testsudoers.c:282 plugins/sudoers/testsudoers.c:302
 #: plugins/sudoers/testsudoers.c:756 plugins/sudoers/timestamp.c:468
 #: plugins/sudoers/timestamp.c:514 plugins/sudoers/timestamp.c:1045
-#: plugins/sudoers/timestamp.c:1248 plugins/sudoers/toke_util.c:79
-#: plugins/sudoers/toke_util.c:108 plugins/sudoers/toke_util.c:134
-#: plugins/sudoers/toke_util.c:163 plugins/sudoers/toke_util.c:204
+#: plugins/sudoers/timestamp.c:1248 plugins/sudoers/toke_util.c:80
+#: plugins/sudoers/toke_util.c:109 plugins/sudoers/toke_util.c:135
+#: plugins/sudoers/toke_util.c:164 plugins/sudoers/toke_util.c:205
 #: plugins/sudoers/tsdump.c:136 plugins/sudoers/visudo.c:151
 #: plugins/sudoers/visudo.c:258 plugins/sudoers/visudo.c:383
 #: plugins/sudoers/visudo.c:389 plugins/sudoers/visudo.c:501
 #: plugins/sudoers/visudo.c:1073 plugins/sudoers/visudo.c:1094
 #: plugins/sudoers/visudo.c:1189 toke.l:1011 toke.l:1174 toke.l:1193
-#: toke.l:1220 toke.l:1289 toke.l:1300
+#: toke.l:1221 toke.l:1290 toke.l:1301
 #, c-format
 msgid "%s: %s"
 msgstr ""
@@ -545,7 +555,7 @@ msgstr ""
 msgid "parse error"
 msgstr ""
 
-#: lib/iolog/iolog_filter.c:133 plugins/sudoers/defaults.c:1303
+#: lib/iolog/iolog_filter.c:133 plugins/sudoers/defaults.c:1305
 #: plugins/sudoers/sudoreplay.c:1293 plugins/sudoers/sudoreplay.c:1589
 #, c-format
 msgid "invalid regular expression \"%s\": %s"
@@ -587,7 +597,7 @@ msgid "%s exists but is not a directory (0%o)"
 msgstr ""
 
 #: lib/iolog/iolog_mkdirs.c:125 lib/iolog/iolog_mkdtemp.c:80
-#: logsrvd/iolog_writer.c:803 plugins/sudoers/timestamp.c:218
+#: logsrvd/iolog_writer.c:831 plugins/sudoers/timestamp.c:218
 #, c-format
 msgid "unable to mkdir %s"
 msgstr ""
@@ -625,67 +635,67 @@ msgstr ""
 msgid "%s: protocol error: NULL value found in %s"
 msgstr ""
 
-#: logsrvd/iolog_writer.c:141 plugins/sudoers/logging.c:1035
-#: plugins/sudoers/policy.c:621
+#: logsrvd/iolog_writer.c:155 plugins/sudoers/logging.c:1045
+#: plugins/sudoers/policy.c:624
 msgid "unable to generate UUID"
 msgstr ""
 
-#: logsrvd/iolog_writer.c:362 logsrvd/iolog_writer.c:367
-#: logsrvd/iolog_writer.c:372 logsrvd/iolog_writer.c:377
+#: logsrvd/iolog_writer.c:390 logsrvd/iolog_writer.c:395
+#: logsrvd/iolog_writer.c:400 logsrvd/iolog_writer.c:405
 #, c-format
 msgid "%s: protocol error: %s missing from AcceptMessage"
 msgstr ""
 
-#: logsrvd/iolog_writer.c:438
+#: logsrvd/iolog_writer.c:466
 #, c-format
 msgid "%s: unable to format session id"
 msgstr ""
 
-#: logsrvd/iolog_writer.c:452 logsrvd/iolog_writer.c:466
-#: logsrvd/iolog_writer.c:480 logsrvd/iolog_writer.c:495
-#: logsrvd/iolog_writer.c:509 logsrvd/iolog_writer.c:523
+#: logsrvd/iolog_writer.c:480 logsrvd/iolog_writer.c:494
+#: logsrvd/iolog_writer.c:508 logsrvd/iolog_writer.c:523
+#: logsrvd/iolog_writer.c:537 logsrvd/iolog_writer.c:551
 #, c-format
 msgid "%s: %s is not set"
 msgstr ""
 
-#: logsrvd/iolog_writer.c:559 logsrvd/iolog_writer.c:566
+#: logsrvd/iolog_writer.c:587 logsrvd/iolog_writer.c:594
 #, c-format
 msgid "unable to expand iolog path %s"
 msgstr ""
 
-#: logsrvd/iolog_writer.c:584
+#: logsrvd/iolog_writer.c:612
 #, c-format
 msgid "unable to create iolog path %s"
 msgstr ""
 
-#: logsrvd/iolog_writer.c:614
+#: logsrvd/iolog_writer.c:642
 #, c-format
 msgid "invalid iofd %d"
 msgstr ""
 
-#: logsrvd/iolog_writer.c:634
+#: logsrvd/iolog_writer.c:662
 #, c-format
 msgid "error closing iofd %u: %s"
 msgstr ""
 
-#: logsrvd/iolog_writer.c:655
+#: logsrvd/iolog_writer.c:683
 #, c-format
 msgid "error flushing iofd %u: %s"
 msgstr ""
 
-#: logsrvd/iolog_writer.c:773
+#: logsrvd/iolog_writer.c:801
 #, c-format
 msgid "invalid I/O log %s: %s referenced but not present"
 msgstr ""
 
-#: logsrvd/iolog_writer.c:785 logsrvd/logsrvd_journal.c:391
+#: logsrvd/iolog_writer.c:813 logsrvd/logsrvd_journal.c:391
 #, c-format
 msgid "%s: unable to find resume point [%lld, %ld]"
 msgstr ""
 
-#: logsrvd/iolog_writer.c:807 logsrvd/logsrvd_journal.c:434
+#: logsrvd/iolog_writer.c:835 logsrvd/logsrvd_journal.c:434
 #: logsrvd/logsrvd_queue.c:115 logsrvd/tls_init.c:256
-#: plugins/sudoers/check.c:278 plugins/sudoers/cvtsudoers.c:758
+#: plugins/sudoers/check.c:287 plugins/sudoers/cvtsudoers.c:758
 #: plugins/sudoers/cvtsudoers.c:780 plugins/sudoers/cvtsudoers.c:1457
 #: plugins/sudoers/cvtsudoers_csv.c:722 plugins/sudoers/cvtsudoers_json.c:1034
 #: plugins/sudoers/cvtsudoers_ldif.c:753 plugins/sudoers/sudoers.c:1309
@@ -696,19 +706,19 @@ msgstr ""
 msgid "unable to open %s"
 msgstr ""
 
-#: logsrvd/iolog_writer.c:819 logsrvd/logsrv_util.c:111
+#: logsrvd/iolog_writer.c:847 logsrvd/logsrv_util.c:111
 #: logsrvd/logsrv_util.c:118 plugins/sudoers/sudoreplay.c:355
 #: plugins/sudoers/sudoreplay.c:361
 #, c-format
 msgid "unable to open %s/%s"
 msgstr ""
 
-#: logsrvd/iolog_writer.c:832
+#: logsrvd/iolog_writer.c:860
 #, c-format
 msgid "unable to copy %s/%s to %s/%s: %s"
 msgstr ""
 
-#: logsrvd/iolog_writer.c:861 logsrvd/logsrvd_journal.c:198
+#: logsrvd/iolog_writer.c:889 logsrvd/logsrvd_journal.c:198
 #, c-format
 msgid "unable to rename %s to %s"
 msgstr ""
@@ -732,20 +742,20 @@ msgstr ""
 msgid "unable to connect to relay"
 msgstr ""
 
-#: logsrvd/logsrvd.c:339 logsrvd/logsrvd_relay.c:847
+#: logsrvd/logsrvd.c:339 logsrvd/logsrvd_relay.c:853
 #, c-format
 msgid "server message too large: %zu"
 msgstr ""
 
 #: logsrvd/logsrvd.c:431 logsrvd/logsrvd.c:554 logsrvd/logsrvd.c:640
-#: logsrvd/logsrvd.c:882 logsrvd/logsrvd.c:896 logsrvd/logsrvd.c:1057
-#: logsrvd/logsrvd.c:1182 logsrvd/logsrvd.c:1364 logsrvd/logsrvd.c:1382
-#: logsrvd/logsrvd.c:1481 logsrvd/logsrvd.c:1606 logsrvd/logsrvd.c:1793
-#: logsrvd/logsrvd_journal.c:503 logsrvd/logsrvd_local.c:238
+#: logsrvd/logsrvd.c:882 logsrvd/logsrvd.c:896 logsrvd/logsrvd.c:1061
+#: logsrvd/logsrvd.c:1189 logsrvd/logsrvd.c:1371 logsrvd/logsrvd.c:1389
+#: logsrvd/logsrvd.c:1488 logsrvd/logsrvd.c:1613 logsrvd/logsrvd.c:1800
+#: logsrvd/logsrvd_journal.c:503 logsrvd/logsrvd_local.c:239
 #: logsrvd/logsrvd_queue.c:164 logsrvd/logsrvd_relay.c:172
 #: logsrvd/logsrvd_relay.c:249 logsrvd/logsrvd_relay.c:253
 #: logsrvd/logsrvd_relay.c:391 logsrvd/logsrvd_relay.c:583
-#: logsrvd/logsrvd_relay.c:747 logsrvd/logsrvd_relay.c:1137
+#: logsrvd/logsrvd_relay.c:747 logsrvd/logsrvd_relay.c:1149
 #: logsrvd/sendlog.c:1333 logsrvd/tls_client.c:145 logsrvd/tls_client.c:161
 #: logsrvd/tls_client.c:225 plugins/sudoers/audit.c:281
 #: plugins/sudoers/iolog.c:1049 plugins/sudoers/iolog.c:1183
@@ -755,8 +765,8 @@ msgstr ""
 #: plugins/sudoers/log_client.c:629 plugins/sudoers/log_client.c:1137
 #: plugins/sudoers/log_client.c:1418 plugins/sudoers/log_client.c:1459
 #: plugins/sudoers/log_client.c:1467 plugins/sudoers/log_client.c:1626
-#: plugins/sudoers/log_client.c:1751 plugins/sudoers/log_client.c:2085
-#: plugins/sudoers/log_client.c:2093 plugins/sudoers/logging.c:148
+#: plugins/sudoers/log_client.c:1751 plugins/sudoers/log_client.c:2092
+#: plugins/sudoers/log_client.c:2100 plugins/sudoers/logging.c:148
 #: plugins/sudoers/logging.c:206 plugins/sudoers/sudoreplay.c:519
 #: plugins/sudoers/sudoreplay.c:566 plugins/sudoers/sudoreplay.c:810
 #: plugins/sudoers/sudoreplay.c:922 plugins/sudoers/sudoreplay.c:1013
@@ -844,93 +854,115 @@ msgstr ""
 msgid "timed out writing to client %s"
 msgstr ""
 
-#: logsrvd/logsrvd.c:933 logsrvd/logsrvd_relay.c:919 logsrvd/sendlog.c:1438
+#: logsrvd/logsrvd.c:933 logsrvd/logsrvd_relay.c:925 logsrvd/sendlog.c:1443
 #, c-format
 msgid "missing write buffer for client %s"
 msgstr ""
 
-#: logsrvd/logsrvd.c:1028
+#: logsrvd/logsrvd.c:982 logsrvd/logsrvd.c:1109 logsrvd/logsrvd_relay.c:841
+#: logsrvd/logsrvd_relay.c:999 logsrvd/sendlog.c:1393 logsrvd/sendlog.c:1514
+#: plugins/sudoers/cvtsudoers_csv.c:192 plugins/sudoers/cvtsudoers_csv.c:199
+#: plugins/sudoers/cvtsudoers_ldif.c:270 plugins/sudoers/cvtsudoers_ldif.c:277
+#: plugins/sudoers/cvtsudoers_ldif.c:628 plugins/sudoers/env.c:357
+#: plugins/sudoers/env.c:364 plugins/sudoers/env.c:475
+#: plugins/sudoers/ldap.c:511 plugins/sudoers/ldap.c:629
+#: plugins/sudoers/ldap.c:1003 plugins/sudoers/ldap.c:1301
+#: plugins/sudoers/ldap_conf.c:219 plugins/sudoers/ldap_conf.c:310
+#: plugins/sudoers/ldap_util.c:483 plugins/sudoers/linux_audit.c:93
+#: plugins/sudoers/log_client.c:1810 plugins/sudoers/log_client.c:1942
+#: plugins/sudoers/logging.c:489 plugins/sudoers/policy.c:839
+#: plugins/sudoers/policy.c:851 plugins/sudoers/prompt.c:169
+#: plugins/sudoers/serialize_list.c:62 plugins/sudoers/serialize_list.c:71
+#: plugins/sudoers/strvec_join.c:62 plugins/sudoers/sudoreplay.c:1342
+#: plugins/sudoers/sudoreplay.c:1348 plugins/sudoers/sudoreplay.c:1354
+#: plugins/sudoers/testsudoers.c:306 plugins/sudoers/toke_util.c:218 toke.l:975
+#: toke.l:1258
+#, c-format
+msgid "internal error, %s overflow"
+msgstr ""
+
+#: logsrvd/logsrvd.c:1032
 #, c-format
 msgid "timed out reading from client %s"
 msgstr ""
 
-#: logsrvd/logsrvd.c:1069 logsrvd/logsrvd_relay.c:782
+#: logsrvd/logsrvd.c:1073 logsrvd/logsrvd_relay.c:782
 #, c-format
 msgid "EOF from %s without proper TLS shutdown"
 msgstr ""
 
-#: logsrvd/logsrvd.c:1113 logsrvd/logsrvd_relay.c:205 logsrvd/sendlog.c:336
+#: logsrvd/logsrvd.c:1120 logsrvd/logsrvd_relay.c:205 logsrvd/sendlog.c:336
 #: plugins/sudoers/log_client.c:732
 #, c-format
 msgid "client message too large: %zu"
 msgstr ""
 
-#: logsrvd/logsrvd.c:1114 logsrvd/logsrvd_journal.c:259
+#: logsrvd/logsrvd.c:1121 logsrvd/logsrvd_journal.c:259
 #: logsrvd/logsrvd_journal.c:260
 msgid "client message too large"
 msgstr ""
 
-#: logsrvd/logsrvd.c:1132 logsrvd/logsrvd.c:1133
+#: logsrvd/logsrvd.c:1139 logsrvd/logsrvd.c:1140
 msgid "invalid ClientMessage"
 msgstr ""
 
-#: logsrvd/logsrvd.c:1442
+#: logsrvd/logsrvd.c:1449
 msgid "unable to get remote IP addr"
 msgstr ""
 
-#: logsrvd/logsrvd.c:1473 logsrvd/tls_client.c:212
+#: logsrvd/logsrvd.c:1480 logsrvd/tls_client.c:212
 #: plugins/sudoers/log_client.c:290
 #, c-format
 msgid "Unable to attach user data to the ssl object: %s"
 msgstr ""
 
-#: logsrvd/logsrvd.c:1656 logsrvd/logsrvd.c:2050
+#: logsrvd/logsrvd.c:1663 logsrvd/logsrvd.c:2057
 msgid "unable to setup listen socket"
 msgstr ""
 
-#: logsrvd/logsrvd.c:1776
+#: logsrvd/logsrvd.c:1783
 #, c-format
 msgid "unexpected signal %d"
 msgstr ""
 
-#: logsrvd/logsrvd.c:1949
+#: logsrvd/logsrvd.c:1956
 msgid "sudo log server"
 msgstr ""
 
-#: logsrvd/logsrvd.c:1951 logsrvd/sendlog.c:126
+#: logsrvd/logsrvd.c:1958 logsrvd/sendlog.c:126
 msgid "Options:"
 msgstr ""
 
-#: logsrvd/logsrvd.c:1953
+#: logsrvd/logsrvd.c:1960
 msgid "path to configuration file"
 msgstr ""
 
-#: logsrvd/logsrvd.c:1955 logsrvd/sendlog.c:128
+#: logsrvd/logsrvd.c:1962 logsrvd/sendlog.c:128
 msgid "display help message and exit"
 msgstr ""
 
-#: logsrvd/logsrvd.c:1957
+#: logsrvd/logsrvd.c:1964
 msgid "do not fork, run in the foreground"
 msgstr ""
 
-#: logsrvd/logsrvd.c:1959
+#: logsrvd/logsrvd.c:1966
 msgid "percent chance connections will drop"
 msgstr ""
 
-#: logsrvd/logsrvd.c:1961 logsrvd/sendlog.c:158
+#: logsrvd/logsrvd.c:1968 logsrvd/sendlog.c:158
 msgid "display version information and exit"
 msgstr ""
 
-#: logsrvd/logsrvd.c:2011 logsrvd/sendlog.c:1747
+#: logsrvd/logsrvd.c:2018 logsrvd/sendlog.c:1757
 msgid "Protobuf-C version 1.3 or higher required"
 msgstr ""
 
-#: logsrvd/logsrvd.c:2027
+#: logsrvd/logsrvd.c:2034
 #, c-format
 msgid "invalid random drop value: %s"
 msgstr ""
 
-#: logsrvd/logsrvd.c:2030 logsrvd/sendlog.c:1801
+#: logsrvd/logsrvd.c:2037 logsrvd/sendlog.c:1811
 #: plugins/sudoers/cvtsudoers.c:250 plugins/sudoers/sudoreplay.c:294
 #: plugins/sudoers/visudo.c:181
 #, c-format
@@ -1022,7 +1054,7 @@ msgid "%s:%d [%s] illegal key: %s"
 msgstr ""
 
 #: logsrvd/logsrvd_conf.c:1286 plugins/sudoers/cvtsudoers.c:273
-#: plugins/sudoers/logging.c:1087
+#: plugins/sudoers/logging.c:1097
 #, c-format
 msgid "unable to open log file %s"
 msgstr ""
@@ -1095,64 +1127,64 @@ msgstr ""
 msgid "error creating I/O log"
 msgstr ""
 
-#: logsrvd/logsrvd_local.c:228
+#: logsrvd/logsrvd_local.c:229
 msgid "error logging accept event"
 msgstr ""
 
-#: logsrvd/logsrvd_local.c:267
+#: logsrvd/logsrvd_local.c:268
 msgid "error parsing RejectMessage"
 msgstr ""
 
-#: logsrvd/logsrvd_local.c:291
+#: logsrvd/logsrvd_local.c:293
 msgid "error logging reject event"
 msgstr ""
 
-#: logsrvd/logsrvd_local.c:427 logsrvd/logsrvd_local.c:437
+#: logsrvd/logsrvd_local.c:430 logsrvd/logsrvd_local.c:440
 msgid "error logging exit event"
 msgstr ""
 
-#: logsrvd/logsrvd_local.c:494 logsrvd/logsrvd_local.c:495
+#: logsrvd/logsrvd_local.c:497 logsrvd/logsrvd_local.c:498
 msgid "log is already complete, cannot be restarted"
 msgstr ""
 
-#: logsrvd/logsrvd_local.c:525
+#: logsrvd/logsrvd_local.c:528
 msgid "unable to restart log"
 msgstr ""
 
-#: logsrvd/logsrvd_local.c:541
+#: logsrvd/logsrvd_local.c:544
 msgid "error parsing AlertMessage"
 msgstr ""
 
-#: logsrvd/logsrvd_local.c:551
+#: logsrvd/logsrvd_local.c:554
 msgid "error logging alert event"
 msgstr ""
 
-#: logsrvd/logsrvd_local.c:587 logsrvd/logsrvd_local.c:650
-#: logsrvd/logsrvd_local.c:685
+#: logsrvd/logsrvd_local.c:590 logsrvd/logsrvd_local.c:653
+#: logsrvd/logsrvd_local.c:688
 #, c-format
 msgid "unable to format timing buffer, length %d"
 msgstr ""
 
-#: logsrvd/logsrvd_local.c:601 logsrvd/logsrvd_local.c:609
-#: logsrvd/logsrvd_local.c:657 logsrvd/logsrvd_local.c:692
+#: logsrvd/logsrvd_local.c:604 logsrvd/logsrvd_local.c:612
+#: logsrvd/logsrvd_local.c:660 logsrvd/logsrvd_local.c:695
 #: plugins/sudoers/sudoreplay.c:344 toke.l:961 toke.l:964
 #, c-format
 msgid "%s/%s: %s"
 msgstr ""
 
-#: logsrvd/logsrvd_local.c:620
+#: logsrvd/logsrvd_local.c:623
 msgid "randomly dropping connection"
 msgstr ""
 
-#: logsrvd/logsrvd_local.c:632
+#: logsrvd/logsrvd_local.c:635
 msgid "error writing IoBuffer"
 msgstr ""
 
-#: logsrvd/logsrvd_local.c:667
+#: logsrvd/logsrvd_local.c:670
 msgid "error writing ChangeWindowSize"
 msgstr ""
 
-#: logsrvd/logsrvd_local.c:702
+#: logsrvd/logsrvd_local.c:705
 msgid "error writing CommandSuspend"
 msgstr ""
 
@@ -1192,33 +1224,30 @@ msgid "relay host name does not match certificate"
 msgstr ""
 
 #: logsrvd/logsrvd_relay.c:773 logsrvd/logsrvd_relay.c:787
-#: logsrvd/logsrvd_relay.c:794
+#: logsrvd/logsrvd_relay.c:794 logsrvd/logsrvd_relay.c:811
+#: logsrvd/logsrvd_relay.c:842
 msgid "error reading from relay"
 msgstr ""
 
-#: logsrvd/logsrvd_relay.c:815
-msgid "unable to read from relay"
-msgstr ""
-
-#: logsrvd/logsrvd_relay.c:830 logsrvd/logsrvd_relay.c:949
+#: logsrvd/logsrvd_relay.c:833 logsrvd/logsrvd_relay.c:955
 msgid "relay server closed connection"
 msgstr ""
 
-#: logsrvd/logsrvd_relay.c:848
+#: logsrvd/logsrvd_relay.c:854
 msgid "server message too large"
 msgstr ""
 
-#: logsrvd/logsrvd_relay.c:912
+#: logsrvd/logsrvd_relay.c:918
 #, c-format
 msgid "timed out writing to relay %s (%s)"
 msgstr ""
 
-#: logsrvd/logsrvd_relay.c:914
+#: logsrvd/logsrvd_relay.c:920
 msgid "timeout writing to relay"
 msgstr ""
 
-#: logsrvd/logsrvd_relay.c:968 logsrvd/logsrvd_relay.c:975
-#: logsrvd/logsrvd_relay.c:987
+#: logsrvd/logsrvd_relay.c:974 logsrvd/logsrvd_relay.c:981
+#: logsrvd/logsrvd_relay.c:993 logsrvd/logsrvd_relay.c:1000
 msgid "error writing to relay"
 msgstr ""
 
@@ -1324,38 +1353,38 @@ msgstr ""
 msgid "host name does not match certificate"
 msgstr ""
 
-#: logsrvd/sendlog.c:1386
+#: logsrvd/sendlog.c:1389
 msgid "premature EOF"
 msgstr ""
 
-#: logsrvd/sendlog.c:1399 plugins/sudoers/log_client.c:1818
+#: logsrvd/sendlog.c:1404 plugins/sudoers/log_client.c:1821
 #, c-format
 msgid "server message too large: %u"
 msgstr ""
 
-#: logsrvd/sendlog.c:1455
+#: logsrvd/sendlog.c:1460
 msgid "timeout writing to server"
 msgstr ""
 
-#: logsrvd/sendlog.c:1825
+#: logsrvd/sendlog.c:1835
 msgid "both restart point and iolog ID must be specified"
 msgstr ""
 
-#: logsrvd/sendlog.c:1829
+#: logsrvd/sendlog.c:1839
 msgid "a restart point may not be set when no I/O is sent"
 msgstr ""
 
-#: logsrvd/sendlog.c:1905
+#: logsrvd/sendlog.c:1915
 #, c-format
 msgid "exited prematurely with state %d"
 msgstr ""
 
-#: logsrvd/sendlog.c:1906
+#: logsrvd/sendlog.c:1916
 #, c-format
 msgid "elapsed time sent to server [%lld, %ld]"
 msgstr ""
 
-#: logsrvd/sendlog.c:1908
+#: logsrvd/sendlog.c:1918
 #, c-format
 msgid "commit point received from server [%lld, %ld]"
 msgstr ""
@@ -1415,9 +1444,9 @@ msgstr ""
 
 #: plugins/sudoers/audit.c:272 plugins/sudoers/log_client.c:985
 #: plugins/sudoers/log_client.c:1034 plugins/sudoers/log_client.c:1083
-#: plugins/sudoers/log_client.c:1208 plugins/sudoers/logging.c:627
-#: plugins/sudoers/logging.c:867 plugins/sudoers/logging.c:1017
-#: plugins/sudoers/logging.c:1041 plugins/sudoers/policy.c:1055
+#: plugins/sudoers/log_client.c:1208 plugins/sudoers/logging.c:632
+#: plugins/sudoers/logging.c:877 plugins/sudoers/logging.c:1027
+#: plugins/sudoers/logging.c:1051 plugins/sudoers/policy.c:1058
 msgid "unable to get time of day"
 msgstr ""
 
@@ -1521,35 +1550,35 @@ msgstr ""
 msgid "unable to initialize PAM: %s"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:349
+#: plugins/sudoers/auth/pam.c:359
 #, c-format
 msgid "PAM authentication error: %s"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:369
+#: plugins/sudoers/auth/pam.c:380
 msgid "account validation failure, is your account locked?"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:380
+#: plugins/sudoers/auth/pam.c:391
 msgid "Account or password is expired, reset your password and try again"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:387
+#: plugins/sudoers/auth/pam.c:398
 #, c-format
 msgid "unable to change expired password: %s"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:398
+#: plugins/sudoers/auth/pam.c:409
 msgid "Password expired, contact your system administrator"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:403
+#: plugins/sudoers/auth/pam.c:414
 msgid ""
 "Account expired or PAM config lacks an \"account\" section for sudo, contact "
 "your system administrator"
 msgstr ""
 
-#: plugins/sudoers/auth/pam.c:411 plugins/sudoers/auth/pam.c:416
+#: plugins/sudoers/auth/pam.c:422 plugins/sudoers/auth/pam.c:427
 #, c-format
 msgid "PAM account management error: %s"
 msgstr ""
@@ -1637,17 +1666,17 @@ msgstr ""
 msgid "unknown uid %u"
 msgstr ""
 
-#: plugins/sudoers/check.c:270
+#: plugins/sudoers/check.c:279
 #, c-format
 msgid "error reading lecture file %s"
 msgstr ""
 
-#: plugins/sudoers/check.c:273
+#: plugins/sudoers/check.c:282
 #, c-format
 msgid "ignoring lecture file %s: not a regular file"
 msgstr ""
 
-#: plugins/sudoers/check.c:286
+#: plugins/sudoers/check.c:295
 msgid ""
 "\n"
 "We trust you have received the usual lecture from the local System\n"
@@ -1659,15 +1688,10 @@ msgid ""
 "\n"
 msgstr ""
 
-#: plugins/sudoers/check.c:294
+#: plugins/sudoers/check.c:303
 msgid ""
 "For security reasons, the password you type will not be visible.\n"
 "\n"
-msgstr ""
-
-#: plugins/sudoers/check_aliases.c:93
-#, c-format
-msgid "cycle in %s \"%s\""
 msgstr ""
 
 #: plugins/sudoers/check_aliases.c:96
@@ -1779,24 +1803,6 @@ msgid ""
 "  -P, --padding=num          base padding for sudoOrder increment\n"
 "  -s, --suppress=sections    suppress output of certain sections\n"
 "  -V, --version              display version information and exit"
-msgstr ""
-
-#: plugins/sudoers/cvtsudoers_csv.c:192 plugins/sudoers/cvtsudoers_csv.c:199
-#: plugins/sudoers/cvtsudoers_ldif.c:270 plugins/sudoers/cvtsudoers_ldif.c:277
-#: plugins/sudoers/cvtsudoers_ldif.c:628 plugins/sudoers/env.c:357
-#: plugins/sudoers/env.c:364 plugins/sudoers/env.c:475
-#: plugins/sudoers/ldap.c:511 plugins/sudoers/ldap.c:629
-#: plugins/sudoers/ldap.c:1003 plugins/sudoers/ldap_conf.c:219
-#: plugins/sudoers/ldap_conf.c:310 plugins/sudoers/ldap_util.c:483
-#: plugins/sudoers/linux_audit.c:93 plugins/sudoers/logging.c:487
-#: plugins/sudoers/policy.c:836 plugins/sudoers/policy.c:848
-#: plugins/sudoers/prompt.c:169 plugins/sudoers/serialize_list.c:62
-#: plugins/sudoers/serialize_list.c:71 plugins/sudoers/strvec_join.c:62
-#: plugins/sudoers/sudoreplay.c:1342 plugins/sudoers/sudoreplay.c:1348
-#: plugins/sudoers/sudoreplay.c:1354 plugins/sudoers/testsudoers.c:306
-#: plugins/sudoers/toke_util.c:217 toke.l:975 toke.l:1257
-#, c-format
-msgid "internal error, %s overflow"
 msgstr ""
 
 #: plugins/sudoers/cvtsudoers_csv.c:481 plugins/sudoers/cvtsudoers_csv.c:495
@@ -2034,12 +2040,12 @@ msgstr ""
 
 #: plugins/sudoers/def_data.c:194
 #, c-format
-msgid "Authentication timestamp timeout: %.1f minutes"
+msgid "Authentication timestamp timeout: %d.%d minutes"
 msgstr ""
 
 #: plugins/sudoers/def_data.c:198
 #, c-format
-msgid "Password prompt timeout: %.1f minutes"
+msgid "Password prompt timeout: %d.%d minutes"
 msgstr ""
 
 #: plugins/sudoers/def_data.c:202
@@ -2628,48 +2634,48 @@ msgstr ""
 msgid "Command denial message: %s"
 msgstr ""
 
-#: plugins/sudoers/defaults.c:207
+#: plugins/sudoers/defaults.c:209
 #, c-format
 msgid "unknown defaults entry \"%s\""
 msgstr ""
 
-#: plugins/sudoers/defaults.c:251
+#: plugins/sudoers/defaults.c:253
 #, c-format
 msgid "no value specified for \"%s\""
 msgstr ""
 
-#: plugins/sudoers/defaults.c:260
+#: plugins/sudoers/defaults.c:262
 #, c-format
 msgid "invalid operator \"%c=\" for \"%s\""
 msgstr ""
 
-#: plugins/sudoers/defaults.c:292
+#: plugins/sudoers/defaults.c:294
 #, c-format
 msgid "option \"%s\" does not take a value"
 msgstr ""
 
-#: plugins/sudoers/defaults.c:319
+#: plugins/sudoers/defaults.c:321
 #, c-format
 msgid "invalid Defaults type 0x%x for option \"%s\""
 msgstr ""
 
-#: plugins/sudoers/defaults.c:326
+#: plugins/sudoers/defaults.c:328
 #, c-format
 msgid "value \"%s\" is invalid for option \"%s\""
 msgstr ""
 
-#: plugins/sudoers/defaults.c:1189 plugins/sudoers/policy.c:208
+#: plugins/sudoers/defaults.c:1191 plugins/sudoers/policy.c:208
 #: plugins/sudoers/policy.c:217
 #, c-format
 msgid "path name for \"%s\" too long"
 msgstr ""
 
-#: plugins/sudoers/defaults.c:1195
+#: plugins/sudoers/defaults.c:1197
 #, c-format
 msgid "values for \"%s\" must start with a '/', '~', or '*'"
 msgstr ""
 
-#: plugins/sudoers/defaults.c:1202
+#: plugins/sudoers/defaults.c:1204
 #, c-format
 msgid "values for \"%s\" must start with a '/'"
 msgstr ""
@@ -2733,11 +2739,11 @@ msgstr ""
 msgid "sudo_putenv: corrupted envp, length mismatch"
 msgstr ""
 
-#: plugins/sudoers/env.c:1137
+#: plugins/sudoers/env.c:1139
 msgid "unable to rebuild the environment"
 msgstr ""
 
-#: plugins/sudoers/env.c:1217
+#: plugins/sudoers/env.c:1219
 #, c-format
 msgid ""
 "sorry, you are not allowed to set the following environment variables: %s"
@@ -2831,18 +2837,18 @@ msgstr ""
 msgid "you must set TLS_CERT in %s to use SSL"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1593
+#: plugins/sudoers/ldap.c:1599
 #, c-format
 msgid "unable to initialize LDAP: %s"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1630
+#: plugins/sudoers/ldap.c:1636
 msgid ""
 "start_tls specified but LDAP libs do not support ldap_start_tls_s() or "
 "ldap_start_tls_s_np()"
 msgstr ""
 
-#: plugins/sudoers/ldap.c:1767 plugins/sudoers/parse_ldif.c:745
+#: plugins/sudoers/ldap.c:1773 plugins/sudoers/parse_ldif.c:745
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
 msgstr ""
@@ -2883,7 +2889,7 @@ msgid "unable to send audit message"
 msgstr ""
 
 #: plugins/sudoers/log_client.c:125 plugins/sudoers/log_client.c:421
-#: plugins/sudoers/log_client.c:1473 plugins/sudoers/log_client.c:2101
+#: plugins/sudoers/log_client.c:1473 plugins/sudoers/log_client.c:2108
 msgid "error in event loop"
 msgstr ""
 
@@ -2930,15 +2936,15 @@ msgstr ""
 msgid "%s: internal error, invalid exit status %d"
 msgstr ""
 
-#: plugins/sudoers/log_client.c:1780 plugins/sudoers/log_client.c:1805
+#: plugins/sudoers/log_client.c:1780 plugins/sudoers/log_client.c:1806
 msgid "lost connection to log server"
 msgstr ""
 
-#: plugins/sudoers/log_client.c:1882
+#: plugins/sudoers/log_client.c:1885
 msgid "missing write buffer"
 msgstr ""
 
-#: plugins/sudoers/log_client.c:2040
+#: plugins/sudoers/log_client.c:2047
 msgid "unable to connect to log server"
 msgstr ""
 
@@ -2991,7 +2997,7 @@ msgstr ""
 msgid "This incident has been reported to the administrator.\n"
 msgstr ""
 
-#: plugins/sudoers/logging.c:395 plugins/sudoers/sudoers.c:564
+#: plugins/sudoers/logging.c:397 plugins/sudoers/sudoers.c:564
 #: plugins/sudoers/sudoers.c:566 plugins/sudoers/sudoers.c:568
 #: plugins/sudoers/sudoers.c:570 plugins/sudoers/sudoers.c:794
 #: plugins/sudoers/sudoers.c:796
@@ -2999,38 +3005,38 @@ msgstr ""
 msgid "%s: command not found"
 msgstr ""
 
-#: plugins/sudoers/logging.c:397 plugins/sudoers/sudoers.c:560
+#: plugins/sudoers/logging.c:399 plugins/sudoers/sudoers.c:560
 #, c-format
 msgid ""
 "ignoring \"%s\" found in '.'\n"
 "Use \"sudo ./%s\" if this is the \"%s\" you wish to run."
 msgstr ""
 
-#: plugins/sudoers/logging.c:417
+#: plugins/sudoers/logging.c:419
 #, c-format
 msgid "%u incorrect password attempt"
 msgid_plural "%u incorrect password attempts"
 msgstr[0] ""
 msgstr[1] ""
 
-#: plugins/sudoers/logging.c:508
+#: plugins/sudoers/logging.c:510
 msgid "authentication failure"
 msgstr ""
 
-#: plugins/sudoers/logging.c:552 plugins/sudoers/logging.c:571
+#: plugins/sudoers/logging.c:557 plugins/sudoers/logging.c:576
 msgid "a password is required"
 msgstr ""
 
-#: plugins/sudoers/logging.c:889
+#: plugins/sudoers/logging.c:899
 msgid "problem parsing sudoers"
 msgstr ""
 
-#: plugins/sudoers/logging.c:930 plugins/sudoers/logging.c:938
+#: plugins/sudoers/logging.c:940 plugins/sudoers/logging.c:948
 #, c-format
 msgid "%s:%d:%d: %s"
 msgstr ""
 
-#: plugins/sudoers/logging.c:1119
+#: plugins/sudoers/logging.c:1129
 #, c-format
 msgid "unable to write log file %s"
 msgstr ""
@@ -3077,82 +3083,82 @@ msgstr ""
 msgid "unable to parse network address list"
 msgstr ""
 
-#: plugins/sudoers/policy.c:555
+#: plugins/sudoers/policy.c:558
 msgid "user name not set by sudo front-end"
 msgstr ""
 
-#: plugins/sudoers/policy.c:559
+#: plugins/sudoers/policy.c:562
 msgid "user-ID not set by sudo front-end"
 msgstr ""
 
-#: plugins/sudoers/policy.c:563
+#: plugins/sudoers/policy.c:566
 msgid "group-ID not set by sudo front-end"
 msgstr ""
 
-#: plugins/sudoers/policy.c:567
+#: plugins/sudoers/policy.c:570
 msgid "host name not set by sudo front-end"
 msgstr ""
 
-#: plugins/sudoers/policy.c:765
+#: plugins/sudoers/policy.c:768
 #, c-format
 msgid "invalid working directory: %s"
 msgstr ""
 
-#: plugins/sudoers/policy.c:952
+#: plugins/sudoers/policy.c:955
 #, c-format
 msgid "invalid chroot directory: %s"
 msgstr ""
 
-#: plugins/sudoers/policy.c:1163 plugins/sudoers/visudo.c:919
+#: plugins/sudoers/policy.c:1166 plugins/sudoers/visudo.c:919
 #: plugins/sudoers/visudo.c:1218
 #, c-format
 msgid "unable to execute %s"
 msgstr ""
 
-#: plugins/sudoers/policy.c:1232 plugins/sudoers/policy.c:1267
-#: plugins/sudoers/policy.c:1289 plugins/sudoers/policy.c:1307
+#: plugins/sudoers/policy.c:1235 plugins/sudoers/policy.c:1270
+#: plugins/sudoers/policy.c:1292 plugins/sudoers/policy.c:1310
 #, c-format
 msgid "%s: invalid mode flags from sudo front end: 0x%x"
 msgstr ""
 
-#: plugins/sudoers/policy.c:1330
+#: plugins/sudoers/policy.c:1333
 #, c-format
 msgid "Sudoers policy plugin version %s\n"
 msgstr ""
 
-#: plugins/sudoers/policy.c:1332
+#: plugins/sudoers/policy.c:1335
 #, c-format
 msgid "Sudoers file grammar version %d\n"
 msgstr ""
 
-#: plugins/sudoers/policy.c:1336
+#: plugins/sudoers/policy.c:1339
 #, c-format
 msgid ""
 "\n"
 "Sudoers path: %s\n"
 msgstr ""
 
-#: plugins/sudoers/policy.c:1339
+#: plugins/sudoers/policy.c:1342
 #, c-format
 msgid "nsswitch path: %s\n"
 msgstr ""
 
-#: plugins/sudoers/policy.c:1342
+#: plugins/sudoers/policy.c:1345
 #, c-format
 msgid "ldap.conf path: %s\n"
 msgstr ""
 
-#: plugins/sudoers/policy.c:1344
+#: plugins/sudoers/policy.c:1347
 #, c-format
 msgid "ldap.secret path: %s\n"
 msgstr ""
 
-#: plugins/sudoers/policy.c:1377
+#: plugins/sudoers/policy.c:1380
 #, c-format
 msgid "unable to register hook of type %d (version %d.%d)"
 msgstr ""
 
-#: plugins/sudoers/policy.c:1395
+#: plugins/sudoers/policy.c:1398
 #, c-format
 msgid "unable to deregister hook of type %d (version %d.%d)"
 msgstr ""
@@ -3400,17 +3406,17 @@ msgstr ""
 msgid "%s is not a regular file"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:1343 plugins/sudoers/timestamp.c:272 toke.l:1335
+#: plugins/sudoers/sudoers.c:1343 plugins/sudoers/timestamp.c:272 toke.l:1336
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:1348 plugins/sudoers/timestamp.c:279 toke.l:1340
+#: plugins/sudoers/sudoers.c:1348 plugins/sudoers/timestamp.c:279 toke.l:1341
 #, c-format
 msgid "%s is world writable"
 msgstr ""
 
-#: plugins/sudoers/sudoers.c:1352 plugins/sudoers/timestamp.c:284 toke.l:1343
+#: plugins/sudoers/sudoers.c:1352 plugins/sudoers/timestamp.c:284 toke.l:1344
 #, c-format
 msgid "%s is owned by gid %u, should be %u"
 msgstr ""
@@ -3523,16 +3529,6 @@ msgstr ""
 msgid "unknown search type %d"
 msgstr ""
 
-#: plugins/sudoers/sudoreplay.c:1681
-#, c-format
-msgid "usage: %s [-hnRS] [-d dir] [-m num] [-s num] ID\n"
-msgstr ""
-
-#: plugins/sudoers/sudoreplay.c:1683
-#, c-format
-msgid "usage: %s [-h] [-d dir] -l [search expression]\n"
-msgstr ""
-
 #: plugins/sudoers/sudoreplay.c:1697
 #, c-format
 msgid ""
@@ -3618,7 +3614,7 @@ msgstr ""
 msgid "%s:%d:%d timestampowner: unknown user %s"
 msgstr ""
 
-#: plugins/sudoers/toke_util.c:159
+#: plugins/sudoers/toke_util.c:160
 msgid "sudoedit should not be specified with a path"
 msgstr ""
 
@@ -3812,6 +3808,6 @@ msgstr ""
 msgid "ignoring file name containing '.'"
 msgstr ""
 
-#: toke.l:1290
+#: toke.l:1291
 msgid "too many levels of includes"
 msgstr ""
