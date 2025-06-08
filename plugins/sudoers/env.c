@@ -1123,7 +1123,7 @@ rebuild_env(const struct sudoers_context *ctx)
 	CHECK_SETENV2("SUDO_COMMAND", ctx->user.cmnd, true, true);
     }
 
-    /* Add the SUDO_{USER,UID,GID,HOME,TTY,TTY} environment variables. */
+    /* Add the SUDO_{USER,UID,GID,HOME,TTY} environment variables. */
     CHECK_SETENV2("SUDO_USER", ctx->user.name, true, true);
     (void)snprintf(idbuf, sizeof(idbuf), "%u", (unsigned int) ctx->user.uid);
     CHECK_SETENV2("SUDO_UID", idbuf, true, true);
