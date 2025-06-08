@@ -26,7 +26,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "February 22, 2025" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "June 7, 2025" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -1868,6 +1868,10 @@ user's home directory.
 .PP
 This setting is only supported by version 1.9.3 or higher.
 .SS "Chroot_Spec"
+Support for setting the root directory is deprecated and will be removed
+in a future version of
+\fBsudo\fR.
+.PP
 The root directory that the command will be run in can be specified
 using the
 \fRCHROOT\fR
@@ -5647,6 +5651,10 @@ that includes a
 \fIChroot_Spec\fR.
 .sp
 This setting is only supported by version 1.9.3 or higher.
+.sp
+Support for setting the root directory is deprecated and will be removed
+in a future version of
+\fBsudo\fR.
 .TP 14n
 runcwd
 If set,
@@ -6967,12 +6975,7 @@ facility in all cases and for commands to be run with
 the target user's home directory as the working directory.
 We don't want to subject the full time staff to the
 \fBsudo\fR
-lecture and we want to allow them to run commands in a
-chroot(2)
-\(lqsandbox\(rq
-via the
-\fB\-R\fR
-option.
+lecture.
 User
 \fBmillert\fR
 need not provide a password and we don't want to reset the
@@ -7003,7 +7006,7 @@ privileges.
 # Override built-in defaults
 Defaults		syslog=auth,runcwd=~
 Defaults>root		!set_logname
-Defaults:FULLTIMERS	!lecture,runchroot=*
+Defaults:FULLTIMERS	!lecture
 Defaults:millert	!authenticate
 Defaults@SERVERS	log_year, logfile=@log_dir@/sudo.log
 Defaults!PAGERS		noexec

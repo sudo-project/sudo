@@ -454,6 +454,8 @@ parse_args(int argc, char **argv, const char *shell, int *old_optind,
 			usage();
 		    if (sudo_settings[ARG_CHROOT].value != NULL)
 			usage();
+		    sudo_warnx("%s",
+			U_("the -R option will be removed in a future version of sudo"));
 		    sudo_settings[ARG_CHROOT].value = optarg;
 		    break;
 #ifdef HAVE_SELINUX

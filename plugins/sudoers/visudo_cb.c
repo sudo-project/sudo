@@ -25,6 +25,16 @@
 
 #include <sudoers.h>
 
+static bool
+cb_runchroot(struct sudoers_context *ctx, const char *file, int line, int column, const union sudo_defs_val *sd_un, int op)
+{
+    parser_warnx(ctx, file, line, column, ctx->parser_conf.strict > 1,
+	!ctx->parser_conf.verbose,
+	N_("\"runchroot\" is deprecated and will be removed in a future sudo release"));
+
+    return true;
+}
+
 /*
  * Set visudo Defaults callbacks.
  */
@@ -35,6 +45,9 @@ set_callbacks(void)
 
     /* Set locale callback. */
     sudo_defs_table[I_SUDOERS_LOCALE].callback = sudoers_locale_callback;
+
+    /* The "runchroot" setting is deprecated. */
+    sudo_defs_table[I_RUNCHROOT].callback = cb_runchroot;
 
     debug_return;
 }

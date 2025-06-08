@@ -15,6 +15,7 @@ Password required
 Command denied
 
 User cannot override the sudoers chroot:
+sudoers:1:19: "CHROOT" is deprecated
 Parses OK
 
 Entries for user root:
@@ -29,6 +30,7 @@ Password required
 Command unmatched
 
 User can chroot if sudoers rule sets chroot to '*':
+sudoers:1:19: "CHROOT" is deprecated
 Parses OK
 
 Entries for user root:

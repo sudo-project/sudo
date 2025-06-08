@@ -1,3 +1,4 @@
+sudoers:2:19: "CHROOT" is deprecated
 Parses OK
 
 Entries for user root:

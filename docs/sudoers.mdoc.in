@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd February 22, 2025
+.Dd June 7, 2025
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1772,6 +1772,10 @@ user's home directory.
 .Pp
 This setting is only supported by version 1.9.3 or higher.
 .Ss Chroot_Spec
+Support for setting the root directory is deprecated and will be removed
+in a future version of
+.Nm sudo .
+.Pp
 The root directory that the command will be run in can be specified
 using the
 .Dv CHROOT
@@ -5281,6 +5285,10 @@ that includes a
 .Em Chroot_Spec .
 .Pp
 This setting is only supported by version 1.9.3 or higher.
+.Pp
+Support for setting the root directory is deprecated and will be removed
+in a future version of
+.Nm sudo .
 .It runcwd
 If set,
 .Nm sudo
@@ -6462,12 +6470,7 @@ facility in all cases and for commands to be run with
 the target user's home directory as the working directory.
 We don't want to subject the full time staff to the
 .Nm sudo
-lecture and we want to allow them to run commands in a
-.Xr chroot 2
-.Dq sandbox
-via the
-.Fl R
-option.
+lecture.
 User
 .Sy millert
 need not provide a password and we don't want to reset the
@@ -6497,7 +6500,7 @@ privileges.
 # Override built-in defaults
 Defaults		syslog=auth,runcwd=~
 Defaults>root		!set_logname
-Defaults:FULLTIMERS	!lecture,runchroot=*
+Defaults:FULLTIMERS	!lecture
 Defaults:millert	!authenticate
 Defaults@SERVERS	log_year, logfile=@log_dir@/sudo.log
 Defaults!PAGERS		noexec
