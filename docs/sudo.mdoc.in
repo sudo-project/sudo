@@ -667,6 +667,9 @@ before running the
 .Ar command .
 The security policy may return an error if the user does not have
 permission to specify the root directory.
+.Pp
+This option is deprecated and will be removed in a future version of
+.Nm .
 .if \n(SL \{\
 .It Fl r Ar role , Fl -role Ns = Ns Ar role
 Run the

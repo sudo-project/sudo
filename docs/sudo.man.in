@@ -712,6 +712,9 @@ before running the
 \fIcommand\fR.
 The security policy may return an error if the user does not have
 permission to specify the root directory.
+.sp
+This option is deprecated and will be removed in a future version of
+\fBsudo\fR.
 .if \n(SL \{\
 .TP 8n
 \fB\-r\fR \fIrole\fR, \fB\--role\fR=\fIrole\fR

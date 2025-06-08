@@ -611,6 +611,12 @@ chrootspec	:	CHROOT '=' WORD {
 				sudoerserror(N_("\"CHROOT\" path too long"));
 				YYERROR;
 			    }
+			    if (parser_conf.strict > 2) {
+				sudoerserror(N_("\"CHROOT\" is deprecated"));
+				YYERROR;
+			    } else if (parser_conf.verbose > 0) {
+				parser_warnx(parsed_policy.ctx, sudoers, this_lineno, sudolinebuf.toke_start + 1, false, false, N_("\"CHROOT\" is deprecated"));
+			    }
 			    $$ = $3;
 			}
 		;
