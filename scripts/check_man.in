@@ -20,7 +20,7 @@ $EGREP -n '([^0-9][0-9]-[1-9]|[^A-Z][A-Z]-[A-Z]|[^a-z][a-z]-[a-z])' "$@" > "$TFI
 if [ $? -eq 0 ]; then
     rval=`expr $rval + 1`
     echo "" >> "$OFILE"
-    echo "Change '-' to '\(en' (en-dash) for alpha or numberic range:" >> "$OFILE"
+    echo "Change '-' to '\(en' (en-dash) for alpha or numeric range:" >> "$OFILE"
     cat "$TFILE" >> "$OFILE"
 fi
 
