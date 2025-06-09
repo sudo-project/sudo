@@ -16,7 +16,7 @@ What's new in Sudo 1.9.17
  * Fixed the display of timeout values in the "sudo -V" output
    on systems without a C99-compliant snprintf() function.
 
- * Quieted a number of Coverity minor warnings.
+ * Quieted a number of minor Coverity warnings.
 
  * Fixed a problem running sudo from a serial console on Linux when
    the command is run in a pseudo-terminal (the default).
