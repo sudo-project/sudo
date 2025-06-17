@@ -84,7 +84,7 @@ iolog_write(struct iolog_file *iol, const void *buf, size_t len,
 #endif
     {
 	ret = (ssize_t)fwrite(buf, 1, len, iol->fd.f);
-	if (ret <= 0) {
+	if (ret != (ssize_t)len) {
 	    ret = -1;
 	    if (errstr != NULL)
 		*errstr = strerror(errno);

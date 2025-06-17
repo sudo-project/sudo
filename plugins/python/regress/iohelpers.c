@@ -51,7 +51,7 @@ fwriteall(const char *file_path, const char *string)
         goto cleanup;
 
     size_t size = strlen(string);
-    if (fwrite(string, 1, size, file) < size) {
+    if (fwrite(string, 1, size, file) != size) {
         goto cleanup;
     }
 

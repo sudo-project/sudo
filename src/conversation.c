@@ -120,9 +120,9 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 			close(ttyfd);
 		    }
 		    if (!written) {
-			if (len != 0 && fwrite(msg->msg, 1, len, fp) == 0)
+			if (len != 0 && fwrite(msg->msg, 1, len, fp) != len)
 			    goto err;
-			if (crnl != NULL && fwrite(crnl, 1, 2, fp) == 0)
+			if (crnl != NULL && fwrite(crnl, 1, 2, fp) != 2)
 			    goto err;
 		    }
 		}
@@ -218,8 +218,8 @@ sudo_conversation_printf(int msg_type, const char * restrict fmt, ...)
             len = vasprintf(&buf, fmt, ap);
             va_end(ap);
         }
-        if (len != -1) {
-            if (fwrite(buf, 1, (size_t)len, ttyfp ? ttyfp : fp) == 0)
+        if (len >= 0) {
+            if (fwrite(buf, 1, (size_t)len, ttyfp ? ttyfp : fp) != (size_t)len)
                 len = -1;
             if (buf != sbuf)
                 free(buf);
