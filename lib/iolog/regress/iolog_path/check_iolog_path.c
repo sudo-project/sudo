@@ -64,7 +64,7 @@ reset_escape_data(struct iolog_escape_data *data)
 }
 
 static size_t
-fill_seq(char *str, size_t strsize, void *unused)
+fill_seq(char *restrict str, size_t strsize, void *restrict unused)
 {
     int len;
 
@@ -78,37 +78,37 @@ fill_seq(char *str, size_t strsize, void *unused)
 }
 
 static size_t
-fill_user(char *str, size_t strsize, void *unused)
+fill_user(char *restrict str, size_t strsize, void * restrict unused)
 {
     return strlcpy(str, escape_data.user, strsize);
 }
 
 static size_t
-fill_group(char *str, size_t strsize, void *unused)
+fill_group(char *restrict str, size_t strsize, void * restrict unused)
 {
     return strlcpy(str, escape_data.group, strsize);
 }
 
 static size_t
-fill_runas_user(char *str, size_t strsize, void *unused)
+fill_runas_user(char * restrict str, size_t strsize, void * restrict unused)
 {
     return strlcpy(str, escape_data.runas_user, strsize);
 }
 
 static size_t
-fill_runas_group(char *str, size_t strsize, void *unused)
+fill_runas_group(char * restrict str, size_t strsize, void *restrict unused)
 {
     return strlcpy(str, escape_data.runas_group, strsize);
 }
 
 static size_t
-fill_hostname(char *str, size_t strsize, void *unused)
+fill_hostname(char *restrict str, size_t strsize, void * restrict unused)
 {
     return strlcpy(str, escape_data.host, strsize);
 }
 
 static size_t
-fill_command(char *str, size_t strsize, void *unused)
+fill_command(char * restrict str, size_t strsize, void * restrict unused)
 {
     return strlcpy(str, escape_data.command, strsize);
 }

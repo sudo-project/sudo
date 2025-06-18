@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2019
+ * Copyright (c) 1996, 1998-2005, 2007-2020, 2022-2025
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -44,14 +44,6 @@
 #include <sudoers.h>
 #include <cvtsudoers.h>
 #include <pwutil.h>
-
-#ifndef LOGIN_NAME_MAX
-# ifdef _POSIX_LOGIN_NAME_MAX
-#  define LOGIN_NAME_MAX _POSIX_LOGIN_NAME_MAX
-# else
-#  define LOGIN_NAME_MAX 9
-# endif
-#endif /* LOGIN_NAME_MAX */
 
 #define FIELD_SIZE(src, name, size)			\
 do {							\
@@ -403,7 +395,7 @@ cvtsudoers_make_grlist_item(const struct passwd *pw, char * const *unused1)
     struct cache_item_grlist *grlitem;
     struct sudoers_string *s;
     struct group_list *grlist;
-    long groupname_len;
+    const size_t groupname_len = sudo_login_name_max();
     debug_decl(cvtsudoers_make_grlist_item, SUDOERS_DEBUG_NSS);
 
     /*
@@ -420,18 +412,10 @@ cvtsudoers_make_grlist_item(const struct passwd *pw, char * const *unused1)
 	ngroups++;
     }
 
-#ifdef _SC_LOGIN_NAME_MAX
-    groupname_len = sysconf(_SC_LOGIN_NAME_MAX);
-    if (groupname_len < 32)
-	groupname_len = 32;
-#else
-    groupname_len = MAX(LOGIN_NAME_MAX, 32);
-#endif
-
     /* Allocate in one big chunk for easy freeing. */
     nsize = strlen(pw->pw_name) + 1;
     total = sizeof(*grlitem) + nsize;
-    total += (size_t)groupname_len * ngroups;
+    total += groupname_len * ngroups;
 
 again:
     if ((grlitem = calloc(1, total)) == NULL) {
@@ -472,7 +456,7 @@ again:
 	}
 	len = strlen(s->str) + 1;
 	if ((size_t)(cp - (char *)grlitem) + len > total) {
-	    total += len + (size_t)groupname_len;
+	    total += len + groupname_len;
 	    free(grlitem);
 	    goto again;
 	}

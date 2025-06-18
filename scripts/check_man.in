@@ -1,0 +1,84 @@
+#!/bin/sh
+
+MANDOC="@MANDOCPROG@"
+GROFF="@GROFFPROG@"
+MANTYPE="@MANTYPE@"
+EGREP="@EGREP@"
+
+if [ "$MANTYPE" != "mdoc" ]; then
+    echo "$0 only supports mdoc manuals" 1>&2
+    exit 1
+fi
+
+TFILE=`mktemp -t check_man.XXXXXX` || exit 1
+OFILE=`mktemp -t check_man.XXXXXX` || exit 1
+
+rval=0
+
+# Perform checks across all files first
+$EGREP -n '([^0-9][0-9]-[1-9]|[^A-Z][A-Z]-[A-Z]|[^a-z][a-z]-[a-z])' "$@" > "$TFILE" 2>&1
+if [ $? -eq 0 ]; then
+    rval=`expr $rval + 1`
+    echo "" >> "$OFILE"
+    echo "Change '-' to '\(en' (en-dash) for alpha or numeric range:" >> "$OFILE"
+    cat "$TFILE" >> "$OFILE"
+fi
+
+$EGREP -n '--' "$@" > "$TFILE" 2>&1
+if [ $? -eq 0 ]; then
+    rval=`expr $rval + 1`
+    echo "" >> "$OFILE"
+    echo "Change '--' to '\(em' (em-dash) or escape the '-':" >> "$OFILE"
+    cat "$TFILE" >> "$OFILE"
+fi
+
+$EGREP -n '-[^-\\]' "$@" > "$TFILE" 2>&1
+if [ $? -eq 0 ]; then
+    rval=`expr $rval + 1`
+    echo "" >> "$OFILE"
+    echo "Escape '-' as '\-':" >> "$OFILE"
+    cat "$TFILE" >> "$OFILE"
+fi
+
+# Change a HYPHEN-MINUS (code 0x2D) to a minus(-dash) (\-),
+
+$EGREP -n '^\.It[ 	].*[ 	]Ta$' "$@" > "$TFILE" 2>&1
+if [ $? -eq 0 ]; then
+    rval=`expr $rval + 1`
+    echo "" >> "$OFILE"
+    echo "Empty table cell at EOL leads to trailing whitespace:" >> "$OFILE"
+    cat "$TFILE" >> "$OFILE"
+fi
+
+$EGREP -n '[ 	]$' "$@" > "$TFILE" 2>&1
+if [ $? -eq 0 ]; then
+    rval=`expr $rval + 1`
+    echo "" >> "$OFILE"
+    echo "Trailing whitespace:" >> "$OFILE"
+    cat "$TFILE" >> "$OFILE"
+fi
+
+while [ $# != 0 ]; do
+    if [ "$MANDOC" != "mandoc" ]; then
+	# Ignore OS warning and missing cross-references
+	$MANDOC -Tlint $1 | $EGREP -v 'STYLE: (operating system explicitly specified|referenced manual not found):' > "$TFILE" 2>&1
+	if [ -s "$TFILE" ]; then
+	    rval=`expr $rval + 1`
+	    cat "$TFILE"
+	fi
+    fi
+
+    if [ "$GROFF" != "groff" ]; then
+	$GROFF -mandoc -K utf8 -rF0 -rHY=0 -rCHECKSTYLE=10 -ww -b -z $1 || \
+	    rval=`expr $rval + $?`
+    fi
+
+    shift
+done
+
+if [ -s "$OFILE"  ]; then
+    cat "$OFILE"
+fi
+
+rm -f "$OFILE" "$TFILE"
+exit $rval

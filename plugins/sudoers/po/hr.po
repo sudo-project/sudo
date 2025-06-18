@@ -1,13 +1,13 @@
 # Translation of sudoer to Croatian.
 # This file is put in the public domain.
 #
-# Božidar Putanec <bozidarp@yahoo.com>, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024.
+# Božidar Putanec <bozidarp@yahoo.com>, 2016-2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: sudoers-1.9.16b1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
 "POT-Creation-Date: 2024-06-08 09:06-0600\n"
-"PO-Revision-Date: 2024-06-16 18:28-0700\n"
+"PO-Revision-Date: 2025-03-26 20:59-0700\n"
 "Last-Translator: Božidar Putanec <bozidarp@yahoo.com>\n"
 "Language-Team: Croatian <lokalizacija@linux.hr>\n"
 "Language: hr\n"
@@ -213,19 +213,19 @@ msgstr "kontrolni zbroj zahtijeva ime staze"
 
 #: gram.y:639
 msgid "values for \"CWD\" must start with a '/', '~', or '*'"
-msgstr "vrijednosti za „CWD“ moraju započeti s „/“, „~“, ili „*“"
+msgstr "vrijednosti za „CWD” moraju započeti s „/”, „~”, ili „*”"
 
 #: gram.y:645
 msgid "\"CWD\" path too long"
-msgstr "„CWD“ staza je preduga"
+msgstr "„CWD” staza je preduga"
 
 #: gram.y:655
 msgid "values for \"CHROOT\" must start with a '/', '~', or '*'"
-msgstr "vrijednosti za „CHROOT“ moraju započeti s „/“, „~“, ili „*“"
+msgstr "vrijednosti za „CHROOT” moraju započeti s „/”, „~”, ili „*”"
 
 #: gram.y:661
 msgid "\"CHROOT\" path too long"
-msgstr "„CHROOT“ staza je preduga"
+msgstr "„CHROOT” staza je preduga"
 
 #: gram.y:810
 #, c-format
@@ -264,7 +264,7 @@ msgstr "%s:%d:%zu: %s\n"
 #: gram.y:1298
 #, c-format
 msgid "Alias \"%s\" already defined"
-msgstr "Alias „%s“ je već ranije definiran"
+msgstr "Alias „%s” je već ranije definiran"
 
 #: gram.y:1811 gram.y:1822 gram.y:1898 lib/eventlog/eventlog.c:236
 #: lib/eventlog/eventlog.c:778 lib/eventlog/eventlog.c:851
@@ -553,7 +553,7 @@ msgstr "greška u raščlambi"
 #: plugins/sudoers/sudoreplay.c:1293 plugins/sudoers/sudoreplay.c:1589
 #, c-format
 msgid "invalid regular expression \"%s\": %s"
-msgstr "nevaljani regularni izraz: „%s“: %s"
+msgstr "nevaljani regularni izraz: „%s”: %s"
 
 #: lib/iolog/iolog_legacy.c:65
 #, c-format
@@ -1678,12 +1678,12 @@ msgstr ""
 #: plugins/sudoers/check_aliases.c:93
 #, c-format
 msgid "cycle in %s \"%s\""
-msgstr "ciklus u %s „%s“"
+msgstr "ciklus u %s „%s”"
 
 #: plugins/sudoers/check_aliases.c:96
 #, c-format
 msgid "%s \"%s\" referenced but not defined"
-msgstr "Greška: %s „%s“ je referenciran ali nije definiran"
+msgstr "Greška: %s „%s” je referenciran ali nije definiran"
 
 #: plugins/sudoers/cvtsudoers.c:211
 #, c-format
@@ -1698,7 +1698,7 @@ msgstr "početni redoslijed (order): %s: %s"
 #: plugins/sudoers/cvtsudoers.c:242
 #, c-format
 msgid "order padding: %s: %s"
-msgstr "ispuna redoslijeda (order): %s: %s"
+msgstr "dopuna redoslijeda (order): %s: %s"
 
 #: plugins/sudoers/cvtsudoers.c:252 plugins/sudoers/visudo.c:183
 #, c-format
@@ -1807,7 +1807,7 @@ msgstr ""
 "  -o, --output=output_file   pretvoreni sudoers zapiše u output_file\n"
 "  -O, --order-start=num      prvi sudoOrder započinje od num\n"
 "  -p, --prune-matches        izreže nepodudarne korisnike, grupe i računala\n"
-"  -P, --padding=num          osnovna ispuna za sudoOrder inkrement\n"
+"  -P, --padding=num          osnovna dopuna za sudoOrder inkrement\n"
 "  -s, --suppress=sections    izostavi izlaz od sections sekcija\n"
 "  -V, --version              informira o inačici ovog programa i završi"
 
@@ -1847,7 +1847,7 @@ msgstr "nije moguće oblikovati vremensku oznaku"
 #: plugins/sudoers/cvtsudoers_json.c:841
 #, c-format
 msgid "%s:%d:%d: unknown defaults entry \"%s\""
-msgstr "%s:%d:%d: nepoznata zadana stavka „%s“"
+msgstr "%s:%d:%d: nepoznata zadana stavka „%s”"
 
 #: plugins/sudoers/cvtsudoers_ldif.c:116
 #, c-format
@@ -1866,7 +1866,7 @@ msgstr "previše sudoers grešaka, maksimum je %u"
 
 #: plugins/sudoers/cvtsudoers_ldif.c:747
 msgid "the SUDOERS_BASE environment variable is not set and the -b option was not specified."
-msgstr "varijabla okoline SUDOERS_BASE nije postavljena i -b opcija nije specificirana."
+msgstr "varijabla okruženja SUDOERS_BASE nije postavljena i -b opcija nije specificirana."
 
 #: plugins/sudoers/cvtsudoers_merge.c:275
 #: plugins/sudoers/cvtsudoers_merge.c:313
@@ -1892,22 +1892,22 @@ msgstr "%s:%d:%d: uklanjamo duplikat aliasa %s"
 #: plugins/sudoers/cvtsudoers_merge.c:868
 #, c-format
 msgid "%s:%d:%d: conflicting Defaults entry \"%s\" host-specific in %s:%d:%d"
-msgstr "%s:%d:%d: konfliktni Defaults unos „%s“ specifičan za hosta u %s:%d:%d"
+msgstr "%s:%d:%d: konfliktni Defaults unos „%s” specifičan za hosta u %s:%d:%d"
 
 #: plugins/sudoers/cvtsudoers_merge.c:904
 #, c-format
 msgid "%s:%d:%d: made Defaults \"%s\" specific to host %s"
-msgstr "%s:%d:%d: napravljen je Defaults „%s“ specifičan za opciju %s"
+msgstr "%s:%d:%d: napravljen je Defaults „%s” specifičan za opciju %s"
 
 #: plugins/sudoers/cvtsudoers_merge.c:922
 #, c-format
 msgid "%s:%d:%d: unable to make Defaults \"%s\" host-specific"
-msgstr "%s:%d:%d: nije moguće napraviti Defaults „%s“ specifično za hosta"
+msgstr "%s:%d:%d: nije moguće napraviti Defaults „%s” specifično za hosta"
 
 #: plugins/sudoers/cvtsudoers_merge.c:932
 #, c-format
 msgid "%s:%d:%d: removing Defaults \"%s\" overridden by subsequent entries"
-msgstr "%s:%d:%d: uklanjamo Defaults „%s“ nadvladan naknadnim unosima"
+msgstr "%s:%d:%d: uklanjamo Defaults „%s” nadvladan naknadnim unosima"
 
 #: plugins/sudoers/cvtsudoers_merge.c:1128
 #, c-format
@@ -2025,7 +2025,7 @@ msgstr "Korisniku dopustiti pokretanje sudo samo ako ima tty"
 
 #: plugins/sudoers/def_data.c:158
 msgid "Visudo will honor the EDITOR environment variable"
-msgstr "Visudo poštuje varijablu okoline EDITOR"
+msgstr "Visudo poštuje varijablu okruženja EDITOR"
 
 #: plugins/sudoers/def_data.c:162
 msgid "Prompt for root's password, not the user's"
@@ -2045,7 +2045,7 @@ msgstr "Ako postoje, primijeniti zadane vrijednosti iz login klase ciljanog kori
 
 #: plugins/sudoers/def_data.c:178
 msgid "Set the LOGNAME and USER environment variables"
-msgstr "Postavlja varijable okoline LOGNAME i USER"
+msgstr "Postavlja varijable okruženja LOGNAME i USER"
 
 #: plugins/sudoers/def_data.c:182
 msgid "Only set the effective uid to the target user, not the real uid"
@@ -2162,12 +2162,12 @@ msgstr "Staza do uređivača koji će koristiti visudo: %s"
 #: plugins/sudoers/def_data.c:274
 #, c-format
 msgid "When to require a password for 'list' pseudocommand: %s"
-msgstr "Kada zatražiti lozinku za pseudonaredbu „list“: %s"
+msgstr "Kada zatražiti lozinku za pseudonaredbu „list”: %s"
 
 #: plugins/sudoers/def_data.c:278
 #, c-format
 msgid "When to require a password for 'verify' pseudocommand: %s"
-msgstr "Kada zatražiti lozinku za pseudonaredbu „verify“: %s"
+msgstr "Kada zatražiti lozinku za pseudonaredbu „verify”: %s"
 
 #: plugins/sudoers/def_data.c:282
 msgid "Preload the sudo_noexec library which replaces the exec functions"
@@ -2184,15 +2184,15 @@ msgstr "Deskriptori datoteka >= %d bit će zatvoreni prije izvršavanja naredbe"
 
 #: plugins/sudoers/def_data.c:294
 msgid "If set, users may override the value of \"closefrom\" with the -C option"
-msgstr "Ako je dana, korisnici mogu s opcijom -C redefinirati vrijednost od „closefrom“"
+msgstr "Ako je dana, korisnici mogu s opcijom -C redefinirati vrijednost od „closefrom”"
 
 #: plugins/sudoers/def_data.c:298
 msgid "Allow users to set arbitrary environment variables"
-msgstr "Korisnici mogu postaviti bilo koje varijable okoline"
+msgstr "Korisnici mogu postaviti bilo koje varijable okruženja"
 
 #: plugins/sudoers/def_data.c:302
 msgid "Reset the environment to a default set of variables"
-msgstr "Okolinu vratiti u zadani skup varijabli okoline"
+msgstr "Okolinu vratiti u zadani skup varijabli okruženja"
 
 #: plugins/sudoers/def_data.c:306
 msgid "Environment variables to check for safety:"
@@ -2200,11 +2200,11 @@ msgstr "Varijable okruženja čiju sigurnost treba provjeriti:"
 
 #: plugins/sudoers/def_data.c:310
 msgid "Environment variables to remove:"
-msgstr "Varijable okoline koje treba ukloniti:"
+msgstr "Varijable okruženja koje treba ukloniti:"
 
 #: plugins/sudoers/def_data.c:314
 msgid "Environment variables to preserve:"
-msgstr "Varijable okoline koje treba zadržati:"
+msgstr "Varijable okruženja koje treba zadržati:"
 
 #: plugins/sudoers/def_data.c:318
 #, c-format
@@ -2219,12 +2219,12 @@ msgstr "SELinux tip za korištenje u novom sigurnosnom kontekstu: %s"
 #: plugins/sudoers/def_data.c:326
 #, c-format
 msgid "Path to the sudo-specific environment file: %s"
-msgstr "Staza do datoteke okoline specifične za sudo: %s"
+msgstr "Staza do datoteke okruženja specifične za sudo: %s"
 
 #: plugins/sudoers/def_data.c:330
 #, c-format
 msgid "Path to the restricted sudo-specific environment file: %s"
-msgstr "Staza do datoteke okoline s ograničenim pristupom specifične za sudo: %s"
+msgstr "Staza do datoteke okruženja s ograničenim pristupom specifične za sudo: %s"
 
 #: plugins/sudoers/def_data.c:334
 #, c-format
@@ -2645,48 +2645,48 @@ msgstr "Poruka o odbijanju naredbe: %s"
 #: plugins/sudoers/defaults.c:207
 #, c-format
 msgid "unknown defaults entry \"%s\""
-msgstr "nepoznati unos defaults „%s“"
+msgstr "nepoznati unos defaults „%s”"
 
 #: plugins/sudoers/defaults.c:251
 #, c-format
 msgid "no value specified for \"%s\""
-msgstr "nije navedena vrijednost za „%s“"
+msgstr "nije navedena vrijednost za „%s”"
 
 #: plugins/sudoers/defaults.c:260
 #, c-format
 msgid "invalid operator \"%c=\" for \"%s\""
-msgstr "nevaljan operator „%c=“ za „%s“"
+msgstr "nevaljan operator „%c=” za „%s”"
 
 #: plugins/sudoers/defaults.c:292
 #, c-format
 msgid "option \"%s\" does not take a value"
-msgstr "opcija „%s“ ne prihvaća vrijednost"
+msgstr "opcija „%s” ne prihvaća vrijednost"
 
 #: plugins/sudoers/defaults.c:319
 #, c-format
 msgid "invalid Defaults type 0x%x for option \"%s\""
-msgstr "nevaljani Defaults tip 0x%x za opciju „%s“"
+msgstr "nevaljani Defaults tip 0x%x za opciju „%s”"
 
 #: plugins/sudoers/defaults.c:326
 #, c-format
 msgid "value \"%s\" is invalid for option \"%s\""
-msgstr "vrijednost „%s“ nije ispravna za opciju „%s“"
+msgstr "vrijednost „%s” nije ispravna za opciju „%s”"
 
 #: plugins/sudoers/defaults.c:1189 plugins/sudoers/policy.c:208
 #: plugins/sudoers/policy.c:217
 #, c-format
 msgid "path name for \"%s\" too long"
-msgstr "ime staze za „%s“ je predugo"
+msgstr "ime staze za „%s” je predugo"
 
 #: plugins/sudoers/defaults.c:1195
 #, c-format
 msgid "values for \"%s\" must start with a '/', '~', or '*'"
-msgstr "vrijednost za „%s“ mora započeti s „/“, „~“, ili „*“"
+msgstr "vrijednost za „%s” mora započeti s „/”, „~”, ili „*”"
 
 #: plugins/sudoers/defaults.c:1202
 #, c-format
 msgid "values for \"%s\" must start with a '/'"
-msgstr "vrijednost za „%s“ mora početi s „/“"
+msgstr "vrijednost za „%s” mora početi s „/”"
 
 #: plugins/sudoers/display.c:154
 #, c-format
@@ -2741,7 +2741,7 @@ msgstr "ignoriramo editor: %.*s"
 
 #: plugins/sudoers/editor.c:181
 msgid "editor arguments may not contain \"--\""
-msgstr "argumenti editora ne smiju sadržavati „--“"
+msgstr "argumenti editora ne smiju sadržavati „--”"
 
 #: plugins/sudoers/env.c:443
 msgid "sudo_putenv: corrupted envp, length mismatch"
@@ -2754,7 +2754,7 @@ msgstr "nije moguće obnoviti okolinu"
 #: plugins/sudoers/env.c:1217
 #, c-format
 msgid "sorry, you are not allowed to set the following environment variables: %s"
-msgstr "nemate dopuštenje za postavljanje sljedećih varijabli okoline: %s"
+msgstr "nemate dopuštenje za postavljanje sljedećih varijabli okruženja: %s"
 
 #: plugins/sudoers/filedigest.c:50
 #, c-format
@@ -2774,7 +2774,7 @@ msgstr "nije moguće učitati %s: %s"
 #: plugins/sudoers/group_plugin.c:181
 #, c-format
 msgid "unable to find symbol \"group_plugin\" in %s"
-msgstr "nije moguće pronaći simbol „group_plugin“ u %s"
+msgstr "nije moguće pronaći simbol „group_plugin” u %s"
 
 #: plugins/sudoers/group_plugin.c:186
 #, c-format
@@ -2784,12 +2784,12 @@ msgstr "%s: nekompatibilna glavna inačica plugin grupe %d, očekivano je %d"
 #: plugins/sudoers/interfaces.c:76 plugins/sudoers/interfaces.c:93
 #, c-format
 msgid "unable to parse IP address \"%s\""
-msgstr "„%s“ nije valjana IP adresa (nemoguće ju je raščlaniti)"
+msgstr "„%s” nije valjana IP adresa (nemoguće ju je raščlaniti)"
 
 #: plugins/sudoers/interfaces.c:81 plugins/sudoers/interfaces.c:98
 #, c-format
 msgid "unable to parse netmask \"%s\""
-msgstr "„%s“ nije valjana mrežna maska (nemoguće ju je raščlaniti)"
+msgstr "„%s” nije valjana mrežna maska (nemoguće ju je raščlaniti)"
 
 #: plugins/sudoers/interfaces.c:126
 msgid "Local IP address and netmask pairs:\n"
@@ -3019,8 +3019,8 @@ msgid ""
 "ignoring \"%s\" found in '.'\n"
 "Use \"sudo ./%s\" if this is the \"%s\" you wish to run."
 msgstr ""
-"zanemaruje se „%s“ pronađen u „.“\n"
-"Koristite „sudo ./%s“ ako je to „%s“ koji želite pokrenuti."
+"zanemaruje se „%s” pronađen u „.”\n"
+"Koristite „sudo ./%s” ako je to „%s” koji želite pokrenuti."
 
 #: plugins/sudoers/logging.c:417
 #, c-format
@@ -3310,7 +3310,7 @@ msgstr "nije moguće inicijalizirati SSS izvor. Je li SSSD instaliran na vašem 
 #: plugins/sudoers/sssd.c:625
 #, c-format
 msgid "unable to find symbol \"%s\" in %s"
-msgstr "nije moguće pronaći simbol „%s“ u %s"
+msgstr "nije moguće pronaći simbol „%s” u %s"
 
 #: plugins/sudoers/sudoers.c:250
 #, c-format
@@ -3372,7 +3372,7 @@ msgstr "naredba u trenutnom direktoriju"
 
 #: plugins/sudoers/sudoers.c:574
 msgid "\"cd\" is a shell built-in command, it cannot be run directly."
-msgstr "„cd“ naredba je ugrađena u ljusku, ne može se izravno pokrenuti."
+msgstr "„cd” naredba je ugrađena u ljusku, ne može se izravno pokrenuti."
 
 #: plugins/sudoers/sudoers.c:576
 msgid "the -s option may be used to run a privileged shell."
@@ -3439,7 +3439,7 @@ msgstr "vlasnik %s je GID %u, a treba biti %u"
 #: plugins/sudoers/sudoers.c:1381
 #, c-format
 msgid "only root can use \"-c %s\""
-msgstr "samo root može koristiti „-c %s“"
+msgstr "samo root može koristiti „-c %s”"
 
 #: plugins/sudoers/sudoers.c:1400
 #, c-format
@@ -3469,7 +3469,7 @@ msgstr "nevaljani faktor brzine: %s"
 #: plugins/sudoers/sudoreplay.c:326
 #, c-format
 msgid "invalid time offset %s"
-msgstr "nevaljani vremenski odmak %s"
+msgstr "nevaljani vremenski pomak %s"
 
 #: plugins/sudoers/sudoreplay.c:335
 #, c-format
@@ -3506,16 +3506,16 @@ msgstr "Reprodukcija je završena -- obnovite terminal pritiskom na bilo koju ti
 #: plugins/sudoers/sudoreplay.c:1219 plugins/sudoers/sudoreplay.c:1249
 #, c-format
 msgid "ambiguous expression \"%s\""
-msgstr "dvosmisleni izraz „%s“"
+msgstr "dvosmisleni izraz „%s”"
 
 #: plugins/sudoers/sudoreplay.c:1271
 msgid "unmatched ')' in expression"
-msgstr "nesparena „)“ u izrazu"
+msgstr "nesparena „)” u izrazu"
 
 #: plugins/sudoers/sudoreplay.c:1275
 #, c-format
 msgid "unknown search term \"%s\""
-msgstr "nepoznati pojam za pretragu „%s“"
+msgstr "nepoznati pojam za pretragu „%s”"
 
 #: plugins/sudoers/sudoreplay.c:1290
 #, c-format
@@ -3525,19 +3525,19 @@ msgstr "%s zahtijeva argument"
 #: plugins/sudoers/sudoreplay.c:1300
 #, c-format
 msgid "could not parse date \"%s\""
-msgstr "nije moguće raščlaniti datum „%s“"
+msgstr "nije moguće raščlaniti datum „%s”"
 
 #: plugins/sudoers/sudoreplay.c:1309
 msgid "unmatched '(' in expression"
-msgstr "nesparena „(“ u izrazu"
+msgstr "nesparena „(” u izrazu"
 
 #: plugins/sudoers/sudoreplay.c:1311
 msgid "illegal trailing \"or\""
-msgstr "nelegalni zaostali „or“"
+msgstr "nelegalni zaostali „or”"
 
 #: plugins/sudoers/sudoreplay.c:1313
 msgid "illegal trailing \"!\""
-msgstr "nelegalni zaostali „!“"
+msgstr "nelegalni zaostali „!”"
 
 #: plugins/sudoers/sudoreplay.c:1419
 #, c-format
@@ -3742,7 +3742,7 @@ msgstr "%s i %s nisu na istom datotečnom sustavu, koristi se mv za preimenovanj
 #: plugins/sudoers/visudo.c:836
 #, c-format
 msgid "command failed: '%s %s %s', %s unchanged"
-msgstr "naredba nije uspjela: „%s %s %s“, %s nije promijenjena"
+msgstr "naredba nije uspjela: „%s %s %s”, %s nije promijenjena"
 
 #: plugins/sudoers/visudo.c:843
 #, c-format
@@ -3805,7 +3805,7 @@ msgstr "molimo da umjesto toga pokušate rabiti cvtsudoers uslužni program"
 #: plugins/sudoers/visudo.c:1228
 #, c-format
 msgid "Warning: %s:%d:%d: unused %s \"%s\""
-msgstr "Upozorenje: %s:%d:%d nekorišteni %s „%s“"
+msgstr "Upozorenje: %s:%d:%d nekorišteni %s „%s”"
 
 #: plugins/sudoers/visudo.c:1341
 #, c-format
@@ -3897,13 +3897,13 @@ msgstr "previše razina uključivanja"
 #~ msgstr "staza do lekcije je predugačka: %s/%s"
 
 #~ msgid "Error: %s:%d:%d: cycle in %s \"%s\""
-#~ msgstr "Greška: %s:%d:%d: ciklus u %s „%s“"
+#~ msgstr "Greška: %s:%d:%d: ciklus u %s „%s”"
 
 #~ msgid "Warning: %s:%d:%d: cycle in %s \"%s\""
-#~ msgstr "Upozorenje: %s:%d:%d: ciklus u %s „%s“"
+#~ msgstr "Upozorenje: %s:%d:%d: ciklus u %s „%s”"
 
 #~ msgid "Warning: %s:%d:%d: %s \"%s\" referenced but not defined"
-#~ msgstr "Upozorenje: %s:%d:%d %s „%s“ je referenciran ali nije definiran"
+#~ msgstr "Upozorenje: %s:%d:%d %s „%s” je referenciran ali nije definiran"
 
 #~ msgid "parse error in %s near line %d\n"
 #~ msgstr "greška u raščlambi u %s blizu retka %d\n"
@@ -3912,34 +3912,34 @@ msgstr "previše razina uključivanja"
 #~ msgstr "greška u raščlambi u %s\n"
 
 #~ msgid "%s: unknown defaults entry \"%s\""
-#~ msgstr "%s: nepoznata stavka zadanih vrijednosti „%s“"
+#~ msgstr "%s: nepoznata stavka zadanih vrijednosti „%s”"
 
 #~ msgid "%s:%d:%d: no value specified for \"%s\""
-#~ msgstr "%s:%d:%d: nije navedena vrijednost za „%s“"
+#~ msgstr "%s:%d:%d: nije navedena vrijednost za „%s”"
 
 #~ msgid "%s:%d:%d: invalid operator \"%c=\" for \"%s\""
-#~ msgstr "%s:%d:%d: nevaljan operator \"%c=\" za „%s“"
+#~ msgstr "%s:%d:%d: nevaljan operator \"%c=\" za „%s”"
 
 #~ msgid "%s:%d:%d: option \"%s\" does not take a value"
-#~ msgstr "%s:%d:%d: opcija „%s“ ne treba nikakvu vrijednost"
+#~ msgstr "%s:%d:%d: opcija „%s” ne treba nikakvu vrijednost"
 
 #~ msgid "%s:%d:%d: invalid Defaults type 0x%x for option \"%s\""
-#~ msgstr "%s:%d:%d: nevaljana vrsta Defaults 0x%x za opciju „%s“"
+#~ msgstr "%s:%d:%d: nevaljana vrsta Defaults 0x%x za opciju „%s”"
 
 #~ msgid "%s:%d:%d: value \"%s\" is invalid for option \"%s\""
-#~ msgstr "%s:%d:%d: vrijednost „%s“ za opciju „%s“ nije valjana"
+#~ msgstr "%s:%d:%d: vrijednost „%s” za opciju „%s” nije valjana"
 
 #~ msgid "%s:%d:%d: path name for \"%s\" too long"
-#~ msgstr "%s:%d:%d: ime staze za „%s“ je predugačko"
+#~ msgstr "%s:%d:%d: ime staze za „%s” je predugačko"
 
 #~ msgid "%s: path name for \"%s\" too long"
-#~ msgstr "%s: ime staze za „%s“ je predugačko"
+#~ msgstr "%s: ime staze za „%s” je predugačko"
 
 #~ msgid "%s:%d:%d: values for \"%s\" must start with a '/', '~', or '*'"
-#~ msgstr "%s:%d:%d: vrijednost za „%s“ mora započeti s „/“, „~“, ili „*“"
+#~ msgstr "%s:%d:%d: vrijednost za „%s” mora započeti s „/”, „~”, ili „*”"
 
 #~ msgid "%s:%d:%d: values for \"%s\" must start with a '/'"
-#~ msgstr "%s:%d:%d: vrijednost za „%s“ mora započeti s „/“"
+#~ msgstr "%s:%d:%d: vrijednost za „%s” mora započeti s „/”"
 
 #~ msgid "parse error in %s near line %d"
 #~ msgstr "greška u raščlambi u %s blizu retka %d"
@@ -4129,7 +4129,7 @@ msgstr "previše razina uključivanja"
 #~ "SSSD uloga: NEPOZNATA\n"
 
 #~ msgid "Warning: unused %s `%s'"
-#~ msgstr "Upozorenje: %s „%s“ nije upotrebljen"
+#~ msgstr "Upozorenje: %s „%s” nije upotrebljen"
 
 #~ msgid "Password:"
 #~ msgstr "Lozinka:"

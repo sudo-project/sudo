@@ -433,7 +433,7 @@ List sessions run by user
 .Em jeff
 that match a regular expression:
 .Bd -literal -offset 4n
-# sudoreplay -l user jeff command '/bin/[a-z]*sh'
+# sudoreplay \-l user jeff command '/bin/[a\-z]*sh'
 .Ed
 .Pp
 List sessions run by jeff or bob on the console:
@@ -468,7 +468,7 @@ sudo-workers mailing list,
 https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
 or <sudo@sudo.ws> (private).
 .Pp
-Please not report security vulnerabilities through public GitHub
+Please do not report security vulnerabilities through public GitHub
 issues, Bugzilla or mailing lists.
 Instead, report them via email to <Todd.Miller@sudo.ws>.
 You may encrypt your message with PGP if you would like, using

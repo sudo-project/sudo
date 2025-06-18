@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2008, 2009-2023
+ * Copyright (c) 1996, 1998-2005, 2008, 2009-2024
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -39,6 +39,10 @@
 /*
  * Macros and functions that may be missing on some operating systems.
  */
+
+#ifndef NODEV
+# define NODEV	((dev_t)-1)	/* non-existent device */
+#endif
 
 /*
  * Given the pointer x to the member m of the struct s, return

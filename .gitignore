@@ -98,3 +98,5 @@ plugins/sudoers/regress/testsudoers/test3.d/root
 plugins/python/__pycache__
 plugins/python/regress/__pycache__
 plugins/python/check_python_examples
+
+scripts/check_man

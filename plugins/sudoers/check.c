@@ -87,6 +87,21 @@ get_authpw(struct sudoers_context *ctx, unsigned int mode)
 }
 
 /*
+ * Returns true if the user is running the command as themselves
+ * and no SELinux type/role, AppArmor profile or Solaris privilege
+ * was specified.
+ */
+static bool
+running_as_user(struct sudoers_context *ctx)
+{
+    return ctx->user.uid == ctx->runas.pw->pw_uid && (ctx->runas.gr == NULL ||
+	user_in_group(ctx->user.pw, ctx->runas.gr->gr_name)) &&
+	ctx->runas.role == NULL && ctx->runas.type == NULL &&
+	ctx->runas.apparmor_profile == NULL &&
+	ctx->runas.privs == NULL && ctx->runas.limitprivs == NULL;
+}
+
+/*
  * Returns AUTH_SUCCESS if the user successfully authenticates,
  * AUTH_FAILURE if not or AUTH_ERROR on error.
  */
@@ -124,29 +139,22 @@ check_user(struct sudoers_context *ctx, unsigned int validated,
     }
     closure.ctx = ctx;
 
-    /*
-     * Don't prompt for the root passwd or if the user is exempt.
-     * If the user is not changing uid/gid, no need for a password.
-     */
     if (!def_authenticate || user_is_exempt(ctx)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %s", __func__,
 	    !def_authenticate ? "authentication disabled" :
 	    "user exempt from authentication");
 	exempt = true;
-	ret = AUTH_SUCCESS;
-	goto done;
+	goto success;
     }
-    if (ctx->user.uid == 0 || (ctx->user.uid == ctx->runas.pw->pw_uid &&
-	(ctx->runas.gr == NULL ||
-	user_in_group(ctx->user.pw, ctx->runas.gr->gr_name)))) {
-	if (ctx->runas.role == NULL && ctx->runas.type == NULL &&
-	    ctx->runas.apparmor_profile == NULL &&
-	    ctx->runas.privs == NULL && ctx->runas.limitprivs == NULL) {
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"%s: user running command as self", __func__);
-	    ret = AUTH_SUCCESS;
-	    goto done;
-	}
+    if (ctx->user.uid == ROOT_UID) {
+	/* Do not prompt for the root password. */
+	goto success;
+    }
+    if ((ISSET(mode, MODE_RUN|MODE_EDIT) && running_as_user(ctx))) {
+	/* If the user is not changing uid/gid, no need for a password. */
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: user running command as self", __func__);
+	goto success;
     }
 
     /* Construct callback for getpass function. */
@@ -201,8 +209,8 @@ check_user(struct sudoers_context *ctx, unsigned int validated,
 	break;
     }
 
-done:
     if (ret == AUTH_SUCCESS) {
+success:
 	/* The approval function may disallow a user post-authentication. */
 	ret = sudo_auth_approval(ctx, closure.auth_pw, validated, exempt);
 
@@ -215,6 +223,7 @@ done:
 		(void)timestamp_update(closure.cookie, closure.auth_pw);
 	}
     }
+done:
     timestamp_close(closure.cookie);
     sudo_auth_cleanup(ctx, closure.auth_pw, !ISSET(validated, VALIDATE_SUCCESS));
     sudo_pw_delref(closure.auth_pw);

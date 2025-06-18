@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2023
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2025
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -24,7 +24,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd August 9, 2023
+.Dd June 7, 2025
 .Dt SUDO @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -324,7 +324,7 @@ In lieu of a path name, the string "sudoedit" is used when consulting
 the security policy.
 If the user is authorized by the policy, the following steps are
 taken:
-.Bl -enum -offset 4
+.Bl -enum -offset 4n
 .It
 Temporary copies are made of the files to be edited with the owner
 set to the invoking user.
@@ -1355,6 +1355,8 @@ option was specified.
 If set,
 .Ev PS1
 will be set to its value for the program being run.
+.It Ev SUDO_TTY
+Set to the terminal device of the user who invoked sudo, if one is present.
 .It Ev SUDO_UID
 Set to the user-ID of the user who invoked sudo.
 .It Ev SUDO_USER
@@ -1426,8 +1428,9 @@ $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 Error messages produced by
 .Nm
 include:
-.Bl -tag -width 4n
-.It Li editing files in a writable directory is not permitted
+.Pp
+editing files in a writable directory is not permitted
+.Bd -ragged -offset 4n -compact
 By default,
 .Nm sudoedit
 does not permit editing a file when any of the parent directories are writable
@@ -1439,7 +1442,10 @@ See the
 option in
 .Xr sudoers @mansectform@
 for more information.
-.It Li editing symbolic links is not permitted
+.Ed
+.Pp
+editing symbolic links is not permitted
+.Bd -ragged -offset 4n -compact
 By default,
 .Nm sudoedit
 does not follow symbolic links when opening files.
@@ -1448,7 +1454,10 @@ See the
 option in
 .Xr sudoers @mansectform@
 for more information.
-.It Li effective uid is not 0, is sudo installed setuid root?
+.Ed
+.Pp
+effective uid is not 0, is sudo installed setuid root?
+.Bd -ragged -offset 4n -compact
 .Nm
 was not run with root privileges.
 The
@@ -1457,7 +1466,11 @@ binary must be owned by the root user and have the set-user-ID bit set.
 Also, it must not be located on a file system mounted with the
 .Sq nosuid
 option or on an NFS file system that maps uid 0 to an unprivileged uid.
-.It Li effective uid is not 0, is sudo on a file system with the 'nosuid' option set or an NFS file system without root privileges?
+.Ed
+.Pp
+effective uid is not 0, is sudo on a file system with the 'nosuid'
+option set or an NFS file system without root privileges?
+.Bd -ragged -offset 4n -compact
 .Nm
 was not run with root privileges.
 The
@@ -1469,10 +1482,16 @@ The most common reason for this is that the file system the
 binary is located on is mounted with the
 .Sq nosuid
 option or it is an NFS file system that maps uid 0 to an unprivileged uid.
-.It Li fatal error, unable to load plugins
+.Ed
+.Pp
+fatal error, unable to load plugins
+.Bd -ragged -offset 4n -compact
 An error occurred while loading or initializing the plugins specified in
 .Xr sudo.conf @mansectform@ .
-.It Li invalid environment variable name
+.Ed
+.Pp
+invalid environment variable name
+.Bd -ragged -offset 4n -compact
 One or more environment variable names specified via the
 .Fl E
 option contained an equal sign
@@ -1480,7 +1499,10 @@ option contained an equal sign
 The arguments to the
 .Fl E
 option should be environment variable names without an associated value.
-.It Li no password was provided
+.Ed
+.Pp
+no password was provided
+.Bd -ragged -offset 4n -compact
 When
 .Nm
 tried to read the password, it did not receive any characters.
@@ -1488,25 +1510,45 @@ This may happen if no terminal is available (or the
 .Fl S
 option is specified) and the standard input has been redirected from
 .Pa /dev/null .
-.It Li a terminal is required to read the password
+.Ed
+.Pp
+a terminal is required to read the password
+.Bd -ragged -offset 4n -compact
 .Nm
 needs to read the password but there is no mechanism available for it
 to do so.
-A terminal is not present to read the password from,
+Remote commands run via
+.Xr ssh 1
+do not have a terminal available by default; passing the
+.Fl t
+option to
+.Xr ssh 1
+will cause it to allocate a terminal which should allow
 .Nm
-has not been configured to read from the standard input,
-the
+to read the password.
+To allow
+.Nm
+to run local commands without a terminal, the
 .Fl S
-option was not used, and no askpass helper has been specified either via the
+option can be used to read a password from the standard input, or
+an askpass helper can be configured via either the
 .Xr sudo.conf @mansectform@
-file or the
+file or by setting the
 .Ev SUDO_ASKPASS
 environment variable.
-.It Li no writable temporary directory found
+.Ed
+.Pp
+no writable temporary directory found
+.Bd -ragged -offset 4n -compact
 .Nm sudoedit
 was unable to find a usable temporary directory in which to store its
 intermediate files.
-.It Li The Do "no new privileges" Dc "flag is set, which prevents sudo from running as root."
+.Ed
+.Pp
+The
+.Dq no new privileges
+flag is set, which prevents sudo from running as root.
+.Bd -ragged -offset 4n -compact
 .Nm
 was run by a process that has the Linux
 .Dq no new privileges
@@ -1520,27 +1562,42 @@ The most likely cause for this is running
 within a container that sets this flag.
 Check the documentation to see if it is possible to configure the
 container such that the flag is not set.
-.It Li sudo must be owned by uid 0 and have the setuid bit set
+.Ed
+.Pp
+sudo must be owned by uid 0 and have the setuid bit set
+.Bd -ragged -offset 4n -compact
 .Nm
 was not run with root privileges.
 The
 .Nm
 binary does not have the correct owner or permissions.
 It must be owned by the root user and have the set-user-ID bit set.
-.It Li sudoedit is not supported on this platform
+.Ed
+.Pp
+sudoedit is not supported on this platform
+.Bd -ragged -offset 4n -compact
 It is only possible to run
 .Nm sudoedit
 on systems that support setting the effective user-ID.
-.It Li timed out reading password
+.Ed
+.Pp
+timed out reading password
+.Bd -ragged -offset 4n -compact
 The user did not enter a password before the password timeout
 (5 minutes by default) expired.
-.It Li you do not exist in the passwd database
+.Ed
+.Pp
+you do not exist in the passwd database
+.Bd -ragged -offset 4n -compact
 Your user-ID does not appear in the system passwd database.
-.It Li you may not specify environment variables in edit mode
+.Ed
+.Pp
+you may not specify environment variables in edit mode
+.Bd -ragged -offset 4n -compact
 It is only possible to specify environment variables when running a
 .Ar command .
 When editing a file, the editor is run with the user's environment unmodified.
-.El
+.Ed
 .Sh SEE ALSO
 .Xr su 1 ,
 .Xr stat 2 ,
@@ -1621,7 +1678,7 @@ sudo-workers mailing list,
 https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
 or <sudo@sudo.ws> (private).
 .Pp
-Please not report security vulnerabilities through public GitHub
+Please do not report security vulnerabilities through public GitHub
 issues, Bugzilla or mailing lists.
 Instead, report them via email to <Todd.Miller@sudo.ws>.
 You may encrypt your message with PGP if you would like, using

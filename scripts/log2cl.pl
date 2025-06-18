@@ -32,8 +32,7 @@ my $format="%ad  %aN  <%aE>%n%h%n%B%n";
 # Parse options and build up "git log" command
 my @cmd = ( "git" );
 my %opts;
-getopts('b:R:', \%opts);
-push(@cmd, "-b", $opts{"b"}) if exists $opts{"b"};
+getopts('mR:', \%opts);
 push(@cmd, "--git-dir", $opts{"R"}) if exists $opts{"R"};
 push(@cmd, "log", "--log-size", "--name-only", "--date=short", "--format=$format", @ARGV);
 
@@ -45,9 +44,12 @@ my @files;
 my $key_date = "";
 my $log_size = 0;
 my @lines;
+my $hash_link = "https://git.sudo.ws/sudo/commit/?id=";
 
 # Wrap like "hg log --template=changelog"
 $Text::Wrap::columns = 77;
+# Don't preserve tabs
+$Text::Wrap::unexpand = 0;
 
 while (<LOG>) {
     chomp;
@@ -70,6 +72,9 @@ while (<LOG>) {
 
 	# Check for continued entry (duplicate Date + Author)
 	$_ = shift(@lines);
+	# Strip author email address for markdown
+	s/\s*<[^>]+>$// if exists $opts{'m'};
+
 	if ($_ ne $key_date) {
 	    # New entry
 	    print "$_\n\n";
@@ -105,11 +110,41 @@ exit(0);
 
 sub print_entry
 {
+    if (exists $opts{'m'}) {
+	print_entry_markdown(@_);
+    } else {
+	print_entry_plain(@_);
+    }
+}
+
+sub print_entry_plain
+{
     my $hash = shift;
     my $body = shift;
     my $files = "* " . join(", ", @_) . ":";
 
     print wrap("\t", "\t", $files) . "\n";
-    print wrap("\t", "\t", $body) . "\n";
+    print fill("\t", "\t", $body) . "\n";
     print "\t[$hash]\n\n";
+}
+
+sub print_entry_markdown
+{
+    my $hash = shift;
+    my $body = shift;
+    my $files = ": * " . join(", ", @_) . ":  ";
+
+    # Obfuscate email addresses in body
+    $body =~ s/([^@ ]+@)[\w\.-]+\.(com|org|edu|ws|io)/$1.../g;
+
+    # Escape email chars in body
+    $body =~ s/([@<>])/\\$1/g;
+
+    # Expand GitHub issue and bugzilla links
+    $body =~ s@(GitHub issue #)(\d+)@[$1$2](https://github.com/sudo-project/sudo/issues/$2)@;
+    $body =~ s@(Bug #)(\d+)@[$1$2](https://bugzilla.sudo.ws/show_bug.cgi?id=$2)@;
+
+    print wrap("", "    ", $files) . "\n";
+    print fill("    ", "    ", $body) . "\n";
+    print "    [[${hash}]](${hash_link}${hash})\n\n";
 }

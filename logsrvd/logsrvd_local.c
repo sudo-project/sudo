@@ -210,6 +210,7 @@ store_accept_local(AcceptMessage *msg, uint8_t *buf, size_t len,
 	}
     } else if (closure->log_io) {
 	/* Sub-command from an existing session, set iolog and offset. */
+	free(evlog->iolog_path);
 	evlog->iolog_path = strdup(closure->evlog->iolog_path);
 	if (evlog->iolog_path == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -273,6 +274,7 @@ store_reject_local(RejectMessage *msg, uint8_t *buf, size_t len,
 	closure->evlog = evlog;
     } else if (closure->log_io) {
 	/* Sub-command from an existing session, set iolog and offset. */
+	free(evlog->iolog_path);
 	evlog->iolog_path = strdup(closure->evlog->iolog_path);
 	if (evlog->iolog_path == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -376,7 +378,7 @@ store_exit_info_json(int dfd, struct eventlog *evlog)
     iov[1].iov_len = sudo_json_get_len(&jsonc);
     iov[2].iov_base = (char *)"\n}\n";
     iov[2].iov_len = 3;
-    if (writev(fd, iov, 3) == -1) {
+    if (writev(fd, iov, 3) < 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to write %s/log.json", evlog->iolog_path);
 	/* Back up and try to restore to original state. */
@@ -412,6 +414,7 @@ store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len,
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "command was killed by SIG%s%s", msg->signal,
 	    msg->dumped_core ? " (core dumped)" : "");
+	free(evlog->signal_name);
 	evlog->signal_name = strdup(msg->signal);
 	if (evlog->signal_name == NULL) {
 	    closure->errstr = _("unable to allocate memory");

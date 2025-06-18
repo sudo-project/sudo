@@ -6,6 +6,9 @@
 /* Configure script arguments used to build sudo. */
 #undef CONFIGURE_ARGS
 
+/* Define to 1 if you want sudo to honor '.' and "" in the PATH. */
+#undef ALLOW_DOT_PATH
+
 /* Define to 1 if you want the insults from the "classic" version sudo. */
 #undef CLASSIC_INSULTS
 
@@ -1138,9 +1141,6 @@
 /* Define to 1 if you want the hostname to be entered into the log file. */
 #undef HOST_IN_LOG
 
-/* Define to 1 if you want to ignore '.' and empty PATH elements. */
-#undef IGNORE_DOT_PATH
-
 /* The message given when a bad password is entered. */
 #undef INCORRECT_PASSWORD
 
@@ -1301,6 +1301,9 @@
 
 /* The size of 'long long', as computed by sizeof. */
 #undef SIZEOF_LONG_LONG
+
+/* The size of 'off_t', as computed by sizeof. */
+#undef SIZEOF_OFF_T
 
 /* The size of 'time_t', as computed by sizeof. */
 #undef SIZEOF_TIME_T

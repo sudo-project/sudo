@@ -3,7 +3,7 @@
 .\" SPDX-License-Identifier: ISC
 .\"
 .\" Copyright (c) 2019-2021 Robert Manner <robert.manner@oneidentity.com>
-.\" Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2025 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_PLUGIN_PYTHON" "5" "January 16, 2023" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_PLUGIN_PYTHON" "5" "February 26, 2025" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -479,7 +479,8 @@ validate(self)
 .fi
 .RS 6n
 .sp
-For policy plugins that cache authentication credentials, this function is used to validate and cache the credentials (optional).
+For policy plugins that cache authentication credentials,
+this function is used to validate and cache the credentials (optional).
 .RE
 .TP 6n
 \fIinvalidate\fR
@@ -490,7 +491,8 @@ invalidate(self, remove: int)
 .fi
 .RS 6n
 .sp
-For policy plugins that cache authentication credentials, this function is used to invalidate the credentials (optional).
+For policy plugins that cache authentication credentials,
+this function is used to invalidate the credentials (optional).
 .sp
 The function arguments are as follows:
 .TP 6n
@@ -553,8 +555,8 @@ The exit status of the command if was executed, otherwise \-1.
 .TP 6n
 \fIerror\fR
 .br
-If the command could not be executed, this is set to the value of
-errno set by the
+If the command could not be executed,
+this is set to the value of errno set by the
 execve(2)
 system call, otherwise 0.
 .PD 0
@@ -853,8 +855,8 @@ The exit status of the command if was executed, otherwise \-1.
 .TP 6n
 \fIerror\fR
 .br
-If the command could not be executed, this is set to the value of
-errno set by the
+If the command could not be executed,
+this is set to the value of errno set by the
 execve(2)
 system call, otherwise 0.
 .PD 0
@@ -887,7 +889,8 @@ Plugin python_audit @python_plugin@ ModulePath=<path> ClassName=<class>
 Sudo supports loading multiple audit plugins.
 Currently only 8 python audit plugins can be loaded at once.
 .PP
-An audit plugin may have the following member functions (all of which are optional):
+An audit plugin may have the following member functions
+(all of which are optional):
 .TP 6n
 \fIconstructor\fR
 .nf
@@ -1732,21 +1735,21 @@ l l l.
 .PP
 \fBsudo.conf name\fR	\fBPython constant\fR	\fBdescription\fR
 .PP
-crit	\fRsudo.DEBUG.CRIT\fR	only critical messages
+crit	\fRsudo.DEBUG.CRIT\fR	critical errors
 .PP
-err	\fRsudo.DEBUG.ERROR\fR	
+err	\fRsudo.DEBUG.ERROR\fR	non-critical errors
 .PP
-warn	\fRsudo.DEBUG.WARN\fR	
+warn	\fRsudo.DEBUG.WARN\fR	non-fatal warnings
 .PP
-notice	\fRsudo.DEBUG.NOTICE\fR	
+notice	\fRsudo.DEBUG.NOTICE\fR	non-error condition notices
 .PP
-diag	\fRsudo.DEBUG.DIAG\fR	
+diag	\fRsudo.DEBUG.DIAG\fR	diagnostic messages
 .PP
-info	\fRsudo.DEBUG.INFO\fR	
+info	\fRsudo.DEBUG.INFO\fR	informational message
 .PP
-trace	\fRsudo.DEBUG.TRACE\fR	
+trace	\fRsudo.DEBUG.TRACE\fR	log function enter/exit
 .PP
-debug	\fRsudo.DEBUG.DEBUG\fR	very extreme verbose debugging
+debug	\fRsudo.DEBUG.DEBUG\fR	very verbose debugging
 .TE
 .PP
 \fIUsing the logging module\fR
@@ -1877,7 +1880,7 @@ sudo-workers mailing list,
 https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
 or <sudo@sudo.ws> (private).
 .PP
-Please not report security vulnerabilities through public GitHub
+Please do not report security vulnerabilities through public GitHub
 issues, Bugzilla or mailing lists.
 Instead, report them via email to <Todd.Miller@sudo.ws>.
 You may encrypt your message with PGP if you would like, using

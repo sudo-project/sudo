@@ -234,7 +234,7 @@ The following plugin-agnostic paths may be set in the
 file:
 .Bl -tag -width 4n
 .It askpass
-The fully qualified path to a helper program used to read the user's
+The fully-qualified path to a helper program used to read the user's
 password when no terminal is available.
 This may be the case when
 .Nm sudo
@@ -271,7 +271,7 @@ functions, for example
 .Bx ,
 macOS and Solaris.
 .It intercept
-The path to a shared library containing a wrappers for the
+The path to a shared library containing wrappers for the
 .Xr execve 2 ,
 .Xr execl 3 ,
 .Xr execle 3 ,
@@ -347,7 +347,7 @@ The default value is
 .Pa @noexec_file@ .
 .It plugin_dir
 The default directory to use when searching for plugins
-that are specified without a fully qualified path name.
+that are specified without a fully-qualified path name.
 The default value is
 .Pa @plugindir@ .
 .if \n(SL \{\
@@ -734,11 +734,11 @@ front-end configuration
 # Sudo command interception:
 #   Path intercept /path/to/sudo_intercept.so
 #
-# Path to a shared library containing replacements for the execv()
-# and execve() library functions that perform a policy check to verify
-# the command is allowed and simply return an error if not.  This is
-# used to implement the "intercept" functionality on systems that
-# support LD_PRELOAD or its equivalent.
+# Path to a shared library containing replacements for the execv(),
+# execve() and fexecve() library functions, which perform a policy
+# check to verify whether the command is allowed and simply return
+# an error if it is not.  This is used to implement the "intercept"
+# functionality on systems that support LD_PRELOAD or its equivalent.
 #
 # The compiled-in value is usually sufficient and should only be changed
 # if you rename or move the sudo_intercept.so file.
@@ -764,7 +764,7 @@ front-end configuration
 #   Path plugin_dir /path/to/plugins
 #
 # The default directory to use when searching for plugins that are
-# specified without a fully qualified path name.
+# specified without a fully-qualified path name.
 #
 #Path plugin_dir @plugindir@
 
@@ -850,7 +850,7 @@ sudo-workers mailing list,
 https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
 or <sudo@sudo.ws> (private).
 .Pp
-Please not report security vulnerabilities through public GitHub
+Please do not report security vulnerabilities through public GitHub
 issues, Bugzilla or mailing lists.
 Instead, report them via email to <Todd.Miller@sudo.ws>.
 You may encrypt your message with PGP if you would like, using

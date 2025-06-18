@@ -1443,7 +1443,7 @@ proc_read_vec(pid_t pid, const char *name, int *countp, char ***vecp,
     /* Read in strings until EOF. */
     do {
 	nread = read(fd, strtab, remainder);
-	if (nread == -1) {
+	if (nread < 0) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 		"%s: unable to read %s", __func__, path);
 	    close(fd);

@@ -1293,21 +1293,27 @@ sudo_krb5_copy_cc_file(struct sudoers_context *ctx)
 			do {
 			    nwritten = write(nfd, buf + off,
 				(size_t)(nread - off));
-			    if (nwritten == -1) {
+			    if (nwritten < 0) {
 				sudo_warn("error writing to %s", new_ccname);
+				goto write_error;
+			    }
+			    if (nwritten > SSIZE_MAX - off) {
+				sudo_warnx(U_("internal error, %s overflow"),
+				    __func__);
+				nwritten = -1;
 				goto write_error;
 			    }
 			    off += nwritten;
 			} while (off < nread);
 		    }
-		    if (nread == -1)
+		    if (nread < 0)
 			sudo_warn("unable to read %s", new_ccname);
 write_error:
 		    close(nfd);
-		    if (nread != -1 && nwritten != -1) {
-			ret = new_ccname;	/* success! */
-		    } else {
+		    if (nread < 0 || nwritten < 0) {
 			unlink(new_ccname);	/* failed */
+		    } else {
+			ret = new_ccname;	/* success! */
 		    }
 		} else {
 		    sudo_warn("unable to create temp file %s", new_ccname);

@@ -137,8 +137,13 @@ restart:
 	ttyfd = open(_PATH_TTY, O_RDWR);
 	if (ttyfd == -1 && !ISSET(flags, TGP_ECHO|TGP_NOECHO_TRY)) {
 	    if (askpass == NULL || getenv_unhooked("DISPLAY") == NULL) {
-		sudo_warnx("%s",
-		    U_("a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper"));
+		if (getenv_unhooked("SSH_CONNECTION") != NULL && getenv_unhooked("SSH_TTY") == NULL) {
+		    sudo_warnx("%s",
+			U_("a terminal is required to read the password; either use ssh's -t option or configure an askpass helper"));
+		} else {
+		    sudo_warnx("%s",
+			U_("a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper"));
+		}
 		debug_return_str(NULL);
 	    }
 	    SET(flags, TGP_ASKPASS);
@@ -180,7 +185,7 @@ restart:
     if (!ISSET(flags, TGP_ECHO)) {
 	for (;;) {
 	    if (ISSET(flags, TGP_MASK))
-		neednl = feedback = sudo_term_cbreak(input);
+		neednl = feedback = sudo_term_cbreak(input, true);
 	    else
 		neednl = sudo_term_noecho(input);
 	    if (neednl || errno != EINTR)
@@ -213,11 +218,11 @@ restart:
 
     if (ISSET(flags, TGP_BELL) && output != STDERR_FILENO) {
 	/* Ring the bell if requested and there is a tty. */
-	if (write(output, "\a", 1) == -1)
+	if (write(output, "\a", 1) != 1)
 	    goto restore;
     }
     if (prompt) {
-	if (write(output, prompt, strlen(prompt)) == -1)
+	if (write(output, prompt, strlen(prompt)) < 0)
 	    goto restore;
     }
 
@@ -228,7 +233,7 @@ restart:
     save_errno = errno;
 
     if (neednl || pass == NULL) {
-	if (write(output, "\n", 1) == -1)
+	if (write(output, "\n", 1) != 1)
 	    goto restore;
     }
     tgetpass_display_error(errval);
@@ -374,21 +379,22 @@ static char *
 getln(int fd, char *buf, size_t bufsiz, bool feedback,
     enum tgetpass_errval *errval)
 {
-    size_t left = bufsiz;
     ssize_t nr = -1;
+    const char *ep;
     char *cp = buf;
     char c = '\0';
     debug_decl(getln, SUDO_DEBUG_CONV);
 
     *errval = TGP_ERRVAL_NOERROR;
 
-    if (left == 0) {
+    if (bufsiz == 0) {
 	*errval = TGP_ERRVAL_READERROR;
 	errno = EINVAL;
 	debug_return_str(NULL);
     }
+    ep = buf + bufsiz - 1;	/* reserve space for NUL byte */
 
-    while (--left) {
+    while (cp < ep) {
 	nr = read(fd, &c, 1);
 	if (nr != 1 || c == '\n' || c == '\r')
 	    break;
@@ -398,18 +404,16 @@ getln(int fd, char *buf, size_t bufsiz, bool feedback,
 		break;
 	    } else if (c == sudo_term_kill) {
 		while (cp > buf) {
-		    if (write(fd, "\b \b", 3) == -1)
+		    if (write(fd, "\b \b", 3) != 3)
 			break;
 		    cp--;
 		}
 		cp = buf;
-		left = bufsiz;
 		continue;
 	    } else if (c == sudo_term_erase) {
 		if (cp > buf) {
 		    ignore_result(write(fd, "\b \b", 3));
 		    cp--;
-		    left++;
 		}
 		continue;
 	    }
@@ -421,9 +425,9 @@ getln(int fd, char *buf, size_t bufsiz, bool feedback,
     if (feedback) {
 	/* erase stars */
 	while (cp > buf) {
-	    if (write(fd, "\b \b", 3) == -1)
+	    if (write(fd, "\b \b", 3) != 3)
 		break;
-	    --cp;
+	    cp--;
 	}
     }
 
@@ -439,7 +443,7 @@ getln(int fd, char *buf, size_t bufsiz, bool feedback,
 	debug_return_str(NULL);
     case 0:
 	/* EOF is only an error if no bytes were read. */
-	if (left == bufsiz - 1) {
+	if (buf[0] == '\0') {
 	    *errval = TGP_ERRVAL_NOPASSWORD;
 	    debug_return_str(NULL);
 	}

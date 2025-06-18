@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2018, 2021-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2018, 2021-2025 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "CVTSUDOERS" "1" "April 26, 2024" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
+.TH "CVTSUDOERS" "1" "February 22, 2025" "Sudo @PACKAGE_VERSION@" "General Commands Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -47,7 +47,7 @@ utility accepts one or more security policies in either
 or LDIF format as input, and generates a single
 policy of the specified format as output.
 The default input format is
-\fIsudoers.\fR
+\fIsudoers\fR.
 The default output format is LDIF.
 It is only possible to convert a policy file that is syntactically correct.
 .PP
@@ -888,7 +888,8 @@ array, an optional
 array, an optional
 \fIrunasgroups\fR
 array, and an optional
-\fIOptions array.\fR
+\fIOptions\fR
+array.
 .sp
 The
 \fICommands\fR
@@ -1390,7 +1391,7 @@ sudo-workers mailing list,
 https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
 or <sudo@sudo.ws> (private).
 .PP
-Please not report security vulnerabilities through public GitHub
+Please do not report security vulnerabilities through public GitHub
 issues, Bugzilla or mailing lists.
 Instead, report them via email to <Todd.Miller@sudo.ws>.
 You may encrypt your message with PGP if you would like, using

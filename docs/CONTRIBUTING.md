@@ -42,7 +42,7 @@ work flows:
    a discussion.
 
 In addition to the [GitHub repo](https://github.com/sudo-project/sudo),
-there is also a [mercurial repo](https://www.sudo.ws/repos/sudo).
+there is also a mirror hosted on [git.sudo.ws](https://git.sudo.ws/sudo).
 
 ## sudo-workers mailing list
 

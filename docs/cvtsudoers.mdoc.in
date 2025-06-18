@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2018, 2021-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2018, 2021-2025 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd April 26, 2024
+.Dd February 22, 2025
 .Dt CVTSUDOERS 1
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -45,7 +45,7 @@ utility accepts one or more security policies in either
 or LDIF format as input, and generates a single
 policy of the specified format as output.
 The default input format is
-.Em sudoers.
+.Em sudoers .
 The default output format is LDIF.
 It is only possible to convert a policy file that is syntactically correct.
 .Pp
@@ -775,7 +775,8 @@ array, an optional
 array, an optional
 .Em runasgroups
 array, and an optional
-.Em Options array.
+.Em Options
+array.
 .Pp
 The
 .Em Commands
@@ -1206,7 +1207,7 @@ sudo-workers mailing list,
 https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
 or <sudo@sudo.ws> (private).
 .Pp
-Please not report security vulnerabilities through public GitHub
+Please do not report security vulnerabilities through public GitHub
 issues, Bugzilla or mailing lists.
 Instead, report them via email to <Todd.Miller@sudo.ws>.
 You may encrypt your message with PGP if you would like, using

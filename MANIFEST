@@ -275,6 +275,7 @@ lib/util/lbuf.c
 lib/util/localtime_r.c
 lib/util/locking.c
 lib/util/logfac.c
+lib/util/login_max.c
 lib/util/logpri.c
 lib/util/memrchr.c
 lib/util/mkdir_parents.c
@@ -1274,10 +1275,13 @@ po/uk.mo
 po/uk.po
 po/vi.mo
 po/vi.po
+po/yue.mo
+po/yue.po
 po/zh_CN.mo
 po/zh_CN.po
 po/zh_TW.mo
 po/zh_TW.po
+scripts/check_man.in
 scripts/config.guess
 scripts/config.sub
 scripts/generate_test_coverage.sh

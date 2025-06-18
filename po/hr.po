@@ -1,13 +1,13 @@
 # Translation of sudo to Croatian.
 # This file is put in the public domain.
 # Tomislav Krznar <tomislav.krznar@gmail.com>, 2012, 2013.
-# Božidar Putanec <bozidarp@yahoo.com>, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024.
+# Božidar Putanec <bozidarp@yahoo.com>, 2016-2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: sudo-1.9.16b1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
 "POT-Creation-Date: 2024-06-08 09:06-0600\n"
-"PO-Revision-Date: 2024-06-16 17:03-0700\n"
+"PO-Revision-Date: 2025-03-26 20:59-0700\n"
 "Last-Translator: Božidar Putanec <bozidarp@yahoo.com>\n"
 "Language-Team: Croatian <lokalizacija@linux.hr>\n"
 "Language: hr\n"
@@ -28,7 +28,7 @@ msgstr "nije moguće otvoriti userdb (korisničku baza podataka)"
 #: lib/util/aix.c:224
 #, c-format
 msgid "unable to switch to registry \"%s\" for %s"
-msgstr "nije moguće prebaciti se u registar „%s“ za %s"
+msgstr "nije moguće prebaciti se u registar „%s” za %s"
 
 #: lib/util/aix.c:249
 msgid "unable to restore registry"
@@ -163,22 +163,22 @@ msgstr "veličina je premala"
 #: lib/util/sudo_conf.c:237
 #, c-format
 msgid "invalid Path value \"%s\" in %s, line %u"
-msgstr "nevaljana Path vrijednost „%s“ u %s, redak %u"
+msgstr "nevaljana Path vrijednost „%s” u %s, redak %u"
 
 #: lib/util/sudo_conf.c:403 lib/util/sudo_conf.c:456
 #, c-format
 msgid "invalid value for %s \"%s\" in %s, line %u"
-msgstr "nevaljana vrijednost za %s „%s“ u %s, redak %u"
+msgstr "nevaljana vrijednost za %s „%s” u %s, redak %u"
 
 #: lib/util/sudo_conf.c:424
 #, c-format
 msgid "unsupported group source \"%s\" in %s, line %u"
-msgstr "nepodržani izvor grupe „%s“ u %s, redak %u"
+msgstr "nepodržani izvor grupe „%s” u %s, redak %u"
 
 #: lib/util/sudo_conf.c:440
 #, c-format
 msgid "invalid max groups \"%s\" in %s, line %u"
-msgstr "nevaljani maksimalni broj grupa „%s“ u %s, redak %u"
+msgstr "nevaljani maksimalni broj grupa „%s” u %s, redak %u"
 
 #: lib/util/sudo_conf.c:711
 #, c-format
@@ -463,18 +463,18 @@ msgstr "nije moguće postaviti seccomp filtar"
 #: src/exec_ptrace.c:1408
 #, c-format
 msgid "interpreter argument , expected \"%s\", got \"%s\""
-msgstr "argument interpretera, očekivano „%s“, a dobiveno je „%s“"
+msgstr "argument interpretera, očekivano „%s”, a dobiveno je „%s”"
 
 #: src/exec_ptrace.c:1506
 #, c-format
 msgid "pathname mismatch, expected \"%s\", got \"%s\""
-msgstr "nepodudaranje imena staza, očekivano „%s“, a dobiveno je „%s“"
+msgstr "nepodudaranje imena staza, očekivano „%s”, a dobiveno je „%s”"
 
 #: src/exec_ptrace.c:1515 src/exec_ptrace.c:1522 src/exec_ptrace.c:1546
 #: src/exec_ptrace.c:1554 src/exec_ptrace.c:1560 src/exec_ptrace.c:1566
 #, c-format
 msgid "%s[%d] mismatch, expected \"%s\", got \"%s\""
-msgstr "nepodudaranje %s[%d], očekivano „%s“, a dobiveno je „%s“"
+msgstr "nepodudaranje %s[%d], očekivano „%s”, a dobiveno je „%s”"
 
 #: src/exec_ptrace.c:1634
 #, c-format
@@ -527,12 +527,12 @@ msgstr "nije moguće poslati poruku za praćenje procesa"
 #: src/load_plugins.c:242 src/load_plugins.c:289
 #, c-format
 msgid "error in %s, line %d while loading plugin \"%s\""
-msgstr "greška u %s, redak %d pri učitavanju plugina „%s“"
+msgstr "greška u %s, redak %d pri učitavanju plugina „%s”"
 
 #: src/load_plugins.c:186 src/load_plugins.c:257
 #, c-format
 msgid "ignoring duplicate plugin \"%s\" in %s, line %d"
-msgstr "zanemareni duplikat plugina „%s“ u %s, redak %d"
+msgstr "zanemareni duplikat plugina „%s” u %s, redak %d"
 
 #: src/load_plugins.c:224
 #, c-format
@@ -542,7 +542,7 @@ msgstr "nije moguće učitati %s: %s"
 #: src/load_plugins.c:234
 #, c-format
 msgid "unable to find symbol \"%s\" in %s"
-msgstr "nije moguće pronaći simbol „%s“ u %s"
+msgstr "nije moguće pronaći simbol „%s” u %s"
 
 #: src/load_plugins.c:244
 #, c-format
@@ -552,7 +552,7 @@ msgstr "nekompatibilni plugin inačica %d (očekivana %d) pronađen u %s"
 #: src/load_plugins.c:262
 #, c-format
 msgid "ignoring policy plugin \"%s\" in %s, line %d"
-msgstr "zanemareni plugin s pravilima „%s“ u %s, redak %d"
+msgstr "zanemareni plugin s pravilima „%s” u %s, redak %d"
 
 #: src/load_plugins.c:265
 msgid "only a single policy plugin may be specified"
@@ -571,7 +571,7 @@ msgstr "plugin s pravilima %s ne sadrži metodu check_policy"
 #: src/parse_args.c:213
 #, c-format
 msgid "invalid environment variable name: %s"
-msgstr "nevaljano ime varijable okoline: %s"
+msgstr "nevaljano ime varijable okruženja: %s"
 
 #: src/parse_args.c:318
 msgid "the argument to -C must be a number greater than or equal to 3"
@@ -591,7 +591,7 @@ msgstr "opcija -E nije valjana kad se redigira (in edit mode)"
 
 #: src/parse_args.c:573
 msgid "you may not specify environment variables in edit mode"
-msgstr "ne smijete specificirati varijable okoline kad se redigira (in edit mode)"
+msgstr "ne smijete specificirati varijable okruženja kad se redigira (in edit mode)"
 
 #: src/parse_args.c:583
 msgid "the -U option may only be used with the -l option"
@@ -673,7 +673,7 @@ msgstr "sačuva okolinu korisnika pri izvršenju naredbe"
 
 #: src/parse_args.c:810
 msgid "preserve specific environment variables"
-msgstr "sačuva specifične varijable okoline"
+msgstr "sačuva specifične varijable okruženja"
 
 #: src/parse_args.c:812
 msgid "edit files instead of running a command"
@@ -806,7 +806,7 @@ msgstr "nije moguće dobiti trenutni TTY kontekst, oznaka TTY se me mijenja"
 
 #: src/selinux.c:210
 msgid "unknown security class \"chr_file\", not relabeling tty"
-msgstr "nepoznata sigurnosna klasa „chr_file“, oznaka TTY se me mijenja"
+msgstr "nepoznata sigurnosna klasa „chr_file”, oznaka TTY se me mijenja"
 
 #: src/selinux.c:215
 msgid "unable to get new tty context, not relabeling tty"
@@ -921,7 +921,7 @@ msgstr "dosegnuta je granica upravljanja resursima"
 #: src/solaris.c:75
 #, c-format
 msgid "user \"%s\" is not a member of project \"%s\""
-msgstr "korisnik „%s“ nije član projekta „%s“"
+msgstr "korisnik „%s” nije član projekta „%s”"
 
 #: src/solaris.c:79
 msgid "the invoking task is final"
@@ -930,32 +930,32 @@ msgstr "pozvani zadatak je zadnji -- svršetak"
 #: src/solaris.c:82
 #, c-format
 msgid "could not join project \"%s\""
-msgstr "nije bilo moguće pridružiti se projektu „%s“"
+msgstr "nije bilo moguće pridružiti se projektu „%s”"
 
 #: src/solaris.c:89
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
-msgstr "ne postoji skup resursa koji prihvaća zadane poveznice za projekt „%s“"
+msgstr "ne postoji skup resursa koji prihvaća zadane poveznice za projekt „%s”"
 
 #: src/solaris.c:93
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
-msgstr "ne postoji navedeni skup resursa za projekt „%s“"
+msgstr "ne postoji navedeni skup resursa za projekt „%s”"
 
 #: src/solaris.c:97
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
-msgstr "nije bilo moguće povezati se na zadani skup resursa za projekt „%s“"
+msgstr "nije bilo moguće povezati se na zadani skup resursa za projekt „%s”"
 
 #: src/solaris.c:104
 #, c-format
 msgid "setproject failed for project \"%s\""
-msgstr "neuspješna setproject() za projekt „%s“"
+msgstr "neuspješna setproject() za projekt „%s”"
 
 #: src/solaris.c:106
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
-msgstr "upozorenje: nije uspjelo dodijeliti upravljanje resursima projekta „%s“"
+msgstr "upozorenje: nije uspjelo dodijeliti upravljanje resursima projekta „%s”"
 
 #: src/sudo.c:215
 #, c-format
@@ -991,7 +991,7 @@ msgstr "nije moguće odrediti TTY"
 
 #: src/sudo.c:955
 msgid "The \"no new privileges\" flag is set, which prevents sudo from running as root."
-msgstr "Flag „no new privileges“ je podignut, i to sprečava da sudo postane root."
+msgstr "Flag „no new privileges” je podignut, i to sprečava da sudo postane root."
 
 #: src/sudo.c:957
 msgid "If sudo is running in a container, you may need to adjust the container configuration to disable the flag."
@@ -1005,7 +1005,7 @@ msgstr "vlasnik %s mora biti UID %d i mora imati postavljeni setuid bit"
 #: src/sudo.c:994
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
-msgstr "efektivni UID nije %d; je li %s na datotečnom sustavu s postavljenom opcijom „nosuid“ ili NFS datotečnom sustavu bez root privilegija?"
+msgstr "efektivni UID nije %d; je li %s na datotečnom sustavu s postavljenom opcijom „nosuid” ili NFS datotečnom sustavu bez root privilegija?"
 
 #: src/sudo.c:1000
 #, c-format
@@ -1046,7 +1046,7 @@ msgstr "nije moguće inicijalizirati plugin s pravilima"
 #: src/sudo.c:1259
 #, c-format
 msgid "policy plugin %s is missing the \"check_policy\" method"
-msgstr "u pluginu s pravilima %s nema metode „check_policy“"
+msgstr "u pluginu s pravilima %s nema metode „check_policy”"
 
 #: src/sudo.c:1305
 #, c-format
@@ -1258,7 +1258,7 @@ msgstr "nije moguće obnoviti stdin"
 #~ msgstr "nije moguće čitati privremenu datoteku"
 
 #~ msgid "ignoring duplicate policy plugin \"%s\" in %s, line %d"
-#~ msgstr "ignorira se duplikat plugina s pravilima „%s“ u %s, redak %d"
+#~ msgstr "ignorira se duplikat plugina s pravilima „%s” u %s, redak %d"
 
 #~ msgid "no tty present and no askpass program specified"
 #~ msgstr "nema TTY i nije specificiran askpass program"

@@ -398,7 +398,7 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
     ctx->user.gid = (gid_t)-1;
     ctx->user.uid = (gid_t)-1;
     ctx->user.umask = (mode_t)-1;
-    ctx->user.ttydev = (dev_t)-1;
+    ctx->user.ttydev = NODEV;
     for (cur = info->user_info; *cur != NULL; cur++) {
 	if (MATCHES(*cur, "user=")) {
 	    CHECK(*cur, "user=");
@@ -597,7 +597,7 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
     }
 
     /* ttydev is only set in user_info[] for API 1.22 and above. */
-    if (ctx->user.ttydev == (dev_t)-1 && ctx->user.ttypath != NULL) {
+    if (ctx->user.ttydev == NODEV && ctx->user.ttypath != NULL) {
 	struct stat sb;
 	if (stat(ctx->user.ttypath, &sb) == 0)
 	    ctx->user.ttydev = sb.st_rdev;

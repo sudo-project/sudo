@@ -105,7 +105,7 @@ get_process_ttyname(char *name, size_t namelen)
     struct sudo_kinfo_proc *ki_proc = NULL;
     size_t size = sizeof(*ki_proc);
     int mib[6], rc, serrno = errno;
-    dev_t ttydev = (dev_t)-1;
+    dev_t ttydev = NODEV;
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL);
 
     /*
@@ -133,7 +133,7 @@ get_process_ttyname(char *name, size_t namelen)
     }
     errno = ENOENT;
     if (rc != -1) {
-	if ((dev_t)ki_proc->sudo_kp_tdev != (dev_t)-1) {
+	if ((dev_t)ki_proc->sudo_kp_tdev != NODEV) {
 	    errno = serrno;
 	    ttydev = (dev_t)ki_proc->sudo_kp_tdev;
 	    if (sudo_ttyname_dev(ttydev, name, namelen) == NULL) {
@@ -162,7 +162,7 @@ get_process_ttyname(char *name, size_t namelen)
 dev_t
 get_process_ttyname(char *name, size_t namelen)
 {
-    dev_t ttydev = (dev_t)-1;
+    dev_t ttydev = NODEV;
     struct psinfo psinfo;
     char path[PATH_MAX];
     ssize_t nread;
@@ -181,7 +181,7 @@ get_process_ttyname(char *name, size_t namelen)
 		ttydev = makedev(major64(psinfo.pr_ttydev), minor64(psinfo.pr_ttydev));
 #endif
 	    /* On AIX, pr_ttydev is 0 (not -1) when no terminal is present. */
-	    if (ttydev != 0 && ttydev != (dev_t)-1) {
+	    if (ttydev != 0 && ttydev != NODEV) {
 		errno = serrno;
 		if (sudo_ttyname_dev(ttydev, name, namelen) == NULL) {
 		    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
@@ -192,7 +192,7 @@ get_process_ttyname(char *name, size_t namelen)
 		}
 		goto done;
 	    }
-	    ttydev = (dev_t)-1;
+	    ttydev = NODEV;
 	}
     } else {
 	struct stat sb;
@@ -216,7 +216,7 @@ get_process_ttyname(char *name, size_t namelen)
     errno = ENOENT;
 
 done:
-    if (ttydev == (dev_t)-1)
+    if (ttydev == NODEV)
 	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to resolve tty via %s", path);
 
@@ -233,7 +233,7 @@ dev_t
 get_process_ttyname(char *name, size_t namelen)
 {
     const char path[] = "/proc/self/stat";
-    dev_t ttydev = (dev_t)-1;
+    dev_t ttydev = NODEV;
     char *cp, buf[1024];
     int serrno = errno;
     pid_t ppid = 0;
@@ -248,7 +248,7 @@ get_process_ttyname(char *name, size_t namelen)
     if ((fd = open(path, O_RDONLY | O_NOFOLLOW)) != -1) {
 	cp = buf;
 	while ((nread = read(fd, cp, sizeof(buf) - (size_t)(cp - buf))) != 0) {
-	    if (nread == -1) {
+	    if (nread < 0) {
 		if (errno == EAGAIN || errno == EINTR)
 		    continue;
 		break;
@@ -301,7 +301,7 @@ get_process_ttyname(char *name, size_t namelen)
 			    }
 			    break;
 			}
-			if (field == 3) {
+			if (field == 4) {
 			    ppid =
 				(int)sudo_strtonum(cp, INT_MIN, INT_MAX, NULL);
 			}
@@ -335,7 +335,7 @@ get_process_ttyname(char *name, size_t namelen)
 done:
     if (fd != -1)
 	close(fd);
-    if (ttydev == (dev_t)-1)
+    if (ttydev == NODEV)
 	sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to resolve tty via %s", path);
 
@@ -351,7 +351,7 @@ done:
 dev_t
 get_process_ttyname(char *name, size_t namelen)
 {
-    dev_t ttydev = (dev_t)-1;
+    dev_t ttydev = NODEV;
     int rc, serrno = errno;
     struct pst_status pst;
     debug_decl(get_process_ttyname, SUDO_DEBUG_UTIL);
@@ -418,6 +418,6 @@ get_process_ttyname(char *name, size_t namelen)
     sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	"unable to resolve tty via ttyname");
     errno = ENOENT;
-    debug_return_dev_t((dev_t)-1);
+    debug_return_dev_t(NODEV);
 }
 #endif

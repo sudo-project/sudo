@@ -115,10 +115,10 @@ loglinelen
 	"Length at which to wrap log file lines (0 for no wrap): %u"
 timestamp_timeout
 	T_TIMESPEC|T_BOOL
-	"Authentication timestamp timeout: %.1f minutes"
+	"Authentication timestamp timeout: %d.%d minutes"
 passwd_timeout
 	T_TIMESPEC|T_BOOL
-	"Password prompt timeout: %.1f minutes"
+	"Password prompt timeout: %d.%d minutes"
 passwd_tries
 	T_UINT
 	"Number of tries to enter a password: %u"

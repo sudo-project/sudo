@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2013-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2013-2025 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -32,6 +32,14 @@
 # define ROOT_UID	0
 #endif
 #define ROOT_GID	0
+
+#ifndef OFF_T_MAX
+# if SIZEOF_OFF_T == 8
+#  define OFF_T_MAX	LLONG_MAX
+# else
+#  define OFF_T_MAX	INT_MAX
+# endif
+#endif
 
 #ifndef TIME_T_MIN
 # if SIZEOF_TIME_T == 8
@@ -177,6 +185,8 @@ sudo_dso_public char *sudo_basename_v1(const char *filename);
 /* gethostname.c */
 sudo_dso_public char *sudo_gethostname_v1(void);
 #define sudo_gethostname() sudo_gethostname_v1()
+sudo_dso_public size_t sudo_host_name_max_v1(void);
+#define sudo_host_name_max() sudo_host_name_max_v1()
 
 /* gettime.c */
 sudo_dso_public int sudo_gettime_awake_v1(struct timespec *ts);
@@ -216,6 +226,10 @@ sudo_dso_public bool sudo_str2logfac_v1(const char *str, int *logfac);
 #define sudo_str2logfac(_a, _b) sudo_str2logfac_v1((_a), (_b))
 sudo_dso_public const char *sudo_logfac2str_v1(int num);
 #define sudo_logfac2str(_a) sudo_logfac2str_v1((_a))
+
+/* login_max.c */
+sudo_dso_public size_t sudo_login_name_max_v1(void);
+#define sudo_login_name_max() sudo_login_name_max_v1()
 
 /* logpri.c */
 sudo_dso_public bool sudo_str2logpri_v1(const char *str, int *logpri);
@@ -328,7 +342,8 @@ extern int (*sudo_printf)(int msg_type, const char * restrict fmt, ...);
 sudo_dso_public bool sudo_isatty_v1(int fd, struct stat *sbp);
 #define sudo_isatty(_a, _b) sudo_isatty_v1((_a), (_b))
 sudo_dso_public bool sudo_term_cbreak_v1(int fd);
-#define sudo_term_cbreak(_a) sudo_term_cbreak_v1((_a))
+sudo_dso_public bool sudo_term_cbreak_v2(int fd, bool flush);
+#define sudo_term_cbreak(_a, _b) sudo_term_cbreak_v2((_a), (_b))
 sudo_dso_public bool sudo_term_copy_v1(int src, int dst);
 #define sudo_term_copy(_a, _b) sudo_term_copy_v1((_a), (_b))
 sudo_dso_public bool sudo_term_noecho_v1(int fd);

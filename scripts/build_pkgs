@@ -24,8 +24,8 @@ my $debug = 0;
 my $help = 0;
 my $ignore_cache = 0;
 my $quiet = 0;
-my $repo = "/repos/sudo";
-my $rev = "tip";
+my $repo = "/repos/sudo.git";
+my $rev = "main";
 my $sudo_tmpdir;
 my $tarball;
 my $tarball_base;
@@ -49,6 +49,9 @@ pod2usage(1) if $help;
 # Debug and verbose override quiet.
 $verbose = 1 if $debug;
 $quiet = 0 if $verbose;
+
+# Make sure files are created with a reasonable mode.
+umask(022);
 
 # Read config data (using Parse::CPAN::Meta is cheating a bit).
 my @yaml = Parse::CPAN::Meta->load_file($conf_file) ||
@@ -903,9 +906,19 @@ sub wait_for_ssh {
 
 # Create a tarball from an archive $repo
 sub create_tarball {
+    return create_tarball_hg() if -d "$repo/.hg";
+    return create_tarball_git();
+}
+
+sub create_tarball_hg {
     die "$0: unable to create directory $sudo_tmpdir/sudo: $!\n"
         unless mkdir("$sudo_tmpdir/sudo", 0755);
     system("hg archive -R $repo -r $rev --type=files $sudo_tmpdir/sudo && hg log -R $repo --template=changelog -r 'sort(branch(.) or follow(), -date)' > $sudo_tmpdir/sudo/ChangeLog && cd $sudo_tmpdir && sed -e 's/^/sudo\\//' -e 's/[ 	].*//' sudo/MANIFEST | GZIP=-9 pax -wz -x ustar -f sudo.tar.gz && rm -rf sudo");
+    return $? ? undef : "$sudo_tmpdir/sudo.tar.gz";
+}
+
+sub create_tarball_git {
+    system("cd $sudo_tmpdir && git --git-dir=$repo archive --format=tar --prefix=sudo/ $rev | pax -r && ./sudo/scripts/log2cl.pl -R $repo $rev > sudo/ChangeLog && sed -e 's/^/sudo\\//' -e 's/[ 	].*//' sudo/MANIFEST | GZIP=-9 pax -wz -x ustar -f sudo.tar.gz && rm -rf sudo");
     return $? ? undef : "$sudo_tmpdir/sudo.tar.gz";
 }
 
@@ -1026,6 +1039,8 @@ sub grep_log {
 		next if /warning: (Installed .but unpackaged. file.s. found:|Deprecated external dependency generator is used!|absolute symlink)/;
 		# Solaris ld may warn about the gcc dwarf2 unwinder
 		next if /warning: unwind table: .* suspicious InitialLoc value 0: binary search table will be incomplete if section requires runtime relocation/;
+		# GNU Hurd has no 64-bit glob()
+		next if /warning: glob64 is not implemented and will always fail/;
 		# Solaris Studio compiler warns about anonymous unions
 		next if /warning: anonymous union declaration/;
 		# HP-UX shl_t uses type-punning

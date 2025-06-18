@@ -154,7 +154,7 @@ signal_pipe_cb(int fd, int what, void *v)
 	sudo_debug_printf(SUDO_DEBUG_INFO,
 	    "%s: received signal %d", __func__, (int)ch);
     }
-    if (nread == -1 && errno != EAGAIN) {
+    if (nread < 0 && errno != EAGAIN) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "%s: error reading from signal pipe fd %d", __func__, fd);
     }

@@ -736,6 +736,14 @@ Defaults are listed in brackets after the description.
         of the "env_reset" Defaults option in sudoers to false.
         Sudoers option: !env_reset
 
+    --disable-ignore-dot
+        By default, sudo will not search for a command in the current
+        working directory, even if "." or "" in present in the PATH
+        environment variable.  If this option is disabled, sudo
+        will check the current directory last if it appears anywhere
+        in PATH.  The PATH variable itself is not modified.
+        Sudoers option: ignore_dot
+
     --disable-path-info
         Normally, sudo will tell the user when a command could not be found
         in their $PATH.  Some sites may wish to disable this as it could
@@ -875,11 +883,6 @@ Defaults are listed in brackets after the description.
         Uses 2001-like insults when an incorrect password is entered.
         You must either specify --with-insults or enable insults in the
         sudoers file for this to have any effect.
-
-    --with-ignore-dot
-        If set, sudo will ignore "." or "" (current dir) in $PATH.
-        The $PATH itself is not modified.
-        Sudoers option: ignore_dot
 
     --with-insults
         Define this if you want to be insulted by default for typing

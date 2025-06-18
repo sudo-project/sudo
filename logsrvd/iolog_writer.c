@@ -114,6 +114,20 @@ bad:
 }
 
 /*
+ * Free a NULL-terminated string vector.
+ */
+static void
+strvec_free(char *vec[])
+{
+    if (vec != NULL) {
+	char **vp;
+	for (vp = vec; *vp != NULL; vp++)
+	    free(*vp);
+	free(vec);
+    }
+}
+
+/*
  * Fill in eventlog details from an AcceptMessage
  * Caller is responsible for freeing strings in struct eventlog.
  * Returns true on success and false on failure.
@@ -180,6 +194,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	    }
 	    if (strcmp(key, "command") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    free(evlog->command);
 		    if ((evlog->command = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
 			    U_("unable to allocate memory"));
@@ -205,6 +220,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	case 'r':
 	    if (strcmp(key, "runargv") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRLISTVAL)) {
+		    strvec_free(evlog->runargv);
 		    evlog->runargv = strlist_copy(info->u.strlistval);
 		    if (evlog->runargv == NULL)
 			goto bad;
@@ -213,6 +229,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	    }
 	    if (strcmp(key, "runchroot") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    free(evlog->runchroot);
 		    if ((evlog->runchroot = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
 			    U_("unable to allocate memory"));
@@ -223,6 +240,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	    }
 	    if (strcmp(key, "runcwd") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    free(evlog->runcwd);
 		    if ((evlog->runcwd = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
 			    U_("unable to allocate memory"));
@@ -233,6 +251,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	    }
 	    if (strcmp(key, "runenv") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRLISTVAL)) {
+		    strvec_free(evlog->runenv);
 		    evlog->runenv = strlist_copy(info->u.strlistval);
 		    if (evlog->runenv == NULL)
 			goto bad;
@@ -252,6 +271,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	    }
 	    if (strcmp(key, "rungroup") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    free(evlog->rungroup);
 		    if ((evlog->rungroup = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
 			    U_("unable to allocate memory"));
@@ -273,6 +293,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	    }
 	    if (strcmp(key, "runuser") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    free(evlog->runuser);
 		    if ((evlog->runuser = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
 			    U_("unable to allocate memory"));
@@ -285,6 +306,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	case 's':
 	    if (strcmp(key, "source") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    free(evlog->source);
 		    if ((evlog->source = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
 			    U_("unable to allocate memory"));
@@ -295,6 +317,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	    }
 	    if (strcmp(key, "submitcwd") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    free(evlog->cwd);
 		    if ((evlog->cwd = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
 			    U_("unable to allocate memory"));
@@ -305,6 +328,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	    }
 	    if (strcmp(key, "submitenv") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRLISTVAL)) {
+		    strvec_free(evlog->submitenv);
 		    evlog->submitenv = strlist_copy(info->u.strlistval);
 		    if (evlog->submitenv == NULL)
 			goto bad;
@@ -313,6 +337,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	    }
 	    if (strcmp(key, "submitgroup") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    free(evlog->submitgroup);
 		    if ((evlog->submitgroup = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
 			    U_("unable to allocate memory"));
@@ -323,6 +348,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	    }
 	    if (strcmp(key, "submithost") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    free(evlog->submithost);
 		    if ((evlog->submithost = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
 			    U_("unable to allocate memory"));
@@ -333,6 +359,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	    }
 	    if (strcmp(key, "submituser") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    free(evlog->submituser);
 		    if ((evlog->submituser = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
 			    U_("unable to allocate memory"));
@@ -345,6 +372,7 @@ evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen,
 	case 't':
 	    if (strcmp(key, "ttyname") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    free(evlog->ttyname);
 		    if ((evlog->ttyname = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
 			    U_("unable to allocate memory"));
@@ -419,7 +447,7 @@ struct iolog_path_closure {
 };
 
 static size_t
-fill_seq(char *str, size_t strsize, void *v)
+fill_seq(char * restrict str, size_t strsize, void * restrict v)
 {
     struct iolog_path_closure *closure = v;
     char *sessid = closure->evlog->sessid;

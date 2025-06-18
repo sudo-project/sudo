@@ -201,25 +201,35 @@ signal_cb_nopty(int signo, int what, void *v)
     debug_return;
 }
 
-
 /*
- * Fill in the exec closure and setup initial exec events.
- * Allocates events for the signal pipe and error pipe.
+ * Fill in the non-event part of the exec closure.
  */
 static void
-fill_exec_closure(struct exec_closure *ec, struct command_status *cstat,
-    struct command_details *details, const struct user_details *user_details,
-    struct sudo_event_base *evbase, int errfd)
+init_exec_closure(struct exec_closure *ec, struct command_status *cstat,
+    struct command_details *details, const struct user_details *user_details)
 {
-    debug_decl(fill_exec_closure, SUDO_DEBUG_EXEC);
+    debug_decl(init_exec_closure, SUDO_DEBUG_EXEC);
 
     /* Fill in the non-event part of the closure. */
+    memset(ec, 0, sizeof(*ec));
     ec->sudo_pid = getpid();
     ec->ppgrp = getpgrp();
     ec->cstat = cstat;
     ec->details = details;
     ec->rows = user_details->ts_rows;
     ec->cols = user_details->ts_cols;
+
+    debug_return;
+}
+
+/*
+ * Allocate and set events for the signal pipe and error pipe.
+ */
+static void
+init_exec_events(struct exec_closure *ec, struct sudo_event_base *evbase,
+    int errfd)
+{
+    debug_decl(init_exec_events, SUDO_DEBUG_EXEC);
 
     /* Setup event base and events. */
     ec->evbase = evbase;
@@ -470,9 +480,10 @@ static void
 interpose_pipes(struct exec_closure *ec, const char *tty, int io_pipe[3][2])
 {
     bool interpose[3] = { false, false, false };
-    struct stat sb, tty_sbuf, *tty_sb = NULL;
     struct plugin_container *plugin;
+    const pid_t pgrp = getpgrp();
     bool want_winch = false;
+    struct stat sb;
     debug_decl(interpose_pipes, SUDO_DEBUG_EXEC);
 
     /*
@@ -496,11 +507,8 @@ interpose_pipes(struct exec_closure *ec, const char *tty, int io_pipe[3][2])
      * If stdin, stdout or stderr is not the user's tty and logging is
      * enabled, use a pipe to interpose ourselves.
      */
-    if (tty != NULL && stat(tty, &tty_sbuf) != -1)
-	tty_sb = &tty_sbuf;
-
     if (interpose[STDIN_FILENO]) {
-	if (!fd_matches_tty(STDIN_FILENO, tty_sb, &sb)) {
+	if (!fd_matches_pgrp(STDIN_FILENO, pgrp, &sb)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdin not user's tty, creating a pipe");
 	    if (pipe2(io_pipe[STDIN_FILENO], O_CLOEXEC) != 0)
@@ -510,7 +518,7 @@ interpose_pipes(struct exec_closure *ec, const char *tty, int io_pipe[3][2])
 	}
     }
     if (interpose[STDOUT_FILENO]) {
-	if (!fd_matches_tty(STDOUT_FILENO, tty_sb, &sb)) {
+	if (!fd_matches_pgrp(STDOUT_FILENO, pgrp, &sb)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdout not user's tty, creating a pipe");
 	    if (pipe2(io_pipe[STDOUT_FILENO], O_CLOEXEC) != 0)
@@ -520,7 +528,7 @@ interpose_pipes(struct exec_closure *ec, const char *tty, int io_pipe[3][2])
 	}
     }
     if (interpose[STDERR_FILENO]) {
-	if (!fd_matches_tty(STDERR_FILENO, tty_sb, &sb)) {
+	if (!fd_matches_pgrp(STDERR_FILENO, pgrp, &sb)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stderr not user's tty, creating a pipe");
 	    if (pipe2(io_pipe[STDERR_FILENO], O_CLOEXEC) != 0)
@@ -545,7 +553,7 @@ exec_nopty(struct command_details *details,
 {
     int io_pipe[3][2] = { { -1, -1 }, { -1, -1 }, { -1, -1 } };
     int errpipe[2], intercept_sv[2] = { -1, -1 };
-    struct exec_closure ec = { 0 };
+    struct exec_closure ec;
     sigset_t set, oset;
     debug_decl(exec_nopty, SUDO_DEBUG_EXEC);
 
@@ -555,6 +563,9 @@ exec_nopty(struct command_details *details,
      */
     if (policy_init_session(details) != true)
 	sudo_fatalx("%s", U_("policy plugin failed session initialization"));
+
+    /* Fill in exec closure. */
+    init_exec_closure(&ec, cstat, details, user_details);
 
     /*
      * We use a pipe to get errno if execve(2) fails in the child.
@@ -661,11 +672,8 @@ exec_nopty(struct command_details *details,
     if (ISSET(details->flags, CD_SET_TIMEOUT))
 	alarm(details->timeout);
 
-    /*
-     * Fill in exec closure, allocate event base, signal events and
-     * the error pipe event.
-     */
-    fill_exec_closure(&ec, cstat, details, user_details, evbase, errpipe[0]);
+    /* Allocate and set signal events and the error pipe event.  */
+    init_exec_events(&ec, evbase, errpipe[0]);
 
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
 	int rc = 1;

@@ -2,7 +2,7 @@
 .\" SPDX-License-Identifier: ISC
 .\"
 .\" Copyright (c) 2019-2021 Robert Manner <robert.manner@oneidentity.com>
-.\" Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2025 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 16, 2023
+.Dd February 26, 2025
 .Dt SUDO_PLUGIN_PYTHON @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -401,13 +401,15 @@ the plugin should list the privileges of the invoking user.
 validate(self)
 .Ed
 .Pp
-For policy plugins that cache authentication credentials, this function is used to validate and cache the credentials (optional).
+For policy plugins that cache authentication credentials,
+this function is used to validate and cache the credentials (optional).
 .It Fa invalidate
 .Bd -literal -compact
 invalidate(self, remove: int)
 .Ed
 .Pp
-For policy plugins that cache authentication credentials, this function is used to invalidate the credentials (optional).
+For policy plugins that cache authentication credentials,
+this function is used to invalidate the credentials (optional).
 .Pp
 The function arguments are as follows:
 .Bl -tag -width 4n
@@ -453,8 +455,8 @@ The function arguments are as follows:
 .It Fa exit_status
 The exit status of the command if was executed, otherwise \-1.
 .It Fa error
-If the command could not be executed, this is set to the value of
-errno set by the
+If the command could not be executed,
+this is set to the value of errno set by the
 .Xr execve 2
 system call, otherwise 0.
 .El
@@ -695,8 +697,8 @@ The function arguments are as follows:
 .It Fa exit_status
 The exit status of the command if was executed, otherwise \-1.
 .It Fa error
-If the command could not be executed, this is set to the value of
-errno set by the
+If the command could not be executed,
+this is set to the value of errno set by the
 .Xr execve 2
 system call, otherwise 0.
 .El
@@ -721,7 +723,8 @@ Plugin python_audit @python_plugin@ ModulePath=<path> ClassName=<class>
 Sudo supports loading multiple audit plugins.
 Currently only 8 python audit plugins can be loaded at once.
 .Pp
-An audit plugin may have the following member functions (all of which are optional):
+An audit plugin may have the following member functions
+(all of which are optional):
 .Bl -tag -width 4n
 .It Fa constructor
 .Bd -literal -compact
@@ -1400,14 +1403,14 @@ one or more messages to log
 .Em Available log levels:
 .Bl -column "name in sudo.conf" "Python constant" "only critical messages"
 .It Sy sudo.conf name Ta Sy Python constant Ta Sy description
-.It crit Ta Dv sudo.DEBUG.CRIT Ta only critical messages
-.It err Ta Dv sudo.DEBUG.ERROR Ta
-.It warn Ta Dv sudo.DEBUG.WARN Ta
-.It notice Ta Dv sudo.DEBUG.NOTICE Ta
-.It diag Ta Dv sudo.DEBUG.DIAG Ta
-.It info Ta Dv sudo.DEBUG.INFO Ta
-.It trace Ta Dv sudo.DEBUG.TRACE Ta
-.It debug Ta Dv sudo.DEBUG.DEBUG Ta very extreme verbose debugging
+.It crit Ta Dv sudo.DEBUG.CRIT Ta critical errors
+.It err Ta Dv sudo.DEBUG.ERROR Ta non-critical errors
+.It warn Ta Dv sudo.DEBUG.WARN Ta non-fatal warnings
+.It notice Ta Dv sudo.DEBUG.NOTICE Ta non-error condition notices
+.It diag Ta Dv sudo.DEBUG.DIAG Ta diagnostic messages
+.It info Ta Dv sudo.DEBUG.INFO Ta informational message
+.It trace Ta Dv sudo.DEBUG.TRACE Ta log function enter/exit
+.It debug Ta Dv sudo.DEBUG.DEBUG Ta very verbose debugging
 .El
 .Pp
 .Em Using the logging module
@@ -1528,7 +1531,7 @@ sudo-workers mailing list,
 https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
 or <sudo@sudo.ws> (private).
 .Pp
-Please not report security vulnerabilities through public GitHub
+Please do not report security vulnerabilities through public GitHub
 issues, Bugzilla or mailing lists.
 Instead, report them via email to <Todd.Miller@sudo.ws>.
 You may encrypt your message with PGP if you would like, using

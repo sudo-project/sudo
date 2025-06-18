@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2014-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2014-2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -348,7 +348,7 @@ ts_write(const struct sudoers_context *ctx, int fd, const char *fname,
 	nwritten = pwrite(fd, entry, entry->size, offset);
     }
     if ((size_t)nwritten != entry->size) {
-	if (nwritten == -1) {
+	if (nwritten < 0) {
 	    log_warning(ctx, SLOG_SEND_MAIL,
 		N_("unable to write to %s"), fname);
 	} else {
@@ -397,7 +397,7 @@ ts_init_key(const struct sudoers_context *ctx,
 	sudo_warnx("unknown time stamp ticket type %d", ticket_type);
 	FALLTHROUGH;
     case tty:
-	if (ctx->user.ttydev != (dev_t)-1) {
+	if (ctx->user.ttydev != NODEV) {
 	    /* tty-based time stamp */
 	    entry->type = TS_TTY;
 	    entry->u.ttydev = ctx->user.ttydev;

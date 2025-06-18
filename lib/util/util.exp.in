@@ -96,6 +96,7 @@ sudo_gettime_awake_v1
 sudo_gettime_mono_v1
 sudo_gettime_real_v1
 sudo_hexchar_v1
+sudo_host_name_max_v1
 sudo_isatty_v1
 sudo_json_add_value_as_object_v1
 sudo_json_add_value_v1
@@ -119,6 +120,7 @@ sudo_lbuf_print_v1
 sudo_lock_file_v1
 sudo_lock_region_v1
 sudo_logfac2str_v1
+sudo_login_name_max_v1
 sudo_logpri2str_v1
 sudo_mkdir_parents_v1
 sudo_mmap_alloc_v1
@@ -157,6 +159,7 @@ sudo_strtomode_v1
 sudo_strtomode_v2
 sudo_strtonum
 sudo_term_cbreak_v1
+sudo_term_cbreak_v2
 sudo_term_copy_v1
 sudo_term_eof
 sudo_term_erase

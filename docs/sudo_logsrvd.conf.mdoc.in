@@ -978,7 +978,7 @@ Sudo log server configuration file
 # password prompts in the terminal output when log_passwords is
 # disabled.  Multiple passprompt_regex settings may be specified.
 #passprompt_regex = [Pp]assword[: ]*
-#passprompt_regex = [Pp]assword for [a-z0-9]+: *
+#passprompt_regex = [Pp]assword for [a\-z0\-9]+: *
 
 [eventlog]
 # Where to log accept, reject, exit, and alert events.
@@ -1065,7 +1065,7 @@ sudo-workers mailing list,
 https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
 or <sudo@sudo.ws> (private).
 .Pp
-Please not report security vulnerabilities through public GitHub
+Please do not report security vulnerabilities through public GitHub
 issues, Bugzilla or mailing lists.
 Instead, report them via email to <Todd.Miller@sudo.ws>.
 You may encrypt your message with PGP if you would like, using

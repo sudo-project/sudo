@@ -138,7 +138,7 @@ main(int argc, char *argv[])
 
 	    nread = read(fd, tbuf, timing.u.nbytes);
 	    if ((size_t)nread != timing.u.nbytes) {
-		if (nread == -1)
+		if (nread < 0)
 		    sudo_warn("%s/%s", argv[i], name);
 		else
 		    sudo_warnx("%s/%s: short read", argv[i], name);
@@ -155,8 +155,8 @@ main(int argc, char *argv[])
 
 	    if (timing.event == IO_EVENT_TTYIN) {
 		nread = read(ttyin_ok_fd, fbuf, timing.u.nbytes);
-		if (nread == -1) {
-		    if (nread == -1)
+		if ((size_t)nread != timing.u.nbytes) {
+		    if (nread < 0)
 			sudo_warn("%s/ttyin.filtered", argv[i]);
 		    else
 			sudo_warnx("%s/ttyin.filtered: short read", argv[i]);

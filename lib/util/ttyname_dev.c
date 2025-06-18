@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2012-2018 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2012-2018, 2024 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -272,7 +272,7 @@ sudo_ttyname_dev_v1(dev_t rdev, char *buf, size_t buflen)
 	    continue;
 
 	fdpath[sizeof("/proc/self/fd/N") - 2] = '0' + fd;
-	len = readlink(fdpath, buf, buflen);
+	len = (size_t)readlink(fdpath, buf, buflen);
 	if (len != (size_t)-1) {
 	    if (len == buflen) {
 		errno = ERANGE;	/* buf too small */

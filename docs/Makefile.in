@@ -32,7 +32,7 @@ scriptdir = $(top_srcdir)/scripts
 # Tools to use
 SED = @SED@
 IGOR = igor
-MANDOC = mandoc
+MANDOC = @MANDOCPROG@
 MANCOMPRESS = @MANCOMPRESS@
 MANCOMPRESSEXT = @MANCOMPRESSEXT@
 TR = @TRPROG@
@@ -118,17 +118,7 @@ igor:
 	exit $$rval
 
 lint: all
-	@if [ "$(mantype)" != "mdoc" ]; then \
-	    echo "make lint only supported for mdoc manuals" 1>&2; \
-	    exit 1; \
-	else \
-	    rval=0; \
-	    for m in $(DOCS); do \
-		echo $(MANDOC) -Tlint -Wwarning $$m; \
-		$(MANDOC) -Tlint -Wwarning $$m || rval=`expr $$rval + $$?`; \
-	    done; \
-	    exit $$rval; \
-	fi
+	$(SHELL) $(top_builddir)/scripts/check_man $(DOCS)
 
 depend:
 

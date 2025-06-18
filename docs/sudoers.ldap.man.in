@@ -170,7 +170,7 @@ option (or as
 It may take command line arguments just as a normal command does.
 Unlike other commands,
 \(lqsudoedit\(rq
-is a built into
+is built into
 \fBsudo\fR
 itself and must be specified in without a leading path.
 .sp
@@ -420,7 +420,7 @@ The query will match
 \fInisNetgroupTriple\fR
 entries with either the short or long form of the host name or
 no host name specified in the tuple.
-If the NIS domain is set, the query will match only match entries
+If the NIS domain is set, the query will only match entries
 that include the domain or for which there is no domain present.
 If the NIS domain is
 \fInot\fR
@@ -1796,7 +1796,7 @@ sudo-workers mailing list,
 https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
 or <sudo@sudo.ws> (private).
 .PP
-Please not report security vulnerabilities through public GitHub
+Please do not report security vulnerabilities through public GitHub
 issues, Bugzilla or mailing lists.
 Instead, report them via email to <Todd.Miller@sudo.ws>.
 You may encrypt your message with PGP if you would like, using

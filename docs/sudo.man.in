@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2023
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2025
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDO" "@mansectsu@" "August 9, 2023" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO" "@mansectsu@" "June 7, 2025" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -214,6 +214,7 @@ If no askpass program is available,
 \fBsudo\fR
 will exit with an error.
 .RE
+.if \n(BA \{\
 .TP 8n
 \fB\-a\fR \fItype\fR, \fB\--auth-type\fR=\fItype\fR
 Use the specified
@@ -230,6 +231,7 @@ entry in
 This option is only available on systems that support
 BSD
 authentication.
+.\}
 .TP 8n
 \fB\-B\fR, \fB\--bell\fR
 Ring the bell as part of the password prompt when a terminal is present.
@@ -265,6 +267,7 @@ policy only permits use of the
 option when the administrator has enabled the
 \fIclosefrom_override\fR
 option.
+.if \n(LC \{\
 .TP 8n
 \fB\-c\fR \fIclass\fR, \fB\--login-class\fR=\fIclass\fR
 Run the
@@ -297,6 +300,7 @@ be applied, if present.
 This option is only available on systems with
 BSD
 login classes.
+.\}
 .TP 8n
 \fB\-D\fR \fIdirectory\fR, \fB\--chdir\fR=\fIdirectory\fR
 Run the
@@ -708,12 +712,14 @@ before running the
 \fIcommand\fR.
 The security policy may return an error if the user does not have
 permission to specify the root directory.
+.if \n(SL \{\
 .TP 8n
 \fB\-r\fR \fIrole\fR, \fB\--role\fR=\fIrole\fR
 Run the
 \fIcommand\fR
 with an SELinux security context that includes the specified
 \fIrole\fR.
+.\}
 .TP 8n
 \fB\-S\fR, \fB\--stdin\fR
 Write the prompt to the standard error and read the password from the
@@ -746,6 +752,7 @@ Most shells behave differently when a
 \fIcommand\fR
 is specified as compared to an interactive session; consult the shell's manual
 for details.
+.if \n(SL \{\
 .TP 8n
 \fB\-t\fR \fItype\fR, \fB\--type\fR=\fItype\fR
 Run the
@@ -755,6 +762,7 @@ with an SELinux security context that includes the specified
 If no
 \fItype\fR
 is specified, the default type is derived from the role.
+.\}
 .TP 8n
 \fB\-U\fR \fIuser\fR, \fB\--other-user\fR=\fIuser\fR
 Used in conjunction with the
@@ -1428,6 +1436,9 @@ If set,
 \fRPS1\fR
 will be set to its value for the program being run.
 .TP 17n
+\fRSUDO_TTY\fR
+Set to the terminal device of the user who invoked sudo, if one is present.
+.TP 17n
 \fRSUDO_UID\fR
 Set to the user-ID of the user who invoked sudo.
 .TP 17n
@@ -1521,8 +1532,9 @@ $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 Error messages produced by
 \fBsudo\fR
 include:
-.TP 6n
-\fRediting files in a writable directory is not permitted\fR
+.PP
+editing files in a writable directory is not permitted
+.RS 4n
 By default,
 \fBsudoedit\fR
 does not permit editing a file when any of the parent directories are writable
@@ -1534,8 +1546,10 @@ See the
 option in
 sudoers(@mansectform@)
 for more information.
-.TP 6n
-\fRediting symbolic links is not permitted\fR
+.RE
+.PP
+editing symbolic links is not permitted
+.RS 4n
 By default,
 \fBsudoedit\fR
 does not follow symbolic links when opening files.
@@ -1544,8 +1558,10 @@ See the
 option in
 sudoers(@mansectform@)
 for more information.
-.TP 6n
-\fReffective uid is not 0, is sudo installed setuid root?\fR
+.RE
+.PP
+effective uid is not 0, is sudo installed setuid root?
+.RS 4n
 \fBsudo\fR
 was not run with root privileges.
 The
@@ -1554,8 +1570,11 @@ binary must be owned by the root user and have the set-user-ID bit set.
 Also, it must not be located on a file system mounted with the
 \(oqnosuid\(cq
 option or on an NFS file system that maps uid 0 to an unprivileged uid.
-.TP 6n
-\fReffective uid is not 0, is sudo on a file system with the 'nosuid' option set or an NFS file system without root privileges?\fR
+.RE
+.PP
+effective uid is not 0, is sudo on a file system with the 'nosuid'
+option set or an NFS file system without root privileges?
+.RS 4n
 \fBsudo\fR
 was not run with root privileges.
 The
@@ -1567,12 +1586,16 @@ The most common reason for this is that the file system the
 binary is located on is mounted with the
 \(oqnosuid\(cq
 option or it is an NFS file system that maps uid 0 to an unprivileged uid.
-.TP 6n
-\fRfatal error, unable to load plugins\fR
+.RE
+.PP
+fatal error, unable to load plugins
+.RS 4n
 An error occurred while loading or initializing the plugins specified in
 sudo.conf(@mansectform@).
-.TP 6n
-\fRinvalid environment variable name\fR
+.RE
+.PP
+invalid environment variable name
+.RS 4n
 One or more environment variable names specified via the
 \fB\-E\fR
 option contained an equal sign
@@ -1580,8 +1603,10 @@ option contained an equal sign
 The arguments to the
 \fB\-E\fR
 option should be environment variable names without an associated value.
-.TP 6n
-\fRno password was provided\fR
+.RE
+.PP
+no password was provided
+.RS 4n
 When
 \fBsudo\fR
 tried to read the password, it did not receive any characters.
@@ -1589,28 +1614,45 @@ This may happen if no terminal is available (or the
 \fB\-S\fR
 option is specified) and the standard input has been redirected from
 \fI/dev/null\fR.
-.TP 6n
-\fRa terminal is required to read the password\fR
+.RE
+.PP
+a terminal is required to read the password
+.RS 4n
 \fBsudo\fR
 needs to read the password but there is no mechanism available for it
 to do so.
-A terminal is not present to read the password from,
+Remote commands run via
+ssh(1)
+do not have a terminal available by default; passing the
+\fB\-t\fR
+option to
+ssh(1)
+will cause it to allocate a terminal which should allow
 \fBsudo\fR
-has not been configured to read from the standard input,
-the
+to read the password.
+To allow
+\fBsudo\fR
+to run local commands without a terminal, the
 \fB\-S\fR
-option was not used, and no askpass helper has been specified either via the
+option can be used to read a password from the standard input, or
+an askpass helper can be configured via either the
 sudo.conf(@mansectform@)
-file or the
+file or by setting the
 \fRSUDO_ASKPASS\fR
 environment variable.
-.TP 6n
-\fRno writable temporary directory found\fR
+.RE
+.PP
+no writable temporary directory found
+.RS 4n
 \fBsudoedit\fR
 was unable to find a usable temporary directory in which to store its
 intermediate files.
-.TP 6n
-\fRThe\fR \(lqno new privileges\(rq flag is set, which prevents sudo from running as root.
+.RE
+.PP
+The
+\(lqno new privileges\(rq
+flag is set, which prevents sudo from running as root.
+.RS 4n
 \fBsudo\fR
 was run by a process that has the Linux
 \(lqno new privileges\(rq
@@ -1624,31 +1666,42 @@ The most likely cause for this is running
 within a container that sets this flag.
 Check the documentation to see if it is possible to configure the
 container such that the flag is not set.
-.TP 6n
-\fRsudo must be owned by uid 0 and have the setuid bit set\fR
+.RE
+.PP
+sudo must be owned by uid 0 and have the setuid bit set
+.RS 4n
 \fBsudo\fR
 was not run with root privileges.
 The
 \fBsudo\fR
 binary does not have the correct owner or permissions.
 It must be owned by the root user and have the set-user-ID bit set.
-.TP 6n
-\fRsudoedit is not supported on this platform\fR
+.RE
+.PP
+sudoedit is not supported on this platform
+.RS 4n
 It is only possible to run
 \fBsudoedit\fR
 on systems that support setting the effective user-ID.
-.TP 6n
-\fRtimed out reading password\fR
+.RE
+.PP
+timed out reading password
+.RS 4n
 The user did not enter a password before the password timeout
 (5 minutes by default) expired.
-.TP 6n
-\fRyou do not exist in the passwd database\fR
+.RE
+.PP
+you do not exist in the passwd database
+.RS 4n
 Your user-ID does not appear in the system passwd database.
-.TP 6n
-\fRyou may not specify environment variables in edit mode\fR
+.RE
+.PP
+you may not specify environment variables in edit mode
+.RS 4n
 It is only possible to specify environment variables when running a
 \fIcommand\fR.
 When editing a file, the editor is run with the user's environment unmodified.
+.RE
 .SH "SEE ALSO"
 su(1),
 stat(2),
@@ -1733,7 +1786,7 @@ sudo-workers mailing list,
 https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
 or <sudo@sudo.ws> (private).
 .PP
-Please not report security vulnerabilities through public GitHub
+Please do not report security vulnerabilities through public GitHub
 issues, Bugzilla or mailing lists.
 Instead, report them via email to <Todd.Miller@sudo.ws>.
 You may encrypt your message with PGP if you would like, using

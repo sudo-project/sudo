@@ -537,7 +537,7 @@ get_user_info(struct user_details *ud)
 
     ud->pid = getpid();
     ud->ppid = getppid();
-    ud->pgid = getpgid(0);
+    ud->pgid = getpgrp();
     ttyfd = open(_PATH_TTY, O_RDWR);
     sudo_get_ttysize(ttyfd, &ud->ts_rows, &ud->ts_cols);
     if (ttyfd != -1) {
@@ -619,7 +619,7 @@ get_user_info(struct user_details *ud)
     }
 
     ttydev = get_process_ttyname(path, sizeof(path));
-    if (ttydev != (dev_t)-1) {
+    if (ttydev != NODEV) {
 	if (asprintf(&info[++i], "ttydev=%lld", (long long)ttydev) == -1)
 	    goto oom;
 	/* The terminal device file may be missing in a chroot() jail. */

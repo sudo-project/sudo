@@ -377,26 +377,23 @@ sudo_needs_pty(const struct command_details *details)
 }
 
 /*
- * Check whether the specified fd matches the device file that
- * corresponds to tty_sb.  If tty_sb is NULL, just check whether
- * fd is a tty.  Always fills in fd_sb (zeroed on error).
+ * Check whether the specified fd is a terminal with the specified
+ * controlling process group.  Always fills in sb (zeroed on error).
  * Returns true on match, else false.
  */
 bool
-fd_matches_tty(int fd, struct stat *tty_sb, struct stat *fd_sb)
+fd_matches_pgrp(int fd, pid_t pgrp, struct stat *sb)
 {
-    debug_decl(fd_is_user_tty, SUDO_DEBUG_EXEC);
+    debug_decl(fd_matches_pgrp, SUDO_DEBUG_EXEC);
 
-    if (fstat(fd, fd_sb) == -1) {
-	 /* Always initialize fd_sb. */
-	memset(fd_sb, 0, sizeof(*fd_sb));
+    if (!sudo_isatty(fd, sb))
 	debug_return_bool(false);
+
+    if (pgrp != -1) {
+	if (pgrp != tcgetpgrp(fd))
+	    debug_return_bool(false);
     }
-    if (!S_ISCHR(fd_sb->st_mode))
-	debug_return_bool(false);
-
-    /* Compare with tty_sb if available, else just check that fd is a tty. */
-    debug_return_bool(tty_sb ? tty_sb->st_rdev == fd_sb->st_rdev : isatty(fd));
+    debug_return_bool(true);
 }
 
 /*

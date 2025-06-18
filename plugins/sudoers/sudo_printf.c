@@ -68,8 +68,8 @@ sudo_printf_int(int msg_type, const char * restrict fmt, ...)
 	    len = vasprintf(&buf, fmt, ap);
 	    va_end(ap);
 	}
-	if (len != -1) {
-	    if (fwrite(buf, 1, (size_t)len, ttyfp ? ttyfp : fp) == 0)
+	if (len >= 0) {
+	    if (fwrite(buf, 1, (size_t)len, ttyfp ? ttyfp : fp) != (size_t)len)
 		len = -1;
 	    if (buf != sbuf)
 		free(buf);

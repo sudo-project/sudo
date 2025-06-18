@@ -247,7 +247,7 @@ calculated using a monotonic clock where possible.
 This is not the wall clock time.
 .TP 8n
 exit_value
-The command's exit value in the range 0-255.
+The command's exit value in the range 0\(en255.
 .TP 8n
 dumped_core
 True if the command was terminated by a signal and dumped core.
@@ -290,7 +290,7 @@ was previously interrupted.
 It contains the following members:
 .TP 8n
 log_id
-The the server-side name for an I/O log that was previously
+The server-side name for an I/O log that was previously
 sent to the client by the server.
 This may be a path name on the server or some other kind of server-side
 identifier.
@@ -726,7 +726,7 @@ submitgroups	StringList	submit user's supplementary group names
 .PP
 submituid	int64	submit user's user-ID
 .PP
-ttyname	string	the terminal the command was submitted from
+ttyname	string	terminal the command was submitted from
 .TE
 .PP
 The server must accept other variables not listed above but may
@@ -815,7 +815,7 @@ message RejectMessage {
 /* Might revisit runtime and use end_time instead */
 message ExitMessage {
   TimeSpec run_time = 1;	/* total elapsed run time */
-  int32 exit_value = 2;		/* 0-255 */
+  int32 exit_value = 2;		/* 0\(en255 */
   bool dumped_core = 3;		/* true if command dumped core */
   string signal = 4;		/* signal name if killed by signal */
   string error = 5;		/* if killed due to other error */
@@ -876,7 +876,7 @@ sudo(8),
 sudo_logsrvd(8)
 .PP
 \fIProtocol Buffers\fR,
-https://developers.google.com/protocol-buffers/.
+https://protobuf.dev/.
 .SH "AUTHORS"
 Many people have worked on
 \fBsudo\fR
@@ -902,7 +902,7 @@ sudo-workers mailing list,
 https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
 or <sudo@sudo.ws> (private).
 .PP
-Please not report security vulnerabilities through public GitHub
+Please do not report security vulnerabilities through public GitHub
 issues, Bugzilla or mailing lists.
 Instead, report them via email to <Todd.Miller@sudo.ws>.
 You may encrypt your message with PGP if you would like, using

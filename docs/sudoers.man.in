@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2024
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2025
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -22,10 +22,11 @@
 .\" Materiel Command, USAF, under agreement number F39502-99-1-0512.
 .\"
 .nr SL @SEMAN@
+.nr AA @AAMAN@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "November 11, 2024" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "February 22, 2025" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -672,16 +673,16 @@ Resource limits may also be set in the
 \fIsudoers\fR
 file itself, in which case they override those set by the system.
 See the
-\fIrlimit_as,\fR
-\fIrlimit_core,\fR
-\fIrlimit_cpu,\fR
-\fIrlimit_data,\fR
-\fIrlimit_fsize,\fR
-\fIrlimit_locks,\fR
-\fIrlimit_memlock,\fR
-\fIrlimit_nofile,\fR
-\fIrlimit_nproc,\fR
-\fIrlimit_rss,\fR
+\fIrlimit_as\fR,
+\fIrlimit_core\fR,
+\fIrlimit_cpu\fR,
+\fIrlimit_data\fR,
+\fIrlimit_fsize\fR,
+\fIrlimit_locks\fR,
+\fIrlimit_memlock\fR,
+\fIrlimit_nofile\fR,
+\fIrlimit_nproc\fR,
+\fIrlimit_rss\fR,
 \fIrlimit_stack\fR
 options described below.
 Resource limits in
@@ -805,7 +806,7 @@ Cmnd_Alias ::= NAME
 
 Cmnd_Alias_Spec ::= Cmnd_Alias '=' Cmnd_List
 
-NAME ::= [A-Z]([A-Z][0-9]_)*
+NAME ::= [A\(enZ]([A\(enZ][0\(en9]_)*
 .RE
 .fi
 .PP
@@ -933,7 +934,7 @@ Group in the same domain: "%:Group Name"
 Group in any domain: "%:Group Name@FULLY.QUALIFIED.DOMAIN"
 .TP 3n
 \fB\(bu\fR
-Group SID: "%:S-1-2-34-5678901234-5678901234-5678901234-567"
+Group SID: "%:S\-1\-2\-34\-5678901234\-5678901234\-5678901234\-567"
 .PP
 See
 \fIGROUP PROVIDER PLUGINS\fR
@@ -1038,8 +1039,8 @@ only the case for non-networked systems.
 .nf
 .sp
 .RS 0n
-digest ::= [A-Fa-f0-9]+ |
-           [A-Za-z0-9\e+/=]+
+digest ::= [A\(enFa\(enf0\(en9]+ |
+           [A\(enZa\(enz0\(en9\e+/=]+
 
 Digest_Spec ::= "sha224" ':' digest |
                 "sha256" ':' digest |
@@ -1225,7 +1226,7 @@ For example, using openssl:
 .nf
 .sp
 .RS 0n
-$ openssl dgst -sha224 /bin/ls
+$ openssl dgst \-sha224 /bin/ls
 SHA224(/bin/ls)= 118187da8364d490b4a7debbf483004e8f3e053ec954309de2c41a25
 .RE
 .fi
@@ -1234,7 +1235,7 @@ It is also possible to use openssl to generate base64 output:
 .nf
 .sp
 .RS 0n
-$ openssl dgst -binary -sha224 /bin/ls | openssl base64
+$ openssl dgst \-binary \-sha224 /bin/ls | openssl base64
 EYGH2oNk1JC0p9679IMATo8+BT7JVDCd4sQaJQ==
 .RE
 .fi
@@ -1357,14 +1358,16 @@ It is not an error to use the
 operator to remove an element
 that does not exist in a list.
 .PP
-Defaults entries are parsed in the following order: global, host,
-user, and runas Defaults first, then command defaults.
-If there are multiple Defaults settings of the same type, the last
-matching setting is used.
-The following Defaults settings are parsed before all others since
-they may affect subsequent entries:
+In general Defaults settings are applied in order, later entries
+will override earlier ones.
+However, command-specific Defaults settings are applied later, once
+the command's path is known.
+In addition, the following Defaults settings must be applied before
+all others since they may affect subsequent entries:
 \fIfqdn\fR,
 \fIgroup_plugin\fR,
+\fIignore_unknown_defaults\fR,
+\fImatch_group_by_gid\fR,
 \fIrunas_default\fR,
 \fIsudoers_locale\fR.
 .PP
@@ -1385,20 +1388,28 @@ Cmnd_Spec ::= Runas_Spec? Option_Spec* (Tag_Spec ':')* Cmnd
 Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 
 .ie \n(SL \{\
-.ie \n(PS Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec)
-.el Option_Spec ::= (SELinux_Spec | Date_Spec | Timeout_Spec)
+.ie \n(PS Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
+.el Option_Spec ::= (SELinux_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
 .\}
 .el \{\
-.ie \n(PS Option_Spec ::= (Solaris_Priv_Spec | Date_Spec | Timeout_Spec)
-.el Option_Spec ::= (Date_Spec | Timeout_Spec)
+.ie \n(AA \{\
+.ie \n(PS Option_Spec ::= (AppArmor_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
+.el Option_Spec ::= (AppArmor_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
+.\}
+.el \{\
+.ie \n(PS Option_Spec ::= (Solaris_Priv_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
+.el Option_Spec ::= (Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
+.\}
 .\}
 
 .if \n(SL \{\
 SELinux_Spec ::= ('ROLE=role' | 'TYPE=type')
 
 .\}
+.if \n(AA \{\
 AppArmor_Spec ::= 'APPARMOR_PROFILE=profile'
 
+.\}
 .if \n(PS \{\
 Solaris_Priv_Spec ::= ('PRIVS=privset' | 'LIMITPRIVS=privset')
 
@@ -1507,7 +1518,7 @@ For example:
 .nf
 .sp
 .RS 0n
-$ sudo -u operator /bin/ls
+$ sudo \-u operator /bin/ls
 .RE
 .fi
 .PP
@@ -1562,9 +1573,9 @@ The following would all be permitted by the sudoers entry above:
 .nf
 .sp
 .RS 0n
-$ sudo -u operator /bin/ls
-$ sudo -u operator -g operator /bin/ls
-$ sudo -g operator /bin/ls
+$ sudo \-u operator /bin/ls
+$ sudo \-u operator \-g operator /bin/ls
+$ sudo \-g operator /bin/ls
 .RE
 .fi
 .PP
@@ -1586,7 +1597,7 @@ For example:
 .nf
 .sp
 .RS 0n
-$ sudo -g dialer /usr/bin/cu
+$ sudo \-g dialer /usr/bin/cu
 .RE
 .fi
 .PP
@@ -1620,7 +1631,9 @@ Options may consist of
 .if \n(SL \{\
 SELinux roles and/or types,
 .\}
+.if \n(AA \{\
 AppArmor profiles,
+.\}
 .if \n(PS \{\
 Solaris privileges sets,
 .\}
@@ -1651,6 +1664,7 @@ A role or type specified on the command line,
 however, will supersede the values in
 \fIsudoers\fR.
 .\}
+.if \n(AA \{\
 .SS "AppArmor_Spec"
 On systems supporting AppArmor,
 \fIsudoers\fR
@@ -1709,6 +1723,7 @@ and user
 to run
 \fI/bin/ls\fR
 without any confinement at all.
+.\}
 .if \n(PS \{\
 .SS "Solaris_Priv_Spec"
 On Solaris systems,
@@ -1727,7 +1742,7 @@ For example:
 .nf
 .sp
 .RS 0n
-$ ppriv -l
+$ ppriv \-l
 .RE
 .fi
 .PP
@@ -1774,7 +1789,7 @@ It is also possible to specify a timezone offset from UTC in hours
 and minutes instead of a
 \(oqZ\(cq.
 For example,
-\(oq-0500\(cq
+\(oq\-0500\(cq
 would correspond to Eastern Standard time in the US.
 As an extension, if no
 \(oqZ\(cq
@@ -2081,10 +2096,10 @@ By default, if the
 \fRNOPASSWD\fR
 tag is applied to any of a user's entries for the current host,
 the user will be able to run
-\(oqsudo -l\(cq
+\(oqsudo \-l\(cq
 without a password.
 Additionally, a user may only run
-\(oqsudo -v\(cq
+\(oqsudo \-v\(cq
 without a password if all of the user's entries for the current
 host have the
 \fRNOPASSWD\fR
@@ -2336,7 +2351,7 @@ This kind of rule is impossible to express safely using wildcards.
 .nf
 .sp
 .RS 4n
-john	ALL = /usr/bin/passwd ^[a-zA-Z0-9_]+$,\e
+john	ALL = /usr/bin/passwd ^[a\-zA\-Z0\-9_]+$,\e
               !/usr/bin/passwd root
 .RE
 .fi
@@ -4253,7 +4268,7 @@ will set the umask to be the union of the user's umask and what is specified in
 This flag is
 \fI@umask_override@\fR
 by default.
-.if \n(BA \{\
+.if \n(LC \{\
 .TP 18n
 use_loginclass
 If set,
@@ -4263,7 +4278,7 @@ if one exists.
 Only available if
 \fBsudo\fR
 is configured with the
-\fR--with-logincap\fR
+\fR\-\-with-logincap\fR
 option.
 This flag is
 \fIoff\fR
@@ -4371,7 +4386,7 @@ closefrom
 Before it executes a command,
 \fBsudo\fR
 will close all open file descriptors other than standard input,
-standard output, and standard error (file descriptors 0-2).
+standard output, and standard error (file descriptors 0\(en2).
 The
 \fIclosefrom\fR
 option can be used to specify a different file descriptor at which
@@ -4482,9 +4497,9 @@ Set this to 0 to always prompt for a password.
 If set to a value less than 0 the user's time stamp will not expire
 until the system is rebooted.
 This can be used to allow users to create or delete their own time stamps via
-\(oqsudo -v\(cq
+\(oqsudo \-v\(cq
 and
-\(oqsudo -k\(cq
+\(oqsudo \-k\(cq
 respectively.
 .TP 18n
 umask
@@ -4517,6 +4532,7 @@ The umask setting in PAM is not used for
 which does not create a new PAM session.
 .PP
 \fBStrings\fR:
+.if \n(AA \{\
 .TP 18n
 apparmor_profile
 The default AppArmor profile to transition into when executing the
@@ -4530,6 +4546,7 @@ entries by specifying the
 option.
 This option is only available when sudo is built with AppArmor
 support.
+.\}
 .TP 18n
 cmddenial_message
 .br
@@ -5167,7 +5184,7 @@ groups runs
 Only available if
 \fBsudo\fR
 is configured with the
-\fR--enable-admin-flag\fR
+\fR\-\-enable-admin-flag\fR
 option.
 The default value is
 \fI~/.sudo_as_admin_successful\fR.
@@ -5864,7 +5881,7 @@ single value without double-quotes.
 The list can be replaced, added to, deleted from, or disabled by using the
 \(oq=\(cq,
 \(oq+=\(cq,
-\(oq-=\(cq,
+\(oq\-=\(cq,
 and
 \(oq\&!\(cq
 operators respectively.
@@ -5891,7 +5908,7 @@ single value without double-quotes.
 The list can be replaced, added to, deleted from, or disabled by using the
 \(oq=\(cq,
 \(oq+=\(cq,
-\(oq-=\(cq,
+\(oq\-=\(cq,
 and
 \(oq\&!\(cq
 operators respectively.
@@ -6174,34 +6191,34 @@ locale.
 If the user is not allowed to run the command, the reason for the denial
 will follow the user name.
 Possible reasons include:
-.TP 3n
+.TP 6n
 user NOT in sudoers
 The user is not listed in the
 \fIsudoers\fR
 file.
-.TP 3n
+.TP 6n
 user NOT authorized on host
 The user is listed in the
 \fIsudoers\fR
 file but is not allowed to run commands on the host.
-.TP 3n
+.TP 6n
 command not allowed
 The user is listed in the
 \fIsudoers\fR
 file for the host but they are not allowed to run the specified command.
-.TP 3n
+.TP 6n
 3 incorrect password attempts
 The user failed to enter their password after 3 tries.
 The actual number of tries will vary based on the number of
 failed attempts and the value of the
 \fIpasswd_tries\fR
 option.
-.TP 3n
+.TP 6n
 a password is required
 The
 \fB\-n\fR
 option was specified but a password was required.
-.TP 3n
+.TP 6n
 sorry, you are not allowed to set the following environment variables
 The user specified environment variables on the command line that
 were not allowed by
@@ -6212,13 +6229,13 @@ If an error occurs,
 will log a message and, in most cases, send a message to the
 administrator via email.
 Possible errors include:
-.TP 3n
+.TP 6n
 parse error in @sysconfdir@/sudoers near line N
 \fBsudoers\fR
 encountered an error when parsing the specified file.
 In some cases, the actual error may be one line above or below the
 line number listed, depending on the type of error.
-.TP 3n
+.TP 6n
 problem with defaults entries
 The
 \fIsudoers\fR
@@ -6229,12 +6246,12 @@ from running, but the
 \fIsudoers\fR
 file should be checked using
 \fBvisudo\fR.
-.TP 3n
+.TP 6n
 timestamp owner (username): \&No such user
 The time stamp directory owner, as specified by the
 \fItimestampowner\fR
 setting, could not be found in the password database.
-.TP 3n
+.TP 6n
 unable to open/read @sysconfdir@/sudoers
 The
 \fIsudoers\fR
@@ -6262,17 +6279,17 @@ file) to the end of the
 line in the
 sudo.conf(@mansectform@)
 file.
-.TP 3n
+.TP 6n
 unable to open @sysconfdir@/sudoers
 The
 \fI@sysconfdir@/sudoers\fR
 file is missing.
-.TP 3n
+.TP 6n
 @sysconfdir@/sudoers is not a regular file
 The
 \fI@sysconfdir@/sudoers\fR
 file exists but is not a regular file or symbolic link.
-.TP 3n
+.TP 6n
 @sysconfdir@/sudoers is owned by uid N, should be 0
 The
 \fIsudoers\fR
@@ -6291,7 +6308,7 @@ file) to the
 line in the
 sudo.conf(@mansectform@)
 file.
-.TP 3n
+.TP 6n
 @sysconfdir@/sudoers is world writable
 The permissions on the
 \fIsudoers\fR
@@ -6308,7 +6325,7 @@ option to the
 line in the
 sudo.conf(@mansectform@)
 file.
-.TP 3n
+.TP 6n
 @sysconfdir@/sudoers is owned by gid N, should be 1
 The
 \fIsudoers\fR
@@ -6327,7 +6344,7 @@ file) to the
 line in the
 sudo.conf(@mansectform@)
 file.
-.TP 3n
+.TP 6n
 unable to open @rundir@/ts/user-ID
 \fBsudoers\fR
 was unable to read or create the user's time stamp file.
@@ -6341,11 +6358,11 @@ is not searchable by group or other.
 The default mode for
 \fI@rundir@\fR
 is 0711.
-.TP 3n
+.TP 6n
 unable to write to @rundir@/ts/user-ID
 \fBsudoers\fR
 was unable to write to the user's time stamp file.
-.TP 3n
+.TP 6n
 @rundir@/ts is owned by uid X, should be Y
 The time stamp directory is owned by a user other than
 \fItimestampowner\fR.
@@ -6354,7 +6371,7 @@ This can occur when the value of
 has been changed.
 \fBsudoers\fR
 will ignore the time stamp directory until the owner is corrected.
-.TP 3n
+.TP 6n
 @rundir@/ts is group writable
 The time stamp directory is group-writable; it should be writable only by
 \fItimestampowner\fR.
@@ -6540,7 +6557,7 @@ statement is never executed.
 .nf
 .sp
 .RS 4n
-$ sh -s < test.sh
+$ sh \-s < test.sh
 testing
 .RE
 .fi
@@ -6613,7 +6630,7 @@ flag or the
 command tag will enable
 \fIlog_stdout\fR
 and
-\fIlog_stderr.\fR
+\fIlog_stderr\fR.
 Careful ordering of rules may be necessary to achieve the results
 that you expect.
 .SS "I/O log format"
@@ -6772,7 +6789,7 @@ No post-processing is performed.
 For manual viewing, you may wish to convert carriage return characters
 in the log to line feeds.
 For example:
-\(oqgunzip -c ttyin | tr \&"\er\&" \&"\en\&"\(cq
+\(oqgunzip \-c ttyin | tr \&"\er\&" \&"\en\&"\(cq
 .TP 10n
 \fIstdin\fR
 The standard input when no terminal is present, or input redirected from
@@ -7106,7 +7123,7 @@ to operator.
 .nf
 .sp
 .RS 0n
-pete		HPPA = /usr/bin/passwd [A-Za-z]*, !/usr/bin/passwd *root*
+pete		HPPA = /usr/bin/passwd [A\-Za\-z]*, !/usr/bin/passwd *root*
 
 %opers		ALL = (: ADMINGRP) /usr/sbin/
 .RE
@@ -7151,7 +7168,7 @@ As a result, this rule will also allow:
 .nf
 .sp
 .RS 4n
-passwd username --expire
+passwd username \-\-expire
 .RE
 .fi
 .PP
@@ -7223,7 +7240,7 @@ without giving a password.
 .nf
 .sp
 .RS 0n
-john		ALPHA = /usr/bin/su [!-]*, !/usr/bin/su *root*
+john		ALPHA = /usr/bin/su [!\-]*, !/usr/bin/su *root*
 .RE
 .fi
 .PP
@@ -7316,7 +7333,7 @@ to www.
 .sp
 .RS 0n
 ALL		CDROM = NOPASSWD: /sbin/umount /CDROM,\e
-		/sbin/mount -o nosuid\e,nodev /dev/cd0a /CDROM
+		/sbin/mount \-o nosuid\e,nodev /dev/cd0a /CDROM
 .RE
 .fi
 .PP
@@ -7380,8 +7397,8 @@ file entry:
 .nf
 .sp
 .RS 0n
-john	ALL = /usr/bin/passwd [a-zA-Z0-9]*, /usr/bin/chsh [a-zA-Z0-9]*,\e
-              /usr/bin/chfn [a-zA-Z0-9]*, !/usr/bin/* root
+john	ALL = /usr/bin/passwd [a\-zA\-Z0\-9]*, /usr/bin/chsh [a\-zA\-Z0\-9]*,\e
+              /usr/bin/chfn [a\-zA\-Z0\-9]*, !/usr/bin/* root
 .RE
 .fi
 .PP
@@ -8121,7 +8138,7 @@ sudo-workers mailing list,
 https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
 or <sudo@sudo.ws> (private).
 .PP
-Please not report security vulnerabilities through public GitHub
+Please do not report security vulnerabilities through public GitHub
 issues, Bugzilla or mailing lists.
 Instead, report them via email to <Todd.Miller@sudo.ws>.
 You may encrypt your message with PGP if you would like, using
