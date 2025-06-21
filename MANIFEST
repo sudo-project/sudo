@@ -861,6 +861,8 @@ plugins/sudoers/regress/cvtsudoers/test4.out.ok
 plugins/sudoers/regress/cvtsudoers/test4.sh
 plugins/sudoers/regress/cvtsudoers/test40.out.ok
 plugins/sudoers/regress/cvtsudoers/test40.sh
+plugins/sudoers/regress/cvtsudoers/test41.out.ok
+plugins/sudoers/regress/cvtsudoers/test41.sh
 plugins/sudoers/regress/cvtsudoers/test5.out.ok
 plugins/sudoers/regress/cvtsudoers/test5.sh
 plugins/sudoers/regress/cvtsudoers/test6.out.ok
@@ -1032,6 +1034,12 @@ plugins/sudoers/regress/sudoers/test30.ldif2sudo.ok
 plugins/sudoers/regress/sudoers/test30.out.ok
 plugins/sudoers/regress/sudoers/test30.sudo.ok
 plugins/sudoers/regress/sudoers/test30.toke.ok
+plugins/sudoers/regress/sudoers/test31.in
+plugins/sudoers/regress/sudoers/test31.json.ok
+plugins/sudoers/regress/sudoers/test31.ldif.ok
+plugins/sudoers/regress/sudoers/test31.ldif2sudo.ok
+plugins/sudoers/regress/sudoers/test31.out.ok
+plugins/sudoers/regress/sudoers/test31.toke.ok
 plugins/sudoers/regress/sudoers/test4.in
 plugins/sudoers/regress/sudoers/test4.json.ok
 plugins/sudoers/regress/sudoers/test4.ldif.ok
