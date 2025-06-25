@@ -28,7 +28,7 @@
     N_("Where did you learn to type?"),
     N_("Are you on drugs?"),
     N_("My pet ferret can type better than you!"),
-    N_("You type like i drive."),
+    N_("You type like I drive."),
     N_("Do you think like you type?"),
     N_("Your mind just hasn't been the same since the electro-shock, has it?"),
 
