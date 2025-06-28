@@ -1,3 +1,15 @@
+What's new in Sudo 1.9.17p1
+
+ * Fixed CVE-2025-32462.  Sudo's -h (--host) option could be specified
+   when running a command or editing a file.  This could enable a
+   local privilege escalation attack if the sudoers file allows the
+   user to run commands on a different host.
+
+ * Fixed CVE-2025-32463.  An attacker can leverage sudo's -R
+   (--chroot) option to run arbitrary commands as root, even if
+   they are not listed in the sudoers file.  The chroot support has
+   been deprecated an will be removed entirely in a future release.
+
 What's new in Sudo 1.9.17
 
  * Sudo now uses the NODEV macro consistently. Bug #1074.
