@@ -499,7 +499,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
     if (sp->tpath == NULL) {
 	if (asprintf(&sp->tpath, "%s.tmp", sp->dpath) == -1)
 	    sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	tfd = open(sp->tpath, O_WRONLY|O_CREAT|O_TRUNC, S_IRWXU|S_IRUSR);
+	tfd = open(sp->tpath, O_WRONLY|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR);
 	if (tfd < 0)
 	    sudo_fatal("%s", sp->tpath);
 
