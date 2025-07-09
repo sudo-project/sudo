@@ -5581,7 +5581,7 @@ pp_rpm_detect_distro () {
          -e 's/^Red Hat Enterprise Linux.*release \([0-9][0-9\.]*\).*/rhel\1/p' \
          -e 's/^Rocky Linux.*release \([0-9][0-9\.]*\).*/rhel\1/p' \
          -e 's/^AlmaLinux.*release \([0-9][0-9\.]*\).*/rhel\1/p' \
-         -e 's/^CentOS.*release \([0-9][0-9\.]*\).*/centos\1/p' \
+         -e 's/^CentOS.*release \([0-9]\{1,\}\)\(\.[0-9]*\)\{0,1\}.*/centos\1\2/p' \
        /etc/redhat-release`
     elif test -f /etc/SuSE-release; then
        pp_rpm_distro=`awk '
