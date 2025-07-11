@@ -46,6 +46,7 @@ struct tempfile {
     char *ofile;
     off_t osize;
     struct timespec omtim;
+    int ofd;
 };
 
 static char edit_tmpdir[MAX(sizeof(_PATH_VARTMP), sizeof(_PATH_TMP))];
@@ -174,7 +175,7 @@ sudo_edit_create_tfiles(const struct command_details *command_details,
 	rc = -1;
 	switch_user(command_details->cred.euid, command_details->cred.egid,
 	    command_details->cred.ngroups, command_details->cred.groups);
-	ofd = sudo_edit_open(files[i], O_RDONLY,
+	ofd = sudo_edit_open(files[i], O_RDWR,
 	    S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, command_details->flags,
 	    user_cred, &command_details->cred);
 	if (ofd != -1 || errno == ENOENT) {
@@ -208,6 +209,7 @@ sudo_edit_create_tfiles(const struct command_details *command_details,
 		close(ofd);
 	    continue;
 	}
+	tf[j].ofd = ofd;
 	tf[j].ofile = files[i];
 	tf[j].osize = sb.st_size; // -V614
 	mtim_get(&sb, tf[j].omtim);
@@ -232,7 +234,6 @@ sudo_edit_create_tfiles(const struct command_details *command_details,
 		close(tfd);
 		debug_return_int(-1);
 	    }
-	    close(ofd);
 	}
 	/*
 	 * We always update the stashed mtime because the time
@@ -265,7 +266,7 @@ sudo_edit_copy_tfiles(const struct command_details *command_details,
     const struct sudo_cred *user_cred, struct tempfile *tf,
     int nfiles, struct timespec *times)
 {
-    int i, tfd, ofd, errors = 0;
+    int i, tfd, errors = 0;
     struct timespec ts;
     struct stat sb;
     mode_t oldmask;
@@ -303,21 +304,33 @@ sudo_edit_copy_tfiles(const struct command_details *command_details,
 		continue;
 	    }
 	}
-	switch_user(command_details->cred.euid, command_details->cred.egid,
-	    command_details->cred.ngroups, command_details->cred.groups);
-	oldmask = umask(command_details->umask);
-	ofd = sudo_edit_open(tf[i].ofile, O_WRONLY|O_CREAT,
-	    S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, command_details->flags,
-	    user_cred, &command_details->cred);
-	umask(oldmask);
-	switch_user(ROOT_UID, user_cred->egid, user_cred->ngroups, user_cred->groups);
-	if (ofd == -1) {
-	    sudo_warn(U_("unable to write to %s"), tf[i].ofile);
-	    goto bad;
+	if (tf[i].ofd != -1) {
+	    /* Existing file, rewind so it can be overwritten. */
+	    if (lseek(tf[i].ofd, 0, SEEK_SET) == -1) {
+		sudo_warn("lseek %s", tf[i].ofile);
+		goto bad;
+	    }
+	} else {
+	    /* New file, create it. */
+	    int ofd;
+
+	    switch_user(command_details->cred.euid, command_details->cred.egid,
+		command_details->cred.ngroups, command_details->cred.groups);
+	    oldmask = umask(command_details->umask);
+	    ofd = sudo_edit_open(tf[i].ofile, O_WRONLY|O_CREAT|O_EXCL,
+		S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH, command_details->flags,
+		user_cred, &command_details->cred);
+	    umask(oldmask);
+	    switch_user(ROOT_UID, user_cred->egid, user_cred->ngroups, user_cred->groups);
+	    if (ofd == -1) {
+		sudo_warn(U_("unable to write to %s"), tf[i].ofile);
+		goto bad;
+	    }
+	    tf[i].ofd = ofd;
 	}
 
 	/* Overwrite the old file with the new contents. */
-	if (sudo_copy_file(tf[i].tfile, tfd, sb.st_size, tf[i].ofile, ofd,
+	if (sudo_copy_file(tf[i].tfile, tfd, sb.st_size, tf[i].ofile, tf[i].ofd,
 		tf[i].osize) == 0) {
 	    /* success, remove temporary file. */
 	    unlink(tf[i].tfile);
@@ -327,8 +340,8 @@ bad:
 	    errors++;
 	}
 
-	if (ofd != -1)
-	    close(ofd);
+	if (tf[i].ofd != -1)
+	    close(tf[i].ofd);
 	close(tfd);
     }
     debug_return_int(errors);
