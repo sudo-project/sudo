@@ -398,7 +398,7 @@ ptrace_readv_string(pid_t pid, unsigned long addr, char *buf, size_t bufsize)
 	    if (cp != NULL)
 		debug_return_ssize_t((cp - buf0) + 1);	/* includes NUL */
 	    /* No NUL terminator, we should have a full page. */
-	    if (nread != page_size) {
+	    if ((size_t)nread != page_size) {
 		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		    "process_vm_readv(%d, [0x%lx, %zu], 1, [0x%lx, %zu], 1, 0)"
 		    " -> %zd",
