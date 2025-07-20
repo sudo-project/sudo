@@ -387,8 +387,7 @@ ptrace_readv_string(pid_t pid, unsigned long addr, char *buf, size_t bufsize)
 		(unsigned long)remote.iov_base, remote.iov_len);
 	    debug_return_ssize_t(-1);
 	case 0:
-	    sudo_debug_printf(
-		SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"process_vm_readv(%d, [0x%lx, %zu], 1, [0x%lx, %zu], 1, 0): %s",
 		(int)pid, (unsigned long)local.iov_base, local.iov_len,
 		(unsigned long)remote.iov_base, remote.iov_len, "premature EOF");
@@ -398,9 +397,17 @@ ptrace_readv_string(pid_t pid, unsigned long addr, char *buf, size_t bufsize)
 	    cp = memchr(buf, '\0', (size_t)nread);
 	    if (cp != NULL)
 		debug_return_ssize_t((cp - buf0) + 1);	/* includes NUL */
+	    /* No NUL terminator, we should have a full page. */
+	    if (nread != page_size) {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		    "process_vm_readv(%d, [0x%lx, %zu], 1, [0x%lx, %zu], 1, 0)"
+		    " -> %zd",
+		    (int)pid, (unsigned long)local.iov_base, local.iov_len,
+		    (unsigned long)remote.iov_base, remote.iov_len, nread);
+	    }
 	    buf += nread;
 	    bufsize -= (size_t)nread;
-	    addr += sizeof(unsigned long);
+	    addr += (size_t)nread;
 	    break;
 	}
     }
