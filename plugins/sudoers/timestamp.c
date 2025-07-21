@@ -358,11 +358,16 @@ ts_write(const struct sudoers_context *ctx, int fd, const char *fname,
 
 	/* Truncate on partial write to be safe (assumes end of file). */
 	if (nwritten > 0) {
-	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"short write, truncating partial time stamp record");
 	    if (ftruncate(fd, old_eof) != 0) {
 		sudo_warn(U_("unable to truncate time stamp file to %lld bytes"),
 		    (long long)old_eof);
+	    }
+	    if (lseek(fd, old_eof, SEEK_SET) == -1) {
+		sudo_debug_printf(
+		    SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		    "unable to seek to %lld", (long long)old_eof);
 	    }
 	}
 	debug_return_ssize_t(-1);
