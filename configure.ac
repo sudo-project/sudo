@@ -1742,7 +1742,7 @@ AC_CACHE_CHECK([which macro set to use for manual pages],
     [sudo_cv_var_mantype],
     [
 	case "$ac_cv_path_NROFFPROG" in
-	*mandoc|nroff)
+	*mandoc|*nroff)
 	    # Prefer mdoc format for mandoc (or when no formatter is present).
 	    sudo_cv_var_mantype="mdoc"
 	    ;;
