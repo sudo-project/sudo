@@ -17,8 +17,8 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 # Build a binary package using polypkg
-# Usage: mkpkg [--build-only] [--configure-only] [--debug] [--flavor flavor]
-#              [--platform platform] [--osversion ver]
+# Usage: mkpkg [--arch arch] [--build-only] [--configure-only] [--debug]
+#              [--flavor flavor] [--osversion ver] [--platform platform]
 #
 
 # Make sure IFS is set to space, tab, newline in that order.
@@ -29,7 +29,7 @@ nl='
 IFS=" 	$nl"
 
 # Parse arguments
-usage="usage: mkpkg [--build-only] [--configure-only] [--debug] [--flavor flavor] [--platform platform] [--osversion ver]"
+usage="usage: mkpkg [--arch arch] [--build-only] [--configure-only] [--debug] [--flavor flavor] [--osversion ver] [--platform platform]"
 debug=0
 flavor=vanilla
 crossbuild=false
@@ -37,6 +37,18 @@ build_packages=true;
 build_sudo=true;
 while test $# -gt 0; do
     case "$1" in
+	--arch=?*)
+	    arch=`echo "$1" | sed -n 's/^--arch=\(.*\)/\1/p'`
+	    ;;
+	--arch)
+	    arch=`echo "$1" | sed -n 's/^--arch=\(.*\)/\1/p'`
+	    if [ $# -lt 2 ]; then
+		echo "$usage" 1>&2
+		exit 1
+	    fi
+	    arch="$2"
+	    shift
+	    ;;
 	--debug)
 	    set -x
 	    debug=1
@@ -208,6 +220,10 @@ case "$osversion" in
 		;;
 	esac
 
+	if [ -n "$arch" ]; then
+	    # Override the default rpm arch for, e.g. x86_64_v2
+	    PPVARS="${PPVARS}${PPVARS+$space}pp_rpm_arch_override=$arch"
+	fi
 	if [ X"$with_selinux" = X"true" ]; then
 	    configure_opts="${configure_opts}${configure_opts+$tab}--with-selinux"
 	fi

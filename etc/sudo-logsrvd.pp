@@ -128,6 +128,11 @@ This makes it possible to have all sudo I/O logs on a central server."
 %endif
 
 %if [rpm]
+	# Used to set rpm_arch to x86_64_v2 on Alma Linux
+	if test -n "$pp_rpm_arch_override"; then
+		pp_rpm_arch="$pp_rpm_arch_override"
+	fi
+
 	# Add distro info to release
 	osrelease=`echo "$pp_rpm_distro" | sed -e 's/^[^0-9]*\([0-9]\{1,3\}\).*/\1/'`
 	case "$pp_rpm_distro" in

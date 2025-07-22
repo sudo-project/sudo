@@ -149,6 +149,11 @@ still allow people to get their work done."
 %endif
 
 %if [rpm]
+	# Used to set rpm_arch to x86_64_v2 on Alma Linux
+	if test -n "$pp_rpm_arch_override"; then
+		pp_rpm_arch="$pp_rpm_arch_override"
+	fi
+
 	# Add distro info to release
 	osrelease=`echo "$pp_rpm_distro" | sed -e 's/^[^0-9]*\([0-9]\{1,3\}\).*/\1/'`
 	case "$pp_rpm_distro" in
