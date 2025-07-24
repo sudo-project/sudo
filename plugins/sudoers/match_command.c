@@ -272,7 +272,8 @@ command_matches_dir(struct sudoers_context *ctx, const char *sudoers_dir,
 	len = snprintf(sdbuf, sizeof(sdbuf), "%s%s", runchroot, sudoers_dir);
 	if (len >= ssizeof(sdbuf)) {
 	    errno = ENAMETOOLONG;
-	    debug_return_bool(false);
+	    sudo_warn("%s%s", runchroot, sudoers_dir);
+	    goto done;
 	}
 	sudoers_dir = sdbuf;
 	chrootlen = strlen(runchroot);
@@ -536,7 +537,8 @@ command_matches_glob(struct sudoers_context *ctx, const char *sudoers_cmnd,
 	    snprintf(pathbuf, sizeof(pathbuf), "%s%s", runchroot, sudoers_cmnd);
 	if (len >= ssizeof(pathbuf)) {
 	    errno = ENAMETOOLONG;
-	    debug_return_bool(false);
+	    sudo_warn("%s%s", runchroot, sudoers_cmnd);
+	    debug_return_int(DENY);
 	}
 	sudoers_cmnd = pathbuf;
 	chrootlen = strlen(runchroot);

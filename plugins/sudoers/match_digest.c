@@ -73,7 +73,8 @@ digest_matches(int fd, const char *path, const char *runchroot,
 	    snprintf(pathbuf, sizeof(pathbuf), "%s%s", runchroot, path);
 	if (len >= ssizeof(pathbuf)) {
 	    errno = ENAMETOOLONG;
-	    debug_return_bool(false);
+	    sudo_warn("%s%s", runchroot, path);
+	    goto done;
 	}
 	path = pathbuf;
     }
