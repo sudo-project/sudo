@@ -1933,7 +1933,7 @@ client_msg_cb(int fd, int what, void *v)
     {
 	const ssize_t n = write(fd, buf->data + buf->off, buf->len - buf->off);
 	if (n < 0) {
-	    sudo_warn("send");
+	    sudo_warn("write");
 	    goto bad;
 	}
 	nwritten = (size_t)n;
