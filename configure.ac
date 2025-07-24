@@ -1742,7 +1742,7 @@ AC_CACHE_CHECK([which macro set to use for manual pages],
     [sudo_cv_var_mantype],
     [
 	case "$ac_cv_path_NROFFPROG" in
-	*mandoc|*nroff)
+	*mandoc|nroff)
 	    # Prefer mdoc format for mandoc (or when no formatter is present).
 	    sudo_cv_var_mantype="mdoc"
 	    ;;
@@ -1753,7 +1753,7 @@ AC_CACHE_CHECK([which macro set to use for manual pages],
 	    echo ".Nd sudo" >> conftest
 	    echo ".Sh DESCRIPTION" >> conftest
 	    echo "sudo" >> conftest
-	    if $ac_cv_path_NROFF -mdoc conftest >/dev/null 2>&1; then
+	    if $ac_cv_path_NROFFPROG -mdoc conftest >/dev/null 2>&1; then
 		sudo_cv_var_mantype="mdoc"
 	    fi
 	    rm -f conftest

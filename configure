@@ -17775,7 +17775,7 @@ then :
 else case e in #(
   e)
 	case "$ac_cv_path_NROFFPROG" in
-	*mandoc|*nroff)
+	*mandoc|nroff)
 	    # Prefer mdoc format for mandoc (or when no formatter is present).
 	    sudo_cv_var_mantype="mdoc"
 	    ;;
@@ -17786,7 +17786,7 @@ else case e in #(
 	    echo ".Nd sudo" >> conftest
 	    echo ".Sh DESCRIPTION" >> conftest
 	    echo "sudo" >> conftest
-	    if $ac_cv_path_NROFF -mdoc conftest >/dev/null 2>&1; then
+	    if $ac_cv_path_NROFFPROG -mdoc conftest >/dev/null 2>&1; then
 		sudo_cv_var_mantype="mdoc"
 	    fi
 	    rm -f conftest
