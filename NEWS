@@ -1,3 +1,22 @@
+What's new in Sudo 1.9.17p2
+
+ * Fixed a bug introduced in sudo 1.9.16 that could result in sudo
+   sending SIGHUP to all processes on the system in certain rare
+   cases.  The bug could manifest if sudo is running a command in
+   a pseudo-terminal, sudo terminates the command due to an internal
+   error, and the user's terminal is revoked.  GitHub issue #458.
+
+ * Fixed a bug introduced in sudo 1.9.12 that caused sudo to abort
+   when the "intercept" and "intercept_verify" options are enabled
+   in sudoers and either the command line arguments or the environment
+   contains a string larger than the page size (usually 4096).  This
+   only Linux affects systems that support the ptrace_readv_string()
+   function.  GitHub issue #453.
+
+ * Fixed a bug in sudo's configure script introduced in sudo 1.9.17
+   that prevented mdoc-format man pages from being used on systems
+   without the mandoc utility.  Bug #1077.
+
 What's new in Sudo 1.9.17p1
 
  * Fixed CVE-2025-32462.  Sudo's -h (--host) option could be specified
