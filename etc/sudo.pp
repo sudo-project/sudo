@@ -149,15 +149,20 @@ still allow people to get their work done."
 %endif
 
 %if [rpm]
+	# Used to set rpm_arch to x86_64_v2 on Alma Linux
+	if test -n "$pp_rpm_arch_override"; then
+		pp_rpm_arch="$pp_rpm_arch_override"
+	fi
+
 	# Add distro info to release
-	osrelease=`echo "$pp_rpm_distro" | sed -e 's/^[^0-9]*\([0-9]\{1,2\}\).*/\1/'`
+	osrelease=`echo "$pp_rpm_distro" | sed -e 's/^[^0-9]*\([0-9]\{1,3\}\).*/\1/'`
 	case "$pp_rpm_distro" in
 	centos*|rhel*|f[0-9]*)
 		# CentOS Stream has a single-digit version
 		if test $osrelease -lt 10; then
 		    osrelease="${osrelease}0"
 		fi
-		pp_rpm_release="$pp_rpm_release.el${osrelease%%[0-9]}"
+		pp_rpm_release="$pp_rpm_release.el${osrelease%[0-9]}"
 		;;
 	sles*)
 		pp_rpm_release="$pp_rpm_release.sles$osrelease"

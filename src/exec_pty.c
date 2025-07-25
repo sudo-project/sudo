@@ -358,9 +358,11 @@ revoke_pty(struct exec_closure *ec)
 	    pgrp = tcpgrp;
 	close(io_fds[SFD_LEADER]);
     }
-    sudo_debug_printf(SUDO_DEBUG_NOTICE, "%s: killpg(%d, SIGHUP)",
-	__func__, (int)pgrp);
-    kill(pgrp, SIGHUP);
+    if (pgrp != -1) {
+	sudo_debug_printf(SUDO_DEBUG_NOTICE, "%s: killpg(%d, SIGHUP)",
+	    __func__, (int)pgrp);
+	killpg(pgrp, SIGHUP);
+    }
 }
 
 /*

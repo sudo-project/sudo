@@ -18,7 +18,7 @@ dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 dnl
 AC_PREREQ([2.69])
-AC_INIT([sudo], [1.9.17p1], [https://bugzilla.sudo.ws/], [sudo])
+AC_INIT([sudo], [1.9.17p2], [https://bugzilla.sudo.ws/], [sudo])
 AC_CONFIG_HEADERS([config.h pathnames.h])
 AC_CONFIG_SRCDIR([src/sudo.c])
 AC_CONFIG_AUX_DIR([scripts])
@@ -1753,7 +1753,7 @@ AC_CACHE_CHECK([which macro set to use for manual pages],
 	    echo ".Nd sudo" >> conftest
 	    echo ".Sh DESCRIPTION" >> conftest
 	    echo "sudo" >> conftest
-	    if $ac_cv_path_NROFF -mdoc conftest >/dev/null 2>&1; then
+	    if $ac_cv_path_NROFFPROG -mdoc conftest >/dev/null 2>&1; then
 		sudo_cv_var_mantype="mdoc"
 	    fi
 	    rm -f conftest
