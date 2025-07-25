@@ -223,6 +223,56 @@ sudo_auth_cleanup(const struct sudoers_context *ctx, struct passwd *pw,
     debug_return_int(AUTH_SUCCESS);
 }
 
+
+static void
+convert_str(char *str) {
+    char *src = str;
+    char *dst = str;
+
+    while (*src) {
+        if (src[0] == '\\') 
+	{
+	   switch (src[1])
+	   {
+		case 'a':
+		   *dst = '\a';
+		   src += 2;
+		   break;
+		case 'b':
+		   *dst = '\b';
+		   src += 2;
+		   break;
+		case 'v':
+		   *dst = '\v';
+		   src += 2;
+		   break;
+		case 'f':
+		   *dst = '\f';
+		   src += 2;
+		   break;
+		case 'n':
+		   *dst = '\n';
+		   src += 2;
+		   break;	
+		case 'e':
+		   *dst = '\033';
+		   src += 2;
+		   break;
+		default:
+		   src++;
+		   break;
+	   }
+        } 
+	else 
+	{
+            *dst = *src;
+            src++;
+        }
+        dst++;
+    }
+    *dst = '\0';
+}
+
 static void
 pass_warn(void)
 {
@@ -233,8 +283,10 @@ pass_warn(void)
     if (def_insults)
 	warning = _(INSULT);
 #endif
-    sudo_printf(SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY, "%s\n", warning);
-
+    char *second_warning = strdup(warning);
+    convert_str(second_warning);
+    sudo_printf(SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY, "%s\n", second_warning);
+    free(second_warning);
     debug_return;
 }
 
