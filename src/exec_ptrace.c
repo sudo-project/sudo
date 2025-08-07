@@ -65,10 +65,15 @@
 #  define COMPAT_FLAG 0x00
 # endif
 
+/* SECCOMP_RET_KILL_PROCESS was added in Linux 4.14. */
+# ifndef SECCOMP_RET_KILL_PROCESS
+#  define SECCOMP_RET_KILL_PROCESS SECCOMP_RET_KILL
+# endif
+
 static int seccomp_trap_supported = -1;
-#ifdef HAVE_PROCESS_VM_READV
+# ifdef HAVE_PROCESS_VM_READV
 static size_t page_size;
-#endif
+# endif
 static size_t arg_max;
 
 /* Register getters and setters. */
@@ -1186,8 +1191,9 @@ set_exec_filter(void)
 	/* Trace execve(2)/execveat(2) syscalls (w/ compat flag) */
 	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE | COMPAT_FLAG),
 # endif /* SECCOMP_AUDIT_ARCH_COMPAT */
-	/* Jump to the end unless the architecture matches. */
-	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SECCOMP_AUDIT_ARCH, 0, 6),
+	/* Kill the process unless the (native) architecture matches. */
+	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SECCOMP_AUDIT_ARCH, 1, 0),
+	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_KILL_PROCESS)
 	/* Load syscall number into the accumulator. */
 	BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, nr)),
 	/* Jump to trace for execve(2)/execveat(2), else allow. */
