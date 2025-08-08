@@ -408,8 +408,11 @@ direct_exec_allowed(const struct command_details *details)
     debug_decl(direct_exec_allowed, SUDO_DEBUG_EXEC);
 
     /* Assumes sudo_needs_pty() was already checked. */
-    if (ISSET(details->flags, CD_RBAC_ENABLED|CD_SET_TIMEOUT|CD_SUDOEDIT) ||
-	    policy_plugin.u.policy->close != NULL)
+    if (policy_plugin.u.policy->close != NULL)
+	debug_return_bool(false);
+    if (ISSET(details->flags, CD_RBAC_ENABLED|CD_SET_TIMEOUT|CD_SUDOEDIT))
+	debug_return_bool(false);
+    if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS))
 	debug_return_bool(false);
 
     TAILQ_FOREACH(plugin, &audit_plugins, entries) {
