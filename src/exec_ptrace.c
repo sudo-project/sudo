@@ -1193,7 +1193,7 @@ set_exec_filter(void)
 # endif /* SECCOMP_AUDIT_ARCH_COMPAT */
 	/* Kill the process unless the (native) architecture matches. */
 	BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, SECCOMP_AUDIT_ARCH, 1, 0),
-	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_KILL_PROCESS)
+	BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_KILL_PROCESS),
 	/* Load syscall number into the accumulator. */
 	BPF_STMT(BPF_LD | BPF_W | BPF_ABS, offsetof(struct seccomp_data, nr)),
 	/* Jump to trace for execve(2)/execveat(2), else allow. */
