@@ -203,7 +203,7 @@ Makefile: $(srcdir)/Makefile.in
 
 $(devdir)/intercept.pb-c.c: $(srcdir)/intercept.proto
 	@if [ -n "$(DEVEL)" ]; then \
-	    cmd='protoc-c --c_out=$(devdir) --proto_path=$(srcdir) $(srcdir)/intercept.proto'; \
+	    cmd='protoc --c_out=$(devdir) --proto_path=$(srcdir) $(srcdir)/intercept.proto'; \
 	    echo "$$cmd"; eval $$cmd; \
 	    cmd='$(scriptdir)/unanon $(devdir)/intercept.pb-c.h $(devdir)/intercept.pb-c.c'; \
 	    echo "$$cmd"; eval $$cmd; \

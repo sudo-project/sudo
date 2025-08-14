@@ -378,7 +378,7 @@ static const ProtobufCFieldDescriptor intercept_request__field_descriptors[2] =
     offsetof(InterceptRequest, u.policy_check_req),
     &policy_check_request__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -390,7 +390,7 @@ static const ProtobufCFieldDescriptor intercept_request__field_descriptors[2] =
     offsetof(InterceptRequest, u.hello),
     &intercept_hello__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
 };
@@ -774,7 +774,7 @@ static const ProtobufCFieldDescriptor intercept_response__field_descriptors[4] =
     offsetof(InterceptResponse, u.hello_resp),
     &hello_response__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -786,7 +786,7 @@ static const ProtobufCFieldDescriptor intercept_response__field_descriptors[4] =
     offsetof(InterceptResponse, u.accept_msg),
     &policy_accept_message__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -798,7 +798,7 @@ static const ProtobufCFieldDescriptor intercept_response__field_descriptors[4] =
     offsetof(InterceptResponse, u.reject_msg),
     &policy_reject_message__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -810,7 +810,7 @@ static const ProtobufCFieldDescriptor intercept_response__field_descriptors[4] =
     offsetof(InterceptResponse, u.error_msg),
     &policy_error_message__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
 };

@@ -108,7 +108,7 @@ Makefile: $(srcdir)/Makefile.in
 
 $(devdir)/log_server.pb-c.c: $(srcdir)/log_server.proto
 	@if [ -n "$(DEVEL)" ]; then \
-	    cmd='protoc-c --c_out=$(devdir) --proto_path=$(srcdir) $(srcdir)/log_server.proto'; \
+	    cmd='protoc --c_out=$(devdir) --proto_path=$(srcdir) $(srcdir)/log_server.proto'; \
 	    echo "$$cmd"; eval $$cmd; \
 	    cmd='$(scriptdir)/unanon $(devdir)/log_server.pb-c.h $(devdir)/log_server.pb-c.c'; \
 	    echo "$$cmd"; eval $$cmd; \

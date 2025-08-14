@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2022, Dave Benson and the protobuf-c authors.
+ * Copyright (c) 2008-2025, Dave Benson and the protobuf-c authors.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,14 +28,14 @@
  */
 
 /*! \file
- * Support library for `protoc-c` generated code.
+ * Support library for `protoc-gen-c` generated code.
  *
  * This file implements the public API used by the code generated
- * by `protoc-c`.
+ * by `protoc-gen-c`.
  *
  * \authors Dave Benson and the protobuf-c authors
  *
- * \copyright 2008-2014. Licensed under the terms of the [BSD-2-Clause] license.
+ * \copyright 2008-2025. Licensed under the terms of the [BSD-2-Clause] license.
  */
 
 /**
@@ -1903,7 +1903,6 @@ pack_buffer_packed_payload(const ProtobufCFieldDescriptor *field,
 		for (i = 0; i < count; i++) {
 			unsigned len = boolean_pack(((protobuf_c_boolean *) array)[i], scratch);
 			buffer->append(buffer, len, scratch);
-			rv += len;
 		}
 		return count;
 	default:
@@ -1938,6 +1937,7 @@ repeated_field_pack_to_buffer(const ProtobufCFieldDescriptor *field,
 		buffer->append(buffer, rv, scratch);
 		tmp = pack_buffer_packed_payload(field, count, array, buffer);
 		assert(tmp == payload_len);
+		(void)tmp;
 		return rv + payload_len;
 	} else {
 		size_t siz;
@@ -2571,7 +2571,7 @@ parse_required_member(ScannedMember *scanned_member,
 
 		if (maybe_clear && *pstr != NULL) {
 			const char *def = scanned_member->field->default_value;
-			if (*pstr != NULL && *pstr != def)
+			if (*pstr != def)
 				do_free(allocator, *pstr);
 		}
 		*pstr = do_alloc(allocator, len - pref_len + 1);
@@ -3293,6 +3293,8 @@ protobuf_c_message_unpack(const ProtobufCMessageDescriptor *desc,
 					      n_unknown * sizeof(ProtobufCMessageUnknownField));
 		if (rv->unknown_fields == NULL)
 			goto error_cleanup;
+	} else {
+		rv->unknown_fields = NULL;
 	}
 
 	/* do real parsing */
