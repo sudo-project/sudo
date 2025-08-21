@@ -287,7 +287,7 @@ main(int argc, char *argv[])
 	case 's':
 	    errno = 0;
 	    speed_factor = strtod(optarg, &ep);
-	    if (*ep != '\0' || errno != 0)
+	    if (*ep != '\0' || errno != 0 || speed_factor < 0.0)
 		sudo_fatalx(U_("invalid speed factor: %s"), optarg);
 	    break;
 	case 'V':
@@ -795,8 +795,7 @@ get_timing_record(struct replay_closure *closure)
 
 	if (nodelay) {
 	    /* Already waited, fire immediately. */
-	    timing->delay.tv_sec = 0;
-	    timing->delay.tv_nsec = 0;
+	    sudo_timespecclear(&timing->delay);
 	} else {
 	    /* Adjust delay using speed factor and max_delay. */
 	    iolog_adjust_delay(&timing->delay, closure->max_delay,

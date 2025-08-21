@@ -55,6 +55,12 @@ iolog_adjust_delay(struct timespec *delay, struct timespec *max_delay,
 {
     debug_decl(iolog_adjust_delay, SUDO_DEBUG_UTIL);
 
+    /* Avoid division by zero or negative delays. */
+    if (scale_factor <= 0.0) {
+	sudo_timespecclear(delay);
+	debug_return;
+    }
+
     if (scale_factor != 1.0) {
 	/* Order is important: we don't want to double the remainder. */
 	const double seconds = (double)delay->tv_sec / scale_factor;
