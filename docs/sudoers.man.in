@@ -1564,7 +1564,7 @@ dgb	boulder = (operator : operator) /bin/ls, (root) /bin/kill,\e
 While the group portion of the
 \fIRunas_Spec\fR
 permits the
-user to run as command with that group, it does not force the user
+user to run a command with that group, it does not force the user
 to do so.
 If no group is specified on the command line, the command
 will run with the group listed in the target user's password database
