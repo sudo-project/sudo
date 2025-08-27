@@ -223,7 +223,7 @@ runas_userlist_matches(const struct sudoers_parse_tree *parse_tree,
  */
 static int
 runas_grouplist_matches(const struct sudoers_parse_tree *parse_tree,
-    const struct member_list *group_list)
+    const struct member_list *group_list, int user_matched)
 {
     const struct sudoers_context *ctx = parse_tree->ctx;
     int group_matched = UNSPEC;
@@ -241,7 +241,7 @@ runas_grouplist_matches(const struct sudoers_parse_tree *parse_tree,
 		    a = alias_get(parse_tree, m->name, RUNASALIAS);
 		    if (a != NULL) {
 			const int rc = runas_grouplist_matches(parse_tree,
-			    &a->members);
+			    &a->members, user_matched);
 			if (SPECIFIED(rc)) {
 			    if (m->negated) {
 				group_matched = rc == ALLOW ? DENY : ALLOW;
@@ -260,11 +260,11 @@ runas_grouplist_matches(const struct sudoers_parse_tree *parse_tree,
 	    }
 	}
     }
-    if (!SPECIFIED(group_matched)) {
+    if (!SPECIFIED(group_matched) && user_matched == ALLOW) {
 	struct gid_list *runas_groups;
 	/*
 	 * The runas group was not explicitly allowed by sudoers.
-	 * Check whether it is one of the target user's groups.
+	 * If the runas user matched, check its group list too.
 	 */
 	if (ctx->runas.pw->pw_gid == ctx->runas.gr->gr_gid) {
 	    group_matched = ALLOW;	/* runas group matches passwd db */
@@ -312,7 +312,16 @@ runaslist_matches(const struct sudoers_parse_tree *parse_tree,
 
     user_matched = runas_userlist_matches(parse_tree, user_list);
     if (ISSET(ctx->settings.flags, RUNAS_GROUP_SPECIFIED)) {
-	group_matched = runas_grouplist_matches(parse_tree, group_list);
+	group_matched = runas_grouplist_matches(parse_tree, group_list,
+	    user_matched);
+	/*
+	 * Allow "sudo -g group" or "sudo -u myname -g group"
+	 * if the runas group matches.
+	 */
+	if (group_matched == ALLOW && user_matched == UNSPEC) {
+	    if (strcmp(ctx->user.name, ctx->runas.pw->pw_name) == 0)
+		user_matched = ALLOW;
+	}
     }
 
     if (user_matched == DENY || group_matched == DENY)
