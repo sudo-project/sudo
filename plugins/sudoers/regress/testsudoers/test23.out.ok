@@ -1,3 +1,18 @@
+Testing with user and group set to invoking user:
+
+Parses OK
+
+Entries for user admin:
+
+ALL = (root) /bin/ls
+	host  allowed
+	runas unmatched
+
+Password required
+
+Command unmatched
+Testing with no user and group set to invoking user:
+
 Parses OK
 
 Entries for user admin:

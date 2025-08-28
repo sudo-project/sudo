@@ -9,7 +9,16 @@
 
 exec 2>&1
 
+echo "Testing with user and group set to invoking user:"
+echo ""
 $TESTSUDOERS -u admin -g admin -p ${TESTDIR}/passwd -P ${TESTDIR}/group \
+    admin /bin/ls <<'EOF'
+admin ALL = (root) /bin/ls
+EOF
+
+echo "Testing with no user and group set to invoking user:"
+echo ""
+$TESTSUDOERS -g admin -p ${TESTDIR}/passwd -P ${TESTDIR}/group \
     admin /bin/ls <<'EOF'
 admin ALL = (root) /bin/ls
 EOF
