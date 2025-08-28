@@ -231,7 +231,6 @@ sudoers_lookup_check(struct sudo_nss *nss, struct sudoers_context *ctx,
     struct cmndspec *cs;
     struct privilege *priv;
     struct userspec *us;
-    struct member *matching_user;
     debug_decl(sudoers_lookup_check, SUDOERS_DEBUG_PARSER);
 
     memset(info, 0, sizeof(*info));
@@ -271,10 +270,8 @@ sudoers_lookup_check(struct sudo_nss *nss, struct sudoers_context *ctx,
 		    date_match = now > cs->notafter ? DENY : ALLOW;
 		}
 		if (date_match != DENY) {
-		    matching_user = NULL;
 		    runas_match = runaslist_matches(nss->parse_tree,
-			cs->runasuserlist, cs->runasgrouplist, &matching_user,
-			NULL);
+			cs->runasuserlist, cs->runasgrouplist);
 		    if (runas_match == ALLOW) {
 			cmnd_match = cmnd_matches(nss->parse_tree, cs->cmnd,
 			    cs->runchroot, info);
@@ -286,16 +283,6 @@ sudoers_lookup_check(struct sudo_nss *nss, struct sudoers_context *ctx,
 		}
 
 		if (SPECIFIED(cmnd_match)) {
-		    /*
-		     * If user is running command as themselves,
-		     * set ctx->runas.pw = ctx->user.pw.
-		     * XXX - hack, want more general solution
-		     */
-		    if (matching_user && matching_user->type == MYSELF) {
-			sudo_pw_delref(ctx->runas.pw);
-			sudo_pw_addref(ctx->user.pw);
-			ctx->runas.pw = ctx->user.pw;
-		    }
 		    *matching_cs = cs;
 		    *defs = &priv->defaults;
 		    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,

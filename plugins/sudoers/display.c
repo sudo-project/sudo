@@ -579,7 +579,7 @@ display_cmnd_check(struct sudoers_context *ctx,
 			continue;
 		}
 		runas_match = runaslist_matches(parse_tree, cs->runasuserlist,
-		    cs->runasgrouplist, NULL, NULL);
+		    cs->runasgrouplist);
 		if (runas_match == ALLOW) {
 		    cmnd_match = cmnd_matches(parse_tree, cs->cmnd,
 			cs->runchroot, NULL);

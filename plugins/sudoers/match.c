@@ -154,7 +154,7 @@ runas_getgroups(const struct sudoers_context *ctx)
  */
 static int
 runas_userlist_matches(const struct sudoers_parse_tree *parse_tree,
-    const struct member_list *user_list, struct member **matching_user)
+    const struct member_list *user_list)
 {
     const struct sudoers_context *ctx = parse_tree->ctx;
     const char *lhost = parse_tree->lhost ? parse_tree->lhost : ctx->runas.host;
@@ -184,7 +184,7 @@ runas_userlist_matches(const struct sudoers_parse_tree *parse_tree,
 		a = alias_get(parse_tree, m->name, RUNASALIAS);
 		if (a != NULL) {
 		    const int rc = runas_userlist_matches(parse_tree,
-			&a->members, matching_user);
+			&a->members);
 		    if (SPECIFIED(rc)) {
 			if (m->negated) {
 			    user_matched = rc == ALLOW ? DENY : ALLOW;
@@ -212,11 +212,6 @@ runas_userlist_matches(const struct sudoers_parse_tree *parse_tree,
 		    user_matched = m->negated ? DENY : ALLOW;
 		break;
 	}
-	if (SPECIFIED(user_matched)) {
-	    if (matching_user != NULL && m->type != ALIAS)
-		*matching_user = m;
-	    break;
-	}
     }
     debug_return_int(user_matched);
 }
@@ -228,7 +223,7 @@ runas_userlist_matches(const struct sudoers_parse_tree *parse_tree,
  */
 static int
 runas_grouplist_matches(const struct sudoers_parse_tree *parse_tree,
-    const struct member_list *group_list, struct member **matching_group)
+    const struct member_list *group_list)
 {
     const struct sudoers_context *ctx = parse_tree->ctx;
     int group_matched = UNSPEC;
@@ -246,7 +241,7 @@ runas_grouplist_matches(const struct sudoers_parse_tree *parse_tree,
 		    a = alias_get(parse_tree, m->name, RUNASALIAS);
 		    if (a != NULL) {
 			const int rc = runas_grouplist_matches(parse_tree,
-			    &a->members, matching_group);
+			    &a->members);
 			if (SPECIFIED(rc)) {
 			    if (m->negated) {
 				group_matched = rc == ALLOW ? DENY : ALLOW;
@@ -262,11 +257,6 @@ runas_grouplist_matches(const struct sudoers_parse_tree *parse_tree,
 		    if (group_matches(m->name, ctx->runas.gr) == ALLOW)
 			group_matched = m->negated ? DENY : ALLOW;
 		    break;
-	    }
-	    if (SPECIFIED(group_matched)) {
-		if (matching_group != NULL && m->type != ALIAS)
-		    *matching_group = m;
-		break;
 	    }
 	}
     }
@@ -303,8 +293,7 @@ runas_grouplist_matches(const struct sudoers_parse_tree *parse_tree,
  */
 int
 runaslist_matches(const struct sudoers_parse_tree *parse_tree,
-    const struct member_list *user_list, const struct member_list *group_list,
-    struct member **matching_user, struct member **matching_group)
+    const struct member_list *user_list, const struct member_list *group_list)
 {
     const struct sudoers_context *ctx = parse_tree->ctx;
     struct member_list _user_list = TAILQ_HEAD_INITIALIZER(_user_list);
@@ -319,13 +308,11 @@ runaslist_matches(const struct sudoers_parse_tree *parse_tree,
 	m_user.negated = false;
 	TAILQ_INSERT_HEAD(&_user_list, &m_user, entries);
 	user_list = &_user_list;
-	matching_user = NULL;
     }
 
-    user_matched = runas_userlist_matches(parse_tree, user_list, matching_user);
+    user_matched = runas_userlist_matches(parse_tree, user_list);
     if (ISSET(ctx->settings.flags, RUNAS_GROUP_SPECIFIED)) {
-	group_matched = runas_grouplist_matches(parse_tree, group_list,
-	    matching_group);
+	group_matched = runas_grouplist_matches(parse_tree, group_list);
     }
 
     if (user_matched == DENY || group_matched == DENY)

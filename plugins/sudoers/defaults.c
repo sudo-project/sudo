@@ -745,7 +745,7 @@ default_binding_matches(const struct sudoers_context *ctx,
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_RUNAS:
-	if (runaslist_matches(parse_tree, &d->binding->members, NULL, NULL, NULL) == ALLOW)
+	if (runaslist_matches(parse_tree, &d->binding->members, NULL) == ALLOW)
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_HOST:
