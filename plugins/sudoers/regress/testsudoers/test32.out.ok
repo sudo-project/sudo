@@ -1,0 +1,72 @@
+Parses OK
+
+Entries for user admin:
+
+ALL = (admin : staff) /bin/ls
+	host  allowed
+	runas allowed
+	cmnd  allowed
+
+Password required
+
+Command allowed
+Parses OK
+
+Entries for user admin:
+
+ALL = (admin : staff) /bin/ls
+	host  allowed
+	runas allowed
+	cmnd  allowed
+
+Password required
+
+Command allowed
+Parses OK
+
+Entries for user admin:
+
+ALL = (root : staff) /bin/ls
+	host  allowed
+	runas allowed
+	cmnd  allowed
+
+Password required
+
+Command allowed
+Parses OK
+
+Entries for user admin:
+
+ALL = (admin : staff) /bin/ls
+	host  allowed
+	runas allowed
+	cmnd  allowed
+
+Password required
+
+Command allowed
+Parses OK
+
+Entries for user admin:
+
+ALL = (admin : staff) /bin/ls
+	host  allowed
+	runas allowed
+	cmnd  allowed
+
+Password required
+
+Command allowed
+Parses OK
+
+Entries for user admin:
+
+ALL = (root : staff) /bin/ls
+	host  allowed
+	runas allowed
+	cmnd  allowed
+
+Password required
+
+Command allowed
