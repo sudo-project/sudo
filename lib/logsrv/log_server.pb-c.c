@@ -660,7 +660,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     offsetof(ClientMessage, u.accept_msg),
     &accept_message__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -672,7 +672,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     offsetof(ClientMessage, u.reject_msg),
     &reject_message__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -684,7 +684,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     offsetof(ClientMessage, u.exit_msg),
     &exit_message__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -696,7 +696,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     offsetof(ClientMessage, u.restart_msg),
     &restart_message__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -708,7 +708,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     offsetof(ClientMessage, u.alert_msg),
     &alert_message__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -720,7 +720,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     offsetof(ClientMessage, u.ttyin_buf),
     &io_buffer__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -732,7 +732,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     offsetof(ClientMessage, u.ttyout_buf),
     &io_buffer__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -744,7 +744,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     offsetof(ClientMessage, u.stdin_buf),
     &io_buffer__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -756,7 +756,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     offsetof(ClientMessage, u.stdout_buf),
     &io_buffer__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -768,7 +768,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     offsetof(ClientMessage, u.stderr_buf),
     &io_buffer__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -780,7 +780,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     offsetof(ClientMessage, u.winsize_event),
     &change_window_size__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -792,7 +792,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     offsetof(ClientMessage, u.suspend_event),
     &command_suspend__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -804,7 +804,7 @@ static const ProtobufCFieldDescriptor client_message__field_descriptors[13] =
     offsetof(ClientMessage, u.hello_msg),
     &client_hello__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
 };
@@ -994,7 +994,7 @@ static const ProtobufCFieldDescriptor info_message__number_list__field_descripto
     offsetof(InfoMessage__NumberList, numbers),
     NULL,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_PACKED,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_PACKED,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
 };
@@ -1044,7 +1044,7 @@ static const ProtobufCFieldDescriptor info_message__field_descriptors[5] =
     offsetof(InfoMessage, u.numval),
     NULL,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -1056,7 +1056,7 @@ static const ProtobufCFieldDescriptor info_message__field_descriptors[5] =
     offsetof(InfoMessage, u.strval),
     NULL,
     &protobuf_c_empty_string,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -1068,7 +1068,7 @@ static const ProtobufCFieldDescriptor info_message__field_descriptors[5] =
     offsetof(InfoMessage, u.strlistval),
     &info_message__string_list__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -1080,7 +1080,7 @@ static const ProtobufCFieldDescriptor info_message__field_descriptors[5] =
     offsetof(InfoMessage, u.numlistval),
     &info_message__number_list__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
 };
@@ -1608,7 +1608,7 @@ static const ProtobufCFieldDescriptor server_message__field_descriptors[5] =
     offsetof(ServerMessage, u.hello),
     &server_hello__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -1620,7 +1620,7 @@ static const ProtobufCFieldDescriptor server_message__field_descriptors[5] =
     offsetof(ServerMessage, u.commit_point),
     &time_spec__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -1632,7 +1632,7 @@ static const ProtobufCFieldDescriptor server_message__field_descriptors[5] =
     offsetof(ServerMessage, u.log_id),
     NULL,
     &protobuf_c_empty_string,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -1644,7 +1644,7 @@ static const ProtobufCFieldDescriptor server_message__field_descriptors[5] =
     offsetof(ServerMessage, u.error),
     NULL,
     &protobuf_c_empty_string,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -1656,7 +1656,7 @@ static const ProtobufCFieldDescriptor server_message__field_descriptors[5] =
     offsetof(ServerMessage, u.abort),
     NULL,
     &protobuf_c_empty_string,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
 };
