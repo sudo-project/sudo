@@ -74,6 +74,44 @@ ALL = NOPASSWD: list, !list
 
 Command denied
 
+'sudo -U root -l' with a matching ALL=ALL rule and non-matching NOPASSWD
+Parses OK
+
+Entries for user admin:
+
+ALL = PASSWD: ALL
+	host  allowed
+	runas allowed
+	cmnd  allowed
+
+ALL = NOPASSWD: /bin/ls
+	host  allowed
+	runas allowed
+	cmnd  unmatched
+
+Password required
+
+Command allowed
+
+'sudo -U root -l' with a matching list rule and non-matching NOPASSWD
+Parses OK
+
+Entries for user admin:
+
+ALL = PASSWD: list
+	host  allowed
+	runas allowed
+	cmnd  allowed
+
+ALL = NOPASSWD: /bin/ls
+	host  allowed
+	runas allowed
+	cmnd  unmatched
+
+Password required
+
+Command allowed
+
 'sudo -l command' with a matching command
 Parses OK
 

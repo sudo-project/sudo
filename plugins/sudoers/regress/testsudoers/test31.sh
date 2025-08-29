@@ -45,6 +45,20 @@ admin ALL = NOPASSWD: list, !list
 EOF
 
 echo ""
+echo "'sudo -U root -l' with a matching ALL=ALL rule and non-matching NOPASSWD"
+$TESTSUDOERS -p ${TESTDIR}/passwd -P ${TESTDIR}/group -L root admin <<'EOF'
+admin ALL = PASSWD: ALL
+admin ALL = NOPASSWD: /bin/ls
+EOF
+
+echo ""
+echo "'sudo -U root -l' with a matching list rule and non-matching NOPASSWD"
+$TESTSUDOERS -p ${TESTDIR}/passwd -P ${TESTDIR}/group -L root admin <<'EOF'
+admin ALL = PASSWD: list
+admin ALL = NOPASSWD: /bin/ls
+EOF
+
+echo ""
 echo "'sudo -l command' with a matching command"
 $TESTSUDOERS -p ${TESTDIR}/passwd -P ${TESTDIR}/group -l admin /bin/ls <<'EOF'
 admin ALL = /bin/ls

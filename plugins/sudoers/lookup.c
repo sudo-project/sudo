@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2004-2005, 2007-2024 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2004-2005, 2007-2025 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -128,14 +128,6 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct sudoers_context *ctx,
 		    int date_match = UNSPEC;
 		    int runas_match = UNSPEC;
 
-		    if (pwcheck == any) {
-			if (cs->tags.nopasswd == true || priv_nopass == true)
-			    nopass = true;
-		    } else if (pwcheck == all) {
-			if (cs->tags.nopasswd != true && priv_nopass != true)
-			    nopass = false;
-		    }
-
 		    if (cs->notbefore != UNSPEC) {
 			date_match = now < cs->notbefore ? DENY : ALLOW;
 		    }
@@ -184,6 +176,22 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct sudoers_context *ctx,
 			    break;
 			}
 		    }
+
+		    /*
+		     * Apply the NOPASSWD tag if the entry matched.
+		     * This is relevant for "sudo -U otheruser -l".
+		     */
+		    if (cmnd_match == ALLOW && runas_match == ALLOW &&
+			    date_match != DENY) {
+			if (pwcheck == any) {
+			    if (cs->tags.nopasswd == true || priv_nopass == true)
+				nopass = true;
+			} else if (pwcheck == all) {
+			    if (cs->tags.nopasswd != true && priv_nopass != true)
+				nopass = false;
+			}
+		    }
+
 		    if (callback != NULL) {
 			callback(nss->parse_tree, us, user_match, priv,
 			    host_match, cs, date_match, runas_match,
