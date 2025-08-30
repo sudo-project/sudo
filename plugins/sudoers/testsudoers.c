@@ -173,7 +173,7 @@ main(int argc, char *argv[])
 	    case 'l':
 		if (test_ctx.mode != MODE_RUN) {
 		    sudo_warnx(
-			"only one of the -l or -v flags may be specified");
+			"only one of the -l, -L or -v flags may be specified");
 		    usage();
 		}
 		test_ctx.mode = MODE_LIST;
@@ -213,7 +213,7 @@ main(int argc, char *argv[])
 	    case 'v':
 		if (test_ctx.mode != MODE_RUN) {
 		    sudo_warnx(
-			"only one of the -l or -v flags may be specified");
+			"only one of the -l, -L or -v flags may be specified");
 		    usage();
 		}
 		test_ctx.mode = MODE_VALIDATE;
