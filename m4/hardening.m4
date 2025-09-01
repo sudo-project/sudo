@@ -100,13 +100,18 @@ AC_DEFUN([SUDO_CHECK_HARDENING], [
 		])
 	    fi
 
-	    # Check for control-flow transfer instrumentation (Intel CET).
-	    AX_CHECK_COMPILE_FLAG([-fcf-protection], [
-		AX_CHECK_LINK_FLAG([-fcf-protection], [
-		    AX_APPEND_FLAG([-fcf-protection], [HARDENING_CFLAGS])
-		    AX_APPEND_FLAG([-Wc,-fcf-protection], [HARDENING_LDFLAGS])
+	    # Check for control-flow transfer instrumentation (Intel CET)
+	    # on x86-64. Do not enable for 32-bit, since no 32-bit OS supports
+	    # it and the generated ENDBR32 instructions have compatibility
+	    # issues with some old i586/i686 processors (eg Geode or Vortex).
+	    if test "$host_cpu" = "x86_64"; then
+		AX_CHECK_COMPILE_FLAG([-fcf-protection], [
+		    AX_CHECK_LINK_FLAG([-fcf-protection], [
+			AX_APPEND_FLAG([-fcf-protection], [HARDENING_CFLAGS])
+			AX_APPEND_FLAG([-Wc,-fcf-protection], [HARDENING_LDFLAGS])
+		    ])
 		])
-	    ])
+	    fi
 	fi
 
 	# Linker-specific hardening flags.
