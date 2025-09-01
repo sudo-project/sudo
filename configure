@@ -7649,6 +7649,30 @@ case $build_os in *\ *) build_os=`echo "$build_os" | sed 's/ /-/g'`;; esac
 
 
 
+ac_cv_host_exeext=$ac_cv_exeext
+if test ${ac_cv_build_exeext+y}
+then :
+  ac_cv_exeext=$ac_cv_build_exeext
+else case e in #(
+  e) { ac_cv_exeext=; unset ac_cv_exeext;} ;;
+esac
+fi
+ac_cv_host_objext=$ac_cv_objext
+if test ${ac_cv_build_objext+y}
+then :
+  ac_cv_objext=$ac_cv_build_objext
+else case e in #(
+  e) { ac_cv_objext=; unset ac_cv_objext;} ;;
+esac
+fi
+ac_cv_host_c_compiler_gnu=$ac_cv_c_compiler_gnu
+if test ${ac_cv_build_c_compiler_gnu+y}
+then :
+  ac_cv_c_compiler_gnu=$ac_cv_build_c_compiler_gnu
+else case e in #(
+  e) { ac_cv_c_compiler_gnu=; unset ac_cv_c_compiler_gnu;} ;;
+esac
+fi
 
 cross_compiling_build=no
 
@@ -7665,21 +7689,13 @@ ac_ext=c
 ac_cpp='$CPP_FOR_BUILD $CPPFLAGS_FOR_BUILD'
 ac_compile='$CC_FOR_BUILD -c $CFLAGS_FOR_BUILD $CPPFLAGS_FOR_BUILD conftest.$ac_ext >&5'
 ac_link='$CC_FOR_BUILD -o conftest$ac_build_exeext $CFLAGS_FOR_BUILD $CPPFLAGS_FOR_BUILD $LDFLAGS_FOR_BUILD conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_build_c_compiler_gnu
-
-
-was_set_c_compiler_gnu=${ac_cv_c_compiler_gnu+y}
-if test ${was_set_c_compiler_gnu}
-then :
-  saved_c_compiler_gnu=$ac_cv_c_compiler_gnu
-    { ac_cv_c_compiler_gnu=; unset ac_cv_c_compiler_gnu;}
-fi
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 ac_ext=c
 ac_cpp='$CPP_FOR_BUILD $CPPFLAGS_FOR_BUILD'
 ac_compile='$CC_FOR_BUILD -c $CFLAGS_FOR_BUILD $CPPFLAGS_FOR_BUILD conftest.$ac_ext >&5'
 ac_link='$CC_FOR_BUILD -o conftest$ac_build_exeext $CFLAGS_FOR_BUILD $CPPFLAGS_FOR_BUILD $LDFLAGS_FOR_BUILD conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_build_c_compiler_gnu
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
 if test -n "$ac_build_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}gcc", so it can be a program name with args.
 set dummy ${ac_build_tool_prefix}gcc; ac_word=$2
@@ -8273,8 +8289,8 @@ else
     CFLAGS_FOR_BUILD=
   fi
 fi
-ac_prog_cc_stdc=no
-if test x$ac_prog_cc_stdc = xno
+ac_build_prog_cc_stdc=no
+if test x$ac_build_prog_cc_stdc = xno
 then :
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $CC_FOR_BUILD option to enable C11 features" >&5
 printf %s "checking for $CC_FOR_BUILD option to enable C11 features... " >&6; }
@@ -8318,12 +8334,12 @@ printf "%s\n" "$ac_cv_build_prog_cc_c11" >&6; }
      CC_FOR_BUILD="$CC_FOR_BUILD $ac_cv_build_prog_cc_c11" ;;
 esac
 fi
-  ac_cv_prog_cc_stdc=$ac_cv_build_prog_cc_c11
-  ac_prog_cc_stdc=c11 ;;
+  ac_cv_build_prog_cc_stdc=$ac_cv_build_prog_cc_c11
+  ac_build_prog_cc_stdc=c11 ;;
 esac
 fi
 fi
-if test x$ac_prog_cc_stdc = xno
+if test x$ac_build_prog_cc_stdc = xno
 then :
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $CC_FOR_BUILD option to enable C99 features" >&5
 printf %s "checking for $CC_FOR_BUILD option to enable C99 features... " >&6; }
@@ -8367,12 +8383,12 @@ printf "%s\n" "$ac_cv_build_prog_cc_c99" >&6; }
      CC_FOR_BUILD="$CC_FOR_BUILD $ac_cv_build_prog_cc_c99" ;;
 esac
 fi
-  ac_cv_prog_cc_stdc=$ac_cv_build_prog_cc_c99
-  ac_prog_cc_stdc=c99 ;;
+  ac_cv_build_prog_cc_stdc=$ac_cv_build_prog_cc_c99
+  ac_build_prog_cc_stdc=c99 ;;
 esac
 fi
 fi
-if test x$ac_prog_cc_stdc = xno
+if test x$ac_build_prog_cc_stdc = xno
 then :
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $CC_FOR_BUILD option to enable C89 features" >&5
 printf %s "checking for $CC_FOR_BUILD option to enable C89 features... " >&6; }
@@ -8416,8 +8432,8 @@ printf "%s\n" "$ac_cv_build_prog_cc_c89" >&6; }
      CC_FOR_BUILD="$CC_FOR_BUILD $ac_cv_build_prog_cc_c89" ;;
 esac
 fi
-  ac_cv_prog_cc_stdc=$ac_cv_build_prog_cc_c89
-  ac_prog_cc_stdc=c89 ;;
+  ac_cv_build_prog_cc_stdc=$ac_cv_build_prog_cc_c89
+  ac_build_prog_cc_stdc=c89 ;;
 esac
 fi
 fi
@@ -8426,13 +8442,7 @@ ac_ext=c
 ac_cpp='$CPP_FOR_BUILD $CPPFLAGS_FOR_BUILD'
 ac_compile='$CC_FOR_BUILD -c $CFLAGS_FOR_BUILD $CPPFLAGS_FOR_BUILD conftest.$ac_ext >&5'
 ac_link='$CC_FOR_BUILD -o conftest$ac_build_exeext $CFLAGS_FOR_BUILD $CPPFLAGS_FOR_BUILD $LDFLAGS_FOR_BUILD conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_build_c_compiler_gnu
-
-
-if test ${was_set_c_compiler_gnu}
-then :
-  ac_cv_c_compiler_gnu=$saved_c_compiler_gnu
-fi
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -8495,9 +8505,9 @@ do
 	# certainly right.
 	break;;
     *.* )
-	if test ${ac_cv_build_exeext+y} && test "$ac_cv_build_exeext" != no;
+	if test ${ac_cv_exeext+y} && test "$ac_cv_exeext" != no;
 	then :; else
-	   ac_cv_build_exeext=`expr "$ac_file" : '[^.]*\(\..*\)'`
+	   ac_cv_exeext=`expr "$ac_file" : '[^.]*\(\..*\)'`
 	fi
 	# We set ac_cv_exeext here because the later test for it is not
 	# safe: cross compilers may not add the suffix if given an '-o'
@@ -8509,7 +8519,7 @@ do
 	break;;
   esac
 done
-test "$ac_cv_build_exeext" = no && ac_cv_build_exeext=
+test "$ac_cv_exeext" = no && ac_cv_exeext=
 
 else case e in #(
   e) ac_file='' ;;
@@ -8535,9 +8545,9 @@ fi
 printf %s "checking for C compiler default output file name... " >&6; }
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_file" >&5
 printf "%s\n" "$ac_file" >&6; }
-ac_build_exeext=$ac_cv_build_exeext
+ac_build_exeext=$ac_cv_exeext
 
-rm -f -r a.out a.out.dSYM a.exe conftest$ac_cv_build_exeext b.out
+rm -f -r a.out a.out.dSYM a.exe conftest$ac_cv_exeext b.out
 ac_clean_files=$ac_clean_files_save
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for suffix of executables" >&5
 printf %s "checking for suffix of executables... " >&6; }
@@ -8561,7 +8571,7 @@ for ac_file in conftest.exe conftest conftest.*; do
   test -f "$ac_file" || continue
   case $ac_file in
     *.$ac_ext | *.xcoff | *.tds | *.d | *.pdb | *.xSYM | *.bb | *.bbg | *.map | *.inf | *.dSYM | *.o | *.obj ) ;;
-    *.* ) ac_cv_build_exeext=`expr "$ac_file" : '[^.]*\(\..*\)'`
+    *.* ) ac_cv_exeext=`expr "$ac_file" : '[^.]*\(\..*\)'`
 	  break;;
     * ) break;;
   esac
@@ -8573,13 +8583,13 @@ as_fn_error $? "cannot compute suffix of executables: cannot compile and link
 See 'config.log' for more details" "$LINENO" 5; } ;;
 esac
 fi
-rm -f conftest conftest$ac_cv_build_exeext
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_build_exeext" >&5
-printf "%s\n" "$ac_cv_build_exeext" >&6; }
+rm -f conftest conftest$ac_cv_exeext
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_exeext" >&5
+printf "%s\n" "$ac_cv_exeext" >&6; }
 
 rm -f conftest.$ac_ext
-EXEEXT=$ac_cv_build_exeext
-ac_build_exeext=$BUILD_EXEEXT
+EXEEXT=$ac_cv_exeext
+ac_build_exeext=$EXEEXT
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <stdio.h>
@@ -8612,7 +8622,7 @@ printf "%s\n" "$ac_try_echo"; } >&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-  if { ac_try='./conftest$ac_cv_build_exeext'
+  if { ac_try='./conftest$ac_cv_exeext'
   { { case "(($ac_try" in
   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
   *) ac_try_echo=$ac_try;;
@@ -8639,13 +8649,13 @@ fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $cross_compiling_build" >&5
 printf "%s\n" "$cross_compiling_build" >&6; }
 
-rm -f conftest.$ac_ext conftest$ac_cv_build_exeext \
+rm -f conftest.$ac_ext conftest$ac_cv_exeext \
   conftest.o conftest.obj conftest.out
 ac_clean_files=$ac_clean_files_save
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for suffix of object files" >&5
 printf %s "checking for suffix of object files... " >&6; }
-if test ${ac_cv_build_objext+y}
+if test ${ac_cv_objext+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
@@ -8677,7 +8687,7 @@ then :
   test -f "$ac_file" || continue;
   case $ac_file in
     *.$ac_ext | *.xcoff | *.tds | *.d | *.pdb | *.xSYM | *.bb | *.bbg | *.map | *.inf | *.dSYM ) ;;
-    *) ac_cv_build_objext=`expr "$ac_file" : '.*\.\(.*\)'`
+    *) ac_cv_objext=`expr "$ac_file" : '.*\.\(.*\)'`
        break;;
   esac
 done
@@ -8691,19 +8701,19 @@ as_fn_error $? "cannot compute suffix of object files: cannot compile
 See 'config.log' for more details" "$LINENO" 5; } ;;
 esac
 fi
-rm -f conftest.$ac_cv_build_objext conftest.$ac_ext ;;
+rm -f conftest.$ac_cv_objext conftest.$ac_ext ;;
 esac
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_build_objext" >&5
-printf "%s\n" "$ac_cv_build_objext" >&6; }
-OBJEXT=$ac_cv_build_objext
-ac_build_objext=$BUILD_OBJEXT
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_objext" >&5
+printf "%s\n" "$ac_cv_objext" >&6; }
+OBJEXT=$ac_cv_objext
+ac_build_objext=$OBJEXT
 
 ac_ext=c
 ac_cpp='$CPP_FOR_BUILD $CPPFLAGS_FOR_BUILD'
 ac_compile='$CC_FOR_BUILD -c $CFLAGS_FOR_BUILD $CPPFLAGS_FOR_BUILD conftest.$ac_ext >&5'
 ac_link='$CC_FOR_BUILD -o conftest$ac_build_exeext $CFLAGS_FOR_BUILD $CPPFLAGS_FOR_BUILD $LDFLAGS_FOR_BUILD conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_build_c_compiler_gnu
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking how to run the C preprocessor" >&5
 printf %s "checking how to run the C preprocessor... " >&6; }
 # On Suns, sometimes $CPP names a directory.
@@ -8835,9 +8845,18 @@ ac_ext=c
 ac_cpp='$CPP_FOR_BUILD $CPPFLAGS_FOR_BUILD'
 ac_compile='$CC_FOR_BUILD -c $CFLAGS_FOR_BUILD $CPPFLAGS_FOR_BUILD conftest.$ac_ext >&5'
 ac_link='$CC_FOR_BUILD -o conftest$ac_build_exeext $CFLAGS_FOR_BUILD $CPPFLAGS_FOR_BUILD $LDFLAGS_FOR_BUILD conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_build_c_compiler_gnu
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
+BUILD_EXEEXT=$ac_cv_exeext
+BUILD_OBJEXT=$ac_cv_objext
+
+ac_cv_exeext=$ac_cv_host_exeext
+EXEEXT=$ac_cv_host_exeext
+ac_cv_objext=$ac_cv_host_objext
+OBJEXT=$ac_cv_host_objext
+ac_cv_c_compiler_gnu=$ac_cv_host_c_compiler_gnu
+ac_compiler_gnu=$ac_cv_host_c_compiler_gnu
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -18905,7 +18924,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__force_flat_namespace" >&5
 printf "%s\n" "$ax_cv_check_ldflags___Wl__force_flat_namespace" >&6; }
-if test x"$ax_cv_check_ldflags___Wl__force_flat_namespace" = xyes
+if test "x$ax_cv_check_ldflags___Wl__force_flat_namespace" = xyes
 then :
 
 
@@ -18979,7 +18998,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__flat_namespace" >&5
 printf "%s\n" "$ax_cv_check_ldflags___Wl__flat_namespace" >&6; }
-if test x"$ax_cv_check_ldflags___Wl__flat_namespace" = xyes
+if test "x$ax_cv_check_ldflags___Wl__flat_namespace" = xyes
 then :
 
 
@@ -19414,7 +19433,7 @@ then :
 else case e in #(
   e)
   sudo_cv_cpp_variadic_macros=yes
-  if test X"$ac_cv_build_prog_cc_c99" = X"no"; then
+  if test X"$ac_cv_prog_cc_c99" = X"no"; then
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 $ac_includes_default
@@ -23304,7 +23323,7 @@ fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_have___builtin_clz" >&5
 printf "%s\n" "$ax_cv_have___builtin_clz" >&6; }
 
-    if test yes = $ax_cv_have___builtin_clz
+    if test "x$ax_cv_have___builtin_clz" = xyes
 then :
 
 printf "%s\n" "#define HAVE___BUILTIN_CLZ 1" >>confdefs.h
@@ -23351,7 +23370,7 @@ fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_have___builtin_clzl" >&5
 printf "%s\n" "$ax_cv_have___builtin_clzl" >&6; }
 
-    if test yes = $ax_cv_have___builtin_clzl
+    if test "x$ax_cv_have___builtin_clzl" = xyes
 then :
 
 printf "%s\n" "#define HAVE___BUILTIN_CLZL 1" >>confdefs.h
@@ -25093,7 +25112,7 @@ esac
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }mktemp_test"
 
 fi
-if test X"$ac_cv_build_prog_cc_c99" != X"no" -a X"$cross_compiling" = X"yes"
+if test X"$ac_cv_prog_cc_c99" != X"no" -a X"$cross_compiling" = X"yes"
 then :
 
     # If we have a C99 compiler and are cross-compiling, assume
@@ -28342,7 +28361,7 @@ then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
-    if test X"$ac_cv_build_prog_cc_c99" = X"no"
+    if test X"$ac_cv_prog_cc_c99" = X"no"
 then :
 
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -32986,15 +33005,18 @@ fi
 if test -n "$GCC" -a "$lt_cv_prog_gnu_ld" != "yes"
 then :
 
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -static-libgcc" >&5
-printf %s "checking whether C compiler accepts -static-libgcc... " >&6; }
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -static-libgcc" >&5
+printf %s "checking whether the C compiler accepts -static-libgcc... " >&6; }
 if test ${ax_cv_check_cflags___static_libgcc+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
   ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -static-libgcc"
+  if test x"$GCC" = xyes ; then
+    add_gnu_werror="-Werror"
+  fi
+  CFLAGS="$CFLAGS  -static-libgcc $add_gnu_werror"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -33101,7 +33123,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl___enable_new_dtags" >&5
 printf "%s\n" "$ax_cv_check_ldflags___Wl___enable_new_dtags" >&6; }
-if test x"$ax_cv_check_ldflags___Wl___enable_new_dtags" = xyes
+if test "x$ax_cv_check_ldflags___Wl___enable_new_dtags" = xyes
 then :
 
 if test ${LDFLAGS+y}
@@ -33157,15 +33179,18 @@ esac
 	fi
 	if test X"$enable_pie" != X""; then
 	    if test "$enable_pie" = "no"; then
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fno-pie" >&5
-printf %s "checking whether C compiler accepts -fno-pie... " >&6; }
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -fno-pie" >&5
+printf %s "checking whether the C compiler accepts -fno-pie... " >&6; }
 if test ${ax_cv_check_cflags___fno_pie+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
   ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -fno-pie"
+  if test x"$GCC" = xyes ; then
+    add_gnu_werror="-Werror"
+  fi
+  CFLAGS="$CFLAGS  -fno-pie $add_gnu_werror"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -33229,7 +33254,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___nopie" >&5
 printf "%s\n" "$ax_cv_check_ldflags___nopie" >&6; }
-if test x"$ax_cv_check_ldflags___nopie" = xyes
+if test "x$ax_cv_check_ldflags___nopie" = xyes
 then :
 
 			PIE_CFLAGS="-fno-pie"
@@ -33248,15 +33273,18 @@ esac
 fi
 
 	    else
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fPIE" >&5
-printf %s "checking whether C compiler accepts -fPIE... " >&6; }
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -fPIE" >&5
+printf %s "checking whether the C compiler accepts -fPIE... " >&6; }
 if test ${ax_cv_check_cflags___fPIE+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
   ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -fPIE"
+  if test x"$GCC" = xyes ; then
+    add_gnu_werror="-Werror"
+  fi
+  CFLAGS="$CFLAGS  -fPIE $add_gnu_werror"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -33321,7 +33349,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___pie" >&5
 printf "%s\n" "$ax_cv_check_ldflags___pie" >&6; }
-if test x"$ax_cv_check_ldflags___pie" = xyes
+if test "x$ax_cv_check_ldflags___pie" = xyes
 then :
 
 			if test "$enable_pie" = "maybe"; then
@@ -33432,7 +33460,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__ztype_pie" >&5
 printf "%s\n" "$ax_cv_check_ldflags___Wl__ztype_pie" >&6; }
-if test x"$ax_cv_check_ldflags___Wl__ztype_pie" = xyes
+if test "x$ax_cv_check_ldflags___Wl__ztype_pie" = xyes
 then :
 
 			# Try building PIE if not disabled.
@@ -33527,7 +33555,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__zaslr" >&5
 printf "%s\n" "$ax_cv_check_ldflags___Wl__zaslr" >&6; }
-if test x"$ax_cv_check_ldflags___Wl__zaslr" = xyes
+if test "x$ax_cv_check_ldflags___Wl__zaslr" = xyes
 then :
 
 
@@ -33604,7 +33632,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__znxheap" >&5
 printf "%s\n" "$ax_cv_check_ldflags___Wl__znxheap" >&6; }
-if test x"$ax_cv_check_ldflags___Wl__znxheap" = xyes
+if test "x$ax_cv_check_ldflags___Wl__znxheap" = xyes
 then :
 
 
@@ -33681,7 +33709,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__znxstack" >&5
 printf "%s\n" "$ax_cv_check_ldflags___Wl__znxstack" >&6; }
-if test x"$ax_cv_check_ldflags___Wl__znxstack" = xyes
+if test "x$ax_cv_check_ldflags___Wl__znxstack" = xyes
 then :
 
 
@@ -33730,15 +33758,18 @@ fi
 
 
                     if test -n "$GCC"; then
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fvisibility=hidden" >&5
-printf %s "checking whether C compiler accepts -fvisibility=hidden... " >&6; }
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -fvisibility=hidden" >&5
+printf %s "checking whether the C compiler accepts -fvisibility=hidden... " >&6; }
 if test ${ax_cv_check_cflags___fvisibility_hidden+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
   ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -fvisibility=hidden"
+  if test x"$GCC" = xyes ; then
+    add_gnu_werror="-Werror"
+  fi
+  CFLAGS="$CFLAGS  -fvisibility=hidden $add_gnu_werror"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -33813,15 +33844,18 @@ fi
     else
 	case "$host_os" in
 	hpux*)
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -Bhidden_def" >&5
-printf %s "checking whether C compiler accepts -Bhidden_def... " >&6; }
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -Bhidden_def" >&5
+printf %s "checking whether the C compiler accepts -Bhidden_def... " >&6; }
 if test ${ax_cv_check_cflags___Bhidden_def+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
   ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -Bhidden_def"
+  if test x"$GCC" = xyes ; then
+    add_gnu_werror="-Werror"
+  fi
+  CFLAGS="$CFLAGS  -Bhidden_def $add_gnu_werror"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -33933,15 +33967,18 @@ fi
 
 	    ;;
 	solaris2*)
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -xldscope=hidden" >&5
-printf %s "checking whether C compiler accepts -xldscope=hidden... " >&6; }
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -xldscope=hidden" >&5
+printf %s "checking whether the C compiler accepts -xldscope=hidden... " >&6; }
 if test ${ax_cv_check_cflags___xldscope_hidden+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
   ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -xldscope=hidden"
+  if test x"$GCC" = xyes ; then
+    add_gnu_werror="-Werror"
+  fi
+  CFLAGS="$CFLAGS  -xldscope=hidden $add_gnu_werror"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -34203,7 +34240,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl___allow_multiple_definition" >&5
 printf "%s\n" "$ax_cv_check_ldflags___Wl___allow_multiple_definition" >&6; }
-if test x"$ax_cv_check_ldflags___Wl___allow_multiple_definition" = xyes
+if test "x$ax_cv_check_ldflags___Wl___allow_multiple_definition" = xyes
 then :
 
 if test ${ASAN_LDFLAGS+y}
@@ -34248,15 +34285,18 @@ fi
 
                     if test X"$enable_sanitizer" != X"no"; then
 	as_CACHEVAR=`printf "%s\n" "ax_cv_check_cflags__$enable_sanitizer" | sed "$as_sed_sh"`
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts $enable_sanitizer" >&5
-printf %s "checking whether C compiler accepts $enable_sanitizer... " >&6; }
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts $enable_sanitizer" >&5
+printf %s "checking whether the C compiler accepts $enable_sanitizer... " >&6; }
 if eval test \${$as_CACHEVAR+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
   ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  $enable_sanitizer"
+  if test x"$GCC" = xyes ; then
+    add_gnu_werror="-Werror"
+  fi
+  CFLAGS="$CFLAGS  $enable_sanitizer $add_gnu_werror"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -34387,15 +34427,18 @@ else case e in #(
 esac
 fi
 
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fno-omit-frame-pointer" >&5
-printf %s "checking whether C compiler accepts -fno-omit-frame-pointer... " >&6; }
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -fno-omit-frame-pointer" >&5
+printf %s "checking whether the C compiler accepts -fno-omit-frame-pointer... " >&6; }
 if test ${ax_cv_check_cflags___fno_omit_frame_pointer+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
   ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -fno-omit-frame-pointer"
+  if test x"$GCC" = xyes ; then
+    add_gnu_werror="-Werror"
+  fi
+  CFLAGS="$CFLAGS  -fno-omit-frame-pointer $add_gnu_werror"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -34489,15 +34532,18 @@ fi
     fi
 
     if test X"$enable_fuzzer" = X"yes"; then
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fsanitize=fuzzer-no-link" >&5
-printf %s "checking whether C compiler accepts -fsanitize=fuzzer-no-link... " >&6; }
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -fsanitize=fuzzer-no-link" >&5
+printf %s "checking whether the C compiler accepts -fsanitize=fuzzer-no-link... " >&6; }
 if test ${ax_cv_check_cflags___fsanitize_fuzzer_no_link+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
   ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -fsanitize=fuzzer-no-link"
+  if test x"$GCC" = xyes ; then
+    add_gnu_werror="-Werror"
+  fi
+  CFLAGS="$CFLAGS  -fsanitize=fuzzer-no-link $add_gnu_werror"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -34630,15 +34676,18 @@ fi
 	    if test -z "$FUZZ_ENGINE"; then
 		FUZZ_ENGINE="-fsanitize=fuzzer"
 	    fi
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fno-omit-frame-pointer" >&5
-printf %s "checking whether C compiler accepts -fno-omit-frame-pointer... " >&6; }
+	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -fno-omit-frame-pointer" >&5
+printf %s "checking whether the C compiler accepts -fno-omit-frame-pointer... " >&6; }
 if test ${ax_cv_check_cflags___fno_omit_frame_pointer+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
   ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -fno-omit-frame-pointer"
+  if test x"$GCC" = xyes ; then
+    add_gnu_werror="-Werror"
+  fi
+  CFLAGS="$CFLAGS  -fno-omit-frame-pointer $add_gnu_werror"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -35020,7 +35069,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___fstack_clash_protection" >&5
 printf "%s\n" "$ax_cv_check_ldflags___fstack_clash_protection" >&6; }
-if test x"$ax_cv_check_ldflags___fstack_clash_protection" = xyes
+if test "x$ax_cv_check_ldflags___fstack_clash_protection" = xyes
 then :
 
 
@@ -35099,16 +35148,23 @@ fi
 
 	    fi
 
-	    # Check for control-flow transfer instrumentation (Intel CET).
-	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fcf-protection" >&5
-printf %s "checking whether C compiler accepts -fcf-protection... " >&6; }
+	    # Check for control-flow transfer instrumentation (Intel CET)
+	    # on x86-64. Do not enable for 32-bit, since no 32-bit OS supports
+	    # it and the generated ENDBR32 instructions have compatibility
+	    # issues with some old i586/i686 processors (eg Geode or Vortex).
+	    if test "$host_cpu" = "x86_64"; then
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -fcf-protection" >&5
+printf %s "checking whether the C compiler accepts -fcf-protection... " >&6; }
 if test ${ax_cv_check_cflags___fcf_protection+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
   ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -fcf-protection"
+  if test x"$GCC" = xyes ; then
+    add_gnu_werror="-Werror"
+  fi
+  CFLAGS="$CFLAGS  -fcf-protection $add_gnu_werror"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -35136,7 +35192,7 @@ printf "%s\n" "$ax_cv_check_cflags___fcf_protection" >&6; }
 if test "x$ax_cv_check_cflags___fcf_protection" = xyes
 then :
 
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fcf-protection" >&5
+		    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fcf-protection" >&5
 printf %s "checking whether the linker accepts -fcf-protection... " >&6; }
 if test ${ax_cv_check_ldflags___fcf_protection+y}
 then :
@@ -35170,7 +35226,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___fcf_protection" >&5
 printf "%s\n" "$ax_cv_check_ldflags___fcf_protection" >&6; }
-if test x"$ax_cv_check_ldflags___fcf_protection" = xyes
+if test "x$ax_cv_check_ldflags___fcf_protection" = xyes
 then :
 
 
@@ -35253,6 +35309,7 @@ else case e in #(
 esac
 fi
 
+	    fi
 	fi
 
 	# Linker-specific hardening flags.
@@ -35292,7 +35349,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__z_relro" >&5
 printf "%s\n" "$ax_cv_check_ldflags___Wl__z_relro" >&6; }
-if test x"$ax_cv_check_ldflags___Wl__z_relro" = xyes
+if test "x$ax_cv_check_ldflags___Wl__z_relro" = xyes
 then :
 
 if test ${HARDENING_LDFLAGS+y}
@@ -35367,7 +35424,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__z_now" >&5
 printf "%s\n" "$ax_cv_check_ldflags___Wl__z_now" >&6; }
-if test x"$ax_cv_check_ldflags___Wl__z_now" = xyes
+if test "x$ax_cv_check_ldflags___Wl__z_now" = xyes
 then :
 
 if test ${HARDENING_LDFLAGS+y}
@@ -35442,7 +35499,7 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___Wl__z_noexecstack" >&5
 printf "%s\n" "$ax_cv_check_ldflags___Wl__z_noexecstack" >&6; }
-if test x"$ax_cv_check_ldflags___Wl__z_noexecstack" = xyes
+if test "x$ax_cv_check_ldflags___Wl__z_noexecstack" = xyes
 then :
 
 if test ${HARDENING_LDFLAGS+y}
@@ -35824,15 +35881,18 @@ else case e in #(
 esac
 fi
 
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -Wvla" >&5
-printf %s "checking whether C compiler accepts -Wvla... " >&6; }
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -Wvla" >&5
+printf %s "checking whether the C compiler accepts -Wvla... " >&6; }
 if test ${ax_cv_check_cflags___Wvla+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
   ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -Wvla"
+  if test x"$GCC" = xyes ; then
+    add_gnu_werror="-Werror"
+  fi
+  CFLAGS="$CFLAGS  -Wvla $add_gnu_werror"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -35898,15 +35958,18 @@ else case e in #(
 esac
 fi
 
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -Walloca" >&5
-printf %s "checking whether C compiler accepts -Walloca... " >&6; }
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -Walloca" >&5
+printf %s "checking whether the C compiler accepts -Walloca... " >&6; }
 if test ${ax_cv_check_cflags___Walloca+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
   ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -Walloca"
+  if test x"$GCC" = xyes ; then
+    add_gnu_werror="-Werror"
+  fi
+  CFLAGS="$CFLAGS  -Walloca $add_gnu_werror"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -35972,15 +36035,18 @@ else case e in #(
 esac
 fi
 
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -Wtrampolines" >&5
-printf %s "checking whether C compiler accepts -Wtrampolines... " >&6; }
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -Wtrampolines" >&5
+printf %s "checking whether the C compiler accepts -Wtrampolines... " >&6; }
 if test ${ax_cv_check_cflags___Wtrampolines+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
   ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -Wtrampolines"
+  if test x"$GCC" = xyes ; then
+    add_gnu_werror="-Werror"
+  fi
+  CFLAGS="$CFLAGS  -Wtrampolines $add_gnu_werror"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 

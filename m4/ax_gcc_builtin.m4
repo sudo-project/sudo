@@ -94,7 +94,7 @@
 #   and this notice are preserved.  This file is offered as-is, without any
 #   warranty.
 
-#serial 7
+#serial 8
 
 AC_DEFUN([AX_GCC_BUILTIN], [
     AS_VAR_PUSHDEF([ac_var], [ax_cv_have_$1])
@@ -168,9 +168,9 @@ AC_DEFUN([AX_GCC_BUILTIN], [
             [AS_VAR_SET([ac_var], [no])])
     ])
 
-    AS_IF([test yes = AS_VAR_GET([ac_var])],
+    AS_VAR_IF([ac_var], [yes],
         [AC_DEFINE_UNQUOTED(AS_TR_CPP(HAVE_$1), 1,
-            [Define to 1 if you have the '$1' built-in function])], [])
+            [Define to 1 if the system has the `$1' built-in function])], [])
 
     AS_VAR_POPDEF([ac_var])
 ])

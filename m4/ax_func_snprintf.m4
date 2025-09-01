@@ -24,7 +24,7 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 7
+#serial 8
 
 AU_ALIAS([AC_FUNC_SNPRINTF], [AX_FUNC_SNPRINTF])
 AC_DEFUN([AX_FUNC_SNPRINTF],
