@@ -35310,6 +35310,169 @@ esac
 fi
 
 	    fi
+
+	    #
+	    # Check for branch protection against ROP and JOP attacks on
+	    # AArch64 by using PAC and BTI.
+	    #
+	    if test "$host_cpu" = "aarch64"; then
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -mbranch-protection=standard" >&5
+printf %s "checking whether the C compiler accepts -mbranch-protection=standard... " >&6; }
+if test ${ax_cv_check_cflags___mbranch_protection_standard+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+  ax_check_save_flags=$CFLAGS
+  if test x"$GCC" = xyes ; then
+    add_gnu_werror="-Werror"
+  fi
+  CFLAGS="$CFLAGS  -mbranch-protection=standard $add_gnu_werror"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  ax_cv_check_cflags___mbranch_protection_standard=yes
+else case e in #(
+  e) ax_cv_check_cflags___mbranch_protection_standard=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___mbranch_protection_standard" >&5
+printf "%s\n" "$ax_cv_check_cflags___mbranch_protection_standard" >&6; }
+if test "x$ax_cv_check_cflags___mbranch_protection_standard" = xyes
+then :
+
+		    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -mbranch-protection=standard" >&5
+printf %s "checking whether the linker accepts -mbranch-protection=standard... " >&6; }
+if test ${ax_cv_check_ldflags___mbranch_protection_standard+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -mbranch-protection=standard"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ax_cv_check_ldflags___mbranch_protection_standard=yes
+else case e in #(
+  e) ax_cv_check_ldflags___mbranch_protection_standard=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___mbranch_protection_standard" >&5
+printf "%s\n" "$ax_cv_check_ldflags___mbranch_protection_standard" >&6; }
+if test "x$ax_cv_check_ldflags___mbranch_protection_standard" = xyes
+then :
+
+
+if test ${HARDENING_CFLAGS+y}
+then :
+
+  case " $HARDENING_CFLAGS " in #(
+  *" -mbranch-protection=standard "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_CFLAGS already contains -mbranch-protection=standard"; } >&5
+  (: HARDENING_CFLAGS already contains -mbranch-protection=standard) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append HARDENING_CFLAGS " -mbranch-protection=standard"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_CFLAGS=\"\$HARDENING_CFLAGS\""; } >&5
+  (: HARDENING_CFLAGS="$HARDENING_CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  HARDENING_CFLAGS=-mbranch-protection=standard
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_CFLAGS=\"\$HARDENING_CFLAGS\""; } >&5
+  (: HARDENING_CFLAGS="$HARDENING_CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
+
+if test ${HARDENING_LDFLAGS+y}
+then :
+
+  case " $HARDENING_LDFLAGS " in #(
+  *" -Wc,-mbranch-protection=standard "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_LDFLAGS already contains -Wc,-mbranch-protection=standard"; } >&5
+  (: HARDENING_LDFLAGS already contains -Wc,-mbranch-protection=standard) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append HARDENING_LDFLAGS " -Wc,-mbranch-protection=standard"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_LDFLAGS=\"\$HARDENING_LDFLAGS\""; } >&5
+  (: HARDENING_LDFLAGS="$HARDENING_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  HARDENING_LDFLAGS=-Wc,-mbranch-protection=standard
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_LDFLAGS=\"\$HARDENING_LDFLAGS\""; } >&5
+  (: HARDENING_LDFLAGS="$HARDENING_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
+
+else case e in #(
+  e) : ;;
+esac
+fi
+
+
+else case e in #(
+  e) : ;;
+esac
+fi
+
+	    fi
 	fi
 
 	# Linker-specific hardening flags.

@@ -1,3 +1,6 @@
+dnl
+dnl https://best.openssf.org/Compiler-Hardening-Guides/Compiler-Options-Hardening-Guide-for-C-and-C++.html
+dnl
 AC_DEFUN([SUDO_CHECK_HARDENING], [
     if test "$enable_hardening" != "no"; then
 	#
@@ -109,6 +112,19 @@ AC_DEFUN([SUDO_CHECK_HARDENING], [
 		    AX_CHECK_LINK_FLAG([-fcf-protection], [
 			AX_APPEND_FLAG([-fcf-protection], [HARDENING_CFLAGS])
 			AX_APPEND_FLAG([-Wc,-fcf-protection], [HARDENING_LDFLAGS])
+		    ])
+		])
+	    fi
+
+	    #
+	    # Check for branch protection against ROP and JOP attacks on
+	    # AArch64 by using PAC and BTI.
+	    #
+	    if test "$host_cpu" = "aarch64"; then
+		AX_CHECK_COMPILE_FLAG([-mbranch-protection=standard], [
+		    AX_CHECK_LINK_FLAG([-mbranch-protection=standard], [
+			AX_APPEND_FLAG([-mbranch-protection=standard], [HARDENING_CFLAGS])
+			AX_APPEND_FLAG([-Wc,-mbranch-protection=standard], [HARDENING_LDFLAGS])
 		    ])
 		])
 	    fi
