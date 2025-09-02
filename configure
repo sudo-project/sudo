@@ -34810,8 +34810,140 @@ fi
 	#
 	# Attempt to use _FORTIFY_SOURCE with sprintf.  If the headers support
 	# it but libc does not, __sprintf_chk should be an undefined symbol.
+	# Some systems warn about using a value of _FORTIFY_SOURCE > 2.
 	#
 	O_CPPFLAGS="$CPPFLAGS"
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking supported _FORTIFY_SOURCE level" >&5
+printf %s "checking supported _FORTIFY_SOURCE level... " >&6; }
+if test ${sudo_cv_fortify_source_level+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+
+if test ${CPPFLAGS+y}
+then :
+
+  case " $CPPFLAGS " in #(
+  *" -U_FORTIFY_SOURCE "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -U_FORTIFY_SOURCE"; } >&5
+  (: CPPFLAGS already contains -U_FORTIFY_SOURCE) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -U_FORTIFY_SOURCE"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  CPPFLAGS=-U_FORTIFY_SOURCE
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
+
+if test ${CPPFLAGS+y}
+then :
+
+  case " $CPPFLAGS " in #(
+  *" -D_FORTIFY_SOURCE=3 "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -D_FORTIFY_SOURCE=3"; } >&5
+  (: CPPFLAGS already contains -D_FORTIFY_SOURCE=3) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -D_FORTIFY_SOURCE=3"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  CPPFLAGS=-D_FORTIFY_SOURCE=3
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
+		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+		    #include <stdio.h>
+int
+main (void)
+{
+char buf[4]; sprintf(buf, "%s", "foo"); return buf[0];
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+
+			sudo_cv_fortify_source_level=3
+
+else case e in #(
+  e)
+			# Try again with -D_FORTIFY_SOURCE=2
+			CPPFLAGS="$O_CPPFLAGS"
+
+if test ${CPPFLAGS+y}
+then :
+
+  case " $CPPFLAGS " in #(
+  *" -U_FORTIFY_SOURCE "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -U_FORTIFY_SOURCE"; } >&5
+  (: CPPFLAGS already contains -U_FORTIFY_SOURCE) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -U_FORTIFY_SOURCE"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  CPPFLAGS=-U_FORTIFY_SOURCE
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
 
 if test ${CPPFLAGS+y}
 then :
@@ -34846,16 +34978,10 @@ else case e in #(
 esac
 fi
 
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether _FORTIFY_SOURCE may be specified" >&5
-printf %s "checking whether _FORTIFY_SOURCE may be specified... " >&6; }
-if test ${sudo_cv_use_fortify_source+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+			cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-		    #include <stdio.h>
+			    #include <stdio.h>
 int
 main (void)
 {
@@ -34867,9 +34993,19 @@ char buf[4]; sprintf(buf, "%s", "foo"); return buf[0];
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  sudo_cv_use_fortify_source=yes
+
+				sudo_cv_fortify_source_level=2
+
 else case e in #(
-  e) sudo_cv_use_fortify_source=no
+  e)
+				sudo_cv_fortify_source_level=none
+
+			 ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+
 		 ;;
 esac
 fi
@@ -34879,10 +35015,78 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam \
 	 ;;
 esac
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_use_fortify_source" >&5
-printf "%s\n" "$sudo_cv_use_fortify_source" >&6; }
-	if test "$sudo_cv_use_fortify_source" != yes; then
-	    CPPFLAGS="$O_CPPFLAGS"
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_fortify_source_level" >&5
+printf "%s\n" "$sudo_cv_fortify_source_level" >&6; }
+	CPPFLAGS="$O_CPPFLAGS"
+	if test "$sudo_cv_fortify_source_level" != none; then
+
+if test ${CPPFLAGS+y}
+then :
+
+  case " $CPPFLAGS " in #(
+  *" -U_FORTIFY_SOURCE "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -U_FORTIFY_SOURCE"; } >&5
+  (: CPPFLAGS already contains -U_FORTIFY_SOURCE) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -U_FORTIFY_SOURCE"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  CPPFLAGS=-U_FORTIFY_SOURCE
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
+
+if test ${CPPFLAGS+y}
+then :
+
+  case " $CPPFLAGS " in #(
+  *" -D_FORTIFY_SOURCE=$sudo_cv_fortify_source_level "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -D_FORTIFY_SOURCE=\$sudo_cv_fortify_source_level"; } >&5
+  (: CPPFLAGS already contains -D_FORTIFY_SOURCE=$sudo_cv_fortify_source_level) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append CPPFLAGS " -D_FORTIFY_SOURCE=$sudo_cv_fortify_source_level"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  CPPFLAGS=-D_FORTIFY_SOURCE=$sudo_cv_fortify_source_level
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
 	fi
 
 				if test -n "$GCC" -a "$enable_ssp" != "no"; then

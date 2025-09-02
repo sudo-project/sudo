@@ -6,23 +6,43 @@ AC_DEFUN([SUDO_CHECK_HARDENING], [
 	#
 	# Attempt to use _FORTIFY_SOURCE with sprintf.  If the headers support
 	# it but libc does not, __sprintf_chk should be an undefined symbol.
+	# Some systems warn about using a value of _FORTIFY_SOURCE > 2.
 	#
 	O_CPPFLAGS="$CPPFLAGS"
-	AX_APPEND_FLAG([-D_FORTIFY_SOURCE=2], [CPPFLAGS])
-	AC_CACHE_CHECK([whether _FORTIFY_SOURCE may be specified],
-	    [sudo_cv_use_fortify_source],
-	    [AC_LINK_IFELSE([
+	AC_CACHE_CHECK([supported _FORTIFY_SOURCE level],
+	    [sudo_cv_fortify_source_level],
+	    [
+		AX_APPEND_FLAG([-U_FORTIFY_SOURCE], [CPPFLAGS])
+		AX_APPEND_FLAG([-D_FORTIFY_SOURCE=3], [CPPFLAGS])
+		AC_LINK_IFELSE([
 		    AC_LANG_PROGRAM(
 			[[#include <stdio.h>]],
 			[[char buf[4]; sprintf(buf, "%s", "foo"); return buf[0];]]
-		    )],
-		    [sudo_cv_use_fortify_source=yes],
-		    [sudo_cv_use_fortify_source=no]
+		    )], [
+			sudo_cv_fortify_source_level=3
+		    ], [
+			# Try again with -D_FORTIFY_SOURCE=2
+			CPPFLAGS="$O_CPPFLAGS"
+			AX_APPEND_FLAG([-U_FORTIFY_SOURCE], [CPPFLAGS])
+			AX_APPEND_FLAG([-D_FORTIFY_SOURCE=2], [CPPFLAGS])
+			AC_LINK_IFELSE([
+			    AC_LANG_PROGRAM(
+				[[#include <stdio.h>]],
+				[[char buf[4]; sprintf(buf, "%s", "foo"); return buf[0];]]
+			    )], [
+				sudo_cv_fortify_source_level=2
+			    ], [
+				sudo_cv_fortify_source_level=none
+			    ]
+			)
+		    ]
 		)
 	    ]
 	)
-	if test "$sudo_cv_use_fortify_source" != yes; then
-	    CPPFLAGS="$O_CPPFLAGS"
+	CPPFLAGS="$O_CPPFLAGS"
+	if test "$sudo_cv_fortify_source_level" != none; then
+	    AX_APPEND_FLAG([-U_FORTIFY_SOURCE], [CPPFLAGS])
+	    AX_APPEND_FLAG([-D_FORTIFY_SOURCE=$sudo_cv_fortify_source_level], [CPPFLAGS])
 	fi
 
 	dnl
