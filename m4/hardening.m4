@@ -148,13 +148,42 @@ AC_DEFUN([SUDO_CHECK_HARDENING], [
 		    ])
 		])
 	    fi
+
+	    # Force retention of null pointer checks.
+	    AX_CHECK_COMPILE_FLAG([-fno-delete-null-pointer-checks], [AX_APPEND_FLAG([-fno-delete-null-pointer-checks], [HARDENING_CFLAGS])])
+
+	    # Guarantee zero initialization of padding bits in
+	    # all automatic variable initializers.
+	    AX_CHECK_COMPILE_FLAG([-fzero-init-padding-bits=all], [AX_APPEND_FLAG([-fzero-init-padding-bits=all], [HARDENING_CFLAGS])])
+
+	    # Define behavior for signed integer and pointer overflow.
+	    AX_CHECK_COMPILE_FLAG([-fno-strict-overflow], [AX_APPEND_FLAG([-fno-strict-overflow], [HARDENING_CFLAGS])])
+
+	    # Disable strict aliasing rules that allow the compiler to assume
+	    # that two objects of different types may not use the same address.
+	    AX_CHECK_COMPILE_FLAG([-fno-strict-aliasing], [AX_APPEND_FLAG([-fno-strict-aliasing], [HARDENING_CFLAGS])])
+
+	    # Initialize automatic variables without an assignment to zero.
+	    # This prevents uninitialized variables from having stack garbage.
+	    AX_CHECK_COMPILE_FLAG([-ftrivial-auto-var-init=zero], [AX_APPEND_FLAG([-ftrivial-auto-var-init=zero], [HARDENING_CFLAGS])])
 	fi
 
-	# Linker-specific hardening flags.
+	# Linker-specific hardening for GNU ld and similar (gold, lld, etc).
 	if test X"$with_gnu_ld" = X"yes"; then
-	    # GNU ld, and similar (gold, lld, etc).
+	    # Mark relocation table entries resolved at load-time as read-only.
 	    AX_CHECK_LINK_FLAG([-Wl,-z,relro], [AX_APPEND_FLAG([-Wl,-z,relro], [HARDENING_LDFLAGS])])
+
+	    # Resolve all symbols when the program is started.
 	    AX_CHECK_LINK_FLAG([-Wl,-z,now], [AX_APPEND_FLAG([-Wl,-z,now], [HARDENING_LDFLAGS])])
+
+	    # Mark stack memory as non-executable.
 	    AX_CHECK_LINK_FLAG([-Wl,-z,noexecstack], [AX_APPEND_FLAG([-Wl,-z,noexecstack], [HARDENING_LDFLAGS])])
+
+	    # Only link libraries containing symbols that are actually used.
+	    AX_CHECK_LINK_FLAG([-Wl,--as-needed], [AX_APPEND_FLAG([-Wl,--as-needed], [HARDENING_LDFLAGS])])
+
+	    # Don't resolve symbols using transitive library dependencies.
+	    # The binary must explicitly link against all of its dependencies.
+	    AX_CHECK_LINK_FLAG([-Wl,--no-copy-dt-needed-entries], [AX_APPEND_FLAG([-Wl,--no-copy-dt-needed-entries], [HARDENING_LDFLAGS])])
 	fi
     fi])
