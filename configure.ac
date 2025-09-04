@@ -1950,7 +1950,7 @@ case "$host" in
 			    portable_flag="+DAportable"
 			])
 			CFLAGS="$CFLAGS $portable_flag"
-			AC_CACHE_CHECK([whether $CC understands $portable_flag],
+			AC_CACHE_CHECK([whether the C compiler understands $portable_flag],
 			    [sudo_cv_var_daportable],
 			    [AC_LINK_IFELSE(
 				[AC_LANG_PROGRAM([[]], [[]])],
@@ -4252,7 +4252,7 @@ AS_IF([test -n "$GCC"], [
     # The fallthrough attribute is supported by gcc 7.0 and clang 10.
     # This test relies on AC_LANG_WERROR.
     #
-    AC_CACHE_CHECK([whether $CC supports the fallthrough attribute],
+    AC_CACHE_CHECK([whether the C compiler supports the fallthrough attribute],
 	[sudo_cv_var_fallthrough_attribute],
 	[AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
 	    int main(int argc, char *argv[])

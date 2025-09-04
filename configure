@@ -18248,8 +18248,8 @@ else case e in #(
 esac
 fi
 			CFLAGS="$CFLAGS $portable_flag"
-			{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether $CC understands $portable_flag" >&5
-printf %s "checking whether $CC understands $portable_flag... " >&6; }
+			{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler understands $portable_flag" >&5
+printf %s "checking whether the C compiler understands $portable_flag... " >&6; }
 if test ${sudo_cv_var_daportable+y}
 then :
   printf %s "(cached) " >&6
@@ -36685,8 +36685,8 @@ then :
     # The fallthrough attribute is supported by gcc 7.0 and clang 10.
     # This test relies on AC_LANG_WERROR.
     #
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether $CC supports the fallthrough attribute" >&5
-printf %s "checking whether $CC supports the fallthrough attribute... " >&6; }
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler supports the fallthrough attribute" >&5
+printf %s "checking whether the C compiler supports the fallthrough attribute... " >&6; }
 if test ${sudo_cv_var_fallthrough_attribute+y}
 then :
   printf %s "(cached) " >&6
