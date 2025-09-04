@@ -123,31 +123,39 @@ AC_DEFUN([SUDO_CHECK_HARDENING], [
 		])
 	    fi
 
-	    # Check for control-flow transfer instrumentation (Intel CET)
-	    # on x86-64. Do not enable for 32-bit, since no 32-bit OS supports
-	    # it and the generated ENDBR32 instructions have compatibility
-	    # issues with some old i586/i686 processors (eg Geode or Vortex).
-	    if test "$host_cpu" = "x86_64"; then
-		AX_CHECK_COMPILE_FLAG([-fcf-protection], [
-		    AX_CHECK_LINK_FLAG([-fcf-protection], [
-			AX_APPEND_FLAG([-fcf-protection], [HARDENING_CFLAGS])
-			AX_APPEND_FLAG([-Wc,-fcf-protection], [HARDENING_LDFLAGS])
+	    # Check for control-flow transfer instrumentation (Intel CET).
+	    # Do not enable branch protection for 32-bit, since no 32-bit
+	    # OS supports it and the generated ENDBR32 instructions have
+	    # compatibility issues with some older i586/i686 compatible
+	    # processors (e.g. Geode or Vortex).
+	    AS_CASE([$host_cpu], [x86_64], [
+		AX_CHECK_COMPILE_FLAG([-fcf-protection=full], [
+		    AX_CHECK_LINK_FLAG([-fcf-protection=full], [
+			AX_APPEND_FLAG([-fcf-protection=full], [HARDENING_CFLAGS])
+			AX_APPEND_FLAG([-Wc,-fcf-protection=full], [HARDENING_LDFLAGS])
 		    ])
 		])
-	    fi
+	    ], [i*86], [
+		AX_CHECK_COMPILE_FLAG([-fcf-protection=return], [
+		    AX_CHECK_LINK_FLAG([-fcf-protection=return], [
+			AX_APPEND_FLAG([-fcf-protection=return], [HARDENING_CFLAGS])
+			AX_APPEND_FLAG([-Wc,-fcf-protection=return], [HARDENING_LDFLAGS])
+		    ])
+		])
+	    ])
 
 	    #
 	    # Check for branch protection against ROP and JOP attacks on
 	    # AArch64 by using PAC and BTI.
 	    #
-	    if test "$host_cpu" = "aarch64"; then
+	    AS_IF([test "$host_cpu" = "aarch64"], [
 		AX_CHECK_COMPILE_FLAG([-mbranch-protection=standard], [
 		    AX_CHECK_LINK_FLAG([-mbranch-protection=standard], [
 			AX_APPEND_FLAG([-mbranch-protection=standard], [HARDENING_CFLAGS])
 			AX_APPEND_FLAG([-Wc,-mbranch-protection=standard], [HARDENING_LDFLAGS])
 		    ])
 		])
-	    fi
+	    ])
 
 	    # Force retention of null pointer checks.
 	    AX_CHECK_COMPILE_FLAG([-fno-delete-null-pointer-checks], [AX_APPEND_FLAG([-fno-delete-null-pointer-checks], [HARDENING_CFLAGS])])

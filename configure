@@ -35352,14 +35352,17 @@ fi
 
 	    fi
 
-	    # Check for control-flow transfer instrumentation (Intel CET)
-	    # on x86-64. Do not enable for 32-bit, since no 32-bit OS supports
-	    # it and the generated ENDBR32 instructions have compatibility
-	    # issues with some old i586/i686 processors (eg Geode or Vortex).
-	    if test "$host_cpu" = "x86_64"; then
-		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -fcf-protection" >&5
-printf %s "checking whether the C compiler accepts -fcf-protection... " >&6; }
-if test ${ax_cv_check_cflags___fcf_protection+y}
+	    # Check for control-flow transfer instrumentation (Intel CET).
+	    # Do not enable branch protection for 32-bit, since no 32-bit
+	    # OS supports it and the generated ENDBR32 instructions have
+	    # compatibility issues with some older i586/i686 compatible
+	    # processors (e.g. Geode or Vortex).
+	    case $host_cpu in #(
+  x86_64) :
+
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -fcf-protection=full" >&5
+printf %s "checking whether the C compiler accepts -fcf-protection=full... " >&6; }
+if test ${ax_cv_check_cflags___fcf_protection_full+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
@@ -35368,7 +35371,7 @@ else case e in #(
   if test x"$GCC" = xyes ; then
     add_gnu_werror="-Werror"
   fi
-  CFLAGS="$CFLAGS  -fcf-protection $add_gnu_werror"
+  CFLAGS="$CFLAGS  -fcf-protection=full $add_gnu_werror"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -35382,29 +35385,29 @@ main (void)
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"
 then :
-  ax_cv_check_cflags___fcf_protection=yes
+  ax_cv_check_cflags___fcf_protection_full=yes
 else case e in #(
-  e) ax_cv_check_cflags___fcf_protection=no ;;
+  e) ax_cv_check_cflags___fcf_protection_full=no ;;
 esac
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
   CFLAGS=$ax_check_save_flags ;;
 esac
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fcf_protection" >&5
-printf "%s\n" "$ax_cv_check_cflags___fcf_protection" >&6; }
-if test "x$ax_cv_check_cflags___fcf_protection" = xyes
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fcf_protection_full" >&5
+printf "%s\n" "$ax_cv_check_cflags___fcf_protection_full" >&6; }
+if test "x$ax_cv_check_cflags___fcf_protection_full" = xyes
 then :
 
-		    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fcf-protection" >&5
-printf %s "checking whether the linker accepts -fcf-protection... " >&6; }
-if test ${ax_cv_check_ldflags___fcf_protection+y}
+		    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fcf-protection=full" >&5
+printf %s "checking whether the linker accepts -fcf-protection=full... " >&6; }
+if test ${ax_cv_check_ldflags___fcf_protection_full+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
   e)
   ax_check_save_flags=$LDFLAGS
-  LDFLAGS="$LDFLAGS  -fcf-protection"
+  LDFLAGS="$LDFLAGS  -fcf-protection=full"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -35418,9 +35421,9 @@ main (void)
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  ax_cv_check_ldflags___fcf_protection=yes
+  ax_cv_check_ldflags___fcf_protection_full=yes
 else case e in #(
-  e) ax_cv_check_ldflags___fcf_protection=no ;;
+  e) ax_cv_check_ldflags___fcf_protection_full=no ;;
 esac
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
@@ -35428,9 +35431,9 @@ rm -f core conftest.err conftest.$ac_objext conftest.beam \
   LDFLAGS=$ax_check_save_flags ;;
 esac
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___fcf_protection" >&5
-printf "%s\n" "$ax_cv_check_ldflags___fcf_protection" >&6; }
-if test "x$ax_cv_check_ldflags___fcf_protection" = xyes
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___fcf_protection_full" >&5
+printf "%s\n" "$ax_cv_check_ldflags___fcf_protection_full" >&6; }
+if test "x$ax_cv_check_ldflags___fcf_protection_full" = xyes
 then :
 
 
@@ -35438,15 +35441,15 @@ if test ${HARDENING_CFLAGS+y}
 then :
 
   case " $HARDENING_CFLAGS " in #(
-  *" -fcf-protection "*) :
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_CFLAGS already contains -fcf-protection"; } >&5
-  (: HARDENING_CFLAGS already contains -fcf-protection) 2>&5
+  *" -fcf-protection=full "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_CFLAGS already contains -fcf-protection=full"; } >&5
+  (: HARDENING_CFLAGS already contains -fcf-protection=full) 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; } ;; #(
   *) :
 
-     as_fn_append HARDENING_CFLAGS " -fcf-protection"
+     as_fn_append HARDENING_CFLAGS " -fcf-protection=full"
      { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_CFLAGS=\"\$HARDENING_CFLAGS\""; } >&5
   (: HARDENING_CFLAGS="$HARDENING_CFLAGS") 2>&5
   ac_status=$?
@@ -35457,7 +35460,7 @@ esac
 
 else case e in #(
   e)
-  HARDENING_CFLAGS=-fcf-protection
+  HARDENING_CFLAGS=-fcf-protection=full
   { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_CFLAGS=\"\$HARDENING_CFLAGS\""; } >&5
   (: HARDENING_CFLAGS="$HARDENING_CFLAGS") 2>&5
   ac_status=$?
@@ -35472,15 +35475,15 @@ if test ${HARDENING_LDFLAGS+y}
 then :
 
   case " $HARDENING_LDFLAGS " in #(
-  *" -Wc,-fcf-protection "*) :
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_LDFLAGS already contains -Wc,-fcf-protection"; } >&5
-  (: HARDENING_LDFLAGS already contains -Wc,-fcf-protection) 2>&5
+  *" -Wc,-fcf-protection=full "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_LDFLAGS already contains -Wc,-fcf-protection=full"; } >&5
+  (: HARDENING_LDFLAGS already contains -Wc,-fcf-protection=full) 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; } ;; #(
   *) :
 
-     as_fn_append HARDENING_LDFLAGS " -Wc,-fcf-protection"
+     as_fn_append HARDENING_LDFLAGS " -Wc,-fcf-protection=full"
      { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_LDFLAGS=\"\$HARDENING_LDFLAGS\""; } >&5
   (: HARDENING_LDFLAGS="$HARDENING_LDFLAGS") 2>&5
   ac_status=$?
@@ -35491,7 +35494,7 @@ esac
 
 else case e in #(
   e)
-  HARDENING_LDFLAGS=-Wc,-fcf-protection
+  HARDENING_LDFLAGS=-Wc,-fcf-protection=full
   { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_LDFLAGS=\"\$HARDENING_LDFLAGS\""; } >&5
   (: HARDENING_LDFLAGS="$HARDENING_LDFLAGS") 2>&5
   ac_status=$?
@@ -35513,13 +35516,177 @@ else case e in #(
 esac
 fi
 
-	    fi
+	     ;; #(
+  i*86) :
+
+		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -fcf-protection=return" >&5
+printf %s "checking whether the C compiler accepts -fcf-protection=return... " >&6; }
+if test ${ax_cv_check_cflags___fcf_protection_return+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+  ax_check_save_flags=$CFLAGS
+  if test x"$GCC" = xyes ; then
+    add_gnu_werror="-Werror"
+  fi
+  CFLAGS="$CFLAGS  -fcf-protection=return $add_gnu_werror"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  ax_cv_check_cflags___fcf_protection_return=yes
+else case e in #(
+  e) ax_cv_check_cflags___fcf_protection_return=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fcf_protection_return" >&5
+printf "%s\n" "$ax_cv_check_cflags___fcf_protection_return" >&6; }
+if test "x$ax_cv_check_cflags___fcf_protection_return" = xyes
+then :
+
+		    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -fcf-protection=return" >&5
+printf %s "checking whether the linker accepts -fcf-protection=return... " >&6; }
+if test ${ax_cv_check_ldflags___fcf_protection_return+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e)
+  ax_check_save_flags=$LDFLAGS
+  LDFLAGS="$LDFLAGS  -fcf-protection=return"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ax_cv_check_ldflags___fcf_protection_return=yes
+else case e in #(
+  e) ax_cv_check_ldflags___fcf_protection_return=no ;;
+esac
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$ax_check_save_flags ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___fcf_protection_return" >&5
+printf "%s\n" "$ax_cv_check_ldflags___fcf_protection_return" >&6; }
+if test "x$ax_cv_check_ldflags___fcf_protection_return" = xyes
+then :
+
+
+if test ${HARDENING_CFLAGS+y}
+then :
+
+  case " $HARDENING_CFLAGS " in #(
+  *" -fcf-protection=return "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_CFLAGS already contains -fcf-protection=return"; } >&5
+  (: HARDENING_CFLAGS already contains -fcf-protection=return) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append HARDENING_CFLAGS " -fcf-protection=return"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_CFLAGS=\"\$HARDENING_CFLAGS\""; } >&5
+  (: HARDENING_CFLAGS="$HARDENING_CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  HARDENING_CFLAGS=-fcf-protection=return
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_CFLAGS=\"\$HARDENING_CFLAGS\""; } >&5
+  (: HARDENING_CFLAGS="$HARDENING_CFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
+
+if test ${HARDENING_LDFLAGS+y}
+then :
+
+  case " $HARDENING_LDFLAGS " in #(
+  *" -Wc,-fcf-protection=return "*) :
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_LDFLAGS already contains -Wc,-fcf-protection=return"; } >&5
+  (: HARDENING_LDFLAGS already contains -Wc,-fcf-protection=return) 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } ;; #(
+  *) :
+
+     as_fn_append HARDENING_LDFLAGS " -Wc,-fcf-protection=return"
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_LDFLAGS=\"\$HARDENING_LDFLAGS\""; } >&5
+  (: HARDENING_LDFLAGS="$HARDENING_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+     ;;
+esac
+
+else case e in #(
+  e)
+  HARDENING_LDFLAGS=-Wc,-fcf-protection=return
+  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: : HARDENING_LDFLAGS=\"\$HARDENING_LDFLAGS\""; } >&5
+  (: HARDENING_LDFLAGS="$HARDENING_LDFLAGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   ;;
+esac
+fi
+
+
+else case e in #(
+  e) : ;;
+esac
+fi
+
+
+else case e in #(
+  e) : ;;
+esac
+fi
+
+	     ;; #(
+  *) :
+     ;;
+esac
 
 	    #
 	    # Check for branch protection against ROP and JOP attacks on
 	    # AArch64 by using PAC and BTI.
 	    #
-	    if test "$host_cpu" = "aarch64"; then
+	    if test "$host_cpu" = "aarch64"
+then :
+
 		{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -mbranch-protection=standard" >&5
 printf %s "checking whether the C compiler accepts -mbranch-protection=standard... " >&6; }
 if test ${ax_cv_check_cflags___mbranch_protection_standard+y}
@@ -35676,7 +35843,8 @@ else case e in #(
 esac
 fi
 
-	    fi
+
+fi
 
 	    # Force retention of null pointer checks.
 	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -fno-delete-null-pointer-checks" >&5
