@@ -577,7 +577,7 @@ handle_log_id(char *id, struct connection_closure *closure)
     len = asprintf(&new_id, "%s/%s", id,
 	closure->relay_closure->relay_name.name);
     if (len != -1) {
-	if (fmt_log_id_message(id, closure)) {
+	if (fmt_log_id_message(new_id, closure)) {
 	    if (sudo_ev_add(closure->evbase, closure->write_ev,
 		    logsrvd_conf_relay_timeout(), false) == -1) {
 		sudo_warnx("%s", U_("unable to add event to queue"));
