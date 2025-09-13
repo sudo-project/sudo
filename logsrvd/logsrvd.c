@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2025 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1043,7 +1043,7 @@ client_msg_cb(int fd, int what, void *v)
 #if defined(HAVE_OPENSSL)
     if (closure->ssl != NULL) {
 	const int result = SSL_read_ex(closure->ssl, buf->data + buf->len,
-	    buf->size, &nread);
+	    buf->size - buf->len, &nread);
         if (result <= 0) {
 	    const char *errstr;
             switch (SSL_get_error(closure->ssl, result)) {
