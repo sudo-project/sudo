@@ -32,6 +32,7 @@
 #include <sudoers.h>
 #ifdef SUDOERS_LOG_CLIENT
 # include <log_client.h>
+# include <strlist.h>
 #endif
 
 #ifdef HAVE_BSM_AUDIT
@@ -44,9 +45,6 @@
 # include <solaris_audit.h>
 #endif
 
-#ifdef SUDOERS_LOG_CLIENT
-static struct log_details audit_details;
-#endif
 char *audit_msg = NULL;
 
 /* sudoers_audit is declared at the end of this file. */
@@ -191,7 +189,7 @@ sudoers_audit_open(unsigned int version, sudo_conv_t conversation,
     if (ret == true) {
 	/* Unset close function if we don't need it to avoid extra process. */
 #ifdef SUDOERS_LOG_CLIENT
-	if (client_closure == NULL)
+	if (SLIST_EMPTY(&def_log_servers))
 #endif
 	    sudoers_audit.close = NULL;
     } else {
@@ -284,6 +282,8 @@ log_server_accept(const struct sudoers_context *ctx, struct eventlog *evlog)
 	    ret = true;
 	}
     } else {
+	struct log_details audit_details;
+
 	if (!init_log_details(&audit_details, evlog))
 	    goto done;
 
@@ -292,6 +292,9 @@ log_server_accept(const struct sudoers_context *ctx, struct eventlog *evlog)
 	    SEND_ACCEPT, NULL);
 	if (client_closure != NULL)
 	    ret = true;
+
+	/* Only the log_servers string list is dynamically allocated. */
+	str_list_free(audit_details.log_servers);
     }
 
 done:
@@ -317,8 +320,6 @@ log_server_exit(int status_type, int status)
 	}
 	log_server_close(client_closure, exit_status, error);
 	client_closure = NULL;
-	free(audit_details.evlog);
-	audit_details.evlog = NULL;
     }
 
     debug_return;
