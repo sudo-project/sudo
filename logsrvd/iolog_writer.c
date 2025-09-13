@@ -178,7 +178,11 @@ evlog_new(const TimeSpec *submit_time, InfoMessage * const *info_msgs,
     /* Pull out values by key from info array. */
     for (idx = 0; idx < infolen; idx++) {
 	const InfoMessage *info = info_msgs[idx];
-	const char *key = info->key;
+	const char *key;
+
+	if (info == NULL)
+	    continue;
+	key = info->key;
 	switch (key[0]) {
 	case 'c':
 	    if (strcmp(key, "columns") == 0) {

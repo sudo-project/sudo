@@ -405,12 +405,13 @@ store_exit_local(const ExitMessage *msg, const uint8_t *buf, size_t len,
     int flags = 0;
     debug_decl(store_exit_local, SUDO_DEBUG_UTIL);
 
+    /* TODO: store the "error" string if present. */
     if (msg->run_time != NULL) {
 	evlog->run_time.tv_sec = (time_t)msg->run_time->tv_sec;
 	evlog->run_time.tv_nsec = (long)msg->run_time->tv_nsec;
     }
     evlog->exit_value = msg->exit_value;
-    if (msg->signal != NULL && msg->signal[0] != '\0') {
+    if (msg->signal[0] != '\0') {
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "command was killed by SIG%s%s", msg->signal,
 	    msg->dumped_core ? " (core dumped)" : "");

@@ -1502,7 +1502,7 @@ handle_server_hello(const ServerHello *msg, struct client_closure *closure)
     }
 
     /* Check that ServerHello is valid. */
-    if (msg->server_id == NULL || msg->server_id[0] == '\0') {
+    if (msg == NULL || msg->server_id == NULL || msg->server_id[0] == '\0') {
 	sudo_warnx("%s", U_("invalid ServerHello"));
 	debug_return_bool(false);
     }
@@ -1526,7 +1526,7 @@ handle_server_hello(const ServerHello *msg, struct client_closure *closure)
 }
 
 /*
- * Respond to a CommitPoint message from the server.
+ * Respond to a commit_point ServerMessage from the server.
  * Returns true on success, false on error.
  */
 static bool
@@ -1538,6 +1538,12 @@ handle_commit_point(const TimeSpec *commit_point,
     /* Only valid after we have sent an IO buffer. */
     if (closure->state < SEND_IO) {
 	sudo_warnx(U_("%s: unexpected state %d"), __func__, closure->state);
+	debug_return_bool(false);
+    }
+
+    /* Check that ServerMessage's commit_point is valid. */
+    if (commit_point == NULL) {
+	sudo_warnx(U_("invalid ServerMessage"));
 	debug_return_bool(false);
     }
 
@@ -1570,6 +1576,12 @@ handle_log_id(const char *id, struct client_closure *closure)
     debug_decl(handle_log_id, SUDOERS_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: remote log ID: %s", __func__, id);
+
+    if (id[0] == '\0') {
+	sudo_warnx(U_("invalid ServerMessage"));
+	debug_return_bool(false);
+    }
+
     if (closure->iolog_id == NULL) {
 	if ((closure->iolog_id = strdup(id)) == NULL)
 	    sudo_fatal(U_("%s: %s"), __func__, U_("unable to allocate memory"));

@@ -458,7 +458,7 @@ handle_accept(const AcceptMessage *msg, const uint8_t *buf, size_t len,
     }
 
     /* Check that message is valid. */
-    if (msg->submit_time == NULL || msg->n_info_msgs == 0) {
+    if (msg == NULL || msg->submit_time == NULL || msg->n_info_msgs == 0) {
 	sudo_warnx(U_("%s: %s"), source, U_("invalid AcceptMessage"));
 	closure->errstr = _("invalid AcceptMessage");
 	debug_return_bool(false);
@@ -495,7 +495,8 @@ handle_reject(const RejectMessage *msg, const uint8_t *buf, size_t len,
     }
 
     /* Check that message is valid. */
-    if (msg->submit_time == NULL || msg->n_info_msgs == 0) {
+    if (msg == NULL || msg->submit_time == NULL || msg->reason[0] == '\0' ||
+	    msg->n_info_msgs == 0) {
 	sudo_warnx(U_("%s: %s"), source, U_("invalid RejectMessage"));
 	closure->errstr = _("invalid RejectMessage");
 	debug_return_bool(false);
@@ -527,7 +528,7 @@ handle_exit(const ExitMessage *msg, const uint8_t *buf, size_t len,
     }
 
     /* Check that message is valid. */
-    if (msg->run_time == NULL) {
+    if (msg == NULL || msg->run_time == NULL) {
 	sudo_warnx(U_("%s: %s"), source, U_("invalid ExitMessage"));
 	closure->errstr = _("invalid ExitMessage");
 	debug_return_bool(false);
@@ -581,7 +582,7 @@ handle_restart(const RestartMessage *msg, const uint8_t *buf, size_t len,
     }
 
     /* Check that message is valid. */
-    if (msg->log_id == NULL || msg->resume_point == NULL) {
+    if (msg == NULL || msg->log_id[0] == '\0' || msg->resume_point == NULL) {
 	sudo_warnx(U_("%s: %s"), source, U_("invalid RestartMessage"));
 	closure->errstr = _("invalid RestartMessage");
 	debug_return_bool(false);
@@ -616,7 +617,7 @@ handle_alert(const AlertMessage *msg, const uint8_t *buf, size_t len,
     debug_decl(handle_alert, SUDO_DEBUG_UTIL);
 
     /* Check that message is valid. */
-    if (msg->alert_time == NULL || msg->reason == NULL) {
+    if (msg == NULL || msg->alert_time == NULL || msg->reason[0] == '\0') {
 	sudo_warnx(U_("%s: %s"), source, U_("invalid AlertMessage"));
 	closure->errstr = _("invalid AlertMessage");
 	debug_return_bool(false);
@@ -665,7 +666,7 @@ handle_iobuf(int iofd, const IoBuffer *iobuf, const uint8_t *buf, size_t len,
     }
 
     /* Check that message is valid. */
-    if (iobuf->delay == NULL) {
+    if (iobuf == NULL || iobuf->delay == NULL || iobuf->data.len == 0) {
 	sudo_warnx(U_("%s: %s"), source, U_("invalid IoBuffer"));
 	closure->errstr = _("invalid IoBuffer");
 	debug_return_bool(false);
@@ -701,7 +702,7 @@ handle_winsize(const ChangeWindowSize *msg, const uint8_t *buf, size_t len,
     }
 
     /* Check that message is valid. */
-    if (msg->delay == NULL) {
+    if (msg == NULL || msg->delay == NULL) {
 	sudo_warnx(U_("%s: %s"), source, U_("invalid ChangeWindowSize"));
 	closure->errstr = _("invalid ChangeWindowSize");
 	debug_return_bool(false);
@@ -737,7 +738,7 @@ handle_suspend(const CommandSuspend *msg, const uint8_t *buf, size_t len,
     }
 
     /* Check that message is valid. */
-    if (msg->delay == NULL || msg->signal == NULL) {
+    if (msg == NULL || msg->delay == NULL || msg->signal[0] == '\0') {
 	sudo_warnx(U_("%s: %s"), source, U_("invalid CommandSuspend"));
 	closure->errstr = _("invalid CommandSuspend");
 	debug_return_bool(false);
@@ -767,10 +768,16 @@ handle_client_hello(const ClientHello *msg, const uint8_t *buf, size_t len,
 	debug_return_bool(false);
     }
 
+    /* Check that message is valid. */
+    if (msg == NULL || msg->client_id[0] == '\0') {
+	sudo_warnx(U_("%s: %s"), source, U_("invalid ClientHello"));
+	closure->errstr = _("invalid ClientHello");
+	debug_return_bool(false);
+    }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received ClientHello",
 	__func__);
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: client ID %s",
-	__func__, msg->client_id ? msg->client_id : "unknown");
+	__func__, msg->client_id);
 
     debug_return_bool(true);
 }

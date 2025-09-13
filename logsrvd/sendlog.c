@@ -1132,7 +1132,7 @@ handle_server_hello(const ServerHello *msg, struct client_closure *closure)
     }
 
     /* Check that ServerHello is valid. */
-    if (msg->server_id == NULL || msg->server_id[0] == '\0') {
+    if (msg == NULL || msg->server_id == NULL || msg->server_id[0] == '\0') {
 	sudo_warnx("%s", U_("invalid ServerHello"));
 	debug_return_bool(false);
     }
@@ -1151,7 +1151,7 @@ handle_server_hello(const ServerHello *msg, struct client_closure *closure)
 }
 
 /*
- * Respond to a CommitPoint message from the server.
+ * Respond to a commit_point ServerMessage from the server.
  * Returns true on success, false on error.
  */
 static bool
@@ -1166,6 +1166,13 @@ handle_commit_point(const TimeSpec *commit_point,
 	debug_return_bool(false);
     }
 
+    /* Check that ServerMessage's commit_point is valid. */
+    if (commit_point == NULL) {
+	sudo_warnx(U_("%s: invalid ServerMessage, missing commit_point"),
+	    server_info.name);
+	debug_return_bool(false);
+    }
+
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: commit point: [%lld, %d]",
 	__func__, (long long)commit_point->tv_sec, commit_point->tv_nsec);
     closure->committed.tv_sec = (time_t)commit_point->tv_sec;
@@ -1175,7 +1182,7 @@ handle_commit_point(const TimeSpec *commit_point,
 }
 
 /*
- * Respond to a LogId message from the server.
+ * Respond to a log_id ServerMessage from the relay.
  * Always returns true.
  */
 static bool

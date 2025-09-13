@@ -516,7 +516,7 @@ handle_server_hello(const ServerHello *msg, struct connection_closure *closure)
     }
 
     /* Check that ServerHello is valid. */
-    if (msg->server_id == NULL || msg->server_id[0] == '\0') {
+    if (msg == NULL || msg->server_id == NULL || msg->server_id[0] == '\0') {
 	sudo_warnx(U_("%s: invalid ServerHello, missing server_id"),
 	    relay_closure->relay_name.ipaddr);
 	closure->errstr = _("invalid ServerHello");
@@ -533,7 +533,7 @@ handle_server_hello(const ServerHello *msg, struct connection_closure *closure)
 }
 
 /*
- * Respond to a CommitPoint message from the relay.
+ * Respond to a commit_point ServerMessage from the relay.
  * Returns true on success, false on error.
  */
 static bool
@@ -549,13 +549,21 @@ handle_commit_point(const TimeSpec *commit_point,
 	debug_return_bool(false);
     }
 
+    /* Check that ServerMessage's commit_point is valid. */
+    if (commit_point == NULL) {
+	sudo_warnx(U_("%s: invalid ServerMessage, missing commit_point"),
+	    closure->relay_closure->relay_name.ipaddr);
+	closure->errstr = _("invalid ServerMessage");
+	debug_return_bool(false);
+    }
+
     /* Pass commit point from relay to client. */
     debug_return_bool(schedule_commit_point(commit_point, closure));
 }
 
 /*
- * Respond to a LogId message from the relay.
- * Always returns true.
+ * Respond to a log_id ServerMessage from the relay.
+ * Returns true on success, false on error.
  */
 static bool
 handle_log_id(const char *id, struct connection_closure *closure)
@@ -573,6 +581,13 @@ handle_log_id(const char *id, struct connection_closure *closure)
     /* No client connection when replaying a journaled entry. */
     if (closure->write_ev == NULL)
 	debug_return_bool(true);
+
+    if (id[0] == '\0') {
+	sudo_warnx(U_("%s: invalid ServerMessage, missing log_id string"),
+	    closure->relay_closure->relay_name.ipaddr);
+	closure->errstr = _("invalid ServerMessage");
+	debug_return_bool(false);
+    }
 
     /* Generate a new log ID that includes the relay host. */
     len = asprintf(&new_id, "%s/%s", id,
@@ -593,8 +608,8 @@ handle_log_id(const char *id, struct connection_closure *closure)
 }
 
 /*
- * Respond to a ServerError message from the relay.
- * Always returns false.
+ * Respond to an error ServerMessage from the relay.
+ * Returns true on success, false on error.
  */
 static bool
 handle_server_error(const char *errmsg, struct connection_closure *closure)
@@ -611,6 +626,10 @@ handle_server_error(const char *errmsg, struct connection_closure *closure)
     sudo_ev_del(closure->evbase, closure->relay_closure->read_ev);
     sudo_ev_del(closure->evbase, closure->relay_closure->write_ev);
 
+    /* Missing error string. */
+    if (errmsg[0] == '\0')
+	errmsg = "unknown error";
+
     if (!schedule_error_message(errmsg, closure))
 	debug_return_bool(false);
 
@@ -618,8 +637,8 @@ handle_server_error(const char *errmsg, struct connection_closure *closure)
 }
 
 /*
- * Respond to a ServerAbort message from the server.
- * Always returns false.
+ * Respond to an abort ServerMessage from the relay.
+ * Returns true on success, false on error.
  */
 static bool
 handle_server_abort(const char *errmsg, struct connection_closure *closure)
@@ -631,6 +650,10 @@ handle_server_abort(const char *errmsg, struct connection_closure *closure)
 	"abort message received from relay %s (%s): %s",
 	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr,
 	errmsg);
+
+    /* Missing error string. */
+    if (errmsg[0] == '\0')
+	errmsg = "unknown error";
 
     if (!schedule_error_message(errmsg, closure))
 	debug_return_bool(false);
