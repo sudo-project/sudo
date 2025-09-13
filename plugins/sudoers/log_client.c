@@ -1965,7 +1965,7 @@ bad:
     if (closure->log_details->ignore_log_errors) {
 	/* Disable plugin, the command continues. */
 	closure->disabled = true;
-	closure->write_ev->del(closure->read_ev);
+	closure->read_ev->del(closure->read_ev);
 	closure->write_ev->del(closure->write_ev);
     } else {
 	/* Break out of sudo event loop and kill the command. */
