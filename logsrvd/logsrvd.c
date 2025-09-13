@@ -1149,6 +1149,9 @@ client_msg_cb(int fd, int what, void *v)
 	}
 	buf->off += msg_len;
     }
+    if (buf->len != buf->off) {
+	memmove(buf->data, buf->data + buf->off, buf->len - buf->off);
+    }
     buf->len -= buf->off;
     buf->off = 0;
 

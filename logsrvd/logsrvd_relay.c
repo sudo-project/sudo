@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2023, 2025 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -896,6 +896,9 @@ relay_server_msg_cb(int fd, int what, void *v)
 	if (!handle_server_message(buf->data + buf->off, msg_len, closure))
 	    goto send_error;
 	buf->off += msg_len;
+    }
+    if (buf->len != buf->off) {
+	memmove(buf->data, buf->data + buf->off, buf->len - buf->off);
     }
     buf->len -= buf->off;
     buf->off = 0;
