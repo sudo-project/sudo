@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2025 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1671,21 +1671,23 @@ expand_buf(struct connection_buffer *buf, size_t needed)
     if (buf->size < needed) {
 	/* Expand buffer. */
 	const size_t newsize = sudo_pow2_roundup(needed);
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "expanding buffer from %zu to %zu", buf->size, newsize);
 	if (newsize < needed) {
 	    /* overflow */
 	    errno = ENOMEM;
 	    goto oom;
 	}
-	if ((newdata = malloc(needed)) == NULL)
+	if ((newdata = malloc(newsize)) == NULL)
 	    goto oom;
-	if (buf->off > 0)
+	if (buf->len != buf->off)
 	    memcpy(newdata, buf->data + buf->off, buf->len - buf->off);
 	free(buf->data);
 	buf->data = newdata;
 	buf->size = newsize;
     } else {
 	/* Just reset existing buffer. */
-	if (buf->off > 0) {
+	if (buf->len != buf->off) {
 	    memmove(buf->data, buf->data + buf->off,
 		buf->len - buf->off);
 	}
