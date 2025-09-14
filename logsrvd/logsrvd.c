@@ -591,6 +591,14 @@ handle_restart(const RestartMessage *msg, const uint8_t *buf, size_t len,
 	"%s: received RestartMessage for %s from %s", __func__, msg->log_id,
 	source);
 
+    /* The log_id is used to create a path name, prevent path traversal. */
+    if (contains_dot_dot(msg->log_id)) {
+	sudo_warnx(U_("%s: %s"), source,
+	    U_("RestartMessage log_id path traversal attack"));
+	closure->errstr = _("invalid RestartMessage");
+	debug_return_bool(false);
+    }
+
     /* Only I/O logs are restartable. */
     closure->log_io = true;
 

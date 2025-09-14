@@ -419,6 +419,7 @@ lib/zlib/zlib.h
 lib/zlib/zutil.c
 lib/zlib/zutil.h
 logsrvd/Makefile.in
+logsrvd/dotdot.c
 logsrvd/iolog_writer.c
 logsrvd/logsrv_util.c
 logsrvd/logsrv_util.h
@@ -436,6 +437,7 @@ logsrvd/regress/corpus/seed/logsrvd_conf/logsrvd.conf.4
 logsrvd/regress/corpus/seed/logsrvd_conf/logsrvd.conf.5
 logsrvd/regress/corpus/seed/logsrvd_conf/logsrvd.conf.6
 logsrvd/regress/corpus/seed/logsrvd_conf/logsrvd.conf.7
+logsrvd/regress/dotdot/dotdot_test.c
 logsrvd/regress/fuzz/fuzz_logsrvd_conf.c
 logsrvd/regress/fuzz/fuzz_logsrvd_conf.dict
 logsrvd/regress/logsrvd_conf/cacert.pem

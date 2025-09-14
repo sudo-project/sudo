@@ -53,6 +53,9 @@ struct connection_buffer {
 };
 TAILQ_HEAD(connection_buffer_list, connection_buffer);
 
+/* dotdot.c */
+bool contains_dot_dot(const char *str);
+
 /* logsrv_util.c */
 struct iolog_file;
 bool expand_buf(struct connection_buffer *buf, size_t needed);
