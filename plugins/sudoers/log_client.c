@@ -638,8 +638,11 @@ log_server_connect(struct client_closure *closure)
     }
     free(copy);
 
-    if (!ret && cause != NULL)
-        sudo_warn("%s", cause);
+    if (!ret) {
+	if (cause != NULL)
+	    sudo_warn("%s", cause);
+	close(sock);
+    }
 
     debug_return_bool(ret);
 }
