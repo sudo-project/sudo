@@ -956,14 +956,6 @@ sudo_ldap_build_pass1(struct sudoers_context *ctx, LDAP *ld, struct passwd *pw)
 	}
     }
 
-    /* Done with groups. */
-    if (gidlist != NULL)
-	sudo_gidlist_delref(gidlist);
-    if (grlist != NULL)
-	sudo_grlist_delref(grlist);
-    if (grp != NULL)
-	sudo_gr_delref(grp);
-
     /* Add netgroups (if any), freeing the list as we go. */
     while ((ng = STAILQ_FIRST(&netgroups)) != NULL) {
 	STAILQ_REMOVE_HEAD(&netgroups, entries);
@@ -997,6 +989,13 @@ sudo_ldap_build_pass1(struct sudoers_context *ctx, LDAP *ld, struct passwd *pw)
 
     CHECK_STRLCAT(buf, ")", sz); /* closes the global OR or the global AND */
 
+out:
+    if (gidlist != NULL)
+	sudo_gidlist_delref(gidlist);
+    if (grlist != NULL)
+	sudo_grlist_delref(grlist);
+    if (grp != NULL)
+	sudo_gr_delref(grp);
     free(notbuf);
     debug_return_str(buf);
 overflow:
@@ -1014,8 +1013,8 @@ bad:
 	free(ng);
     }
     free(buf);
-    free(notbuf);
-    debug_return_str(NULL);
+    buf = NULL;
+    goto out;
 }
 
 /*
