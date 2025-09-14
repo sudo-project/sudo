@@ -60,9 +60,6 @@ static sudo_auth auth_switch[] = {
 #ifdef HAVE_SIA_SES_INIT
     AUTH_ENTRY("sia", FLAG_STANDALONE, NULL, sudo_sia_setup, sudo_sia_verify, NULL, sudo_sia_cleanup, sudo_sia_begin_session, NULL)
 #endif
-#ifdef HAVE_FWTK
-    AUTH_ENTRY("fwtk", FLAG_STANDALONE, sudo_fwtk_init, NULL, sudo_fwtk_verify, NULL, sudo_fwtk_cleanup, NULL, NULL)
-#endif
 #ifdef HAVE_BSD_AUTH_H
     AUTH_ENTRY("bsdauth", FLAG_STANDALONE, bsdauth_init, NULL, bsdauth_verify, bsdauth_approval, bsdauth_cleanup, NULL, NULL)
 #endif

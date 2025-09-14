@@ -358,9 +358,6 @@
 /* Define to 1 if you have the 'futimesat' function. */
 #undef HAVE_FUTIMESAT
 
-/* Define to 1 if you use the FWTK authsrv daemon. */
-#undef HAVE_FWTK
-
 /* Define to 1 if you are using gcrypt's sha2 functions. */
 #undef HAVE_GCRYPT
 

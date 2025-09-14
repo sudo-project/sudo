@@ -580,11 +580,6 @@ Defaults are listed in brackets after the description.
         (such as HP-UX 11.0 and higher, Solaris, FreeBSD, and Linux), the
         DCE PAM module (usually libpam_dce) should be used instead.
 
-    --with-fwtk[=DIR]
-        Enable TIS Firewall Toolkit (FWTK) "authsrv" support. If specified,
-        DIR is the base directory containing the compiled FWTK package
-        (or at least the library and header files).
-
     --with-kerb5[=DIR]
         Enable Kerberos V support.  If specified, DIR is the base
         directory containing the Kerberos V include and lib dirs.
