@@ -378,7 +378,7 @@ sudo_ldap_get_first_rdn(LDAP *ld, LDAPMessage *entry, int *rc)
     ldap_memfree(dn);
     debug_return_str(rdn);
 #else
-    char *dn, **edn;
+    char *dn, **edn, *rdn;
     debug_decl(sudo_ldap_get_first_rdn, SUDOERS_DEBUG_LDAP);
 
     if ((dn = ldap_get_dn(ld, entry)) == NULL) {
@@ -393,8 +393,10 @@ sudo_ldap_get_first_rdn(LDAP *ld, LDAPMessage *entry, int *rc)
 	*rc = LDAP_NO_MEMORY;
 	debug_return_str(NULL);
     }
-    *rc = LDAP_SUCCESS;
-    debug_return_str(edn[0]);
+    rdn = strdup(edn[0]);
+    *rc = rdn ? LDAP_SUCCESS : LDAP_NO_MEMORY;
+    ldap_value_free(edn);
+    debug_return_str(rdn);
 #endif
 }
 
