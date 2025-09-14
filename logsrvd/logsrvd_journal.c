@@ -427,13 +427,19 @@ journal_restart(const RestartMessage *msg, const uint8_t *buf, size_t buflen,
     if (len >= ssizeof(journal_path)) {
 	errno = ENAMETOOLONG;
 	sudo_warn("%s/incoming/%s", logsrvd_conf_relay_dir(), cp);
-	closure->errstr = _("unable to create journal file");
+	closure->errstr = _("unable to open journal file");
 	debug_return_bool(false);
     }
     if ((fd = open(journal_path, O_RDWR)) == -1) {
 	sudo_warn(U_("unable to open %s"), journal_path);
-	closure->errstr = _("unable to create journal file");
-        debug_return_bool(false);
+	closure->errstr = _("unable to open journal file");
+	debug_return_bool(false);
+    }
+    if (!sudo_lock_file(fd, SUDO_TLOCK)) {
+	sudo_warn(U_("unable to lock %s"), journal_path);
+	close(fd);
+	closure->errstr = _("unable to lock journal file");
+	debug_return_bool(false);
     }
     if (!journal_fdopen(fd, journal_path, closure)) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
