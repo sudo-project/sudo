@@ -144,7 +144,7 @@ bad:
  * The length parameter does not include space for the message's wire size.
  */
 static bool
-relay_enqueue_write(uint8_t *msgbuf, size_t len,
+relay_enqueue_write(const uint8_t *msgbuf, size_t len,
     struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
@@ -503,7 +503,7 @@ connect_relay(struct connection_closure *closure)
  * Returns true on success, false on error.
  */
 static bool
-handle_server_hello(ServerHello *msg, struct connection_closure *closure)
+handle_server_hello(const ServerHello *msg, struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
     debug_decl(handle_server_hello, SUDO_DEBUG_UTIL);
@@ -537,7 +537,8 @@ handle_server_hello(ServerHello *msg, struct connection_closure *closure)
  * Returns true on success, false on error.
  */
 static bool
-handle_commit_point(TimeSpec *commit_point, struct connection_closure *closure)
+handle_commit_point(const TimeSpec *commit_point,
+    struct connection_closure *closure)
 {
     debug_decl(handle_commit_point, SUDO_DEBUG_UTIL);
 
@@ -557,7 +558,7 @@ handle_commit_point(TimeSpec *commit_point, struct connection_closure *closure)
  * Always returns true.
  */
 static bool
-handle_log_id(char *id, struct connection_closure *closure)
+handle_log_id(const char *id, struct connection_closure *closure)
 {
     char *new_id;
     bool ret = false;
@@ -596,7 +597,7 @@ handle_log_id(char *id, struct connection_closure *closure)
  * Always returns false.
  */
 static bool
-handle_server_error(char *errmsg, struct connection_closure *closure)
+handle_server_error(const char *errmsg, struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
     debug_decl(handle_server_error, SUDO_DEBUG_UTIL);
@@ -621,7 +622,7 @@ handle_server_error(char *errmsg, struct connection_closure *closure)
  * Always returns false.
  */
 static bool
-handle_server_abort(char *errmsg, struct connection_closure *closure)
+handle_server_abort(const char *errmsg, struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
     debug_decl(handle_server_abort, SUDO_DEBUG_UTIL);
@@ -642,7 +643,8 @@ handle_server_abort(char *errmsg, struct connection_closure *closure)
  * Returns true on success, false on error.
  */
 static bool
-handle_server_message(uint8_t *buf, size_t len, struct connection_closure *closure)
+handle_server_message(const uint8_t *buf, size_t len,
+    struct connection_closure *closure)
 {
     ServerMessage *msg;
     bool ret = false;
@@ -1056,7 +1058,7 @@ start_relay(int sock, struct connection_closure *closure)
  * Relay an AcceptMessage from the client to the relay server.
  */
 static bool
-relay_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
+relay_accept(const AcceptMessage *msg, const uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
@@ -1075,7 +1077,7 @@ relay_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
  * Relay a RejectMessage from the client to the relay server.
  */
 static bool
-relay_reject(RejectMessage *msg, uint8_t *buf, size_t len,
+relay_reject(const RejectMessage *msg, const uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
@@ -1094,7 +1096,7 @@ relay_reject(RejectMessage *msg, uint8_t *buf, size_t len,
  * Relay an ExitMessage from the client to the relay server.
  */
 static bool
-relay_exit(ExitMessage *msg, uint8_t *buf, size_t len,
+relay_exit(const ExitMessage *msg, const uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
@@ -1114,7 +1116,7 @@ relay_exit(ExitMessage *msg, uint8_t *buf, size_t len,
  * We must rebuild the packed message because the log_id is modified.
  */
 static bool
-relay_restart(RestartMessage *msg, uint8_t *buf, size_t len,
+relay_restart(const RestartMessage *msg, const uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
@@ -1158,7 +1160,7 @@ relay_restart(RestartMessage *msg, uint8_t *buf, size_t len,
  * Relay an AlertMessage from the client to the relay server.
  */
 static bool
-relay_alert(AlertMessage *msg, uint8_t *buf, size_t len,
+relay_alert(const AlertMessage *msg, const uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
@@ -1180,7 +1182,7 @@ relay_alert(AlertMessage *msg, uint8_t *buf, size_t len,
  * Relay a CommandSuspend from the client to the relay server.
  */
 static bool
-relay_suspend(CommandSuspend *msg, uint8_t *buf, size_t len,
+relay_suspend(const CommandSuspend *msg, const uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
@@ -1202,7 +1204,7 @@ relay_suspend(CommandSuspend *msg, uint8_t *buf, size_t len,
  * Relay a ChangeWindowSize from the client to the relay server.
  */
 static bool
-relay_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len,
+relay_winsize(const ChangeWindowSize *msg, const uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;
@@ -1224,7 +1226,7 @@ relay_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len,
  * Relay an IoBuffer from the client to the relay server.
  */
 static bool
-relay_iobuf(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len,
+relay_iobuf(int iofd, const IoBuffer *iobuf, const uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     struct relay_closure *relay_closure = closure->relay_closure;

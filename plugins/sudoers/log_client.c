@@ -822,7 +822,7 @@ free_info_messages(InfoMessage **info_msgs, size_t n)
 }
 
 static InfoMessage **
-fmt_info_messages(struct client_closure *closure, struct eventlog *evlog,
+fmt_info_messages(struct client_closure *closure, const struct eventlog *evlog,
     size_t *n_info_msgs)
 {
     InfoMessage__StringList *runargv = NULL;
@@ -969,7 +969,7 @@ bad:
  * Returns true on success, false on failure.
  */
 bool
-fmt_accept_message(struct client_closure *closure, struct eventlog *evlog)
+fmt_accept_message(struct client_closure *closure, const struct eventlog *evlog)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     AcceptMessage accept_msg = ACCEPT_MESSAGE__INIT;
@@ -1018,7 +1018,7 @@ done:
  * Returns true on success, false on failure.
  */
 bool
-fmt_reject_message(struct client_closure *closure, struct eventlog *evlog)
+fmt_reject_message(struct client_closure *closure, const struct eventlog *evlog)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     RejectMessage reject_msg = REJECT_MESSAGE__INIT;
@@ -1067,7 +1067,7 @@ done:
  * Returns true on success, false on failure.
  */
 bool
-fmt_alert_message(struct client_closure *closure, struct eventlog *evlog)
+fmt_alert_message(struct client_closure *closure, const struct eventlog *evlog)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     AlertMessage alert_msg = ALERT_MESSAGE__INIT;
@@ -1273,7 +1273,7 @@ done:
  */
 bool
 fmt_io_buf(struct client_closure *closure, int type, const char *buf,
-    unsigned int len, struct timespec *delay)
+    unsigned int len, const struct timespec *delay)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     IoBuffer iobuf_msg = IO_BUFFER__INIT;
@@ -1311,7 +1311,7 @@ done:
  */
 bool
 fmt_winsize(struct client_closure *closure, unsigned int lines,
-    unsigned int cols, struct timespec *delay)
+    unsigned int cols, const struct timespec *delay)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     ChangeWindowSize winsize_msg = CHANGE_WINDOW_SIZE__INIT;
@@ -1347,7 +1347,8 @@ done:
  * Returns true on success, false on failure.
  */
 bool
-fmt_suspend(struct client_closure *closure, const char *signame, struct timespec *delay)
+fmt_suspend(struct client_closure *closure, const char *signame,
+    const struct timespec *delay)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     CommandSuspend suspend_msg = COMMAND_SUSPEND__INIT;
@@ -1487,7 +1488,7 @@ done:
  * Returns true on success, false on error.
  */
 static bool
-handle_server_hello(ServerHello *msg, struct client_closure *closure)
+handle_server_hello(const ServerHello *msg, struct client_closure *closure)
 {
     size_t n;
     debug_decl(handle_server_hello, SUDOERS_DEBUG_UTIL);
@@ -1526,7 +1527,8 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
  * Returns true on success, false on error.
  */
 static bool
-handle_commit_point(TimeSpec *commit_point, struct client_closure *closure)
+handle_commit_point(const TimeSpec *commit_point,
+    struct client_closure *closure)
 {
     debug_decl(handle_commit_point, SUDOERS_DEBUG_UTIL);
 
@@ -1560,7 +1562,7 @@ handle_commit_point(TimeSpec *commit_point, struct client_closure *closure)
  * Always returns true.
  */
 static bool
-handle_log_id(char *id, struct client_closure *closure)
+handle_log_id(const char *id, struct client_closure *closure)
 {
     debug_decl(handle_log_id, SUDOERS_DEBUG_UTIL);
 
@@ -1577,7 +1579,7 @@ handle_log_id(char *id, struct client_closure *closure)
  * Always returns false.
  */
 static bool
-handle_server_error(char *errmsg, struct client_closure *closure)
+handle_server_error(const char *errmsg, struct client_closure *closure)
 {
     debug_decl(handle_server_error, SUDOERS_DEBUG_UTIL);
 
@@ -1590,7 +1592,7 @@ handle_server_error(char *errmsg, struct client_closure *closure)
  * Always returns false.
  */
 static bool
-handle_server_abort(char *errmsg, struct client_closure *closure)
+handle_server_abort(const char *errmsg, struct client_closure *closure)
 {
     debug_decl(handle_server_abort, SUDOERS_DEBUG_UTIL);
 
@@ -1603,7 +1605,7 @@ handle_server_abort(char *errmsg, struct client_closure *closure)
  * Returns true on success, false on error.
  */
 static bool
-handle_server_message(uint8_t *buf, size_t len,
+handle_server_message(const uint8_t *buf, size_t len,
     struct client_closure *closure)
 {
     ServerMessage *msg;

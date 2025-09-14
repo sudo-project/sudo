@@ -442,7 +442,7 @@ done:
  * AcceptMessage handler.
  */
 static bool
-handle_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
+handle_accept(const AcceptMessage *msg, const uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     const char *source = closure->journal_path ? closure->journal_path :
@@ -479,7 +479,7 @@ handle_accept(AcceptMessage *msg, uint8_t *buf, size_t len,
  * RejectMessage handler.
  */
 static bool
-handle_reject(RejectMessage *msg, uint8_t *buf, size_t len,
+handle_reject(const RejectMessage *msg, const uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     const char *source = closure->journal_path ? closure->journal_path :
@@ -512,7 +512,7 @@ handle_reject(RejectMessage *msg, uint8_t *buf, size_t len,
 }
 
 static bool
-handle_exit(ExitMessage *msg, uint8_t *buf, size_t len,
+handle_exit(const ExitMessage *msg, const uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     const char *source = closure->journal_path ? closure->journal_path :
@@ -566,7 +566,7 @@ handle_exit(ExitMessage *msg, uint8_t *buf, size_t len,
 }
 
 static bool
-handle_restart(RestartMessage *msg, uint8_t *buf, size_t len,
+handle_restart(const RestartMessage *msg, const uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     const char *source = closure->journal_path ? closure->journal_path :
@@ -608,7 +608,7 @@ handle_restart(RestartMessage *msg, uint8_t *buf, size_t len,
 }
 
 static bool
-handle_alert(AlertMessage *msg, uint8_t *buf, size_t len,
+handle_alert(const AlertMessage *msg, const uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     const char *source = closure->journal_path ? closure->journal_path :
@@ -646,7 +646,7 @@ enable_commit(struct connection_closure *closure)
 }
 
 static bool
-handle_iobuf(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len,
+handle_iobuf(int iofd, const IoBuffer *iobuf, const uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     const char *source = closure->journal_path ? closure->journal_path :
@@ -682,7 +682,7 @@ handle_iobuf(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len,
 }
 
 static bool
-handle_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len,
+handle_winsize(const ChangeWindowSize *msg, const uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     const char *source = closure->journal_path ? closure->journal_path :
@@ -718,7 +718,7 @@ handle_winsize(ChangeWindowSize *msg, uint8_t *buf, size_t len,
 }
 
 static bool
-handle_suspend(CommandSuspend *msg, uint8_t *buf, size_t len,
+handle_suspend(const CommandSuspend *msg, const uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     const char *source = closure->journal_path ? closure->journal_path :
@@ -754,7 +754,7 @@ handle_suspend(CommandSuspend *msg, uint8_t *buf, size_t len,
 }
 
 static bool
-handle_client_hello(ClientHello *msg, uint8_t *buf, size_t len,
+handle_client_hello(const ClientHello *msg, const uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     const char *source = closure->journal_path ? closure->journal_path :
@@ -776,7 +776,7 @@ handle_client_hello(ClientHello *msg, uint8_t *buf, size_t len,
 }
 
 static bool
-handle_client_message(uint8_t *buf, size_t len,
+handle_client_message(const uint8_t *buf, size_t len,
     struct connection_closure *closure)
 {
     const char *source = closure->journal_path ? closure->journal_path :
@@ -1167,7 +1167,7 @@ close_connection:
  * Format and schedule a commit_point message.
  */
 bool
-schedule_commit_point(TimeSpec *commit_point,
+schedule_commit_point(const TimeSpec *commit_point,
     struct connection_closure *closure)
 {
     debug_decl(schedule_commit_point, SUDO_DEBUG_UTIL);
@@ -1175,7 +1175,7 @@ schedule_commit_point(TimeSpec *commit_point,
     if (closure->write_ev != NULL) {
 	/* Send an acknowledgement of what we've committed to disk. */
 	ServerMessage msg = SERVER_MESSAGE__INIT;
-	msg.u.commit_point = commit_point;
+	msg.u.commit_point = (TimeSpec *)commit_point;
 	msg.type_case = SERVER_MESSAGE__TYPE_COMMIT_POINT;
 
 	sudo_debug_printf(SUDO_DEBUG_INFO,

@@ -1121,7 +1121,7 @@ client_message_completion(struct client_closure *closure)
  * Returns true on success, false on error.
  */
 static bool
-handle_server_hello(ServerHello *msg, struct client_closure *closure)
+handle_server_hello(const ServerHello *msg, struct client_closure *closure)
 {
     size_t n;
     debug_decl(handle_server_hello, SUDO_DEBUG_UTIL);
@@ -1155,7 +1155,8 @@ handle_server_hello(ServerHello *msg, struct client_closure *closure)
  * Returns true on success, false on error.
  */
 static bool
-handle_commit_point(TimeSpec *commit_point, struct client_closure *closure)
+handle_commit_point(const TimeSpec *commit_point,
+    struct client_closure *closure)
 {
     debug_decl(handle_commit_point, SUDO_DEBUG_UTIL);
 
@@ -1178,7 +1179,7 @@ handle_commit_point(TimeSpec *commit_point, struct client_closure *closure)
  * Always returns true.
  */
 static bool
-handle_log_id(char *id, struct client_closure *closure)
+handle_log_id(const char *id, struct client_closure *closure)
 {
     debug_decl(handle_log_id, SUDO_DEBUG_UTIL);
 
@@ -1193,7 +1194,7 @@ handle_log_id(char *id, struct client_closure *closure)
  * Always returns false.
  */
 static bool
-handle_server_error(char *errmsg, struct client_closure *closure)
+handle_server_error(const char *errmsg, struct client_closure *closure)
 {
     debug_decl(handle_server_error, SUDO_DEBUG_UTIL);
 
@@ -1206,7 +1207,7 @@ handle_server_error(char *errmsg, struct client_closure *closure)
  * Always returns false.
  */
 static bool
-handle_server_abort(char *errmsg, struct client_closure *closure)
+handle_server_abort(const char *errmsg, struct client_closure *closure)
 {
     debug_decl(handle_server_abort, SUDO_DEBUG_UTIL);
 
@@ -1219,7 +1220,7 @@ handle_server_abort(char *errmsg, struct client_closure *closure)
  * Returns true on success, false on error.
  */
 static bool
-handle_server_message(uint8_t *buf, size_t len,
+handle_server_message(const uint8_t *buf, size_t len,
     struct client_closure *closure)
 {
     ServerMessage *msg;

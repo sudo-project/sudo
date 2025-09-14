@@ -126,21 +126,21 @@ struct connection_closure {
 
 /* Client message switch. */
 struct client_message_switch {
-    bool (*accept)(AcceptMessage *msg, uint8_t *buf, size_t len,
+    bool (*accept)(const AcceptMessage *msg, const uint8_t *buf, size_t len,
 	struct connection_closure *closure);
-    bool (*reject)(RejectMessage *msg, uint8_t *buf, size_t len,
+    bool (*reject)(const RejectMessage *msg, const uint8_t *buf, size_t len,
 	struct connection_closure *closure);
-    bool (*exit)(ExitMessage *msg, uint8_t *buf, size_t len,
+    bool (*exit)(const ExitMessage *msg, const uint8_t *buf, size_t len,
 	struct connection_closure *closure);
-    bool (*restart)(RestartMessage *msg, uint8_t *buf, size_t len,
+    bool (*restart)(const RestartMessage *msg, const uint8_t *buf, size_t len,
 	struct connection_closure *closure);
-    bool (*alert)(AlertMessage *msg, uint8_t *buf, size_t len,
+    bool (*alert)(const AlertMessage *msg, const uint8_t *buf, size_t len,
 	struct connection_closure *closure);
-    bool (*iobuf)(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len,
+    bool (*iobuf)(int iofd, const IoBuffer *iobuf, const uint8_t *buf,
+	size_t len, struct connection_closure *closure);
+    bool (*suspend)(const CommandSuspend *msg, const uint8_t *buf, size_t len,
 	struct connection_closure *closure);
-    bool (*suspend)(CommandSuspend *msg, uint8_t *buf, size_t len,
-	struct connection_closure *closure);
-    bool (*winsize)(ChangeWindowSize *msg, uint8_t *buf, size_t len,
+    bool (*winsize)(const ChangeWindowSize *msg, const uint8_t *buf, size_t len,
 	struct connection_closure *closure);
 };
 
@@ -186,19 +186,19 @@ struct outgoing_journal {
 TAILQ_HEAD(outgoing_journal_queue, outgoing_journal);
 
 /* iolog_writer.c */
-struct eventlog *evlog_new(TimeSpec *submit_time, InfoMessage **info_msgs, size_t infolen, struct connection_closure *closure);
-bool iolog_init(AcceptMessage *msg, struct connection_closure *closure);
+struct eventlog *evlog_new(const TimeSpec *submit_time, InfoMessage * const *info_msgs, size_t infolen, struct connection_closure *closure);
+bool iolog_init(const AcceptMessage *msg, struct connection_closure *closure);
 bool iolog_create(int iofd, struct connection_closure *closure);
 void iolog_close_all(struct connection_closure *closure);
 bool iolog_flush_all(struct connection_closure *closure);
 bool iolog_rewrite(const struct timespec *target, struct connection_closure *closure);
-void update_elapsed_time(TimeSpec *delta, struct timespec *elapsed);
+void update_elapsed_time(const TimeSpec *delta, struct timespec *elapsed);
 
 /* logsrvd.c */
 extern struct client_message_switch cms_local;
 bool start_protocol(struct connection_closure *closure);
 void connection_close(struct connection_closure *closure);
-bool schedule_commit_point(TimeSpec *commit_point, struct connection_closure *closure);
+bool schedule_commit_point(const TimeSpec *commit_point, struct connection_closure *closure);
 bool fmt_log_id_message(const char *id, struct connection_closure *closure);
 bool schedule_error_message(const char *errstr, struct connection_closure *closure);
 struct connection_buffer *get_free_buf(size_t, struct connection_closure *closure);
@@ -242,14 +242,14 @@ extern struct client_message_switch cms_journal;
 /* logsrvd_local.c */
 extern struct client_message_switch cms_local;
 bool set_random_drop(const char *dropstr);
-bool store_accept_local(AcceptMessage *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
-bool store_reject_local(RejectMessage *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
-bool store_exit_local(ExitMessage *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
-bool store_restart_local(RestartMessage *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
-bool store_alert_local(AlertMessage *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
-bool store_iobuf_local(int iofd, IoBuffer *iobuf, uint8_t *buf, size_t len, struct connection_closure *closure);
-bool store_winsize_local(ChangeWindowSize *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
-bool store_suspend_local(CommandSuspend *msg, uint8_t *buf, size_t len, struct connection_closure *closure);
+bool store_accept_local(const AcceptMessage *msg, const uint8_t *buf, size_t len, struct connection_closure *closure);
+bool store_reject_local(const RejectMessage *msg, const uint8_t *buf, size_t len, struct connection_closure *closure);
+bool store_exit_local(const ExitMessage *msg, const uint8_t *buf, size_t len, struct connection_closure *closure);
+bool store_restart_local(const RestartMessage *msg, const uint8_t *buf, size_t len, struct connection_closure *closure);
+bool store_alert_local(const AlertMessage *msg, const uint8_t *buf, size_t len, struct connection_closure *closure);
+bool store_iobuf_local(int iofd, const IoBuffer *iobuf, const uint8_t *buf, size_t len, struct connection_closure *closure);
+bool store_winsize_local(const ChangeWindowSize *msg, const uint8_t *buf, size_t len, struct connection_closure *closure);
+bool store_suspend_local(const CommandSuspend *msg, const uint8_t *buf, size_t len, struct connection_closure *closure);
 
 /* logsrvd_queue.c */
 bool logsrvd_queue_enable(time_t timeout, struct sudo_event_base *evbase);
