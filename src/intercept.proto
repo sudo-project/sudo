@@ -2,7 +2,7 @@ syntax = "proto3";
 
 /*
  * Intercept message from sudo_intercept.so.  Messages on the
- * wire are prefixed with a 32-bit size in network byte order.
+ * wire are prefixed with a 32-bit size in host byte order.
  */
 message InterceptRequest {
   oneof type {
