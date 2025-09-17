@@ -53,8 +53,8 @@
 #if defined(HAVE_OPENSSL)
 
 /*
- * Check that the server's certificate is valid that it contains the
- * server name or IP address.
+ * Check that the server's certificate is valid and that it
+ * contains the server name or IP address.
  * Returns 0 if the cert is invalid, else 1.
  */
 static int
@@ -95,13 +95,8 @@ verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
     ssl = X509_STORE_CTX_get_ex_data(ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
     peer_info = SSL_get_ex_data(ssl, 1);
 
-    /*
-     * Validate the cert based on the host name and IP address.
-     * If host name is not known, validate_hostname() can resolve it.
-     */
-    result = validate_hostname(peer_cert,
-	peer_info->name ? peer_info->name : peer_info->ipaddr,
-	peer_info->ipaddr, peer_info->name ? 0 : 1);
+    /* Validate the cert based on the host name and IP address. */
+    result = validate_hostname(peer_cert, peer_info->name, peer_info->ipaddr, 0);
 
     debug_return_int(result == MatchFound);
 }
