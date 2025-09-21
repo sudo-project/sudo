@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2024 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2025 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD" "@mansectsu@" "July 14, 2024" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO_LOGSRVD" "@mansectsu@" "September 21, 2025" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -176,7 +176,7 @@ for this purpose.
 # cd /etc/ssl/sudo
 # mkdir certs csr newcerts private
 # chmod 700 private
-# touch index.txt
+# touch index.txt index.txt.attr
 # echo 1000 > serial
 .RE
 .fi
@@ -217,8 +217,22 @@ default_ca              = CA_default
 dir                     = /etc/ssl/sudo
 certs                   = $dir/certs
 database                = $dir/index.txt
+private_key             = $dir/private/cakey.pem
 certificate             = $dir/cacert.pem
+new_certs_dir           = $dir/newcerts
 serial                  = $dir/serial
+
+# CA policy if you don't have one defined already.
+policy			= policy_loose
+
+[ policy_loose ]
+# See POLICY FORMAT section in the "openssl-ca" manual.
+countryName             = optional
+stateOrProvinceName     = optional
+organizationName        = optional
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
 
 [ v3_ca ]
 subjectKeyIdentifier    = hash
