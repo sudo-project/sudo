@@ -598,8 +598,8 @@ log_server_connect(struct client_closure *closure)
     struct sudoers_string *server;
     char *host, *port, *copy = NULL;
     const char *cause = NULL;
-    int sock;
     bool tls, ret = false;
+    int sock = -1;
     debug_decl(log_server_connect, SUDOERS_DEBUG_UTIL);
 
     STAILQ_FOREACH(server, closure->log_details->log_servers, entries) {
@@ -641,7 +641,8 @@ log_server_connect(struct client_closure *closure)
     if (!ret) {
 	if (cause != NULL)
 	    sudo_warn("%s", cause);
-	close(sock);
+	if (sock != -1)
+	    close(sock);
     }
 
     debug_return_bool(ret);
