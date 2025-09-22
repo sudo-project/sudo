@@ -204,6 +204,9 @@ certificate             = $dir/cacert.pem
 new_certs_dir           = $dir/newcerts
 serial                  = $dir/serial
 
+# Copy extension from the csr to the cert
+copy_extensions         = copy
+
 # CA policy if you don't have one defined already.
 policy			= policy_loose
 
@@ -326,6 +329,18 @@ to be sent with your certificate request
 A challenge password []:
 An optional company name []:
 .Ed
+.Pp
+To add additional DNS names (or IP addresses) to the request, set
+the Subject Alternative Name (SAN) by adding the something like
+the following to the above command.
+.Bd -literal -offset 4n
+-addext 'subjectAltName = DNS:other.example.com, IP:192.168.10.10'
+.Ed
+.Pp
+You may include zero or more DNS and IP entries, separated by a comma.
+This will only work if
+.Li copy_extensions
+has been enabled in the CA configuration.
 .Pp
 Now sign the CSR that was just created:
 .Bd -literal -offset 4n
