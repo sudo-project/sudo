@@ -155,14 +155,19 @@ still allow people to get their work done."
 	fi
 
 	# Add distro info to release
-	osrelease=`echo "$pp_rpm_distro" | sed -e 's/^[^0-9]*\([0-9]\{1,3\}\).*/\1/'`
+	if test -s /etc/os-release; then
+	    osrelease=`sed -n 's/^VERSION_ID="\([^"\.]*\).*$/\1/p' /etc/os-release`
+	else
+	    # Assumes major version number < 10
+	    osrelease=`echo "$pp_rpm_distro" | sed -e 's/^[^0-9]*\([0-9]\{1,2\}\).*/\1/'`
+	fi
+
 	case "$pp_rpm_distro" in
-	centos*|rhel*|f[0-9]*)
-		# CentOS Stream has a single-digit version
-		if test $osrelease -lt 10; then
-		    osrelease="${osrelease}0"
-		fi
-		pp_rpm_release="$pp_rpm_release.el${osrelease%[0-9]}"
+	centos*|rhel*)
+		pp_rpm_release="$pp_rpm_release.el$osrelease"
+		;;
+	f[0-9]*)
+		pp_rpm_release="$pp_rpm_release.fc$osrelease"
 		;;
 	sles*)
 		pp_rpm_release="$pp_rpm_release.sles$osrelease"
@@ -185,7 +190,7 @@ still allow people to get their work done."
 	case "$pp_rpm_distro" in
 	centos*|rhel*)
 		mkdir -p ${pp_destdir}/etc/pam.d
-		if test $osrelease -lt 50; then
+		if test $osrelease -lt 5; then
 			cat > ${pp_destdir}/etc/pam.d/sudo <<-EOF
 			#%PAM-1.0
 			auth       required	pam_stack.so service=system-auth
