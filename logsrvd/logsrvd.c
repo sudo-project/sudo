@@ -527,8 +527,12 @@ handle_exit(const ExitMessage *msg, const uint8_t *buf, size_t len,
 	debug_return_bool(false);
     }
 
-    /* Check that message is valid. */
-    if (msg == NULL || msg->run_time == NULL) {
+    /*
+     * Check that message is valid.
+     * The run_time field is optional and will not be present
+     * when sending old, pre-JSON I/O logs via sudo_sendlog.
+     */
+    if (msg == NULL) {
 	sudo_warnx(U_("%s: %s"), source, U_("invalid ExitMessage"));
 	closure->errstr = _("invalid ExitMessage");
 	debug_return_bool(false);
