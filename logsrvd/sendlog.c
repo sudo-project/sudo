@@ -606,7 +606,10 @@ fmt_info_messages(const struct eventlog *evlog, char *hostname,
     n++; \
 } while (0)
 
-    /* Fill in info_msgs */
+    /*
+     * Fill in info_msgs.  For legacy I/O log files, only command, runargv,
+     * runuser, submitcwd, submithost, submituser, ttyname may be present.
+     */
     n = 0;
     fill_num("columns", evlog->columns);
     fill_str("command", evlog->command);
@@ -631,7 +634,9 @@ fmt_info_messages(const struct eventlog *evlog, char *hostname,
 	fill_num("runuid", evlog->runuid);
     }
     fill_str("runuser", evlog->runuser);
-    fill_str("source", evlog->source);
+    if (evlog->source != NULL) {
+	fill_str("source", evlog->source);
+    }
     fill_str("submitcwd", evlog->cwd);
     fill_str("submithost", hostname);
     fill_str("submituser", evlog->submituser);
