@@ -558,10 +558,10 @@ static InfoMessage **
 fmt_info_messages(const struct eventlog *evlog, char *hostname,
     size_t *n_info_msgs)
 {
-    InfoMessage **info_msgs = NULL;
     InfoMessage__StringList *runargv = NULL;
     InfoMessage__StringList *runenv = NULL;
     InfoMessage__StringList *submitenv = NULL;
+    InfoMessage **info_msgs = NULL;
     size_t info_msgs_size, n = 0;
     debug_decl(fmt_info_messages, SUDO_DEBUG_UTIL);
 
@@ -681,7 +681,7 @@ fmt_reject_message(struct client_closure *closure)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     RejectMessage reject_msg = REJECT_MESSAGE__INIT;
-    TimeSpec tv = TIME_SPEC__INIT;
+    TimeSpec ts = TIME_SPEC__INIT;
     size_t n_info_msgs;
     bool ret = false;
     char *hostname;
@@ -696,9 +696,9 @@ fmt_reject_message(struct client_closure *closure)
     }
 
     /* Sudo I/O logs only store start time in seconds. */
-    tv.tv_sec = (int64_t)closure->evlog->event_time.tv_sec;
-    tv.tv_nsec = (int32_t)closure->evlog->event_time.tv_nsec;
-    reject_msg.submit_time = &tv;
+    ts.tv_sec = (int64_t)closure->evlog->event_time.tv_sec;
+    ts.tv_nsec = (int32_t)closure->evlog->event_time.tv_nsec;
+    reject_msg.submit_time = &ts;
 
     /* Why the command was rejected. */
     reject_msg.reason = closure->reject_reason;
@@ -740,8 +740,7 @@ fmt_accept_message(struct client_closure *closure)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     AcceptMessage accept_msg = ACCEPT_MESSAGE__INIT;
-    TimeSpec tv = TIME_SPEC__INIT;
-    size_t n_info_msgs;
+    TimeSpec ts = TIME_SPEC__INIT;
     bool ret = false;
     char *hostname;
     debug_decl(fmt_accept_message, SUDO_DEBUG_UTIL);
@@ -753,25 +752,21 @@ fmt_accept_message(struct client_closure *closure)
 	sudo_warn("gethostname");
 	debug_return_bool(false);
     }
-
-    /* Sudo I/O logs only store start time in seconds. */
-    tv.tv_sec = (int64_t)closure->evlog->event_time.tv_sec;
-    tv.tv_nsec = (int32_t)closure->evlog->event_time.tv_nsec;
-    accept_msg.submit_time = &tv;
+    ts.tv_sec = (int64_t)closure->evlog->event_time.tv_sec;
+    ts.tv_nsec = (int32_t)closure->evlog->event_time.tv_nsec;
+    accept_msg.submit_time = &ts;
 
     /* Client will send IoBuffer messages. */
     accept_msg.expect_iobufs = !closure->accept_only;
 
     accept_msg.info_msgs = fmt_info_messages(closure->evlog, hostname,
-        &n_info_msgs);
+        &accept_msg.n_info_msgs);
     if (accept_msg.info_msgs == NULL)
 	goto done;
 
-    /* Update n_info_msgs. */
-    accept_msg.n_info_msgs = n_info_msgs;
-
     sudo_debug_printf(SUDO_DEBUG_INFO,
-	"%s: sending AcceptMessage, array length %zu", __func__, n_info_msgs);
+	"%s: sending AcceptMessage, array length %zu", __func__,
+	accept_msg.n_info_msgs);
 
     /* Schedule ClientMessage */
     client_msg.u.accept_msg = &accept_msg;
@@ -783,7 +778,7 @@ fmt_accept_message(struct client_closure *closure)
     }
 
 done:
-    free_info_messages(accept_msg.info_msgs, n_info_msgs);
+    free_info_messages(accept_msg.info_msgs, accept_msg.n_info_msgs);
     free(hostname);
 
     debug_return_bool(ret);
@@ -799,7 +794,7 @@ fmt_restart_message(struct client_closure *closure)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     RestartMessage restart_msg = RESTART_MESSAGE__INIT;
-    TimeSpec tv = TIME_SPEC__INIT;
+    TimeSpec ts = TIME_SPEC__INIT;
     bool ret = false;
     debug_decl(fmt_restart_message, SUDO_DEBUG_UTIL);
 
@@ -807,9 +802,9 @@ fmt_restart_message(struct client_closure *closure)
 	"%s: sending RestartMessage, [%lld, %ld]", __func__,
 	(long long)closure->restart.tv_sec, closure->restart.tv_nsec);
 
-    tv.tv_sec = (int64_t)closure->restart.tv_sec;
-    tv.tv_nsec = (int32_t)closure->restart.tv_nsec;
-    restart_msg.resume_point = &tv;
+    ts.tv_sec = (int64_t)closure->restart.tv_sec;
+    ts.tv_nsec = (int32_t)closure->restart.tv_nsec;
+    restart_msg.resume_point = &ts;
     restart_msg.log_id = (char *)closure->iolog_id;
 
     /* Schedule ClientMessage */
