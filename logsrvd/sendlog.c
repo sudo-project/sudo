@@ -1895,7 +1895,7 @@ main(int argc, char *argv[])
 #if defined(HAVE_OPENSSL)
 	if (cert != NULL) {
 	    if (!tls_client_setup(closure->sock, ca_bundle, cert, key, NULL,
-		    NULL, NULL, verify_server, false, &closure->tls_client))
+		    NULL, NULL, true, verify_server, &closure->tls_client))
 		goto bad;
 	} else
 #endif
