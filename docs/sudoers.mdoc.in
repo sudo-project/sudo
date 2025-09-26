@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd June 7, 2025
+.Dd September 26, 2025
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -3095,7 +3095,7 @@ If the server does not respond to a message, the connection will
 be closed and the running command will be terminated unless the
 .Em ignore_iolog_errors
 flag (I/O logging enabled) or the
-.Em ignore_log_errors
+.Em ignore_logfile_errors
 flag (I/O logging disabled) is set.
 This flag is
 .Em on
@@ -5590,14 +5590,14 @@ If no log servers are available, the user will not be able to run
 a command unless either the
 .Em ignore_iolog_errors
 flag (I/O logging enabled) or the
-.Em ignore_log_errors
+.Em ignore_logfile_errors
 flag (I/O logging disabled) is set.
 Likewise, if the connection to the log server is interrupted while
 .Nm sudo
 is running, the command will be terminated unless the
 .Em ignore_iolog_errors
 flag (I/O logging enabled) or the
-.Em ignore_log_errors
+.Em ignore_logfile_errors
 flag (I/O logging disabled) is set.
 .Pp
 This setting is only supported by version 1.9.0 or higher.
