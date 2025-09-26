@@ -64,11 +64,11 @@ static void eventlog_stub_close_log(int type, FILE *fp);
 static struct eventlog_config evl_conf = {
     EVLOG_NONE,			/* type */
     EVLOG_SUDO,			/* format */
+    0,				/* file_maxlen */
+    MAXSYSLOGLEN,		/* syslog_maxlen */
     LOG_NOTICE,			/* syslog_acceptpri */
     LOG_ALERT,			/* syslog_rejectpri */
     LOG_ALERT,			/* syslog_alertpri */
-    MAXSYSLOGLEN,		/* syslog_maxlen */
-    0,				/* file_maxlen */
     ROOT_UID,			/* mailuid */
     false,			/* omit_hostname */
     _PATH_SUDO_LOGFILE,		/* logpath */
