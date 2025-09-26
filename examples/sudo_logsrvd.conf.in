@@ -205,7 +205,7 @@
 #log_exit = true
 
 # Event log format.
-# Supported log formats are "sudo" and "json"
+# Supported log formats are "sudo", "json", "json_compact" and "json_pretty".
 # Defaults to sudo
 #log_format = sudo
 
