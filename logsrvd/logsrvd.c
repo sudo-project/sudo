@@ -34,6 +34,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <netdb.h>
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
@@ -152,6 +153,7 @@ connection_closure_free(struct connection_closure *closure)
 	    free(buf->data);
 	    free(buf);
 	}
+	free(closure->name);
 	free(closure->journal_path);
 	if (closure->journal != NULL)
 	    fclose(closure->journal);
@@ -1316,17 +1318,13 @@ verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
     ssl = X509_STORE_CTX_get_ex_data(ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
     closure = (struct connection_closure *)SSL_get_ex_data(ssl, 1);
 
-    result = validate_hostname(peer_cert, closure->ipaddr, closure->ipaddr, 1);
-
-    switch(result)
-    {
-        case MatchFound:
-            debug_return_int(1);
-        default:
-            sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-                "hostname validation failed");
-            debug_return_int(0);
+    result = validate_hostname(peer_cert, closure->name, closure->ipaddr);
+    if (result != MatchFound) {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+	    "hostname validation failed");
+	debug_return_int(0);
     }
+    debug_return_int(1);
 }
 
 /*
@@ -1449,7 +1447,7 @@ bad:
  */
 static bool
 new_connection(int sock, bool tls, const union sockaddr_union *sa_un,
-    struct sudo_event_base *evbase)
+    socklen_t salen, struct sudo_event_base *evbase)
 {
     struct connection_closure *closure;
     debug_decl(new_connection, SUDO_DEBUG_UTIL);
@@ -1493,6 +1491,24 @@ new_connection(int sock, bool tls, const union sockaddr_union *sa_un,
 		errstr ? errstr : strerror(errno));
             goto bad;
         }
+
+	if (logsrvd_conf_server_tls_check_peer()) {
+	    /* Hostname to verify in certificate during handshake. */
+	    char hbuf[NI_MAXHOST];
+	    const int error = getnameinfo(&sa_un->sa, salen, hbuf,
+		sizeof(hbuf), NULL, 0, NI_NAMEREQD);
+	    if (error == 0) {
+		closure->name = strdup(hbuf);
+		if (closure->name == NULL) {
+		    sudo_warnx(U_("%s: %s"), __func__,
+			U_("unable to allocate memory"));
+		    goto bad;
+		}
+	    } else {
+		sudo_gai_warn(error, _("unable to resolve host %s"),
+		    closure->ipaddr);
+	    }
+	}
 
         /* attach the closure object to the ssl connection object to make it
         available during hostname matching
@@ -1597,7 +1613,7 @@ listener_cb(int fd, int what, void *v)
 		sudo_warn("SO_KEEPALIVE");
 	    }
 	}
-	if (!new_connection(sock, l->tls, &sa_un, evbase)) {
+	if (!new_connection(sock, l->tls, &sa_un, salen, evbase)) {
 	    /* TODO: pause accepting on ENOMEM */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to start new connection");

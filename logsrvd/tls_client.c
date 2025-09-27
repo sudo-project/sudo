@@ -96,7 +96,7 @@ verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
     peer_info = SSL_get_ex_data(ssl, 1);
 
     /* Validate the cert based on the host name and IP address. */
-    result = validate_hostname(peer_cert, peer_info->name, peer_info->ipaddr, 0);
+    result = validate_hostname(peer_cert, peer_info->name, peer_info->ipaddr);
 
     debug_return_int(result == MatchFound);
 }

@@ -178,7 +178,7 @@ verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
     closure = SSL_get_ex_data(ssl, 1);
 
     result = validate_hostname(peer_cert, closure->server_name,
-	closure->server_ip, 0);
+	closure->server_ip);
 
     switch(result)
     {

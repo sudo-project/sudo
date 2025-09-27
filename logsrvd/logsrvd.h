@@ -101,6 +101,7 @@ struct connection_closure {
     struct sudo_event *write_ev;
 #if defined(HAVE_OPENSSL)
     struct sudo_event *ssl_accept_ev;
+    char *name;
     SSL *ssl;
 #endif
     const char *errstr;
