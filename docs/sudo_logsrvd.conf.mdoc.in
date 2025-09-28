@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2025 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd March 9, 2024
+.Dd September 28, 2025
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -183,6 +183,11 @@ authority, the
 .Em tls_cacert
 setting must be set to a CA bundle that contains the CA certificate
 used to generate the client certificate.
+To validate the certificate,
+.Nm sudo_logsrvd
+will perform a reverse DNS lookup of the client's IP address.
+In order to be considered valid, either the IP address or the
+resolved hostname must be present in the client certificate.
 The default value is
 .Em false .
 .It tls_ciphers_v12 = string
