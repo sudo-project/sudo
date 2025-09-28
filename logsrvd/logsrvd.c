@@ -127,6 +127,7 @@ connection_closure_free(struct connection_closure *closure)
 		SSL_shutdown(closure->ssl);
 	    SSL_free(closure->ssl);
 	}
+	free(closure->name);
 #endif
 	if (closure->sock != -1) {
 	    shutdown(closure->sock, SHUT_RDWR);
@@ -153,7 +154,6 @@ connection_closure_free(struct connection_closure *closure)
 	    free(buf->data);
 	    free(buf);
 	}
-	free(closure->name);
 	free(closure->journal_path);
 	if (closure->journal != NULL)
 	    fclose(closure->journal);
