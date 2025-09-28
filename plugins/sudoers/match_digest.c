@@ -81,7 +81,8 @@ digest_matches(int fd, const char *path, const char *runchroot,
 	    file_digest = sudo_filedigest(fd, path, digest->digest_type,
 		&digest_len);
 	    if (lseek(fd, (off_t)0, SEEK_SET) == -1) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		sudo_debug_printf(
+		    SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
 		    "unable to rewind digest fd");
 	    }
 	    digest_type = digest->digest_type;
@@ -92,7 +93,8 @@ digest_matches(int fd, const char *path, const char *runchroot,
 	}
 
 	/* Convert the command digest from ascii to binary. */
-	if ((sudoers_digest = malloc(digest_len)) == NULL) {
+	sudoers_digest = malloc(digest_len); // -V614
+	if (sudoers_digest == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
@@ -107,7 +109,8 @@ digest_matches(int fd, const char *path, const char *runchroot,
 	    }
 	} else {
 	    /* Convert base64 to binary. */
-	    size_t len = base64_decode(digest->digest_str, sudoers_digest, digest_len);
+	    size_t len = base64_decode(digest->digest_str, sudoers_digest,
+		digest_len);
 	    if (len == (size_t)-1)
 		goto bad_format;
 	    if (len != digest_len) {

@@ -112,7 +112,7 @@ bad:
  * Free a NULL-terminated string vector.
  */
 static void
-strvec_free(char *vec[])
+strvec_free(char **vec)
 {
     if (vec != NULL) {
 	char **vp;
