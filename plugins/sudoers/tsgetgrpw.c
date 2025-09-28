@@ -18,11 +18,6 @@
  */
 
 /*
- * This is an open source non-commercial project. Dear PVS-Studio, please check it.
- * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
- */
-
-/*
  * Trivial replacements for the libc getgrent() and getpwent() family
  * of functions for use by testsudoers in the sudo test harness.
  * We need our own since many platforms don't provide set{pw,gr}file().

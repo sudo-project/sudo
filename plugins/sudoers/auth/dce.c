@@ -22,10 +22,6 @@
  */
 
 /*
- * This is an open source non-commercial project. Dear PVS-Studio, please check it.
- * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
- */
-/*
  *  The code below basically comes from the examples supplied on
  *  the OSF DCE 1.0.3 manpages for the sec_login routines, with
  *  enough additional polishing to make the routine work with the

@@ -15,11 +15,6 @@
  */
 
 /*
- * This is an open source non-commercial project. Dear PVS-Studio, please check it.
- * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
- */
-
-/*
  * Test program to exercise seccomp(2) and ptrace(2) intercept code.
  *
  * Usage: test_ptrace [-d 1-3] [command]

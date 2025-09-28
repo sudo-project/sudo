@@ -20,11 +20,6 @@
  * http://man.openbsd.org/getentropy.2
  */
 
-/*
- * This is an open source non-commercial project. Dear PVS-Studio, please check it.
- * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
- */
-
 #include <config.h>
 
 #ifndef HAVE_GETENTROPY
@@ -195,11 +190,6 @@ sudo_getentropy(void *buf, size_t len)
 	errno = EIO;
 	return (ret);
 }
-
-/*
- * This is an open source non-commercial project. Dear PVS-Studio, please check it.
- * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
- */
 
 /*
  * Basic validity checking; wish we could do better.

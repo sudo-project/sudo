@@ -500,11 +500,6 @@ run-fuzz_sudoers_ldif: fuzz_sudoers_ldif
 GENERATED = gram.h gram.c toke.c def_data.c def_data.h getdate.c
 
 prologue:
-	echo "/*" > $@
-	echo " * This is an open source non-commercial project. Dear PVS-Studio, please check it." >> $@
-	echo " * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com" >> $@
-	echo " */" >> $@
-	echo "" >> $@
 	echo "#include <config.h>" >> $@
 
 $(devdir)/gram.c $(devdir)/gram.h: $(srcdir)/gram.y prologue

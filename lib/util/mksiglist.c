@@ -17,11 +17,6 @@
  */
 
 /*
- * This is an open source non-commercial project. Dear PVS-Studio, please check it.
- * PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
- */
-
-/*
  * Self-contained program run on the host to generate sudo_sys_siglist[]
  * for systems that lack sys_siglist[] or the equivalent (like HP-UX).
  *
