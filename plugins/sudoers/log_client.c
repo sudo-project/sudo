@@ -1539,7 +1539,7 @@ handle_commit_point(const TimeSpec *commit_point,
 
     /* Check that ServerMessage's commit_point is valid. */
     if (commit_point == NULL) {
-	sudo_warnx(U_("invalid ServerMessage"));
+	sudo_warnx("%s", U_("invalid ServerMessage"));
 	debug_return_bool(false);
     }
 
@@ -1574,7 +1574,7 @@ handle_log_id(const char *id, struct client_closure *closure)
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: remote log ID: %s", __func__, id);
 
     if (id[0] == '\0') {
-	sudo_warnx(U_("invalid ServerMessage"));
+	sudo_warnx("%s", U_("invalid ServerMessage"));
 	debug_return_bool(false);
     }
 
