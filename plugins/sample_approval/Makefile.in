@@ -137,7 +137,7 @@ Makefile: $(srcdir)/Makefile.in
 	$(CPP) $(CPPFLAGS) $< > $@
 
 .i.plog:
-	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
+	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $${ifile%i}c --i-file $< --output-file $@
 
 $(shlib_map): $(shlib_exp)
 	@$(AWK) 'BEGIN { print "{\n\tglobal:" } { print "\t\t"$$0";" } END { print "\tlocal:\n\t\t*;\n};" }' $(shlib_exp) > $@
@@ -226,4 +226,4 @@ sample_approval.i: $(srcdir)/sample_approval.c $(incdir)/compat/stdbool.h \
                     $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/sample_approval.c > $@
 sample_approval.plog: sample_approval.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/sample_approval.c --i-file sample_approval.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/sample_approval.c --i-file sample_approval.i --output-file $@

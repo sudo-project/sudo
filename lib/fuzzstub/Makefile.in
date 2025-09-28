@@ -106,7 +106,7 @@ Makefile: $(srcdir)/Makefile.in
 	$(CPP) $(CPPFLAGS) $< > $@
 
 .i.plog:
-	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
+	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $${ifile%i}c --i-file $< --output-file $@
 
 libsudo_fuzzstub.la: $(LIBFUZZSTUB_OBJS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LIBFUZZSTUB_OBJS) $(LT_LIBS)
@@ -174,4 +174,4 @@ fuzzstub.i: $(srcdir)/fuzzstub.c $(incdir)/compat/stdbool.h \
              $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/fuzzstub.c > $@
 fuzzstub.plog: fuzzstub.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/fuzzstub.c --i-file fuzzstub.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/fuzzstub.c --i-file fuzzstub.i --output-file $@

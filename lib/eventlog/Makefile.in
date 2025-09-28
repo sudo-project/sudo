@@ -121,7 +121,7 @@ Makefile: $(srcdir)/Makefile.in
 	$(CPP) $(CPPFLAGS) $< > $@
 
 .i.plog:
-	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
+	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $${ifile%i}c --i-file $< --output-file $@
 
 libsudo_eventlog.la: $(LIBEVENTLOG_OBJS) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LIBEVENTLOG_OBJS) $(LT_LIBS)
@@ -226,7 +226,7 @@ check_parse_json.i: $(srcdir)/regress/parse_json/check_parse_json.c \
                      $(srcdir)/parse_json.h $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/regress/parse_json/check_parse_json.c > $@
 check_parse_json.plog: check_parse_json.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/parse_json/check_parse_json.c --i-file check_parse_json.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/regress/parse_json/check_parse_json.c --i-file check_parse_json.i --output-file $@
 check_wrap.lo: $(srcdir)/regress/logwrap/check_wrap.c \
                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
@@ -240,7 +240,7 @@ check_wrap.i: $(srcdir)/regress/logwrap/check_wrap.c \
                $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/regress/logwrap/check_wrap.c > $@
 check_wrap.plog: check_wrap.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/logwrap/check_wrap.c --i-file check_wrap.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/regress/logwrap/check_wrap.c --i-file check_wrap.i --output-file $@
 eventlog.lo: $(srcdir)/eventlog.c $(incdir)/compat/stdbool.h \
              $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
              $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
@@ -258,7 +258,7 @@ eventlog.i: $(srcdir)/eventlog.c $(incdir)/compat/stdbool.h \
              $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/eventlog.c > $@
 eventlog.plog: eventlog.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/eventlog.c --i-file eventlog.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/eventlog.c --i-file eventlog.i --output-file $@
 eventlog_conf.lo: $(srcdir)/eventlog_conf.c $(incdir)/compat/stdbool.h \
                   $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                   $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
@@ -276,7 +276,7 @@ eventlog_conf.i: $(srcdir)/eventlog_conf.c $(incdir)/compat/stdbool.h \
                   $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/eventlog_conf.c > $@
 eventlog_conf.plog: eventlog_conf.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/eventlog_conf.c --i-file eventlog_conf.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/eventlog_conf.c --i-file eventlog_conf.i --output-file $@
 eventlog_free.lo: $(srcdir)/eventlog_free.c $(incdir)/compat/stdbool.h \
                   $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                   $(incdir)/sudo_eventlog.h $(incdir)/sudo_queue.h \
@@ -288,7 +288,7 @@ eventlog_free.i: $(srcdir)/eventlog_free.c $(incdir)/compat/stdbool.h \
                   $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/eventlog_free.c > $@
 eventlog_free.plog: eventlog_free.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/eventlog_free.c --i-file eventlog_free.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/eventlog_free.c --i-file eventlog_free.i --output-file $@
 logwrap.lo: $(srcdir)/logwrap.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_eventlog.h $(incdir)/sudo_queue.h \
@@ -300,7 +300,7 @@ logwrap.i: $(srcdir)/logwrap.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/logwrap.c > $@
 logwrap.plog: logwrap.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/logwrap.c --i-file logwrap.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/logwrap.c --i-file logwrap.i --output-file $@
 parse_json.lo: $(srcdir)/parse_json.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
@@ -318,7 +318,7 @@ parse_json.i: $(srcdir)/parse_json.c $(incdir)/compat/stdbool.h \
                $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/parse_json.c > $@
 parse_json.plog: parse_json.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/parse_json.c --i-file parse_json.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/parse_json.c --i-file parse_json.i --output-file $@
 store_json_test.lo: $(srcdir)/regress/eventlog_store/store_json_test.c \
                     $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                     $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
@@ -334,7 +334,7 @@ store_json_test.i: $(srcdir)/regress/eventlog_store/store_json_test.c \
                     $(srcdir)/parse_json.h $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/regress/eventlog_store/store_json_test.c > $@
 store_json_test.plog: store_json_test.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/eventlog_store/store_json_test.c --i-file store_json_test.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/regress/eventlog_store/store_json_test.c --i-file store_json_test.i --output-file $@
 store_sudo_test.lo: $(srcdir)/regress/eventlog_store/store_sudo_test.c \
                     $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                     $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
@@ -348,4 +348,4 @@ store_sudo_test.i: $(srcdir)/regress/eventlog_store/store_sudo_test.c \
                     $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/regress/eventlog_store/store_sudo_test.c > $@
 store_sudo_test.plog: store_sudo_test.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/eventlog_store/store_sudo_test.c --i-file store_sudo_test.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/regress/eventlog_store/store_sudo_test.c --i-file store_sudo_test.i --output-file $@

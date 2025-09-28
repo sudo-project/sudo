@@ -99,7 +99,7 @@ Makefile: $(srcdir)/Makefile.in
 	$(CPP) $(CPPFLAGS) $< > $@
 
 .i.plog:
-	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
+	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $${ifile%i}c --i-file $< --output-file $@
 
 libprotobuf-c.la: $(LIBPROTOBUF_C_OBJS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LIBPROTOBUF_C_OBJS)
@@ -164,4 +164,4 @@ protobuf-c.i: $(srcdir)/protobuf-c.c $(incdir)/compat/endian.h \
                $(incdir)/protobuf-c/protobuf-c.h $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/protobuf-c.c > $@
 protobuf-c.plog: protobuf-c.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/protobuf-c.c --i-file protobuf-c.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/protobuf-c.c --i-file protobuf-c.i --output-file $@

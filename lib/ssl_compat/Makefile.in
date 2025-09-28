@@ -104,7 +104,7 @@ Makefile: $(srcdir)/Makefile.in
 	$(CPP) $(CPPFLAGS) $< > $@
 
 .i.plog:
-	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
+	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $${ifile%i}c --i-file $< --output-file $@
 
 libssl_compat.la: $(LIBSSL_COMPAT_OBJS) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LIBSSL_COMPAT_OBJS) $(LT_LIBS)
@@ -173,4 +173,4 @@ ssl_compat.i: $(srcdir)/ssl_compat.c $(incdir)/sudo_compat.h \
                $(incdir)/sudo_ssl_compat.h $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/ssl_compat.c > $@
 ssl_compat.plog: ssl_compat.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/ssl_compat.c --i-file ssl_compat.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/ssl_compat.c --i-file ssl_compat.i --output-file $@

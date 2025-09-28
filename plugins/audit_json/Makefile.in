@@ -137,7 +137,7 @@ Makefile: $(srcdir)/Makefile.in
 	$(CPP) $(CPPFLAGS) $< > $@
 
 .i.plog:
-	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
+	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $${ifile%i}c --i-file $< --output-file $@
 
 $(shlib_map): $(shlib_exp)
 	@$(AWK) 'BEGIN { print "{\n\tglobal:" } { print "\t\t"$$0";" } END { print "\tlocal:\n\t\t*;\n};" }' $(shlib_exp) > $@
@@ -228,4 +228,4 @@ audit_json.i: $(srcdir)/audit_json.c $(incdir)/compat/stdbool.h \
                $(top_builddir)/config.h $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/audit_json.c > $@
 audit_json.plog: audit_json.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/audit_json.c --i-file audit_json.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/audit_json.c --i-file audit_json.i --output-file $@

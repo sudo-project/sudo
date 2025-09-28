@@ -158,7 +158,7 @@ Makefile: $(srcdir)/Makefile.in
 	$(CPP) $(CPPFLAGS) $< > $@
 
 .i.plog:
-	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $${ifile%i}c --i-file $< --output-file $@
+	ifile=$<; rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $${ifile%i}c --i-file $< --output-file $@
 
 libsudo_iolog.la: $(LIBIOLOG_OBJS) $(LT_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(LIBIOLOG_OBJS) $(LT_LIBS) @ZLIB@ @NET_LIBS@
@@ -373,7 +373,7 @@ check_iolog_filter.i: $(srcdir)/regress/iolog_filter/check_iolog_filter.c \
                        $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/regress/iolog_filter/check_iolog_filter.c > $@
 check_iolog_filter.plog: check_iolog_filter.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/iolog_filter/check_iolog_filter.c --i-file check_iolog_filter.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/regress/iolog_filter/check_iolog_filter.c --i-file check_iolog_filter.i --output-file $@
 check_iolog_mkpath.lo: $(srcdir)/regress/iolog_mkpath/check_iolog_mkpath.c \
                        $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                        $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
@@ -387,7 +387,7 @@ check_iolog_mkpath.i: $(srcdir)/regress/iolog_mkpath/check_iolog_mkpath.c \
                        $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/regress/iolog_mkpath/check_iolog_mkpath.c > $@
 check_iolog_mkpath.plog: check_iolog_mkpath.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/iolog_mkpath/check_iolog_mkpath.c --i-file check_iolog_mkpath.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/regress/iolog_mkpath/check_iolog_mkpath.c --i-file check_iolog_mkpath.i --output-file $@
 check_iolog_path.lo: $(srcdir)/regress/iolog_path/check_iolog_path.c \
                      $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                      $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
@@ -401,7 +401,7 @@ check_iolog_path.i: $(srcdir)/regress/iolog_path/check_iolog_path.c \
                      $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/regress/iolog_path/check_iolog_path.c > $@
 check_iolog_path.plog: check_iolog_path.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/iolog_path/check_iolog_path.c --i-file check_iolog_path.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/regress/iolog_path/check_iolog_path.c --i-file check_iolog_path.i --output-file $@
 check_iolog_timing.lo: $(srcdir)/regress/iolog_timing/check_iolog_timing.c \
                        $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                        $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
@@ -415,7 +415,7 @@ check_iolog_timing.i: $(srcdir)/regress/iolog_timing/check_iolog_timing.c \
                        $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/regress/iolog_timing/check_iolog_timing.c > $@
 check_iolog_timing.plog: check_iolog_timing.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/iolog_timing/check_iolog_timing.c --i-file check_iolog_timing.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/regress/iolog_timing/check_iolog_timing.c --i-file check_iolog_timing.i --output-file $@
 fuzz_iolog_json.lo: $(srcdir)/regress/fuzz/fuzz_iolog_json.c \
                     $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                     $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
@@ -431,7 +431,7 @@ fuzz_iolog_json.i: $(srcdir)/regress/fuzz/fuzz_iolog_json.c \
                     $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/regress/fuzz/fuzz_iolog_json.c > $@
 fuzz_iolog_json.plog: fuzz_iolog_json.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/fuzz/fuzz_iolog_json.c --i-file fuzz_iolog_json.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/regress/fuzz/fuzz_iolog_json.c --i-file fuzz_iolog_json.i --output-file $@
 fuzz_iolog_legacy.lo: $(srcdir)/regress/fuzz/fuzz_iolog_legacy.c \
                       $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                       $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
@@ -447,7 +447,7 @@ fuzz_iolog_legacy.i: $(srcdir)/regress/fuzz/fuzz_iolog_legacy.c \
                       $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/regress/fuzz/fuzz_iolog_legacy.c > $@
 fuzz_iolog_legacy.plog: fuzz_iolog_legacy.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/fuzz/fuzz_iolog_legacy.c --i-file fuzz_iolog_legacy.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/regress/fuzz/fuzz_iolog_legacy.c --i-file fuzz_iolog_legacy.i --output-file $@
 fuzz_iolog_timing.lo: $(srcdir)/regress/fuzz/fuzz_iolog_timing.c \
                       $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                       $(incdir)/sudo_debug.h $(incdir)/sudo_eventlog.h \
@@ -463,7 +463,7 @@ fuzz_iolog_timing.i: $(srcdir)/regress/fuzz/fuzz_iolog_timing.c \
                       $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/regress/fuzz/fuzz_iolog_timing.c > $@
 fuzz_iolog_timing.plog: fuzz_iolog_timing.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/fuzz/fuzz_iolog_timing.c --i-file fuzz_iolog_timing.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/regress/fuzz/fuzz_iolog_timing.c --i-file fuzz_iolog_timing.i --output-file $@
 host_port.lo: $(srcdir)/host_port.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
               $(incdir)/sudo_gettext.h $(incdir)/sudo_iolog.h \
@@ -477,7 +477,7 @@ host_port.i: $(srcdir)/host_port.c $(incdir)/compat/stdbool.h \
               $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/host_port.c > $@
 host_port.plog: host_port.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/host_port.c --i-file host_port.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/host_port.c --i-file host_port.i --output-file $@
 host_port_test.lo: $(srcdir)/regress/host_port/host_port_test.c \
                    $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
                    $(incdir)/sudo_fatal.h $(incdir)/sudo_iolog.h \
@@ -491,7 +491,7 @@ host_port_test.i: $(srcdir)/regress/host_port/host_port_test.c \
                    $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/regress/host_port/host_port_test.c > $@
 host_port_test.plog: host_port_test.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/regress/host_port/host_port_test.c --i-file host_port_test.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/regress/host_port/host_port_test.c --i-file host_port_test.i --output-file $@
 hostcheck.lo: $(srcdir)/hostcheck.c $(incdir)/compat/stdbool.h \
               $(incdir)/hostcheck.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_debug.h $(incdir)/sudo_queue.h \
@@ -503,7 +503,7 @@ hostcheck.i: $(srcdir)/hostcheck.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/hostcheck.c > $@
 hostcheck.plog: hostcheck.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/hostcheck.c --i-file hostcheck.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/hostcheck.c --i-file hostcheck.i --output-file $@
 iolog_clearerr.lo: $(srcdir)/iolog_clearerr.c $(incdir)/compat/stdbool.h \
                    $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                    $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -515,7 +515,7 @@ iolog_clearerr.i: $(srcdir)/iolog_clearerr.c $(incdir)/compat/stdbool.h \
                    $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_clearerr.c > $@
 iolog_clearerr.plog: iolog_clearerr.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_clearerr.c --i-file iolog_clearerr.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_clearerr.c --i-file iolog_clearerr.i --output-file $@
 iolog_close.lo: $(srcdir)/iolog_close.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                 $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -527,7 +527,7 @@ iolog_close.i: $(srcdir)/iolog_close.c $(incdir)/compat/stdbool.h \
                 $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_close.c > $@
 iolog_close.plog: iolog_close.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_close.c --i-file iolog_close.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_close.c --i-file iolog_close.i --output-file $@
 iolog_conf.lo: $(srcdir)/iolog_conf.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -541,7 +541,7 @@ iolog_conf.i: $(srcdir)/iolog_conf.c $(incdir)/compat/stdbool.h \
                $(top_builddir)/pathnames.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_conf.c > $@
 iolog_conf.plog: iolog_conf.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_conf.c --i-file iolog_conf.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_conf.c --i-file iolog_conf.i --output-file $@
 iolog_eof.lo: $(srcdir)/iolog_eof.c $(incdir)/compat/stdbool.h \
               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
               $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -553,7 +553,7 @@ iolog_eof.i: $(srcdir)/iolog_eof.c $(incdir)/compat/stdbool.h \
               $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_eof.c > $@
 iolog_eof.plog: iolog_eof.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_eof.c --i-file iolog_eof.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_eof.c --i-file iolog_eof.i --output-file $@
 iolog_filter.lo: $(srcdir)/iolog_filter.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                  $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -569,7 +569,7 @@ iolog_filter.i: $(srcdir)/iolog_filter.c $(incdir)/compat/stdbool.h \
                  $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_filter.c > $@
 iolog_filter.plog: iolog_filter.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_filter.c --i-file iolog_filter.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_filter.c --i-file iolog_filter.i --output-file $@
 iolog_flush.lo: $(srcdir)/iolog_flush.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                 $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -581,7 +581,7 @@ iolog_flush.i: $(srcdir)/iolog_flush.c $(incdir)/compat/stdbool.h \
                 $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_flush.c > $@
 iolog_flush.plog: iolog_flush.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_flush.c --i-file iolog_flush.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_flush.c --i-file iolog_flush.i --output-file $@
 iolog_gets.lo: $(srcdir)/iolog_gets.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -593,7 +593,7 @@ iolog_gets.i: $(srcdir)/iolog_gets.c $(incdir)/compat/stdbool.h \
                $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_gets.c > $@
 iolog_gets.plog: iolog_gets.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_gets.c --i-file iolog_gets.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_gets.c --i-file iolog_gets.i --output-file $@
 iolog_json.lo: $(srcdir)/iolog_json.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_eventlog.h $(incdir)/sudo_iolog.h \
@@ -605,7 +605,7 @@ iolog_json.i: $(srcdir)/iolog_json.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_queue.h $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_json.c > $@
 iolog_json.plog: iolog_json.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_json.c --i-file iolog_json.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_json.c --i-file iolog_json.i --output-file $@
 iolog_legacy.lo: $(srcdir)/iolog_legacy.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                  $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
@@ -621,7 +621,7 @@ iolog_legacy.i: $(srcdir)/iolog_legacy.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_legacy.c > $@
 iolog_legacy.plog: iolog_legacy.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_legacy.c --i-file iolog_legacy.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_legacy.c --i-file iolog_legacy.i --output-file $@
 iolog_loginfo.lo: $(srcdir)/iolog_loginfo.c $(incdir)/compat/stdbool.h \
                   $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                   $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
@@ -639,7 +639,7 @@ iolog_loginfo.i: $(srcdir)/iolog_loginfo.c $(incdir)/compat/stdbool.h \
                   $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_loginfo.c > $@
 iolog_loginfo.plog: iolog_loginfo.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_loginfo.c --i-file iolog_loginfo.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_loginfo.c --i-file iolog_loginfo.i --output-file $@
 iolog_mkdirs.lo: $(srcdir)/iolog_mkdirs.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                  $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -655,7 +655,7 @@ iolog_mkdirs.i: $(srcdir)/iolog_mkdirs.c $(incdir)/compat/stdbool.h \
                  $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_mkdirs.c > $@
 iolog_mkdirs.plog: iolog_mkdirs.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_mkdirs.c --i-file iolog_mkdirs.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_mkdirs.c --i-file iolog_mkdirs.i --output-file $@
 iolog_mkdtemp.lo: $(srcdir)/iolog_mkdtemp.c $(incdir)/compat/stdbool.h \
                   $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                   $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -671,7 +671,7 @@ iolog_mkdtemp.i: $(srcdir)/iolog_mkdtemp.c $(incdir)/compat/stdbool.h \
                   $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_mkdtemp.c > $@
 iolog_mkdtemp.plog: iolog_mkdtemp.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_mkdtemp.c --i-file iolog_mkdtemp.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_mkdtemp.c --i-file iolog_mkdtemp.i --output-file $@
 iolog_mkpath.lo: $(srcdir)/iolog_mkpath.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                  $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -683,7 +683,7 @@ iolog_mkpath.i: $(srcdir)/iolog_mkpath.c $(incdir)/compat/stdbool.h \
                  $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_mkpath.c > $@
 iolog_mkpath.plog: iolog_mkpath.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_mkpath.c --i-file iolog_mkpath.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_mkpath.c --i-file iolog_mkpath.i --output-file $@
 iolog_nextid.lo: $(srcdir)/iolog_nextid.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                  $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -699,7 +699,7 @@ iolog_nextid.i: $(srcdir)/iolog_nextid.c $(incdir)/compat/stdbool.h \
                  $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_nextid.c > $@
 iolog_nextid.plog: iolog_nextid.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_nextid.c --i-file iolog_nextid.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_nextid.c --i-file iolog_nextid.i --output-file $@
 iolog_open.lo: $(srcdir)/iolog_open.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -711,7 +711,7 @@ iolog_open.i: $(srcdir)/iolog_open.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_open.c > $@
 iolog_open.plog: iolog_open.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_open.c --i-file iolog_open.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_open.c --i-file iolog_open.i --output-file $@
 iolog_openat.lo: $(srcdir)/iolog_openat.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                  $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -727,7 +727,7 @@ iolog_openat.i: $(srcdir)/iolog_openat.c $(incdir)/compat/stdbool.h \
                  $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_openat.c > $@
 iolog_openat.plog: iolog_openat.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_openat.c --i-file iolog_openat.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_openat.c --i-file iolog_openat.i --output-file $@
 iolog_path.lo: $(srcdir)/iolog_path.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -743,7 +743,7 @@ iolog_path.i: $(srcdir)/iolog_path.c $(incdir)/compat/stdbool.h \
                $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_path.c > $@
 iolog_path.plog: iolog_path.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_path.c --i-file iolog_path.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_path.c --i-file iolog_path.i --output-file $@
 iolog_read.lo: $(srcdir)/iolog_read.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -755,7 +755,7 @@ iolog_read.i: $(srcdir)/iolog_read.c $(incdir)/compat/stdbool.h \
                $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_read.c > $@
 iolog_read.plog: iolog_read.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_read.c --i-file iolog_read.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_read.c --i-file iolog_read.i --output-file $@
 iolog_seek.lo: $(srcdir)/iolog_seek.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -767,7 +767,7 @@ iolog_seek.i: $(srcdir)/iolog_seek.c $(incdir)/compat/stdbool.h \
                $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_seek.c > $@
 iolog_seek.plog: iolog_seek.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_seek.c --i-file iolog_seek.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_seek.c --i-file iolog_seek.i --output-file $@
 iolog_swapids.lo: $(srcdir)/iolog_swapids.c $(incdir)/compat/stdbool.h \
                   $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                   $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \
@@ -781,7 +781,7 @@ iolog_swapids.i: $(srcdir)/iolog_swapids.c $(incdir)/compat/stdbool.h \
                   $(incdir)/sudo_queue.h $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_swapids.c > $@
 iolog_swapids.plog: iolog_swapids.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_swapids.c --i-file iolog_swapids.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_swapids.c --i-file iolog_swapids.i --output-file $@
 iolog_timing.lo: $(srcdir)/iolog_timing.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                  $(incdir)/sudo_eventlog.h $(incdir)/sudo_fatal.h \
@@ -797,7 +797,7 @@ iolog_timing.i: $(srcdir)/iolog_timing.c $(incdir)/compat/stdbool.h \
                  $(incdir)/sudo_util.h $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_timing.c > $@
 iolog_timing.plog: iolog_timing.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_timing.c --i-file iolog_timing.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_timing.c --i-file iolog_timing.i --output-file $@
 iolog_util.lo: $(srcdir)/iolog_util.c $(incdir)/compat/stdbool.h \
                $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -809,7 +809,7 @@ iolog_util.i: $(srcdir)/iolog_util.c $(incdir)/compat/stdbool.h \
                $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_util.c > $@
 iolog_util.plog: iolog_util.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_util.c --i-file iolog_util.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_util.c --i-file iolog_util.i --output-file $@
 iolog_write.lo: $(srcdir)/iolog_write.c $(incdir)/compat/stdbool.h \
                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                 $(incdir)/sudo_iolog.h $(incdir)/sudo_queue.h \
@@ -821,4 +821,4 @@ iolog_write.i: $(srcdir)/iolog_write.c $(incdir)/compat/stdbool.h \
                 $(top_builddir)/config.h
 	$(CPP) $(CPPFLAGS) $(srcdir)/iolog_write.c > $@
 iolog_write.plog: iolog_write.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --sourcetree-root $(top_srcdir) --skip-cl-exe yes --source-file $(srcdir)/iolog_write.c --i-file iolog_write.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/iolog_write.c --i-file iolog_write.i --output-file $@
