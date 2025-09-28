@@ -45,6 +45,18 @@ how you can help contribute to sudo.
 Sudo is distributed under an ISC-style license.
 Refer to [LICENSE.md](LICENSE.md) for details.
 
+## SAST Tools
+
+[PVS-Studio](https://pvs-studio.com/en/pvs-studio/?utm_source=website&utm_medium=github&utm_campaign=open_source) - static analyzer for C, C++, C#, and Java code.
+
+[Coverity Static Analysis](https://www.blackduck.com/static-analysis-tools-sast/coverity.html)
+
+[CodeQL](https://codeql.github.com)
+
+[Clang Static Analyzer](https://clang-analyzer.llvm.org)
+
+[Cppcheck](http://cppcheck.net)
+
 ## Mailing lists
 
 #### sudo-announce
