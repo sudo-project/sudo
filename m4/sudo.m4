@@ -595,6 +595,8 @@ dnl Create PVS-Studio.cfg for supported platforms or throw an error.
 dnl
 AC_DEFUN([SUDO_PVS_STUDIO_CFG], [
     if test X"$enable_pvs_studio" = X"yes"; then
+	AC_DEFINE(HAVE_PVS_STUDIO)
+
 	# Determine preprocessor type
 	case "$CC" in
 	*clang*) preprocessor=clang;;

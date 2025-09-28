@@ -4794,6 +4794,7 @@ AH_TEMPLATE(SUDOERS_LOG_CLIENT, [Define to 1 to compile support for sudo_logsrvd
 AH_TEMPLATE(HAVE_FALLTHROUGH_ATTRIBUTE, [Define to 1 if the compiler supports the fallthrough attribute.])
 AH_TEMPLATE(HAVE_VA_COPY, [Define to 1 if you have the 'va_copy' function.])
 AH_TEMPLATE(HAVE___VA_COPY, [Define to 1 if you have the '__va_copy' function.])
+AH_TEMPLATE(HAVE_PVS_STUDIO, [Define to 1 if you are using PVS Studio to scan sudo.])
 
 dnl
 dnl Bits to copy verbatim into config.h.in
@@ -4827,7 +4828,7 @@ typedef unsigned int		socklen_t;
 #endif
 
 /* For functions that call exit() directly. */
-#ifdef __has_c_attribute
+#if defined(__has_c_attribute) && !defined(HAVE_PVS_STUDIO)
 # if __has_c_attribute(__noreturn__)
 #  define sudo_noreturn		[[__noreturn__]]
 # endif
@@ -4866,7 +4867,7 @@ typedef unsigned int		socklen_t;
 #endif
 
 /* C23 defines a fallthrough attribute, gcc 7.0 and clang 10 have their own. */
-#ifdef __has_c_attribute
+#if defined(__has_c_attribute) && !defined(HAVE_PVS_STUDIO)
 # if __has_c_attribute(__fallthrough__)
 # define FALLTHROUGH		[[__fallthrough__]]
 # endif

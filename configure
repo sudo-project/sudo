@@ -8955,6 +8955,9 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 
     if test X"$enable_pvs_studio" = X"yes"; then
+	printf "%s\n" "#define HAVE_PVS_STUDIO 1" >>confdefs.h
+
+
 	# Determine preprocessor type
 	case "$CC" in
 	*clang*) preprocessor=clang;;
@@ -39985,6 +39988,7 @@ printf "%s\n" "$as_me: warning: the $rundir/ts directory must be cleared at boot
 printf "%s\n" "$as_me:          You may need to create a startup item to do this." >&6;}
 
 fi
+
 
 
 
