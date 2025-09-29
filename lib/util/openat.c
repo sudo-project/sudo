@@ -32,8 +32,8 @@ sudo_openat(int dfd, const char *path, int flags, mode_t mode)
     if (dfd == AT_FDCWD)
 	return open(path, flags, mode);
 
-    /* Save cwd */
-    if ((odfd = open(".", O_RDONLY)) == -1)
+    /* Save cwd (cannot use O_PATH on older Linux kernels). */
+    if ((odfd = open(".", O_RDONLY|O_DIRECTORY)) == -1)
 	return -1;
 
     if (fchdir(dfd) == -1) {

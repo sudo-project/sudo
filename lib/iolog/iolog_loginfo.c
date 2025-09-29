@@ -49,7 +49,7 @@ iolog_parse_loginfo(int dfd, const char *iolog_dir)
     debug_decl(iolog_parse_loginfo, SUDO_DEBUG_UTIL);
 
     if (dfd == -1) {
-	if ((tmpfd = open(iolog_dir, O_RDONLY)) == -1) {
+	if ((tmpfd = open(iolog_dir, O_RDONLY|O_DIRECTORY)) == -1) {
 	    sudo_warn("%s", iolog_dir);
 	    goto bad;
 	}

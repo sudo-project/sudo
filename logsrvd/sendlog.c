@@ -1850,7 +1850,7 @@ main(int argc, char *argv[])
     if (argc != 1)
 	usage();
     iolog_dir = argv[0];
-    if ((iolog_dir_fd = open(iolog_dir, O_RDONLY)) == -1) {
+    if ((iolog_dir_fd = open(iolog_dir, O_RDONLY|O_DIRECTORY)) == -1) {
 	sudo_warn("%s", iolog_dir);
 	goto bad;
     }

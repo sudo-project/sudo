@@ -36,8 +36,8 @@ sudo_fchownat(int dfd, const char *path, uid_t uid, gid_t gid, int flags)
 	    return chown(path, uid, gid);
     }
 
-    /* Save cwd */
-    if ((odfd = open(".", O_RDONLY)) == -1)
+    /* Save cwd (cannot use O_PATH on older Linux kernels). */
+    if ((odfd = open(".", O_RDONLY|O_DIRECTORY)) == -1)
 	return -1;
 
     if (fchdir(dfd) == -1) {

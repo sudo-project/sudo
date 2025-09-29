@@ -718,7 +718,8 @@ sudoers_io_open_local(struct timespec *start_time)
 	goto done;
     }
 
-    iolog_dir_fd = iolog_openat(AT_FDCWD, evlog->iolog_path, O_RDONLY);
+    iolog_dir_fd =
+	iolog_openat(AT_FDCWD, evlog->iolog_path, O_RDONLY|O_DIRECTORY);
     if (iolog_dir_fd == -1) {
 	log_warning(ctx, SLOG_SEND_MAIL, "%s", evlog->iolog_path);
 	warned = true;

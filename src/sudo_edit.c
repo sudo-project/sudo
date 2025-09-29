@@ -96,7 +96,7 @@ set_tmpdir(const struct sudo_cred *user_cred)
     }
 
     for (i = 0; tdir == NULL && i < nitems(tmpdirs); i++) {
-	if ((dfd = open(tmpdirs[i], O_RDONLY)) != -1) {
+	if ((dfd = open(tmpdirs[i], O_RDONLY|O_DIRECTORY)) != -1) {
 	    if (dir_is_writable(dfd, user_cred, &saved_cred) == true)
 		tdir = tmpdirs[i];
 	    close(dfd);

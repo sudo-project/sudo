@@ -40,8 +40,8 @@ sudo_fchmodat(int dfd, const char *path, mode_t mode, int flag)
     if (dfd == (int)AT_FDCWD)
 	return chmod(path, mode);
 
-    /* Save cwd */
-    if ((odfd = open(".", O_RDONLY)) == -1)
+    /* Save cwd (cannot use O_PATH on older Linux kernels). */
+    if ((odfd = open(".", O_RDONLY|O_DIRECTORY)) == -1)
 	goto done;
 
     if (fchdir(dfd) == -1)

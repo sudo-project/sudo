@@ -619,7 +619,7 @@ create_iolog_path(struct connection_closure *closure)
 
     /* We use iolog_dir_fd in calls to openat(2) */
     closure->iolog_dir_fd =
-	iolog_openat(AT_FDCWD, evlog->iolog_path, O_RDONLY);
+	iolog_openat(AT_FDCWD, evlog->iolog_path, O_RDONLY|O_DIRECTORY);
     if (closure->iolog_dir_fd == -1) {
 	sudo_warn("%s", evlog->iolog_path);
 	goto bad;
@@ -830,7 +830,8 @@ iolog_rewrite(const struct timespec *target, struct connection_closure *closure)
 	sudo_warn(U_("unable to mkdir %s"), tmpdir);
 	goto done;
     }
-    if ((tmpdir_fd = iolog_openat(AT_FDCWD, tmpdir, O_RDONLY)) == -1) {
+    tmpdir_fd = iolog_openat(AT_FDCWD, tmpdir, O_RDONLY|O_DIRECTORY);
+    if (tmpdir_fd == -1) {
 	sudo_warn(U_("unable to open %s"), tmpdir);
 	goto done;
     }

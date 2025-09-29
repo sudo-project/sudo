@@ -53,11 +53,11 @@ iolog_mkdirs(const char *path)
     int dfd;
     debug_decl(iolog_mkdirs, SUDO_DEBUG_UTIL);
 
-    dfd = open(path, O_RDONLY|O_NONBLOCK);
+    dfd = open(path, O_RDONLY|O_NONBLOCK|O_DIRECTORY);
     if (dfd == -1 && errno == EACCES) {
 	/* Try again as the I/O log owner (for NFS). */
 	if (iolog_swapids(false)) {
-	    dfd = open(path, O_RDONLY|O_NONBLOCK);
+	    dfd = open(path, O_RDONLY|O_NONBLOCK|O_DIRECTORY);
 	    if (!iolog_swapids(true)) {
 		ok = false;
 		goto done;

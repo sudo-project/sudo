@@ -144,6 +144,11 @@
 # endif
 #endif
 
+/* Older systems lack O_DIRECTORY. */
+#ifndef O_DIRECTORY
+# define O_DIRECTORY	0
+#endif
+
 /*
  * BSD defines these in <sys/param.h> but we don't include that anymore.
  */

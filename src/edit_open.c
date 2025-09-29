@@ -288,8 +288,8 @@ sudo_edit_openat_nofollow(int dfd, char *path, int oflags, mode_t mode)
     struct stat sb;
     debug_decl(sudo_edit_openat_nofollow, SUDO_DEBUG_EDIT);
 
-    /* Save cwd and chdir to dfd */
-    if ((odfd = open(".", O_RDONLY)) == -1)
+    /* Save cwd and chdir to dfd (cannot use O_PATH on older Linux kernels). */
+    if ((odfd = open(".", O_RDONLY|DIRECTORY)) == -1)
 	debug_return_int(-1);
     if (fchdir(dfd) == -1) {
 	close(odfd);

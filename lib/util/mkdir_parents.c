@@ -89,9 +89,9 @@ sudo_open_parent_dir_v1(const char *path, uid_t uid, gid_t gid, mode_t mode,
 	do {
 	    cp++;
 	} while (*cp == '/');
-	parentfd = open("/", O_RDONLY|O_NONBLOCK);
+	parentfd = open("/", O_RDONLY|O_NONBLOCK|O_DIRECTORY);
     } else {
-	parentfd = open(".", O_RDONLY|O_NONBLOCK);
+	parentfd = open(".", O_RDONLY|O_NONBLOCK|O_DIRECTORY);
     }
     if (parentfd == -1) {
 	if (!quiet)
@@ -118,7 +118,7 @@ sudo_open_parent_dir_v1(const char *path, uid_t uid, gid_t gid, mode_t mode,
 	memcpy(name, cp, len);
 	name[len] = '\0';
 reopen:
-	dfd = openat(parentfd, name, O_RDONLY|O_NONBLOCK, 0);
+	dfd = openat(parentfd, name, O_RDONLY|O_NONBLOCK|O_DIRECTORY, 0);
 	if (dfd == -1) {
 	    if (errno != ENOENT) {
 		if (!quiet) {
@@ -128,7 +128,8 @@ reopen:
 		goto bad;
 	    }
 	    if (mkdirat(parentfd, name, mode) == 0) {
-		dfd = openat(parentfd, name, O_RDONLY|O_NONBLOCK|O_NOFOLLOW, 0);
+		dfd = openat(parentfd, name,
+		    O_RDONLY|O_NONBLOCK|O_DIRECTORY|O_NOFOLLOW, 0);
 		if (dfd == -1) {
 		    if (!quiet) {
 			sudo_warn(U_("unable to open %.*s"),

@@ -1028,7 +1028,7 @@ timestamp_remove(const struct sudoers_context *ctx, bool unlink_it)
     }
 #endif
 
-    dfd = open(def_timestampdir, O_RDONLY|O_NONBLOCK);
+    dfd = open(def_timestampdir, O_RDONLY|O_NONBLOCK|O_DIRECTORY);
     if (dfd == -1) {
 	if (errno != ENOENT)
 	    ret = -1;

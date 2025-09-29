@@ -38,8 +38,8 @@ sudo_fstatat(int dfd, const char * restrict path, struct stat * restrict sb, int
 	    return stat(path, sb);
     }
 
-    /* Save cwd */
-    if ((odfd = open(".", O_RDONLY)) == -1)
+    /* Save cwd (cannot use O_PATH on older Linux kernels). */
+    if ((odfd = open(".", O_RDONLY|O_DIRECTORY)) == -1)
 	goto done;
 
     if (fchdir(dfd) == -1)

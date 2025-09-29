@@ -476,8 +476,8 @@ store_restart_local(const RestartMessage *msg, const uint8_t *buf, size_t len,
     }
 
     /* We use iolog_dir_fd in calls to openat(2) */
-    closure->iolog_dir_fd =
-	iolog_openat(AT_FDCWD, closure->evlog->iolog_path, O_RDONLY);
+    closure->iolog_dir_fd = iolog_openat(AT_FDCWD,
+	closure->evlog->iolog_path, O_RDONLY|O_DIRECTORY);
     if (closure->iolog_dir_fd == -1) {
 	sudo_warn("%s", closure->evlog->iolog_path);
 	goto bad;

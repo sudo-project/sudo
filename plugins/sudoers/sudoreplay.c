@@ -342,7 +342,8 @@ main(int argc, char *argv[])
     }
 
     /* Open files for replay, applying replay filter for the -f flag. */
-    if ((iolog_dir_fd = iolog_openat(AT_FDCWD, iolog_dir, O_RDONLY)) == -1)
+    iolog_dir_fd = iolog_openat(AT_FDCWD, iolog_dir, O_RDONLY|O_DIRECTORY);
+    if (iolog_dir_fd == -1)
 	sudo_fatal("%s", iolog_dir);
     for (i = 0; i < IOFD_MAX; i++) {
 	if (!iolog_open(&iolog_files[i], iolog_dir_fd, i, "r")) {

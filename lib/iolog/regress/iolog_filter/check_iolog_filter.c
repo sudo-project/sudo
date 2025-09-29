@@ -72,7 +72,7 @@ main(int argc, char *argv[])
 	ntests++;
 
 	/* I/O logs consist of multiple files in a directory. */
-	dfd = open(logdir, O_RDONLY);
+	dfd = open(logdir, O_RDONLY|O_DIRECTORY);
 	if (dfd == -1) {
 	    sudo_warn("%s", logdir);
 	    errors++;

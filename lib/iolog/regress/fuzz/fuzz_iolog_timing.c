@@ -86,7 +86,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	return 0;
 
     /* Create a timing file from the supplied data. */
-    dfd = open(logdir, O_RDONLY);
+    dfd = open(logdir, O_RDONLY|O_DIRECTORY);
     if (dfd == -1)
 	goto cleanup;
 

@@ -115,13 +115,15 @@ sudo_secure_open(const char *path, unsigned int type, uid_t uid, gid_t gid,
     struct stat *sb, int *error)
 {
     struct stat stat_buf;
-    int fd;
+    int fd, flags = O_RDONLY|O_NONBLOCK;
     debug_decl(sudo_secure_open, SUDO_DEBUG_UTIL);
 
     if (sb == NULL)
 	sb = &stat_buf;
 
-    fd = open(path, O_RDONLY|O_NONBLOCK);
+    if (type == S_IFDIR)
+	flags |= O_DIRECTORY;
+    fd = open(path, flags);
     if (fd == -1 || fstat(fd, sb) != 0) {
 	if (fd != -1)
 	    close(fd);

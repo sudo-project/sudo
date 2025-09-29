@@ -33,8 +33,8 @@ sudo_mkdirat(int dfd, const char *path, mode_t mode)
     if (dfd == (int)AT_FDCWD)
 	return mkdir(path, mode);
 
-    /* Save cwd */
-    if ((odfd = open(".", O_RDONLY)) == -1)
+    /* Save cwd (cannot use O_PATH on older Linux kernels). */
+    if ((odfd = open(".", O_RDONLY|O_DIRECTORY)) == -1)
 	return -1;
 
     if (fchdir(dfd) == -1) {
