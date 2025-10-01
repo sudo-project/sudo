@@ -644,13 +644,13 @@ log_server_connect(struct client_closure *closure)
 }
 
 /*
- * Free client closure and contents, not including log details.
+ * Free client closure contents, not including log details.
  */
-void
-client_closure_free(struct client_closure *closure)
+static void
+client_closure_free_contents(struct client_closure *closure)
 {
     struct connection_buffer *buf;
-    debug_decl(client_closure_free, SUDOERS_DEBUG_UTIL);
+    debug_decl(client_closure_free_contents, SUDOERS_DEBUG_UTIL);
 
     if (closure == NULL)
         debug_return;
@@ -661,15 +661,19 @@ client_closure_free(struct client_closure *closure)
 	if (SSL_shutdown(closure->ssl) == 0)
 	    SSL_shutdown(closure->ssl);
 	SSL_free(closure->ssl);
+	closure->ssl = NULL;
     }
     SSL_CTX_free(closure->ssl_ctx);
+    closure->ssl_ctx = NULL;
 #endif
 
     if (closure->sock != -1) {
 	shutdown(closure->sock, SHUT_RDWR);
 	close(closure->sock);
+	closure->sock = -1;
     }
     free(closure->server_name);
+    closure->server_name = NULL;
     while ((buf = TAILQ_FIRST(&closure->write_bufs)) != NULL) {
 	TAILQ_REMOVE(&closure->write_bufs, buf, entries);
 	free(buf->data);
@@ -680,13 +684,31 @@ client_closure_free(struct client_closure *closure)
 	free(buf->data);
 	free(buf);
     }
-    if (closure->read_ev != NULL)
+    if (closure->read_ev != NULL) {
 	closure->read_ev->free(closure->read_ev);
-    if (closure->write_ev != NULL)
+	closure->read_ev = NULL;
+    }
+    if (closure->write_ev != NULL) {
 	closure->write_ev->free(closure->write_ev);
+	closure->write_ev = NULL;
+    }
     free(closure->read_buf.data);
+    closure->read_buf.data = NULL;
     free(closure->iolog_id);
+    closure->iolog_id = NULL;
 
+    debug_return;
+}
+
+/*
+ * Free client closure and contents, not including log details.
+ */
+void
+client_closure_free(struct client_closure *closure)
+{
+    debug_decl(client_closure_free, SUDOERS_DEBUG_UTIL);
+
+    client_closure_free_contents(closure);
     free(closure);
 
     debug_return;
@@ -1860,13 +1882,13 @@ server_msg_cb(int fd, int what, void *v)
     debug_return;
 bad:
     if (closure->log_details->ignore_log_errors) {
-	/* Disable plugin, the command continues. */
+	/* Disable log server connection, the command continues. */
 	closure->disabled = true;
-	closure->read_ev->del(closure->read_ev);
     } else {
 	/* Break out of sudo event loop and kill the command. */
 	closure->read_ev->loopbreak(closure->read_ev);
     }
+    client_closure_free_contents(closure);
     debug_return;
 }
 
@@ -1981,14 +2003,13 @@ client_msg_cb(int fd, int what, void *v)
 
 bad:
     if (closure->log_details->ignore_log_errors) {
-	/* Disable plugin, the command continues. */
+	/* Disable log server connection, the command continues. */
 	closure->disabled = true;
-	closure->read_ev->del(closure->read_ev);
-	closure->write_ev->del(closure->write_ev);
     } else {
 	/* Break out of sudo event loop and kill the command. */
 	closure->write_ev->loopbreak(closure->write_ev);
     }
+    client_closure_free_contents(closure);
     debug_return;
 }
 
