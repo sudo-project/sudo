@@ -474,10 +474,6 @@ case "$osversion" in
 	;;
     aix*)
 	# TODO: openssl (AIX freeware?)
-	# Use -gxcoff with gcc instead of -g for dbx-style debugging symbols.
-	if test -z "$CC" && gcc -v >/dev/null 2>&1; then
-	    CFLAGS="-O2 -gxcoff"; export CFLAGS
-	fi
 	# Note, must indent with tabs, not spaces due to IFS trickery
 	# Note: we include our own zlib instead of relying on the
 	#       AIX freeware version being installed.
