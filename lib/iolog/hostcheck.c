@@ -119,7 +119,7 @@ validate_name(const char *hostname, ASN1_STRING *certname_asn1)
  *          Error
  */
 static HostnameValidationResult
-matches_common_name(const char *hostname, const X509 *cert)
+matches_common_name(const char *hostname, X509 *cert)
 {
     X509_NAME_ENTRY *common_name_entry = NULL;
     ASN1_STRING *common_name_asn1 = NULL;
@@ -175,7 +175,7 @@ matches_common_name(const char *hostname, const X509 *cert)
  */
 static HostnameValidationResult
 matches_subject_alternative_name(const char *hostname, const char *ipaddr,
-    const X509 *cert)
+    X509 *cert)
 {
     HostnameValidationResult ret = MatchNotFound;
     STACK_OF(GENERAL_NAME) *san_names;
@@ -254,7 +254,7 @@ matches_subject_alternative_name(const char *hostname, const char *ipaddr,
  *          Error
  */
 HostnameValidationResult
-validate_hostname(const X509 *cert, const char *hostname, const char *ipaddr)
+validate_hostname(X509 *cert, const char *hostname, const char *ipaddr)
 {
     HostnameValidationResult ret = MatchFound;
     debug_decl(validate_hostname, SUDO_DEBUG_UTIL);

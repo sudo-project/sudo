@@ -29,7 +29,7 @@ typedef enum {
     Error
 } HostnameValidationResult;
 
-HostnameValidationResult validate_hostname(const X509 *cert,
+HostnameValidationResult validate_hostname(X509 *cert,
 	const char *hostname, const char *ipaddr);
 
 #endif /* HAVE_OPENSSL */
