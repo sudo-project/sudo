@@ -2123,17 +2123,13 @@ log_server_close(struct client_closure *closure, int exit_status, int error)
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
     }
-
-    /* Enable read event to receive server messages. */
     closure->read_ev->setbase(closure->read_ev, evbase);
-    if (closure->read_ev->add(closure->read_ev,
-	    &closure->log_details->server_timeout) == -1) {
-	sudo_warn("%s", U_("unable to add event to queue"));
-	goto done;
-    }
-
-    /* Enable the write event to write the ExitMessage. */
     closure->write_ev->setbase(closure->write_ev, evbase);
+
+    /*
+     * Enable the write event to write the ExitMessage.
+     * The read event will be enabled on demand, as needed.
+     */
     if (closure->write_ev->add(closure->write_ev,
 	    &closure->log_details->server_timeout) == -1) {
 	sudo_warn("%s", U_("unable to add event to queue"));
