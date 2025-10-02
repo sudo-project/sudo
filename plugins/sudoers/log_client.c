@@ -685,10 +685,12 @@ client_closure_free_contents(struct client_closure *closure)
 	free(buf);
     }
     if (closure->read_ev != NULL) {
+	closure->read_ev->del(closure->read_ev);
 	closure->read_ev->free(closure->read_ev);
 	closure->read_ev = NULL;
     }
     if (closure->write_ev != NULL) {
+	closure->write_ev->del(closure->write_ev);
 	closure->write_ev->free(closure->write_ev);
 	closure->write_ev = NULL;
     }
