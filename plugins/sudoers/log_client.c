@@ -1883,10 +1883,9 @@ server_msg_cb(int fd, int what, void *v)
     buf->off = 0;
     debug_return;
 bad:
-    if (closure->log_details->ignore_log_errors) {
-	/* Disable log server connection, the command continues. */
-	closure->disabled = true;
-    } else {
+    /* Disable further log server operations. */
+    closure->disabled = true;
+    if (!closure->log_details->ignore_log_errors) {
 	/* Break out of sudo event loop and kill the command. */
 	closure->read_ev->loopbreak(closure->read_ev);
     }
@@ -2004,12 +2003,11 @@ client_msg_cb(int fd, int what, void *v)
     debug_return;
 
 bad:
-    if (closure->log_details->ignore_log_errors) {
-	/* Disable log server connection, the command continues. */
-	closure->disabled = true;
-    } else {
+    /* Disable further log server operations. */
+    closure->disabled = true;
+    if (!closure->log_details->ignore_log_errors) {
 	/* Break out of sudo event loop and kill the command. */
-	closure->write_ev->loopbreak(closure->write_ev);
+	closure->read_ev->loopbreak(closure->read_ev);
     }
     client_closure_free_contents(closure);
     debug_return;

@@ -301,6 +301,7 @@ log_server_exit(int status_type, int status)
 {
     debug_decl(log_server_exit, SUDOERS_DEBUG_PLUGIN);
 
+    /* Only send exit status to log server if I/O logging plugin did not. */
     if (client_closure != NULL) {
 	int exit_status = 0, error = 0;
 
