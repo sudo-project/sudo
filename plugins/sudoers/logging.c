@@ -128,6 +128,9 @@ log_server_reject(const struct sudoers_context *ctx, struct eventlog *evlog,
     bool ret = false;
     debug_decl(log_server_reject, SUDOERS_DEBUG_LOGGING);
 
+    if (client_closure->disabled)
+       debug_return_bool(false);
+
     if (SLIST_EMPTY(&def_log_servers))
 	debug_return_bool(true);
 
@@ -176,6 +179,9 @@ log_server_alert(const struct sudoers_context *ctx, struct eventlog *evlog,
     char *emessage = NULL;
     bool ret = false;
     debug_decl(log_server_alert, SUDOERS_DEBUG_LOGGING);
+
+    if (client_closure->disabled)
+       debug_return_bool(false);
 
     if (SLIST_EMPTY(&def_log_servers))
 	debug_return_bool(true);
