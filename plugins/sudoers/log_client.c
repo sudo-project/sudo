@@ -808,6 +808,9 @@ fmt_client_hello(struct client_closure *closure)
     bool ret = false;
     debug_decl(fmt_client_hello, SUDOERS_DEBUG_UTIL);
 
+    if (closure->state != RECV_HELLO)
+	goto done;
+
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: sending ClientHello", __func__);
 
     /* Client name + version */
@@ -818,6 +821,7 @@ fmt_client_hello(struct client_closure *closure)
     client_msg.type_case = CLIENT_MESSAGE__TYPE_HELLO_MSG;
     ret = fmt_client_message(closure, &client_msg);
 
+done:
     debug_return_bool(ret);
 }
 
@@ -1001,6 +1005,9 @@ fmt_accept_message(struct client_closure *closure, const struct eventlog *evlog)
     bool ret = false;
     debug_decl(fmt_accept_message, SUDOERS_DEBUG_UTIL);
 
+    if (closure->state != SEND_ACCEPT && closure->state != SEND_IO)
+	goto done;
+
     /*
      * Fill in AcceptMessage and add it to ClientMessage.
      */
@@ -1050,6 +1057,9 @@ fmt_reject_message(struct client_closure *closure, const struct eventlog *evlog)
     bool ret = false;
     debug_decl(fmt_reject_message, SUDOERS_DEBUG_UTIL);
 
+    if (closure->state != SEND_REJECT && closure->state != SEND_IO)
+	goto done;
+
     /*
      * Fill in RejectMessage and add it to ClientMessage.
      */
@@ -1098,6 +1108,10 @@ fmt_alert_message(struct client_closure *closure, const struct eventlog *evlog)
     struct timespec now;
     bool ret = false;
     debug_decl(fmt_alert_message, SUDOERS_DEBUG_UTIL);
+
+    /* Alerts can happen at any time. */
+    if (closure->state == ERROR)
+	goto done;
 
     /*
      * Fill in AlertMessage and add it to ClientMessage.
@@ -1193,6 +1207,9 @@ fmt_restart_message(struct client_closure *closure)
     bool ret = false;
     debug_decl(fmt_restart_message, SUDOERS_DEBUG_UTIL);
 
+    if (closure->state != SEND_RESTART)
+	goto done;
+
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: sending RestartMessage, [%lld, %ld]", __func__,
 	(long long)closure->restart->tv_sec, closure->restart->tv_nsec);
@@ -1226,6 +1243,9 @@ fmt_exit_message(struct client_closure *closure, int exit_status, int error)
     bool ret = false;
     struct timespec run_time;
     debug_decl(fmt_exit_message, SUDOERS_DEBUG_UTIL);
+
+    if (closure->state != SEND_IO)
+	goto done;
 
     if (sudo_gettime_awake(&run_time) == -1) {
 	sudo_warn("%s", U_("unable to get time of day"));
@@ -1304,6 +1324,9 @@ fmt_io_buf(struct client_closure *closure, int type, const char *buf,
     bool ret = false;
     debug_decl(fmt_io_buf, SUDOERS_DEBUG_UTIL);
 
+    if (closure->state != SEND_IO)
+	goto done;
+
     /* Fill in IoBuffer. */
     ts.tv_sec = (int64_t)delay->tv_sec;
     ts.tv_nsec = (int32_t)delay->tv_nsec;
@@ -1342,6 +1365,10 @@ fmt_winsize(struct client_closure *closure, unsigned int lines,
     bool ret = false;
     debug_decl(fmt_winsize, SUDOERS_DEBUG_UTIL);
 
+    if (closure->state != SEND_IO)
+	goto done;
+
+
     /* Fill in ChangeWindowSize message. */
     ts.tv_sec = (int64_t)delay->tv_sec;
     ts.tv_nsec = (int32_t)delay->tv_nsec;
@@ -1378,6 +1405,9 @@ fmt_suspend(struct client_closure *closure, const char *signame,
     TimeSpec ts = TIME_SPEC__INIT;
     bool ret = false;
     debug_decl(fmt_suspend, SUDOERS_DEBUG_UTIL);
+
+    if (closure->state != SEND_IO)
+	goto done;
 
     /* Fill in CommandSuspend message. */
     ts.tv_sec = (int64_t)delay->tv_sec;
@@ -1889,7 +1919,7 @@ bad:
     }
     /* Disable further log server operations. */
     client_closure_free_contents(closure);
-    closure->disabled = true;
+    closure->state = ERROR;
     debug_return;
 }
 
@@ -2009,7 +2039,7 @@ bad:
     }
     /* Disable further log server operations. */
     client_closure_free_contents(closure);
-    closure->disabled = true;
+    closure->state = ERROR;
     debug_return;
 }
 
@@ -2107,9 +2137,6 @@ log_server_close(struct client_closure *closure, int exit_status, int error)
     struct sudo_event_base *evbase = NULL;
     bool ret = false;
     debug_decl(log_server_close, SUDOERS_DEBUG_UTIL);
-
-    if (closure->disabled)
-	goto done;
 
     /* Format and append an ExitMessage to the write queue. */
     if (!fmt_exit_message(closure, exit_status, error))

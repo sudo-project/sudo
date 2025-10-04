@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2023, 2025 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1012,9 +1012,6 @@ sudoers_io_log_remote(int event, const char *buf, unsigned int len,
     int type, ret = -1;
     debug_decl(sudoers_io_log_remote, SUDOERS_DEBUG_PLUGIN);
 
-    if (client_closure->disabled)
-	debug_return_int(1);
-
     /* Track elapsed time for comparison with commit points. */
     sudo_timespecadd(delay, &client_closure->elapsed, &client_closure->elapsed);
 
@@ -1166,9 +1163,6 @@ sudoers_io_change_winsize_remote(unsigned int lines, unsigned int cols,
     int ret = -1;
     debug_decl(sudoers_io_change_winsize_remote, SUDOERS_DEBUG_PLUGIN);
 
-    if (client_closure->disabled)
-	debug_return_int(1);
-
     /* Track elapsed time for comparison with commit points. */
     sudo_timespecadd(delay, &client_closure->elapsed, &client_closure->elapsed);
 
@@ -1264,9 +1258,6 @@ sudoers_io_suspend_remote(const char *signame, struct timespec *delay,
 {
     int ret = -1;
     debug_decl(sudoers_io_suspend_remote, SUDOERS_DEBUG_PLUGIN);
-
-    if (client_closure->disabled)
-	debug_return_int(1);
 
     /* Track elapsed time for comparison with commit points. */
     sudo_timespecadd(delay, &client_closure->elapsed, &client_closure->elapsed);

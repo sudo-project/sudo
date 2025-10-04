@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2015, 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2015, 2019-2025 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -248,9 +248,6 @@ log_server_accept(const struct sudoers_context *ctx, struct eventlog *evlog)
     bool ret = false;
     debug_decl(log_server_accept, SUDOERS_DEBUG_PLUGIN);
 
-    if (client_closure->disabled)
-	debug_return_bool(false);
-
     if (SLIST_EMPTY(&def_log_servers))
 	debug_return_bool(true);
 
@@ -262,11 +259,6 @@ log_server_accept(const struct sudoers_context *ctx, struct eventlog *evlog)
 	/* Only send accept event to log server if I/O log plugin did not. */
 	if (iolog_enabled)
 	    debug_return_bool(true);
-    }
-
-    if (sudo_gettime_awake(&start_time) == -1) {
-	sudo_warn("%s", U_("unable to get time of day"));
-	goto done;
     }
 
     if (client_closure != NULL) {
@@ -281,6 +273,11 @@ log_server_accept(const struct sudoers_context *ctx, struct eventlog *evlog)
 	}
     } else {
 	struct log_details audit_details;
+
+	if (sudo_gettime_awake(&start_time) == -1) {
+	    sudo_warn("%s", U_("unable to get time of day"));
+	    goto done;
+	}
 
 	if (!init_log_details(&audit_details, evlog))
 	    goto done;
@@ -308,7 +305,7 @@ log_server_exit(int status_type, int status)
      * I/O log plugin clears client_closure on close so we don't log
      * the exit status twice.
      */
-    if (client_closure != NULL && !client_closure->disabled) {
+    if (client_closure != NULL) {
 	int exit_status = 0, error = 0;
 
 	if (status_type == SUDO_PLUGIN_WAIT_STATUS) {
