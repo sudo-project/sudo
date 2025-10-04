@@ -248,6 +248,9 @@ log_server_accept(const struct sudoers_context *ctx, struct eventlog *evlog)
     bool ret = false;
     debug_decl(log_server_accept, SUDOERS_DEBUG_PLUGIN);
 
+    if (client_closure->disabled)
+	debug_return_bool(false);
+
     if (SLIST_EMPTY(&def_log_servers))
 	debug_return_bool(true);
 
@@ -301,8 +304,11 @@ log_server_exit(int status_type, int status)
 {
     debug_decl(log_server_exit, SUDOERS_DEBUG_PLUGIN);
 
-    /* Only send exit status to log server if I/O logging plugin did not. */
-    if (client_closure != NULL) {
+    /*
+     * I/O log plugin clears client_closure on close so we don't log
+     * the exit status twice.
+     */
+    if (client_closure != NULL && !client_closure->disabled) {
 	int exit_status = 0, error = 0;
 
 	if (status_type == SUDO_PLUGIN_WAIT_STATUS) {
