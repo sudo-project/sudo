@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo-1.9.16b1\n"
+"Project-Id-Version: sudo-1.9.17rc1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2024-06-08 09:06-0600\n"
-"PO-Revision-Date: 2024-12-15 18:21+0100\n"
+"POT-Creation-Date: 2025-06-08 16:30-0600\n"
+"PO-Revision-Date: 2025-08-31 08:09+0200\n"
 "Last-Translator: Мирослав Николић <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: Serbian <(nothing)>\n"
 "Language: sr\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Bugs: Report translation errors to the Language-Team address.\n"
-"X-Generator: Gtranslator 47.0\n"
+"X-Generator: Poedit 3.5\n"
 
 #: lib/util/aix.c:89 lib/util/aix.c:169
 msgid "unable to open userdb"
@@ -35,35 +35,35 @@ msgstr "не могу да повратим регистар"
 #: lib/util/json.c:55 lib/util/json.c:197 lib/util/sudo_conf.c:218
 #: lib/util/sudo_conf.c:304 lib/util/sudo_conf.c:381 lib/util/sudo_conf.c:672
 #: src/conversation.c:81 src/exec_iolog.c:122 src/exec_iolog.c:133
-#: src/exec_iolog.c:210 src/exec_monitor.c:173 src/exec_monitor.c:430
-#: src/exec_monitor.c:436 src/exec_monitor.c:444 src/exec_monitor.c:452
-#: src/exec_monitor.c:459 src/exec_monitor.c:466 src/exec_monitor.c:473
-#: src/exec_monitor.c:480 src/exec_monitor.c:487 src/exec_monitor.c:494
-#: src/exec_monitor.c:501 src/exec_nopty.c:231 src/exec_nopty.c:240
-#: src/exec_nopty.c:247 src/exec_nopty.c:254 src/exec_nopty.c:261
-#: src/exec_nopty.c:268 src/exec_nopty.c:275 src/exec_nopty.c:282
-#: src/exec_nopty.c:289 src/exec_nopty.c:296 src/exec_nopty.c:303
-#: src/exec_nopty.c:310 src/exec_nopty.c:318 src/exec_nopty.c:326
-#: src/exec_nopty.c:748 src/exec_preload.c:347 src/exec_ptrace.c:475
+#: src/exec_iolog.c:210 src/exec_monitor.c:173 src/exec_monitor.c:441
+#: src/exec_monitor.c:447 src/exec_monitor.c:455 src/exec_monitor.c:463
+#: src/exec_monitor.c:470 src/exec_monitor.c:477 src/exec_monitor.c:484
+#: src/exec_monitor.c:491 src/exec_monitor.c:498 src/exec_monitor.c:505
+#: src/exec_monitor.c:512 src/exec_nopty.c:241 src/exec_nopty.c:250
+#: src/exec_nopty.c:257 src/exec_nopty.c:264 src/exec_nopty.c:271
+#: src/exec_nopty.c:278 src/exec_nopty.c:285 src/exec_nopty.c:292
+#: src/exec_nopty.c:299 src/exec_nopty.c:306 src/exec_nopty.c:313
+#: src/exec_nopty.c:320 src/exec_nopty.c:328 src/exec_nopty.c:336
+#: src/exec_nopty.c:756 src/exec_preload.c:347 src/exec_ptrace.c:475
 #: src/exec_ptrace.c:768 src/exec_ptrace.c:985 src/exec_ptrace.c:1098
 #: src/exec_ptrace.c:1273 src/exec_ptrace.c:1626 src/exec_ptrace.c:1653
-#: src/exec_ptrace.c:1845 src/exec_pty.c:599 src/exec_pty.c:783
-#: src/exec_pty.c:990 src/exec_pty.c:999 src/exec_pty.c:1006
-#: src/exec_pty.c:1013 src/exec_pty.c:1020 src/exec_pty.c:1027
-#: src/exec_pty.c:1034 src/exec_pty.c:1041 src/exec_pty.c:1048
-#: src/exec_pty.c:1055 src/exec_pty.c:1062 src/exec_pty.c:1069
-#: src/exec_pty.c:1077 src/load_plugins.c:100 src/load_plugins.c:125
+#: src/exec_ptrace.c:1845 src/exec_pty.c:604 src/exec_pty.c:788
+#: src/exec_pty.c:1003 src/exec_pty.c:1012 src/exec_pty.c:1019
+#: src/exec_pty.c:1026 src/exec_pty.c:1033 src/exec_pty.c:1040
+#: src/exec_pty.c:1047 src/exec_pty.c:1054 src/exec_pty.c:1061
+#: src/exec_pty.c:1068 src/exec_pty.c:1075 src/exec_pty.c:1082
+#: src/exec_pty.c:1090 src/load_plugins.c:100 src/load_plugins.c:125
 #: src/load_plugins.c:161 src/load_plugins.c:394 src/load_plugins.c:400
 #: src/parse_args.c:171 src/parse_args.c:192 src/parse_args.c:268
 #: src/parse_args.c:624 src/parse_args.c:646 src/parse_args.c:671
 #: src/preserve_fds.c:46 src/preserve_fds.c:131 src/selinux.c:89
 #: src/selinux.c:362 src/selinux.c:472 src/selinux.c:489 src/selinux.c:496
 #: src/sesh.c:206 src/sesh.c:240 src/sesh.c:246 src/sesh.c:253 src/sesh.c:259
-#: src/sesh.c:470 src/sudo.c:581 src/sudo.c:607 src/sudo.c:660 src/sudo.c:726
-#: src/sudo.c:737 src/sudo.c:764 src/sudo.c:787 src/sudo.c:796 src/sudo.c:805
-#: src/sudo.c:818 src/sudo.c:827 src/sudo.c:868 src/sudo.c:878 src/sudo.c:888
-#: src/sudo.c:921 src/sudo.c:923 src/sudo.c:1150 src/sudo.c:1171
-#: src/sudo.c:1462 src/sudo.c:1631 src/sudo.c:1858 src/sudo.c:2191
+#: src/sesh.c:470 src/sudo.c:581 src/sudo.c:607 src/sudo.c:663 src/sudo.c:729
+#: src/sudo.c:740 src/sudo.c:767 src/sudo.c:790 src/sudo.c:799 src/sudo.c:808
+#: src/sudo.c:821 src/sudo.c:830 src/sudo.c:871 src/sudo.c:881 src/sudo.c:891
+#: src/sudo.c:924 src/sudo.c:926 src/sudo.c:1153 src/sudo.c:1174
+#: src/sudo.c:1465 src/sudo.c:1634 src/sudo.c:1861 src/sudo.c:2194
 #: src/sudo_edit.c:89 src/sudo_edit.c:149 src/sudo_edit.c:430
 #: src/sudo_edit.c:439 src/sudo_edit.c:540 src/sudo_edit.c:547
 #: src/sudo_edit.c:692 src/sudo_edit.c:712 src/sudo_intercept_common.c:122
@@ -78,31 +78,31 @@ msgstr "%s: %s"
 #: src/conversation.c:82 src/exec_intercept.c:112 src/exec_intercept.c:351
 #: src/exec_intercept.c:527 src/exec_intercept.c:591 src/exec_intercept.c:715
 #: src/exec_intercept.c:839 src/exec_iolog.c:122 src/exec_iolog.c:133
-#: src/exec_iolog.c:210 src/exec_monitor.c:430 src/exec_monitor.c:436
-#: src/exec_monitor.c:444 src/exec_monitor.c:452 src/exec_monitor.c:459
-#: src/exec_monitor.c:466 src/exec_monitor.c:473 src/exec_monitor.c:480
-#: src/exec_monitor.c:487 src/exec_monitor.c:494 src/exec_monitor.c:501
-#: src/exec_nopty.c:231 src/exec_nopty.c:240 src/exec_nopty.c:247
-#: src/exec_nopty.c:254 src/exec_nopty.c:261 src/exec_nopty.c:268
-#: src/exec_nopty.c:275 src/exec_nopty.c:282 src/exec_nopty.c:289
-#: src/exec_nopty.c:296 src/exec_nopty.c:303 src/exec_nopty.c:310
-#: src/exec_nopty.c:318 src/exec_nopty.c:326 src/exec_preload.c:347
+#: src/exec_iolog.c:210 src/exec_monitor.c:441 src/exec_monitor.c:447
+#: src/exec_monitor.c:455 src/exec_monitor.c:463 src/exec_monitor.c:470
+#: src/exec_monitor.c:477 src/exec_monitor.c:484 src/exec_monitor.c:491
+#: src/exec_monitor.c:498 src/exec_monitor.c:505 src/exec_monitor.c:512
+#: src/exec_nopty.c:241 src/exec_nopty.c:250 src/exec_nopty.c:257
+#: src/exec_nopty.c:264 src/exec_nopty.c:271 src/exec_nopty.c:278
+#: src/exec_nopty.c:285 src/exec_nopty.c:292 src/exec_nopty.c:299
+#: src/exec_nopty.c:306 src/exec_nopty.c:313 src/exec_nopty.c:320
+#: src/exec_nopty.c:328 src/exec_nopty.c:336 src/exec_preload.c:347
 #: src/exec_ptrace.c:475 src/exec_ptrace.c:768 src/exec_ptrace.c:985
-#: src/exec_ptrace.c:1653 src/exec_ptrace.c:1846 src/exec_pty.c:599
-#: src/exec_pty.c:990 src/exec_pty.c:999 src/exec_pty.c:1006
-#: src/exec_pty.c:1013 src/exec_pty.c:1020 src/exec_pty.c:1027
-#: src/exec_pty.c:1034 src/exec_pty.c:1041 src/exec_pty.c:1048
-#: src/exec_pty.c:1055 src/exec_pty.c:1062 src/exec_pty.c:1069
-#: src/exec_pty.c:1077 src/load_plugins.c:100 src/load_plugins.c:125
+#: src/exec_ptrace.c:1653 src/exec_ptrace.c:1846 src/exec_pty.c:604
+#: src/exec_pty.c:1003 src/exec_pty.c:1012 src/exec_pty.c:1019
+#: src/exec_pty.c:1026 src/exec_pty.c:1033 src/exec_pty.c:1040
+#: src/exec_pty.c:1047 src/exec_pty.c:1054 src/exec_pty.c:1061
+#: src/exec_pty.c:1068 src/exec_pty.c:1075 src/exec_pty.c:1082
+#: src/exec_pty.c:1090 src/load_plugins.c:100 src/load_plugins.c:125
 #: src/load_plugins.c:161 src/load_plugins.c:394 src/load_plugins.c:400
 #: src/parse_args.c:171 src/parse_args.c:193 src/parse_args.c:268
 #: src/parse_args.c:624 src/parse_args.c:646 src/parse_args.c:671
 #: src/preserve_fds.c:46 src/preserve_fds.c:131 src/selinux.c:89
 #: src/selinux.c:362 src/selinux.c:472 src/selinux.c:489 src/selinux.c:496
 #: src/sesh.c:206 src/sesh.c:471 src/sudo.c:229 src/sudo.c:581 src/sudo.c:607
-#: src/sudo.c:660 src/sudo.c:819 src/sudo.c:921 src/sudo.c:923 src/sudo.c:1150
-#: src/sudo.c:1171 src/sudo.c:1462 src/sudo.c:1631 src/sudo.c:1858
-#: src/sudo.c:2191 src/sudo_edit.c:89 src/sudo_edit.c:149 src/sudo_edit.c:430
+#: src/sudo.c:663 src/sudo.c:822 src/sudo.c:924 src/sudo.c:926 src/sudo.c:1153
+#: src/sudo.c:1174 src/sudo.c:1465 src/sudo.c:1634 src/sudo.c:1861
+#: src/sudo.c:2194 src/sudo_edit.c:89 src/sudo_edit.c:149 src/sudo_edit.c:430
 #: src/sudo_edit.c:439 src/sudo_edit.c:540 src/sudo_edit.c:547
 #: src/sudo_edit.c:692 src/sudo_edit.c:712 src/sudo_intercept_common.c:122
 #: src/sudo_intercept_common.c:347
@@ -182,7 +182,7 @@ msgstr "неисправне највеће групе „%s“ у „%s“, %u.
 msgid "%s is not a regular file"
 msgstr "„%s“ није обична датотека"
 
-#: lib/util/sudo_conf.c:714 src/copy_file.c:164
+#: lib/util/sudo_conf.c:714 src/copy_file.c:171
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s је у власништву уиб-а %u, а треба бити %u"
@@ -206,12 +206,12 @@ msgstr "нисам успео да одредим оивичење АпАрмо�
 msgid "unable to change AppArmor profile to %s"
 msgstr "не могу да променим АпАрмор профил на „%s“"
 
-#: src/copy_file.c:94
+#: src/copy_file.c:98
 #, c-format
 msgid "%s: truncate %s to zero bytes? (y/n) [n] "
 msgstr "%s: да скратим „%s“ на нула бајта? (y/n) [n] "
 
-#: src/copy_file.c:98
+#: src/copy_file.c:102
 #, c-format
 msgid "not overwriting %s"
 msgstr "не преписујем „%s“"
@@ -221,22 +221,22 @@ msgstr "не преписујем „%s“"
 msgid "unable to read from %s"
 msgstr "не могу да читам из „%s“"
 
-#: src/copy_file.c:137 src/sudo_edit.c:320
+#: src/copy_file.c:144 src/sudo_edit.c:320
 #, c-format
 msgid "unable to write to %s"
 msgstr "не могу да упишем у %s"
 
-#: src/copy_file.c:151
+#: src/copy_file.c:158
 #, c-format
 msgid "unable to stat %s"
 msgstr "не могу да добијем податке о „%s“"
 
-#: src/copy_file.c:155 src/sesh.c:312 src/sudo_edit.c:197
+#: src/copy_file.c:162 src/sesh.c:312 src/sudo_edit.c:197
 #, c-format
 msgid "%s: not a regular file"
 msgstr "%s: није обична датотека"
 
-#: src/copy_file.c:159
+#: src/copy_file.c:166
 #, c-format
 msgid "%s: bad file mode: 0%o"
 msgstr "%s: лош режим датотеке: 0%o"
@@ -286,18 +286,18 @@ msgstr "не могу да променим директоријум у %s"
 msgid "starting from %s"
 msgstr "почевши од „%s“"
 
-#: src/exec.c:278 src/exec.c:351 src/exec_monitor.c:564 src/exec_monitor.c:566
-#: src/exec_pty.c:1148 src/exec_pty.c:1150 src/signal.c:144 src/signal.c:151
+#: src/exec.c:278 src/exec.c:351 src/exec_monitor.c:575 src/exec_monitor.c:577
+#: src/exec_pty.c:1160 src/exec_pty.c:1162 src/signal.c:144 src/signal.c:151
 #: src/signal.c:165 src/suspend_parent.c:143
 #, c-format
 msgid "unable to set handler for signal %d"
 msgstr "не могу да подесим руковаоца за сигнал „%d“"
 
-#: src/exec.c:447
+#: src/exec.c:444
 msgid "intercept mode is not supported with SELinux RBAC on this system"
 msgstr "режим пресретања није подржан са СЕЛинукс РБАЦ-ом на овом систему"
 
-#: src/exec.c:452
+#: src/exec.c:449
 msgid "unable to log sub-commands with SELinux RBAC on this system"
 msgstr "не могу да забележим садржане наредбе са СЕЛинукс РБАЦ-ом на овом систему"
 
@@ -307,38 +307,38 @@ msgstr "не могу да уклоним PRIV_PROC_EXEC из PRIV_LIMIT"
 
 #: src/exec_intercept.c:71 src/exec_iolog.c:163 src/exec_iolog.c:173
 #: src/exec_iolog.c:218 src/exec_iolog.c:225 src/exec_iolog.c:252
-#: src/exec_monitor.c:438 src/exec_monitor.c:446 src/exec_monitor.c:454
-#: src/exec_monitor.c:461 src/exec_monitor.c:468 src/exec_monitor.c:475
-#: src/exec_monitor.c:482 src/exec_monitor.c:489 src/exec_monitor.c:496
-#: src/exec_monitor.c:503 src/exec_nopty.c:233 src/exec_nopty.c:242
-#: src/exec_nopty.c:249 src/exec_nopty.c:256 src/exec_nopty.c:263
-#: src/exec_nopty.c:270 src/exec_nopty.c:277 src/exec_nopty.c:284
-#: src/exec_nopty.c:291 src/exec_nopty.c:298 src/exec_nopty.c:305
-#: src/exec_nopty.c:312 src/exec_nopty.c:320 src/exec_nopty.c:328
-#: src/exec_nopty.c:387 src/exec_nopty.c:457 src/exec_pty.c:441
-#: src/exec_pty.c:555 src/exec_pty.c:605 src/exec_pty.c:992 src/exec_pty.c:1001
-#: src/exec_pty.c:1008 src/exec_pty.c:1015 src/exec_pty.c:1022
-#: src/exec_pty.c:1029 src/exec_pty.c:1036 src/exec_pty.c:1043
-#: src/exec_pty.c:1050 src/exec_pty.c:1057 src/exec_pty.c:1064
-#: src/exec_pty.c:1071
+#: src/exec_monitor.c:449 src/exec_monitor.c:457 src/exec_monitor.c:465
+#: src/exec_monitor.c:472 src/exec_monitor.c:479 src/exec_monitor.c:486
+#: src/exec_monitor.c:493 src/exec_monitor.c:500 src/exec_monitor.c:507
+#: src/exec_monitor.c:514 src/exec_nopty.c:243 src/exec_nopty.c:252
+#: src/exec_nopty.c:259 src/exec_nopty.c:266 src/exec_nopty.c:273
+#: src/exec_nopty.c:280 src/exec_nopty.c:287 src/exec_nopty.c:294
+#: src/exec_nopty.c:301 src/exec_nopty.c:308 src/exec_nopty.c:315
+#: src/exec_nopty.c:322 src/exec_nopty.c:330 src/exec_nopty.c:338
+#: src/exec_nopty.c:397 src/exec_nopty.c:467 src/exec_pty.c:446
+#: src/exec_pty.c:560 src/exec_pty.c:610 src/exec_pty.c:1005
+#: src/exec_pty.c:1014 src/exec_pty.c:1021 src/exec_pty.c:1028
+#: src/exec_pty.c:1035 src/exec_pty.c:1042 src/exec_pty.c:1049
+#: src/exec_pty.c:1056 src/exec_pty.c:1063 src/exec_pty.c:1070
+#: src/exec_pty.c:1077 src/exec_pty.c:1084
 msgid "unable to add event to queue"
 msgstr "не могу да додам догађај у ред"
 
-#: src/exec_intercept.c:324 src/sudo.c:1056
+#: src/exec_intercept.c:324 src/sudo.c:1059
 msgid "command not set by the security policy"
 msgstr "наредба није постављена политиком безбедности"
 
-#: src/exec_intercept.c:403 src/exec_intercept.c:443 src/sudo.c:1274
-#: src/sudo.c:1319 src/sudo.c:1363
+#: src/exec_intercept.c:403 src/exec_intercept.c:443 src/sudo.c:1277
+#: src/sudo.c:1322 src/sudo.c:1366
 msgid "command rejected by policy"
 msgstr "наредба је одбачена политиком"
 
-#: src/exec_intercept.c:514 src/sudo.c:1961
+#: src/exec_intercept.c:514 src/sudo.c:1964
 msgid "approval plugin error"
 msgstr "грешка прикључка одобравања"
 
-#: src/exec_intercept.c:539 src/sudo.c:1279 src/sudo.c:1324 src/sudo.c:1368
-#: src/sudo.c:1442
+#: src/exec_intercept.c:539 src/sudo.c:1282 src/sudo.c:1327 src/sudo.c:1371
+#: src/sudo.c:1445
 msgid "policy plugin error"
 msgstr "грешка прикључка политике"
 
@@ -384,53 +384,53 @@ msgstr "грешка обуставе писања дневника"
 msgid "error changing window size"
 msgstr "грешка промене величине прозора"
 
-#: src/exec_monitor.c:330
+#: src/exec_monitor.c:329
 msgid "error reading from socketpair"
 msgstr "грешка у читању из пара прикључка"
 
-#: src/exec_monitor.c:342
+#: src/exec_monitor.c:341
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr "неочекивана врста одговора на повратном каналу: %d"
 
-#: src/exec_monitor.c:578
+#: src/exec_monitor.c:589
 msgid "unable to set controlling tty"
 msgstr "не могу да подесим контролисање tty"
 
-#: src/exec_monitor.c:590 src/exec_nopty.c:572 src/exec_pty.c:1126
-#: src/exec_pty.c:1135
+#: src/exec_monitor.c:604 src/exec_nopty.c:583 src/exec_pty.c:1138
+#: src/exec_pty.c:1147
 msgid "unable to create sockets"
 msgstr "не могу да направим утичнице"
 
-#: src/exec_monitor.c:599
+#: src/exec_monitor.c:613
 msgid "unable to receive message from parent"
 msgstr "не могу да примим поруку од родитеља"
 
-#: src/exec_monitor.c:614 src/exec_nopty.c:606 src/exec_pty.c:1336
-#: src/sudo_edit.c:361 src/tgetpass.c:310
+#: src/exec_monitor.c:628 src/exec_nopty.c:617 src/exec_pty.c:1343
+#: src/sudo_edit.c:361 src/tgetpass.c:315
 msgid "unable to fork"
 msgstr "не могу да поделим"
 
-#: src/exec_monitor.c:618 src/exec_monitor.c:720 src/exec_nopty.c:712
+#: src/exec_monitor.c:632 src/exec_monitor.c:734 src/exec_nopty.c:720
 msgid "unable to restore tty label"
 msgstr "не могу да повратим tty натпис"
 
-#: src/exec_monitor.c:629 src/exec_monitor.c:678 src/sesh.c:217 src/sudo.c:1225
+#: src/exec_monitor.c:643 src/exec_monitor.c:692 src/sesh.c:217 src/sudo.c:1228
 #, c-format
 msgid "unable to execute %s"
 msgstr "не могу да извршим %s"
 
-#: src/exec_nopty.c:507 src/exec_nopty.c:517 src/exec_nopty.c:527
-#: src/exec_nopty.c:563 src/exec_pty.c:1224 src/exec_pty.c:1251
-#: src/exec_pty.c:1274 src/exec_pty.c:1292 src/tgetpass.c:306
+#: src/exec_nopty.c:515 src/exec_nopty.c:525 src/exec_nopty.c:535
+#: src/exec_nopty.c:574 src/exec_pty.c:1231 src/exec_pty.c:1258
+#: src/exec_pty.c:1281 src/exec_pty.c:1299 src/tgetpass.c:311
 msgid "unable to create pipe"
 msgstr "не могу да направим спојку"
 
-#: src/exec_nopty.c:557 src/exec_pty.c:1157
+#: src/exec_nopty.c:565 src/exec_pty.c:1169
 msgid "policy plugin failed session initialization"
 msgstr "није успело покретање сесије прикључка политике"
 
-#: src/exec_nopty.c:700 src/exec_pty.c:1437
+#: src/exec_nopty.c:708 src/exec_pty.c:1444
 msgid "error in event loop"
 msgstr "грешка у петљи догађаја"
 
@@ -486,33 +486,33 @@ msgstr "не могу да добавим поруку догађаја за п�
 msgid "unable to get registers for process %d"
 msgstr "не могу да добавим регистре за процес %d"
 
-#: src/exec_pty.c:87
-msgid "unable to allocate pty"
-msgstr "не могу да доделим pty"
-
-#: src/exec_pty.c:118 src/exec_pty.c:257 src/tgetpass.c:251
+#: src/exec_pty.c:80 src/exec_pty.c:262 src/tgetpass.c:256
 msgid "unable to restore terminal settings"
 msgstr "не могу да повратим поставке терминала"
 
-#: src/exec_pty.c:218
+#: src/exec_pty.c:122
+msgid "unable to allocate pty"
+msgstr "не могу да доделим pty"
+
+#: src/exec_pty.c:223
 msgid "unable to set handler for SIGCONT"
 msgstr "не могу да подесим руковаоца за „SIGCONT“"
 
-#: src/exec_pty.c:267
+#: src/exec_pty.c:272
 #, c-format
 msgid "unable to set handler for SIG%s"
 msgstr "не могу да подесим руковаоца за „SIG%s“"
 
-#: src/exec_pty.c:291
+#: src/exec_pty.c:296
 #, c-format
 msgid "unable to restore handler for SIG%s"
 msgstr "не могу да повратим руковаоца за „SIG%s“"
 
-#: src/exec_pty.c:319
+#: src/exec_pty.c:324
 msgid "unable to restore handler for SIGCONT"
 msgstr "не могу да повратим руковаоца за „SIGCONT“"
 
-#: src/exec_pty.c:1385
+#: src/exec_pty.c:1392
 msgid "unable to send message to monitor process"
 msgstr "не могу да пошаљем поруку процесу праћења"
 
@@ -976,123 +976,123 @@ msgstr "неочекивани судо режим 0x%x"
 msgid "you do not exist in the %s database"
 msgstr "не постојите у „%s“ бази података"
 
-#: src/sudo.c:632
+#: src/sudo.c:635
 msgid "unable to determine tty"
 msgstr "не могу да одредим конзолу"
 
-#: src/sudo.c:955
+#: src/sudo.c:958
 msgid "The \"no new privileges\" flag is set, which prevents sudo from running as root."
 msgstr "Опција „no new privileges“ је постављена, што спречава „sudo“-а да ради као администратор."
 
-#: src/sudo.c:957
+#: src/sudo.c:960
 msgid "If sudo is running in a container, you may need to adjust the container configuration to disable the flag."
 msgstr "Ако судо ради у садржаоцу, треба да прилагодите подешавање садржаоца да искључи опцију."
 
-#: src/sudo.c:991
+#: src/sudo.c:994
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s мора бити власништвo уида %d и треба да има подешен бит „setuid“"
 
-#: src/sudo.c:994
+#: src/sudo.c:997
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "стварни уид није %d, већ %s на систему датотека са подешеном опцијом „nosuid“ или је НФС систем датотека без администраторских привилегија?"
 
-#: src/sudo.c:1000
+#: src/sudo.c:1003
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "стварни уид није %d, већ сетуид администратор инсталиран судоом?"
 
-#: src/sudo.c:1016 src/tgetpass.c:332
+#: src/sudo.c:1019 src/tgetpass.c:337
 msgid "unable to set supplementary group IDs"
 msgstr "не могу да подесим додатне ИБ-ове групе"
 
-#: src/sudo.c:1023
+#: src/sudo.c:1026
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "не могу да подесим ефективан гид да се покрене_као гид %u"
 
-#: src/sudo.c:1029
+#: src/sudo.c:1032
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "не могу да подесим гид да се покрене као гид %u"
 
-#: src/sudo.c:1060
+#: src/sudo.c:1063
 msgid "argv not set by the security policy"
 msgstr "„argv“ није постављено политиком безбедности"
 
-#: src/sudo.c:1064
+#: src/sudo.c:1067
 msgid "envp not set by the security policy"
 msgstr "„envp“ није постављено политиком безбедности"
 
-#: src/sudo.c:1086
+#: src/sudo.c:1089
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "неочекивани услов завршетка потпроцеса: %d"
 
-#: src/sudo.c:1198
+#: src/sudo.c:1201
 msgid "unable to initialize policy plugin"
 msgstr "не могу да започнем прикључак сигурности"
 
-#: src/sudo.c:1259
+#: src/sudo.c:1262
 #, c-format
 msgid "policy plugin %s is missing the \"check_policy\" method"
 msgstr "прикључак сигурности %s не садржи метод „check_policy“"
 
-#: src/sudo.c:1305
+#: src/sudo.c:1308
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "прикључак сигурности %s не подржава привилегије исписивања"
 
-#: src/sudo.c:1349
+#: src/sudo.c:1352
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "прикључак сигурности %s не подржава опцију -v"
 
-#: src/sudo.c:1387
+#: src/sudo.c:1390
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "прикључак сигурности %s не подржава опције -k/-K"
 
-#: src/sudo.c:1516
+#: src/sudo.c:1519
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "грешка приликом покретања У/И прикључка %s"
 
-#: src/sudo.c:1519
+#: src/sudo.c:1522
 msgid "error initializing I/O plugin"
 msgstr "грешка приликом покретања У/И прикључка"
 
-#: src/sudo.c:1668
+#: src/sudo.c:1671
 #, c-format
 msgid "error initializing audit plugin %s"
 msgstr "грешка покретања аудит прикључка „%s“"
 
-#: src/sudo.c:1747
+#: src/sudo.c:1750
 #, c-format
 msgid "%s: unable to log error event%s%s"
 msgstr "%s: не могу да забележим догађај грешке%s%s"
 
-#: src/sudo.c:1783
+#: src/sudo.c:1786
 #, c-format
 msgid "%s: unable to log accept event%s%s"
 msgstr "%s: не могу да забележим догађај прихватања%s%s"
 
-#: src/sudo.c:1788 src/sudo.c:1826
+#: src/sudo.c:1791 src/sudo.c:1829
 msgid "audit plugin error"
 msgstr "грешка аудит прикључка"
 
-#: src/sudo.c:1821
+#: src/sudo.c:1824
 #, c-format
 msgid "%s: unable to log reject event%s%s"
 msgstr "%s: не могу да забележим догађај одбијања%s%s"
 
-#: src/sudo.c:1881
+#: src/sudo.c:1884
 #, c-format
 msgid "error initializing approval plugin %s"
 msgstr "грешка покретања прикључка одобравања „%s“"
 
-#: src/sudo.c:1951
+#: src/sudo.c:1954
 msgid "command rejected by approver"
 msgstr "наредбу је одбацио одобравач"
 
@@ -1168,34 +1168,32 @@ msgstr "лозинка није достављена"
 msgid "unable to read password"
 msgstr "не могу да прочитам лозинку"
 
-#: src/tgetpass.c:141
+#: src/tgetpass.c:142
+msgid "a terminal is required to read the password; either use ssh's -t option or configure an askpass helper"
+msgstr "терминал је потребан за читање лозинке; или користите „-t“ опцију безбедне шкољке или подесите помоћника тражиоца пролаза"
+
+#: src/tgetpass.c:145
 msgid "a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper"
 msgstr "терминал је потребан за читање лозинке; или користите опцију „-S“ да читате из стандардног улаза или подесите помоћника тражиоца пролаза"
 
-#: src/tgetpass.c:152
+#: src/tgetpass.c:157
 msgid "no askpass program specified, try setting SUDO_ASKPASS"
 msgstr "није наведен програм за пропуштање, покушајте да подесите SUDO_ASKPASS"
 
-#: src/tgetpass.c:327
+#: src/tgetpass.c:332
 #, c-format
 msgid "unable to set gid to %u"
 msgstr "не могу да подесим гид у %u"
 
-#: src/tgetpass.c:337
+#: src/tgetpass.c:342
 #, c-format
 msgid "unable to set uid to %u"
 msgstr "не могу да подесим уид у %u"
 
-#: src/tgetpass.c:342
+#: src/tgetpass.c:347
 #, c-format
 msgid "unable to run %s"
 msgstr "не могу да покренем %s"
-
-#: src/ttyname.c:139 src/ttyname.c:182 src/ttyname.c:199 src/ttyname.c:284
-#: src/ttyname.c:312 src/ttyname.c:356
-#, c-format
-msgid "unable to find terminal name for device %u, %u"
-msgstr "не могу да нађем назив терминала за уређај „%u, %u“"
 
 #: src/utmp.c:283
 msgid "unable to save stdin"
@@ -1208,6 +1206,10 @@ msgstr "не могу да дуп2 стандардни улаз"
 #: src/utmp.c:288
 msgid "unable to restore stdin"
 msgstr "не могу да повратим стандардни улаз"
+
+#, c-format
+#~ msgid "unable to find terminal name for device %u, %u"
+#~ msgstr "не могу да нађем назив терминала за уређај „%u, %u“"
 
 #~ msgid "insufficient space for execve arguments"
 #~ msgstr "недовољно простора за „execve“ аргументе"

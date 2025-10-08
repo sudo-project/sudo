@@ -2314,7 +2314,7 @@ msgstr "klarte ikke å låse %s"
 
 #: plugins/sudoers/visudo.c:996
 msgid "Edit anyway? [y/N]"
-msgstr "Vil du redigere likevel [j/N]"
+msgstr "Vil du redigere likevel [y/N]"
 
 #: plugins/sudoers/visudo.c:1080
 #, c-format
