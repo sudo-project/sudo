@@ -281,6 +281,8 @@ iolog_read_timing_record(struct iolog_file *iol, struct timing_closure *timing)
 
     debug_return_int(0);
 invalid:
+    /* Truncate invalid timing file line at 128 bytes. */
+    line[128] = '\0';
     sudo_warnx(U_("invalid timing file line: %s"), line);
     debug_return_int(-1);
 }
