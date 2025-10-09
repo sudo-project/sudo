@@ -252,6 +252,7 @@ iolog_read_timing_record(struct iolog_file *iol, struct timing_closure *timing)
 {
     char line[LINE_MAX];
     const char *errstr;
+    char *nl;
     debug_decl(iolog_read_timing_record, SUDO_DEBUG_UTIL);
 
     /* Read next record from timing file. */
@@ -263,12 +264,23 @@ iolog_read_timing_record(struct iolog_file *iol, struct timing_closure *timing)
 	debug_return_int(-1);
     }
 
+    /*
+     * All timing file records must end with a newline.
+     * A missing newline may indicate a line longer than LINE_MAX.
+     */
+    nl = strchr(line, '\n');
+    if (nl == NULL) {
+	goto invalid;
+    }
+    *nl = '\0';
+
     /* Parse timing file record. */
-    line[strcspn(line, "\n")] = '\0';
     if (!iolog_parse_timing(line, timing)) {
-	sudo_warnx(U_("invalid timing file line: %s"), line);
-	debug_return_int(-1);
+	goto invalid;
     }
 
     debug_return_int(0);
+invalid:
+    sudo_warnx(U_("invalid timing file line: %s"), line);
+    debug_return_int(-1);
 }
