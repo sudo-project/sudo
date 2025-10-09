@@ -1422,9 +1422,9 @@ static int
 logsrvd_conv_syslog(int num_msgs, const struct sudo_conv_message msgs[],
     struct sudo_conv_reply replies[], struct sudo_conv_callback *callback)
 {
-    char *buf = NULL, *cp = NULL;
     const char *progname;
-    size_t proglen, bufsize = 0;
+    char buf[4096], *cp, *ep;
+    size_t proglen;
     int i;
     debug_decl(logsrvd_conv_syslog, SUDO_DEBUG_UTIL);
 
@@ -1442,10 +1442,11 @@ logsrvd_conv_syslog(int num_msgs, const struct sudo_conv_message msgs[],
      */
     progname = getprogname();
     proglen = strlen(progname);
-    for (i = 0; i < num_msgs; i++) {
+    cp = buf;
+    ep = buf + sizeof(buf);
+    for (i = 0; i < num_msgs && ep - cp > 1; i++) {
 	const char *msg = msgs[i].msg;
 	size_t len = strlen(msg);
-	size_t used = (size_t)(cp - buf);
 
 	/* Strip leading "sudo_logsrvd: " prefix. */
 	if (strncmp(msg, progname, proglen) == 0) {
@@ -1470,25 +1471,17 @@ logsrvd_conv_syslog(int num_msgs, const struct sudo_conv_message msgs[],
 	if (len == 0)
 	    continue;
 
-	if (len >= bufsize - used) {
-	    bufsize += 1024;
-	    char *tmp = realloc(buf, bufsize);
-	    if (tmp == NULL) {
-		sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-		free(buf);
-		debug_return_int(-1);
-	    }
-	    buf = tmp;
-	    cp = tmp + used;
+	if (len >= (size_t)(ep - cp)) {
+	    /* Message too long, truncate. */
+	    len = (size_t)(ep - cp) - 1;
 	}
 	memcpy(cp, msg, len);
 	cp[len] = '\0';
 	cp += len;
     }
-    if (buf != NULL) {
+    if (cp != buf) {
 	openlog(progname, 0, logsrvd_config->syslog.server_facility);
 	syslog(LOG_ERR, "%s", buf);
-	free(buf);
 
 	/* Restore old syslog settings. */
 	if (logsrvd_config->eventlog.log_type == EVLOG_SYSLOG)
