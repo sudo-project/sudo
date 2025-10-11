@@ -99,7 +99,8 @@ iolog_open_all(int dfd, const char *iolog_dir, struct iolog_file *iolog_files,
     int iofd;
     debug_decl(iolog_open_all, SUDO_DEBUG_UTIL);
 
-    for (iofd = 0; iofd < IOFD_MAX; iofd++) {
+    /* Iterate in reverse order so we open/lock IOFD_TIMING first. */
+    for (iofd = IOFD_MAX - 1; iofd >= 0; iofd--) {
 	iolog_files[iofd].enabled = true;
         if (!iolog_open(&iolog_files[iofd], dfd, iofd, mode)) {
 	    if (errno != ENOENT) {

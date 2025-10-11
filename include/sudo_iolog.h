@@ -82,6 +82,7 @@ struct timing_closure {
 struct iolog_file {
     bool enabled;
     bool compressed;
+    bool locked;
     bool writable;
     union {
 	FILE *f;

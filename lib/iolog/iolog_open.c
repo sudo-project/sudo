@@ -40,12 +40,14 @@ static unsigned char const gzip_magic[2] = {0x1f, 0x8b};
 /*
  * Open the specified I/O log file and store in iol.
  * Stores the open file handle which has the close-on-exec flag set.
+ * Also locks the file if iofd is IOFD_TIMING and mode is writable.
  */
 bool
 iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode)
 {
     int flags;
     const char *file;
+    bool lockit = false;
     unsigned char magic[2];
     const uid_t iolog_uid = iolog_get_uid();
     const gid_t iolog_gid = iolog_get_gid();
@@ -66,11 +68,25 @@ iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode)
 	    "%s: invalid iofd %d", __func__, iofd);
 	debug_return_bool(false);
     }
+    if (iofd == IOFD_TIMING && ISSET(flags, O_WRONLY|O_RDWR)) {
+	lockit = true;
+    }
 
     iol->writable = false;
     iol->compressed = false;
+    iol->locked = false;
     if (iol->enabled) {
 	int fd = iolog_openat(dfd, file, flags);
+	if (lockit && fd != -1) {
+	    if (sudo_lock_file(fd, SUDO_TLOCK)) {
+		iol->locked = true;
+	    } else {
+		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+		    "%s: unable to lock %s", __func__, file);
+		close(fd);
+		fd = -1;
+	    }
+	}
 	if (fd != -1) {
 	    if (*mode == 'w') {
 		if (fchown(fd, iolog_uid, iolog_gid) != 0) {
