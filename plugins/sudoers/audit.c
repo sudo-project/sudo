@@ -241,6 +241,19 @@ audit_to_eventlog(const struct sudoers_context *ctx, struct eventlog *evlog,
 }
 
 #ifdef SUDOERS_LOG_CLIENT
+static struct log_details audit_details;
+
+static void
+free_audit_details(void)
+{
+    debug_decl(free_audit_details, SUDOERS_DEBUG_PLUGIN);
+
+    /* Only the log_servers string list is dynamically allocated. */
+    str_list_free(audit_details.log_servers);
+
+    debug_return;
+}
+
 static bool
 log_server_accept(const struct sudoers_context *ctx, struct eventlog *evlog)
 {
@@ -272,13 +285,16 @@ log_server_accept(const struct sudoers_context *ctx, struct eventlog *evlog)
 	    ret = true;
 	}
     } else {
-	struct log_details audit_details;
-
+	/* No existing client closure, I/O logging not enabled. */
 	if (sudo_gettime_awake(&start_time) == -1) {
 	    sudo_warn("%s", U_("unable to get time of day"));
 	    goto done;
 	}
 
+	/*
+	 * audit_details is stored in client_closure->log_details
+	 * and must remain in scope until the command exits.
+	 */
 	if (!init_log_details(&audit_details, evlog))
 	    goto done;
 
@@ -287,9 +303,6 @@ log_server_accept(const struct sudoers_context *ctx, struct eventlog *evlog)
 	    SEND_ACCEPT, NULL);
 	if (client_closure != NULL)
 	    ret = true;
-
-	/* Only the log_servers string list is dynamically allocated. */
-	str_list_free(audit_details.log_servers);
     }
 
 done:
@@ -320,6 +333,7 @@ log_server_exit(int status_type, int status)
 	log_server_close(client_closure, exit_status, error);
 	client_closure = NULL;
     }
+    free_audit_details();
 
     debug_return;
 }
