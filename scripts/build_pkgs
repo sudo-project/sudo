@@ -1041,8 +1041,9 @@ sub grep_log {
 		next if /warning: unwind table: .* suspicious InitialLoc value 0: binary search table will be incomplete if section requires runtime relocation/;
 		# GNU Hurd has no 64-bit glob()
 		next if /warning: glob64 is not implemented and will always fail/;
-		# Solaris Studio compiler warns about anonymous unions
-		next if /warning: anonymous union declaration/;
+		# macOS no longer supports -force_flat_namespace
+		# but doesn't not honor -Werror to check this
+		next if /warning: -force_flat_namespace is no longer supported/;
 		# HP-UX shl_t uses type-punning
 		next if /sudo_dso.c:.*warning: type-punning to incomplete type might break strict-aliasing rules/;
 		# Bogus HP-UX 11.23 warning about PTHREAD_MUTEX_INITIALIZER
