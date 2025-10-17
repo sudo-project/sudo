@@ -53,25 +53,25 @@ digest_matches(int fd, const char *path, const char *runchroot,
 	debug_return_int(ALLOW);
     }
 
-    if (fd == -1) {
-	fd2 = open(path, O_RDONLY|O_NONBLOCK);
-	if (fd2 == -1) {
-	    /* No file, no match. */
-	    goto done;
-	}
-	fd = fd2;
+    if (runchroot != NULL) {
+        /* XXX - handle symlinks and '..' in path outside chroot */
+        const int len =
+            snprintf(pathbuf, sizeof(pathbuf), "%s%s", runchroot, path);
+        if (len >= ssizeof(pathbuf)) {
+            errno = ENAMETOOLONG;
+            sudo_warn("%s%s", runchroot, path);
+            goto done;
+        }
+        path = pathbuf;
     }
 
-    if (runchroot != NULL) {
-	/* XXX - handle symlinks and '..' in path outside chroot */
-	const int len =
-	    snprintf(pathbuf, sizeof(pathbuf), "%s%s", runchroot, path);
-	if (len >= ssizeof(pathbuf)) {
-	    errno = ENAMETOOLONG;
-	    sudo_warn("%s%s", runchroot, path);
-	    goto done;
-	}
-	path = pathbuf;
+    if (fd == -1) {
+        fd2 = open(path, O_RDONLY|O_NONBLOCK);
+        if (fd2 == -1) {
+            /* No file, no match. */
+            goto done;
+        }
+        fd = fd2;
     }
 
     TAILQ_FOREACH(digest, digests, entries) {
