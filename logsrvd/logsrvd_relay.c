@@ -563,9 +563,8 @@ handle_commit_point(const TimeSpec *commit_point,
 static bool
 handle_log_id(const char *id, struct connection_closure *closure)
 {
-    char *new_id;
+    ServerMessage msg = SERVER_MESSAGE__INIT;
     bool ret = false;
-    int len;
     debug_decl(handle_log_id, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
@@ -581,24 +580,26 @@ handle_log_id(const char *id, struct connection_closure *closure)
 	sudo_warnx(U_("%s: invalid ServerMessage, missing log_id string"),
 	    closure->relay_closure->relay_name.ipaddr);
 	closure->errstr = _("invalid ServerMessage");
-	debug_return_bool(false);
+	goto done;
     }
 
-    /* Generate a new log ID that includes the relay host. */
-    len = asprintf(&new_id, "%s/%s", id,
-	closure->relay_closure->relay_name.name);
-    if (len != -1) {
-	if (fmt_log_id_message(new_id, closure)) {
-	    if (sudo_ev_add(closure->evbase, closure->write_ev,
-		    logsrvd_conf_relay_timeout(), false) == -1) {
-		sudo_warnx("%s", U_("unable to add event to queue"));
-	    } else {
-		ret = true;
-	    }
+    /*
+     * We currently pass log_id to the client without modifying it.
+     * TODO: append relay host to the log_id so we can restart the
+     *       session with the proper relay if more than one is conifgured.
+     */
+    msg.u.log_id = (char *)id;
+    msg.type_case = SERVER_MESSAGE__TYPE_LOG_ID;
+    ret = fmt_server_message(closure, &msg);
+    if (ret) {
+	if (sudo_ev_add(closure->evbase, closure->write_ev,
+		logsrvd_conf_relay_timeout(), false) == -1) {
+	    sudo_warnx("%s", U_("unable to add event to queue"));
+	    ret = false;
 	}
-	free(new_id);
     }
 
+done:
     debug_return_bool(ret);
 }
 
@@ -1134,7 +1135,6 @@ relay_exit(const ExitMessage *msg, const uint8_t *buf, size_t len,
 
 /*
  * Relay a RestartMessage from the client to the relay server.
- * We must rebuild the packed message because the log_id is modified.
  */
 static bool
 relay_restart(const RestartMessage *msg, const uint8_t *buf, size_t len,
@@ -1143,38 +1143,13 @@ relay_restart(const RestartMessage *msg, const uint8_t *buf, size_t len,
     struct relay_closure *relay_closure = closure->relay_closure;
     const char *source = closure->journal_path ? closure->journal_path :
 	closure->ipaddr;
-    struct sudo_event_base *evbase = closure->evbase;
-    ClientMessage client_msg = CLIENT_MESSAGE__INIT;
-    RestartMessage restart_msg = *msg;
-    char *cp;
-    bool ret;
     debug_decl(relay_restart, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: relaying RestartMessage from %s to %s (%s)", __func__, source,
 	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
 
-    /*
-     * We prepend "relayhost/" to the log ID before relaying it to
-     * the client.  Perform the reverse operation before passing the
-     * log ID to the relay host.
-     */
-    if ((cp = strchr(restart_msg.log_id, '/')) != NULL) {
-	if (cp != restart_msg.log_id)
-	    restart_msg.log_id = cp + 1;
-    }
-
-    client_msg.u.restart_msg = &restart_msg;
-    client_msg.type_case = CLIENT_MESSAGE__TYPE_RESTART_MSG;
-    ret = fmt_client_message(closure, &client_msg);
-    if (ret) {
-	if (sudo_ev_add(evbase, relay_closure->write_ev, NULL, false) == -1) {
-	    sudo_warnx("%s", U_("unable to add event to queue"));
-	    ret = false;
-	}
-    }
-
-    debug_return_bool(ret);
+    debug_return_bool(relay_enqueue_write(buf, len, closure));
 }
 
 /*
@@ -1187,16 +1162,13 @@ relay_alert(const AlertMessage *msg, const uint8_t *buf, size_t len,
     struct relay_closure *relay_closure = closure->relay_closure;
     const char *source = closure->journal_path ? closure->journal_path :
 	closure->ipaddr;
-    bool ret;
     debug_decl(relay_alert, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: relaying AlertMessage from %s to %s (%s)", __func__, source,
 	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
 
-    ret = relay_enqueue_write(buf, len, closure);
-
-    debug_return_bool(ret);
+    debug_return_bool(relay_enqueue_write(buf, len, closure));
 }
 
 /*
@@ -1209,16 +1181,13 @@ relay_suspend(const CommandSuspend *msg, const uint8_t *buf, size_t len,
     struct relay_closure *relay_closure = closure->relay_closure;
     const char *source = closure->journal_path ? closure->journal_path :
 	closure->ipaddr;
-    bool ret;
     debug_decl(relay_suspend, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: relaying CommandSuspend from %s to %s (%s)", __func__, source,
 	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
 
-    ret = relay_enqueue_write(buf, len, closure);
-
-    debug_return_bool(ret);
+    debug_return_bool(relay_enqueue_write(buf, len, closure));
 }
 
 /*
@@ -1231,16 +1200,13 @@ relay_winsize(const ChangeWindowSize *msg, const uint8_t *buf, size_t len,
     struct relay_closure *relay_closure = closure->relay_closure;
     const char *source = closure->journal_path ? closure->journal_path :
 	closure->ipaddr;
-    bool ret;
     debug_decl(relay_winsize, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: relaying ChangeWindowSize from %s to %s (%s)", __func__, source,
 	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
 
-    ret = relay_enqueue_write(buf, len, closure);
-
-    debug_return_bool(ret);
+    debug_return_bool(relay_enqueue_write(buf, len, closure));
 }
 
 /*
@@ -1253,16 +1219,13 @@ relay_iobuf(int iofd, const IoBuffer *iobuf, const uint8_t *buf, size_t len,
     struct relay_closure *relay_closure = closure->relay_closure;
     const char *source = closure->journal_path ? closure->journal_path :
 	closure->ipaddr;
-    bool ret;
     debug_decl(relay_iobuf, SUDO_DEBUG_UTIL);
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: relaying IoBuffer from %s to %s (%s)", __func__, source,
 	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr);
 
-    ret = relay_enqueue_write(buf, len, closure);
-
-    debug_return_bool(ret);
+    debug_return_bool(relay_enqueue_write(buf, len, closure));
 }
 
 /*

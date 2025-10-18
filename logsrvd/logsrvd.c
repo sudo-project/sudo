@@ -322,7 +322,7 @@ oom:
     debug_return_ptr(NULL);
 }
 
-static bool
+bool
 fmt_server_message(struct connection_closure *closure, ServerMessage *msg)
 {
     struct connection_buffer *buf = NULL;
@@ -376,16 +376,58 @@ fmt_hello_message(struct connection_closure *closure)
     debug_return_bool(fmt_server_message(closure, &msg));
 }
 
+static char *
+gen_log_id(const unsigned char *uuid, const char *path,
+    struct connection_closure *closure)
+{
+    size_t b64_size, id_len, pathlen = strlen(path);
+    char *b64_id = NULL;
+    unsigned char *id;
+    debug_decl(gen_log_id, SUDO_DEBUG_UTIL);
+
+    /* Log ID is 16-byte UUID + path. */
+    id_len = 16 + pathlen;
+    if ((id = malloc(id_len)) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto done;
+    }
+    memcpy(id, uuid, 16);
+    memcpy(id + 16, path, pathlen);
+
+    /* Base64 encode log ID */
+    b64_size = ((id_len + 2) / 3 * 4) + 1;
+    if ((b64_id = malloc(b64_size)) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto done;
+    }
+    if (sudo_base64_encode(id, id_len, b64_id, b64_size) == (size_t)-1) {
+	sudo_warnx("%s", U_("unable to base64 log ID"));
+	free(b64_id);
+	b64_id = NULL;
+    }
+
+done:
+    free(id);
+    debug_return_str(b64_id);
+}
+
 bool
-fmt_log_id_message(const char *id, struct connection_closure *closure)
+fmt_log_id_message(const unsigned char uuid[restrict static 16],
+    const char *path, struct connection_closure *closure)
 {
     ServerMessage msg = SERVER_MESSAGE__INIT;
+    bool ret = false;
     debug_decl(fmt_log_id_message, SUDO_DEBUG_UTIL);
 
-    msg.u.log_id = (char *)id;
+    /* Generate log_id from path and closure's UUID */
     msg.type_case = SERVER_MESSAGE__TYPE_LOG_ID;
+    msg.u.log_id = gen_log_id(uuid, path, closure);
+    if (msg.u.log_id != NULL) {
+	ret = fmt_server_message(closure, &msg);
+	free(msg.u.log_id);
+    }
 
-    debug_return_bool(fmt_server_message(closure, &msg));
+    debug_return_bool(ret);
 }
 
 static bool
@@ -591,14 +633,6 @@ handle_restart(const RestartMessage *msg, const uint8_t *buf, size_t len,
     sudo_debug_printf(SUDO_DEBUG_INFO,
 	"%s: received RestartMessage for %s from %s", __func__, msg->log_id,
 	source);
-
-    /* The log_id is used to create a path name, prevent path traversal. */
-    if (contains_dot_dot(msg->log_id)) {
-	sudo_warnx(U_("%s: %s"), source,
-	    U_("RestartMessage log_id path traversal attack"));
-	closure->errstr = _("invalid RestartMessage");
-	debug_return_bool(false);
-    }
 
     /* Only I/O logs are restartable. */
     closure->log_io = true;

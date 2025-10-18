@@ -178,7 +178,6 @@ store_accept_local(const AcceptMessage *msg, const uint8_t *buf, size_t len,
     struct logsrvd_info_closure info = { msg->info_msgs, msg->n_info_msgs };
     bool new_session = closure->evlog == NULL;
     struct eventlog *evlog = NULL;
-    char *log_id = NULL;
     bool ret = false;
     debug_decl(store_accept_local, SUDO_DEBUG_UTIL);
 
@@ -201,7 +200,6 @@ store_accept_local(const AcceptMessage *msg, const uint8_t *buf, size_t len,
 		goto done;
 	    }
 	    closure->log_io = true;
-	    log_id = closure->evlog->iolog_path;
 	}
     } else if (closure->log_io) {
 	/* Sub-command from an existing session, set iolog and offset. */
@@ -225,9 +223,10 @@ store_accept_local(const AcceptMessage *msg, const uint8_t *buf, size_t len,
 	goto done;
     }
 
-    if (new_session && log_id != NULL) {
+    if (new_session && closure->log_io) {
 	/* Send log ID to client for restarting connections. */
-	if (!fmt_log_id_message(log_id, closure))
+	if (!fmt_log_id_message(closure->uuid, closure->evlog->iolog_path,
+		closure))
 	    goto done;
 	if (sudo_ev_add(closure->evbase, closure->write_ev,
 		logsrvd_conf_server_timeout(), false) == -1) {
@@ -449,6 +448,85 @@ store_exit_local(const ExitMessage *msg, const uint8_t *buf, size_t len,
     debug_return_bool(true);
 }
 
+/*
+ * Decode a base64 log ID by and split it into a UUID and a path.
+ * The path must not contain ".." elements.
+ */
+static char *
+decode_log_id(const char *b64_log_id, unsigned char uuid[restrict static 16])
+{
+    unsigned char log_id_buf[PATH_MAX + 16];
+    char *path;
+    size_t len;
+    debug_decl(decode_log_id, SUDO_DEBUG_UTIL);
+
+    /* The log ID is base64-encoded; path has no NUL so leave room for one. */
+    len = sudo_base64_decode(b64_log_id, log_id_buf, sizeof(log_id_buf) - 1);
+    if (len == (size_t)-1)
+	debug_return_str(NULL);
+    log_id_buf[len] = '\0';
+
+    /* A log ID consists of a 16-byte UUID followed by a path. */
+    if (len <= 16)
+	debug_return_str(NULL);
+    memcpy(uuid, log_id_buf, 16);
+    if (memchr(&log_id_buf[16], '\0', len - 16) != NULL) {
+	sudo_warnx("%s", U_("RestartMessage log_id path has embedded NUL"));
+	debug_return_str(NULL);
+    }
+    path = (char *)&log_id_buf[16];
+    if (contains_dot_dot(path)) {
+	sudo_warnx("%s", U_("RestartMessage log_id path traversal attack"));
+	debug_return_str(NULL);
+    }
+
+    /* The caller is responsible for freeing path */
+    path = strdup(path);
+    if (path == NULL)
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    debug_return_str(path);
+}
+
+/*
+ * Verify the specified uuid against the uuid file in the I/O log directory.
+ */
+static bool
+verify_iolog_uuid(int dfd, const unsigned char uuid[restrict static 16])
+{
+    unsigned char uuid2[16];
+    char uuid2_str[37];
+    bool ret = false;
+    struct stat sb;
+    int fd;
+    debug_decl(verify_iolog_uuid, SUDO_DEBUG_UTIL);
+
+    /* Read in the I/O log uuid (string form), which must be 36-bytes. */
+    fd = openat(dfd, "uuid", O_RDONLY);
+    if (fd == -1)
+	goto done;
+    if (fstat(fd, &sb) == -1 || sb.st_size != 36)
+        goto done;
+    if (read(fd, uuid2_str, sizeof(uuid2_str)) != 36)
+        goto done;
+    uuid2_str[36] = '\0';
+
+    /* Convert I/O log uuid to binary and compare. */
+    if (sudo_uuid_from_string(uuid2_str, uuid2) != 0)
+        goto done;
+    if (memcmp(uuid, uuid2, sizeof(uuid2)) != 0)
+        goto done;
+
+    ret = true;
+
+done:
+    if (fd != -1) {
+	/* Invalid uuid, not file error. */
+	errno = EINVAL;
+	close(fd);
+    }
+    debug_return_bool(ret);
+}
+
 bool
 store_restart_local(const RestartMessage *msg, const uint8_t *buf, size_t len,
     struct connection_closure *closure)
@@ -468,10 +546,12 @@ store_restart_local(const RestartMessage *msg, const uint8_t *buf, size_t len,
 	closure->errstr = _("unable to allocate memory");
         goto bad;
     }
-    closure->evlog->iolog_path = strdup(msg->log_id);
+
+    /* Parse log_id into a uuid and a path. */
+    closure->evlog->iolog_path = decode_log_id(msg->log_id, closure->uuid);
     if (closure->evlog->iolog_path == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	closure->errstr = _("unable to allocate memory");
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to parse log_id"));
+	closure->errstr = _("unable to parse log_id");
 	goto bad;
     }
 
@@ -480,6 +560,12 @@ store_restart_local(const RestartMessage *msg, const uint8_t *buf, size_t len,
 	closure->evlog->iolog_path, O_RDONLY|O_DIRECTORY);
     if (closure->iolog_dir_fd == -1) {
 	sudo_warn("%s", closure->evlog->iolog_path);
+	goto bad;
+    }
+
+    /* Verify the log ID uuid against the actual I/O log uuid file. */
+    if (!verify_iolog_uuid(closure->iolog_dir_fd, closure->uuid)) {
+	sudo_warn("%s/uuid", closure->evlog->iolog_path);
 	goto bad;
     }
 

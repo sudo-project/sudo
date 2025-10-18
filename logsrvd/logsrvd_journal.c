@@ -85,12 +85,13 @@ journal_fdopen(int fd, const char *journal_path,
 }
 
 static int
-journal_mkstemp(const char *parent_dir, char *pathbuf, size_t pathsize)
+journal_mkuuid(const char *parent_dir, char *pathbuf, size_t pathsize)
 {
     int len, dfd = -1, fd = -1;
     mode_t dirmode, oldmask;
-    char *template;
-    debug_decl(journal_mkstemp, SUDO_DEBUG_UTIL);
+    unsigned char uuid[16];
+    char uuid_str[37];
+    debug_decl(journal_mkuuid, SUDO_DEBUG_UTIL);
 
     /* umask must not be more restrictive than the file modes. */
     dirmode = logsrvd_conf_iolog_mode() | S_IXUSR;
@@ -100,24 +101,35 @@ journal_mkstemp(const char *parent_dir, char *pathbuf, size_t pathsize)
         dirmode |= S_IXOTH;
     oldmask = umask(ACCESSPERMS & ~dirmode);
 
-    len = snprintf(pathbuf, pathsize, "%s/%s/%s",
-	logsrvd_conf_relay_dir(), parent_dir, RELAY_TEMPLATE);
-    if ((size_t)len >= pathsize) {
-	errno = ENAMETOOLONG;
-	sudo_warn("%s/%s/%s", logsrvd_conf_relay_dir(), parent_dir,
-	    RELAY_TEMPLATE);
-	goto done;
-    }
-    dfd = sudo_open_parent_dir(pathbuf, logsrvd_conf_iolog_uid(),
-	logsrvd_conf_iolog_gid(), S_IRWXU|S_IXGRP|S_IXOTH, false);
-    if (dfd == -1) {
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
-	    "unable to create parent dir for %s", pathbuf);
-	goto done;
-    }
-    template = &pathbuf[(size_t)len - (sizeof(RELAY_TEMPLATE) - 1)];
-    if ((fd = mkostempsat(dfd, template, 0, 0)) == -1) {
-	sudo_warn(U_("%s: %s"), "mkstemp", pathbuf);
+    do {
+	sudo_uuid_create(uuid);
+	if (sudo_uuid_to_string(uuid, uuid_str, sizeof(uuid_str)) == NULL) {
+	    sudo_warnx("%s", U_("unable to generate UUID"));
+	    goto done;
+	}
+
+	len = snprintf(pathbuf, pathsize, "%s/%s/%s",
+	    logsrvd_conf_relay_dir(), parent_dir, uuid_str);
+	if ((size_t)len >= pathsize) {
+	    errno = ENAMETOOLONG;
+	    sudo_warn("%s/%s/%s",
+		logsrvd_conf_relay_dir(), parent_dir, uuid_str);
+	    goto done;
+	}
+	if (dfd == -1) {
+	    dfd = sudo_open_parent_dir(pathbuf, logsrvd_conf_iolog_uid(),
+		logsrvd_conf_iolog_gid(), S_IRWXU|S_IXGRP|S_IXOTH, false);
+	    if (dfd == -1) {
+		sudo_debug_printf(
+		    SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
+		    "unable to create parent dir for %s", pathbuf);
+		goto done;
+	    }
+	}
+	fd = openat(dfd, uuid_str, O_CREAT|O_EXCL|O_RDWR, S_IRUSR|S_IWUSR);
+    } while (fd == -1 && errno == EEXIST);
+    if (fd == -1) {
+	sudo_warn(U_("%s: %s"), "openat", pathbuf);
 	goto done;
     }
 
@@ -139,7 +151,7 @@ journal_create(struct connection_closure *closure)
     int fd;
     debug_decl(journal_create, SUDO_DEBUG_UTIL);
 
-    fd = journal_mkstemp("incoming", journal_path, sizeof(journal_path));
+    fd = journal_mkuuid("incoming", journal_path, sizeof(journal_path));
     if (fd == -1) {
 	closure->errstr = _("unable to create journal file");
 	debug_return_bool(false);
@@ -183,7 +195,7 @@ journal_finish(struct connection_closure *closure)
     rewind(closure->journal);
 
     /* Move journal to the outgoing directory. */
-    fd = journal_mkstemp("outgoing", outgoing_path, sizeof(outgoing_path));
+    fd = journal_mkuuid("outgoing", outgoing_path, sizeof(outgoing_path));
     if (fd == -1) {
 	closure->errstr = _("unable to rename journal file");
 	debug_return_bool(false);
@@ -405,23 +417,30 @@ static bool
 journal_restart(const RestartMessage *msg, const uint8_t *buf, size_t buflen,
     struct connection_closure *closure)
 {
+    char uuid_str[37], journal_path[PATH_MAX];
+    unsigned char uuid[16];
     struct timespec target;
     int fd, len;
-    char *cp, journal_path[PATH_MAX];
     debug_decl(journal_restart, SUDO_DEBUG_UTIL);
 
-    /* Strip off leading hostname from log_id. */
-    if ((cp = strchr(msg->log_id, '/')) != NULL) {
-        if (cp != msg->log_id)
-            cp++;
-    } else {
-    	cp = msg->log_id;
+    /* A journal log_id must be a base64-encoded UUID. */
+    if (strlen(msg->log_id) != ((16 + 2) / 3 * 4))
+	goto parse_err;
+    if (sudo_base64_decode(msg->log_id, uuid, sizeof(uuid)) != sizeof(uuid))
+	goto parse_err;
+    if (sudo_uuid_to_string(uuid, uuid_str, sizeof(uuid_str)) == NULL) {
+	parse_err:
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to parse log_id"));
+	closure->errstr = _("unable to open journal file");
+	debug_return_bool(false);
     }
+
+    /* Journal files are stored by UUID. */
     len = snprintf(journal_path, sizeof(journal_path), "%s/incoming/%s",
-	logsrvd_conf_relay_dir(), cp);
+	logsrvd_conf_relay_dir(), uuid_str);
     if (len >= ssizeof(journal_path)) {
 	errno = ENAMETOOLONG;
-	sudo_warn("%s/incoming/%s", logsrvd_conf_relay_dir(), cp);
+	sudo_warn("%s/incoming/%s", logsrvd_conf_relay_dir(), uuid_str);
 	closure->errstr = _("unable to open journal file");
 	debug_return_bool(false);
     }
@@ -498,7 +517,19 @@ journal_accept(const AcceptMessage *msg, const uint8_t *buf, size_t len,
 
     if (msg->expect_iobufs) {
 	/* Send log ID to client for restarting connections. */
-	if (!fmt_log_id_message(closure->journal_path, closure))
+	unsigned char uuid[16];
+	const char *uuid_str;
+
+	/* Journaled I/O log files are files stored by UUID. */
+	uuid_str = strrchr(closure->journal_path, '/');
+	if (uuid_str == NULL)
+	    debug_return_bool(false);
+	uuid_str++;
+
+	/* Parse UUID and format as a log ID (base64-encoded). */
+	if (sudo_uuid_from_string(uuid_str, uuid) != 0)
+	    debug_return_bool(false);
+	if (!fmt_log_id_message(uuid, "", closure))
 	    debug_return_bool(false);
 	if (sudo_ev_add(closure->evbase, closure->write_ev,
 		logsrvd_conf_server_timeout(), false) == -1) {

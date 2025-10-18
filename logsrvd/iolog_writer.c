@@ -151,6 +151,13 @@ evlog_new(const TimeSpec *submit_time, InfoMessage * const *info_msgs,
        goto bad;
     }
 
+    /* Create a UUID to store in the event log. */
+    sudo_uuid_create(uuid);
+    if (sudo_uuid_to_string(uuid, evlog->uuid_str, sizeof(evlog->uuid_str)) == NULL) {
+       sudo_warnx("%s", U_("unable to generate UUID"));
+       goto bad;
+    }
+
     /* Client/peer IP address. */
     if ((evlog->peeraddr = strdup(closure->ipaddr)) == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -687,6 +694,46 @@ iolog_flush_all(struct connection_closure *closure)
     debug_return_bool(ret);
 }
 
+static bool
+iolog_store_uuid(int dfd, struct connection_closure *closure)
+{
+    char uuid_str[37];
+    int fd = -1;
+    debug_decl(iolog_create_uuid, SUDO_DEBUG_UTIL);
+
+    /* Create a UUID to store in the I/O log. */
+    sudo_uuid_create(closure->uuid);
+    if (sudo_uuid_to_string(closure->uuid, uuid_str, sizeof(uuid_str)) == NULL) {
+       sudo_warnx("%s", U_("unable to generate UUID"));
+       goto bad;
+    }
+
+    /* Write UUID in string form to the I/O log directory. */
+    fd = iolog_openat(dfd, "uuid", O_CREAT|O_TRUNC|O_WRONLY);
+    if (fd == -1) {
+	sudo_warn(U_("unable to open %s/%s"), closure->evlog->iolog_path,
+	    "uuid");
+        goto bad;
+    }
+    if (fchown(fd, iolog_get_uid(), iolog_get_gid()) != 0) {
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
+            "%s: unable to fchown %d:%d %s/uuid", __func__,
+            (int)iolog_get_uid(), (int)iolog_get_gid(),
+	    closure->evlog->iolog_path);
+    }
+    if (write(fd, uuid_str, sizeof(uuid_str) - 1) != ssizeof(uuid_str) - 1) {
+	sudo_warn(U_("unable to write %s/%s"), closure->evlog->iolog_path,
+	    "uuid");
+        goto bad;
+    }
+
+    debug_return_bool(true);
+bad:
+    if (fd != -1)
+	close(fd);
+    debug_return_bool(false);
+}
+
 bool
 iolog_init(const AcceptMessage *msg, struct connection_closure *closure)
 {
@@ -695,6 +742,10 @@ iolog_init(const AcceptMessage *msg, struct connection_closure *closure)
 
     /* Create I/O log path */
     if (!create_iolog_path(closure))
+	debug_return_bool(false);
+
+    /* Create and store I/O log UUID */
+    if (!iolog_store_uuid(closure->iolog_dir_fd, closure))
 	debug_return_bool(false);
 
     /* Write sudo I/O log info file */

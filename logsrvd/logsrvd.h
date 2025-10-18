@@ -118,6 +118,7 @@ struct connection_closure {
     bool read_instead_of_write;
     bool write_instead_of_read;
     bool temporary_write_event;
+    unsigned char uuid[16];
 #ifdef HAVE_STRUCT_IN6_ADDR
     char ipaddr[INET6_ADDRSTRLEN];
 #else
@@ -200,7 +201,8 @@ extern struct client_message_switch cms_local;
 bool start_protocol(struct connection_closure *closure);
 void connection_close(struct connection_closure *closure);
 bool schedule_commit_point(const TimeSpec *commit_point, struct connection_closure *closure);
-bool fmt_log_id_message(const char *id, struct connection_closure *closure);
+bool fmt_server_message(struct connection_closure *closure, ServerMessage *msg);
+bool fmt_log_id_message(const unsigned char uuid[restrict static 16], const char *path, struct connection_closure *closure);
 bool schedule_error_message(const char *errstr, struct connection_closure *closure);
 struct connection_buffer *get_free_buf(size_t, struct connection_closure *closure);
 struct connection_closure *connection_closure_alloc(int fd, bool tls, bool relay_only, struct sudo_event_base *base);
