@@ -109,7 +109,7 @@ digest_matches(int fd, const char *path, const char *runchroot,
 	    }
 	} else {
 	    /* Convert base64 to binary. */
-	    size_t len = base64_decode(digest->digest_str, sudoers_digest,
+	    size_t len = sudo_base64_decode(digest->digest_str, sudoers_digest,
 		digest_len);
 	    if (len == (size_t)-1)
 		goto bad_format;

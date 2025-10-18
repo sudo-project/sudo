@@ -112,11 +112,11 @@ PVS_IGNORE = 'V707,V011,V002,V536,V795'
 PVS_LOG_OPTS = -a 'GA:1,2' -e -t errorfile -d $(PVS_IGNORE)
 
 # Regression tests
-TEST_PROGS = conf_test digest_test getgids getgrouplist_test hexchar_test \
-	     hltq_test json_test multiarch_test open_parent_dir_test \
-	     parse_gids_test parseln_test progname_test regex_test \
-	     strsplit_test strtobool_test strtoid_test strtomode_test \
-	     strtonum_test uuid_test @COMPAT_TEST_PROGS@
+TEST_PROGS = base64_test conf_test digest_test getgids getgrouplist_test \
+	     hexchar_test hltq_test json_test multiarch_test \
+	     open_parent_dir_test parse_gids_test parseln_test progname_test \
+	     regex_test strsplit_test strtobool_test strtoid_test \
+	     strtomode_test strtonum_test uuid_test @COMPAT_TEST_PROGS@
 
 TEST_LIBS = @LIBS@
 TEST_LDFLAGS = @LDFLAGS@
@@ -145,18 +145,20 @@ DEVEL = @DEVEL@
 
 SHELL = @SHELL@
 
-LTOBJS = basename.lo @DIGEST@ event.lo fatal.lo key_val.lo gethostname.lo \
-	 gettime.lo getgrouplist.lo gidlist.lo hexchar.lo json.lo lbuf.lo \
-	 locking.lo logfac.lo login_max.lo logpri.lo mkdir_parents.lo \
-	 mmap_alloc.lo multiarch.lo parseln.lo progname.lo rcstr.lo regex.lo \
-	 roundup.lo secure_path.lo setgroups.lo strsplit.lo strtobool.lo \
-	 strtoid.lo strtomode.lo strtonum.lo sudo_conf.lo sudo_debug.lo \
-	 sudo_dso.lo term.lo ttyname_dev.lo ttysize.lo uuid.lo \
-	 @COMMON_OBJS@ @LTLIBOBJS@
+LTOBJS = b64_decode.lo b64_encode.lo basename.lo @DIGEST@ event.lo fatal.lo \
+	 key_val.lo gethostname.lo gettime.lo getgrouplist.lo gidlist.lo \
+	 hexchar.lo json.lo lbuf.lo locking.lo logfac.lo login_max.lo \
+	 logpri.lo mkdir_parents.lo mmap_alloc.lo multiarch.lo parseln.lo \
+	 progname.lo rcstr.lo regex.lo roundup.lo secure_path.lo setgroups.lo \
+	 strsplit.lo strtobool.lo strtoid.lo strtomode.lo strtonum.lo \
+	 sudo_conf.lo sudo_debug.lo sudo_dso.lo term.lo ttyname_dev.lo \
+	 ttysize.lo uuid.lo @COMMON_OBJS@ @LTLIBOBJS@
 
 IOBJS = $(LTOBJS:.lo=.i)
 
 POBJS = $(IOBJS:.i=.plog)
+
+BASE64_TEST_OBJS = base64_test.lo b64_decode.lo b64_encode.lo
 
 MKTEMP_TEST_OBJS = mktemp_test.lo mktemp.lo
 
@@ -283,6 +285,9 @@ mksiglist.h: sys_siglist.i
 
 mksigname.h: sys_signame.i
 	$(SED) -e '1,/^int sudo_end_of_headers;/d' -e '/^#/d' < sys_signame.i > mksigname.h
+
+base64_test: $(BASE64_TEST_OBJS) libsudo_util.la
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(BASE64_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
 
 closefrom_test: $(CLOSEFROM_TEST_OBJS) libsudo_util.la
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(CC) -o $@ $(CLOSEFROM_TEST_OBJS) libsudo_util.la $(ASAN_LDFLAGS) $(PIE_LDFLAGS) $(HARDENING_LDFLAGS) $(TEST_LDFLAGS) $(TEST_LIBS)
@@ -458,6 +463,7 @@ check: $(TEST_PROGS) check-fuzzer
 	    MALLOC_OPTIONS=S; export MALLOC_OPTIONS; \
 	    MALLOC_CONF="abort:true,junk:true"; export MALLOC_CONF; \
 	    rval=0; \
+	    ./base64_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
 	    if test -f closefrom_test; then \
 		./closefrom_test $(TEST_VERBOSE) || rval=`expr $$rval + $$?`; \
 	    fi; \
@@ -574,6 +580,40 @@ arc4random_uniform.i: $(srcdir)/arc4random_uniform.c $(incdir)/sudo_compat.h \
 	$(CPP) $(CPPFLAGS) $(srcdir)/arc4random_uniform.c > $@
 arc4random_uniform.plog: arc4random_uniform.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/arc4random_uniform.c --i-file arc4random_uniform.i --output-file $@
+b64_decode.lo: $(srcdir)/b64_decode.c $(incdir)/compat/stdbool.h \
+               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+               $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/b64_decode.c
+b64_decode.i: $(srcdir)/b64_decode.c $(incdir)/compat/stdbool.h \
+               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+               $(top_builddir)/config.h
+	$(CPP) $(CPPFLAGS) $(srcdir)/b64_decode.c > $@
+b64_decode.plog: b64_decode.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/b64_decode.c --i-file b64_decode.i --output-file $@
+b64_encode.lo: $(srcdir)/b64_encode.c $(incdir)/compat/stdbool.h \
+               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+               $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/b64_encode.c
+b64_encode.i: $(srcdir)/b64_encode.c $(incdir)/compat/stdbool.h \
+               $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
+               $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
+               $(top_builddir)/config.h
+	$(CPP) $(CPPFLAGS) $(srcdir)/b64_encode.c > $@
+b64_encode.plog: b64_encode.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/b64_encode.c --i-file b64_encode.i --output-file $@
+base64_test.lo: $(srcdir)/regress/base64/base64_test.c \
+                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/regress/base64/base64_test.c
+base64_test.i: $(srcdir)/regress/base64/base64_test.c \
+                $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
+                $(incdir)/sudo_util.h $(top_builddir)/config.h
+	$(CPP) $(CPPFLAGS) $(srcdir)/regress/base64/base64_test.c > $@
+base64_test.plog: base64_test.i
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/regress/base64/base64_test.c --i-file base64_test.i --output-file $@
 basename.lo: $(srcdir)/basename.c $(incdir)/compat/stdbool.h \
              $(incdir)/sudo_compat.h $(incdir)/sudo_util.h \
              $(top_builddir)/config.h

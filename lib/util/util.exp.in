@@ -1,5 +1,7 @@
 @COMPAT_EXP@initprogname
 initprogname2
+sudo_base64_decode_v1
+sudo_base64_encode_v1
 sudo_basename_v1
 sudo_conf_askpass_path_v1
 sudo_conf_clear_paths_v1

@@ -329,7 +329,7 @@ sudo_ldap_decode_secret(const char *secret)
 	if (result == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	} else {
-	    len = base64_decode(secret, result, reslen);
+	    len = sudo_base64_decode(secret, result, reslen);
 	    if (len == (size_t)-1) {
 		free(result);
 		result = NULL;

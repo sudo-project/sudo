@@ -178,6 +178,12 @@ sudo_dso_public int aix_setauthdb_v1(char *user);
 sudo_dso_public int aix_setauthdb_v2(char *user, char *registry);
 #define aix_setauthdb(_a, _b) aix_setauthdb_v2((_a), (_b))
 
+/* base64.c */
+sudo_dso_public size_t sudo_base64_decode_v1(const char * restrict str, unsigned char * restrict dst, size_t dsize);
+#define sudo_base64_decode(_a, _b, _c) sudo_base64_decode_v1((_a), (_b), (_c))
+sudo_dso_public size_t sudo_base64_encode_v1(const unsigned char * restrict in, size_t in_len, char * restrict out, size_t out_len);
+#define sudo_base64_encode(_a, _b, _c, _d) sudo_base64_encode_v1((_a), (_b), (_c), (_d))
+
 /* basename.c */
 sudo_dso_public char *sudo_basename_v1(const char *filename);
 #define sudo_basename(_a) sudo_basename_v1(_a)

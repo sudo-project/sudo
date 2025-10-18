@@ -147,7 +147,7 @@ ldif_parse_attribute(char *line, char **name, char **value)
 	    sudo_fatalx(U_("%s: %s"), __func__,
 		U_("unable to allocate memory"));
 	}
-	len = base64_decode(attr, (unsigned char *)copy, strlen(copy));
+	len = sudo_base64_decode(attr, (unsigned char *)copy, strlen(copy));
 	if (len == (size_t)-1) {
 	    free(copy);
 	    debug_return_bool(false);

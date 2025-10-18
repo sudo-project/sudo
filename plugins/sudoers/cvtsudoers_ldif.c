@@ -107,7 +107,7 @@ print_attribute_ldif(FILE *fp, const char *name, const char *value)
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    debug_return_bool(false);
 	}
-	if (base64_encode(uvalue, vlen, encoded, esize) == (size_t)-1) {
+	if (sudo_base64_encode(uvalue, vlen, encoded, esize) == (size_t)-1) {
 	    sudo_warnx(U_("unable to base64 encode value \"%s\""), value);
 	    free(encoded);
 	    debug_return_bool(false);

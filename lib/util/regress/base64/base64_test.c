@@ -27,10 +27,6 @@
 #include <sudo_compat.h>
 #include <sudo_util.h>
 
-/* From parse.h */
-extern size_t base64_decode(const char * restrict str, unsigned char * restrict dst, size_t dsize);
-extern size_t base64_encode(const unsigned char * restrict in, size_t in_len, char * restrict out, size_t out_len);
-
 sudo_dso_public int main(int argc, char *argv[]);
 
 static unsigned char bstring1[] = { 0xea, 0xb8, 0xa2, 0x71, 0xef, 0x67, 0xc1, 0xcd, 0x0d, 0xd9, 0xa6, 0xaa, 0xa8, 0x24, 0x77, 0x2a, 0xfc, 0x6f, 0x76, 0x37, 0x1b, 0xed, 0x9e, 0x1a, 0x90, 0x5f, 0xcf, 0xbc, 0x00 };
@@ -73,7 +69,7 @@ main(int argc, char *argv[])
     unsigned char buf[64];
     size_t len;
 
-    initprogname(argc > 0 ? argv[0] : "check_base64");
+    initprogname(argc > 0 ? argv[0] : "base64_test");
 
     while ((ch = getopt(argc, argv, "v")) != -1) {
 	switch (ch) {
@@ -90,30 +86,30 @@ main(int argc, char *argv[])
 
     for (i = 0; i < ntests; i++) {
 	/* Test decode. */
-	len = base64_decode(test_strings[i].encoded, buf, sizeof(buf));
+	len = sudo_base64_decode(test_strings[i].encoded, buf, sizeof(buf));
 	if (len == (size_t)-1) {
-	    fprintf(stderr, "check_base64: failed to decode %s\n",
+	    fprintf(stderr, "base64_test: failed to decode %s\n",
 		test_strings[i].encoded);
 	    errors++;
 	} else {
 	    buf[len] = '\0';
 	    if (strcmp(test_strings[i].ascii, (char *)buf) != 0) {
-		fprintf(stderr, "check_base64: expected %s, got %s\n",
+		fprintf(stderr, "base64_test: expected %s, got %s\n",
 		    test_strings[i].ascii, buf);
 		errors++;
 	    }
 	}
 
 	/* Test encode. */
-	len = base64_encode((unsigned char *)test_strings[i].ascii,
+	len = sudo_base64_encode((unsigned char *)test_strings[i].ascii,
 	    strlen(test_strings[i].ascii), (char *)buf, sizeof(buf));
 	if (len == (size_t)-1) {
-	    fprintf(stderr, "check_base64: failed to encode %s\n",
+	    fprintf(stderr, "base64_test: failed to encode %s\n",
 		test_strings[i].ascii);
 	    errors++;
 	} else {
 	    if (strcmp(test_strings[i].encoded, (char *)buf) != 0) {
-		fprintf(stderr, "check_base64: expected %s, got %s\n",
+		fprintf(stderr, "base64_test: expected %s, got %s\n",
 		    test_strings[i].encoded, buf);
 		errors++;
 	    }

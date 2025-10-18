@@ -18,17 +18,20 @@
 
 #include <config.h>
 
-#include <sudoers.h>
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_util.h>
 
 static const unsigned char base64enc_tab[64] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 size_t
-base64_encode(const unsigned char * restrict in, size_t in_len, char * restrict out, size_t out_len)
+sudo_base64_encode_v1(const unsigned char * restrict in, size_t in_len,
+    char * restrict out, size_t out_len)
 {
     size_t ii, io;
     unsigned int rem, v;
-    debug_decl(base64_encode, SUDOERS_DEBUG_MATCH);
+    debug_decl(base64_encode, SUDO_DEBUG_UTIL);
 
     for (io = 0, ii = 0, v = 0, rem = 0; ii < in_len; ii++) {
 	unsigned char ch = in[ii];

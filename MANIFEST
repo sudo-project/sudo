@@ -236,6 +236,8 @@ lib/util/aix.c
 lib/util/arc4random.c
 lib/util/arc4random_buf.c
 lib/util/arc4random_uniform.c
+lib/util/b64_decode.c
+lib/util/b64_encode.c
 lib/util/basename.c
 lib/util/cfmakeraw.c
 lib/util/chacha_private.h
@@ -297,6 +299,7 @@ lib/util/rcstr.c
 lib/util/reallocarray.c
 lib/util/realpath.c
 lib/util/regex.c
+lib/util/regress/base64/base64_test.c
 lib/util/regress/closefrom/closefrom_test.c
 lib/util/regress/corpus/seed/sudo_conf/sudo.conf.1
 lib/util/regress/corpus/seed/sudo_conf/sudo.conf.2
@@ -616,8 +619,6 @@ plugins/sudoers/auth/securid5.c
 plugins/sudoers/auth/sia.c
 plugins/sudoers/auth/sudo_auth.c
 plugins/sudoers/auth/sudo_auth.h
-plugins/sudoers/b64_decode.c
-plugins/sudoers/b64_encode.c
 plugins/sudoers/boottime.c
 plugins/sudoers/bsm_audit.c
 plugins/sudoers/bsm_audit.h
@@ -890,7 +891,6 @@ plugins/sudoers/regress/harness.in
 plugins/sudoers/regress/iolog_plugin/check_iolog_plugin.c
 plugins/sudoers/regress/parser/check_addr.c
 plugins/sudoers/regress/parser/check_addr.in
-plugins/sudoers/regress/parser/check_base64.c
 plugins/sudoers/regress/parser/check_digest.c
 plugins/sudoers/regress/parser/check_digest.out.ok
 plugins/sudoers/regress/parser/check_fill.c

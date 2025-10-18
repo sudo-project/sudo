@@ -18,7 +18,9 @@
 
 #include <config.h>
 
-#include <sudoers.h>
+#include <sudo_compat.h>
+#include <sudo_debug.h>
+#include <sudo_util.h>
 
 /*
  * Derived from code with the following declaration:
@@ -49,12 +51,13 @@ static const unsigned char base64dec_tab[256]= {
  * result in dst.
  */
 size_t
-base64_decode(const char * restrict in, unsigned char * restrict out, size_t out_size)
+sudo_base64_decode_v1(const char * restrict in, unsigned char * restrict out,
+    size_t out_size)
 {
     unsigned char *out_end = out + out_size;
     const unsigned char *out0 = out;
     unsigned int rem, v;
-    debug_decl(base64_decode, SUDOERS_DEBUG_MATCH);
+    debug_decl(sudo_base64_decode, SUDO_DEBUG_UTIL);
 
     for (v = 0, rem = 0; *in != '\0' && *in != '='; in++) {
 	unsigned char ch = base64dec_tab[(unsigned char)*in];
