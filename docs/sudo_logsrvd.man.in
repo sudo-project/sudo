@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD" "@mansectsu@" "September 21, 2025" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
+.TH "SUDO_LOGSRVD" "@mansectsu@" "October 17, 2025" "Sudo @PACKAGE_VERSION@" "System Manager's Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -65,10 +65,6 @@ sudo_logsrvd.conf(@mansectform@)
 file or the file specified via the
 \fB\-f\fR
 option.
-.PP
-\fBsudo_logsrvd\fR
-rereads its configuration file when it receives SIGHUP and writes server
-state to the debug file (if one is configured) when it receives SIGUSR1.
 .PP
 The options are as follows:
 .TP 8n
@@ -125,6 +121,19 @@ file.
 For more information on configuring
 sudo.conf(@mansectform@),
 refer to its manual.
+.SH "SIGNALS"
+\fBsudo_logsrvd\fR
+responds to the following signals:
+.TP 6n
+HUP
+Reload the configuration file.
+The event log file is closed and re-opened if logging to a file
+and not syslog.
+Active log connections are otherwise unaffected.
+.TP 6n
+USR1
+Dump server state to the debug file (if one is configured).
+This includes a list of active client connections.
 .SH "FILES"
 .TP 26n
 \fI@sysconfdir@/sudo.conf\fR

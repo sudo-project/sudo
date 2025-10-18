@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 21, 2025
+.Dd October 17, 2025
 .Dt SUDO_LOGSRVD @mansectsu@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -63,10 +63,6 @@ may be specified in the
 file or the file specified via the
 .Fl f
 option.
-.Pp
-.Nm
-rereads its configuration file when it receives SIGHUP and writes server
-state to the debug file (if one is configured) when it receives SIGUSR1.
 .Pp
 The options are as follows:
 .Bl -tag -width Ds
@@ -120,6 +116,19 @@ file.
 For more information on configuring
 .Xr sudo.conf @mansectform@ ,
 refer to its manual.
+.Sh SIGNALS
+.Nm
+responds to the following signals:
+.Bl -tag -width USR1
+.It HUP
+Reload the configuration file.
+The event log file is closed and re-opened if logging to a file
+and not syslog.
+Active log connections are otherwise unaffected.
+.It USR1
+Dump server state to the debug file (if one is configured).
+This includes a list of active client connections.
+.El
 .Sh FILES
 .Bl -tag -width 24n
 .It Pa @sysconfdir@/sudo.conf
