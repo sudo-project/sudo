@@ -375,5 +375,7 @@ sudo_dso_public void sudo_uuid_create_v1(unsigned char uuid_out[restrict static 
 #define sudo_uuid_create(_a) sudo_uuid_create_v1((_a))
 sudo_dso_public char *sudo_uuid_to_string_v1(const unsigned char uuid[restrict static 16], char * restrict dst, size_t dstsiz);
 #define sudo_uuid_to_string(_a, _b, _c) sudo_uuid_to_string_v1((_a), (_b), (_c))
+sudo_dso_public int sudo_uuid_from_string_v1(const char *str, unsigned char uuid[restrict static 16]);
+#define sudo_uuid_from_string(_a, _b) sudo_uuid_from_string_v1((_a), (_b))
 
 #endif /* SUDO_UTIL_H */

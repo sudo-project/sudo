@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2021, 2025 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -75,6 +75,8 @@ main(int argc, char *argv[])
 
     /* Do 16 passes. */
     for (ntests = 0; ntests < 16; ntests++) {
+	char uuid_buf[16], uuid_str[37];
+
 	sudo_uuid_create(uuid.u8);
 
 	/* Variant: two most significant bits (6 and 7) are 0 and 1. */
@@ -92,6 +94,24 @@ main(int argc, char *argv[])
 	/* Version: bits 12-15 are 0010. */
 	if ((uuid.id.time_hi_and_version & 0xf000) != 0x4000) {
 	    sudo_warnx("bad version: 0x%x", uuid.id.time_hi_and_version & 0xf000);
+	    errors++;
+	    continue;
+	}
+
+	/* Test round-tripping uuid -> string -> uuid */
+	if (sudo_uuid_to_string(uuid.u8, uuid_str, sizeof(uuid_str)) == NULL) {
+	    sudo_warnx("unable to convert uuid to string form");
+	    errors++;
+	    continue;
+	}
+	if (sudo_uuid_from_string(uuid_str, uuid_buf) != 0) {
+	    sudo_warnx("unable to parse uuid string \"%s\" to binary",
+		uuid_str);
+	    errors++;
+	    continue;
+	}
+	if (memcmp(uuid.u8, uuid_buf, sizeof(uuid_buf)) != 0) {
+	    sudo_warnx("binary uuid mismatch");
 	    errors++;
 	    continue;
 	}

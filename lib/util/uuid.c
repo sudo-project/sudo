@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2020-2021, 2025 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -80,10 +80,7 @@ sudo_uuid_to_string_v1(const unsigned char uuid[restrict static 16], char * rest
 	*cp++ = hex[uuid[i] & 0x0f];
 
 	switch (i) {
-	case 4:
-	case 6:
-	case 8:
-	case 10:
+	case 3: case 5: case 7: case 9:
 	    *cp++ = '-';
 	    break;
 	}
@@ -91,4 +88,37 @@ sudo_uuid_to_string_v1(const unsigned char uuid[restrict static 16], char * rest
     *cp = '\0';
 
     return dst;
+}
+
+/*
+ * Parse 36-byte uuid string into a 16-byte binary uuid.
+ * Returns 0 on success, -1 if str is not a valid uuid.
+ */
+int
+sudo_uuid_from_string_v1(const char *str, unsigned char uuid[static 16])
+{
+    unsigned int i = 0, j = 0;
+    int ch;
+
+    if (strlen(str) != 36)
+	return -1;
+
+    /* Parse a uuid in the format 123e4567-e89b-12d3-a456-426655440000 */
+    while (i < 36) {
+	switch (i) {
+	case 8: case 13: case 18: case 23:
+	    if (str[i] != '-')
+		return -1;
+	    i++;
+	    FALLTHROUGH;
+	default:
+	    ch = sudo_hexchar(str + i);
+	    if (ch == -1)
+		return -1;
+	    uuid[j++] = ch;
+	    i += 2;
+	}
+    }
+
+    return 0;
 }
