@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2025 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -224,9 +224,13 @@ store_accept_local(const AcceptMessage *msg, const uint8_t *buf, size_t len,
     }
 
     if (new_session && closure->log_io) {
-	/* Send log ID to client for restarting connections. */
-	if (!fmt_log_id_message(closure->uuid, closure->evlog->iolog_path,
-		closure))
+	/*
+	 * Send log ID to client for restarting connections.
+	 * Note that iolog_base has no trailing '/'.
+	 */
+	const char *relative_path = closure->evlog->iolog_path +
+	    strlen(logsrvd_conf_iolog_base()) + 1;
+	if (!fmt_log_id_message(closure->uuid, relative_path, closure))
 	    goto done;
 	if (sudo_ev_add(closure->evbase, closure->write_ev,
 		logsrvd_conf_server_timeout(), false) == -1) {
@@ -456,7 +460,7 @@ static char *
 decode_log_id(const char *b64_log_id, unsigned char uuid[restrict static 16])
 {
     unsigned char log_id_buf[PATH_MAX + 16];
-    char *path;
+    char *path, *ret;
     size_t len;
     debug_decl(decode_log_id, SUDO_DEBUG_UTIL);
 
@@ -480,11 +484,12 @@ decode_log_id(const char *b64_log_id, unsigned char uuid[restrict static 16])
 	debug_return_str(NULL);
     }
 
-    /* The caller is responsible for freeing path */
-    path = strdup(path);
-    if (path == NULL)
+    /* The log_id path is relative to iolog_base. */
+    if (asprintf(&ret, "%s/%s", logsrvd_conf_iolog_base(), path) == -1) {
+	ret = NULL;
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    debug_return_str(path);
+    }
+    debug_return_str(ret);
 }
 
 /*

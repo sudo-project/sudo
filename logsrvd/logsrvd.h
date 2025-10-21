@@ -209,6 +209,7 @@ struct connection_closure *connection_closure_alloc(int fd, bool tls, bool relay
 
 /* logsrvd_conf.c */
 bool logsrvd_conf_read(const char *path);
+const char *logsrvd_conf_iolog_base(void);
 const char *logsrvd_conf_iolog_dir(void);
 const char *logsrvd_conf_iolog_file(void);
 bool logsrvd_conf_iolog_log_passwords(void);

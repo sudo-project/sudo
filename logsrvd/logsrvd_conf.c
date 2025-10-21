@@ -153,6 +153,7 @@ static struct logsrvd_config {
 	gid_t gid;
 	mode_t mode;
 	unsigned int maxseq;
+	char *iolog_base;
 	char *iolog_dir;
 	char *iolog_file;
 	void *passprompt_regex;
@@ -203,6 +204,12 @@ mode_t
 logsrvd_conf_iolog_mode(void)
 {
     return logsrvd_config->iolog.mode;
+}
+
+const char *
+logsrvd_conf_iolog_base(void)
+{
+    return logsrvd_config->iolog.iolog_base;
 }
 
 const char *
@@ -345,14 +352,36 @@ logsrvd_conf_relay_tls_check_peer(void)
 static bool
 cb_iolog_dir(struct logsrvd_config *config, const char *path, size_t offset)
 {
+    size_t base_len = 0;
     debug_decl(cb_iolog_dir, SUDO_DEBUG_UTIL);
 
     free(config->iolog.iolog_dir);
-    if ((config->iolog.iolog_dir = strdup(path)) == NULL) {
-	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	debug_return_bool(false);
+    if ((config->iolog.iolog_dir = strdup(path)) == NULL)
+	goto oom;
+
+    /*
+     * iolog_base is the portion of iolog_dir that contains no escapes.
+     * This is used to create a relative path for the log id.
+     */
+    for (;;) {
+	base_len += strcspn(path + base_len, "%");
+	if (path[base_len] == '\0')
+	    break;
+	if (path[base_len + 1] == '{') {
+	    /* We want the base to end on a directory boundary. */
+	    while (base_len > 0 && path[base_len] != '/')
+		base_len--;
+	    break;
+	}
+	base_len++;
     }
+    if ((config->iolog.iolog_base = strndup(path, base_len)) == NULL)
+	goto oom;
+
     debug_return_bool(true);
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    debug_return_bool(false);
 }
 
 static bool
