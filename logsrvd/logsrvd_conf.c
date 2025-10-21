@@ -363,6 +363,7 @@ cb_iolog_dir(struct logsrvd_config *config, const char *path, size_t offset)
      * iolog_base is the portion of iolog_dir that contains no escapes.
      * This is used to create a relative path for the log id.
      */
+    free(config->iolog.iolog_base);
     for (;;) {
 	base_len += strcspn(path + base_len, "%");
 	if (path[base_len] == '\0')
@@ -1591,6 +1592,7 @@ logsrvd_conf_free(struct logsrvd_config *config)
 #endif
 
     /* struct logsrvd_config_iolog */
+    free(config->iolog.iolog_base);
     free(config->iolog.iolog_dir);
     free(config->iolog.iolog_file);
     iolog_pwfilt_free(config->iolog.passprompt_regex);
