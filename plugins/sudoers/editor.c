@@ -73,7 +73,7 @@ wordsplit(const char *str, const char *endstr, const char **last)
 
     /* Scan str until we encounter white space. */
     for (cp = str; cp < endstr; cp++) {
-	if (cp[0] == '\\' && cp[1] != '\0') {
+	if (*cp == '\\' && cp + 1 < endstr) {
 	    /* quoted char, do not interpret */
 	    cp++;
 	    continue;
