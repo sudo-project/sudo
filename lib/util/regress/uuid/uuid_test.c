@@ -75,7 +75,8 @@ main(int argc, char *argv[])
 
     /* Do 16 passes. */
     for (ntests = 0; ntests < 16; ntests++) {
-	char uuid_buf[16], uuid_str[37];
+	unsigned char uuid_buf[16];
+	char uuid_str[37];
 
 	sudo_uuid_create(uuid.u8);
 
