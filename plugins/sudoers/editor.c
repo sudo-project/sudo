@@ -98,7 +98,7 @@ copy_arg(const char *src, size_t len)
     if ((copy = malloc(len + 1)) != NULL) {
 	sudoers_gc_add(GC_PTR, copy);
 	for (dst = copy; src < src_end; ) {
-	    if (src[0] == '\\' && src[1] != '\0')
+	    if (*src == '\\' && src + 1 < src_end)
 		src++;
 	    *dst++ = *src++;
 	}
