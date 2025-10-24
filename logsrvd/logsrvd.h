@@ -46,9 +46,6 @@
 /* Shutdown timeout (in seconds) in case client connections time out. */
 #define SHUTDOWN_TIMEO	10
 
-/* Template for mkstemp(3) when creating temporary files. */
-#define RELAY_TEMPLATE	"relay.XXXXXXXX"
-
 /*
  * Connection status.
  * In the RUNNING state we expect I/O log buffers.

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2021-2025 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -202,9 +202,9 @@ logsrvd_queue_insert(struct connection_closure *closure)
 bool
 logsrvd_queue_scan(struct sudo_event_base *evbase)
 {
+    const char uuid_template[] = "123e4567-e89b-12d3-a456-426655440000";
     char path[PATH_MAX];
     struct dirent *dent;
-    size_t prefix_len;
     int dirlen;
     DIR *dirp;
     debug_decl(logsrvd_queue_scan, SUDO_DEBUG_UTIL);
@@ -214,13 +214,13 @@ logsrvd_queue_scan(struct sudo_event_base *evbase)
 	debug_return_bool(true);
 
     dirlen = snprintf(path, sizeof(path), "%s/outgoing/%s",
-	logsrvd_conf_relay_dir(), RELAY_TEMPLATE);
+	logsrvd_conf_relay_dir(), uuid_template);
     if (dirlen >= ssizeof(path)) {
 	errno = ENAMETOOLONG;
-	sudo_warn("%s/outgoing/%s", logsrvd_conf_relay_dir(), RELAY_TEMPLATE);
+	sudo_warn("%s/outgoing/%s", logsrvd_conf_relay_dir(), uuid_template);
 	debug_return_bool(false);
     }
-    dirlen -= (int)sizeof(RELAY_TEMPLATE) - 1;
+    dirlen -= (int)sizeof(uuid_template) - 1;
     path[dirlen] = '\0';
 
     dirp = opendir(path);
@@ -228,14 +228,12 @@ logsrvd_queue_scan(struct sudo_event_base *evbase)
 	sudo_warn("opendir %s", path);
 	debug_return_bool(false);
     }
-    prefix_len = strcspn(RELAY_TEMPLATE, "X");
     while ((dent = readdir(dirp)) != NULL) {
+	unsigned char uuid[16];
 	struct outgoing_journal *oj;
 
-	/* Skip anything that is not a relay temp file. */
-	if (NAMLEN(dent) != sizeof(RELAY_TEMPLATE) - 1)
-	    continue;
-	if (strncmp(dent->d_name, RELAY_TEMPLATE, prefix_len) != 0)
+	/* Skip anything that is not a uuid. */
+	if (sudo_uuid_from_string(dent->d_name, uuid) != 0)
 	    continue;
 
 	/* Add to queue. */
