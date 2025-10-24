@@ -1734,7 +1734,6 @@ main(int argc, char *argv[])
     bool accept_only = false;
     char *reject_reason = NULL;
     const char *iolog_id = NULL;
-    const char *open_mode = "r";
     const char *errstr;
     int ch, sock, iolog_dir_fd, finished;
     debug_decl_vars(main, SUDO_DEBUG_MAIN);
@@ -1782,7 +1781,6 @@ main(int argc, char *argv[])
 	case 'r':
 	    if (!parse_timespec(&restart, optarg))
 		goto bad;
-	    open_mode = "r+";
 	    break;
 	case 's':
 	    if (!parse_timespec(&stop_after, optarg))
@@ -1879,7 +1877,7 @@ main(int argc, char *argv[])
             goto bad;
 
         /* Open the I/O log files and seek to restart point if there is one. */
-        if (!iolog_open_all(iolog_dir_fd, iolog_dir, closure->iolog_files, open_mode))
+        if (!iolog_open_all(iolog_dir_fd, iolog_dir, closure->iolog_files, "r"))
             goto bad;
         if (sudo_timespecisset(&closure->restart)) {
             if (!iolog_seekto(iolog_dir_fd, iolog_dir, closure->iolog_files,
