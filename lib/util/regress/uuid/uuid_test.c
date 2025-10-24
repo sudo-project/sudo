@@ -75,6 +75,7 @@ main(int argc, char *argv[])
 
     /* Do 16 passes. */
     for (ntests = 0; ntests < 16; ntests++) {
+	uint16_t time_hi_and_version;
 	unsigned char uuid_buf[16];
 	char uuid_str[37];
 
@@ -93,8 +94,9 @@ main(int argc, char *argv[])
 	}
 
 	/* Version: bits 12-15 are 0010. */
-	if ((uuid.id.time_hi_and_version & 0xf000) != 0x4000) {
-	    sudo_warnx("bad version: 0x%x", uuid.id.time_hi_and_version & 0xf000);
+	time_hi_and_version = ntohs(uuid.id.time_hi_and_version);
+	if ((time_hi_and_version & 0xf000) != 0x4000) {
+	    sudo_warnx("bad version: 0x%x", (unsigned int)time_hi_and_version);
 	    errors++;
 	    continue;
 	}

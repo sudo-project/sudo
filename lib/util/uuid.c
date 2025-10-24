@@ -59,6 +59,11 @@ sudo_uuid_create_v1(unsigned char uuid_out[restrict static 16])
     uuid.clock_seq_hi_and_reserved &= 0x3f;
     uuid.clock_seq_hi_and_reserved |= 0x80;
 
+    /* Convert 16 and 32-bit fields to network byte order. */
+    uuid.time_low = ntohl(uuid.time_low);
+    uuid.time_mid = ntohs(uuid.time_mid);
+    uuid.time_hi_and_version = ntohs(uuid.time_hi_and_version);
+
     memcpy(uuid_out, &uuid, 16);
 }
 
