@@ -1034,8 +1034,13 @@ relay_client_msg_cb(int fd, int what, void *v)
 	buf->len = 0;
 	TAILQ_REMOVE(&relay_closure->write_bufs, buf, entries);
 	TAILQ_INSERT_TAIL(&closure->free_bufs, buf, entries);
-	if (TAILQ_EMPTY(&relay_closure->write_bufs))
+	if (TAILQ_EMPTY(&relay_closure->write_bufs)) {
+	    /* Write queue empty, check state. */
 	    sudo_ev_del(closure->evbase, relay_closure->write_ev);
+	    if (closure->error || closure->state == FINISHED ||
+		    closure->state == SHUTDOWN)
+		goto close_connection;
+	}
     }
     debug_return;
 

@@ -1198,7 +1198,7 @@ client_msg_cb(int fd, int what, void *v)
     buf->len -= buf->off;
     buf->off = 0;
 
-    if (closure->state == FINISHED)
+    if (closure->state == FINISHED && closure->relay_closure == NULL)
 	goto close_connection;
 
     debug_return;
