@@ -242,7 +242,6 @@ extern struct client_message_switch cms_journal;
 
 /* logsrvd_local.c */
 extern struct client_message_switch cms_local;
-bool set_random_drop(const char *dropstr);
 bool store_accept_local(const AcceptMessage *msg, const uint8_t *buf, size_t len, struct connection_closure *closure);
 bool store_reject_local(const RejectMessage *msg, const uint8_t *buf, size_t len, struct connection_closure *closure);
 bool store_exit_local(const ExitMessage *msg, const uint8_t *buf, size_t len, struct connection_closure *closure);

@@ -92,6 +92,8 @@ static void server_commit_cb(int fd, int what, void *v);
 static void tls_handshake_cb(int fd, int what, void *v);
 #endif
 
+static double random_drop;
+
 /*
  * Free a struct connection_closure container and its contents.
  */
@@ -717,6 +719,17 @@ handle_iobuf(int iofd, const IoBuffer *iobuf, const uint8_t *buf, size_t len,
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received IoBuffer from %s",
 	source, __func__);
 
+    /* Random drop is a debugging tool to test client restart. */
+    if (random_drop > 0.0) {
+	double randval = arc4random() / (double)UINT32_MAX;
+	if (randval < random_drop) {
+	    closure->errstr = _("randomly dropping connection");
+	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+		"randomly dropping connection (%f < %f)", randval, random_drop);
+	    debug_return_bool(false);
+	}
+    }
+
     if (!closure->cms->iobuf(iofd, iobuf, buf, len, closure))
 	debug_return_bool(false);
     if (!enable_commit(closure))
@@ -1186,8 +1199,11 @@ client_msg_cb(int fd, int what, void *v)
 	    "%s: parsing ClientMessage, size %u", __func__, msg_len);
 	buf->off += sizeof(msg_len);
 	if (!handle_client_message(buf->data + buf->off, msg_len, closure)) {
-	    sudo_warnx(U_("%s: %s"), source, U_("invalid ClientMessage"));
-	    closure->errstr = _("invalid ClientMessage");
+	    /* Use specific error string if one is set. */
+	    if (closure->errstr == NULL) {
+		sudo_warnx(U_("%s: %s"), source, U_("invalid ClientMessage"));
+		closure->errstr = _("invalid ClientMessage");
+	    }
 	    goto send_error;
 	}
 	buf->off += msg_len;
@@ -2054,6 +2070,7 @@ main(int argc, char *argv[])
 {
     struct sudo_event_base *evbase;
     bool nofork = false;
+    char *ep;
     int ch;
     debug_decl_vars(main, SUDO_DEBUG_MAIN);
 
@@ -2097,8 +2114,11 @@ main(int argc, char *argv[])
 	    break;
 	case 'R':
 	    /* random connection drop probability as a percentage (debug) */
-	    if (!set_random_drop(optarg))
-                sudo_fatalx(U_("invalid random drop value: %s"), optarg);
+	    errno = 0;
+	    random_drop = strtod(optarg, &ep);
+	    if (*ep != '\0' || errno != 0)
+		sudo_fatalx(U_("invalid random drop value: %s"), optarg);
+	    random_drop /= 100.0;	/* convert from percentage */
 	    break;
 	case 'V':
 	    (void)printf(_("%s version %s\n"), getprogname(),

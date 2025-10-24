@@ -64,23 +64,6 @@ struct logsrvd_info_closure {
     size_t infolen;
 };
 
-static double random_drop;
-
-bool
-set_random_drop(const char *dropstr)
-{
-    char *ep;
-    debug_decl(set_random_drop, SUDO_DEBUG_UTIL);
-
-    errno = 0;
-    random_drop = strtod(dropstr, &ep);
-    if (*ep != '\0' || errno != 0)
-	debug_return_bool(false);
-    random_drop /= 100.0;	/* convert from percentage */
-
-    debug_return_bool(true);
-}
-
 static bool
 logsrvd_json_log_cb(struct json_container *jsonc, void *v)
 {
@@ -702,17 +685,6 @@ store_iobuf_local(int iofd, const IoBuffer *iobuf, const uint8_t *buf,
     }
 
     update_elapsed_time(iobuf->delay, &closure->elapsed_time);
-
-    /* Random drop is a debugging tool to test client restart. */
-    if (random_drop > 0.0) {
-	double randval = arc4random() / (double)UINT32_MAX;
-	if (randval < random_drop) {
-	    closure->errstr = _("randomly dropping connection");
-	    sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
-		"randomly dropping connection (%f < %f)", randval, random_drop);
-	    goto bad;
-	}
-    }
 
     free(newbuf);
     debug_return_bool(true);
