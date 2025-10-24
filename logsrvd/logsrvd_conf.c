@@ -1790,25 +1790,34 @@ logsrvd_conf_apply(struct logsrvd_config *config)
 	break;
     }
 
-    if (TLS_CONFIGURED(config->relay)) {
-	TAILQ_FOREACH(addr, &config->relay.relays.addrs, entries) {
-	    if (!addr->tls)
-		continue;
-	    /* Create a TLS context for the relay. */
-	    config->relay.ssl_ctx = init_tls_context(
-		TLS_RELAY_STR(config, tls_cacert_path),
-		TLS_RELAY_STR(config, tls_cert_path),
-		TLS_RELAY_STR(config, tls_key_path),
-		TLS_RELAY_STR(config, tls_dhparams_path),
-		TLS_RELAY_STR(config, tls_ciphers_v12),
-		TLS_RELAY_STR(config, tls_ciphers_v13),
-		TLS_RELAY_INT(config, tls_verify));
-	    if (config->relay.ssl_ctx == NULL) {
-		sudo_warnx("%s", U_("unable to initialize relay TLS context"));
-		debug_return_bool(false);
+    TAILQ_FOREACH(addr, &config->relay.relays.addrs, entries) {
+	if (!addr->tls)
+	    continue;
+
+	/* Relay requires TLS so it must be configured (in relay or server). */
+	if (!TLS_CONFIGURED(config->relay)) {
+	    if (config->server.ssl_ctx != NULL) {
+		/* We will use the server TLS settings. */
+		break;
 	    }
-	    break;
+	    sudo_warnx("%s", U_("relay uses TLS but TLS not configured"));
+	    debug_return_bool(false);
 	}
+
+	/* Create a TLS context for the relay. */
+	config->relay.ssl_ctx = init_tls_context(
+	    TLS_RELAY_STR(config, tls_cacert_path),
+	    TLS_RELAY_STR(config, tls_cert_path),
+	    TLS_RELAY_STR(config, tls_key_path),
+	    TLS_RELAY_STR(config, tls_dhparams_path),
+	    TLS_RELAY_STR(config, tls_ciphers_v12),
+	    TLS_RELAY_STR(config, tls_ciphers_v13),
+	    TLS_RELAY_INT(config, tls_verify));
+	if (config->relay.ssl_ctx == NULL) {
+	    sudo_warnx("%s", U_("unable to initialize relay TLS context"));
+	    debug_return_bool(false);
+	}
+	break;
     }
 #endif /* HAVE_OPENSSL */
 
