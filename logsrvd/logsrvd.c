@@ -1497,8 +1497,10 @@ new_connection(int sock, bool tls, const union sockaddr_union *sa_un,
     struct connection_closure *closure;
     debug_decl(new_connection, SUDO_DEBUG_UTIL);
 
-    if ((closure = connection_closure_alloc(sock, tls, false, evbase)) == NULL)
+    if ((closure = connection_closure_alloc(sock, tls, false, evbase)) == NULL) {
+	close(sock);
 	goto bad;
+    }
 
     /* store the peer's IP address in the closure object */
     if (sa_un->sa.sa_family == AF_INET) {
