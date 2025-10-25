@@ -41,6 +41,8 @@ static unsigned char const gzip_magic[2] = {0x1f, 0x8b};
  * Open the specified I/O log file and store in iol.
  * Stores the open file handle which has the close-on-exec flag set.
  * Also locks the file if iofd is IOFD_TIMING and mode is writable.
+ * The "r+" and "w+" modes are not supported for compressed logs
+ * so the "+" will be stripped before calling gzdopen().
  */
 bool
 iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode)
@@ -102,6 +104,12 @@ iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode)
 			iol->compressed = true;
 		}
 	    }
+	    /*
+	     * Compressed logs don't support random access, gzdopen() will
+	     * fail for mode "r+".  Caller must check the compressed flag.
+	     */
+	    if (iol->compressed)
+		mode = *mode == 'r' ? "r" : "w";
 	    if (fcntl(fd, F_SETFD, FD_CLOEXEC) != -1) {
 #ifdef HAVE_ZLIB_H
 		if (iol->compressed)
