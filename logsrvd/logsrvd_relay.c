@@ -268,6 +268,7 @@ static bool
 connect_relay_tls(struct connection_closure *closure)
 {
     struct tls_client_closure *tls_client = &closure->relay_closure->tls_client;
+    const struct timespec *timeout = logsrvd_conf_relay_connect_timeout();
     SSL_CTX *ssl_ctx = logsrvd_relay_tls_ctx();
     debug_decl(connect_relay_tls, SUDO_DEBUG_UTIL);
 
@@ -279,7 +280,11 @@ connect_relay_tls(struct connection_closure *closure)
     if (tls_client->tls_connect_ev == NULL)
         goto bad;
     tls_client->peer_name = &closure->relay_closure->relay_name;
-    tls_client->connect_timeout = *logsrvd_conf_relay_connect_timeout();
+    if (timeout != NULL) {
+	tls_client->connect_timeout = *timeout;
+    } else {
+	sudo_timespecclear(&tls_client->connect_timeout);
+    }
     tls_client->start_fn = tls_client_start_fn;
     if (!tls_ctx_client_setup(ssl_ctx, closure->relay_closure->sock, tls_client))
         goto bad;

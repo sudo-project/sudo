@@ -101,7 +101,7 @@ tls_connect_cb(int sock, int what, void *v)
 {
     struct tls_client_closure *tls_client = v;
     struct sudo_event_base *evbase = tls_client->evbase;
-    const struct timespec *timeout = &tls_client->connect_timeout;
+    const struct timespec *timeout = NULL;
     const char *errstr;
     int con_stat;
     debug_decl(tls_connect_cb, SUDO_DEBUG_UTIL);
@@ -110,6 +110,9 @@ tls_connect_cb(int sock, int what, void *v)
         sudo_warnx("%s", U_("TLS handshake timeout occurred"));
         goto bad;
     }
+
+    if (sudo_timespecisset(&tls_client->connect_timeout))
+	timeout = &tls_client->connect_timeout;
 
     con_stat = SSL_connect(tls_client->ssl);
 
