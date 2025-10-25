@@ -1686,7 +1686,7 @@ logsrvd_conf_alloc(void)
     config->iolog.uid = ROOT_UID;
     config->iolog.gid = ROOT_GID;
     config->iolog.gid_set = false;
-    config->iolog.log_passwords = true;
+    config->iolog.log_passwords = false;
 
     /* Event log defaults */
     config->eventlog.log_type = EVLOG_SYSLOG;

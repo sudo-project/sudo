@@ -26,7 +26,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "September 26, 2025" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "October 25, 2025" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -3025,7 +3025,7 @@ or
 \fIlog_ttyin\fR
 are also set.
 This flag is
-\fIon\fR
+\fIoff\fR
 by default.
 .sp
 This setting is only supported by version 1.9.10 or higher.
@@ -6865,9 +6865,11 @@ In most cases, logging the command output via
 or
 \fRLOG_OUTPUT\fR
 is all that is required.
-When logging input, consider disabling the
+When logging input, avoid enabling the
 \fIlog_passwords\fR
-flag.
+flag unless absolutely necessary and extend the
+\fIpassprompt_regex\fR
+setting with additional password prompt patterns used on your system.
 .PP
 Since each session's I/O logs are stored in a separate directory,
 traditional log rotation utilities cannot be used to limit the

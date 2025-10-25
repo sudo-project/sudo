@@ -64,7 +64,7 @@ static struct sudoers_io_operations {
 
 static struct log_details iolog_details;
 static bool warned = false;
-static bool log_passwords = true;
+static bool log_passwords = false;
 static int iolog_dir_fd = -1;
 static struct timespec last_time;
 static void *passprompt_regex_handle;

@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd September 26, 2025
+.Dd October 25, 2025
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -2860,7 +2860,7 @@ or
 .Em log_ttyin
 are also set.
 This flag is
-.Em on
+.Em off
 by default.
 .Pp
 This setting is only supported by version 1.9.10 or higher.
@@ -6369,9 +6369,11 @@ In most cases, logging the command output via
 or
 .Dv LOG_OUTPUT
 is all that is required.
-When logging input, consider disabling the
+When logging input, avoid enabling the
 .Em log_passwords
-flag.
+flag unless absolutely necessary and extend the
+.Em passprompt_regex
+setting with additional password prompt patterns used on your system.
 .Pp
 Since each session's I/O logs are stored in a separate directory,
 traditional log rotation utilities cannot be used to limit the
