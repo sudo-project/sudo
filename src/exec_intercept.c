@@ -222,7 +222,7 @@ prepare_listener(struct intercept_closure *closure)
 {
     struct sockaddr_in sin4;
     socklen_t sin4_len = sizeof(sin4);
-    int sock;
+    int sock = -1;
     debug_decl(prepare_listener, SUDO_DEBUG_EXEC);
 
     /* Generate a random token. */
