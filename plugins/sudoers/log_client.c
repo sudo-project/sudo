@@ -1048,7 +1048,7 @@ done:
  * Returns true on success, false on failure.
  */
 bool
-fmt_reject_message(struct client_closure *closure, const struct eventlog *evlog)
+fmt_reject_message(struct client_closure *closure, const struct eventlog *evlog,    const char *reason)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     RejectMessage reject_msg = REJECT_MESSAGE__INIT;
@@ -1072,7 +1072,7 @@ fmt_reject_message(struct client_closure *closure, const struct eventlog *evlog)
     reject_msg.submit_time = &ts;
 
     /* Reason for rejecting the request. */
-    reject_msg.reason = (char *)closure->reason;
+    reject_msg.reason = (char *)reason;
 
     reject_msg.info_msgs = fmt_info_messages(closure, evlog,
 	&reject_msg.n_info_msgs);
@@ -1100,7 +1100,8 @@ done:
  * Returns true on success, false on failure.
  */
 bool
-fmt_alert_message(struct client_closure *closure, const struct eventlog *evlog)
+fmt_alert_message(struct client_closure *closure, const struct eventlog *evlog,
+    const char *reason)
 {
     ClientMessage client_msg = CLIENT_MESSAGE__INIT;
     AlertMessage alert_msg = ALERT_MESSAGE__INIT;
@@ -1125,7 +1126,7 @@ fmt_alert_message(struct client_closure *closure, const struct eventlog *evlog)
     alert_msg.alert_time = &ts;
 
     /* Reason for the alert. */
-    alert_msg.reason = (char *)closure->reason;
+    alert_msg.reason = (char *)reason;
 
     alert_msg.info_msgs = fmt_info_messages(closure, evlog,
 	&alert_msg.n_info_msgs);
@@ -1179,11 +1180,13 @@ fmt_initial_message(struct client_closure *closure)
 	break;
     case SEND_REJECT:
 	/* Format and schedule RejectMessage. */
-	ret = fmt_reject_message(closure, closure->log_details->evlog);
+	ret = fmt_reject_message(closure, closure->log_details->evlog,
+	    closure->reason);
 	break;
     case SEND_ALERT:
 	/* Format and schedule AlertMessage. */
-	ret = fmt_alert_message(closure, closure->log_details->evlog);
+	ret = fmt_alert_message(closure, closure->log_details->evlog,
+	    closure->reason);
 	break;
     default:
 	sudo_warnx(U_("%s: unexpected state %d"), __func__, closure->state);

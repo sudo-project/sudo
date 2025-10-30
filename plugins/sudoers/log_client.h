@@ -109,8 +109,8 @@ struct client_closure {
 struct client_closure *log_server_open(struct log_details *details, struct timespec *start_time, bool log_io, enum client_state initial_state, const char *reason);
 bool log_server_close(struct client_closure *closure, int exit_status, int error);
 bool fmt_accept_message(struct client_closure *closure, const struct eventlog *evlog);
-bool fmt_reject_message(struct client_closure *closure, const struct eventlog *evlog);
-bool fmt_alert_message(struct client_closure *closure, const struct eventlog *evlog);
+bool fmt_reject_message(struct client_closure *closure, const struct eventlog *evlog, const char *reason);
+bool fmt_alert_message(struct client_closure *closure, const struct eventlog *evlog, const char *reason);
 bool fmt_io_buf(struct client_closure *closure, int type, const char *buf, unsigned int len, const struct timespec *delay);
 bool fmt_suspend(struct client_closure *closure, const char *signame, const struct timespec *delay);
 bool fmt_winsize(struct client_closure *closure, unsigned int lines, unsigned int cols, const struct timespec *delay);
