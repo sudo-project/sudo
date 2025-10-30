@@ -1630,6 +1630,7 @@ sudo_ldap_open(struct sudoers_context *ctx, struct sudo_nss *nss)
 #else
 	sudo_warnx("%s",
 	    U_("start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()"));
+	goto done;
 #endif /* !HAVE_LDAP_START_TLS_S && !HAVE_LDAP_START_TLS_S_NP */
     }
 
