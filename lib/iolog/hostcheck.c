@@ -256,7 +256,7 @@ matches_subject_alternative_name(const char *hostname, const char *ipaddr,
 HostnameValidationResult
 validate_hostname(X509 *cert, const char *hostname, const char *ipaddr)
 {
-    HostnameValidationResult ret = MatchFound;
+    HostnameValidationResult ret;
     debug_decl(validate_hostname, SUDO_DEBUG_UTIL);
 
     /* Check SAN first if exists */
