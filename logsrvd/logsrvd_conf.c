@@ -1825,7 +1825,28 @@ logsrvd_conf_apply(struct logsrvd_config *config)
     if (TAILQ_EMPTY(&config->relay.relays.addrs))
 	config->relay.store_first = false;
 
-    /* Open server log if specified. */
+    /* Open event log if specified. */
+    switch (config->eventlog.log_type) {
+    case EVLOG_SYSLOG:
+	openlog("sudo", 0, config->syslog.facility);
+	break;
+    case EVLOG_FILE:
+	config->logfile.stream = logsrvd_open_eventlog(config);
+	if (config->logfile.stream == NULL)
+	    debug_return_bool(false);
+	break;
+    case EVLOG_NONE:
+	break;
+    default:
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "cannot open unknown log type %d", config->eventlog.log_type);
+	break;
+    }
+
+    /*
+     * Open server log if specified.
+     * We do this last due to the sudo_warn_set_conversation() call.
+     */
     switch (config->server.log_type) {
     case SERVER_LOG_SYSLOG:
 	sudo_warn_set_conversation(logsrvd_conv_syslog);
@@ -1843,24 +1864,6 @@ logsrvd_conf_apply(struct logsrvd_config *config)
     case SERVER_LOG_STDERR:
 	/* Default is stderr. */
 	sudo_warn_set_conversation(NULL);
-	break;
-    default:
-	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	    "cannot open unknown log type %d", config->eventlog.log_type);
-	break;
-    }
-
-    /* Open event log if specified. */
-    switch (config->eventlog.log_type) {
-    case EVLOG_SYSLOG:
-	openlog("sudo", 0, config->syslog.facility);
-	break;
-    case EVLOG_FILE:
-	config->logfile.stream = logsrvd_open_eventlog(config);
-	if (config->logfile.stream == NULL)
-	    debug_return_bool(false);
-	break;
-    case EVLOG_NONE:
 	break;
     default:
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
