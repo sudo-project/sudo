@@ -591,7 +591,7 @@ handle_log_id(const char *id, struct connection_closure *closure)
     /*
      * We currently pass log_id to the client without modifying it.
      * TODO: append relay host to the log_id so we can restart the
-     *       session with the proper relay if more than one is conifgured.
+     *       session with the proper relay if more than one is configured.
      */
     msg.u.log_id = (char *)id;
     msg.type_case = SERVER_MESSAGE__TYPE_LOG_ID;
