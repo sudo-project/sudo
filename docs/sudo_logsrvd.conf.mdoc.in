@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 28, 2025
+.Dd November 7, 2025
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -104,16 +104,22 @@ service name as defined by the system service name database.
 If no port is specified, port 30343 will be used for plaintext
 connections and port 30344 will be used for TLS connections.
 .Pp
-The default value is:
-.Bd -literal -compact -offset indent
-listen_address = *:30343
-listen_address = *:30344(tls)
-.Ed
-which will listen on all configured network interfaces for both
-plaintext and TLS connections.
 Multiple
 .Em listen_address
-lines may be specified to listen on more than one port or interface.
+lines may be specified to listen on more than one port or address.
+.Pp
+The default value for
+.Em listen_address
+depends on whether or not TLS has been configured.
+If any of the TLS options have been enabled, the default is:
+.Bd -literal -offset indent
+listen_address = *:30344(tls)
+.Ed
+.Pp
+Otherwise, the plaintext listener is enabled by default:
+.Bd -literal -offset indent
+listen_address = *:30343
+.Ed
 .It server_log = string
 Where to log server warning and error messages.
 Supported values are

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2025 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1740,13 +1740,10 @@ logsrvd_conf_apply(struct logsrvd_config *config)
     }
 
     /* There can be multiple addresses so we can't set a default earlier. */
-    if (TAILQ_EMPTY(&config->server.addresses.addrs)) {
-	/* Enable plaintext listender. */
-	if (!cb_server_listen_address(config, "*:" DEFAULT_PORT, 0))
-	    debug_return_bool(false);
 #if defined(HAVE_OPENSSL)
-	/* If a certificate was specified, enable the TLS listener too. */
-	if (config->server.tls_cert_path != NULL) {
+    if (TAILQ_EMPTY(&config->server.addresses.addrs)) {
+	/* If no listener but TLS has been configured, enable TLS listener. */
+	if (TLS_CONFIGURED(config->server)) {
 	    if (!cb_server_listen_address(config, "*:" DEFAULT_PORT_TLS "(tls)", 0))
 		debug_return_bool(false);
 	}
@@ -1770,7 +1767,12 @@ logsrvd_conf_apply(struct logsrvd_config *config)
 	    }
 	    break;
 	}
+    }
 #endif /* HAVE_OPENSSL */
+    if (TAILQ_EMPTY(&config->server.addresses.addrs)) {
+	/* TLS not configured, enable plaintext listener. */
+	if (!cb_server_listen_address(config, "*:" DEFAULT_PORT, 0))
+	    debug_return_bool(false);
     }
 
 #if defined(HAVE_OPENSSL)

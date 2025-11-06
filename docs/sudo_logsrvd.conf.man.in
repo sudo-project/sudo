@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "September 28, 2025" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "November 7, 2025" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -56,7 +56,7 @@ section contains a copy of the default
 file.
 .PP
 The following configuration sections are recognized:
-.PP
+.sp
 .RS 1n
 .PD 0
 .TP 3n
@@ -113,19 +113,29 @@ service name as defined by the system service name database.
 If no port is specified, port 30343 will be used for plaintext
 connections and port 30344 will be used for TLS connections.
 .sp
-The default value is:
+Multiple
+\fIlisten_address\fR
+lines may be specified to listen on more than one port or address.
+.sp
+The default value for
+\fIlisten_address\fR
+depends on whether or not TLS has been configured.
+If any of the TLS options have been enabled, the default is:
 .nf
+.sp
 .RS 12n
-listen_address = *:30343
 listen_address = *:30344(tls)
 .RE
 .fi
 .RS 6n
-which will listen on all configured network interfaces for both
-plaintext and TLS connections.
-Multiple
-\fIlisten_address\fR
-lines may be specified to listen on more than one port or interface.
+.sp
+Otherwise, the plaintext listener is enabled by default:
+.nf
+.sp
+.RS 12n
+listen_address = *:30343
+.RE
+.fi
 .RE
 .TP 6n
 server_log = string
