@@ -966,6 +966,7 @@ rebuild_env(const struct sudoers_context *ctx)
 	if (ISSET(ctx->mode, MODE_LOGIN_SHELL)) {
 	    CHECK_SETENV2("SHELL", ctx->runas.pw->pw_shell,
 		ISSET(didvar, DID_SHELL), true);
+	    SET(didvar, DID_SHELL);
 #ifdef _AIX
 	    CHECK_SETENV2("LOGIN", ctx->runas.pw->pw_name,
 		ISSET(didvar, DID_LOGIN), true);
