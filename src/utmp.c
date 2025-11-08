@@ -95,7 +95,7 @@ static void
 utmp_setid(sudo_utmp_t *old, sudo_utmp_t *new)
 {
     const char *line = new->ut_line;
-    size_t linelen = strnlen(new->ut_line, sizeof(new->ut_line);
+    size_t linelen = strnlen(new->ut_line, sizeof(new->ut_line));
     debug_decl(utmp_setid, SUDO_DEBUG_UTMP);
 
     /* Skip over "tty" in the id if old entry did too. */
