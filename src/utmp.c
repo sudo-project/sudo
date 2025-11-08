@@ -95,27 +95,28 @@ static void
 utmp_setid(sudo_utmp_t *old, sudo_utmp_t *new)
 {
     const char *line = new->ut_line;
-    size_t idlen;
+    size_t linelen = strnlen(new->ut_line, sizeof(new->ut_line);
     debug_decl(utmp_setid, SUDO_DEBUG_UTMP);
 
     /* Skip over "tty" in the id if old entry did too. */
     if (old != NULL) {
 	/* cppcheck-suppress uninitdata */
 	if (strncmp(line, "tty", 3) == 0) {
-	    idlen = MIN(sizeof(old->ut_id), 3);
-	    if (strncmp(old->ut_id, "tty", idlen) != 0)
+	    const size_t idlen = MIN(sizeof(old->ut_id), 3);
+	    if (strncmp(old->ut_id, "tty", idlen) != 0) {
 		line += 3;
+		linelen -= 3;
+	    }
 	}
     }
     
     /* Store as much as will fit, skipping parts of the beginning as needed. */
     /* cppcheck-suppress uninitdata */
-    idlen = strlen(line);
-    if (idlen > sizeof(new->ut_id)) {
-	line += idlen - sizeof(new->ut_id);
-	idlen = sizeof(new->ut_id);
+    if (linelen > sizeof(new->ut_id)) {
+	line += linelen - sizeof(new->ut_id);
+	linelen = sizeof(new->ut_id);
     }
-    strncpy(new->ut_id, line, idlen);
+    strncpy(new->ut_id, line, linelen);
 
     debug_return;
 }
