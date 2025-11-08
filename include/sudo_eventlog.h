@@ -80,6 +80,7 @@ struct eventlog_config {
     int syslog_rejectpri;
     int syslog_alertpri;
     uid_t mailuid;
+    gid_t mailgid;
     bool omit_hostname;
     const char *logpath;
     const char *time_fmt;
@@ -151,7 +152,7 @@ void eventlog_set_syslog_rejectpri(int pri);
 void eventlog_set_syslog_alertpri(int pri);
 void eventlog_set_syslog_maxlen(size_t len);
 void eventlog_set_file_maxlen(size_t len);
-void eventlog_set_mailuid(uid_t uid);
+void eventlog_set_mailuser(uid_t uid, gid_t gid);
 void eventlog_set_omit_hostname(bool omit_hostname);
 void eventlog_set_logpath(const char *path);
 void eventlog_set_time_fmt(const char *fmt);

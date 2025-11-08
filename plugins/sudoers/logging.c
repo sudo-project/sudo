@@ -1152,7 +1152,7 @@ init_eventlog_config(void)
     eventlog_set_syslog_alertpri(def_syslog_badpri);
     eventlog_set_syslog_maxlen(def_syslog_maxlen);
     eventlog_set_file_maxlen(def_loglinelen);
-    eventlog_set_mailuid(ROOT_UID);
+    eventlog_set_mailuser(ROOT_UID, ROOT_GID);
     eventlog_set_omit_hostname(!def_log_host);
     eventlog_set_logpath(def_logfile);
     eventlog_set_time_fmt(def_log_year ? "%h %e %T %Y" : "%h %e %T");

@@ -634,7 +634,7 @@ sudoers_policy_deserialize_info(struct sudoers_context *ctx, void *v,
     }
 
 #ifdef NO_ROOT_MAILER
-    eventlog_set_mailuid(ctx->user.uid);
+    eventlog_set_mailuser(ctx->user.uid, ctx->user.gid);
 #endif
 
     /* Dump settings and user info (XXX - plugin args) */
