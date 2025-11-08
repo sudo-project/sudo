@@ -726,6 +726,7 @@ iolog_store_uuid(int dfd, struct connection_closure *closure)
 	    "uuid");
         goto bad;
     }
+    close(fd);
 
     debug_return_bool(true);
 bad:
