@@ -70,6 +70,7 @@ static struct eventlog_config evl_conf = {
     MAXSYSLOGLEN,		/* syslog_maxlen */
     0,				/* file_maxlen */
     ROOT_UID,			/* mailuid */
+    ROOT_GID,			/* mailgid */
     false,			/* omit_hostname */
     _PATH_SUDO_LOGFILE,		/* logpath */
     "%h %e %T",			/* time_fmt */
@@ -151,9 +152,10 @@ eventlog_set_file_maxlen(size_t len)
 }
 
 void
-eventlog_set_mailuid(uid_t uid)
+eventlog_set_mailuser(uid_t uid, gid_t gid)
 {
     evl_conf.mailuid = uid;
+    evl_conf.mailgid = gid;
 }
 
 void
