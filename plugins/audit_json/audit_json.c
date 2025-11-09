@@ -153,7 +153,8 @@ audit_json_open(unsigned int version, sudo_conv_t conversation,
     oldmask = umask(S_IRWXG|S_IRWXO);
     fd = open(state.logfile, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
     (void)umask(oldmask);
-    if (fd == -1 || (state.log_fp = fdopen(fd, "w")) == NULL) {
+    if (fd == -1 || fcntl(fd, F_SETFD, FD_CLOEXEC) == -1 ||
+	    (state.log_fp = fdopen(fd, "w")) == NULL) {
 	*errstr = U_("unable to open audit system");
 	if (fd != -1)
 	    close(fd);
