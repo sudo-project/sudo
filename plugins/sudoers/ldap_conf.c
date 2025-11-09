@@ -338,7 +338,7 @@ sudo_ldap_decode_secret(const char *secret)
 	    }
 	}
     }
-    debug_return_str((char *)result);
+    debug_return_str_masked((char *)result);
 }
 
 static void
@@ -637,7 +637,7 @@ sudo_ldap_read_config(const struct sudoers_context *ctx)
     DPRINTF1("binddn           %s",
 	ldap_conf.binddn ? ldap_conf.binddn : "(anonymous)");
     DPRINTF1("bindpw           %s",
-	ldap_conf.bindpw ? ldap_conf.bindpw : "(anonymous)");
+	ldap_conf.bindpw ? "********" : "(anonymous)");
     if (ldap_conf.bind_timelimit > 0) {
 	DPRINTF1("bind_timelimit   %d", ldap_conf.bind_timelimit);
     }
