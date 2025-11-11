@@ -103,6 +103,7 @@ bool iolog_parse_host_port(char *str, char **hostp, char **portp, bool *tlsp, co
 
 /* iolog_path.c */
 bool expand_iolog_path(const char *inpath, char *path, size_t pathlen, const struct iolog_path_escape *escapes, void *closure);
+size_t strlcpy_no_slash(char * restrict dst, const char * restrict src, size_t size);
 
 /* iolog_util.c */
 bool iolog_parse_timing(const char *line, struct timing_closure *timing);

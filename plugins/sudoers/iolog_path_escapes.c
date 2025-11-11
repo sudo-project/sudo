@@ -28,32 +28,6 @@
 #include <sudoers.h>
 #include <sudo_iolog.h>
 
-/*
- * Like strlcpy(3) but replaces '/' with '_'.
- */
-static size_t
-strlcpy_no_slash(char * restrict dst, const char * restrict src, size_t size)
-{
-    size_t len = 0;
-    char ch;
-    debug_decl(strlcpy_no_slash, SUDOERS_DEBUG_UTIL);
-
-    while ((ch = *src++) != '\0') {
-	if (size > 1) {
-	    /* Replace '/' with '_' */
-	    if (ch == '/')
-		ch = '_';
-	    *dst++ = ch;
-	    size--;
-	}
-	len++;
-    }
-    if (size > 0)
-	*dst = '\0';
-
-    debug_return_size_t(len);
-}
-
 static size_t
 fill_seq(char * restrict str, size_t strsize, void * restrict v)
 {
