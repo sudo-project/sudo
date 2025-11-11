@@ -190,16 +190,17 @@ free_iolog_details(void)
 {
     debug_decl(free_iolog_details, SUDOERS_DEBUG_PLUGIN);
 
-    if (iolog_details.evlog != NULL) {
-	/* We only make a shallow copy of argv and envp. */
-	free(iolog_details.evlog->runargv);
-	iolog_details.evlog->runargv = NULL;
-	free(iolog_details.evlog->runenv);
-	iolog_details.evlog->runenv = NULL;
-	free(iolog_details.evlog->submitenv);
-	iolog_details.evlog->submitenv = NULL;
-	eventlog_free(iolog_details.evlog);
-    }
+    /*
+     * We only make a shallow copy of argv and envp.
+     */
+    free(iolog_details.evlog.runargv);
+    iolog_details.evlog.runargv = NULL;
+    free(iolog_details.evlog.runenv);
+    iolog_details.evlog.runenv = NULL;
+    free(iolog_details.evlog.submitenv);
+    iolog_details.evlog.submitenv = NULL;
+    eventlog_free_contents(&iolog_details.evlog);
+
     str_list_free(iolog_details.log_servers);
 #if defined(HAVE_OPENSSL)
     free(iolog_details.ca_bundle);
@@ -290,7 +291,7 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
     char * const command_info[], char * const argv[], char * const user_env[])
 {
     const struct sudoers_context *ctx = sudoers_get_context();
-    struct eventlog *evlog;
+    struct eventlog *evlog = &details->evlog;
     const char *runas_uid_str = "0", *runas_euid_str = NULL;
     const char *runas_gid_str = "0", *runas_egid_str = NULL;
     const char *errstr;
@@ -300,10 +301,6 @@ iolog_deserialize_info(struct log_details *details, char * const user_info[],
     struct group *gr;
     id_t id;
     debug_decl(iolog_deserialize_info, SUDOERS_DEBUG_UTIL);
-
-    if ((evlog = calloc(1, sizeof(*evlog))) == NULL)
-	goto oom;
-    details->evlog = evlog;
 
     evlog->lines = 24;
     evlog->columns = 80;
@@ -683,7 +680,7 @@ static int
 sudoers_io_open_local(struct timespec *start_time)
 {
     const struct sudoers_context *ctx = sudoers_get_context();
-    struct eventlog *evlog = iolog_details.evlog;
+    struct eventlog *evlog = &iolog_details.evlog;
     int i;
     debug_decl(sudoers_io_open_local, SUDOERS_DEBUG_PLUGIN);
 
@@ -727,7 +724,7 @@ sudoers_io_open_local(struct timespec *start_time)
     }
 
     /* Write log file with user and command details. */
-    if (!iolog_write_info_file(iolog_dir_fd, iolog_details.evlog)) {
+    if (!iolog_write_info_file(iolog_dir_fd, &iolog_details.evlog)) {
 	log_warningx(ctx, SLOG_SEND_MAIL,
 	    N_("unable to write to I/O log file: %s"), strerror(errno));
 	warned = true;

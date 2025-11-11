@@ -143,6 +143,7 @@ bool eventlog_reject(const struct eventlog *evlog, int flags, const char *reason
 bool eventlog_store_json(struct json_container *jsonc, const struct eventlog *evlog);
 bool eventlog_store_sudo(int event_type, const struct eventlog *evlog, struct sudo_lbuf *lbuf);
 void eventlog_free(struct eventlog *evlog);
+void eventlog_free_contents(struct eventlog *evlog);
 
 /* eventlog_conf.c */
 void eventlog_set_type(int type);

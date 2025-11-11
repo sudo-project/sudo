@@ -1164,7 +1164,7 @@ fmt_initial_message(struct client_closure *closure)
     switch (closure->state) {
     case SEND_ACCEPT:
 	/* Format and schedule AcceptMessage. */
-	if ((ret = fmt_accept_message(closure, closure->log_details->evlog))) {
+	if ((ret = fmt_accept_message(closure, &closure->log_details->evlog))) {
 	    /*
 	     * Move read/write events back to main sudo event loop.
 	     * Server messages may occur at any time, so no timeout.
@@ -1180,12 +1180,12 @@ fmt_initial_message(struct client_closure *closure)
 	break;
     case SEND_REJECT:
 	/* Format and schedule RejectMessage. */
-	ret = fmt_reject_message(closure, closure->log_details->evlog,
+	ret = fmt_reject_message(closure, &closure->log_details->evlog,
 	    closure->reason);
 	break;
     case SEND_ALERT:
 	/* Format and schedule AlertMessage. */
-	ret = fmt_alert_message(closure, closure->log_details->evlog,
+	ret = fmt_alert_message(closure, &closure->log_details->evlog,
 	    closure->reason);
 	break;
     default:

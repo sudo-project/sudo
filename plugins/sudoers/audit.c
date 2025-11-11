@@ -241,6 +241,10 @@ audit_to_eventlog(const struct sudoers_context *ctx, struct eventlog *evlog,
 }
 
 #ifdef SUDOERS_LOG_CLIENT
+/*
+ * Persistent audit details and associated event log data used
+ * when opening a new connection to the log server.
+ */
 static struct log_details audit_details;
 
 static void

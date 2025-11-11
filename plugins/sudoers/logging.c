@@ -106,7 +106,7 @@ init_log_details(struct log_details *details, struct eventlog *evlog)
 	debug_return_bool(false);
     }
 
-    details->evlog = evlog;
+    details->evlog = *evlog;
     details->ignore_log_errors = def_ignore_logfile_errors;
     details->log_servers = log_servers;
     details->server_timeout.tv_sec = def_log_server_timeout;

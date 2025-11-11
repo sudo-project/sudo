@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2020, 2023, 2025 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -34,46 +34,59 @@
  * Free the strings in a struct eventlog.
  */
 void
-eventlog_free(struct eventlog *evlog)
+eventlog_free_contents(struct eventlog *evlog)
 {
     size_t i;
+    debug_decl(eventlog_free_contents, SUDO_DEBUG_UTIL);
+
+    free(evlog->iolog_path);
+    free(evlog->command);
+    free(evlog->cwd);
+    free(evlog->runchroot);
+    free(evlog->runcwd);
+    free(evlog->rungroup);
+    free(evlog->runuser);
+    free(evlog->peeraddr);
+    free(evlog->signal_name);
+    free(evlog->source);
+    if (evlog->submitenv != NULL) {
+	for (i = 0; evlog->submitenv[i] != NULL; i++)
+	    free(evlog->submitenv[i]);
+	free(evlog->submitenv);
+    }
+    free(evlog->submithost);
+    free(evlog->submituser);
+    free(evlog->submitgroup);
+    free(evlog->ttyname);
+    if (evlog->runargv != NULL) {
+	for (i = 0; evlog->runargv[i] != NULL; i++)
+	    free(evlog->runargv[i]);
+	free(evlog->runargv);
+    }
+    if (evlog->runenv != NULL) {
+	for (i = 0; evlog->runenv[i] != NULL; i++)
+	    free(evlog->runenv[i]);
+	free(evlog->runenv);
+    }
+    if (evlog->env_add != NULL) {
+	for (i = 0; evlog->env_add[i] != NULL; i++)
+	    free(evlog->env_add[i]);
+	free(evlog->env_add);
+    }
+
+    debug_return;
+}
+
+/*
+ * Free the strings in a struct eventlog and the eventlog container itself.
+ */
+void
+eventlog_free(struct eventlog *evlog)
+{
     debug_decl(eventlog_free, SUDO_DEBUG_UTIL);
 
     if (evlog != NULL) {
-	free(evlog->iolog_path);
-	free(evlog->command);
-	free(evlog->cwd);
-	free(evlog->runchroot);
-	free(evlog->runcwd);
-	free(evlog->rungroup);
-	free(evlog->runuser);
-	free(evlog->peeraddr);
-	free(evlog->signal_name);
-	free(evlog->source);
-	if (evlog->submitenv != NULL) {
-	    for (i = 0; evlog->submitenv[i] != NULL; i++)
-		free(evlog->submitenv[i]);
-	    free(evlog->submitenv);
-	}
-	free(evlog->submithost);
-	free(evlog->submituser);
-	free(evlog->submitgroup);
-	free(evlog->ttyname);
-	if (evlog->runargv != NULL) {
-	    for (i = 0; evlog->runargv[i] != NULL; i++)
-		free(evlog->runargv[i]);
-	    free(evlog->runargv);
-	}
-	if (evlog->runenv != NULL) {
-	    for (i = 0; evlog->runenv[i] != NULL; i++)
-		free(evlog->runenv[i]);
-	    free(evlog->runenv);
-	}
-	if (evlog->env_add != NULL) {
-	    for (i = 0; evlog->env_add[i] != NULL; i++)
-		free(evlog->env_add[i]);
-	    free(evlog->env_add);
-	}
+	eventlog_free_contents(evlog);
 	free(evlog);
     }
 

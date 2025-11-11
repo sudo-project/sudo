@@ -24,7 +24,7 @@
 
 struct sudoers_str_list;
 struct log_details {
-    struct eventlog *evlog;
+    struct eventlog evlog;
     struct sudoers_str_list *log_servers;
     struct timespec server_timeout;
 # if defined(HAVE_OPENSSL)
