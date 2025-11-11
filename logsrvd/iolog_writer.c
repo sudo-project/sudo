@@ -486,7 +486,7 @@ fill_user(char * restrict str, size_t strsize, void * restrict v)
 	sudo_warnx(U_("%s: %s is not set"), __func__, "submituser");
 	debug_return_size_t(strsize);
     }
-    debug_return_size_t(strlcpy(str, evlog->submituser, strsize));
+    debug_return_size_t(strlcpy_no_slash(str, evlog->submituser, strsize));
 }
 
 static size_t
@@ -500,7 +500,7 @@ fill_group(char * restrict str, size_t strsize, void * restrict v)
 	sudo_warnx(U_("%s: %s is not set"), __func__, "submitgroup");
 	debug_return_size_t(strsize);
     }
-    debug_return_size_t(strlcpy(str, evlog->submitgroup, strsize));
+    debug_return_size_t(strlcpy_no_slash(str, evlog->submitgroup, strsize));
 }
 
 static size_t
@@ -514,7 +514,7 @@ fill_runas_user(char * restrict str, size_t strsize, void * restrict v)
 	sudo_warnx(U_("%s: %s is not set"), __func__, "runuser");
 	debug_return_size_t(strsize);
     }
-    debug_return_size_t(strlcpy(str, evlog->runuser, strsize));
+    debug_return_size_t(strlcpy_no_slash(str, evlog->runuser, strsize));
 }
 
 static size_t
@@ -529,7 +529,7 @@ fill_runas_group(char * restrict str, size_t strsize, void * restrict v)
 	sudo_warnx(U_("%s: %s is not set"), __func__, "rungroup");
 	debug_return_size_t(strsize);
     }
-    debug_return_size_t(strlcpy(str, evlog->rungroup, strsize));
+    debug_return_size_t(strlcpy_no_slash(str, evlog->rungroup, strsize));
 }
 
 static size_t
@@ -543,7 +543,7 @@ fill_hostname(char * restrict str, size_t strsize, void * restrict v)
 	sudo_warnx(U_("%s: %s is not set"), __func__, "submithost");
 	debug_return_size_t(strsize);
     }
-    debug_return_size_t(strlcpy(str, evlog->submithost, strsize));
+    debug_return_size_t(strlcpy_no_slash(str, evlog->submithost, strsize));
 }
 
 static size_t
@@ -551,13 +551,15 @@ fill_command(char * restrict str, size_t strsize, void * restrict v)
 {
     struct iolog_path_closure *closure = v;
     const struct eventlog *evlog = closure->evlog;
+    const char *cmnd_base;
     debug_decl(fill_command, SUDO_DEBUG_UTIL);
 
     if (evlog->command == NULL) {
 	sudo_warnx(U_("%s: %s is not set"), __func__, "command");
 	debug_return_size_t(strsize);
     }
-    debug_return_size_t(strlcpy(str, evlog->command, strsize));
+    cmnd_base = sudo_basename(evlog->command);
+    debug_return_size_t(strlcpy_no_slash(str, cmnd_base, strsize));
 }
 
 /* Note: "seq" must be first in the list. */
