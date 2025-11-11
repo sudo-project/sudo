@@ -2145,6 +2145,11 @@ main(int argc, char *argv[])
     if (!server_setup(evbase))
 	sudo_fatalx("%s", U_("unable to setup listen socket"));
 
+    if (!logsrvd_queue_scan(evbase)) {
+	/* Error displayed by logsrvd_queue_scan() */
+        return EXIT_FAILURE;
+    }
+
     register_signal(SIGHUP, evbase);
     register_signal(SIGINT, evbase);
     register_signal(SIGTERM, evbase);
@@ -2154,7 +2159,6 @@ main(int argc, char *argv[])
     daemonize(nofork);
     signal(SIGPIPE, SIG_IGN);
 
-    logsrvd_queue_scan(evbase);
     sudo_ev_dispatch(evbase);
     if (!nofork && logsrvd_conf_pid_file() != NULL)
 	unlink(logsrvd_conf_pid_file());
