@@ -258,7 +258,7 @@ CHECK_SERIALIZE_LIST_OBJS = check_serialize_list.lo serialize_list.lo \
 			    sudoers_debug.lo
 
 FUZZ_POLICY_OBJS = editor.lo env.lo env_pattern.lo fuzz_policy.o \
-                   fuzz_stubs.o gc.lo iolog_path_escapes.lo locale.lo \
+                   fuzz_stubs.o gc.lo locale.lo \
                    policy.lo sethost.lo serialize_list.lo \
                    strlcpy_unesc.lo strvec_join.lo sudoers.lo \
                    sudoers_cb.lo sudoers_ctx_free.lo sudoers_hooks.lo

@@ -51,6 +51,13 @@ char *audit_msg;
 
 static int pass;
 
+/* STUB */
+static const struct iolog_path_escape path_escapes[] = {
+    { NULL, NULL },
+    { NULL, NULL }
+};
+const struct iolog_path_escape *sudoers_iolog_path_escapes = path_escapes;
+
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
 static FILE *
