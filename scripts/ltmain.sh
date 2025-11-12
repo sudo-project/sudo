@@ -6935,8 +6935,6 @@ func_mode_link ()
     lib_search_path=`pwd`
     inst_prefix_dir=
     new_inherited_linker_flags=
-    fix_hardcoded_libdir_flag=
-    fix_hardcoded_libdir_flag_ld=
 
     avoid_version=no
     bindir=
@@ -8753,15 +8751,6 @@ func_mode_link ()
 	      elif test no = "$hardcode_shlibpath_var"; then
 		add_shlibpath=$dir
 		add=-l$name
-	      elif test -n "$fix_hardcoded_libdir_flag_spec"; then
-		add_dir="-L${absdir}"
-		add="-l$name"
-		if test "${linkmode}" = prog && test "X${absdir}" != "X${libdir}"; then
-		  linkdir=$absdir
-		  eval "fix_hardcoded_libdir_flag=\"\${fix_hardcoded_libdir_flag} ${fix_hardcoded_libdir_flag_spec}\""
-		  # fix_hardcoded_libdir_flag_ld not needed, programs are linked with $CC
-		  $lt_unset linkdir
-		fi
 	      else
 		lib_linked=no
 	      fi
@@ -8829,15 +8818,6 @@ func_mode_link ()
 	    elif test yes = "$hardcode_minus_L"; then
 	      add_dir=-L$lt_sysroot$libdir
 	      add=-l$name
-	      if test -n "$inst_prefix_dir" &&
-		 test -f "$inst_prefix_dir$libdir/$linklib" &&
-		 test -n "${fix_hardcoded_libdir_flag_spec}"; then
-		linkdir="$inst_prefix_dir$libdir"
-		add_dir="-L$linkdir"
-		eval "fix_hardcoded_libdir_flag=\"\${fix_hardcoded_libdir_flag} ${fix_hardcoded_libdir_flag_spec}\""
-		eval "fix_hardcoded_libdir_flag_ld=\"\${fix_hardcoded_libdir_flag_ld} ${fix_hardcoded_libdir_flag_spec_ld}\""
-		$lt_unset linkdir
-	      fi
 	    elif test yes = "$hardcode_shlibpath_var"; then
 	      case :$finalize_shlibpath: in
 	      *":$libdir:"*) ;;
@@ -9220,6 +9200,9 @@ func_mode_link ()
 	eval libname=\"$libname_spec\"
 	;;
       *)
+	test no = "$module" \
+	  && func_fatal_help "libtool library '$output' must begin with 'lib'"
+
 	if test no != "$need_lib_prefix"; then
 	  # Add the "lib" prefix for modules if required
 	  func_stripname '' '.la' "$outputname"
