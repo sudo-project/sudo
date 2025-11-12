@@ -670,15 +670,16 @@ store_iobuf_local(int iofd, const IoBuffer *iobuf, const uint8_t *buf,
     }
 
     /* Write to specified I/O log file. */
-    if (!iolog_write(&closure->iolog_files[iofd], data.data, data.len, &errstr)) {
+    if (iolog_write(&closure->iolog_files[iofd], data.data, data.len,
+	    &errstr) == -1) {
 	sudo_warnx(U_("%s/%s: %s"), evlog->iolog_path, iolog_fd_to_name(iofd),
 	    errstr);
 	goto bad;
     }
 
     /* Write timing data. */
-    if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
-	    (size_t)len, &errstr)) {
+    if (iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
+	    (size_t)len, &errstr) == -1) {
 	sudo_warnx(U_("%s/%s: %s"), evlog->iolog_path,
 	    iolog_fd_to_name(IOFD_TIMING), errstr);
 	goto bad;
@@ -714,8 +715,8 @@ store_winsize_local(const ChangeWindowSize *msg, const uint8_t *buf,
     }
 
     /* Write timing data. */
-    if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
-	    (size_t)len, &errstr)) {
+    if (iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
+	    (size_t)len, &errstr) == -1) {
 	sudo_warnx(U_("%s/%s: %s"), closure->evlog->iolog_path,
 	    iolog_fd_to_name(IOFD_TIMING), errstr);
 	goto bad;
@@ -749,8 +750,8 @@ store_suspend_local(const CommandSuspend *msg, const uint8_t *buf,
     }
 
     /* Write timing data. */
-    if (!iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
-	    (size_t)len, &errstr)) {
+    if (iolog_write(&closure->iolog_files[IOFD_TIMING], tbuf,
+	    (size_t)len, &errstr) == -1) {
 	sudo_warnx(U_("%s/%s: %s"), closure->evlog->iolog_path,
 	    iolog_fd_to_name(IOFD_TIMING), errstr);
 	goto bad;
