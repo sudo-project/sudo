@@ -78,6 +78,8 @@ journal_fdopen(int fd, const char *journal_path,
     if ((closure->journal = fdopen(fd, "r+")) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to fdopen journal file %s", journal_path);
+	free(closure->journal_path);
+	closure->journal_path = NULL;
 	debug_return_bool(false);
     }
 
