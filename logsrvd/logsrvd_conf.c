@@ -334,9 +334,7 @@ logsrvd_conf_relay_retry_interval(void)
 SSL_CTX *
 logsrvd_relay_tls_ctx(void)
 {
-    if (logsrvd_config->relay.ssl_ctx != NULL)
-	return logsrvd_config->relay.ssl_ctx;
-    return logsrvd_config->server.ssl_ctx;
+    return logsrvd_config->relay.ssl_ctx;
 }
 
 bool
