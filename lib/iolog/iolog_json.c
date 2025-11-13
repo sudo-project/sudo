@@ -45,6 +45,15 @@ iolog_parse_loginfo_json(FILE *fp, const char *iolog_dir, struct eventlog *evlog
 
 	/* Cleanup. */
 	eventlog_json_free(root);
+
+	/* Check for required entries (some may be set to "unknown"). */
+	if (evlog->command == NULL || evlog->cwd == NULL ||
+		evlog->runargv == NULL || evlog->runuser == NULL ||
+		evlog->submituser == NULL || evlog->ttyname == NULL) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"missing required log.json entries");
+	    ret = false;
+	}
     }
 
     debug_return_bool(ret);
