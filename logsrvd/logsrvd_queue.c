@@ -215,7 +215,7 @@ logsrvd_queue_scan(struct sudo_event_base *evbase)
 
     dirlen = snprintf(path, sizeof(path), "%s/outgoing/%s",
 	logsrvd_conf_relay_dir(), uuid_template);
-    if (dirlen >= ssizeof(path)) {
+    if (dirlen < 0 || dirlen >= ssizeof(path)) {
 	errno = ENAMETOOLONG;
 	sudo_warn("%s/outgoing/%s", logsrvd_conf_relay_dir(), uuid_template);
 	debug_return_bool(false);
