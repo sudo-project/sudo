@@ -794,11 +794,20 @@ handle_suspend(const CommandSuspend *msg, const uint8_t *buf, size_t len,
     }
 
     /* Check that message is valid. */
-    if (msg == NULL || msg->delay == NULL || msg->signal[0] == '\0') {
+    if (msg == NULL || msg->delay == NULL) {
 	sudo_warnx(U_("%s: %s"), source, U_("invalid CommandSuspend"));
 	closure->errstr = _("invalid CommandSuspend");
 	debug_return_bool(false);
     }
+    if (strcmp(msg->signal, "STOP") != 0 && strcmp(msg->signal, "TSTP") != 0 && 
+	    strcmp(msg->signal, "CONT") != 0 &&
+	    strcmp(msg->signal, "TTIN") != 0 &&
+	    strcmp(msg->signal, "TTOU") != 0) {
+	sudo_warnx(U_("%s: %s"), source, U_("invalid CommandSuspend"));
+	closure->errstr = _("invalid CommandSuspend");
+	debug_return_bool(false);
+    }
+
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: received CommandSuspend from %s",
 	source, __func__);
 
