@@ -31,29 +31,27 @@
 
 /*
  * Emulate SSL_read_ex() using SSL_read().
- * Unlike the real SSL_read_ex(), this can return -1 on error.
  */
 int
 SSL_read_ex(SSL *ssl, void *buf, size_t num, size_t *readbytes)
 {
     int nr = SSL_read(ssl, buf, (int)num);
-    if (nr <= 0)
-	return nr;
+    if (nr < 0)
+	nr = 0;
     *readbytes = (size_t)nr;
-    return 1;
+    return nr > 0;
 }
 
 /*
  * Emulate SSL_write_ex() using SSL_write().
- * Unlike the real SSL_write_ex(), this can return -1 on error.
  */
 int
 SSL_write_ex(SSL *ssl, const void *buf, size_t num, size_t *written)
 {
     int nw = SSL_write(ssl, buf, (int)num);
-    if (nw <= 0)
-	return nw;
+    if (nw < 0)
+	nw = 0;
     *written = (size_t)nw;
-    return 1;
+    return nw > 0;
 }
 #endif /* HAVE_OPENSSL && !HAVE_SSL_READ_EX */
