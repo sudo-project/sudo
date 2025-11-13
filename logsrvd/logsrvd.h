@@ -175,15 +175,6 @@ struct listener {
 };
 TAILQ_HEAD(listener_list, listener);
 
-/*
- * Queue of finished journal files to be relayed.
- */
-struct outgoing_journal {
-    TAILQ_ENTRY(outgoing_journal) entries;
-    char *journal_path;
-};
-TAILQ_HEAD(outgoing_journal_queue, outgoing_journal);
-
 /* iolog_writer.c */
 struct eventlog *evlog_new(const TimeSpec *submit_time, InfoMessage * const *info_msgs, size_t infolen, struct connection_closure *closure);
 bool iolog_init(const AcceptMessage *msg, struct connection_closure *closure);
