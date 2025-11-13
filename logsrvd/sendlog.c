@@ -305,7 +305,9 @@ read_io_buf(struct client_closure *closure)
 
     nread = (size_t)iolog_read(&closure->iolog_files[timing->event],
 	closure->buf, timing->u.nbytes, &errstr);
-    if (nread == (size_t)-1) {
+    if (nread != timing->u.nbytes) {
+	if (nread != (size_t)-1)
+	    errstr = strerror(EINVAL);
 	sudo_warnx(U_("unable to read %s/%s: %s"), iolog_dir,
 	    iolog_fd_to_name(timing->event), errstr);
 	debug_return_bool(false);
