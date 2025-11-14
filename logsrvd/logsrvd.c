@@ -1698,6 +1698,8 @@ register_listener(struct server_address *addr, struct sudo_event_base *evbase)
     /* TODO: make non-fatal */
     if ((l = malloc(sizeof(*l))) == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    l->sa_str = addr->sa_str;
+    sudo_rcstr_addref(l->sa_str);
     l->sock = sock;
     l->tls = addr->tls;
     l->ev = sudo_ev_alloc(sock, SUDO_EV_READ|SUDO_EV_PERSIST, listener_cb, l);
@@ -1716,22 +1718,63 @@ register_listener(struct server_address *addr, struct sudo_event_base *evbase)
 static bool
 server_setup(struct sudo_event_base *base)
 {
+    struct listener_list kept_listeners =
+	TAILQ_HEAD_INITIALIZER(kept_listeners);
     struct server_address *addr;
     struct listener *l;
     int nlisteners = 0;
     bool ret;
     debug_decl(server_setup, SUDO_DEBUG_UTIL);
 
-    /* Free old listeners (if any) and register new ones. */
+    /*
+     * Free any listeners not present in the new config.
+     * We must free non-matching listeners before adding new ones.
+     */
     while ((l = TAILQ_FIRST(&listeners)) != NULL) {
 	TAILQ_REMOVE(&listeners, l, entries);
-	sudo_ev_free(l->ev);
-	close(l->sock);
-	free(l);
+
+	TAILQ_FOREACH(addr, logsrvd_conf_server_listen_address(), entries) {
+	    if (strcmp(addr->sa_str, l->sa_str) == 0) {
+		TAILQ_INSERT_TAIL(&kept_listeners, l, entries);
+		break;
+	    }
+	}
+	if (addr == NULL) {
+	    /* Listener not used in new config. */
+	    sudo_rcstr_delref(l->sa_str);
+	    sudo_ev_free(l->ev);
+	    close(l->sock);
+	    free(l);
+	}
     }
+
+    /* Register new listeners, reusing existing ones. */
     TAILQ_FOREACH(addr, logsrvd_conf_server_listen_address(), entries) {
-	nlisteners += register_listener(addr, base);
+	/* Check for addr in kept_listeners first. */
+	TAILQ_FOREACH(l, &kept_listeners, entries) {
+	    if (strcmp(addr->sa_str, l->sa_str) == 0) {
+		/* Reuse existing listener. */
+		TAILQ_REMOVE(&kept_listeners, l, entries);
+		TAILQ_INSERT_TAIL(&listeners, l, entries);
+
+		/* Update l->sa_str from new addr. */
+		sudo_rcstr_delref(l->sa_str);
+		l->sa_str = addr->sa_str;
+		sudo_rcstr_addref(l->sa_str);
+
+		nlisteners++;
+		break;
+	    }
+	}
+
+	if (l == NULL) {
+	    /* Register new listener. */
+	    nlisteners += register_listener(addr, base);
+	}
     }
+    if (!TAILQ_EMPTY(&kept_listeners))
+	sudo_warnx("bug: kept_listeners not empty");
+
     ret = nlisteners > 0;
 
 #if defined(HAVE_OPENSSL)

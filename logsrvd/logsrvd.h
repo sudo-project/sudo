@@ -170,6 +170,7 @@ TAILQ_HEAD(server_address_list, server_address);
 struct listener {
     TAILQ_ENTRY(listener) entries;
     struct sudo_event *ev;
+    char *sa_str;
     int sock;
     bool tls;
 };
