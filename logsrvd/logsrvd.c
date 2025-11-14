@@ -1602,11 +1602,11 @@ bad:
 }
 
 static int
-create_listener(struct server_address *addr)
+open_listener_socket(struct server_address *addr)
 {
     int flags, on, sock;
     const char *family = "inet4";
-    debug_decl(create_listener, SUDO_DEBUG_UTIL);
+    debug_decl(open_listener_socket, SUDO_DEBUG_UTIL);
 
     if ((sock = socket(addr->sa_un.sa.sa_family, SOCK_STREAM, 0)) == -1) {
 	sudo_warn("socket");
@@ -1650,6 +1650,22 @@ bad:
 }
 
 static void
+free_listener(struct listener *l)
+{
+    debug_decl(free_listener, SUDO_DEBUG_UTIL);
+
+    if (l != NULL) {
+	sudo_ev_free(l->ev);
+	sudo_rcstr_delref(l->sa_str);
+	if (l->sock != -1)
+	    close(l->sock);
+	free(l);
+    }
+
+    debug_return;
+}
+
+static void
 listener_cb(int fd, int what, void *v)
 {
     struct listener *l = v;
@@ -1687,29 +1703,41 @@ listener_cb(int fd, int what, void *v)
 static bool
 register_listener(struct server_address *addr, struct sudo_event_base *evbase)
 {
-    struct listener *l;
+    struct listener *l = NULL;
     int sock;
     debug_decl(register_listener, SUDO_DEBUG_UTIL);
 
-    sock = create_listener(addr);
+    sock = open_listener_socket(addr);
     if (sock == -1)
-	debug_return_bool(false);
+	goto bad;
 
-    /* TODO: make non-fatal */
-    if ((l = malloc(sizeof(*l))) == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    if ((l = calloc(1, sizeof(*l))) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto bad;
+    }
+    l->ev = sudo_ev_alloc(sock, SUDO_EV_READ|SUDO_EV_PERSIST, listener_cb, l);
+    if (l->ev == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto bad;
+    }
     l->sa_str = addr->sa_str;
     sudo_rcstr_addref(l->sa_str);
     l->sock = sock;
+    sock = -1;
     l->tls = addr->tls;
-    l->ev = sudo_ev_alloc(sock, SUDO_EV_READ|SUDO_EV_PERSIST, listener_cb, l);
-    if (l->ev == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-    if (sudo_ev_add(evbase, l->ev, NULL, false) == -1)
-	sudo_fatal("%s", U_("unable to add event to queue"));
+
+    if (sudo_ev_add(evbase, l->ev, NULL, false) == -1) {
+	sudo_warn("%s", U_("unable to add event to queue"));
+	goto bad;
+    }
     TAILQ_INSERT_TAIL(&listeners, l, entries);
 
     debug_return_bool(true);
+bad:
+    if (sock != -1)
+	close(sock);
+    free_listener(l);
+    debug_return_bool(false);
 }
 
 /*
@@ -1741,10 +1769,7 @@ server_setup(struct sudo_event_base *base)
 	}
 	if (addr == NULL) {
 	    /* Listener not used in new config. */
-	    sudo_rcstr_delref(l->sa_str);
-	    sudo_ev_free(l->ev);
-	    close(l->sock);
-	    free(l);
+	    free_listener(l);
 	}
     }
 
