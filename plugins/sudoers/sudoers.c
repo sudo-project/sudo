@@ -175,16 +175,20 @@ sudoers_reinit_defaults(struct sudoers_context *ctx)
     debug_return_bool(true);
 }
 
+/*
+ * Initialize sudoers data structures and parse sudoers sources.
+ * Returns 1 on success and -1 on error.
+ */
 int
 sudoers_init(void *info, sudoers_logger_t logger, char * const envp[])
 {
     struct sudo_nss *nss, *nss_next;
     int oldlocale, sources = 0;
-    static int ret = -1;
+    static int ret = 0;
     debug_decl(sudoers_init, SUDOERS_DEBUG_PLUGIN);
 
-    /* Only initialize once. */
-    if (snl != NULL)
+    /* Only initialize once, don't re-initialize on error (-1). */
+    if (ret != 0)
 	debug_return_int(ret);
 
     bindtextdomain("sudoers", LOCALEDIR);
@@ -197,29 +201,29 @@ sudoers_init(void *info, sudoers_logger_t logger, char * const envp[])
 
     /* Initialize environment functions (including replacements). */
     if (!env_init(envp))
-	debug_return_int(-1);
+	goto done;
 
     /* Setup defaults data structures. */
     if (!init_defaults()) {
 	sudo_warnx("%s", U_("unable to initialize sudoers default values"));
-	debug_return_int(-1);
+	goto done;
     }
 
     /* Parse info from front-end. */
     sudoers_ctx.mode = sudoers_policy_deserialize_info(&sudoers_ctx, info,
 	&initial_defaults);
     if (ISSET(sudoers_ctx.mode, MODE_ERROR))
-	debug_return_int(-1);
+	goto done;
 
     if (!init_vars(&sudoers_ctx, envp))
-	debug_return_int(-1);
+	goto done;
 
     /* Parse nsswitch.conf for sudoers order. */
     snl = sudo_read_nss();
 
     /* LDAP or NSS may modify the euid so we need to be root for the open. */
     if (!set_perms(NULL, PERM_ROOT))
-	debug_return_int(-1);
+	goto done;
 
     /* Use the C locale unless another is specified in sudoers. */
     sudoers_setlocale(SUDOERS_LOCALE_SUDOERS, &oldlocale);
@@ -257,7 +261,7 @@ sudoers_init(void *info, sudoers_logger_t logger, char * const envp[])
 
     /* Set login class if applicable (after sudoers is parsed). */
     if (set_loginclass(&sudoers_ctx))
-	ret = true;
+	ret = 1;
 
 cleanup:
     mail_parse_errors(&sudoers_ctx);
@@ -269,6 +273,9 @@ cleanup:
     sudo_warn_set_locale_func(NULL);
     sudoers_setlocale(oldlocale, NULL);
 
+done:
+    if (ret == 0)
+	ret = -1;
     debug_return_int(ret);
 }
 

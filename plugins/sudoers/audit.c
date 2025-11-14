@@ -181,7 +181,7 @@ sudoers_audit_open(unsigned int version, sudo_conv_t conversation,
     info.plugin_args = plugin_options;
     ret = sudoers_init(&info, log_parse_error, submit_envp);
 
-    if (ret == true) {
+    if (ret == 1) {
 	/* Unset close function if we don't need it to avoid extra process. */
 #ifdef SUDOERS_LOG_CLIENT
 	if (SLIST_EMPTY(&def_log_servers))
