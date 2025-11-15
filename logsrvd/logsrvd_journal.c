@@ -340,42 +340,90 @@ journal_seek(const struct timespec *target, struct connection_closure *closure)
 		"seeking past AlertMessage (%d)", msg->type_case);
 	    break;
 	case CLIENT_MESSAGE__TYPE_TTYIN_BUF:
-	    delay = msg->u.ttyin_buf->delay;
+	    if (msg->u.ttyin_buf == NULL ||
+		    !valid_timespec(msg->u.ttyin_buf->delay)) {
+		sudo_warnx(U_("%s: %s"), closure->journal_path,
+		    U_("invalid IoBuffer"));
+		closure->errstr = _("invalid IoBuffer");
+		goto done;
+	    }
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		"read IoBuffer (%d), delay [%lld, %ld]", msg->type_case,
 		(long long)delay->tv_sec, (long)delay->tv_nsec);
 	    break;
 	case CLIENT_MESSAGE__TYPE_TTYOUT_BUF:
+	    if (msg->u.ttyout_buf == NULL ||
+		    !valid_timespec(msg->u.ttyout_buf->delay)) {
+		sudo_warnx(U_("%s: %s"), closure->journal_path,
+		    U_("invalid IoBuffer"));
+		closure->errstr = _("invalid IoBuffer");
+		goto done;
+	    }
 	    delay = msg->u.ttyout_buf->delay;
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		"read IoBuffer (%d), delay [%lld, %ld]", msg->type_case,
 		(long long)delay->tv_sec, (long)delay->tv_nsec);
 	    break;
 	case CLIENT_MESSAGE__TYPE_STDIN_BUF:
+	    if (msg->u.stdin_buf == NULL ||
+		    !valid_timespec(msg->u.stdin_buf->delay)) {
+		sudo_warnx(U_("%s: %s"), closure->journal_path,
+		    U_("invalid IoBuffer"));
+		closure->errstr = _("invalid IoBuffer");
+		goto done;
+	    }
 	    delay = msg->u.stdin_buf->delay;
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		"read IoBuffer (%d), delay [%lld, %ld]", msg->type_case,
 		(long long)delay->tv_sec, (long)delay->tv_nsec);
 	    break;
 	case CLIENT_MESSAGE__TYPE_STDOUT_BUF:
+	    if (msg->u.stdout_buf == NULL ||
+		    !valid_timespec(msg->u.stdout_buf->delay)) {
+		sudo_warnx(U_("%s: %s"), closure->journal_path,
+		    U_("invalid IoBuffer"));
+		closure->errstr = _("invalid IoBuffer");
+		goto done;
+	    }
 	    delay = msg->u.stdout_buf->delay;
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		"read stdout_buf (%d), delay [%lld, %ld]", msg->type_case,
 		(long long)delay->tv_sec, (long)delay->tv_nsec);
 	    break;
 	case CLIENT_MESSAGE__TYPE_STDERR_BUF:
+	    if (msg->u.stderr_buf == NULL ||
+		    !valid_timespec(msg->u.stderr_buf->delay)) {
+		sudo_warnx(U_("%s: %s"), closure->journal_path,
+		    U_("invalid IoBuffer"));
+		closure->errstr = _("invalid IoBuffer");
+		goto done;
+	    }
 	    delay = msg->u.stderr_buf->delay;
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		"read stderr_buf (%d), delay [%lld, %ld]", msg->type_case,
 		(long long)delay->tv_sec, (long)delay->tv_nsec);
 	    break;
 	case CLIENT_MESSAGE__TYPE_WINSIZE_EVENT:
+	    if (msg->u.winsize_event == NULL ||
+		    !valid_timespec(msg->u.winsize_event->delay)) {
+		sudo_warnx(U_("%s: %s"), closure->journal_path,
+		    U_("invalid ChangeWindowSize"));
+		closure->errstr = _("invalid ChangeWindowSize");
+		goto done;
+	    }
 	    delay = msg->u.winsize_event->delay;
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		"read ChangeWindowSize (%d), delay [%lld, %ld]", msg->type_case,
 		(long long)delay->tv_sec, (long)delay->tv_nsec);
 	    break;
 	case CLIENT_MESSAGE__TYPE_SUSPEND_EVENT:
+	    if (msg->u.suspend_event == NULL ||
+		    !valid_timespec(msg->u.suspend_event->delay)) {
+		sudo_warnx(U_("%s: %s"), closure->journal_path,
+		    U_("invalid invalid CommandSuspend"));
+		closure->errstr = _("invalid CommandSuspend");
+		goto done;
+	    }
 	    delay = msg->u.suspend_event->delay;
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		"read CommandSuspend (%d), delay [%lld, %ld]", msg->type_case,
@@ -404,6 +452,7 @@ journal_seek(const struct timespec *target, struct connection_closure *closure)
 	}
     }
 
+done:
     client_message__free_unpacked(msg, NULL);
     free(buf);
 
