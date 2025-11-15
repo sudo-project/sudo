@@ -186,13 +186,14 @@ sudoers_init(void *info, sudoers_logger_t logger, char * const envp[])
 {
     struct sudo_nss *nss, *nss_next;
     int oldlocale, sources = 0;
-    static int ret = -1;
+    static int ret;
     debug_decl(sudoers_init, SUDOERS_DEBUG_PLUGIN);
 
     /* Only attempt to initialize once. */
     if (sudoers_initialized)
 	debug_return_int(ret);
     sudoers_initialized = true;
+    ret = -1;
 
     bindtextdomain("sudoers", LOCALEDIR);
 
