@@ -6,10 +6,10 @@
 # Lumynous <lumynou5.tw@gmail.com>, 2025.
 msgid ""
 msgstr ""
-"Project-Id-Version: sudo 1.9.16b1\n"
+"Project-Id-Version: sudo 1.9.18b1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
-"POT-Creation-Date: 2024-06-08 09:06-0600\n"
-"PO-Revision-Date: 2025-02-06 17:32+08:00\n"
+"POT-Creation-Date: 2025-10-05 19:32-0600\n"
+"PO-Revision-Date: 2025-11-12 16:38+08:00\n"
 "Last-Translator: Lumynous <lumynou5.tw@gmail.com>\n"
 "Language-Team: Chinese (traditional) <zh-l10n@lists.slat.org>\n"
 "Language: zh_TW\n"
@@ -20,481 +20,481 @@ msgstr ""
 "X-Bugs: Report translation errors to the Language-Team address.\n"
 "X-Generator: Poedit 3.5\n"
 
-#: lib/util/aix.c:89 lib/util/aix.c:169
+#: lib/util/aix.c:84 lib/util/aix.c:164
 msgid "unable to open userdb"
 msgstr "無法開啟使用者資料庫"
 
-#: lib/util/aix.c:224
+#: lib/util/aix.c:219
 #, c-format
 msgid "unable to switch to registry \"%s\" for %s"
 msgstr "無法切換至 %2$s 的登錄表「%1$s」"
 
-#: lib/util/aix.c:249
+#: lib/util/aix.c:244
 msgid "unable to restore registry"
 msgstr "無法還原登錄表"
 
-#: lib/util/aix.c:272 lib/util/gidlist.c:66 lib/util/gidlist.c:76
-#: lib/util/json.c:55 lib/util/json.c:197 lib/util/sudo_conf.c:218
-#: lib/util/sudo_conf.c:304 lib/util/sudo_conf.c:381 lib/util/sudo_conf.c:672
-#: src/conversation.c:81 src/exec_iolog.c:122 src/exec_iolog.c:133
-#: src/exec_iolog.c:210 src/exec_monitor.c:173 src/exec_monitor.c:430
-#: src/exec_monitor.c:436 src/exec_monitor.c:444 src/exec_monitor.c:452
-#: src/exec_monitor.c:459 src/exec_monitor.c:466 src/exec_monitor.c:473
-#: src/exec_monitor.c:480 src/exec_monitor.c:487 src/exec_monitor.c:494
-#: src/exec_monitor.c:501 src/exec_nopty.c:231 src/exec_nopty.c:240
-#: src/exec_nopty.c:247 src/exec_nopty.c:254 src/exec_nopty.c:261
-#: src/exec_nopty.c:268 src/exec_nopty.c:275 src/exec_nopty.c:282
-#: src/exec_nopty.c:289 src/exec_nopty.c:296 src/exec_nopty.c:303
-#: src/exec_nopty.c:310 src/exec_nopty.c:318 src/exec_nopty.c:326
-#: src/exec_nopty.c:748 src/exec_preload.c:347 src/exec_ptrace.c:475
-#: src/exec_ptrace.c:768 src/exec_ptrace.c:985 src/exec_ptrace.c:1098
-#: src/exec_ptrace.c:1273 src/exec_ptrace.c:1626 src/exec_ptrace.c:1653
-#: src/exec_ptrace.c:1845 src/exec_pty.c:599 src/exec_pty.c:783
-#: src/exec_pty.c:990 src/exec_pty.c:999 src/exec_pty.c:1006
-#: src/exec_pty.c:1013 src/exec_pty.c:1020 src/exec_pty.c:1027
-#: src/exec_pty.c:1034 src/exec_pty.c:1041 src/exec_pty.c:1048
-#: src/exec_pty.c:1055 src/exec_pty.c:1062 src/exec_pty.c:1069
-#: src/exec_pty.c:1077 src/load_plugins.c:100 src/load_plugins.c:125
-#: src/load_plugins.c:161 src/load_plugins.c:394 src/load_plugins.c:400
-#: src/parse_args.c:171 src/parse_args.c:192 src/parse_args.c:268
-#: src/parse_args.c:624 src/parse_args.c:646 src/parse_args.c:671
-#: src/preserve_fds.c:46 src/preserve_fds.c:131 src/selinux.c:89
-#: src/selinux.c:362 src/selinux.c:472 src/selinux.c:489 src/selinux.c:496
-#: src/sesh.c:206 src/sesh.c:240 src/sesh.c:246 src/sesh.c:253 src/sesh.c:259
-#: src/sesh.c:470 src/sudo.c:581 src/sudo.c:607 src/sudo.c:660 src/sudo.c:726
-#: src/sudo.c:737 src/sudo.c:764 src/sudo.c:787 src/sudo.c:796 src/sudo.c:805
-#: src/sudo.c:818 src/sudo.c:827 src/sudo.c:868 src/sudo.c:878 src/sudo.c:888
-#: src/sudo.c:921 src/sudo.c:923 src/sudo.c:1150 src/sudo.c:1171
-#: src/sudo.c:1462 src/sudo.c:1631 src/sudo.c:1858 src/sudo.c:2191
-#: src/sudo_edit.c:89 src/sudo_edit.c:149 src/sudo_edit.c:430
-#: src/sudo_edit.c:439 src/sudo_edit.c:540 src/sudo_edit.c:547
-#: src/sudo_edit.c:692 src/sudo_edit.c:712 src/sudo_intercept_common.c:122
-#: src/sudo_intercept_common.c:347
+#: lib/util/aix.c:267 lib/util/gidlist.c:61 lib/util/gidlist.c:71
+#: lib/util/json.c:50 lib/util/json.c:192 lib/util/sudo_conf.c:213
+#: lib/util/sudo_conf.c:299 lib/util/sudo_conf.c:376 lib/util/sudo_conf.c:667
+#: src/conversation.c:76 src/exec_iolog.c:117 src/exec_iolog.c:128
+#: src/exec_iolog.c:205 src/exec_monitor.c:168 src/exec_monitor.c:436
+#: src/exec_monitor.c:442 src/exec_monitor.c:450 src/exec_monitor.c:458
+#: src/exec_monitor.c:465 src/exec_monitor.c:472 src/exec_monitor.c:479
+#: src/exec_monitor.c:486 src/exec_monitor.c:493 src/exec_monitor.c:500
+#: src/exec_monitor.c:507 src/exec_nopty.c:236 src/exec_nopty.c:245
+#: src/exec_nopty.c:252 src/exec_nopty.c:259 src/exec_nopty.c:266
+#: src/exec_nopty.c:273 src/exec_nopty.c:280 src/exec_nopty.c:287
+#: src/exec_nopty.c:294 src/exec_nopty.c:301 src/exec_nopty.c:308
+#: src/exec_nopty.c:315 src/exec_nopty.c:323 src/exec_nopty.c:331
+#: src/exec_nopty.c:751 src/exec_preload.c:342 src/exec_ptrace.c:482
+#: src/exec_ptrace.c:775 src/exec_ptrace.c:992 src/exec_ptrace.c:1105
+#: src/exec_ptrace.c:1281 src/exec_ptrace.c:1634 src/exec_ptrace.c:1661
+#: src/exec_ptrace.c:1853 src/exec_pty.c:601 src/exec_pty.c:785
+#: src/exec_pty.c:1000 src/exec_pty.c:1009 src/exec_pty.c:1016
+#: src/exec_pty.c:1023 src/exec_pty.c:1030 src/exec_pty.c:1037
+#: src/exec_pty.c:1044 src/exec_pty.c:1051 src/exec_pty.c:1058
+#: src/exec_pty.c:1065 src/exec_pty.c:1072 src/exec_pty.c:1079
+#: src/exec_pty.c:1087 src/load_plugins.c:95 src/load_plugins.c:120
+#: src/load_plugins.c:156 src/load_plugins.c:389 src/load_plugins.c:395
+#: src/parse_args.c:166 src/parse_args.c:187 src/parse_args.c:263
+#: src/parse_args.c:621 src/parse_args.c:643 src/parse_args.c:668
+#: src/preserve_fds.c:41 src/preserve_fds.c:126 src/selinux.c:84
+#: src/selinux.c:357 src/selinux.c:467 src/selinux.c:484 src/selinux.c:491
+#: src/sesh.c:201 src/sesh.c:235 src/sesh.c:241 src/sesh.c:248 src/sesh.c:254
+#: src/sesh.c:465 src/sudo.c:576 src/sudo.c:602 src/sudo.c:658 src/sudo.c:724
+#: src/sudo.c:735 src/sudo.c:762 src/sudo.c:785 src/sudo.c:794 src/sudo.c:803
+#: src/sudo.c:816 src/sudo.c:825 src/sudo.c:866 src/sudo.c:876 src/sudo.c:886
+#: src/sudo.c:919 src/sudo.c:921 src/sudo.c:1148 src/sudo.c:1169
+#: src/sudo.c:1460 src/sudo.c:1629 src/sudo.c:1856 src/sudo.c:2189
+#: src/sudo_edit.c:84 src/sudo_edit.c:144 src/sudo_edit.c:425
+#: src/sudo_edit.c:434 src/sudo_edit.c:535 src/sudo_edit.c:542
+#: src/sudo_edit.c:687 src/sudo_edit.c:707 src/sudo_intercept_common.c:117
+#: src/sudo_intercept_common.c:342
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: lib/util/aix.c:272 lib/util/gidlist.c:66 lib/util/json.c:56
-#: lib/util/json.c:198 lib/util/regex.c:173 lib/util/sudo_conf.c:219
-#: lib/util/sudo_conf.c:304 lib/util/sudo_conf.c:381 lib/util/sudo_conf.c:672
-#: src/conversation.c:82 src/exec_intercept.c:112 src/exec_intercept.c:351
-#: src/exec_intercept.c:527 src/exec_intercept.c:591 src/exec_intercept.c:715
-#: src/exec_intercept.c:839 src/exec_iolog.c:122 src/exec_iolog.c:133
-#: src/exec_iolog.c:210 src/exec_monitor.c:430 src/exec_monitor.c:436
-#: src/exec_monitor.c:444 src/exec_monitor.c:452 src/exec_monitor.c:459
-#: src/exec_monitor.c:466 src/exec_monitor.c:473 src/exec_monitor.c:480
-#: src/exec_monitor.c:487 src/exec_monitor.c:494 src/exec_monitor.c:501
-#: src/exec_nopty.c:231 src/exec_nopty.c:240 src/exec_nopty.c:247
-#: src/exec_nopty.c:254 src/exec_nopty.c:261 src/exec_nopty.c:268
-#: src/exec_nopty.c:275 src/exec_nopty.c:282 src/exec_nopty.c:289
-#: src/exec_nopty.c:296 src/exec_nopty.c:303 src/exec_nopty.c:310
-#: src/exec_nopty.c:318 src/exec_nopty.c:326 src/exec_preload.c:347
-#: src/exec_ptrace.c:475 src/exec_ptrace.c:768 src/exec_ptrace.c:985
-#: src/exec_ptrace.c:1653 src/exec_ptrace.c:1846 src/exec_pty.c:599
-#: src/exec_pty.c:990 src/exec_pty.c:999 src/exec_pty.c:1006
-#: src/exec_pty.c:1013 src/exec_pty.c:1020 src/exec_pty.c:1027
-#: src/exec_pty.c:1034 src/exec_pty.c:1041 src/exec_pty.c:1048
-#: src/exec_pty.c:1055 src/exec_pty.c:1062 src/exec_pty.c:1069
-#: src/exec_pty.c:1077 src/load_plugins.c:100 src/load_plugins.c:125
-#: src/load_plugins.c:161 src/load_plugins.c:394 src/load_plugins.c:400
-#: src/parse_args.c:171 src/parse_args.c:193 src/parse_args.c:268
-#: src/parse_args.c:624 src/parse_args.c:646 src/parse_args.c:671
-#: src/preserve_fds.c:46 src/preserve_fds.c:131 src/selinux.c:89
-#: src/selinux.c:362 src/selinux.c:472 src/selinux.c:489 src/selinux.c:496
-#: src/sesh.c:206 src/sesh.c:471 src/sudo.c:229 src/sudo.c:581 src/sudo.c:607
-#: src/sudo.c:660 src/sudo.c:819 src/sudo.c:921 src/sudo.c:923 src/sudo.c:1150
-#: src/sudo.c:1171 src/sudo.c:1462 src/sudo.c:1631 src/sudo.c:1858
-#: src/sudo.c:2191 src/sudo_edit.c:89 src/sudo_edit.c:149 src/sudo_edit.c:430
-#: src/sudo_edit.c:439 src/sudo_edit.c:540 src/sudo_edit.c:547
-#: src/sudo_edit.c:692 src/sudo_edit.c:712 src/sudo_intercept_common.c:122
-#: src/sudo_intercept_common.c:347
+#: lib/util/aix.c:267 lib/util/gidlist.c:61 lib/util/json.c:51
+#: lib/util/json.c:193 lib/util/regex.c:168 lib/util/sudo_conf.c:214
+#: lib/util/sudo_conf.c:299 lib/util/sudo_conf.c:376 lib/util/sudo_conf.c:667
+#: src/conversation.c:77 src/exec_intercept.c:107 src/exec_intercept.c:346
+#: src/exec_intercept.c:522 src/exec_intercept.c:586 src/exec_intercept.c:710
+#: src/exec_intercept.c:834 src/exec_iolog.c:117 src/exec_iolog.c:128
+#: src/exec_iolog.c:205 src/exec_monitor.c:436 src/exec_monitor.c:442
+#: src/exec_monitor.c:450 src/exec_monitor.c:458 src/exec_monitor.c:465
+#: src/exec_monitor.c:472 src/exec_monitor.c:479 src/exec_monitor.c:486
+#: src/exec_monitor.c:493 src/exec_monitor.c:500 src/exec_monitor.c:507
+#: src/exec_nopty.c:236 src/exec_nopty.c:245 src/exec_nopty.c:252
+#: src/exec_nopty.c:259 src/exec_nopty.c:266 src/exec_nopty.c:273
+#: src/exec_nopty.c:280 src/exec_nopty.c:287 src/exec_nopty.c:294
+#: src/exec_nopty.c:301 src/exec_nopty.c:308 src/exec_nopty.c:315
+#: src/exec_nopty.c:323 src/exec_nopty.c:331 src/exec_preload.c:342
+#: src/exec_ptrace.c:482 src/exec_ptrace.c:775 src/exec_ptrace.c:992
+#: src/exec_ptrace.c:1661 src/exec_ptrace.c:1854 src/exec_pty.c:601
+#: src/exec_pty.c:1000 src/exec_pty.c:1009 src/exec_pty.c:1016
+#: src/exec_pty.c:1023 src/exec_pty.c:1030 src/exec_pty.c:1037
+#: src/exec_pty.c:1044 src/exec_pty.c:1051 src/exec_pty.c:1058
+#: src/exec_pty.c:1065 src/exec_pty.c:1072 src/exec_pty.c:1079
+#: src/exec_pty.c:1087 src/load_plugins.c:95 src/load_plugins.c:120
+#: src/load_plugins.c:156 src/load_plugins.c:389 src/load_plugins.c:395
+#: src/parse_args.c:166 src/parse_args.c:188 src/parse_args.c:263
+#: src/parse_args.c:621 src/parse_args.c:643 src/parse_args.c:668
+#: src/preserve_fds.c:41 src/preserve_fds.c:126 src/selinux.c:84
+#: src/selinux.c:357 src/selinux.c:467 src/selinux.c:484 src/selinux.c:491
+#: src/sesh.c:201 src/sesh.c:466 src/sudo.c:224 src/sudo.c:576 src/sudo.c:602
+#: src/sudo.c:658 src/sudo.c:817 src/sudo.c:919 src/sudo.c:921 src/sudo.c:1148
+#: src/sudo.c:1169 src/sudo.c:1460 src/sudo.c:1629 src/sudo.c:1856
+#: src/sudo.c:2189 src/sudo_edit.c:84 src/sudo_edit.c:144 src/sudo_edit.c:425
+#: src/sudo_edit.c:434 src/sudo_edit.c:535 src/sudo_edit.c:542
+#: src/sudo_edit.c:687 src/sudo_edit.c:707 src/sudo_intercept_common.c:117
+#: src/sudo_intercept_common.c:342
 msgid "unable to allocate memory"
 msgstr "無法分配記憶體"
 
-#: lib/util/mkdir_parents.c:63
+#: lib/util/mkdir_parents.c:58
 #, c-format
 msgid "unable to stat %.*s"
 msgstr "無法取得 %.*s 的狀態"
 
-#: lib/util/mkdir_parents.c:69
+#: lib/util/mkdir_parents.c:64
 #, c-format
 msgid "%.*s exists but is not a directory (0%o)"
 msgstr "%.*s 存在但非目錄（0%o）"
 
-#: lib/util/mkdir_parents.c:103 lib/util/sudo_conf.c:689
-#: lib/util/sudo_conf.c:708 lib/util/sudo_conf.c:735 src/selinux.c:235
-#: src/selinux.c:265 src/sudo.c:375 src/sudo_edit.c:495 src/sudo_edit.c:559
+#: lib/util/mkdir_parents.c:98 lib/util/sudo_conf.c:684
+#: lib/util/sudo_conf.c:703 lib/util/sudo_conf.c:730 src/selinux.c:230
+#: src/selinux.c:260 src/sudo.c:370 src/sudo_edit.c:490 src/sudo_edit.c:554
 #, c-format
 msgid "unable to open %s"
 msgstr "無法開啟 %s"
 
-#: lib/util/mkdir_parents.c:120 lib/util/mkdir_parents.c:160
+#: lib/util/mkdir_parents.c:115 lib/util/mkdir_parents.c:156
 #, c-format
 msgid "unable to mkdir %.*s"
 msgstr "無法建立目錄 %.*s"
 
-#: lib/util/mkdir_parents.c:130 lib/util/mkdir_parents.c:139
+#: lib/util/mkdir_parents.c:125 lib/util/mkdir_parents.c:135
 #, c-format
 msgid "unable to open %.*s"
 msgstr "無法開啟 %.*s"
 
-#: lib/util/regex.c:163
+#: lib/util/regex.c:158
 msgid "regular expression too large"
 msgstr "正則表達式過長"
 
-#: lib/util/strsignal.c:50
+#: lib/util/strsignal.c:45
 msgid "Unknown signal"
 msgstr "未知訊號"
 
-#: lib/util/strtoid.c:84 lib/util/strtomode.c:52 lib/util/strtonum.c:147
-#: lib/util/strtonum.c:186 src/sesh.c:240 src/sesh.c:253
+#: lib/util/strtoid.c:79 lib/util/strtomode.c:47 lib/util/strtonum.c:142
+#: lib/util/strtonum.c:181 src/sesh.c:235 src/sesh.c:248
 msgid "invalid value"
 msgstr "值無效"
 
-#: lib/util/strtomode.c:58 lib/util/strtonum.c:159
+#: lib/util/strtomode.c:53 lib/util/strtonum.c:154
 msgid "value too large"
 msgstr "數值過大"
 
-#: lib/util/strtomode.c:58 lib/util/strtonum.c:153
+#: lib/util/strtomode.c:53 lib/util/strtonum.c:148
 msgid "value too small"
 msgstr "數值過小"
 
-#: lib/util/sudo_conf.c:237
+#: lib/util/sudo_conf.c:232
 #, c-format
 msgid "invalid Path value \"%s\" in %s, line %u"
 msgstr "無效的 Path 值「%s」，位於 %s 第 %u 行"
 
-#: lib/util/sudo_conf.c:403 lib/util/sudo_conf.c:456
+#: lib/util/sudo_conf.c:398 lib/util/sudo_conf.c:451
 #, c-format
 msgid "invalid value for %s \"%s\" in %s, line %u"
 msgstr "無效的 %s 值「%s」，位於 %s 第 %u 行"
 
-#: lib/util/sudo_conf.c:424
+#: lib/util/sudo_conf.c:419
 #, c-format
 msgid "unsupported group source \"%s\" in %s, line %u"
 msgstr "不支援的群組來源「%s」，位於 %s 第 %u 行"
 
-#: lib/util/sudo_conf.c:440
+#: lib/util/sudo_conf.c:435
 #, c-format
 msgid "invalid max groups \"%s\" in %s, line %u"
 msgstr "無效的群組上限「%s」，位於 %s 第 %u 行"
 
-#: lib/util/sudo_conf.c:711
+#: lib/util/sudo_conf.c:706
 #, c-format
 msgid "%s is not a regular file"
 msgstr "%s 非一般檔案"
 
-#: lib/util/sudo_conf.c:714 src/copy_file.c:164
+#: lib/util/sudo_conf.c:709 src/copy_file.c:166
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
 msgstr "%s 不應由 UID %u 擁有，應由 %u"
 
-#: lib/util/sudo_conf.c:718
+#: lib/util/sudo_conf.c:713
 #, c-format
 msgid "%s is world writable"
 msgstr "%s 允許所有使用者寫入"
 
-#: lib/util/sudo_conf.c:721
+#: lib/util/sudo_conf.c:716
 #, c-format
 msgid "%s is group writable"
 msgstr "%s 允許群組寫入"
 
-#: src/apparmor.c:85
+#: src/apparmor.c:80
 msgid "failed to determine AppArmor confinement"
 msgstr "無法確定 AppArmor 的拘束規則"
 
-#: src/apparmor.c:93
+#: src/apparmor.c:88
 #, c-format
 msgid "unable to change AppArmor profile to %s"
 msgstr "無法將 AppArmor 設定檔更變更至 %s"
 
-#: src/copy_file.c:94
+#: src/copy_file.c:93
 #, c-format
 msgid "%s: truncate %s to zero bytes? (y/n) [n] "
 msgstr "%s: 將 %s 截斷至零個位元組？(y/n) [n] "
 
-#: src/copy_file.c:98
+#: src/copy_file.c:97
 #, c-format
 msgid "not overwriting %s"
 msgstr "未覆寫 %s"
 
-#: src/copy_file.c:120
+#: src/copy_file.c:115
 #, c-format
 msgid "unable to read from %s"
 msgstr "無法讀取 %s"
 
-#: src/copy_file.c:137 src/sudo_edit.c:320
+#: src/copy_file.c:139 src/sudo_edit.c:315
 #, c-format
 msgid "unable to write to %s"
 msgstr "無法寫入 %s"
 
-#: src/copy_file.c:151
+#: src/copy_file.c:153
 #, c-format
 msgid "unable to stat %s"
 msgstr "無法取得 %s 的狀態"
 
-#: src/copy_file.c:155 src/sesh.c:312 src/sudo_edit.c:197
+#: src/copy_file.c:157 src/sesh.c:307 src/sudo_edit.c:192
 #, c-format
 msgid "%s: not a regular file"
 msgstr "%s: 非一般檔案"
 
-#: src/copy_file.c:159
+#: src/copy_file.c:161
 #, c-format
 msgid "%s: bad file mode: 0%o"
 msgstr "%s: 檔案模式錯誤: 0%o"
 
-#: src/edit_open.c:333
+#: src/edit_open.c:328
 msgid "unable to restore current working directory"
 msgstr "無法還原目前工作目錄"
 
-#: src/exec.c:111
+#: src/exec.c:106
 msgid "unable to set privileges"
 msgstr "無法設定特權"
 
-#: src/exec.c:117 src/exec.c:122
+#: src/exec.c:112 src/exec.c:117
 msgid "unable to set limit privileges"
 msgstr "無法設定限制特權"
 
-#: src/exec.c:145
+#: src/exec.c:140
 #, c-format
 msgid "unknown login class %s"
 msgstr "未知登入類別 %s"
 
-#: src/exec.c:157
+#: src/exec.c:152
 msgid "unable to set user context"
 msgstr "無法設定使用者上下文"
 
-#: src/exec.c:173
+#: src/exec.c:168
 msgid "unable to set process priority"
 msgstr "無法設定行程優先層級"
 
-#: src/exec.c:190
+#: src/exec.c:185
 #, c-format
 msgid "unable to change root to %s"
 msgstr "無法將根目錄變更至 %s"
 
-#: src/exec.c:203 src/exec.c:209 src/exec.c:216
+#: src/exec.c:198 src/exec.c:204 src/exec.c:211
 #, c-format
 msgid "unable to change to runas uid (%u, %u)"
 msgstr "無法變更至 runas UID (%u, %u)"
 
-#: src/exec.c:238 src/sesh.c:199
+#: src/exec.c:233 src/sesh.c:194
 #, c-format
 msgid "unable to change directory to %s"
 msgstr "無法將目錄變更至 %s"
 
-#: src/exec.c:243
+#: src/exec.c:238
 #, c-format
 msgid "starting from %s"
 msgstr "於 %s 開始"
 
-#: src/exec.c:278 src/exec.c:351 src/exec_monitor.c:564 src/exec_monitor.c:566
-#: src/exec_pty.c:1148 src/exec_pty.c:1150 src/signal.c:144 src/signal.c:151
-#: src/signal.c:165 src/suspend_parent.c:143
+#: src/exec.c:273 src/exec.c:346 src/exec_monitor.c:570 src/exec_monitor.c:572
+#: src/exec_pty.c:1157 src/exec_pty.c:1159 src/signal.c:139 src/signal.c:146
+#: src/signal.c:160 src/suspend_parent.c:138
 #, c-format
 msgid "unable to set handler for signal %d"
 msgstr "無法設定訊號 %d 的處理器"
 
-#: src/exec.c:447
+#: src/exec.c:442
 msgid "intercept mode is not supported with SELinux RBAC on this system"
 msgstr "此系統的 SELinux RBAC 不支援攔截模式"
 
-#: src/exec.c:452
+#: src/exec.c:447
 msgid "unable to log sub-commands with SELinux RBAC on this system"
 msgstr "此系統的 SELinux RBAC 無法記錄子命令"
 
-#: src/exec_common.c:56
+#: src/exec_common.c:51
 msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
 msgstr "無法自 PRIV_LIMIT 移除 PRIV_PROC_EXEC"
 
-#: src/exec_intercept.c:71 src/exec_iolog.c:163 src/exec_iolog.c:173
-#: src/exec_iolog.c:218 src/exec_iolog.c:225 src/exec_iolog.c:252
-#: src/exec_monitor.c:438 src/exec_monitor.c:446 src/exec_monitor.c:454
-#: src/exec_monitor.c:461 src/exec_monitor.c:468 src/exec_monitor.c:475
-#: src/exec_monitor.c:482 src/exec_monitor.c:489 src/exec_monitor.c:496
-#: src/exec_monitor.c:503 src/exec_nopty.c:233 src/exec_nopty.c:242
-#: src/exec_nopty.c:249 src/exec_nopty.c:256 src/exec_nopty.c:263
-#: src/exec_nopty.c:270 src/exec_nopty.c:277 src/exec_nopty.c:284
-#: src/exec_nopty.c:291 src/exec_nopty.c:298 src/exec_nopty.c:305
-#: src/exec_nopty.c:312 src/exec_nopty.c:320 src/exec_nopty.c:328
-#: src/exec_nopty.c:387 src/exec_nopty.c:457 src/exec_pty.c:441
-#: src/exec_pty.c:555 src/exec_pty.c:605 src/exec_pty.c:992 src/exec_pty.c:1001
-#: src/exec_pty.c:1008 src/exec_pty.c:1015 src/exec_pty.c:1022
-#: src/exec_pty.c:1029 src/exec_pty.c:1036 src/exec_pty.c:1043
-#: src/exec_pty.c:1050 src/exec_pty.c:1057 src/exec_pty.c:1064
-#: src/exec_pty.c:1071
+#: src/exec_intercept.c:66 src/exec_iolog.c:158 src/exec_iolog.c:168
+#: src/exec_iolog.c:213 src/exec_iolog.c:220 src/exec_iolog.c:247
+#: src/exec_monitor.c:444 src/exec_monitor.c:452 src/exec_monitor.c:460
+#: src/exec_monitor.c:467 src/exec_monitor.c:474 src/exec_monitor.c:481
+#: src/exec_monitor.c:488 src/exec_monitor.c:495 src/exec_monitor.c:502
+#: src/exec_monitor.c:509 src/exec_nopty.c:238 src/exec_nopty.c:247
+#: src/exec_nopty.c:254 src/exec_nopty.c:261 src/exec_nopty.c:268
+#: src/exec_nopty.c:275 src/exec_nopty.c:282 src/exec_nopty.c:289
+#: src/exec_nopty.c:296 src/exec_nopty.c:303 src/exec_nopty.c:310
+#: src/exec_nopty.c:317 src/exec_nopty.c:325 src/exec_nopty.c:333
+#: src/exec_nopty.c:392 src/exec_nopty.c:462 src/exec_pty.c:443
+#: src/exec_pty.c:557 src/exec_pty.c:607 src/exec_pty.c:1002
+#: src/exec_pty.c:1011 src/exec_pty.c:1018 src/exec_pty.c:1025
+#: src/exec_pty.c:1032 src/exec_pty.c:1039 src/exec_pty.c:1046
+#: src/exec_pty.c:1053 src/exec_pty.c:1060 src/exec_pty.c:1067
+#: src/exec_pty.c:1074 src/exec_pty.c:1081
 msgid "unable to add event to queue"
 msgstr "無法將事件加入佇列"
 
-#: src/exec_intercept.c:324 src/sudo.c:1056
+#: src/exec_intercept.c:319 src/sudo.c:1054
 msgid "command not set by the security policy"
 msgstr "安全方針未設定命令"
 
-#: src/exec_intercept.c:403 src/exec_intercept.c:443 src/sudo.c:1274
-#: src/sudo.c:1319 src/sudo.c:1363
+#: src/exec_intercept.c:398 src/exec_intercept.c:438 src/sudo.c:1272
+#: src/sudo.c:1317 src/sudo.c:1361
 msgid "command rejected by policy"
 msgstr "方針拒絕了命令"
 
-#: src/exec_intercept.c:514 src/sudo.c:1961
+#: src/exec_intercept.c:509 src/sudo.c:1959
 msgid "approval plugin error"
 msgstr "核准插件發生錯誤"
 
-#: src/exec_intercept.c:539 src/sudo.c:1279 src/sudo.c:1324 src/sudo.c:1368
-#: src/sudo.c:1442
+#: src/exec_intercept.c:534 src/sudo.c:1277 src/sudo.c:1322 src/sudo.c:1366
+#: src/sudo.c:1440
 msgid "policy plugin error"
 msgstr "方針插件發生錯誤"
 
-#: src/exec_intercept.c:568
+#: src/exec_intercept.c:563
 msgid "invalid PolicyCheckRequest"
 msgstr "無效的 PolicyCheckRequest"
 
-#: src/exec_intercept.c:711
+#: src/exec_intercept.c:706
 #, c-format
 msgid "client request too large: %zu"
 msgstr "用戶端請求過長: %zu"
 
-#: src/exec_intercept.c:753
+#: src/exec_intercept.c:748
 #, c-format
 msgid "unable to unpack %s size %zu"
 msgstr "無法解包 %s（大小 %zu）"
 
-#: src/exec_intercept.c:801
+#: src/exec_intercept.c:796
 #, c-format
 msgid "unexpected type_case value %d in %s from %s"
 msgstr "從 %3$s 收到的 %2$s 中有非預期的 type_case 值 %1$d"
 
-#: src/exec_intercept.c:827
+#: src/exec_intercept.c:822
 #, c-format
 msgid "server message too large: %zu"
 msgstr "伺服器訊息過長: %zu"
 
-#: src/exec_iolog.c:321 src/exec_iolog.c:361 src/exec_iolog.c:401
-#: src/exec_iolog.c:452 src/exec_iolog.c:503
+#: src/exec_iolog.c:316 src/exec_iolog.c:356 src/exec_iolog.c:396
+#: src/exec_iolog.c:447 src/exec_iolog.c:498
 msgid "I/O plugin error"
 msgstr "I/O 插件錯誤"
 
-#: src/exec_iolog.c:325 src/exec_iolog.c:365 src/exec_iolog.c:405
-#: src/exec_iolog.c:456 src/exec_iolog.c:507
+#: src/exec_iolog.c:320 src/exec_iolog.c:360 src/exec_iolog.c:400
+#: src/exec_iolog.c:451 src/exec_iolog.c:502
 msgid "command rejected by I/O plugin"
 msgstr "I/O 插件拒絕了命令"
 
-#: src/exec_iolog.c:555
+#: src/exec_iolog.c:550
 msgid "error logging suspend"
 msgstr "記錄暫停時發生錯誤"
 
-#: src/exec_iolog.c:590
+#: src/exec_iolog.c:585
 msgid "error changing window size"
 msgstr "變更視窗大小時發生錯誤"
 
-#: src/exec_monitor.c:330
+#: src/exec_monitor.c:324
 msgid "error reading from socketpair"
 msgstr "讀取插口對時發生錯誤"
 
-#: src/exec_monitor.c:342
+#: src/exec_monitor.c:336
 #, c-format
 msgid "unexpected reply type on backchannel: %d"
 msgstr "未預期的反向通道回覆類型: %d"
 
-#: src/exec_monitor.c:578
+#: src/exec_monitor.c:584
 msgid "unable to set controlling tty"
 msgstr "無法設定控制 TTY"
 
-#: src/exec_monitor.c:590 src/exec_nopty.c:572 src/exec_pty.c:1126
-#: src/exec_pty.c:1135
+#: src/exec_monitor.c:599 src/exec_nopty.c:578 src/exec_pty.c:1135
+#: src/exec_pty.c:1144
 msgid "unable to create sockets"
 msgstr "無法建立插口"
 
-#: src/exec_monitor.c:599
+#: src/exec_monitor.c:608
 msgid "unable to receive message from parent"
 msgstr "無法從親代行程接收訊息"
 
-#: src/exec_monitor.c:614 src/exec_nopty.c:606 src/exec_pty.c:1336
-#: src/sudo_edit.c:361 src/tgetpass.c:310
+#: src/exec_monitor.c:623 src/exec_nopty.c:612 src/exec_pty.c:1340
+#: src/sudo_edit.c:356 src/tgetpass.c:310
 msgid "unable to fork"
 msgstr "無法分叉行程"
 
-#: src/exec_monitor.c:618 src/exec_monitor.c:720 src/exec_nopty.c:712
+#: src/exec_monitor.c:627 src/exec_monitor.c:729 src/exec_nopty.c:715
 msgid "unable to restore tty label"
 msgstr "無法還原 TTY 標籤"
 
-#: src/exec_monitor.c:629 src/exec_monitor.c:678 src/sesh.c:217 src/sudo.c:1225
+#: src/exec_monitor.c:638 src/exec_monitor.c:687 src/sesh.c:212 src/sudo.c:1223
 #, c-format
 msgid "unable to execute %s"
 msgstr "無法執行 %s"
 
-#: src/exec_nopty.c:507 src/exec_nopty.c:517 src/exec_nopty.c:527
-#: src/exec_nopty.c:563 src/exec_pty.c:1224 src/exec_pty.c:1251
-#: src/exec_pty.c:1274 src/exec_pty.c:1292 src/tgetpass.c:306
+#: src/exec_nopty.c:510 src/exec_nopty.c:520 src/exec_nopty.c:530
+#: src/exec_nopty.c:569 src/exec_pty.c:1228 src/exec_pty.c:1255
+#: src/exec_pty.c:1278 src/exec_pty.c:1296 src/tgetpass.c:306
 msgid "unable to create pipe"
 msgstr "無法建立管線"
 
-#: src/exec_nopty.c:557 src/exec_pty.c:1157
+#: src/exec_nopty.c:560 src/exec_pty.c:1166
 msgid "policy plugin failed session initialization"
 msgstr "方針插件無法初始化工作階段"
 
-#: src/exec_nopty.c:700 src/exec_pty.c:1437
+#: src/exec_nopty.c:703 src/exec_pty.c:1441
 msgid "error in event loop"
 msgstr "在事件處理迴圈中發生錯誤"
 
-#: src/exec_preload.c:168 src/net_ifs.c:206 src/net_ifs.c:372 src/net_ifs.c:433
-#: src/net_ifs.c:620 src/net_ifs.c:852 src/sudo.c:494 src/sudo_edit.c:398
-#: src/sudo_edit.c:406
+#: src/exec_preload.c:163 src/net_ifs.c:201 src/net_ifs.c:367 src/net_ifs.c:428
+#: src/net_ifs.c:615 src/net_ifs.c:847 src/sudo.c:489 src/sudo_edit.c:393
+#: src/sudo_edit.c:401
 #, c-format
 msgid "internal error, %s overflow"
 msgstr "內部錯誤，%s 溢位"
 
-#: src/exec_ptrace.c:1082 src/exec_ptrace.c:1107 src/exec_ptrace.c:1930
+#: src/exec_ptrace.c:1089 src/exec_ptrace.c:1114 src/exec_ptrace.c:1938
 #, c-format
 msgid "unable to set registers for process %d"
 msgstr "無法設定行程 %d 的暫存器"
 
-#: src/exec_ptrace.c:1102 src/exec_ptrace.c:1277 src/exec_ptrace.c:1630
+#: src/exec_ptrace.c:1109 src/exec_ptrace.c:1285 src/exec_ptrace.c:1638
 #, c-format
 msgid "process %d exited unexpectedly"
 msgstr "行程 %d 非預期地結束了"
 
-#: src/exec_ptrace.c:1211
+#: src/exec_ptrace.c:1219
 msgid "unable to set seccomp filter"
 msgstr "無法設定 seccomp 過濾器"
 
-#: src/exec_ptrace.c:1408
+#: src/exec_ptrace.c:1416
 #, c-format
 msgid "interpreter argument , expected \"%s\", got \"%s\""
 msgstr "直譯器引數，預期「%s」，卻收到「%s」"
 
-#: src/exec_ptrace.c:1506
+#: src/exec_ptrace.c:1514
 #, c-format
 msgid "pathname mismatch, expected \"%s\", got \"%s\""
 msgstr "路徑不相符，預期「%s」，卻收到「%s」"
 
-#: src/exec_ptrace.c:1515 src/exec_ptrace.c:1522 src/exec_ptrace.c:1546
-#: src/exec_ptrace.c:1554 src/exec_ptrace.c:1560 src/exec_ptrace.c:1566
+#: src/exec_ptrace.c:1523 src/exec_ptrace.c:1530 src/exec_ptrace.c:1554
+#: src/exec_ptrace.c:1562 src/exec_ptrace.c:1568 src/exec_ptrace.c:1574
 #, c-format
 msgid "%s[%d] mismatch, expected \"%s\", got \"%s\""
 msgstr "%s[%d] 不相符，預期「%s」，卻收到「%s」"
 
-#: src/exec_ptrace.c:1634
+#: src/exec_ptrace.c:1642
 #, c-format
 msgid "process %d unexpected status 0x%x"
 msgstr "行程 %d 以非預期的狀態 0x%x 結束了"
 
-#: src/exec_ptrace.c:1727
+#: src/exec_ptrace.c:1735
 #, c-format
 msgid "unable to get event message for process %d"
 msgstr "無法取得行程 %d 的事件訊息"
 
-#: src/exec_ptrace.c:1734
+#: src/exec_ptrace.c:1742
 #, c-format
 msgid "unable to get registers for process %d"
 msgstr "無法取得行程 %d 的暫存器"
 
-#: src/exec_pty.c:87
-msgid "unable to allocate pty"
-msgstr "無法分配 PTY"
-
-#: src/exec_pty.c:118 src/exec_pty.c:257 src/tgetpass.c:251
+#: src/exec_pty.c:75 src/exec_pty.c:257 src/tgetpass.c:251
 msgid "unable to restore terminal settings"
 msgstr "無法還原終端機設定"
+
+#: src/exec_pty.c:117
+msgid "unable to allocate pty"
+msgstr "無法分配 PTY"
 
 #: src/exec_pty.c:218
 msgid "unable to set handler for SIGCONT"
@@ -514,101 +514,105 @@ msgstr "無法還原 SIG%s 的處理器"
 msgid "unable to restore handler for SIGCONT"
 msgstr "無法還原 SIGCONT 的處理器"
 
-#: src/exec_pty.c:1385
+#: src/exec_pty.c:1389
 msgid "unable to send message to monitor process"
 msgstr "無法傳送訊息給監聽行程"
 
-#: src/load_plugins.c:75 src/load_plugins.c:222 src/load_plugins.c:232
-#: src/load_plugins.c:242 src/load_plugins.c:289
+#: src/load_plugins.c:70 src/load_plugins.c:217 src/load_plugins.c:227
+#: src/load_plugins.c:237 src/load_plugins.c:284
 #, c-format
 msgid "error in %s, line %d while loading plugin \"%s\""
 msgstr "載入插件「%3$s」時發現錯誤，位於 %1$s 第 %2$d 行"
 
-#: src/load_plugins.c:186 src/load_plugins.c:257
+#: src/load_plugins.c:181 src/load_plugins.c:252
 #, c-format
 msgid "ignoring duplicate plugin \"%s\" in %s, line %d"
 msgstr "忽略重複的插件「%s」，位於 %s 第 %d 行"
 
-#: src/load_plugins.c:224
+#: src/load_plugins.c:219
 #, c-format
 msgid "unable to load %s: %s"
 msgstr "無法載入 %s: %s"
 
-#: src/load_plugins.c:234
+#: src/load_plugins.c:229
 #, c-format
 msgid "unable to find symbol \"%s\" in %s"
 msgstr "無法在 %2$s 中找到符號「%1$s」"
 
-#: src/load_plugins.c:244
+#: src/load_plugins.c:239
 #, c-format
 msgid "incompatible plugin major version %d (expected %d) found in %s"
 msgstr "在 %3$s 中發現不相容的插件主版本 %1$d（預期 %2$d）"
 
-#: src/load_plugins.c:262
+#: src/load_plugins.c:257
 #, c-format
 msgid "ignoring policy plugin \"%s\" in %s, line %d"
 msgstr "忽略方針插件「%s」，位於 %s 第 %d 行"
 
-#: src/load_plugins.c:265
+#: src/load_plugins.c:260
 msgid "only a single policy plugin may be specified"
 msgstr "只能指定一個方針插件"
 
-#: src/load_plugins.c:291
+#: src/load_plugins.c:286
 #, c-format
 msgid "unknown plugin type %d found in %s"
 msgstr "在 %2$s 中發現未知插件類型 %1$d"
 
-#: src/load_plugins.c:474
+#: src/load_plugins.c:469
 #, c-format
 msgid "policy plugin %s does not include a check_policy method"
 msgstr "方針插件 %s 未包含 check_policy 方法"
 
-#: src/parse_args.c:213
+#: src/parse_args.c:208
 #, c-format
 msgid "invalid environment variable name: %s"
 msgstr "無效的環境變數名稱: %s"
 
-#: src/parse_args.c:318
+#: src/parse_args.c:313
 msgid "the argument to -C must be a number greater than or equal to 3"
 msgstr "-C 的引數必須是大於等於 3 的數字"
 
-#: src/parse_args.c:555
+#: src/parse_args.c:453
+msgid "the -R option will be removed in a future version of sudo"
+msgstr "-R 選項將在之後的版本移除"
+
+#: src/parse_args.c:552
 msgid "you may not specify both the -i and -s options"
 msgstr "-i 與 -s 選項不能同時指定"
 
-#: src/parse_args.c:560
+#: src/parse_args.c:557
 msgid "you may not specify both the -i and -E options"
 msgstr "-i 與 -E 選項不能同時指定"
 
-#: src/parse_args.c:570
+#: src/parse_args.c:567
 msgid "the -E option is not valid in edit mode"
 msgstr "-E 選項在編輯模式下無效"
 
-#: src/parse_args.c:573
+#: src/parse_args.c:570
 msgid "you may not specify environment variables in edit mode"
 msgstr "環境變數不能在編輯模式下指定"
 
-#: src/parse_args.c:583
+#: src/parse_args.c:580
 msgid "the -U option may only be used with the -l option"
 msgstr "-U 選項只能與 -l 選項同時使用"
 
-#: src/parse_args.c:587
+#: src/parse_args.c:584
 msgid "the -A and -S options may not be used together"
 msgstr "-A 與 -S 選項不能同時使用"
 
-#: src/parse_args.c:685
+#: src/parse_args.c:682
 msgid "sudoedit is not supported on this platform"
 msgstr "此平台不支援 sudoedit"
 
-#: src/parse_args.c:744
+#: src/parse_args.c:741
 msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
 msgstr "-e、-h、-i、-K、-l、-s、-v 和 -V 選項只能同時指定其中之一"
 
-#: src/parse_args.c:757
+#: src/parse_args.c:754
 msgid "Only one of the -K, -k or -N options may be specified"
 msgstr "-K、-k 和 -N 選項只能同時指定其中之一"
 
-#: src/parse_args.c:778
+#: src/parse_args.c:775
 #, c-format
 msgid ""
 "%s - edit files as another user\n"
@@ -617,7 +621,7 @@ msgstr ""
 "%s - 以另一個使用者的身分編輯檔案\n"
 "\n"
 
-#: src/parse_args.c:780
+#: src/parse_args.c:777
 #, c-format
 msgid ""
 "%s - execute a command as another user\n"
@@ -626,7 +630,7 @@ msgstr ""
 "%s - 以另一個使用者的身分執行命令\n"
 "\n"
 
-#: src/parse_args.c:785
+#: src/parse_args.c:782
 msgid ""
 "\n"
 "Options:\n"
@@ -634,545 +638,549 @@ msgstr ""
 "\n"
 "選項：\n"
 
-#: src/parse_args.c:787
+#: src/parse_args.c:784
 msgid "use a helper program for password prompting"
 msgstr "使用指定程式來提示使用者輸入密碼"
 
-#: src/parse_args.c:790
+#: src/parse_args.c:787
 msgid "use specified BSD authentication type"
 msgstr "使用指定的 BSD 認證類型"
 
-#: src/parse_args.c:794
+#: src/parse_args.c:791
 msgid "run command in the background"
 msgstr "在背景執行命令"
 
-#: src/parse_args.c:797
+#: src/parse_args.c:794
 msgid "ring bell when prompting"
 msgstr "在提示時響鈴"
 
-#: src/parse_args.c:799
+#: src/parse_args.c:796
 msgid "close all file descriptors >= num"
 msgstr "關閉所有 >= num 的檔案描述子"
 
-#: src/parse_args.c:802
+#: src/parse_args.c:799
 msgid "run command with the specified BSD login class"
 msgstr "以指定的 BSD 登入類別執行命令"
 
-#: src/parse_args.c:805
+#: src/parse_args.c:802
 msgid "change the working directory before running command"
 msgstr "執行命令前變更工作目錄"
 
-#: src/parse_args.c:808
+#: src/parse_args.c:805
 msgid "preserve user environment when running command"
 msgstr "執行命令時保留使用者環境"
 
-#: src/parse_args.c:810
+#: src/parse_args.c:807
 msgid "preserve specific environment variables"
 msgstr "保留指定環境變數"
 
-#: src/parse_args.c:812
+#: src/parse_args.c:809
 msgid "edit files instead of running a command"
 msgstr "編輯檔案而非執行命令"
 
-#: src/parse_args.c:815
+#: src/parse_args.c:812
 msgid "run command as the specified group name or ID"
 msgstr "以指定群組名稱或 ID 的身分執行命令"
 
-#: src/parse_args.c:818
+#: src/parse_args.c:815
 msgid "set HOME variable to target user's home dir"
 msgstr "將 HOME 變數設定為目標使用者的家目錄"
 
-#: src/parse_args.c:821
+#: src/parse_args.c:818
 msgid "display help message and exit"
 msgstr "顯示說明訊息後結束"
 
-#: src/parse_args.c:823
+#: src/parse_args.c:820
 msgid "run command on host (if supported by plugin)"
 msgstr "在指定主機上執行命令（若插件支援）"
 
-#: src/parse_args.c:826
+#: src/parse_args.c:823
 msgid "run login shell as the target user; a command may also be specified"
 msgstr "以目標使用者的身分執行登入殼層；亦可指定命令"
 
-#: src/parse_args.c:828
+#: src/parse_args.c:825
 msgid "remove timestamp file completely"
 msgstr "完全移除時間戳檔案"
 
-#: src/parse_args.c:831
+#: src/parse_args.c:828
 msgid "invalidate timestamp file"
 msgstr "使時間戳檔案作廢"
 
-#: src/parse_args.c:834
+#: src/parse_args.c:831
 msgid "list user's privileges or check a specific command; use twice for longer format"
 msgstr "列出使用者的特權或檢查指定命令；使用兩次以獲得較長格式的輸出"
 
-#: src/parse_args.c:837
+#: src/parse_args.c:834
 msgid "non-interactive mode, no prompts are used"
 msgstr "非互動模式，不使用提示"
 
-#: src/parse_args.c:840
+#: src/parse_args.c:837
 msgid "preserve group vector instead of setting to target's"
 msgstr "保留群組列表而不設定為目標的"
 
-#: src/parse_args.c:843
+#: src/parse_args.c:840
 msgid "use the specified password prompt"
 msgstr "使用指定的密碼輸入提示"
 
-#: src/parse_args.c:845
+#: src/parse_args.c:842
 msgid "change the root directory before running command"
 msgstr "執行命令前變更根目錄"
 
-#: src/parse_args.c:848
+#: src/parse_args.c:845
 msgid "create SELinux security context with specified role"
 msgstr "以指定角色建立 SELinux 安全上下文"
 
-#: src/parse_args.c:851
+#: src/parse_args.c:848
 msgid "read password from standard input"
 msgstr "從標準輸入流讀取密碼"
 
-#: src/parse_args.c:854
+#: src/parse_args.c:851
 msgid "run shell as the target user; a command may also be specified"
 msgstr "以目標使用者的身分執行殼層；亦可指定命令"
 
-#: src/parse_args.c:858
+#: src/parse_args.c:855
 msgid "create SELinux security context with specified type"
 msgstr "以指定類型建立 SELinux 安全上下文"
 
-#: src/parse_args.c:861
+#: src/parse_args.c:858
 msgid "terminate command after the specified time limit"
 msgstr "在指定的時間限制後結束命令"
 
-#: src/parse_args.c:864
+#: src/parse_args.c:861
 msgid "in list mode, display privileges for user"
 msgstr "在列出模式下顯示使用者的特權"
 
-#: src/parse_args.c:867
+#: src/parse_args.c:864
 msgid "run command (or edit file) as specified user name or ID"
 msgstr "以指定使用者名稱或 ID 的身分執行命令（或編輯檔案）"
 
-#: src/parse_args.c:869
+#: src/parse_args.c:866
 msgid "display version information and exit"
 msgstr "顯示版本資訊後結束"
 
-#: src/parse_args.c:872
+#: src/parse_args.c:869
 msgid "update user's timestamp without running a command"
 msgstr "更新使用者的時間戳而不執行命令"
 
-#: src/parse_args.c:875
+#: src/parse_args.c:872
 msgid "stop processing command line arguments"
 msgstr "停止處理命令列引數"
 
-#: src/selinux.c:83
+#: src/selinux.c:78
 msgid "unable to open audit system"
 msgstr "無法開啟稽核系統"
 
-#: src/selinux.c:93
+#: src/selinux.c:88
 msgid "unable to send audit message"
 msgstr "無法傳送稽核訊息"
 
-#: src/selinux.c:129
+#: src/selinux.c:124
 #, c-format
 msgid "unable to fgetfilecon %s"
 msgstr "無法 fgetfilecon %s"
 
-#: src/selinux.c:134
+#: src/selinux.c:129
 #, c-format
 msgid "%s changed labels"
 msgstr "%s 的標籤變更了"
 
-#: src/selinux.c:142
+#: src/selinux.c:137
 #, c-format
 msgid "unable to restore context for %s"
 msgstr "無法還原 %s 的上下文"
 
-#: src/selinux.c:190
+#: src/selinux.c:185
 #, c-format
 msgid "unable to open %s, not relabeling tty"
 msgstr "無法開啟 %s，未重新標籤 TTY"
 
-#: src/selinux.c:194 src/selinux.c:239 src/selinux.c:269
+#: src/selinux.c:189 src/selinux.c:234 src/selinux.c:264
 #, c-format
 msgid "%s is not a character device, not relabeling tty"
 msgstr "%s 不是字元裝置，未重新標籤 TTY"
 
-#: src/selinux.c:203
+#: src/selinux.c:198
 msgid "unable to get current tty context, not relabeling tty"
 msgstr "無法取得目前 TTY 的上下文，未重新標籤 TTY"
 
-#: src/selinux.c:210
+#: src/selinux.c:205
 msgid "unknown security class \"chr_file\", not relabeling tty"
 msgstr "未知安全類別「chr_file」，未重新標籤 TTY"
 
-#: src/selinux.c:215
+#: src/selinux.c:210
 msgid "unable to get new tty context, not relabeling tty"
 msgstr "無法取得新 TTY 的上下文，未重新標籤 TTY"
 
-#: src/selinux.c:224
+#: src/selinux.c:219
 msgid "unable to set new tty context"
 msgstr "無法設定新 TTY 的上下文"
 
-#: src/selinux.c:323
+#: src/selinux.c:318
 #, c-format
 msgid "you must specify a role for type %s"
 msgstr "您必須為類型 %s 指定角色"
 
-#: src/selinux.c:329
+#: src/selinux.c:324
 #, c-format
 msgid "unable to get default type for role %s"
 msgstr "無法取得角色 %s 的預設類型"
 
-#: src/selinux.c:341
+#: src/selinux.c:336
 msgid "failed to get new context"
 msgstr "無法取得新上下文"
 
-#: src/selinux.c:350
+#: src/selinux.c:345
 #, c-format
 msgid "failed to set new role %s"
 msgstr "無法設定新角色 %s"
 
-#: src/selinux.c:354
+#: src/selinux.c:349
 #, c-format
 msgid "failed to set new type %s"
 msgstr "無法設定新類型 %s"
 
-#: src/selinux.c:366
+#: src/selinux.c:361
 #, c-format
 msgid "%s is not a valid context"
 msgstr "%s 不是有效的上下文"
 
-#: src/selinux.c:394
+#: src/selinux.c:389
 msgid "failed to get old context"
 msgstr "無法取得舊上下文"
 
-#: src/selinux.c:400
+#: src/selinux.c:395
 msgid "unable to determine enforcing mode."
 msgstr "無法確定強制模式。"
 
-#: src/selinux.c:425
+#: src/selinux.c:420
 #, c-format
 msgid "unable to set exec context to %s"
 msgstr "無法將 exec 上下文設定為 %s"
 
-#: src/selinux.c:432
+#: src/selinux.c:427
 #, c-format
 msgid "unable to set key creation context to %s"
 msgstr "無法將金鑰建立上下文設定為 %s"
 
-#: src/sesh.c:114 src/sesh.c:134
+#: src/sesh.c:109 src/sesh.c:129
 msgid "Only one of the -c or -i options may be specified"
 msgstr "-c 和 -i 選項只能同時指定其中之一"
 
-#: src/sesh.c:129
+#: src/sesh.c:124
 #, c-format
 msgid "invalid file descriptor number: %s"
 msgstr "無效的檔案描述子號碼: %s"
 
-#: src/sesh.c:167 src/sesh.c:171 src/sesh.c:175
+#: src/sesh.c:162 src/sesh.c:166 src/sesh.c:170
 #, c-format
 msgid "The -%c option may not be used in edit mode."
 msgstr "-%c 選項不能在編輯模式下使用。"
 
-#: src/sesh.c:184 src/sesh.c:189
+#: src/sesh.c:179 src/sesh.c:184
 #, c-format
 msgid "The -%c option may only be used in edit mode."
 msgstr "-%c 選項只能在編輯模式下使用。"
 
-#: src/sesh.c:294 src/sesh.c:394 src/sudo_edit.c:204
+#: src/sesh.c:289 src/sesh.c:389 src/sudo_edit.c:199
 #, c-format
 msgid "%s: editing symbolic links is not permitted"
 msgstr "%s: 不允許編輯象徵式連結"
 
-#: src/sesh.c:297 src/sesh.c:397 src/sudo_edit.c:207
+#: src/sesh.c:292 src/sesh.c:392 src/sudo_edit.c:202
 #, c-format
 msgid "%s: editing files in a writable directory is not permitted"
 msgstr "%s: 不允許編輯可寫目錄中的檔案"
 
-#: src/sesh.c:381 src/sesh.c:402 src/sesh.c:411 src/sesh.c:419
-#: src/sudo_edit.c:331
+#: src/sesh.c:376 src/sesh.c:397 src/sesh.c:406 src/sesh.c:414
+#: src/sudo_edit.c:326
 #, c-format
 msgid "contents of edit session left in %s"
 msgstr "編輯階段的內容留在 %s"
 
-#: src/sesh.c:476 src/sudo_edit.c:94
+#: src/sesh.c:471 src/sudo_edit.c:89
 msgid "unable to get group list"
 msgstr "無法取得群組列表"
 
-#: src/signal.c:79
+#: src/signal.c:74
 #, c-format
 msgid "unable to save handler for signal %d"
 msgstr "無法儲存訊號 %d 的處理器"
 
-#: src/signal.c:101 src/suspend_parent.c:149
+#: src/signal.c:96 src/suspend_parent.c:144
 #, c-format
 msgid "unable to restore handler for signal %d"
 msgstr "無法還原訊號 %d 的處理器"
 
-#: src/solaris.c:72
+#: src/solaris.c:67
 msgid "resource control limit has been reached"
 msgstr "達到了資源控制限制"
 
-#: src/solaris.c:75
+#: src/solaris.c:70
 #, c-format
 msgid "user \"%s\" is not a member of project \"%s\""
 msgstr "使用者「%s」不是專案「%s」的成員"
 
-#: src/solaris.c:79
+#: src/solaris.c:74
 msgid "the invoking task is final"
 msgstr "呼叫者是末尾任務"
 
-#: src/solaris.c:82
+#: src/solaris.c:77
 #, c-format
 msgid "could not join project \"%s\""
 msgstr "無法加入專案「%s」"
 
-#: src/solaris.c:89
+#: src/solaris.c:84
 #, c-format
 msgid "no resource pool accepting default bindings exists for project \"%s\""
 msgstr "沒有資源池接受預設綁定來與專案「%s」關聯"
 
-#: src/solaris.c:93
+#: src/solaris.c:88
 #, c-format
 msgid "specified resource pool does not exist for project \"%s\""
 msgstr "專案「%s」指定的資源池不存在"
 
-#: src/solaris.c:97
+#: src/solaris.c:92
 #, c-format
 msgid "could not bind to default resource pool for project \"%s\""
 msgstr "無法為專案「%s」綁定預設資源池"
 
-#: src/solaris.c:104
+#: src/solaris.c:99
 #, c-format
 msgid "setproject failed for project \"%s\""
 msgstr "無法以專案「%s」setproject"
 
-#: src/solaris.c:106
+#: src/solaris.c:101
 #, c-format
 msgid "warning, resource control assignment failed for project \"%s\""
 msgstr "警告，無法指派專案「%s」資源控制"
 
-#: src/sudo.c:215
+#: src/sudo.c:210
 #, c-format
 msgid "Sudo version %s\n"
 msgstr "Sudo 版本 %s\n"
 
-#: src/sudo.c:217
+#: src/sudo.c:212
 #, c-format
 msgid "Configure options: %s\n"
 msgstr "配置選項：%s\n"
 
-#: src/sudo.c:225
+#: src/sudo.c:220
 msgid "fatal error, unable to load plugins"
 msgstr "致命錯誤，無法載入插件"
 
-#: src/sudo.c:271
+#: src/sudo.c:266
 msgid "plugin did not return a command to execute"
 msgstr "插件未回傳要執行的命令"
 
-#: src/sudo.c:307
+#: src/sudo.c:302
 #, c-format
 msgid "unexpected sudo mode 0x%x"
 msgstr "非預期的 sudo 模式 0x%x"
 
-#: src/sudo.c:567
+#: src/sudo.c:562
 #, c-format
 msgid "you do not exist in the %s database"
 msgstr "您不在 %s 資料庫中"
 
-#: src/sudo.c:632
+#: src/sudo.c:630
 msgid "unable to determine tty"
 msgstr "無法確定 TTY"
 
-#: src/sudo.c:955
+#: src/sudo.c:953
 msgid "The \"no new privileges\" flag is set, which prevents sudo from running as root."
 msgstr "由於設定了「無新特權」旗標，sudo 無法以根權限執行。"
 
-#: src/sudo.c:957
+#: src/sudo.c:955
 msgid "If sudo is running in a container, you may need to adjust the container configuration to disable the flag."
 msgstr "若 sudo 正在容器中執行，您可能需要調整容器組態來關閉該旗標。"
 
-#: src/sudo.c:991
+#: src/sudo.c:989
 #, c-format
 msgid "%s must be owned by uid %d and have the setuid bit set"
 msgstr "%s 必須由 UID %d 擁有，並設定 setuid 位元"
 
-#: src/sudo.c:994
+#: src/sudo.c:992
 #, c-format
 msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
 msgstr "實效 UID 不是 %d，%s 是不是在設定了「nosuid」選項的檔案系統或不具有根特權的 NFS 檔案系統上？"
 
-#: src/sudo.c:1000
+#: src/sudo.c:998
 #, c-format
 msgid "effective uid is not %d, is sudo installed setuid root?"
 msgstr "實效 UID 不是 %d，sudo 是以 setuid root 安裝的嗎？"
 
-#: src/sudo.c:1016 src/tgetpass.c:332
+#: src/sudo.c:1014 src/tgetpass.c:332
 msgid "unable to set supplementary group IDs"
 msgstr "無法設定補充群組 ID"
 
-#: src/sudo.c:1023
+#: src/sudo.c:1021
 #, c-format
 msgid "unable to set effective gid to runas gid %u"
 msgstr "無法將實效 GID 設定為 runas GID %u"
 
-#: src/sudo.c:1029
+#: src/sudo.c:1027
 #, c-format
 msgid "unable to set gid to runas gid %u"
 msgstr "無法將 GID 設定為 runas GID %u"
 
-#: src/sudo.c:1060
+#: src/sudo.c:1058
 msgid "argv not set by the security policy"
 msgstr "安全方針未設定 argv"
 
-#: src/sudo.c:1064
+#: src/sudo.c:1062
 msgid "envp not set by the security policy"
 msgstr "安全方針未設定 envp"
 
-#: src/sudo.c:1086
+#: src/sudo.c:1084
 #, c-format
 msgid "unexpected child termination condition: %d"
 msgstr "非預期的子代行程結束狀態: %d"
 
-#: src/sudo.c:1198
+#: src/sudo.c:1196
 msgid "unable to initialize policy plugin"
 msgstr "無法初始化方針插件"
 
-#: src/sudo.c:1259
+#: src/sudo.c:1257
 #, c-format
 msgid "policy plugin %s is missing the \"check_policy\" method"
 msgstr "方針插件 %s 缺少「check_policy」方法"
 
-#: src/sudo.c:1305
+#: src/sudo.c:1303
 #, c-format
 msgid "policy plugin %s does not support listing privileges"
 msgstr "方針插件 %s 不支援列出特權"
 
-#: src/sudo.c:1349
+#: src/sudo.c:1347
 #, c-format
 msgid "policy plugin %s does not support the -v option"
 msgstr "方針插件 %s 不支援 -v 選項"
 
-#: src/sudo.c:1387
+#: src/sudo.c:1385
 #, c-format
 msgid "policy plugin %s does not support the -k/-K options"
 msgstr "方針插件 %s 不支援 -k／-K 選項"
 
-#: src/sudo.c:1516
+#: src/sudo.c:1514
 #, c-format
 msgid "error initializing I/O plugin %s"
 msgstr "初始化 I/O 插件 %s 時發生錯誤"
 
-#: src/sudo.c:1519
+#: src/sudo.c:1517
 msgid "error initializing I/O plugin"
 msgstr "初始化 I/O 插件時發生錯誤"
 
-#: src/sudo.c:1668
+#: src/sudo.c:1666
 #, c-format
 msgid "error initializing audit plugin %s"
 msgstr "初始化稽核插件 %s 時發生錯誤"
 
-#: src/sudo.c:1747
+#: src/sudo.c:1745
 #, c-format
 msgid "%s: unable to log error event%s%s"
 msgstr "%s: 無法記錄錯誤事件%s%s"
 
-#: src/sudo.c:1783
+#: src/sudo.c:1781
 #, c-format
 msgid "%s: unable to log accept event%s%s"
 msgstr "%s: 無法記錄接受事件%s%s"
 
-#: src/sudo.c:1788 src/sudo.c:1826
+#: src/sudo.c:1786 src/sudo.c:1824
 msgid "audit plugin error"
 msgstr "稽核插件發生錯誤"
 
-#: src/sudo.c:1821
+#: src/sudo.c:1819
 #, c-format
 msgid "%s: unable to log reject event%s%s"
 msgstr "%s: 無法記錄拒絕事件%s%s"
 
-#: src/sudo.c:1881
+#: src/sudo.c:1879
 #, c-format
 msgid "error initializing approval plugin %s"
 msgstr "初始化核准插件 %s 時發生錯誤"
 
-#: src/sudo.c:1951
+#: src/sudo.c:1949
 msgid "command rejected by approver"
 msgstr "核准插件拒絕了命令"
 
-#: src/sudo_edit.c:113
+#: src/sudo_edit.c:108
 msgid "no writable temporary directory found"
 msgstr "可寫的暫存目錄不存在"
 
-#: src/sudo_edit.c:292
+#: src/sudo_edit.c:287
 #, c-format
 msgid "%s left unmodified"
 msgstr "%s 保持未修改"
 
-#: src/sudo_edit.c:305 src/sudo_edit.c:571
+#: src/sudo_edit.c:300 src/sudo_edit.c:566
 #, c-format
 msgid "%s unchanged"
 msgstr "%s 未變更"
 
-#: src/sudo_edit.c:482
+#: src/sudo_edit.c:477
 msgid "sesh: internal error: odd number of paths"
 msgstr "sesh: 內部錯誤: 奇數個路徑"
 
-#: src/sudo_edit.c:484
+#: src/sudo_edit.c:479
 msgid "sesh: unable to create temporary files"
 msgstr "sesh: 無法建立暫存檔"
 
-#: src/sudo_edit.c:486 src/sudo_edit.c:606
+#: src/sudo_edit.c:481 src/sudo_edit.c:601
 msgid "sesh: killed by a signal"
 msgstr "sesh: 行程被訊號殺死了"
 
-#: src/sudo_edit.c:488 src/sudo_edit.c:609
+#: src/sudo_edit.c:483 src/sudo_edit.c:604
 #, c-format
 msgid "sesh: unknown error %d"
 msgstr "sesh: 未知錯誤 %d"
 
-#: src/sudo_edit.c:599
+#: src/sudo_edit.c:594
 msgid "unable to copy temporary files back to their original location"
 msgstr "無法將暫存檔複製回原始位置"
 
-#: src/sudo_edit.c:603
+#: src/sudo_edit.c:598
 msgid "unable to copy some of the temporary files back to their original location"
 msgstr "無法將其中某些暫存檔複製回原始位置"
 
-#: src/sudo_edit.c:650
+#: src/sudo_edit.c:645
 #, c-format
 msgid "unable to change uid to root (%u)"
 msgstr "無法將 UID 變更至 root（%u）"
 
-#: src/sudo_edit.c:664
+#: src/sudo_edit.c:659
 msgid "plugin error: invalid file list for sudoedit"
 msgstr "插件錯誤: sudoedit 有無效的檔案列表"
 
-#: src/sudo_edit.c:685
+#: src/sudo_edit.c:680
 msgid "plugin error: missing file list for sudoedit"
 msgstr "插件錯誤: sudoedit 缺少檔案列表"
 
-#: src/sudo_edit.c:728 src/sudo_edit.c:743
+#: src/sudo_edit.c:723 src/sudo_edit.c:738
 msgid "unable to read the clock"
 msgstr "無法讀取時鐘"
 
-#: src/sudo_intercept_common.c:372
+#: src/sudo_intercept_common.c:367
 msgid "intercept port not set"
 msgstr "未設定攔截埠"
 
-#: src/tgetpass.c:95
+#: src/tgetpass.c:90
 msgid "timed out reading password"
 msgstr "讀取密碼逾時"
 
-#: src/tgetpass.c:98
+#: src/tgetpass.c:93
 msgid "no password was provided"
 msgstr "未提供密碼"
 
-#: src/tgetpass.c:101
+#: src/tgetpass.c:96
 msgid "unable to read password"
 msgstr "無法讀取密碼"
 
-#: src/tgetpass.c:141
+#: src/tgetpass.c:137
+msgid "a terminal is required to read the password; either use ssh's -t option or configure an askpass helper"
+msgstr "需要終端機來讀取密碼；使用 ssh 的 -t 選項，或配置 askpass 輔助程式"
+
+#: src/tgetpass.c:140
 msgid "a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper"
-msgstr "需要終端機來讀取密碼；使用 -S 選項來從標準輸入流讀取或配置 askpass 輔助程式"
+msgstr "需要終端機來讀取密碼；使用 -S 選項來從標準輸入流讀取，或配置 askpass 輔助程式"
 
 #: src/tgetpass.c:152
 msgid "no askpass program specified, try setting SUDO_ASKPASS"
@@ -1193,23 +1201,21 @@ msgstr "無法將 UID 設定為 %u"
 msgid "unable to run %s"
 msgstr "無法執行 %s"
 
-#: src/ttyname.c:139 src/ttyname.c:182 src/ttyname.c:199 src/ttyname.c:284
-#: src/ttyname.c:312 src/ttyname.c:356
-#, c-format
-msgid "unable to find terminal name for device %u, %u"
-msgstr "無法找到裝置 %u, %u 的終端機名稱"
-
-#: src/utmp.c:283
+#: src/utmp.c:278
 msgid "unable to save stdin"
 msgstr "無法儲存 stdin"
 
-#: src/utmp.c:285
+#: src/utmp.c:280
 msgid "unable to dup2 stdin"
 msgstr "無法 dup2 stdin"
 
-#: src/utmp.c:288
+#: src/utmp.c:283
 msgid "unable to restore stdin"
 msgstr "無法還原 stdin"
+
+#, c-format
+#~ msgid "unable to find terminal name for device %u, %u"
+#~ msgstr "無法找到裝置 %u, %u 的終端機名稱"
 
 #~ msgid "%s must be owned by uid %d"
 #~ msgstr "%s 必須由使用者 ID 為 %d 的使用者所擁有"
