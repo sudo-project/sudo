@@ -46,6 +46,9 @@
 /* Shutdown timeout (in seconds) in case client connections time out. */
 #define SHUTDOWN_TIMEO	10
 
+#define valid_timespec(ts) ((ts) != NULL && \
+    (ts)->tv_sec >= 0 && (ts)->tv_nsec >= 0 && (ts)->tv_nsec < 1000000000)
+
 /*
  * Connection status.
  * In the RUNNING state we expect I/O log buffers.
