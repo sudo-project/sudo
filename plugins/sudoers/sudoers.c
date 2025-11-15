@@ -186,7 +186,7 @@ sudoers_init(void *info, sudoers_logger_t logger, char * const envp[])
 {
     struct sudo_nss *nss, *nss_next;
     int oldlocale, sources = 0;
-    int ret = -1;
+    static int ret = -1;
     debug_decl(sudoers_init, SUDOERS_DEBUG_PLUGIN);
 
     /* Only attempt to initialize once. */
