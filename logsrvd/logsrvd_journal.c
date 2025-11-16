@@ -347,6 +347,7 @@ journal_seek(const struct timespec *target, struct connection_closure *closure)
 		closure->errstr = _("invalid IoBuffer");
 		goto done;
 	    }
+	    delay = msg->u.ttyin_buf->delay;
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 		"read IoBuffer (%d), delay [%lld, %ld]", msg->type_case,
 		(long long)delay->tv_sec, (long)delay->tv_nsec);
