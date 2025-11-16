@@ -276,7 +276,7 @@ closefrom_nodebug(int lowfd)
 #define MAX_MAILFLAGS	63
 
 sudo_noreturn static void
-exec_mailer(int pipein)
+exec_mailer(int pipein) // -V1082
 {
     const struct eventlog_config *evl_conf = eventlog_getconf();
     char *last, *mflags, *p, *argv[MAX_MAILFLAGS + 1];
@@ -304,7 +304,7 @@ exec_mailer(int pipein)
 
     /* Build up an argv based on the mailer path and flags */
     if ((mflags = strdup(evl_conf->mailerflags)) == NULL) {
-	syslog(LOG_ERR, _("unable to allocate memory")); // -V618
+	syslog(LOG_ERR, "%s", _("unable to allocate memory"));
 	goto bad;
     }
     argv[0] = sudo_basename(mpath);
