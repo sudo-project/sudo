@@ -281,6 +281,7 @@ exec_mailer(int pipein) // -V1082
     const struct eventlog_config *evl_conf = eventlog_getconf();
     char *last, *mflags, *p, *argv[MAX_MAILFLAGS + 1];
     const char *mpath = evl_conf->mailerpath;
+    gid_t mailgid = evl_conf->mailgid;
     size_t i;
     const char * const root_envp[] = {
 	"HOME=/",
@@ -326,14 +327,14 @@ exec_mailer(int pipein) // -V1082
 	    ROOT_UID);
 	goto bad;
     }
-    if (setgid(evl_conf->mailgid) != 0) {
+    if (setgid(mailgid) != 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to change gid to %u",
-	    (unsigned int)evl_conf->mailgid);
+	    (unsigned int)mailgid);
 	goto bad;
     }
-    if (setgroups(1, &evl_conf->mailgid) != 0) {
+    if (setgroups(1, &mailgid) != 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to set groups to %u",
-	    (unsigned int)evl_conf->mailgid);
+	    (unsigned int)mailgid);
 	goto bad;
     }
     if (evl_conf->mailuid != ROOT_UID) {
