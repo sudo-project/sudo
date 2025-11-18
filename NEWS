@@ -78,6 +78,32 @@ What's new in Sudo 1.9.18
  * Fixed a bug that could result in sudo waiting 5 seconds after
    the command exits when logging events, but not I/O, to sudo_logsrvd.
 
+ * New Persian (Farsi) translation from translationproject.org.
+
+ * Sudo now generates standard version 4 random UUIDs.  Previously
+   the type and variant fields were stored in host byte order instead
+   of network byte order.
+
+ * Fixed a bug when formatting UUIDs as strings where the '-'
+   characters were in the wrong positions.
+
+ * The log ID sent to the client by sudo_logsrvd now includes a
+   UUID to prevent ID guessing attacks.  The remaining portion of
+   the ID is a path relative to the I/O log dir.  Previously, it
+   was an absolute path.
+
+ * Fixed a large number of potential problems found by the ZeroPath
+   AI Security Engineer <https://zeropath.com>.
+
+ * Fixed a bug in "sudo -i" where the SHELL variable was set twice
+   in the environment.
+
+ * In sudo_logsrvd.conf, the default value for listen_address now
+   depends on whether or not TLS has been configured.  If any of the
+   TLS options have been enabled, the default is now to enable the
+   TLS listener.  Otherwise, the plaintext listener is enabled.
+   Previously, the default was to use both a plaintext and TLS listener.
+
 What's new in Sudo 1.9.17p2
 
  * Fixed a bug introduced in sudo 1.9.16 that could result in sudo
