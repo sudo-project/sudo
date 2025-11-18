@@ -225,7 +225,12 @@ sudo_term_noecho_v1(int fd)
 {
     struct termios term = { 0 };
     bool ret = false;
+    struct stat sb;
     debug_decl(sudo_term_noecho, SUDO_DEBUG_UTIL);
+
+    /* Avoid calling ioctl on non-device to prevent CVE-2023-2002. */
+    if (fstat(fd, &sb) != 0 || !S_ISCHR(sb.st_mode))
+	debug_return_bool(false);
 
     sudo_lock_file(fd, SUDO_LOCK);
     if (!changed && tcgetattr(fd, &orig_term) == -1) {
@@ -280,9 +285,11 @@ bool
 sudo_term_is_raw_v1(int fd)
 {
     struct termios term = { 0 };
+    struct stat sb;
     debug_decl(sudo_term_is_raw, SUDO_DEBUG_UTIL);
 
-    if (!sudo_isatty(fd, NULL))
+    /* Avoid calling ioctl on non-device to prevent CVE-2023-2002. */
+    if (fstat(fd, &sb) != 0 || !S_ISCHR(sb.st_mode))
 	debug_return_bool(false);
 
     sudo_lock_file(fd, SUDO_LOCK);
@@ -306,8 +313,13 @@ sudo_term_raw_v1(int fd, unsigned int flags)
 {
     struct termios term = { 0 };
     bool ret = false;
+    struct stat sb;
     tcflag_t oflag;
     debug_decl(sudo_term_raw, SUDO_DEBUG_UTIL);
+
+    /* Avoid calling ioctl on non-device to prevent CVE-2023-2002. */
+    if (fstat(fd, &sb) != 0 || !S_ISCHR(sb.st_mode))
+	debug_return_bool(false);
 
     sudo_lock_file(fd, SUDO_LOCK);
     if (!changed && tcgetattr(fd, &orig_term) == -1) {
@@ -358,7 +370,12 @@ sudo_term_cbreak_v2(int fd, bool flush)
     const int flags = flush ? (TCSASOFT|TCSAFLUSH) : (TCSASOFT|TCSADRAIN);
     struct termios term = { 0 };
     bool ret = false;
+    struct stat sb;
     debug_decl(sudo_term_cbreak, SUDO_DEBUG_UTIL);
+
+    /* Avoid calling ioctl on non-device to prevent CVE-2023-2002. */
+    if (fstat(fd, &sb) != 0 || !S_ISCHR(sb.st_mode))
+	debug_return_bool(false);
 
     sudo_lock_file(fd, SUDO_LOCK);
     if (!changed && tcgetattr(fd, &orig_term) == -1) {
@@ -468,6 +485,7 @@ unlock:
  * Like isatty(3) but stats the fd and stores the result in sb.
  * Only calls isatty(3) if fd is a character special device.
  * Returns true if a tty, else returns false and sets errno.
+ * This is mitigation for CVE-2023-2002.
  */
 bool
 sudo_isatty_v1(int fd, struct stat *sbp)
