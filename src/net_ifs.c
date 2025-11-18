@@ -654,7 +654,7 @@ get_net_ifs(char **addrinfo_out)
     struct sockaddr_in6 *sin6;
 # endif
     char addrstr[INET6_ADDRSTRLEN], maskstr[INET6_ADDRSTRLEN];
-    char *cp, addrinfo = NULL;
+    char *cp, *addrinfo = NULL;
     int i, n, sock, sock4, sock6 = -1;
     int num_interfaces = 0;
     size_t ailen, buflen;
