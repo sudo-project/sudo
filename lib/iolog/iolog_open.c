@@ -70,7 +70,9 @@ iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode)
 	    "%s: invalid iofd %d", __func__, iofd);
 	debug_return_bool(false);
     }
-    if (iofd == IOFD_TIMING && ISSET(flags, O_WRONLY|O_RDWR)) {
+
+    /* Lock the timing file if opening for writing. */
+    if (iofd == IOFD_TIMING && (mode[0] == 'w' || mode[1] == '+')) {
 	lockit = true;
     }
 
