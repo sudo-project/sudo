@@ -78,7 +78,7 @@ What's new in Sudo 1.9.18
  * Fixed a bug that could result in sudo waiting 5 seconds after
    the command exits when logging events, but not I/O, to sudo_logsrvd.
 
- * New Persian (Farsi) translation from translationproject.org.
+ * New Persian (Farsi) translation for sudoers from translationproject.org.
 
  * Sudo now generates standard version 4 random UUIDs.  Previously
    the type and variant fields were stored in host byte order instead
