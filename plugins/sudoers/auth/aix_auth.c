@@ -229,7 +229,8 @@ sudo_aix_verify(const struct sudoers_context *ctx, struct passwd *pw,
     const char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
     char *pass, *message = NULL, *restrict_msg = NULL;
-    int result = 1, reenter = 0, restrict_result = -1, pwdexp_msg = 0;
+    int result = 1, reenter = 0, restrict_result = -1, restrict_warn = 0;
+    int pwdexp_msg = 0;
     int ret = AUTH_SUCCESS;
     void *login_state = NULL;
     debug_decl(sudo_aix_verify, SUDOERS_DEBUG_AUTH);
@@ -254,8 +255,10 @@ sudo_aix_verify(const struct sudoers_context *ctx, struct passwd *pw,
             sudo_conv(1, &msg, &repl, NULL);
             free(restrict_msg);
             restrict_msg = NULL;
+            restrict_warn = 1;
         }
-        sudo_warn("loginrestrictionsx");
+        if (!restrict_warn)
+            sudo_warn("loginrestrictionsx");
         debug_return_int(AUTH_ERROR);
     }
 
@@ -268,8 +271,6 @@ sudo_aix_verify(const struct sudoers_context *ctx, struct passwd *pw,
 	result = authenticatex(pw->pw_name, pass, &reenter, &message, &login_state);
 	freezero(pass, strlen(pass));
 	prompt = message;
-        if (!reenter && !result && message)
-            sudo_printf(SUDO_CONV_ERROR_MSG, "%s ", message);
     } while (reenter);
 
     if (result != 0) {
