@@ -168,6 +168,10 @@
    */
 #undef HAVE_DECL_NSIG
 
+/* Define to 1 if you have the declaration of 'passwdexpiredx', and to 0 if
+   you don't. */
+#undef HAVE_DECL_PASSWDEXPIREDX
+
 /* Define to 1 if you have the declaration of 'PATH_MAX', and to 0 if you
    don't. */
 #undef HAVE_DECL_PATH_MAX

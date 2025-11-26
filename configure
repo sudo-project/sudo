@@ -18697,6 +18697,20 @@ esac
 fi
 printf "%s\n" "#define HAVE_DECL_SETAUTHDB $ac_have_decl" >>confdefs.h
 
+		ac_fn_check_decl "$LINENO" "passwdexpiredx" "ac_cv_have_decl_passwdexpiredx" "
+#include <sys/types.h>
+#include <usersec.h>
+
+" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl_passwdexpiredx" = xyes
+then :
+  ac_have_decl=1
+else case e in #(
+  e) ac_have_decl=0 ;;
+esac
+fi
+printf "%s\n" "#define HAVE_DECL_PASSWDEXPIREDX $ac_have_decl" >>confdefs.h
+
 		;;
     *-*-hiuxmpp*)
 		# HI-UX/MPP is based on OSF/1

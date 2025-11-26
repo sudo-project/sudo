@@ -44,6 +44,11 @@
  * http://publib16.boulder.ibm.com/doc_link/en_US/a_doc_lib/libs/basetrf1/authenticate.htm
  */
 
+/* AIX usersec.h is missing the passwdexpiredx() prototype. */
+#if defined(HAVE_DECL_PASSWDEXPIREDX) && !HAVE_DECL_PASSWDEXPIREDX
+int passwdexpiredx(char *, char **, void **);
+#endif
+
 #ifdef HAVE_PAM
 # define AIX_AUTH_UNKNOWN	0
 # define AIX_AUTH_STD		1

@@ -1880,6 +1880,10 @@ case "$host" in
 #include <sys/types.h>
 #include <usersec.h>
 		])
+		AC_CHECK_DECLS([passwdexpiredx], [], [], [
+#include <sys/types.h>
+#include <usersec.h>
+		])
 		;;
     *-*-hiuxmpp*)
 		# HI-UX/MPP is based on OSF/1
