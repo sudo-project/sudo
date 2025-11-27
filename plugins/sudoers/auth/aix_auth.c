@@ -168,13 +168,14 @@ sudo_aix_valid_message(const char *message)
     debug_return_bool(true);
 }
 
-/* 
+/*
  * Change the user's password.  If root changes the user's password
  * the ADMCHG flag is set on the account (and the user must change
  * it again) so we run passwd(1) as the user.  This does mean that
  * the user will need to re-enter their original password again,
  * unlike with su(1).  We may consider using pwdadm(1) as root to
  * change the password and then clear the flag in the future.
+ * TODO: investigate using chpassx(3) instead.
  */
 static bool
 sudo_aix_change_password(const struct sudoers_context *ctx, const char *user)
@@ -187,9 +188,9 @@ sudo_aix_change_password(const struct sudoers_context *ctx, const char *user)
     debug_decl(sudo_aix_change_password, SUDOERS_DEBUG_AUTH);
 
     /* Set SIGCHLD handler to default since we call waitpid() below. */
-    memset(&sa, 0, sizeof(sa));                
+    memset(&sa, 0, sizeof(sa));
     sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_RESTART;     
+    sa.sa_flags = SA_RESTART;
     sa.sa_handler = SIG_DFL;
     (void) sigaction(SIGCHLD, &sa, &savechld);
 
@@ -233,75 +234,69 @@ int
 sudo_aix_verify(const struct sudoers_context *ctx, struct passwd *pw,
     const char *prompt, sudo_auth *auth, struct sudo_conv_callback *callback)
 {
-    char *pass, *message = NULL, *restrict_msg = NULL;
-    int result = 1, reenter = 0, restrict_result = -1, restrict_warn = 0;
-    int pwdexp_msg = 0;
+    char *pass, *message = NULL;
+    int result, reenter = 0;
     int ret = AUTH_SUCCESS;
-    void *login_state = NULL;
+    void *state = NULL;
     debug_decl(sudo_aix_verify, SUDOERS_DEBUG_AUTH);
 
     if (IS_NONINTERACTIVE(auth))
-        debug_return_int(AUTH_NONINTERACTIVE);
+	debug_return_int(AUTH_NONINTERACTIVE);
 
-    /* Use newer APIs to propogate the state information. */
-    restrict_result = loginrestrictionsx(pw->pw_name, 0, NULL,
-                               &restrict_msg, &login_state);
-    if (restrict_result != 0)
-    {
-        if (restrict_msg != NULL && restrict_msg[0] != '\0')
-        {
-            struct sudo_conv_message msg;
-            struct sudo_conv_reply repl;
-
-            memset(&msg, 0, sizeof(msg));
-            msg.msg_type = SUDO_CONV_ERROR_MSG;
-            msg.msg = restrict_msg;
-            memset(&repl, 0, sizeof(repl));
-            sudo_conv(1, &msg, &repl, NULL);
-            free(restrict_msg);
-            restrict_msg = NULL;
-            restrict_warn = 1;
-        }
-        if (!restrict_warn)
-            sudo_warn("loginrestrictionsx");
-        debug_return_int(AUTH_ERROR);
+    /* Use newer APIs to propagate the state information. */
+    result = loginrestrictionsx(pw->pw_name, 0, NULL, &message, &state);
+    if (result != 0) {
+	if (message != NULL && message[0] != '\0') {
+	    sudo_printf(SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY,
+		"%s", message);
+	} else {
+	    sudo_warn("loginrestrictionsx");
+	}
+	free(message);
+	free(state);
+	debug_return_int(AUTH_ERROR);
     }
 
     do {
 	pass = auth_getpass(prompt, SUDO_CONV_PROMPT_ECHO_OFF, callback);
-	if (pass == NULL)
+	if (pass == NULL) {
+	    result = -1;
 	    break;
+	}
 	free(message);
 	message = NULL;
-	result = authenticatex(pw->pw_name, pass, &reenter, &message, &login_state);
+	result = authenticatex(pw->pw_name, pass, &reenter, &message, &state);
 	freezero(pass, strlen(pass));
 	prompt = message;
     } while (reenter);
 
     if (result != 0) {
-	/* Display error message, if any. */
-	if (sudo_aix_valid_message(message))
-	    sudo_printf(SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY,
-		"%s", message);
-	ret = pass ? AUTH_FAILURE : AUTH_INTR;
+	if (pass == NULL) {
+	    /* User interrupted password prompt with ^C. */
+	    ret = AUTH_INTR;
+	} else {
+	    /* Display error message, if any. */
+	    if (sudo_aix_valid_message(message)) {
+		sudo_printf(SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY,
+		    "%s", message);
+	    }
+	    ret = AUTH_FAILURE;
+	}
     }
-    free(message);
-    message = NULL;
 
     /* Check if password expired and allow user to change it if possible. */
     if (ret == AUTH_SUCCESS) {
-	result = passwdexpiredx(pw->pw_name, &message, &login_state);
+	free(message);
+	message = NULL;
+	result = passwdexpiredx(pw->pw_name, &message, &state);
 	if (message != NULL && message[0] != '\0') {
-            pwdexp_msg = 1;
 	    int msg_type = SUDO_CONV_PREFER_TTY;
 	    msg_type |= result ? SUDO_CONV_ERROR_MSG : SUDO_CONV_INFO_MSG,
 	    sudo_printf(msg_type, "%s", message);
-	    free(message);
-	    message = NULL;
 	}
 	switch (result) {
 	case 0:
-	    /* password not expired. */
+	    /* password not expired */
 	    break;
 	case 1:
 	    /* password expired, user must change it */
@@ -311,10 +306,12 @@ sudo_aix_verify(const struct sudoers_context *ctx, struct passwd *pw,
 	    }
 	    break;
 	case 2:
-        case 3:
-	    /* password expired, only admin can change it */
-            if (!pwdexp_msg)
-                sudo_printf(SUDO_CONV_ERROR_MSG, "Your password expired, only admin can change it.\n");
+	case 3:
+	    /* password expired, cannot be updated by user */
+	    if (message == NULL) {
+		sudo_warnx(
+		    U_("Password expired, contact your system administrator"));
+	    }
 	    ret = AUTH_ERROR;
 	    break;
 	default:
@@ -324,6 +321,8 @@ sudo_aix_verify(const struct sudoers_context *ctx, struct passwd *pw,
 	    break;
 	}
     }
+    free(message);
+    free(state);
 
     debug_return_int(ret);
 }
