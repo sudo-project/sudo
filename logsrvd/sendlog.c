@@ -394,6 +394,13 @@ tls_start_fn(struct tls_client_closure *tls_client)
 {
     return fmt_client_hello(tls_client->parent_closure);
 }
+
+/* Called on TLS connection error. */
+static void
+tls_connect_error_fn(struct tls_client_closure *tls_client)
+{
+    sudo_ev_loopbreak(tls_client->evbase);
+}
 #endif /* HAVE_OPENSSL */
 
 static void
@@ -1688,6 +1695,7 @@ client_closure_alloc(int sock, struct sudo_event_base *base,
 	closure->tls_client.peer_name = &server_info;
 	closure->tls_client.connect_timeout.tv_sec = TLS_HANDSHAKE_TIMEO_SEC;
 	closure->tls_client.start_fn = tls_start_fn;
+	closure->tls_client.connect_error_fn = tls_connect_error_fn;
     }
 #endif
 

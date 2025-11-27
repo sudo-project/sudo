@@ -187,7 +187,7 @@ tls_connect_cb(int sock, int what, void *v)
     debug_return;
 
 bad:
-    sudo_ev_loopbreak(evbase);
+    tls_client->connect_error_fn(tls_client);
     debug_return;
 }
 
@@ -199,6 +199,7 @@ tls_ctx_client_setup(SSL_CTX *ssl_ctx, int sock,
     bool ret = false;
     debug_decl(tls_ctx_client_setup, SUDO_DEBUG_UTIL);
 
+    SSL_free(closure->ssl);
     if ((closure->ssl = SSL_new(ssl_ctx)) == NULL) {
 	errstr = ERR_reason_error_string(ERR_get_error());
         sudo_warnx(U_("unable to allocate ssl object: %s"),
