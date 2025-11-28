@@ -1794,16 +1794,6 @@ logsrvd_conf_apply(struct logsrvd_config *config)
 	if (!addr->tls)
 	    continue;
 
-	/* Relay requires TLS so it must be configured (in relay or server). */
-	if (!TLS_CONFIGURED(config->relay)) {
-	    if (config->server.ssl_ctx != NULL) {
-		/* We will use the server TLS settings. */
-		break;
-	    }
-	    sudo_warnx("%s", U_("relay uses TLS but TLS not configured"));
-	    debug_return_bool(false);
-	}
-
 	/* Create a TLS context for the relay. */
 	config->relay.ssl_ctx = init_tls_context(
 	    TLS_RELAY_STR(config, tls_cacert_path),
