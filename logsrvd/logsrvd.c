@@ -458,8 +458,15 @@ schedule_error_message(const char *errstr, struct connection_closure *closure)
     sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 	"send error to client: %s", errstr ? errstr : "none");
 
-    /* Prevent further reads from the client, just write the error. */
+    /*
+     * Prevent further reads from the client and any relay I/O.
+     * Just write the error to the client.
+     */
     sudo_ev_del(closure->evbase, closure->read_ev);
+    if (closure->relay_closure != NULL) {
+	sudo_ev_del(closure->evbase, closure->relay_closure->read_ev);
+	sudo_ev_del(closure->evbase, closure->relay_closure->write_ev);
+    }
 
     if (errstr == NULL || closure->error || closure->write_ev == NULL)
 	goto done;
