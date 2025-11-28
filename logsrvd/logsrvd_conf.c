@@ -62,13 +62,6 @@
 # define DEFAULT_SERVER_CERT_PATH   "/etc/ssl/sudo/certs/logsrvd_cert.pem"
 # define DEFAULT_SERVER_KEY_PATH    "/etc/ssl/sudo/private/logsrvd_key.pem"
 
-/* Evaluates to true if at least one TLS field is set, else false. */
-# define TLS_CONFIGURED(_s)						\
-    ((_s).tls_key_path != NULL || (_s).tls_cert_path != NULL ||		\
-     (_s).tls_cacert_path != NULL || (_s).tls_dhparams_path != NULL ||	\
-     (_s).tls_ciphers_v12 != NULL || (_s).tls_ciphers_v13 != NULL ||	\
-     (_s).tls_verify != -1)
-
 /* Evaluates to the relay-specific TLS setting, falling back to server. */
 # define TLS_RELAY_STR(_c, _f)	\
     ((_c)->relay._f != NULL ? (_c)->relay._f : (_c)->server._f)
@@ -1740,8 +1733,8 @@ logsrvd_conf_apply(struct logsrvd_config *config)
     /* There can be multiple addresses so we can't set a default earlier. */
 #if defined(HAVE_OPENSSL)
     if (TAILQ_EMPTY(&config->server.addresses.addrs)) {
-	/* If no listener but TLS has been configured, enable TLS listener. */
-	if (TLS_CONFIGURED(config->server)) {
+	/* TLS certificate configured, enable default TLS listener. */
+	if (config->server.tls_cert_path != NULL) {
 	    if (!cb_server_listen_address(config, "*:" DEFAULT_PORT_TLS "(tls)", 0))
 		debug_return_bool(false);
 	}
