@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "November 7, 2025" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "November 29, 2025" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -119,8 +119,12 @@ lines may be specified to listen on more than one port or address.
 .sp
 The default value for
 \fIlisten_address\fR
-depends on whether or not TLS has been configured.
-If any of the TLS options have been enabled, the default is:
+depends on whether or not TLS is enabled.
+If the
+\fItls_cert\fR
+setting has been enabled, or if the default TLS certificate
+(\fI/etc/ssl/sudo/certs/logsrvd_cert.pem\fR)
+is present, the default value is:
 .nf
 .sp
 .RS 12n
@@ -129,7 +133,7 @@ listen_address = *:30344(tls)
 .fi
 .RS 6n
 .sp
-Otherwise, the plaintext listener is enabled by default:
+Otherwise, the default is to use the plaintext listener:
 .nf
 .sp
 .RS 12n

@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 7, 2025
+.Dd November 29, 2025
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -110,13 +110,17 @@ lines may be specified to listen on more than one port or address.
 .Pp
 The default value for
 .Em listen_address
-depends on whether or not TLS has been configured.
-If any of the TLS options have been enabled, the default is:
+depends on whether or not TLS is enabled.
+If the
+.Em tls_cert
+setting has been enabled, or if the default TLS certificate
+.Pq Pa /etc/ssl/sudo/certs/logsrvd_cert.pem
+is present, the default value is:
 .Bd -literal -offset indent
 listen_address = *:30344(tls)
 .Ed
 .Pp
-Otherwise, the plaintext listener is enabled by default:
+Otherwise, the default is to use the plaintext listener:
 .Bd -literal -offset indent
 listen_address = *:30343
 .Ed
