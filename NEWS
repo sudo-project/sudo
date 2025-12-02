@@ -104,6 +104,9 @@ What's new in Sudo 1.9.18
    TLS listener.  Otherwise, the plaintext listener is enabled.
    Previously, the default was to use both a plaintext and TLS listener.
 
+ * Fixed a problem with AIX authentication when validating the
+   password of Kerberos users not present in /etc/security/passwd.
+
 What's new in Sudo 1.9.17p2
 
  * Fixed a bug introduced in sudo 1.9.16 that could result in sudo
