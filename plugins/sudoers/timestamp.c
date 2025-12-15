@@ -243,6 +243,12 @@ ts_secure_opendir(const char *path, bool make_it, bool quiet)
     struct stat sb;
     debug_decl(ts_secure_opendir, SUDOERS_DEBUG_AUTH);
 
+    /* Timestamp or lecture dir not defined? */
+    if (path == NULL) {
+	errno = ENOENT;
+	debug_return_int(-1);
+    }
+
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO, "checking %s", path);
     fd = sudo_secure_open_dir(path, timestamp_uid, timestamp_gid, &sb, &error);
     if (fd == -1) {
