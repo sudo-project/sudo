@@ -67,9 +67,10 @@ AC_DEFUN([SUDO_PATH_UTMP], [
 	    fi
 	done
     ])
-    if test X"$sudo_cv_path_UTMP" != X"no"; then
-	SUDO_DEFINE_UNQUOTED(_PATH_UTMP, "$sudo_cv_path_UTMP")
+    if test X"$sudo_cv_path_UTMP" = X"no"; then
+	AC_MSG_ERROR([Unable to determine utmp file location])
     fi
+    SUDO_DEFINE_UNQUOTED(_PATH_UTMP, "$sudo_cv_path_UTMP")
 ])
 
 dnl
@@ -138,10 +139,11 @@ AC_DEFUN([SUDO_RUNDIR], [
 	])
 	rundir="$sudo_cv_run_dir"
     fi
-    if test X"$rundir" != X"no"; then
-	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_TIMEDIR, "$rundir/ts")
-	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_LOGSRVD_PID, "$rundir/sudo_logsrvd.pid")
+    if test X"$rundir" = X"no"; then
+	AC_MSG_ERROR([Unable to determine sudo run dir location, please specify --with-rundir])
     fi
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_TIMEDIR, "$rundir/ts")
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_LOGSRVD_PID, "$rundir/sudo_logsrvd.pid")
 ])
 
 dnl
@@ -162,9 +164,10 @@ AC_DEFUN([SUDO_VARDIR], [
 	])
 	vardir="$sudo_cv_var_dir"
     fi
-    if test X"$vardir" != X"no"; then
-	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_LECTURE_DIR, "$vardir/lectured")
+    if test X"$vardir" = X"no"; then
+	AC_MSG_ERROR([Unable to determine sudo var dir location, please specify --with-vardir])
     fi
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_LECTURE_DIR, "$vardir/lectured")
 ])
 
 dnl

@@ -33216,12 +33216,13 @@ esac
 fi
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $sudo_cv_path_UTMP" >&5
 printf "%s\n" "$sudo_cv_path_UTMP" >&6; }
-    if test X"$sudo_cv_path_UTMP" != X"no"; then
-	cat >>confdefs.h <<EOF
+    if test X"$sudo_cv_path_UTMP" = X"no"; then
+	as_fn_error $? "Unable to determine utmp file location" "$LINENO" 5
+    fi
+    cat >>confdefs.h <<EOF
 #define _PATH_UTMP "$sudo_cv_path_UTMP"
 EOF
 
-    fi
 
 fi
 
@@ -33345,16 +33346,17 @@ fi
 printf "%s\n" "$sudo_cv_run_dir" >&6; }
 	rundir="$sudo_cv_run_dir"
     fi
-    if test X"$rundir" != X"no"; then
-	cat >>confdefs.h <<EOF
+    if test X"$rundir" = X"no"; then
+	as_fn_error $? "Unable to determine sudo run dir location, please specify --with-rundir" "$LINENO" 5
+    fi
+    cat >>confdefs.h <<EOF
 #define _PATH_SUDO_TIMEDIR "$rundir/ts"
 EOF
 
-	cat >>confdefs.h <<EOF
+    cat >>confdefs.h <<EOF
 #define _PATH_SUDO_LOGSRVD_PID "$rundir/sudo_logsrvd.pid"
 EOF
 
-    fi
 
 
     if test -n "$with_vardir"; then
@@ -33381,12 +33383,13 @@ fi
 printf "%s\n" "$sudo_cv_var_dir" >&6; }
 	vardir="$sudo_cv_var_dir"
     fi
-    if test X"$vardir" != X"no"; then
-	cat >>confdefs.h <<EOF
+    if test X"$vardir" = X"no"; then
+	as_fn_error $? "Unable to determine sudo var dir location, please specify --with-vardir" "$LINENO" 5
+    fi
+    cat >>confdefs.h <<EOF
 #define _PATH_SUDO_LECTURE_DIR "$vardir/lectured"
 EOF
 
-    fi
 
 
     if test "${with_iologdir-yes}" != "yes"; then
