@@ -491,12 +491,16 @@ run-fuzz_sudoers_ldif: fuzz_sudoers_ldif
 	done; \
 	./fuzz_sudoers_ldif -dict=$(srcdir)/regress/fuzz/fuzz_sudoers_ldif.dict -max_len=$(FUZZ_MAX_LEN) -runs=$(FUZZ_RUNS) $(FUZZ_VERBOSE) $$corpus
 
-GENERATED = gram.h gram.c toke.c def_data.c def_data.h getdate.c
+GENERATED = gram.h gram.c gram.stamp toke.c def_data.c def_data.h def_data.stamp getdate.c
 
 prologue:
 	echo "#include <config.h>" >> $@
 
-$(devdir)/gram.c $(devdir)/gram.h: $(srcdir)/gram.y prologue
+$(devdir)/gram.c $(devdir)/gram.h: $(devdir)/gram.stamp
+	@if [ ! -f $@ ]; then rm -f $<; false; fi
+$(devdir)/gram.stamp: $(srcdir)/gram.y prologue
+	@rm -f $(devdir)/gram.tmp
+	@touch $(devdir)/gram.tmp
 	@if [ -n "$(DEVEL)" ]; then \
 	    if test "$(srcdir)" = "."; then \
 		gram_y="gram.y"; \
@@ -506,6 +510,7 @@ $(devdir)/gram.c $(devdir)/gram.h: $(srcdir)/gram.y prologue
 	    cmd='$(YACC) -d -p sudoers '"$$gram_y"' && cp prologue $(devdir)/gram.c && $(SED) -e "s/^\\(#line .*\\) \"y\\.tab\\.c\"/\1 \"gram.c\"/" -e "/^# *include <limits.h>/{N;s/__STDC_VERSION__ && 199901 <= __STDC_VERSION__/HAVE_STDINT_H/;}" y.tab.c >> $(devdir)/gram.c && sed -e "s/^\\(#line .*\\) \"y\\.tab\\.h\"/\1 \"gram.h\"/" y.tab.h > $(devdir)/gram.h && rm -f y.tab.[ch]'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
+	@mv -f $(devdir)/gram.tmp $@
 
 $(devdir)/toke.c: $(srcdir)/toke.l prologue
 	@if [ -n "$(DEVEL)" ]; then \
@@ -530,11 +535,16 @@ $(devdir)/getdate.c: $(srcdir)/getdate.y prologue
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
-$(devdir)/def_data.c $(devdir)/def_data.h: $(srcdir)/def_data.in
+$(devdir)/def_data.c $(devdir)/def_data.h: $(devdir)/def_data.stamp
+	@if [ ! -f $@ ]; then rm -f $<; false; fi
+$(devdir)/def_data.stamp: $(srcdir)/def_data.in
+	@rm -f $(devdir)/def_data.tmp
+	@touch $(devdir)/def_data.tmp
 	@if [ -n "$(DEVEL)" ]; then \
 	    cmd='AWK=$(AWK) $(SHELL) $(srcdir)/mkdefaults -o $(devdir)/def_data $(srcdir)/def_data.in'; \
 	    echo "$$cmd"; eval $$cmd; \
 	fi
+	@mv -f $(devdir)/def_data.tmp $@
 
 tsgetusershell.c: $(top_srcdir)/lib/util/getusershell.c
 	printf '#define TESTSUDOERS\n\n' > $@
