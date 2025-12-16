@@ -890,37 +890,6 @@ format_json(int event_type, struct eventlog_args *args,
 	}
     }
 
-    if (event_type == EVLOG_EXIT && evlog != NULL) {
-	/* Exit events don't need evlog details if there is a UUID. */
-	if (evlog->uuid_str[0] != '\0') {
-	    if (args->json_info == NULL)
-		info = NULL;
-	}
-
-	if (sudo_timespecisset(&evlog->run_time)) {
-	    if (!json_add_timestamp(&jsonc, "run_time", &evlog->run_time, false)) {
-		sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-		    "unable format timestamp");
-		goto bad;
-	    }
-	}
-	if (evlog->signal_name != NULL) {
-	    json_value.type = JSON_STRING;
-	    json_value.u.string = evlog->signal_name;
-	    if (!sudo_json_add_value(&jsonc, "signal", &json_value))
-		goto bad;
-
-	    json_value.type = JSON_BOOL;
-	    json_value.u.boolean = evlog->dumped_core;
-	    if (!sudo_json_add_value(&jsonc, "dumped_core", &json_value))
-		goto bad;
-	}
-	json_value.type = JSON_NUMBER;
-	json_value.u.number = evlog->exit_value;
-	if (!sudo_json_add_value(&jsonc, "exit_value", &json_value))
-	    goto bad;
-    }
-
     /* Event log info may be missing for alert messages. */
     if (evlog != NULL) {
 	if (evlog->peeraddr != NULL) {
