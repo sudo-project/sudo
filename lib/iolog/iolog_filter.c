@@ -211,7 +211,7 @@ iolog_pwfilt_run(void *vhandle, int event, const char *buf,
 	break;
     case IO_EVENT_TTYIN:
 	if (handle->is_filtered) {
-	    unsigned int i;
+	    size_t i;
 
 	    for (i = 0; i < len; i++) {
 		/* We will stop filtering after reaching cr/nl. */
