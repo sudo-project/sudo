@@ -678,7 +678,7 @@ backchannel_cb(int fd, int what, void *v)
 	    /* Nothing ready. */
 	    break;
 	default:
-	    if (ec->cstat->val == CMD_INVALID) {
+	    if (ec->cstat->type == CMD_INVALID) {
 		ec->cstat->type = CMD_ERRNO;
 		ec->cstat->val = errno;
 		sudo_debug_printf(SUDO_DEBUG_ERROR,
@@ -752,7 +752,7 @@ backchannel_cb(int fd, int what, void *v)
 	break;
     default:
 	/* Short read, should not happen. */
-	if (ec->cstat->val == CMD_INVALID) {
+	if (ec->cstat->type == CMD_INVALID) {
 	    ec->cstat->type = CMD_ERRNO;
 	    ec->cstat->val = EIO;
 	    sudo_debug_printf(SUDO_DEBUG_ERROR,
@@ -1443,7 +1443,7 @@ exec_pty(struct command_details *details,
 	    /* error from callback */
 	    sudo_debug_printf(SUDO_DEBUG_ERROR, "event loop exited prematurely");
 	    /* XXX: no good way to know if we should terminate the command. */
-	    if (cstat->val == CMD_INVALID && ec->cmnd_pid != -1) {
+	    if (cstat->type == CMD_INVALID && ec->cmnd_pid != -1) {
 		/* no status message, kill command */
 		terminate_command(ec->cmnd_pid, true);
 		ec->cmnd_pid = -1;
