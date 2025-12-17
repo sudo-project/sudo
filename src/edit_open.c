@@ -300,9 +300,10 @@ sudo_edit_openat_nofollow(int dfd, char *path, int oflags, mode_t mode)
      * Check if path is a symlink.  This is racey but we detect whether
      * we lost the race in sudo_edit_is_symlink() after the open.
      */
-    if (lstat(path, &sb) == -1 && errno != ENOENT)
-	goto done;
-    if (S_ISLNK(sb.st_mode)) {
+    if (lstat(path, &sb) == -1) {
+	if (errno != ENOENT)
+	    goto done;
+    } else if (S_ISLNK(sb.st_mode)) {
 	errno = ELOOP;
 	goto done;
     }
