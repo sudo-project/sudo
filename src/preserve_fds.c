@@ -100,8 +100,8 @@ closefrom_except(int startfd, struct preserved_fd_list *pfds)
 	    /* NOTE: still need to adjust lastfd below with unchanged lowfd. */
 	} else if (fd < pfd->highfd) {
 	    sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
-		"dup %d -> %d", pfd->highfd, pfd->lowfd);
-	    sudo_debug_update_fd(pfd->highfd, pfd->lowfd);
+		"dup %d -> %d", pfd->highfd, fd);
+	    sudo_debug_update_fd(pfd->highfd, fd);
 	    pfd->lowfd = fd;
 	    fd = pfd->highfd;
 	}
