@@ -335,7 +335,7 @@ command_matches_dir(struct sudoers_context *ctx, const char *sudoers_dir,
 	goto bad;
 
     /* Make sure ctx->user.cmnd is not in a subdir of sudoers_dir. */
-    if (strchr(ctx->user.cmnd + dlen + 1, '\0') != NULL)
+    if (strchr(ctx->user.cmnd + dlen + 1, '/') != NULL)
 	goto bad;
 
     /* Open the file for fdexec or for digest matching. */
