@@ -150,7 +150,7 @@ static void
 utmp_fill(const char *line, const char *user, sudo_utmp_t *ut_old,
     sudo_utmp_t *ut_new)
 {
-    debug_decl(utmp_file, SUDO_DEBUG_UTMP);
+    debug_decl(utmp_fill, SUDO_DEBUG_UTMP);
 
     if (ut_old == NULL) {
 	memset(ut_new, 0, sizeof(*ut_new));
