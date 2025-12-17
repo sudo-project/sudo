@@ -160,7 +160,7 @@ py_str_array_to_tuple_with_count(Py_ssize_t count, char * const strings[])
     if (py_argv == NULL)
         debug_return_ptr(NULL);
 
-    for (int i = 0; i < count; ++i) {
+    for (Py_ssize_t i = 0; i < count; ++i) {
         PyObject *py_arg = PyUnicode_FromString(strings[i]);
         if (py_arg == NULL || PyTuple_SetItem(py_argv, i, py_arg) != 0) {
             Py_CLEAR(py_argv);
@@ -205,7 +205,7 @@ py_str_array_from_tuple(PyObject *py_tuple)
         debug_return_ptr(NULL);
     }
 
-    for (int i = 0; i < tuple_size; ++i) {
+    for (Py_ssize_t i = 0; i < tuple_size; ++i) {
         PyObject *py_value = PyTuple_GetItem(py_tuple, i);
         if (py_value == NULL) {
             str_array_free(&result);
