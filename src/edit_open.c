@@ -40,7 +40,7 @@ switch_user_int(uid_t euid, gid_t egid, int ngroups, GETGROUPS_T *groups,
 {
     int serrno = errno;
     int ret = -1;
-    debug_decl(switch_user, SUDO_DEBUG_EDIT);
+    debug_decl(switch_user_int, SUDO_DEBUG_EDIT);
 
     sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	"set uid:gid to %u:%u(%u)", (unsigned int)euid, (unsigned int)egid,
@@ -126,7 +126,7 @@ is_writable(const struct sudo_cred *user_cred, struct stat *sb)
     if (ISSET(sb->st_mode, S_IWOTH)) {
 	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 	    "directory is writable by other");
-	debug_return_int(true);
+	debug_return_bool(true);
     }
 
     /* Group writable? */
@@ -134,12 +134,12 @@ is_writable(const struct sudo_cred *user_cred, struct stat *sb)
 	if (group_matches(sb->st_gid, user_cred)) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"directory is writable by one of the user's groups");
-	    debug_return_int(true);
+	    debug_return_bool(true);
 	}
     }
 
     errno = EACCES;
-    debug_return_int(false);
+    debug_return_bool(false);
 }
 
 #if defined(HAVE_FACCESSAT) && defined(AT_EACCESS)
