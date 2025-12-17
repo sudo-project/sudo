@@ -68,10 +68,9 @@ class SudoPolicyPlugin(sudo.Plugin):
         cmd = argv[0]
         # Example for a simple reject:
         if not self._is_command_allowed(cmd):
-            sudo.log_error("You are not allowed to run this command!")
-            return sudo.RC.REJECT
-
-            raise sudo.PluginError("You are not allowed to run this command!")
+            error_msg = "You are not allowed to run this command!"
+            sudo.log_error(error_msg)
+            raise sudo.PluginReject(error_msg)
 
         # The environment the command will be executed with (we allow any here)
         user_env_out = sudo.options_from_dict(self.user_env) + env_add
