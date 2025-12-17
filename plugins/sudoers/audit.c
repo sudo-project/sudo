@@ -76,7 +76,7 @@ audit_failure_int(const struct sudoers_context *ctx, char *const argv[],
     int ret = 0;
     debug_decl(audit_failure_int, SUDOERS_DEBUG_AUDIT);
 
-#if defined(HAVE_BSM_AUDIT) || defined(HAVE_LINUX_AUDIT)
+#if defined(HAVE_BSM_AUDIT) || defined(HAVE_LINUX_AUDIT) || defined(HAVE_SOLARIS_AUDIT)
     if (def_log_denied && argv != NULL) {
 #ifdef HAVE_BSM_AUDIT
 	if (bsm_audit_failure(ctx, argv, message) == -1)
