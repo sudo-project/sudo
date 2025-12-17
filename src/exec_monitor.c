@@ -276,7 +276,7 @@ mon_errsock_cb(int fd, int what, void *v)
     nread = read(fd, &errval, sizeof(errval));
     if (nread < 0) {
 	if (errno != EAGAIN && errno != EINTR) {
-	    if (mc->cstat->val == CMD_INVALID) {
+	    if (mc->cstat->type == CMD_INVALID) {
 		/* XXX - need a way to distinguish non-exec error. */
 		mc->cstat->type = CMD_ERRNO;
 		mc->cstat->val = errno;

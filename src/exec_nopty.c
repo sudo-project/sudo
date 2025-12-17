@@ -82,7 +82,7 @@ errpipe_cb(int fd, int what, void *v)
     switch (nread) {
     case -1:
 	if (errno != EAGAIN && errno != EINTR) {
-	    if (ec->cstat->val == CMD_INVALID) {
+	    if (ec->cstat->type == CMD_INVALID) {
 		/* XXX - need a way to distinguish non-exec error. */
 		ec->cstat->type = CMD_ERRNO;
 		ec->cstat->val = errno;
