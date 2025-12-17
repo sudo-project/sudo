@@ -87,7 +87,7 @@ sudo_krb5_setup(const struct sudoers_context *ctx, struct passwd *pw,
     char **promptp, sudo_auth *auth)
 {
     static char	*krb5_prompt;
-    debug_decl(sudo_krb5_init, SUDOERS_DEBUG_AUTH);
+    debug_decl(sudo_krb5_setup, SUDOERS_DEBUG_AUTH);
 
     /* Don't override the prompt if the user specified their own. */
     if (strcmp(*promptp, PASSPROMPT) != 0) {
