@@ -365,7 +365,7 @@ python_sudo_conversation(PyObject *Py_UNUSED(self), PyObject *py_args, PyObject 
     int rc = py_sudo_conv((int)num_msgs, msgs, replies, &callback);
     if (rc != 0) {
         PyErr_Format(sudo_exc_ConversationInterrupted,
-                     "%s: conversation was interrupted", __func__, rc);
+                     "%s: conversation was interrupted", __func__);
         goto cleanup;
     }
 
