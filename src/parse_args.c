@@ -559,17 +559,17 @@ parse_args(int argc, char **argv, const char *shell, int *old_optind,
 	}
 	SET(flags, MODE_SHELL);
     }
-    if ((flags & valid_flags) != flags)
-	usage();
     if (mode == MODE_EDIT &&
        (ISSET(flags, MODE_PRESERVE_ENV) || extra_env.env_len != 0)) {
-	if (ISSET(mode, MODE_PRESERVE_ENV))
+	if (ISSET(flags, MODE_PRESERVE_ENV))
 	    sudo_warnx("%s", U_("the -E option is not valid in edit mode"));
 	if (extra_env.env_len != 0)
 	    sudo_warnx("%s",
 		U_("you may not specify environment variables in edit mode"));
 	usage();
     }
+    if ((flags & valid_flags) != flags)
+	usage();
     if ((sudo_settings[ARG_RUNAS_USER].value != NULL ||
 	 sudo_settings[ARG_RUNAS_GROUP].value != NULL) &&
 	!ISSET(mode, MODE_EDIT | MODE_RUN | MODE_CHECK | MODE_VALIDATE)) {
