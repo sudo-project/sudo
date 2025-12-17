@@ -45,5 +45,5 @@ iolog_eof(struct iolog_file *iol)
     else
 #endif
 	ret = feof(iol->fd.f) != 0;
-    debug_return_int(ret);
+    debug_return_bool(ret);
 }
