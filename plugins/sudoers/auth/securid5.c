@@ -157,7 +157,7 @@ sudo_securid_verify(const struct sudoers_context *ctx, struct passwd *pw,
     /* Have ACE verify password */
     switch (SD_Check(*sd, pass, pw->pw_name)) {
 	case ACM_OK:
-		ret = AUTH_SUCESS;
+		ret = AUTH_SUCCESS;
 		break;
 
 	case ACE_UNDEFINED_PASSCODE:
