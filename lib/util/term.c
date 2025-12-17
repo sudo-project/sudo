@@ -272,7 +272,7 @@ sudo_term_is_raw_int(struct termios *term)
     if (ISSET(term->c_oflag, OPOST))
 	debug_return_bool(false);
 
-    if (ISSET(term->c_oflag, ECHO|ECHONL|ICANON))
+    if (ISSET(term->c_lflag, ECHO|ECHONL|ICANON))
 	debug_return_bool(false);
 
     debug_return_bool(true);
