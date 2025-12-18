@@ -100,7 +100,7 @@ sudo_uuid_to_string_v1(const unsigned char uuid[restrict static 16], char * rest
  * Returns 0 on success, -1 if str is not a valid uuid.
  */
 int
-sudo_uuid_from_string_v1(const char *str, unsigned char uuid[static 16])
+sudo_uuid_from_string_v1(const char *str, unsigned char uuid[restrict static 16])
 {
     unsigned int i = 0, j = 0;
     int ch;

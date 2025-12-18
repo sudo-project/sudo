@@ -165,7 +165,7 @@ sudo_secure_open_dir_v1(const char *path, uid_t uid, gid_t gid,
  * Sets name based on the last file it tried to open, even on error.
  */
 int
-sudo_open_conf_path_v1(const char *path, char *name, size_t namesize,
+sudo_open_conf_path_v1(const char *restrict path, char *restrict name, size_t namesize,
     int (*fn)(const char *, int))
 {
     const char *cp, *ep, *path_end;

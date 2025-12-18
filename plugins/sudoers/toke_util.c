@@ -40,7 +40,7 @@ static size_t arg_size = 0;
  * Requires that dst have at least len + 1 bytes free.
  */
 static void
-copy_string(char *dst, const char *src, size_t len)
+copy_string(char * restrict dst, const char * restrict src, size_t len)
 {
     const char *end = src + len;
     debug_decl(copy_string, SUDOERS_DEBUG_PARSER);
