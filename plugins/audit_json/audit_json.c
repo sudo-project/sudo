@@ -383,7 +383,7 @@ add_timestamp(struct json_container *jsonc, struct timespec *ts)
 }
 
 static int
-audit_write_json(struct json_container * restrict jsonc)
+audit_write_json(struct json_container *jsonc)
 {
     struct stat sb;
     int ret = -1;

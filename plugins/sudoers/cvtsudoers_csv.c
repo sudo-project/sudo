@@ -107,7 +107,7 @@ defaults_to_alias_type(int defaults_type)
  * XXX - rewrite this
  */
 static bool
-print_csv_string(FILE * restrict fp, const char * restrict str, bool quoted)
+print_csv_string(FILE *fp, const char *str, bool quoted)
 {
     const char *src = str;
     char *dst, *newstr;

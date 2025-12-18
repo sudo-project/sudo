@@ -527,8 +527,8 @@ journal_restart(const RestartMessage *msg, const uint8_t *buf, size_t buflen,
 }
 
 static bool
-journal_write(const uint8_t * restrict buf, size_t len,
-    struct connection_closure * restrict closure)
+journal_write(const uint8_t *buf, size_t len,
+    struct connection_closure *closure)
 {
     uint32_t msg_len;
     debug_decl(journal_write, SUDO_DEBUG_UTIL);
@@ -597,8 +597,8 @@ journal_accept(const AcceptMessage *msg, const uint8_t *buf, size_t len,
  * Store a RejectMessage from the client in the journal.
  */
 static bool
-journal_reject(const RejectMessage *msg, const uint8_t * restrict buf,
-    size_t len, struct connection_closure * restrict closure)
+journal_reject(const RejectMessage *msg, const uint8_t *buf,
+    size_t len, struct connection_closure *closure)
 {
     debug_decl(journal_reject, SUDO_DEBUG_UTIL);
 
@@ -617,8 +617,8 @@ journal_reject(const RejectMessage *msg, const uint8_t * restrict buf,
  * Store an ExitMessage from the client in the journal.
  */
 static bool
-journal_exit(const ExitMessage *msg, const uint8_t * restrict buf, size_t len,
-    struct connection_closure * restrict closure)
+journal_exit(const ExitMessage *msg, const uint8_t *buf, size_t len,
+    struct connection_closure *closure)
 {
     debug_decl(journal_exit, SUDO_DEBUG_UTIL);
 
@@ -635,8 +635,8 @@ journal_exit(const ExitMessage *msg, const uint8_t * restrict buf, size_t len,
  * Store an AlertMessage from the client in the journal.
  */
 static bool
-journal_alert(const AlertMessage *msg, const uint8_t * restrict buf, size_t len,
-    struct connection_closure * restrict closure)
+journal_alert(const AlertMessage *msg, const uint8_t *buf, size_t len,
+    struct connection_closure *closure)
 {
     debug_decl(journal_alert, SUDO_DEBUG_UTIL);
 
@@ -655,8 +655,8 @@ journal_alert(const AlertMessage *msg, const uint8_t * restrict buf, size_t len,
  * Store an IoBuffer from the client in the journal.
  */
 static bool
-journal_iobuf(int iofd, const IoBuffer *iobuf, const uint8_t * restrict buf,
-    size_t len, struct connection_closure * restrict closure)
+journal_iobuf(int iofd, const IoBuffer *iobuf, const uint8_t *buf,
+    size_t len, struct connection_closure *closure)
 {
     debug_decl(journal_iobuf, SUDO_DEBUG_UTIL);
 
@@ -671,8 +671,8 @@ journal_iobuf(int iofd, const IoBuffer *iobuf, const uint8_t * restrict buf,
  * Store a CommandSuspend message from the client in the journal.
  */
 static bool
-journal_suspend(const CommandSuspend *msg, const uint8_t * restrict buf,
-    size_t len, struct connection_closure * restrict closure)
+journal_suspend(const CommandSuspend *msg, const uint8_t *buf,
+    size_t len, struct connection_closure *closure)
 {
     debug_decl(journal_suspend, SUDO_DEBUG_UTIL);
 
@@ -685,8 +685,8 @@ journal_suspend(const CommandSuspend *msg, const uint8_t * restrict buf,
  * Store a ChangeWindowSize message from the client in the journal.
  */
 static bool
-journal_winsize(const ChangeWindowSize *msg, const uint8_t * restrict buf,
-    size_t len, struct connection_closure * restrict closure)
+journal_winsize(const ChangeWindowSize *msg, const uint8_t *buf,
+    size_t len, struct connection_closure *closure)
 {
     debug_decl(journal_winsize, SUDO_DEBUG_UTIL);
 

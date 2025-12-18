@@ -65,8 +65,8 @@ enum sudoers_formats {
 static void dump_sudoers(void);
 static void set_runaspw(struct sudoers_context *ctx, const char *);
 static void set_runasgr(struct sudoers_context *ctx, const char *);
-static int testsudoers_error(const char * restrict buf);
-static int testsudoers_output(const char * restrict buf);
+static int testsudoers_error(const char *buf);
+static int testsudoers_output(const char *buf);
 sudo_noreturn static void usage(void);
 static void cb_lookup(const struct sudoers_parse_tree *parse_tree, const struct userspec *us, int user_match, const struct privilege *priv, int host_match, const struct cmndspec *cs, int date_match, int runas_match, int cmnd_match, void *closure);
 static int testsudoers_query(struct sudoers_context *ctx, const struct sudo_nss *nss, struct passwd *pw);
@@ -744,13 +744,13 @@ done:
 }
 
 static int
-testsudoers_output(const char * restrict buf)
+testsudoers_output(const char *buf)
 {
     return fputs(buf, stdout);
 }
 
 static int
-testsudoers_error(const char *restrict buf)
+testsudoers_error(const char *buf)
 {
     return fputs(buf, stderr);
 }

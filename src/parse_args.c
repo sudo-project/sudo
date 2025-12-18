@@ -756,7 +756,7 @@ usage_excl_ticket(void)
 }
 
 static int
-help_out(const char * restrict buf)
+help_out(const char *buf)
 {
     return fputs(buf, stdout);
 }
