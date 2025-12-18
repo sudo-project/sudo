@@ -315,8 +315,9 @@ xxxprintf(char ** restrict strp, size_t strsize, int alloc, const char * restric
 			char *t; \
 			strsize = (strsize << 1) + 1; \
 			if (!(t = realloc(*strp, strsize))) { \
-				free(str); \
+				free(*strp); \
 				*strp = NULL; \
+				strsize = 0;  \
 				ret = -1; \
 				goto done; \
 			} \
