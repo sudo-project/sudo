@@ -72,8 +72,8 @@ sudo_sig2str(int signo, char *signame)
 		(void)snprintf(signame, SIG2STR_MAX, "RTMAX-%d",
 		    (SIGRTMAX - signo));
 	    }
+        return 0;
 	}
-	return 0;
     }
 #endif
     if (signo > 0 && signo < NSIG) {
