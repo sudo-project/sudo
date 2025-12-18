@@ -39,7 +39,7 @@
  * Returns a dynamically allocated string on success and NULL on failure.
  */
 char *
-sudo_stat_multiarch_v1(const char * restrict path, struct stat * restrict sb)
+sudo_stat_multiarch_v1(const char *path, struct stat *sb)
 {
 #  if defined(__ILP32__)
     const char *libdirs[] = { "/libx32/", "/lib/", "/libexec/", NULL };
@@ -91,7 +91,7 @@ sudo_stat_multiarch_v1(const char * restrict path, struct stat * restrict sb)
 }
 #else
 char *
-sudo_stat_multiarch_v1(const char * restrict path, struct stat * restrict sb)
+sudo_stat_multiarch_v1(const char *path, struct stat *sb)
 {
     return NULL;
 }

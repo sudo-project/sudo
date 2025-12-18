@@ -1079,7 +1079,7 @@ print_aliases_sudoers(struct sudoers_parse_tree *parse_tree,
 static FILE *output_fp;		/* global for convert_sudoers_output */
 
 static int
-convert_sudoers_output(const char * restrict buf)
+convert_sudoers_output(const char *buf)
 {
     return fputs(buf, output_fp);
 }

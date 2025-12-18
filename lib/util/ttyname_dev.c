@@ -216,7 +216,7 @@ done:
 }
 
 static char *
-sudo_dev_check(dev_t rdev, const char * restrict devname, char * restrict buf, size_t buflen)
+sudo_dev_check(dev_t rdev, const char *devname, char *buf, size_t buflen)
 {
     struct stat sb;
     debug_decl(sudo_dev_check, SUDO_DEBUG_UTIL);

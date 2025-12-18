@@ -28,7 +28,7 @@
 #include <sudo_eventlog.h>
 
 size_t
-eventlog_writeln(FILE * restrict fp, char * restrict line, size_t linelen, size_t maxlen)
+eventlog_writeln(FILE *fp, char *line, size_t linelen, size_t maxlen)
 {
     const char *indent = "";
     char *beg = line;
