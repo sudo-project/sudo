@@ -145,7 +145,7 @@ fmtstr(sudo_alloc_fn_t alloc_fn, sudo_free_fn_t free_fn, const char * restrict o
 	    goto oflow;
 	}
 	*cur++ = *fmt++;
-	size++;
+	size--;
     }
 
     if (size < 1) {
