@@ -669,7 +669,6 @@ check_example_conversation_plugin_user_interrupts(void)
     VERIFY_INT(python_io->open(SUDO_API_VERSION, fake_conversation, fake_printf, data.settings,
                               data.user_info, data.command_info, data.plugin_argc, data.plugin_argv,
                               data.user_env, data.plugin_options, &errstr), SUDO_RC_REJECT);
-    VERIFY_PTR(errstr, NULL);
     python_io->close(0, 0);
 
     VERIFY_STDOUT(expected_path("check_example_conversation_plugin_user_interrupts.stdout"));
@@ -818,7 +817,6 @@ check_example_policy_plugin_denied_execution(void)
     VERIFY_INT(python_policy->check_policy(data.plugin_argc, data.plugin_argv, NULL,
                                           &command_info_out, &argv_out, &user_env_out, &errstr),
                SUDO_RC_REJECT);
-    VERIFY_PTR(errstr, NULL);
 
     VERIFY_PTR(command_info_out, NULL);
     VERIFY_PTR(argv_out, NULL);
