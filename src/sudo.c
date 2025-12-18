@@ -1411,9 +1411,11 @@ policy_init_session(struct command_details *details)
      * groups to be set via pam_group(8) in pam_setcred(3).
      */
     if (ISSET(details->flags, CD_SET_GROUPS)) {
-	/* set_user_groups() prints error message on failure. */
-	if (!set_user_groups(details))
-	    goto done;
+        /* set_user_groups() prints error message on failure. */
+        if (!set_user_groups(details)) {
+            ret = false;
+            goto done;
+        }
     }
 
     /* Session setup may override sudoers umask so set it first. */
