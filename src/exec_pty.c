@@ -1210,7 +1210,23 @@ exec_pty(struct command_details *details,
      * enabled, use a pipe to interpose ourselves instead of using the
      * pty fd.  We always use a pipe for stdin when in background mode.
      */
-    if (!fd_matches_pgrp(STDIN_FILENO, ppgrp, &sb)) {
+    if (ISSET(details->flags, CD_BACKGROUND)) {
+	    /*
+	     * Running in background (sudo -b), no access to terminal input.
+	     * In non-pty mode, the command runs in an orphaned process
+	     * group and reads from the controlling terminal fail with EIO.
+	     * We cannot do the same while running in a pty but if we set
+	     * stdin to a half-closed pipe, reads from it will get EOF.
+	     */
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"terminal input not available, creating empty pipe");
+	    SET(details->flags, CD_EXEC_BG);
+	    if (pipe2(io_pipe[STDIN_FILENO], O_CLOEXEC) != 0)
+		sudo_fatal("%s", U_("unable to create pipe"));
+	    io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
+	    close(io_pipe[STDIN_FILENO][1]);
+	    io_pipe[STDIN_FILENO][1] = -1;
+    } else if (!fd_matches_pgrp(STDIN_FILENO, ppgrp, &sb)) {
 	if (!interpose[STDIN_FILENO]) {
 	    /* Not logging stdin, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
@@ -1240,22 +1256,6 @@ exec_pty(struct command_details *details,
 	     */
 	    SET(details->flags, CD_EXEC_BG);
 	}
-    } else if (ISSET(details->flags, CD_BACKGROUND)) {
-	    /*
-	     * Running in background (sudo -b), no access to terminal input.
-	     * In non-pty mode, the command runs in an orphaned process
-	     * group and reads from the controlling terminal fail with EIO.
-	     * We cannot do the same while running in a pty but if we set
-	     * stdin to a half-closed pipe, reads from it will get EOF.
-	     */
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"terminal input not available, creating empty pipe");
-	    SET(details->flags, CD_EXEC_BG);
-	    if (pipe2(io_pipe[STDIN_FILENO], O_CLOEXEC) != 0)
-		sudo_fatal("%s", U_("unable to create pipe"));
-	    io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
-	    close(io_pipe[STDIN_FILENO][1]);
-	    io_pipe[STDIN_FILENO][1] = -1;
     }
     if (!fd_matches_pgrp(STDOUT_FILENO, ppgrp, &sb)) {
 	if (!interpose[STDOUT_FILENO]) {
