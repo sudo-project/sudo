@@ -1208,11 +1208,22 @@ exec_pty(struct command_details *details,
     /*
      * If stdin, stdout or stderr is not the user's tty and logging is
      * enabled, use a pipe to interpose ourselves instead of using the
-     * pty fd.  We always use a pipe for stdin when in background mode.
+     * pty fd.  In background mode, sudo runs in an orphaned process
+     * group so fd_matches_pgrp() will always return false.
      */
-    if (ISSET(details->flags, CD_BACKGROUND)) {
+    if (!fd_matches_pgrp(STDIN_FILENO, ppgrp, &sb)) {
+	if (interpose[STDIN_FILENO]) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"stdin not user's tty, creating a pipe");
+	    SET(details->flags, CD_EXEC_BG);
+	    if (pipe2(io_pipe[STDIN_FILENO], O_CLOEXEC) != 0)
+		sudo_fatal("%s", U_("unable to create pipe"));
+	    io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
+		log_stdin, read_callback, write_callback, ec);
+	    io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
+	} else if (ISSET(details->flags, CD_BACKGROUND) && S_ISCHR(sb.st_mode)) {
 	    /*
-	     * Running in background (sudo -b), no access to terminal input.
+	     * Background mode (sudo -b) has no access to terminal input.
 	     * In non-pty mode, the command runs in an orphaned process
 	     * group and reads from the controlling terminal fail with EIO.
 	     * We cannot do the same while running in a pty but if we set
@@ -1226,8 +1237,7 @@ exec_pty(struct command_details *details,
 	    io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
 	    close(io_pipe[STDIN_FILENO][1]);
 	    io_pipe[STDIN_FILENO][1] = -1;
-    } else if (!fd_matches_pgrp(STDIN_FILENO, ppgrp, &sb)) {
-	if (!interpose[STDIN_FILENO]) {
+	} else {
 	    /* Not logging stdin, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdin not user's tty, not logging");
@@ -1236,15 +1246,6 @@ exec_pty(struct command_details *details,
 	    io_fds[SFD_STDIN] = dup(STDIN_FILENO);
 	    if (io_fds[SFD_STDIN] == -1)
 		sudo_fatal("dup");
-	} else {
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stdin not user's tty, creating a pipe");
-	    SET(details->flags, CD_EXEC_BG);
-	    if (pipe2(io_pipe[STDIN_FILENO], O_CLOEXEC) != 0)
-		sudo_fatal("%s", U_("unable to create pipe"));
-	    io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
-		log_stdin, read_callback, write_callback, ec);
-	    io_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
 	}
 
 	if (ec->foreground && ppgrp != sudo_pid) {
@@ -1258,7 +1259,17 @@ exec_pty(struct command_details *details,
 	}
     }
     if (!fd_matches_pgrp(STDOUT_FILENO, ppgrp, &sb)) {
-	if (!interpose[STDOUT_FILENO]) {
+	if (interpose[STDOUT_FILENO]) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"stdout not user's tty, creating a pipe");
+	    SET(details->flags, CD_EXEC_BG);
+	    term_raw_flags = SUDO_TERM_OFLAG;
+	    if (pipe2(io_pipe[STDOUT_FILENO], O_CLOEXEC) != 0)
+		sudo_fatal("%s", U_("unable to create pipe"));
+	    io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
+		log_stdout, read_callback, write_callback, ec);
+	    io_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
+	} else {
 	    /* Not logging stdout, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdout not user's tty, not logging");
@@ -1269,27 +1280,10 @@ exec_pty(struct command_details *details,
 	    io_fds[SFD_STDOUT] = dup(STDOUT_FILENO);
 	    if (io_fds[SFD_STDOUT] == -1)
 		sudo_fatal("dup");
-	} else {
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stdout not user's tty, creating a pipe");
-	    SET(details->flags, CD_EXEC_BG);
-	    term_raw_flags = SUDO_TERM_OFLAG;
-	    if (pipe2(io_pipe[STDOUT_FILENO], O_CLOEXEC) != 0)
-		sudo_fatal("%s", U_("unable to create pipe"));
-	    io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
-		log_stdout, read_callback, write_callback, ec);
-	    io_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
 	}
     }
     if (!fd_matches_pgrp(STDERR_FILENO, ppgrp, &sb)) {
-	if (!interpose[STDERR_FILENO]) {
-	    /* Not logging stderr, do not interpose. */
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"stderr not user's tty, not logging");
-	    io_fds[SFD_STDERR] = dup(STDERR_FILENO);
-	    if (io_fds[SFD_STDERR] == -1)
-		sudo_fatal("dup");
-	} else {
+	if (interpose[STDERR_FILENO]) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stderr not user's tty, creating a pipe");
 	    if (pipe2(io_pipe[STDERR_FILENO], O_CLOEXEC) != 0)
@@ -1297,6 +1291,13 @@ exec_pty(struct command_details *details,
 	    io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
 		log_stderr, read_callback, write_callback, ec);
 	    io_fds[SFD_STDERR] = io_pipe[STDERR_FILENO][1];
+	} else {
+	    /* Not logging stderr, do not interpose. */
+	    sudo_debug_printf(SUDO_DEBUG_INFO,
+		"stderr not user's tty, not logging");
+	    io_fds[SFD_STDERR] = dup(STDERR_FILENO);
+	    if (io_fds[SFD_STDERR] == -1)
+		sudo_fatal("dup");
 	}
     }
 
