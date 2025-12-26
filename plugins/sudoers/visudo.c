@@ -808,8 +808,10 @@ install_sudoers(struct sudoersfile *sp, bool set_owner, bool set_mode)
      */
     if (!set_owner || !set_mode) {
 	/* Preserve owner/perms of the existing file.  */
-	if (fstat(sp->fd, &sb) == -1)
-	    sudo_fatal(U_("unable to stat %s"), sp->opath);
+	if (fstat(sp->fd, &sb) == -1) {
+	    sudo_warn(U_("unable to stat %s"), sp->opath);
+	    goto done;
+	}
     }
     if (set_owner) {
 	if (chown(sp->tpath, sudoers_file_uid(), sudoers_file_gid()) != 0) {
@@ -942,8 +944,10 @@ run_command(const char *path, char *const *argv)
 
     switch (pid = sudo_debug_fork()) {
 	case -1:
-	    sudo_fatal(U_("unable to execute %s"), path);
+	    sudo_warn(U_("unable to execute %s"), path);
+	    debug_return_int(-1);
 	case 0:
+	    /* child */
 	    closefrom(STDERR_FILENO + 1);
 	    execv(path, argv);
 	    sudo_warn(U_("unable to run %s"), path);
