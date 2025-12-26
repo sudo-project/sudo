@@ -107,6 +107,9 @@ What's new in Sudo 1.9.18
  * Fixed a problem with AIX authentication when validating the
    password of Kerberos users not present in /etc/security/passwd.
 
+ * Fixed a bug introduced in sudo 1.9.17 when running a command in
+   background mode (sudo -b) in a pseudo-terminal.
+
 What's new in Sudo 1.9.17p2
 
  * Fixed a bug introduced in sudo 1.9.16 that could result in sudo
