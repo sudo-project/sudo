@@ -521,6 +521,10 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 		}
 		lastch = buf[nread - 1];
 	    }
+	    if (nread == -1) {
+		sudo_warn(U_("%s: read error"), sp->opath);
+		goto done;
+	    }
 
 	    /* Add missing newline at EOF if needed. */
 	    if (lastch != '\n') {
