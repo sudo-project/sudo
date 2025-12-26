@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2023
+ * Copyright (c) 1996, 1998-2005, 2007-2023, 2025
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -478,7 +478,7 @@ static bool
 edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
     char **editor_argv, int lineno)
 {
-    int tfd;				/* sudoers temp file descriptor */
+    int tfd = -1;			/* sudoers temp file descriptor */
     bool modified;			/* was the file modified? */
     int ac;				/* argument count */
     char linestr[64];			/* string version of lineno */
@@ -536,6 +536,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 	    }
 	}
 	(void) close(tfd);
+	tfd = -1;
     }
     times[0].tv_sec = times[1].tv_sec = orig_mtim.tv_sec;
     times[0].tv_nsec = times[1].tv_nsec = orig_mtim.tv_nsec;
@@ -628,6 +629,8 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 
     ret = true;
 done:
+    if (tfd != -1)
+	close(tfd);
     debug_return_bool(ret);
 }
 
@@ -680,6 +683,7 @@ reparse_sudoers(struct sudoers_context *ctx, char *editor, int editor_argc,
 	/* Clean slate for each parse */
 	if (!init_defaults()) {
 	    sudo_warnx("%s", U_("unable to initialize sudoers default values"));
+	    fclose(fp);
 	    goto done;
 	}
 	init_parser(ctx, sp->opath);
