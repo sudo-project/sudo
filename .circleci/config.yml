@@ -60,7 +60,7 @@ jobs:
   build_macos:
     description: Configure, build and package sudo (macOS)
     macos:
-      xcode: 26.1.0 # indicate our selected version of Xcode
+      xcode: 26.2.0 # indicate our selected version of Xcode
     steps:
       - checkout
       - run:
@@ -74,7 +74,7 @@ jobs:
   test_macos:
     description: run sudo tests in a pre-built workspace (macOS)
     macos:
-      xcode: 26.1.0 # indicate our selected version of Xcode
+      xcode: 26.2.0 # indicate our selected version of Xcode
     steps:
       # Reuse the workspace from the build job
       - attach_workspace:
