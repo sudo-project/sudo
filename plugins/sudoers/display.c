@@ -459,7 +459,7 @@ display_privs(struct sudoers_context *ctx, const struct sudo_nss_list *snl,
     }
 
     cols = ctx->user.cols;
-    if (fstat(STDOUT_FILENO, &sb) == 0 && S_ISFIFO(sb.st_mode))
+    if (!sudo_isatty(STDOUT_FILENO, &sb))
 	cols = 0;
     sudo_lbuf_init(&def_buf, output, 4, NULL, cols);
     sudo_lbuf_init(&priv_buf, output, 8, NULL, cols);
