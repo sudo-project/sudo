@@ -126,7 +126,7 @@ sudoers_lookup_pseudo(struct sudo_nss_list *snl, struct sudoers_context *ctx,
 		    if (cs->notbefore != UNSPEC) {
 			date_match = now < cs->notbefore ? DENY : ALLOW;
 		    }
-		    if (cs->notafter != UNSPEC) {
+		    if (date_match != DENY && cs->notafter != UNSPEC) {
 			date_match = now > cs->notafter ? DENY : ALLOW;
 		    }
 		    /*
@@ -269,7 +269,7 @@ sudoers_lookup_check(struct sudo_nss *nss, struct sudoers_context *ctx,
 		if (cs->notbefore != UNSPEC) {
 		    date_match = now < cs->notbefore ? DENY : ALLOW;
 		}
-		if (cs->notafter != UNSPEC) {
+		if (date_match != DENY && cs->notafter != UNSPEC) {
 		    date_match = now > cs->notafter ? DENY : ALLOW;
 		}
 		if (date_match != DENY) {
