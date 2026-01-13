@@ -1241,7 +1241,7 @@ exec_pty(struct command_details *details,
 	    /* Not logging stdin, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdin not user's tty, not logging");
-	    if (S_ISFIFO(sb.st_mode))
+	    if (S_ISFIFO(sb.st_mode) || S_ISSOCK(sb.st_mode))
 		SET(details->flags, CD_EXEC_BG);
 	    io_fds[SFD_STDIN] = dup(STDIN_FILENO);
 	    if (io_fds[SFD_STDIN] == -1)
@@ -1273,7 +1273,7 @@ exec_pty(struct command_details *details,
 	    /* Not logging stdout, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stdout not user's tty, not logging");
-	    if (S_ISFIFO(sb.st_mode)) {
+	    if (S_ISFIFO(sb.st_mode) || S_ISSOCK(sb.st_mode)) {
 		SET(details->flags, CD_EXEC_BG);
 		term_raw_flags = SUDO_TERM_OFLAG;
 	    }
