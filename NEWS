@@ -110,6 +110,17 @@ What's new in Sudo 1.9.18
  * Fixed a bug introduced in sudo 1.9.17 when running a command in
    background mode (sudo -b) in a pseudo-terminal.
 
+ * Fixed a bug with ksh93 when running a command in a pty with
+   the output piped.  ksh93 uses a socketpair instead of a pipe,
+   which prevented sudo's heuristic for when to run commands in the
+   background from working properly.  This resulted in "stair-stepped"
+   output and the terminal settings were not always restored on exit.
+
+ * Fixed a bug parsing sudoers rules where both NOTBEFORE and
+   NOTAFTER are set.  A matching NOTAFTER setting would override
+   an unmatched NOTBEFORE setting. This was a regression introduced
+   in version 1.9.15.
+
 What's new in Sudo 1.9.17p2
 
  * Fixed a bug introduced in sudo 1.9.16 that could result in sudo
