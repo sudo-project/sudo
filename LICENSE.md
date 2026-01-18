@@ -1,6 +1,6 @@
 Sudo is distributed under the following license:
 
-    Copyright (c) 1994-1996, 1998-2025
+    Copyright (c) 1994-1996, 1998-2026
         Todd C. Miller <Todd.Miller@sudo.ws>
 
     Permission to use, copy, modify, and distribute this software for any
