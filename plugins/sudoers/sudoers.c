@@ -1289,7 +1289,15 @@ open_sudoers(const char *path, char **outfile, bool doedit, bool *keepopen)
     int error, fd;
     debug_decl(open_sudoers, SUDOERS_DEBUG_PLUGIN);
 
-    fd = sudo_open_conf_path(path, fname, sizeof(fname), open_file);
+    if (outfile == NULL) {
+	/* Single file, do not treat as a path. */
+	fd = open_file(path, O_RDONLY|O_NONBLOCK);
+        if (fd != -1)
+            (void)fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
+    } else {
+	/* Could be a colon-separated path of file names. */
+	fd = sudo_open_conf_path(path, fname, sizeof(fname), open_file);
+    }
     if (sudoers_ctx.parser_conf.ignore_perms) {
 	/* Skip sudoers security checks when ignore_perms is set. */
 	if (fd == -1 || fstat(fd, &sb) == -1)
