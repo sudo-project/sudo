@@ -84,6 +84,25 @@ Defaults!@visudo@ env_keep += "SUDO_EDITOR EDITOR VISUAL"
 ## equivalent users (group sudo)
 # Defaults:%sudo env_keep += "http_proxy https_proxy ftp_proxy all_proxy no_proxy"
 ##
+## Uncomment to preserve environment variables for grep
+# Defaults:%sudo env_keep += "GREP_COLOR"
+##
+## Uncomment to preserve git related environment. While you shouldn't
+## normally run git as root, you need to with etckeeper
+# Defaults:%sudo env_keep += "GIT_AUTHOR_* GIT_COMMITTER_*"
+##
+## Uncomment to preserve Debian-related environment variables. root 
+## won't have sensible values for them.
+# Defaults:%sudo env_keep += "EMAIL DEBEMAIL DEBFULLNAME"
+##
+## Uncomment to allow root to use the calling user's ssh agent
+## transparently. This enabled "sudo scp" or "sudo rsync"
+# Defaults:%sudo env_keep += "SSH_AGENT_PID SSH_AUTH_SOCK"
+##
+## Uncomment to allow root to use the calling user's gpg agent
+## transparently. This enabled "sudo scp" or "sudo rsync"
+# Defaults:%sudo env_keep += "GPG_AGENT_INFO"
+##
 ## Uncomment to disable "use_pty" when running commands as root.
 ## Commands run as non-root users will run in a pseudo-terminal,
 ## not the user's own terminal, to prevent command injection.
