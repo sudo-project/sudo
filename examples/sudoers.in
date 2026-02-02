@@ -1,9 +1,16 @@
-#
-# Sample /etc/sudoers file.
-#
-# This file MUST be edited with the 'visudo' command as root.
-#
-# See the sudoers man page for the details on how to write a sudoers file.
+##
+## Sample sudoers file.
+##
+## This file MUST be edited with the 'visudo' command as root.
+## Failure to use 'visudo' may result in syntax or file permission errors
+## that prevent sudo from running.
+
+## Please consider adding local content in /etc/sudoers.d/ instead of
+## directly modifying this file.
+
+##
+## See the sudoers man page for the details on how to write a sudoers file.
+##
 
 ##
 # Override built-in defaults
@@ -16,21 +23,11 @@ Defaults@SERVERS	log_year, logfile=@log_dir@/sudo.log
 Defaults!PAGERS		noexec
 
 ##
-# User alias specification
+## Host alias specification
 ##
-User_Alias	FULLTIMERS = millert, mikef, dowdy
-User_Alias	PARTTIMERS = bostley, jwfox, crawl
-User_Alias	WEBADMIN = will, wendy, wim
-
-##
-# Runas alias specification
-##
-Runas_Alias	OP = root, operator
-Runas_Alias	DB = oracle, sybase
-
-##
-# Host alias specification
-##
+## Groups of machines. These may include host names (optionally with wildcards),
+## IP addresses, network numbers or netgroups.
+# Host_Alias	WEBSERVERS = www1, www2, www3
 Host_Alias	SPARC = bigtime, eclipse, moet, anchor:\
 		SGI = grolsch, dandelion, black:\
 		ALPHA = widget, thalamus, foobar:\
@@ -41,8 +38,27 @@ Host_Alias	SERVERS = primary, mail, www, ns
 Host_Alias	CDROM = orion, perseus, hercules
 
 ##
-# Cmnd alias specification
+## User alias specification
 ##
+## Groups of users.  These may consist of user names, uids, Unix groups,
+## or netgroups.
+# User_Alias	ADMINS = millert, dowdy, mikef
+User_Alias	FULLTIMERS = millert, mikef, dowdy
+User_Alias	PARTTIMERS = bostley, jwfox, crawl
+User_Alias	WEBADMIN = will, wendy, wim
+
+##
+## Cmnd alias specification
+##
+## Groups of commands.  Often used to group related commands together.
+# Cmnd_Alias	PROCESSES = /usr/bin/nice, /bin/kill, /usr/bin/renice, \
+# 			    /usr/bin/pkill, /usr/bin/top
+#
+# Cmnd_Alias	REBOOT = /sbin/halt, /sbin/reboot, /sbin/poweroff
+#
+# Cmnd_Alias	PKGMAN = /usr/bin/apt, /usr/bin/dpkg, /usr/bin/rpm, \
+# 			 /usr/bin/yum, /usr/bin/dnf,  /usr/bin/zypper, \
+# 			 /usr/bin/pacman
 Cmnd_Alias	DUMPS = /usr/sbin/dump, /usr/sbin/rdump, /usr/sbin/restore, \
 			/usr/sbin/rrestore, /usr/bin/mt, \
 			sha224:0GomF8mNN3wlDt1HD9XldjJ3SNgpFdbjO1+NsQ== \
@@ -51,7 +67,6 @@ Cmnd_Alias	KILL = /usr/bin/kill, /usr/bin/top
 Cmnd_Alias	PRINTING = /usr/sbin/lpc, /usr/bin/lprm
 Cmnd_Alias	SHUTDOWN = /usr/sbin/shutdown
 Cmnd_Alias	HALT = /usr/sbin/halt
-Cmnd_Alias	REBOOT = /usr/sbin/reboot
 Cmnd_Alias	SHELLS = /sbin/sh, /usr/bin/sh, /usr/bin/csh, /usr/bin/ksh, \
 			 /usr/local/bin/tcsh, /usr/bin/rsh, \
 			 /usr/local/bin/zsh
@@ -61,12 +76,133 @@ Cmnd_Alias	VIPW = /usr/sbin/vipw, /usr/bin/passwd, /usr/bin/chsh, \
 Cmnd_Alias	PAGERS = /usr/bin/more, /usr/bin/pg, /usr/bin/less
 
 ##
-# User specification
+## Defaults specification
 ##
+## Preserve editor environment variables for visudo.
+## To preserve these for all commands, remove the "!visudo" qualifier.
+Defaults!@visudo@ env_keep += "SUDO_EDITOR EDITOR VISUAL"
+##
+## Preserve EDITOR environment variables for all users in the sudo group.
+## This allows running arbitrary commands, but sudo members are root
+## equivalent anyway.
+#Defaults:%sudo env_keep += "SUDO_EDITOR EDITOR VISUAL"
+##
+## Use a hard-coded PATH instead of the user's to find commands.
+## This also helps prevent poorly written scripts from running
+## arbitrary commands under sudo.
+@secure_path_config@Defaults secure_path="@secure_path@"
+##
+## You may wish to keep some of the following environment variables
+## when running commands via sudo.
+##
+## Locale settings
+# Defaults env_keep += "LANG LANGUAGE LINGUAS LC_* _XKB_CHARSET"
+##
+## Run X applications through sudo; HOME is used to find the
+## .Xauthority file.  Note that other programs use HOME to find   
+## configuration files and this may lead to privilege escalation!
+# Defaults env_keep += "HOME"
+##
+## X11 resource path settings
+# Defaults env_keep += "XAPPLRESDIR XFILESEARCHPATH XUSERFILESEARCHPATH"
+##
+## Desktop path settings
+# Defaults env_keep += "QTDIR KDEDIR"
+##
+## Allow sudo-run commands to inherit the callers' ConsoleKit session
+# Defaults env_keep += "XDG_SESSION_COOKIE"
+##
+## Uncomment to enable special input methods.  Care should be taken as
+## this may allow users to subvert the command being run via sudo.
+# Defaults env_keep += "XMODIFIERS GTK_IM_MODULE QT_IM_MODULE QT_IM_SWITCHER"
+##
+## Uncomment to preserve proxy settings from user environments of root
+## equivalent users (group sudo)
+# Defaults:%sudo env_keep += "http_proxy https_proxy ftp_proxy all_proxy no_proxy"
+##
+## Uncomment to preserve environment variables for grep
+# Defaults:%sudo env_keep += "GREP_COLOR"
+##
+## Uncomment to preserve git related environment. While you shouldn't
+## normally run git as root, you need to with etckeeper
+# Defaults:%sudo env_keep += "GIT_AUTHOR_* GIT_COMMITTER_*"
+##
+## Uncomment to preserve Debian-related environment variables. root 
+## won't have sensible values for them.
+# Defaults:%sudo env_keep += "EMAIL DEBEMAIL DEBFULLNAME"
+##
+## Uncomment to allow root to use the calling user's ssh agent
+## transparently. This enabled "sudo scp" or "sudo rsync"
+# Defaults:%sudo env_keep += "SSH_AGENT_PID SSH_AUTH_SOCK"
+##
+## Uncomment to allow root to use the calling user's gpg agent
+## transparently. This enabled "sudo scp" or "sudo rsync"
+# Defaults:%sudo env_keep += "GPG_AGENT_INFO"
+##
+## Uncomment to disable "use_pty" when running commands as root.
+## Commands run as non-root users will run in a pseudo-terminal,
+## not the user's own terminal, to prevent command injection.
+# Defaults>root !use_pty
+##
+## Uncomment to run commands in the background by default.
+## This can be used to prevent sudo from consuming user input while
+## a non-interactive command runs if "use_pty" or I/O logging are
+## enabled.  Some commands may not run properly in the background.
+# Defaults exec_background
+##
+## Uncomment to send mail if the user does not enter the correct password.
+# Defaults mail_badpass
+##
+## Uncomment to enable logging of a command's output, except for
+## sudoreplay and reboot.  Use sudoreplay to play back logged sessions.
+## Sudo will create up to 2,176,782,336 I/O logs before recycling them.
+## Set maxseq to a smaller number if you don't have unlimited disk space.
+# Defaults log_output
+# Defaults!/usr/bin/sudoreplay !log_output
+# Defaults!/usr/local/bin/sudoreplay !log_output
+# Defaults!REBOOT !log_output
+# Defaults maxseq = 1000
+##
+## Uncomment to disable intercept and log_subcmds for debuggers and
+## tracers.  Otherwise, anything that uses ptrace(2) will be unable
+## to run under sudo if intercept_type is set to "trace".
+# Defaults!DEBUGGERS !intercept, !log_subcmds
+##
+## Uncomment to disable intercept and log_subcmds for package managers.
+## Some package scripts run a huge number of commands, which is made
+## slower by these options and also can clutter up the logs.
+# Defaults!PKGMAN !intercept, !log_subcmds
+##
+## Uncomment to disable PAM silent mode.  Otherwise messages by PAM
+## modules such as pam_faillock will not be printed.
+# Defaults !pam_silent
 
-# root and users in group wheel can run anything on any machine as any user
-root		ALL = (ALL:ALL) ALL
-%wheel		ALL = (ALL:ALL) ALL
+##
+## Runas alias specification
+##
+Runas_Alias	OP = root, operator
+Runas_Alias	DB = oracle, sybase
+
+
+##
+## User privilege specification
+##
+root ALL=(ALL:ALL) ALL
+
+## Uncomment to allow members of group wheel to execute any command
+# %wheel ALL=(ALL:ALL) ALL
+
+## Same thing without a password
+# %wheel ALL=(ALL:ALL) NOPASSWD: ALL
+
+## Uncomment to allow members of group sudo to execute any command
+# %sudo ALL=(ALL:ALL) ALL
+
+## Uncomment to allow any user to run sudo if they know the password
+## of the user they are running the command as (root by default).
+# Defaults targetpw  # Ask for the password of the target user
+# ALL ALL=(ALL:ALL) ALL  # WARNING: only use this together with 'Defaults targetpw'
+
 
 # full time sysadmins can run anything on any machine without a password
 FULLTIMERS	ALL = (ALL:ALL) NOPASSWD: ALL
@@ -131,3 +267,6 @@ WEBADMIN	www = (www) ALL, (root) /usr/bin/su www
 # anyone can mount/unmount a cd-rom on the machines in the CDROM alias
 ALL		CDROM = NOPASSWD: /sbin/umount /CDROM,\
 		/sbin/mount -o nosuid\,nodev /dev/cd0a /CDROM
+
+## Read drop-in files from @sysconfdir@/sudoers.d
+@includedir @sysconfdir@/sudoers.d
