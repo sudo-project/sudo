@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2021-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2021-2026 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -128,7 +128,8 @@ journal_mkuuid(const char *parent_dir, char *pathbuf, size_t pathsize)
 		goto done;
 	    }
 	}
-	fd = openat(dfd, uuid_str, O_CREAT|O_EXCL|O_RDWR, S_IRUSR|S_IWUSR);
+	fd = openat(dfd, uuid_str, O_CREAT|O_EXCL|O_RDWR|O_NOFOLLOW,
+	    S_IRUSR|S_IWUSR);
     } while (fd == -1 && errno == EEXIST);
     if (fd == -1) {
 	sudo_warn(U_("%s: %s"), "openat", pathbuf);
@@ -496,7 +497,7 @@ journal_restart(const RestartMessage *msg, const uint8_t *buf, size_t buflen,
 	closure->errstr = _("unable to open journal file");
 	debug_return_bool(false);
     }
-    if ((fd = open(journal_path, O_RDWR)) == -1) {
+    if ((fd = open(journal_path, O_RDWR|O_NOFOLLOW)) == -1) {
 	sudo_warn(U_("unable to open %s"), journal_path);
 	closure->errstr = _("unable to open journal file");
 	debug_return_bool(false);

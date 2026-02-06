@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2021, 2026 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -82,7 +82,7 @@ iolog_nextid(const char *iolog_dir, char sessid[7])
 	    "%s: %s/seq", __func__, iolog_dir);
 	goto done;
     }
-    fd = iolog_openat(AT_FDCWD, pathbuf, O_RDWR|O_CREAT);
+    fd = iolog_openat(AT_FDCWD, pathbuf, O_RDWR|O_CREAT|O_NOFOLLOW);
     if (fd == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: unable to open %s", __func__, pathbuf);

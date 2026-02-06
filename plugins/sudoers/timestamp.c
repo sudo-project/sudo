@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2014-2024 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2014-2026 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -477,7 +477,7 @@ timestamp_open(const struct sudoers_context *ctx)
     for (tries = 1; ; tries++) {
 	struct stat sb;
 
-	fd = ts_openat(dfd, uidstr, O_RDWR|O_CREAT);
+	fd = ts_openat(dfd, uidstr, O_RDWR|O_CREAT|O_NOFOLLOW);
 	switch (fd) {
 	case TIMESTAMP_OPEN_ERROR:
 	    log_warning(ctx, SLOG_SEND_MAIL, N_("unable to open %s"), fname);
@@ -1034,7 +1034,7 @@ timestamp_remove(const struct sudoers_context *ctx, bool unlink_it)
     }
 #endif
 
-    dfd = open(def_timestampdir, O_RDONLY|O_NONBLOCK|O_DIRECTORY);
+    dfd = open(def_timestampdir, O_RDONLY|O_NONBLOCK|O_DIRECTORY|O_NOFOLLOW);
     if (dfd == -1) {
 	if (errno != ENOENT)
 	    ret = -1;
@@ -1060,7 +1060,7 @@ timestamp_remove(const struct sudoers_context *ctx, bool unlink_it)
     }
 
     /* Open time stamp file and lock it for exclusive access. */
-    fd = ts_openat(dfd, uidstr, O_RDWR);
+    fd = ts_openat(dfd, uidstr, O_RDWR|O_NOFOLLOW);
     switch (fd) {
     case TIMESTAMP_OPEN_ERROR:
 	if (errno != ENOENT)

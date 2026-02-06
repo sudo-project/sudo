@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2011-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2011-2023, 2026 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -164,12 +164,13 @@ sudo_debug_new_output(struct sudo_debug_instance *instance,
 	output->settings[j] = -1;
 
     /* Open debug file. */
-    output->fd = open(output->filename, O_WRONLY|O_APPEND, S_IRUSR|S_IWUSR);
+    output->fd = open(output->filename, O_WRONLY|O_APPEND|O_NOFOLLOW,
+	S_IRUSR|S_IWUSR);
     if (output->fd == -1) {
 	/* Create debug file as needed and set group ownership. */
 	if (errno == ENOENT) {
-	    output->fd = open(output->filename, O_WRONLY|O_APPEND|O_CREAT,
-		S_IRUSR|S_IWUSR);
+	    output->fd = open(output->filename,
+		O_WRONLY|O_APPEND|O_CREAT|O_NOFOLLOW, S_IRUSR|S_IWUSR);
 	}
 	if (output->fd == -1) {
 	    sudo_warn_nodebug("%s", output->filename);

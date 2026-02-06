@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2023, 2025 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2023, 2025-2026 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1858,7 +1858,7 @@ main(int argc, char *argv[])
     if (argc != 1)
 	usage();
     iolog_dir = argv[0];
-    if ((iolog_dir_fd = open(iolog_dir, O_RDONLY|O_DIRECTORY)) == -1) {
+    if ((iolog_dir_fd = open(iolog_dir, O_RDONLY|O_DIRECTORY|O_NOFOLLOW)) == -1) {
 	sudo_warn("%s", iolog_dir);
 	goto bad;
     }

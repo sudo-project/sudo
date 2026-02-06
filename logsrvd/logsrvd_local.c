@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2025 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2026 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -298,7 +298,7 @@ store_exit_info_json(int dfd, const struct eventlog *evlog)
     if (!sudo_json_init(&jsonc, 4, false, false, false))
         goto done;
 
-    fd = iolog_openat(dfd, "log.json", O_RDWR);
+    fd = iolog_openat(dfd, "log.json", O_RDWR|O_NOFOLLOW);
     if (fd == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to open to %s/log.json", evlog->iolog_path);
@@ -489,7 +489,7 @@ verify_iolog_uuid(int dfd, const unsigned char uuid[restrict static 16])
     debug_decl(verify_iolog_uuid, SUDO_DEBUG_UTIL);
 
     /* Read in the I/O log uuid (string form), which must be 36-bytes. */
-    fd = openat(dfd, "uuid", O_RDONLY);
+    fd = openat(dfd, "uuid", O_RDONLY|O_NOFOLLOW);
     if (fd == -1)
 	goto done;
     if (fstat(fd, &sb) == -1 || sb.st_size != 36)
@@ -545,7 +545,7 @@ store_restart_local(const RestartMessage *msg, const uint8_t *buf, size_t len,
 
     /* We use iolog_dir_fd in calls to openat(2) */
     closure->iolog_dir_fd = iolog_openat(AT_FDCWD,
-	closure->evlog->iolog_path, O_RDONLY|O_DIRECTORY);
+	closure->evlog->iolog_path, O_RDONLY|O_DIRECTORY|O_NOFOLLOW);
     if (closure->iolog_dir_fd == -1) {
 	sudo_warn("%s", closure->evlog->iolog_path);
 	goto bad;

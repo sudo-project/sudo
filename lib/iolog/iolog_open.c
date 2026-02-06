@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2021, 2025-2026 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -80,7 +80,7 @@ iolog_open(struct iolog_file *iol, int dfd, int iofd, const char *mode)
     iol->compressed = false;
     iol->locked = false;
     if (iol->enabled) {
-	int fd = iolog_openat(dfd, file, flags);
+	int fd = iolog_openat(dfd, file, flags|O_NOFOLLOW);
 	if (lockit && fd != -1) {
 	    if (sudo_lock_file(fd, SUDO_TLOCK)) {
 		iol->locked = true;

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2026 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -342,7 +342,8 @@ main(int argc, char *argv[])
     }
 
     /* Open files for replay, applying replay filter for the -f flag. */
-    iolog_dir_fd = iolog_openat(AT_FDCWD, iolog_dir, O_RDONLY|O_DIRECTORY);
+    iolog_dir_fd = iolog_openat(AT_FDCWD, iolog_dir,
+	O_RDONLY|O_DIRECTORY|O_NOFOLLOW);
     if (iolog_dir_fd == -1)
 	sudo_fatal("%s", iolog_dir);
     for (i = 0; i < IOFD_MAX; i++) {

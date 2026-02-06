@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2020-2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2020-2023, 2025-2026 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -151,7 +151,7 @@ audit_json_open(unsigned int version, sudo_conv_t conversation,
     /* open log file */
     /* TODO: support pipe */
     oldmask = umask(S_IRWXG|S_IRWXO);
-    fd = open(state.logfile, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
+    fd = open(state.logfile, O_RDWR|O_CREAT|O_NOFOLLOW, S_IRUSR|S_IWUSR);
     (void)umask(oldmask);
     if (fd == -1 || fcntl(fd, F_SETFD, FD_CLOEXEC) == -1 ||
 	    (state.log_fp = fdopen(fd, "w")) == NULL) {

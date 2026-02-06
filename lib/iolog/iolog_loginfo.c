@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2020 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2023, 2025-2026 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -49,14 +49,14 @@ iolog_parse_loginfo(int dfd, const char *iolog_dir)
     debug_decl(iolog_parse_loginfo, SUDO_DEBUG_UTIL);
 
     if (dfd == -1) {
-	if ((tmpfd = open(iolog_dir, O_RDONLY|O_DIRECTORY)) == -1) {
+	if ((tmpfd = open(iolog_dir, O_RDONLY|O_DIRECTORY|O_NOFOLLOW)) == -1) {
 	    sudo_warn("%s", iolog_dir);
 	    goto bad;
 	}
 	dfd = tmpfd;
     }
-    if ((fd = openat(dfd, "log.json", O_RDONLY, 0)) == -1) {
-	fd = openat(dfd, "log", O_RDONLY, 0);
+    if ((fd = openat(dfd, "log.json", O_RDONLY|O_NOFOLLOW, 0)) == -1) {
+	fd = openat(dfd, "log", O_RDONLY|O_NOFOLLOW, 0);
 	legacy = true;
     }
     if (tmpfd != -1)
@@ -103,7 +103,7 @@ iolog_write_info_file_legacy(int dfd, struct eventlog *evlog)
     int error, fd;
     debug_decl(iolog_info_write_log, SUDO_DEBUG_UTIL);
 
-    fd = iolog_openat(dfd, "log", O_CREAT|O_TRUNC|O_WRONLY);
+    fd = iolog_openat(dfd, "log", O_CREAT|O_TRUNC|O_WRONLY|O_NOFOLLOW);
     if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to %sopen %s/log", fd == -1 ? "" : "fd", evlog->iolog_path);
@@ -178,7 +178,7 @@ iolog_write_info_file_json(int dfd, struct eventlog *evlog)
     if (!eventlog_store_json(&jsonc, evlog))
 	goto done;
 
-    fd = iolog_openat(dfd, "log.json", O_CREAT|O_TRUNC|O_WRONLY);
+    fd = iolog_openat(dfd, "log.json", O_CREAT|O_TRUNC|O_WRONLY|O_NOFOLLOW);
     if (fd == -1 || (fp = fdopen(fd, "w")) == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO|SUDO_DEBUG_ERRNO,
 	    "unable to %sopen %s/log.json", fd == -1 ? "" : "fd",

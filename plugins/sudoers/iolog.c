@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2023, 2025 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2023, 2025-2026 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -715,8 +715,8 @@ sudoers_io_open_local(struct timespec *start_time)
 	goto bad;
     }
 
-    iolog_dir_fd =
-	iolog_openat(AT_FDCWD, evlog->iolog_path, O_RDONLY|O_DIRECTORY);
+    iolog_dir_fd = iolog_openat(AT_FDCWD, evlog->iolog_path,
+	O_RDONLY|O_DIRECTORY|O_NOFOLLOW);
     if (iolog_dir_fd == -1) {
 	log_warning(ctx, SLOG_SEND_MAIL, "%s", evlog->iolog_path);
 	warned = true;

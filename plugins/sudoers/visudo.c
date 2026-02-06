@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2023, 2025
+ * Copyright (c) 1996, 1998-2005, 2007-2023, 2025-2026
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -502,7 +502,8 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
-	tfd = open(sp->tpath, O_WRONLY|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR);
+	tfd = open(sp->tpath, O_WRONLY|O_CREAT|O_TRUNC|O_NOFOLLOW,
+	    S_IRUSR|S_IWUSR);
 	if (tfd < 0) {
 	    sudo_warn("%s", sp->tpath);
 	    goto done;
@@ -1136,7 +1137,8 @@ new_sudoers(const char *path, bool doedit)
     if (fd == -1) {
 	if (!checkonly) {
 	    /* No sudoers file, create the destination file for editing. */
-	    fd = open(entry->dpath, O_RDWR|O_CREAT, sudoers_file_mode());
+	    fd = open(entry->dpath, O_RDWR|O_CREAT|O_EXCL,
+		sudoers_file_mode());
 	    entry->created = true;
 	}
 	if (fd == -1) {

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2025 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2026 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1315,9 +1315,9 @@ logsrvd_open_eventlog(struct logsrvd_config *config)
 
     /* Cannot append to a JSON file that is a single object. */
     if (config->eventlog.log_format == EVLOG_JSON_PRETTY) {
-	flags = O_RDWR|O_CREAT;
+	flags = O_RDWR|O_CREAT|O_NOFOLLOW;
     } else {
-	flags = O_WRONLY|O_APPEND|O_CREAT;
+	flags = O_WRONLY|O_APPEND|O_CREAT|O_NOFOLLOW;
     }
     debug_return_ptr(logsrvd_open_log_file(config->logfile.path, flags));
 }
@@ -1836,7 +1836,8 @@ logsrvd_conf_apply(struct logsrvd_config *config)
 	break;
     case SERVER_LOG_FILE:
 	config->server.log_stream =
-	    logsrvd_open_log_file(config->server.log_file, O_WRONLY|O_APPEND|O_CREAT);
+	    logsrvd_open_log_file(config->server.log_file,
+	    O_WRONLY|O_APPEND|O_CREAT|O_NOFOLLOW);
 	if (config->server.log_stream == NULL)
 	    debug_return_bool(false);
 	sudo_warn_set_conversation(logsrvd_conv_logfile);

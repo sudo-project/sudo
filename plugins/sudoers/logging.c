@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1994-1996, 1998-2024 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 1994-1996, 1998-2026 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1070,10 +1070,10 @@ sudoers_log_open(int type, const char *log_file)
 	case EVLOG_FILE:
 	    /* Open log file as root, mode 0600 (cannot append to JSON). */
 	    if (def_log_format == json || def_log_format == json_pretty) {
-		flags = O_RDWR|O_CREAT;
+		flags = O_RDWR|O_CREAT|O_NOFOLLOW;
 		omode = "w";
 	    } else {
-		flags = O_WRONLY|O_APPEND|O_CREAT;
+		flags = O_WRONLY|O_APPEND|O_CREAT|O_NOFOLLOW;
 		omode = "a";
 	    }
 	    oldmask = umask(S_IRWXG|S_IRWXO);

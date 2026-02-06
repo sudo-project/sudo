@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2021, 2025-2026 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -86,7 +86,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	return 0;
 
     /* Create a timing file from the supplied data. */
-    dfd = open(logdir, O_RDONLY|O_DIRECTORY);
+    dfd = open(logdir, O_RDONLY|O_DIRECTORY|O_NOFOLLOW);
     if (dfd == -1)
 	goto cleanup;
 

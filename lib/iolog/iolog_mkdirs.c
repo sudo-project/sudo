@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2009-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2009-2023, 2025-2026 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -53,11 +53,11 @@ iolog_mkdirs(const char *path)
     int dfd;
     debug_decl(iolog_mkdirs, SUDO_DEBUG_UTIL);
 
-    dfd = open(path, O_RDONLY|O_NONBLOCK|O_DIRECTORY);
+    dfd = open(path, O_RDONLY|O_NONBLOCK|O_DIRECTORY|O_NOFOLLOW);
     if (dfd == -1 && errno == EACCES) {
 	/* Try again as the I/O log owner (for NFS). */
 	if (iolog_swapids(false)) {
-	    dfd = open(path, O_RDONLY|O_NONBLOCK|O_DIRECTORY);
+	    dfd = open(path, O_RDONLY|O_NONBLOCK|O_DIRECTORY|O_NOFOLLOW);
 	    if (!iolog_swapids(true)) {
 		ok = false;
 		goto done;

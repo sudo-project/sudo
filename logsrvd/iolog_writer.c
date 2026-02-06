@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2023, 2025-2026 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -637,8 +637,8 @@ create_iolog_path(struct connection_closure *closure)
     evlog->iolog_file = evlog->iolog_path + strlen(expanded_dir) + 1;
 
     /* We use iolog_dir_fd in calls to openat(2) */
-    closure->iolog_dir_fd =
-	iolog_openat(AT_FDCWD, evlog->iolog_path, O_RDONLY|O_DIRECTORY);
+    closure->iolog_dir_fd = iolog_openat(AT_FDCWD, evlog->iolog_path,
+	O_RDONLY|O_DIRECTORY|O_NOFOLLOW);
     if (closure->iolog_dir_fd == -1) {
 	sudo_warn("%s", evlog->iolog_path);
 	goto bad;
@@ -721,7 +721,7 @@ iolog_store_uuid(int dfd, struct connection_closure *closure)
     }
 
     /* Write UUID in string form to the I/O log directory. */
-    fd = iolog_openat(dfd, "uuid", O_CREAT|O_TRUNC|O_WRONLY);
+    fd = iolog_openat(dfd, "uuid", O_CREAT|O_TRUNC|O_WRONLY|O_NOFOLLOW);
     if (fd == -1) {
 	sudo_warn(U_("unable to open %s/%s"), closure->evlog->iolog_path,
 	    "uuid");
@@ -894,7 +894,7 @@ iolog_rewrite(const struct timespec *target, struct connection_closure *closure)
 	sudo_warn(U_("unable to mkdir %s"), tmpdir);
 	goto done;
     }
-    tmpdir_fd = iolog_openat(AT_FDCWD, tmpdir, O_RDONLY|O_DIRECTORY);
+    tmpdir_fd = iolog_openat(AT_FDCWD, tmpdir, O_RDONLY|O_DIRECTORY|O_NOFOLLOW);
     if (tmpdir_fd == -1) {
 	sudo_warn(U_("unable to open %s"), tmpdir);
 	goto done;

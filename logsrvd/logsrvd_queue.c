@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2021-2025 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2021-2026 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -94,7 +94,7 @@ outgoing_queue_cb(int unused, int what, void *v)
 	FILE *fp;
 	int fd;
 
-	fd = open(oj->journal_path, O_RDWR);
+	fd = open(oj->journal_path, O_RDWR|O_NOFOLLOW);
 	if (fd == -1) {
 	    if (errno == ENOENT) {
 		TAILQ_REMOVE(&outgoing_journal_queue, oj, entries);
