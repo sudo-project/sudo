@@ -172,6 +172,10 @@
    don't. */
 #undef HAVE_DECL_O_DIRECTORY
 
+/* Define to 1 if you have the declaration of 'O_NOFOLLOW', and to 0 if you
+   don't. */
+#undef HAVE_DECL_O_NOFOLLOW
+
 /* Define to 1 if you have the declaration of 'passwdexpiredx', and to 0 if
    you don't. */
 #undef HAVE_DECL_PASSWDEXPIREDX

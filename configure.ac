@@ -3396,6 +3396,14 @@ AC_INCLUDES_DEFAULT
 ])
 
 dnl
+dnl Check for O_NOFOLLOW declaration in fcntl.h
+dnl
+AC_CHECK_DECLS([O_NOFOLLOW], [], [], [
+AC_INCLUDES_DEFAULT
+#include <fcntl.h>
+])
+
+dnl
 dnl Check for errno declaration in errno.h
 dnl
 AC_CHECK_DECLS([errno], [], [], [

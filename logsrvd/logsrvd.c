@@ -70,10 +70,6 @@
 #include <logsrvd.h>
 #include <hostcheck.h>
 
-#ifndef O_NOFOLLOW
-# define O_NOFOLLOW 0
-#endif
-
 /*
  * Sudo I/O audit server.
  */

@@ -39,10 +39,6 @@
 #include <sudo_debug.h>
 #include <sudo_util.h>
 
-#ifndef O_NOFOLLOW
-# define O_NOFOLLOW 0
-#endif
-
 /*
  * Returns true if fd is a directory, else false.
  * Warns on failure if not quiet.

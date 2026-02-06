@@ -232,7 +232,7 @@ dir_is_writable(int dfd, const struct sudo_cred *user_cred,
 }
 #endif /* HAVE_FACCESSAT && AT_EACCESS */
 
-#ifdef O_NOFOLLOW
+#if defined(HAVE_DECL_O_NOFOLLOW) && HAVE_DECL_O_NOFOLLOW
 static int
 sudo_edit_openat_nofollow(int dfd, char *path, int oflags, mode_t mode)
 {
@@ -332,7 +332,7 @@ done:
 
     debug_return_int(fd);
 }
-#endif /* O_NOFOLLOW */
+#endif /* HAVE_DECL_O_NOFOLLOW */
 
 static int
 sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode,
@@ -400,7 +400,7 @@ sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode,
     debug_return_int(fd);
 }
 
-#ifdef O_NOFOLLOW
+#if defined(HAVE_DECL_O_NOFOLLOW) && HAVE_DECL_O_NOFOLLOW
 int
 sudo_edit_open(char *path, int oflags, mode_t mode, unsigned int sflags,
     const struct sudo_cred *user_cred, const struct sudo_cred *cur_cred)
@@ -474,7 +474,7 @@ sudo_edit_open(char *path, int oflags, mode_t mode, unsigned int sflags,
 
     debug_return_int(fd);
 }
-#endif /* O_NOFOLLOW */
+#endif /* HAVE_DECL_O_NOFOLLOW */
 
 /*
  * Verify that the parent dir of a new file exists and is not writable

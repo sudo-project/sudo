@@ -149,6 +149,11 @@
 # define O_DIRECTORY	0
 #endif
 
+/* Older systems lack O_NOFOLLOW. */
+#if defined(HAVE_DECL_O_NOFOLLOW) && !HAVE_DECL_O_NOFOLLOW
+# define O_NOFOLLOW	0
+#endif
+
 /*
  * BSD defines these in <sys/param.h> but we don't include that anymore.
  */
