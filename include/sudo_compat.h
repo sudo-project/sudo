@@ -145,7 +145,7 @@
 #endif
 
 /* Older systems lack O_DIRECTORY. */
-#ifndef O_DIRECTORY
+#if defined(HAVE_DECL_O_DIRECTORY) && !HAVE_DECL_O_DIRECTORY
 # define O_DIRECTORY	0
 #endif
 

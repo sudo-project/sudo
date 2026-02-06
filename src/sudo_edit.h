@@ -24,18 +24,18 @@
  * Use O_SEARCH/O_PATH and/or O_DIRECTORY where possible.
  */
 #if defined(O_SEARCH)
-# if defined(O_DIRECTORY)
+# if defined(HAVE_DECL_O_DIRECTORY) && HAVE_DECL_O_DIRECTORY
 #  define DIR_OPEN_FLAGS	(O_SEARCH|O_DIRECTORY)
 # else
 #  define DIR_OPEN_FLAGS	(O_SEARCH)
 # endif
 #elif defined(O_PATH)
-# if defined(O_DIRECTORY)
+# if defined(HAVE_DECL_O_DIRECTORY) && HAVE_DECL_O_DIRECTORY
 #  define DIR_OPEN_FLAGS	(O_PATH|O_DIRECTORY)
 # else
 #  define DIR_OPEN_FLAGS	(O_PATH)
 # endif
-#elif defined(O_DIRECTORY)
+#elif defined(HAVE_DECL_O_DIRECTORY) && HAVE_DECL_O_DIRECTORY
 # define DIR_OPEN_FLAGS		(O_RDONLY|O_DIRECTORY)
 #else
 # define DIR_OPEN_FLAGS		(O_RDONLY|O_NONBLOCK)
