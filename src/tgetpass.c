@@ -370,6 +370,27 @@ sudo_askpass(const char *askpass, const char *prompt)
 
 extern int sudo_term_eof, sudo_term_erase, sudo_term_kill;
 
+static ssize_t
+last_chunk_len(const char *buf, ssize_t len)
+{
+    ssize_t pos = len;
+
+    /* Determine the length of what could be a (partial) UTF8 sequence */
+    while (pos > 0 && len - pos < 4) {
+        char last = buf[--pos];
+        switch (last & 0xC0) {
+        case 0xC0:
+            return len - pos;
+        case 0x80:
+            continue;
+        default:
+            return 1;
+        }
+    }
+
+    return len != 0;
+}
+
 static char *
 getln(int fd, char *buf, size_t bufsiz, bool feedback,
     enum tgetpass_errval *errval)
@@ -401,20 +422,23 @@ getln(int fd, char *buf, size_t bufsiz, bool feedback,
 		while (cp > buf) {
 		    if (write(fd, "\b \b", 3) != 3)
 			break;
-		    cp--;
+		    cp -= last_chunk_len(buf, cp - buf);
 		}
 		cp = buf;
 		continue;
 	    } else if (c == sudo_term_erase) {
 		if (cp > buf) {
 		    ignore_result(write(fd, "\b \b", 3));
-		    cp--;
+		    cp -= last_chunk_len(buf, cp - buf);
 		}
 		continue;
 	    }
-	    ignore_result(write(fd, "*", 1));
+	    *cp++ = c;
+	    if (last_chunk_len(buf, cp - buf) == 1)
+	        ignore_result(write(fd, "*", 1));
+	} else {
+	    *cp++ = c;
 	}
-	*cp++ = c;
     }
     *cp = '\0';
     if (feedback) {
@@ -422,7 +446,7 @@ getln(int fd, char *buf, size_t bufsiz, bool feedback,
 	while (cp > buf) {
 	    if (write(fd, "\b \b", 3) != 3)
 		break;
-	    cp--;
+	    cp -= last_chunk_len(buf, cp - buf);
 	}
     }
 
