@@ -48,8 +48,11 @@ src/check_ttyname
 src/intercept.exp
 src/sudo_usage.h
 
+lib/eventlog/check_parse_json
 lib/eventlog/check_wrap
 lib/eventlog/regress/logwrap/check_wrap.out
+lib/eventlog/store_json_test
+lib/eventlog/store_sudo_test
 
 lib/iolog/check_iolog_[a-z]*
 lib/iolog/fuzz_iolog_[a-z]*
@@ -72,6 +75,7 @@ lib/util/regress/harness
 logsrvd/sudo_logsrvd
 logsrvd/sudo_sendlog
 logsrvd/fuzz_[a-z]*
+logsrvd/dotdot_test
 logsrvd/logsrvd_conf_test
 
 plugins/sudoers/cvtsudoers

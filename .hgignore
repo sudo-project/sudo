@@ -43,8 +43,11 @@ Makefile$
 ^src/intercept\.exp$
 ^src/sudo_usage\.h$
 
+^lib/eventlog/check_parse_json$
 ^lib/eventlog/check_wrap$
 ^lib/eventlog/regress/logwrap/check_wrap.out$
+^lib/eventlog/store_json_test$
+^lib/eventlog/store_sudo_test$
 
 ^lib/iolog/check_iolog_(json|filter|mkpath|path|timing)$
 ^lib/iolog/fuzz_iolog_(json|legacy|timing)$
@@ -64,6 +67,7 @@ Makefile$
 ^lib/util/regress/.*\.(out|err)$
 
 ^logsrvd/sudo_(logsrvd|sendlog)$
+^logsrvd/dotdot_test$
 ^logsrvd/fuzz_logsrvd_conf$
 ^logsrvd/logsrvd_conf_test$
 
