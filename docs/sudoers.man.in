@@ -3195,6 +3195,19 @@ This flag is
 \fI@insults@\fR
 by default.
 .TP 18n
+iolog_flush
+If set,
+\fBsudo\fR
+will flush I/O log data to disk after each write instead of buffering it.
+This makes it possible to view the logs in real-time as the program
+is executing but may significantly reduce the effectiveness of I/O
+log compression.
+This flag is
+\fIoff\fR
+by default.
+.sp
+This setting is only supported by version 1.8.20 or higher.
+.TP 18n
 log_allowed
 If set,
 \fBsudoers\fR
@@ -4481,31 +4494,6 @@ This value is used to decide when to wrap lines for nicer log files.
 This has no effect on the syslog log file, only the file log.
 The default is @loglen@ (use 0 or negate the option to disable word wrap).
 .TP 18n
-passwd_timeout
-Number of minutes before the
-\fBsudo\fR
-password prompt times out, or 0 for no timeout.
-The timeout may include a fractional component
-if minute granularity is insufficient, for example 2.5.
-The default is @password_timeout@.
-.TP 18n
-timestamp_timeout
-.br
-Number of minutes that can elapse before
-\fBsudo\fR
-will ask for a password again.
-The timeout may include a fractional component if
-minute granularity is insufficient, for example 2.5.
-The default is @timeout@.
-Set this to 0 to always prompt for a password.
-If set to a value less than 0 the user's time stamp will not expire
-until the system is rebooted.
-This can be used to allow users to create or delete their own time stamps via
-\(oqsudo \-v\(cq
-and
-\(oqsudo \-k\(cq
-respectively.
-.TP 18n
 umask
 File mode creation mask to use when running the command.
 Negate this option or set it to 0777 to prevent
@@ -4534,6 +4522,46 @@ the umask specified by PAM or login.conf will take precedence.
 The umask setting in PAM is not used for
 \fBsudoedit\fR,
 which does not create a new PAM session.
+.TP 18n
+iolog_mode
+The file mode to use when creating I/O log files.
+Mode bits for read and write permissions for owner, group, or other
+are honored, everything else is ignored.
+The file permissions will always include the owner read and
+write bits, even if they are not present in the specified mode.
+When creating I/O log directories, search (execute) bits are added
+to match the read and write bits specified by
+\fIiolog_mode\fR.
+Defaults to 0600 (read and write by user only).
+.sp
+This setting is only supported by version 1.8.19 or higher.
+.PP
+\fBDecimals that can be used in a boolean context\fR:
+.TP 18n
+passwd_timeout
+Number of minutes before the
+\fBsudo\fR
+password prompt times out, or 0 for no timeout.
+The timeout may include a fractional component
+if minute granularity is insufficient, for example 2.5.
+The default is @password_timeout@.
+.TP 18n
+timestamp_timeout
+.br
+Number of minutes that can elapse before
+\fBsudo\fR
+will ask for a password again.
+The timeout may include a fractional component if
+minute granularity is insufficient, for example 2.5.
+The default is @timeout@.
+Set this to 0 to always prompt for a password.
+If set to a value less than 0 the user's time stamp will not expire
+until the system is rebooted.
+This can be used to allow users to create or delete their own time stamps via
+\(oqsudo \-v\(cq
+and
+\(oqsudo \-k\(cq
+respectively.
 .PP
 \fBStrings\fR:
 .if \n(AA \{\
@@ -4790,19 +4818,6 @@ ends in six or
 more
 \fIX\fRs.
 .TP 18n
-iolog_flush
-If set,
-\fBsudo\fR
-will flush I/O log data to disk after each write instead of buffering it.
-This makes it possible to view the logs in real-time as the program
-is executing but may significantly reduce the effectiveness of I/O
-log compression.
-This flag is
-\fIoff\fR
-by default.
-.sp
-This setting is only supported by version 1.8.20 or higher.
-.TP 18n
 iolog_group
 The group name to look up when setting the group-ID on new I/O log
 files and directories.
@@ -4817,19 +4832,6 @@ If neither
 nor
 \fIiolog_user\fR
 are set, I/O log files and directories are created with group-ID 0.
-.sp
-This setting is only supported by version 1.8.19 or higher.
-.TP 18n
-iolog_mode
-The file mode to use when creating I/O log files.
-Mode bits for read and write permissions for owner, group, or other
-are honored, everything else is ignored.
-The file permissions will always include the owner read and
-write bits, even if they are not present in the specified mode.
-When creating I/O log directories, search (execute) bits are added
-to match the read and write bits specified by
-\fIiolog_mode\fR.
-Defaults to 0600 (read and write by user only).
 .sp
 This setting is only supported by version 1.8.19 or higher.
 .TP 18n
