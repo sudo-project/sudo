@@ -273,26 +273,77 @@ closefrom_nodebug(int lowfd)
     debug_return;
 }
 
+/*
+ * Build minimal environment for executing the mailer.
+ * We set HOME to / even for non-root users.
+ */
+static char **
+user_mailer_env(const char *user)
+{
+    char **envp;
+    int envc = 4;
+    int i = 0;
+
+#ifdef _AIX
+    envc++;	/* for LOGIN variable */
+#endif
+
+    /* User defaults to root. */
+    if (user == NULL)
+	user = "root";
+
+    envp = calloc(envc + 1, sizeof(char *));
+    if (envp == NULL)
+	goto bad;
+
+    if (i >= envc)
+	goto bad;
+    if ((envp[i++] = strdup("HOME=/")) == NULL)
+	goto bad;
+
+    if (i >= envc)
+	goto bad;
+    if ((envp[i++] = strdup("PATH=" _PATH_STDPATH)) == NULL)
+	goto bad;
+
+    if (i >= envc)
+	goto bad;
+    if (asprintf(&envp[i++], "LOGNAME=%s", user) == -1)
+	goto bad;
+
+    if (i >= envc)
+	goto bad;
+    if (asprintf(&envp[i++], "USER=%s", user) == -1)
+	goto bad;
+
+#ifdef _AIX
+    if (i >= envc)
+	goto bad;
+    if (asprintf(&envp[i++], "LOGIN=%s", user) == -1)
+	goto bad;
+#endif /* _AIX */
+
+    return envp;
+bad:
+    if (envp != NULL) {
+	for (i = 0; i < envc && envp[i] != NULL; i++) {
+	    free(envp[i]);
+	}
+	free(envp);
+    }
+    return NULL;
+}
+
 #define MAX_MAILFLAGS	63
 
 sudo_noreturn static void
-exec_mailer(int pipein) // -V1082
+exec_mailer(const struct eventlog_config *evl_conf, int pipein) // -V1082
 {
-    const struct eventlog_config *evl_conf = eventlog_getconf();
     char *last, *mflags, *p, *argv[MAX_MAILFLAGS + 1];
     const char *mpath = evl_conf->mailerpath;
-    gid_t mailgid = evl_conf->mailgid;
+    gid_t mailergid = evl_conf->mailergid;
+    char **mail_envp;
     size_t i;
-    const char * const root_envp[] = {
-	"HOME=/",
-	"PATH=/usr/bin:/bin:/usr/sbin:/sbin",
-	"LOGNAME=root",
-	"USER=root",
-# ifdef _AIX
-	"LOGIN=root",
-# endif
-	NULL
-    };
     debug_decl(exec_mailer, SUDO_DEBUG_UTIL);
 
     /* Set stdin to read side of the pipe. */
@@ -300,6 +351,12 @@ exec_mailer(int pipein) // -V1082
 	syslog(LOG_ERR, _("unable to dup stdin: %m")); // -V618
 	sudo_debug_printf(SUDO_DEBUG_ERROR,
 	    "unable to dup stdin: %s", strerror(errno));
+	goto bad;
+    }
+
+    mail_envp = user_mailer_env(evl_conf->maileruser);
+    if (mail_envp == NULL) {
+	syslog(LOG_ERR, "%s", _("unable to allocate memory"));
 	goto bad;
     }
 
@@ -327,28 +384,25 @@ exec_mailer(int pipein) // -V1082
 	    ROOT_UID);
 	goto bad;
     }
-    if (setgid(mailgid) != 0) {
+    if (setgid(mailergid) != 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to change gid to %u",
-	    (unsigned int)mailgid);
+	    (unsigned int)mailergid);
 	goto bad;
     }
-    if (setgroups(1, &mailgid) != 0) {
+    if (setgroups(1, &mailergid) != 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to set groups to %u",
-	    (unsigned int)mailgid);
+	    (unsigned int)mailergid);
 	goto bad;
     }
-    if (evl_conf->mailuid != ROOT_UID) {
-	if (setuid(evl_conf->mailuid) != 0) {
+    if (evl_conf->maileruid != ROOT_UID) {
+	if (setuid(evl_conf->maileruid) != 0) {
 	    sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to change uid to %u",
-		(unsigned int)evl_conf->mailuid);
+		(unsigned int)evl_conf->maileruid);
 	    goto bad;
 	}
     }
     sudo_debug_exit(__func__, __FILE__, __LINE__, sudo_debug_subsys);
-    if (evl_conf->mailuid == ROOT_UID)
-	execve(mpath, argv, (char **)root_envp);
-    else
-	execv(mpath, argv);
+    execve(mpath, argv, (char **)mail_envp);
     syslog(LOG_ERR, _("unable to execute %s: %m"), mpath); // -V618
     sudo_debug_printf(SUDO_DEBUG_ERROR, "unable to execute %s: %s",
 	mpath, strerror(errno));
@@ -486,7 +540,7 @@ send_mail(const struct eventlog *evlog, const char *message)
 	    /* NOTREACHED */
 	case 0:
 	    /* Child. */
-	    exec_mailer(pfd[0]);
+	    exec_mailer(evl_conf, pfd[0]);
 	    /* NOTREACHED */
     }
 

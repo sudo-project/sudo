@@ -64,9 +64,10 @@ static struct eventlog_config evl_conf = {
     LOG_NOTICE,			/* syslog_acceptpri */
     LOG_ALERT,			/* syslog_rejectpri */
     LOG_ALERT,			/* syslog_alertpri */
-    ROOT_UID,			/* mailuid */
-    ROOT_GID,			/* mailgid */
+    ROOT_UID,			/* maileruid */
+    ROOT_GID,			/* mailergid */
     false,			/* omit_hostname */
+    NULL,			/* maileruser */
     _PATH_SUDO_LOGFILE,		/* logpath */
     "%h %e %T",			/* time_fmt */
 #ifdef _PATH_SUDO_SENDMAIL
@@ -147,10 +148,11 @@ eventlog_set_file_maxlen(size_t len)
 }
 
 void
-eventlog_set_mailuser(uid_t uid, gid_t gid)
+eventlog_set_maileruser(const char *name, uid_t uid, gid_t gid)
 {
-    evl_conf.mailuid = uid;
-    evl_conf.mailgid = gid;
+    evl_conf.maileruid = uid;
+    evl_conf.mailergid = gid;
+    evl_conf.maileruser = name;
 }
 
 void
