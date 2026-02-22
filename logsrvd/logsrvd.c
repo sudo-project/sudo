@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2025 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2026 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1339,14 +1339,13 @@ start_protocol(struct connection_closure *closure)
 
 #if defined(HAVE_OPENSSL)
 static int
-verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
+verify_peer(int preverify_ok, X509_STORE_CTX *ctx, bool check_host)
 {
-    HostnameValidationResult result;
     struct connection_closure *closure;
     SSL *ssl;
     X509 *current_cert;
     X509 *peer_cert;
-    debug_decl(verify_peer_identity, SUDO_DEBUG_UTIL);
+    debug_decl(verify_peer, SUDO_DEBUG_UTIL);
 
     current_cert = X509_STORE_CTX_get_current_cert(ctx);
 
@@ -1376,13 +1375,28 @@ verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
     ssl = X509_STORE_CTX_get_ex_data(ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
     closure = (struct connection_closure *)SSL_get_ex_data(ssl, 1);
 
-    result = validate_hostname(peer_cert, closure->name, closure->ipaddr);
-    if (result != MatchFound) {
-	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
-	    "hostname validation failed");
-	debug_return_int(0);
+    if (check_host) {
+	const HostnameValidationResult result =
+	    validate_hostname(peer_cert, closure->name, closure->ipaddr);
+	if (result != MatchFound) {
+	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
+		"hostname validation failed");
+	    debug_return_int(0);
+	}
     }
     debug_return_int(1);
+}
+
+static int
+verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
+{
+    return verify_peer(preverify_ok, ctx, true);
+}
+
+static int
+verify_peer_identity_nohost(int preverify_ok, X509_STORE_CTX *ctx)
+{
+    return verify_peer(preverify_ok, ctx, false);
 }
 
 /*
@@ -1397,9 +1411,15 @@ set_tls_verify_peer(void)
 
     if (server_ctx != NULL && logsrvd_conf_server_tls_check_peer()) {
 	/* Verify server cert during the handshake. */
-	SSL_CTX_set_verify(server_ctx,
-	    SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
-	    verify_peer_identity);
+	if (logsrvd_conf_server_tls_check_host()) {
+	    SSL_CTX_set_verify(server_ctx,
+		SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
+		verify_peer_identity);
+	} else {
+	    SSL_CTX_set_verify(server_ctx,
+		SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
+		verify_peer_identity_nohost);
+	}
     }
     if (relay_ctx != NULL && logsrvd_conf_relay_tls_check_peer()) {
 	/* Verify relay cert during the handshake. */
@@ -1552,7 +1572,7 @@ new_connection(int sock, bool tls, const union sockaddr_union *sa_un,
             goto bad;
         }
 
-	if (logsrvd_conf_server_tls_check_peer()) {
+	if (logsrvd_conf_server_tls_check_host()) {
 	    /* Hostname to verify in certificate during handshake. */
 	    char hbuf[NI_MAXHOST];
 	    const int error = getnameinfo(&sa_un->sa, salen, hbuf,

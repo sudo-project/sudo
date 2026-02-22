@@ -39,6 +39,11 @@
 # Defaults to true.
 #tls_verify = true
 
+# If true, client certificates being validated by the server must have a
+# matching host name or IP address in the Subject Alternative Name (SAN).
+# Defaults to true.  Only has an effect when tls_checkpeer is also true.
+#tls_checkhost = true
+
 # If true, client certificates will be validated by the server;
 # clients without a valid certificate will be unable to connect.
 # By default, client certs are not checked.

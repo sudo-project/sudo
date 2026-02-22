@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+ * Copyright (c) 2019-2022, 2025-2026 Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -218,6 +218,7 @@ struct timespec *logsrvd_conf_relay_connect_timeout(void);
 struct timespec *logsrvd_conf_relay_timeout(void);
 time_t logsrvd_conf_relay_retry_interval(void);
 #if defined(HAVE_OPENSSL)
+bool logsrvd_conf_server_tls_check_host(void);
 bool logsrvd_conf_server_tls_check_peer(void);
 SSL_CTX *logsrvd_server_tls_ctx(void);
 bool logsrvd_conf_relay_tls_check_peer(void);

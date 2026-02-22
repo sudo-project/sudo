@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2025 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2026 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 29, 2025
+.Dd February 21, 2026
 .Dt SUDO_LOGSRVD.CONF @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -183,6 +183,29 @@ database is used.
 The path to the server's certificate file, in PEM format.
 The default value is
 .Pa /etc/ssl/sudo/certs/logsrvd_cert.pem .
+.It tls_checkhost = bool
+If true and
+.Em tls_checkpeer
+is also enabled,
+.Nm sudo_logsrvd
+will perform a reverse DNS lookup of the client's IP address for TLS
+connections.
+In order to be considered valid, either the IP address or the resolved
+hostname must be present in the client certificate's Subject
+Alternative Name (SAN), or the host name must match the Common Name
+(CN) if no SAN is present.
+.Pp
+Disabling
+.Em tls_checkhost
+makes it possible to use the same client certificate on multiple
+systems, regardless of the client host name or IP address.
+.Pp
+The
+.Em tls_checkhost
+setting only has an effect when
+.Em tls_checkpeer
+is also enabled.
+Defaults to true.
 .It tls_checkpeer = bool
 If true, client certificates will be validated by
 .Nm sudo_logsrvd ;
@@ -193,11 +216,10 @@ authority, the
 .Em tls_cacert
 setting must be set to a CA bundle that contains the CA certificate
 used to generate the client certificate.
-To validate the certificate,
-.Nm sudo_logsrvd
-will perform a reverse DNS lookup of the client's IP address.
-In order to be considered valid, either the IP address or the
-resolved hostname must be present in the client certificate.
+Validation of the client's IP address and host name is controlled
+by the
+.Em tls_checkhost
+setting.
 The default value is
 .Em false .
 .It tls_ciphers_v12 = string
@@ -354,6 +376,16 @@ section, or the system's default certificate authority database if
 no value is set.
 .It tls_cert = path
 The path to the server's certificate file, in PEM format.
+The default is to use the value specified in the
+.Sx server
+section.
+.It tls_checkhost = bool
+If true and
+.Em tls_checkpeer
+is also enabled,
+.Nm sudo_logsrvd
+will perform a reverse DNS lookup of the client's IP address for TLS
+connections.
 The default is to use the value specified in the
 .Sx server
 section.
@@ -839,6 +871,11 @@ Sudo log server configuration file
 # If true, the server will validate its own certificate at startup.
 # Defaults to true.
 #tls_verify = true
+
+# If true, client certificates being validated by the server must have a
+# matching host name or IP address in the Subject Alternative Name (SAN).
+# Defaults to true.  Only has an effect when tls_checkpeer is also true.
+#tls_checkhost = true
 
 # If true, client certificates will be validated by the server;
 # clients without a valid certificate will be unable to connect.

@@ -112,6 +112,7 @@ static struct logsrvd_config {
 	char *tls_dhparams_path;
 	char *tls_ciphers_v12;
 	char *tls_ciphers_v13;
+	int tls_check_host;
 	int tls_check_peer;
 	int tls_verify;
 	SSL_CTX *ssl_ctx;
@@ -263,6 +264,12 @@ SSL_CTX *
 logsrvd_server_tls_ctx(void)
 {
     return logsrvd_config->server.ssl_ctx;
+}
+
+bool
+logsrvd_conf_server_tls_check_host(void)
+{
+    return logsrvd_config->server.tls_check_host;
 }
 
 bool
@@ -782,6 +789,20 @@ cb_tls_verify(struct logsrvd_config *config, const char *str, size_t offset)
 }
 
 static bool
+cb_tls_checkhost(struct logsrvd_config *config, const char *str, size_t offset)
+{
+    int *p = (int *)((char *)config + offset);
+    int val;
+    debug_decl(cb_tls_checkhost, SUDO_DEBUG_UTIL);
+
+    if ((val = sudo_strtobool(str)) == -1)
+	debug_return_bool(false);
+
+    *p = val;
+    debug_return_bool(true);
+}
+
+static bool
 cb_tls_checkpeer(struct logsrvd_config *config, const char *str, size_t offset)
 {
     int *p = (int *)((char *)config + offset);
@@ -1118,6 +1139,7 @@ static struct logsrvd_config_entry server_conf_entries[] = {
     { "tls_dhparams", cb_tls_dhparams, offsetof(struct logsrvd_config, server.tls_dhparams_path) },
     { "tls_ciphers_v12", cb_tls_ciphers12, offsetof(struct logsrvd_config, server.tls_ciphers_v12) },
     { "tls_ciphers_v13", cb_tls_ciphers13, offsetof(struct logsrvd_config, server.tls_ciphers_v13) },
+    { "tls_checkhost", cb_tls_checkhost, offsetof(struct logsrvd_config, server.tls_check_host) },
     { "tls_checkpeer", cb_tls_checkpeer, offsetof(struct logsrvd_config, server.tls_check_peer) },
     { "tls_verify", cb_tls_verify, offsetof(struct logsrvd_config, server.tls_verify) },
 #endif
@@ -1662,6 +1684,7 @@ logsrvd_conf_alloc(void)
 	goto bad;
     }
     config->server.tls_verify = true;
+    config->server.tls_check_host = true;
     config->server.tls_check_peer = false;
 #endif
 
