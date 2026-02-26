@@ -1335,6 +1335,10 @@ exec_pty(struct command_details *details,
 	debug_return_bool(true);
     }
 
+    /* Allocate and set signal events and the backchannel event. */
+    init_exec_events(ec, evbase, sv[0]);
+    /* Restore signal mask now that signal handlers are setup. */
+    sigprocmask(SIG_SETMASK, &oset, NULL);
     ec->monitor_pid = sudo_debug_fork();
     switch (ec->monitor_pid) {
     case -1:
@@ -1408,9 +1412,6 @@ exec_pty(struct command_details *details,
     if (ISSET(details->flags, CD_SET_TIMEOUT))
 	alarm(details->timeout);
 
-    /* Allocate and set signal events and the backchannel event.  */
-    init_exec_events(ec, evbase, sv[0]);
-
     /* Create event and closure for intercept mode. */
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
 	ec->intercept = intercept_setup(intercept_sv[0], ec->evbase, details);
@@ -1421,9 +1422,6 @@ exec_pty(struct command_details *details,
     /* Reset cstat for running the command. */
     cstat->type = CMD_INVALID;
     cstat->val = 0;
-
-    /* Restore signal mask now that signal handlers are setup. */
-    sigprocmask(SIG_SETMASK, &oset, NULL);
 
     /*
      * I/O logging must be in the C locale for floating point numbers

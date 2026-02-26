@@ -606,6 +606,10 @@ exec_nopty(struct command_details *details,
     }
 #endif
 
+    /* Allocate and set signal events and the error pipe event.*/
+    init_exec_events(&ec, evbase, errpipe[0]);
+    /* Restore signal mask now that signal handlers are setup. */
+    sigprocmask(SIG_SETMASK, &oset, NULL);
     ec.cmnd_pid = sudo_debug_fork();
     switch (ec.cmnd_pid) {
     case -1:
@@ -667,9 +671,6 @@ exec_nopty(struct command_details *details,
     if (ISSET(details->flags, CD_SET_TIMEOUT))
 	alarm(details->timeout);
 
-    /* Allocate and set signal events and the error pipe event.  */
-    init_exec_events(&ec, evbase, errpipe[0]);
-
     if (ISSET(details->flags, CD_INTERCEPT|CD_LOG_SUBCMDS)) {
 	int rc = 1;
 
@@ -691,9 +692,6 @@ exec_nopty(struct command_details *details,
 
     /* Enable any I/O log events. */
     add_io_events(&ec);
-
-    /* Restore signal mask now that signal handlers are setup. */
-    sigprocmask(SIG_SETMASK, &oset, NULL);
 
     /*
      * Non-pty event loop.

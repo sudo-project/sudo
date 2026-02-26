@@ -616,6 +616,13 @@ exec_monitor(struct command_details *details, sigset_t *oset,
 	selinux_audit_role_change();
     }
 #endif
+    /*
+     * Create new event base and register read events for the
+     * signal pipe, error pipe, and backchannel.
+     */
+     init_exec_events_monitor(&mc, errsock[0]);
+     /* Restore signal mask now that signal handlers are setup. */
+     sigprocmask(SIG_SETMASK, oset, NULL);
 
     mc.cmnd_pid = sudo_debug_fork();
     switch (mc.cmnd_pid) {
@@ -653,15 +660,6 @@ exec_monitor(struct command_details *details, sigset_t *oset,
     cstat.type = CMD_PID;
     cstat.val = mc.cmnd_pid;
     send_status(backchannel, &cstat);
-
-    /*
-     * Create new event base and register read events for the
-     * signal pipe, error pipe, and backchannel.
-     */
-    init_exec_events_monitor(&mc, errsock[0]);
-
-    /* Restore signal mask now that signal handlers are setup. */
-    sigprocmask(SIG_SETMASK, oset, NULL);
 
     /* If any of stdin/stdout/stderr are pipes, close them in parent. */
     if (io_fds[SFD_STDIN] != io_fds[SFD_FOLLOWER])
