@@ -113,11 +113,36 @@ connection_closure_free(struct connection_closure *closure)
 	    relay_closure_free(closure->relay_closure);
 #if defined(HAVE_OPENSSL)
 	if (closure->ssl != NULL) {
+	    const char *errstr;
+	    int result;
+
 	    /* Must call SSL_shutdown() before closing closure->sock. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_LINENO,
 		"closing down TLS connection from %s", closure->ipaddr);
-	    if (SSL_shutdown(closure->ssl) == 0)
+	    result = SSL_shutdown(closure->ssl);
+	    switch (result) {
+	    case 0:
+		/* SSL_shutdown did not finish, must call it again */
+		sudo_debug_printf(SUDO_DEBUG_NOTICE|SUDO_DEBUG_LINENO,
+		    "retrying SSL_shutdown");
 		SSL_shutdown(closure->ssl);
+		break;
+	    case 1:
+		/* success */
+		break;
+	    default:
+		/* error */
+		switch (SSL_get_error(closure->ssl, result)) {
+		    case SSL_ERROR_SYSCALL:
+			sudo_warn("%s: SSL_shutdown", closure->ipaddr);
+			break;
+		    default:
+			errstr = ERR_reason_error_string(ERR_get_error());
+			sudo_warnx("%s: SSL_shutdown: %s", closure->ipaddr,
+			    errstr ? errstr : strerror(errno));
+			break;
+		}
+	    }
 	    SSL_free(closure->ssl);
 	}
 	free(closure->name);
