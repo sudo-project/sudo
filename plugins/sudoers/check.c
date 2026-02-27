@@ -295,7 +295,8 @@ display_lecture(struct sudo_conv_callback *callback)
 	"    #3) With great power comes great responsibility.\n\n");
     if (!def_pwfeedback) {
 	msg[1].msg_type = SUDO_CONV_ERROR_MSG|SUDO_CONV_PREFER_TTY;
-	msg[1].msg = _("For security reasons, the password you type will not be visible.\n\n");
+	msg[1].msg = _("For security reasons, the password you type will not be echoed in any form —\n"
+                   "not even as '***'. You won't see anything at all on your screen.\n\n");
 	msgcount++;
     }
     sudo_conv(msgcount, msg, repl, NULL);
