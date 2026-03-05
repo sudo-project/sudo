@@ -1189,7 +1189,7 @@ valid_path(const struct sudoers_context *ctx, const struct sudo_defs_types *def,
     if (ISSET(def->type, T_CHPATH)) {
 	if (val[0] != '/' && val[0] != '~' && (val[0] != '*' || val[1] != '\0')) {
 	    defaults_warnx(ctx, file, line, column, quiet,
-		N_("values for \"%s\" must start with a '/', '~', or '*'"),
+		N_("values for \"%s\" must begin with a '/' or '~', or be '*'"),
 		def->name);
 	    ret = false;
 	}
