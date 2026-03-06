@@ -815,7 +815,7 @@ env_update_didvar(const char *ep, unsigned int *didvar)
 	    break;
 	case 'L':
 #ifdef _AIX
-	    if (strncmp(ep, "LOGIN=", 8) == 0)
+	    if (strncmp(ep, "LOGIN=", 6) == 0)
 		SET(*didvar, DID_LOGIN);
 #endif
 	    if (strncmp(ep, "LOGNAME=", 8) == 0)
