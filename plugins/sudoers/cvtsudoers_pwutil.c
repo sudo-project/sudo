@@ -230,6 +230,7 @@ cvtsudoers_make_gritem(gid_t gid, const char *name)
 	    total += strlen(s->str) + 1;
 	    nmem++;
 	}
+	nmem++;	/* include space for the NULL terminator */
 	total += sizeof(char *) * nmem;
     }
     if (name != NULL)
