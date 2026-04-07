@@ -812,7 +812,8 @@ sudoers_policy_store_result(struct sudoers_context *ctx, bool accepted,
 	struct gid_list *gidlist;
 
 	/* Only use results from a group db query, not the front end. */
-	gidlist = sudo_get_gidlist(ctx->runas.pw, ENTRY_TYPE_QUERIED);
+	if ((gidlist = sudo_get_gidlist(ctx->runas.pw, ENTRY_TYPE_QUERIED)) == NULL)
+	    goto oom;
 
 	/* We reserve an extra spot in the list for the effective gid. */
 	glsize = sizeof("runas_groups=") - 1 +
