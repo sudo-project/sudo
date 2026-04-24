@@ -769,7 +769,7 @@ User_Alias_Spec ::= User_Alias '=' User_List
 
 Runas_Alias ::= NAME
 
-Runas_Alias_Spec ::= Runas_Alias '=' Runas_List
+Runas_Alias_Spec ::= Runas_Alias '=' Runas_User_List
 
 Host_Alias ::= NAME
 
@@ -911,22 +911,31 @@ See
 for a list of
 characters that need to be escaped.
 .Bd -literal
-Runas_List ::= Runas_Member |
-               Runas_Member ',' Runas_List
+Runas_User_List ::= Runas_User |
+                    Runas_User ',' Runas_User_List
 
-Runas_Member ::= '!'* user name |
-                 '!'* #user-ID |
-                 '!'* %group |
-                 '!'* %#group-ID |
-                 '!'* %:nonunix_group |
-                 '!'* %:#nonunix_gid |
-                 '!'* +netgroup |
-                 '!'* Runas_Alias |
-                 '!'* ALL
+Runas_User ::= '!'* user name |
+               '!'* #user-ID |
+               '!'* %group |
+               '!'* %#group-ID |
+               '!'* %:nonunix_group |
+               '!'* %:#nonunix_gid |
+               '!'* +netgroup |
+               '!'* Runas_Alias |
+               '!'* ALL
+
+Runas_Group_List ::= Runas_Group |
+                     Runas_Group ',' Runas_Group_List
+
+Runas_Group ::= '!'* group name |
+                '!'* #group-ID |
+                '!'* +netgroup |
+                '!'* Runas_Alias |
+                '!'* ALL
 .Ed
 .Pp
 A
-.Em Runas_List
+.Em Runas_User_List
 is similar to a
 .Em User_List
 except that instead
@@ -943,7 +952,9 @@ and
 .Sy toor ) ,
 you can use a user-ID instead of a name (#0 in the example given).
 The user-ID or group-ID specified in a
-.Em Runas_Member
+.Em Runas_User
+or
+.Em Runas_Group
 need not be listed in the password or group database.
 .Bd -literal
 Host_List ::= Host |
@@ -1243,7 +1254,7 @@ Default_Type ::= 'Defaults' |
                  'Defaults@' Host_List |
                  'Defaults:' User_List |
                  'Defaults!' Cmnd_List |
-                 'Defaults>' Runas_List
+                 'Defaults>' Runas_User_List
 
 Default_Entry ::= Default_Type Parameter_List
 
@@ -1328,7 +1339,7 @@ Cmnd_Spec_List ::= Cmnd_Spec |
 
 Cmnd_Spec ::= Runas_Spec? Option_Spec* (Tag_Spec ':')* Cmnd
 
-Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
+Runas_Spec ::= '(' Runas_User_List? (':' Runas_Group_List)? ')'
 
 .ie \n(SL \{\
 .ie \n(PS Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
@@ -1393,34 +1404,33 @@ determines the user and/or the group that a command
 may be run as.
 A fully-specified
 .Em Runas_Spec
-consists of two
-.Em Runas_List Ns s
+consists of a
+.Em Runas_User_List
+and a
+.Em Runas_Group_List
 (as defined above) separated by a colon
 .Pq Ql \&:
 and enclosed in a set of parentheses.
-The first
-.Em Runas_List
+The first list
+.Pq Em Runas_User_List
 indicates which users the command may be run as via the
 .Fl u
 option.
-The second defines a list of groups that may be specified via the
+The second list
+.Pq Em Runas_Group_List
+defines a list of groups that may be specified via the
 .Fl g
 option (in addition to any of the target user's groups).
-If both
-.Em Runas_List Ns s
+If both lists
 are specified, the command may be run with any combination of users
-and groups listed in their respective
-.Em Runas_List Ns s.
+and groups listed in their respective lists.
 If only the first is specified, the command may be run as any user
 in the list and, optionally, with any group the target user belongs to.
-If the first
-.Em Runas_List
-is empty but the
+If the first list is empty but the
 second is specified, the command may be run as the invoking user
 with the group set to any listed in the
-.Em Runas_List .
-If both
-.Em Runas_List Ns s
+.Em Runas_Group_List .
+If both lists
 are empty, the command may only be run as the invoking user and the
 group, if specified, must be one that the invoking user is a member of.
 If no
