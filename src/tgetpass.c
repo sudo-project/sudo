@@ -374,6 +374,7 @@ sudo_askpass(const char *askpass, const char *prompt)
 }
 
 extern int sudo_term_eof, sudo_term_erase, sudo_term_kill;
+extern const char *sudo_pwfeedback_char;
 
 static ssize_t
 last_chunk_len(const char *buf, ssize_t len)
@@ -444,7 +445,7 @@ getln(int fd, char *buf, size_t bufsiz, bool cbreak, bool feedback,
 	    *cp++ = c;
 	    if (feedback) {
 		if (last_chunk_len(buf, cp - buf) == 1)
-		    ignore_result(write(fd, "*", 1));
+		    ignore_result(write(fd, sudo_pwfeedback_char, strlen(sudo_pwfeedback_char)));
 	    }
 	} else {
 	    *cp++ = c;
