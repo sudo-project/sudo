@@ -1033,7 +1033,7 @@ switch_dir(struct include_stack *stack, char *dirpath, int verbose)
     debug_decl(switch_dir, SUDOERS_DEBUG_PARSER);
 
     count = read_dir_files(dirpath, &paths, verbose);
-    if (count > 0) {
+    if (count > 0 && count != SIZE_MAX) {
 	/* Sort the list as an array in reverse order. */
 	qsort(paths, count, sizeof(*paths), pl_compare);
 
