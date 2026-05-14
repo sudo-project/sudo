@@ -328,7 +328,8 @@ alias_make_unique(const char *old_name, short type,
     struct sudoers_parse_tree *merged_tree)
 {
     struct sudoers_parse_tree *parse_tree;
-    char *cp, *new_name = NULL;
+    char *new_name = NULL;
+    const char *cp;
     struct alias *a;
     long long suffix;
     size_t namelen;

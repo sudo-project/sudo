@@ -194,8 +194,8 @@ main(int argc, char *argv[])
     int ch, i, iolog_dir_fd, len, exitcode = EXIT_FAILURE;
     bool def_filter = true, listonly = false;
     bool interactive = true, suspend_wait = false, resize = true;
-    const char *decimal, *id, *user = NULL, *pattern = NULL, *tty = NULL;
-    char *cp, *ep, iolog_dir[PATH_MAX];
+    const char *decimal, *user = NULL, *pattern = NULL, *tty = NULL;
+    char *cp, *ep, *id, iolog_dir[PATH_MAX];
     struct timespec offset = { 0, 0};
     struct eventlog *evlog;
     struct timespec max_delay_storage, *max_delay = NULL;

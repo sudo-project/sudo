@@ -125,7 +125,7 @@ done:
  * the value from the plugin's init function.
  */
 static int
-group_plugin_load(const struct sudoers_context *ctx, const char *plugin_info)
+group_plugin_load(const struct sudoers_context *ctx, char *plugin_info)
 {
     const char *plugin_dir = ctx->settings.plugin_dir;
     char *args, path[PATH_MAX];

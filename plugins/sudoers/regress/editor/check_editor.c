@@ -126,7 +126,8 @@ main(int argc, char *argv[])
 
     for (data = test_data; data->editor_var != NULL; data++) {
 	const char *env_editor = NULL;
-	char *cp, *editor_path, **edit_argv = NULL;
+	char *editor_path, **edit_argv = NULL;
+	const char *cp;
 	int i, edit_argc = 0;
 
 	/* clear existing editor environment vars */

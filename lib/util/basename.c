@@ -36,12 +36,12 @@
 char *
 sudo_basename_v1(const char *filename)
 {
-    char *base;
+    const char *base;
 
     if ((base = strrchr(filename, '/')) != NULL)
 	base++;
     else
-	base = (char *)filename;
+	base = filename;
 
-    return base;
+    return (char *)base;
 }

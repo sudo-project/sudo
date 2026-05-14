@@ -139,7 +139,7 @@ str_replaced(const char *source, size_t dest_len, const char *old, const char *n
 {
     char *result = malloc(dest_len);
     char *dest = result;
-    char *pos = NULL;
+    const char *pos = NULL;
     size_t old_len = strlen(old);
 
     if (result == NULL)
