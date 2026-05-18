@@ -258,7 +258,6 @@ command_matches_dir(struct sudoers_context *ctx, const char *sudoers_dir,
     char path[PATH_MAX], sdbuf[PATH_MAX];
     size_t chrootlen = 0;
     int len, fd = -1;
-    int ret = DENY;
     debug_decl(command_matches_dir, SUDOERS_DEBUG_MATCH);
 
     /* Make sudoers_dir relative to the new root, if any. */
@@ -268,7 +267,7 @@ command_matches_dir(struct sudoers_context *ctx, const char *sudoers_dir,
 	if (len >= ssizeof(sdbuf)) {
 	    errno = ENAMETOOLONG;
 	    sudo_warn("%s%s", runchroot, sudoers_dir);
-	    goto done;
+	    goto bad;
 	}
 	sudoers_dir = sdbuf;
 	chrootlen = strlen(runchroot);
@@ -280,7 +279,7 @@ command_matches_dir(struct sudoers_context *ctx, const char *sudoers_dir,
 	if (resolved != NULL) {
 	    if (strcmp(resolved, ctx->user.cmnd_dir) != 0) {
 		canon_path_free(resolved);
-		goto done;
+		goto bad;
 	    }
 	    canon_path_free(resolved);
 	}
@@ -289,34 +288,34 @@ command_matches_dir(struct sudoers_context *ctx, const char *sudoers_dir,
     /* Check for command in sudoers_dir. */
     len = snprintf(path, sizeof(path), "%s/%s", sudoers_dir, ctx->user.cmnd_base);
     if (len < 0 || len >= ssizeof(path))
-	goto done;
+	goto bad;
 
     /* Open the file for fdexec or for digest matching. */
     if (!open_cmnd(path, NULL, digests, &fd))
-	goto done;
+	goto bad;
     if (!do_stat(fd, path, NULL, &sudoers_stat))
-	goto done;
+	goto bad;
 
     if (ctx->user.cmnd_stat == NULL ||
 	(ctx->user.cmnd_stat->st_dev == sudoers_stat.st_dev &&
 	ctx->user.cmnd_stat->st_ino == sudoers_stat.st_ino)) {
 	/* path is already relative to runchroot */
 	if (digest_matches(fd, path, NULL, digests) != ALLOW)
-	    goto done;
+	    goto bad;
 	free(ctx->runas.cmnd);
 	if ((ctx->runas.cmnd = strdup(path + chrootlen)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__,
 		U_("unable to allocate memory"));
+	    goto bad;
 	}
-	ret = ALLOW;
-	goto done;
+	set_cmnd_fd(ctx, fd);
+	debug_return_int(ALLOW);
     }
-    ret = DENY;
 
-done:
+bad:
     if (fd != -1)
 	close(fd);
-    debug_return_int(ret);
+    debug_return_int(DENY);
 }
 #else /* SUDOERS_NAME_MATCH */
 /*
