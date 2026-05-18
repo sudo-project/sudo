@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2025
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2026
 .\"	Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -26,7 +26,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.TH "SUDOERS" "@mansectform@" "October 25, 2025" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDOERS" "@mansectform@" "May 17, 2026" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -7604,11 +7604,6 @@ system call instead of pre-loading a dynamic shared object.
 Both static and dynamic executables are supported and it is compatible with
 \fBsudo\fR's
 SELinux RBAC mode.
-Functions utilizing the
-execveat(2)
-system call, such as
-fexecve(3),
-are not currently intercepted.
 Programs that rely on
 ptrace(2)
 themselves, such as debuggers and system call tracers
