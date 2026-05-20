@@ -1382,7 +1382,7 @@ precedence over earlier ones (unless
 \(oq[SUCCESS=return]\(cq
 is used, see below).
 The following sources are recognized:
-.PP
+.sp
 .RS 4n
 .PD 0
 .TP 7n

@@ -796,7 +796,7 @@ User_Alias_Spec ::= User_Alias '=' User_List
 
 Runas_Alias ::= NAME
 
-Runas_Alias_Spec ::= Runas_Alias '=' Runas_List
+Runas_Alias_Spec ::= Runas_Alias '=' Runas_User_List
 
 Host_Alias ::= NAME
 
@@ -951,23 +951,32 @@ characters that need to be escaped.
 .nf
 .sp
 .RS 0n
-Runas_List ::= Runas_Member |
-               Runas_Member ',' Runas_List
+Runas_User_List ::= Runas_User |
+                    Runas_User ',' Runas_User_List
 
-Runas_Member ::= '!'* user name |
-                 '!'* #user-ID |
-                 '!'* %group |
-                 '!'* %#group-ID |
-                 '!'* %:nonunix_group |
-                 '!'* %:#nonunix_gid |
-                 '!'* +netgroup |
-                 '!'* Runas_Alias |
-                 '!'* ALL
+Runas_User ::= '!'* user name |
+               '!'* #user-ID |
+               '!'* %group |
+               '!'* %#group-ID |
+               '!'* %:nonunix_group |
+               '!'* %:#nonunix_gid |
+               '!'* +netgroup |
+               '!'* Runas_Alias |
+               '!'* ALL
+
+Runas_Group_List ::= Runas_Group |
+                     Runas_Group ',' Runas_Group_List
+
+Runas_Group ::= '!'* group name |
+                '!'* #group-ID |
+                '!'* +netgroup |
+                '!'* Runas_Alias |
+                '!'* ALL
 .RE
 .fi
 .PP
 A
-\fIRunas_List\fR
+\fIRunas_User_List\fR
 is similar to a
 \fIUser_List\fR
 except that instead
@@ -984,7 +993,9 @@ and
 \fBtoor\fR),
 you can use a user-ID instead of a name (#0 in the example given).
 The user-ID or group-ID specified in a
-\fIRunas_Member\fR
+\fIRunas_User\fR
+or
+\fIRunas_Group\fR
 need not be listed in the password or group database.
 .nf
 .sp
@@ -1298,7 +1309,7 @@ Default_Type ::= 'Defaults' |
                  'Defaults@' Host_List |
                  'Defaults:' User_List |
                  'Defaults!' Cmnd_List |
-                 'Defaults>' Runas_List
+                 'Defaults>' Runas_User_List
 
 Default_Entry ::= Default_Type Parameter_List
 
@@ -1385,7 +1396,7 @@ Cmnd_Spec_List ::= Cmnd_Spec |
 
 Cmnd_Spec ::= Runas_Spec? Option_Spec* (Tag_Spec ':')* Cmnd
 
-Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
+Runas_Spec ::= '(' Runas_User_List? (':' Runas_Group_List)? ')'
 
 .ie \n(SL \{\
 .ie \n(PS Option_Spec ::= (SELinux_Spec | Solaris_Priv_Spec | Date_Spec | Timeout_Spec | Chdir_Spec | Chroot_Spec)
@@ -1451,34 +1462,33 @@ determines the user and/or the group that a command
 may be run as.
 A fully-specified
 \fIRunas_Spec\fR
-consists of two
-\fIRunas_List\fRs
+consists of a
+\fIRunas_User_List\fR
+and a
+\fIRunas_Group_List\fR
 (as defined above) separated by a colon
 (\(oq\&:\(cq)
 and enclosed in a set of parentheses.
-The first
-\fIRunas_List\fR
+The first list
+(\fIRunas_User_List\fR)
 indicates which users the command may be run as via the
 \fB\-u\fR
 option.
-The second defines a list of groups that may be specified via the
+The second list
+(\fIRunas_Group_List\fR)
+defines a list of groups that may be specified via the
 \fB\-g\fR
 option (in addition to any of the target user's groups).
-If both
-\fIRunas_List\fRs
+If both lists
 are specified, the command may be run with any combination of users
-and groups listed in their respective
-\fIRunas_List\fRs.
+and groups listed in their respective lists.
 If only the first is specified, the command may be run as any user
 in the list and, optionally, with any group the target user belongs to.
-If the first
-\fIRunas_List\fR
-is empty but the
+If the first list is empty but the
 second is specified, the command may be run as the invoking user
 with the group set to any listed in the
-\fIRunas_List\fR.
-If both
-\fIRunas_List\fRs
+\fIRunas_Group_List\fR.
+If both lists
 are empty, the command may only be run as the invoking user and the
 group, if specified, must be one that the invoking user is a member of.
 If no

@@ -2,7 +2,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2025 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2026 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "November 29, 2025" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
+.TH "SUDO_LOGSRVD.CONF" "@mansectform@" "February 21, 2026" "Sudo @PACKAGE_VERSION@" "File Formats Manual"
 .nh
 .if n .ad l
 .SH "NAME"
@@ -207,6 +207,30 @@ The path to the server's certificate file, in PEM format.
 The default value is
 \fI/etc/ssl/sudo/certs/logsrvd_cert.pem\fR.
 .TP 6n
+tls_checkhost = bool
+If true and
+\fItls_checkpeer\fR
+is also enabled,
+\fBsudo_logsrvd\fR
+will perform a reverse DNS lookup of the client's IP address for TLS
+connections.
+In order to be considered valid, either the IP address or the resolved
+hostname must be present in the client certificate's Subject
+Alternative Name (SAN), or the host name must match the Common Name
+(CN) if no SAN is present.
+.sp
+Disabling
+\fItls_checkhost\fR
+makes it possible to use the same client certificate on multiple
+systems, regardless of the client host name or IP address.
+.sp
+The
+\fItls_checkhost\fR
+setting only has an effect when
+\fItls_checkpeer\fR
+is also enabled.
+Defaults to true.
+.TP 6n
 tls_checkpeer = bool
 If true, client certificates will be validated by
 \fBsudo_logsrvd\fR;
@@ -217,11 +241,10 @@ authority, the
 \fItls_cacert\fR
 setting must be set to a CA bundle that contains the CA certificate
 used to generate the client certificate.
-To validate the certificate,
-\fBsudo_logsrvd\fR
-will perform a reverse DNS lookup of the client's IP address.
-In order to be considered valid, either the IP address or the
-resolved hostname must be present in the client certificate.
+Validation of the client's IP address and host name is controlled
+by the
+\fItls_checkhost\fR
+setting.
 The default value is
 \fIfalse\fR.
 .TP 6n
@@ -404,6 +427,17 @@ no value is set.
 .TP 6n
 tls_cert = path
 The path to the server's certificate file, in PEM format.
+The default is to use the value specified in the
+\fIserver\fR
+section.
+.TP 6n
+tls_checkhost = bool
+If true and
+\fItls_checkpeer\fR
+is also enabled,
+\fBsudo_logsrvd\fR
+will perform a reverse DNS lookup of the client's IP address for TLS
+connections.
 The default is to use the value specified in the
 \fIserver\fR
 section.
@@ -924,6 +958,11 @@ Sudo log server configuration file
 # If true, the server will validate its own certificate at startup.
 # Defaults to true.
 #tls_verify = true
+
+# If true, client certificates being validated by the server must have a
+# matching host name or IP address in the Subject Alternative Name (SAN).
+# Defaults to true.  Only has an effect when tls_checkpeer is also true.
+#tls_checkhost = true
 
 # If true, client certificates will be validated by the server;
 # clients without a valid certificate will be unable to connect.

@@ -33,7 +33,7 @@ plugin API described by
 sudo_plugin(@mansectform@).
 .PP
 The supported plugins types are:
-.PP
+.sp
 .RS 1n
 .PD 0
 .TP 3n
@@ -1513,7 +1513,7 @@ exception.
 The default is to wait forever (no timeout).
 .PP
 To specify the message type, the following constants are available:
-.PP
+.sp
 .RS 1n
 .PD 0
 .TP 3n
