@@ -169,6 +169,7 @@ main(int argc, char *argv[])
     /*
      * Arg handling.
      */
+    ctx.parser_conf.verbose = 2;
     fflag = use_owner = use_perms = false;
     while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	switch (ch) {
