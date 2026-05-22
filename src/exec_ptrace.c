@@ -1595,8 +1595,8 @@ execve_args_match(const char *pathname, int argc, char * const *argv,
     int envc, char * const *envp, bool do_stat,
     struct intercept_closure *closure)
 {
-    bool ret = true;
-    int i;
+    bool ret = false;
+    int i, run_argc, run_envc;
     debug_decl(execve_args_match, SUDO_DEBUG_EXEC);
 
     if (!pathname_matches(pathname, closure->command, do_stat)) {
@@ -1614,24 +1614,18 @@ execve_args_match(const char *pathname, int argc, char * const *argv,
 	sudo_warnx(
 	    U_("pathname mismatch, expected \"%s\", got \"%s\""),
 	    closure->command, pathname ? pathname : "(NULL)");
-	ret = false;
+	goto done;
     }
+
 check_argv:
+    for (run_argc = 0; closure->run_argv[run_argc] != NULL; run_argc++)
+	continue;
+    if (argc != run_argc) {
+	sudo_warnx(U_("%s mismatch, expected %d, got %d"), "argc",
+	    run_argc, argc);
+	goto done;
+    }
     for (i = 0; i < argc; i++) {
-	if (closure->run_argv[i] == NULL) {
-	    ret = false;
-	    sudo_warnx(
-		U_("%s[%d] mismatch, expected \"%s\", got \"%s\""),
-		"argv", i, "(NULL)", argv[i] ? argv[i] : "(NULL)");
-	    break;
-	}
-	if (argv[i] == NULL) {
-	    ret = false;
-	    sudo_warnx(
-		U_("%s[%d] mismatch, expected \"%s\", got \"%s\""),
-		"argv", i, closure->run_argv[i], "(NULL)");
-	    break;
-	}
 	if (strcmp(argv[i], closure->run_argv[i]) != 0) {
 	    if (i == 0) {
 		/* Special case for argv[0] which may contain the basename. */
@@ -1650,33 +1644,32 @@ check_argv:
 		    }
 		}
 	    }
-	    ret = false;
 	    sudo_warnx(
 		U_("%s[%d] mismatch, expected \"%s\", got \"%s\""),
 		"argv", i, closure->run_argv[i], argv[i]);
-	}
-    }
-    for (i = 0; i < envc; i++) {
-	if (closure->run_envp[i] == NULL) {
-	    ret = false;
-	    sudo_warnx(
-		U_("%s[%d] mismatch, expected \"%s\", got \"%s\""),
-		"envp", i, "(NULL)", envp[i] ? envp[i] : "(NULL)");
-	    break;
-	} else if (envp[i] == NULL) {
-	    ret = false;
-	    sudo_warnx(
-		U_("%s[%d] mismatch, expected \"%s\", got \"%s\""),
-		"envp", i, closure->run_envp[i], "(NULL)");
-	    break;
-	} else if (strcmp(envp[i], closure->run_envp[i]) != 0) {
-	    ret = false;
-	    sudo_warnx(
-		U_("%s[%d] mismatch, expected \"%s\", got \"%s\""),
-		"envp", i, closure->run_envp[i], envp[i]);
+	    goto done;
 	}
     }
 
+    for (run_envc = 0; closure->run_envp[run_envc] != NULL; run_envc++)
+	continue;
+    if (envc != run_envc) {
+	sudo_warnx(U_("%s mismatch, expected %d, got %d"), "envc",
+	    run_envc, envc);
+	goto done;
+    }
+    for (i = 0; i < envc; i++) {
+	if (strcmp(envp[i], closure->run_envp[i]) != 0) {
+	    sudo_warnx(
+		U_("%s[%d] mismatch, expected \"%s\", got \"%s\""),
+		"envp", i, closure->run_envp[i], envp[i]);
+	    goto done;
+	}
+    }
+
+    ret = true;		/* matched! */
+
+done:
     debug_return_bool(ret);
 }
 
