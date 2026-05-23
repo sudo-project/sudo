@@ -1674,12 +1674,12 @@ done:
 }
 
 /*
- * Verify that the execve(2) argument we wrote match the contents of closure.
- * TODO: test execveat(2) too.
+ * Verify that the execve(2) or execveat(2) arguments we wrote match
+ * the contents of closure.
  * Returns true if they match, else false.
  */
 static bool
-verify_execve_args(pid_t pid, struct sudo_ptrace_regs *regs,
+verify_execve_args(pid_t pid, bool is_execveat, struct sudo_ptrace_regs *regs,
     struct intercept_closure *closure)
 {
     char *pathname, **argv, **envp, *buf;
@@ -1687,7 +1687,7 @@ verify_execve_args(pid_t pid, struct sudo_ptrace_regs *regs,
     bool ret = false;
     debug_decl(verify_execve_args, SUDO_DEBUG_EXEC);
 
-    buf = get_exec_info(pid, false, regs, &pathname, &argc, &argv,
+    buf = get_exec_info(pid, is_execveat, regs, &pathname, &argc, &argv,
 	&envc, &envp);
     if (buf != NULL) {
 	ret = execve_args_match(pathname, argc, argv, envc, envp, false, closure);
@@ -2057,7 +2057,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 
 	    if (closure->state == POLICY_TEST) {
 		/* Verify the contents of what we just wrote. */
-		if (!verify_execve_args(pid, &regs, closure)) {
+		if (!verify_execve_args(pid, is_execveat, &regs, closure)) {
 		    sudo_debug_printf(SUDO_DEBUG_ERROR,
 			"%s: new execve args don't match closure", __func__);
 		}
