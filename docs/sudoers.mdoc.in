@@ -25,7 +25,7 @@
 .nr BA @BAMAN@
 .nr LC @LCMAN@
 .nr PS @PSMAN@
-.Dd May 17, 2026
+.Dd May 23, 2026
 .Dt SUDOERS @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -1211,6 +1211,11 @@ See the description of the
 setting for more information on how
 .Nm sudo
 executes commands that have an associated digest.
+This setting has no effect for the
+.Nm list
+and
+.Nm sudoedit
+built-in commands.
 .Pp
 Command digests are only supported by version 1.8.7 or higher.
 .Ss Defaults
@@ -1779,6 +1784,11 @@ Path names of the form
 are interpreted as being relative to the named user's home directory.
 If the user name is omitted, the path will be relative to the runas
 user's home directory.
+This setting has no effect for the
+.Nm list
+and
+.Nm sudoedit
+built-in commands.
 .Pp
 This setting is only supported by version 1.9.3 or higher.
 .Ss Chroot_Spec
@@ -1816,6 +1826,11 @@ Path names of the form
 are interpreted as being relative to the named user's home directory.
 If the user name is omitted, the path will be relative to the runas
 user's home directory.
+This setting has no effect for the
+.Nm list
+and
+.Nm sudoedit
+built-in commands.
 .Pp
 This setting is only supported by version 1.9.3 or higher.
 .Ss Tag_Spec
