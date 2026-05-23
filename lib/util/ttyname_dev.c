@@ -253,6 +253,13 @@ sudo_ttyname_dev_v1(dev_t rdev, char *buf, size_t buflen)
     size_t len;
     debug_decl(sudo_ttyname_dev, SUDO_DEBUG_UTIL);
 
+    /*
+     * First, check /dev/console.
+     */
+    ret = sudo_dev_check(rdev, _PATH_DEV "console", buf, buflen);
+    if (ret != NULL)
+	goto done;
+
 #ifdef __linux__
     /*
      * First check std{in,out,err} and use /proc/self/fd/{0,1,2} if possible.
@@ -280,13 +287,6 @@ sudo_ttyname_dev_v1(dev_t rdev, char *buf, size_t buflen)
 	}
     }
 #endif
-
-    /*
-     * First, check /dev/console.
-     */
-    ret = sudo_dev_check(rdev, _PATH_DEV "console", buf, buflen);
-    if (ret != NULL)
-	goto done;
 
     /*
      * Then check the device search path.
