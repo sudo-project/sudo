@@ -807,8 +807,8 @@ ptrace_writev_vec(pid_t pid, struct sudo_ptrace_regs *regs, char **vec,
 	continue;
     local = reallocarray(NULL, len, sizeof(struct iovec));
     remote = reallocarray(NULL, len, sizeof(struct iovec));
-    j = regs->compat && (len & 1) != 0;	/* pad for final NULL in compat */
-    addrbuf = reallocarray(NULL, len + 1 + j, sizeof(*addrbuf));
+    j = regs->compat && (len & 1) == 0;	/* pad for final NULL in compat */
+    addrbuf = reallocarray(NULL, len + 1 + j, regs->wordsize);
     if (local == NULL || remote == NULL || addrbuf == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	goto done;
