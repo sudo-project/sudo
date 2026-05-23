@@ -2,7 +2,7 @@
 /*
  * SPDX-License-Identifier: ISC
  *
- * Copyright (c) 1996, 1998-2005, 2007-2025
+ * Copyright (c) 1996, 1998-2005, 2007-2026
  *	Todd C. Miller <Todd.Miller@sudo.ws>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -86,6 +86,14 @@ int (*trace_print)(const char *msg) = sudoers_trace_print;
 	yyless((int)n);						\
 } while (0);
 
+#define CHECK_EDIT_ARG							\
+    if (YY_START == GOTEDIT && sudoerstext[0] != '/' &&			\
+	    (sudoerslval.command.args == NULL || sawspace)) {		\
+	sudoers_errstr = N_("invalid sudoedit file name");		\
+	LEXTRACE("ERROR ");						\
+	return ERROR;							\
+    }
+
 %}
 
 HEX16			[0-9A-Fa-f]{1,4}
@@ -108,6 +116,7 @@ DEFVAR			[a-z_]+
 
 %s	GOTDEFS
 %x	GOTCMND
+%x	GOTEDIT
 %x	GOTREGEX
 %x	STARTDEFS
 %x	INDEFS
@@ -228,9 +237,10 @@ DEFVAR			[a-z_]+
 			}
 }
 
-<GOTCMND>{
+<GOTCMND,GOTEDIT>{
     \\[\*\?\[\]\!^]	{
 			    /* quoted fnmatch glob char, pass verbatim */
+			    CHECK_EDIT_ARG
 			    LEXTRACE("QUOTEDCHAR ");
 			    if (!fill_args(sudoerstext, 2, sawspace))
 				yyterminate();
@@ -239,6 +249,7 @@ DEFVAR			[a-z_]+
 
     \\[:\\,= \t#]	{
 			    /* quoted sudoers special char, strip backslash */
+			    CHECK_EDIT_ARG
 			    LEXTRACE("QUOTEDCHAR ");
 			    if (!fill_args(sudoerstext + 1, 1, sawspace))
 				yyterminate();
@@ -259,8 +270,10 @@ DEFVAR			[a-z_]+
 				sudoersless(0);
 				yy_set_bol(0);
 			    } else {
+				CHECK_EDIT_ARG
 				LEXTRACE("ARG ");
-				if (!fill_args(sudoerstext, sudoersleng, sawspace))
+				if (!fill_args(sudoerstext, sudoersleng,
+					sawspace))
 				    yyterminate();
 				sawspace = false;
 			    }
@@ -292,7 +305,8 @@ DEFVAR			[a-z_]+
 			    BEGIN INITIAL;
 			    continued = false;
 			    if (sudoers_strict()) {
-				if (!sudo_regex_compile(NULL, sudoerstext, &sudoers_errstr)) {
+				if (!sudo_regex_compile(NULL, sudoerstext,
+					&sudoers_errstr)) {
 				    LEXTRACE("ERROR ");
 				    return ERROR;
 				}
@@ -725,7 +739,7 @@ sha512			{
 			}
 
 sudoedit		{
-			    BEGIN GOTCMND;
+			    BEGIN GOTEDIT;
 			    LEXTRACE("COMMAND ");
 			    if (!fill_cmnd(sudoerstext, sudoersleng))
 				yyterminate();
@@ -755,7 +769,8 @@ sudoedit		{
 
 {REGEX}			{
 			    if (sudoers_strict()) {
-				if (!sudo_regex_compile(NULL, sudoerstext, &sudoers_errstr)) {
+				if (!sudo_regex_compile(NULL, sudoerstext,
+					&sudoers_errstr)) {
 				    LEXTRACE("ERROR ");
 				    return ERROR;
 				}

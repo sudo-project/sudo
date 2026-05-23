@@ -1,0 +1,6 @@
+stdin:2:22: invalid sudoedit file name
+user1	ALL = sudoedit shadow
+                     ^~~~~~
+stdin:3:32: invalid sudoedit file name
+user1	ALL = sudoedit /etc/motd shadow
+                               ^~~~~~
