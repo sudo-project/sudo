@@ -157,14 +157,19 @@ sudo_check_temp_file(int tfd, const char *tfile, uid_t uid, struct stat *sb)
 	sudo_warnx(U_("%s: not a regular file"), tfile);
 	debug_return_bool(false);
     }
+    if (sb->st_uid != uid) {
+	sudo_warnx(U_("%s is owned by uid %u, should be %u"),
+	    tfile, (unsigned int)sb->st_uid, (unsigned int)uid);
+	debug_return_bool(false);
+    }
     if ((sb->st_mode & ALLPERMS) != (S_IRUSR|S_IWUSR)) {
 	sudo_warnx(U_("%s: bad file mode: 0%o"), tfile,
 	    (unsigned int)(sb->st_mode & ALLPERMS));
 	debug_return_bool(false);
     }
-    if (sb->st_uid != uid) {
-	sudo_warnx(U_("%s is owned by uid %u, should be %u"),
-	    tfile, (unsigned int)sb->st_uid, (unsigned int)uid);
+    if (sb->st_nlink > 1) {
+	errno = EMLINK;
+	sudo_warn("%s", tfile);
 	debug_return_bool(false);
     }
     debug_return_bool(true);
