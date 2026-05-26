@@ -403,6 +403,7 @@ static char *
 getln(int fd, char *buf, size_t bufsiz, bool cbreak, bool feedback,
     enum tgetpass_errval *errval)
 {
+    const char eraseline[3] = "\033[K";
     ssize_t nr = -1;
     const char *ep;
     char *cp = buf;
@@ -435,12 +436,20 @@ getln(int fd, char *buf, size_t bufsiz, bool cbreak, bool feedback,
 		    cp -= last_chunk_len(buf, cp - buf);
 		}
 		cp = buf;
+		if (feedback) {
+		    /* ANSI escape sequence to erase from cursor to EOL. */
+		    ignore_result(write(fd, eraseline, sizeof(eraseline)));
+		}
 		continue;
 	    } else if (c == sudo_term_erase) {
 		if (cp > buf) {
 		    if (feedback)
 			ignore_result(write(fd, "\b \b", 3));
 		    cp -= last_chunk_len(buf, cp - buf);
+		}
+		if (feedback) {
+		    /* ANSI escape sequence to erase from cursor to EOL. */
+		    ignore_result(write(fd, eraseline, sizeof(eraseline)));
 		}
 		continue;
 	    }
