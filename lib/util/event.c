@@ -48,6 +48,9 @@ static struct sudo_event_base *default_base;
 /* We need the event base to be available from the signal handler. */
 static struct sudo_event_base *signal_base;
 
+/* Check for signals at this interval in case of write(2) failure. */
+static const struct timespec signal_timeout = { 2, 0 };
+
 /*
  * Add an event to the base's active queue and mark it active.
  * This is extern so sudo_ev_scan_impl() can call it.
@@ -156,6 +159,11 @@ signal_pipe_cb(int fd, int what, void *v)
 
     /* Activate signal events. */
     sudo_ev_activate_sigevents(base);
+
+    if (what == SUDO_EV_TIMEOUT) {
+	/* Re-arm signal event timeout. */
+	sudo_ev_add(base, &base->signal_event, &signal_timeout, true);
+    }
 
     debug_return;
 }
@@ -368,7 +376,11 @@ sudo_ev_handler(int signo, siginfo_t *info, void *context)
 	signal_base->signal_pending[signo] = 1;
 	signal_base->signal_caught = 1;
 
-	/* Wake up the other end of the pipe. */
+	/*
+	 * Wake up the other end of the pipe (in the same process).
+	 * We cannot sleep here or we would deadlock.  There is a periodic
+	 * check for missed signals in case this write(2) fails.
+	 */
 	ignore_result(write(signal_base->signal_pipe[1], &ch, 1));
     }
 }
@@ -447,9 +459,9 @@ sudo_ev_add_signal(struct sudo_event_base *base, struct sudo_event *ev,
 
     /* Add the internal signal_pipe event on demand. */
     if (!ISSET(base->signal_event.flags, SUDO_EVQ_INSERTED))
-	sudo_ev_add(base, &base->signal_event, NULL, true);
+	sudo_ev_add(base, &base->signal_event, &signal_timeout, true);
 
-    /* Update global signal base so handler to update signals_pending[] */
+    /* Update global signal base so handler can update signals_pending[] */
     signal_base = base;
 
     debug_return_int(0);
