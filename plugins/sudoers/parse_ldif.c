@@ -103,7 +103,7 @@ ldif_parse_attribute(char *line, char **name, char **value)
 {
     bool encoded = false;
     char *attr, *cp, *ep, *colon;
-    size_t len;
+    size_t i, len;
     debug_decl(ldif_parse_attribute, SUDOERS_DEBUG_UTIL);
 
     /* Parse attribute name: [a-zA-Z][a-zA-Z0-9-]*: */
@@ -152,7 +152,13 @@ ldif_parse_attribute(char *line, char **name, char **value)
 	    free(copy);
 	    debug_return_bool(false);
 	}
-	memcpy(attr, copy, len);
+	for (i = 0; i < len; i++) {
+	    if (iscntrl((unsigned char)copy[i]) && copy[i] != '\t') {
+		/* Reject attributes with embedded control characters. */
+		debug_return_bool(false);
+	    }
+	    attr[i] = copy[i];
+	}
 	attr[len] = '\0';
 	free(copy);
     }
