@@ -779,7 +779,7 @@ ptrace_write_string(pid_t pid, unsigned long addr, const char *str)
 		__func__, (int)pid, addr, (int)sizeof(u.buf), u.buf);
 	    debug_return_ssize_t(-1);
 	}
-	if ((u.word & 0xff) == 0) {
+	if (u.buf[sizeof(u.buf) - 1] == '\0') {
 	    /* If the last byte we wrote is a NUL we are done. */
 	    debug_return_ssize_t(str - str0 + 1);
 	}
