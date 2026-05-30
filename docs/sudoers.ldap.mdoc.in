@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2003-2023 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2003-2026 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd June 25, 2024
+.Dd May 30, 2026
 .Dt SUDOERS.LDAP @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -489,6 +489,19 @@ sudoHost: ALL
 sudoCommand: !/bin/sh
 sudoCommand: ALL
 .Ed
+.Pp
+Unlike traditional sudoers, in a
+.Em sudoRole
+negated entries may not have white space between the exclamation point,
+.Ql \&! ,
+and the item being negated.
+Only a single exclamation point before the item is supported
+.Pq traditional sudoers supports any number .
+These limitations are due to the way in which
+.Nm sudo
+performs LDAP queries for matching
+.Em sudoRole
+objects.
 .Ss Converting between file-based and LDAP sudoers
 The
 .Xr cvtsudoers 1

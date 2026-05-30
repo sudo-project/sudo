@@ -37,8 +37,8 @@
 #include <gram.h>
 
 /*
- * Returns true if the string pointed to by valp begins with an
- * odd number of '!' characters.  Intervening blanks are ignored.
+ * Returns true if the string pointed to by valp begins with a
+ * '!' character.
  * Stores the address of the string after '!' removal in valp.
  */
 bool
@@ -48,11 +48,9 @@ sudo_ldap_is_negated(char **valp)
     bool ret = false;
     debug_decl(sudo_ldap_is_negated, SUDOERS_DEBUG_LDAP);
 
-    while (*val == '!') {
-	ret = !ret;
-	do {
-	    val++;
-	} while (isblank((unsigned char)*val));
+    if (*val == '!') {
+	ret = true;
+	val++;
     }
     *valp = val;
     debug_return_bool(ret);
