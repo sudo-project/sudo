@@ -229,6 +229,9 @@ visiblepw
 pwfeedback
 	T_FLAG
 	"Provide visual feedback at the password prompt when there is user input"
+pwfeedback_char
+	T_STR
+	"Character to use for password feedback: %s"
 fast_glob
 	T_FLAG
 	"Use faster globbing that is less accurate but does not access the filesystem"
