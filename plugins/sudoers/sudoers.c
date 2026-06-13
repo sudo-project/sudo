@@ -700,6 +700,34 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
 	}
 	sudoers_gc_add(GC_PTR, sudoers_ctx.runas.argv[0]);
     }
+    if (ISSET(sudoers_ctx.mode, MODE_EDIT)) {
+	int i;
+
+	/*
+	 * Fully-qualify sudoedit file names if necessary.
+	 * We don't currently support -D or CWD for sudoedit
+	 * so this uses the user's current working directory.
+	 */
+	for (i = 1; i < sudoers_ctx.runas.argc; i++) {
+	    if (*sudoers_ctx.runas.argv[i] != '/') {
+		char *cp;
+
+		if (sudoers_ctx.user.cwd == NULL) {
+		    sudo_warnx("%s",
+			U_("unable to get current working directory"));
+		    goto error;
+		}
+		if (asprintf(&cp, "%s/%s", sudoers_ctx.user.cwd,
+			sudoers_ctx.runas.argv[i]) == -1) {
+		    sudo_warnx(U_("%s: %s"), __func__,
+			U_("unable to allocate memory"));
+		    goto error;
+		}
+		sudoers_gc_add(GC_PTR, cp);
+		sudoers_ctx.runas.argv[i] = cp;
+	    }
+	}
+    }
 
     ret = sudoers_check_common(&sudoers_ctx, 0);
     if (ret != true)
@@ -796,32 +824,7 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
     if (ISSET(sudoers_ctx.mode, MODE_EDIT)) {
 	const char *env_editor = NULL;
 	char **edit_argv;
-	int edit_argc, i;
-
-	/*
-	 * Fully-qualify sudoedit file names if necessary.
-	 * We don't currently support -D or CWD for sudoedit
-	 * so this uses the user's current working directory.
-	 */
-	for (i = 1; i < sudoers_ctx.runas.argc; i++) {
-	    if (*sudoers_ctx.runas.argv[i] != '/') {
-		char *cp;
-
-		if (sudoers_ctx.runas.cwd == NULL) {
-		    sudo_warnx("%s",
-			U_("unable to get current working directory"));
-		    goto error;
-		}
-		if (asprintf(&cp, "%s/%s", sudoers_ctx.user.cwd,
-			sudoers_ctx.runas.argv[i]) == -1) {
-		    sudo_warnx(U_("%s: %s"), __func__,
-			U_("unable to allocate memory"));
-		    goto error;
-		}
-		sudoers_gc_add(GC_PTR, cp);
-		sudoers_ctx.runas.argv[i] = cp;
-	    }
-	}
+	int edit_argc;
 
 	sudoers_ctx.sudoedit_nfiles = sudoers_ctx.runas.argc - 1;
 	free(sudoers_ctx.runas.cmnd);
