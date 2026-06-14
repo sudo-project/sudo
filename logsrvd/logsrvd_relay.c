@@ -62,7 +62,7 @@ static void relay_client_msg_cb(int fd, int what, void *v);
 static void relay_server_msg_cb(int fd, int what, void *v);
 static void connect_cb(int sock, int what, void *v);
 static bool start_relay(int sock, struct connection_closure *closure);
-static void tls_connect_error_fn(struct tls_client_closure *tls_client);
+static int connect_relay_next(struct connection_closure *closure);
 
 /*
  * Free a struct relay_closure container and its contents.
@@ -262,6 +262,27 @@ tls_client_start_fn(struct tls_client_closure *tls_client)
     sudo_ev_free(tls_client->tls_connect_ev);
     tls_client->tls_connect_ev = NULL;
     return start_relay(SSL_get_fd(tls_client->ssl), tls_client->parent_closure);
+}
+
+/* Called on TLS connection error. */
+static void
+tls_connect_error_fn(struct tls_client_closure *tls_client)
+{
+    struct connection_closure *closure = tls_client->parent_closure;
+    int res;
+
+    /* TLS connection failed, try next relay (if any). */
+    while ((res = connect_relay_next(closure)) == -1) {
+	if (errno == ENOENT || errno == EINPROGRESS) {
+	    /* Out of relays or connecting asynchronously. */
+	    break;
+	}
+    }
+    if (res == -1 && errno != EINPROGRESS) {
+	closure->errstr = _("unable to connect to relay host");
+	if (!schedule_error_message(closure->errstr, closure))
+	    connection_close(closure);
+    }
 }
 
 /* Perform TLS connection to the relay host. */
@@ -498,27 +519,6 @@ connect_relay(struct connection_closure *closure)
     /* Switch to relay client message handlers. */
     closure->cms = &cms_relay;
     debug_return_bool(true);
-}
-
-/* Called on TLS connection error. */
-static void
-tls_connect_error_fn(struct tls_client_closure *tls_client)
-{
-    struct connection_closure *closure = tls_client->parent_closure;
-    int res;
-
-    /* TLS connection failed, try next relay (if any). */
-    while ((res = connect_relay_next(closure)) == -1) {
-	if (errno == ENOENT || errno == EINPROGRESS) {
-	    /* Out of relays or connecting asynchronously. */
-	    break;
-	}
-    }
-    if (res == -1 && errno != EINPROGRESS) {
-	closure->errstr = _("unable to connect to relay host");
-	if (!schedule_error_message(closure->errstr, closure))
-	    connection_close(closure);
-    }
 }
 
 /*
