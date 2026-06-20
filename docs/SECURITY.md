@@ -34,7 +34,7 @@ We prefer all communications to be in English.
 
 ## Disclosure Policy
 
-The Sudo Project follows the principle of [Coordinated Vulnerability Disclosure](https://vuls.cert.org/confluence/display/CVD/Executive+Summary).  Disclosure is usually coordinated using the [distros mailing list](https://oss-security.openwall.org/wiki/mailing-lists/distros).
+The Sudo Project follows the principle of [Coordinated Vulnerability Disclosure](https://certcc.github.io/certcc_disclosure_policy/).  Disclosure is usually coordinated using the [distros mailing list](https://oss-security.openwall.org/wiki/mailing-lists/distros).
 
 ## Security Advisories
 
