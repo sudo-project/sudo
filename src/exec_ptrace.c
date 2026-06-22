@@ -1500,10 +1500,10 @@ script_matches(const char *script, const char *execpath, int argc,
 	/* Match interpreter. */
 	if (!pathname_matches(execpath, interp, true)) {
 	    /* It is possible for the interpreter to be a script too. */
-	    if (argc > 0 && strcmp(interp, argv[1]) == 0) {
+	    if (argc > 1 && strcmp(interp, argv[1]) == 0) {
 		/* Interpreter args must match for *this* interpreter. */
 		if (interp_args == NULL ||
-			(argc > 1 && strcmp(interp_args, argv[2]) == 0)) {
+			(argc > 2 && strcmp(interp_args, argv[2]) == 0)) {
 		    script = interp;
 		    argv++;
 		    argc--;
@@ -1516,7 +1516,7 @@ script_matches(const char *script, const char *execpath, int argc,
 		}
 	    }
 	}
-	if (argc > 0 && interp_args != NULL) {
+	if (argc > 1 && interp_args != NULL) {
 	    if (strcmp(interp_args, argv[1]) != 0) {
 		sudo_warnx(
 		    U_("interpreter argument , expected \"%s\", got \"%s\""),
