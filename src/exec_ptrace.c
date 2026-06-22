@@ -66,6 +66,11 @@
 #  define SECCOMP_RET_KILL_PROCESS SECCOMP_RET_KILL
 # endif
 
+/* PTRACE_O_EXITKILL was added in Linux 3.8. */
+# ifndef PTRACE_O_EXITKILL
+#  define PTRACE_O_EXITKILL 0
+# endif
+
 static int seccomp_trap_supported = -1;
 # ifdef HAVE_PROCESS_VM_READV
 static size_t page_size;
@@ -1352,7 +1357,7 @@ exec_ptrace_seize(pid_t child, int intercept_fd)
 {
     const long ptrace_opts = PTRACE_O_TRACESECCOMP|PTRACE_O_TRACECLONE|
 			     PTRACE_O_TRACEFORK|PTRACE_O_TRACEVFORK|
-			     PTRACE_O_TRACEEXEC;
+			     PTRACE_O_TRACEEXEC|PTRACE_O_EXITKILL;
     struct command_status cstat;
     int ret = true;
     debug_decl(exec_ptrace_seize, SUDO_DEBUG_EXEC);
