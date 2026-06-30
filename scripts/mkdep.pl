@@ -281,6 +281,10 @@ sub find_depends {
 	my ($hdr, $hdr_path) = find_header($src, $1);
 	if (defined($hdr)) {
 	    $headers{$hdr} = 1;
+	    if ($src eq $hdr_path) {
+		next
+	    }
+
 	    # Look for other includes in the .h file
 	    foreach (find_depends($hdr_path)) {
 		$headers{$_} = 1;
