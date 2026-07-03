@@ -1040,7 +1040,7 @@ int
 timestamp_remove(const struct sudoers_context *ctx, bool unlink_it)
 {
     struct timestamp_entry key, entry;
-    int len, dfd = -1, fd = -1, ret = true;
+    int len, pass, dfd = -1, fd = -1, ret = true;
     char uidstr[STRLEN_MAX_UNSIGNED(uid_t) + 1];
     char *fname = NULL;
     debug_decl(timestamp_remove, SUDOERS_DEBUG_AUTH);
@@ -1100,16 +1100,35 @@ timestamp_remove(const struct sudoers_context *ctx, bool unlink_it)
     }
 
     /*
-     * Find matching entries and invalidate them.
+     * Find matching timestamp entries and invalidate them.
+     * We do 3 passes to invalidate all possible timestamp entries
+     * since timestamp_type may be set on a per-command basis in sudoers.
      */
-    ts_init_key(ctx, &key, NULL, 0, def_timestamp_type);
-    while (ts_find_record(fd, &key, &entry)) {
-	/* Back up and disable the entry. */
-	if (!ISSET(entry.flags, TS_DISABLED)) {
-	    SET(entry.flags, TS_DISABLED);
-	    if (lseek(fd, 0 - (off_t)sizeof(entry), SEEK_CUR) != -1) {
-		if (ts_write(ctx, fd, fname, &entry, -1) == -1)
-		    ret = false;
+    for (pass = 0; pass < 3; pass++) {
+	switch (pass) {
+	case 0:
+	    ts_init_key(ctx, &key, NULL, 0, tty);
+	    break;
+	case 1:
+	    ts_init_key(ctx, &key, NULL, 0, ppid);
+	    break;
+	default:
+	    ts_init_key(ctx, &key, NULL, 0, global);
+	    break;
+	}
+	if (lseek(fd, 0, SEEK_SET) == -1) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO|SUDO_DEBUG_LINENO,
+		"unable to rewind timestamp fd");
+	    break;
+	}
+	while (ts_find_record(fd, &key, &entry)) {
+	    /* Back up and disable the entry. */
+	    if (!ISSET(entry.flags, TS_DISABLED)) {
+		SET(entry.flags, TS_DISABLED);
+		if (lseek(fd, 0 - (off_t)sizeof(entry), SEEK_CUR) != -1) {
+		    if (ts_write(ctx, fd, fname, &entry, -1) == -1)
+			ret = false;
+		}
 	    }
 	}
     }
