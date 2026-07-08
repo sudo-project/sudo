@@ -1,0 +1,1212 @@
+# Translation of sudo to ِArabic
+# This file is put in the public domain.
+# Todd C. Miller <Todd.Miller@sudo.ws>, 2011-2018
+# Zayed Al-Saidi <zayed.alsaidi@gmail.com>, 2026.
+msgid ""
+msgstr ""
+"Project-Id-Version: sudo 1.9.18b1\n"
+"Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
+"POT-Creation-Date: 2025-10-05 19:32-0600\n"
+"PO-Revision-Date: 2026-01-31 21:37+0400\n"
+"Last-Translator: Zayed Al-Saidi <zayed.alsaidi@gmail.com>\n"
+"Language-Team: Arabic <(nothing)>\n"
+"Language: ar\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+"X-Generator: Lokalize 23.08.5\n"
+
+#: lib/util/aix.c:84 lib/util/aix.c:164
+msgid "unable to open userdb"
+msgstr "عجز عن فتح قاعدة بيانات المستخدمين (userdb)"
+
+#: lib/util/aix.c:219
+#, c-format
+msgid "unable to switch to registry \"%s\" for %s"
+msgstr "عجز عن الانتقال إلى السجل \"%s\" لأجل %s"
+
+#: lib/util/aix.c:244
+msgid "unable to restore registry"
+msgstr "عجز عن استعادة السجل"
+
+#: lib/util/aix.c:267 lib/util/gidlist.c:61 lib/util/gidlist.c:71
+#: lib/util/json.c:50 lib/util/json.c:192 lib/util/sudo_conf.c:213
+#: lib/util/sudo_conf.c:299 lib/util/sudo_conf.c:376 lib/util/sudo_conf.c:667
+#: src/conversation.c:76 src/exec_iolog.c:117 src/exec_iolog.c:128
+#: src/exec_iolog.c:205 src/exec_monitor.c:168 src/exec_monitor.c:436
+#: src/exec_monitor.c:442 src/exec_monitor.c:450 src/exec_monitor.c:458
+#: src/exec_monitor.c:465 src/exec_monitor.c:472 src/exec_monitor.c:479
+#: src/exec_monitor.c:486 src/exec_monitor.c:493 src/exec_monitor.c:500
+#: src/exec_monitor.c:507 src/exec_nopty.c:236 src/exec_nopty.c:245
+#: src/exec_nopty.c:252 src/exec_nopty.c:259 src/exec_nopty.c:266
+#: src/exec_nopty.c:273 src/exec_nopty.c:280 src/exec_nopty.c:287
+#: src/exec_nopty.c:294 src/exec_nopty.c:301 src/exec_nopty.c:308
+#: src/exec_nopty.c:315 src/exec_nopty.c:323 src/exec_nopty.c:331
+#: src/exec_nopty.c:751 src/exec_preload.c:342 src/exec_ptrace.c:482
+#: src/exec_ptrace.c:775 src/exec_ptrace.c:992 src/exec_ptrace.c:1105
+#: src/exec_ptrace.c:1281 src/exec_ptrace.c:1634 src/exec_ptrace.c:1661
+#: src/exec_ptrace.c:1853 src/exec_pty.c:601 src/exec_pty.c:785
+#: src/exec_pty.c:1000 src/exec_pty.c:1009 src/exec_pty.c:1016
+#: src/exec_pty.c:1023 src/exec_pty.c:1030 src/exec_pty.c:1037
+#: src/exec_pty.c:1044 src/exec_pty.c:1051 src/exec_pty.c:1058
+#: src/exec_pty.c:1065 src/exec_pty.c:1072 src/exec_pty.c:1079
+#: src/exec_pty.c:1087 src/load_plugins.c:95 src/load_plugins.c:120
+#: src/load_plugins.c:156 src/load_plugins.c:389 src/load_plugins.c:395
+#: src/parse_args.c:166 src/parse_args.c:187 src/parse_args.c:263
+#: src/parse_args.c:621 src/parse_args.c:643 src/parse_args.c:668
+#: src/preserve_fds.c:41 src/preserve_fds.c:126 src/selinux.c:84
+#: src/selinux.c:357 src/selinux.c:467 src/selinux.c:484 src/selinux.c:491
+#: src/sesh.c:201 src/sesh.c:235 src/sesh.c:241 src/sesh.c:248 src/sesh.c:254
+#: src/sesh.c:465 src/sudo.c:576 src/sudo.c:602 src/sudo.c:658 src/sudo.c:724
+#: src/sudo.c:735 src/sudo.c:762 src/sudo.c:785 src/sudo.c:794 src/sudo.c:803
+#: src/sudo.c:816 src/sudo.c:825 src/sudo.c:866 src/sudo.c:876 src/sudo.c:886
+#: src/sudo.c:919 src/sudo.c:921 src/sudo.c:1148 src/sudo.c:1169
+#: src/sudo.c:1460 src/sudo.c:1629 src/sudo.c:1856 src/sudo.c:2189
+#: src/sudo_edit.c:84 src/sudo_edit.c:144 src/sudo_edit.c:425
+#: src/sudo_edit.c:434 src/sudo_edit.c:535 src/sudo_edit.c:542
+#: src/sudo_edit.c:687 src/sudo_edit.c:707 src/sudo_intercept_common.c:117
+#: src/sudo_intercept_common.c:342
+#, c-format
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: lib/util/aix.c:267 lib/util/gidlist.c:61 lib/util/json.c:51
+#: lib/util/json.c:193 lib/util/regex.c:168 lib/util/sudo_conf.c:214
+#: lib/util/sudo_conf.c:299 lib/util/sudo_conf.c:376 lib/util/sudo_conf.c:667
+#: src/conversation.c:77 src/exec_intercept.c:107 src/exec_intercept.c:346
+#: src/exec_intercept.c:522 src/exec_intercept.c:586 src/exec_intercept.c:710
+#: src/exec_intercept.c:834 src/exec_iolog.c:117 src/exec_iolog.c:128
+#: src/exec_iolog.c:205 src/exec_monitor.c:436 src/exec_monitor.c:442
+#: src/exec_monitor.c:450 src/exec_monitor.c:458 src/exec_monitor.c:465
+#: src/exec_monitor.c:472 src/exec_monitor.c:479 src/exec_monitor.c:486
+#: src/exec_monitor.c:493 src/exec_monitor.c:500 src/exec_monitor.c:507
+#: src/exec_nopty.c:236 src/exec_nopty.c:245 src/exec_nopty.c:252
+#: src/exec_nopty.c:259 src/exec_nopty.c:266 src/exec_nopty.c:273
+#: src/exec_nopty.c:280 src/exec_nopty.c:287 src/exec_nopty.c:294
+#: src/exec_nopty.c:301 src/exec_nopty.c:308 src/exec_nopty.c:315
+#: src/exec_nopty.c:323 src/exec_nopty.c:331 src/exec_preload.c:342
+#: src/exec_ptrace.c:482 src/exec_ptrace.c:775 src/exec_ptrace.c:992
+#: src/exec_ptrace.c:1661 src/exec_ptrace.c:1854 src/exec_pty.c:601
+#: src/exec_pty.c:1000 src/exec_pty.c:1009 src/exec_pty.c:1016
+#: src/exec_pty.c:1023 src/exec_pty.c:1030 src/exec_pty.c:1037
+#: src/exec_pty.c:1044 src/exec_pty.c:1051 src/exec_pty.c:1058
+#: src/exec_pty.c:1065 src/exec_pty.c:1072 src/exec_pty.c:1079
+#: src/exec_pty.c:1087 src/load_plugins.c:95 src/load_plugins.c:120
+#: src/load_plugins.c:156 src/load_plugins.c:389 src/load_plugins.c:395
+#: src/parse_args.c:166 src/parse_args.c:188 src/parse_args.c:263
+#: src/parse_args.c:621 src/parse_args.c:643 src/parse_args.c:668
+#: src/preserve_fds.c:41 src/preserve_fds.c:126 src/selinux.c:84
+#: src/selinux.c:357 src/selinux.c:467 src/selinux.c:484 src/selinux.c:491
+#: src/sesh.c:201 src/sesh.c:466 src/sudo.c:224 src/sudo.c:576 src/sudo.c:602
+#: src/sudo.c:658 src/sudo.c:817 src/sudo.c:919 src/sudo.c:921 src/sudo.c:1148
+#: src/sudo.c:1169 src/sudo.c:1460 src/sudo.c:1629 src/sudo.c:1856
+#: src/sudo.c:2189 src/sudo_edit.c:84 src/sudo_edit.c:144 src/sudo_edit.c:425
+#: src/sudo_edit.c:434 src/sudo_edit.c:535 src/sudo_edit.c:542
+#: src/sudo_edit.c:687 src/sudo_edit.c:707 src/sudo_intercept_common.c:117
+#: src/sudo_intercept_common.c:342
+msgid "unable to allocate memory"
+msgstr "عجز عن تخصيص ذاكرة"
+
+#: lib/util/mkdir_parents.c:58
+#, c-format
+msgid "unable to stat %.*s"
+msgstr "عجز عن جلب حالة (stat) %.*s"
+
+#: lib/util/mkdir_parents.c:64
+#, c-format
+msgid "%.*s exists but is not a directory (0%o)"
+msgstr "%.*s موجود لكنه ليس دليلاً (0%o)"
+
+#: lib/util/mkdir_parents.c:98 lib/util/sudo_conf.c:684
+#: lib/util/sudo_conf.c:703 lib/util/sudo_conf.c:730 src/selinux.c:230
+#: src/selinux.c:260 src/sudo.c:370 src/sudo_edit.c:490 src/sudo_edit.c:554
+#, c-format
+msgid "unable to open %s"
+msgstr "عجز عن فتح %s"
+
+#: lib/util/mkdir_parents.c:115 lib/util/mkdir_parents.c:156
+#, c-format
+msgid "unable to mkdir %.*s"
+msgstr "عجز عن إنشاء الدليل (mkdir) %.*s"
+
+#: lib/util/mkdir_parents.c:125 lib/util/mkdir_parents.c:135
+#, c-format
+msgid "unable to open %.*s"
+msgstr "عجز عن فتح %.*s"
+
+#: lib/util/regex.c:158
+msgid "regular expression too large"
+msgstr "التعبير النمطي كبير جداً"
+
+#: lib/util/strsignal.c:45
+msgid "Unknown signal"
+msgstr "إشارة مجهولة"
+
+#: lib/util/strtoid.c:79 lib/util/strtomode.c:47 lib/util/strtonum.c:142
+#: lib/util/strtonum.c:181 src/sesh.c:235 src/sesh.c:248
+msgid "invalid value"
+msgstr "قيمة غير صالحة"
+
+#: lib/util/strtomode.c:53 lib/util/strtonum.c:154
+msgid "value too large"
+msgstr "القيمة كبيرة جداً"
+
+#: lib/util/strtomode.c:53 lib/util/strtonum.c:148
+msgid "value too small"
+msgstr "القيمة صغيرة جداً"
+
+#: lib/util/sudo_conf.c:232
+#, c-format
+msgid "invalid Path value \"%s\" in %s, line %u"
+msgstr "قيمة مسار غير صالحة \"%s\" في %s، السطر %u"
+
+#: lib/util/sudo_conf.c:398 lib/util/sudo_conf.c:451
+#, c-format
+msgid "invalid value for %s \"%s\" in %s, line %u"
+msgstr "قيمة غير صالحة لـ %s \"%s\" في %s، السطر %u"
+
+#: lib/util/sudo_conf.c:419
+#, c-format
+msgid "unsupported group source \"%s\" in %s, line %u"
+msgstr "مصدر مجموعة غير مدعوم \"%s\" في %s، السطر %u"
+
+#: lib/util/sudo_conf.c:435
+#, c-format
+msgid "invalid max groups \"%s\" in %s, line %u"
+msgstr "الحد الأقصى للمجموعات غير صالح \"%s\" في %s، السطر %u"
+
+#: lib/util/sudo_conf.c:706
+#, c-format
+msgid "%s is not a regular file"
+msgstr "%s ليس ملفاً عادياً"
+
+#: lib/util/sudo_conf.c:709 src/copy_file.c:166
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr "%s مملوك للمعرف %u، ويجب أن يكون %u"
+
+#: lib/util/sudo_conf.c:713
+#, c-format
+msgid "%s is world writable"
+msgstr "%s قابل للكتابة من الجميع"
+
+#: lib/util/sudo_conf.c:716
+#, c-format
+msgid "%s is group writable"
+msgstr "%s قابل للكتابة من المجموعة"
+
+#: src/apparmor.c:80
+msgid "failed to determine AppArmor confinement"
+msgstr "فشل تحديد تقييد AppArmor"
+
+#: src/apparmor.c:88
+#, c-format
+msgid "unable to change AppArmor profile to %s"
+msgstr "عجز عن تغيير تشكيلة AppArmor إلى %s"
+
+#: src/copy_file.c:93
+#, c-format
+msgid "%s: truncate %s to zero bytes? (y/n) [n] "
+msgstr "%s: هل يصفر حجم %s؟ (y/n) [n] "
+
+#: src/copy_file.c:97
+#, c-format
+msgid "not overwriting %s"
+msgstr "لا يعيد الكتابة فوق %s"
+
+#: src/copy_file.c:115
+#, c-format
+msgid "unable to read from %s"
+msgstr "عجز عن القراءة من %s"
+
+#: src/copy_file.c:139 src/sudo_edit.c:315
+#, c-format
+msgid "unable to write to %s"
+msgstr "عجز عن الكتابة في %s"
+
+#: src/copy_file.c:153
+#, c-format
+msgid "unable to stat %s"
+msgstr "عجز عن جلب حالة (stat) %s"
+
+#: src/copy_file.c:157 src/sesh.c:307 src/sudo_edit.c:192
+#, c-format
+msgid "%s: not a regular file"
+msgstr "%s: ليس ملفاً عادياً"
+
+#: src/copy_file.c:161
+#, c-format
+msgid "%s: bad file mode: 0%o"
+msgstr "%s: وضع ملف سيئ: 0%o"
+
+#: src/edit_open.c:328
+msgid "unable to restore current working directory"
+msgstr "عجز عن استعادة دليل العمل الحالي"
+
+#: src/exec.c:106
+msgid "unable to set privileges"
+msgstr "عجز عن ضبط الامتيازات"
+
+#: src/exec.c:112 src/exec.c:117
+msgid "unable to set limit privileges"
+msgstr "عجز عن ضبط حدود الامتيازات"
+
+#: src/exec.c:140
+#, c-format
+msgid "unknown login class %s"
+msgstr "فئة ولوج مجهولة %s"
+
+#: src/exec.c:152
+msgid "unable to set user context"
+msgstr "عجز عن ضبط سياق المستخدم"
+
+#: src/exec.c:168
+msgid "unable to set process priority"
+msgstr "عجز عن ضبط أولوية العملية"
+
+#: src/exec.c:185
+#, c-format
+msgid "unable to change root to %s"
+msgstr "عجز عن تغيير الجذر (root) إلى %s"
+
+#: src/exec.c:198 src/exec.c:204 src/exec.c:211
+#, c-format
+msgid "unable to change to runas uid (%u, %u)"
+msgstr "عجز عن التغيير إلى معرف تشغيل كـ (%u, %u)"
+
+#: src/exec.c:233 src/sesh.c:194
+#, c-format
+msgid "unable to change directory to %s"
+msgstr "عجز عن تغيير الدليل إلى %s"
+
+#: src/exec.c:238
+#, c-format
+msgid "starting from %s"
+msgstr "يبدأ من %s"
+
+#: src/exec.c:273 src/exec.c:346 src/exec_monitor.c:570 src/exec_monitor.c:572
+#: src/exec_pty.c:1157 src/exec_pty.c:1159 src/signal.c:139 src/signal.c:146
+#: src/signal.c:160 src/suspend_parent.c:138
+#, c-format
+msgid "unable to set handler for signal %d"
+msgstr "عجز عن ضبط معالج للإشارة %d"
+
+#: src/exec.c:442
+msgid "intercept mode is not supported with SELinux RBAC on this system"
+msgstr "وضع الاعتراض غير مدعوم مع SELinux RBAC على هذا النظام"
+
+#: src/exec.c:447
+msgid "unable to log sub-commands with SELinux RBAC on this system"
+msgstr "عجز عن تسجيل الأوامر الفرعية مع SELinux RBAC على هذا النظام"
+
+#: src/exec_common.c:51
+msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
+msgstr "عجز عن إزالة PRIV_PROC_EXEC من PRIV_LIMIT"
+
+#: src/exec_intercept.c:66 src/exec_iolog.c:158 src/exec_iolog.c:168
+#: src/exec_iolog.c:213 src/exec_iolog.c:220 src/exec_iolog.c:247
+#: src/exec_monitor.c:444 src/exec_monitor.c:452 src/exec_monitor.c:460
+#: src/exec_monitor.c:467 src/exec_monitor.c:474 src/exec_monitor.c:481
+#: src/exec_monitor.c:488 src/exec_monitor.c:495 src/exec_monitor.c:502
+#: src/exec_monitor.c:509 src/exec_nopty.c:238 src/exec_nopty.c:247
+#: src/exec_nopty.c:254 src/exec_nopty.c:261 src/exec_nopty.c:268
+#: src/exec_nopty.c:275 src/exec_nopty.c:282 src/exec_nopty.c:289
+#: src/exec_nopty.c:296 src/exec_nopty.c:303 src/exec_nopty.c:310
+#: src/exec_nopty.c:317 src/exec_nopty.c:325 src/exec_nopty.c:333
+#: src/exec_nopty.c:392 src/exec_nopty.c:462 src/exec_pty.c:443
+#: src/exec_pty.c:557 src/exec_pty.c:607 src/exec_pty.c:1002
+#: src/exec_pty.c:1011 src/exec_pty.c:1018 src/exec_pty.c:1025
+#: src/exec_pty.c:1032 src/exec_pty.c:1039 src/exec_pty.c:1046
+#: src/exec_pty.c:1053 src/exec_pty.c:1060 src/exec_pty.c:1067
+#: src/exec_pty.c:1074 src/exec_pty.c:1081
+msgid "unable to add event to queue"
+msgstr "عجز عن إضافة حدث إلى الطابور"
+
+#: src/exec_intercept.c:319 src/sudo.c:1054
+msgid "command not set by the security policy"
+msgstr "الأمر غير مضبوط بواسطة سياسة الأمان"
+
+#: src/exec_intercept.c:398 src/exec_intercept.c:438 src/sudo.c:1272
+#: src/sudo.c:1317 src/sudo.c:1361
+msgid "command rejected by policy"
+msgstr "الأمر مرفوض من السياسة"
+
+#: src/exec_intercept.c:509 src/sudo.c:1959
+msgid "approval plugin error"
+msgstr "خطأ في ملحق الموافقة"
+
+#: src/exec_intercept.c:534 src/sudo.c:1277 src/sudo.c:1322 src/sudo.c:1366
+#: src/sudo.c:1440
+msgid "policy plugin error"
+msgstr "خطأ في ملحق السياسة"
+
+#: src/exec_intercept.c:563
+msgid "invalid PolicyCheckRequest"
+msgstr "طلب فحص سياسة (PolicyCheckRequest) غير صالح"
+
+#: src/exec_intercept.c:706
+#, c-format
+msgid "client request too large: %zu"
+msgstr "طلب العميل كبير جداً: %zu"
+
+#: src/exec_intercept.c:748
+#, c-format
+msgid "unable to unpack %s size %zu"
+msgstr "تعذر فك حزمة %s بحجم %zu"
+
+#: src/exec_intercept.c:796
+#, c-format
+msgid "unexpected type_case value %d in %s from %s"
+msgstr "قيمة type_case غير متوقعة %d في %s من %s"
+
+#: src/exec_intercept.c:822
+#, c-format
+msgid "server message too large: %zu"
+msgstr "رسالة الخادم كبيرة جداً: %zu"
+
+#: src/exec_iolog.c:316 src/exec_iolog.c:356 src/exec_iolog.c:396
+#: src/exec_iolog.c:447 src/exec_iolog.c:498
+msgid "I/O plugin error"
+msgstr "خطأ في ملحق الإدخال والإخراج"
+
+#: src/exec_iolog.c:320 src/exec_iolog.c:360 src/exec_iolog.c:400
+#: src/exec_iolog.c:451 src/exec_iolog.c:502
+msgid "command rejected by I/O plugin"
+msgstr "الأمر مرفوض من قبل ملحق الإدخال والإخراج"
+
+#: src/exec_iolog.c:550
+msgid "error logging suspend"
+msgstr "خطأ أثناء تسجيل تعليق العمل"
+
+#: src/exec_iolog.c:585
+msgid "error changing window size"
+msgstr "خطأ أثناء تغيير حجم النافذة"
+
+#: src/exec_monitor.c:324
+msgid "error reading from socketpair"
+msgstr "خطأ أثناء القراءة من socketpair"
+
+#: src/exec_monitor.c:336
+#, c-format
+msgid "unexpected reply type on backchannel: %d"
+msgstr "نوع رد غير متوقع في القناة الخلفية: %d"
+
+#: src/exec_monitor.c:584
+msgid "unable to set controlling tty"
+msgstr "تعذر ضبط tty التحكم"
+
+#: src/exec_monitor.c:599 src/exec_nopty.c:578 src/exec_pty.c:1135
+#: src/exec_pty.c:1144
+msgid "unable to create sockets"
+msgstr "تعذر إنشاء مقابس (sockets)"
+
+#: src/exec_monitor.c:608
+msgid "unable to receive message from parent"
+msgstr "تعذر استلام رسالة من العملية الأب"
+
+#: src/exec_monitor.c:623 src/exec_nopty.c:612 src/exec_pty.c:1340
+#: src/sudo_edit.c:356 src/tgetpass.c:310
+msgid "unable to fork"
+msgstr "تعذر إجراء تفريع (fork)"
+
+#: src/exec_monitor.c:627 src/exec_monitor.c:729 src/exec_nopty.c:715
+msgid "unable to restore tty label"
+msgstr "تعذر استعادة لصيقة tty"
+
+#: src/exec_monitor.c:638 src/exec_monitor.c:687 src/sesh.c:212 src/sudo.c:1223
+#, c-format
+msgid "unable to execute %s"
+msgstr "تعذر تنفيذ %s"
+
+#: src/exec_nopty.c:510 src/exec_nopty.c:520 src/exec_nopty.c:530
+#: src/exec_nopty.c:569 src/exec_pty.c:1228 src/exec_pty.c:1255
+#: src/exec_pty.c:1278 src/exec_pty.c:1296 src/tgetpass.c:306
+msgid "unable to create pipe"
+msgstr "تعذر إنشاء أنبوب (pipe)"
+
+#: src/exec_nopty.c:560 src/exec_pty.c:1166
+msgid "policy plugin failed session initialization"
+msgstr "فشل ملحق السياسة في تهيئة الجلسة"
+
+#: src/exec_nopty.c:703 src/exec_pty.c:1441
+msgid "error in event loop"
+msgstr "خطأ في حلقة الأحداث"
+
+#: src/exec_preload.c:163 src/net_ifs.c:201 src/net_ifs.c:367 src/net_ifs.c:428
+#: src/net_ifs.c:615 src/net_ifs.c:847 src/sudo.c:489 src/sudo_edit.c:393
+#: src/sudo_edit.c:401
+#, c-format
+msgid "internal error, %s overflow"
+msgstr "خطأ داخلي، فيض في %s"
+
+#: src/exec_ptrace.c:1089 src/exec_ptrace.c:1114 src/exec_ptrace.c:1938
+#, c-format
+msgid "unable to set registers for process %d"
+msgstr "تعذر ضبط المسجلات للعملية %d"
+
+#: src/exec_ptrace.c:1109 src/exec_ptrace.c:1285 src/exec_ptrace.c:1638
+#, c-format
+msgid "process %d exited unexpectedly"
+msgstr "خرجت العملية %d بشكل غير متوقع"
+
+#: src/exec_ptrace.c:1219
+msgid "unable to set seccomp filter"
+msgstr "تعذر ضبط مرشح seccomp"
+
+#: src/exec_ptrace.c:1416
+#, c-format
+msgid "interpreter argument , expected \"%s\", got \"%s\""
+msgstr "وسيط المفسر، المتوقع \"%s\"، والموجود \"%s\""
+
+#: src/exec_ptrace.c:1514
+#, c-format
+msgid "pathname mismatch, expected \"%s\", got \"%s\""
+msgstr "عدم تطابق في مسار الملف، المتوقع \"%s\"، والموجود \"%s\""
+
+#: src/exec_ptrace.c:1523 src/exec_ptrace.c:1530 src/exec_ptrace.c:1554
+#: src/exec_ptrace.c:1562 src/exec_ptrace.c:1568 src/exec_ptrace.c:1574
+#, c-format
+msgid "%s[%d] mismatch, expected \"%s\", got \"%s\""
+msgstr "عدم تطابق في %s[%d]، المتوقع \"%s\"، والموجود \"%s\""
+
+#: src/exec_ptrace.c:1642
+#, c-format
+msgid "process %d unexpected status 0x%x"
+msgstr "حالة غير متوقعة للعملية %d وهي 0x%x"
+
+#: src/exec_ptrace.c:1735
+#, c-format
+msgid "unable to get event message for process %d"
+msgstr "تعذر الحصول على رسالة الحدث للعملية %d"
+
+#: src/exec_ptrace.c:1742
+#, c-format
+msgid "unable to get registers for process %d"
+msgstr "تعذر الحصول على المسجلات للعملية %d"
+
+#: src/exec_pty.c:75 src/exec_pty.c:257 src/tgetpass.c:251
+msgid "unable to restore terminal settings"
+msgstr "تعذر استعادة إعدادات الطرفية"
+
+#: src/exec_pty.c:117
+msgid "unable to allocate pty"
+msgstr "تعذر تخصيص pty"
+
+#: src/exec_pty.c:218
+msgid "unable to set handler for SIGCONT"
+msgstr "تعذر ضبط معالج SIGCONT"
+
+#: src/exec_pty.c:267
+#, c-format
+msgid "unable to set handler for SIG%s"
+msgstr "تعذر ضبط معالج SIG%s"
+
+#: src/exec_pty.c:291
+#, c-format
+msgid "unable to restore handler for SIG%s"
+msgstr "تعذر استعادة معالج SIG%s"
+
+#: src/exec_pty.c:319
+msgid "unable to restore handler for SIGCONT"
+msgstr "تعذر استعادة معالج SIGCONT"
+
+#: src/exec_pty.c:1389
+msgid "unable to send message to monitor process"
+msgstr "تعذر إرسال رسالة إلى عملية المراقبة"
+
+#: src/load_plugins.c:70 src/load_plugins.c:217 src/load_plugins.c:227
+#: src/load_plugins.c:237 src/load_plugins.c:284
+#, c-format
+msgid "error in %s, line %d while loading plugin \"%s\""
+msgstr "خطأ في %s، السطر %d أثناء تحميل الملحق \"%s\""
+
+#: src/load_plugins.c:181 src/load_plugins.c:252
+#, c-format
+msgid "ignoring duplicate plugin \"%s\" in %s, line %d"
+msgstr "تجاهل الملحق المكرر \"%s\" في %s، السطر %d"
+
+#: src/load_plugins.c:219
+#, c-format
+msgid "unable to load %s: %s"
+msgstr "تعذر تحميل %s: %s"
+
+#: src/load_plugins.c:229
+#, c-format
+msgid "unable to find symbol \"%s\" in %s"
+msgstr "تعذر العثور على الرمز \"%s\" في %s"
+
+#: src/load_plugins.c:239
+#, c-format
+msgid "incompatible plugin major version %d (expected %d) found in %s"
+msgstr "نسخة الملحق الرئيسية غير متوافقة %d (المتوقع %d) وجدت في %s"
+
+#: src/load_plugins.c:257
+#, c-format
+msgid "ignoring policy plugin \"%s\" in %s, line %d"
+msgstr "تجاهل ملحق السياسة \"%s\" في %s، السطر %d"
+
+#: src/load_plugins.c:260
+msgid "only a single policy plugin may be specified"
+msgstr "يمكن تحديد ملحق سياسة واحد فقط"
+
+#: src/load_plugins.c:286
+#, c-format
+msgid "unknown plugin type %d found in %s"
+msgstr "نوع ملحق غير معروف %d وجد في %s"
+
+#: src/load_plugins.c:469
+#, c-format
+msgid "policy plugin %s does not include a check_policy method"
+msgstr "ملحق السياسة %s لا يتضمن طريقة check_policy"
+
+#: src/parse_args.c:208
+#, c-format
+msgid "invalid environment variable name: %s"
+msgstr "اسم متغير بيئة غير صالح: %s"
+
+#: src/parse_args.c:313
+msgid "the argument to -C must be a number greater than or equal to 3"
+msgstr "يجب أن يكون وسيط الخيار -C رقماً أكبر من أو يساوي 3"
+
+#: src/parse_args.c:453
+msgid "the -R option will be removed in a future version of sudo"
+msgstr "خيار -R سيُزال في نسخة مستقبلية من sudo"
+
+#: src/parse_args.c:552
+msgid "you may not specify both the -i and -s options"
+msgstr "لا يمكنك تحديد الخيارين -i و -s معاً"
+
+#: src/parse_args.c:557
+msgid "you may not specify both the -i and -E options"
+msgstr "لا يمكنك تحديد الخيارين -i و -E معاً"
+
+#: src/parse_args.c:567
+msgid "the -E option is not valid in edit mode"
+msgstr "الخيار -E غير صالح في وضع التحرير"
+
+#: src/parse_args.c:570
+msgid "you may not specify environment variables in edit mode"
+msgstr "لا يجوز تحديد متغيرات البيئة في وضع التحرير"
+
+#: src/parse_args.c:580
+msgid "the -U option may only be used with the -l option"
+msgstr "لا يجوز استخدام الخيار -U إلا مع الخيار -l"
+
+#: src/parse_args.c:584
+msgid "the -A and -S options may not be used together"
+msgstr "لا يجوز استخدام الخيارين -A و -S معاً"
+
+#: src/parse_args.c:682
+msgid "sudoedit is not supported on this platform"
+msgstr "sudoedit غير مدعوم على هذه المنصة"
+
+#: src/parse_args.c:741
+msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
+msgstr "يسمح بتحديد خيار واحد فقط من الخيارات التالية: -e، -h، -i، -K، -l، -s، -v أو -V"
+
+#: src/parse_args.c:754
+msgid "Only one of the -K, -k or -N options may be specified"
+msgstr "يسمح بتحديد خيار واحد فقط من الخيارات التالية: -K، -k أو -N"
+
+#: src/parse_args.c:775
+#, c-format
+msgid ""
+"%s - edit files as another user\n"
+"\n"
+msgstr ""
+"%s - تحرير الملفات بصفتك مستخدماً آخر\n"
+"\n"
+
+#: src/parse_args.c:777
+#, c-format
+msgid ""
+"%s - execute a command as another user\n"
+"\n"
+msgstr ""
+"%s - تنفيذ أمر بصفتك مستخدماً آخر\n"
+"\n"
+
+#: src/parse_args.c:782
+msgid ""
+"\n"
+"Options:\n"
+msgstr ""
+"\n"
+"الخيارات:\n"
+
+#: src/parse_args.c:784
+msgid "use a helper program for password prompting"
+msgstr "استخدام برنامج مساعد لطلب كلمة السر"
+
+#: src/parse_args.c:787
+msgid "use specified BSD authentication type"
+msgstr "استخدام نوع الاستيثاق المحدد لـ BSD"
+
+#: src/parse_args.c:791
+msgid "run command in the background"
+msgstr "تشغيل الأمر في الخلفية"
+
+#: src/parse_args.c:794
+msgid "ring bell when prompting"
+msgstr "رنين الجرس عند الطلب"
+
+#: src/parse_args.c:796
+msgid "close all file descriptors >= num"
+msgstr "إغلاق جميع واصفات الملفات >= num"
+
+#: src/parse_args.c:799
+msgid "run command with the specified BSD login class"
+msgstr "تشغيل الأمر مع فئة تسجيل دخول BSD المحددة"
+
+#: src/parse_args.c:802
+msgid "change the working directory before running command"
+msgstr "تغيير دليل العمل قبل تشغيل الأمر"
+
+#: src/parse_args.c:805
+msgid "preserve user environment when running command"
+msgstr "الحفاظ على بيئة المستخدم عند تشغيل الأمر"
+
+#: src/parse_args.c:807
+msgid "preserve specific environment variables"
+msgstr "الحفاظ على متغيرات بيئة محددة"
+
+#: src/parse_args.c:809
+msgid "edit files instead of running a command"
+msgstr "تحرير الملفات بدلاً من تشغيل أمر"
+
+#: src/parse_args.c:812
+msgid "run command as the specified group name or ID"
+msgstr "تشغيل الأمر باسم المجموعة أو المعرف المحدد"
+
+#: src/parse_args.c:815
+msgid "set HOME variable to target user's home dir"
+msgstr "ضبط متغير HOME إلى الدليل المنزلي للمستخدم المستهدف"
+
+#: src/parse_args.c:818
+msgid "display help message and exit"
+msgstr "عرض رسالة المساعدة والخروج"
+
+#: src/parse_args.c:820
+msgid "run command on host (if supported by plugin)"
+msgstr "تشغيل الأمر على المضيف (إذا كان مدعوماً من قبل الملحق)"
+
+#: src/parse_args.c:823
+msgid "run login shell as the target user; a command may also be specified"
+msgstr "تشغيل غلاف تسجيل الدخول كالمستخدم المستهدف؛ يمكن أيضاً تحديد أمر"
+
+#: src/parse_args.c:825
+msgid "remove timestamp file completely"
+msgstr "إزالة ملف الطابع الزمني كلياً"
+
+#: src/parse_args.c:828
+msgid "invalidate timestamp file"
+msgstr "إبطال مفعول ملف الطابع الزمني"
+
+#: src/parse_args.c:831
+msgid "list user's privileges or check a specific command; use twice for longer format"
+msgstr "سرد امتيازات المستخدم أو التحقق من أمر معين؛ استخدم الخيار مرتين لتنسيق أطول"
+
+#: src/parse_args.c:834
+msgid "non-interactive mode, no prompts are used"
+msgstr "وضع غير تفاعلي، لا تستخدم أي مطالبات"
+
+#: src/parse_args.c:837
+msgid "preserve group vector instead of setting to target's"
+msgstr "الحفاظ على متجه المجموعة بدلاً من ضبطه على الخاص بالمستهدف"
+
+#: src/parse_args.c:840
+msgid "use the specified password prompt"
+msgstr "استخدام مطالبة كلمة السر المحددة"
+
+#: src/parse_args.c:842
+msgid "change the root directory before running command"
+msgstr "تغيير دليل الجذر قبل تشغيل الأمر"
+
+#: src/parse_args.c:845
+msgid "create SELinux security context with specified role"
+msgstr "إنشاء سياق أمني لـ SELinux بالدور المحدد"
+
+#: src/parse_args.c:848
+msgid "read password from standard input"
+msgstr "قراءة كلمة السر من المدخل القياسي"
+
+#: src/parse_args.c:851
+msgid "run shell as the target user; a command may also be specified"
+msgstr "تشغيل الغلاف كالمستخدم المستهدف؛ يمكن أيضاً تحديد أمر"
+
+#: src/parse_args.c:855
+msgid "create SELinux security context with specified type"
+msgstr "إنشاء سياق أمني لـ SELinux بالنوع المحدد"
+
+#: src/parse_args.c:858
+msgid "terminate command after the specified time limit"
+msgstr "إنهاء الأمر بعد المهلة الزمنية المحددة"
+
+#: src/parse_args.c:861
+msgid "in list mode, display privileges for user"
+msgstr "في وضع القائمة، عرض امتيازات المستخدم"
+
+#: src/parse_args.c:864
+msgid "run command (or edit file) as specified user name or ID"
+msgstr "تشغيل الأمر (أو تحرير الملف) كاسم المستخدم أو المعرف المحدد"
+
+#: src/parse_args.c:866
+msgid "display version information and exit"
+msgstr "عرض معلومات الإصدار والخروج"
+
+#: src/parse_args.c:869
+msgid "update user's timestamp without running a command"
+msgstr "تحديث الطابع الزمني للمستخدم دون تشغيل أمر"
+
+#: src/parse_args.c:872
+msgid "stop processing command line arguments"
+msgstr "إيقاف معالجة وسائط سطر الأوامر"
+
+#: src/selinux.c:78
+msgid "unable to open audit system"
+msgstr "عجز عن فتح نظام التدقيق"
+
+#: src/selinux.c:88
+msgid "unable to send audit message"
+msgstr "عجز عن إرسال رسالة التدقيق"
+
+#: src/selinux.c:124
+#, c-format
+msgid "unable to fgetfilecon %s"
+msgstr "عجز عن تنفيذ fgetfilecon %s"
+
+#: src/selinux.c:129
+#, c-format
+msgid "%s changed labels"
+msgstr "تغيرت لصائق %s"
+
+#: src/selinux.c:137
+#, c-format
+msgid "unable to restore context for %s"
+msgstr "عجز عن استعادة السياق لـ %s"
+
+#: src/selinux.c:185
+#, c-format
+msgid "unable to open %s, not relabeling tty"
+msgstr "عجز عن فتح %s، لن تجري إعادة وسم لصائق tty"
+
+#: src/selinux.c:189 src/selinux.c:234 src/selinux.c:264
+#, c-format
+msgid "%s is not a character device, not relabeling tty"
+msgstr "%s ليس جهازاً رمزياً، لن تجري إعادة وسم لصائق tty"
+
+#: src/selinux.c:198
+msgid "unable to get current tty context, not relabeling tty"
+msgstr "عجز عن الحصول على سياق tty الحالي، لن تجري إعادة وسم لصائق tty"
+
+#: src/selinux.c:205
+msgid "unknown security class \"chr_file\", not relabeling tty"
+msgstr "فئة أمان مجهولة \"chr_file\"، لن تُعاد تسمية لصائق tty"
+
+#: src/selinux.c:210
+msgid "unable to get new tty context, not relabeling tty"
+msgstr "تعذر الحصول على سياق tty جديد، لن تُعاد تسمية لصائق tty"
+
+#: src/selinux.c:219
+msgid "unable to set new tty context"
+msgstr "تعذر ضبط سياق tty جديد"
+
+#: src/selinux.c:318
+#, c-format
+msgid "you must specify a role for type %s"
+msgstr "يجب عليك تحديد دور للنوع %s"
+
+#: src/selinux.c:324
+#, c-format
+msgid "unable to get default type for role %s"
+msgstr "تعذر الحصول على النوع المبدئي للدور %s"
+
+#: src/selinux.c:336
+msgid "failed to get new context"
+msgstr "فشل الحصول على سياق جديد"
+
+#: src/selinux.c:345
+#, c-format
+msgid "failed to set new role %s"
+msgstr "فشل ضبط الدور الجديد %s"
+
+#: src/selinux.c:349
+#, c-format
+msgid "failed to set new type %s"
+msgstr "فشل ضبط النوع الجديد %s"
+
+#: src/selinux.c:361
+#, c-format
+msgid "%s is not a valid context"
+msgstr "%s ليس سياقاً صالحاً"
+
+#: src/selinux.c:389
+msgid "failed to get old context"
+msgstr "فشل الحصول على السياق القديم"
+
+#: src/selinux.c:395
+msgid "unable to determine enforcing mode."
+msgstr "تعذر تحديد وضع الفرض (enforcing)."
+
+#: src/selinux.c:420
+#, c-format
+msgid "unable to set exec context to %s"
+msgstr "تعذر ضبط سياق التنفيذ إلى %s"
+
+#: src/selinux.c:427
+#, c-format
+msgid "unable to set key creation context to %s"
+msgstr "تعذر ضبط سياق إنشاء المفتاح إلى %s"
+
+#: src/sesh.c:109 src/sesh.c:129
+msgid "Only one of the -c or -i options may be specified"
+msgstr "يسمح بتحديد خيار واحد فقط من -c أو -i"
+
+#: src/sesh.c:124
+#, c-format
+msgid "invalid file descriptor number: %s"
+msgstr "رقم واصف ملف غير صالح: %s"
+
+#: src/sesh.c:162 src/sesh.c:166 src/sesh.c:170
+#, c-format
+msgid "The -%c option may not be used in edit mode."
+msgstr "لا يجوز استخدام الخيار -%c في وضع التحرير."
+
+#: src/sesh.c:179 src/sesh.c:184
+#, c-format
+msgid "The -%c option may only be used in edit mode."
+msgstr "يجوز استخدام الخيار -%c في وضع التحرير فقط."
+
+#: src/sesh.c:289 src/sesh.c:389 src/sudo_edit.c:199
+#, c-format
+msgid "%s: editing symbolic links is not permitted"
+msgstr "%s: تحرير الروابط الرمزية غير مسموح به"
+
+#: src/sesh.c:292 src/sesh.c:392 src/sudo_edit.c:202
+#, c-format
+msgid "%s: editing files in a writable directory is not permitted"
+msgstr "%s: تحرير الملفات في دليل قابل للكتابة غير مسموح به"
+
+#: src/sesh.c:376 src/sesh.c:397 src/sesh.c:406 src/sesh.c:414
+#: src/sudo_edit.c:326
+#, c-format
+msgid "contents of edit session left in %s"
+msgstr "محتويات جلسة التحرير تركت في %s"
+
+#: src/sesh.c:471 src/sudo_edit.c:89
+msgid "unable to get group list"
+msgstr "تعذر الحصول على قائمة المجموعات"
+
+#: src/signal.c:74
+#, c-format
+msgid "unable to save handler for signal %d"
+msgstr "تعذر حفظ معالج الإشارة %d"
+
+#: src/signal.c:96 src/suspend_parent.c:144
+#, c-format
+msgid "unable to restore handler for signal %d"
+msgstr "تعذر استعادة معالج الإشارة %d"
+
+#: src/solaris.c:67
+msgid "resource control limit has been reached"
+msgstr "وصلنا إلى حد التحكم في الموارد"
+
+#: src/solaris.c:70
+#, c-format
+msgid "user \"%s\" is not a member of project \"%s\""
+msgstr "المستخدم \"%s\" ليس عضواً في المشروع \"%s\""
+
+#: src/solaris.c:74
+msgid "the invoking task is final"
+msgstr "المهمة المستدعية نهائية"
+
+#: src/solaris.c:77
+#, c-format
+msgid "could not join project \"%s\""
+msgstr "تعذر الانضمام إلى المشروع \"%s\""
+
+#: src/solaris.c:84
+#, c-format
+msgid "no resource pool accepting default bindings exists for project \"%s\""
+msgstr "لا توجد مجموعة موارد تقبل الارتباطات المبدئية للمشروع \"%s\""
+
+#: src/solaris.c:88
+#, c-format
+msgid "specified resource pool does not exist for project \"%s\""
+msgstr "مجموعة الموارد المحددة غير موجودة للمشروع \"%s\""
+
+#: src/solaris.c:92
+#, c-format
+msgid "could not bind to default resource pool for project \"%s\""
+msgstr "تعذر الارتباط بمجموعة الموارد المبدئية للمشروع \"%s\""
+
+#: src/solaris.c:99
+#, c-format
+msgid "setproject failed for project \"%s\""
+msgstr "فشل setproject للمشروع \"%s\""
+
+#: src/solaris.c:101
+#, c-format
+msgid "warning, resource control assignment failed for project \"%s\""
+msgstr "تحذير، فشل تخصيص التحكم في الموارد للمشروع \"%s\""
+
+#: src/sudo.c:210
+#, c-format
+msgid "Sudo version %s\n"
+msgstr "إصدار Sudo %s\n"
+
+#: src/sudo.c:212
+#, c-format
+msgid "Configure options: %s\n"
+msgstr "خيارات الضبط: %s\n"
+
+#: src/sudo.c:220
+msgid "fatal error, unable to load plugins"
+msgstr "خطأ فادح، تعذر تحميل الملحقات"
+
+#: src/sudo.c:266
+msgid "plugin did not return a command to execute"
+msgstr "الملحق لم يرجع أمراً للتنفيذ"
+
+#: src/sudo.c:302
+#, c-format
+msgid "unexpected sudo mode 0x%x"
+msgstr "وضع sudo غير متوقع 0x%x"
+
+#: src/sudo.c:562
+#, c-format
+msgid "you do not exist in the %s database"
+msgstr "أنت غير موجود في قاعدة بيانات %s"
+
+#: src/sudo.c:630
+msgid "unable to determine tty"
+msgstr "تعذر تحديد tty"
+
+#: src/sudo.c:953
+msgid "The \"no new privileges\" flag is set, which prevents sudo from running as root."
+msgstr "وسم \"لا امتيازات جديدة\" مضبوط، مما يمنع sudo من العمل كجذر (root)."
+
+#: src/sudo.c:955
+msgid "If sudo is running in a container, you may need to adjust the container configuration to disable the flag."
+msgstr "إذا كان sudo يعمل داخل حاوية، قد تحتاج لضبط تشكيلة الحاوية لتعطيل هذا الوسم."
+
+#: src/sudo.c:989
+#, c-format
+msgid "%s must be owned by uid %d and have the setuid bit set"
+msgstr "يجب أن يعود ملك %s لـ uid %d وأن يكون بت setuid مضبوطاً"
+
+#: src/sudo.c:992
+#, c-format
+msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
+msgstr "الـ uid الفعلي ليس %d، هل %s موجود على نظام ملفات بوضع 'nosuid' أو نظام ملفات NFS بدون امتيازات جذر؟"
+
+#: src/sudo.c:998
+#, c-format
+msgid "effective uid is not %d, is sudo installed setuid root?"
+msgstr "الـ uid الفعلي ليس %d، هل sudo مثبت كـ setuid root؟"
+
+#: src/sudo.c:1014 src/tgetpass.c:332
+msgid "unable to set supplementary group IDs"
+msgstr "تعذر ضبط معرفات المجموعات الإضافية"
+
+#: src/sudo.c:1021
+#, c-format
+msgid "unable to set effective gid to runas gid %u"
+msgstr "تعذر ضبط gid الفعلي إلى gid التشغيل %u"
+
+#: src/sudo.c:1027
+#, c-format
+msgid "unable to set gid to runas gid %u"
+msgstr "تعذر ضبط gid إلى gid التشغيل %u"
+
+#: src/sudo.c:1058
+msgid "argv not set by the security policy"
+msgstr "argv غير مضبوط بواسطة سياسة الأمان"
+
+#: src/sudo.c:1062
+msgid "envp not set by the security policy"
+msgstr "envp غير مضبوط بواسطة سياسة الأمان"
+
+#: src/sudo.c:1084
+#, c-format
+msgid "unexpected child termination condition: %d"
+msgstr "حالة إنهاء ابن غير متوقعة: %d"
+
+#: src/sudo.c:1196
+msgid "unable to initialize policy plugin"
+msgstr "تعذر بدء ملحق السياسة"
+
+#: src/sudo.c:1257
+#, c-format
+msgid "policy plugin %s is missing the \"check_policy\" method"
+msgstr "ملحق السياسة %s يفتقد إلى طريقة \"check_policy\""
+
+#: src/sudo.c:1303
+#, c-format
+msgid "policy plugin %s does not support listing privileges"
+msgstr "ملحق السياسة %s لا يدعم سرد الامتيازات"
+
+#: src/sudo.c:1347
+#, c-format
+msgid "policy plugin %s does not support the -v option"
+msgstr "ملحق السياسة %s لا يدعم الخيار -v"
+
+#: src/sudo.c:1385
+#, c-format
+msgid "policy plugin %s does not support the -k/-K options"
+msgstr "ملحق السياسة %s لا يدعم الخيارات -k/-K"
+
+#: src/sudo.c:1514
+#, c-format
+msgid "error initializing I/O plugin %s"
+msgstr "خطأ أثناء بدء ملحق الإدخال/الإخراج %s"
+
+#: src/sudo.c:1517
+msgid "error initializing I/O plugin"
+msgstr "خطأ أثناء بدء ملحق الإدخال/الإخراج"
+
+#: src/sudo.c:1666
+#, c-format
+msgid "error initializing audit plugin %s"
+msgstr "خطأ أثناء بدء ملحق التدقيق %s"
+
+#: src/sudo.c:1745
+#, c-format
+msgid "%s: unable to log error event%s%s"
+msgstr "%s: تعذر تسجيل حدث الخطأ %s%s"
+
+#: src/sudo.c:1781
+#, c-format
+msgid "%s: unable to log accept event%s%s"
+msgstr "%s: تعذر تسجيل حدث القبول %s%s"
+
+#: src/sudo.c:1786 src/sudo.c:1824
+msgid "audit plugin error"
+msgstr "خطأ في ملحق التدقيق"
+
+#: src/sudo.c:1819
+#, c-format
+msgid "%s: unable to log reject event%s%s"
+msgstr "%s: تعذر تسجيل حدث الرفض %s%s"
+
+#: src/sudo.c:1879
+#, c-format
+msgid "error initializing approval plugin %s"
+msgstr "خطأ أثناء بدء ملحق الموافقة %s"
+
+#: src/sudo.c:1949
+msgid "command rejected by approver"
+msgstr "رفض الموفِق الأمر"
+
+#: src/sudo_edit.c:108
+msgid "no writable temporary directory found"
+msgstr "لا يوجد دليل مؤقت قابل للكتابة"
+
+#: src/sudo_edit.c:287
+#, c-format
+msgid "%s left unmodified"
+msgstr "بقي %s بلا تعديل"
+
+#: src/sudo_edit.c:300 src/sudo_edit.c:566
+#, c-format
+msgid "%s unchanged"
+msgstr "بقي %s كما هو"
+
+#: src/sudo_edit.c:477
+msgid "sesh: internal error: odd number of paths"
+msgstr "sesh: خطأ داخلي: عدد مسارات فردي"
+
+#: src/sudo_edit.c:479
+msgid "sesh: unable to create temporary files"
+msgstr "sesh: تعذر إنشاء ملفات مؤقتة"
+
+#: src/sudo_edit.c:481 src/sudo_edit.c:601
+msgid "sesh: killed by a signal"
+msgstr "sesh: أُنهي بواسطة إشارة"
+
+#: src/sudo_edit.c:483 src/sudo_edit.c:604
+#, c-format
+msgid "sesh: unknown error %d"
+msgstr "sesh: خطأ مجهول %d"
+
+#: src/sudo_edit.c:594
+msgid "unable to copy temporary files back to their original location"
+msgstr "تعذر نسخ الملفات المؤقتة وإعادتها إلى موقعها الأصلي"
+
+#: src/sudo_edit.c:598
+msgid "unable to copy some of the temporary files back to their original location"
+msgstr "تعذر نسخ بعض الملفات المؤقتة وإعادتها إلى موقعها الأصلي"
+
+#: src/sudo_edit.c:645
+#, c-format
+msgid "unable to change uid to root (%u)"
+msgstr "تعذر تغيير معرف المستخدم (uid) إلى الجذر (%u)"
+
+#: src/sudo_edit.c:659
+msgid "plugin error: invalid file list for sudoedit"
+msgstr "خطأ في الملحق: قائمة ملفات غير صالحة لـ sudoedit"
+
+#: src/sudo_edit.c:680
+msgid "plugin error: missing file list for sudoedit"
+msgstr "خطأ في الملحق: قائمة ملفات مفقودة لـ sudoedit"
+
+#: src/sudo_edit.c:723 src/sudo_edit.c:738
+msgid "unable to read the clock"
+msgstr "تعذر قراءة الساعة"
+
+#: src/sudo_intercept_common.c:367
+msgid "intercept port not set"
+msgstr "منفذ الاعتراض غير مضبوط"
+
+#: src/tgetpass.c:90
+msgid "timed out reading password"
+msgstr "انتهت المهلة أثناء قراءة كلمة السر"
+
+#: src/tgetpass.c:93
+msgid "no password was provided"
+msgstr "لم تُقدّم كلمة سر"
+
+#: src/tgetpass.c:96
+msgid "unable to read password"
+msgstr "تعذر قراءة كلمة السر"
+
+#: src/tgetpass.c:137
+msgid "a terminal is required to read the password; either use ssh's -t option or configure an askpass helper"
+msgstr "يلزم وجود طرفية لقراءة كلمة السر؛ استخدم الخيار -t الخاص بـ ssh أو اضبط مساعد askpass"
+
+#: src/tgetpass.c:140
+msgid "a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper"
+msgstr "يلزم وجود طرفية لقراءة كلمة السر؛ استخدم الخيار -S للقراءة من المدخلات القياسية أو اضبط مساعد askpass"
+
+#: src/tgetpass.c:152
+msgid "no askpass program specified, try setting SUDO_ASKPASS"
+msgstr "لم يُحدد برنامج askpass، حاول ضبط SUDO_ASKPASS"
+
+#: src/tgetpass.c:327
+#, c-format
+msgid "unable to set gid to %u"
+msgstr "تعذر ضبط معرف المجموعة (gid) إلى %u"
+
+#: src/tgetpass.c:337
+#, c-format
+msgid "unable to set uid to %u"
+msgstr "تعذر ضبط معرف المستخدم (uid) إلى %u"
+
+#: src/tgetpass.c:342
+#, c-format
+msgid "unable to run %s"
+msgstr "تعذر تشغيل %s"
+
+#: src/utmp.c:278
+msgid "unable to save stdin"
+msgstr "تعذر حفظ المدخلات القياسية (stdin)"
+
+#: src/utmp.c:280
+msgid "unable to dup2 stdin"
+msgstr "تعذر تنفيذ dup2 على المدخلات القياسية"
+
+#: src/utmp.c:283
+msgid "unable to restore stdin"
+msgstr "تعذر استعادة المدخلات القياسية (stdin)"
