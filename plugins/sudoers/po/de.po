@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: sudoers 1.9.18b1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
 "POT-Creation-Date: 2025-10-05 19:32-0600\n"
-"PO-Revision-Date: 2025-10-08 11:25+0200\n"
+"PO-Revision-Date: 2026-06-12 00:37+0200\n"
 "Last-Translator: Jochen Hein <jochen@jochen.org>\n"
 "Language-Team: German <translation-team-de@lists.sourceforge.net>\n"
 "Language: de\n"
@@ -3385,7 +3385,7 @@ msgstr "Der Benutzer darf das Verzeichnis nicht auf %s ändern"
 #: plugins/sudoers/sudoers.c:514
 #, c-format
 msgid "you are not permitted to use the -D option with %s"
-msgstr "Sie dürfen die Option -C nicht mit dem Kommando »%s« verwenden"
+msgstr "Sie dürfen die Option -D nicht mit dem Kommando »%s« verwenden"
 
 #: plugins/sudoers/sudoers.c:566
 msgid "command in current directory"

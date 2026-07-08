@@ -1,13 +1,13 @@
 # Polish translation for sudo.
 # This file is put in the public domain.
-# Jakub Bogusz <qboosh@pld-linux.org>, 2011-2025.
+# Jakub Bogusz <qboosh@pld-linux.org>, 2011-2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: sudo 1.9.18b1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
 "POT-Creation-Date: 2025-10-05 19:32-0600\n"
-"PO-Revision-Date: 2025-10-09 20:34+0200\n"
+"PO-Revision-Date: 2026-01-16 19:34+0100\n"
 "Last-Translator: Jakub Bogusz <qboosh@pld-linux.org>\n"
 "Language-Team: Polish <translation-team-pl@lists.sourceforge.net>\n"
 "Language: pl\n"
@@ -207,7 +207,7 @@ msgstr "nie udało się zmienić profilu AppArmor na %s"
 #: src/copy_file.c:93
 #, c-format
 msgid "%s: truncate %s to zero bytes? (y/n) [n] "
-msgstr "%s: uciąć %s to zera bajtów? (y/n) [n] "
+msgstr "%s: uciąć %s do zera bajtów? (y/n) [n] "
 
 #: src/copy_file.c:97
 #, c-format
