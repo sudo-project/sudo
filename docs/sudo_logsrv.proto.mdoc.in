@@ -1,7 +1,7 @@
 .\"
 .\" SPDX-License-Identifier: ISC
 .\"
-.\" Copyright (c) 2019-2022 Todd C. Miller <Todd.Miller@sudo.ws>
+.\" Copyright (c) 2019-2022, 2024-2026 Todd C. Miller <Todd.Miller@sudo.ws>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 13, 2022
+.Dd July 19, 2026
 .Dt SUDO_LOGSRV.PROTO @mansectform@
 .Os Sudo @PACKAGE_VERSION@
 .Sh NAME
@@ -639,6 +639,7 @@ entries are recognized, but not required:
 .It rungroup Ta string Ta primary group name of the command
 .It rungroups Ta StringList Ta supplementary group names for the command
 .It runuid Ta int64 Ta run user's user-ID
+.It source Ta string Ta location of the sudoers rule that matched
 .It submitcwd Ta string Ta submit user's current working directory
 .It submitenv Ta StringList Ta the submit user's environment
 .It submitgid Ta int64 Ta submit user's primary group-ID
@@ -648,6 +649,12 @@ entries are recognized, but not required:
 .It submituid Ta int64 Ta submit user's user-ID
 .It ttyname Ta string Ta terminal the command was submitted from
 .El
+.Pp
+The command, runchroot, runcwd, source, submitcwd and ttyname are
+limited to 4095 bytes each.
+The submithost is limited to 1023 bytes.
+User and group names are limited to 255 bytes each.
+User and group IDs must be between 0 and less than 4294967294 inclusive.
 .Pp
 The server must accept other variables not listed above but may
 ignore them.

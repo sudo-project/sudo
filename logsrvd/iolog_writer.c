@@ -49,6 +49,10 @@
 
 #include <logsrvd.h>
 
+#define EVLOG_LOGIN_NAME_MAX	255
+#define EVLOG_HOST_NAME_MAX	1023
+#define EVLOG_PATH_MAX		4095
+
 static bool
 type_matches(const InfoMessage *info, const char *source,
     InfoMessage__ValueCase value_case)
@@ -193,6 +197,11 @@ evlog_new(const TimeSpec *submit_time, InfoMessage * const *info_msgs,
 	    }
 	    if (strcmp(key, "command") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    if (strlen(info->u.strval) > EVLOG_PATH_MAX) {
+			errno = ERANGE;
+			sudo_warn(U_("%s: %s"), source, "command");
+			goto bad;
+		    }
 		    free(evlog->command);
 		    if ((evlog->command = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
@@ -228,6 +237,11 @@ evlog_new(const TimeSpec *submit_time, InfoMessage * const *info_msgs,
 	    }
 	    if (strcmp(key, "runchroot") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    if (strlen(info->u.strval) > EVLOG_PATH_MAX) {
+			errno = ERANGE;
+			sudo_warn(U_("%s: %s"), source, "runchroot");
+			goto bad;
+		    }
 		    free(evlog->runchroot);
 		    if ((evlog->runchroot = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
@@ -239,6 +253,11 @@ evlog_new(const TimeSpec *submit_time, InfoMessage * const *info_msgs,
 	    }
 	    if (strcmp(key, "runcwd") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    if (strlen(info->u.strval) > EVLOG_PATH_MAX) {
+			errno = ERANGE;
+			sudo_warn(U_("%s: %s"), source, "runcwd");
+			goto bad;
+		    }
 		    free(evlog->runcwd);
 		    if ((evlog->runcwd = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
@@ -259,7 +278,7 @@ evlog_new(const TimeSpec *submit_time, InfoMessage * const *info_msgs,
 	    }
 	    if (strcmp(key, "rungid") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_NUMVAL)) {
-		    if (info->u.numval < 0 || info->u.numval > UINT_MAX) {
+		    if (info->u.numval < 0 || info->u.numval >= UINT_MAX) {
 			errno = ERANGE;
 			sudo_warn(U_("%s: %s"), source, "rungid");
 		    } else {
@@ -270,6 +289,11 @@ evlog_new(const TimeSpec *submit_time, InfoMessage * const *info_msgs,
 	    }
 	    if (strcmp(key, "rungroup") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    if (strlen(info->u.strval) > EVLOG_LOGIN_NAME_MAX) {
+			errno = ERANGE;
+			sudo_warn(U_("%s: %s"), source, "rungroup");
+			goto bad;
+		    }
 		    free(evlog->rungroup);
 		    if ((evlog->rungroup = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
@@ -281,7 +305,7 @@ evlog_new(const TimeSpec *submit_time, InfoMessage * const *info_msgs,
 	    }
 	    if (strcmp(key, "runuid") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_NUMVAL)) {
-		    if (info->u.numval < 0 || info->u.numval > UINT_MAX) {
+		    if (info->u.numval < 0 || info->u.numval >= UINT_MAX) {
 			errno = ERANGE;
 			sudo_warn(U_("%s: %s"), source, "runuid");
 		    } else {
@@ -292,6 +316,11 @@ evlog_new(const TimeSpec *submit_time, InfoMessage * const *info_msgs,
 	    }
 	    if (strcmp(key, "runuser") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    if (strlen(info->u.strval) > EVLOG_LOGIN_NAME_MAX) {
+			errno = ERANGE;
+			sudo_warn(U_("%s: %s"), source, "runuser");
+			goto bad;
+		    }
 		    free(evlog->runuser);
 		    if ((evlog->runuser = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
@@ -305,6 +334,11 @@ evlog_new(const TimeSpec *submit_time, InfoMessage * const *info_msgs,
 	case 's':
 	    if (strcmp(key, "source") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    if (strlen(info->u.strval) > EVLOG_PATH_MAX) {
+			errno = ERANGE;
+			sudo_warn(U_("%s: %s"), source, "source");
+			goto bad;
+		    }
 		    free(evlog->source);
 		    if ((evlog->source = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
@@ -316,6 +350,11 @@ evlog_new(const TimeSpec *submit_time, InfoMessage * const *info_msgs,
 	    }
 	    if (strcmp(key, "submitcwd") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    if (strlen(info->u.strval) > EVLOG_PATH_MAX) {
+			errno = ERANGE;
+			sudo_warn(U_("%s: %s"), source, "submitcwd");
+			goto bad;
+		    }
 		    free(evlog->cwd);
 		    if ((evlog->cwd = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
@@ -336,6 +375,11 @@ evlog_new(const TimeSpec *submit_time, InfoMessage * const *info_msgs,
 	    }
 	    if (strcmp(key, "submitgroup") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    if (strlen(info->u.strval) > EVLOG_LOGIN_NAME_MAX) {
+			errno = ERANGE;
+			sudo_warn(U_("%s: %s"), source, "submitgroup");
+			goto bad;
+		    }
 		    free(evlog->submitgroup);
 		    if ((evlog->submitgroup = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
@@ -347,6 +391,11 @@ evlog_new(const TimeSpec *submit_time, InfoMessage * const *info_msgs,
 	    }
 	    if (strcmp(key, "submithost") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    if (strlen(info->u.strval) > EVLOG_HOST_NAME_MAX) {
+			errno = ERANGE;
+			sudo_warn(U_("%s: %s"), source, "submithost");
+			goto bad;
+		    }
 		    free(evlog->submithost);
 		    if ((evlog->submithost = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
@@ -358,6 +407,11 @@ evlog_new(const TimeSpec *submit_time, InfoMessage * const *info_msgs,
 	    }
 	    if (strcmp(key, "submituser") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    if (strlen(info->u.strval) > EVLOG_LOGIN_NAME_MAX) {
+			errno = ERANGE;
+			sudo_warn(U_("%s: %s"), source, "submituser");
+			goto bad;
+		    }
 		    free(evlog->submituser);
 		    if ((evlog->submituser = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
@@ -371,6 +425,11 @@ evlog_new(const TimeSpec *submit_time, InfoMessage * const *info_msgs,
 	case 't':
 	    if (strcmp(key, "ttyname") == 0) {
 		if (type_matches(info, source, INFO_MESSAGE__VALUE_STRVAL)) {
+		    if (strlen(info->u.strval) > EVLOG_PATH_MAX) {
+			errno = ERANGE;
+			sudo_warn(U_("%s: %s"), source, "ttyname");
+			goto bad;
+		    }
 		    free(evlog->ttyname);
 		    if ((evlog->ttyname = strdup(info->u.strval)) == NULL) {
 			sudo_warnx(U_("%s: %s"), __func__,
