@@ -155,6 +155,7 @@ ldif_parse_attribute(char *line, char **name, char **value)
 	for (i = 0; i < len; i++) {
 	    if (iscntrl((unsigned char)copy[i]) && copy[i] != '\t') {
 		/* Reject attributes with embedded control characters. */
+		free(copy);
 		debug_return_bool(false);
 	    }
 	    attr[i] = copy[i];
