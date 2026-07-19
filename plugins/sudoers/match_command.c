@@ -536,6 +536,12 @@ command_matches_glob(struct sudoers_context *ctx, const char *sudoers_cmnd,
 	    sudo_warn("%s%s", runchroot, sudoers_cmnd);
 	    debug_return_int(DENY);
 	}
+	if (has_meta(runchroot)) {
+	    /* Do not allow meta characters in runchroot. */
+	    errno = EINVAL;
+	    sudo_warn("%s%s", runchroot, sudoers_cmnd);
+	    debug_return_int(DENY);
+	}
 	sudoers_cmnd = pathbuf;
 	chrootlen = strlen(runchroot);
     }
@@ -572,7 +578,11 @@ command_matches_glob(struct sudoers_context *ctx, const char *sudoers_cmnd,
 		fd = -1;
 	    }
 	    /* Remove the runchroot, if any. */
-	    cp += chrootlen;
+	    if (runchroot != NULL) {
+		if (strncmp(cp, runchroot, chrootlen) != 0)
+		    continue;
+		cp += chrootlen;
+	    }
 
 	    if (strcmp(cp, ctx->user.cmnd) != 0)
 		continue;
@@ -610,7 +620,11 @@ command_matches_glob(struct sudoers_context *ctx, const char *sudoers_cmnd,
 		fd = -1;
 	    }
 	    /* Remove the runchroot, if any. */
-	    cp += chrootlen;
+	    if (runchroot != NULL) {
+		if (strncmp(cp, runchroot, chrootlen) != 0)
+		    continue;
+		cp += chrootlen;
+	    }
 
 	    /* If it ends in '/' it is a directory spec. */
 	    dlen = strlen(cp);
