@@ -272,6 +272,13 @@ parse_default_entry(const struct sudoers_context *ctx,
 		    break;
 		}
 	    }
+	    if (val != NULL && strcmp(def->name, "pwfeedback_char") == 0) {
+		if (val[0] == '\0' || strlen(val) > 4) {
+		    defaults_warnx(ctx, file, line, column, quiet, N_("pwfeedback_char must be a single character"));
+		    rc = -1;
+		    break;
+		}
+	    }
 	    rc = store_str(val, def);
 	    break;
 	case T_INT:
@@ -632,6 +639,8 @@ init_defaults(void)
 	goto oom;
 #endif
     if ((def_passprompt = strdup(_(PASSPROMPT))) == NULL)
+	goto oom;
+    if ((def_pwfeedback_char = strdup("*")) == NULL)
 	goto oom;
     if ((def_runas_default = strdup(RUNAS_DEFAULT)) == NULL)
 	goto oom;
