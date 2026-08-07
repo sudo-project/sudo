@@ -89,6 +89,16 @@ get_stack_pointer(struct sudo_ptrace_regs *regs)
     }
 }
 
+static inline int
+get_sc_retval(struct sudo_ptrace_regs *regs)
+{
+    if (regs->compat) {
+	return compat_reg_retval(regs->u.compat);
+    } else {
+	return reg_retval(regs->u.native);
+    }
+}
+
 static inline void
 set_sc_retval(struct sudo_ptrace_regs *regs, int retval)
 {
@@ -1704,7 +1714,7 @@ verify_execve_args(pid_t pid, bool is_execveat, struct sudo_ptrace_regs *regs,
 
 /*
  * Verify that the command executed matches the arguments we checked.
- * Returns true on success and false on error.
+ * Returns true on success (or execve failure) and false on error.
  */
 static bool
 ptrace_verify_post_exec(pid_t pid, struct sudo_ptrace_regs *regs,
@@ -1739,7 +1749,21 @@ ptrace_verify_post_exec(pid_t pid, struct sudo_ptrace_regs *regs,
 	goto done;
     }
     if (status >> 8 != (SIGTRAP | (PTRACE_EVENT_EXEC << 8))) {
-	sudo_warnx(U_("process %d unexpected status 0x%x"), (int)pid, status);
+	/* No PTRACE_EVENT_EXEC, did execve(2) fail? */
+	struct sudo_ptrace_regs newregs;
+	memset(&newregs, 0, sizeof(newregs));
+	if (!ptrace_getregs(pid, &newregs, regs->compat)) {
+	    sudo_warn(U_("unable to get registers for process %d"), (int)pid);
+	    goto done;
+	}
+	if (get_sc_retval(&newregs) != 0) {
+	    /* execve(2) failure, nothing to verify. */
+	    ret = true;
+	} else {
+	    /* should not happen */
+	    sudo_warnx(U_("process %d unexpected status 0x%x"), (int)pid,
+		status);
+	}
 	goto done;
     }
 
