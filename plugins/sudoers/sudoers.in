@@ -1,8 +1,13 @@
+##
 ## sudoers file.
 ##
 ## This file MUST be edited with the 'visudo' command as root.
 ## Failure to use 'visudo' may result in syntax or file permission errors
 ## that prevent sudo from running.
+
+## Please consider adding local content in /etc/sudoers.d/ instead of
+## directly modifying this file.
+
 ##
 ## See the sudoers man page for the details on how to write a sudoers file.
 ##
@@ -30,10 +35,6 @@
 #
 # Cmnd_Alias	REBOOT = /sbin/halt, /sbin/reboot, /sbin/poweroff
 #
-# Cmnd_Alias	DEBUGGERS = /usr/bin/gdb, /usr/bin/lldb, /usr/bin/strace, \
-# 			    /usr/bin/truss, /usr/bin/bpftrace, \
-# 			    /usr/bin/dtrace, /usr/bin/dtruss
-#
 # Cmnd_Alias	PKGMAN = /usr/bin/apt, /usr/bin/dpkg, /usr/bin/rpm, \
 # 			 /usr/bin/yum, /usr/bin/dnf,  /usr/bin/zypper, \
 # 			 /usr/bin/pacman
@@ -44,6 +45,11 @@
 ## Preserve editor environment variables for visudo.
 ## To preserve these for all commands, remove the "!visudo" qualifier.
 Defaults!@visudo@ env_keep += "SUDO_EDITOR EDITOR VISUAL"
+##
+## Preserve EDITOR environment variables for all users in the sudo group.
+## This allows running arbitrary commands, but sudo members are root
+## equivalent anyway.
+#Defaults:%sudo env_keep += "SUDO_EDITOR EDITOR VISUAL"
 ##
 ## Use a hard-coded PATH instead of the user's to find commands.
 ## This also helps prevent poorly written scripts from running
@@ -73,6 +79,29 @@ Defaults!@visudo@ env_keep += "SUDO_EDITOR EDITOR VISUAL"
 ## Uncomment to enable special input methods.  Care should be taken as
 ## this may allow users to subvert the command being run via sudo.
 # Defaults env_keep += "XMODIFIERS GTK_IM_MODULE QT_IM_MODULE QT_IM_SWITCHER"
+##
+## Uncomment to preserve proxy settings from user environments of root
+## equivalent users (group sudo)
+# Defaults:%sudo env_keep += "http_proxy https_proxy ftp_proxy all_proxy no_proxy"
+##
+## Uncomment to preserve environment variables for grep
+# Defaults:%sudo env_keep += "GREP_COLOR"
+##
+## Uncomment to preserve git related environment. While you shouldn't
+## normally run git as root, you need to with etckeeper
+# Defaults:%sudo env_keep += "GIT_AUTHOR_* GIT_COMMITTER_*"
+##
+## Uncomment to preserve Debian-related environment variables. root 
+## won't have sensible values for them.
+# Defaults:%sudo env_keep += "EMAIL DEBEMAIL DEBFULLNAME"
+##
+## Uncomment to allow root to use the calling user's ssh agent
+## transparently. This enabled "sudo scp" or "sudo rsync"
+# Defaults:%sudo env_keep += "SSH_AGENT_PID SSH_AUTH_SOCK"
+##
+## Uncomment to allow root to use the calling user's gpg agent
+## transparently. This enabled "sudo scp" or "sudo rsync"
+# Defaults:%sudo env_keep += "GPG_AGENT_INFO"
 ##
 ## Uncomment to disable "use_pty" when running commands as root.
 ## Commands run as non-root users will run in a pseudo-terminal,
