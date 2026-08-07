@@ -557,7 +557,7 @@ static ssize_t
 strtab_to_vec(char *strtab, size_t strtab_len, int *countp, char ***vecp,
     char **bufp, size_t *bufsizep, size_t remainder)
 {
-    char *strend = strtab + strtab_len;
+    const char *strend = strtab + strtab_len;
     char **vec, **vp;
     int count = 0;
     debug_decl(strtab_to_vec, SUDO_DEBUG_EXEC);
@@ -574,10 +574,19 @@ strtab_to_vec(char *strtab, size_t strtab_len, int *countp, char ***vecp,
     /* Fill in vector with the strings we read. */
     for (vp = vec; strtab < strend; ) {
 	while (remainder < 2 * sizeof(char *)) {
+	    /*
+	     * Recalculate strtab_len based on the amount of space left
+	     * in the table.  growbuf() will adjust strtab and remainder,
+	     * but we need to manually account for changes to the alignment
+	     * of strend when vec is reset.
+	     */
+	    strtab_len = (size_t)(strend - strtab);
+	    remainder += (size_t)((char *)vec - strend);
 	    if (!growbuf(bufp, bufsizep, &strtab, &remainder))
 		debug_return_ssize_t(-1);
 	    strend = strtab + strtab_len;
 	    vec = (char **)LONGALIGN(strend);
+	    remainder -= (size_t)((char *)vec - strend);
 	    vp = vec + count;
 	}
 	/* Store offset into buf (not a pointer) in case of realloc(). */
