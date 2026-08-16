@@ -442,9 +442,15 @@ command_matches_fnmatch(struct sudoers_context *ctx, const char *sudoers_cmnd,
 	/* Check digest of cmnd since sudoers_cmnd is a pattern. */
 	if (digest_matches(fd, cmnd, runchroot, digests) != ALLOW)
 	    goto bad;
-	set_cmnd_fd(ctx, fd);
 
-	/* No need to set ctx->runas.cmnd since cmnd matches sudoers_cmnd */
+	/* Successful match. */
+	free(ctx->runas.cmnd);
+	if ((ctx->runas.cmnd = strdup(cmnd)) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__,
+		U_("unable to allocate memory"));
+	    debug_return_int(DENY);
+	}
+	set_cmnd_fd(ctx, fd);
 	debug_return_int(ALLOW);
 bad:
 	if (fd != -1)
@@ -497,12 +503,18 @@ command_matches_regex(struct sudoers_context *ctx, const char *sudoers_cmnd,
 	if (!do_stat(fd, cmnd, runchroot, &sb))
 	    goto bad;
 #endif
-	/* Check digest of cmnd since sudoers_cmnd is a pattern. */
+	/* Check digest of cmnd since sudoers_cmnd is a regex. */
 	if (digest_matches(fd, cmnd, runchroot, digests) != ALLOW)
 	    goto bad;
-	set_cmnd_fd(ctx, fd);
 
-	/* No need to set ctx->runas.cmnd since cmnd matches sudoers_cmnd */
+	/* Successful match. */
+	free(ctx->runas.cmnd);
+	if ((ctx->runas.cmnd = strdup(cmnd)) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__,
+		U_("unable to allocate memory"));
+	    debug_return_int(DENY);
+	}
+	set_cmnd_fd(ctx, fd);
 	debug_return_int(ALLOW);
 bad:
 	if (fd != -1)
