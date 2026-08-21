@@ -386,7 +386,7 @@ sudo_edit_open_nonwritable(char *path, int oflags, mode_t mode,
 
     if (writable) {
 	close(dfd);
-	errno = EISDIR;
+	errno = EINVAL;
 	debug_return_int(-1);
     }
 

@@ -288,7 +288,7 @@ sesh_edit_create_tfiles(int edit_flags, struct sudo_cred *user_cred,
 		if (errno == ELOOP) {
 		    sudo_warnx(U_("%s: editing symbolic links is not "
 			"permitted"), path_src);
-		} else if (errno == EISDIR) {
+		} else if (errno == EINVAL) {
 		    sudo_warnx(U_("%s: editing files in a writable directory "
 			"is not permitted"), path_src);
 		} else {
@@ -388,7 +388,7 @@ sesh_edit_copy_tfiles(int edit_flags, struct sudo_cred *user_cred,
 	    if (errno == ELOOP) {
 		sudo_warnx(U_("%s: editing symbolic links is not "
 		    "permitted"), path_dst);
-	    } else if (errno == EISDIR) {
+	    } else if (errno == EINVAL) {
 		sudo_warnx(U_("%s: editing files in a writable directory "
 		    "is not permitted"), path_dst);
 	    } else {

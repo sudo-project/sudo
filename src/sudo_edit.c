@@ -199,7 +199,7 @@ sudo_edit_create_tfiles(const struct command_details *command_details,
 	    if (ofd == -1 && errno == ELOOP) {
 		sudo_warnx(U_("%s: editing symbolic links is not permitted"),
 		    files[i]);
-	    } else if (ofd == -1 && errno == EISDIR) {
+	    } else if (ofd == -1 && errno == EINVAL) {
 		sudo_warnx(U_("%s: editing files in a writable directory is not permitted"),
 		    files[i]);
 	    } else {
