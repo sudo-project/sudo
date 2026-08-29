@@ -93,6 +93,7 @@ main(int argc, char *argv[], char *envp[])
     unsigned int flags = CD_SUDOEDIT_FOLLOW;
     char *edit_user = NULL;
     int ch, ret, fd = -1;
+    bool login_shell;
     debug_decl(main, SUDO_DEBUG_MAIN);
 
     initprogname(argc > 0 ? argv[0] : "sesh");
@@ -100,6 +101,9 @@ main(int argc, char *argv[], char *envp[])
     setlocale(LC_ALL, "");
     bindtextdomain(PACKAGE_NAME, LOCALEDIR);
     textdomain(PACKAGE_NAME);
+
+    /* If the first char of argv[0] is '-', we are running a login shell. */
+    login_shell = argv[0] != NULL && argv[0][0] == '-';
 
     while ((ch = getopt_long(argc, argv, short_opts, long_opts, NULL)) != -1) {
 	switch (ch) {
@@ -172,7 +176,6 @@ main(int argc, char *argv[], char *envp[])
 	}
 	ret = sesh_sudoedit(mode, flags, edit_user, argc, argv);
     } else {
-	bool login_shell;
 	char *cmnd;
 
 	if (!ISSET(flags, CD_SUDOEDIT_FOLLOW)) {
@@ -185,9 +188,6 @@ main(int argc, char *argv[], char *envp[])
 		'w');
 	    usage();
 	}
-
-	/* If the first char of argv[0] is '-', we are running a login shell. */
-	login_shell = argv[0][0] == '-';
 
 	/* We must change the directory in sesh after the context changes. */
 	if (rundir != NULL && chdir(rundir) == -1) {
