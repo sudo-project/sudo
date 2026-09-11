@@ -29,8 +29,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <pwd.h>
 #include <errno.h>
+#include <termios.h>
 
 #ifdef HAVE_PAM_PAM_APPL_H
 # include <pam/pam_appl.h>
@@ -95,6 +97,17 @@ static bool getpass_error;
 static bool noninteractive;
 static pam_handle_t *pamh;
 static struct conv_filter *conv_filter;
+
+/*
+ * State for TTY echo suppression during pam_authenticate().
+ * echo_suppress_fd holds an open /dev/tty fd while pam_authenticate()
+ * is running with echo disabled. echo_saved_term is the original terminal
+ * state (with echo) used to restore after auth. echo_noecho_term is the
+ * noecho state used to re-suppress after PAM_PROMPT_ECHO_ON prompts.
+ */
+static int echo_suppress_fd = -1;
+static struct termios echo_saved_term;
+static struct termios echo_noecho_term;
 
 static void
 conv_filter_init(const struct sudoers_context *ctx)
@@ -313,8 +326,55 @@ sudo_pam_verify(const struct sudoers_context *ctx, struct passwd *pw,
 	}
     }
 
+    /*
+     * Disable TTY echo before calling pam_authenticate() to prevent
+     * characters typed during a pam_faildelay sleep from being echoed
+     * to the terminal (shoulder surfing risk).
+     *
+     * The trick: tgetpass() calls sudo_term_cbreak() which, on its first
+     * call, saves the current TTY state as orig_term. If we set echo-off
+     * *before* that first call, tgetpass saves our noecho state as
+     * orig_term. When sudo_term_restore() is called after reading the
+     * password, it restores to that noecho orig_term -- keeping echo
+     * suppressed throughout the delay. We restore the real terminal state
+     * after pam_authenticate() returns.
+     *
+     * PAM_PROMPT_ECHO_ON prompts (2FA, challenge-response) are handled
+     * by converse() which temporarily restores echo for those prompts.
+     */
+    if (!getpass_error) {
+	struct stat sb;
+	echo_suppress_fd = open(_PATH_TTY, O_RDWR);
+	if (echo_suppress_fd != -1) {
+	    if (fstat(echo_suppress_fd, &sb) == 0 && S_ISCHR(sb.st_mode) &&
+		tcgetattr(echo_suppress_fd, &echo_saved_term) == 0) {
+		echo_noecho_term = echo_saved_term;
+		CLR(echo_noecho_term.c_lflag, ECHO|ECHOE|ECHOK|ECHONL);
+		if (tcsetattr(echo_suppress_fd, TCSADRAIN, &echo_noecho_term) != 0) {
+		    /* Failed to suppress echo; close fd to signal disabled. */
+		    (void)close(echo_suppress_fd);
+		    echo_suppress_fd = -1;
+		}
+	    } else {
+		(void)close(echo_suppress_fd);
+		echo_suppress_fd = -1;
+	    }
+	}
+    }
+
     /* PAM_SILENT prevents the authentication service from generating output. */
     *pam_status = pam_authenticate(pamh, def_pam_silent ? PAM_SILENT : 0);
+
+    /*
+     * Restore the original terminal state (echo on) and flush any typeahead
+     * that accumulated during the pam_faildelay sleep.
+     */
+    if (echo_suppress_fd != -1) {
+	(void)tcflush(echo_suppress_fd, TCIFLUSH);
+	(void)tcsetattr(echo_suppress_fd, TCSADRAIN, &echo_saved_term);
+	(void)close(echo_suppress_fd);
+	echo_suppress_fd = -1;
+    }
 
     /* Restore def_prompt, the passed-in prompt may be freed later. */
     def_prompt = PASSPROMPT;
@@ -714,6 +774,15 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 	switch (pm->msg_style) {
 	case PAM_PROMPT_ECHO_ON:
 	    type = SUDO_CONV_PROMPT_ECHO_ON;
+	    /*
+	     * Echo suppression is active during pam_authenticate() to prevent
+	     * shoulder surfing during the failure delay. However, PAM modules
+	     * using PAM_PROMPT_ECHO_ON (e.g. 2FA tokens, challenge-response)
+	     * need the user to see what they type. Temporarily restore echo
+	     * for the duration of this prompt, then re-suppress it.
+	     */
+	    if (echo_suppress_fd != -1)
+		(void)tcsetattr(echo_suppress_fd, TCSANOW, &echo_saved_term);
 	    FALLTHROUGH;
 	case PAM_PROMPT_ECHO_OFF:
 	    /* Error out if the last password read was interrupted. */
@@ -731,6 +800,12 @@ converse(int num_msg, PAM_CONST struct pam_message **msg,
 
 	    /* Read the password unless interrupted. */
 	    pass = auth_getpass(prompt, type, callback);
+	    /*
+	     * Re-suppress echo after a PAM_PROMPT_ECHO_ON prompt so that
+	     * the failure delay (if any) still has echo disabled.
+	     */
+	    if (type == SUDO_CONV_PROMPT_ECHO_ON && echo_suppress_fd != -1)
+		(void)tcsetattr(echo_suppress_fd, TCSANOW, &echo_noecho_term);
 	    if (pass == NULL) {
 		/* Error (or ^C) reading password, don't try again. */
 		getpass_error = true;
