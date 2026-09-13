@@ -487,6 +487,8 @@ sudo_auth_end_session(void)
     debug_return_int(ret);
 }
 
+extern const char *sudo_pwfeedback_char;
+
 /*
  * Prompts the user for a password using the conversation function.
  * Returns the plaintext password or NULL.
@@ -504,8 +506,11 @@ auth_getpass(const char *prompt, int type, struct sudo_conv_callback *callback)
     display_lecture(callback);
 
     /* Mask user input if pwfeedback set and echo is off. */
-    if (type == SUDO_CONV_PROMPT_ECHO_OFF && def_pwfeedback)
+    if (type == SUDO_CONV_PROMPT_ECHO_OFF && def_pwfeedback) {
 	type = SUDO_CONV_PROMPT_MASK;
+	if (def_pwfeedback_char != NULL)
+		sudo_pwfeedback_char = def_pwfeedback_char;
+    }
 
     /* If visiblepw set, do not error out if there is no tty. */
     if (def_visiblepw)
