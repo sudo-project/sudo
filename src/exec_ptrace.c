@@ -241,6 +241,12 @@ get_stack_pointer(struct sudo_ptrace_regs *regs)
     return reg_sp(regs->u.native);
 }
 
+static inline int
+get_sc_retval(struct sudo_ptrace_regs *regs)
+{
+    return reg_retval(regs->u.native);
+}
+
 static inline void
 set_sc_retval(struct sudo_ptrace_regs *regs, int retval)
 {
