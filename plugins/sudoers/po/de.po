@@ -3,13 +3,13 @@
 # Todd C. Miller <Todd.Miller@courtesan.com>, 2011-2013
 # Hendrik Knackstedt <hendrik.knackstedt@t-online.de>, 2013
 # Mario Blättermann  <mario.blaettermann@gmail.com>, 2015.
-# Jochen Hein <jochen@jochen.org>, 2001-2025.
+# Jochen Hein <jochen@jochen.org>, 2001-2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: sudoers 1.9.18b1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
 "POT-Creation-Date: 2025-10-05 19:32-0600\n"
-"PO-Revision-Date: 2026-06-12 00:37+0200\n"
+"PO-Revision-Date: 2026-07-26 18:40+0200\n"
 "Last-Translator: Jochen Hein <jochen@jochen.org>\n"
 "Language-Team: German <translation-team-de@lists.sourceforge.net>\n"
 "Language: de\n"
@@ -26,7 +26,7 @@ msgstr "Syntax-Fehler"
 
 #: confstr.sh:2
 msgid "%p's password: "
-msgstr "%p's Passwort: "
+msgstr "Passwort für %p: "
 
 #: confstr.sh:3
 msgid "[sudo] password for %p: "
@@ -204,7 +204,7 @@ msgstr "Das hat nicht funktioniert, bitte nochmal probieren."
 #: plugins/sudoers/visudo.c:1184 toke.l:1011 toke.l:1174 toke.l:1193
 #: toke.l:1221 toke.l:1301
 msgid "unable to allocate memory"
-msgstr "Es kann kein Speicher mehr alloziert werden"
+msgstr "Es kann kein Speicher mehr zugewiesen werden"
 
 #: gram.y:567
 msgid "a digest requires a path name"
@@ -216,7 +216,7 @@ msgstr "Werte für »CWD« müssen mit »/«, »~« oder »*« beginnen"
 
 #: gram.y:595
 msgid "\"CWD\" path too long"
-msgstr "»CWD« (aktuelles Arbeitsverzeichnis) Pfad ist zu lang"
+msgstr "»CWD«-Pfad (aktuelles Arbeitsverzeichnis) ist zu lang"
 
 #: gram.y:605
 msgid "values for \"CHROOT\" must start with a '/', '~', or '*'"
@@ -224,7 +224,7 @@ msgstr "Werte für »CHROOT« müssen mit »/«, »~« oder »*« beginnen"
 
 #: gram.y:611
 msgid "\"CHROOT\" path too long"
-msgstr "»CHROOT« Pfad ist zu lang"
+msgstr "»CHROOT«-Pfad ist zu lang"
 
 #: gram.y:615 gram.y:618
 msgid "\"CHROOT\" is deprecated"
@@ -237,19 +237,19 @@ msgstr "Syntaxfehler, das reservierte Wort »%s« wird als Aliasname verwendet"
 
 #: gram.y:789
 msgid "invalid notbefore value"
-msgstr "ungültiger Wert für »notbefore«"
+msgstr "Ungültiger Wert für »notbefore«"
 
 #: gram.y:798
 msgid "invalid notafter value"
-msgstr "ungültiger Wert für »notafter«"
+msgstr "Ungültiger Wert für »notafter«"
 
 #: gram.y:808 plugins/sudoers/policy.c:368
 msgid "timeout value too large"
-msgstr "Wert für Timeout ist zu groß"
+msgstr "Wert für Zeitüberschreitung ist zu groß"
 
 #: gram.y:810 plugins/sudoers/policy.c:370
 msgid "invalid timeout value"
-msgstr "ungültiger Wert für Timeout"
+msgstr "Ungültiger Wert für Zeitüberschreitung"
 
 #: gram.y:921 plugins/sudoers/sudoers.c:1174
 msgid "command too long"
@@ -267,8 +267,9 @@ msgstr "%s:%d:%zu: %s\n"
 #: gram.y:1257
 #, c-format
 msgid "duplicate %s \"%s\", previously defined at %s:%d:%d"
-msgstr "doppelte %s »%s«, bereits definiert in %s:%d:%d"
+msgstr "Doppelte %s »%s«, bereits definiert in %s:%d:%d"
 
+# FIXME Zyklus → Schleife (?)
 #: gram.y:1262 plugins/sudoers/check_aliases.c:88
 #, c-format
 msgid "cycle in %s \"%s\""
@@ -500,7 +501,7 @@ msgstr "Das JSON_ARRAY ist zu groß"
 
 #: lib/eventlog/parse_json.c:518
 msgid "missing double quote in name"
-msgstr "Im Name fehlt das doppelte Anführungszeichen"
+msgstr "Im Namen fehlt das doppelte Anführungszeichen"
 
 #: lib/eventlog/parse_json.c:636
 msgid "missing JSON_OBJECT"
@@ -514,60 +515,60 @@ msgstr "JSON_OBJECT erwartet, aber »%d« bekommen"
 #: lib/eventlog/parse_json.c:774
 #, c-format
 msgid "json stack exhausted (max %u frames)"
-msgstr "json Stack erschöpft (maximal %u Frames)"
+msgstr "JSON-Stack erschöpft (maximal %u Frames)"
 
 #: lib/eventlog/parse_json.c:852
 msgid "objects must consist of name:value pairs"
-msgstr "Objekte müssen aus Name:Wert Paaren bestehen"
+msgstr "Objekte müssen aus Name:Wert-Paaren bestehen"
 
 #: lib/eventlog/parse_json.c:857 lib/eventlog/parse_json.c:888
 #: lib/eventlog/parse_json.c:932 lib/eventlog/parse_json.c:954
 #: lib/eventlog/parse_json.c:976 lib/eventlog/parse_json.c:998
 #: lib/eventlog/parse_json.c:1020
 msgid "missing separator between values"
-msgstr "Fehlender Separator zwischen den Werten"
+msgstr "Fehlender Trenner zwischen den Werten"
 
 #: lib/eventlog/parse_json.c:872 lib/eventlog/parse_json.c:1046
 msgid "unmatched close brace"
-msgstr "unpassende schließende geschweifte Klammer"
+msgstr "Schließende geschweifte Klammer ohne öffnendes Gegenstück"
 
 #: lib/eventlog/parse_json.c:883
 msgid "unexpected array"
-msgstr "unerwartetes Array"
+msgstr "Unerwartetes Array"
 
 #: lib/eventlog/parse_json.c:903 lib/eventlog/parse_json.c:1049
 msgid "unmatched close bracket"
-msgstr "unpassende schließende eckige Klammer"
+msgstr "Schließende eckige Klammer ohne öffnendes Gegenstück"
 
 #: lib/eventlog/parse_json.c:914
 msgid "unexpected string"
-msgstr "unerwartete Zeichenkette"
+msgstr "Unerwartete Zeichenkette"
 
 #: lib/eventlog/parse_json.c:925
 msgid "missing colon after name"
-msgstr "fehlender Doppelpunkt nach dem Name"
+msgstr "Fehlender Doppelpunkt nach dem Namen"
 
 #: lib/eventlog/parse_json.c:946 lib/eventlog/parse_json.c:968
 msgid "unexpected boolean"
-msgstr "unerwarteter boolescher Wert (true/false)"
+msgstr "Unerwarteter boolescher Wert (true/false)"
 
 #: lib/eventlog/parse_json.c:990
 msgid "unexpected null"
-msgstr "unerwartete »null«"
+msgstr "Unerwartete »null«"
 
 #: lib/eventlog/parse_json.c:1011
 msgid "unexpected number"
-msgstr "unerwartete Zahl"
+msgstr "Unerwartete Zahl"
 
 #: lib/eventlog/parse_json.c:1057
 msgid "parse error"
-msgstr "Syntax-Fehler"
+msgstr "Analysefehler"
 
 #: lib/iolog/iolog_filter.c:128 plugins/sudoers/defaults.c:1300
 #: plugins/sudoers/sudoreplay.c:1288 plugins/sudoers/sudoreplay.c:1584
 #, c-format
 msgid "invalid regular expression \"%s\": %s"
-msgstr "ungültiger regulärer Ausdruck »%s«: %s"
+msgstr "Ungültiger regulärer Ausdruck »%s«: %s"
 
 #: lib/iolog/iolog_legacy.c:60
 #, c-format
@@ -629,19 +630,19 @@ msgstr "Ungültige Zeitdateizeile: %s"
 #: logsrvd/iolog_writer.c:60
 #, c-format
 msgid "%s: protocol error: NULL key"
-msgstr "%s: Protokollfehker: NULL-Schlüssel"
+msgstr "%s: Protokollfehler: NULL-Schlüssel"
 
 #: logsrvd/iolog_writer.c:64
 #, c-format
 msgid "%s: protocol error: wrong type for %s"
-msgstr "%s: Protokollfehker: falscher Typ für %s"
+msgstr "%s: Protokollfehler: falscher Typ für %s"
 
 #: logsrvd/iolog_writer.c:69 logsrvd/logsrvd_local.c:104
 #: logsrvd/logsrvd_local.c:118 logsrvd/logsrvd_local.c:126
 #: logsrvd/logsrvd_local.c:144
 #, c-format
 msgid "%s: protocol error: NULL value found in %s"
-msgstr "%s: Protokollfehker: Wert NULL gefunden in %s"
+msgstr "%s: Protokollfehler: Wert NULL gefunden in %s"
 
 #: logsrvd/iolog_writer.c:150 plugins/sudoers/logging.c:1040
 #: plugins/sudoers/policy.c:619
@@ -657,7 +658,7 @@ msgstr "%s: Protokollfehler: %s fehlt in der AcceptMessage"
 #: logsrvd/iolog_writer.c:465
 #, c-format
 msgid "%s: unable to format session id"
-msgstr "%s: Session-ID kann nicht formatiert werden"
+msgstr "%s: Sitzungs-ID kann nicht formatiert werden"
 
 #: logsrvd/iolog_writer.c:479 logsrvd/iolog_writer.c:493
 #: logsrvd/iolog_writer.c:507 logsrvd/iolog_writer.c:522
@@ -670,32 +671,32 @@ msgstr "%s: %s ist nicht gesetzt"
 #: logsrvd/iolog_writer.c:586 logsrvd/iolog_writer.c:593
 #, c-format
 msgid "unable to expand iolog path %s"
-msgstr "Kann den iolog-Pfad nicht erweitern: %s"
+msgstr "E/A-Protokollpfad kann nicht erweitert werden: %s"
 
 #: logsrvd/iolog_writer.c:611
 #, c-format
 msgid "unable to create iolog path %s"
-msgstr "Kann den iolog-Pfad »%s« nicht erstellen"
+msgstr "E/A-Protokollpfad »%s« kann nicht erstellt werden"
 
 #: logsrvd/iolog_writer.c:641
 #, c-format
 msgid "invalid iofd %d"
-msgstr "Ungültiger I/O Dateideskriptor: %d"
+msgstr "Ungültiger E/A-Dateideskriptor: %d"
 
 #: logsrvd/iolog_writer.c:661
 #, c-format
 msgid "error closing iofd %u: %s"
-msgstr "Fehler beim Schließen des I/O Dateideskriptors %u: %s"
+msgstr "Fehler beim Schließen des E/A-Dateideskriptors %u: %s"
 
 #: logsrvd/iolog_writer.c:682
 #, c-format
 msgid "error flushing iofd %u: %s"
-msgstr "Fehler beim Leeren des I/O Dateideskriptors %u: %s"
+msgstr "Fehler beim Leeren des E/A-Dateideskriptors %u: %s"
 
 #: logsrvd/iolog_writer.c:800
 #, c-format
 msgid "invalid I/O log %s: %s referenced but not present"
-msgstr "Ungültiges I/O log %s: »%s« wird verwendet, ist aber nicht vorhanden"
+msgstr "Ungültiges E/A-Protokoll %s: »%s« wird verwendet, ist aber nicht vorhanden"
 
 #: logsrvd/iolog_writer.c:812 logsrvd/logsrvd_journal.c:386
 #, c-format
@@ -740,12 +741,12 @@ msgstr "%s/%s: Der Wiederaufsetz-Punkt [%lld, %ld] kann nicht gefunden werden"
 #: logsrvd/logsrv_util.c:160
 #, c-format
 msgid "missing I/O log file %s/%s"
-msgstr "Die I/O Logdatei %s/%s fehlt"
+msgstr "Die E/A-Protokolldatei %s/%s fehlt"
 
 #: logsrvd/logsrv_util.c:167
 #, c-format
 msgid "%s/%s: unable to seek forward %zu"
-msgstr "%s/%s: kann nicht zur Position %zu springen"
+msgstr "%s/%s: Springen zur Position %zu ist nicht möglich"
 
 #: logsrvd/logsrvd.c:269 logsrvd/logsrvd_queue.c:130
 msgid "unable to connect to relay"
@@ -803,19 +804,19 @@ msgstr "Fehler der State Machine"
 
 #: logsrvd/logsrvd.c:459 logsrvd/logsrvd.c:460
 msgid "invalid AcceptMessage"
-msgstr "ungültige AcceptMessage"
+msgstr "Ungültige AcceptMessage"
 
 #: logsrvd/logsrvd.c:497 logsrvd/logsrvd.c:498
 msgid "invalid RejectMessage"
-msgstr "ungültige RejectMessage"
+msgstr "Ungültige RejectMessage"
 
 #: logsrvd/logsrvd.c:533 logsrvd/logsrvd.c:534
 msgid "invalid ExitMessage"
-msgstr "ungültige ExitMessage"
+msgstr "Ungültige ExitMessage"
 
 #: logsrvd/logsrvd.c:587 logsrvd/logsrvd.c:588 logsrvd/logsrvd.c:599
 msgid "invalid RestartMessage"
-msgstr "ungültige RestartMessage"
+msgstr "Ungültige RestartMessage"
 
 #: logsrvd/logsrvd.c:598
 msgid "RestartMessage log_id path traversal attack"
@@ -823,12 +824,12 @@ msgstr "RestartMessage log_id path traversal Angriff"
 
 #: logsrvd/logsrvd.c:630 logsrvd/logsrvd.c:631
 msgid "invalid AlertMessage"
-msgstr "ungültige AlertMessage"
+msgstr "Ungültige AlertMessage"
 
 #: logsrvd/logsrvd.c:672 logsrvd/logsrvd.c:708 logsrvd/logsrvd.c:744
 #, c-format
 msgid "%s: unexpected IoBuffer"
-msgstr "%s: unerwarteter IoBuffer"
+msgstr "%s: Unerwarteter IoBuffer"
 
 #: logsrvd/logsrvd.c:673 logsrvd/logsrvd.c:709 logsrvd/logsrvd.c:745
 msgid "protocol error"
@@ -840,37 +841,37 @@ msgstr "Ungültiger IoBuffer"
 
 #: logsrvd/logsrvd.c:715 logsrvd/logsrvd.c:716
 msgid "invalid ChangeWindowSize"
-msgstr "ungültige ChangeWindowSize"
+msgstr "Ungültige ChangeWindowSize"
 
 #: logsrvd/logsrvd.c:751 logsrvd/logsrvd.c:752
 msgid "invalid CommandSuspend"
-msgstr "ungültiges CommandSusped"
+msgstr "Ungültiges CommandSuspend"
 
 #: logsrvd/logsrvd.c:782 logsrvd/logsrvd.c:783
 msgid "invalid ClientHello"
-msgstr "ungültiges ClientHello"
+msgstr "Ungültiges ClientHello"
 
 #: logsrvd/logsrvd.c:807 logsrvd/logsrvd_journal.c:297
 #: logsrvd/logsrvd_relay.c:674 logsrvd/sendlog.c:1235
 #: plugins/sudoers/log_client.c:1683
 #, c-format
 msgid "unable to unpack %s size %zu"
-msgstr "Kann »%s« nicht auspacken, Größe %zu"
+msgstr "»%s« kann nicht entpackt werden, Größe %zu"
 
 #: logsrvd/logsrvd.c:852 logsrvd/logsrvd_journal.c:371
 #: logsrvd/logsrvd_relay.c:698
 #, c-format
 msgid "unexpected type_case value %d in %s from %s"
-msgstr "unerwarteter type_case Wert %d in »%s« aus »%s«"
+msgstr "Unerwarteter type_case-Wert %d in »%s« aus »%s«"
 
 #: logsrvd/logsrvd.c:854
 msgid "unrecognized ClientMessage type"
-msgstr "unbekannter ClientMessage-Typ"
+msgstr "Unbekannter ClientMessage-Typ"
 
 #: logsrvd/logsrvd.c:944
 #, c-format
 msgid "timed out writing to client %s"
-msgstr "Zeitablauf beim Senden zum Client %s"
+msgstr "Zeitüberschreitung beim Senden zum Client %s"
 
 #: logsrvd/logsrvd.c:949 logsrvd/logsrvd_relay.c:948 logsrvd/sendlog.c:1449
 #, c-format
@@ -902,12 +903,12 @@ msgstr "Interner Fehler, %s-Überlauf"
 #: logsrvd/logsrvd.c:1048
 #, c-format
 msgid "timed out reading from client %s"
-msgstr "Zeitablauf beim Lesen vom Client %s"
+msgstr "Zeitüberschreitung beim Lesen vom Client %s"
 
 #: logsrvd/logsrvd.c:1089 logsrvd/logsrvd_relay.c:802
 #, c-format
 msgid "EOF from %s without proper TLS shutdown"
-msgstr "Dateiende (EOF) von %s ohne korrekten TLS-Abscluß"
+msgstr "Dateiende (EOF) von %s ohne korrekten TLS-Abschluss"
 
 #: logsrvd/logsrvd.c:1136 logsrvd/logsrvd_relay.c:200 logsrvd/sendlog.c:331
 #: plugins/sudoers/log_client.c:755
@@ -922,11 +923,11 @@ msgstr "Client-Nachricht ist zu groß"
 
 #: logsrvd/logsrvd.c:1155 logsrvd/logsrvd.c:1156
 msgid "invalid ClientMessage"
-msgstr "ungültige ClientMessage"
+msgstr "Ungültige ClientMessage"
 
 #: logsrvd/logsrvd.c:1464
 msgid "unable to get remote IP addr"
-msgstr "Kann die entfernte IP-Adresse nicht finden"
+msgstr "Entfernte IP-Adresse kann nicht gefunden werden"
 
 #: logsrvd/logsrvd.c:1503 plugins/sudoers/sudoers_cb.c:115
 #: plugins/sudoers/sudoers_cb.c:130
@@ -938,20 +939,20 @@ msgstr "Hostname %s kann nicht aufgelöst werden"
 #: plugins/sudoers/log_client.c:285
 #, c-format
 msgid "Unable to attach user data to the ssl object: %s"
-msgstr "Kann die User-Daten nicht an das SSL-Objekt anhängen: %s"
+msgstr "Benutzerdaten können nicht an das SSL-Objekt angehängt werden: %s"
 
 #: logsrvd/logsrvd.c:1696 logsrvd/logsrvd.c:2090
 msgid "unable to setup listen socket"
-msgstr "Konnte keinen Socket zum »Lauschen« einrichten"
+msgstr "Socket kann nicht zum »Lauschen« eingerichtet werden"
 
 #: logsrvd/logsrvd.c:1816
 #, c-format
 msgid "unexpected signal %d"
-msgstr "unerwartete Signal %d"
+msgstr "Unerwartetes Signal %d"
 
 #: logsrvd/logsrvd.c:1989
 msgid "sudo log server"
-msgstr "sudo Log-Server"
+msgstr "sudo-Protokollserver"
 
 #: logsrvd/logsrvd.c:1991 logsrvd/sendlog.c:121
 msgid "Options:"
@@ -984,7 +985,7 @@ msgstr "Protobuf-C Version 1.3 oder höher ist notwendig"
 #: logsrvd/logsrvd.c:2067
 #, c-format
 msgid "invalid random drop value: %s"
-msgstr "ungültiger Wert für »random drop«: %s"
+msgstr "Ungültiger Wert für »random drop«: %s"
 
 #: logsrvd/logsrvd.c:2070 logsrvd/sendlog.c:1817
 #: plugins/sudoers/cvtsudoers.c:245 plugins/sudoers/sudoreplay.c:289
@@ -1013,7 +1014,7 @@ msgstr "Unbekannte Gruppe %s"
 #: logsrvd/logsrvd_conf.c:452
 #, c-format
 msgid "unable to parse iolog mode %s"
-msgstr "Iolog mode %s kann nicht geparst werden"
+msgstr "E/A-Protokollmodus %s kann nicht analysiert werden"
 
 #: logsrvd/logsrvd_conf.c:469 logsrvd/logsrvd_conf.c:1243
 #, c-format
@@ -1050,7 +1051,7 @@ msgstr "Unbekannte Syslog-Priorität %s"
 #: logsrvd/logsrvd_conf.c:1197
 #, c-format
 msgid "%s:%d unmatched '[': %s"
-msgstr "%s: %d »[« ohne schliessende Klammer »]«: %s"
+msgstr "%s: %d »[« ohne schließende Klammer »]«: %s"
 
 # XXX Geht das besser?
 #: logsrvd/logsrvd_conf.c:1203
@@ -1066,17 +1067,17 @@ msgstr "%s/%d Ungültiger Konfigurations-Abschnitt: %s"
 #: logsrvd/logsrvd_conf.c:1223
 #, c-format
 msgid "%s:%d invalid configuration line: %s"
-msgstr "%s/%d Ungültige Konfigurationszeile: %s"
+msgstr "%s:%d Ungültige Konfigurationszeile: %s"
 
 #: logsrvd/logsrvd_conf.c:1229
 #, c-format
 msgid "%s:%d expected section name: %s"
-msgstr "%s:%d erwartetder Section Name: %s"
+msgstr "%s:%d Erwarteter Abschnittsname: %s"
 
 #: logsrvd/logsrvd_conf.c:1251
 #, c-format
 msgid "%s:%d [%s] illegal key: %s"
-msgstr "%s:%d [%s] ungültiger Schlüssel: %s"
+msgstr "%s:%d [%s] Ungültiger Schlüssel: %s"
 
 #: logsrvd/logsrvd_conf.c:1281 plugins/sudoers/cvtsudoers.c:268
 #: plugins/sudoers/logging.c:1092
@@ -1086,15 +1087,15 @@ msgstr "Die Protokolldatei kann nicht geöffnet werden %s"
 
 #: logsrvd/logsrvd_conf.c:1763
 msgid "unable to initialize server TLS context"
-msgstr "Server-SSL-Kontext kann nicht initialisiert werden"
+msgstr "Server-TLS-Kontext kann nicht initialisiert werden"
 
 #: logsrvd/logsrvd_conf.c:1783
 msgid "unable to initialize relay TLS context"
-msgstr "SSL-Kontext kann nicht initialisiert werden"
+msgstr "Relay-TLS-Kontext kann nicht initialisiert werden"
 
 #: logsrvd/logsrvd_journal.c:144
 msgid "unable to create journal file"
-msgstr "Kann die Journal-Datei nicht anlegen"
+msgstr "Journal-Datei kann nicht angelegt werden"
 
 #: logsrvd/logsrvd_journal.c:148 logsrvd/logsrvd_journal.c:434
 #: logsrvd/logsrvd_queue.c:104 plugins/sudoers/visudo.c:1041
@@ -1104,7 +1105,7 @@ msgstr "Die Datei »%s« kann nicht gesperrt werden"
 
 #: logsrvd/logsrvd_journal.c:151 logsrvd/logsrvd_journal.c:436
 msgid "unable to lock journal file"
-msgstr "Die Journal-Datei »%s« kann nicht gesperrt werden"
+msgstr "Die Journal-Datei kann nicht gesperrt werden"
 
 #: logsrvd/logsrvd_journal.c:159 logsrvd/logsrvd_journal.c:425
 #: logsrvd/logsrvd_journal.c:430
@@ -1114,16 +1115,16 @@ msgstr "Die Journal-Datei kann nicht geöffnet werden"
 #: logsrvd/logsrvd_journal.c:180 logsrvd/logsrvd_journal.c:468
 #: logsrvd/logsrvd_journal.c:473
 msgid "unable to write journal file"
-msgstr "In die Logdatei kann nicht geschrieben werden"
+msgstr "In die Protokolldatei kann nicht geschrieben werden"
 
 #: logsrvd/logsrvd_journal.c:188 logsrvd/logsrvd_journal.c:195
 msgid "unable to rename journal file"
-msgstr "Die Journal-Datei kann nicht geöffnet werden"
+msgstr "Die Journal-Datei kann nicht umbenannt werden"
 
 #: logsrvd/logsrvd_journal.c:242 logsrvd/logsrvd_journal.c:243
 #: logsrvd/logsrvd_journal.c:283 logsrvd/logsrvd_journal.c:284
 msgid "unexpected EOF reading journal file"
-msgstr "unerwartetes Dateiende beim Lesen der Journal-Datei"
+msgstr "Unerwartetes Dateiende beim Lesen der Journal-Datei"
 
 #: logsrvd/logsrvd_journal.c:246 logsrvd/logsrvd_journal.c:247
 #: logsrvd/logsrvd_journal.c:287 logsrvd/logsrvd_journal.c:288
@@ -1132,7 +1133,7 @@ msgstr "Fehler beim Lesen der Journal-Datei"
 
 #: logsrvd/logsrvd_journal.c:299 logsrvd/logsrvd_journal.c:385
 msgid "invalid journal file, unable to restart"
-msgstr "Ungültige Journal-Datei - kann nicht neu starten"
+msgstr "Ungültige Journal-Datei - Neustart nicht möglich"
 
 #: logsrvd/logsrvd_journal.c:450
 #, c-format
@@ -1142,11 +1143,11 @@ msgstr "Kann nicht zu [%lld, %ld] in der Journaldatei »%s« springen"
 #: logsrvd/logsrvd_local.c:161
 #, c-format
 msgid "unexpected value_case %d in %s from %s"
-msgstr "unerwarteter value_case Wert %d in »%s« aus »%s«"
+msgstr "Unerwarteter value_case-Wert %d in »%s« aus »%s«"
 
 #: logsrvd/logsrvd_local.c:189
 msgid "error parsing AcceptMessage"
-msgstr "Fehler beim Parsen der AcceptMessage"
+msgstr "Fehler beim Auswerten der AcceptMessage"
 
 #: logsrvd/logsrvd_local.c:200
 msgid "error creating I/O log"
@@ -1154,11 +1155,11 @@ msgstr "Fehler beim Erstellen des Ein-/Ausgabe-Protokolls"
 
 #: logsrvd/logsrvd_local.c:224
 msgid "error logging accept event"
-msgstr "Fehler beim Protokolliereb des Accept-Events"
+msgstr "Fehler beim Protokollieren des Accept-Events"
 
 #: logsrvd/logsrvd_local.c:263
 msgid "error parsing RejectMessage"
-msgstr "Fehler beim Parsen der RejectMessage"
+msgstr "Fehler beim Auswerten der RejectMessage"
 
 #: logsrvd/logsrvd_local.c:288
 msgid "error logging reject event"
@@ -1170,15 +1171,15 @@ msgstr "Fehler beim Protokollieren des Exit-Events"
 
 #: logsrvd/logsrvd_local.c:493 logsrvd/logsrvd_local.c:494
 msgid "log is already complete, cannot be restarted"
-msgstr "Das Log ist bereits abgeschlossen, kann nicht neu gestartet werden"
+msgstr "Das Protokollieren ist bereits abgeschlossen, kann nicht neu gestartet werden"
 
 #: logsrvd/logsrvd_local.c:524
 msgid "unable to restart log"
-msgstr "Das Log konnte nicht wieder begonnen werden"
+msgstr "Das Protokollieren konnte nicht neu gestartet werden"
 
 #: logsrvd/logsrvd_local.c:540
 msgid "error parsing AlertMessage"
-msgstr "Fehler beim Parsen der AlertMessage"
+msgstr "Fehler beim Auswerten der AlertMessage"
 
 #: logsrvd/logsrvd_local.c:550
 msgid "error logging alert event"
@@ -1188,7 +1189,7 @@ msgstr "Fehler beim Protokollieren des Alert-Events"
 #: logsrvd/logsrvd_local.c:684
 #, c-format
 msgid "unable to format timing buffer, length %d"
-msgstr "Der Zeitstempel kann nicht formatiert werden, Länge %d"
+msgstr "Der Zeitpuffer kann nicht formatiert werden, Länge %d"
 
 #: logsrvd/logsrvd_local.c:600 logsrvd/logsrvd_local.c:608
 #: logsrvd/logsrvd_local.c:656 logsrvd/logsrvd_local.c:691
@@ -1211,7 +1212,7 @@ msgstr "Fehler beim Schreiben der ChangeWindowSize"
 
 #: logsrvd/logsrvd_local.c:701
 msgid "error writing CommandSuspend"
-msgstr "Fehler beim Schreiben des CommandSusped"
+msgstr "Fehler beim Schreiben des CommandSuspend"
 
 #: logsrvd/logsrvd_relay.c:432
 msgid "TLS handshake with relay host failed"
@@ -1224,40 +1225,40 @@ msgstr "Verbindung zum Relay-Host kann nicht aufgebaut werden"
 #: logsrvd/logsrvd_relay.c:515
 #, c-format
 msgid "%s: invalid ServerHello, missing server_id"
-msgstr "%s: ungültiges ServerHello, fehlende server_id"
+msgstr "%s: Ungültiges ServerHello, fehlende server_id"
 
 #: logsrvd/logsrvd_relay.c:517 logsrvd/sendlog.c:1131
 #: plugins/sudoers/log_client.c:1556
 msgid "invalid ServerHello"
-msgstr "ungültiges ServerHello"
+msgstr "Ungültiges ServerHello"
 
 #: logsrvd/logsrvd_relay.c:549 logsrvd/sendlog.c:1166
 #, c-format
 msgid "%s: invalid ServerMessage, missing commit_point"
-msgstr "%s: ungültige ServerMessage, fehlender »commit_point«"
+msgstr "%s: Ungültige ServerMessage, fehlender »commit_point«"
 
 #: logsrvd/logsrvd_relay.c:551 logsrvd/logsrvd_relay.c:583
 #: plugins/sudoers/log_client.c:1596 plugins/sudoers/log_client.c:1631
 msgid "invalid ServerMessage"
-msgstr "ungültige Serveressage"
+msgstr "Ungültige ServerMessage"
 
 #: logsrvd/logsrvd_relay.c:581
 #, c-format
 msgid "%s: invalid ServerMessage, missing log_id string"
-msgstr "%s: ungültige ServerMessage, fehlende »log_id« Zeichenkette"
+msgstr "%s: Ungültige ServerMessage, fehlende »log_id«-Zeichenkette"
 
 #: logsrvd/logsrvd_relay.c:701
 msgid "unrecognized ServerMessage type"
-msgstr "unbekannter ServerMessage-Typ"
+msgstr "Unbekannter ServerMessage-Typ"
 
 #: logsrvd/logsrvd_relay.c:730
 #, c-format
 msgid "timed out reading from relay %s (%s)"
-msgstr "Zeitablauf beim Lesen vom Relay-Server »%s« (%s)"
+msgstr "Zeitüberschreitung beim Lesen vom Relay-Server »%s« (%s)"
 
 #: logsrvd/logsrvd_relay.c:732
 msgid "timeout reading from relay"
-msgstr "Zeitablauf beim Lesen vom Relay-Server"
+msgstr "Zeitüberschreitung beim Lesen vom Relay-Server"
 
 #: logsrvd/logsrvd_relay.c:787
 msgid "relay host name does not match certificate"
@@ -1280,28 +1281,28 @@ msgstr "Server-Nachricht ist zu groß"
 #: logsrvd/logsrvd_relay.c:941
 #, c-format
 msgid "timed out writing to relay %s (%s)"
-msgstr "Zeitablauf beim Senden an den Relay-Server »%s« (%s)"
+msgstr "Zeitüberschreitung beim Senden an den Relay-Server »%s« (%s)"
 
 #: logsrvd/logsrvd_relay.c:943
 msgid "timeout writing to relay"
-msgstr "Zeitablauf beim Senden an den Relay-Server"
+msgstr "Zeitüberschreitung beim Senden an den Relay-Server"
 
 #: logsrvd/logsrvd_relay.c:997 logsrvd/logsrvd_relay.c:1004
 #: logsrvd/logsrvd_relay.c:1016 logsrvd/logsrvd_relay.c:1023
 msgid "error writing to relay"
-msgstr "Fehler beim Schreiben des zum Relay-Server"
+msgstr "Fehler beim Schreiben zum Relay-Server"
 
 #: logsrvd/sendlog.c:119
 msgid "send sudo I/O log to remote server"
-msgstr "sende sudo I/O-Log zu einem entfernten Server"
+msgstr "sudo E/A-Protokoll zu einem entfernten Server senden"
 
 #: logsrvd/sendlog.c:125
 msgid "only send an accept event (no I/O)"
-msgstr "Nur einen Accept-Event senden (kein I/O)"
+msgstr "Nur ein Accept-Event senden (kein I/O)"
 
 #: logsrvd/sendlog.c:128
 msgid "certificate bundle file to verify server's cert against"
-msgstr "Zertifikatsbündel-Datei zur Verifikation des Server-Zertifikats"
+msgstr "Zertifikatsbündel-Datei zur Verifizierung des Server-Zertifikats"
 
 #: logsrvd/sendlog.c:130
 msgid "certificate file for TLS handshake"
@@ -1309,11 +1310,11 @@ msgstr "Zertifikatsdatei für TLS-Handshake"
 
 #: logsrvd/sendlog.c:133
 msgid "host to send logs to"
-msgstr "Rechner an den die Logs gesendet werden"
+msgstr "Rechner, an den die Protokolle gesendet werden"
 
 #: logsrvd/sendlog.c:135
 msgid "remote ID of I/O log to be resumed"
-msgstr "Entfernte ID des I/O-Logs zum Wiederaufnehmen"
+msgstr "Entfernte ID des E/A-Protokolls zum Wiederaufnehmen"
 
 #: logsrvd/sendlog.c:138
 msgid "private key file"
@@ -1329,46 +1330,46 @@ msgstr "Portnummer für die Verbindung zum Host"
 
 #: logsrvd/sendlog.c:145
 msgid "restart previous I/O log transfer"
-msgstr "Restarte die vorhergehende I/O-Log Übertragung"
+msgstr "Die vorhergehende E/A-Protokollübertragung neu starten"
 
 #: logsrvd/sendlog.c:147
 msgid "reject the command with the given reason"
-msgstr "Weise das Kommando mit dem angegebenen Grund zurück"
+msgstr "Den Befehl aus dem angegebenen Grund zurückweisen"
 
 #: logsrvd/sendlog.c:149
 msgid "stop transfer after reaching this time"
-msgstr "Beende den Transfer nach Erreichen dieser Zeit"
+msgstr "Die Übertragung nach Erreichen dieser Zeit beenden"
 
 #: logsrvd/sendlog.c:151
 msgid "test audit server by sending selected I/O log n times in parallel"
-msgstr "Teste den Audit-Server durch senden ausgewählter I/O-Logs n-Mal parallel"
+msgstr "Den Audit-Server durch Senden ausgewählter E/A-Protokolle n-Mal parallel testen"
 
 #: logsrvd/sendlog.c:176 plugins/sudoers/log_client.c:457
 #, c-format
 msgid "unable to look up %s:%s: %s"
-msgstr "Fehler beim Lookup %s:%s: %s"
+msgstr "Fehler beim Nachschlagen von %s:%s: %s"
 
 #: logsrvd/sendlog.c:214
 msgid "unable to get server IP addr"
-msgstr "Kann die Server IP-Adresse nicht finden"
+msgstr "Server-IP-Adresse kann nicht gefunden werden"
 
 #: logsrvd/sendlog.c:309 plugins/sudoers/sudoreplay.c:865
 #, c-format
 msgid "unable to read %s/%s: %s"
-msgstr "Fehler beim Lesen %s/%s: %s"
+msgstr "Fehler beim Lesen von %s/%s: %s"
 
 #: logsrvd/sendlog.c:1055 plugins/sudoers/iolog.c:963
 #: plugins/sudoers/iolog.c:1035
 #, c-format
 msgid "unexpected I/O event %d"
-msgstr "unerwarteter I/O Event %d"
+msgstr "Unerwartetes E/A-Event %d"
 
 #: logsrvd/sendlog.c:1108 logsrvd/sendlog.c:1125 logsrvd/sendlog.c:1160
 #: plugins/sudoers/log_client.c:1189 plugins/sudoers/log_client.c:1482
 #: plugins/sudoers/log_client.c:1550 plugins/sudoers/log_client.c:1590
 #, c-format
 msgid "%s: unexpected state %d"
-msgstr "%s: unerwarteter Status %d"
+msgstr "%s: Unerwarteter Status %d"
 
 #: logsrvd/sendlog.c:1203 plugins/sudoers/log_client.c:1651
 #, c-format
@@ -1383,7 +1384,7 @@ msgstr "Abbruch-Nachricht vom Server empfangen: %s"
 #: logsrvd/sendlog.c:1275 plugins/sudoers/log_client.c:1714
 #, c-format
 msgid "%s: unexpected type_case value %d"
-msgstr "%s: unerwarteter type_case Wert %d"
+msgstr "%s: Unerwarteter type_case-Wert %d"
 
 #: logsrvd/sendlog.c:1304
 msgid "timeout reading from server"
@@ -1395,7 +1396,7 @@ msgstr "Der Hostname passt nicht zum Zertifikat"
 
 #: logsrvd/sendlog.c:1392
 msgid "premature EOF"
-msgstr "unerwartetes Datei-Ende"
+msgstr "Unerwartetes Datei-Ende"
 
 #: logsrvd/sendlog.c:1407 plugins/sudoers/log_client.c:1890
 #, c-format
@@ -1404,15 +1405,15 @@ msgstr "Server-Nachricht ist zu groß: %u"
 
 #: logsrvd/sendlog.c:1466
 msgid "timeout writing to server"
-msgstr "Zeitablauf beim Senden an den Server"
+msgstr "Zeitüberschreitung beim Senden an den Server"
 
 #: logsrvd/sendlog.c:1841
 msgid "both restart point and iolog ID must be specified"
-msgstr "Sowohl Restart-Punkt als auch die I/O-Log ID sind notwendig"
+msgstr "Sowohl Neustart-Punkt als auch die E/A-Protokoll-ID sind notwendig"
 
 #: logsrvd/sendlog.c:1845
 msgid "a restart point may not be set when no I/O is sent"
-msgstr "Ein Restart-Punkt kann nicht angegeben werden, wenn keine Ein/Ausgabe gesendet ist."
+msgstr "Ein Neustart-Punkt kann nicht angegeben werden, wenn keine Ein/Ausgabe gesendet ist."
 
 #: logsrvd/sendlog.c:1921
 #, c-format
@@ -1427,35 +1428,35 @@ msgstr "Abgelaufene Zeit zum Server gesendet [%lld, %ld]"
 #: logsrvd/sendlog.c:1924
 #, c-format
 msgid "commit point received from server [%lld, %ld]"
-msgstr "Commit Punkt vom Server empfangen [%lld, %ld]"
+msgstr "Commit-Punkt vom Server empfangen [%lld, %ld]"
 
 #: logsrvd/tls_client.c:110 plugins/sudoers/log_client.c:319
 msgid "TLS handshake timeout occurred"
-msgstr "Timeout beim TLS-Handshake erreicht"
+msgstr "Zeitüberschreitung beim TLS-Handshake erreicht"
 
 #: logsrvd/tls_client.c:130 logsrvd/tls_client.c:146
 #: plugins/sudoers/log_client.c:341 plugins/sudoers/log_client.c:357
 msgid "unable to set event"
-msgstr "Konnte den Event nicht setzen"
+msgstr "Event konnte nicht gesetzt werden"
 
 #: logsrvd/tls_client.c:156 logsrvd/tls_client.c:160
 #, c-format
 msgid "TLS connection failed: %s"
-msgstr "TLS-Kommunikation fehlgeschlagen: %s"
+msgstr "TLS-Verbindungsaufbau fehlgeschlagen: %s"
 
 #: logsrvd/tls_client.c:195
 #, c-format
 msgid "unable to allocate ssl object: %s"
-msgstr "Kann kein SSL-Objekt anlegen: %s"
+msgstr "SSL-Objekt kann nicht angelegt werden: %s"
 
 #: logsrvd/tls_client.c:209
 #, c-format
 msgid "Unable to attach socket to the ssl object: %s"
-msgstr "Kann den Socket nicht an das SSL-Objekt anhängen: %s"
+msgstr "Socket kann nicht an das SSL-Objekt angehängt werden: %s"
 
 #: logsrvd/tls_client.c:237
 msgid "unable to initialize TLS context"
-msgstr "SSL-Kontext kann nicht initialisiert werden"
+msgstr "TLS-Kontext kann nicht initialisiert werden"
 
 #: logsrvd/tls_init.c:133 logsrvd/tls_init.c:141
 #, c-format
@@ -1470,17 +1471,17 @@ msgstr "Die TLS 1.3 Cyphersuite kann nicht auf »%s« gesetzt werden: %s"
 #: logsrvd/tls_init.c:201 logsrvd/tls_init.c:222
 #, c-format
 msgid "unable to set diffie-hellman parameters: %s"
-msgstr "Kann die Diffie-Hellman Parameter nicht setzen: %s"
+msgstr "Diffie-Hellman-Parameter können nicht gesetzt werden: %s"
 
 #: logsrvd/tls_init.c:278
 #, c-format
 msgid "unable to create TLS context: %s"
-msgstr "SSL-Kontext kann nicht erzeugt werden: %s"
+msgstr "TLS-Kontext kann nicht erzeugt werden: %s"
 
 #: logsrvd/tls_init.c:285
 #, c-format
 msgid "unable to set minimum protocol version to TLS 1.2: %s"
-msgstr "Kann die minimale Protokollversion nicht auf TLS 1.2 setzen: %s"
+msgstr "Minimale Protokollversion kann nicht auf TLS 1.2 gesetzt werden: %s"
 
 #: plugins/sudoers/audit.c:278 plugins/sudoers/log_client.c:1015
 #: plugins/sudoers/log_client.c:1067 plugins/sudoers/log_client.c:1120
@@ -1510,11 +1511,11 @@ msgstr "Die BSD-Authentifizierung kann nicht begonnen werden"
 
 #: plugins/sudoers/auth/bsdauth.c:92
 msgid "unable to initialize BSD authentication"
-msgstr "Die BSD-Authentifizierung kann nicht begonnen werden"
+msgstr "Die BSD-Authentifizierung kann nicht initialisiert werden"
 
 #: plugins/sudoers/auth/bsdauth.c:186
 msgid "your account has expired"
-msgstr "Ihr Account ist abgelaufen"
+msgstr "Ihr Konto ist abgelaufen"
 
 #: plugins/sudoers/auth/bsdauth.c:188
 msgid "approval failed"
@@ -1528,7 +1529,7 @@ msgstr "%s: Principal kann nicht in eine Zeichenkette umgewandelt werden (»%s«
 #: plugins/sudoers/auth/kerb5.c:162
 #, c-format
 msgid "%s: unable to parse '%s': %s"
-msgstr "%s: »%s« kann nicht ausgewertet werden: %s"
+msgstr "%s: »%s« kann nicht analysiert werden: %s"
 
 # XXX check source?
 #: plugins/sudoers/auth/kerb5.c:171
@@ -1600,7 +1601,7 @@ msgstr "Das Konto ist abgelaufen oder in der PAM-Konfiguration fehlt der »accou
 #: plugins/sudoers/auth/pam.c:417 plugins/sudoers/auth/pam.c:422
 #, c-format
 msgid "PAM account management error: %s"
-msgstr "Fehler beim PAM-Account-Management: %s"
+msgstr "Fehler in der PAM-Kontoverwaltung: %s"
 
 #: plugins/sudoers/auth/rfc1938.c:95 plugins/sudoers/visudo.c:261
 #, c-format
@@ -1689,7 +1690,7 @@ msgstr "Fehler beim Lesen der Belehrungsdatei %s"
 #: plugins/sudoers/check.c:277
 #, c-format
 msgid "ignoring lecture file %s: not a regular file"
-msgstr "Ignoriere Belehrungsdatei %s: es ist keine reguläre Datei"
+msgstr "Belehrungsdatei %s wird ignoriert: es ist keine reguläre Datei"
 
 #: plugins/sudoers/check.c:290
 msgid ""
@@ -1773,7 +1774,7 @@ msgstr "%s: %s: %s: %s"
 #: plugins/sudoers/cvtsudoers.c:607
 #, c-format
 msgid "%s: unknown key word %s"
-msgstr "%s: unbekanntes Schlüsselwort %s"
+msgstr "%s: Unbekanntes Schlüsselwort %s"
 
 #: plugins/sudoers/cvtsudoers.c:653
 #, c-format
@@ -1783,7 +1784,7 @@ msgstr "Ungültiger Standardtyp: %s"
 #: plugins/sudoers/cvtsudoers.c:676
 #, c-format
 msgid "invalid suppression type: %s"
-msgstr "ungültiger suppression Typ: %s"
+msgstr "Ungültiger Suppression-Typ: %s"
 
 #: plugins/sudoers/cvtsudoers.c:717 plugins/sudoers/cvtsudoers.c:733
 #, c-format
@@ -1807,7 +1808,7 @@ msgid ""
 "%s - convert between sudoers file formats\n"
 "\n"
 msgstr ""
-"%s – zwischen sudoers Dateiformaten konvertieren\n"
+"%s – zwischen sudoers-Dateiformaten konvertieren\n"
 "\n"
 
 #: plugins/sudoers/cvtsudoers.c:1529
@@ -1833,21 +1834,22 @@ msgid ""
 msgstr ""
 "\n"
 "Optionen:\n"
-"  -b, --base=dn              Der Basis DN für sudo LDAP Abfragen\n"
-"  -d, --defaults=deftypes    Konvertiere nur Defaults von spezifischen Typen\n"
-"  -e, --expand-aliases       Expandiere Aliase beim Konvertieren\n"
-"  -f, --output-format=format Ausgabeformat: JSON, LDIF oder sudoers\n"
-"  -i, --input-format=format  Eingabeformat: LDIF oder sudoers\n"
-"  -I, --increment=num        Größe der Schrittweite für sudoOrder\n"
-"  -h, --help                 Zeige diese Hilfe an und Ende\n"
-"  -m, --match=filter         Konvertiere nur Einträge die zum Filter passen\n"
-"  -M, --match-local          Filter verwendet passwd und group Databank\n"
-"  -o, --output=output_file   Schreibe die konvertiere sudoers in die Ausgabe-Datei\n"
-"  -O, --order-start=num      Start für die erste sudoOrder\n"
-"  -p, --prune-matches        nicht passende Benutzer, Gruppen und Hosts nicht ausgeben\n"
-"  -P, --padding=num          Auffüllen der sudoOrder Folge\n"
-"  -s, --suppress=sections    Unterdrücke Ausgabe von bestimmten Abschnitten\n"
-"  -V, --version              Zeige Versionsinformationen an und Ende"
+"  -b, --base=dn              Der Basis-DN für LDAP-Abfragen mit sudo\n"
+"  -c, --config=Konf.datei    Pfad zur Konfigurationsdatei\n"
+"  -d, --defaults=Typen       Nur Vorgaben von spezifischen Typen konvertieren\n"
+"  -e, --expand-aliases       Aliase beim Konvertieren expandieren\n"
+"  -f, --output-format=Format Ausgabeformat: JSON, LDIF oder sudoers\n"
+"  -i, --input-format=Format  Eingabeformat: LDIF oder sudoers\n"
+"  -I, --increment=Zahl       Größe der Schrittweite für sudoOrder\n"
+"  -h, --help                 Diese Hilfe anzeigen und beenden\n"
+"  -m, --match=Filter         Nur Einträge verwenden, die zum Filter passen\n"
+"  -M, --match-local          Filter verwendet passwd- und group-Datenbank\n"
+"  -o, --output=Ausg.datei    Konvertierte sudoers in die Ausgabedatei schreiben\n"
+"  -O, --order-start=Zahl     Start für die erste sudoOrder\n"
+"  -p, --prune-matches        Nicht passende Benutzer, Gruppen und Hosts nicht ausgeben\n"
+"  -P, --padding=Zahl         Auffüllen der sudoOrder-Folge\n"
+"  -s, --suppress=Abschnitte  Ausgabe von bestimmten Abschnitten unterdrücken\n"
+"  -V, --version              Versionsinformationen anzeigen und beenden"
 
 #: plugins/sudoers/cvtsudoers_csv.c:476 plugins/sudoers/cvtsudoers_csv.c:490
 #: plugins/sudoers/cvtsudoers_json.c:755 plugins/sudoers/cvtsudoers_json.c:771
@@ -1867,7 +1869,7 @@ msgstr "Der Zeitstempel kann nicht formatiert werden"
 #: plugins/sudoers/cvtsudoers_json.c:836
 #, c-format
 msgid "%s:%d:%d: unknown defaults entry \"%s\""
-msgstr "%s:%d:%d: unbekannter defaults-Eintrag »%s«"
+msgstr "%s:%d:%d: Unbekannter defaults-Eintrag »%s«"
 
 #: plugins/sudoers/cvtsudoers_ldif.c:111
 #, c-format
@@ -1877,12 +1879,12 @@ msgstr "Der Wert »%s« kann nicht in base64 kodiert werden"
 #: plugins/sudoers/cvtsudoers_ldif.c:590
 #, c-format
 msgid "internal error, unable insert user %s"
-msgstr "Interner Fehler, kann den Benutzer »%s« nicht einfügen"
+msgstr "Interner Fehler; der Benutzer »%s« kann nicht eingefügt werden"
 
 #: plugins/sudoers/cvtsudoers_ldif.c:697
 #, c-format
 msgid "too many sudoers entries, maximum %u"
-msgstr "Zu viele sudoers Einträge, Maximum ist %u"
+msgstr "Zu viele sudoers-Einträge, Maximum ist %u"
 
 #: plugins/sudoers/cvtsudoers_ldif.c:742
 msgid "the SUDOERS_BASE environment variable is not set and the -b option was not specified."
@@ -1892,7 +1894,7 @@ msgstr "Die Umgebunsvariable SUDOERS_BASE ist nicht gesetzt und die Option -b is
 #: plugins/sudoers/cvtsudoers_merge.c:308
 #, c-format
 msgid "%s:%d:%d: converting host list to ALL"
-msgstr "%s:%d:%d: Konvertiere die Hostliste in »ALL«"
+msgstr "%s:%d:%d: Die Hostliste wird in »ALL« konvertiert"
 
 #: plugins/sudoers/cvtsudoers_merge.c:563
 #, c-format
@@ -1902,48 +1904,48 @@ msgstr "Der Alias »%s« kann nicht gefunden werden"
 #: plugins/sudoers/cvtsudoers_merge.c:567
 #, c-format
 msgid "%s:%d:%d: renaming alias %s to %s"
-msgstr "%s:%d:%d: Benenne »%s« in »%s« um"
+msgstr "%s:%d:%d: Alias »%s« wird in »%s« umbenannt"
 
 #: plugins/sudoers/cvtsudoers_merge.c:629
 #, c-format
 msgid "%s:%d:%d: removing duplicate alias %s"
-msgstr "%s:%d:%d: doppelter Alias »%s« entfernt"
+msgstr "%s:%d:%d: Doppelter Alias »%s« entfernt"
 
 #: plugins/sudoers/cvtsudoers_merge.c:863
 #, c-format
 msgid "%s:%d:%d: conflicting Defaults entry \"%s\" host-specific in %s:%d:%d"
-msgstr "%s:%d:%d: widersprüchlicher »Defaults«-Eintrag \"%s\" Host-spezifisch in %s:%d:%d"
+msgstr "%s:%d:%d: Widersprüchlicher »Defaults«-Eintrag \"%s\" Host-spezifisch in %s:%d:%d"
 
 #: plugins/sudoers/cvtsudoers_merge.c:899
 #, c-format
 msgid "%s:%d:%d: made Defaults \"%s\" specific to host %s"
-msgstr "%s:%d:%d: Mache »Defaults« »%s« spezifisch für Host »%s«"
+msgstr "%s:%d:%d: »Defaults« »%s« wurden spezifisch für Host »%s« gemacht"
 
 #: plugins/sudoers/cvtsudoers_merge.c:917
 #, c-format
 msgid "%s:%d:%d: unable to make Defaults \"%s\" host-specific"
-msgstr "%s:%d:%d: Kann Defaults »%s« nicht host-spezifisch machen"
+msgstr "%s:%d:%d: Defaults »%s« können nicht host-spezifisch gemacht werden"
 
 #: plugins/sudoers/cvtsudoers_merge.c:927
 #, c-format
 msgid "%s:%d:%d: removing Defaults \"%s\" overridden by subsequent entries"
-msgstr "%s:%d:%d: entferne Defaults \"%s\" überschrieben in folgenden Einträgen"
+msgstr "%s:%d:%d: Defaults \"%s\" werden entfernt, da sie in folgenden Einträgen außer Kraft gesetzt werden"
 
 #: plugins/sudoers/cvtsudoers_merge.c:1123
 #, c-format
 msgid "%s:%d:%d: merging userspec into %s:%d:%d"
-msgstr "%s:%d:%d: Führe »userspec« zusammen in %s:%d:%d"
+msgstr "%s:%d:%d: »userspec« wird in %s:%d:%d zusammengeführt"
 
 # XXX
 #: plugins/sudoers/cvtsudoers_merge.c:1219
 #, c-format
 msgid "%s:%d:%d: removing userspec overridden by subsequent entries"
-msgstr "%s:%d:%d: entferne durch nachfolgende Einträge überschriebene userspec "
+msgstr "%s:%d:%d: Durch nachfolgende Einträge außer Kraft gesetzte userspec wird entfernt"
 
 #: plugins/sudoers/def_data.c:58
 #, c-format
 msgid "Syslog facility if syslog is being used for logging: %s"
-msgstr "Syslog Facility, wenn syslog für Protokollierung verwendet wird: %s"
+msgstr "Syslog-Facility, wenn syslog für Protokollierung verwendet wird: %s"
 
 #: plugins/sudoers/def_data.c:62
 #, c-format
@@ -1957,7 +1959,7 @@ msgstr "Syslog-Priorität, wenn sich der Benutzer nicht erfolgreich authentifizi
 
 #: plugins/sudoers/def_data.c:70
 msgid "Put OTP prompt on its own line"
-msgstr "Die OTP-Eingabeaufforderung (One-Time-Passwords) in eine eigene Zeile schreiben"
+msgstr "Die OTP-Eingabeaufforderung (Einmalpasswörter) in eine eigene Zeile schreiben"
 
 #: plugins/sudoers/def_data.c:74
 msgid "Ignore '.' in $PATH"
@@ -1989,7 +1991,7 @@ msgstr "Eine Mail senden, wenn der Benutzer versucht, einen Befehl auszuführen"
 
 #: plugins/sudoers/def_data.c:102
 msgid "Use a separate timestamp for each user/tty combo"
-msgstr "Getrennte Zeitstempel für jede Benutzer/tty-Kombination verwenden"
+msgstr "Getrennte Zeitstempel für jede Benutzer/TTY-Kombination verwenden"
 
 #: plugins/sudoers/def_data.c:106
 msgid "Lecture user the first time they run sudo"
@@ -2042,7 +2044,7 @@ msgstr "»Beschimpfung« bei Eingabe eines falschen Passwortes"
 
 #: plugins/sudoers/def_data.c:154
 msgid "Only allow the user to run sudo if they have a tty"
-msgstr "Der Benutzer darf sudo nur aufrufen, wenn ein tty vorhanden ist"
+msgstr "Der Benutzer darf sudo nur aufrufen, wenn ein TTY vorhanden ist"
 
 #: plugins/sudoers/def_data.c:158
 msgid "Visudo will honor the EDITOR environment variable"
@@ -2192,11 +2194,11 @@ msgstr "Wann soll ein Passwort für den Pseudobefehl »verify« erforderlich sei
 
 #: plugins/sudoers/def_data.c:282
 msgid "Preload the sudo_noexec library which replaces the exec functions"
-msgstr "Preload der »sudo_noexec« Bibliothek zum Ersetzen der »exec« Funktionen"
+msgstr "Preload der »sudo_noexec«-Bibliothek zum Ersetzen der »exec«-Funktionen"
 
 #: plugins/sudoers/def_data.c:286
 msgid "If LDAP directory is up, do we ignore local sudoers file"
-msgstr "Wenn das LDAP-Verzeichnis erreichbar ist, ignorieren wir die lokale sudoers-Datei"
+msgstr "Wenn das LDAP-Verzeichnis erreichbar ist, wird die lokale sudoers-Datei ignoriert"
 
 #: plugins/sudoers/def_data.c:290
 #, c-format
@@ -2205,7 +2207,7 @@ msgstr "Datei-Deskriptoren >= %d werden geschlossen, bevor ein Befehl ausgeführ
 
 #: plugins/sudoers/def_data.c:294
 msgid "If set, users may override the value of \"closefrom\" with the -C option"
-msgstr "Benutzer können den Wert für »closefrom« mit der der Option -C überschreiben, wenn diese Option gesetzt ist"
+msgstr "Benutzer können den Wert für »closefrom« mit der der Option -C außer Kraft setzen, wenn diese Option gesetzt ist"
 
 #: plugins/sudoers/def_data.c:298
 msgid "Allow users to set arbitrary environment variables"
@@ -2276,7 +2278,7 @@ msgstr "Benutzereingaben für den ausgeführten Befehl protokollieren"
 
 #: plugins/sudoers/def_data.c:358
 msgid "Log the command's standard input if not connected to a terminal"
-msgstr "Standardeingabe des Kommandos protokollieren, wenn kein Terminal angebunden ist"
+msgstr "Standardeingabe des Befehls protokollieren, wenn kein Terminal angebunden ist"
 
 #: plugins/sudoers/def_data.c:362
 msgid "Log the user's terminal input for the command being run"
@@ -2288,11 +2290,11 @@ msgstr "Die Ausgabe des ausgeführten Befehls protokollieren"
 
 #: plugins/sudoers/def_data.c:370
 msgid "Log the command's standard output if not connected to a terminal"
-msgstr "Standardausgabe des Kommandos protokollieren, wenn kein Terminal angebunden ist"
+msgstr "Standardausgabe des Befehls protokollieren, wenn kein Terminal angebunden ist"
 
 #: plugins/sudoers/def_data.c:374
 msgid "Log the command's standard error if not connected to a terminal"
-msgstr "Standarderror des Kommandos protokollieren, wenn kein Terminal angebunden ist<"
+msgstr "Standardfehlerausgabe des Befehls protokollieren, wenn kein Terminal angebunden ist<"
 
 #: plugins/sudoers/def_data.c:378
 msgid "Log the terminal output of the command being run"
@@ -2369,11 +2371,11 @@ msgstr "Eine neue PAM-Sitzung erzeugen, um den Befehl auszuführen"
 
 #: plugins/sudoers/def_data.c:442
 msgid "Perform PAM account validation management"
-msgstr "Ausführen vom PAM-Account-Management"
+msgstr "Ausführen der PAM-Kontenverwaltung"
 
 #: plugins/sudoers/def_data.c:446
 msgid "Do not allow PAM authentication modules to generate output"
-msgstr "Erlaube PAM Authentifizierungsmodulen nicht Ausgaben zu erzeugen"
+msgstr "PAM-Authentifizierungsmodulen nicht erlauben, Ausgaben zu erzeugen"
 
 #: plugins/sudoers/def_data.c:450
 #, c-format
@@ -2386,81 +2388,81 @@ msgstr "Unterstützung für netgroups in sudoers aktivieren"
 
 #: plugins/sudoers/def_data.c:458
 msgid "Check parent directories for writability when editing files with sudoedit"
-msgstr "Prüfe die übergeordneten Verzeichnisse auf Schreibbarkeit beim Editieren von Dateien mit »sudoedit«"
+msgstr "Die übergeordneten Verzeichnisse auf Schreibbarkeit beim Bearbeiten von Dateien mit »sudoedit« überprüfen"
 
 #: plugins/sudoers/def_data.c:462
 msgid "Follow symbolic links when editing files with sudoedit"
-msgstr "Folge symbolischen Links beim Editieren von Dateien mit sudoedit"
+msgstr "Symbolischen Links beim Bearbeiten von Dateien mit sudoedit folgen"
 
 #: plugins/sudoers/def_data.c:466
 msgid "Query the group plugin for unknown system groups"
-msgstr "Frage das Group-Plugin nach unbekannten System-Gruppen"
+msgstr "Das Group-Plugin nach unbekannten System-Gruppen abfragen"
 
 #: plugins/sudoers/def_data.c:470
 msgid "Match netgroups based on the entire tuple: user, host and domain"
-msgstr "Prüfe die Netgroup-Zuordnung aufgrund des gesamten Tupels: Benutzer, Host und Domain"
+msgstr "Die Netgroup-Zuordnung aufgrund des gesamten Tupels prüfen: Benutzer, Host und Domain"
 
 #: plugins/sudoers/def_data.c:474
 msgid "Allow commands to be run even if sudo cannot write to the audit log"
-msgstr "Erlaubt das Ausführen von Kommandos, auch wenn kein Audit-Log geschrieben werden kann"
+msgstr "Das Ausführen von Befehlen erlauben, auch wenn kein Audit-Protokoll geschrieben werden kann"
 
 #: plugins/sudoers/def_data.c:478
 msgid "Allow commands to be run even if sudo cannot write to the I/O log"
-msgstr "Erlaubt das Ausführen von Kommandos, auch wenn kein I/O-Log geschrieben werden kann"
+msgstr "Das Ausführen von Befehlen erlauben, auch wenn kein E/A-Protokoll geschrieben werden kann"
 
 #: plugins/sudoers/def_data.c:482
 msgid "Allow commands to be run even if sudo cannot write to the log file"
-msgstr "Erlaubt das Ausführen von Kommandos, auch wenn kein Log geschrieben werden kann"
+msgstr "Das Ausführen von Befehlen erlauben, auch wenn kein Protokoll geschrieben werden kann"
 
 #: plugins/sudoers/def_data.c:486
 msgid "Resolve groups in sudoers and match on the group ID, not the name"
-msgstr "Beim Auflösen von Gruppen in der sudoers nach der Guppen-ID suchen, nicht nach dem Gruppenname"
+msgstr "Beim Auflösen von Gruppen in der sudoers nach der Gruppen-ID suchen, nicht nach dem Gruppennamen"
 
 #: plugins/sudoers/def_data.c:490
 #, c-format
 msgid "Log entries larger than this value will be split into multiple syslog messages: %u"
-msgstr "Log-Einträge größer als dieser Wert werden auf mehrere Syslog Einträge verteilt: %u"
+msgstr "Protokolleinträge größer als dieser Wert werden auf mehrere Syslog-Einträge verteilt: %u"
 
 #: plugins/sudoers/def_data.c:494
 #, c-format
 msgid "User that will own the I/O log files: %s"
-msgstr "Eigentümer der I/O Logdateien: %s"
+msgstr "Eigentümer der E/A-Protokolldateien: %s"
 
 #: plugins/sudoers/def_data.c:498
 #, c-format
 msgid "Group that will own the I/O log files: %s"
-msgstr "Gruppe der I/O Logdateien: %s"
+msgstr "Gruppe der E/A-Protokolldateien: %s"
 
 #: plugins/sudoers/def_data.c:502
 #, c-format
 msgid "File mode to use for the I/O log files: 0%o"
-msgstr "Dateimode der I/O Logdatei: 0%o"
+msgstr "Dateimodus der E/A-Protokolldateien: 0%o"
 
 #: plugins/sudoers/def_data.c:506
 #, c-format
 msgid "Execute commands by file descriptor instead of by path: %s"
-msgstr "Führe Kommandos mit Hilfe eines Dateideskriptors anstelle des Pfades aus: %s"
+msgstr "Befehle mit Hilfe eines Dateideskriptors anstelle des Pfades ausführen: %s"
 
 #: plugins/sudoers/def_data.c:510
 msgid "Ignore unknown Defaults entries in sudoers instead of producing a warning"
-msgstr "Ignoriere unbekannte Default-Einträge in der Datei »sudoers« anstatt eine Warnung auszugeben"
+msgstr "Unbekannte Default-Einträge in der Datei »sudoers« ignorieren, anstatt eine Warnung auszugeben"
 
 #: plugins/sudoers/def_data.c:514
 #, c-format
 msgid "Time in seconds after which the command will be terminated: %u"
-msgstr "Laufzeit in Sekunde, nach der das Kommando abgebrochen wird: %u"
+msgstr "Laufzeit in Sekunden, nach der die Befehlsausführung abgebrochen wird: %u"
 
 #: plugins/sudoers/def_data.c:518
 msgid "Allow the user to specify a timeout on the command line"
-msgstr "Erlaube dem Benutzer per Kommandozeile einen Timeout anzugeben"
+msgstr "Dem Benutzer erlauben, per Befehlszeile eine Zeitüberschreitung anzugeben"
 
 #: plugins/sudoers/def_data.c:522
 msgid "Flush I/O log data to disk immediately instead of buffering it"
-msgstr "Schreibe Log-Daten direkt ohne zu puffern"
+msgstr "E/A-Protokolldaten direkt schreiben, ohne zu puffern"
 
 #: plugins/sudoers/def_data.c:526
 msgid "Include the process ID when logging via syslog"
-msgstr "Protokolliere auch die Prozess-ID beim Schreiben ins Systemlog"
+msgstr "Auch die Prozess-ID beim Schreiben ins Systemprotokoll schreiben"
 
 #: plugins/sudoers/def_data.c:530
 #, c-format
@@ -2474,55 +2476,55 @@ msgstr "Fehler bei der Authentifizierung: %s"
 
 #: plugins/sudoers/def_data.c:538
 msgid "Ignore case when matching user names"
-msgstr "Ignoriere Groß-/Kleinschreibung beim Matchen von Benutzernamen"
+msgstr "Groß-/Kleinschreibung bei der Treffersuche nach Benutzernamen ignorieren"
 
 #: plugins/sudoers/def_data.c:542
 msgid "Ignore case when matching group names"
-msgstr "Ignoriere Groß-/Kleinschreibung beim Matchen von Gruppennamen"
+msgstr "Groß-/Kleinschreibung bei der Treffersuche nach Gruppennamen ignorieren"
 
 #: plugins/sudoers/def_data.c:546
 msgid "Log when a command is allowed by sudoers"
-msgstr "Protokolliere von sudo erlaubte Kommandos"
+msgstr "Von sudo erlaubte Befehle protokollieren"
 
 #: plugins/sudoers/def_data.c:550
 msgid "Log when a command is denied by sudoers"
-msgstr "Protokolliere von sudo verweigerte Kommandos"
+msgstr "Von sudo abgewiesene Befehle protokollieren"
 
 #: plugins/sudoers/def_data.c:554
 msgid "Sudo log server(s) to connect to with optional port"
-msgstr "Sudo Log Server mit optionalem Port für die Verbindung"
+msgstr "Sudo-Protokollserver mit optionalem Port für die Verbindung"
 
 #: plugins/sudoers/def_data.c:558
 #, c-format
 msgid "Sudo log server timeout in seconds: %u"
-msgstr "Sudo Log-Server Timeout in Secunden: %u"
+msgstr "Zeitüberschreitung auf dem sudo-Protokollserver in Sekunden: %u"
 
 #: plugins/sudoers/def_data.c:562
 msgid "Enable SO_KEEPALIVE socket option on the socket connected to the logserver"
-msgstr "Verwende die SO_KEEPALIVE Socket Option für die Verbindung zum Logserver"
+msgstr "Die SO_KEEPALIVE-Socket-Option für die Verbindung zum Protokollserver aktivieren"
 
 #: plugins/sudoers/def_data.c:566
 #, c-format
 msgid "Path to the audit server's CA bundle file: %s"
-msgstr "Pfad zur Zertifikats-Bündel-Datei des Audit Servers: %s"
+msgstr "Pfad zur Zertifikats-Bündel-Datei des Audit-Servers: %s"
 
 #: plugins/sudoers/def_data.c:570
 #, c-format
 msgid "Path to the sudoers certificate file: %s"
-msgstr "Pfad zur sudoers Zertifikats-Datei: %s"
+msgstr "Pfad zur sudoers-Zertifikats-Datei: %s"
 
 #: plugins/sudoers/def_data.c:574
 #, c-format
 msgid "Path to the sudoers private key file: %s"
-msgstr "Pfad zur sudoers Datei mit dem privaten Schlüssel: %s"
+msgstr "Pfad zur sudoers-Datei mit dem privaten Schlüssel: %s"
 
 #: plugins/sudoers/def_data.c:578
 msgid "Verify that the log server's certificate is valid"
-msgstr "Prüfe das Log-Server-Zertifikat auf Gültigkeit"
+msgstr "Das Protokollserver-Zertifikat auf Gültigkeit prüfen"
 
 #: plugins/sudoers/def_data.c:582
 msgid "Allow the use of unknown runas user and/or group ID"
-msgstr "Erlaube die Verwendung eines unbekannten »runas« Benutzers oder Gruppen-ID"
+msgstr "Die Verwendung eines unbekannten »runas«-Benutzers und/oder Gruppen-ID erlauben"
 
 #: plugins/sudoers/def_data.c:586
 msgid "Only permit running commands as a user with a valid shell"
@@ -2530,16 +2532,16 @@ msgstr "Nur die Ausführung von Kommandos erlauben für Benutzer mit einer gült
 
 #: plugins/sudoers/def_data.c:590
 msgid "Set the pam remote user to the user running sudo"
-msgstr "Setze den PAM remote Benutzer auf den Benutzer, der sudo ausführt"
+msgstr "Den PAM-Remote-Benutzer auf den Benutzer setzen, der sudo ausführt"
 
 #: plugins/sudoers/def_data.c:594
 msgid "Set the pam remote host to the local host name"
-msgstr "Setze den PAM remote Rechner auf den lokalen Hostname"
+msgstr "Den PAM-Remote-Rechner auf den lokalen Hostnamen setzen"
 
 #: plugins/sudoers/def_data.c:598
 #, c-format
 msgid "Working directory to change to before executing the command: %s"
-msgstr "Arbeitsverzeichnis um vor Ausführung des Kommandos dorthin zu wechseln: %s"
+msgstr "Arbeitsverzeichnis, in das vor Ausführung des Befehls gewechselt werden soll: %s"
 
 #: plugins/sudoers/def_data.c:602
 #, c-format
@@ -2549,24 +2551,24 @@ msgstr "Root-Verzeichnis zur Verwendung, bevor ein Befehl ausgeführt wird: %s"
 #: plugins/sudoers/def_data.c:606
 #, c-format
 msgid "The format of logs to produce: %s"
-msgstr "Das Format der zu schreibenden Logs: %s"
+msgstr "Das Format der zu schreibenden Protokolle: %s"
 
 #: plugins/sudoers/def_data.c:610
 msgid "Enable SELinux RBAC support"
-msgstr "Schalte SELinux RBAC Support ein"
+msgstr "SELinux-RBAC-Unterstützung einschalten"
 
 #: plugins/sudoers/def_data.c:614
 #, c-format
 msgid "Path to the file that is created the first time sudo is run: %s"
-msgstr "Pfad zur Datei die beim ersten sudo-Lauf erzeugt wird: %s"
+msgstr "Pfad zur Datei, die beim ersten sudo-Lauf erzeugt wird: %s"
 
 #: plugins/sudoers/def_data.c:618
 msgid "Intercept further commands and apply sudoers restrictions to them"
-msgstr "Weitere Kommando abfangen und sudoers Restriktionen auf sie anwenden"
+msgstr "Weitere Befehle abfangen und sudoers-Restriktionen auf sie anwenden"
 
 #: plugins/sudoers/def_data.c:622
 msgid "Log sub-commands run by the original command"
-msgstr "Protokolliere von diesem Kommando gestartete Kind-Prozesse"
+msgstr "Von diesem Befehl gestartete Teilbefehle protokollieren"
 
 #: plugins/sudoers/def_data.c:626
 msgid "Log the exit status of commands"
@@ -2575,16 +2577,16 @@ msgstr "Den Exitcode des ausgeführten Befehls protokollieren"
 # XXX Check!
 #: plugins/sudoers/def_data.c:630
 msgid "Subsequent commands in an intercepted session must be authenticated"
-msgstr "Folgende Kommando in einer nachverfolgten Sitzung müssen authentifiziert werden"
+msgstr "Folgende Befehle in einer nachverfolgten Sitzung müssen authentifiziert werden"
 
 #: plugins/sudoers/def_data.c:634
 msgid "Allow an intercepted command to run set setuid or setgid programs"
-msgstr "Erlaube einem abgefangenen Kommando die Ausführung von setuid oder setgid Programmen"
+msgstr "Einem abgefangenen Befehl die Ausführung von setuid- oder setgid-Programmen erlauben"
 
 #: plugins/sudoers/def_data.c:638
 #, c-format
 msgid "The maximum size to which the process's address space may grow (in bytes): %s"
-msgstr "Die maximale Größe zu der der Adressbereich des Prozesse wachsen kann (in Bytes): %s"
+msgstr "Die maximale Größe, bis zu der der Adressbereich des Prozesses wachsen kann (in Bytes): %s"
 
 #: plugins/sudoers/def_data.c:642
 #, c-format
@@ -2594,12 +2596,12 @@ msgstr "Die maximale Größe eines erzeugten Core Dumps (in Bytes): %s"
 #: plugins/sudoers/def_data.c:646
 #, c-format
 msgid "The maximum amount of CPU time that the process may use (in seconds): %s"
-msgstr "Die maximale CPU Zeit die vom Prozess genutzt werden kann (in Sekunden): %s"
+msgstr "Die maximale CPU-Zeit, die vom Prozess genutzt werden kann (in Sekunden): %s"
 
 #: plugins/sudoers/def_data.c:650
 #, c-format
 msgid "The maximum size of the data segment for the process (in bytes): %s"
-msgstr "Die maximale Größe des Data Segments für den Prozess (in Bytes): %s"
+msgstr "Die maximale Größe des Datensegments für den Prozess (in Bytes): %s"
 
 #: plugins/sudoers/def_data.c:654
 #, c-format
@@ -2624,12 +2626,12 @@ msgstr "Die maximale Anzahl offener Dateien des Prozesses: %s"
 #: plugins/sudoers/def_data.c:670
 #, c-format
 msgid "The maximum number of processes that the user may run simultaneously: %s"
-msgstr "Die maximale Anzahl von gleichzeitige laufenden Prozessen des Benutzers: %s"
+msgstr "Die maximale Anzahl von gleichzeitig laufenden Prozessen des Benutzers: %s"
 
 #: plugins/sudoers/def_data.c:674
 #, c-format
 msgid "The maximum size to which the process's resident set size may grow (in bytes): %s"
-msgstr "Die maximle Größe des residenten Speichers vom Prozess (in Bytes): %s"
+msgstr "Die maximle Größe des residenten Speichers des Prozesses (in Bytes): %s"
 
 #: plugins/sudoers/def_data.c:678
 #, c-format
@@ -2642,20 +2644,20 @@ msgstr "Authentifzierung auch im nicht-interaktiven Modus versuchen"
 
 #: plugins/sudoers/def_data.c:686
 msgid "Store plaintext passwords in I/O log input"
-msgstr "Klartext-Passwörter im Ein-Ausgabe-Log als Eingabe protokollieren"
+msgstr "Klartext-Passwörter im E/A-Protokoll als Eingabe protokollieren"
 
 #: plugins/sudoers/def_data.c:690
 msgid "List of regular expressions to use when matching a password prompt"
-msgstr "Liste von regulären Ausdrücken zum Matchen des Passwort-Prompts"
+msgstr "Liste von regulären Ausdrücken für die Treffersuche des Passwort-Prompts"
 
 #: plugins/sudoers/def_data.c:694
 #, c-format
 msgid "The mechanism used by the intercept and log_subcmds options: %s"
-msgstr "Der Mechanismus für »intercept« und »log_subcmds« Optionen: %s"
+msgstr "Der Mechanismus für »intercept«- und »log_subcmds«-Optionen: %s"
 
 #: plugins/sudoers/def_data.c:698
 msgid "Attempt to verify the command and arguments after execution"
-msgstr "Versuche das Kommando und die Argumente nach der Ausführung zu verifizieren"
+msgstr "Versuchen, den Befehl und die Argumente nach der Ausführung zu verifizieren"
 
 #: plugins/sudoers/def_data.c:702
 #, c-format
@@ -2665,12 +2667,12 @@ msgstr "Im neuen Security-Kontext von AppArmor wird diese Rolle verwendet: %s"
 #: plugins/sudoers/def_data.c:706
 #, c-format
 msgid "Command denial message: %s"
-msgstr "Meldung bei verweigertem Kommando: %s"
+msgstr "Meldung bei abgewiesenem Befehl: %s"
 
 #: plugins/sudoers/defaults.c:204
 #, c-format
 msgid "unknown defaults entry \"%s\""
-msgstr "unbekannter defaults-Eintrag »%s«"
+msgstr "Unbekannter defaults-Eintrag »%s«"
 
 #: plugins/sudoers/defaults.c:248
 #, c-format
@@ -2690,7 +2692,7 @@ msgstr "Die Option »%s« wird ohne Wert verwendet"
 #: plugins/sudoers/defaults.c:316
 #, c-format
 msgid "invalid Defaults type 0x%x for option \"%s\""
-msgstr "Ungültiger »Defaults« Typ 0x%x für Option »%s«"
+msgstr "Ungültiger »Defaults«-Typ 0x%x für Option »%s«"
 
 #: plugins/sudoers/defaults.c:323
 #, c-format
@@ -2762,11 +2764,11 @@ msgstr "Der Benutzer %s darf sudo auf dem Rechner %s nicht ausführen.\n"
 #: plugins/sudoers/editor.c:175
 #, c-format
 msgid "ignoring editor: %.*s"
-msgstr "Ignoriere Editor: %.*s"
+msgstr "Editor wird ignoriert: %.*s"
 
 #: plugins/sudoers/editor.c:176
 msgid "editor arguments may not contain \"--\""
-msgstr "Editor Argumente dürfen »--« nicht enthalten"
+msgstr "Editor-Argumente dürfen kein »--« enthalten"
 
 #: plugins/sudoers/env.c:438
 msgid "sudo_putenv: corrupted envp, length mismatch"
@@ -2774,12 +2776,12 @@ msgstr "sudo_putenv: envp ist beschädigt, die Längen passen nicht"
 
 #: plugins/sudoers/env.c:1134
 msgid "unable to rebuild the environment"
-msgstr "Das Environment kann nicht neu erstellt werden"
+msgstr "Die Umgebung kann nicht neu erstellt werden"
 
 #: plugins/sudoers/env.c:1214
 #, c-format
 msgid "sorry, you are not allowed to set the following environment variables: %s"
-msgstr "Leider dürfen die folgenden Umgebungsvariablen nicht gesetzt werden: %s"
+msgstr "Die folgenden Umgebungsvariablen dürfen nicht gesetzt werden: %s"
 
 #: plugins/sudoers/filedigest.c:45
 #, c-format
@@ -2804,17 +2806,17 @@ msgstr "Das Symbol »group_plugin« kann in %s nicht gefunden werden"
 #: plugins/sudoers/group_plugin.c:181
 #, c-format
 msgid "%s: incompatible group plugin major version %d, expected %d"
-msgstr "%s: Die Major-Version %d des Group-Plugins ist inkompatibel, erwartet wird %d"
+msgstr "%s: Die Hauptversion %d des Group-Plugins ist inkompatibel, erwartet wird %d"
 
 #: plugins/sudoers/interfaces.c:71 plugins/sudoers/interfaces.c:88
 #, c-format
 msgid "unable to parse IP address \"%s\""
-msgstr "»%s« ist keine gültige IP-Adresse"
+msgstr "IP-Adresse »%s« kann nicht analysiert werden"
 
 #: plugins/sudoers/interfaces.c:76 plugins/sudoers/interfaces.c:93
 #, c-format
 msgid "unable to parse netmask \"%s\""
-msgstr "»%s« ist keine gültige Netzmaske"
+msgstr "Netzmaske »%s« kann nicht analysiert werden"
 
 #: plugins/sudoers/interfaces.c:121
 msgid "Local IP address and netmask pairs:\n"
@@ -2822,7 +2824,7 @@ msgstr "Lokale IP-Adresse und Netzmaske:\n"
 
 #: plugins/sudoers/iolog.c:697
 msgid "unable to update sequence file"
-msgstr "Kann die Sequenz-Datei nicht aktualisieren"
+msgstr "Die Sequenz-Datei kann nicht aktualisiert werden"
 
 #: plugins/sudoers/iolog.c:732 plugins/sudoers/iolog.c:921
 #: plugins/sudoers/iolog.c:1081 plugins/sudoers/iolog.c:1088
@@ -2830,7 +2832,7 @@ msgstr "Kann die Sequenz-Datei nicht aktualisieren"
 #: plugins/sudoers/iolog.c:1311 plugins/sudoers/iolog.c:1318
 #, c-format
 msgid "unable to write to I/O log file: %s"
-msgstr "In die I/O Logdatei kann nicht geschrieben werden: %s"
+msgstr "In die E/A-Protokolldatei kann nicht geschrieben werden: %s"
 
 #: plugins/sudoers/iolog.c:740
 #, c-format
@@ -2840,7 +2842,7 @@ msgstr "Die Datei %s%s kann nicht erstellt werden"
 #: plugins/sudoers/iolog.c:969
 #, c-format
 msgid "%s: internal error, I/O log file for event %d not open"
-msgstr "%s: Interner Fehler, Logdatei für Event %d nicht geöffnet"
+msgstr "%s: Interner Fehler, E/A-Protokolldatei für Event %d nicht geöffnet"
 
 #: plugins/sudoers/iolog.c:1066 plugins/sudoers/iolog.c:1192
 #: plugins/sudoers/iolog.c:1295 plugins/sudoers/timestamp.c:900
@@ -2881,7 +2883,7 @@ msgstr "start_tls ist angegeben, aber die LDAP-Bibliotheken unterstützen ldap_s
 #: plugins/sudoers/ldap.c:1769 plugins/sudoers/parse_ldif.c:740
 #, c-format
 msgid "invalid sudoOrder attribute: %s"
-msgstr "Ungültiges »sudoOrder« Attribut: %s"
+msgstr "Ungültiges »sudoOrder«-Attribut: %s"
 
 #: plugins/sudoers/ldap_conf.c:192
 #, c-format
@@ -2903,7 +2905,7 @@ msgstr "ldap- und ldaps-Adressen können nicht zusammen verwendet werden"
 #: plugins/sudoers/ldap_util.c:538 plugins/sudoers/ldap_util.c:546
 #, c-format
 msgid "duplicate sudoOption: %s%s%s"
-msgstr "doppelte sudoOption: %s%s%s"
+msgstr "Doppelte sudoOption: %s%s%s"
 
 #: plugins/sudoers/ldap_util.c:564 plugins/sudoers/ldap_util.c:566
 #, c-format
@@ -2926,17 +2928,17 @@ msgstr "Fehler in der Event-Schleife"
 #: plugins/sudoers/log_client.c:209
 #, c-format
 msgid "Creation of new SSL_CTX object failed: %s"
-msgstr "Erzeugen eines neuen SSL_CTX Objektes fehlgeschlagen: %s"
+msgstr "Erzeugen eines neuen SSL_CTX-Objektes fehlgeschlagen: %s"
 
 #: plugins/sudoers/log_client.c:234
 #, c-format
 msgid "unable to load certificate authority bundle %s"
-msgstr "Kann das CA-Bundle »%s« nicht laden"
+msgstr "Das CA-Bundle »%s« nicht geladen werden"
 
 #: plugins/sudoers/log_client.c:256
 #, c-format
 msgid "unable to load certificate %s"
-msgstr "Laden von Zertifikat »%s« fehlgeschlagen"
+msgstr "Laden des Zertifikats »%s« fehlgeschlagen"
 
 #: plugins/sudoers/log_client.c:270
 #, c-format
@@ -2946,20 +2948,20 @@ msgstr "Laden des privaten Schlüssels »%s« fehlgeschlagen"
 #: plugins/sudoers/log_client.c:279
 #, c-format
 msgid "Unable to allocate ssl object: %s"
-msgstr "Kann kein SSL-Objekt anlegen: %s"
+msgstr "SSL-Objekt kann nicht angelegt werden: %s"
 
 #: plugins/sudoers/log_client.c:368 plugins/sudoers/log_client.c:373
 #, c-format
 msgid "TLS connection to %s:%s failed: %s"
-msgstr "TLS Verbindung zu %s:%s fehlgeschlagen: %s"
+msgstr "TLS-Verbindung zu %s:%s fehlgeschlagen: %s"
 
 #: plugins/sudoers/log_client.c:549
 msgid "TLS initialization was unsuccessful"
-msgstr "TLS Initialisierung war nicht erfolgreich"
+msgstr "TLS-Initialisierung war nicht erfolgreich"
 
 #: plugins/sudoers/log_client.c:559
 msgid "TLS handshake was unsuccessful"
-msgstr "TLS Handshake war nicht erfolgreich"
+msgstr "TLS-Handshake war nicht erfolgreich"
 
 #: plugins/sudoers/log_client.c:1287
 #, c-format
@@ -2968,7 +2970,7 @@ msgstr "%s: Interner Fehler, ungültiger Exit-Status %d"
 
 #: plugins/sudoers/log_client.c:1849 plugins/sudoers/log_client.c:1875
 msgid "lost connection to log server"
-msgstr "Verbindung zum Logserver verloren"
+msgstr "Verbindung zum Protokollserver verloren"
 
 #: plugins/sudoers/log_client.c:1956
 msgid "missing write buffer"
@@ -2976,7 +2978,7 @@ msgstr "Schreib-Puffer fehlt"
 
 #: plugins/sudoers/log_client.c:2116
 msgid "unable to connect to log server"
-msgstr "Verbindung zum Logserver kann nicht aufgebaut werden"
+msgstr "Verbindung zum Protokollserver kann nicht aufgebaut werden"
 
 #: plugins/sudoers/logging.c:290
 msgid "user NOT in sudoers"
@@ -2988,7 +2990,7 @@ msgstr "Der Benutzer ist NICHT auf dem Rechner autorisiert"
 
 #: plugins/sudoers/logging.c:294
 msgid "setid command rejected in intercept mode"
-msgstr "setid Kommand verweigert im Intercept Modus"
+msgstr "setid-Befehl verweigert im Intercept-Modus"
 
 #: plugins/sudoers/logging.c:296
 msgid "command not allowed"
@@ -2997,9 +2999,7 @@ msgstr "Der Befehl ist nicht erlaubt"
 #: plugins/sudoers/logging.c:317
 #, c-format
 msgid "%s is not in the sudoers file.\n"
-msgstr ""
-"»%s« ist nicht in der sudoers-Datei.\n"
-"\n"
+msgstr "»%s« ist nicht in der sudoers-Datei.\n"
 
 #: plugins/sudoers/logging.c:320
 #, c-format
@@ -3013,12 +3013,12 @@ msgstr "%s: %s\n"
 
 #: plugins/sudoers/logging.c:324
 msgid "setid commands are not permitted in intercept mode"
-msgstr "setid Commandos sind im Intercept Modus nicht erlaubt"
+msgstr "setid-Befehle sind im Intercept-Modus nicht erlaubt"
 
 #: plugins/sudoers/logging.c:326
 #, c-format
 msgid "Sorry, user %s may not run sudo on %s.\n"
-msgstr "Leider darf der Benutzer %s sudo für %s nicht verwenden.\n"
+msgstr "Leider darf der Benutzer %s sudo auf %s nicht verwenden.\n"
 
 #: plugins/sudoers/logging.c:339
 #, c-format
@@ -3073,7 +3073,7 @@ msgstr "%s:%d:%d: %s"
 #: plugins/sudoers/logging.c:1124
 #, c-format
 msgid "unable to write log file %s"
-msgstr "In die Logdatei %s kann nicht geschrieben werden"
+msgstr "In die Protokolldatei %s kann nicht geschrieben werden"
 
 #: plugins/sudoers/match_digest.c:118
 #, c-format
@@ -3088,7 +3088,7 @@ msgstr "Prüfsumme für %s (%s) ist nicht in der Form %s"
 #: plugins/sudoers/parse_ldif.c:610
 #, c-format
 msgid "ignoring incomplete sudoRole: cn: %s"
-msgstr "ignoriere die unvollständige sudoRole: cn: %s"
+msgstr "Die unvollständige sudoRole wird ignoriert: cn: %s"
 
 #: plugins/sudoers/parse_ldif.c:670
 #, c-format
@@ -3103,11 +3103,11 @@ msgstr "%s:%d:%d: %s\n"
 #: plugins/sudoers/policy.c:73 plugins/sudoers/policy.c:106
 #, c-format
 msgid "invalid %.*s set by sudo front-end"
-msgstr "ungültige Option »%.*s« durch das sudo-Frontend angegeben"
+msgstr "Ungültige Option »%.*s« durch das sudo-Frontend angegeben"
 
 #: plugins/sudoers/policy.c:342 plugins/sudoers/testsudoers.c:324
 msgid "unable to parse network address list"
-msgstr "Die Netzwerkadressliste kann nicht eingelesen werden"
+msgstr "Die Netzwerkadressliste kann nicht analysiert werden"
 
 #: plugins/sudoers/policy.c:553
 msgid "user name not set by sudo front-end"
@@ -3115,7 +3115,7 @@ msgstr "Benutzername nicht durch das sudo-Frontend angegeben"
 
 #: plugins/sudoers/policy.c:557
 msgid "user-ID not set by sudo front-end"
-msgstr "User-ID nicht durch das sudo-Frontend angegeben"
+msgstr "Benutzer-ID nicht durch das sudo-Frontend angegeben"
 
 #: plugins/sudoers/policy.c:561
 msgid "group-ID not set by sudo front-end"
@@ -3133,7 +3133,7 @@ msgstr "Ungültiges Arbeitsverzeichnis: %s"
 #: plugins/sudoers/policy.c:950
 #, c-format
 msgid "invalid chroot directory: %s"
-msgstr "Ungültiges »chroot« Verzeichnis: %s"
+msgstr "Ungültiges »chroot«-Verzeichnis: %s"
 
 #: plugins/sudoers/policy.c:1161 plugins/sudoers/visudo.c:914
 #: plugins/sudoers/visudo.c:1213
@@ -3145,7 +3145,7 @@ msgstr "%s kann nicht ausgeführt werden"
 #: plugins/sudoers/policy.c:1287 plugins/sudoers/policy.c:1305
 #, c-format
 msgid "%s: invalid mode flags from sudo front end: 0x%x"
-msgstr "%s: ungültige Mode-Flags vom sudo-Frontend: 0x%x"
+msgstr "%s: Ungültige Modus-Flags vom sudo-Frontend: 0x%x"
 
 #: plugins/sudoers/policy.c:1328
 #, c-format
@@ -3210,17 +3210,17 @@ msgstr "Der Benutzer %s kann nicht zwischengespeichert werden"
 #: plugins/sudoers/pwutil.c:322
 #, c-format
 msgid "unable to cache user %s, already exists"
-msgstr "Der Benutzer %s kann nicht in den Zwischenspeicher aufgenommen werden, er existiert bereits"
+msgstr "Der Benutzer %s kann nicht zwischengespeichert werden, er existiert bereits"
 
 #: plugins/sudoers/pwutil.c:554 plugins/sudoers/pwutil.c:572
 #, c-format
 msgid "unable to cache gid %u"
-msgstr "Die Gruppen-ID %u kann nicht in den Zwischenspeicher aufgenommen werden"
+msgstr "Die Gruppen-ID %u kann nicht zwischengespeichert werden"
 
 #: plugins/sudoers/pwutil.c:566
 #, c-format
 msgid "unable to cache gid %u, already exists"
-msgstr "Die Gruppen-ID %u kann nicht in den Zwischenspeicher aufgenommen werden, sie existiert bereits"
+msgstr "Die Gruppen-ID %u kann nicht zwischengespeichert werden, sie existiert bereits"
 
 #: plugins/sudoers/pwutil.c:620 plugins/sudoers/pwutil.c:638
 #: plugins/sudoers/pwutil.c:699 plugins/sudoers/pwutil.c:748
@@ -3231,29 +3231,29 @@ msgstr "Die Gruppe %s kann nicht zwischengespeichert werden"
 #: plugins/sudoers/pwutil.c:633
 #, c-format
 msgid "unable to cache group %s, already exists"
-msgstr "Die Gruppe %s kann nicht in den Zwischenspeicher aufgenommen werden, sie existiert bereits"
+msgstr "Die Gruppe %s kann nicht zwischengespeichert werden, sie existiert bereits"
 
 #: plugins/sudoers/pwutil.c:895 plugins/sudoers/pwutil.c:983
 #: plugins/sudoers/pwutil.c:1037 plugins/sudoers/pwutil.c:1096
 #, c-format
 msgid "unable to cache group list for %s, already exists"
-msgstr "Die Gruppen-Liste für %s kann nicht in den Zwischenspeicher aufgenommen werden, sie existiert bereits"
+msgstr "Die Gruppenliste für %s kann nicht zwischengespeichert werden, sie existiert bereits"
 
 #: plugins/sudoers/pwutil.c:901 plugins/sudoers/pwutil.c:988
 #: plugins/sudoers/pwutil.c:1043 plugins/sudoers/pwutil.c:1101
 #, c-format
 msgid "unable to cache group list for %s"
-msgstr "Die Gruppenliste für %s können nicht zwischengespeichert werden"
+msgstr "Die Gruppenliste für %s kann nicht zwischengespeichert werden"
 
 #: plugins/sudoers/pwutil.c:977
 #, c-format
 msgid "unable to parse groups for %s"
-msgstr "Die Gruppen für %s können nicht eingelesen werden"
+msgstr "Die Gruppen für %s können nicht analysiert werden"
 
 #: plugins/sudoers/pwutil.c:1090
 #, c-format
 msgid "unable to parse gids for %s"
-msgstr "Die Gruppen für %s können nicht geparst werden"
+msgstr "Die Gruppen-IDs für %s können nicht analysiert werden"
 
 #: plugins/sudoers/set_perms.c:115 plugins/sudoers/set_perms.c:452
 #: plugins/sudoers/set_perms.c:865 plugins/sudoers/set_perms.c:1181
@@ -3277,7 +3277,7 @@ msgstr "Wechsel zur root-GID ist nicht möglich"
 #: plugins/sudoers/set_perms.c:277 plugins/sudoers/set_perms.c:607
 #: plugins/sudoers/set_perms.c:1008 plugins/sudoers/set_perms.c:1323
 msgid "unable to change to runas gid"
-msgstr "Wechsel zur runas-UID ist nicht möglich"
+msgstr "Wechsel zur runas-GID ist nicht möglich"
 
 #: plugins/sudoers/set_perms.c:282 plugins/sudoers/set_perms.c:612
 #: plugins/sudoers/set_perms.c:1013 plugins/sudoers/set_perms.c:1328
@@ -3287,7 +3287,7 @@ msgstr "Die runas-Gruppen können nicht gesetzt werden"
 #: plugins/sudoers/set_perms.c:293 plugins/sudoers/set_perms.c:623
 #: plugins/sudoers/set_perms.c:1022 plugins/sudoers/set_perms.c:1337
 msgid "unable to change to runas uid"
-msgstr "Wechsel zur runas-GID ist nicht möglich"
+msgstr "Wechsel zur runas-UID ist nicht möglich"
 
 #: plugins/sudoers/set_perms.c:315 plugins/sudoers/set_perms.c:645
 #: plugins/sudoers/set_perms.c:1042 plugins/sudoers/set_perms.c:1357
@@ -3328,7 +3328,7 @@ msgstr "Das Symbol »%s« kann in %s nicht gefunden werden"
 #: plugins/sudoers/sudoers.c:245
 #, c-format
 msgid "unable to get defaults from %s"
-msgstr "Kann die Defaults von »%s« nicht bekommen"
+msgstr "Die Defaults von »%s« können nicht ermittelt werden"
 
 #: plugins/sudoers/sudoers.c:254
 msgid "no valid sudoers sources found, quitting"
@@ -3336,11 +3336,11 @@ msgstr "Keine gültige sudoers-Quelle gefunden, Programmende"
 
 #: plugins/sudoers/sudoers.c:352
 msgid "user not allowed to set remote host for command"
-msgstr "Der Benutzer darf keinen remote Server angeben"
+msgstr "Der Benutzer darf keinen Remote-Server für den Befehl angeben"
 
 #: plugins/sudoers/sudoers.c:354
 msgid "a remote host may only be specified when listing privileges."
-msgstr "Ein entfernter Rechner kann nur verwendet werden beim Anzeigen von Privilegien."
+msgstr "Ein entfernter Rechner kann nur beim Anzeigen von Privilegien angegeben werden."
 
 #: plugins/sudoers/sudoers.c:373
 msgid "sudoers specifies that root is not allowed to sudo"
@@ -3356,7 +3356,7 @@ msgstr "Sie dürfen die Option -C nicht verwenden"
 
 #: plugins/sudoers/sudoers.c:447
 msgid "no tty"
-msgstr "Kein tty"
+msgstr "Kein TTY"
 
 #: plugins/sudoers/sudoers.c:448
 msgid "sorry, you must have a tty to run sudo"
@@ -3365,7 +3365,7 @@ msgstr "Sie müssen ein TTY haben, um sudo zu verwenden"
 #: plugins/sudoers/sudoers.c:456
 #, c-format
 msgid "invalid shell for user %s: %s"
-msgstr "Ungültiger Shell für den Benutzer %s: %s"
+msgstr "Ungültige Shell für den Benutzer %s: %s"
 
 #: plugins/sudoers/sudoers.c:498
 #, c-format
@@ -3375,7 +3375,7 @@ msgstr "Der Benutzer darf das root-Verzeichnis nicht auf »%s« ändern"
 #: plugins/sudoers/sudoers.c:500
 #, c-format
 msgid "you are not permitted to use the -R option with %s"
-msgstr "Sie dürfen die Option -R nicht mit dem Kommando »%s« verwenden"
+msgstr "Sie dürfen die Option -R nicht mit dem Befehl »%s« verwenden"
 
 #: plugins/sudoers/sudoers.c:513
 #, c-format
@@ -3385,7 +3385,7 @@ msgstr "Der Benutzer darf das Verzeichnis nicht auf %s ändern"
 #: plugins/sudoers/sudoers.c:514
 #, c-format
 msgid "you are not permitted to use the -D option with %s"
-msgstr "Sie dürfen die Option -D nicht mit dem Kommando »%s« verwenden"
+msgstr "Sie dürfen die Option -D nicht mit dem Befehl »%s« verwenden"
 
 #: plugins/sudoers/sudoers.c:566
 msgid "command in current directory"
@@ -3393,7 +3393,7 @@ msgstr "Befehl ist im aktuellen Verzeichnis"
 
 #: plugins/sudoers/sudoers.c:581
 msgid "\"cd\" is a shell built-in command, it cannot be run directly."
-msgstr "»cd\"« ist ein Shell-internes Kommando, das nicht direkt gestartet werden kann."
+msgstr "»cd\"« ist ein Shell-interner Befehl, der nicht direkt gestartet werden kann."
 
 #: plugins/sudoers/sudoers.c:583
 msgid "the -s option may be used to run a privileged shell."
@@ -3405,23 +3405,23 @@ msgstr "Die Option »-D« kann zum Start des Programms im angegebenen Verzeichni
 
 #: plugins/sudoers/sudoers.c:594
 msgid "user not allowed to set a command timeout"
-msgstr "Der Benutzer darf keinen Kommand-Timeout angeben"
+msgstr "Der Benutzer darf keine Befehls-Zeitüberschreitung angeben"
 
 #: plugins/sudoers/sudoers.c:596
 msgid "sorry, you are not allowed set a command timeout"
-msgstr "Sie dürfen keinen Timeout angeben"
+msgstr "Sie dürfen keine Befehls-Zeitüberschreitung angeben"
 
 #: plugins/sudoers/sudoers.c:604
 msgid "user not allowed to preserve the environment"
-msgstr "Der Benutzer darf das Environment nicht erhalten"
+msgstr "Der Benutzer darf die Umgebung nicht beibehalten"
 
 #: plugins/sudoers/sudoers.c:606
 msgid "sorry, you are not allowed to preserve the environment"
-msgstr "Sie dürfen das Environment nicht erhalten"
+msgstr "Sie dürfen die Umgebung nicht beibehalten"
 
 #: plugins/sudoers/sudoers.c:642
 msgid "no command specified"
-msgstr "Kein Kommando angegeben"
+msgstr "Kein Befehl angegeben"
 
 #: plugins/sudoers/sudoers.c:783
 msgid "error setting user-specified environment variables"
@@ -3435,7 +3435,7 @@ msgstr "»sudoedit« muss nicht mittels »sudo« aufgerufen werden"
 #: plugins/sudoers/tsdump.c:146
 #, c-format
 msgid "unable to read %s"
-msgstr "Die Datei »%s« kann nicht gelesen werden"
+msgstr "»%s« kann nicht gelesen werden"
 
 #: plugins/sudoers/sudoers.c:1333 plugins/sudoers/visudo.c:1118
 #, c-format
@@ -3445,7 +3445,7 @@ msgstr "%s ist keine reguläre Datei"
 #: plugins/sudoers/sudoers.c:1337 plugins/sudoers/timestamp.c:267 toke.l:1336
 #, c-format
 msgid "%s is owned by uid %u, should be %u"
-msgstr "%s gehört UID %u, sollte UID %u gehören"
+msgstr "%s gehört UID %u, sollte %u gehören"
 
 #: plugins/sudoers/sudoers.c:1342 plugins/sudoers/timestamp.c:274 toke.l:1341
 #, c-format
@@ -3485,7 +3485,7 @@ msgstr "Ungültiger Geschwindigkeitsfaktor: %s"
 #: plugins/sudoers/sudoreplay.c:321
 #, c-format
 msgid "invalid time offset %s"
-msgstr "ungültiger Zeitversatz »%s«"
+msgstr "Ungültiger Zeitversatz »%s«"
 
 #: plugins/sudoers/sudoreplay.c:330
 #, c-format
@@ -3517,7 +3517,7 @@ msgstr "Protokollgeometrie ist %d x %d, die Geometrie Ihres Terminals ist %d x %
 
 #: plugins/sudoers/sudoreplay.c:712
 msgid "Replay finished, press any key to restore the terminal."
-msgstr "Wiedergabe beendet, eine Taste drücken um das Terminal wiederherzustellen."
+msgstr "Wiedergabe beendet, eine Taste drücken, um das Terminal wiederherzustellen."
 
 #: plugins/sudoers/sudoreplay.c:1214 plugins/sudoers/sudoreplay.c:1244
 #, c-format
@@ -3595,9 +3595,9 @@ msgstr ""
 "  -m, --max-wait=Zahl          gibt die maximale Wartezeit zwischen Ereignissen\n"
 "                                 in Sekunden an\n"
 "  -n, --non-interactive        keine Prompts, Sitzung wird auf die Standard-\n"
-"                                 Ausgabe gesendet\n"
+"                                 ausgabe gesendet\n"
 "  -R, --no-resize              Terminal-Größe wird nicht verändert\n"
-"  -S, --suspend-wait           wait while the command was suspended\n"
+"  -S, --suspend-wait           wartet, während der Befehl suspendiert wird\n"
 "  -s, --speed=Zahl             beschleunigt oder verlangsamt die Wiedergabe\n"
 "  -V, --version                zeigt Versionsinformationen an und beendet\n"
 "                                 das Programm"
@@ -3625,7 +3625,7 @@ msgid ""
 "Parse error"
 msgstr ""
 "\n"
-"Syntax-Fehler"
+"Analysefehler"
 
 #: plugins/sudoers/testsudoers.c:420
 msgid ""
@@ -3842,9 +3842,9 @@ msgstr ""
 "\n"
 "Optionen:\n"
 "  -c, --check              nur den Prüf-Modus verwenden\n"
-"  -f, --file=sudoers       gibt den Namen der sudoers Datei an\n"
+"  -f, --file=sudoers       gibt den Namen der sudoers-Datei an\n"
 "  -h, --help               diese Hilfe anzeigen und beenden\n"
-"  -I, --no-includes        Include-Dateien nicht editieren\n"
+"  -I, --no-includes        Include-Dateien nicht bearbeiten\n"
 "  -q, --quiet              weniger ausführliche Syntaxfehler-Meldungen\n"
 "  -s, --strict             strikte Syntax-Prüfung\n"
 "  -V, --version            Versionsinformation anzeigen und beenden\n"
@@ -3855,39 +3855,39 @@ msgstr "»runchroot» ist veraltet und wird in einer zukünftigen Version entfer
 
 #: toke.l:184
 msgid "empty string"
-msgstr "leere Zeichenkette"
+msgstr "Leere Zeichenkette"
 
 #: toke.l:196 toke.l:566
 msgid "empty group"
-msgstr "leere Gruppe"
+msgstr "Leere Gruppe"
 
 #: toke.l:206 toke.l:564
 msgid "empty netgroup"
-msgstr "leere Netgroup"
+msgstr "Leere Netgroup"
 
 #: toke.l:284
 msgid "unterminated regular expression"
-msgstr "nicht abgeschlossener regulärer Ausdruck"
+msgstr "Nicht abgeschlossener regulärer Ausdruck"
 
 #: toke.l:358 toke.l:370 toke.l:382 toke.l:398 toke.l:417 toke.l:457
 msgid "invalid line continuation"
-msgstr "Ungültiger Zeilenfortsetzung"
+msgstr "Ungültige Zeilenfortsetzung"
 
 #: toke.l:603 toke.l:615
 msgid "invalid IPv6 address"
-msgstr "Ungültiges IPv6 Adresse: %s"
+msgstr "Ungültige IPv6-Adresse: %s"
 
 #: toke.l:843
 msgid "unexpected line break in string"
-msgstr "unerwarteter Zeilenumbruch in Zeichenkette"
+msgstr "Unerwarteter Zeilenumbruch in Zeichenkette"
 
 #: toke.l:962
 msgid "ignoring editor backup file"
-msgstr "Ignoriere die Backup Datei des Editors"
+msgstr "Sicherungsdatei des Editors wird ignoriert"
 
 #: toke.l:965
 msgid "ignoring file name containing '.'"
-msgstr "Ignoriere Dateiname mit '.'"
+msgstr "Dateiname mit ».« wird ignoriert"
 
 #: toke.l:1291
 msgid "too many levels of includes"
