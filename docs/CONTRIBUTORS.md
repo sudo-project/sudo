@@ -226,6 +226,7 @@ https://translationproject.org for more details.
     Nylander, Daniel
     Pan, Yi-Jyun
     Písař, Petr
+    Prieditis, Rihards
     Puente, Enol
     Putanec, Božidar
     Quân, Trần Ngọc

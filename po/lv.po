@@ -1,0 +1,1212 @@
+# Latvian translation of sudo
+# This file is put in the public domain.
+# Todd C. Miller <Todd.Miller@sudo.ws>, 2011-2018
+# Rihards Prieditis <rprieditis@gmail.com>, 2026
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: sudo 1.9.18b1\n"
+"Report-Msgid-Bugs-To: https://bugzilla.sudo.ws\n"
+"POT-Creation-Date: 2025-10-05 19:32-0600\n"
+"PO-Revision-Date: 2026-09-18 14:39+0300\n"
+"Last-Translator: Rihards Prieditis <rprieditis@gmail.com>\n"
+"Language-Team: Latvian <translation-team-lv@lists.sourceforge.net>\n"
+"Language: lv\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==0 || (n%100>=11 && n%100<=19) ? 0 : n%10==1 && n%100!=11 ? 1 : 2);\n"
+"X-Generator: Poedit 3.9\n"
+
+#: lib/util/aix.c:84 lib/util/aix.c:164
+msgid "unable to open userdb"
+msgstr "neizdevās atvērt lietotāju datubāzi"
+
+#: lib/util/aix.c:219
+#, c-format
+msgid "unable to switch to registry \"%s\" for %s"
+msgstr "neizdevās pārslēgties uz reģistru \"%s\" no %s"
+
+#: lib/util/aix.c:244
+msgid "unable to restore registry"
+msgstr "neizdevās atjaunot reģistru"
+
+#: lib/util/aix.c:267 lib/util/gidlist.c:61 lib/util/gidlist.c:71
+#: lib/util/json.c:50 lib/util/json.c:192 lib/util/sudo_conf.c:213
+#: lib/util/sudo_conf.c:299 lib/util/sudo_conf.c:376 lib/util/sudo_conf.c:667
+#: src/conversation.c:76 src/exec_iolog.c:117 src/exec_iolog.c:128
+#: src/exec_iolog.c:205 src/exec_monitor.c:168 src/exec_monitor.c:436
+#: src/exec_monitor.c:442 src/exec_monitor.c:450 src/exec_monitor.c:458
+#: src/exec_monitor.c:465 src/exec_monitor.c:472 src/exec_monitor.c:479
+#: src/exec_monitor.c:486 src/exec_monitor.c:493 src/exec_monitor.c:500
+#: src/exec_monitor.c:507 src/exec_nopty.c:236 src/exec_nopty.c:245
+#: src/exec_nopty.c:252 src/exec_nopty.c:259 src/exec_nopty.c:266
+#: src/exec_nopty.c:273 src/exec_nopty.c:280 src/exec_nopty.c:287
+#: src/exec_nopty.c:294 src/exec_nopty.c:301 src/exec_nopty.c:308
+#: src/exec_nopty.c:315 src/exec_nopty.c:323 src/exec_nopty.c:331
+#: src/exec_nopty.c:751 src/exec_preload.c:342 src/exec_ptrace.c:482
+#: src/exec_ptrace.c:775 src/exec_ptrace.c:992 src/exec_ptrace.c:1105
+#: src/exec_ptrace.c:1281 src/exec_ptrace.c:1634 src/exec_ptrace.c:1661
+#: src/exec_ptrace.c:1853 src/exec_pty.c:601 src/exec_pty.c:785
+#: src/exec_pty.c:1000 src/exec_pty.c:1009 src/exec_pty.c:1016
+#: src/exec_pty.c:1023 src/exec_pty.c:1030 src/exec_pty.c:1037
+#: src/exec_pty.c:1044 src/exec_pty.c:1051 src/exec_pty.c:1058
+#: src/exec_pty.c:1065 src/exec_pty.c:1072 src/exec_pty.c:1079
+#: src/exec_pty.c:1087 src/load_plugins.c:95 src/load_plugins.c:120
+#: src/load_plugins.c:156 src/load_plugins.c:389 src/load_plugins.c:395
+#: src/parse_args.c:166 src/parse_args.c:187 src/parse_args.c:263
+#: src/parse_args.c:621 src/parse_args.c:643 src/parse_args.c:668
+#: src/preserve_fds.c:41 src/preserve_fds.c:126 src/selinux.c:84
+#: src/selinux.c:357 src/selinux.c:467 src/selinux.c:484 src/selinux.c:491
+#: src/sesh.c:201 src/sesh.c:235 src/sesh.c:241 src/sesh.c:248 src/sesh.c:254
+#: src/sesh.c:465 src/sudo.c:576 src/sudo.c:602 src/sudo.c:658 src/sudo.c:724
+#: src/sudo.c:735 src/sudo.c:762 src/sudo.c:785 src/sudo.c:794 src/sudo.c:803
+#: src/sudo.c:816 src/sudo.c:825 src/sudo.c:866 src/sudo.c:876 src/sudo.c:886
+#: src/sudo.c:919 src/sudo.c:921 src/sudo.c:1148 src/sudo.c:1169
+#: src/sudo.c:1460 src/sudo.c:1629 src/sudo.c:1856 src/sudo.c:2189
+#: src/sudo_edit.c:84 src/sudo_edit.c:144 src/sudo_edit.c:425
+#: src/sudo_edit.c:434 src/sudo_edit.c:535 src/sudo_edit.c:542
+#: src/sudo_edit.c:687 src/sudo_edit.c:707 src/sudo_intercept_common.c:117
+#: src/sudo_intercept_common.c:342
+#, c-format
+msgid "%s: %s"
+msgstr "%s: %s"
+
+#: lib/util/aix.c:267 lib/util/gidlist.c:61 lib/util/json.c:51
+#: lib/util/json.c:193 lib/util/regex.c:168 lib/util/sudo_conf.c:214
+#: lib/util/sudo_conf.c:299 lib/util/sudo_conf.c:376 lib/util/sudo_conf.c:667
+#: src/conversation.c:77 src/exec_intercept.c:107 src/exec_intercept.c:346
+#: src/exec_intercept.c:522 src/exec_intercept.c:586 src/exec_intercept.c:710
+#: src/exec_intercept.c:834 src/exec_iolog.c:117 src/exec_iolog.c:128
+#: src/exec_iolog.c:205 src/exec_monitor.c:436 src/exec_monitor.c:442
+#: src/exec_monitor.c:450 src/exec_monitor.c:458 src/exec_monitor.c:465
+#: src/exec_monitor.c:472 src/exec_monitor.c:479 src/exec_monitor.c:486
+#: src/exec_monitor.c:493 src/exec_monitor.c:500 src/exec_monitor.c:507
+#: src/exec_nopty.c:236 src/exec_nopty.c:245 src/exec_nopty.c:252
+#: src/exec_nopty.c:259 src/exec_nopty.c:266 src/exec_nopty.c:273
+#: src/exec_nopty.c:280 src/exec_nopty.c:287 src/exec_nopty.c:294
+#: src/exec_nopty.c:301 src/exec_nopty.c:308 src/exec_nopty.c:315
+#: src/exec_nopty.c:323 src/exec_nopty.c:331 src/exec_preload.c:342
+#: src/exec_ptrace.c:482 src/exec_ptrace.c:775 src/exec_ptrace.c:992
+#: src/exec_ptrace.c:1661 src/exec_ptrace.c:1854 src/exec_pty.c:601
+#: src/exec_pty.c:1000 src/exec_pty.c:1009 src/exec_pty.c:1016
+#: src/exec_pty.c:1023 src/exec_pty.c:1030 src/exec_pty.c:1037
+#: src/exec_pty.c:1044 src/exec_pty.c:1051 src/exec_pty.c:1058
+#: src/exec_pty.c:1065 src/exec_pty.c:1072 src/exec_pty.c:1079
+#: src/exec_pty.c:1087 src/load_plugins.c:95 src/load_plugins.c:120
+#: src/load_plugins.c:156 src/load_plugins.c:389 src/load_plugins.c:395
+#: src/parse_args.c:166 src/parse_args.c:188 src/parse_args.c:263
+#: src/parse_args.c:621 src/parse_args.c:643 src/parse_args.c:668
+#: src/preserve_fds.c:41 src/preserve_fds.c:126 src/selinux.c:84
+#: src/selinux.c:357 src/selinux.c:467 src/selinux.c:484 src/selinux.c:491
+#: src/sesh.c:201 src/sesh.c:466 src/sudo.c:224 src/sudo.c:576 src/sudo.c:602
+#: src/sudo.c:658 src/sudo.c:817 src/sudo.c:919 src/sudo.c:921 src/sudo.c:1148
+#: src/sudo.c:1169 src/sudo.c:1460 src/sudo.c:1629 src/sudo.c:1856
+#: src/sudo.c:2189 src/sudo_edit.c:84 src/sudo_edit.c:144 src/sudo_edit.c:425
+#: src/sudo_edit.c:434 src/sudo_edit.c:535 src/sudo_edit.c:542
+#: src/sudo_edit.c:687 src/sudo_edit.c:707 src/sudo_intercept_common.c:117
+#: src/sudo_intercept_common.c:342
+msgid "unable to allocate memory"
+msgstr "neizdevās piešķirt atmiņu"
+
+#: lib/util/mkdir_parents.c:58
+#, c-format
+msgid "unable to stat %.*s"
+msgstr "neizdevās iegūt informāciju par %.*s"
+
+#: lib/util/mkdir_parents.c:64
+#, c-format
+msgid "%.*s exists but is not a directory (0%o)"
+msgstr "%.*s pastāv, bet nav direktorija (0%o)"
+
+#: lib/util/mkdir_parents.c:98 lib/util/sudo_conf.c:684
+#: lib/util/sudo_conf.c:703 lib/util/sudo_conf.c:730 src/selinux.c:230
+#: src/selinux.c:260 src/sudo.c:370 src/sudo_edit.c:490 src/sudo_edit.c:554
+#, c-format
+msgid "unable to open %s"
+msgstr "neizdevās atvērt %s"
+
+#: lib/util/mkdir_parents.c:115 lib/util/mkdir_parents.c:156
+#, c-format
+msgid "unable to mkdir %.*s"
+msgstr "neizdevās izveidot direktoriju %.*s"
+
+#: lib/util/mkdir_parents.c:125 lib/util/mkdir_parents.c:135
+#, c-format
+msgid "unable to open %.*s"
+msgstr "neizdevās atvērt %.*s"
+
+#: lib/util/regex.c:158
+msgid "regular expression too large"
+msgstr "regulārā izteiksme ir pārāk liela"
+
+#: lib/util/strsignal.c:45
+msgid "Unknown signal"
+msgstr "Nezināms signāls"
+
+#: lib/util/strtoid.c:79 lib/util/strtomode.c:47 lib/util/strtonum.c:142
+#: lib/util/strtonum.c:181 src/sesh.c:235 src/sesh.c:248
+msgid "invalid value"
+msgstr "nederīga vērtība"
+
+#: lib/util/strtomode.c:53 lib/util/strtonum.c:154
+msgid "value too large"
+msgstr "vērtība ir pārāk liela"
+
+#: lib/util/strtomode.c:53 lib/util/strtonum.c:148
+msgid "value too small"
+msgstr "vērtība ir pārāk maza"
+
+#: lib/util/sudo_conf.c:232
+#, c-format
+msgid "invalid Path value \"%s\" in %s, line %u"
+msgstr "nederīga ceļa vērtība \"%s\" failā %s, %u. rindā"
+
+#: lib/util/sudo_conf.c:398 lib/util/sudo_conf.c:451
+#, c-format
+msgid "invalid value for %s \"%s\" in %s, line %u"
+msgstr "nederīga vērtība %s \"%s\" failā %s, %u. rindā"
+
+#: lib/util/sudo_conf.c:419
+#, c-format
+msgid "unsupported group source \"%s\" in %s, line %u"
+msgstr "neatbalstīts grupu avots \"%s\" failā %s, %u. rindā"
+
+#: lib/util/sudo_conf.c:435
+#, c-format
+msgid "invalid max groups \"%s\" in %s, line %u"
+msgstr "nederīgs maksimālais grupu skaits \"%s\" failā %s, %u. rindā"
+
+#: lib/util/sudo_conf.c:706
+#, c-format
+msgid "%s is not a regular file"
+msgstr "%s nav parasts fails"
+
+#: lib/util/sudo_conf.c:709 src/copy_file.c:166
+#, c-format
+msgid "%s is owned by uid %u, should be %u"
+msgstr "%s pieder lietotājam ar UID %u, bet tam vajadzētu būt %u"
+
+#: lib/util/sudo_conf.c:713
+#, c-format
+msgid "%s is world writable"
+msgstr "%s ir rakstāms visiem"
+
+#: lib/util/sudo_conf.c:716
+#, c-format
+msgid "%s is group writable"
+msgstr "%s ir rakstāms grupai"
+
+#: src/apparmor.c:80
+msgid "failed to determine AppArmor confinement"
+msgstr "neizdevās noteikt AppArmor izolāciju"
+
+#: src/apparmor.c:88
+#, c-format
+msgid "unable to change AppArmor profile to %s"
+msgstr "neizdevās mainīt AppArmor profilu uz %s"
+
+#: src/copy_file.c:93
+#, c-format
+msgid "%s: truncate %s to zero bytes? (y/n) [n] "
+msgstr "%s: saīsināt %s līdz nullei baitu? (y/n) [n] "
+
+#: src/copy_file.c:97
+#, c-format
+msgid "not overwriting %s"
+msgstr "%s netiek pārrakstīts"
+
+#: src/copy_file.c:115
+#, c-format
+msgid "unable to read from %s"
+msgstr "neizdevās nolasīt no %s"
+
+#: src/copy_file.c:139 src/sudo_edit.c:315
+#, c-format
+msgid "unable to write to %s"
+msgstr "neizdevās ierakstīt failā %s"
+
+#: src/copy_file.c:153
+#, c-format
+msgid "unable to stat %s"
+msgstr "neizdevās iegūt informāciju par %s"
+
+#: src/copy_file.c:157 src/sesh.c:307 src/sudo_edit.c:192
+#, c-format
+msgid "%s: not a regular file"
+msgstr "%s: nav parasts fails"
+
+#: src/copy_file.c:161
+#, c-format
+msgid "%s: bad file mode: 0%o"
+msgstr "%s: nederīgs faila režīms: 0%o"
+
+#: src/edit_open.c:328
+msgid "unable to restore current working directory"
+msgstr "neizdevās atjaunot pašreizējo darba direktoriju"
+
+#: src/exec.c:106
+msgid "unable to set privileges"
+msgstr "neizdevās iestatīt tiesības"
+
+#: src/exec.c:112 src/exec.c:117
+msgid "unable to set limit privileges"
+msgstr "neizdevās iestatīt ierobežotās tiesības"
+
+#: src/exec.c:140
+#, c-format
+msgid "unknown login class %s"
+msgstr "nezināma pieteikšanās klase %s"
+
+#: src/exec.c:152
+msgid "unable to set user context"
+msgstr "neizdevās iestatīt lietotāja kontekstu"
+
+#: src/exec.c:168
+msgid "unable to set process priority"
+msgstr "neizdevās iestatīt procesa prioritāti"
+
+#: src/exec.c:185
+#, c-format
+msgid "unable to change root to %s"
+msgstr "neizdevās nomainīt saknes direktoriju uz %s"
+
+#: src/exec.c:198 src/exec.c:204 src/exec.c:211
+#, c-format
+msgid "unable to change to runas uid (%u, %u)"
+msgstr "neizdevās nomainīt uz runas uid (%u, %u)"
+
+#: src/exec.c:233 src/sesh.c:194
+#, c-format
+msgid "unable to change directory to %s"
+msgstr "neizdevās mainīt direktoriju uz %s"
+
+#: src/exec.c:238
+#, c-format
+msgid "starting from %s"
+msgstr "sākot no %s"
+
+#: src/exec.c:273 src/exec.c:346 src/exec_monitor.c:570 src/exec_monitor.c:572
+#: src/exec_pty.c:1157 src/exec_pty.c:1159 src/signal.c:139 src/signal.c:146
+#: src/signal.c:160 src/suspend_parent.c:138
+#, c-format
+msgid "unable to set handler for signal %d"
+msgstr "neizdevās iestatīt signāla %d apstrādātāju"
+
+#: src/exec.c:442
+msgid "intercept mode is not supported with SELinux RBAC on this system"
+msgstr "pārtveršanas režīms netiek atbalstīts ar SELinux RBAC šajā sistēmā"
+
+#: src/exec.c:447
+msgid "unable to log sub-commands with SELinux RBAC on this system"
+msgstr "neizdevās reģistrēt apakškomandas ar SELinux RBAC šajā sistēmā"
+
+#: src/exec_common.c:51
+msgid "unable to remove PRIV_PROC_EXEC from PRIV_LIMIT"
+msgstr "neizdvās noņemt PRIV_PROC_EXEC no PRIV_LIMIT"
+
+#: src/exec_intercept.c:66 src/exec_iolog.c:158 src/exec_iolog.c:168
+#: src/exec_iolog.c:213 src/exec_iolog.c:220 src/exec_iolog.c:247
+#: src/exec_monitor.c:444 src/exec_monitor.c:452 src/exec_monitor.c:460
+#: src/exec_monitor.c:467 src/exec_monitor.c:474 src/exec_monitor.c:481
+#: src/exec_monitor.c:488 src/exec_monitor.c:495 src/exec_monitor.c:502
+#: src/exec_monitor.c:509 src/exec_nopty.c:238 src/exec_nopty.c:247
+#: src/exec_nopty.c:254 src/exec_nopty.c:261 src/exec_nopty.c:268
+#: src/exec_nopty.c:275 src/exec_nopty.c:282 src/exec_nopty.c:289
+#: src/exec_nopty.c:296 src/exec_nopty.c:303 src/exec_nopty.c:310
+#: src/exec_nopty.c:317 src/exec_nopty.c:325 src/exec_nopty.c:333
+#: src/exec_nopty.c:392 src/exec_nopty.c:462 src/exec_pty.c:443
+#: src/exec_pty.c:557 src/exec_pty.c:607 src/exec_pty.c:1002
+#: src/exec_pty.c:1011 src/exec_pty.c:1018 src/exec_pty.c:1025
+#: src/exec_pty.c:1032 src/exec_pty.c:1039 src/exec_pty.c:1046
+#: src/exec_pty.c:1053 src/exec_pty.c:1060 src/exec_pty.c:1067
+#: src/exec_pty.c:1074 src/exec_pty.c:1081
+msgid "unable to add event to queue"
+msgstr "neizdevās pievienot notikumu rindai"
+
+#: src/exec_intercept.c:319 src/sudo.c:1054
+msgid "command not set by the security policy"
+msgstr "komanda nav iestatīta drošības politikā"
+
+#: src/exec_intercept.c:398 src/exec_intercept.c:438 src/sudo.c:1272
+#: src/sudo.c:1317 src/sudo.c:1361
+msgid "command rejected by policy"
+msgstr "komanda noraidīta saskaņā ar politiku"
+
+#: src/exec_intercept.c:509 src/sudo.c:1959
+msgid "approval plugin error"
+msgstr "apstiprinājuma spraudņa kļūda"
+
+#: src/exec_intercept.c:534 src/sudo.c:1277 src/sudo.c:1322 src/sudo.c:1366
+#: src/sudo.c:1440
+msgid "policy plugin error"
+msgstr "politikas spraudņa kļūda"
+
+#: src/exec_intercept.c:563
+msgid "invalid PolicyCheckRequest"
+msgstr "nederīgs PolicyCheckRequest"
+
+#: src/exec_intercept.c:706
+#, c-format
+msgid "client request too large: %zu"
+msgstr "klienta pieprasījums pārāk liels: %zu"
+
+#: src/exec_intercept.c:748
+#, c-format
+msgid "unable to unpack %s size %zu"
+msgstr "neizdevās atpakot %s, izmērs %zu"
+
+#: src/exec_intercept.c:796
+#, c-format
+msgid "unexpected type_case value %d in %s from %s"
+msgstr "neparedzēta type_case vērtība %d iekš %s no %s"
+
+#: src/exec_intercept.c:822
+#, c-format
+msgid "server message too large: %zu"
+msgstr "servera ziņojums ir par lielu: %zu"
+
+#: src/exec_iolog.c:316 src/exec_iolog.c:356 src/exec_iolog.c:396
+#: src/exec_iolog.c:447 src/exec_iolog.c:498
+msgid "I/O plugin error"
+msgstr "I/O spraudņa kļūda"
+
+#: src/exec_iolog.c:320 src/exec_iolog.c:360 src/exec_iolog.c:400
+#: src/exec_iolog.c:451 src/exec_iolog.c:502
+msgid "command rejected by I/O plugin"
+msgstr "komandu noraidīja I/O spraudnis"
+
+#: src/exec_iolog.c:550
+msgid "error logging suspend"
+msgstr "neizdevās iežurnālēt apturēšanu"
+
+#: src/exec_iolog.c:585
+msgid "error changing window size"
+msgstr "neizdevās mainīt loga izmēru"
+
+#: src/exec_monitor.c:324
+msgid "error reading from socketpair"
+msgstr "neizdevās nolasīt no ligzdu pāra (socketpair)"
+
+#: src/exec_monitor.c:336
+#, c-format
+msgid "unexpected reply type on backchannel: %d"
+msgstr "negaidīta atbildes tipa atgriezeniskajā kanālā: %d"
+
+#: src/exec_monitor.c:584
+msgid "unable to set controlling tty"
+msgstr "neizdevās iestatīt kontrolējošo termināli"
+
+#: src/exec_monitor.c:599 src/exec_nopty.c:578 src/exec_pty.c:1135
+#: src/exec_pty.c:1144
+msgid "unable to create sockets"
+msgstr "neizdevās izveidot ligzdas"
+
+#: src/exec_monitor.c:608
+msgid "unable to receive message from parent"
+msgstr "neizdevās saņemt ziņojumu no vecāka procesa"
+
+#: src/exec_monitor.c:623 src/exec_nopty.c:612 src/exec_pty.c:1340
+#: src/sudo_edit.c:356 src/tgetpass.c:310
+msgid "unable to fork"
+msgstr "neizdevās izveidot jaunu procesu"
+
+#: src/exec_monitor.c:627 src/exec_monitor.c:729 src/exec_nopty.c:715
+msgid "unable to restore tty label"
+msgstr "neizdevās atjaunot tty etiķeti"
+
+#: src/exec_monitor.c:638 src/exec_monitor.c:687 src/sesh.c:212 src/sudo.c:1223
+#, c-format
+msgid "unable to execute %s"
+msgstr "neizdevās izpildīt %s"
+
+#: src/exec_nopty.c:510 src/exec_nopty.c:520 src/exec_nopty.c:530
+#: src/exec_nopty.c:569 src/exec_pty.c:1228 src/exec_pty.c:1255
+#: src/exec_pty.c:1278 src/exec_pty.c:1296 src/tgetpass.c:306
+msgid "unable to create pipe"
+msgstr "neizdevās izveidot cauruli"
+
+#: src/exec_nopty.c:560 src/exec_pty.c:1166
+msgid "policy plugin failed session initialization"
+msgstr "politikas spraudnim neizdevās inicializēt sesiju"
+
+#: src/exec_nopty.c:703 src/exec_pty.c:1441
+msgid "error in event loop"
+msgstr "kļūda notikumu cilpā"
+
+#: src/exec_preload.c:163 src/net_ifs.c:201 src/net_ifs.c:367 src/net_ifs.c:428
+#: src/net_ifs.c:615 src/net_ifs.c:847 src/sudo.c:489 src/sudo_edit.c:393
+#: src/sudo_edit.c:401
+#, c-format
+msgid "internal error, %s overflow"
+msgstr "iekšēja kļūda, %s pārpilde"
+
+#: src/exec_ptrace.c:1089 src/exec_ptrace.c:1114 src/exec_ptrace.c:1938
+#, c-format
+msgid "unable to set registers for process %d"
+msgstr "neizdevās iestatīt reģistrus procesam %d"
+
+#: src/exec_ptrace.c:1109 src/exec_ptrace.c:1285 src/exec_ptrace.c:1638
+#, c-format
+msgid "process %d exited unexpectedly"
+msgstr "procesam %d negaidīti beidzās darbība"
+
+#: src/exec_ptrace.c:1219
+msgid "unable to set seccomp filter"
+msgstr "neizdevās iestatīt seccomp filtru"
+
+#: src/exec_ptrace.c:1416
+#, c-format
+msgid "interpreter argument , expected \"%s\", got \"%s\""
+msgstr "tulka arguments \"%s\", saņemts \"%s\""
+
+#: src/exec_ptrace.c:1514
+#, c-format
+msgid "pathname mismatch, expected \"%s\", got \"%s\""
+msgstr "ceļā neatbilstība, gaidīts \"%s\", saņemts \"%s\""
+
+#: src/exec_ptrace.c:1523 src/exec_ptrace.c:1530 src/exec_ptrace.c:1554
+#: src/exec_ptrace.c:1562 src/exec_ptrace.c:1568 src/exec_ptrace.c:1574
+#, c-format
+msgid "%s[%d] mismatch, expected \"%s\", got \"%s\""
+msgstr "%s[%d] neatbilstība, gaidīts \"%s\", iegūts \"%s\""
+
+#: src/exec_ptrace.c:1642
+#, c-format
+msgid "process %d unexpected status 0x%x"
+msgstr "procesam %d negaidīts statuss 0x%x"
+
+#: src/exec_ptrace.c:1735
+#, c-format
+msgid "unable to get event message for process %d"
+msgstr "neizdevās iegūt notikuma ziņojumu procesam %d"
+
+#: src/exec_ptrace.c:1742
+#, c-format
+msgid "unable to get registers for process %d"
+msgstr "neizdevās iegūt reģistrus procesam %d"
+
+#: src/exec_pty.c:75 src/exec_pty.c:257 src/tgetpass.c:251
+msgid "unable to restore terminal settings"
+msgstr "neizdevās atjaunot termināla iestatījumus"
+
+#: src/exec_pty.c:117
+msgid "unable to allocate pty"
+msgstr "neizdevās piešķirt pty"
+
+#: src/exec_pty.c:218
+msgid "unable to set handler for SIGCONT"
+msgstr "neizdevās iestatīt apstrādātāju priekš SIGCONT"
+
+#: src/exec_pty.c:267
+#, c-format
+msgid "unable to set handler for SIG%s"
+msgstr "neizdevās iestatīt apstrādātāju priekš SIG%s"
+
+#: src/exec_pty.c:291
+#, c-format
+msgid "unable to restore handler for SIG%s"
+msgstr "neizdevās atjaunot apstrādātāju priekš SIG%s"
+
+#: src/exec_pty.c:319
+msgid "unable to restore handler for SIGCONT"
+msgstr "neizdevās atjaunot apstrādātāju priekš SIGCONT"
+
+#: src/exec_pty.c:1389
+msgid "unable to send message to monitor process"
+msgstr "neizdevās nosūtīt ziņojumu uzraudzības procesam"
+
+#: src/load_plugins.c:70 src/load_plugins.c:217 src/load_plugins.c:227
+#: src/load_plugins.c:237 src/load_plugins.c:284
+#, c-format
+msgid "error in %s, line %d while loading plugin \"%s\""
+msgstr "kļūda %s, %d. rindā, ielādējot spraudni \"%s\""
+
+#: src/load_plugins.c:181 src/load_plugins.c:252
+#, c-format
+msgid "ignoring duplicate plugin \"%s\" in %s, line %d"
+msgstr "tiek ignorēts dublētais spraudnis \"%s\" failā %s, %d. rindā"
+
+#: src/load_plugins.c:219
+#, c-format
+msgid "unable to load %s: %s"
+msgstr "neizdevās ielādēt %s: %s"
+
+#: src/load_plugins.c:229
+#, c-format
+msgid "unable to find symbol \"%s\" in %s"
+msgstr "neizdevās atrast simbolu \"%s\" failā %s"
+
+#: src/load_plugins.c:239
+#, c-format
+msgid "incompatible plugin major version %d (expected %d) found in %s"
+msgstr "nesaderīga spraudņa galvenā versija %d (gaidīta %d), atrasta %s"
+
+#: src/load_plugins.c:257
+#, c-format
+msgid "ignoring policy plugin \"%s\" in %s, line %d"
+msgstr "tiek ignorēts politikas spraudnis \"%s\" vietā %s, rindiņā %d"
+
+#: src/load_plugins.c:260
+msgid "only a single policy plugin may be specified"
+msgstr "var norādīt tikai vienu politikas spraudni"
+
+#: src/load_plugins.c:286
+#, c-format
+msgid "unknown plugin type %d found in %s"
+msgstr "nezināms spraudņa tips %d atrasts %s"
+
+#: src/load_plugins.c:469
+#, c-format
+msgid "policy plugin %s does not include a check_policy method"
+msgstr "politikas spraudnim %s nav iekļauta check_policy metode"
+
+#: src/parse_args.c:208
+#, c-format
+msgid "invalid environment variable name: %s"
+msgstr "nederīgs vides mainīgā nosaukums: %s"
+
+#: src/parse_args.c:313
+msgid "the argument to -C must be a number greater than or equal to 3"
+msgstr "argumentam -C jābūt skaitlim, kas ir lielāks vai vienāds ar 3"
+
+#: src/parse_args.c:453
+msgid "the -R option will be removed in a future version of sudo"
+msgstr "opcija -R tiks noņemta turpmākajā sudo versijā"
+
+#: src/parse_args.c:552
+msgid "you may not specify both the -i and -s options"
+msgstr "jūs nevarat norādīt gan opciju -i, gan opciju -s"
+
+#: src/parse_args.c:557
+msgid "you may not specify both the -i and -E options"
+msgstr "jūs nevarat norādīt gan opciju -i, gan opciju -E"
+
+#: src/parse_args.c:567
+msgid "the -E option is not valid in edit mode"
+msgstr "opcija -E nav derīga rediģēšanas režīmā"
+
+#: src/parse_args.c:570
+msgid "you may not specify environment variables in edit mode"
+msgstr "rediģēšanas režīmā nevar norādīt vides mainīgos"
+
+#: src/parse_args.c:580
+msgid "the -U option may only be used with the -l option"
+msgstr "opcija -U var tikt izmantota tikai kopā ar opciju -l"
+
+#: src/parse_args.c:584
+msgid "the -A and -S options may not be used together"
+msgstr "opcijas -A un -S nevar izmantot kopā"
+
+#: src/parse_args.c:682
+msgid "sudoedit is not supported on this platform"
+msgstr "sudoedit šajā platformā netiek atbalstīts"
+
+#: src/parse_args.c:741
+msgid "Only one of the -e, -h, -i, -K, -l, -s, -v or -V options may be specified"
+msgstr "Var norādīt tikai vienu no opcijām -e, -h, -i, -K, -l, -s, -v vai -V"
+
+#: src/parse_args.c:754
+msgid "Only one of the -K, -k or -N options may be specified"
+msgstr "Var norādīt tikai vienu no opcijām -K, -k vai -N"
+
+#: src/parse_args.c:775
+#, c-format
+msgid ""
+"%s - edit files as another user\n"
+"\n"
+msgstr "%s - rediģēt failus kā citu lietotāju\n"
+
+#: src/parse_args.c:777
+#, c-format
+msgid ""
+"%s - execute a command as another user\n"
+"\n"
+msgstr ""
+"%s - izpildīt komandu kā citu lietotāju\n"
+"\n"
+
+#: src/parse_args.c:782
+msgid ""
+"\n"
+"Options:\n"
+msgstr ""
+"\n"
+"Opcijas:\n"
+
+#: src/parse_args.c:784
+msgid "use a helper program for password prompting"
+msgstr "izmantot palīgprogrammu paroļu prasīšanai"
+
+#: src/parse_args.c:787
+msgid "use specified BSD authentication type"
+msgstr "izmanto norādīto BSD autentifikācijas tipu"
+
+#: src/parse_args.c:791
+msgid "run command in the background"
+msgstr "palaist komandu fonā"
+
+#: src/parse_args.c:794
+msgid "ring bell when prompting"
+msgstr "zvanīt zvanu, kad tiek prasīts"
+
+#: src/parse_args.c:796
+msgid "close all file descriptors >= num"
+msgstr "aizvērt visus failu deskriptorus, kas ir >= num"
+
+#: src/parse_args.c:799
+msgid "run command with the specified BSD login class"
+msgstr "palaist komandu ar norādīto BSD pieteikšanās klasi"
+
+#: src/parse_args.c:802
+msgid "change the working directory before running command"
+msgstr "mainīt darba direktoriju pirms komandas izpildes"
+
+#: src/parse_args.c:805
+msgid "preserve user environment when running command"
+msgstr "saglabāt lietotāja vidi, izpildot komandu"
+
+#: src/parse_args.c:807
+msgid "preserve specific environment variables"
+msgstr "saglabāt noteiktus vides mainīgos"
+
+#: src/parse_args.c:809
+msgid "edit files instead of running a command"
+msgstr "rediģēt failus, nevis izpildīt komandu"
+
+#: src/parse_args.c:812
+msgid "run command as the specified group name or ID"
+msgstr "palaist komandu kā norādīto grupas nosaukumu vai ID"
+
+#: src/parse_args.c:815
+msgid "set HOME variable to target user's home dir"
+msgstr "iestatīt HOME mainīgo uz mērķa lietotāja mājas direktoriju"
+
+#: src/parse_args.c:818
+msgid "display help message and exit"
+msgstr "parādīt palīdzības ziņojumu un iziet"
+
+#: src/parse_args.c:820
+msgid "run command on host (if supported by plugin)"
+msgstr "palaist komandu uz resursdatora (ja to atbalsta spraudnis)"
+
+#: src/parse_args.c:823
+msgid "run login shell as the target user; a command may also be specified"
+msgstr "palaist pieteikšanās čaulu kā mērķa lietotāju; var tikt norādīta arī komanda"
+
+#: src/parse_args.c:825
+msgid "remove timestamp file completely"
+msgstr "pilnībā dzēst laika zīmoga failu"
+
+#: src/parse_args.c:828
+msgid "invalidate timestamp file"
+msgstr "anulēt laika zīmoga failu"
+
+#: src/parse_args.c:831
+msgid "list user's privileges or check a specific command; use twice for longer format"
+msgstr "uzskaitīt lietotāja privilēģijas vai pārbaudīt konkrētu komandu; izmantot divreiz garākam formātam"
+
+#: src/parse_args.c:834
+msgid "non-interactive mode, no prompts are used"
+msgstr "neinteraktīvs režīms, netiek izmantotas uzvednes"
+
+#: src/parse_args.c:837
+msgid "preserve group vector instead of setting to target's"
+msgstr "saglabāt grupu vektoru, nevis iestatīt uz mērķa"
+
+#: src/parse_args.c:840
+msgid "use the specified password prompt"
+msgstr "izmantot norādīto paroles uzvedni"
+
+#: src/parse_args.c:842
+msgid "change the root directory before running command"
+msgstr "mainīt saknes direktoriju pirms komandas izpildes"
+
+#: src/parse_args.c:845
+msgid "create SELinux security context with specified role"
+msgstr "izveidot SELinux drošības kontekstu ar norādīto lomu"
+
+#: src/parse_args.c:848
+msgid "read password from standard input"
+msgstr "nolasīt paroli no standarta ievades"
+
+#: src/parse_args.c:851
+msgid "run shell as the target user; a command may also be specified"
+msgstr "palaist čaulu kā mērķa lietotāju; var tikt norādīta arī komanda"
+
+#: src/parse_args.c:855
+msgid "create SELinux security context with specified type"
+msgstr "izveidot SELinux drošības kontekstu ar norādīto tipu"
+
+#: src/parse_args.c:858
+msgid "terminate command after the specified time limit"
+msgstr "pārtraukt komandu pēc norādītā laika limita"
+
+#: src/parse_args.c:861
+msgid "in list mode, display privileges for user"
+msgstr "saraksta režīmā parādīt lietotāja privilēģijas"
+
+#: src/parse_args.c:864
+msgid "run command (or edit file) as specified user name or ID"
+msgstr "palaist komandu (vai rediģēt failu) ar norādīto lietotāja vārdu vai ID"
+
+#: src/parse_args.c:866
+msgid "display version information and exit"
+msgstr "parādīt versijas informāciju un iziet"
+
+#: src/parse_args.c:869
+msgid "update user's timestamp without running a command"
+msgstr "atjaunināt lietotāja laika zīmogu, neizpildot komandu"
+
+#: src/parse_args.c:872
+msgid "stop processing command line arguments"
+msgstr "pārtraukt komandrindas argumentu apstrādi"
+
+#: src/selinux.c:78
+msgid "unable to open audit system"
+msgstr "neizdevās atvērt audita sistēmu"
+
+#: src/selinux.c:88
+msgid "unable to send audit message"
+msgstr "neizdevās nosūtīt audita ziņojumu"
+
+#: src/selinux.c:124
+#, c-format
+msgid "unable to fgetfilecon %s"
+msgstr "neizdevās izsaukt fgetfilecon priekš %s"
+
+#: src/selinux.c:129
+#, c-format
+msgid "%s changed labels"
+msgstr "%s mainīja etiķetes"
+
+#: src/selinux.c:137
+#, c-format
+msgid "unable to restore context for %s"
+msgstr "neizdevās atjaunot %s kontekstu"
+
+#: src/selinux.c:185
+#, c-format
+msgid "unable to open %s, not relabeling tty"
+msgstr "neizdevās atvērt %s, tty netiek pārmarķēts"
+
+#: src/selinux.c:189 src/selinux.c:234 src/selinux.c:264
+#, c-format
+msgid "%s is not a character device, not relabeling tty"
+msgstr "%s nav rakstzīmju ierīce, tty netiek pārmarķēts"
+
+#: src/selinux.c:198
+msgid "unable to get current tty context, not relabeling tty"
+msgstr "neizdevās iegūt pašreizējo tty kontekstu, tty netiek pārmarķēts"
+
+#: src/selinux.c:205
+msgid "unknown security class \"chr_file\", not relabeling tty"
+msgstr "nezināma drošības klase \"chr_file\", tty netiek pārmarķēts"
+
+#: src/selinux.c:210
+msgid "unable to get new tty context, not relabeling tty"
+msgstr "neizdevās iegūt jaunu tty kontekstu, tty netiek pārmarķēts"
+
+#: src/selinux.c:219
+msgid "unable to set new tty context"
+msgstr "neizdevās iestatīt jaunu tty kontekstu"
+
+#: src/selinux.c:318
+#, c-format
+msgid "you must specify a role for type %s"
+msgstr "jums jānorāda loma tipam %s"
+
+#: src/selinux.c:324
+#, c-format
+msgid "unable to get default type for role %s"
+msgstr "neizdevās iegūt noklusējuma tipu lomai %s"
+
+#: src/selinux.c:336
+msgid "failed to get new context"
+msgstr "neizdevās iegūt jaunu kontekstu"
+
+#: src/selinux.c:345
+#, c-format
+msgid "failed to set new role %s"
+msgstr "neizdevās iestatīt jauno lomu %s"
+
+#: src/selinux.c:349
+#, c-format
+msgid "failed to set new type %s"
+msgstr "neizdevās iestatīt jauno tipu %s"
+
+#: src/selinux.c:361
+#, c-format
+msgid "%s is not a valid context"
+msgstr "%s nav derīgs konteksts"
+
+#: src/selinux.c:389
+msgid "failed to get old context"
+msgstr "neizdevās iegūt veco kontekstu"
+
+#: src/selinux.c:395
+msgid "unable to determine enforcing mode."
+msgstr "neizdevās noteikt piespiedu režīmu (enforcing mode)."
+
+#: src/selinux.c:420
+#, c-format
+msgid "unable to set exec context to %s"
+msgstr "neizdevās iestatīt izpildes kontekstu uz %s"
+
+#: src/selinux.c:427
+#, c-format
+msgid "unable to set key creation context to %s"
+msgstr "neizdevās iestatīt atslēgas izveides kontekstu uz %s"
+
+#: src/sesh.c:109 src/sesh.c:129
+msgid "Only one of the -c or -i options may be specified"
+msgstr "Var norādīt tikai vienu no opcijām -c vai -i"
+
+#: src/sesh.c:124
+#, c-format
+msgid "invalid file descriptor number: %s"
+msgstr "nederīgs faila deskriptora numurs: %s"
+
+#: src/sesh.c:162 src/sesh.c:166 src/sesh.c:170
+#, c-format
+msgid "The -%c option may not be used in edit mode."
+msgstr "Opcija -%c nevar tikt izmantota rediģēšanas režīmā."
+
+#: src/sesh.c:179 src/sesh.c:184
+#, c-format
+msgid "The -%c option may only be used in edit mode."
+msgstr "Opcija -%c var tikt izmantota tikai rediģēšanas režīmā."
+
+#: src/sesh.c:289 src/sesh.c:389 src/sudo_edit.c:199
+#, c-format
+msgid "%s: editing symbolic links is not permitted"
+msgstr "%s: simbolisko saišu rediģēšana nav atļauta"
+
+#: src/sesh.c:292 src/sesh.c:392 src/sudo_edit.c:202
+#, c-format
+msgid "%s: editing files in a writable directory is not permitted"
+msgstr "%s: failu rediģēšana rakstāmā direktorijā nav atļauta"
+
+#: src/sesh.c:376 src/sesh.c:397 src/sesh.c:406 src/sesh.c:414
+#: src/sudo_edit.c:326
+#, c-format
+msgid "contents of edit session left in %s"
+msgstr "rediģēšanas sesijas saturs atstāts %s"
+
+#: src/sesh.c:471 src/sudo_edit.c:89
+msgid "unable to get group list"
+msgstr "neizdevās iegūt grupu sarakstu"
+
+#: src/signal.c:74
+#, c-format
+msgid "unable to save handler for signal %d"
+msgstr "neizdevās saglabāt signāla %d apstrādātāju"
+
+#: src/signal.c:96 src/suspend_parent.c:144
+#, c-format
+msgid "unable to restore handler for signal %d"
+msgstr "neizdevās atjaunot signāla %d apstrādātāju"
+
+#: src/solaris.c:67
+msgid "resource control limit has been reached"
+msgstr "resursu kontroles limits ir sasniegts"
+
+#: src/solaris.c:70
+#, c-format
+msgid "user \"%s\" is not a member of project \"%s\""
+msgstr "lietotājs \"%s\" nav projekta \"%s\" dalībnieks"
+
+#: src/solaris.c:74
+msgid "the invoking task is final"
+msgstr "izsaucamais uzdevums ir galīgs"
+
+#: src/solaris.c:77
+#, c-format
+msgid "could not join project \"%s\""
+msgstr "neizdevās pievienoties projektam \"%s\""
+
+#: src/solaris.c:84
+#, c-format
+msgid "no resource pool accepting default bindings exists for project \"%s\""
+msgstr "projektam \"%s\" nepastāv neviena resursu kopa, kas pieņemtu noklusējuma piesaistes"
+
+#: src/solaris.c:88
+#, c-format
+msgid "specified resource pool does not exist for project \"%s\""
+msgstr "norādītā resursu kopa neeksistē projektam \"%s\""
+
+#: src/solaris.c:92
+#, c-format
+msgid "could not bind to default resource pool for project \"%s\""
+msgstr "neizdevās piesaistīt projektam \"%s\" noklusējuma resursu kopu"
+
+#: src/solaris.c:99
+#, c-format
+msgid "setproject failed for project \"%s\""
+msgstr "projekta \"%s\" iestatīšana neizdevās (setproject)"
+
+#: src/solaris.c:101
+#, c-format
+msgid "warning, resource control assignment failed for project \"%s\""
+msgstr "brīdinājums, resursu kontroles piešķiršana neizdevās projektam \"%s\""
+
+#: src/sudo.c:210
+#, c-format
+msgid "Sudo version %s\n"
+msgstr "Sudo versija %s\n"
+
+#: src/sudo.c:212
+#, c-format
+msgid "Configure options: %s\n"
+msgstr "Konfigurācijas opcijas: %s\n"
+
+#: src/sudo.c:220
+msgid "fatal error, unable to load plugins"
+msgstr "kritiska kļūda, neizdevās ielādēt spraudņus"
+
+#: src/sudo.c:266
+msgid "plugin did not return a command to execute"
+msgstr "spraudnis neatgrieza izpildāmo komandu"
+
+#: src/sudo.c:302
+#, c-format
+msgid "unexpected sudo mode 0x%x"
+msgstr "neparedzēts sudo režīms 0x%x"
+
+#: src/sudo.c:562
+#, c-format
+msgid "you do not exist in the %s database"
+msgstr "jūs neeksistējat %s datubāzē"
+
+#: src/sudo.c:630
+msgid "unable to determine tty"
+msgstr "neizdevās noteikt tty"
+
+#: src/sudo.c:953
+msgid "The \"no new privileges\" flag is set, which prevents sudo from running as root."
+msgstr "Ir iestatīta karogs \"nav jaunu privilēģiju\", kas neļauj sudo palaist kā root."
+
+#: src/sudo.c:955
+msgid "If sudo is running in a container, you may need to adjust the container configuration to disable the flag."
+msgstr "Ja sudo darbojas konteinerī, iespējams, būs jāpielāgo konteinera konfigurācija, lai atspējotu šo karogu."
+
+#: src/sudo.c:989
+#, c-format
+msgid "%s must be owned by uid %d and have the setuid bit set"
+msgstr "%s īpašniekam jābūt uid %d un jābūt iestatītam setuid bitam"
+
+#: src/sudo.c:992
+#, c-format
+msgid "effective uid is not %d, is %s on a file system with the 'nosuid' option set or an NFS file system without root privileges?"
+msgstr "efektīvais uid nav %d, vai %s ir failu sistēmā ar iestatītu opciju 'nosuid' vai NFS failu sistēmā bez root privilēģijām?"
+
+#: src/sudo.c:998
+#, c-format
+msgid "effective uid is not %d, is sudo installed setuid root?"
+msgstr "efektīvais uid nav %d, vai sudo ir instalēts ar setuid root?"
+
+#: src/sudo.c:1014 src/tgetpass.c:332
+msgid "unable to set supplementary group IDs"
+msgstr "neizdevās iestatīt papildu grupas ID"
+
+#: src/sudo.c:1021
+#, c-format
+msgid "unable to set effective gid to runas gid %u"
+msgstr "neizdevās iestatīt efektīvo gid uz runas gid %u"
+
+#: src/sudo.c:1027
+#, c-format
+msgid "unable to set gid to runas gid %u"
+msgstr "neizdevās iestatīt gid uz runas gid %u"
+
+#: src/sudo.c:1058
+msgid "argv not set by the security policy"
+msgstr "drošības politika nav iestatījusi argv"
+
+#: src/sudo.c:1062
+msgid "envp not set by the security policy"
+msgstr "drošības politika nav iestatījusi envp"
+
+#: src/sudo.c:1084
+#, c-format
+msgid "unexpected child termination condition: %d"
+msgstr "neparedzēts bērna procesa izbeigšananas nosacījums: %d"
+
+#: src/sudo.c:1196
+msgid "unable to initialize policy plugin"
+msgstr "neizdevās inicializēt politikas spraudni"
+
+#: src/sudo.c:1257
+#, c-format
+msgid "policy plugin %s is missing the \"check_policy\" method"
+msgstr "politikas spraudnim %s trūkst metode \"check_policy\""
+
+#: src/sudo.c:1303
+#, c-format
+msgid "policy plugin %s does not support listing privileges"
+msgstr "politikas spraudnis %s neatbalsta privilēģiju uzskaiti"
+
+#: src/sudo.c:1347
+#, c-format
+msgid "policy plugin %s does not support the -v option"
+msgstr "politikas spraudnis %s neatbalsta -v opciju"
+
+#: src/sudo.c:1385
+#, c-format
+msgid "policy plugin %s does not support the -k/-K options"
+msgstr "politikas spraudnis %s neatbalsta -k/-K opcijas"
+
+#: src/sudo.c:1514
+#, c-format
+msgid "error initializing I/O plugin %s"
+msgstr "kļūda, inicializējot I/O spraudni %s"
+
+#: src/sudo.c:1517
+msgid "error initializing I/O plugin"
+msgstr "kļūda, inicializējot I/O spraudni"
+
+#: src/sudo.c:1666
+#, c-format
+msgid "error initializing audit plugin %s"
+msgstr "kļūda, inicializējot audita spraudni %s"
+
+#: src/sudo.c:1745
+#, c-format
+msgid "%s: unable to log error event%s%s"
+msgstr "%s: neizdevās reģistrēt kļūdas notikumu%s%s"
+
+#: src/sudo.c:1781
+#, c-format
+msgid "%s: unable to log accept event%s%s"
+msgstr "%s: neizdevās reģistrēt apstiprināšanas notikumu%s%s"
+
+#: src/sudo.c:1786 src/sudo.c:1824
+msgid "audit plugin error"
+msgstr "audita spraudņa kļūda"
+
+#: src/sudo.c:1819
+#, c-format
+msgid "%s: unable to log reject event%s%s"
+msgstr "%s: neizdevās reģistrēt noraidīšanas notikumu%s%s"
+
+#: src/sudo.c:1879
+#, c-format
+msgid "error initializing approval plugin %s"
+msgstr "kļūda, inicializējot apstiprinājuma spraudni %s"
+
+#: src/sudo.c:1949
+msgid "command rejected by approver"
+msgstr "apstiprinātājs noraidīja komandu"
+
+#: src/sudo_edit.c:108
+msgid "no writable temporary directory found"
+msgstr "netika atrasta rakstāma pagaidu direktorija"
+
+#: src/sudo_edit.c:287
+#, c-format
+msgid "%s left unmodified"
+msgstr "%s atstāts nemainīts"
+
+#: src/sudo_edit.c:300 src/sudo_edit.c:566
+#, c-format
+msgid "%s unchanged"
+msgstr "%s nemainīts"
+
+#: src/sudo_edit.c:477
+msgid "sesh: internal error: odd number of paths"
+msgstr "sesh: iekšējā kļūda: nepāra ceļu skaits"
+
+#: src/sudo_edit.c:479
+msgid "sesh: unable to create temporary files"
+msgstr "sesh: neizdevās izveidot pagaidu failus"
+
+#: src/sudo_edit.c:481 src/sudo_edit.c:601
+msgid "sesh: killed by a signal"
+msgstr "sesh: pārtraukts ar signālu"
+
+#: src/sudo_edit.c:483 src/sudo_edit.c:604
+#, c-format
+msgid "sesh: unknown error %d"
+msgstr "sesh: nezināma kļūda %d"
+
+#: src/sudo_edit.c:594
+msgid "unable to copy temporary files back to their original location"
+msgstr "neizdevās nokopēt pagaidu failus atpakaļ uz to sākotnējo atrašanās vietu"
+
+#: src/sudo_edit.c:598
+msgid "unable to copy some of the temporary files back to their original location"
+msgstr "neizdevās nokopēt dažus no pagaidu failiem atpakaļ uz to sākotnējo atrašanās vietu"
+
+#: src/sudo_edit.c:645
+#, c-format
+msgid "unable to change uid to root (%u)"
+msgstr "neizdevās nomainīt lietotāja ID uz root (%u)"
+
+#: src/sudo_edit.c:659
+msgid "plugin error: invalid file list for sudoedit"
+msgstr "spraudņa kļūda: nederīgs failu saraksta priekš sudoedit"
+
+#: src/sudo_edit.c:680
+msgid "plugin error: missing file list for sudoedit"
+msgstr "spraudņa kļūda: trūkst failu saraksta priekš sudoedit"
+
+#: src/sudo_edit.c:723 src/sudo_edit.c:738
+msgid "unable to read the clock"
+msgstr "neizdevās nolasīt pulksteni"
+
+#: src/sudo_intercept_common.c:367
+msgid "intercept port not set"
+msgstr "pārtveršanas ports nav norādīts"
+
+#: src/tgetpass.c:90
+msgid "timed out reading password"
+msgstr "pārsniegts gaidīšanas laiks, lasot paroli"
+
+#: src/tgetpass.c:93
+msgid "no password was provided"
+msgstr "nav norādīta parole"
+
+#: src/tgetpass.c:96
+msgid "unable to read password"
+msgstr "neizdevās nolasīt paroli"
+
+#: src/tgetpass.c:137
+msgid "a terminal is required to read the password; either use ssh's -t option or configure an askpass helper"
+msgstr "paroles nolasīšanai nepieciešams terminālis; izmantojiet ssh -t opciju vai konfigurējiet askpass programmu"
+
+#: src/tgetpass.c:140
+msgid "a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper"
+msgstr "paroles nolasīšanai nepieciešams terminālis; izmantojiet opciju -S, lai nolasītu no standarta ievades, vai konfigurējiet askpass programmu"
+
+#: src/tgetpass.c:152
+msgid "no askpass program specified, try setting SUDO_ASKPASS"
+msgstr "nav norādīta askpass programma, mēģiniet iestatīt SUDO_ASKPASS"
+
+#: src/tgetpass.c:327
+#, c-format
+msgid "unable to set gid to %u"
+msgstr "neizdevās iestatīt gid uz %u"
+
+#: src/tgetpass.c:337
+#, c-format
+msgid "unable to set uid to %u"
+msgstr "neizdevās iestatīt uid uz %u"
+
+#: src/tgetpass.c:342
+#, c-format
+msgid "unable to run %s"
+msgstr "neizdevās palaist %s"
+
+#: src/utmp.c:278
+msgid "unable to save stdin"
+msgstr "neizdevās saglabāt stdin"
+
+#: src/utmp.c:280
+msgid "unable to dup2 stdin"
+msgstr "neizdevās dublēt stdin (dup2)"
+
+#: src/utmp.c:283
+msgid "unable to restore stdin"
+msgstr "neizdevās atjaunot stdin"
