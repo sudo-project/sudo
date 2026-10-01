@@ -69,11 +69,15 @@ struct sudoersfile {
     TAILQ_ENTRY(sudoersfile) entries;
     char *opath;	/* original path we opened */
     char *dpath;	/* destination path to write to */
+    const char *dbase;	/* destination file basename */
     char *tpath;	/* editor temporary file path */
+    const char *tbase;	/* editor temporary file basename */
     bool created;	/* true if visudo created a new sudoers file */
     bool modified;	/* true if the user modified the file */
     bool doedit;	/* true when editing (not just checking) sudoers */
     int fd;		/* fd of the original file (if it exists) */
+    int tfd;		/* fd of the temporary file */
+    int dfd;		/* fd of the destination directory */
     int errorline;	/* line number when there is a syntax error */
 };
 TAILQ_HEAD(sudoersfile_list, sudoersfile);
@@ -479,7 +483,6 @@ static bool
 edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
     char **editor_argv, int lineno)
 {
-    int tfd = -1;			/* sudoers temp file descriptor */
     bool modified;			/* was the file modified? */
     int ac;				/* argument count */
     char linestr[64];			/* string version of lineno */
@@ -503,9 +506,10 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 	    goto done;
 	}
-	tfd = open(sp->tpath, O_WRONLY|O_CREAT|O_TRUNC|O_NOFOLLOW,
+	sp->tbase = sudo_basename(sp->tpath);
+	sp->tfd = openat(sp->dfd, sp->tbase, O_RDWR|O_CREAT|O_TRUNC|O_NOFOLLOW,
 	    S_IRUSR|S_IWUSR);
-	if (tfd < 0) {
+	if (sp->tfd == -1) {
 	    sudo_warn("%s", sp->tpath);
 	    goto done;
 	}
@@ -515,9 +519,12 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 	    char buf[4096], lastch = '\0';
 	    ssize_t nread;
 
-	    (void) lseek(sp->fd, (off_t)0, SEEK_SET);
+	    if (lseek(sp->fd, (off_t)0, SEEK_SET) == -1) {
+		sudo_warn("lseek");
+		goto done;
+	    }
 	    while ((nread = read(sp->fd, buf, sizeof(buf))) > 0) {
-		if (write(tfd, buf, (size_t)nread) != nread) {
+		if (write(sp->tfd, buf, (size_t)nread) != nread) {
 		    sudo_warn("%s", U_("write error"));
 		    goto done;
 		}
@@ -531,18 +538,16 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 	    /* Add missing newline at EOF if needed. */
 	    if (lastch != '\n') {
 		lastch = '\n';
-		if (write(tfd, &lastch, 1) != 1) {
+		if (write(sp->tfd, &lastch, 1) != 1) {
 		    sudo_warn("%s", U_("write error"));
 		    goto done;
 		}
 	    }
 	}
-	(void) close(tfd);
-	tfd = -1;
     }
     times[0].tv_sec = times[1].tv_sec = orig_mtim.tv_sec;
     times[0].tv_nsec = times[1].tv_nsec = orig_mtim.tv_nsec;
-    (void) utimensat(AT_FDCWD, sp->tpath, times, 0);
+    (void) futimens(sp->tfd, times);
 
     /* Disable +lineno if editor doesn't support it. */
     if (lineno > 0 && !editor_supports_plus(editor))
@@ -580,7 +585,7 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 	/*
 	 * Check for zero length sudoers file.
 	 */
-	if (stat(sp->tpath, &sb) == -1) {
+	if (fstat(sp->tfd, &sb) == -1) {
 	    sudo_warnx(U_("unable to stat temporary file (%s), %s unchanged"),
 		sp->tpath, sp->opath);
 	    goto done;
@@ -624,15 +629,13 @@ edit_sudoers(struct sudoersfile *sp, char *editor, int editor_argc,
 	 */
 	if (sp->created && orig_size == 0) {
 	    if (sp == TAILQ_FIRST(&sudoerslist))
-		unlink(sp->dpath);
+		unlinkat(sp->dfd, sp->dbase, 0);
 	}
 	sudo_warnx(U_("%s unchanged"), sp->tpath);
     }
 
     ret = true;
 done:
-    if (tfd != -1)
-	close(tfd);
     debug_return_bool(ret);
 }
 
@@ -665,6 +668,7 @@ reparse_sudoers(struct sudoers_context *ctx, char *editor, int editor_argc,
 {
     struct sudoersfile *sp, *last;
     FILE *fp;
+    int fd;
     bool ret = false;
     int ch, oldlocale;
     debug_decl(reparse_sudoers, SUDOERS_DEBUG_UTIL);
@@ -675,10 +679,13 @@ reparse_sudoers(struct sudoers_context *ctx, char *editor, int editor_argc,
     errors = 0;
     while ((sp = TAILQ_FIRST(&sudoerslist)) != NULL) {
 	last = TAILQ_LAST(&sudoerslist, sudoersfile_list);
-	fp = fopen(sp->tpath, "r+");
-	if (fp == NULL) {
+	fd = dup(sp->tfd);
+	if (fd == -1 || lseek(fd, (off_t)0, SEEK_SET) == -1 ||
+		(fp = fdopen(fd, "r+")) == NULL) {
 	    sudo_warnx(U_("unable to re-open temporary file (%s), %s unchanged."),
 		sp->tpath, sp->opath);
+	    if (fd != -1)
+		close(fd);
 	    goto done;
 	}
 
@@ -767,8 +774,9 @@ done:
 static bool
 install_sudoers(struct sudoersfile *sp, bool set_owner, bool set_mode)
 {
-    struct stat sb;
+    struct stat sb, sb2;
     bool ret = false;
+    int result;
     debug_decl(install_sudoers, SUDOERS_DEBUG_UTIL);
 
     if (sp->tpath == NULL) {
@@ -780,11 +788,11 @@ install_sudoers(struct sudoersfile *sp, bool set_owner, bool set_mode)
 	/*
 	 * No changes but fix owner/mode if needed.
 	 */
-	(void) unlink(sp->tpath);
+	(void) unlinkat(sp->dfd, sp->tbase, 0);
 	if (fstat(sp->fd, &sb) == 0) {
 	    if (set_owner) {
 		if (sb.st_uid != sudoers_file_uid() || sb.st_gid != sudoers_file_gid()) {
-		    if (chown(sp->opath, sudoers_file_uid(), sudoers_file_gid()) != 0) {
+		    if (fchown(sp->fd, sudoers_file_uid(), sudoers_file_gid()) != 0) {
 			sudo_warn(U_("unable to set (uid, gid) of %s to (%u, %u)"),
 			    sp->opath, (unsigned int)sudoers_file_uid(),
 			    (unsigned int)sudoers_file_gid());
@@ -793,7 +801,7 @@ install_sudoers(struct sudoersfile *sp, bool set_owner, bool set_mode)
 	    }
 	    if (set_mode) {
 		if ((sb.st_mode & ACCESSPERMS) != sudoers_file_mode()) {
-		    if (chmod(sp->opath, sudoers_file_mode()) != 0) {
+		    if (fchmod(sp->fd, sudoers_file_mode()) != 0) {
 			sudo_warn(U_("unable to change mode of %s to 0%o"),
 			    sp->opath, (unsigned int)sudoers_file_mode());
 		    }
@@ -801,6 +809,21 @@ install_sudoers(struct sudoersfile *sp, bool set_owner, bool set_mode)
 	    }
 	}
 	ret = true;
+	goto done;
+    }
+
+    /*
+     * Verify that the temp file on disk matches the fd we have open.
+     * If these don't match either, the editor didn't re-use the existing
+     * file or the temporary file was changed outside of the editor.
+     */
+    if (fstat(sp->tfd, &sb) == -1 ||
+	    fstatat(sp->dfd, sp->tbase, &sb2, AT_SYMLINK_NOFOLLOW) == -1) {
+	sudo_warn(U_("unable to stat %s"), sp->tpath);
+	goto done;
+    }
+    if (sb.st_dev != sb2.st_dev || sb.st_ino != sb2.st_ino) {
+	sudo_warnx(U_("temporary file changed on disk %s"), sp->tpath);
 	goto done;
     }
 
@@ -816,26 +839,26 @@ install_sudoers(struct sudoersfile *sp, bool set_owner, bool set_mode)
 	}
     }
     if (set_owner) {
-	if (chown(sp->tpath, sudoers_file_uid(), sudoers_file_gid()) != 0) {
+	if (fchown(sp->tfd, sudoers_file_uid(), sudoers_file_gid()) != 0) {
 	    sudo_warn(U_("unable to set (uid, gid) of %s to (%u, %u)"),
 		sp->tpath, (unsigned int)sudoers_file_uid(),
 		(unsigned int)sudoers_file_gid());
 	    goto done;
 	}
     } else {
-	if (chown(sp->tpath, sb.st_uid, sb.st_gid) != 0) {
+	if (fchown(sp->tfd, sb.st_uid, sb.st_gid) != 0) {
 	    sudo_warn(U_("unable to set (uid, gid) of %s to (%u, %u)"),
 		sp->tpath, (unsigned int)sb.st_uid, (unsigned int)sb.st_gid);
 	}
     }
     if (set_mode) {
-	if (chmod(sp->tpath, sudoers_file_mode()) != 0) {
+	if (fchmod(sp->tfd, sudoers_file_mode()) != 0) {
 	    sudo_warn(U_("unable to change mode of %s to 0%o"), sp->tpath,
 		(unsigned int)sudoers_file_mode());
 	    goto done;
 	}
     } else {
-	if (chmod(sp->tpath, sb.st_mode & ACCESSPERMS) != 0) {
+	if (fchmod(sp->tfd, sb.st_mode & ACCESSPERMS) != 0) {
 	    sudo_warn(U_("unable to change mode of %s to 0%o"), sp->tpath,
 		(unsigned int)(sb.st_mode & ACCESSPERMS));
 	}
@@ -846,7 +869,12 @@ install_sudoers(struct sudoersfile *sp, bool set_owner, bool set_mode)
      * rename(2)'d to sp->dpath.  If the rename(2) fails we try using
      * mv(1) in case sp->tpath and sp->dpath are on different file systems.
      */
-    if (rename(sp->tpath, sp->dpath) == 0) {
+#ifdef HAVE_RENAMEAT
+    result = renameat(sp->dfd, sp->tbase, sp->dfd, sp->dbase);
+#else
+    result = rename(sp->tpath, sp->dpath);
+#endif
+    if (result == 0) {
 	free(sp->tpath);
 	sp->tpath = NULL;
     } else {
@@ -877,6 +905,13 @@ install_sudoers(struct sudoersfile *sp, bool set_owner, bool set_mode)
     }
     ret = true;
 done:
+    close(sp->fd);
+    sp->fd = -1;
+    close(sp->tfd);
+    sp->tfd = -1;
+    if (sp->dfd != AT_FDCWD)
+	close(sp->dfd);
+    sp->dfd = -1;
     debug_return_bool(ret);
 }
 
@@ -1096,6 +1131,8 @@ new_sudoers(const char *path, bool doedit)
     struct stat sb;
     size_t len;
     int fd = -1;
+    int dfd = -1;
+    char *slash;
     debug_decl(new_sudoersfile, SUDOERS_DEBUG_UTIL);
 
     /* We always write to the first file in the colon-separated path. */
@@ -1103,6 +1140,26 @@ new_sudoers(const char *path, bool doedit)
     entry = calloc(1, sizeof(*entry));
     if (entry == NULL || (entry->dpath = strndup(path, len)) == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+
+    /*
+     * Open parent directory and set basename of dpath.
+     * The directory fd will be used for the destination and temporary files.
+     */
+    slash = strrchr(entry->dpath, '/');
+    if (slash == NULL) {
+	/* No parent directory, e.g. "visudo -f sudoers" */
+	dfd = AT_FDCWD;
+	entry->dbase = entry->dpath;
+    } else {
+	*slash = '\0';
+	dfd = open(entry->dpath, O_RDONLY|O_DIRECTORY);
+	*slash = '/';
+	entry->dbase = slash + 1;
+    }
+    if (dfd == -1) {
+	sudo_warn("%s", entry->dpath);
+	goto bad;
+    }
 
     /* Open the first file found in the colon-separated path. */
     path_end = path + strlen(path);
@@ -1138,7 +1195,7 @@ new_sudoers(const char *path, bool doedit)
     if (fd == -1) {
 	if (!checkonly) {
 	    /* No sudoers file, create the destination file for editing. */
-	    fd = open(entry->dpath, O_RDWR|O_CREAT|O_EXCL,
+	    fd = openat(dfd, entry->dbase, O_RDWR|O_CREAT|O_EXCL,
 		sudoers_file_mode());
 	    entry->created = true;
 	}
@@ -1157,7 +1214,10 @@ new_sudoers(const char *path, bool doedit)
 	goto bad;
     }
     entry->fd = fd;
+    entry->tfd = -1;
+    entry->dfd = dfd;
     /* entry->tpath = NULL; */
+    /* entry->tbase = NULL; */
     /* entry->modified = false; */
     entry->doedit = doedit;
     if (!checkonly && !lock_sudoers(entry))
@@ -1166,6 +1226,8 @@ new_sudoers(const char *path, bool doedit)
 bad:
     if (fd != -1)
 	close(fd);
+    if (dfd != -1 && dfd != AT_FDCWD)
+	close(dfd);
     if (entry->opath != entry->dpath)
 	free(entry->opath);
     free(entry->dpath);
@@ -1206,13 +1268,13 @@ open_sudoers(const char *path, char **outfile, bool doedit, bool *keepopen)
     } else {
 	/* Already exists, open .tmp version if there is one. */
 	if (entry->tpath != NULL) {
-	    if ((fp = fopen(entry->tpath, "r")) == NULL)
+	    if ((fp = fdopen(entry->tfd, "r")) == NULL)
 		sudo_fatal("%s", entry->tpath);
 	} else {
 	    if ((fp = fdopen(entry->fd, "r")) == NULL)
 		sudo_fatal("%s", entry->opath);
-	    rewind(fp);
 	}
+	rewind(fp);
     }
     if (keepopen != NULL)
 	*keepopen = true;
@@ -1332,12 +1394,12 @@ visudo_cleanup(void)
 
     TAILQ_FOREACH(sp, &sudoerslist, entries) {
 	if (sp->tpath != NULL)
-	    (void) unlink(sp->tpath);
+	    (void) unlinkat(sp->dfd, sp->tbase, 0);
 	if (sp->created) {
 	    struct stat sb;
 	    if (fstat(sp->fd, &sb) == 0 && sb.st_size == 0) {
 		/* Remove newly created zero-length file. */
-		(void) unlink(sp->dpath);
+		(void) unlinkat(sp->dfd, sp->dbase, 0);
 	    }
 	}
     }
