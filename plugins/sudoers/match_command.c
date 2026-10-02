@@ -448,7 +448,7 @@ command_matches_fnmatch(struct sudoers_context *ctx, const char *sudoers_cmnd,
 	if ((ctx->runas.cmnd = strdup(cmnd)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__,
 		U_("unable to allocate memory"));
-	    debug_return_int(DENY);
+	    goto bad;
 	}
 	set_cmnd_fd(ctx, fd);
 	debug_return_int(ALLOW);
@@ -512,7 +512,7 @@ command_matches_regex(struct sudoers_context *ctx, const char *sudoers_cmnd,
 	if ((ctx->runas.cmnd = strdup(cmnd)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__,
 		U_("unable to allocate memory"));
-	    debug_return_int(DENY);
+	    goto bad;
 	}
 	set_cmnd_fd(ctx, fd);
 	debug_return_int(ALLOW);
