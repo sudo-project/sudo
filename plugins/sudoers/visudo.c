@@ -1333,6 +1333,13 @@ visudo_cleanup(void)
     TAILQ_FOREACH(sp, &sudoerslist, entries) {
 	if (sp->tpath != NULL)
 	    (void) unlink(sp->tpath);
+	if (sp->created) {
+	    struct stat sb;
+	    if (fstat(sp->fd, &sb) == 0 && sb.st_size == 0) {
+		/* Remove newly created zero-length file. */
+		(void) unlink(sp->dpath);
+	    }
+	}
     }
 }
 
