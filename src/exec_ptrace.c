@@ -1600,7 +1600,7 @@ proc_read_vec(pid_t pid, const char *name, int *countp, char ***vecp,
     close(fd);
 
     /* Trim off the extra NUL byte at the end of the string table. */
-    if (strtab - *bufp >= 2 && strtab[-1] == '\0' && strtab[-2] == '\0') {
+    if (strtab - (*bufp + off) >= 2 && strtab[-1] == '\0' && strtab[-2] == '\0') {
 	strtab--;
 	remainder++;
     }
