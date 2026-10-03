@@ -56,6 +56,7 @@
 #endif
 
 #include <sudoers.h>
+#include <sudo_compat.h>
 #include "sudo_auth.h"
 
 /* Only OpenPAM and Linux PAM use const qualifiers. */
@@ -313,11 +314,51 @@ sudo_pam_verify(const struct sudoers_context *ctx, struct passwd *pw,
 	}
     }
 
+    /*
+     * Clear SUDO_PROMPT before authentication to avoid stale values
+     * from previous PAM transactions.
+     */
+    rc = pam_putenv(pamh, "SUDO_PROMPT");
+    if (rc != PAM_SUCCESS && rc != PAM_BAD_ITEM) {
+        const char *errstr = sudo_pam_strerror(pamh, rc);
+        sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+                          "pam_putenv(pamh, SUDO_PROMPT): %s", errstr);
+        debug_return_int(AUTH_ERROR);
+    }
+
+    if (def_prompt && ctx->user.prompt) {
+        char *sudo_prompt = NULL;
+
+        if (asprintf(&sudo_prompt, "SUDO_PROMPT=%s", def_prompt) != -1) {
+            rc = pam_putenv(pamh, sudo_prompt);
+            free(sudo_prompt);
+
+            if (rc != PAM_SUCCESS) {
+                const char *errstr = sudo_pam_strerror(pamh, rc);
+                sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+                                  "pam_putenv(pamh, SUDO_PROMPT, %s): %s",
+                                  def_prompt, errstr);
+            }
+        } else {
+            const char *errstr = strerror(errno);
+            sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+                              "unable to set SUDO_PROMPT: %s", errstr);
+        }
+    }
+
     /* PAM_SILENT prevents the authentication service from generating output. */
     *pam_status = pam_authenticate(pamh, def_pam_silent ? PAM_SILENT : 0);
 
     /* Restore def_prompt, the passed-in prompt may be freed later. */
     def_prompt = PASSPROMPT;
+
+    /* Clear the SUDO_PROMPT PAM environment variable. */
+    rc = pam_putenv(pamh, "SUDO_PROMPT");
+    if (rc != PAM_SUCCESS) {
+        const char *errstr = sudo_pam_strerror(pamh, rc);
+        sudo_debug_printf(SUDO_DEBUG_WARN|SUDO_DEBUG_LINENO,
+                          "pam_putenv(pamh, SUDO_PROMPT): %s", errstr);
+    }
 
     /* Restore KRB5CCNAME to its original value. */
     if (envccname == NULL && sudo_unsetenv("KRB5CCNAME") != 0) {
