@@ -355,8 +355,24 @@ ptrace_getregs(int pid, struct sudo_ptrace_regs *regs, int compat)
     if (ptrace(PTRACE_GETREGSET, pid, (void *)NT_PRSTATUS, &iov) == -1)
 	debug_return_bool(false);
 # endif /* __mips__ */
-    if (compat == -1) {
 # ifdef SECCOMP_AUDIT_ARCH_COMPAT
+    switch (compat) {
+    case true:
+	/*
+	 * The seccomp filter set the compat flag but we still need to
+	 * verify that the register layout matches the compat version.
+	 * It is possible for an x86_64 binary to invoke a system call
+	 * through int 0x80 instead of the syscall instruction.
+	 * If the wrong register layout is used the syscall number
+	 * will be incorrect and won't match execve or execveat.
+	 */
+	if (iov.iov_len == sizeof(regs->u.compat)) {
+	    /* Register struct size matches compat version as expected. */
+	    break;
+	}
+	/* Register struct size mismatch, recompute register compat flag. */
+	FALLTHROUGH;
+    case -1:
 	if (sizeof(regs->u.native) != sizeof(regs->u.compat)) {
 	    /* Guess compat based on size of register struct returned. */
 	    compat = iov.iov_len != sizeof(regs->u.native);
@@ -364,10 +380,11 @@ ptrace_getregs(int pid, struct sudo_ptrace_regs *regs, int compat)
 	    /* Assume a 64-bit executable will have a 64-bit stack pointer. */
 	    compat = reg_sp(regs->u.native) < 0xffffffff;
 	}
-# else
-	compat = false;
-# endif /* SECCOMP_AUDIT_ARCH_COMPAT */
+	break;
     }
+# else
+    compat = false;
+# endif /* SECCOMP_AUDIT_ARCH_COMPAT */
 
     /* Machine-dependent parameters to support compat binaries. */
     if (compat) {
@@ -1851,7 +1868,7 @@ done:
 static bool
 ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 {
-    char *pathname, **argv, **envp, *buf;
+    char *pathname, **argv, **envp, *buf = NULL;
     const unsigned int flags = closure->details->flags;
     int argc, envc, syscallno;
     struct sudo_ptrace_regs regs;
@@ -1873,6 +1890,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     /* Get compat flag. */
     if (ptrace(PTRACE_GETEVENTMSG, pid, NULL, &msg) == -1) {
 	sudo_warn(U_("unable to get event message for process %d"), (int)pid);
+	kill(pid, SIGKILL);
 	debug_return_bool(false);
     }
 
@@ -1880,6 +1898,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     memset(&regs, 0, sizeof(regs));
     if (!ptrace_getregs(pid, &regs, msg)) {
 	sudo_warn(U_("unable to get registers for process %d"), (int)pid);
+	kill(pid, SIGKILL);
 	debug_return_bool(false);
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "%s: %d: compat: %s, wordsize: %u",
@@ -1899,7 +1918,8 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	default:
 	    sudo_warnx("%s: unexpected compat system call %d",
 		__func__, syscallno);
-	    debug_return_bool(false);
+	    errno = EINVAL;
+	    goto fail;
 	}
     } else
 # endif /* SECCOMP_AUDIT_ARCH_COMPAT */
@@ -1921,7 +1941,8 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	    break;
 	default:
 	    sudo_warnx("%s: unexpected system call %d", __func__, syscallno);
-	    debug_return_bool(false);
+	    errno = EINVAL;
+	    goto fail;
 	}
     }
 
@@ -1933,17 +1954,13 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
     if (buf == NULL) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: %d: unable to get execve info", __func__, (int)pid);
-	/* EIO from ptrace is like EFAULT from the kernel. */
-	if (errno == EIO)
-	    errno = EFAULT;
-	ptrace_fail_syscall(pid, &regs, errno);
-	goto done;
+	goto fail;
     }
 
     /* Must have a pathname. */
     if (pathname == NULL) {
-	ptrace_fail_syscall(pid, &regs, EINVAL);
-	goto done;
+	errno = EINVAL;
+	goto fail;
     }
 
     /* We can only pass the pathname to execute via argv[0] (plugin API). */
@@ -2001,7 +2018,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	    if (run_argv0 == NULL) {
 		sudo_warnx(U_("%s: %s"), __func__,
 		    U_("unable to allocate memory"));
-		goto done;
+		goto fail;
 	    }
 	    free(closure->run_argv[0]);
 	    closure->run_argv[0] = run_argv0;
@@ -2075,7 +2092,7 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 		nwritten = ptrace_write_vec(pid, &regs, closure->run_argv,
 		    sp, strtab);
 		if (nwritten == -1)
-		    goto done;
+		    goto fail;
 		strtab += (unsigned long)nwritten;
 	    }
 	    if (path_mismatch) {
@@ -2089,14 +2106,14 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 		/* Write pathname to the string table. */
 		nwritten = ptrace_write_string(pid, strtab, closure->command);
 		if (nwritten == -1)
-		    goto done;
+		    goto fail;
 	    }
 
 	    /* Update args in the tracee to the new values. */
 	    if (!ptrace_setregs(pid, &regs)) {
 		sudo_warn(U_("unable to set registers for process %d"),
 		    (int)pid);
-		goto done;
+		goto fail;
 	    }
 
 	    if (closure->state == POLICY_TEST) {
@@ -2118,15 +2135,29 @@ ptrace_intercept_execve(pid_t pid, struct intercept_closure *closure)
 	}
 	break;
     case POLICY_REJECT:
-	/* If rejected, fake the syscall and set return to EACCES */
+	/* Rejected by policy, fail the syscall with errno set to EACCES */
 	errno = EACCES;
 	FALLTHROUGH;
     default:
-	ptrace_fail_syscall(pid, &regs, errno);
+	/* Error checking command, usually due to ENOENT */
+	if (!ptrace_fail_syscall(pid, &regs, errno)) {
+	    kill(pid, SIGKILL);
+	    goto done;
+	}
 	break;
     }
 
     ret = true;
+    goto done;
+
+fail:
+    /* Fail the system call. */
+    if (errno == EIO) {
+	/* EIO from ptrace is like EFAULT from the kernel. */
+	errno = EFAULT;
+    }
+    if (!ptrace_fail_syscall(pid, &regs, errno))
+	kill(pid, SIGKILL);
 
 done:
     if (oldcwd != -1) {
