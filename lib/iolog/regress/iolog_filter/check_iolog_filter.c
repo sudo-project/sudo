@@ -34,6 +34,49 @@
 
 sudo_dso_public int main(int argc, char *argv[]);
 
+/*
+ * Two sessions that share a filter handle (as in sudo_logsrvd) must
+ * not affect each other's filter state.
+ */
+static int
+test_shared_handle(void *handle)
+{
+    bool filtered[2] = { false, false };
+    char *newbuf = NULL;
+    int errors = 0;
+
+    /* Password prompt in the first session. */
+    if (!iolog_pwfilt_run(handle, &filtered[0], IO_EVENT_TTYOUT,
+	    "Password: ", 10, &newbuf))
+	return 1;
+
+    /* Output and input in the second session, input must not be filtered. */
+    if (!iolog_pwfilt_run(handle, &filtered[1], IO_EVENT_TTYOUT,
+	    "total 0\r\n", 9, &newbuf))
+	return 1;
+    if (!iolog_pwfilt_run(handle, &filtered[1], IO_EVENT_TTYIN,
+	    "ls\r", 3, &newbuf))
+	return 1;
+    if (newbuf != NULL) {
+	sudo_warnx("shared handle: input filtered without a password prompt");
+	errors++;
+	free(newbuf);
+	newbuf = NULL;
+    }
+
+    /* The password in the first session must still be filtered. */
+    if (!iolog_pwfilt_run(handle, &filtered[0], IO_EVENT_TTYIN,
+	    "secret\r", 7, &newbuf))
+	return 1;
+    if (newbuf == NULL || memcmp(newbuf, "******\r", 7) != 0) {
+	sudo_warnx("shared handle: password not filtered");
+	errors++;
+    }
+    free(newbuf);
+
+    return errors;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -67,6 +110,7 @@ main(int argc, char *argv[])
 	struct timing_closure timing;
 	const char *logdir = argv[i];
 	char tbuf[8192], fbuf[8192];
+	bool is_filtered = false;
 	ssize_t nread;
 
 	ntests++;
@@ -147,8 +191,8 @@ main(int argc, char *argv[])
 	    }
 
 	    /* Apply filter. */
-	    if (!iolog_pwfilt_run(passprompt_regex, timing.event, tbuf,
-		    timing.u.nbytes, &newbuf)) {
+	    if (!iolog_pwfilt_run(passprompt_regex, &is_filtered, timing.event,
+		    tbuf, timing.u.nbytes, &newbuf)) {
 		errors++;
 		continue;
 	    }
@@ -191,6 +235,11 @@ next:
 	if (iolog_timing.enabled)
 	    iolog_close(&iolog_timing, NULL);
     }
+
+    ntests++;
+    if (test_shared_handle(passprompt_regex) != 0)
+	errors++;
+
     iolog_pwfilt_free(passprompt_regex);
 
     if (ntests != 0) {
