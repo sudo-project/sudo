@@ -662,8 +662,9 @@ store_iobuf_local(int iofd, const IoBuffer *iobuf, const uint8_t *buf,
     }
 
     if (!logsrvd_conf_iolog_log_passwords()) {
-	if (!iolog_pwfilt_run(logsrvd_conf_iolog_passprompt_regex(), iofd,
-		(char *)data.data, data.len, &newbuf))
+	if (!iolog_pwfilt_run(logsrvd_conf_iolog_passprompt_regex(),
+		&closure->pwfilt_active, iofd, (char *)data.data, data.len,
+		&newbuf))
 	    goto bad;
 	if (newbuf != NULL)
 	    data.data = (uint8_t *)newbuf;

@@ -68,6 +68,7 @@ static bool log_passwords = false;
 static int iolog_dir_fd = -1;
 static struct timespec last_time;
 static void *passprompt_regex_handle;
+static bool pwfilt_active = false;
 static void sudoers_io_setops(void);
 
 /* sudoers_io is declared at the end of this file. */
@@ -934,6 +935,7 @@ sudoers_io_close(int exit_status, int error)
     sudo_freegrcache();
     iolog_pwfilt_free(passprompt_regex_handle);
     passprompt_regex_handle = NULL;
+    pwfilt_active = false;
 
     /* sudoers_debug_deregister() calls sudo_debug_exit() for us. */
     sudoers_debug_deregister();
@@ -979,7 +981,8 @@ sudoers_io_log_local(int event, const char *buf, unsigned int len,
     }
 
     if (!log_passwords && passprompt_regex_handle != NULL) {
-	if (!iolog_pwfilt_run(passprompt_regex_handle, event, buf, len, &newbuf))
+	if (!iolog_pwfilt_run(passprompt_regex_handle, &pwfilt_active, event,
+		buf, len, &newbuf))
 	    debug_return_int(-1);
     }
 

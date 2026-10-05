@@ -47,7 +47,6 @@ TAILQ_HEAD(pwfilt_regex_list, pwfilt_regex);
 
 struct pwfilt_handle {
     struct pwfilt_regex_list filters;
-    bool is_filtered;
 };
 
 /*
@@ -62,7 +61,6 @@ iolog_pwfilt_alloc(void)
     handle = malloc(sizeof(*handle));
     if (handle != NULL) {
 	TAILQ_INIT(&handle->filters);
-	handle->is_filtered = false;
     }
 
     debug_return_ptr(handle);
@@ -169,9 +167,11 @@ iolog_pwfilt_remove(void *vhandle, const char *pattern)
  * If logging output and filtering _is_ enabled, disable filtering.
  * If logging input and filtering is enabled, replace all characters in
  * buf with stars ('*') up to the next linefeed or carriage return.
+ * The filtering state is stored in is_filtered, not in the handle, since
+ * a handle may be shared by multiple sessions (as in sudo_logsrvd).
  */
 bool
-iolog_pwfilt_run(void *vhandle, int event, const char *buf,
+iolog_pwfilt_run(void *vhandle, bool *is_filtered, int event, const char *buf,
     size_t len, char **newbuf)
 {
     struct pwfilt_handle *handle = vhandle;
@@ -188,8 +188,8 @@ iolog_pwfilt_run(void *vhandle, int event, const char *buf,
     switch (event) {
     case IO_EVENT_TTYOUT:
 	/* If filtering passwords and we receive output, disable it. */
-	if (handle->is_filtered)
-	    handle->is_filtered = false;
+	if (*is_filtered)
+	    *is_filtered = false;
 
 	/* Make a copy of buf that is NUL-terminated. */
 	copy = malloc(len + 1);
@@ -203,20 +203,20 @@ iolog_pwfilt_run(void *vhandle, int event, const char *buf,
 	/* Check output for a password prompt. */
 	TAILQ_FOREACH(filt, &handle->filters, entries) {
 	    if (regexec(&filt->regex, copy, 0, NULL, 0) == 0) {
-		handle->is_filtered = true;
+		*is_filtered = true;
 		break;
 	    }
 	}
 	free(copy);
 	break;
     case IO_EVENT_TTYIN:
-	if (handle->is_filtered) {
+	if (*is_filtered) {
 	    size_t i;
 
 	    for (i = 0; i < len; i++) {
 		/* We will stop filtering after reaching cr/nl. */
 		if (buf[i] == '\r' || buf[i] == '\n') {
-		    handle->is_filtered = false;
+		    *is_filtered = false;
 		    break;
 		}
 	    }

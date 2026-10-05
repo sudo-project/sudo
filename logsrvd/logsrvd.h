@@ -114,6 +114,7 @@ struct connection_closure {
     bool error;
     bool tls;
     bool log_io;
+    bool pwfilt_active;
     bool store_first;
     bool read_instead_of_write;
     bool write_instead_of_read;
