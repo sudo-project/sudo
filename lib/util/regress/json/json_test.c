@@ -18,6 +18,8 @@
 
 #include <config.h>
 
+#include <ctype.h>
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -49,6 +51,68 @@ const char outbuf[] = "\n"
     "            \"number3\": 9223372036854775807\n"
     "        ]\n"
     "    }";
+
+/*
+ * Check that each byte value is escaped correctly in a JSON string.
+ * Control characters are escaped as \u00XX; which bytes count as
+ * control characters depends on the locale so ask iscntrl() too.
+ */
+static void
+test_escapes(int *ntests_out, int *errors_out)
+{
+    int ntests = *ntests_out;
+    int errors = *errors_out;
+    struct json_container jsonc;
+    struct json_value value;
+    unsigned int byte;
+
+    /* The programs that write JSON use the locale from the environment. */
+    setlocale(LC_CTYPE, "");
+
+    for (byte = 1; byte <= 0xff; byte++) {
+	char expected[sizeof("\"\\u0000\"")], instr[2];
+
+	switch (byte) {
+	case '"':
+	case '\\':
+	case '\b':
+	case '\f':
+	case '\n':
+	case '\r':
+	case '\t':
+	    continue;		/* escaped in a shorter form */
+	}
+
+	instr[0] = (char)byte;
+	instr[1] = '\0';
+	if (iscntrl((int)byte)) {
+	    (void)snprintf(expected, sizeof(expected), "\"\\u00%02x\"", byte);
+	} else {
+	    (void)snprintf(expected, sizeof(expected), "\"%c\"", (int)byte);
+	}
+
+	ntests++;
+	if (!sudo_json_init(&jsonc, 0, true, true, true)) {
+	    sudo_warnx("unable to initialize json");
+	    errors++;
+	    break;
+	}
+	value.type = JSON_STRING;
+	value.u.string = instr;
+	if (!sudo_json_add_value(&jsonc, NULL, &value)) {
+	    sudo_warnx("unable to add string value (byte 0x%02x)", byte);
+	    errors++;
+	} else if (strcmp(expected, jsonc.buf) != 0) {
+	    sudo_warnx("byte 0x%02x: got %s, expected %s", byte, jsonc.buf,
+		expected);
+	    errors++;
+	}
+	sudo_json_free(&jsonc);
+    }
+
+    *ntests_out = ntests;
+    *errors_out = errors;
+}
 
 /*
  * Simple tests for sudo json functions()
@@ -225,6 +289,8 @@ main(int argc, char *argv[])
 
 done:
     sudo_json_free(&jsonc);
+
+    test_escapes(&ntests, &errors);
 
     if (ntests != 0) {
 	printf("%s: %d tests run, %d errors, %d%% success rate\n",

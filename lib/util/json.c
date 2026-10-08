@@ -153,13 +153,14 @@ json_append_string(struct json_container *jsonc, const char *str)
 	    break;
 	default:
 	    if (iscntrl((unsigned char)ch)) {
+		const unsigned char uch = (unsigned char)ch;
 		/* Escape control characters like \u0000 */
 		*cp++ = '\\';
 		*cp++ = 'u';
 		*cp++ = '0';
 		*cp++ = '0';
-		*cp++ = hex[ch >> 4];
-		ch = hex[ch & 0x0f];
+		*cp++ = hex[uch >> 4];
+		ch = hex[uch & 0x0f];
 	    }
 	    break;
 	}
