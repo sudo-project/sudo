@@ -70,6 +70,28 @@ struct eventlog_args {
 };
 
 /*
+ * Escape control characters in str the same way new_logline() does.
+ * Returns an allocated string that the caller must free, else NULL.
+ */
+static char *
+escape_cntrl(const char *str)
+{
+    struct sudo_lbuf lbuf;
+    debug_decl(escape_cntrl, SUDO_DEBUG_UTIL);
+
+    sudo_lbuf_init(&lbuf, NULL, 0, NULL, 0);
+    if (!sudo_lbuf_append_esc(&lbuf, LBUF_ESC_CNTRL, "%s", str)) {
+	sudo_lbuf_destroy(&lbuf);
+	debug_return_str(NULL);
+    }
+    if (lbuf.buf == NULL) {
+	/* Nothing was allocated for the empty string. */
+	debug_return_str(strdup(""));
+    }
+    debug_return_str(lbuf.buf);
+}
+
+/*
  * Allocate and fill in a new logline.
  */
 static bool
@@ -1029,9 +1051,10 @@ static bool
 do_syslog_sudo(int pri, char *logline, const struct eventlog *evlog)
 {
     const struct eventlog_config *evl_conf = eventlog_getconf();
+    char *p, *submituser = NULL, *tmp, save;
     size_t len, maxlen;
-    char *p, *tmp, save;
     const char *fmt;
+    bool ret = true;
     debug_decl(do_syslog_sudo, SUDO_DEBUG_UTIL);
 
     evl_conf->open_log(EVLOG_SYSLOG, NULL);
@@ -1042,12 +1065,19 @@ do_syslog_sudo(int pri, char *logline, const struct eventlog *evlog)
 	goto done;
     }
 
+    /* Escape control characters, the submit user may be untrusted. */
+    if ((submituser = escape_cntrl(evlog->submituser)) == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	ret = false;
+	goto done;
+    }
+
     /*
      * Log the full line, breaking into multiple syslog(3) calls if necessary
      */
     fmt = _("%8s : %s");
     maxlen = evl_conf->syslog_maxlen -
-	(strlen(fmt) - 5 + strlen(evlog->submituser));
+	(strlen(fmt) - 5 + strlen(submituser));
     for (p = logline; *p != '\0'; ) {
 	len = strlen(p);
 	if (len > maxlen) {
@@ -1063,7 +1093,7 @@ do_syslog_sudo(int pri, char *logline, const struct eventlog *evlog)
 	    save = *tmp;
 	    *tmp = '\0';
 
-	    syslog(pri, fmt, evlog->submituser, p);
+	    syslog(pri, fmt, submituser, p);
 
 	    *tmp = save;			/* restore saved character */
 
@@ -1071,17 +1101,18 @@ do_syslog_sudo(int pri, char *logline, const struct eventlog *evlog)
 	    for (p = tmp; *p == ' '; p++)
 		continue;
 	} else {
-	    syslog(pri, fmt, evlog->submituser, p);
+	    syslog(pri, fmt, submituser, p);
 	    p += len;
 	}
 	fmt = _("%8s : (command continued) %s");
 	maxlen = evl_conf->syslog_maxlen -
-	    (strlen(fmt) - 5 + strlen(evlog->submituser));
+	    (strlen(fmt) - 5 + strlen(submituser));
     }
 done:
+    free(submituser);
     evl_conf->close_log(EVLOG_SYSLOG, NULL);
 
-    debug_return_bool(true);
+    debug_return_bool(ret);
 }
 
 static bool
@@ -1187,6 +1218,7 @@ do_logfile_sudo(const char *logline, const struct eventlog *evlog,
     char *full_line, timebuf[8192], *timestr = NULL;
     const char *timefmt = evl_conf->time_fmt;
     const char *logfile = evl_conf->logpath;
+    char *submituser = NULL;
     struct tm tm;
     bool ret = false;
     FILE *fp;
@@ -1214,8 +1246,13 @@ do_logfile_sudo(const char *logline, const struct eventlog *evlog,
 	}
     }
     if (evlog != NULL) {
+	/* Escape control characters, the submit user may be untrusted. */
+	if ((submituser = escape_cntrl(evlog->submituser)) == NULL) {
+	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	    goto done;
+	}
 	len = asprintf(&full_line, "%s : %s : %s",
-	    timestr ? timestr : "invalid date", evlog->submituser, logline);
+	    timestr ? timestr : "invalid date", submituser, logline);
     } else {
 	len = asprintf(&full_line, "%s : %s",
 	    timestr ? timestr : "invalid date", logline);
@@ -1235,6 +1272,7 @@ do_logfile_sudo(const char *logline, const struct eventlog *evlog,
     ret = true;
 
 done:
+    free(submituser);
     (void)sudo_lock_file(fileno(fp), SUDO_UNLOCK);
     evl_conf->close_log(EVLOG_FILE, fp);
     debug_return_bool(ret);
