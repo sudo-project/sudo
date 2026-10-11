@@ -342,6 +342,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	N_("Provide visual feedback at the password prompt when there is user input"),
 	NULL,
     }, {
+	"pwfeedback_char", T_STR,
+	N_("Character to use for password feedback: %s"),
+	NULL,
+    }, {
 	"fast_glob", T_FLAG,
 	N_("Use faster globbing that is less accurate but does not access the filesystem"),
 	NULL,

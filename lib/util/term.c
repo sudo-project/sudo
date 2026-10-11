@@ -93,6 +93,7 @@ static bool changed;
 sudo_dso_public int sudo_term_eof;
 sudo_dso_public int sudo_term_erase;
 sudo_dso_public int sudo_term_kill;
+sudo_dso_public const char *sudo_pwfeedback_char = "*";
 
 static volatile sig_atomic_t got_sigttou;
 
