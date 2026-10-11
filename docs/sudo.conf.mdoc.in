@@ -844,7 +844,8 @@ If you believe you have found a bug in
 .Nm ,
 you can either file a bug report in the sudo bug database,
 https://bugzilla.sudo.ws/, or open an issue at
-https://github.com/sudo-project/sudo/issues.
+.Lk https://github.com/sudo-project/sudo/issues
+.
 If you would prefer to use email, messages may be sent to the
 sudo-workers mailing list,
 https://www.sudo.ws/mailman/listinfo/sudo-workers (public)
