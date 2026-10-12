@@ -77,6 +77,10 @@
 #define PAM_DATA_SILENT	0
 #endif
 
+#ifndef PAM_BAD_ITEM
+#define PAM_BAD_ITEM	PAM_SYMBOL_ERR
+#endif
+
 struct sudo_pam_closure {
     const struct sudoers_context *ctx;
     struct sudo_conv_callback *callback;
