@@ -1151,7 +1151,7 @@ write_output(int fd, int what, void *v)
 	    iobuf->lastc = (size_t)nwritten == nbytes ? '\n' : '\r';
 	} else {
 	    /* Stash the last char written. */
-	    iobuf->lastc = *((char *)iov[0].iov_base + nwritten);
+	    iobuf->lastc = *((char *)iov[0].iov_base + nwritten - 1);
 	}
 	if (added_cr) {
 	    /* Subtract one for the carriage return we added above. */
