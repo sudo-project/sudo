@@ -38,6 +38,79 @@
 
 sudo_dso_public int main(int argc, char *argv[]);
 
+static const struct {
+    const char *dir;
+    const char *base;
+} base_tests[] = {
+    { "/tmp/sudo-io", "/tmp/sudo-io" },
+    { "/tmp/%%%%", "/tmp" },
+    { "/tmp/%%/logs", "/tmp" },
+    { "/tmp/%Y/logs", "/tmp" },
+    { "/tmp/%{user}/logs", "/tmp" },
+    { "///tmp/sudo-io", "/tmp/sudo-io" },
+    { "/tmp/sudo-io///", "/tmp/sudo-io" },
+    { "///tmp/%%%%///", "/tmp" },
+    { "/tmp//%%%%", "/tmp" },
+    { "/", "" },
+    { "////", "" }
+};
+
+static size_t
+fill_test_user(char * restrict dst, size_t size, void * restrict closure)
+{
+    return strlcpy(dst, "testuser", size);
+}
+
+static int
+test_iolog_base(void)
+{
+    static const struct iolog_path_escape escapes[] = {
+	{ "user", fill_test_user },
+	{ NULL, NULL }
+    };
+    int errors = 0;
+
+    for (size_t i = 0; i < nitems(base_tests); i++) {
+	char path[] = "/tmp/logsrvd_conf_test.XXXXXX";
+	char expanded[256], full[256], restored[256];
+	int fd = mkstemp(path);
+	FILE *fp = fd == -1 ? NULL : fdopen(fd, "w");
+	bool ok = false;
+
+	if (fp == NULL) {
+	    if (fd != -1) {
+		close(fd);
+		unlink(path);
+	    }
+	    errors++;
+	    continue;
+	}
+	fprintf(fp, "[iolog]\niolog_dir = %s\n", base_tests[i].dir);
+	if (fclose(fp) == 0 && logsrvd_conf_read(path) &&
+	    strcmp(logsrvd_conf_iolog_base(), base_tests[i].base) == 0 &&
+	    expand_iolog_path(logsrvd_conf_iolog_dir(), expanded,
+		sizeof(expanded), escapes, NULL)) {
+	    size_t offset = strlen(logsrvd_conf_iolog_base()) + 1;
+	    int len = snprintf(full, sizeof(full), "%s/x", expanded);
+
+	    /* Validate before using the relative pointer, then check reconnect. */
+	    if (len >= 0 && (size_t)len < sizeof(full) && offset <= (size_t)len) {
+		len = snprintf(restored, sizeof(restored), "%s/%s",
+		    logsrvd_conf_iolog_base(), full + offset);
+		ok = len >= 0 && (size_t)len < sizeof(restored) &&
+		    strcmp(full, restored) == 0;
+	    }
+	}
+	unlink(path);
+	if (!ok) {
+	    fprintf(stderr, "iolog base/relative path mismatch for %s\n",
+		base_tests[i].dir);
+	    errors++;
+	}
+    }
+    return errors;
+}
+
 sudo_noreturn static void
 usage(void)
 {
@@ -80,6 +153,8 @@ main(int argc, char *argv[])
 	if (!logsrvd_conf_read(path))
 	    errors++;
     }
+    errors += test_iolog_base();
+    ntests += nitems(base_tests);
     logsrvd_conf_cleanup();
 
     if (ntests != 0) {
