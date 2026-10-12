@@ -362,18 +362,17 @@ cb_iolog_dir(struct logsrvd_config *config, const char *path, size_t offset)
      * This is used to create a relative path for the log id.
      */
     free(config->iolog.iolog_base);
-    for (;;) {
-	base_len += strcspn(path + base_len, "%");
-	if (path[base_len] == '\0')
-	    break;
-	if (path[base_len + 1] == '{') {
-	    /* We want the base to end on a directory boundary. */
-	    while (base_len > 0 && path[base_len] != '/')
-		base_len--;
-	    break;
-	}
-	base_len++;
+    /* Match expand_iolog_path()'s slash normalization. */
+    while (path[0] == '/' && path[1] == '/')
+	path++;
+    base_len = strcspn(path, "%");
+    if (path[base_len] != '\0') {
+	/* We want the base to end on a directory boundary. */
+	while (base_len > 0 && path[base_len] != '/')
+	    base_len--;
     }
+    while (base_len > 0 && path[base_len - 1] == '/')
+	base_len--;
     if ((config->iolog.iolog_base = strndup(path, base_len)) == NULL)
 	goto oom;
 
