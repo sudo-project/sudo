@@ -54,6 +54,10 @@ static struct test_data rationalize_test_data[] = {
     { "/etc/../usr/lib", "/usr/lib" },		/* 19 */
     { "/etc/../usr/..", "/" },			/* 20 */
     { "/usr/lib/../../etc", "/etc" },		/* 21 */
+    { "/.", "/" },				/* 22 */
+    { "//.", "/" },				/* 23 */
+    { "/.//.", "/" },				/* 24 */
+    { "/usr/..//.", "/" },			/* 25 */
     { NULL }
 };
 
