@@ -52,6 +52,13 @@ rationalize_path(char *path, bool dotdot)
 
 		/* The size argument includes the terminating NUL byte. */
 		memmove(cp, ep, (size_t)(path_end - ep) + 1);
+
+		/* An absolute path must not collapse to the empty string. */
+		if (cp == path && *cp == '\0') {
+		    /* /. -> / */
+		    path[0] = '/';
+		    path[1] = '\0';
+		}
 		continue;
 	    }
 
