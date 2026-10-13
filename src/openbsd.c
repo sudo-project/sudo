@@ -21,7 +21,7 @@
 #include <sys/stat.h>
 #include <sudo.h>
 
-mode_t _permit_setugid = S_ISUID;
+sudo_dso_public mode_t _permit_setugid = S_ISUID;
 
 int
 os_init(int argc, char *argv[], char *envp[])
