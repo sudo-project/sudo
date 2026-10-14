@@ -18,6 +18,7 @@
 
 #include <config.h>
 
+#include <assert.h>
 #include <string.h>
 
 #include <sudoers.h>
@@ -41,7 +42,10 @@ rationalize_path(char *path, bool dotdot)
 		    continue;
 
 		/* The size argument includes the terminating NUL byte. */
+		assert(ep <= path_end);
 		memmove(cp, ep, (size_t)(path_end - ep) + 1);
+		path_end -= ep - cp;
+		assert(*path_end == '\0');
 		continue;
 	    }
 
@@ -51,14 +55,18 @@ rationalize_path(char *path, bool dotdot)
 		ep = cp + 2;
 
 		/* The size argument includes the terminating NUL byte. */
+		assert(ep <= path_end);
 		memmove(cp, ep, (size_t)(path_end - ep) + 1);
+		path_end -= ep - cp;
 
 		/* An absolute path must not collapse to the empty string. */
 		if (cp == path && *cp == '\0') {
 		    /* /. -> / */
 		    path[0] = '/';
 		    path[1] = '\0';
+		    path_end = path + 1;
 		}
+		assert(*path_end == '\0');
 		continue;
 	    }
 
@@ -83,7 +91,10 @@ rationalize_path(char *path, bool dotdot)
 		}
 
 		/* The size argument includes the terminating NUL byte. */
+		assert(ep <= path_end);
 		memmove(cp + 1, ep, (size_t)(path_end - ep) + 1);
+		path_end -= ep - (cp + 1);
+		assert(*path_end == '\0');
 		continue;
 	    }
 	}
