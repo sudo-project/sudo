@@ -1489,6 +1489,7 @@ script_matches(const char *script, const char *execpath, int argc,
     char magic[2];
     int count;
     FILE *fp = NULL;
+    bool matched = false;
     ssize_t len;
     debug_decl(get_interpreter, SUDO_DEBUG_EXEC);
 
@@ -1557,6 +1558,7 @@ script_matches(const char *script, const char *execpath, int argc,
 		    continue;
 		}
 	    }
+	    goto done;
 	}
 	if (argc > 1 && interp_args != NULL) {
 	    if (strcmp(interp_args, argv[1]) != 0) {
@@ -1568,6 +1570,7 @@ script_matches(const char *script, const char *execpath, int argc,
 	    argv++;
 	}
 	argv++;
+	matched = true;
 	break;
     }
 
@@ -1575,7 +1578,7 @@ done:
     free(line);
     if (fp != NULL)
 	fclose(fp);
-    debug_return_int((int)(argv - orig_argv));
+    debug_return_int(matched ? (int)(argv - orig_argv) : 0);
 }
 
 static ssize_t
