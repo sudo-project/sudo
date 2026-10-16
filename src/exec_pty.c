@@ -1480,6 +1480,12 @@ exec_pty(struct command_details *details,
     /* Flush any remaining output, free I/O bufs and events, do logout. */
     pty_finish(ec, cstat);
 
+    /* Wait for monitor to exit if we didn't already get it. */
+    if (ec->monitor_pid != -1) {
+	while (waitpid(ec->monitor_pid, NULL, 0) == -1 && errno == EINTR)
+	    continue;
+    }
+
     /* Free things up. */
     free_exec_closure(ec);
 
