@@ -29,7 +29,7 @@ sudo_fchownat(int dfd, const char *path, uid_t uid, gid_t gid, int flags)
 {
     int odfd, ret;
 
-    if (dfd == AT_FDCWD) {
+    if (dfd == (int)AT_FDCWD) {
 	if (flags & AT_SYMLINK_NOFOLLOW)
 	    return lchown(path, uid, gid);
 	else

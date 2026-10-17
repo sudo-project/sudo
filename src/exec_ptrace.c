@@ -1127,7 +1127,7 @@ get_exec_info(pid_t pid, bool is_execveat, struct sudo_ptrace_regs *regs,
 		char dir[PATH_MAX];
 		char name[64];
 
-		if (dirfd == AT_FDCWD) {
+		if (dirfd == (int)AT_FDCWD) {
 		    (void)strlcpy(name, "cwd", sizeof(name));
 		} else {
 		    (void)snprintf(name, sizeof(name), "fd/%d", dirfd);

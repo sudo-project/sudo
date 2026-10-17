@@ -29,7 +29,7 @@ sudo_unlinkat(int dfd, const char *path, int flag)
 {
     int odfd, ret;
 
-    if (dfd == AT_FDCWD)
+    if (dfd == (int)AT_FDCWD)
 	return unlink(path);
 
     /* Save cwd (cannot use O_PATH on older Linux kernels). */

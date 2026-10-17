@@ -909,7 +909,7 @@ done:
     sp->fd = -1;
     close(sp->tfd);
     sp->tfd = -1;
-    if (sp->dfd != AT_FDCWD)
+    if (sp->dfd != (int)AT_FDCWD)
 	close(sp->dfd);
     sp->dfd = -1;
     debug_return_bool(ret);

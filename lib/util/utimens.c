@@ -153,7 +153,7 @@ sudo_utimensat(int fd, const char *file, const struct timespec ts[2], int flag)
 {
     struct timeval tv[2], *times = NULL;
 
-    if (fd != AT_FDCWD || flag != 0) {
+    if (fd != (int)AT_FDCWD || flag != 0) {
 	errno = ENOTSUP;
 	return -1;
     }
