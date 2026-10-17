@@ -185,6 +185,8 @@ resume_terminal(struct exec_closure *ec)
     if (ec->foreground) {
 	/* Foreground process, set tty to raw mode. */
 	ec->term_raw = sudo_term_raw(io_fds[SFD_USERTTY], term_raw_flags);
+	/* Re-sync the user tty output flags with the command on next output. */
+	ec->synced_opost = -1;
     } else {
 	/* Background process, no access to tty. */
 	ec->term_raw = false;
@@ -361,6 +363,56 @@ revoke_pty(struct exec_closure *ec)
 }
 
 /*
+ * Keep the user's terminal output flags in sync with the command's pty.
+ *
+ * This is only used when the command's stderr is redirected to a pipe,
+ * socket or FIFO (see exec_pty()).  In that case a third party reading the
+ * redirected stderr (e.g. "sudo strace cmd 2> >(tee log)") writes back to
+ * the user's terminal directly, bypassing sudo.  For that output to be
+ * formatted correctly the terminal must retain its output post-processing
+ * (OPOST/ONLCR) whenever the command itself runs in cooked mode.  A full
+ * screen command, however, puts its pty into raw mode (OPOST cleared) and
+ * emits bare newlines; mirroring that onto the user's terminal avoids
+ * corrupting its display.  We therefore track the command's OPOST state
+ * and toggle the user terminal's output flags to match.
+ */
+static void
+sync_user_oflag(struct exec_closure *ec)
+{
+    struct termios term;
+    int opost;
+    debug_decl(sync_user_oflag, SUDO_DEBUG_EXEC);
+
+    if (!ec->sync_oflag || !ec->term_raw)
+	debug_return;
+    if (io_fds[SFD_LEADER] == -1 || io_fds[SFD_USERTTY] == -1)
+	debug_return;
+
+    if (tcgetattr(io_fds[SFD_LEADER], &term) == -1) {
+	sudo_debug_printf(SUDO_DEBUG_INFO|SUDO_DEBUG_ERRNO,
+	    "%s: unable to get pty terminal settings", __func__);
+	debug_return;
+    }
+
+    opost = ISSET(term.c_oflag, OPOST) ? 1 : 0;
+    if (opost == ec->synced_opost)
+	debug_return;
+
+    /*
+     * If the command's pty performs output post-processing, keep the
+     * user terminal's output flags too; otherwise match its raw mode.
+     */
+    if (sudo_term_raw(io_fds[SFD_USERTTY], opost ? SUDO_TERM_OFLAG : 0)) {
+	ec->synced_opost = opost;
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "%s: user tty output flags %s", __func__,
+	    opost ? "preserved" : "set raw");
+    }
+
+    debug_return;
+}
+
+/*
  * Read an iobuf that is ready.
  */
 static void
@@ -429,6 +481,13 @@ read_callback(int fd, int what, void *v)
 	default:
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"read %zd bytes from fd %d", n, fd);
+	    /*
+	     * When relaying the command's output, keep the user terminal's
+	     * output flags in sync with the command's pty (no-op unless the
+	     * command's stderr was redirected to a pipe, socket or FIFO).
+	     */
+	    if (fd == io_fds[SFD_LEADER])
+		sync_user_oflag(iob->ec);
 	    if (!iob->action(iob->buf + iob->len, (unsigned int)n, iob)) {
 		terminate_command(iob->ec->cmnd_pid, true);
 		iob->ec->cmnd_pid = -1;
@@ -975,6 +1034,7 @@ init_exec_closure(struct exec_closure *ec, struct command_status *cstat,
     ec->cstat = cstat;
     ec->details = details;
     ec->intercept_fd = -1;
+    ec->synced_opost = -1;
     ec->rows = user_details->ts_rows;
     ec->cols = user_details->ts_cols;
 
@@ -1293,6 +1353,17 @@ exec_pty(struct command_details *details,
 	if (interpose[STDERR_FILENO]) {
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stderr not user's tty, creating a pipe");
+	    /*
+	     * Preserve the terminal's output flags (e.g. ONLCR) so that
+	     * stderr written back to the user's terminal is not malformed
+	     * when the terminal is in raw mode.  Unlike stdout, we do not
+	     * set CD_EXEC_BG: stdout may still be the user's tty, in which
+	     * case the command must keep running in the foreground.  The
+	     * output flags are kept in sync with the command's pty while it
+	     * runs (see sync_user_oflag()).
+	     */
+	    term_raw_flags = SUDO_TERM_OFLAG;
+	    ec->sync_oflag = true;
 	    if (pipe2(io_pipe[STDERR_FILENO], O_CLOEXEC) != 0)
 		sudo_fatal("%s", U_("unable to create pipe"));
 	    io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
@@ -1302,6 +1373,16 @@ exec_pty(struct command_details *details,
 	    /* Not logging stderr, do not interpose. */
 	    sudo_debug_printf(SUDO_DEBUG_INFO,
 		"stderr not user's tty, not logging");
+	    /*
+	     * A third party reading the redirected stderr (pipe, socket or
+	     * FIFO) may write back to the user's terminal, so preserve the
+	     * terminal's output flags and keep them in sync with the
+	     * command's pty while it runs (see sync_user_oflag()).
+	     */
+	    if (S_ISFIFO(sb.st_mode) || S_ISSOCK(sb.st_mode)) {
+		term_raw_flags = SUDO_TERM_OFLAG;
+		ec->sync_oflag = true;
+	    }
 	    io_fds[SFD_STDERR] = dup(STDERR_FILENO);
 	    if (io_fds[SFD_STDERR] == -1)
 		sudo_fatal("dup");
@@ -1320,7 +1401,7 @@ exec_pty(struct command_details *details,
     /* Start in raw mode unless the command will run in the background. */
     cmnd_foreground = ec->foreground && !ISSET(details->flags, CD_EXEC_BG);
     if (cmnd_foreground) {
-	if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
+	if (sudo_term_raw(io_fds[SFD_USERTTY], term_raw_flags))
 	    ec->term_raw = true;
     }
 
