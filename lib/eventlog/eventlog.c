@@ -1052,7 +1052,7 @@ do_syslog_sudo(int pri, char *logline, const struct eventlog *evlog)
 {
     const struct eventlog_config *evl_conf = eventlog_getconf();
     char *p, *submituser = NULL, *tmp, save;
-    size_t len, maxlen;
+    size_t len, maxlen, overhead;
     const char *fmt;
     bool ret = true;
     debug_decl(do_syslog_sudo, SUDO_DEBUG_UTIL);
@@ -1076,8 +1076,9 @@ do_syslog_sudo(int pri, char *logline, const struct eventlog *evlog)
      * Log the full line, breaking into multiple syslog(3) calls if necessary
      */
     fmt = _("%8s : %s");
-    maxlen = evl_conf->syslog_maxlen -
-	(strlen(fmt) - 5 + strlen(submituser));
+    overhead = strlen(fmt) - 5 + strlen(submituser);
+    maxlen = evl_conf->syslog_maxlen > overhead ?
+	evl_conf->syslog_maxlen - overhead : 1;
     for (p = logline; *p != '\0'; ) {
 	len = strlen(p);
 	if (len > maxlen) {
@@ -1105,8 +1106,9 @@ do_syslog_sudo(int pri, char *logline, const struct eventlog *evlog)
 	    p += len;
 	}
 	fmt = _("%8s : (command continued) %s");
-	maxlen = evl_conf->syslog_maxlen -
-	    (strlen(fmt) - 5 + strlen(submituser));
+	overhead = strlen(fmt) - 5 + strlen(submituser);
+	maxlen = evl_conf->syslog_maxlen > overhead ?
+	    evl_conf->syslog_maxlen - overhead : 1;
     }
 done:
     free(submituser);
