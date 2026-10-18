@@ -1259,6 +1259,10 @@ client_msg_cb(int fd, int what, void *v)
 	    goto send_error;
 	}
 	buf->off += msg_len;
+
+	/* Don't process any more messages once an error is pending. */
+	if (closure->error)
+	    break;
     }
     if (buf->len != buf->off) {
 	memmove(buf->data, buf->data + buf->off, buf->len - buf->off);
