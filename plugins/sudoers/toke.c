@@ -3882,7 +3882,7 @@ YY_RULE_SETUP
 			    BEGIN INITIAL;
 			    continued = false;
 			    if (sudoers_strict()) {
-				if (!sudo_regex_compile(NULL, sudoerstext,
+				if (!sudo_regex_compile(NULL, sudoerslval.command.args,
 					&sudoers_errstr)) {
 				    LEXTRACE("ERROR ");
 				    return ERROR;
