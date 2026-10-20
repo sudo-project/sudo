@@ -641,6 +641,7 @@ canonicalize_edit_args(int argc, char *argv[])
     debug_decl(canonicalize_edit_args, SUDOERS_DEBUG_PLUGIN);
 
     for (i = 1; i < argc; i++) {
+	const char *canonicalized = NULL;
 	char *file = argv[i];
 
 	/*
@@ -650,7 +651,7 @@ canonicalize_edit_args(int argc, char *argv[])
 	 */
 	if (sudo_contains_dot_dot(file)) {
 	    char *cp, dir[PATH_MAX], resbuf[PATH_MAX];
-	    const char *base, *resolved;
+	    const char *base;
 
 	    /*
 	     * Only canonicalize the parent dir, we may be creating a new file.
@@ -670,17 +671,22 @@ canonicalize_edit_args(int argc, char *argv[])
 		goto bad;
 
 	    /* Older realpath() doesn't support passing a NULL buffer. */
-	    resolved = realpath(dir, resbuf);
+	    canonicalized = realpath(dir, resbuf);
 
 	    if (!restore_perms())
 		goto bad;
 
-	    if (resolved != NULL) {
-		if (asprintf(&cp, "%s/%s", resolved, base) == -1)
+	    if (canonicalized != NULL) {
+		if (asprintf(&cp, "%s/%s", canonicalized, base) == -1)
 		    goto oom;
 		file = cp;
 	    }
-	} else {
+	}
+
+	/*
+	 * Not canonicalized, fully-qualify and rationalize instead.
+	 */
+	if (canonicalized == NULL) {
 	    /* Fully-qualify file to be edited if needed. */
 	    if (file[0] != '/') {
 		char *cp;
@@ -694,14 +700,14 @@ canonicalize_edit_args(int argc, char *argv[])
 		    goto oom;
 		file = cp;
 	    }
+
+	    /* Remove consecutive '/' and "/./" and "/../" path elements. */
+	    rationalize_path(file, true);
 	}
 	if (file != argv[i]) {
 	    sudoers_gc_add(GC_PTR, file);
 	    argv[i] = file;
 	}
-
-	/* Remove consecutive '/' and "/./" and "/../" path elements. */
-	rationalize_path(file, true);
     }
     debug_return_bool(true);
 
