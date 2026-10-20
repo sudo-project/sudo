@@ -779,6 +779,17 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
 	    goto oom;
 	sudoers_gc_add(GC_PTR, sudoers_ctx.runas.argv[0]);
     }
+    if (ISSET(sudoers_ctx.mode, MODE_RUN) &&
+	    strcmp(sudo_basename(sudoers_ctx.runas.argv[0]), "sudoedit") == 0) {
+	/* Convert "sudo sudoedit" -> "sudoedit" */
+	CLR(sudoers_ctx.mode, MODE_RUN);
+	SET(sudoers_ctx.mode, MODE_EDIT);
+	sudo_warnx("%s", U_("sudoedit doesn't need to be run via sudo"));
+	free(sudoers_ctx.user.cmnd);
+	sudoers_ctx.user.cmnd = strdup("sudoedit");
+	if (sudoers_ctx.user.cmnd == NULL)
+	    goto oom;
+    }
     if (ISSET(sudoers_ctx.mode, MODE_EDIT)) {
 	if (!canonicalize_edit_args(sudoers_ctx.runas.argc,
 		sudoers_ctx.runas.argv)) {
@@ -1307,21 +1318,6 @@ set_cmnd(struct sudoers_context *ctx)
 	    debug_return_int(NOT_FOUND_ERROR);
     }
     ctx->user.cmnd_base = sudo_basename(ctx->user.cmnd);
-
-    /* Convert "sudo sudoedit" -> "sudoedit" */
-    if (ISSET(ctx->mode, MODE_RUN) && strcmp(ctx->user.cmnd_base, "sudoedit") == 0) {
-	char *new_cmnd;
-
-	CLR(ctx->mode, MODE_RUN);
-	SET(ctx->mode, MODE_EDIT);
-	sudo_warnx("%s", U_("sudoedit doesn't need to be run via sudo"));
-	if ((new_cmnd = strdup("sudoedit")) == NULL) {
-	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
-	    debug_return_int(NOT_FOUND_ERROR);
-	}
-	free(ctx->user.cmnd);
-	ctx->user.cmnd_base = ctx->user.cmnd = new_cmnd;
-    }
 
     TAILQ_FOREACH(nss, snl, entries) {
 	/* Missing/invalid defaults is not a fatal error. */
