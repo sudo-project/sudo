@@ -1,0 +1,2 @@
+# sudoRole millert
+millert ALL = /usr/bin/systemctl restart httpd, /usr/bin/ls

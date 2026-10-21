@@ -654,6 +654,7 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
 	    memcpy(tmp + savedlen, line, (size_t)len + 1);
 	    free(line);
 	    line = tmp;
+	    len += (ssize_t)savedlen;
 	    savedline = NULL;
 	}
 
