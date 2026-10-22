@@ -274,7 +274,8 @@ ldif_store_options(struct sudoers_parse_tree *parse_tree,
 }
 
 static int
-str_list_cmp(const void *aa, const void *bb)
+str_list_compare(const void *aa, const void *bb,
+    int (*cmp)(const char *, const char *))
 {
     const struct sudoers_str_list *a = aa;
     const struct sudoers_str_list *b = bb;
@@ -283,12 +284,29 @@ str_list_cmp(const void *aa, const void *bb)
     int ret;
 
     while (lsa != NULL && lsb != NULL) {
-	if ((ret = strcasecmp(lsa->str, lsb->str)) != 0)
+	if ((ret = cmp(lsa->str, lsb->str)) != 0)
 	    return ret;
 	lsa = STAILQ_NEXT(lsa, entries);
 	lsb = STAILQ_NEXT(lsb, entries);
     }
     return lsa == lsb ? 0 : (lsa == NULL ? -1 : 1);
+}
+
+/*
+ * User and group names are compared case-sensitively so that names
+ * differing only in case are not merged; sudoers decides how they match.
+ */
+static int
+str_list_cmp(const void *aa, const void *bb)
+{
+    return str_list_compare(aa, bb, strcmp);
+}
+
+/* Host names are case-insensitive. */
+static int
+str_list_casecmp(const void *aa, const void *bb)
+{
+    return str_list_compare(aa, bb, strcasecmp);
 }
 
 static int
@@ -592,7 +610,7 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
      */
     usercache = rbcreate(str_list_cmp);
     groupcache = rbcreate(str_list_cmp);
-    hostcache = rbcreate(str_list_cmp);
+    hostcache = rbcreate(str_list_casecmp);
     if (usercache == NULL || groupcache == NULL || hostcache == NULL)
 	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
 

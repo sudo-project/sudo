@@ -1,0 +1,5 @@
+# sudoRole role1
+Alice WebServer = /usr/bin/id
+
+# sudoRole role2
+alice WebServer = /bin/sh
