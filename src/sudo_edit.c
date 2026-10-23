@@ -542,7 +542,7 @@ selinux_edit_copy_tfiles(const struct command_details *command_details,
     if (nfiles < 1)
 	debug_return_int(0);
 
-    sesh_nargs = 5 + (nfiles * 2) + 1;
+    sesh_nargs = 6 + (nfiles * 2) + 1;
     sesh_args = sesh_ap = reallocarray(NULL, sesh_nargs, sizeof(char *));
     if (sesh_args == NULL) {
 	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
@@ -550,6 +550,8 @@ selinux_edit_copy_tfiles(const struct command_details *command_details,
     }
     *sesh_ap++ = "sesh";
     *sesh_ap++ = "--edit-install";
+    if (!ISSET(command_details->flags, CD_SUDOEDIT_FOLLOW))
+	*sesh_ap++ = "--no-dereference";
     if (ISSET(command_details->flags, CD_SUDOEDIT_CHECKDIR)) {
 	if ((user_str = selinux_fmt_sudo_user(user_cred)) == NULL) {
 	    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
