@@ -524,6 +524,13 @@ journal_restart(const RestartMessage *msg, const uint8_t *buf, size_t buflen,
 	debug_return_bool(false);
     }
 
+    /* Must seek or flush before switching from read -> write. */
+    if (fseeko(closure->journal, 0, SEEK_CUR) == -1) {
+	sudo_warn("%s", journal_path);
+	closure->errstr = _("unable to write journal file");
+	debug_return_bool(false);
+    }
+
     debug_return_bool(true);
 }
 
