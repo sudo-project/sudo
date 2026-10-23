@@ -786,6 +786,7 @@ sudoers_check_cmnd(int argc, char * const argv[], char *env_add[],
 	sudoers_gc_add(GC_PTR, sudoers_ctx.runas.argv[0]);
     }
     if (ISSET(sudoers_ctx.mode, MODE_RUN) &&
+	    !ISSET(sudoers_ctx.mode, MODE_POLICY_INTERCEPTED) &&
 	    strcmp(sudo_basename(sudoers_ctx.runas.argv[0]), "sudoedit") == 0) {
 	/* Convert "sudo sudoedit" -> "sudoedit" */
 	CLR(sudoers_ctx.mode, MODE_RUN);
