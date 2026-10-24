@@ -62,3 +62,5 @@ fake/bin/sha512
 
 [fake/bin/ca[a-z]] <NONE>
 fake/bin/cat
+
+[fake/bin/sha[[:digit:]*] <GLOB_NOCHECK>

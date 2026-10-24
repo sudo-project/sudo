@@ -479,6 +479,9 @@ glob0(const Char * restrict pattern, glob_t * restrict pglob, struct glob_lim * 
 			c = *qpatnext++;
 			do {
 				if (c == LBRACKET && *qpatnext == ':') {
+					const Char *oqpatnext = qpatnext;
+					Char *obufnext = bufnext;
+
 					do {
 						err = g_charclass(&qpatnext,
 						    &bufnext);
@@ -491,6 +494,14 @@ glob0(const Char * restrict pattern, glob_t * restrict pglob, struct glob_lim * 
 						return GLOB_NOMATCH;
 					if (c == RBRACKET)
 						break;
+					if (c == EOS ||
+					    g_strchr(qpatnext, RBRACKET) == NULL) {
+						/* No matching RBRACKET, undo */
+						c = LBRACKET;
+						bufnext = obufnext;
+						qpatnext = oqpatnext;
+						break;
+					}
 				}
 				*bufnext++ = CHAR(c);
 				if (*qpatnext == RANGE &&
