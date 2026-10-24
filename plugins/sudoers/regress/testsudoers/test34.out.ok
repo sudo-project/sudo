@@ -1,0 +1,38 @@
+Parses OK
+
+Entries for user root:
+
+ALL = (ALL) NOTAFTER=20200101000000Z /bin/sh
+	host  allowed
+	date  denied
+
+Password required
+
+Command unmatched
+
+testsudoers: invalid sudoNotAfter value: bogus
+Parses OK
+
+Entries for user root:
+
+ALL = (ALL) NOTAFTER=19700101000000Z /bin/sh
+	host  allowed
+	date  denied
+
+Password required
+
+Command unmatched
+
+testsudoers: invalid sudoNotBefore value: bogus
+Parses OK
+
+Entries for user root:
+
+ALL = (ALL) NOTAFTER=19700101000000Z /bin/sh
+	host  allowed
+	date  denied
+
+Password required
+
+Command unmatched
+

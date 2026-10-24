@@ -93,7 +93,9 @@ parse_gentime(const char *timestr)
 	    /* ignore fractional second */
 	    break;
 	}
-	cp += 2;	/* skip over radix and fraction */
+	/* skip over radix and fraction, only the first digit is used */
+	for (cp += 2; isdigit((unsigned char)*cp); cp++)
+	    continue;
     }
 
     /* Parse optional time zone. */
