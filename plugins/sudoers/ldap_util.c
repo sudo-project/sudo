@@ -355,6 +355,7 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
     struct cmndspec *prev_cmndspec = NULL;
     struct privilege *priv;
     struct member *m;
+    bool bad_time = false;
     char *cmnd;
     debug_decl(sudo_ldap_role_to_priv, SUDOERS_DEBUG_LDAP);
 
@@ -457,11 +458,36 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 		    goto oom;
 	    }
 
-	    /* Parse sudoNotBefore / sudoNotAfter */
-	    if (notbefore != NULL)
+	    /*
+	     * Parse sudoNotBefore / sudoNotAfter.
+	     * The parse_gentime() error value is the same as UNSPEC,
+	     * so an invalid value would otherwise remove the restriction.
+	     * Treat an entry with an invalid time as having expired.
+	     */
+	    if (notbefore != NULL) {
 		cmndspec->notbefore = parse_gentime(notbefore);
-	    if (notafter != NULL)
+		if (cmndspec->notbefore == -1) {
+		    if (warnings) {
+			sudo_warnx(U_("invalid sudoNotBefore value: %s"),
+			    notbefore);
+		    }
+		    bad_time = true;
+		}
+	    }
+	    if (notafter != NULL) {
 		cmndspec->notafter = parse_gentime(notafter);
+		if (cmndspec->notafter == -1) {
+		    if (warnings) {
+			sudo_warnx(U_("invalid sudoNotAfter value: %s"),
+			    notafter);
+		    }
+		    bad_time = true;
+		}
+	    }
+	    if (bad_time) {
+		cmndspec->notbefore = UNSPEC;
+		cmndspec->notafter = 0;
+	    }
 
 	    /* Parse sudoOptions. */
 	    if (opts != NULL) {
