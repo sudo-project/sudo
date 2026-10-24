@@ -176,7 +176,8 @@ union sudo_token_un {
 
 /* exec.c */
 struct stat;
-void exec_cmnd(struct command_details *details, int intercept_fd, int errfd);
+void exec_cmnd(struct command_details *details, sigset_t *mask,
+    int intercept_fd, int errfd);
 void terminate_command(pid_t pid, bool use_pgrp);
 bool sudo_terminated(struct command_status *cstat);
 void free_exec_closure(struct exec_closure *ec);
