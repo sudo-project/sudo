@@ -29,7 +29,7 @@ struct gl_entry {
 	char *results[MAX_RESULTS];
 };
 
-int test_glob(struct gl_entry *);
+static int test_glob(struct gl_entry *);
 sudo_dso_public int main(int argc, char *argv[]);
 
 int
@@ -67,9 +67,9 @@ main(int argc, char **argv)
 	 * Read in test file, which is formatted thusly:
 	 *
 	 * [pattern] <flags>
-	 * result1
-	 * result2
-	 * result3
+	 * result1 [mode]
+	 * result2 [mode]
+	 * result3 [mode]
 	 * ...
 	 *
 	 */
@@ -188,12 +188,13 @@ test_glob(struct gl_entry *entry)
 {
 	glob_t gl;
 	char **ap;
-	int nmatches = 0, i = 0;
+	int nmatches = 0, i = 0, ret = 0;
 
 	if (glob(entry->pattern, entry->flags, NULL, &gl) != 0) {
 		fprintf(stderr, "glob failed: %s: %s\n", entry->pattern,
 		    strerror(errno));
-		return 1;
+		ret = 1;
+		goto done;
 	}
 
 	for (ap = gl.gl_pathv; *ap != NULL; ap++)
@@ -207,7 +208,8 @@ test_glob(struct gl_entry *entry)
 			goto mismatch;
 		free(entry->results[i]);
 	}
-	return 0;
+	goto done;
+
  mismatch:
 	if (nmatches != entry->nresults) {
 		fprintf(stderr,
@@ -220,5 +222,8 @@ test_glob(struct gl_entry *entry)
 		while (i < entry->nresults)
 			free(entry->results[i++]);
 	}
-	return 1;
+	ret = 1;
+ done:
+	globfree(&gl);
+	return ret;
 }
