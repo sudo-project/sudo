@@ -38,6 +38,38 @@
 #include <sudo_util.h>
 
 /*
+ * Double any '%' characters in the first len bytes of str so they
+ * are not interpreted as escapes when the path is expanded further.
+ * Returns the new length or (size_t)-1 if it would not fit in size.
+ */
+static size_t
+escape_percent(char *str, size_t len, size_t size)
+{
+    size_t i, n, nesc = 0;
+    debug_decl(escape_percent, SUDO_DEBUG_UTIL);
+
+    for (i = 0; i < len; i++) {
+	if (str[i] == '%')
+	    nesc++;
+    }
+    if (nesc == 0)
+	debug_return_size_t(len);
+    if (len + nesc >= size)
+	debug_return_size_t((size_t)-1);
+
+    /* Shift right from the end, duplicating each '%'. */
+    for (i = len, n = nesc; n > 0; ) {
+	i--;
+	str[i + n] = str[i];
+	if (str[i] == '%') {
+	    n--;
+	    str[i + n] = '%';
+	}
+    }
+    debug_return_size_t(len + nesc);
+}
+
+/*
  * Expand any escape sequences in inpath, returning the expanded path.
  */
 bool
@@ -72,14 +104,20 @@ expand_iolog_path(const char *inpath, char *path, size_t pathlen,
 			    closure);
 			if (len >= (size_t)(pathend - dst))
 			    goto bad;
+			/* The value may contain '%', treat it as a literal. */
+			len = escape_percent(dst, len, (size_t)(pathend - dst));
+			if (len == (size_t)-1)
+			    goto bad;
 			dst += len;
 			src = endbrace;
 			continue;
 		    }
 		}
 	    } else if (src[1] == '%') {
-		/* Collapse %% -> % */
-		src++;
+		/* Copy %% as-is, it is collapsed after expansion. */
+		if (dst + 1 >= pathend)
+		    goto bad;
+		*dst++ = *src++;
 	    } else {
 		/* May need strftime() */
 		strfit = true;
@@ -116,6 +154,14 @@ expand_iolog_path(const char *inpath, char *path, size_t pathlen,
 	    goto bad;		/* expanded buffer too big to fit. */
 	memcpy(path, tmpbuf, len);
 	dst = path + len;
+	*dst = '\0';
+    } else {
+	/* No strftime() needed, collapse %% -> % ourselves. */
+	for (src = dst = path; *src != '\0'; src++) {
+	    if (src[0] == '%' && src[1] == '%')
+		src++;
+	    *dst++ = *src;
+	}
 	*dst = '\0';
     }
 
