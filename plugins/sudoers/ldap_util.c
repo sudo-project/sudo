@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <errno.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
@@ -516,6 +517,16 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 				op == '+' ? "+=" : op == '-' ? "-=" : "=", val);
 			}
 			cmndspec->timeout = parse_timeout(val);
+			if (cmndspec->timeout == -1) {
+			    if (errno == ERANGE) {
+				sudo_warnx(U_("%s: %s"), var,
+				    U_("timeout value too large"));
+			    } else {
+				sudo_warnx(U_("%s: %s"), var,
+				    U_("invalid timeout value"));
+			    }
+			    break;
+			}
 		    } else if (strcmp(var, "runchroot") == 0 && val != NULL) {
 			if (cmndspec->runchroot != NULL) {
 			    free(cmndspec->runchroot);
@@ -596,8 +607,10 @@ sudo_ldap_role_to_priv(const char *cn, void *hosts, void *runasusers,
 		}
 		sudo_rcstr_delref(source);
 		if (opt != NULL) {
-		    /* Defer oom until we drop the ref on source. */
-		    goto oom;
+		    /* Defer error handling until we drop the ref on source. */
+		    if (errno == ENOMEM)
+			goto oom;
+		    goto bad;
 		}
 	    }
 

@@ -443,8 +443,8 @@ role_to_sudoers(struct sudoers_parse_tree *parse_tree, struct sudo_role *role,
 	role->notbefore, role->notafter, true, store_options,
 	sudoers_string_iter);
     if (priv == NULL) {
-	sudo_fatalx(U_("%s: %s"), __func__,
-	    U_("unable to allocate memory"));
+	/* Error message displayed by sudo_ldap_role_to_priv(). */
+	exit(1);
     }
 
     if (reuse_privilege && !TAILQ_EMPTY(&us->privileges)) {
