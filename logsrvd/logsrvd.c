@@ -685,11 +685,10 @@ handle_restart(const RestartMessage *msg, const uint8_t *buf, size_t len,
 	/* Successfully restarted. */
 	closure->state = RUNNING;
     } else {
-	/* Report error to client before closing the connection. */
+	/* Caller will send closure->error to client and drop connection. */
 	sudo_debug_printf(SUDO_DEBUG_WARN, "%s: unable to restart I/O log",
 	    __func__);
-	if (!schedule_error_message(closure->errstr, closure))
-	    ret = false;
+	ret = false;
     }
 
     debug_return_bool(ret);

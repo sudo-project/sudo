@@ -633,7 +633,7 @@ done:
 
 /*
  * Respond to an error ServerMessage from the relay.
- * Returns true on success, false on error.
+ * Sets closure->errstr and returns false to drop the connection.
  */
 static bool
 handle_server_error(const char *errmsg, struct connection_closure *closure)
@@ -650,39 +650,10 @@ handle_server_error(const char *errmsg, struct connection_closure *closure)
     sudo_ev_del(closure->evbase, closure->relay_closure->read_ev);
     sudo_ev_del(closure->evbase, closure->relay_closure->write_ev);
 
-    /* Missing error string. */
-    if (errmsg[0] == '\0')
-	errmsg = "unknown error";
+    /* Error message from relay could be missing. */
+    closure->errstr = *errmsg ? errmsg : "unknown error";
 
-    if (!schedule_error_message(errmsg, closure))
-	debug_return_bool(false);
-
-    debug_return_bool(true);
-}
-
-/*
- * Respond to an abort ServerMessage from the relay.
- * Returns true on success, false on error.
- */
-static bool
-handle_server_abort(const char *errmsg, struct connection_closure *closure)
-{
-    struct relay_closure *relay_closure = closure->relay_closure;
-    debug_decl(handle_server_abort, SUDO_DEBUG_UTIL);
-
-    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
-	"abort message received from relay %s (%s): %s",
-	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr,
-	errmsg);
-
-    /* Missing error string. */
-    if (errmsg[0] == '\0')
-	errmsg = "unknown error";
-
-    if (!schedule_error_message(errmsg, closure))
-	debug_return_bool(false);
-
-    debug_return_bool(true);
+    debug_return_bool(false);
 }
 
 /*
@@ -717,11 +688,14 @@ handle_server_message(const uint8_t *buf, size_t len,
     case SERVER_MESSAGE__TYPE_LOG_ID:
 	ret = handle_log_id(msg->u.log_id, closure);
 	break;
+    case SERVER_MESSAGE__TYPE_ABORT:
+	/*
+	 * Since logsrvd doesn't currently generate abort messages,
+	 * we treat an abort message the same as an error message.
+	 */
+	FALLTHROUGH;
     case SERVER_MESSAGE__TYPE_ERROR:
 	ret = handle_server_error(msg->u.error, closure);
-	break;
-    case SERVER_MESSAGE__TYPE_ABORT:
-	ret = handle_server_abort(msg->u.abort, closure);
 	break;
     default:
 	sudo_warnx(U_("unexpected type_case value %d in %s from %s"),
