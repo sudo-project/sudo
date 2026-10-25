@@ -331,7 +331,7 @@ sudo_ldap_check_non_unix_group(struct sudoers_context *ctx,
 	    DPRINTF2("ldap sudoUser netgroup '%s%s' ... %s",
 		negated ? "!" : "", val, match == ALLOW ? "MATCH!" : "not");
 	} else if (val[0] == '%' && val[1] == ':') {
-	    if (group_plugin_query(pw->pw_name, val + 2, pw))
+	    if (group_plugin_query(pw->pw_name, val + 2, pw) == true)
 		match = ALLOW;
 	    DPRINTF2("ldap sudoUser non-Unix group '%s%s' ... %s",
 		negated ? "!" : "", val, match == ALLOW ? "MATCH!" : "not");
