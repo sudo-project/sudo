@@ -144,8 +144,9 @@ ldif_parse_attribute(char *line, char **name, char **value)
 	 */
 	char *copy = strdup(attr);
 	if (copy == NULL) {
-	    sudo_fatalx(U_("%s: %s"), __func__,
+	    sudo_warnx(U_("%s: %s"), __func__,
 		U_("unable to allocate memory"));
+	    debug_return_bool(false);
 	}
 	len = sudo_base64_decode(attr, (unsigned char *)copy, strlen(copy));
 	if (len == (size_t)-1) {
@@ -175,16 +176,15 @@ ldif_parse_attribute(char *line, char **name, char **value)
  * Allocate a struct sudoers_string, store str in it and
  * insert into the specified strlist.
  */
-static void
+static bool
 ldif_store_string(const char *str, struct sudoers_str_list *strlist, bool sorted)
 {
     struct sudoers_string *ls;
     debug_decl(ldif_store_string, SUDOERS_DEBUG_UTIL);
 
-    if ((ls = sudoers_string_alloc(str)) == NULL) {
-	sudo_fatalx(U_("%s: %s"), __func__,
-	    U_("unable to allocate memory"));
-    }
+    if ((ls = sudoers_string_alloc(str)) == NULL)
+	debug_return_bool(false);
+
     if (!sorted) {
 	STAILQ_INSERT_TAIL(strlist, ls, entries);
     } else {
@@ -204,7 +204,7 @@ ldif_store_string(const char *str, struct sudoers_str_list *strlist, bool sorted
 	}
     }
 
-    debug_return;
+    debug_return_bool(true);
 }
 
 /*
@@ -239,7 +239,7 @@ role_order_cmp(const void *va, const void *vb)
 /*
  * Parse list of sudoOption and store in the parse tree's defaults list.
  */
-static void
+static bool
 ldif_store_options(struct sudoers_parse_tree *parse_tree,
     struct sudoers_str_list *options)
 {
@@ -251,26 +251,29 @@ ldif_store_options(struct sudoers_parse_tree *parse_tree,
     STAILQ_FOREACH(ls, options, entries) {
 	if ((d = calloc(1, sizeof(*d))) == NULL ||
 	    (d->binding = malloc(sizeof(*d->binding))) == NULL) {
-	    sudo_fatalx(U_("%s: %s"), __func__,
-		U_("unable to allocate memory"));
+	    goto bad;
 	}
 	TAILQ_INIT(&d->binding->members);
 	d->binding->refcnt = 1;
 	d->type = DEFAULTS;
 	d->op = sudo_ldap_parse_option(ls->str, &var, &val);
-	if ((d->var = strdup(var)) == NULL) {
-	    sudo_fatalx(U_("%s: %s"), __func__,
-		U_("unable to allocate memory"));
-	}
+	if ((d->var = strdup(var)) == NULL)
+	    goto bad;
 	if (val != NULL) {
-	    if ((d->val = strdup(val)) == NULL) {
-		sudo_fatalx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-	    }
+	    if ((d->val = strdup(val)) == NULL)
+		goto bad;
 	}
 	TAILQ_INSERT_TAIL(&parse_tree->defaults, d, entries);
     }
-    debug_return;
+    debug_return_bool(true);
+bad:
+    if (d != NULL) {
+	free(d->binding);
+	free(d->var);
+	free(d->val);
+	free(d);
+    }
+    debug_return_bool(false);
 }
 
 static int
@@ -337,7 +340,7 @@ str_list_cache(struct rbtree *cache, struct sudoers_str_list **strlistp)
 /*
  * Convert a sudoRole to sudoers format and store in the parse tree.
  */
-static void
+static bool
 role_to_sudoers(struct sudoers_parse_tree *parse_tree, struct sudo_role *role,
     bool store_options, bool reuse_userspec, bool reuse_privilege,
     bool reuse_runas)
@@ -357,10 +360,8 @@ role_to_sudoers(struct sudoers_parse_tree *parse_tree, struct sudo_role *role,
 	us = TAILQ_LAST(&parse_tree->userspecs, userspec_list);
     } else {
 	/* Allocate a new userspec and fill in the user list. */
-	if ((us = calloc(1, sizeof(*us))) == NULL) {
-	    sudo_fatalx(U_("%s: %s"), __func__,
-		U_("unable to allocate memory"));
-	}
+	if ((us = calloc(1, sizeof(*us))) == NULL)
+	    goto oom;
 	TAILQ_INIT(&us->privileges);
 	TAILQ_INIT(&us->users);
 	STAILQ_INIT(&us->comments);
@@ -368,10 +369,8 @@ role_to_sudoers(struct sudoers_parse_tree *parse_tree, struct sudo_role *role,
 	STAILQ_FOREACH(ls, role->users, entries) {
 	    char *user = ls->str;
 
-	    if ((m = calloc(1, sizeof(*m))) == NULL) {
-		sudo_fatalx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-	    }
+	    if ((m = calloc(1, sizeof(*m))) == NULL)
+		goto oom;
 	    m->negated = sudo_ldap_is_negated(&user);
 	    switch (*user) {
 	    case '\0':
@@ -396,8 +395,8 @@ role_to_sudoers(struct sudoers_parse_tree *parse_tree, struct sudo_role *role,
 	    }
 	    if (m->type != ALL && m->type != MYSELF) {
 		if ((m->name = strdup(user)) == NULL) {
-		    sudo_fatalx(U_("%s: %s"), __func__,
-			U_("unable to allocate memory"));
+		    free(m);
+		    goto oom;
 		}
 	    }
 	    TAILQ_INSERT_TAIL(&us->users, m, entries);
@@ -412,10 +411,8 @@ role_to_sudoers(struct sudoers_parse_tree *parse_tree, struct sudo_role *role,
 	    STAILQ_FOREACH(comment, &us->comments, entries) {
 		if (strncasecmp(comment->str, "sudoRole ", 9) == 0) {
 		    char *tmpstr;
-		    if (asprintf(&tmpstr, "%s, %s", comment->str, role->cn) == -1) {
-			sudo_fatalx(U_("%s: %s"), __func__,
-			    U_("unable to allocate memory"));
-		    }
+		    if (asprintf(&tmpstr, "%s, %s", comment->str, role->cn) == -1)
+			goto oom;
 		    free(comment->str);
 		    comment->str = tmpstr;
 		    break;
@@ -424,13 +421,11 @@ role_to_sudoers(struct sudoers_parse_tree *parse_tree, struct sudo_role *role,
 	}
 	if (comment == NULL) {
 	    /* Create a new comment. */
-	    if ((comment = malloc(sizeof(*comment))) == NULL) {
-		sudo_fatalx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-	    }
+	    if ((comment = malloc(sizeof(*comment))) == NULL)
+		goto oom;
 	    if (asprintf(&comment->str, "sudoRole %s", role->cn) == -1) {
-		sudo_fatalx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
+		free(comment);
+		goto oom;
 	    }
 	    STAILQ_INSERT_TAIL(&us->comments, comment, entries);
 	}
@@ -444,7 +439,9 @@ role_to_sudoers(struct sudoers_parse_tree *parse_tree, struct sudo_role *role,
 	sudoers_string_iter);
     if (priv == NULL) {
 	/* Error message displayed by sudo_ldap_role_to_priv(). */
-	exit(1);
+	if (!reuse_userspec)
+	    free_userspec(us);
+	debug_return_bool(false);
     }
 
     if (reuse_privilege && !TAILQ_EMPTY(&us->privileges)) {
@@ -484,24 +481,32 @@ role_to_sudoers(struct sudoers_parse_tree *parse_tree, struct sudo_role *role,
     if (!reuse_userspec)
 	TAILQ_INSERT_TAIL(&parse_tree->userspecs, us, entries);
 
-    debug_return;
+    debug_return_bool(true);
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    if (!reuse_userspec && us != NULL)
+	free_userspec(us);
+    debug_return_bool(false);
 }
 
 /*
  * Convert the list of sudoRoles to sudoers format and store in the parse tree.
  */
-static void
+static bool
 ldif_to_sudoers(struct sudoers_parse_tree *parse_tree,
     struct sudo_role_list *roles, unsigned int numroles, bool store_options)
 {
     struct sudo_role **role_array, *role = NULL;
     unsigned int n;
+    bool ret = false;
     debug_decl(ldif_to_sudoers, SUDOERS_DEBUG_UTIL);
 
     /* Convert from list of roles to array and sort by order. */
     role_array = reallocarray(NULL, numroles + 1, sizeof(*role_array));
-    if (role_array == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    if (role_array == NULL) {
+	sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	debug_return_bool(false);
+    }
     for (n = 0; n < numroles; n++) {
 	if ((role = STAILQ_FIRST(roles)) == NULL)
 	    break;	/* cannot happen */
@@ -543,16 +548,20 @@ ldif_to_sudoers(struct sudoers_parse_tree *parse_tree,
 	    }
 	}
 
-	role_to_sudoers(parse_tree, role, store_options, reuse_userspec,
-	    reuse_privilege, reuse_runas);
+	if (!role_to_sudoers(parse_tree, role, store_options, reuse_userspec,
+		reuse_privilege, reuse_runas)) {
+	    goto done;
+	}
     }
+    ret = true;
 
+done:
     /* Clean up. */
     for (n = 0; n < numroles; n++)
 	sudo_role_free(role_array[n]);
     free(role_array);
 
-    debug_return;
+    debug_return_bool(ret);
 }
 
 /*
@@ -612,7 +621,7 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
     groupcache = rbcreate(str_list_cmp);
     hostcache = rbcreate(str_list_casecmp);
     if (usercache == NULL || groupcache == NULL || hostcache == NULL)
-	sudo_fatalx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+	goto oom;
 
     /* Read through input, parsing into sudo_roles and global defaults. */
     for (;;) {
@@ -627,7 +636,8 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
 	if (len <= 0) {
 	    if (in_role) {
 		if (role->cn != NULL && strcasecmp(role->cn, "defaults") == 0) {
-		    ldif_store_options(parse_tree, role->options);
+		    if (!ldif_store_options(parse_tree, role->options))
+			goto oom;
 		    sudo_role_free(role);
 		} else if (STAILQ_EMPTY(role->users) ||
 		    STAILQ_EMPTY(role->hosts) || STAILQ_EMPTY(role->cmnds)) {
@@ -641,8 +651,7 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
 			str_list_cache(hostcache, &role->hosts) == -1 ||
 			str_list_cache(usercache, &role->runasusers) == -1 ||
 			str_list_cache(groupcache, &role->runasgroups) == -1) {
-			sudo_fatalx(U_("%s: %s"), __func__,
-			    U_("unable to allocate memory"));
+			    goto oom;
 		    }
 
 		    /* Store finished role. */
@@ -665,10 +674,8 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
 
 	    /* Append to saved line. */
 	    linesize = savedlen + (size_t)len + 1;
-	    if ((tmp = realloc(savedline, linesize)) == NULL) {
-		sudo_fatalx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-	    }
+	    if ((tmp = realloc(savedline, linesize)) == NULL)
+		goto oom;
 	    memcpy(tmp + savedlen, line, (size_t)len + 1);
 	    free(line);
 	    line = tmp;
@@ -724,10 +731,8 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
 	    if (strcasecmp(attr, "sudoRole") == 0) {
 		/* Allocate new role as needed. */
 		if (role == NULL) {
-		    if ((role = sudo_role_alloc()) == NULL) {
-			sudo_fatalx(U_("%s: %s"), __func__,
-			    U_("unable to allocate memory"));
-		    }
+		    if ((role = sudo_role_alloc()) == NULL)
+			goto oom;
 		}
 		in_role = true;
 	    }
@@ -741,24 +746,29 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
 	if (strcasecmp(name, "cn") == 0) {
 	    free(role->cn);
 	    role->cn = unquote_cn(attr);
-	    if (role->cn == NULL) {
-		sudo_fatalx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-	    }
+	    if (role->cn == NULL)
+		goto oom;
 	} else if (strcasecmp(name, "sudoUser") == 0) {
-	    ldif_store_string(attr, role->users, true);
+	    if (!ldif_store_string(attr, role->users, true))
+		goto oom;
 	} else if (strcasecmp(name, "sudoHost") == 0) {
-	    ldif_store_string(attr, role->hosts, true);
+	    if (!ldif_store_string(attr, role->hosts, true))
+		goto oom;
 	} else if (strcasecmp(name, "sudoRunAs") == 0) {
-	    ldif_store_string(attr, role->runasusers, true);
+	    if (!ldif_store_string(attr, role->runasusers, true))
+		goto oom;
 	} else if (strcasecmp(name, "sudoRunAsUser") == 0) {
-	    ldif_store_string(attr, role->runasusers, true);
+	    if (!ldif_store_string(attr, role->runasusers, true))
+		goto oom;
 	} else if (strcasecmp(name, "sudoRunAsGroup") == 0) {
-	    ldif_store_string(attr, role->runasgroups, true);
+	    if (!ldif_store_string(attr, role->runasgroups, true))
+		goto oom;
 	} else if (strcasecmp(name, "sudoCommand") == 0) {
-	    ldif_store_string(attr, role->cmnds, false);
+	    if (!ldif_store_string(attr, role->cmnds, false))
+		goto oom;
 	} else if (strcasecmp(name, "sudoOption") == 0) {
-	    ldif_store_string(attr, role->options, false);
+	    if (!ldif_store_string(attr, role->options, false))
+		goto oom;
 	} else if (strcasecmp(name, "sudoOrder") == 0) {
 	    char *ep;
 	    role->order = strtod(attr, &ep);
@@ -769,31 +779,38 @@ sudoers_parse_ldif(struct sudoers_parse_tree *parse_tree,
 	} else if (strcasecmp(name, "sudoNotBefore") == 0) {
 	    free(role->notbefore);
 	    role->notbefore = strdup(attr);
-	    if (role->notbefore == NULL) {
-		sudo_fatalx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-	    }
+	    if (role->notbefore == NULL)
+		goto oom;
 	} else if (strcasecmp(name, "sudoNotAfter") == 0) {
 	    free(role->notafter);
 	    role->notafter = strdup(attr);
-	    if (role->notafter == NULL) {
-		sudo_fatalx(U_("%s: %s"), __func__,
-		    U_("unable to allocate memory"));
-	    }
+	    if (role->notafter == NULL)
+		goto oom;
 	}
     }
+
+    /* Convert from roles to sudoers data structures. */
+    if (numroles > 0) {
+	if (!ldif_to_sudoers(parse_tree, &roles, numroles, store_options))
+	    errors++;
+    }
+    goto done;
+
+oom:
+    sudo_warnx(U_("%s: %s"), __func__, U_("unable to allocate memory"));
+    errors++;
+
+done:
+    /* Clean up. */
     sudo_role_free(role);
     free(line);
     free(savedline);
-
-    /* Convert from roles to sudoers data structures. */
-    if (numroles > 0)
-	ldif_to_sudoers(parse_tree, &roles, numroles, store_options);
-
-    /* Clean up. */
-    rbdestroy(usercache, str_list_free);
-    rbdestroy(groupcache, str_list_free);
-    rbdestroy(hostcache, str_list_free);
+    if (usercache != NULL)
+	rbdestroy(usercache, str_list_free);
+    if (groupcache != NULL)
+	rbdestroy(groupcache, str_list_free);
+    if (hostcache != NULL)
+	rbdestroy(hostcache, str_list_free);
 
     debug_return_bool(errors == 0);
 }
