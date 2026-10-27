@@ -109,12 +109,10 @@ cb_fqdn(struct sudoers_context *ctx, const char *file,
     remote = strcmp(ctx->runas.host, ctx->user.host) != 0;
 
     /* First resolve ctx->user.host, setting host and shost. */
-    if (resolve_host(ctx->user.host, &lhost, &shost) != 0) {
-	if ((rc = resolve_host(ctx->runas.host, &lhost, &shost)) != 0) {
-	    gai_log_warning(ctx, SLOG_PARSE_ERROR|SLOG_RAW_MSG, rc,
-		N_("unable to resolve host %s"), ctx->user.host);
-	    debug_return_bool(false);
-	}
+    if ((rc = resolve_host(ctx->user.host, &lhost, &shost)) != 0) {
+	gai_log_warning(ctx, SLOG_PARSE_ERROR|SLOG_RAW_MSG, rc,
+	    N_("unable to resolve host %s"), ctx->user.host);
+	debug_return_bool(false);
     }
     if (ctx->user.shost != ctx->user.host)
 	free(ctx->user.shost);
