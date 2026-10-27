@@ -1390,6 +1390,7 @@ read_env_file(const struct sudoers_context *ctx, const char *path,
 	 */
 	if (restricted) {
 	    if (def_env_reset ? !env_should_keep(ctx, envstr) : env_should_delete(envstr)) {
+		sudoers_gc_remove(GC_PTR, envstr);
 		free(envstr);
 		continue;
 	    }
