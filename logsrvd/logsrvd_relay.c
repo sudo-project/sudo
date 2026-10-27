@@ -641,7 +641,7 @@ handle_server_error(const char *errmsg, struct connection_closure *closure)
     struct relay_closure *relay_closure = closure->relay_closure;
     debug_decl(handle_server_error, SUDO_DEBUG_UTIL);
 
-    sudo_warnx(U_("error received from relay %s (%s): %s")
+    sudo_warnx(U_("error received from relay %s (%s): %s"),
 	relay_closure->relay_name.name, relay_closure->relay_name.ipaddr,
 	errmsg);
 
