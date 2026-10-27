@@ -650,8 +650,12 @@ handle_server_error(const char *errmsg, struct connection_closure *closure)
     sudo_ev_del(closure->evbase, closure->relay_closure->read_ev);
     sudo_ev_del(closure->evbase, closure->relay_closure->write_ev);
 
-    /* Error message from relay could be missing. */
-    closure->errstr = *errmsg ? errmsg : "unknown error";
+    /*
+     * The caller frees the ServerMessage that errmsg points into before
+     * closure->errstr is used, so store a static string instead of errmsg
+     * itself.  The relay's message is logged above.
+     */
+    closure->errstr = _("error received from relay host");
 
     debug_return_bool(false);
 }
