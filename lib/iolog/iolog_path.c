@@ -59,7 +59,8 @@ escape_percent(char *str, size_t len, size_t size)
 
     /* Shift right from the end, duplicating each '%'. */
     for (i = len, n = nesc; n > 0; ) {
-	i--;
+	if (i-- == 0)
+	    debug_return_size_t((size_t)-1);
 	str[i + n] = str[i];
 	if (str[i] == '%') {
 	    n--;
