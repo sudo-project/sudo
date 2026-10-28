@@ -189,6 +189,7 @@ sudo_sss_check_user(struct sudoers_context *ctx, struct sudo_sss_handle *handle,
     /* Walk through sudoUser values.  */
     for (i = 0; val_array[i] != NULL; ++i) {
 	const char *val = val_array[i];
+	bool match = false;
 	bool negated = false;
 
 	sudo_debug_printf(SUDO_DEBUG_DEBUG, "val[%d]=%s", i, val);
@@ -201,31 +202,34 @@ sudo_sss_check_user(struct sudoers_context *ctx, struct sudo_sss_handle *handle,
 	    /* Netgroup spec found, check membership. */
 	    if (netgr_matches(NULL, val, def_netgroup_tuple ? host : NULL,
 		def_netgroup_tuple ? shost : NULL, handle->pw->pw_name) == ALLOW) {
-		ret = true;
+		match = true;
 	    }
 	    break;
 	case '%':
 	    /* User group found, check membership. */
 	    if (usergr_matches(val, handle->pw->pw_name, handle->pw) == ALLOW) {
-		ret = true;
+		match = true;
 	    }
 	    break;
 	default:
 	    /* Not a netgroup or user group. */
 	    if (strcmp(val, "ALL") == 0 ||
 		userpw_matches(val, handle->pw->pw_name, handle->pw) == ALLOW) {
-		ret = true;
+		match = true;
 	    }
 	    break;
 	}
 	sudo_debug_printf(SUDO_DEBUG_DIAG,
 	    "sssd/ldap sudoUser '%s%s' ... %s (%s)", negated ? "!" : "",
-	    val, ret ? "MATCH!" : "not", handle->pw->pw_name);
+	    val, match ? "MATCH!" : "not", handle->pw->pw_name);
 
-	/* A negated match overrides all other entries. */
-	if (ret && negated) {
-	    ret = false;
-	    break;
+	if (match) {
+	    /* A negated match overrides all other entries. */
+	    if (negated) {
+		ret = false;
+		break;
+	    }
+	    ret = true;
 	}
     }
     handle->fn_free_values(val_array);
