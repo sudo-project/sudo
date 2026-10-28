@@ -143,7 +143,7 @@ pam_restore_echo(void)
     if (pam_echo_disabled) {
 	fd = open(_PATH_TTY, O_RDWR);
 	if (fd != -1) {
-	    (void) sudo_term_restore(fd, true);
+	    (void) sudo_term_restore(fd, SUDO_TERM_FLUSH);
 	    (void) close(fd);
 	}
 	pam_echo_disabled = false;

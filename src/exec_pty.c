@@ -71,7 +71,7 @@ pty_cleanup(struct exec_closure *ec, int wstatus)
 	/* Only restore the terminal if sudo is the foreground process. */
 	const pid_t tcpgrp = tcgetpgrp(io_fds[SFD_USERTTY]);
 	if (tcpgrp == ec->ppgrp) {
-	    if (!sudo_term_restore(io_fds[SFD_USERTTY], false))
+	    if (!sudo_term_restore(io_fds[SFD_USERTTY], SUDO_TERM_NOW))
 		sudo_warn("%s", U_("unable to restore terminal settings"));
 	    ec->term_raw = false;
 	}
@@ -253,7 +253,7 @@ suspend_sudo_pty(struct exec_closure *ec, int signo)
 
 	/* Restore original tty mode before suspending. */
 	if (ec->term_raw) {
-	    if (!sudo_term_restore(io_fds[SFD_USERTTY], false))
+	    if (!sudo_term_restore(io_fds[SFD_USERTTY], SUDO_TERM_DRAIN))
 		sudo_warn("%s", U_("unable to restore terminal settings"));
 	    ec->term_raw = false;
 	}

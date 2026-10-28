@@ -384,7 +384,7 @@ main(int argc, char *argv[])
 	decimal, interactive, suspend_wait);
 
     restore_terminal_size();
-    sudo_term_restore(ttyfd, true);
+    sudo_term_restore(ttyfd, SUDO_TERM_NOW);
 done:
     sudo_debug_exit_int(__func__, __FILE__, __LINE__, sudo_debug_subsys, exitcode);
     return exitcode;
@@ -1726,5 +1726,5 @@ static void
 sudoreplay_cleanup(void)
 {
     restore_terminal_size();
-    sudo_term_restore(ttyfd, false);
+    sudo_term_restore(ttyfd, SUDO_TERM_NOW);
 }

@@ -187,7 +187,7 @@ restart:
 	     * If we are using a tty but are not the foreground pgrp this will
 	     * return EINTR.  We send ourself SIGTTOU bracketed by callbacks.
 	     */
-	    cbreak = sudo_term_cbreak(input, true);
+	    cbreak = sudo_term_cbreak(input, SUDO_TERM_FLUSH);
 	    if (ISSET(flags, TGP_MASK))
 		feedback = cbreak;
 	    if (cbreak || errno != EINTR)
@@ -255,7 +255,7 @@ restore:
     /* Restore old tty settings. */
     if (!ISSET(flags, TGP_ECHO)) {
 	/* Restore old tty settings if possible. */
-	if (!sudo_term_restore(input, true))
+	if (!sudo_term_restore(input, SUDO_TERM_FLUSH))
 	    sudo_warn("%s", U_("unable to restore terminal settings"));
     }
     if (ttyfd != -1)

@@ -347,13 +347,17 @@ sudo_dso_public mode_t sudo_strtomode_v2(const char *cp, const char **errstr);
 extern int (*sudo_printf)(int msg_type, const char * restrict fmt, ...);
 
 /* term.c */
+#define SUDO_TERM_NOW	0
+#define SUDO_TERM_DRAIN	1
+#define SUDO_TERM_FLUSH	2
 #define SUDO_TERM_ISIG	0x01U
 #define SUDO_TERM_OFLAG	0x02U
 sudo_dso_public bool sudo_isatty_v1(int fd, struct stat *sbp);
 #define sudo_isatty(_a, _b) sudo_isatty_v1((_a), (_b))
 sudo_dso_public bool sudo_term_cbreak_v1(int fd);
 sudo_dso_public bool sudo_term_cbreak_v2(int fd, bool flush);
-#define sudo_term_cbreak(_a, _b) sudo_term_cbreak_v2((_a), (_b))
+sudo_dso_public bool sudo_term_cbreak_v3(int fd, int action);
+#define sudo_term_cbreak(_a, _b) sudo_term_cbreak_v3((_a), (_b))
 sudo_dso_public bool sudo_term_copy_v1(int src, int dst);
 #define sudo_term_copy(_a, _b) sudo_term_copy_v1((_a), (_b))
 sudo_dso_public bool sudo_term_noecho_v1(int fd);
@@ -361,7 +365,8 @@ sudo_dso_public bool sudo_term_noecho_v1(int fd);
 sudo_dso_public bool sudo_term_raw_v1(int fd, unsigned int flags);
 #define sudo_term_raw(_a, _b) sudo_term_raw_v1((_a), (_b))
 sudo_dso_public bool sudo_term_restore_v1(int fd, bool flush);
-#define sudo_term_restore(_a, _b) sudo_term_restore_v1((_a), (_b))
+sudo_dso_public bool sudo_term_restore_v2(int fd, int action);
+#define sudo_term_restore(_a, _b) sudo_term_restore_v2((_a), (_b))
 sudo_dso_public bool sudo_term_is_raw_v1(int fd);
 #define sudo_term_is_raw(_a) sudo_term_is_raw_v1((_a))
 

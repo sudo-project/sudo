@@ -140,12 +140,26 @@ tcsetattr_nobg(int fd, int flags, struct termios *tp)
  * Returns true on success or false on failure.
  */
 bool
-sudo_term_restore_v1(int fd, bool flush)
+sudo_term_restore_v2(int fd, int action)
 {
-    const int flags = flush ? (TCSASOFT|TCSAFLUSH) : (TCSASOFT|TCSADRAIN);
     struct termios term = { 0 };
     bool ret = false;
+    int flags;
     debug_decl(sudo_term_restore, SUDO_DEBUG_UTIL);
+
+    switch (action) {
+    case SUDO_TERM_NOW:
+	flags = TCSASOFT|TCSANOW;
+	break;
+    case SUDO_TERM_DRAIN:
+	flags = TCSASOFT|TCSADRAIN;
+	break;
+    case SUDO_TERM_FLUSH:
+	flags = TCSASOFT|TCSAFLUSH;
+	break;
+    default:
+	debug_return_bool(false);
+    }
 
     if (!changed)
 	debug_return_bool(true);
@@ -214,6 +228,12 @@ unlock:
     sudo_lock_file(fd, SUDO_UNLOCK);
 
     debug_return_bool(ret);
+}
+
+bool
+sudo_term_restore_v1(int fd, bool flush)
+{
+    return sudo_term_restore_v2(fd, flush ? SUDO_TERM_FLUSH : SUDO_TERM_DRAIN);
 }
 
 /*
@@ -365,13 +385,27 @@ unlock:
  * Returns true on success or false on failure.
  */
 bool
-sudo_term_cbreak_v2(int fd, bool flush)
+sudo_term_cbreak_v3(int fd, int action)
 {
-    const int flags = flush ? (TCSASOFT|TCSAFLUSH) : (TCSASOFT|TCSADRAIN);
     struct termios term = { 0 };
     bool ret = false;
     struct stat sb;
+    int flags;
     debug_decl(sudo_term_cbreak, SUDO_DEBUG_UTIL);
+
+    switch (action) {
+    case SUDO_TERM_NOW:
+	flags = TCSASOFT|TCSANOW;
+	break;
+    case SUDO_TERM_DRAIN:
+	flags = TCSASOFT|TCSADRAIN;
+	break;
+    case SUDO_TERM_FLUSH:
+	flags = TCSASOFT|TCSAFLUSH;
+	break;
+    default:
+	debug_return_bool(false);
+    }
 
     /* Avoid calling ioctl on non-device to prevent CVE-2023-2002. */
     if (fstat(fd, &sb) != 0 || !S_ISCHR(sb.st_mode))
@@ -410,6 +444,12 @@ sudo_term_cbreak_v2(int fd, bool flush)
 unlock:
     sudo_lock_file(fd, SUDO_UNLOCK);
     debug_return_bool(ret);
+}
+
+bool
+sudo_term_cbreak_v2(int fd, bool flush)
+{
+    return sudo_term_cbreak_v3(fd, flush ? SUDO_TERM_FLUSH : SUDO_TERM_DRAIN);
 }
 
 bool
