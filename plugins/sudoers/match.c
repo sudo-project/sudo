@@ -147,7 +147,7 @@ runas_getgroups(const struct sudoers_context *ctx)
  * list containing runas_default is used.
  * Returns ALLOW, DENY or UNSPEC.
  */
-static int
+int
 runas_userlist_matches(const struct sudoers_parse_tree *parse_tree,
     const struct member_list *user_list)
 {

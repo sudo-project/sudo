@@ -740,7 +740,8 @@ default_binding_matches(const struct sudoers_context *ctx,
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_RUNAS:
-	if (runaslist_matches(parse_tree, &d->binding->members, NULL) == ALLOW)
+	/* Only the runas user is matched, not the runas group. */
+	if (runas_userlist_matches(parse_tree, &d->binding->members) == ALLOW)
 	    debug_return_bool(true);
 	break;
     case DEFAULTS_HOST:
