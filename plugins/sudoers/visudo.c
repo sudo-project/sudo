@@ -1226,7 +1226,7 @@ new_sudoers(const char *path, bool doedit)
 bad:
     if (fd != -1)
 	close(fd);
-    if (dfd != -1 && dfd != AT_FDCWD)
+    if (dfd != -1 && dfd != (int)AT_FDCWD)
 	close(dfd);
     if (entry->opath != entry->dpath)
 	free(entry->opath);
