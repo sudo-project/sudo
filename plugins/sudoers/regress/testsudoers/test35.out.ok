@@ -1,0 +1,29 @@
+Testing with runas user root:
+
+Parses OK
+
+Entries for user admin:
+
+ALL = (ALL : ALL) ALL
+	host  allowed
+	runas allowed
+	cmnd  allowed
+
+Password required
+
+Command allowed
+
+Testing with runas user root and runas group users:
+
+Parses OK
+
+Entries for user admin:
+
+ALL = (ALL : ALL) ALL
+	host  allowed
+	runas allowed
+	cmnd  allowed
+
+Password required
+
+Command allowed

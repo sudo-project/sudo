@@ -434,6 +434,7 @@ int cmndlist_matches(const struct sudoers_parse_tree *parse_tree, const struct m
 int host_matches(const struct sudoers_parse_tree *parse_tree, const struct passwd *pw, const char *host, const char *shost, const struct member *m);
 int hostlist_matches(const struct sudoers_parse_tree *parse_tree, const struct passwd *pw, const struct member_list *list);
 int runaslist_matches(const struct sudoers_parse_tree *parse_tree, const struct member_list *user_list, const struct member_list *group_list);
+int runas_userlist_matches(const struct sudoers_parse_tree *parse_tree, const struct member_list *user_list);
 int user_matches(const struct sudoers_parse_tree *parse_tree, const struct passwd *pw, const struct member *m);
 int userlist_matches(const struct sudoers_parse_tree *parse_tree, const struct passwd *pw, const struct member_list *list);
 const char *sudo_getdomainname(void);

@@ -1137,6 +1137,8 @@ plugins/sudoers/regress/testsudoers/test33.out.ok
 plugins/sudoers/regress/testsudoers/test33.sh
 plugins/sudoers/regress/testsudoers/test34.out.ok
 plugins/sudoers/regress/testsudoers/test34.sh
+plugins/sudoers/regress/testsudoers/test35.out.ok
+plugins/sudoers/regress/testsudoers/test35.sh
 plugins/sudoers/regress/testsudoers/test4.out.ok
 plugins/sudoers/regress/testsudoers/test4.sh
 plugins/sudoers/regress/testsudoers/test5.out.ok
