@@ -346,7 +346,7 @@ mon_backchannel_cb(int fd, int what, void *v)
  */
 static void
 exec_cmnd_pty(struct command_details *details, bool foreground,
-    int intercept_fd, int errfd)
+    sigset_t *mask, int intercept_fd, int errfd)
 {
     volatile pid_t self = getpid();
     debug_decl(exec_cmnd_pty, SUDO_DEBUG_EXEC);
@@ -396,7 +396,7 @@ exec_cmnd_pty(struct command_details *details, bool foreground,
     /* Execute command; only returns on error. */
     sudo_debug_printf(SUDO_DEBUG_INFO, "executing %s in the %s",
 	details->command, foreground ? "foreground" : "background");
-    exec_cmnd(details, intercept_fd, errfd);
+    exec_cmnd(details, mask, intercept_fd, errfd);
 
     debug_return;
 }
@@ -551,6 +551,7 @@ exec_monitor(struct command_details *details, bool foreground,
     struct monitor_closure mc;
     struct command_status cstat;
     struct sigaction sa;
+    sigset_t set, oset;
     int errsock[2];
     debug_decl(exec_monitor, SUDO_DEBUG_EXEC);
 
@@ -621,10 +622,19 @@ exec_monitor(struct command_details *details, bool foreground,
      */
     init_exec_events_monitor(&mc, errsock[0]);
 
+    /*
+     * Block signals across the fork; the child unblocks them once it
+     * has reset the handlers (see exec_cmnd()) so that a signal
+     * delivered to it before execve(2) is not lost.
+     */
+    sigfillset(&set);
+    sigprocmask(SIG_BLOCK, &set, &oset);
+
     mc.cmnd_pid = sudo_debug_fork();
     switch (mc.cmnd_pid) {
     case -1:
 	sudo_warn("%s", U_("unable to fork"));
+	sigprocmask(SIG_SETMASK, &oset, NULL);
 #ifdef HAVE_SELINUX
 	if (ISSET(details->flags, CD_RBAC_ENABLED)) {
 	    if (selinux_restore_tty() != 0)
@@ -637,12 +647,13 @@ exec_monitor(struct command_details *details, bool foreground,
 	close(backchannel);
 	close(errsock[0]);
 	/* setup tty and exec command */
-	exec_cmnd_pty(details, foreground, intercept_fd, errsock[1]);
+	exec_cmnd_pty(details, foreground, &oset, intercept_fd, errsock[1]);
 	if (send(errsock[1], &errno, sizeof(int), 0) == -1)
 	    sudo_warn(U_("unable to execute %s"), details->command);
 	_exit(EXIT_FAILURE);
 	/* NOTREACHED */
     }
+    sigprocmask(SIG_SETMASK, &oset, NULL);
     close(errsock[1]);
     if (intercept_fd != -1)
 	close(intercept_fd);
