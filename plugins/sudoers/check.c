@@ -83,8 +83,8 @@ get_authpw(struct sudoers_context *ctx, unsigned int mode)
 
 /*
  * Returns true if the user is running the command as themselves
- * and no SELinux type/role, AppArmor profile or Solaris privilege
- * was specified.
+ * and no SELinux type/role, AppArmor profile, Solaris privilege
+ * or root directory was specified.
  */
 static bool
 running_as_user(struct sudoers_context *ctx)
@@ -93,7 +93,9 @@ running_as_user(struct sudoers_context *ctx)
 	user_in_group(ctx->user.pw, ctx->runas.gr->gr_name)) &&
 	ctx->runas.role == NULL && ctx->runas.type == NULL &&
 	ctx->runas.apparmor_profile == NULL &&
-	ctx->runas.privs == NULL && ctx->runas.limitprivs == NULL;
+	ctx->runas.privs == NULL && ctx->runas.limitprivs == NULL &&
+	ctx->runas.chroot == NULL &&
+	(def_runchroot == NULL || strcmp(def_runchroot, "*") == 0);
 }
 
 /*
