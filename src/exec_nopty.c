@@ -615,9 +615,11 @@ exec_nopty(struct command_details *details,
     /* Allocate and set signal events and the error pipe event.*/
     init_exec_events(&ec, evbase, errpipe[0]);
 
-    /* Restore signal mask now that signal handlers are setup. */
-    sigprocmask(SIG_SETMASK, &oset, NULL);
-
+    /*
+     * Signals stay blocked across the fork; the child unblocks them
+     * once it has reset the handlers (see exec_cmnd()) so that a
+     * signal forwarded to it before execve(2) is not lost.
+     */
     ec.cmnd_pid = sudo_debug_fork();
     switch (ec.cmnd_pid) {
     case -1:
@@ -647,7 +649,7 @@ exec_nopty(struct command_details *details,
 	    close(io_pipe[STDERR_FILENO][0]);
 	    close(io_pipe[STDERR_FILENO][1]);
 	}
-	exec_cmnd(details, intercept_sv[1], errpipe[1]);
+	exec_cmnd(details, &oset, intercept_sv[1], errpipe[1]);
 	while (write(errpipe[1], &errno, sizeof(int)) == -1) {
 	    if (errno != EINTR)
 		break;
@@ -658,6 +660,9 @@ exec_nopty(struct command_details *details,
     }
     sudo_debug_printf(SUDO_DEBUG_INFO, "executed %s, pid %d", details->command,
 	(int)ec.cmnd_pid);
+
+    /* Restore signal mask now that the command has been forked. */
+    sigprocmask(SIG_SETMASK, &oset, NULL);
     /* Close the other end of the pipes and socketpairs. */
     if (io_pipe[STDIN_FILENO][0] != -1)
         close(io_pipe[STDIN_FILENO][0]);
