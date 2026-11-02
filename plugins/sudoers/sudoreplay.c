@@ -1373,12 +1373,14 @@ static bool
 match_expr(struct search_node_list *head, struct eventlog *evlog, bool last_match)
 {
     struct search_node *sn;
-    bool res = false, matched = last_match;
+    bool res, matched = last_match;
     char *tofree;
     int rc;
     debug_decl(match_expr, SUDO_DEBUG_UTIL);
 
     STAILQ_FOREACH(sn, head, entries) {
+	/* A term on a field missing from the log does not match. */
+	res = false;
 	switch (sn->type) {
 	case ST_EXPR:
 	    res = match_expr(&sn->u.expr, evlog, matched);
