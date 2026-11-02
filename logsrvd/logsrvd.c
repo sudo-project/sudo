@@ -1460,10 +1460,15 @@ set_tls_verify_peer(void)
 	}
     }
     if (relay_ctx != NULL && logsrvd_conf_relay_tls_check_peer()) {
-	/* Verify relay cert during the handshake. */
+	/*
+	 * Verify relay cert during the handshake.  The relay connection
+	 * stores a struct peer_info in the SSL object (see tls_ctx_client_setup())
+	 * so we must use tls_verify_peer(), not the connection_closure-based
+	 * verify_peer_identity() used for accepted client connections.
+	 */
 	SSL_CTX_set_verify(relay_ctx,
 	    SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
-	    verify_peer_identity);
+	    tls_verify_peer);
     }
 
     debug_return;

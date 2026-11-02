@@ -52,15 +52,15 @@
  * contains the server name or IP address.
  * Returns 0 if the cert is invalid, else 1.
  */
-static int
-verify_peer_identity(int preverify_ok, X509_STORE_CTX *ctx)
+int
+tls_verify_peer(int preverify_ok, X509_STORE_CTX *ctx)
 {
     HostnameValidationResult result;
     struct peer_info *peer_info;
     SSL *ssl;
     X509 *current_cert;
     X509 *peer_cert;
-    debug_decl(verify_peer_identity, SUDO_DEBUG_UTIL);
+    debug_decl(tls_verify_peer, SUDO_DEBUG_UTIL);
 
     current_cert = X509_STORE_CTX_get_current_cert(ctx);
 
@@ -252,7 +252,7 @@ tls_client_setup(int sock, const char *ca_bundle_file, const char *cert_file,
 	/* Verify server cert during the handshake. */
 	SSL_CTX_set_verify(ssl_ctx,
 	    SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
-	    verify_peer_identity);
+	    tls_verify_peer);
     }
 
     debug_return_bool(tls_ctx_client_setup(ssl_ctx, sock, closure));
