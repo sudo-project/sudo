@@ -1,0 +1,9 @@
+alias_type,alias_name,members
+User_Alias,ADMINS,alice
+
+rule,user,host,runusers,rungroups,options,command
+rule,ADMINS,ALL,root,,"!log_input",/bin/ls
+rule,bob,ALL,root,,"!log_output",/bin/cat
+rule,carol,ALL,root,,"log_input",/bin/date
+rule,user,host,runusers,rungroups,options,command
+rule,alice,ALL,,,"env_reset,!requiretty",/bin/ls

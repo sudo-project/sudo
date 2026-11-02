@@ -49,7 +49,7 @@ print_options_csv(FILE *fp, struct defaults_list *options, bool need_comma)
 		opt->op == '+' ? "+=" : opt->op == '-' ? "-=" : "=", opt->val);
 	} else {
 	    /* Boolean flag. */
-	    fprintf(fp, "%s%s%s%s", need_comma ? "," : "", opt->var,
+	    fprintf(fp, "%s%s%s", need_comma ? "," : "",
 		opt->op == false ? "!" : "", opt->var);
 	}
 	need_comma = true;
@@ -420,7 +420,7 @@ print_aliases_csv(FILE *fp, const struct sudoers_parse_tree *parse_tree)
 {
     debug_decl(print_aliases_csv, SUDOERS_DEBUG_UTIL);
 
-    if (TAILQ_EMPTY(&parse_tree->defaults))
+    if (no_aliases(parse_tree))
 	debug_return_bool(true);
 
     /* Heading line. */
@@ -545,12 +545,12 @@ print_cmndspec_csv(FILE *fp, const struct sudoers_parse_tree *parse_tree,
 	}
 	if (tag.log_input != UNSPEC) {
 	    fprintf(fp, "%s%s", need_comma ? "," : "",
-		tag.follow ? "log_input" : "!log_input");
+		tag.log_input ? "log_input" : "!log_input");
 	    need_comma = true;
 	}
 	if (tag.log_output != UNSPEC) {
 	    fprintf(fp, "%s%s", need_comma ? "," : "",
-		tag.follow ? "log_output" : "!log_output");
+		tag.log_output ? "log_output" : "!log_output");
 	    need_comma = true;
 	}
     }
