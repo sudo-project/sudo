@@ -42,6 +42,7 @@ struct tls_client_closure {
 };
 
 /* tls_client.c */
+int tls_verify_peer(int preverify_ok, X509_STORE_CTX *ctx);
 void tls_connect_cb(int sock, int what, void *v);
 bool tls_client_setup(int sock, const char *ca_bundle_file, const char *cert_file, const char *key_file, const char *dhparam_file, const char *ciphers_v12, const char *ciphers_v13, bool verify_server, bool check_peer, struct tls_client_closure *closure);
 bool tls_ctx_client_setup(SSL_CTX *ssl_ctx, int sock, struct tls_client_closure *closure);
