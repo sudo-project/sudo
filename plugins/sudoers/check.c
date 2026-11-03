@@ -82,15 +82,42 @@ get_authpw(struct sudoers_context *ctx, unsigned int mode)
 }
 
 /*
- * Returns true if the user is running the command as themselves
- * and no SELinux type/role, AppArmor profile, Solaris privilege
- * or root directory was specified.
+ * Returns true if gid is the user's primary group-ID or one of
+ * the user's supplementary group-IDs.
+ */
+static bool
+user_has_gid(const struct passwd *pw, gid_t gid)
+{
+    struct gid_list *gidlist;
+    bool matched = false;
+    int i;
+    debug_decl(user_has_gid, SUDOERS_DEBUG_AUTH);
+
+    if (gid == pw->pw_gid)
+	debug_return_bool(true);
+    if ((gidlist = sudo_get_gidlist(pw, ENTRY_TYPE_ANY)) != NULL) {
+	for (i = 0; i < gidlist->ngids; i++) {
+	    if (gidlist->gids[i] == gid) {
+		matched = true;
+		break;
+	    }
+	}
+	sudo_gidlist_delref(gidlist);
+    }
+    debug_return_bool(matched);
+}
+
+/*
+ * Returns true if the user is running the command as themselves,
+ * with one of their own groups, and no SELinux type/role, AppArmor
+ * profile, Solaris privilege or root directory was specified.
+ * The runas group is compared by group-ID, not by name.
  */
 static bool
 running_as_user(struct sudoers_context *ctx)
 {
     return ctx->user.uid == ctx->runas.pw->pw_uid && (ctx->runas.gr == NULL ||
-	user_in_group(ctx->user.pw, ctx->runas.gr->gr_name)) &&
+	user_has_gid(ctx->user.pw, ctx->runas.gr->gr_gid)) &&
 	ctx->runas.role == NULL && ctx->runas.type == NULL &&
 	ctx->runas.apparmor_profile == NULL &&
 	ctx->runas.privs == NULL && ctx->runas.limitprivs == NULL &&
