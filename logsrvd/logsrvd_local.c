@@ -64,6 +64,33 @@ struct logsrvd_info_closure {
     size_t infolen;
 };
 
+/*
+ * Keys that format_json() writes itself for accept and reject events.
+ * These must not be overridden by the client.
+ */
+static const char *reserved_json_keys[] = {
+    "iolog_offset",
+    "iolog_path",
+    "peeraddr",
+    "reason",
+    "server_time",
+    "submit_time",
+    "uuid",
+    NULL
+};
+
+static bool
+reserved_json_key(const char *key)
+{
+    const char **kp;
+
+    for (kp = reserved_json_keys; *kp != NULL; kp++) {
+	if (strcmp(key, *kp) == 0)
+	    return true;
+    }
+    return false;
+}
+
 static bool
 logsrvd_json_log_cb(struct json_container *jsonc, void *v)
 {
@@ -74,6 +101,12 @@ logsrvd_json_log_cb(struct json_container *jsonc, void *v)
 
     for (idx = 0; idx < closure->infolen; idx++) {
 	InfoMessage *info = closure->info_msgs[idx];
+
+	if (reserved_json_key(info->key)) {
+	    sudo_warnx(U_("%s: protocol error: reserved key %s"),
+		"local", info->key);
+	    continue;
+	}
 
 	switch (info->value_case) {
 	case INFO_MESSAGE__VALUE_NUMVAL:
