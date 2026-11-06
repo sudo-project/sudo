@@ -67,14 +67,10 @@ pty_cleanup(struct exec_closure *ec, int wstatus)
     debug_decl(pty_cleanup, SUDO_DEBUG_EXEC);
 
     /* Restore terminal settings. */
-    if (ec->term_raw) {
-	/* Only restore the terminal if sudo is the foreground process. */
-	const pid_t tcpgrp = tcgetpgrp(io_fds[SFD_USERTTY]);
-	if (tcpgrp == ec->ppgrp) {
-	    if (!sudo_term_restore(io_fds[SFD_USERTTY], SUDO_TERM_NOW))
-		sudo_warn("%s", U_("unable to restore terminal settings"));
-	    ec->term_raw = false;
-	}
+    if (io_fds[SFD_USERTTY] != -1) {
+	if (!sudo_term_restore(io_fds[SFD_USERTTY], SUDO_TERM_NOW))
+	    sudo_warn("%s", U_("unable to restore terminal settings"));
+	ec->term_raw = false;
     }
 
     /* Update utmp */
@@ -1320,8 +1316,16 @@ exec_pty(struct command_details *details,
     /* Start in raw mode unless the command will run in the background. */
     cmnd_foreground = ec->foreground && !ISSET(details->flags, CD_EXEC_BG);
     if (cmnd_foreground) {
-	if (sudo_term_raw(io_fds[SFD_USERTTY], 0))
+	/* Pass term_raw_flags so the user's tty applies correct output flags. */
+	if (sudo_term_raw(io_fds[SFD_USERTTY], term_raw_flags))
 	    ec->term_raw = true;
+	/* Disable output processing on the pty so \r works.
+	 * Do not use sudo_term_raw here to preserve the saved user tty state. */
+	struct termios term;
+	if (tcgetattr(io_fds[SFD_LEADER], &term) == 0) {
+	    term.c_oflag &= ~OPOST;
+	    (void)tcsetattr(io_fds[SFD_LEADER], TCSANOW, &term);
+	}
     }
 
     sudo_debug_printf(SUDO_DEBUG_INFO,
