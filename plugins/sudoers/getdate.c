@@ -2104,7 +2104,7 @@ Convert(time_t Month, time_t Day, time_t Year, time_t Hours, time_t Minutes,
     for (Julian = Day - 1, i = 0; i < Month; i++)
 	Julian += DaysInMonth[i];
     for (i = EPOCH; i < Year; i++)
-	Julian += 365 + (i % 4 == 0);
+	Julian += 365 + (i % 4 == 0 && (i % 100 != 0 || i % 400 == 0));
     Julian *= SECSPERDAY;
     Julian += yyTimezone * 60L;
     if ((tod = ToSeconds(Hours, Minutes, Seconds, Meridian)) < 0)
