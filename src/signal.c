@@ -86,16 +86,20 @@ restore_signals(void)
     struct signal_state *ss;
     debug_decl(restore_signals, SUDO_DEBUG_MAIN);
 
+    /*
+     * Restore all saved signals, not just the ones flagged for restore.
+     * The handlers sudo installed are inherited across fork(2) and a
+     * signal that arrives before execve(2) would be swallowed by them.
+     * The saved state is what execve(2) would leave: SIG_IGN or SIG_DFL.
+     */
     for (ss = saved_signals; ss->signo != -1; ss++) {
-	if (ss->restore) {
-	    sudo_debug_printf(SUDO_DEBUG_INFO,
-		"restoring handler for signal %d: %s", ss->signo,
-		ss->sa.sa_handler == SIG_IGN ? "SIG_IGN" :
-		ss->sa.sa_handler == SIG_DFL ? "SIG_DFL" : "???");
-	    if (sigaction(ss->signo, &ss->sa, NULL) != 0) {
-		sudo_warn(U_("unable to restore handler for signal %d"),
-		    ss->signo);
-	    }
+	sudo_debug_printf(SUDO_DEBUG_INFO,
+	    "restoring handler for signal %d: %s", ss->signo,
+	    ss->sa.sa_handler == SIG_IGN ? "SIG_IGN" :
+	    ss->sa.sa_handler == SIG_DFL ? "SIG_DFL" : "???");
+	if (sigaction(ss->signo, &ss->sa, NULL) != 0) {
+	    sudo_warn(U_("unable to restore handler for signal %d"),
+		ss->signo);
 	}
     }
 
