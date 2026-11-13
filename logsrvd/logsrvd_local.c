@@ -65,10 +65,11 @@ struct logsrvd_info_closure {
 };
 
 /*
- * Keys that format_json() writes itself for accept and reject events.
+ * Keys that format_json() writes itself for accept, reject and alert events.
  * These must not be overridden by the client.
  */
 static const char *reserved_json_keys[] = {
+    "alert_time",
     "iolog_offset",
     "iolog_path",
     "peeraddr",
