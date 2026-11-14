@@ -1560,6 +1560,51 @@ bad:
     connection_close(closure);
     debug_return;
 }
+
+/*
+ * Check whether name, obtained via a reverse lookup of the peer's
+ * address, resolves back to that same address.
+ * Returns true if it does, else false.
+ */
+static bool
+name_resolves_to_peer(const char *name, const union sockaddr_union *sa_un)
+{
+    struct addrinfo hints, *res0, *res;
+    bool matched = false;
+    int error;
+    debug_decl(name_resolves_to_peer, SUDO_DEBUG_UTIL);
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = sa_un->sa.sa_family;
+    hints.ai_socktype = SOCK_STREAM;
+    error = getaddrinfo(name, NULL, &hints, &res0);
+    if (error != 0) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "unable to resolve %s: %s", name, gai_strerror(error));
+	debug_return_bool(false);
+    }
+
+    for (res = res0; res != NULL && !matched; res = res->ai_next) {
+	const union sockaddr_union *addr =
+	    (const union sockaddr_union *)res->ai_addr;
+
+	switch (res->ai_family) {
+	case AF_INET:
+	    matched = memcmp(&addr->sin.sin_addr, &sa_un->sin.sin_addr,
+		sizeof(addr->sin.sin_addr)) == 0;
+	    break;
+#ifdef HAVE_STRUCT_IN6_ADDR
+	case AF_INET6:
+	    matched = memcmp(&addr->sin6.sin6_addr, &sa_un->sin6.sin6_addr,
+		sizeof(addr->sin6.sin6_addr)) == 0;
+	    break;
+#endif /* HAVE_STRUCT_IN6_ADDR */
+	}
+    }
+    freeaddrinfo(res0);
+
+    debug_return_bool(matched);
+}
 #endif /* HAVE_OPENSSL */
 
 /*
@@ -1620,7 +1665,11 @@ new_connection(int sock, bool tls, const union sockaddr_union *sa_un,
 	    char hbuf[NI_MAXHOST];
 	    const int error = getnameinfo(&sa_un->sa, salen, hbuf,
 		sizeof(hbuf), NULL, 0, NI_NAMEREQD);
-	    if (error == 0) {
+	    if (error == 0 && !name_resolves_to_peer(hbuf, sa_un)) {
+		/* The PTR record is not proof of identity, ignore it. */
+		sudo_warnx(U_("host name %s does not resolve to %s"),
+		    hbuf, closure->ipaddr);
+	    } else if (error == 0) {
 		closure->name = strdup(hbuf);
 		if (closure->name == NULL) {
 		    sudo_warnx(U_("%s: %s"), __func__,
