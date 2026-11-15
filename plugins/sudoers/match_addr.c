@@ -141,16 +141,18 @@ addr_matches_if_netmask(const char *n, const char *m)
 		    "IPv6 netmask %s: %s", m, errstr);
 		debug_return_int(DENY);
 	    }
-	    for (i = 0; i < sizeof(addr.ip6.s6_addr); i++) {
+	    for (i = 0; i < sizeof(mask.ip6.s6_addr); i++) {
 		if (j < i * 8)
 		    mask.ip6.s6_addr[i] = 0;
 		else if (i * 8 + 8 <= j)
 		    mask.ip6.s6_addr[i] = 0xff;
 		else
 		    mask.ip6.s6_addr[i] = 0xff00 >> (j - i * 8);
-		addr.ip6.s6_addr[i] &= mask.ip6.s6_addr[i];
 	    }
 	}
+	/* Mask off the address bits, as we do for IPv4. */
+	for (i = 0; i < sizeof(addr.ip6.s6_addr); i++)
+	    addr.ip6.s6_addr[i] &= mask.ip6.s6_addr[i];
     }
 #endif /* HAVE_STRUCT_IN6_ADDR */
 
