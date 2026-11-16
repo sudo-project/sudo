@@ -1576,7 +1576,6 @@ name_resolves_to_peer(const char *name, const union sockaddr_union *sa_un)
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = sa_un->sa.sa_family;
-    hints.ai_socktype = SOCK_STREAM;
     error = getaddrinfo(name, NULL, &hints, &res0);
     if (error != 0) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
