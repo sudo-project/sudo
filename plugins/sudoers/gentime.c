@@ -39,6 +39,19 @@
 #endif
 
 /*
+ * Number of days in month mon (1-12) of year (Gregorian calendar).
+ */
+static int
+days_in_month(int year, int mon)
+{
+    static const int mdays[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+
+    if (mon == 2 && ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0))
+	return 29;
+    return mdays[mon - 1];
+}
+
+/*
  * Parse a timestamp in Generalized Time format as per RFC4517.
  * E.g. yyyymmddHHMMSS.FZ or yyyymmddHHMMSS.F[+-]TZOFF
  * where minutes, seconds and fraction are optional.
@@ -76,10 +89,31 @@ parse_gentime(const char *timestr)
 	debug_return_time_t(-1);
     }
 
+    /*
+     * Reject out-of-range fields (RFC 4517): timegm()/mktime() would
+     * otherwise silently normalize them, e.g. February 30 to March 2.
+     * Checked before any fraction is applied; 60 seconds is a leap second.
+     * As in ISO 8601, 24:00:00 is accepted as the end of the day.
+     */
+    if (tm.tm_mon < 1 || tm.tm_mon > 12 || tm.tm_mday < 1 ||
+	    tm.tm_mday > days_in_month(tm.tm_year, tm.tm_mon) ||
+	    tm.tm_hour > 24 || tm.tm_min > 59 || tm.tm_sec > 60 ||
+	    (tm.tm_hour == 24 && (tm.tm_min != 0 || tm.tm_sec != 0))) {
+	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+	    "out of range value in general time string %s", timestr);
+	debug_return_time_t(-1);
+    }
+
     /* Parse optional fractional hours/minute/second if present. */
     cp = timestr + len;
     if ((cp[0] == '.' || cp[0] == ',') && isdigit((unsigned char)cp[1])) {
 	int frac = cp[1] - '0';
+	if (tm.tm_hour == 24) {
+	    /* 24:00:00 is the end of the day, there is nothing after it. */
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"fraction after 24:00:00 in general time string %s", timestr);
+	    debug_return_time_t(-1);
+	}
 	switch (items) {
 	case 4:
 	    /* convert fractional hour -> minutes */
@@ -120,6 +154,11 @@ parse_gentime(const char *timestr)
 	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
 		"unable to parse time zone offset in %s, items %d",
 		timestr, items);
+	    debug_return_time_t(-1);
+	}
+	if (hour > 23 || min > 59) {
+	    sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_LINENO,
+		"time zone offset out of range in %s", timestr);
 	    debug_return_time_t(-1);
 	}
 	if (*cp == '-')
