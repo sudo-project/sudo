@@ -30,7 +30,7 @@
 # include <tsgetgrpw.h>
 #endif
 
-static const char *shellfile = "/etc/shell";
+static const char *shellfile = "/etc/shells";
 static char **allowed_shells, * const *current_shell;
 static const char *default_shells[] = {
     "/bin/sh",
@@ -62,10 +62,15 @@ read_shells(void)
 	goto bad;
 
     while (sudo_parseln(&line, &linesize, NULL, fp, PARSELN_CONT_IGN) != -1) {
+	/* Skip blank lines and comments. */
+	if (line[0] == '\0')
+	    continue;
 	if (nshells + 1 >= maxshells) {
 	    char **new_shells;
 
-	    new_shells = reallocarray(NULL, maxshells + 16, sizeof(char *));
+	    /* Preserve the entries already read when growing the array. */
+	    new_shells = reallocarray(allowed_shells, maxshells + 16,
+		sizeof(char *));
 	    if (new_shells == NULL)
 		goto bad;
 	    allowed_shells = new_shells;
