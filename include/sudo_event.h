@@ -77,7 +77,7 @@ struct sudo_event {
     short events;		/* SUDO_EV_* flags (in) */
     short revents;		/* SUDO_EV_* flags (out) */
     unsigned short flags;	/* internal event flags */
-    short pfd_idx;		/* index into pfds array (XXX) */
+    int pfd_idx;		/* index into pfds array */
     sudo_ev_callback_t callback;/* user-provided callback */
     struct timespec timeout;	/* for SUDO_EV_TIMEOUT */
     void *closure;		/* user-provided data pointer */
