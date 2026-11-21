@@ -115,7 +115,7 @@ sudo_ev_add_impl(struct sudo_event_base *base, struct sudo_event *ev)
     /* Fill in pfd entry. */
     sudo_debug_printf(SUDO_DEBUG_DEBUG|SUDO_DEBUG_LINENO,
 	"%s: choosing free slot %d", __func__, base->pfd_free);
-    ev->pfd_idx = (short)base->pfd_free;
+    ev->pfd_idx = base->pfd_free;
     pfd = &base->pfds[ev->pfd_idx];
     pfd->fd = ev->fd;
     pfd->events = 0;
