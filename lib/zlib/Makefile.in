@@ -207,19 +207,17 @@ gzread.lo: $(srcdir)/gzread.c $(srcdir)/gzguts.h $(srcdir)/zlib.h ./zconf.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/gzread.c
 gzwrite.lo: $(srcdir)/gzwrite.c $(srcdir)/gzguts.h $(srcdir)/zlib.h ./zconf.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/gzwrite.c
-infback.lo: $(srcdir)/infback.c $(srcdir)/inffast.h $(srcdir)/inffixed.h \
-            $(srcdir)/inflate.h $(srcdir)/inftrees.h $(srcdir)/zlib.h \
-            $(srcdir)/zutil.h ./zconf.h
+infback.lo: $(srcdir)/infback.c $(srcdir)/inffast.h $(srcdir)/inflate.h \
+            $(srcdir)/inftrees.h $(srcdir)/zlib.h $(srcdir)/zutil.h ./zconf.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/infback.c
 inffast.lo: $(srcdir)/inffast.c $(srcdir)/inffast.h $(srcdir)/inflate.h \
             $(srcdir)/inftrees.h $(srcdir)/zlib.h $(srcdir)/zutil.h ./zconf.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/inffast.c
-inflate.lo: $(srcdir)/inflate.c $(srcdir)/inffast.h $(srcdir)/inffixed.h \
-            $(srcdir)/inflate.h $(srcdir)/inftrees.h $(srcdir)/zlib.h \
-            $(srcdir)/zutil.h ./zconf.h
+inflate.lo: $(srcdir)/inflate.c $(srcdir)/inffast.h $(srcdir)/inflate.h \
+            $(srcdir)/inftrees.h $(srcdir)/zlib.h $(srcdir)/zutil.h ./zconf.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/inflate.c
-inftrees.lo: $(srcdir)/inftrees.c $(srcdir)/inftrees.h $(srcdir)/zlib.h \
-             $(srcdir)/zutil.h ./zconf.h
+inftrees.lo: $(srcdir)/inftrees.c $(srcdir)/inffixed.h $(srcdir)/inflate.h \
+             $(srcdir)/inftrees.h $(srcdir)/zlib.h $(srcdir)/zutil.h ./zconf.h
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/inftrees.c
 trees.lo: $(srcdir)/trees.c $(srcdir)/deflate.h $(srcdir)/trees.h \
           $(srcdir)/zlib.h $(srcdir)/zutil.h ./zconf.h
