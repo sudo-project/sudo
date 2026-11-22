@@ -23600,45 +23600,6 @@ fi
 
 done
 
-  for ac_func in getusershell
-do :
-  ac_fn_c_check_func "$LINENO" "getusershell" "ac_cv_func_getusershell"
-if test "x$ac_cv_func_getusershell" = xyes
-then :
-  printf "%s\n" "#define HAVE_GETUSERSHELL 1" >>confdefs.h
-
-    # Older Solaris has getusershell() et al but does not declare it.
-    ac_fn_check_decl "$LINENO" "getusershell" "ac_cv_have_decl_getusershell" "$ac_includes_default" "$ac_c_undeclared_builtin_options" "CFLAGS"
-if test "x$ac_cv_have_decl_getusershell" = xyes
-then :
-  ac_have_decl=1
-else case e in #(
-  e) ac_have_decl=0 ;;
-esac
-fi
-printf "%s\n" "#define HAVE_DECL_GETUSERSHELL $ac_have_decl" >>confdefs.h
-
-
-else case e in #(
-  e)
-    case " $LIBOBJS " in
-  *" getusershell.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS getusershell.$ac_objext"
- ;;
-esac
-
-
-    for _sym in sudo_getusershell; do
-	COMPAT_EXP="${COMPAT_EXP}${_sym}
-"
-    done
-
- ;;
-esac
-fi
-
-done
-
   for ac_func in reallocarray
 do :
   ac_fn_c_check_func "$LINENO" "reallocarray" "ac_cv_func_reallocarray"
@@ -26024,6 +25985,18 @@ fi
 fi
 
 fi
+
+# Older Solaris (AIX too?) has getusershell() et al but does not declare it.
+ac_fn_check_decl "$LINENO" "getusershell" "ac_cv_have_decl_getusershell" "$ac_includes_default" "$ac_c_undeclared_builtin_options" "CFLAGS"
+if test "x$ac_cv_have_decl_getusershell" = xyes
+then :
+  ac_have_decl=1
+else case e in #(
+  e) ac_have_decl=0 ;;
+esac
+fi
+printf "%s\n" "#define HAVE_DECL_GETUSERSHELL $ac_have_decl" >>confdefs.h
+
 
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */

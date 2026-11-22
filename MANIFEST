@@ -264,7 +264,6 @@ lib/util/getgrouplist.c
 lib/util/gethostname.c
 lib/util/getopt_long.c
 lib/util/gettime.c
-lib/util/getusershell.c
 lib/util/gidlist.c
 lib/util/glob.c
 lib/util/gmtime_r.c
@@ -1223,6 +1222,7 @@ plugins/sudoers/toke_util.c
 plugins/sudoers/tsdump.c
 plugins/sudoers/tsgetgrpw.c
 plugins/sudoers/tsgetgrpw.h
+plugins/sudoers/tsgetusershell.c
 plugins/sudoers/unesc_str.c
 plugins/sudoers/visudo.c
 plugins/sudoers/visudo_cb.c

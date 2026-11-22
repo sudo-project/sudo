@@ -991,18 +991,6 @@ gettime.i: $(srcdir)/gettime.c $(incdir)/compat/stdbool.h \
 	$(CPP) $(CPPFLAGS) $(srcdir)/gettime.c > $@
 gettime.plog: gettime.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/gettime.c --i-file gettime.i --output-file $@
-getusershell.lo: $(srcdir)/getusershell.c $(incdir)/compat/stdbool.h \
-                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
-                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-                 $(top_builddir)/config.h
-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/getusershell.c
-getusershell.i: $(srcdir)/getusershell.c $(incdir)/compat/stdbool.h \
-                 $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
-                 $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
-                 $(top_builddir)/config.h
-	$(CPP) $(CPPFLAGS) $(srcdir)/getusershell.c > $@
-getusershell.plog: getusershell.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/getusershell.c --i-file getusershell.i --output-file $@
 gidlist.lo: $(srcdir)/gidlist.c $(incdir)/compat/stdbool.h \
             $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
             $(incdir)/sudo_fatal.h $(incdir)/sudo_gettext.h \

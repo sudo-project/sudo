@@ -26,9 +26,7 @@
 #include <sudo_debug.h>
 #include <sudo_util.h>
 
-#ifdef TESTSUDOERS
-# include <tsgetgrpw.h>
-#endif
+#include <tsgetgrpw.h>
 
 static const char *shellfile = "/etc/shells";
 static char **allowed_shells, * const *current_shell;
@@ -66,10 +64,7 @@ read_shells(void)
 	if (line[0] == '\0')
 	    continue;
 	if (nshells + 1 >= maxshells) {
-	    char **new_shells;
-
-	    /* Preserve the entries already read when growing the array. */
-	    new_shells = reallocarray(allowed_shells, maxshells + 16,
+	    char **new_shells = reallocarray(allowed_shells, maxshells + 16,
 		sizeof(char *));
 	    if (new_shells == NULL)
 		goto bad;
@@ -97,7 +92,7 @@ bad:
 }
 
 void
-sudo_setusershell(void)
+testsudoers_setusershell(void)
 {
     debug_decl(setusershell, SUDO_DEBUG_UTIL);
 
@@ -107,7 +102,7 @@ sudo_setusershell(void)
 }
 
 void
-sudo_endusershell(void)
+testsudoers_endusershell(void)
 {
     debug_decl(endusershell, SUDO_DEBUG_UTIL);
 
@@ -125,7 +120,7 @@ sudo_endusershell(void)
 }
 
 char *
-sudo_getusershell(void)
+testsudoers_getusershell(void)
 {
     debug_decl(getusershell, SUDO_DEBUG_UTIL);
 
@@ -135,11 +130,9 @@ sudo_getusershell(void)
     debug_return_str(*current_shell++);
 }
 
-#ifdef TESTSUDOERS
 void
 testsudoers_setshellfile(const char *file)
 {
     testsudoers_endusershell();
     shellfile = file;
 }
-#endif /* TESTSUDOERS */

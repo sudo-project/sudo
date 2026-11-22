@@ -366,22 +366,12 @@ sudo_dso_public ssize_t sudo_getdelim(char ** restrict bufp, size_t * restrict b
 /* getdelim present in libc but missing prototype (old gcc fixed includes?) */
 ssize_t getdelim(char ** restrict bufp, size_t * restrict bufsizep, int delim, FILE * restrict fp);
 #endif /* HAVE_GETDELIM */
-#ifndef HAVE_GETUSERSHELL
-sudo_dso_public char *sudo_getusershell(void);
-# undef getusershell
-# define getusershell() sudo_getusershell()
-sudo_dso_public void sudo_setusershell(void);
-# undef setusershell
-# define setusershell() sudo_setusershell()
-sudo_dso_public void sudo_endusershell(void);
-# undef endusershell
-# define endusershell() sudo_endusershell()
-#elif HAVE_DECL_GETUSERSHELL == 0
+#if HAVE_DECL_GETUSERSHELL == 0
 /* Older Solaris has getusershell() et al but does not declare it. */
 char *getusershell(void);
 void setusershell(void);
 void endusershell(void);
-#endif /* HAVE_GETUSERSHELL */
+#endif /* HAVE_DECL_GETUSERSHELL */
 #ifndef HAVE_GMTIME_R
 sudo_dso_public struct tm *sudo_gmtime_r(const time_t * restrict, struct tm * restrict);
 # undef gmtime_r

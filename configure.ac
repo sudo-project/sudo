@@ -2759,13 +2759,6 @@ AC_CHECK_FUNCS([getdelim], [
     SUDO_APPEND_COMPAT_EXP(sudo_getdelim)
     COMPAT_TEST_PROGS="${COMPAT_TEST_PROGS}${COMPAT_TEST_PROGS+ }getdelim_test"
 ])
-AC_CHECK_FUNCS([getusershell], [
-    # Older Solaris has getusershell() et al but does not declare it.
-    AC_CHECK_DECLS([getusershell])
-], [
-    AC_LIBOBJ(getusershell)
-    SUDO_APPEND_COMPAT_EXP(sudo_getusershell)
-])
 AC_CHECK_FUNCS([reallocarray], [], [
     AC_LIBOBJ(reallocarray)
     SUDO_APPEND_COMPAT_EXP(sudo_reallocarray)
@@ -3125,6 +3118,9 @@ AS_IF([test X"$with_noexec" != X"no"], [
 	AC_CHECK_FUNCS([posix_spawn posix_spawnp])
     ])
 ])
+
+# Older Solaris (AIX too?) has getusershell() et al but does not declare it.
+AC_CHECK_DECLS([getusershell])
 
 dnl
 dnl Check for the dirfd function/macro.  If not found, look for dd_fd in DIR.

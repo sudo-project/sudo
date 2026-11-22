@@ -335,7 +335,7 @@ $(shlib_opt): $(shlib_exp)
 .y.c:
 	@true
 
-depend: tsgetusershell.c
+depend:
 	$(scriptdir)/mkdep.pl --srcdir=$(abs_top_srcdir) \
 	    --builddir=$(abs_top_builddir) plugins/sudoers/Makefile.in
 	cd $(top_builddir) && ./config.status --file plugins/sudoers/Makefile
@@ -541,10 +541,6 @@ $(devdir)/def_data.c $(devdir)/def_data.h: $(srcdir)/def_data.in
 	    echo "$$cmd"; eval $$cmd; \
 	fi
 
-tsgetusershell.c: $(top_srcdir)/lib/util/getusershell.c
-	printf '#define TESTSUDOERS\n\n' > $@
-	$(SED) 's/^sudo_/testsudoers_/' $(top_srcdir)/lib/util/getusershell.c >> $@
-
 sudoers: $(srcdir)/sudoers.in
 	cd $(top_builddir) && $(SHELL) config.status --file=plugins/sudoers/$@
 
@@ -696,7 +692,7 @@ clean:
 mostlyclean: clean
 
 distclean: clean
-	-rm -rf Makefile sudoers sudoers.lo tsgetusershell.c regress/harness \
+	-rm -rf Makefile sudoers sudoers.lo regress/harness \
 	    .libs $(shlib_map) $(shlib_opt)
 	@if [ -n "$(DEVEL)" -a "$(devdir)" != "$(srcdir)" ]; then \
 	    cmd='rm -rf $(GENERATED)'; \
@@ -3353,18 +3349,18 @@ tsgetgrpw.i: $(srcdir)/tsgetgrpw.c $(devdir)/def_data.h \
 	$(CPP) $(CPPFLAGS) $(srcdir)/tsgetgrpw.c > $@
 tsgetgrpw.plog: tsgetgrpw.i
 	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/tsgetgrpw.c --i-file tsgetgrpw.i --output-file $@
-tsgetusershell.o: tsgetusershell.c $(incdir)/compat/stdbool.h \
+tsgetusershell.o: $(srcdir)/tsgetusershell.c $(incdir)/compat/stdbool.h \
                   $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                   $(srcdir)/tsgetgrpw.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) tsgetusershell.c
-tsgetusershell.i: tsgetusershell.c $(incdir)/compat/stdbool.h \
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(ASAN_CFLAGS) $(PIE_CFLAGS) $(HARDENING_CFLAGS) $(srcdir)/tsgetusershell.c
+tsgetusershell.i: $(srcdir)/tsgetusershell.c $(incdir)/compat/stdbool.h \
                   $(incdir)/sudo_compat.h $(incdir)/sudo_debug.h \
                   $(incdir)/sudo_queue.h $(incdir)/sudo_util.h \
                   $(srcdir)/tsgetgrpw.h $(top_builddir)/config.h
-	$(CPP) $(CPPFLAGS) tsgetusershell.c > $@
+	$(CPP) $(CPPFLAGS) $(srcdir)/tsgetusershell.c > $@
 tsgetusershell.plog: tsgetusershell.i
-	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file tsgetusershell.c --i-file tsgetusershell.i --output-file $@
+	rm -f $@; pvs-studio --cfg $(PVS_CFG) --source-file $(srcdir)/tsgetusershell.c --i-file tsgetusershell.i --output-file $@
 unesc_str.lo: $(srcdir)/unesc_str.c $(devdir)/def_data.h \
               $(incdir)/compat/stdbool.h $(incdir)/sudo_compat.h \
               $(incdir)/sudo_conf.h $(incdir)/sudo_debug.h \
