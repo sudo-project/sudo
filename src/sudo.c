@@ -370,19 +370,19 @@ os_init_common(int argc, char *argv[], char *envp[])
      * Make a shallow copy of envp[] and store in submit_envp[].
      * This allows us to remove variables from sudo's environment
      * while still providing the original envp to the plugins.
+     * The copy is made even for an empty environment since the
+     * plugins expect a non-NULL envp.
      */
     for (envc = 0; envp[envc] != NULL; envc++)
 	continue;
-    if (envc != 0) {
-	submit_envp = reallocarray(NULL, sizeof(char *), envc + 1);
-	if (submit_envp == NULL || !gc_add(GC_PTR, submit_envp)) {
-	    sudo_fatalx_nodebug(U_("%s: %s"), __func__,
-		U_("unable to allocate memory"));
-	}
-	for (envc = 0; envp[envc] != NULL; envc++)
-	    submit_envp[envc] = envp[envc];
-	submit_envp[envc] = NULL;
+    submit_envp = reallocarray(NULL, sizeof(char *), envc + 1);
+    if (submit_envp == NULL || !gc_add(GC_PTR, submit_envp)) {
+	sudo_fatalx_nodebug(U_("%s: %s"), __func__,
+	    U_("unable to allocate memory"));
     }
+    for (envc = 0; envp[envc] != NULL; envc++)
+	submit_envp[envc] = envp[envc];
+    submit_envp[envc] = NULL;
 
     return 0;
 }
