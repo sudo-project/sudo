@@ -348,13 +348,6 @@ sudo_term_raw_v1(int fd, unsigned int flags)
 	goto unlock;
     }
 
-    if (sudo_term_is_raw_int(&term)) {
-	sudo_debug_printf(SUDO_DEBUG_INFO, "%s: fd %d already in raw mode",
-	    __func__, fd);
-	ret = true;
-	goto unlock;
-    }
-
     /*
      * Set terminal to raw mode but optionally enable terminal signals
      * and/or preserve output flags.
@@ -366,6 +359,13 @@ sudo_term_raw_v1(int fd, unsigned int flags)
 	SET(term.c_lflag, ISIG);
     if (ISSET(flags, SUDO_TERM_OFLAG))
 	term.c_oflag = oflag;
+    if (!changed && term.c_iflag == orig_term.c_iflag &&
+	    term.c_oflag == orig_term.c_oflag && term.c_cflag == orig_term.c_cflag &&
+	    term.c_lflag == orig_term.c_lflag &&
+	    memcmp(term.c_cc, orig_term.c_cc, sizeof(term.c_cc)) == 0) {
+	ret = true;
+	goto unlock;
+    }
     if (tcsetattr_nobg(fd, TCSASOFT|TCSADRAIN, &term) == -1) {
 	sudo_debug_printf(SUDO_DEBUG_ERROR|SUDO_DEBUG_ERRNO,
 	    "%s: tcsetattr(%d)", __func__, fd);
