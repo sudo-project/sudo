@@ -46,11 +46,12 @@ sudo_getdelim(char ** restrict buf, size_t * restrict bufsize, int delim,
 
     do {
 	if (cp + 1 >= ep) {
+	    size_t used = (size_t)(cp - *buf);
 	    char *newbuf = reallocarray(*buf, *bufsize, 2);
 	    if (newbuf == NULL)
 		goto bad;
 	    *bufsize *= 2;
-	    cp = newbuf + (cp - *buf);
+	    cp = newbuf + used;
 	    ep = newbuf + *bufsize;
 	    *buf = newbuf;
 	}
@@ -70,7 +71,7 @@ sudo_getdelim(char ** restrict buf, size_t * restrict bufsize, int delim,
 bad:
     /* Error, push back what was read if possible. */
     while (cp > *buf) {
-	if (ungetc(*cp--, fp) == EOF)
+	if (ungetc((unsigned char)*--cp, fp) == EOF)
 	    break;
     }
     return -1;
