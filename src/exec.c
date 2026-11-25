@@ -245,9 +245,12 @@ done:
  * If SELinux is enabled, run the command via sesh, otherwise
  * execute it directly.
  * If the exec fails, cstat is filled in with the value of errno.
+ * If mask is not NULL, it is the signal mask to restore after the
+ * signal handlers have been reset.
  */
 void
-exec_cmnd(struct command_details *details, int intercept_fd, int errfd)
+exec_cmnd(struct command_details *details, sigset_t *mask, int intercept_fd,
+    int errfd)
 {
     debug_decl(exec_cmnd, SUDO_DEBUG_EXEC);
 
@@ -261,7 +264,13 @@ exec_cmnd(struct command_details *details, int intercept_fd, int errfd)
     }
 #endif /* HAVE_PTRACE_INTERCEPT */
 
+    /*
+     * Reset the signal handlers before unblocking signals so that a
+     * signal forwarded by the parent before execve(2) is not lost.
+     */
     restore_signals();
+    if (mask != NULL)
+	sigprocmask(SIG_SETMASK, mask, NULL);
     if (exec_setup(details, intercept_fd, errfd) == true) {
 	/* headed for execve() */
 #ifdef HAVE_SELINUX
@@ -473,7 +482,7 @@ sudo_execute(struct command_details *details,
      */
     if (direct_exec_allowed(details)) {
 	if (!sudo_terminated(cstat)) {
-	    exec_cmnd(details, -1, -1);
+	    exec_cmnd(details, NULL, -1, -1);
 	    cstat->type = CMD_ERRNO;
 	    cstat->val = errno;
 	}
