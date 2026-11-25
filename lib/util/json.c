@@ -235,7 +235,8 @@ sudo_json_open_object_v1(struct json_container *jsonc, const char *name)
 	debug_return_bool(false);
 
     if (name != NULL) {
-	json_append_string(jsonc, name);
+	if (!json_append_string(jsonc, name))
+	    debug_return_bool(false);
 	if (!json_append_buf(jsonc, jsonc->minimal ? ":{" : ": {"))
 	    debug_return_bool(false);
     } else {
@@ -280,7 +281,8 @@ sudo_json_open_array_v1(struct json_container *jsonc, const char *name)
 	debug_return_bool(false);
 
     if (name != NULL) {
-	json_append_string(jsonc, name);
+	if (!json_append_string(jsonc, name))
+	    debug_return_bool(false);
 	if (!json_append_buf(jsonc, jsonc->minimal ? ":[" : ": ["))
 	    debug_return_bool(false);
     } else {
