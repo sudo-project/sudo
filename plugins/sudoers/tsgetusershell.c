@@ -127,6 +127,8 @@ testsudoers_getusershell(void)
     if (current_shell == NULL)
 	current_shell = read_shells();
 
+    if (*current_shell == NULL)
+	debug_return_str(NULL);
     debug_return_str(*current_shell++);
 }
 
