@@ -81,6 +81,16 @@ struct exec_closure {
     int cols;
     bool foreground;
     bool term_raw;
+    /*
+     * Set when the command's stderr is redirected to a pipe, socket or FIFO
+     * while its output still reaches the user's terminal.  In that case we
+     * keep the user's terminal output flags (e.g. ONLCR) in sync with the
+     * command's pty so that data written to the terminal by a third party
+     * reading the redirected stderr is not malformed.  synced_opost caches
+     * the last OPOST state applied to the user's tty (-1 when unknown).
+     */
+    bool sync_oflag;
+    int synced_opost;
 };
 
 /*
