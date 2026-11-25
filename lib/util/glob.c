@@ -599,8 +599,6 @@ glob2(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last,
 			if ((pglob->gl_flags & GLOB_LIMIT) &&
 			    limitp->glim_stat++ >= GLOB_LIMIT_STAT) {
 				errno = 0;
-				*pathend++ = SEP;
-				*pathend = EOS;
 				return GLOB_NOSPACE;
 			}
 			if (g_lstat(pathbuf, &sb, pglob))
@@ -685,8 +683,6 @@ glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last,
 		if ((pglob->gl_flags & GLOB_LIMIT) &&
 		    limitp->glim_readdir++ >= GLOB_LIMIT_READDIR) {
 			errno = 0;
-			*pathend++ = SEP;
-			*pathend = EOS;
 			err = GLOB_NOSPACE;
 			break;
 		}
