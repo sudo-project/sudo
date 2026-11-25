@@ -601,7 +601,7 @@ handle_exit(const ExitMessage *msg, const uint8_t *buf, size_t len,
      * The run_time field is optional and will not be present
      * when sending old, pre-JSON I/O logs via sudo_sendlog.
      */
-    if (msg == NULL) {
+    if (msg == NULL || msg->exit_value < 0) {
 	sudo_warnx(U_("%s: %s"), source, U_("invalid ExitMessage"));
 	closure->errstr = _("invalid ExitMessage");
 	debug_return_bool(false);
@@ -800,7 +800,8 @@ handle_winsize(const ChangeWindowSize *msg, const uint8_t *buf, size_t len,
     }
 
     /* Check that message is valid. */
-    if (msg == NULL || !valid_timespec(msg->delay)) {
+    if (msg == NULL || !valid_timespec(msg->delay) || msg->rows < 0 ||
+	    msg->cols < 0) {
 	sudo_warnx(U_("%s: %s"), source, U_("invalid ChangeWindowSize"));
 	closure->errstr = _("invalid ChangeWindowSize");
 	debug_return_bool(false);
