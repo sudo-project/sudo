@@ -279,26 +279,6 @@ unlock:
 }
 
 /*
- * Returns true if term is in raw mode, else false.
- */
-static bool
-sudo_term_is_raw_int(struct termios *term)
-{
-    debug_decl(sudo_term_is_raw_int, SUDO_DEBUG_UTIL);
-
-    if (term->c_cc[VMIN] != 1 || term->c_cc[VTIME] != 0)
-	debug_return_bool(false);
-
-    if (ISSET(term->c_oflag, OPOST))
-	debug_return_bool(false);
-
-    if (ISSET(term->c_lflag, ECHO|ECHONL|ICANON))
-	debug_return_bool(false);
-
-    debug_return_bool(true);
-}
-
-/*
  * Returns true if fd refers to a tty in raw mode, else false.
  */
 bool
@@ -321,7 +301,16 @@ sudo_term_is_raw_v1(int fd)
     }
     sudo_lock_file(fd, SUDO_UNLOCK);
 
-    debug_return_bool(sudo_term_is_raw_int(&term));
+    if (term.c_cc[VMIN] != 1 || term.c_cc[VTIME] != 0)
+	debug_return_bool(false);
+
+    if (ISSET(term.c_oflag, OPOST))
+	debug_return_bool(false);
+
+    if (ISSET(term.c_lflag, ECHO|ECHONL|ICANON))
+	debug_return_bool(false);
+
+    debug_return_bool(true);
 }
 
 /*
