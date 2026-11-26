@@ -46,7 +46,7 @@ sudo_getdelim(char ** restrict buf, size_t * restrict bufsize, int delim,
 
     do {
 	if (cp + 1 >= ep) {
-	    size_t used = (size_t)(cp - *buf);
+	    const size_t used = (size_t)(cp - *buf);
 	    char *newbuf = reallocarray(*buf, *bufsize, 2);
 	    if (newbuf == NULL)
 		goto bad;
