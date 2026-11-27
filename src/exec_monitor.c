@@ -205,10 +205,10 @@ mon_handle_sigchld(struct monitor_closure *mc)
 	mc->cstat->type = CMD_WSTATUS;
 	mc->cstat->val = status;
 	if (WIFSTOPPED(status)) {
-	    /* Save the foreground pgid so we can restore it later. */
-	    pid = tcgetpgrp(io_fds[SFD_FOLLOWER]);
-	    if (pid != mc->mon_pgrp)
-		mc->cmnd_pgrp = pid;
+	    /* Save the stopped process's current pgrp so we restore it later. */
+	    pid_t pgid = getpgid(mc->cmnd_pid);
+	    if (pgid != -1 && pgid != mc->mon_pgrp)
+		mc->cmnd_pgrp = pgid;
 	    send_status(mc->backchannel, mc->cstat);
 	}
     } else {
